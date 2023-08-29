@@ -17,6 +17,7 @@ class LuauConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://luau-lang.org/"
     topics = ("lua", "scripting", "typed", "embed")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [False, True],
@@ -65,10 +66,10 @@ class LuauConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
             )
@@ -77,7 +78,7 @@ class LuauConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared build in MSVC")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

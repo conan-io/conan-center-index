@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.46.0"
+required_conan_version = ">=1.53.0"
 
 
 class RabbitmqcConan(ConanFile):
@@ -12,8 +13,8 @@ class RabbitmqcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/alanxz/rabbitmq-c"
     description = "This is a C-language AMQP client library for use with v2.0+ of the RabbitMQ broker."
-    topics = ("rabbitmq-c", "rabbitmq", "message queue")
-
+    topics = ("rabbitmq", "message queue")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,19 +33,13 @@ class RabbitmqcConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/[>=1.1 <4]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -58,7 +53,10 @@ class RabbitmqcConan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
-        tc.variables["BUILD_TESTS"] = False
+        if Version(self.version) < "0.12.0":
+            tc.variables["BUILD_TESTS"] = False
+        else:
+            tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_TOOLS"] = False
         tc.variables["BUILD_TOOLS_DOCS"] = False
         tc.variables["ENABLE_SSL_SUPPORT"] = self.options.ssl
@@ -77,6 +75,7 @@ class RabbitmqcConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE-MIT", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -100,6 +99,9 @@ class RabbitmqcConan(ConanFile):
                 self.cpp_info.components["rabbitmq"].system_libs.append("pthread")
         if not self.options.shared:
             self.cpp_info.components["rabbitmq"].defines.append("AMQP_STATIC")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("rt")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "rabbitmq-c"

@@ -1,10 +1,28 @@
-from conans import ConanFile, CMake, tools
-import os
+from conan import ConanFile
+from conan.tools.build import build_jobs, can_run
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import chdir
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "VirtualRunEnv"
+    test_type = "explicit"
+
+    def layout(self):
+        cmake_layout(self)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        libverto_options = self.dependencies["libverto"].options
+        tc.variables["LIBVERTO_WITH_GLIB"] = bool(libverto_options.with_glib)
+        tc.variables["LIBVERTO_WITH_LIBEV"] = bool(libverto_options.with_libev)
+        tc.variables["LIBVERTO_WITH_LIBEVENT"] = bool(libverto_options.with_libevent)
+        tc.variables["LIBVERTO_WITH_TEVENT"] = bool(libverto_options.with_tevent)
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -12,9 +30,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
-
-            for impl in self.deps_user_info["libverto"].backends.split(","):
-                self.run("{} {}".format(bin_path, impl), run_environment=True)
-
+        if can_run(self):
+            with chdir(self, self.build_folder):
+                self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {build_jobs(self)}", env="conanrun")

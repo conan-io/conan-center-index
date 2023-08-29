@@ -21,6 +21,7 @@ class PackageConan(ConanFile):
     # Do not put "conan" nor the project name in topics. Use topics from the upstream listed on GH
     # Keep 'header-only' as topic
     topics = ("topic1", "topic2", "topic3", "header-only")
+    package_type = "header-library"
     # Keep these or explain why it's not required for this particular case
     settings = "os", "arch", "compiler", "build_type"
     # Do not copy sources to build folder for header only projects, unless you need to apply patches

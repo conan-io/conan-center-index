@@ -1,0 +1,57 @@
+diff --git a/base64/base64.cc b/base64/base64.cc
+index acab416..f952dc6 100644
+--- a/base64/base64.cc
++++ b/base64/base64.cc
+@@ -12,7 +12,7 @@ For details, see http://sourceforge.net/projects/libb64
+ #include <fstream>
+ #include <string>
+ 
+-#include <stdlib.h>
++#include <cstdlib>
+ 
+ // Function which prints the usage of this executable
+ void usage()
+@@ -38,14 +38,14 @@ int main(int argc, char** argv)
+ 	if (argc == 1)
+ 	{
+ 		usage();
+-		exit(-1);
++		std::exit(-1);
+ 	}
+ 	if (argc != 4)
+ 	{
+ 		usage("Wrong number of arguments!");
+-		exit(-1);
++		std::exit(-1);
+ 	}
+-	
++
+ 	// So far so good; try to open the input file
+ 	std::string input = argv[2];
+ 	// Note that we have to open the input in binary mode.
+@@ -56,9 +56,9 @@ int main(int argc, char** argv)
+ 	if (!instream.is_open())
+ 	{
+ 		usage("Could not open input file!");
+-		exit(-1);
++		std::exit(-1);
+ 	}
+-	
++
+ 	// Now try to open the output file
+ 	std::string output = argv[3];
+ 	// Again, note that we have to open the ouput in binary mode.
+@@ -68,7 +68,7 @@ int main(int argc, char** argv)
+ 	if (!outstream.is_open())
+ 	{
+ 		usage("Could not open output file!");
+-		exit(-1);
++		std::exit(-1);
+ 	}
+ 
+ 	// determine whether we need to encode or decode:
+@@ -91,4 +91,3 @@ int main(int argc, char** argv)
+ 
+ 	return 0;
+ }
+-

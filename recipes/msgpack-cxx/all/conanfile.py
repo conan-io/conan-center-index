@@ -14,6 +14,7 @@ class MsgpackCXXConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/msgpack/msgpack-c"
     topics = ("msgpack", "message-pack", "serialization", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "use_boost": [True, False],
@@ -33,7 +34,7 @@ class MsgpackCXXConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("use_boost", True):
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.83.0")
 
     def package_id(self):
         self.info.clear()

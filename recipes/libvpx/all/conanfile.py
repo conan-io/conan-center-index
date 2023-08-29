@@ -1,17 +1,17 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.build import stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, rename
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, VCVars, unix_path, msvc_runtime_flag
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag
 from conan.tools.scm import Version
-from conan.tools.build import stdcpp_library
 import os
 import re
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.57.0"
 
 
 class LibVPXConan(ConanFile):
@@ -22,6 +22,7 @@ class LibVPXConan(ConanFile):
     topics = "vpx", "codec", "web", "VP8", "VP9"
     license = "BSD-3-Clause"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -55,6 +56,9 @@ class LibVPXConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Windows shared builds are not supported")
@@ -62,15 +66,6 @@ class LibVPXConan(ConanFile):
             raise ConanInvalidConfiguration(f"Unsupported compiler {self.settings.compiler}")
         if self.settings.os == "Macos" and self.settings.arch == "armv8" and Version(self.version) < "1.10.0":
             raise ConanInvalidConfiguration("M1 only supported since 1.10, please upgrade")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
-        # libvpx configure is unusual and requires a workaround, otherwise it will fail with an error.
-        # look for "output_goes_here" below for more in this thread.
-        self.cpp.package.bindirs = []
-        self.cpp.package.includedirs = []
-        self.cpp.package.libdirs = []   # not strictly necessary, but lets do all as a group
 
     def build_requirements(self):
         self.tool_requires("yasm/1.3.0")
@@ -80,7 +75,11 @@ class LibVPXConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    @property
+    def _install_tmp_folder(self):
+        return "tmp_install"
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -90,42 +89,9 @@ class LibVPXConan(ConanFile):
 
         if is_apple_os(self) and self.settings.get_safe("compiler.libcxx") == "libc++":
             # special case, as gcc/g++ is hard-coded in makefile, it implicitly assumes -lstdc++
-# FIXME what to do
             tc.extra_ldflags.append("-stdlib=libc++")
 
-        env = Environment()
-
-        if is_msvc(self):
-            # gen_msvs_vcxproj.sh doesn't like custom flags
-            env.define("CC", "")
-            # FIXME can we leave these alone?
-            # env.define("CFLAGS", "")
-            # env.define("CXXFLAGS", "")
-
-        tc.generate(env=env)
-
-        if is_msvc(self):
-            tc = VCVars(self)
-            tc.generate()
-
-
-    # libvpx's configure script is not a standard autotools script,
-    # and doesn't support some parameters like --host --build and --prefix=/
-    # so we will avoid using conan's configure() call generator and run our own.
-    def _execute_configure(self):
-        configure_args = [unix_path(self,os.path.join(self.source_folder, "configure"))]
-
-        if self.options.shared:
-            configure_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            configure_args.extend(["--disable-shared", "--enable-static"])
-
-        # Note the output_goes_here workaround, libvpx does not like --prefix=/
-        # as it fails the test for "libdir must be a subfolder of prefix"
-        # libvpx src/build/make/configure.sh:683
-        configure_args.extend([
-            "--prefix=/output_goes_here",
-            "--libdir=/output_goes_here/lib",
+        tc.configure_args.extend([
             "--disable-examples",
             "--disable-unit-tests",
             "--disable-tools",
@@ -139,13 +105,13 @@ class LibVPXConan(ConanFile):
         #     the makefile's install step fails as it wants to install a library that doesn't exist.
         #     Instead, we will copy the desired library manually in the package step.
         if self.settings.build_type == "Debug":
-            configure_args.extend([
+            tc.configure_args.extend([
                 # "--enable-debug_libs",
                 "--enable-debug",
             ])
 
-        if is_msvc(self) and "MT" in msvc_runtime_flag(self):
-            configure_args.append('--enable-static-msvcrt')
+        if is_msvc(self) and is_msvc_static_runtime(self):
+            tc.configure_args.append("--enable-static-msvcrt")
 
         arch = {'x86': 'x86',
                 'x86_64': 'x86_64',
@@ -154,7 +120,7 @@ class LibVPXConan(ConanFile):
                 'mips': 'mips32',
                 'mips64': 'mips64',
                 'sparc': 'sparc'}.get(str(self.settings.arch))
-        if self.settings.compiler == "Visual Studio":
+        if str(self.settings.compiler) == "Visual Studio":
             vc_version = self.settings.compiler.version
             compiler = f"vs{vc_version}"
         elif is_msvc(self):
@@ -182,18 +148,36 @@ class LibVPXConan(ConanFile):
         elif host_os == 'Android':
             os_name = 'android'
         target = f"{arch}-{os_name}-{compiler}"
-        configure_args.append(f"--target={target}")
+        tc.configure_args.append(f"--target={target}")
         if str(self.settings.arch) in ["x86", "x86_64"]:
             for name in self._arch_options:
                 if not self.options.get_safe(name):
-                    configure_args.append(f"--disable-{name}")
+                    tc.configure_args.append(f"--disable-{name}")
 
-        configure_command = " ".join(configure_args)
-        self.output.info(configure_command)
-        self.run(configure_command)
+        tc.update_configure_args({
+            # libvpx does not like --prefix=/ as it fails the test for "libdir
+            # must be a subfolder of prefix" libvpx src/build/make/configure.sh:683
+            "--prefix": f"/{self._install_tmp_folder}",
+            "--libdir": f"/{self._install_tmp_folder}/lib",
+            # several options must not be injected as custom configure doesn't like them
+            "--host": None,
+            "--build": None,
+            "--bindir": None,
+            "--sbindir": None,
+            "--includedir": None,
+            "--oldincludedir": None,
+            "--datarootdir": None,
+        })
 
+        if is_msvc(self):
+            # gen_msvs_vcxproj.sh doesn't like custom flags
+            env = Environment()
+            env.define("CC", "")
+        else:
+            env = tc.environment()
+        tc.generate(env)
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
         # Disable LTO for Visual Studio when CFLAGS doesn't contain -GL
         if is_msvc(self):
@@ -225,21 +209,11 @@ class LibVPXConan(ConanFile):
 """
             )
 
+    def build(self):
+        self._patch_sources()
         autotools = Autotools(self)
-        # NOT USED # autotools.configure() # FIXME can use this if we can remove --host and --build flags
-        self._execute_configure()
+        autotools.configure()
         autotools.make()
-
-        # Helpful lines for recipe debugging.  The configure script is not real autotools and is a pain to debug.
-        # replace_in_file(self, os.path.join(self.source_folder, "configure"), "#!/bin/sh", "#!/bin/sh -x\nprintenv")
-        # autotools = Autotools(self)
-        # # NOT USED # autotools.configure()
-        # self._execute_configure()
-        # self.output.info("config.log file generated is:")
-        # self.output.info(open(os.path.join(self.build_folder, "config.log")).read())
-        # # self.output.info("mk file generated is:")
-        # # self.output.info(open(os.path.join(self.build_folder, "libs-x86_64-linux-gcc.mk")).read())
-        # autotools.make("SHELL='sh -x'")
 
     @property
     def _lib_name(self):
@@ -249,11 +223,11 @@ class LibVPXConan(ConanFile):
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
 
         # The workaround requires us to move the outputs into place now
         rename(self,
-                os.path.join(self.package_folder, "output_goes_here", "include"),
+                os.path.join(self.package_folder, self._install_tmp_folder, "include"),
                 os.path.join(self.package_folder, "include")
                 )
 
@@ -270,10 +244,10 @@ class LibVPXConan(ConanFile):
             copy(self, f"{self._lib_name}.lib", libs_from, os.path.join(self.package_folder, "lib"))
         else:
             # if not msvc, then libs were installed into package (in the wrong place), move them
-            libs_from = os.path.join(self.package_folder, "output_goes_here", "lib")
+            libs_from = os.path.join(self.package_folder, self._install_tmp_folder, "lib")
             rename(self, libs_from, os.path.join(self.package_folder, "lib"))
 
-        rmdir(self, os.path.join(self.package_folder, "output_goes_here"))
+        rmdir(self, os.path.join(self.package_folder, self._install_tmp_folder))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         fix_apple_shared_install_name(self)
@@ -286,13 +260,4 @@ class LibVPXConan(ConanFile):
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("m")
-
-        # reset the paths we cleared in layout()
-        self.cpp_info.includedirs = ['include']
-        self.cpp_info.libdirs = ['lib']
-        self.cpp_info.bindirs = ['bin']
-
-        # TODO: to remove in conan v2 once pkg_config generator removed
-        self.cpp_info.names["pkg_config"] = "vpx"
+            self.cpp_info.system_libs.extend(["m", "pthread"])

@@ -17,8 +17,9 @@ class LibmountConan(ConanFile):
     topics = ("mount", "linux", "util-linux")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git"
-    license = "GPL-2.0-or-later"
+    license = "LGPL-2.1-or-later"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -39,12 +40,11 @@ class LibmountConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.os != "Linux":
+        if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
@@ -61,7 +61,8 @@ class LibmountConan(ConanFile):
         autotools.make()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", src=os.path.join(self.source_folder, "libmount"), dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING.LGPL-2.1-or-later", src=os.path.join(self.source_folder, "Documentation", "licenses"), dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "sbin"))

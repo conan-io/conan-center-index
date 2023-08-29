@@ -18,38 +18,44 @@ class MatchitConan(ConanFile):
                    " library for C++17 with macro-free APIs.")
     topics = ("lightweight", "cpp17", "header-only", "pattern-matching")
     no_copy_source = True
-    settings = "arch", "build_type", "compiler", "os"
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
 
-    _compiler_required_cpp17 = {
-        "Visual Studio": "16",
-        "gcc": "8",
-        "clang": "7",
-        "apple-clang": "12.0",
-    }
+    @property
+    def _min_cppstd(self):
+        return "17"
 
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "17")
-
-        minimum_version = self._compiler_required_cpp17.get(
-            str(self.settings.compiler), False)
-        if minimum_version:
-            if Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    "{} requires C++17, which your compiler does not support.".format(self.name))
-        else:
-            self.output.warn(
-                "{0} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True,
-            destination=self.source_folder)
-
-    def build(self):
-        pass
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "12.0",
+        }
 
     def layout(self):
         basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder,
@@ -58,13 +64,8 @@ class MatchitConan(ConanFile):
              src=os.path.join(self.source_folder, "include"),
              dst=os.path.join(self.package_folder, "include"))
 
-    def package_id(self):
-        self.info.clear()
-
     def package_info(self):
-        # TODO: Remove after Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = "matchit"
-        self.cpp_info.names["cmake_find_package_multi"] = "matchit"
-
-        self.cpp_info.set_property("cmake_target_name", "matchit::matchit")
         self.cpp_info.set_property("cmake_file_name", "matchit")
+        self.cpp_info.set_property("cmake_target_name", "matchit::matchit")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

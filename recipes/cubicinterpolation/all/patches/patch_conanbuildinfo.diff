@@ -1,0 +1,24 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 0199a76..b7cd42c 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -11,8 +11,10 @@ add_subdirectory(CubicInterpolation)
+ add_subdirectory(detail)
+ 
+ target_link_libraries(CubicInterpolation
+-    CONAN_PKG::eigen
+-    CONAN_PKG::boost
++    Eigen3::Eigen
++    Boost::boost
++    Boost::filesystem
++    Boost::serialization
+     )
+ 
+ target_include_directories(CubicInterpolation PUBLIC
+@@ -46,6 +48,3 @@ configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/CubicInterpolationConfig.cmake
+     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CubicInterpolation
+     )
+-
+-install(FILES "${PROJECT_BINARY_DIR}/conanbuildinfo.cmake"
+-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CubicInterpolation)

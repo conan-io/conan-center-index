@@ -5,12 +5,11 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 import os
 import stat
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.57.0"
 
 
 class GmpConan(ConanFile):
@@ -24,6 +23,7 @@ class GmpConan(ConanFile):
     license = ("LGPL-3.0", "GPL-2.0")
     homepage = "https://gmplib.org"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -45,10 +45,6 @@ class GmpConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -87,11 +83,11 @@ class GmpConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         if is_msvc(self):
-            self.tool_requires("yasm/1.3.0")
-            self.tool_requires("automake/1.16.5")
+            self.tool_requires("yasm/1.3.0") # Needed for determining 32-bit word size
+            self.tool_requires("automake/1.16.5") # Needed for lib-wrapper
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, verify=False)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -100,11 +96,11 @@ class GmpConan(ConanFile):
         tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
-            "--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True))),
-            "--enable-assembly={}".format(yes_no(not self.options.get_safe("disable_assembly", False))),
-            "--enable-fat={}".format(yes_no(self.options.get_safe("enable_fat", False))),
-            "--enable-cxx={}".format(yes_no(self.options.enable_cxx)),
-            "--srcdir={}".format(self.source_folder.replace("\\", "/")),
+            f'--with-pic={yes_no(self.options.get_safe("fPIC", True))}',
+            f'--enable-assembly={yes_no(not self.options.get_safe("disable_assembly", False))}',
+            f'--enable-fat={yes_no(self.options.get_safe("enable_fat", False))}',
+            f'--enable-cxx={yes_no(self.options.enable_cxx)}',
+            f'--srcdir={"../src"}', # Use relative path to avoid issues with #include "$srcdir/gmp-h.in" on Windows
         ])
         if is_msvc(self):
             tc.configure_args.extend([
@@ -113,24 +109,23 @@ class GmpConan(ConanFile):
                 "lt_cv_sys_global_symbol_pipe=cat",  # added to get further in shared MSVC build, but it gets stuck later
             ])
             tc.extra_cxxflags.append("-EHsc")
-            if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
-               (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler.version) >= "180"):
+            if check_min_vs(self, "180", raise_invalid=False):
                 tc.extra_cflags.append("-FS")
                 tc.extra_cxxflags.append("-FS")
-        env = tc.environment()
+        env = tc.environment() # Environment must be captured *after* setting extra_cflags, etc. to pick up changes
         if is_msvc(self):
             yasm_wrapper = unix_path(self, os.path.join(self.source_folder, "yasm_wrapper.sh"))
             yasm_machine = {
                 "x86": "x86",
                 "x86_64": "amd64",
             }[str(self.settings.arch)]
-            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper"))
             dumpbin_nm = unix_path(self, os.path.join(self.source_folder, "dumpbin_nm.py"))
             env.define("CC", "cl -nologo")
             env.define("CCAS", f"{yasm_wrapper} -a x86 -m {yasm_machine} -p gas -r raw -f win32 -g null -X gnu")
             env.define("CXX", "cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            env.define("AR", f'{ar_wrapper} "lib -nologo"')
             env.define("NM", f"python {dumpbin_nm}")
         tc.generate(env)
 
@@ -149,7 +144,7 @@ class GmpConan(ConanFile):
         autotools.make()
         # INFO: According to the gmp readme file, make check should not be omitted, but it causes timeouts on the CI server.
         if self.options.run_checks:
-            autotools.make(args=["check"])
+            autotools.make(target="check")
 
     def package(self):
         copy(self, "COPYINGv2", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -171,6 +166,8 @@ class GmpConan(ConanFile):
             self.cpp_info.components["gmpxx"].set_property("pkg_config_name", "gmpxx")
             self.cpp_info.components["gmpxx"].libs = ["gmpxx"]
             self.cpp_info.components["gmpxx"].requires = ["libgmp"]
+            if self.settings.os != "Windows":
+                self.cpp_info.components["gmpxx"].system_libs = ["m"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         #       GMP doesn't have any official CMake Find nor config file, do not port these names to CMakeDeps

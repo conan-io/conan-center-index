@@ -1,6 +1,5 @@
 This patch for msvc build allows to:
 * define OPTFLAG ourself from conanfile (allow to honor profile)
-* inject a custom SYSTEM_LIBS variable from conanfile (allow robust shared build)
 * not hardcode this very specific C:\OSGeo4W environment
 
 --- a/makefile.vc
@@ -31,7 +30,7 @@ This patch for msvc build allows to:
 -		C:\OSGeo4w\lib\freexl_i.lib C:\OSGeo4w\lib\iconv.lib \
 -		C:\OSGeo4W\lib\sqlite3_i.lib C:\OSGeo4W\lib\zlib.lib \
 -		C:\OSGeo4W\lib\libxml2.lib C:\OSGeo4W\lib\librttopo.lib
-+		/implib:spatialite_i.lib $(LIBOBJ) $(SYSTEM_LIBS)
++		/implib:spatialite_i.lib $(LIBOBJ)
  	if exist $(SPATIALITE_DLL).manifest mt -manifest \
  		$(SPATIALITE_DLL).manifest -outputresource:$(SPATIALITE_DLL);2
  		

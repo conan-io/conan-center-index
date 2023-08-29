@@ -14,7 +14,7 @@ class TermcapConan(ConanFile):
     description = "Enables programs to use display terminals in a terminal-independent manner"
     license = "GPL-2.0-or-later"
     topics = ("terminal", "display", "text", "writing")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -43,8 +43,7 @@ class TermcapConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _extract_sources(self):
         makefile_text = open(os.path.join(self.source_folder, "Makefile.in")).read()

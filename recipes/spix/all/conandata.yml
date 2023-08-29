@@ -2,8 +2,15 @@ sources:
   "0.4":
     url: "https://github.com/faaxm/spix/archive/refs/tags/v0.4.tar.gz"
     sha256: "e787c08840c37e5b153c0139f3bb613a2729ae8f6ccd0fb450fef92971cd8b53"
+  "0.5":
+    url: "https://github.com/faaxm/spix/archive/refs/tags/v0.5.tar.gz"
+    sha256: "d3fd9bb069aef6ff6c93c69524ed3603afd24e6b52e4bb8d093c80cec255d4dc"
 patches:
   "0.4":
     - patch_file: "patches/0001-use-conan-libs-0.4.patch"
+      patch_description: "Link to conan libs"
+      patch_type: "conan"
+  "0.5":
+    - patch_file: "patches/0001-use-conan-libs-0.5.patch"
       patch_description: "Link to conan libs"
       patch_type: "conan"

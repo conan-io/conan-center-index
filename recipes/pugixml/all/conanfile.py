@@ -5,7 +5,7 @@ from conan.tools.files import collect_libs, copy, get, load, replace_in_file, rm
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.54.0"
 
 
 class PugiXmlConan(ConanFile):
@@ -15,6 +15,7 @@ class PugiXmlConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pugixml.org/"
+    package_type = "library"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -37,11 +38,9 @@ class PugiXmlConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
+        if self.options.shared or self.options.header_only:
+            self.options.rm_safe("fPIC")
         if self.options.header_only:
-            if self.settings.os != "Windows":
-                del self.options.fPIC
             del self.options.shared
 
     def layout(self):
@@ -51,7 +50,7 @@ class PugiXmlConan(ConanFile):
             cmake_layout(self, src_folder="src")
 
     def package_id(self):
-        if self.options.header_only:
+        if self.info.options.header_only:
             self.info.clear()
 
     def validate(self):
@@ -60,8 +59,7 @@ class PugiXmlConan(ConanFile):
             raise ConanInvalidConfiguration("Combination of 'shared' and 'wchar_mode' options is not supported")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         if not self.options.header_only:
@@ -69,8 +67,6 @@ class PugiXmlConan(ConanFile):
             tc.variables["BUILD_TESTS"] = False
             # For msvc shared
             tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-            # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
             tc.generate()
 
     def build(self):
@@ -102,7 +98,8 @@ class PugiXmlConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "pugixml")
         self.cpp_info.set_property("cmake_target_name", "pugixml::pugixml")
         self.cpp_info.set_property("pkg_config_name", "pugixml")
-        self.cpp_info.resdirs = []
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
         if self.options.header_only:
             # For the "header_only" mode, options applied via global definitions
             self.cpp_info.defines.append("PUGIXML_HEADER_ONLY")

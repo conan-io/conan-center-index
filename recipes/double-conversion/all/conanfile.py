@@ -1,11 +1,10 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, rm
-from conan.tools.scm import Version
+from conan.tools.microsoft import check_min_vs
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.54.0"
 
 
 class DoubleConversionConan(ConanFile):
@@ -14,8 +13,9 @@ class DoubleConversionConan(ConanFile):
     homepage = "https://github.com/google/double-conversion"
     description = "Efficient binary-decimal and decimal-binary conversion routines for IEEE doubles."
     license = "BSD-3-Clause"
-    topics = ("double-conversion", "google", "decimal-binary", "conversion")
+    topics = ("google", "decimal-binary", "conversion")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,24 +32,19 @@ class DoubleConversionConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def validate(self):
-        if self.settings.compiler == "Visual Studio" and \
-           Version(self.settings.compiler.version) < "14":
-            raise ConanInvalidConfiguration("Double Convertion could not be built by MSVC <14")
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate(self):
+        check_min_vs(self, "190")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 

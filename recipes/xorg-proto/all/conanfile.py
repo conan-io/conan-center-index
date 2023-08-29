@@ -1,97 +1,85 @@
 from conan import ConanFile
-from conan.tools.files import rmdir, mkdir, save, load, get, apply_conandata_patches
-from conans import AutoToolsBuildEnvironment, tools
-import contextlib
+from conan.tools.files import rmdir, mkdir, save, load, get, apply_conandata_patches, export_conandata_patches, copy
+from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path
+
 import glob
 import os
 import re
 import yaml
 
-required_conan_version = ">=1.41.0"
+required_conan_version = ">=1.54.0"
 
 
 class XorgProtoConan(ConanFile):
     name = "xorg-proto"
+    package_type = "header-library"
     description = "This package provides the headers and specification documents defining " \
         "the core protocol and (many) extensions for the X Window System."
-    topics = ("conan", "xproto", "header", "specification")
+    topics = ("specification", "x-window")
     license = "X11"
     homepage = "https://gitlab.freedesktop.org/xorg/proto/xorgproto"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-
     generators = "PkgConfigDeps"
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def build_requirements(self):
-        self.build_requires("automake/1.16.3")
-        self.build_requires("xorg-macros/1.19.3")
-        self.build_requires("pkgconf/1.7.4")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        self.tool_requires("automake/1.16.5")
+        self.tool_requires("xorg-macros/1.19.3")
+        self.tool_requires("pkgconf/1.9.3")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def requirements(self):
         if hasattr(self, "settings_build"):
             self.requires("xorg-macros/1.19.3")
 
     def package_id(self):
-        # self.info.header_only() would be fine too, but keep the os to add c3i test coverage for Windows.
+        # self.info.clear() would be fine too, but keep the os to add c3i test coverage for Windows.
         del self.info.settings.arch
         del self.info.settings.build_type
         del self.info.settings.compiler
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                env = {
-                    "CC": "{} cl -nologo".format(self._user_info_build["automake"].compile).replace("\\", "/"),
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=self._settings_build.os == "Windows")
-        self._autotools.libs = []
-        self._autotools.configure(configure_dir=self._source_subfolder)
-        return self._autotools
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        env = tc.environment()
+        if is_msvc(self):
+            compile_wrapper = unix_path(self, self.conf.get("user.automake:compile-wrapper"))
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+        tc.generate(env)
 
     def build(self):
         apply_conandata_patches(self)
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     @property
     def _pc_data_path(self):
         return os.path.join(self.package_folder, "res", "pc_data.yml")
 
     def package(self):
-        self.copy("COPYING-*", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
+        copy(self, "COPYING-*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+
+        autotools = Autotools(self)
+        autotools.install()
 
         pc_data = {}
         for fn in glob.glob(os.path.join(self.package_folder, "share", "pkgconfig", "*.pc")):

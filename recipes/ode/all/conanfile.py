@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conans.tools import stdcpp_library
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class OdeConan(ConanFile):
@@ -16,6 +16,7 @@ class OdeConan(ConanFile):
     homepage = "https://www.ode.org"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -49,16 +50,15 @@ class OdeConan(ConanFile):
             self.requires("libccd/2.1")
 
     def validate(self):
-        if self.info.options.with_libccd:
+        if self.options.with_libccd:
             ccd_double_precision = self.dependencies["libccd"].options.enable_double_precision
-            if self.info.options.precision == "single" and ccd_double_precision:
+            if self.options.precision == "single" and ccd_double_precision:
                 raise ConanInvalidConfiguration("ode:precision=single requires libccd:enable_double_precision=False")
-            elif self.info.options.precision == "double" and not ccd_double_precision:
+            elif self.options.precision == "double" and not ccd_double_precision:
                 raise ConanInvalidConfiguration("ode:precision=double requires libccd:enable_double_precision=True")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -77,8 +77,6 @@ class OdeConan(ConanFile):
         tc.variables["ODE_DOUBLE_PRECISION"] = self.options.precision == "double"
         # Relocatable shared libs on macOS
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        # Honor BUILD_SHARED_LIBS (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         # Avoid a warning
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0075"] = "NEW"
         tc.generate()

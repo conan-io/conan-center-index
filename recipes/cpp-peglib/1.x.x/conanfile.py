@@ -1,14 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.54.0"
 
 
 class CpppeglibConan(ConanFile):
@@ -18,6 +17,7 @@ class CpppeglibConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/yhirose/cpp-peglib"
     topics = ("peg", "parser", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -31,8 +31,11 @@ class CpppeglibConan(ConanFile):
             "Visual Studio": "15.7",
             "gcc": "7",
             "clang": "6",
-            "apple-clang": "10"
+            "apple-clang": "10",
         }
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -50,19 +53,15 @@ class CpppeglibConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration(
-                f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler does not support.",
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
 
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) == "7" and \
-           tools_legacy.stdcpp_library(self) == "stdc++":
+           stdcpp_library(self) == "stdc++":
             raise ConanInvalidConfiguration(f"{self.name} {self.version} does not support clang 7 with libstdc++.")
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -73,9 +72,13 @@ class CpppeglibConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
+
+        # Since 1.8.4, cpp-peglib is named as peglib
+        if Version(self.version) >= "1.8.4":
+            self.cpp_info.set_property("cmake_file_name", "peglib")
+            self.cpp_info.set_property("cmake_target_name", "peglib")
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
             self.cpp_info.cxxflags.append("-pthread")

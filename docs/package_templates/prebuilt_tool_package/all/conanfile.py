@@ -16,6 +16,7 @@ class PackageConan(ConanFile):
     homepage = "https://github.com/project/package"
     # no "conan"  and project name in topics. Use "pre-built" for tooling packages
     topics = ("topic1", "topic2", "topic3", "pre-built")
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"  # even for pre-built executables
 
     # not needed but supress warning message from conan commands

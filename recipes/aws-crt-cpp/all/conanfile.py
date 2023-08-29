@@ -6,7 +6,8 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
+
 
 class AwsCrtCpp(ConanFile):
     name = "aws-crt-cpp"
@@ -15,6 +16,7 @@ class AwsCrtCpp(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-crt-cpp"
     topics = ("aws", "amazon", "cloud", "wrapper")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -26,8 +28,8 @@ class AwsCrtCpp(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
-        return 11
+    def _min_cppstd(self):
+        return "11"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -38,10 +40,7 @@ class AwsCrtCpp(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -65,11 +64,11 @@ class AwsCrtCpp(ConanFile):
             self.requires("aws-c-event-stream/0.2.15")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

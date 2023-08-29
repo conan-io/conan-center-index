@@ -1,22 +1,22 @@
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
-from conans import tools as tools_legacy
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.54.0"
 
 
 class FlannConan(ConanFile):
     name = "flann"
     description = "Fast Library for Approximate Nearest Neighbors"
-    topics = ("flann", "nns", "nearest-neighbor-search", "knn", "kd-tree")
+    topics = ("nns", "nearest-neighbor-search", "knn", "kd-tree")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.cs.ubc.ca/research/flann/"
     license = "BSD-3-Clause"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -28,8 +28,7 @@ class FlannConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -37,21 +36,21 @@ class FlannConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def requirements(self):
-        self.requires("lz4/1.9.3")
-
-    def validate(self):
-        if Version(self.version) >= "1.9.2" and self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        # see https://github.com/conan-io/conan-center-index/pull/16355#discussion_r1150197550
+        self.requires("lz4/1.9.4", transitive_headers=True, transitive_libs=True)
+
+    def validate(self):
+        if Version(self.version) >= "1.9.2" and self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -125,15 +124,17 @@ class FlannConan(ConanFile):
 
         # flann_cpp
         flann_cpp_lib = "flann_cpp" if self.options.shared else "flann_cpp_s"
-        self.cpp_info.components["flann_cpp"].set_property("cmake_target_name", "flann::{}".format(flann_cpp_lib))
+        self.cpp_info.components["flann_cpp"].set_property("cmake_target_name", f"flann::{flann_cpp_lib}")
         self.cpp_info.components["flann_cpp"].libs = [flann_cpp_lib]
-        if not self.options.shared and tools_legacy.stdcpp_library(self):
-            self.cpp_info.components["flann_cpp"].system_libs.append(tools_legacy.stdcpp_library(self))
+        if not self.options.shared:
+            libcxx = stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.components["flann_cpp"].system_libs.append(libcxx)
         self.cpp_info.components["flann_cpp"].requires = ["lz4::lz4"]
 
         # flann
         flann_c_lib = "flann" if self.options.shared else "flann_s"
-        self.cpp_info.components["flann_c"].set_property("cmake_target_name", "flann::{}".format(flann_c_lib))
+        self.cpp_info.components["flann_c"].set_property("cmake_target_name", f"flann::{flann_c_lib}")
         self.cpp_info.components["flann_c"].libs = [flann_c_lib]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["flann_c"].system_libs.append("m")

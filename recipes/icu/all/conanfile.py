@@ -4,6 +4,7 @@ import os
 import shutil
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv
@@ -11,6 +12,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.57.0"
 
@@ -22,8 +24,8 @@ class ICUConan(ConanFile):
     description = "ICU is a mature, widely used set of C/C++ and Java libraries " \
                   "providing Unicode and Globalization support for software applications."
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("icu", "icu4c", "i see you", "unicode")
-
+    topics = ("icu4c", "i see you", "unicode")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -67,6 +69,11 @@ class ICUConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+    def validate(self):
+        if self.options.dat_package_file:
+            if not os.path.exists(self.options.dat_package_file):
+                raise ConanInvalidConfiguration("Non-existent dat_package_file specified")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -201,7 +208,7 @@ class ICUConan(ConanFile):
 
     @property
     def _data_filename(self):
-        vtag = self.version.split(".")[0]
+        vtag = Version(self.version).major
         return f"icudt{vtag}l.dat"
 
     @property
@@ -209,7 +216,7 @@ class ICUConan(ConanFile):
         data_dir_name = "icu"
         if self.settings.os == "Windows" and self.settings.build_type == "Debug":
             data_dir_name += "d"
-        data_dir = os.path.join(self.package_folder, "lib", data_dir_name, self.version)
+        data_dir = os.path.join(self.package_folder, "lib", data_dir_name, str(self.version))
         return os.path.join(data_dir, self._data_filename)
 
     def package(self):

@@ -1,0 +1,23 @@
+diff --git a/src/libutil/strutil.cpp b/src/libutil/strutil.cpp
+index 213b1c0bf..24670fe8f 100644
+--- a/src/libutil/strutil.cpp
++++ b/src/libutil/strutil.cpp
+@@ -921,9 +921,17 @@ Strutil::utf16_to_utf8(const std::u16string& str) noexcept
+     try {
+         OIIO_PRAGMA_WARNING_PUSH
+         OIIO_CLANG_PRAGMA(GCC diagnostic ignored "-Wdeprecated-declarations")
++        // https://stackoverflow.com/a/35103224
++#if defined _MSC_VER && _MSC_VER >= 1900 && _MSC_VER < 1930
++        std::wstring_convert<std::codecvt_utf8_utf16<int16_t>, int16_t> convert;
++        auto p = reinterpret_cast<const int16_t *>(str.data());
++        OIIO_PRAGMA_WARNING_POP
++        return convert.to_bytes(p, p + str.size());
++#else
+         std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> conv;
+         OIIO_PRAGMA_WARNING_POP
+         return conv.to_bytes(str);
++#endif
+     } catch (const std::exception&) {
+         return std::string();
+     }
+

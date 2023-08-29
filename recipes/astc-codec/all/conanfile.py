@@ -1,73 +1,72 @@
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 import os
-import glob
-from conans import ConanFile, CMake, tools
+
+required_conan_version = ">=1.54.0"
 
 
 class AstcCodecConan(ConanFile):
     name = "astc-codec"
-    description = " A software ASTC decoder implementation which supports the ASTC LDR profile"
+    description = "A software ASTC decoder implementation which supports the ASTC LDR profile"
     homepage = "https://github.com/google/astc-codec"
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
-    topics = ("conan", "astc", "codec")
-    settings = "os", "compiler", "arch", "build_type"
+    topics = ("astc", "codec")
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
     }
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "11")
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, "11")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("astc-codec-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["OPTION_ASTC_TESTS"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["OPTION_ASTC_TESTS"] = False
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*.lib", src=os.path.join(self._build_subfolder, "lib"), dst="lib", keep_path=False)
-        self.copy("*.dll", src=os.path.join(self._build_subfolder, "bin"), dst="bin", keep_path=False)
-        self.copy("*.exe", src=os.path.join(self._build_subfolder, "bin"), dst="bin", keep_path=False)
-        self.copy("*.so*", src=os.path.join(self._build_subfolder, "lib"), dst="lib", keep_path=False, symlinks=True)
-        self.copy("*.dylib", src=os.path.join(self._build_subfolder, "lib"), dst="lib", keep_path=False)
-        self.copy("*.a", src=os.path.join(self._build_subfolder, "lib"), dst="lib", keep_path=False)
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["astc-codec"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
+        # TODO: to remove in conan v2
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

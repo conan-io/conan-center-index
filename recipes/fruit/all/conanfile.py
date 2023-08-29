@@ -21,26 +21,37 @@ class FruitConan(ConanFile):
     topics = ("injection", "framework")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
-               "use_boost": [True, False],
+               "use_boost": [True, False, "deprecated"],
+               "with_boost": [True, False],
                "fPIC": [True, False]}
-    default_options = {"shared": False, "use_boost": True, "fPIC": True}
+    default_options = {
+        "shared": False,
+        "use_boost": "deprecated",
+        "with_boost": True,
+        "fPIC": True}
 
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def package_id(self):
+        del self.info.options.use_boost
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if self.options.use_boost != "deprecated":
+            self.output.warn("use_boost option is deprecated, use the option with_boost instead.")
+            self.options.with_boost = self.options.use_boost
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.use_boost:
+        if self.options.with_boost:
             self.requires("boost/1.80.0")
 
     def validate(self):
@@ -86,7 +97,7 @@ class FruitConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["FRUIT_USES_BOOST"] = self.options.use_boost
+        tc.cache_variables["FRUIT_USES_BOOST"] = self.options.with_boost
         tc.variables["FRUIT_ENABLE_COVERAGE"] = False
         tc.variables["RUN_TESTS_UNDER_VALGRIND"] = False
         tc.variables["CMAKE_CXX_STANDARD"] = 11
