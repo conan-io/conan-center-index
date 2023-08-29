@@ -40,10 +40,6 @@ class EthashConan(ConanFile):
             "apple-clang": "14.1",
         }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -53,6 +49,8 @@ class EthashConan(ConanFile):
         tc.generate()
 
     def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("ethash does not support windows")
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
@@ -93,6 +91,8 @@ class EthashConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "ethash"
         self.cpp_info.names["cmake_find_package_multi"] = "ethash"
 
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("m")
         self.cpp_info.components["keccak"].set_property("cmake_file_name", "keccak")
         self.cpp_info.components["keccak"].set_property("cmake_target_name", "keccak::keccak")
         self.cpp_info.components["keccak"].libs = ["keccak"]
