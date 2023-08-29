@@ -19,6 +19,7 @@ class LibvaultConan(ConanFile):
     homepage = "https://github.com/abedra/libvault"
     description = "A C++ library for Hashicorp Vault"
     topics = ("vault", "libvault", "secrets", "passwords")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
