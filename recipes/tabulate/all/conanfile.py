@@ -1,57 +1,66 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, copy
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
+
+required_conan_version = ">=1.52.0"
 
 class Tabulate(ConanFile):
     name = "tabulate"
+    description = "Table Maker for Modern C++"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/p-ranav/tabulate"
-    description = "Table Maker for Modern C++"
-    settings = "compiler"
     topics = ("header-only", "cpp17", "tabulate", "table", "cli")
-    license = "MIT"
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 17
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def configure(self):
-        compiler = str(self.settings.compiler)
-        compiler_version = tools.Version(self.settings.compiler.version)
-
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "17")
-        else:
-            self.output.warn("%s recipe lacks information about the %s compiler"
-                             " standard version support" % (self.name, compiler))
-
-        minimal_version = {
+    @property
+    def _compilers_minimum_version(self):
+        return {
             "Visual Studio": "16",
-            "gcc": "7.3",
-            "clang": "6",
-            "apple-clang": "10.0"
+            "msvc": "192",
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "12.0",
         }
 
-        if compiler not in minimal_version:
-            self.output.info("%s requires a compiler that supports at least"
-                             " C++17" % self.name)
-            return
-
-        if compiler_version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration("%s requires a compiler that supports"
-                                            " at least C++17. %s %s is not"
-                                            " supported." % (self.name, compiler, Version(self.settings.compiler.version)))
-
-    def package(self):
-        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def package(self):
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self,
+            pattern="*.hpp",
+            dst=os.path.join(self.package_folder, "include"),
+            src=os.path.join(self.source_folder, "include"),
+        )
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

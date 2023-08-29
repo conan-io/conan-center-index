@@ -7,6 +7,9 @@
 #     (master branch) https://github.com/grpc/grpc/blob/master/CMakeLists.txt#L347
 
 sources:
+  "cci.20230501":
+    url: "https://github.com/googleapis/googleapis/archive/2da477b6a72168c65fdb4245530cfa702cc4b029.tar.gz"
+    sha256: "3e48e5833fcd2e1fcb8b6a5b7a88e18503b670e8636b868cdb5ac32e00fbdafb"
   "cci.20221108":
     url: "https://github.com/googleapis/googleapis/archive/67b2d7c2fb11188776bc398f02c67fccd8187502.zip"
     sha256: "cca450c34e3a8adc03364686d44748f362e4a9af6d3ef32b918f2d5483a3025e"

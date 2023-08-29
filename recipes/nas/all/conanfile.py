@@ -57,6 +57,7 @@ class NasRecipe(ConanFile):
         self.tool_requires("xorg-cf-files/1.0.7")
         self.tool_requires("xorg-makedepend/1.0.6")
         self.tool_requires("xorg-gccmakedep/1.0.3")
+        self.tool_requires("gnu-config/cci.20210814")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0],  strip_root=True)
@@ -91,6 +92,14 @@ class NasRecipe(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                config_folder = os.path.join(self.source_folder, "config")
+                copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=config_folder)
 
         with chdir(self, self.source_folder):
             self.run("imake -DUseInstalled -I{} {}".format(self._imake_irulesrc, self._imake_defines), env="conanbuild")

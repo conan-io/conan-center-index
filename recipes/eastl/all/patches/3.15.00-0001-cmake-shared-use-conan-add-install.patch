@@ -1,11 +1,12 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -46,5 +46,18 @@ target_include_directories(EASTL PUBLIC include)
+@@ -46,5 +46,19 @@ target_include_directories(EASTL PUBLIC include)
  #-------------------------------------------------------------------------------------------
  # Dependencies
  #-------------------------------------------------------------------------------------------
 -target_link_libraries(EASTL EABase)
-+target_link_libraries(EASTL CONAN_PKG::eabase)
++find_package(EABase REQUIRED CONFIG)
++target_link_libraries(EASTL EABase::EABase)
  
 +if(BUILD_SHARED_LIBS)
 +  target_compile_definitions(EASTL PUBLIC EASTL_DLL)

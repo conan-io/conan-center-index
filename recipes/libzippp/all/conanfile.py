@@ -8,6 +8,7 @@ import os
 
 required_conan_version = ">=1.53.0"
 
+
 class LibZipppConan(ConanFile):
     name = "libzippp"
     description = "A simple basic C++ wrapper around the libzip library"
@@ -15,6 +16,7 @@ class LibZipppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ctabin/libzippp"
     topics = ("zip", "zlib", "libzip", "zip-archives", "zip-editing")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -52,7 +54,7 @@ class LibZipppConan(ConanFile):
                 self.requires(f"libzip/{versions[1]}")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
         libzippp_version = str(self.version)
@@ -70,6 +72,7 @@ class LibZipppConan(ConanFile):
         tc.variables["CMAKE_CXX_STANDARD"] = 11
         tc.variables["LIBZIPPP_INSTALL"] = True
         tc.variables["LIBZIPPP_INSTALL_HEADERS"] = True
+        tc.variables["LIBZIPPP_BUILD_TESTS"] = False
         tc.variables["LIBZIPPP_ENABLE_ENCRYPTION"] = self.options.with_encryption
         tc.generate()
 
@@ -96,6 +99,8 @@ class LibZipppConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "libzippp")
+        self.cpp_info.set_property("cmake_target_name", "libzippp::libzippp")
         prefix = "lib" if self.settings.os == "Windows" else ""
         postfix = "" if self.options.shared else "_static"
         self.cpp_info.libs = [f"{prefix}zippp{postfix}"]
@@ -103,8 +108,5 @@ class LibZipppConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
-        self.cpp_info.names["cmake_find_package"] = "libzippp"
-        self.cpp_info.names["cmake_find_package_multi"] = "libzippp"
-        self.cpp_info.set_property("cmake_file_name", "libzippp")
         if self.options.with_encryption:
             self.cpp_info.defines.append("LIBZIPPP_WITH_ENCRYPTION")

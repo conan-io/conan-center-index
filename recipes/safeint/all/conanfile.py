@@ -11,7 +11,8 @@ class SafeintConan(ConanFile):
     name = "safeint"
     description = "SafeInt is a class library for C++ that manages integer overflows."
     license = "MIT"
-    topics = ("integer", "overflow")
+    topics = ("integer", "overflow", "header-only")
+    package_type = "header-library"
     homepage = "https://github.com/dcleblanc/SafeInt"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"

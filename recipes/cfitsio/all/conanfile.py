@@ -108,8 +108,11 @@ class CfitsioConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", f"cfitsio-{self.version}"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "cfitsio")
+        self.cpp_info.set_property("cmake_target_name", "cfitsio::cfitsio")
         self.cpp_info.set_property("pkg_config_name", "cfitsio")
         self.cpp_info.libs = ["cfitsio"]
         if self.settings.os in ["Linux", "FreeBSD"]:

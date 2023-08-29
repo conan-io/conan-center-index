@@ -1,0 +1,69 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -30,7 +30,6 @@ set(TEST_FLAGS "-Wall -Wextra -Wno-unused-parameter -fno-rtti -DGTEST_HAS_RTTI=0
+ else()
+  if(MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DUNICODE /D_UNICODE")
+-   set(BUILD_SHARED_LIBS OFF)
+  endif()
+ endif()
+ 
+@@ -93,7 +92,7 @@ set(MINIZIP_DEPENDS "" CACHE INTERNAL "MINIZIP_DEPENDS")
+ 
+ set(LIBKML_TARGETS)
+ 
+-find_package(EXPAT)
++find_package(EXPAT REQUIRED MODULE)
+ if(EXPAT_FOUND)
+   include_directories(${EXPAT_INCLUDE_DIR})
+ else()
+@@ -110,16 +109,16 @@ else()
+   list(APPEND MINIZIP_DEPENDS ZLIB)
+ endif()
+ 
+-find_package(MiniZip)
+-if(MINIZIP_FOUND)
++find_package(minizip REQUIRED CONFIG)
++if(minizip_FOUND)
+   include_directories(${MINIZIP_INCLUDE_DIR})
+ else()
+   include(External_minizip)
+   list(APPEND KMLBASE_DEPENDS MINIZIP)
+ endif()
+ 
+-find_package(UriParser)
+-if(URIPARSER_FOUND)
++find_package(uriparser REQUIRED CONFIG)
++if(uriparser_FOUND)
+   include_directories(${URIPARSER_INCLUDE_DIR})
+ else()
+   include(External_uriparser)
+@@ -149,10 +148,11 @@ if(WITH_SWIG)
+   endif()
+ endif()
+ 
+-list(APPEND KMLBASE_LINK_LIBS ${EXPAT_LIBRARY})
+-list(APPEND KMLBASE_LINK_LIBS ${ZLIB_LIBRARY})
+-list(APPEND KMLBASE_LINK_LIBS ${MINIZIP_LIBRARY})
+-list(APPEND KMLBASE_LINK_LIBS ${URIPARSER_LIBRARY})
++list(APPEND KMLBASE_LINK_LIBS Boost::headers)
++list(APPEND KMLBASE_LINK_LIBS EXPAT::EXPAT)
++list(APPEND KMLBASE_LINK_LIBS ZLIB::ZLIB)
++list(APPEND KMLBASE_LINK_LIBS minizip::minizip)
++list(APPEND KMLBASE_LINK_LIBS uriparser::uriparser)
+ 
+ include_directories(${CMAKE_SOURCE_DIR}/src)
+ 
+diff --git a/src/kml/base/CMakeLists.txt b/src/kml/base/CMakeLists.txt
+index dc3e9c4..895930b 100644
+--- a/src/kml/base/CMakeLists.txt
++++ b/src/kml/base/CMakeLists.txt
+@@ -3,7 +3,7 @@ if(HAVE_SYSTEM_EXPAT)
+   include_directories(${EXPAT_INCLUDE_DIR})
+ endif()
+ 
+-list(APPEND KMLBASE_LINK_LIBS ${EXPAT_LIBRARY})
++list(APPEND KMLBASE_LINK_LIBS EXPAT::EXPAT)
+ 
+ file(GLOB SRCS "*.cc"
+   contrib/minizip/unzip.c

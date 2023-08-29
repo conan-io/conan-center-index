@@ -1,7 +1,11 @@
 sources:
-    "9.1.5321":
-        url: "https://iweb.dl.sourceforge.net/project/wtl/WTL%209.1/WTL%209.1.5321%20Final/WTL91_5321_Final.zip"
-        sha256: "c03f80c66f28e86b3cc7c98d14afab6bec8eb9366476f6bdda8469c35f52b18a"
     "10.0.9163":
-        url: "https://iweb.dl.sourceforge.net/project/wtl/WTL%2010/WTL%2010.0.9163/WTL10_9163.zip"
+        url:
+            - "https://master.dl.sourceforge.net/project/wtl/WTL%2010/WTL%2010.0.9163/WTL10_9163.zip"
+            - "https://iweb.dl.sourceforge.net/project/wtl/WTL%2010/WTL%2010.0.9163/WTL10_9163.zip"
         sha256: "b9fff11c36532c5fa0114b3c7ee4f752cbef71c7ddfd2e5f88f6f51f15431104"
+    "9.1.5321":
+        url:
+            - "https://master.dl.sourceforge.net/project/wtl/WTL%209.1/WTL%209.1.5321%20Final/WTL91_5321_Final.zip"
+            - "https://iweb.dl.sourceforge.net/project/wtl/WTL%209.1/WTL%209.1.5321%20Final/WTL91_5321_Final.zip"
+        sha256: "c03f80c66f28e86b3cc7c98d14afab6bec8eb9366476f6bdda8469c35f52b18a"

@@ -4,10 +4,11 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["XMLSEC_WITH_XSLT"] = self.options["xmlsec"].with_xslt
         cmake.configure()
         cmake.build()
 

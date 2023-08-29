@@ -4,11 +4,13 @@ https://github.com/chronoxor/CppCMakeScripts/blob/1.0.0.0/SetPlatformFeatures.cm
 
 Even if it sets _WIN32_WINNT to _WIN32_WINNT_WIN10, here a less strict definiton is chosen (_WIN32_WINNT_VISTA).
 
+---
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index ad3d53aa8..d4dcbf8b5 100644
+index 160fc09..5eeddd8 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -74,6 +74,10 @@ target_link_libraries(cppcommon PUBLIC ${LINKLIBS} CONAN_PKG::fmt)
+@@ -75,6 +75,10 @@ target_link_libraries(cppcommon PUBLIC ${LINKLIBS} fmt::fmt)
  list(APPEND INSTALL_TARGETS cppcommon)
  list(APPEND LINKLIBS cppcommon)
  
@@ -18,4 +20,4 @@ index ad3d53aa8..d4dcbf8b5 100644
 +
  # Additional module components: benchmarks, examples, plugins, tests, tools and install
  if(NOT CPPCOMMON_MODULE)
- 
+

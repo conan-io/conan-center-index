@@ -1,0 +1,6 @@
+sources:
+  # Newer versions at the top
+  "1.0.1":
+    url:
+      - "https://gitlab.com/libchef/chef-fun/-/archive/1.0.1/chef-fun-1.0.1.tar.gz"
+    sha256: "52a4facb3b1de9f1a8ed4f3314fc5e2190fab1f5564c04c7071361fb08ca837e"

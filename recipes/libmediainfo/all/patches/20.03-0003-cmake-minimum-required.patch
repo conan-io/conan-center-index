@@ -1,0 +1,10 @@
+--- a/Project/CMake/CMakeLists.txt
++++ b/Project/CMake/CMakeLists.txt
+@@ -1,6 +1,6 @@
++cmake_minimum_required(VERSION 2.8.11)
+ project(MediaInfoLib)
+ 
+-cmake_minimum_required(VERSION 2.8.11)
+ 
+ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+ 

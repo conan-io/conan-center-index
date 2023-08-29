@@ -81,7 +81,7 @@ class DuckdbConan(ConanFile):
         if self.options.with_odbc:
             self.requires("odbc/2.3.11")
         if self.options.with_httpfs:
-            self.requires("openssl/3.0.7")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if self.settings.compiler.cppstd:

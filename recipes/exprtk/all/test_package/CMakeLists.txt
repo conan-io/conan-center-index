@@ -1,17 +1,15 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.8)
 
-project(test_package)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-
-conan_basic_setup()
+find_package(exprtk REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE exprtk::exprtk)
 
 if (MSVC)
-  target_compile_options(${PROJECT_NAME} PRIVATE "/bigobj")
+   # Compile will fail without this flag
+   # TODO should this be something added into conan recipe?
+   target_compile_options(${PROJECT_NAME} PRIVATE "/bigobj")
 endif (MSVC)
-
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)

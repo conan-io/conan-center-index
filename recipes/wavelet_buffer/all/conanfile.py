@@ -17,7 +17,7 @@ class WaveletBufferConan(ConanFile):
     topics = ("compression", "signal-processing", "wavelet")
     homepage = "https://github.com/panda-official/WaveletBuffer"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -60,12 +60,15 @@ class WaveletBufferConan(ConanFile):
 
     def requirements(self):
         self.requires("blaze/3.8", transitive_headers=True)
-        self.requires("cimg/3.0.2")
+        self.requires("cimg/3.2.5")
         if self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
+            self.requires("libjpeg-turbo/3.0.0")
         else:
             self.requires("libjpeg/9e")
         # FIXME: unvendor SfCompressor which is currently downloaded at build time :s
+        if Version(self.version) >= "0.6.0":
+            self.requires("streamvbyte/1.0.0")
+            self.requires("fpzip/1.3.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -80,24 +83,11 @@ class WaveletBufferConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared with Visual Studio.")
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output=output)
-            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
-        if not self._cmake_new_enough("3.16"):
-            self.tool_requires("cmake/3.25.0")
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -118,12 +108,17 @@ class WaveletBufferConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "wavelet_buffer")
         self.cpp_info.set_property("cmake_target_name", "wavelet_buffer::wavelet_buffer")
-        self.cpp_info.libs = ["wavelet_buffer", "sf_compressor"]
         self.cpp_info.requires = ["blaze::blaze", "cimg::cimg"]
+        if Version(self.version) >= "0.6.0":
+            self.cpp_info.libs = ["wavelet_buffer"]
+            self.cpp_info.requires.extend(["streamvbyte::streamvbyte", "fpzip::fpzip"])
+        else:
+            self.cpp_info.libs = ["wavelet_buffer", "sf_compressor"]
         if self.options.jpeg == "libjpeg-turbo":
             self.cpp_info.requires.append("libjpeg-turbo::jpeg")
         else:

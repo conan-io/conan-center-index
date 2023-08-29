@@ -23,6 +23,7 @@ class MoltenVKConan(ConanFile):
     homepage = "https://github.com/KhronosGroup/MoltenVK"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -84,7 +85,7 @@ class MoltenVKConan(ConanFile):
         self.requires("cereal/1.3.2")
         self.requires(self._require("glslang"))
         self.requires(self._require("spirv-cross"))
-        self.requires(self._require("vulkan-headers"))
+        self.requires(self._require("vulkan-headers"), transitive_headers=True)
         if self.options.with_spirv_tools:
             self.requires(self._require("spirv-tools"))
 
@@ -93,15 +94,6 @@ class MoltenVKConan(ConanFile):
             raise ConanException(f"{recipe_name} is missing in {self._dependencies_filename}")
         return f"{recipe_name}/{self._dependencies_versions[recipe_name]}"
 
-    def package_id(self):
-        # MoltenVK >=1.O.42 requires at least XCode 12.0 (11.4 actually) at build
-        # time but can be consumed by older compiler versions if shared
-        if Version(self.version) >= "1.0.42" and self.options.shared:
-            if Version(self.settings.compiler.version) < "12.0":
-                compatible_pkg = self.info.clone()
-                compatible_pkg.settings.compiler.version = "12.0"
-                self.compatible_packages.append(compatible_pkg)
-
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
@@ -109,18 +101,14 @@ class MoltenVKConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} only supported on MacOS, iOS and tvOS")
         if self.settings.compiler != "apple-clang":
             raise ConanInvalidConfiguration(f"{self.ref} requires apple-clang")
-        if Version(self.version) >= "1.0.42":
-            if Version(self.settings.compiler.version) < "12.0":
-                raise ConanInvalidConfiguration(f"{self.ref} requires XCode 12.0 or higher at build time")
-
-    def validate_build(self):
+        if Version(self.settings.compiler.version) < "12.0":
+            raise ConanInvalidConfiguration(f"{self.ref} requires XCode 12.0 or higher")
         spirv_cross = self.dependencies["spirv-cross"]
-        if spirv_cross.options.shared or not spirv_cross.options.msl or not spirv_cross.options.reflect:
+        if spirv_cross.options.shared or not (spirv_cross.options.msl and spirv_cross.options.reflect):
             raise ConanInvalidConfiguration(f"{self.ref} requires spirv-cross static with msl & reflect enabled")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

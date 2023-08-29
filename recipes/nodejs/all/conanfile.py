@@ -1,19 +1,24 @@
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+import re
+from six import StringIO
+from conan import ConanFile, conan_version
+from conan.tools.scm import Version
+from conan.tools.files import copy, get
+from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.59.0"
 
 
 class NodejsConan(ConanFile):
     name = "nodejs"
     description = "nodejs binaries for use in recipes"
-    topics = ("conan", "node", "nodejs")
+    topics = ("node", "javascript", "runtime")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://nodejs.org"
     license = "MIT"
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler"
     no_copy_source = True
+    short_paths = True
 
     @property
     def _source_subfolder(self):
@@ -28,21 +33,35 @@ class NodejsConan(ConanFile):
                 return "armv8"
         return str(self.settings.arch)
 
+    @property
+    def _glibc_version(self):
+        cmd = ['ldd', '--version'] if conan_version.major == "1" else ['ldd --version']
+        buff = StringIO()
+        self.run(cmd, buff)
+        return str(re.search(r'GLIBC (\d{1,3}.\d{1,3})', buff.getvalue()).group(1))
+
     def validate(self):
-        if (not (self.version in self.conan_data["sources"]) or
-            not (str(self.settings.os) in self.conan_data["sources"][self.version]) or
-            not (self._nodejs_arch in self.conan_data["sources"][self.version][str(self.settings.os)] ) ):
+        if not self.version in self.conan_data["sources"] or \
+           not str(self.settings.os) in self.conan_data["sources"][self.version] or \
+           not self._nodejs_arch in self.conan_data["sources"][self.version][str(self.settings.os)]:
             raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
 
+        if Version(self.version) >= "18.0.0":
+            if str(self.settings.os) == "Linux":
+                if Version(self._glibc_version) < '2.27':
+                    raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os not available")
+
     def build(self):
-        tools.get(**self.conan_data["sources"][self.version][str(self.settings.os)][self._nodejs_arch], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][self._nodejs_arch],
+            destination=self._source_subfolder, strip_root=True)
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", src=os.path.join(self._source_subfolder, "bin"), dst="bin")
-        self.copy(pattern="node.exe", src=self._source_subfolder, dst="bin")
-        self.copy(pattern="npm", src=self._source_subfolder, dst="bin")
-        self.copy(pattern="npx", src=self._source_subfolder, dst="bin")
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self._source_subfolder)
+        copy(self, pattern="*", dst=os.path.join(self.package_folder, "bin"), src=os.path.join(self._source_subfolder, "bin"))
+        copy(self, pattern="*", dst=os.path.join(self.package_folder, "lib"), src=os.path.join(self._source_subfolder, "lib"))
+        copy(self, pattern="node.exe", dst=os.path.join(self.package_folder, "bin"), src=self._source_subfolder)
+        copy(self, pattern="npm", dst=os.path.join(self.package_folder, "bin"), src=self._source_subfolder)
+        copy(self, pattern="npx", dst=os.path.join(self.package_folder, "bin"), src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.includedirs = []

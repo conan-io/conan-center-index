@@ -14,7 +14,7 @@ class XorgMakedepend(ConanFile):
     description = "Utility to parse C source files to make dependency lists for Makefiles"
     topics = ("xorg", "dependency", "obsolete")
     license = "MIT"
-    homepage = "https://gitlab.freedesktop.org/xorg/util/cf"
+    homepage = "https://gitlab.freedesktop.org/xorg/util/makedepend"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
 

@@ -23,7 +23,8 @@ to configure plugins, warnings and errors which should be enabled or disabled.
     * [E9008 - conan-import-errors: Deprecated imports should be replaced by new imports](#e9008---conan-import-errors-deprecated-imports-should-be-replaced-by-new-imports)
     * [E9009 - conan-import-error-conanexception: conans.errors is deprecated and conan.errors should be used instead](#e9009---conan-import-error-conanexception-conanserrors-is-deprecated-and-conanerrors-should-be-used-instead)
     * [E9010 - conan-import-error-conaninvalidconfiguration: conans.errors is deprecated and conan.errors should be used instead](#e9010---conan-import-error-conaninvalidconfiguration-conanserrors-is-deprecated-and-conanerrors-should-be-used-instead)
-    * [E9011 - conan-import-tools: Importing conan.tools or conan.tools.xxx.zzz.yyy should be considered as private](#e9011---conan-import-tools-importing-conantools-or-conantoolsxxxzzzyyy-should-be-considered-as-private)<!-- endToc -->
+    * [E9011 - conan-import-tools: Importing conan.tools or conan.tools.xxx.zzz.yyy should be considered as private](#e9011---conan-import-tools-importing-conantools-or-conantoolsxxxzzzyyy-should-be-considered-as-private)
+    * [E9012 - conan-attr-version: Recipe should not contain version attribute](#e9012---conan-attr-version-recipe-should-not-contain-version-attribute)<!-- endToc -->
 
 ## Understanding the different linters
 
@@ -157,4 +158,33 @@ Only modules under `conan.tools` and `conan.tools.xxx` are allowed:
 ```python
 from conan.tools.files import rmdir
 from conan.tools import scm
-````
+```
+
+### E9012 - conan-attr-version: Recipe should not contain version attribute
+
+All recipes on CCI should be generic enough to support as many versions as possible, so enforcing a specific
+version as attribute will not allow to re-use the same recipe for multiple release versions.
+
+```python
+from conan import ConanFile
+
+class FooConanFile(ConanFile):
+    version = "1.0.0"  # Wrong!
+```
+
+The package version should be passed as command argument, e.g:
+
+    conan create all/ 1.0.0@ -pr:h=default -pr:b=default
+
+Or, if you are running Conan 2.0:
+
+    conan create all/ --version=1.0.0 -pr:h=default -pr:b=default
+
+The only exception is when providing ``system`` packages, which are allowed.
+
+```python
+from conan import ConanFile
+
+class FooConanFile(ConanFile):
+    version = "system"  # Okay!
+```

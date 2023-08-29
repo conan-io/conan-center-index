@@ -311,7 +311,9 @@ The CMake definition [CMAKE_VERBOSE_MAKEFILE](https://cmake.org/cmake/help/lates
 
 #### **<a name="KB-H048">#KB-H048</a>: "CMAKE VERSION REQUIRED"**
 
-The file test_package/CMakeLists.txt should require CMake 3.1 by default: [cmake_minimum_required(VERSION 3.1)](https://cmake.org/cmake/help/latest/command/cmake_minimum_required.html). The CMake wrapper file can require CMake 2.8, because Conan recipe and the test package are totally separated. However, if [CMAKE_CXX_STANDARD](https://cmake.org/cmake/help/latest/variable/CMAKE_CXX_STANDARD.html) or [CXX_STANDARD](https://cmake.org/cmake/help/latest/prop_tgt/CXX_STANDARD.html#prop_tgt:CXX_STANDARD) is explicit, CMake 3.1 is mandatory.
+> **Warning**: This is a legacy Conan 1.x details from the deprecated generators
+
+The file test_package/CMakeLists.txt should require CMake 3.15 by default: [cmake_minimum_required(VERSION 3.15)](https://cmake.org/cmake/help/latest/command/cmake_minimum_required.html). The CMake wrapper file can require CMake 2.8, because Conan recipe and the test package are totally separated. However, if [CMAKE_CXX_STANDARD](https://cmake.org/cmake/help/latest/variable/CMAKE_CXX_STANDARD.html) or [CXX_STANDARD](https://cmake.org/cmake/help/latest/prop_tgt/CXX_STANDARD.html#prop_tgt:CXX_STANDARD) is explicit, CMake 3.1 is mandatory.
 
 #### **<a name="KB-H049">#KB-H049</a>: "CMAKE WINDOWS EXPORT ALL SYMBOLS"**
 
@@ -473,10 +475,6 @@ def package_info(self):
 #### **<a name="KB-H072">#KB-H072</a>: "PYLINT EXECUTION"**
 
 Pylint is executed by default over all `conanfile.py` files in ConanCenterIndex and it should not be skipped. It's an important tool which helps us keep a standard level of acceptance. Otherwise, it would be incredibly hard to review all recipes and keep them to the same level of standards.
-
-#### **<a name="KB-H073">#KB-H073</a>: "TEST V1 PACKAGE FOLDER"**
-
-The legacy content in test_package should not be removed. Instead, rename that folder to `test_v1_package` and create a new `test_package` folder following the [file structure](adding_packages/README.md#recipe-files-structure) related to Conan v2 and v1 compatibility. Also, you can obtain good examples of Conan v2 test packages from the [template packages](package_templates/README.md) folder.
 
 #### **<a name="KB-H075">#KB-H075</a>: "REQUIREMENT OVERRIDE PARAMETER"**
 
