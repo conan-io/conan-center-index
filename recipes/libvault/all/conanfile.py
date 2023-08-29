@@ -50,7 +50,7 @@ class LibvaultConan(ConanFile):
         self.requires("libcurl/8.2.0")
 
     def validate(self):
-        compiler = str(self.info.settings.compiler)
+        compiler = str(self.settings.compiler)
         compiler_version = Version(self.settings.compiler.version.value)
 
         minimum_compiler_version = {
@@ -73,7 +73,7 @@ class LibvaultConan(ConanFile):
             raise ConanInvalidConfiguration("clang 11 with libstdc++ is not supported due to old libstdc++ missing C++17 support")
 
         if is_apple_os(self):
-            os_version = self.info.settings.get_safe("os.version")
+            os_version = self.settings.get_safe("os.version")
             if os_version and Version(os_version) < self._mac_os_minimum_required_version:
                 raise ConanInvalidConfiguration(
                     "Macos Mojave (10.14) and earlier cannot to be built because C++ standard library too old.")
