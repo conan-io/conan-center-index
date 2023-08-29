@@ -47,7 +47,6 @@ class LibvaultConan(ConanFile):
 
     def requirements(self):
         self.requires("libcurl/8.2.0")
-        self.requires("catch2/3.2.0")
 
     def validate(self):
         compiler = str(self.info.settings.compiler)
