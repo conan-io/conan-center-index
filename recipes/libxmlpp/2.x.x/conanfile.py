@@ -1,8 +1,9 @@
 from conan import ConanFile
-from conans import Meson
-from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.scm import Version
 from conans.errors import ConanInvalidConfiguration
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.scm import Version
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.microsoft import is_msvc
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, rmdir, rename, get
 import shutil
@@ -31,14 +32,6 @@ class LibXMLPlusPlus(ConanFile):
     }
     generators = "pkg_config"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -65,8 +58,8 @@ class LibXMLPlusPlus(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def build_requirements(self):
-        self.build_requires("meson/0.63.0")
-        self.build_requires("pkgconf/1.7.4")
+        self.build_requires("meson/1.2.1")
+        self.build_requires("pkgconf/1.9.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -81,38 +74,34 @@ class LibXMLPlusPlus(ConanFile):
             # see:
             # https://developercommunity.visualstudio.com/t/error-c2760-in-combaseapih-with-windows-sdk-81-and/185399
             replace_in_file(
-                os.path.join(self._source_subfolder, "meson.build"),
+                os.path.join(self.source_folder, "meson.build"),
                 "cpp_std=c++", "cpp_std=vc++")
 
-    @functools.lru_cache(1)
-    def _configure_meson(self):
-        meson = Meson(self)
-        defs = {
-            "build-examples": "false",
-            "build-tests": "false",
-            "build-documentation": "false",
-            "msvc14x-parallel-installable": "false",
-            "default_library": "shared" if self.options.shared else "static",
-        }
-        meson.configure(
-            defs=defs,
-            build_folder=self._build_subfolder,
-            source_folder=self._source_subfolder,
-            pkg_config_paths=[self.install_folder],
-        )
-        return meson
+    def generate(self):
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
+        tc = MesonToolchain(self)
+        tc.project_options["build-examples"] = "false"
+        tc.project_options["build-tests"] = "false"
+        tc.project_options["build-documentation"] = "false"
+        tc.project_options["msvc14x-parallel-installable"] = "false"
+        tc.project_options["default_library"] = "shared" if self.options.shared else "static",
+        tc.generate()
+        td = PkgConfigDeps(self)
+        td.generate()
 
     def build(self):
         self._patch_sources()
-        with tools.environment_append(tools.RunEnvironment(self).vars):
-            meson = self._configure_meson()
-            meson.build()
+        
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def package(self):
         lib_version = "2.6" if Version(self.version) <= "2.42.1" else "5.0"
 
-        copy(self, "COPYING", dst="licenses", src=self._source_subfolder)
-        meson = self._configure_meson()
+        copy(self, "COPYING", dst="licenses", src=self.source_folder)
+        meson = Meson(self)
         meson.install()
 
         shutil.move(
