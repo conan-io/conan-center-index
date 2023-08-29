@@ -5,7 +5,8 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.microsoft import is_msvc
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, rmdir, rename, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, rmdir, rename, get, rm, replace_in_file
+from conan.tools.build import cross_building, check_min_cppstd
 import shutil
 import os
 import functools
@@ -51,11 +52,11 @@ class LibXMLPlusPlus(ConanFile):
             self.requires("glibmm/2.72.1")
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
+        if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
 
     def build_requirements(self):
         self.build_requires("meson/1.2.1")
@@ -112,8 +113,7 @@ class LibXMLPlusPlus(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", f"libxml++-{lib_version}"))
 
         if is_msvc(self):
-            tools.remove_files_by_mask(
-                os.path.join(self.package_folder, "bin"), "*.pdb")
+            rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
             if not self.options.shared:
                 rename(
                     self,
