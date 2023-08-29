@@ -7,6 +7,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.microsoft import is_msvc
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, rmdir, rename, get, rm, replace_in_file
 from conan.tools.build import cross_building, check_min_cppstd
+from conan.tools.layout import basic_layout
 import shutil
 import os
 import functools
@@ -43,6 +44,9 @@ class LibXMLPlusPlus(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("libxml2/2.9.14")
