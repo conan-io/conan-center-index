@@ -49,11 +49,11 @@ class LibXMLPlusPlus(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libxml2/2.9.14")
+        self.requires("libxml2/2.11.4")
         if Version(self.version) <= "2.42.1":
             self.requires("glibmm/2.66.4")
         else:
-            self.requires("glibmm/2.72.1")
+            self.requires("glibmm/2.75.0")
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self):
