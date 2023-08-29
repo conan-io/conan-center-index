@@ -1,7 +1,10 @@
-from conans import ConanFile, Meson, tools
-from conan.tools.files import rename
-from conan.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conans import Meson
+from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.scm import Version
+from conans.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, rmdir, rename, get
 import shutil
 import os
 import functools
@@ -37,8 +40,7 @@ class LibXMLPlusPlus(ConanFile):
         return "build_subfolder"
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,7 +52,7 @@ class LibXMLPlusPlus(ConanFile):
 
     def requirements(self):
         self.requires("libxml2/2.9.14")
-        if tools.Version(self.version) <= "2.42.1":
+        if Version(self.version) <= "2.42.1":
             self.requires("glibmm/2.66.4")
         else:
             self.requires("glibmm/2.72.1")
@@ -67,15 +69,10 @@ class LibXMLPlusPlus(ConanFile):
         self.build_requires("pkgconf/1.7.4")
 
     def source(self):
-        tools.get(
-            **self.conan_data["sources"][self.version],
-            strip_root=True,
-            destination=self._source_subfolder,
-        )
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
         if is_msvc(self):
             # when using cpp_std=c++NM the /permissive- flag is added which
@@ -83,7 +80,7 @@ class LibXMLPlusPlus(ConanFile):
             # that older versions of the Windows SDK isn't standard conformant!
             # see:
             # https://developercommunity.visualstudio.com/t/error-c2760-in-combaseapih-with-windows-sdk-81-and/185399
-            tools.replace_in_file(
+            replace_in_file(
                 os.path.join(self._source_subfolder, "meson.build"),
                 "cpp_std=c++", "cpp_std=vc++")
 
@@ -112,9 +109,9 @@ class LibXMLPlusPlus(ConanFile):
             meson.build()
 
     def package(self):
-        lib_version = "2.6" if tools.Version(self.version) <= "2.42.1" else "5.0"
+        lib_version = "2.6" if Version(self.version) <= "2.42.1" else "5.0"
 
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        copy(self, "COPYING", dst="licenses", src=self._source_subfolder)
         meson = self._configure_meson()
         meson.install()
 
@@ -122,8 +119,8 @@ class LibXMLPlusPlus(ConanFile):
             os.path.join(self.package_folder, "lib", f"libxml++-{lib_version}", "include", "libxml++config.h"),
             os.path.join(self.package_folder, "include", f"libxml++-{lib_version}", "libxml++config.h"))
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", f"libxml++-{lib_version}"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", f"libxml++-{lib_version}"))
 
         if is_msvc(self):
             tools.remove_files_by_mask(
@@ -135,7 +132,7 @@ class LibXMLPlusPlus(ConanFile):
                     os.path.join(self.package_folder, "lib", f"xml++-{lib_version}.lib"))
 
     def package_info(self):
-        lib_version = "2.6" if tools.Version(self.version) <= "2.42.1" else "5.0"
+        lib_version = "2.6" if Version(self.version) <= "2.42.1" else "5.0"
 
         self.cpp_info.set_property("cmake_module_file_name", "libxml++")
         self.cpp_info.set_property("cmake_module_target_name", "libxml++::libxml++")
