@@ -86,7 +86,7 @@ class LibXMLPlusPlus(ConanFile):
         tc.project_options["build-tests"] = "false"
         tc.project_options["build-documentation"] = "false"
         tc.project_options["msvc14x-parallel-installable"] = "false"
-        tc.project_options["default_library"] = "shared" if self.options.shared else "static",
+        tc.project_options["default_library"] = "shared" if self.options.shared else "static"
         tc.generate()
         td = PkgConfigDeps(self)
         td.generate()
