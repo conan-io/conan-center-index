@@ -89,6 +89,10 @@ class OneTBBConan(ConanFile):
         if self._tbbbind_build:
             self.requires("hwloc/2.9.1")
 
+    def build_requirements(self):
+        if not self._tbbbind_explicit_hwloc and not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.build_requires("pkgconf/1.9.3")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
