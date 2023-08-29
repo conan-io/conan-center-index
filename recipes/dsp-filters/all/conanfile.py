@@ -69,3 +69,6 @@ class DSPFiltersConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["DSPFilters"]
+
+        if self.settings.os in ["Linux", "FreeBSD", "Neutrino"]:
+            self.cpp_info.system_libs.extend(["m"])
