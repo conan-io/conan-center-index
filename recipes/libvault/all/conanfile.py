@@ -115,7 +115,8 @@ class LibvaultConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["vault"]
-        self.cpp_info.system_libs = ["m"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
             self.cpp_info.system_libs.append("stdc++fs")
         # TODO: Remove after Conan 2.0
