@@ -1,23 +1,17 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index de15948..4213ba8 100644
+index de15948..589eab5 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -35,14 +35,8 @@ if(NOT MSVC)
-   endif ()
- endif()
+@@ -41,7 +41,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
  
--set(CMAKE_CXX_STANDARD 11)
--set(CMAKE_CXX_STANDARD_REQUIRED ON)
--set(CMAKE_CXX_EXTENSIONS OFF)
--
  set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
  
 -set(CMAKE_POSITION_INDEPENDENT_CODE ON)
--
++# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ 
  # Create the compile command database for clang by default
  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
- 
-@@ -54,7 +48,7 @@ if (has_potentially_evaluated_expression)
+@@ -54,7 +54,7 @@ if (has_potentially_evaluated_expression)
    add_definitions(-Wno-error=potentially-evaluated-expression)
  endif()
  
@@ -26,7 +20,7 @@ index de15948..4213ba8 100644
  
  option(ENABLE_PLUGIN_LOADING "Support loading of plugins" ON)
  set(PLUGIN_DIRECTORY "${CMAKE_INSTALL_FULL_LIBDIR}/libheif" CACHE STRING "Plugin install directory")
-@@ -88,11 +82,11 @@ macro(plugin_option variableName packageName displayName displayType defaultPlug
+@@ -88,11 +88,11 @@ macro(plugin_option variableName packageName displayName displayType defaultPlug
      unset(msg)
  endmacro()
  
@@ -43,7 +37,7 @@ index de15948..4213ba8 100644
  plugin_option(SvtEnc SvtEnc "Svt-av1" "AVIF encoder" ON)
  plugin_option(RAV1E RAV1E "Rav1e" "AVIF encoder" ON)
  
-@@ -219,7 +213,7 @@ if (WITH_GDK_PIXBUF)
+@@ -219,7 +219,7 @@ if (WITH_GDK_PIXBUF)
    add_subdirectory (gdk-pixbuf)
  endif()
  
