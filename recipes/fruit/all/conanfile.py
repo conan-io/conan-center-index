@@ -20,6 +20,7 @@ class FruitConan(ConanFile):
     homepage = "https://github.com/google/fruit"
     license = "Apache-2.0"
     topics = ("injection", "framework")
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "use_boost": [True, False, "deprecated"],
