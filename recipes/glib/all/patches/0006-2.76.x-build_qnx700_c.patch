@@ -11,4 +11,3 @@
  MISSING_STUFF = '''
  # This is read by gobject-introspection/misc/ and gtk-doc
  gio-public-headers.txt: Makefile
- 
