@@ -43,7 +43,7 @@ class LibXMLPlusPlus(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         basic_layout(self, src_folder="src")
