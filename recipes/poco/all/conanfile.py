@@ -29,12 +29,14 @@ class PocoConan(ConanFile):
         "fPIC": [True, False],
         "enable_fork": [True, False],
         "enable_active_record": [True, False, "deprecated"],
+        "log_debug": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_fork": True,
         "enable_active_record": "deprecated",
+        "log_debug": False,
     }
 
     _PocoComponent = namedtuple("_PocoComponent", ("option", "default_option", "dependencies", "external_dependencies", "is_lib"))
@@ -200,6 +202,9 @@ class PocoConan(ConanFile):
         tc.preprocessor_definitions["POCO_NO_AUTOMATIC_LIBS"] = "1"
         # Picked up from conan v1 CMake wrapper, don't know the rationale
         tc.preprocessor_definitions["XML_DTD"] = "1"
+        # Enable debug and trace logs for Release builds
+        if self.options.log_debug:
+            tc.preprocessor_definitions["POCO_LOG_DEBUG"] = "1"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -293,6 +298,9 @@ class PocoConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["poco_foundation"].system_libs.extend(["pthread", "dl", "rt"])
+
+        if self.options.log_debug:
+            self.cpp_info.components["poco_foundation"].defines.append("POCO_LOG_DEBUG")
 
         if is_msvc(self):
             self.cpp_info.components["poco_foundation"].defines.append("POCO_NO_AUTOMATIC_LIBS")
