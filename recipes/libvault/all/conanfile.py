@@ -97,8 +97,8 @@ class LibvaultConan(ConanFile):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -119,9 +119,6 @@ class LibvaultConan(ConanFile):
             self.cpp_info.system_libs.append("m")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
             self.cpp_info.system_libs.append("stdc++fs")
-        # TODO: Remove after Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = "libvault"
-        self.cpp_info.names["cmake_find_package_multi"] = "libvault"
 
         self.cpp_info.set_property("pkg_config_name", "vault")
         self.cpp_info.set_property("cmake_file_name", "libvault")
