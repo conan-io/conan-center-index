@@ -21,16 +21,17 @@ class FruitConan(ConanFile):
     license = "Apache-2.0"
     topics = ("injection", "framework")
     package_type = "library"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "use_boost": [True, False, "deprecated"],
-               "with_boost": [True, False],
-               "fPIC": [True, False]}
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_boost": [True, False],
+    }
     default_options = {
         "shared": False,
-        "use_boost": "deprecated",
+        "fPIC": True,
         "with_boost": True,
-        "fPIC": True}
+    }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -39,15 +40,9 @@ class FruitConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
 
-    def package_id(self):
-        del self.info.options.use_boost
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.options.use_boost != "deprecated":
-            self.output.warn("use_boost option is deprecated, use the option with_boost instead.")
-            self.options.with_boost = self.options.use_boost
 
     def layout(self):
         cmake_layout(self, src_folder="src")
