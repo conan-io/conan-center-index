@@ -86,7 +86,6 @@ class EthashConan(ConanFile):
     def package_info(self):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
-        self.cpp_info.components["keccak"].set_property("cmake_file_name", "keccak")
         self.cpp_info.components["keccak"].set_property("cmake_target_name", "keccak::keccak")
         self.cpp_info.components["keccak"].libs = ["keccak"]
 
