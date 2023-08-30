@@ -84,7 +84,7 @@ class LibZipppConan(ConanFile):
         deps.generate()
 
     def _patch_source(self):
-        if Version(str(self.version).split("-")[0]) < "6.1":
+        if Version(self.version) <= "6.0":
             replace_in_file(self, os.path.join(self.source_folder, 'CMakeLists.txt'),
                             'find_package(LIBZIP MODULE REQUIRED)',
                             'find_package(libzip REQUIRED CONFIG)')
