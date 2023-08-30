@@ -67,7 +67,7 @@ class PackageConan(ConanFile):
         # INFO: intel-ipsec-mb project forces shared by default.
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         # INFO: Conan 1.x does not find nasm automatically due PATH priority.
-        tc.cache_variables["CMAKE_ASM_NASM_COMPILER"] = os.path.join(self.dependencies.direct_build["nasm"].package_folder, "bin", "nasm")
+        tc.cache_variables["CMAKE_ASM_NASM_COMPILER"] = os.path.join(self.dependencies.direct_build["nasm"].package_folder, "bin", "nasm").replace('\\', '/')
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
