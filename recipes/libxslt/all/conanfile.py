@@ -190,6 +190,7 @@ class LibxsltConan(ConanFile):
             autotools.install()
             os.remove(os.path.join(self.package_folder, "bin", "xslt-config"))
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             rm(self, "*.sh", os.path.join(self.package_folder, "lib"))
             rmdir(self, os.path.join(self.package_folder, "share"))
