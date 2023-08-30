@@ -36,6 +36,7 @@ required_for_references:
 - args-parser
 - argtable2
 - argtable3
+- arrow
 - arsenalgear
 - artery-font-format
 - asio
@@ -406,6 +407,7 @@ required_for_references:
 - harfbuzz
 - hash-library
 - hazelcast-cpp-client
+- hdf4
 - hdf5
 - hdrhistogram-c
 - heatshrink
@@ -795,6 +797,7 @@ required_for_references:
 - ogdf
 - ogg
 - ois
+- onedpl
 - onetbb
 - oniguruma
 - onnx
@@ -823,6 +826,7 @@ required_for_references:
 - openjpeg
 - openmesh
 - openmvg
+- openpam
 - openssl
 - opensubdiv
 - opentdf-client
@@ -945,6 +949,7 @@ required_for_references:
 - readosm
 - recastnavigation
 - reckless
+- rectanglebinpack
 - rectpack2d
 - redis-plus-plus
 - refl-cpp

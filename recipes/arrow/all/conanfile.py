@@ -300,7 +300,7 @@ class ArrowConan(ConanFile):
         if self.options.with_mimalloc:
             self.requires("mimalloc/1.7.6")
         if self.options.with_boost:
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.82.0")
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
         if self.options.with_glog:
@@ -526,6 +526,9 @@ class ArrowConan(ConanFile):
         cmake =CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "cpp"))
         cmake.build()
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def package(self):
         copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
