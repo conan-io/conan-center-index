@@ -28,6 +28,7 @@ class TestPackageConan(ConanFile):
                 cmake.definitions["Python_EXECUTABLE"] = PurePath(self._python_interpreter).as_posix()
                 cmake.configure()
                 cmake.build()
+                cmake.install()
 
     def _test_swig_module(self):
         sys.path.append(self.build_folder)
