@@ -39,6 +39,7 @@ class WolfSSLConan(ConanFile):
         "sessioncerts": [True, False],
         "sni": [True, False],
         "testcert": [True, False],
+        "quic": [True, False],
     }
     default_options = {
         "shared": False,
@@ -55,6 +56,7 @@ class WolfSSLConan(ConanFile):
         "sessioncerts": False,
         "sni": False,
         "testcert": False,
+        "quic": False,
     }
 
     @property
@@ -66,6 +68,8 @@ class WolfSSLConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.quic:
+            self.options.tls13 = True
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
@@ -75,6 +79,8 @@ class WolfSSLConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
+        if self.options.quic and Version(self.version) < "5.5.0":
+            raise ConanInvalidConfiguration("The option 'quic' requires version > 5.5.0")
         if self.options.opensslall and not self.options.opensslextra:
             raise ConanInvalidConfiguration("The option 'opensslall' requires 'opensslextra=True'")
 
@@ -113,6 +119,7 @@ class WolfSSLConan(ConanFile):
             "--enable-testcert={}".format(yes_no(self.options.testcert)),
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--enable-quic={}".format(yes_no(self.options.quic)),
         ])
         if is_msvc(self):
             tc.extra_ldflags.append("-ladvapi32")
