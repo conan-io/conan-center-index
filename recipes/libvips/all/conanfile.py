@@ -201,13 +201,18 @@ class LibvipsConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/1.2.1")
-        self.tool_requires("gettext/0.21")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.5")
         if self.options.introspection:
             self.tool_requires("gobject-introspection/1.72.0")
-        if not can_run(self):
-            self.tool_requires("glib/<host_version>")
+        self.tool_requires("glib/<host_version>")
+
+        if self.settings.os == "Macos":
+            # Avoid using gettext from homebrew which may be linked against
+            # a different/incompatible libiconv than the one being exposed
+            # in the runtime environment (DYLD_LIBRARY_PATH)
+            # See https://github.com/conan-io/conan-center-index/pull/17502#issuecomment-1542492466
+            self.tool_requires("gettext/0.21")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -215,9 +220,6 @@ class LibvipsConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if can_run(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
 
         tc = MesonToolchain(self)
         true_false = lambda v: "true" if v else "false"
