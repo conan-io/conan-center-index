@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import can_run
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -117,7 +117,7 @@ class LibvipsConan(ConanFile):
 
     def requirements(self):
         self.requires("expat/2.5.0")
-        self.requires("glib/2.77.2", transitive_headers=True, transitive_libs=True, run=can_run(self))
+        self.requires("glib/2.77.2", transitive_headers=True, transitive_libs=True)
         if self.options.with_cfitsio:
             self.requires("cfitsio/4.2.0")
         if self.options.with_cgif:
