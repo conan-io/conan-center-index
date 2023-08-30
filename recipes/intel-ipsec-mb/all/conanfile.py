@@ -31,6 +31,10 @@ class PackageConan(ConanFile):
     def _cmake_target(self):
         return "libIPSec_MB" if is_msvc(self) else "IPSec_MB"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -75,6 +79,9 @@ class PackageConan(ConanFile):
         tc = CMakeToolchain(self)
         # INFO: intel-ipsec-mb project forces shared by default.
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        # INFO: When running on Linux, uses /usr/bin/nasm in case no enforced
+        if self._settings_build.os == "Linux":
+            tc.cache_variables["CMAKE_ASM_NASM_COMPILER"] = nasm_path
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
