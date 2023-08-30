@@ -92,7 +92,6 @@ class LibvaultConan(ConanFile):
         tc.variables["ENABLE_INTEGRATION_TEST"] = False
         tc.variables["ENABLE_COVERAGE"] = False
         tc.variables["LINK_CURL"] = False
-        tc.variables["CMAKE_OSX_DEPLOYMENT_TARGET"] = self._mac_os_minimum_required_version
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
