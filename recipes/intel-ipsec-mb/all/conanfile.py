@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.microsoft import is_msvc
 import os
 
@@ -61,13 +61,20 @@ class PackageConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        # INFO: Conan 1.x does not find nasm package automatically due PATH priority.
+        nasm_bin_folder = os.path.join(self.dependencies.direct_build["nasm"].package_folder, "bin").replace("\\", "/")
+        nasm_path = os.path.join(nasm_bin_folder, "nasm").replace("\\", "/")
+        env = Environment()
+        env.define("AS", nasm_path)
+        env.prepend("PATH", nasm_bin_folder)
+        envvars = env.vars(self, scope="build")
+        envvars.save_script("asm_configuration")
+
         env = VirtualBuildEnv(self)
         env.generate(scope="build")
         tc = CMakeToolchain(self)
         # INFO: intel-ipsec-mb project forces shared by default.
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-        # INFO: Conan 1.x does not find nasm automatically due PATH priority.
-        tc.cache_variables["CMAKE_ASM_NASM_COMPILER"] = os.path.join(self.dependencies.direct_build["nasm"].package_folder, "bin", "nasm").replace('\\', '/')
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
