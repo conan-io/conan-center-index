@@ -52,7 +52,7 @@ class PkgConfConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.2.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
