@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(PackageTest C)
 
-find_package(SWIG REQUIRED)
+find_package(SWIG REQUIRED CONFIG)
 include(UseSWIG)
 
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
