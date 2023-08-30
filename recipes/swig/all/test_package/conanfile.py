@@ -60,3 +60,4 @@ class TestPackageConan(ConanFile):
             if self._can_build:
                 self._test_swig_module()
             self.run("swig -version")
+            self.run("swig -swiglib")
