@@ -10,13 +10,12 @@ from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.layout import basic_layout
 import shutil
 import os
-import functools
 
-required_conan_version = ">=1.45.0"
+
+required_conan_version = ">=1.53.0"
+
 
 class LibXMLPlusPlus(ConanFile):
-    # FIXME: naming the library "libxml++" causes conan not to add it to the
-    # environment path on windows
     name = "libxmlpp"
     description = "libxml++ (a.k.a. libxmlplusplus) provides a C++ interface to XML files"
     license = "LGPL-2.1"
@@ -32,7 +31,10 @@ class LibXMLPlusPlus(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "pkg_config"
+
+    @property
+    def _lib_version(self):
+        return "2.6" if Version(self.version) <= "2.42.1" else "5.0"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -64,7 +66,8 @@ class LibXMLPlusPlus(ConanFile):
 
     def build_requirements(self):
         self.build_requires("meson/1.2.1")
-        self.build_requires("pkgconf/1.9.5")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.build_requires("pkgconf/1.9.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -103,43 +106,38 @@ class LibXMLPlusPlus(ConanFile):
         meson.build()
 
     def package(self):
-        lib_version = "2.6" if Version(self.version) <= "2.42.1" else "5.0"
-
-        copy(self, "COPYING", dst="licenses", src=self.source_folder)
+        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         meson = Meson(self)
         meson.install()
 
         shutil.move(
-            os.path.join(self.package_folder, "lib", f"libxml++-{lib_version}", "include", "libxml++config.h"),
-            os.path.join(self.package_folder, "include", f"libxml++-{lib_version}", "libxml++config.h"))
+            os.path.join(self.package_folder, "lib", f"libxml++-{self._lib_version}", "include", "libxml++config.h"),
+            os.path.join(self.package_folder, "include", f"libxml++-{self._lib_version}", "libxml++config.h"))
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", f"libxml++-{lib_version}"))
+        rmdir(self, os.path.join(self.package_folder, "lib", f"libxml++-{self._lib_version}"))
 
         if is_msvc(self):
             rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
             if not self.options.shared:
                 rename(
                     self,
-                    os.path.join(self.package_folder, "lib", f"libxml++-{lib_version}.a"),
-                    os.path.join(self.package_folder, "lib", f"xml++-{lib_version}.lib"))
+                    os.path.join(self.package_folder, "lib", f"libxml++-{self._lib_version}.a"),
+                    os.path.join(self.package_folder, "lib", f"xml++-{self._lib_version}.lib"))
 
     def package_info(self):
-        lib_version = "2.6" if Version(self.version) <= "2.42.1" else "5.0"
-
         self.cpp_info.set_property("cmake_module_file_name", "libxml++")
         self.cpp_info.set_property("cmake_module_target_name", "libxml++::libxml++")
         self.cpp_info.set_property("pkg_config_name", "libxml++")
-        self.cpp_info.components[f"libxml++-{lib_version}"].set_property("pkg_config_name", f"libxml++-{lib_version}")
-        self.cpp_info.components[f"libxml++-{lib_version}"].libs = [f"xml++-{lib_version}"]
-        self.cpp_info.components[f"libxml++-{lib_version}"].includedirs = [
-            os.path.join("include", f"libxml++-{lib_version}")
+        self.cpp_info.components[f"libxml++-{self._lib_version}"].set_property("pkg_config_name", f"libxml++-{self._lib_version}")
+        self.cpp_info.components[f"libxml++-{self._lib_version}"].set_property("cmake_target_name", f"libxml++::libxml++-{self._lib_version}")
+        self.cpp_info.components[f"libxml++-{self._lib_version}"].libs = [f"xml++-{self._lib_version}"]
+        self.cpp_info.components[f"libxml++-{self._lib_version}"].includedirs = [
+            os.path.join("include", f"libxml++-{self._lib_version}")
         ]
-        self.cpp_info.components[f"libxml++-{lib_version}"].requires = [
+        self.cpp_info.components[f"libxml++-{self._lib_version}"].requires = [
                 "glibmm::glibmm", "libxml2::libxml2"
         ]
 
         self.cpp_info.names["cmake_find_package"] = "libxml++"
         self.cpp_info.names["cmake_find_package_multi"] = "libxml++"
-        self.cpp_info.names["pkg_config"] = "libxml++"
-        self.cpp_info.components[f"libxml++-{lib_version}"].names["pkg_config"] = f"libxml++-{lib_version}"
