@@ -6,10 +6,9 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibvaultConan(ConanFile):
@@ -85,18 +84,15 @@ class LibvaultConan(ConanFile):
             check_min_cppstd(self, minimum_cpp_standard)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ENABLE_TEST"] = "OFF"
-        tc.variables["ENABLE_INTEGRATION_TEST"] = "OFF"
-        tc.variables["ENABLE_COVERAGE"] = "OFF"
-        tc.variables["LINK_CURL"] = "OFF"
+        tc.variables["ENABLE_TEST"] = False
+        tc.variables["ENABLE_INTEGRATION_TEST"] = False
+        tc.variables["ENABLE_COVERAGE"] = False
+        tc.variables["LINK_CURL"] = False
         tc.variables["CMAKE_OSX_DEPLOYMENT_TARGET"] = self._mac_os_minimum_required_version
-        if is_msvc(self):
-            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
