@@ -7,7 +7,6 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc, unix_path_package_info_legacy
 from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
 
 
 required_conan_version = ">=1.57.0"
