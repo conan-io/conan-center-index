@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(test_package LANGUAGES C) # if the project is pure C
+project(test_package LANGUAGES C)
 
 find_package(tre REQUIRED CONFIG)
 
