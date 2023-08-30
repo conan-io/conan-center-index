@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e3e7fcf..d1032da 100755
+index a3ba35a..26fed2a 100755
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -198,9 +198,9 @@ else()
@@ -24,7 +24,7 @@ index e3e7fcf..d1032da 100755
                  target_compile_definitions(${PROJECT_NAME} PUBLIC HAS_YAML_CPP)
              endif()
          else()
-@@ -442,7 +442,7 @@ if (BUILD_SQLITE)
+@@ -444,7 +444,7 @@ if (BUILD_SQLITE)
      find_package(SQLite3 QUIET)
      find_package(unofficial-sqlite3 QUIET)
      if (SQLite3_FOUND)
@@ -33,7 +33,7 @@ index e3e7fcf..d1032da 100755
          set(DROGON_FOUND_SQLite3 TRUE)
      elseif (unofficial-sqlite3_FOUND)
          target_link_libraries(${PROJECT_NAME} PRIVATE unofficial::sqlite3::sqlite3)
-@@ -465,10 +465,10 @@ if (BUILD_SQLITE)
+@@ -467,10 +467,10 @@ if (BUILD_SQLITE)
  endif (BUILD_SQLITE)
  
  if (BUILD_REDIS)
@@ -47,7 +47,7 @@ index e3e7fcf..d1032da 100755
          set(DROGON_SOURCES
              ${DROGON_SOURCES}
              nosql_lib/redis/src/RedisClientImpl.cc
-@@ -488,10 +488,10 @@ if (BUILD_REDIS)
+@@ -490,10 +490,10 @@ if (BUILD_REDIS)
              nosql_lib/redis/src/SubscribeContext.h
              nosql_lib/redis/src/RedisSubscriberImpl.h)
  
@@ -60,7 +60,7 @@ index e3e7fcf..d1032da 100755
      set(DROGON_SOURCES
          ${DROGON_SOURCES}
          lib/src/RedisClientSkipped.cc
-@@ -500,7 +500,7 @@ if (NOT Hiredis_FOUND)
+@@ -502,7 +502,7 @@ if (NOT Hiredis_FOUND)
      set(private_headers
          ${private_headers}
          lib/src/RedisClientManager.h)
