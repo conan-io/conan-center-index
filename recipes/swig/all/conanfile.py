@@ -72,7 +72,7 @@ class SwigConan(ConanFile):
         tc.configure_args += [
             f"--host={self.settings.arch}",
             "--with-swiglibdir=${prefix}/bin/swiglib",
-            f"--with-{pcre}-prefix={self.dependencies[pcre].package_folder}"
+            f"--with-{pcre}-prefix={self.dependencies[pcre].package_folder}",
         ]
         env = tc.environment()
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -108,7 +108,9 @@ class SwigConan(ConanFile):
     def package(self):
         copy(self, "LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, "*.cmake", dst=self._module_subfolder, src=os.path.join(self.export_sources_folder, "cmake"))
+        copy(self, "*.cmake",
+             dst=os.path.join(self.package_folder, self._module_subfolder),
+             src=os.path.join(self.export_sources_folder, "cmake"))
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
             autotools.install()
@@ -122,17 +124,17 @@ class SwigConan(ConanFile):
 
     @property
     def _module_subfolder(self):
-        return os.path.join(self.package_folder, "lib", "cmake")
+        return os.path.join("lib", "cmake")
 
     @property
-    def _module_path(self):
-        return os.path.join(self._module_subfolder, f"conan-official-{self.name}-targets.cmake")
+    def _cmake_module_rel_path(self):
+        return os.path.join(self._module_subfolder, "conan-swig-variables.cmake")
 
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.set_property("cmake_file_name", "SWIG")
         self.cpp_info.set_property("cmake_target_name", "SWIG::SWIG")
-        self.cpp_info.set_property("cmake_build_modules", [self._module_path])
+        self.cpp_info.set_property("cmake_build_modules", [self._cmake_module_rel_path])
 
         self.runenv.define_path("SWIG_LIB", os.path.join(self.package_folder, "bin", "swiglib"))
         self.buildenv.define_path("SWIG_LIB", os.path.join(self.package_folder, "bin", "swiglib"))
@@ -140,9 +142,9 @@ class SwigConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "SWIG"
         self.cpp_info.names["cmake_find_package_multi"] = "SWIG"
-        self.cpp_info.builddirs = [self._module_subfolder]
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_path]
+        # self.cpp_info.builddirs = [self._module_subfolder]
+        self.cpp_info.build_modules["cmake_find_package"] = [self._cmake_module_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._cmake_module_rel_path]
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bindir}")

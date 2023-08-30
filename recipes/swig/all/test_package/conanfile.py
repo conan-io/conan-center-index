@@ -1,12 +1,15 @@
+import sys
+from pathlib import PurePath
+
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import cmake_layout, CMake
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 from conan.tools.microsoft import is_msvc
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def requirements(self):
@@ -23,6 +26,17 @@ class TestPackageConan(ConanFile):
         # FIXME: Python does not distribute debug libraries (use cci CPython recipe)
         return not (is_msvc(self) and self.settings.build_type == "Debug")
 
+    @property
+    def _python_interpreter(self):
+        if getattr(sys, "frozen", False):
+            return "python"
+        return sys.executable
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["Python_EXECUTABLE"] = PurePath(self._python_interpreter).as_posix()
+        tc.generate()
+
     def build(self):
         if can_run(self):
             self.run("swig -swiglib")
@@ -31,8 +45,17 @@ class TestPackageConan(ConanFile):
                 cmake.configure()
                 cmake.build()
 
+    def _test_swig_module(self):
+        sys.path.append(self.build_folder)
+        import PackageTest
+        assert PackageTest.gcd(12, 16) == 4
+        self.output.info("PackageTest.gcd(12, 16) ran successfully")
+        assert PackageTest.cvar.foo == 3.14159265359
+        self.output.info("PackageTest.cvar.foo == 3.14159265359 ran successfully")
+        sys.path.pop()
+
     def test(self):
         if can_run(self):
             if self._can_build:
-                self.run(f"ctest --no-tests=error -C {self.settings.build_type}")
+                self._test_swig_module()
             self.run("swig -version")
