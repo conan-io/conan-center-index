@@ -3,17 +3,14 @@ from pathlib import PurePath
 
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.tools.microsoft import is_msvc
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualRunEnv"
+    generators = "VirtualRunEnv"
     test_type = "explicit"
-
-    def requirements(self):
-        self.requires(self.tested_reference_str)
 
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
@@ -36,6 +33,10 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["Python_EXECUTABLE"] = PurePath(self._python_interpreter).as_posix()
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.build_context_activated = ["swig"]
+        deps.build_context_build_modules = ["swig"]
+        deps.generate()
 
     def build(self):
         if can_run(self):
