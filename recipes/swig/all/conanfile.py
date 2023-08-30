@@ -119,10 +119,6 @@ class SwigConan(ConanFile):
                 rmdir(self, path)
 
     @property
-    def _swiglibdir(self):
-        return os.path.join(self.package_folder, "bin", "swiglib").replace("\\", "/")
-
-    @property
     def _module_subfolder(self):
         return os.path.join("lib", "cmake")
 
@@ -142,7 +138,6 @@ class SwigConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "SWIG"
         self.cpp_info.names["cmake_find_package_multi"] = "SWIG"
-        # self.cpp_info.builddirs = [self._module_subfolder]
         self.cpp_info.build_modules["cmake_find_package"] = [self._cmake_module_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._cmake_module_rel_path]
 
