@@ -129,12 +129,10 @@ class PkgConfConan(ConanFile):
             self.cpp_info.libdirs = []
 
         bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env var: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
         exesuffix = ".exe" if self.settings.os == "Windows" else ""
         pkg_config = os.path.join(bindir, "pkgconf" + exesuffix).replace("\\", "/")
-        self.output.info("Setting PKG_CONFIG env var: {}".format(pkg_config))
         self.buildenv_info.define_path("PKG_CONFIG", pkg_config)
 
         pkgconf_aclocal = os.path.join(self.package_folder, "bin", "aclocal")
@@ -144,7 +142,6 @@ class PkgConfConan(ConanFile):
 
         # TODO: remove in conanv2
         automake_extra_includes = unix_path_package_info_legacy(self, pkgconf_aclocal.replace("\\", "/"))
-        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES env var: {}".format(automake_extra_includes))
         self.env_info.PKG_CONFIG = pkg_config
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_extra_includes)
 
