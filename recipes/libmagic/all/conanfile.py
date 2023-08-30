@@ -1,8 +1,10 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps
 from conan.tools.layout import basic_layout
 import os
+
 
 required_conan_version = ">=1.52.0"
 
@@ -43,6 +45,10 @@ class LibmagicConan(ConanFile):
         self.requires("xz_utils/5.4.2")
         self.requires("zlib/1.2.13")
         self.requires("zstd/1.5.5")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows is not supported yet")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
