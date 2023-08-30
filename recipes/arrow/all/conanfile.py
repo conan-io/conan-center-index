@@ -527,6 +527,9 @@ class ArrowConan(ConanFile):
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "cpp"))
         cmake.build()
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
+
     def package(self):
         copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, pattern="NOTICE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
