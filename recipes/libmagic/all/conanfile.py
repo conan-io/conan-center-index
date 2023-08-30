@@ -1,10 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 import os
-
 
 required_conan_version = ">=1.52.0"
 
@@ -62,8 +61,6 @@ class LibmagicConan(ConanFile):
         tc.configure_args.append("--enable-zstd")
         tc.generate()
         deps = AutotoolsDeps(self)
-        deps.generate()
-        deps = PkgConfigDeps(self)
         deps.generate()
 
     def build(self):
