@@ -1,5 +1,6 @@
 import os
 from conan import ConanFile
+from conan.tools.build import can_run
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.files import copy, get, rmdir, rename, chdir, rm
 from conan.tools.layout import basic_layout
@@ -59,7 +60,7 @@ class LibniceConan(ConanFile):
                 "-o glib/*:shared=True with static runtime is not supported")
 
     def requirements(self):
-        self.requires("glib/2.77.2")
+        self.requires("glib/2.77.2", transitive_headers=True, transitive_libs=True, run=can_run(self))
         if self.options.crypto_library == "openssl":
             self.requires("openssl/1.1.1t")
         if self.options.with_gstreamer:
@@ -68,7 +69,8 @@ class LibniceConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("meson/1.0.0")
         self.tool_requires("pkgconf/1.9.3")
-        self.tool_requires("glib/2.77.2")  # for glib-mkenums
+        if not can_run(self):
+            self.tool_requires("glib/2.77.2")  # for glib-mkenums
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
 
