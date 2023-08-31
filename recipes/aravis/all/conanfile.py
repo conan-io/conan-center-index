@@ -63,7 +63,7 @@ class AravisConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.77.2", run=can_run(self))
+        self.requires("glib/2.77.2", transitive_headers=True, transitive_libs=True, run=can_run(self))
         self.requires("libxml2/2.10.3")
         self.requires("zlib/1.2.13")
         if self.options.usb:
