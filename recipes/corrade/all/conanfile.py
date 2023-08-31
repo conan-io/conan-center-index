@@ -6,7 +6,7 @@ from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
-from conan.tools.microsoft.visual import vs_ide_version, check_min_vs
+from conan.tools.microsoft.visual import check_min_vs
 
 required_conan_version = ">=1.47.0"
 
@@ -91,9 +91,12 @@ class CorradeConan(ConanFile):
         tc.variables["LIB_SUFFIX"] = ""
 
         if is_msvc(self):
-            tc.variables["MSVC2015_COMPATIBILITY"] = vs_ide_version(self) == "14"
-            tc.variables["MSVC2017_COMPATIBILITY"] = vs_ide_version(self) == "15"
-            tc.variables["MSVC2019_COMPATIBILITY"] = vs_ide_version(self) in ("16", "17")
+            if check_min_vs(self, 193, raise_invalid=False):
+                tc.variables["MSVC2019_COMPATIBILITY"] = True
+            elif check_min_vs(self, 192, raise_invalid=False):
+                tc.variables["MSVC2017_COMPATIBILITY"] = True
+            elif check_min_vs(self, 191, raise_invalid=False):
+                tc.variables["MSVC2015_COMPATIBILITY"] = True
 
         tc.generate()
         tc = CMakeDeps(self)
