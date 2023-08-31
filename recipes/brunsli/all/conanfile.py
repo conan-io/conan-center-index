@@ -36,6 +36,7 @@ class PackageConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.options["brotli"].shared = False
 
     def layout(self):
         cmake_layout(self, src_folder="src")
