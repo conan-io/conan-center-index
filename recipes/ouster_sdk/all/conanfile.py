@@ -73,7 +73,7 @@ class PackageConan(ConanFile):
         # Used in ouster/sensor_http.h
         self.requires("jsoncpp/1.9.5", transitive_headers=True)
         self.requires("spdlog/1.12.0")
-        self.requires("fmt/10.0.0")
+        self.requires("fmt/10.1.0")
         self.requires("libcurl/8.2.1")
 
         if self.options.build_pcap:
@@ -110,6 +110,7 @@ class PackageConan(ConanFile):
         tc.cache_variables["OUSTER_USE_EIGEN_MAX_ALIGN_BYTES_32"] = self.options.eigen_max_align_bytes
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
         deps.generate()
 
     def build(self):
