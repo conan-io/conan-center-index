@@ -17,24 +17,18 @@ class OfeliConan(ConanFile):
     homepage = "http://ofeli.org/index.html"
     topics = ("finite-element", "finite-element-library", "finite-element-analysis", "finite-element-solver")
 
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -57,10 +51,13 @@ class OfeliConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "add_subdirectory (demos)", "")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "add_subdirectory (util)", "")
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "add_subdirectory (demos)", "")
+        replace_in_file(self, cmakelists, "add_subdirectory (util)", "")
+        # Fix incorrect use of add_definitions() for build flags
+        replace_in_file(self, cmakelists, "add_definitions", "add_compile_options")
+        # Fix -fPIC support
+        replace_in_file(self, cmakelists, " -fPIE", "")
 
     def build(self):
         self._patch_sources()
