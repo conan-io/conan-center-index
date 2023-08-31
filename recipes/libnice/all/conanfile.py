@@ -1,6 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.build import can_run
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.files import copy, get, load, rmdir, rename, chdir, rm
 from conan.tools.layout import basic_layout
@@ -78,6 +79,10 @@ class LibniceConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
+        if can_run(self):
+            VirtualRunEnv(self).generate(scope="build")
         tc = PkgConfigDeps(self)
         tc.generate()
         tc = MesonToolchain(self)
