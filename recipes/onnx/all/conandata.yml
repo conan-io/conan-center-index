@@ -1,4 +1,7 @@
 sources:
+  "1.14.1":
+    url: "https://github.com/onnx/onnx/archive/v1.14.1.tar.gz"
+    sha256: "e296f8867951fa6e71417a18f2e550a730550f8829bd35e947b4df5e3e777aa1"
   "1.14.0":
     url: "https://github.com/onnx/onnx/archive/v1.14.0.tar.gz"
     sha256: "1b02ad523f79d83f9678c749d5a3f63f0bcd0934550d5e0d7b895f9a29320003"
