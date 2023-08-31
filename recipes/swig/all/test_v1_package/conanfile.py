@@ -32,6 +32,7 @@ class TestPackageConan(ConanFile):
 
     def _test_swig_module(self):
         sys.path.append(self.build_folder)
+        # pylint: disable=locally-disabled, import-error
         import PackageTest
         assert PackageTest.gcd(12, 16) == 4
         self.output.info("PackageTest.gcd(12, 16) ran successfully")
