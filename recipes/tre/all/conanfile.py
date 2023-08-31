@@ -11,6 +11,7 @@ from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
+
 class TreConan(ConanFile):
     name = "tre"
     description = "TRE is a lightweight, robust, and efficient POSIX-compliant regexp matching library with some exciting features such as approximate (fuzzy) matching."
@@ -21,14 +22,8 @@ class TreConan(ConanFile):
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-    }
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -37,21 +32,21 @@ class TreConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-
     def validate(self):
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows builds are not yet supported")
+            raise ConanInvalidConfiguration("Windows builds are not supported yet")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
 
     def generate(self):
         env = VirtualBuildEnv(self)
