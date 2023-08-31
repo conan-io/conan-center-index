@@ -31,6 +31,7 @@ class Exiv2Conan(ConanFile):
         "with_curl": [True, False],
         "with_brotli": [True, False],
         "with_inih": [True, False],
+        "win_unicode": [True, False],
     }
     default_options = {
         "shared": False,
@@ -40,6 +41,7 @@ class Exiv2Conan(ConanFile):
         "with_curl": False,
         "with_brotli": True,
         "with_inih": True,
+        "win_unicode": False,
     }
 
     provides = []
@@ -50,6 +52,14 @@ class Exiv2Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "0.28.0":
+            del self.options.win_unicode
+        else:
+            del self.options.with_brotli
+            del self.options.with_inih
+
+            if self.settings.os == "Windows":
+                self.options.win_unicode = True
 
     def configure(self):
         if self.options.shared:
@@ -58,9 +68,6 @@ class Exiv2Conan(ConanFile):
             # recipe has bundled xmp-toolkit-sdk of old version
             # avoid conflict with a future xmp recipe
             self.provides.append("xmp-toolkit-sdk")
-        if Version(self.version) < "0.28.0":
-            del self.options.with_brotli
-            del self.options.with_inih
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -127,6 +134,8 @@ class Exiv2Conan(ConanFile):
             tc.variables["EXIV2_ENABLE_BMFF"] = self.options.with_brotli
             tc.variables["EXIV2_ENABLE_BROTLI"] = self.options.with_brotli
             tc.variables["EXIV2_ENABLE_INIH"] = self.options.with_inih
+        else:
+            tc.variables["EXIV2_ENABLE_WIN_UNICODE"] = self.options.win_unicode
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         if is_msvc(self):
