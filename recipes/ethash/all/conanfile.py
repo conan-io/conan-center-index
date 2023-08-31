@@ -89,7 +89,6 @@ class EthashConan(ConanFile):
         self.cpp_info.components["keccak"].set_property("cmake_target_name", "keccak::keccak")
         self.cpp_info.components["keccak"].libs = ["keccak"]
 
-        self.cpp_info.components["ethash"].set_property("cmake_file_name", "ethash")
         self.cpp_info.components["ethash"].set_property("cmake_target_name", "ethash::ethash")
         self.cpp_info.components["ethash"].requires = ["keccak"]
         self.cpp_info.components["ethash"].libs = ["ethash"]
