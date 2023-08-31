@@ -65,7 +65,8 @@ class AravisConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.77.1")
+        # glib-object.h and gio/gio.h are used in several public headers
+        self.requires("glib/2.77.2", transitive_headers=True)
         self.requires("libxml2/2.11.4")
         self.requires("zlib/1.2.13")
         if self.options.usb:
@@ -86,9 +87,9 @@ class AravisConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.0")
+        self.tool_requires("meson/1.2.1")
         if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires("glib/2.77.1")
+            self.tool_requires("glib/2.77.2")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.5")
         if self.options.introspection:
