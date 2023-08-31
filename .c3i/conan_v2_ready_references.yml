@@ -36,6 +36,7 @@ required_for_references:
 - args-parser
 - argtable2
 - argtable3
+- arrow
 - arsenalgear
 - artery-font-format
 - asio
@@ -61,6 +62,7 @@ required_for_references:
 - aws-c-http
 - aws-c-io
 - aws-c-mqtt
+- aws-c-s3
 - aws-c-sdkutils
 - aws-checksums
 - aws-kvs-pic
@@ -96,6 +98,7 @@ required_for_references:
 - boost
 - boost-ext-ut
 - boost-leaf
+- boostdep
 - box2d
 - breakpad
 - brigand
@@ -123,6 +126,7 @@ required_for_references:
 - capnproto
 - capstone
 - cargs
+- cassandra-cpp-driver
 - catch2
 - ccache
 - cccl
@@ -152,6 +156,7 @@ required_for_references:
 - cli11
 - clickhouse-cpp
 - clipper
+- clipper2
 - clove-unit
 - cmake
 - cmocka
@@ -176,6 +181,7 @@ required_for_references:
 - cpp-optparse
 - cpp-peglib
 - cpp-sort
+- cpp_project_framework
 - cppbenchmark
 - cppcheck
 - cppcmd
@@ -231,11 +237,13 @@ required_for_references:
 - dbus
 - debug_assert
 - decimal_for_cpp
+- deco
 - di
 - dice-template-library
 - dirent
 - discount
 - djinni-generator
+- dlib
 - dlpack
 - docopt.cpp
 - doctest
@@ -250,11 +258,13 @@ required_for_references:
 - drwav
 - dtl
 - duckdb
+- duktape
 - eabase
 - earcut
 - eastl
 - easy_profiler
 - easyhttpcpp
+- easyloggingpp
 - ecos
 - editline
 - edlib
@@ -269,6 +279,7 @@ required_for_references:
 - emio
 - enet
 - enhex-generic_serialization
+- enhex-strong_type
 - entityx
 - entt
 - enum-flags
@@ -306,6 +317,7 @@ required_for_references:
 - flatbush
 - flecs
 - flex
+- fltk
 - fmt
 - fmtlog
 - fontconfig
@@ -395,6 +407,7 @@ required_for_references:
 - harfbuzz
 - hash-library
 - hazelcast-cpp-client
+- hdf4
 - hdf5
 - hdrhistogram-c
 - heatshrink
@@ -437,6 +450,7 @@ required_for_references:
 - iqa
 - irrxml
 - iso8601lib
+- itk
 - itlib
 - ittapi
 - ixwebsocket
@@ -464,6 +478,7 @@ required_for_references:
 - kainjow-mustache
 - kaitai_struct_cpp_stl_runtime
 - kangaru
+- kdbindings
 - keychain
 - khrplatform
 - kickcat
@@ -630,6 +645,7 @@ required_for_references:
 - libx264
 - libx265
 - libxcrypt
+- libxft
 - libxls
 - libxlsxwriter
 - libxml2
@@ -751,7 +767,9 @@ required_for_references:
 - neargye-semver
 - netcdf
 - nettle
+- newmat
 - nextsilicon-cpp-subprocess
+- nfrechette-acl
 - ninja
 - nlohmann_json
 - nlopt
@@ -771,6 +789,7 @@ required_for_references:
 - nvtx
 - oatpp
 - objectbox
+- objectbox-generator
 - observer-ptr-lite
 - octomap
 - odbc
@@ -778,6 +797,7 @@ required_for_references:
 - ogdf
 - ogg
 - ois
+- onedpl
 - onetbb
 - oniguruma
 - onnx
@@ -806,8 +826,10 @@ required_for_references:
 - openjpeg
 - openmesh
 - openmvg
+- openpam
 - openssl
 - opensubdiv
+- opentdf-client
 - opentelemetry-cpp
 - opentelemetry-proto
 - opentracing-cpp
@@ -830,6 +852,7 @@ required_for_references:
 - pbtools
 - pcapplusplus
 - pcg-cpp
+- pcl
 - pcre
 - pcre2
 - pdfgen
@@ -845,6 +868,7 @@ required_for_references:
 - picobench
 - picojson
 - picosha2
+- pipes
 - pixman
 - pkgconf
 - platform.delegates
@@ -872,6 +896,7 @@ required_for_references:
 - pprint
 - pranav-csv2
 - pretty-name
+- procxx-boost-ext-simd
 - proj
 - prometheus-cpp
 - proposal
@@ -898,6 +923,7 @@ required_for_references:
 - qt
 - quantlib
 - quaternions
+- quickfix
 - quickjs
 - quill
 - quirc
@@ -923,6 +949,7 @@ required_for_references:
 - readosm
 - recastnavigation
 - reckless
+- rectanglebinpack
 - rectpack2d
 - redis-plus-plus
 - refl-cpp
@@ -935,7 +962,10 @@ required_for_references:
 - rmm
 - roaring
 - robin-hood-hashing
+- rpclib
 - rply
+- rsync
+- rtklib
 - rtm
 - rtmidi
 - rttr
@@ -949,6 +979,7 @@ required_for_references:
 - sbepp
 - sbp
 - scip
+- scippp
 - scnlib
 - scons
 - scope-lite
@@ -983,6 +1014,7 @@ required_for_references:
 - sml
 - snappy
 - snowhouse
+- sobjectizer
 - soci
 - sofa
 - sokol
@@ -1015,6 +1047,7 @@ required_for_references:
 - stduuid
 - stlab
 - strawberryperl
+- streamvbyte
 - string-view-lite
 - stringtoolbox
 - strong_type
@@ -1079,6 +1112,7 @@ required_for_references:
 - unordered_dense
 - unqlite
 - upx
+- urdfdom
 - uriparser
 - usockets
 - usrsctp
@@ -1103,6 +1137,8 @@ required_for_references:
 - vulkan-loader
 - vulkan-memory-allocator
 - vulkan-validationlayers
+- vvenc
+- wasm-micro-runtime
 - wasmer
 - wasmtime
 - wasmtime-cpp
@@ -1146,6 +1182,7 @@ required_for_references:
 - xxhash
 - xxsds-sdsl-lite
 - xz_utils
+- yaclib
 - yajl
 - yaml-cpp
 - yas
