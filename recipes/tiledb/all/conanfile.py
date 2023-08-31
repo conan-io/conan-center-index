@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir, replace_in_file, collect_libs, rm
+from conan.tools.files import get, copy, rmdir, replace_in_file, rm
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 
@@ -116,8 +116,7 @@ class TileDBConan(ConanFile):
         self.requires("zstd/1.5.5")
         if self.settings.os != "Windows":
             self.requires("openssl/[>=1.1 <4]")
-        # TODO: add libmagic to CCI https://github.com/file/file
-        # self.requires("libmagic/5.40")
+        self.requires("libmagic/5.45")
         if self.options.azure:
             # TODO: add azure-storage-blobs-cpp to CCI
             self.requires("azure-storage-blobs-cpp/12.6.1")
@@ -149,6 +148,8 @@ class TileDBConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21 <4]")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/1.9.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -175,8 +176,7 @@ class TileDBConan(ConanFile):
         tc.cache_variables["TILEDB_WERROR"] = False
         tc.cache_variables["TILEDB_TESTS"] = False
         tc.cache_variables["SANITIZER"] = False
-        # TODO: disable superbuild once libmagic is unvendored
-        tc.cache_variables["TILEDB_SUPERBUILD"] = True
+        tc.cache_variables["TILEDB_SUPERBUILD"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -191,6 +191,7 @@ class TileDBConan(ConanFile):
             "crc32c": "crc32c",
             "google-cloud-cpp": "GCSSDK",
             "libcurl": "Curl",
+            "libmagic": "Magic",
             "libwebp": "Webp",
             "lz4": "LZ4",
             "magic": "Magic",
@@ -208,6 +209,7 @@ class TileDBConan(ConanFile):
             "bzip2":                     "Bzip2::Bzip2",
             "clipp":                     "Clipp::Clipp",
             "google-cloud-cpp::storage": "storage_client",
+            "libmagic":                  "libmagic",
             "libwebp::webp":             "WebP::webp",
             "libwebp::webpdecoder":      "WebP::webpdecoder",
             "libwebp::webpdemux":        "WebP::webpdemux",
@@ -230,18 +232,12 @@ class TileDBConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "add_subdirectory(examples)",
                         "include_directories(external/include)")
-        # Replace find_package(Bzip2_EP REQUIRED) with find_package(Bzip2 REQUIRED CONFIG), etc
+        # Replace ExternalProject packages with Conan versions,
+        # e.g. find_package(Bzip2_EP REQUIRED) with find_package(Bzip2 REQUIRED CONFIG)
         for path in self.source_path.rglob("CMakeLists.txt"):
             replace_in_file(self, path, "_EP REQUIRED", " REQUIRED CONFIG", strict=False)
-
-        # TODO: remove once libmagic is available and superbuild is disabled
-        replace_in_file(self, os.path.join(self.source_folder, "tiledb", "CMakeLists.txt"),
-                        "Magic REQUIRED CONFIG", "Magic_EP REQUIRED")
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "TileDB-Superbuild.cmake"),
-                        "include(", "# include(")
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "TileDB-Superbuild.cmake"),
-                        "# include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/FindMagic_EP.cmake)",
-                        "include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/FindMagic_EP.cmake)")
+        # Remove all _EP modules, just in case
+        rm(self, "*_EP.cmake", os.path.join(self.source_path, "cmake", "Modules"))
 
     def build(self):
         self._patch_sources()
@@ -251,6 +247,7 @@ class TileDBConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        # Plain cmake.install() does not work. Needs to be run from the tiledb subdirectory.
         self.run(f"cmake --install {self.build_path / 'tiledb'}")
         # tools are not installed by CMake
         if self.options.tools:
@@ -274,9 +271,6 @@ class TileDBConan(ConanFile):
         self.cpp_info.set_property("cmake_target_aliases", ["TileDB::tiledb"])
         self.cpp_info.set_property("pkg_config_name", "tiledb")
 
-        # self.cpp_info.libs = ["tiledb"]
-        # TODO: remove once libmagic is unvendored
-        self.cpp_info.libs = collect_libs(self)
-
+        self.cpp_info.libs = ["tiledb"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
