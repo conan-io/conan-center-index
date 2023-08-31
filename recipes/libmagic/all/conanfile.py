@@ -43,6 +43,8 @@ class LibmagicConan(ConanFile):
 
     def requirements(self):
         self.requires("bzip2/1.0.8")
+        # TODO: migrate lzip to Conan v2
+        # self.requires("lzip/1.22")
         self.requires("xz_utils/5.4.2")
         self.requires("zlib/1.2.13")
         self.requires("zstd/1.5.5")
@@ -70,9 +72,10 @@ class LibmagicConan(ConanFile):
         tc = AutotoolsToolchain(self)
         # Set from 'auto' to explicitly enabled
         tc.configure_args.append("--enable-bzlib")
+        tc.configure_args.append("--disable-lzlib")
         tc.configure_args.append("--enable-xzlib")
         tc.configure_args.append("--enable-zlib")
-        tc.configure_args.append("--enable-zstd")
+        tc.configure_args.append("--enable-zstdlib")
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
