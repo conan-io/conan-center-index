@@ -35,3 +35,9 @@ patches:
       patch_type: "portability"
       patch_source: "https://github.com/oneapi-src/oneTBB/pull/716.diff"
       patch_file: "patches/fix-overeager-stripping-of-compile-flag.diff"
+    - patch_description: "Use pkg_search_module with IMPORTED_TARGET"
+      patch_type: "portability"
+      patch_source:
+        - "https://github.com/oneapi-src/oneTBB/pull/448.diff"
+        - "https://github.com/oneapi-src/oneTBB/commit/df3096075a00942acbdd3ce9347f5298cc153fd6.diff"
+      patch_file: "patches/pkg-search-module-use-imported-target.diff"

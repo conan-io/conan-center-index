@@ -28,3 +28,7 @@ patches:
     - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
       patch_description: "allow to build with abseil built without c++17 support"
       patch_type: "portability"
+    - patch_file: "patches/1.14.1-0005-re2-compat.patch"
+      patch_description: "Ensures the forward compatibility with the newest versions of re2 library."
+      patch_type: "portability"
+      patch_source: "https://github.com/microsoft/onnxruntime/commit/126e7bf15fa4af8621814b82a3f7bd0d786f0239.patch"

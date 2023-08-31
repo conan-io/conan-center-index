@@ -1,0 +1,21 @@
+--- a/libcaf_core/caf/detail/ripemd_160.hpp
++++ b/libcaf_core/caf/detail/ripemd_160.hpp
+@@ -42,6 +42,7 @@
+
+ #include <array>
+ #include <string>
++#include <cstdint>
+
+ #include "caf/detail/core_export.hpp"
+
+--- a/libcaf_core/caf/telemetry/metric_type.hpp
++++ b/libcaf_core/caf/telemetry/metric_type.hpp
+@@ -4,6 +4,8 @@
+
+ #pragma once
+
++#include <cstdint>
++
+ namespace caf::telemetry {
+
+ enum class metric_type : uint8_t {
