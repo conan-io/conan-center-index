@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -143,7 +144,7 @@ class OpenVDBConan(ConanFile):
         if Version(self.version) >= "9.0.0":
             self.requires("onetbb/2021.9.0", transitive_headers=True, transitive_libs=True)
         else:
-            self.requires("onetbb/2020.3", transitive_headers=True, transitive_libs=True)
+            self.requires("onetbb/2020.3.3", transitive_headers=True, transitive_libs=True)
         if Version(self.version) < "8.1.0" or self.options.use_imath_half:
             # OpenVDB does not support the separate imath/3.* package, unfortunately.
             self.requires("openexr/2.5.7", transitive_headers=True)
@@ -175,14 +176,27 @@ class OpenVDBConan(ConanFile):
                 raise ConanInvalidConfiguration("Only intel architectures support SSE4 or AVX.")
         self._check_compiler_version()
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
         if Version(self.version) >= "10.0.0":
             self.tool_requires("cmake/[>=3.18 <4]")
+        if self.options.build_ax:
+            if self._settings_build.os == "Windows":
+                self.tool_requires("winflexbison/2.5.24")
+            else:
+                self.tool_requires("bison/3.8.2")
+                self.tool_requires("flex/2.6.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = CMakeToolchain(self)
         tc.cache_variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.shared
         tc.cache_variables["OPENVDB_BUILD_AX"] = self.options.build_ax
