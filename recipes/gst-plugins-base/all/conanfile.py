@@ -5,7 +5,7 @@ import shutil
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import chdir, copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
@@ -61,9 +61,6 @@ class GStPluginsBaseConan(ConanFile):
         "with_xorg": True,
         "with_introspection": False,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -232,7 +229,6 @@ class GStPluginsBaseConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
         meson.build()
