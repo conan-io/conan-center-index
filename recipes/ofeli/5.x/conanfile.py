@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.files import copy, get, rmdir, replace_in_file, rename
 
 required_conan_version = ">=1.53.0"
 
@@ -71,13 +71,13 @@ class OfeliConan(ConanFile):
              src=os.path.join(self.source_folder, "doc"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "share", "ofeli", "doc"))
-        rmdir(self, os.path.join(self.package_folder, "share", "ofeli", "demos"))
-        rmdir(self, os.path.join(self.package_folder, "share", "ofeli", "util"))
+        rename(self, os.path.join(self.package_folder, "share", "ofeli", "material"),
+               os.path.join(self.package_folder, "res"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
 
     def package_info(self):
         self.cpp_info.libs = ["ofeli"]
         self.cpp_info.includedirs = [os.path.join("include", "ofeli")]
-        res_path = os.path.join(self.package_folder, "share", "ofeli", "material")
+        res_path = os.path.join(self.package_folder, "res")
         self.runenv_info.define_path("OFELI_PATH_MATERIAL", res_path)
