@@ -18,6 +18,7 @@ required_conan_version = ">=1.53.0"
 
 class OneTBBConan(ConanFile):
     name = "onetbb"
+    provides = "tbb"
     description = (
         "oneAPI Threading Building Blocks (oneTBB) lets you easily write parallel "
         "C++ programs that take full advantage of multicore performance, that "
