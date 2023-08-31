@@ -286,6 +286,7 @@ class OpenvinoConan(ConanFile):
         openvino_runtime = self.cpp_info.components["Runtime"]
         openvino_runtime.set_property("cmake_target_name", "openvino::runtime")
         openvino_runtime.requires = ["onetbb::onetbb", "pugixml::pugixml"]
+        openvino_runtime.libs.extend(["openvino_c", "openvino"])
         if self._preprocessing_available:
             openvino_runtime.requires.append("ade::ade")
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
@@ -314,6 +315,9 @@ class OpenvinoConan(ConanFile):
                 openvino_runtime.libs.append("openvino_hetero_plugin")
             if self.options.enable_auto_batch:
                 openvino_runtime.libs.append("openvino_auto_batch_plugin")
+            # Preprocessing should come after plugins, because plugins depend on it
+            if self._preprocessing_available:
+                openvino_runtime.libs.extend(["openvino_gapi_preproc", "fluid"])
             # Frontends
             if self.options.enable_ir_frontend:
                 openvino_runtime.libs.append("openvino_ir_frontend")
@@ -331,15 +335,11 @@ class OpenvinoConan(ConanFile):
                 openvino_runtime.requires.append("protobuf::libprotobuf")
             if self.options.enable_pytorch_frontend:
                 openvino_runtime.libs.append("openvino_pytorch_frontend")
-            # Common static libraries (private dependencies)
-            openvino_runtime.libs.extend(["openvino_reference", "openvino_itt",
-                                          "openvino_util", "openvino_builders",
-                                          "openvino_shape_inference"])
-            if self._preprocessing_available:
-                openvino_runtime.libs.extend(["openvino_gapi_preproc", "fluid"])
-
-        # need to add common libraries last, since they resolve the symbols
-        openvino_runtime.libs.extend(["openvino_c", "openvino"])
+            # Common private dependencies should go last, because they satisfy dependencies for all other libraries
+            openvino_runtime.libs.extend(["openvino_reference", "openvino_builders",
+                                          "openvino_shape_inference", "openvino_itt",
+                                          # utils goes last since all others depend on it
+                                          "openvino_util"])
 
         if self.options.enable_onnx_frontend:
             openvino_onnx = self.cpp_info.components["ONNX"]
