@@ -239,7 +239,7 @@ class GStPluginsBaseConan(ConanFile):
             with chdir(self, path):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info("rename %s into %s" % (filename_old, filename_new))
+                    self.output.info(f"rename {filename_old} into {filename_new}")
                     shutil.move(filename_old, filename_new)
 
     def package(self):
@@ -271,7 +271,9 @@ class GStPluginsBaseConan(ConanFile):
         pkgconfig_custom_content = "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items())
 
         if self.options.shared:
-            self.output.info("Appending GST_PLUGIN_PATH env var : %s" % gst_plugin_path)
+            self.runenv_info.define_path("GST_PLUGIN_PATH", gst_plugin_path)
+            # TODO: Legacy, to be removed on Conan 2.0
+            self.output.info(f"Appending GST_PLUGIN_PATH env var : {gst_plugin_path}")
             self.env_info.GST_PLUGIN_PATH.append(gst_plugin_path)
 
         # Plugins ('gst')
