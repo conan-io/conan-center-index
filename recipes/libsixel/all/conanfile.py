@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.gnu import PkgConfigDeps
@@ -105,6 +106,7 @@ class LibSixelConan(ConanFile):
         copy(self, "LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         meson = Meson(self)
         meson.install()
+        fix_apple_shared_install_name(self)
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.options.shared:
