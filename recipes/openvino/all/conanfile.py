@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
@@ -22,6 +22,7 @@ class OpenvinoConan(ConanFile):
     package_id_non_embed_mode = "patch_mode"
     package_type = "library"
     short_paths = True
+    no_copy_source = True
 
     # Binary configuration
     settings = "os", "arch", "compiler", "build_type"
@@ -133,23 +134,25 @@ class OpenvinoConan(ConanFile):
             del self.options.enable_gpu
 
     def configure(self):
+        # suffix = "" if Version(conan_version).major < "2" else "/*"
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if self._protobuf_required:
             # static build + TF FE requires full protobuf, otherwise we can use lite version
             # TODO: how to handle it?
-            # self.options['protobuf'].lite = True # self.options.shared or not self.options.enable_tf_frontend
+            # self.options[f"protobuf{suffix}"].lite = True # self.options.shared or not self.options.enable_tf_frontend
             if self.options.shared:
                 # we need to use static protobuf to overcome potential issues with multiple registrations inside
                 # protobuf when frontends (implemented as plugins) are loaded multiple times in runtime
                 # TODO: how to handle it?
-                # self.options['protobuf'].shared = False
+                # self.options[f"protobuf{suffix}"].shared = False
                 pass
         if self.options.enable_tf_lite_frontend:
             # only flatc is required for TF Lite FE plus headers
             # TODO: how to handle it?
-            # self.options['flatbuffers'].header_only = True
+            # self.options[f"flatbuffers{suffix}"].header_only = True
             pass
+        # TODO: look at vulkan-validationlayers for dependencies files
 
     def build_requirements(self):
         if self._target_arm:
@@ -166,7 +169,7 @@ class OpenvinoConan(ConanFile):
         self.requires("onetbb/[>=2021.3.0]")
         self.requires("pugixml/[>=1.10]")
         if self._target_x86_64:
-            self.requires("xbyak/6.62")
+            self.requires("xbyak/[>=6.62]")
         if self.options.get_safe("enable_gpu"):
             self.requires("opencl-icd-loader/2023.04.17")
         if self._protobuf_required:
@@ -256,6 +259,9 @@ class OpenvinoConan(ConanFile):
         if self.settings.os == "Emscripten":
             raise ConanInvalidConfiguration(f"{self.ref} does not support Emscripten")
 
+        if self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Debug build type")
+
         # GPU does not support oneDNN in static build configuration, warn about it
         if self.options.get_safe("enable_gpu") and not self.options.shared:
             self.output.warning(f"{self.name} recipe builds GPU plugin without oneDNN (dGPU) support during static build.")
@@ -267,7 +273,8 @@ class OpenvinoConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
-        cmake.build()
+        for target in ["ov_frontends", "ov_plugins", "openvino_c"]:
+            cmake.build(target=target)
 
     def package(self):
         cmake = CMake(self)
@@ -338,7 +345,9 @@ class OpenvinoConan(ConanFile):
                                           "openvino_util"])
             # set 'openvino' once again for transformations objects files
             # openvino_runtime.libs.append("openvino")
-            openvino_runtime.system_libs.append("openvino")
+            full_openvino_lib_path = f"{self.package_folder}/lib/openvino.lib" if self.settings.os == "Windows" else \
+                                     f"{self.package_folder}/lib/libopenvino.a"
+            openvino_runtime.system_libs.insert(0, full_openvino_lib_path)
 
         if self.options.get_safe("enable_gpu"):
             openvino_runtime.requires.append("opencl-icd-loader::opencl-icd-loader")
