@@ -66,9 +66,7 @@ class OfeliConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYING",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=os.path.join(self.source_folder, "doc"))
+        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
         rename(self, os.path.join(self.package_folder, "share", "ofeli", "material"),
