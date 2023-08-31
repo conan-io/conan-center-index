@@ -1,3 +1,4 @@
+import importlib
 import sys
 from pathlib import PurePath
 
@@ -48,8 +49,8 @@ class TestPackageConan(ConanFile):
 
     def _test_swig_module(self):
         sys.path.append(self.build_folder)
-        # pylint: disable=locally-disabled, import-error
-        import PackageTest
+        # Could also simply use 'import PackageTest' but this makes pylint angry
+        PackageTest = importlib.import_module("PackageTest")
         assert PackageTest.gcd(12, 16) == 4
         self.output.info("PackageTest.gcd(12, 16) ran successfully")
         assert PackageTest.cvar.foo == 3.14159265359
