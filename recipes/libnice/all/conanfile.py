@@ -2,7 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.files import copy, get, rmdir, rename, chdir, rm
+from conan.tools.files import copy, get, load, rmdir, rename, chdir, rm
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc_static_runtime
@@ -94,7 +94,11 @@ class LibniceConan(ConanFile):
 
     def build(self):
         meson = Meson(self)
-        meson.configure()
+        try:
+            meson.configure()
+        except:
+            self.output.warning(load(self, "meson-logs/meson-log.txt"))
+            raise
         meson.build()
 
     def package(self):
