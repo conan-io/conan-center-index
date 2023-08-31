@@ -21,6 +21,7 @@ class TestPackageConan(ConanFile):
         deps.generate()
 
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_VERBOSE_MAKEFILE"] = True
         # HW plugins
         tc.variables["ENABLE_INTEL_CPU"] = self.dependencies[self.tested_reference_str].options.enable_cpu
         tc.variables["ENABLE_INTEL_GPU"] = self.dependencies[self.tested_reference_str].options.get_safe("enable_gpu", False)

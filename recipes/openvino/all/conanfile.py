@@ -168,11 +168,9 @@ class OpenvinoConan(ConanFile):
         if self._target_x86_64:
             self.requires("xbyak/6.62")
         if self.options.get_safe("enable_gpu"):
-            self.requires("opencl-headers/2023.04.17")
-            self.requires("opencl-clhpp-headers/2023.04.17")
             self.requires("opencl-icd-loader/2023.04.17")
         if self._protobuf_required:
-            self.requires("protobuf/3.21.9")
+            self.requires("protobuf/3.21.12")
         if self.options.enable_tf_frontend:
             self.requires("snappy/[>=1.1.7]")
         if self.options.enable_onnx_frontend:
@@ -286,7 +284,7 @@ class OpenvinoConan(ConanFile):
         openvino_runtime = self.cpp_info.components["Runtime"]
         openvino_runtime.set_property("cmake_target_name", "openvino::runtime")
         openvino_runtime.requires = ["onetbb::onetbb", "pugixml::pugixml"]
-        openvino_runtime.libs.extend(["openvino_c", "openvino"])
+        openvino_runtime.libs = ["openvino_c", "openvino"]
         if self._preprocessing_available:
             openvino_runtime.requires.append("ade::ade")
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
@@ -298,16 +296,14 @@ class OpenvinoConan(ConanFile):
         if not self.options.shared:
             # HW plugins
             if self.options.enable_cpu:
-                if self._target_arm:
-                    openvino_runtime.libs.extend(["openvino_arm_cpu_plugin", "arm_compute-static"])
-                else:
-                    openvino_runtime.libs.append("openvino_intel_cpu_plugin")
+                openvino_runtime.libs.append("openvino_arm_cpu_plugin" if self._target_arm else \
+                                             "openvino_intel_cpu_plugin")
                 openvino_runtime.libs.extend(["openvino_onednn_cpu", "openvino_snippets", "mlas"])
+                if self._target_arm:
+                    openvino_runtime.libs.append("arm_compute-static")
             if self.options.get_safe("enable_gpu"):
                 openvino_runtime.libs.extend(["openvino_intel_gpu_plugin", "openvino_intel_gpu_graph",
                                               "openvino_intel_gpu_runtime", "openvino_intel_gpu_kernels"])
-                if self.settings.os == "Windows":
-                    openvino_runtime.system_libs.append("setupapi")
             # SW plugins
             if self.options.enable_auto:
                 openvino_runtime.libs.append("openvino_auto_plugin")
@@ -340,6 +336,14 @@ class OpenvinoConan(ConanFile):
                                           "openvino_shape_inference", "openvino_itt",
                                           # utils goes last since all others depend on it
                                           "openvino_util"])
+            # set 'openvino' once again for transformations objects files
+            # openvino_runtime.libs.append("openvino")
+            openvino_runtime.system_libs.append("openvino")
+
+        if self.options.get_safe("enable_gpu"):
+            openvino_runtime.requires.append("opencl-icd-loader::opencl-icd-loader")
+            if self.settings.os == "Windows":
+                openvino_runtime.system_libs.append("setupapi")
 
         if self.options.enable_onnx_frontend:
             openvino_onnx = self.cpp_info.components["ONNX"]
