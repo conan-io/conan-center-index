@@ -1,5 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
@@ -49,10 +51,18 @@ class LibmagicConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows is not supported yet")
 
+    def build_requirements(self):
+        self.tool_requires("libtool/2.4.7")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
         tc = AutotoolsToolchain(self)
         # Set from 'auto' to explicitly enabled
         tc.configure_args.append("--enable-bzlib")
@@ -81,3 +91,5 @@ class LibmagicConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name",  "libmagic")
         self.cpp_info.libs = ["magic"]
         self.runenv_info.define_path("MAGIC", os.path.join(self.package_folder, "share", "misc", "magic.mgc"))
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
