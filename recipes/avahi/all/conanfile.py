@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import copy, get, rmdir, rm
+from conan.tools.files import copy, get, load, rmdir, rm
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
@@ -34,7 +34,7 @@ class AvahiConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.77.2")
+        self.requires("glib/2.77.2", run=can_run(self))
         self.requires("expat/2.5.0")
         self.requires("libdaemon/0.14")
         self.requires("dbus/1.15.2")
@@ -42,7 +42,8 @@ class AvahiConan(ConanFile):
         self.requires("libevent/2.1.12")
 
     def build_requirements(self):
-        self.tool_requires("glib/2.77.2")
+        if not can_run(self):
+            self.tool_requires("glib/2.77.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
 
@@ -82,7 +83,11 @@ class AvahiConan(ConanFile):
 
     def build(self):
         autotools = Autotools(self)
-        autotools.configure()
+        try:
+            autotools.configure()
+        except:
+            self.output.warning(load(self, "config.log"))
+            raise
         autotools.make()
 
     def package(self):
