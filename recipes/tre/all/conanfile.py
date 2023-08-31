@@ -2,8 +2,10 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
 from conan.tools.cmake import cmake_layout
-from conan.tools.files import copy, get, replace_in_file
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.microsoft import is_msvc
 
@@ -44,11 +46,19 @@ class TreConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows builds are not yet supported")
 
+    def build_requirements(self):
+        self.tool_requires("libtool/2.4.7")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
         tc = AutotoolsToolchain(self)
         tc.generate()
 
@@ -67,7 +77,10 @@ class TreConan(ConanFile):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         autotools = Autotools(self)
         autotools.install()
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "tre")
         self.cpp_info.libs = ["tre"]
-
