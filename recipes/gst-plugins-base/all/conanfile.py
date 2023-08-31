@@ -272,7 +272,7 @@ class GStPluginsBaseConan(ConanFile):
             "typelibdir": "${libdir}/girepository-1.0",
             "libexecdir": "${prefix}/libexec",
         }
-        pkgconfig_custom_content = "\n".join("{}={}".format(key, value) for key, value in pkgconfig_variables.items())
+        pkgconfig_custom_content = "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items())
 
         if self.options.shared:
             self.output.info("Appending GST_PLUGIN_PATH env var : %s" % gst_plugin_path)
@@ -281,120 +281,201 @@ class GStPluginsBaseConan(ConanFile):
         # Plugins ('gst')
         self.cpp_info.components["gstadder"].libs = ["gstadder"]
         self.cpp_info.components["gstadder"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstadder"].requires = ["gstreamer-audio-1.0"]  # TODO: orc
+        self.cpp_info.components["gstadder"].requires = [
+            "gstreamer-audio-1.0",
+            # TODO: orc
+        ]
         gst_plugins.append("gstadder")
 
         self.cpp_info.components["gstapp"].libs = ["gstapp"]
         self.cpp_info.components["gstapp"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstapp"].requires = ["gstreamer::gstreamer-base-1.0", "gstreamer-app-1.0", "gstreamer-tag-1.0"]
+        self.cpp_info.components["gstapp"].requires = [
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-app-1.0",
+            "gstreamer-tag-1.0",
+        ]
         gst_plugins.append("gstapp")
 
         self.cpp_info.components["gstaudioconvert"].libs = ["gstaudioconvert"]
         self.cpp_info.components["gstaudioconvert"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstaudioconvert"].requires = ["gstreamer::gstreamer-base-1.0", "gstreamer-audio-1.0"]
+        self.cpp_info.components["gstaudioconvert"].requires = [
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-audio-1.0",
+        ]
         gst_plugins.append("gstaudioconvert")
 
         self.cpp_info.components["gstaudiomixer"].libs = ["gstaudiomixer"]
         self.cpp_info.components["gstaudiomixer"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstaudiomixer"].requires = ["gstreamer::gstreamer-base-1.0", "gstreamer-audio-1.0"]  # TODO: orc
+        self.cpp_info.components["gstaudiomixer"].requires = [
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-audio-1.0",
+            # TODO: orc
+        ]
         gst_plugins.append("gstaudiomixer")
 
         self.cpp_info.components["gstaudiorate"].libs = ["gstaudiorate"]
         self.cpp_info.components["gstaudiorate"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstaudiorate"].requires = ["gstreamer::gstreamer-base-1.0", "gstreamer-audio-1.0"]
+        self.cpp_info.components["gstaudiorate"].requires = [
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-audio-1.0",
+        ]
         gst_plugins.append("gstaudiorate")
 
         self.cpp_info.components["gstaudioresample"].libs = ["gstaudioresample"]
         self.cpp_info.components["gstaudioresample"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstaudioresample"].requires = ["gstreamer::gstreamer-base-1.0", "gstreamer-audio-1.0"]
+        self.cpp_info.components["gstaudioresample"].requires = [
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-audio-1.0",
+        ]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gstaudioresample"].system_libs = ["m"]
         gst_plugins.append("gstaudioresample")
 
         self.cpp_info.components["gstaudiotestsrc"].libs = ["gstaudiotestsrc"]
         self.cpp_info.components["gstaudiotestsrc"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstaudiotestsrc"].requires = ["gstreamer::gstreamer-base-1.0", "gstreamer-audio-1.0"]
+        self.cpp_info.components["gstaudiotestsrc"].requires = [
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-audio-1.0",
+        ]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gstaudiotestsrc"].system_libs = ["m"]
         gst_plugins.append("gstaudiotestsrc")
 
         self.cpp_info.components["gstcompositor"].libs = ["gstcompositor"]
         self.cpp_info.components["gstcompositor"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstcompositor"].requires = ["gstreamer::gstreamer-base-1.0", "gstreamer-video-1.0"]  # TODO: orc
+        self.cpp_info.components["gstcompositor"].requires = [
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-video-1.0",
+            # TODO: orc
+        ]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gstcompositor"].system_libs = ["m"]
         gst_plugins.append("gstcompositor")
 
         self.cpp_info.components["gstencoding"].libs = ["gstencoding"]
         self.cpp_info.components["gstencoding"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstencoding"].requires = ["gstreamer::gstreamer-base-1.0", "gstreamer-video-1.0", "gstreamer-pbutils-1.0"]
+        self.cpp_info.components["gstencoding"].requires = [
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-video-1.0",
+            "gstreamer-pbutils-1.0",
+        ]
         gst_plugins.append("gstencoding")
 
         self.cpp_info.components["gstgio"].libs = ["gstgio"]
         self.cpp_info.components["gstgio"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstgio"].requires = ["gstreamer::gstreamer-base-1.0", "glib::gio-2.0"]
+        self.cpp_info.components["gstgio"].requires = [
+            "gstreamer::gstreamer-base-1.0",
+            "glib::gio-2.0",
+        ]
         gst_plugins.append("gstgio")
 
         self.cpp_info.components["gstoverlaycomposition"].libs = ["gstoverlaycomposition"]
         self.cpp_info.components["gstoverlaycomposition"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstoverlaycomposition"].requires = ["gstreamer-video-1.0"]
+        self.cpp_info.components["gstoverlaycomposition"].requires = [
+            "gstreamer-video-1.0",
+        ]
         gst_plugins.append("gstoverlaycomposition")
 
         self.cpp_info.components["gstpbtypes"].libs = ["gstpbtypes"]
         self.cpp_info.components["gstpbtypes"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstpbtypes"].requires = ["gstreamer-video-1.0"]
+        self.cpp_info.components["gstpbtypes"].requires = [
+            "gstreamer-video-1.0",
+        ]
         gst_plugins.append("gstpbtypes")
 
         self.cpp_info.components["gstplayback"].libs = ["gstplayback"]
         self.cpp_info.components["gstplayback"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstplayback"].requires = ["gstreamer-audio-1.0", "gstreamer-video-1.0", "gstreamer-pbutils-1.0", "gstreamer-tag-1.0"]
+        self.cpp_info.components["gstplayback"].requires = [
+            "gstreamer-audio-1.0",
+            "gstreamer-video-1.0",
+            "gstreamer-pbutils-1.0",
+            "gstreamer-tag-1.0",
+        ]
         gst_plugins.append("gstplayback")
 
         self.cpp_info.components["gstrawparse"].libs = ["gstrawparse"]
         self.cpp_info.components["gstrawparse"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstrawparse"].requires = ["gstreamer::gstreamer-base-1.0", "gstreamer-audio-1.0", "gstreamer-video-1.0"]
+        self.cpp_info.components["gstrawparse"].requires = [
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-audio-1.0",
+            "gstreamer-video-1.0",
+        ]
         gst_plugins.append("gstrawparse")
 
         self.cpp_info.components["gstsubparse"].libs = ["gstsubparse"]
         self.cpp_info.components["gstsubparse"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstsubparse"].requires = ["gstreamer::gstreamer-base-1.0"]
+        self.cpp_info.components["gstsubparse"].requires = [
+            "gstreamer::gstreamer-base-1.0",
+        ]
         gst_plugins.append("gstsubparse")
 
         self.cpp_info.components["gsttcp"].libs = ["gsttcp"]
         self.cpp_info.components["gsttcp"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gsttcp"].requires = ["gstreamer::gstreamer-base-1.0", "gstreamer::gstreamer-net-1.0", "glib::gio-2.0"]
+        self.cpp_info.components["gsttcp"].requires = [
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer::gstreamer-net-1.0",
+            "glib::gio-2.0",
+        ]
         gst_plugins.append("gsttcp")
 
         self.cpp_info.components["gsttypefindfunctions"].libs = ["gsttypefindfunctions"]
         self.cpp_info.components["gsttypefindfunctions"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gsttypefindfunctions"].requires = ["gstreamer::gstreamer-base-1.0", "gstreamer-pbutils-1.0", "glib::gio-2.0"]
+        self.cpp_info.components["gsttypefindfunctions"].requires = [
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-pbutils-1.0",
+            "glib::gio-2.0",
+        ]
         gst_plugins.append("gsttypefindfunctions")
 
         self.cpp_info.components["gstvideoconvert"].libs = ["gstvideoconvert"]
         self.cpp_info.components["gstvideoconvert"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstvideoconvert"].requires = ["gstreamer-video-1.0"]
+        self.cpp_info.components["gstvideoconvert"].requires = [
+            "gstreamer-video-1.0",
+        ]
         gst_plugins.append("gstvideoconvert")
 
         self.cpp_info.components["gstvideorate"].libs = ["gstvideorate"]
         self.cpp_info.components["gstvideorate"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstvideorate"].requires = ["gstreamer-video-1.0"]
+        self.cpp_info.components["gstvideorate"].requires = [
+            "gstreamer-video-1.0",
+        ]
         gst_plugins.append("gstvideorate")
 
         self.cpp_info.components["gstvideoscale"].libs = ["gstvideoscale"]
         self.cpp_info.components["gstvideoscale"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstvideoscale"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0", "gstreamer-video-1.0", "glib::glib-2.0", "glib::gobject-2.0"]
+        self.cpp_info.components["gstvideoscale"].requires = [
+            "gstreamer::gstreamer-1.0",
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-video-1.0",
+            "glib::glib-2.0",
+            "glib::gobject-2.0",
+        ]
         gst_plugins.append("gstvideoscale")
 
         self.cpp_info.components["gstvideotestsrc"].libs = ["gstvideotestsrc"]
         self.cpp_info.components["gstvideotestsrc"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstvideotestsrc"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0", "gstreamer-video-1.0", "glib::glib-2.0", "glib::gobject-2.0"]  # TODO: orc
+        self.cpp_info.components["gstvideotestsrc"].requires = [
+            "gstreamer::gstreamer-1.0",
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-video-1.0",
+            "glib::glib-2.0",
+            "glib::gobject-2.0",
+            # TODO: orc
+        ]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gstvideotestsrc"].system_libs = ["m"]
         gst_plugins.append("gstvideotestsrc")
 
         self.cpp_info.components["gstvolume"].libs = ["gstvolume"]
         self.cpp_info.components["gstvolume"].libdirs.append(gst_plugin_path)
-        self.cpp_info.components["gstvolume"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0", "gstreamer-audio-1.0", "glib::glib-2.0", "glib::gobject-2.0"]  # TODO: orc
+        self.cpp_info.components["gstvolume"].requires = [
+            "gstreamer::gstreamer-1.0",
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-audio-1.0",
+            "glib::glib-2.0",
+            "glib::gobject-2.0",
+            # TODO: orc
+        ]
         gst_plugins.append("gstvolume")
 
         # Plugins ('ext')
@@ -412,12 +493,17 @@ class GStPluginsBaseConan(ConanFile):
             ]
             gst_plugins.append("gstalsa")
 
-        # if self.options.with_cdparanoia: # TODO: cdparanoia
+        # if self.options.with_cdparanoia:  # TODO: cdparanoia
         #     self.cpp_info.components["gstcdparanoia"].libs = ["gstcdparanoia"]
         #     self.cpp_info.components["gstcdparanoia"].libdirs.append(gst_plugin_path)
         #     self.cpp_info.components["gstcdparanoia"].requires = [
-        #         "gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0", "gstreamer-audio-1.0",
-        #         "cdparanoia::cdparanoia", "glib::glib-2.0", "glib::gobject-2.0"]
+        #         "gstreamer::gstreamer-1.0",
+        #         "gstreamer::gstreamer-base-1.0",
+        #         "gstreamer-audio-1.0",
+        #         "cdparanoia::cdparanoia",
+        #         "glib::glib-2.0",
+        #         "glib::gobject-2.0",
+        #     ]
         #     gst_plugins.append("gstcdparanoia")
 
         if self.options.with_gl:
@@ -429,7 +515,9 @@ class GStPluginsBaseConan(ConanFile):
                 "gstreamer-video-1.0",
                 "gstreamer-allocators-1.0",
                 "opengl::opengl",
-            ]  # TODO: bcm, nvbuf_utils
+                # TODO: bcm
+                # TODO: nvbuf_utils
+            ]
             if is_apple_os(self):
                 self.cpp_info.components["gstopengl"].frameworks = ["CoreFoundation", "Foundation", "QuartzCore"]
             if self.options.with_graphene:
@@ -446,13 +534,19 @@ class GStPluginsBaseConan(ConanFile):
                 self.cpp_info.components["gstopengl"].system_libs = ["m"]
             gst_plugins.append("gstopengl")
 
-        # if self.options.with_libvisual: # TODO: libvisual
+        # if self.options.with_libvisual:  # TODO: libvisual
         #     self.cpp_info.components["gstlibvisual"].libs = ["gstlibvisual"]
         #     self.cpp_info.components["gstlibvisual"].libdirs.append(gst_plugin_path)
         #     self.cpp_info.components["gstlibvisual"].requires = [
-        #         "gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0",
-        #         "gstreamer-audio-1.0", "gstreamer-video-1.0", "gstreamer-pbutils-1.0",
-        #         "libvisual::libvisual", "glib::glib-2.0", "glib::gobject-2.0"]
+        #         "gstreamer::gstreamer-1.0",
+        #         "gstreamer::gstreamer-base-1.0",
+        #         "gstreamer-audio-1.0",
+        #         "gstreamer-video-1.0",
+        #         "gstreamer-pbutils-1.0",
+        #         "libvisual::libvisual",
+        #         "glib::glib-2.0",
+        #         "glib::gobject-2.0",
+        #     ]
         #     gst_plugins.append("gstlibvisual")
 
         if self.options.with_ogg:
@@ -533,13 +627,18 @@ class GStPluginsBaseConan(ConanFile):
             ]
             gst_plugins.append("gstvorbis")
 
-        # if self.options.with_tremor: # TODO: tremor
+        # if self.options.with_tremor:  # TODO: tremor
         #     self.cpp_info.components["gstivorbisdec"].libs = ["gstivorbisdec"]
         #     self.cpp_info.components["gstivorbisdec"].libdirs.append(gst_plugin_path)
         #     self.cpp_info.components["gstivorbisdec"].requires = [
-        #         "gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0",
-        #         "gstreamer-audio-1.0", "gstreamer-tag-1.0",
-        #         "tremor::tremor", "glib::glib-2.0", "glib::gobject-2.0"]
+        #         "gstreamer::gstreamer-1.0",
+        #         "gstreamer::gstreamer-base-1.0",
+        #         "gstreamer-audio-1.0",
+        #         "gstreamer-tag-1.0",
+        #         "tremor::tremor",
+        #         "glib::glib-2.0",
+        #         "glib::gobject-2.0",
+        #     ]
         #     gst_plugins.append("gstivorbisdec")
 
         # Plugins ('sys')
@@ -575,7 +674,9 @@ class GStPluginsBaseConan(ConanFile):
 
         # Libraries
         self.cpp_info.components["gstreamer-plugins-base-1.0"].names["pkg_config"] = "gstreamer-plugins-base-1.0"
-        self.cpp_info.components["gstreamer-plugins-base-1.0"].requires = ["gstreamer::gstreamer-1.0"]
+        self.cpp_info.components["gstreamer-plugins-base-1.0"].requires = [
+            "gstreamer::gstreamer-1.0",
+        ]
         self.cpp_info.components["gstreamer-plugins-base-1.0"].includedirs = [gst_include_path]
         if not self.options.shared:
             self.cpp_info.components["gstreamer-plugins-base-1.0"].defines.append("GST_PLUGINS_BASE_STATIC")
@@ -586,19 +687,29 @@ class GStPluginsBaseConan(ConanFile):
 
         self.cpp_info.components["gstreamer-allocators-1.0"].set_property("pkg_config_name", "gstreamer-allocators-1.0")
         self.cpp_info.components["gstreamer-allocators-1.0"].libs = ["gstallocators-1.0"]
-        self.cpp_info.components["gstreamer-allocators-1.0"].requires = ["gstreamer::gstreamer-1.0"]
+        self.cpp_info.components["gstreamer-allocators-1.0"].requires = [
+            "gstreamer::gstreamer-1.0",
+        ]
         self.cpp_info.components["gstreamer-allocators-1.0"].includedirs = [gst_include_path]
         self.cpp_info.components["gstreamer-allocators-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
         self.cpp_info.components["gstreamer-app-1.0"].set_property("pkg_config_name", "gstreamer-app-1.0")
         self.cpp_info.components["gstreamer-app-1.0"].libs = ["gstapp-1.0"]
-        self.cpp_info.components["gstreamer-app-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0"]
+        self.cpp_info.components["gstreamer-app-1.0"].requires = [
+            "gstreamer::gstreamer-1.0",
+            "gstreamer::gstreamer-base-1.0",
+        ]
         self.cpp_info.components["gstreamer-app-1.0"].includedirs = [gst_include_path]
         self.cpp_info.components["gstreamer-app-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
         self.cpp_info.components["gstreamer-audio-1.0"].set_property("pkg_config_name", "gstreamer-audio-1.0")
         self.cpp_info.components["gstreamer-audio-1.0"].libs = ["gstaudio-1.0"]
-        self.cpp_info.components["gstreamer-audio-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0", "gstreamer-tag-1.0"]  # TODO: orc
+        self.cpp_info.components["gstreamer-audio-1.0"].requires = [
+            "gstreamer::gstreamer-1.0",
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-tag-1.0",
+            # TODO: orc
+        ]
         self.cpp_info.components["gstreamer-audio-1.0"].includedirs = [gst_include_path]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gstreamer-audio-1.0"].system_libs = ["m"]
@@ -606,7 +717,9 @@ class GStPluginsBaseConan(ConanFile):
 
         self.cpp_info.components["gstreamer-fft-1.0"].set_property("pkg_config_name", "gstreamer-fft-1.0")
         self.cpp_info.components["gstreamer-fft-1.0"].libs = ["gstfft-1.0"]
-        self.cpp_info.components["gstreamer-fft-1.0"].requires = ["gstreamer::gstreamer-1.0"]
+        self.cpp_info.components["gstreamer-fft-1.0"].requires = [
+            "gstreamer::gstreamer-1.0",
+        ]
         self.cpp_info.components["gstreamer-fft-1.0"].includedirs = [gst_include_path]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gstreamer-fft-1.0"].system_libs = ["m"]
@@ -614,8 +727,13 @@ class GStPluginsBaseConan(ConanFile):
 
         if self.options.with_gl:
             gl_api, gl_platform, gl_winsys = self._gl_config()
-            gl_variables = {**pkgconfig_variables, "gl_apis": " ".join(gl_api), "gl_platforms": " ".join(gl_platform), "gl_winsys": " ".join(gl_winsys)}
-            gl_custom_content = "\n".join("{}={}".format(key, value) for key, value in gl_variables.items())
+            gl_variables = {
+                **pkgconfig_variables,
+                "gl_apis": " ".join(gl_api),
+                "gl_platforms": " ".join(gl_platform),
+                "gl_winsys": " ".join(gl_winsys),
+            }
+            gl_custom_content = "\n".join(f"{key}={value}" for key, value in gl_variables.items())
 
             self.cpp_info.components["gstreamer-gl-1.0"].set_property("pkg_config_name", "gstreamer-gl-1.0")
             self.cpp_info.components["gstreamer-gl-1.0"].libs = ["gstgl-1.0"]
@@ -626,61 +744,108 @@ class GStPluginsBaseConan(ConanFile):
                 "gstreamer-video-1.0",
                 "glib::gmodule-no-export-2.0",
                 "opengl::opengl",
-            ]  # TODO: bcm
+                # TODO: bcm
+            ]
             if self.options.get_safe("with_egl"):
-                self.cpp_info.components["gstreamer-gl-1.0"].requires.extend(["egl::egl"])
+                self.cpp_info.components["gstreamer-gl-1.0"].requires += ["egl::egl"]
             if self.options.get_safe("with_xorg"):
-                self.cpp_info.components["gstreamer-gl-1.0"].requires.extend(["xorg::x11", "xorg::x11-xcb"])
+                self.cpp_info.components["gstreamer-gl-1.0"].requires += ["xorg::x11", "xorg::x11-xcb"]
             if self.options.get_safe("with_wayland"):
-                self.cpp_info.components["gstreamer-gl-1.0"].requires.extend(["wayland::wayland-client", "wayland::wayland-cursor", "wayland::wayland-egl", "wayland-protocols::wayland-protocols"])
+                self.cpp_info.components["gstreamer-gl-1.0"].requires += [
+                    "wayland::wayland-client",
+                    "wayland::wayland-cursor",
+                    "wayland::wayland-egl",
+                    "wayland-protocols::wayland-protocols",
+                ]
             if self.settings.os == "Windows":
                 self.cpp_info.components["gstreamer-gl-1.0"].requires.append("wglext::wglext")
-                self.cpp_info.components["gstreamer-gl-1.0"].requires.extend(["glext::glext"])
+                self.cpp_info.components["gstreamer-gl-1.0"].requires.append("glext::glext")
                 self.cpp_info.components["gstreamer-gl-1.0"].system_libs = ["gdi32"]
             if self.settings.os in ["Macos", "iOS", "tvOS", "watchOS"]:
-                self.cpp_info.components["gstreamer-gl-1.0"].frameworks = ["CoreFoundation", "Foundation", "QuartzCore", "Cocoa"]
+                self.cpp_info.components["gstreamer-gl-1.0"].frameworks = [
+                    "CoreFoundation",
+                    "Foundation",
+                    "QuartzCore",
+                    "Cocoa",
+                ]
             if self.settings.os in ["iOS", "tvOS", "watchOS"]:
                 self.cpp_info.components["gstreamer-gl-1.0"].frameworks.extend(["CoreGraphics", "UIkit"])
-            self.cpp_info.components["gstreamer-gl-1.0"].includedirs = [os.path.join(self.package_folder, "include"), gst_include_path]
+            self.cpp_info.components["gstreamer-gl-1.0"].includedirs = [
+                os.path.join(self.package_folder, "include"),
+                gst_include_path,
+            ]
             self.cpp_info.components["gstreamer-gl-1.0"].includedirs.append(os.path.join(gst_plugin_path, "include"))
             self.cpp_info.components["gstreamer-gl-1.0"].set_property("pkg_config_custom_content", gl_custom_content)
 
             self.cpp_info.components["gstreamer-gl-prototypes-1.0"].names["pkg_config"] = "gstreamer-gl-prototypes-1.0"
-            self.cpp_info.components["gstreamer-gl-prototypes-1.0"].requires = ["gstreamer-gl-1.0", "opengl::opengl"]
+            self.cpp_info.components["gstreamer-gl-prototypes-1.0"].requires = [
+                "gstreamer-gl-1.0",
+                "opengl::opengl",
+            ]
 
             if self.options.get_safe("with_egl"):
                 self.cpp_info.components["gstreamer-gl-egl-1.0"].set_property("pkg_config_name", "gstreamer-gl-egl-1.0")
-                self.cpp_info.components["gstreamer-gl-egl-1.0"].requires = ["gstreamer-gl-1.0", "egl::egl"]
+                self.cpp_info.components["gstreamer-gl-egl-1.0"].requires = [
+                    "gstreamer-gl-1.0",
+                    "egl::egl",
+                ]
 
             if self.options.get_safe("with_wayland"):
                 self.cpp_info.components["gstreamer-gl-wayland-1.0"].names["pkg_config"] = "gstreamer-gl-wayland-1.0"
-                self.cpp_info.components["gstreamer-gl-wayland-1.0"].requires = ["gstreamer-gl-1.0", "wayland::wayland-client", "wayland::wayland-egl", "wayland-protocols::wayland-protocols"]
+                self.cpp_info.components["gstreamer-gl-wayland-1.0"].requires = [
+                    "gstreamer-gl-1.0",
+                    "wayland::wayland-client",
+                    "wayland::wayland-egl",
+                    "wayland-protocols::wayland-protocols",
+                ]
 
             if self.options.get_safe("with_xorg"):
                 self.cpp_info.components["gstreamer-gl-x11-1.0"].set_property("pkg_config_name", "gstreamer-gl-x11-1.0")
-                self.cpp_info.components["gstreamer-gl-x11-1.0"].requires = ["gstreamer-gl-1.0", "xorg::x11-xcb"]
+                self.cpp_info.components["gstreamer-gl-x11-1.0"].requires = [
+                    "gstreamer-gl-1.0",
+                    "xorg::x11-xcb",
+                ]
 
         self.cpp_info.components["gstreamer-pbutils-1.0"].set_property("pkg_config_name", "gstreamer-pbutils-1.0")
         self.cpp_info.components["gstreamer-pbutils-1.0"].libs = ["gstpbutils-1.0"]
-        self.cpp_info.components["gstreamer-pbutils-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0", "gstreamer-audio-1.0", "gstreamer-video-1.0", "gstreamer-tag-1.0"]
+        self.cpp_info.components["gstreamer-pbutils-1.0"].requires = [
+            "gstreamer::gstreamer-1.0",
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-audio-1.0",
+            "gstreamer-video-1.0",
+            "gstreamer-tag-1.0",
+        ]
         self.cpp_info.components["gstreamer-pbutils-1.0"].includedirs = [gst_include_path]
         self.cpp_info.components["gstreamer-pbutils-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
         self.cpp_info.components["gstreamer-riff-1.0"].set_property("pkg_config_name", "gstreamer-riff-1.0")
         self.cpp_info.components["gstreamer-riff-1.0"].libs = ["gstriff-1.0"]
-        self.cpp_info.components["gstreamer-riff-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer-audio-1.0", "gstreamer-tag-1.0"]
+        self.cpp_info.components["gstreamer-riff-1.0"].requires = [
+            "gstreamer::gstreamer-1.0",
+            "gstreamer-audio-1.0",
+            "gstreamer-tag-1.0",
+        ]
         self.cpp_info.components["gstreamer-riff-1.0"].includedirs = [gst_include_path]
         self.cpp_info.components["gstreamer-riff-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
         self.cpp_info.components["gstreamer-rtp-1.0"].set_property("pkg_config_name", "gstreamer-rtp-1.0")
         self.cpp_info.components["gstreamer-rtp-1.0"].libs = ["gstrtp-1.0"]
-        self.cpp_info.components["gstreamer-rtp-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0", "gstreamer-audio-1.0"]
+        self.cpp_info.components["gstreamer-rtp-1.0"].requires = [
+            "gstreamer::gstreamer-1.0",
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-audio-1.0",
+        ]
         self.cpp_info.components["gstreamer-rtp-1.0"].includedirs = [gst_include_path]
         self.cpp_info.components["gstreamer-rtp-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
         self.cpp_info.components["gstreamer-rtsp-1.0"].set_property("pkg_config_name", "gstreamer-rtsp-1.0")
         self.cpp_info.components["gstreamer-rtsp-1.0"].libs = ["gstrtsp-1.0"]
-        self.cpp_info.components["gstreamer-rtsp-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0", "gstreamer-sdp-1.0", "glib::gio-2.0"]
+        self.cpp_info.components["gstreamer-rtsp-1.0"].requires = [
+            "gstreamer::gstreamer-1.0",
+            "gstreamer::gstreamer-base-1.0",
+            "gstreamer-sdp-1.0",
+            "glib::gio-2.0",
+        ]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gstreamer-rtsp-1.0"].system_libs = ["m"]
         elif self.settings.os == "Windows":
@@ -690,13 +855,22 @@ class GStPluginsBaseConan(ConanFile):
 
         self.cpp_info.components["gstreamer-sdp-1.0"].set_property("pkg_config_name", "gstreamer-sdp-1.0")
         self.cpp_info.components["gstreamer-sdp-1.0"].libs = ["gstsdp-1.0"]
-        self.cpp_info.components["gstreamer-sdp-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer-rtp-1.0", "glib::glib-2.0", "glib::gio-2.0"]
+        self.cpp_info.components["gstreamer-sdp-1.0"].requires = [
+            "gstreamer::gstreamer-1.0",
+            "gstreamer-rtp-1.0",
+            "glib::glib-2.0",
+            "glib::gio-2.0",
+        ]
         self.cpp_info.components["gstreamer-sdp-1.0"].includedirs = [gst_include_path]
         self.cpp_info.components["gstreamer-sdp-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
         self.cpp_info.components["gstreamer-tag-1.0"].set_property("pkg_config_name", "gstreamer-tag-1.0")
         self.cpp_info.components["gstreamer-tag-1.0"].libs = ["gsttag-1.0"]
-        self.cpp_info.components["gstreamer-tag-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0", "zlib::zlib"]
+        self.cpp_info.components["gstreamer-tag-1.0"].requires = [
+            "gstreamer::gstreamer-1.0",
+            "gstreamer::gstreamer-base-1.0",
+            "zlib::zlib",
+        ]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gstreamer-tag-1.0"].system_libs = ["m"]
         self.cpp_info.components["gstreamer-tag-1.0"].includedirs = [gst_include_path]
@@ -704,7 +878,11 @@ class GStPluginsBaseConan(ConanFile):
 
         self.cpp_info.components["gstreamer-video-1.0"].set_property("pkg_config_name", "gstreamer-video-1.0")
         self.cpp_info.components["gstreamer-video-1.0"].libs = ["gstvideo-1.0"]
-        self.cpp_info.components["gstreamer-video-1.0"].requires = ["gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0"]  # TODO: orc
+        self.cpp_info.components["gstreamer-video-1.0"].requires = [
+            "gstreamer::gstreamer-1.0",
+            "gstreamer::gstreamer-base-1.0",
+            # TODO: orc
+        ]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gstreamer-video-1.0"].system_libs = ["m"]
         self.cpp_info.components["gstreamer-video-1.0"].includedirs = [gst_include_path]
