@@ -10,9 +10,10 @@ sources:
     sha256: "1d518b0e4709cecfb7330c9bd9b3a73cfd01ffe70d1c178f36a4c847283c4672"
 patches:
   "3.0.21":
-    - patch_file: "patches/0001-charls-linking.patch"
-      patch_description: "fix symbol export for gdcmcharls"
+    - patch_file: "patches/0001-3.0.20-find-charls.patch"
+      patch_description: "allow using charls >= 2.2.0"
       patch_type: "portability"
+      patch_source: "https://github.com/malaterre/GDCM/pull/157"
     - patch_file: "patches/0002-3.0.20-openjpeg.patch"
       patch_description: "fix variable names for openjpeg"
       patch_type: "conan"
@@ -32,9 +33,10 @@ patches:
       patch_description: "fix find_package for libuuid"
       patch_type: "conan"
   "3.0.20":
-    - patch_file: "patches/0001-charls-linking.patch"
-      patch_description: "fix symbol export for gdcmcharls"
+    - patch_file: "patches/0001-3.0.20-find-charls.patch"
+      patch_description: "allow using charls >= 2.2.0"
       patch_type: "portability"
+      patch_source: "https://github.com/malaterre/GDCM/pull/157"
     - patch_file: "patches/0002-3.0.20-openjpeg.patch"
       patch_description: "fix variable names for openjpeg"
       patch_type: "conan"
@@ -54,9 +56,10 @@ patches:
       patch_description: "fix find_package for libuuid"
       patch_type: "conan"
   "3.0.9":
-    - patch_file: "patches/0001-charls-linking.patch"
-      patch_description: "fix symbol export for gdcmcharls"
+    - patch_file: "patches/0001-3.0.9-find-charls.patch"
+      patch_description: "allow using charls >= 2.2.0"
       patch_type: "portability"
+      patch_source: "https://github.com/malaterre/GDCM/pull/157"
     - patch_file: "patches/0002-3.0.9-openjpeg.patch"
       patch_description: "fix variable names for openjpeg"
       patch_type: "conan"

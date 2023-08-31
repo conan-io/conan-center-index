@@ -1,4 +1,7 @@
 sources:
+  "0.1.12":
+    url: "https://github.com/awslabs/aws-c-sdkutils/archive/v0.1.12.tar.gz"
+    sha256: "c876c3ce2918f1181c24829f599c8f06e29733f0bd6556d4c4fb523390561316"
   "0.1.3":
     url: "https://github.com/awslabs/aws-c-sdkutils/archive/v0.1.3.tar.gz"
     sha256: "13d99c0877424a8fad40f312762968012dd54ec60a4438fb601ee65ff8b2484b"
