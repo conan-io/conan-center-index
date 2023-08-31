@@ -63,7 +63,7 @@ class AvahiConan(ConanFile):
 
     def generate(self):
         virtual_build_env = VirtualBuildEnv(self)
-        if not cross_building(self):
+        if can_run(self):
             VirtualRunEnv(self).generate(scope="build")
         virtual_build_env.generate()
         tc = AutotoolsToolchain(self)
