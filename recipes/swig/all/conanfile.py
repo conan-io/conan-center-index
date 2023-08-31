@@ -78,7 +78,7 @@ class SwigConan(ConanFile):
         env = tc.environment()
         if self.settings.os in ["Linux", "FreeBSD"]:
             tc.configure_args.append("LIBS=-ldl")
-            tc.extra_cxxflags.append("-DHAVE_UNISTD_H=1")
+            tc.extra_defines.append("HAVE_UNISTD_H=1")
         elif self.settings.os == "Windows":
             if is_msvc(self):
                 env.define("CC", "cccl")
@@ -134,7 +134,7 @@ class SwigConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "SWIG::SWIG")
         self.cpp_info.set_property("cmake_build_modules", [self._cmake_module_rel_path])
 
-        self.buildenv.define_path("SWIG_LIB", os.path.join(self.package_folder, "bin", "swiglib"))
+        self.buildenv_info.define_path("SWIG_LIB", os.path.join(self.package_folder, "bin", "swiglib"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "SWIG"
