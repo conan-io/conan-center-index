@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, load, rmdir, rm
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -63,6 +63,8 @@ class AvahiConan(ConanFile):
 
     def generate(self):
         virtual_build_env = VirtualBuildEnv(self)
+        if not cross_building(self):
+            VirtualRunEnv(self).generate(scope="build")
         virtual_build_env.generate()
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--enable-compat-libdns_sd")
