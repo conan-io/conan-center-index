@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir, rename
@@ -90,6 +91,7 @@ class LibmagicConan(ConanFile):
         copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         autotools = Autotools(self)
         autotools.install()
+        fix_apple_shared_install_name(self)
         rename(self, os.path.join(self.package_folder, "share", "misc"),
                os.path.join(self.package_folder, "res"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
