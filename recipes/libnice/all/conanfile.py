@@ -8,7 +8,7 @@ from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.60.0"
+required_conan_version = ">=1.60.0 <2 || >=2.0.6"
 
 class LibniceConan(ConanFile):
     name = "libnice"
