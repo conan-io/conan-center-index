@@ -86,22 +86,22 @@ class GStPluginsBaseConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("gstreamer/1.22.3", transitive_headers=True)
+        self.requires("glib/2.77.2", transitive_headers=True, force=True)  # FIXME: remove force
         self.requires("zlib/1.2.13")
-        self.requires("glib/2.77.2", override=True)
-        self.requires("gstreamer/1.22.3")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.7.2")
         if self.options.get_safe("with_xorg"):
-            self.requires("xorg/system")
+            self.requires("xorg/system", transitive_headers=True)
         if self.options.with_gl:
             self.requires("opengl/system")
             if self.settings.os == "Windows":
-                self.requires("wglext/cci.20200813")
-                self.requires("glext/cci.20210420")
+                self.requires("wglext/cci.20200813", transitive_headers=True)
+                self.requires("glext/cci.20210420", transitive_headers=True)
             if self.options.get_safe("with_egl"):
-                self.requires("egl/system")
+                self.requires("egl/system", transitive_headers=True)
             if self.options.get_safe("with_wayland"):
-                self.requires("wayland/1.22.0")
+                self.requires("wayland/1.22.0", transitive_headers=True)
                 self.requires("wayland-protocols/1.31")
             if self.options.with_graphene:
                 self.requires("graphene/1.10.8")
