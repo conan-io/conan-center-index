@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import collect_libs, copy, get, apply_conandata_patches, export_conandata_patches, mkdir, rename
-from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rename
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.60.0"
+required_conan_version = ">=1.53.0"
 
 class DSPFiltersConan(ConanFile):
     name = "dsp-filters"
