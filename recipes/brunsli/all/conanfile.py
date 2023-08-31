@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, save
 
 required_conan_version = ">=1.53.0"
 
@@ -64,6 +64,12 @@ class PackageConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        # Allow Conan to control the linkage type of the output libraries
+        if not self.options.shared:
+            replace_in_file(self, os.path.join(self.source_folder, "brunsli.cmake"), " SHARED", "")
+            save(self, os.path.join(self.source_folder, "brunsli.cmake"),
+                 "\ninstall(TARGETS brunslicommon-static brunslidec-static brunslienc-static)",
+                 append=True)
 
     def build(self):
         self._patch_sources()
@@ -79,3 +85,6 @@ class PackageConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["brunslidec-c"].libs = ["brunslidec-c"]
         self.cpp_info.components["brunslienc-c"].libs = ["brunslienc-c"]
+        if not self.options.shared:
+            self.cpp_info.components["brunslidec-c"].libs += ["brunslicommon-static", "brunslidec-static"]
+            self.cpp_info.components["brunslienc-c"].libs += ["brunslicommon-static", "brunslienc-static"]
