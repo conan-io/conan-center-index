@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, rename
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 import os
@@ -87,13 +87,15 @@ class LibmagicConan(ConanFile):
         copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         autotools = Autotools(self)
         autotools.install()
+        rename(self, os.path.join(self.package_folder, "share", "misc"),
+               os.path.join(self.package_folder, "res"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share", "man"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name",  "libmagic")
         self.cpp_info.libs = ["magic"]
-        self.runenv_info.define_path("MAGIC", os.path.join(self.package_folder, "share", "misc", "magic.mgc"))
+        self.runenv_info.define_path("MAGIC", os.path.join(self.package_folder, "res", "magic.mgc"))
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
