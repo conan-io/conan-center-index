@@ -12,7 +12,7 @@ required_conan_version = ">=1.53.0"
 class TreConan(ConanFile):
     name = "tre"
     description = "TRE is a lightweight, robust, and efficient POSIX-compliant regexp matching library with some exciting features such as approximate (fuzzy) matching."
-    license = ""
+    license = "BSD-2-Clause"
     homepage = "https://github.com/laurikari/tre"
     url = "https://github.com/conan-io/conan-center-index"
     topics = "regex", "fuzzy matching"
