@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
@@ -107,6 +107,13 @@ class LibSixelConan(ConanFile):
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.options.shared:
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.lib", os.path.join(self.package_folder, "lib"))
+        else:
+            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
+            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["sixel"]
