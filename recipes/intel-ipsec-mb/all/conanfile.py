@@ -15,7 +15,7 @@ class PackageConan(ConanFile):
     license = "BSD-3-Clause"
     homepage = "https://github.com/intel/intel-ipsec-mb"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("intel", "IPSec", "IPSec_MB")
+    topics = ("intel", "ipsec", "crypto", "security")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -52,8 +52,6 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration(f"{self.ref} only supports architecture x86_64.")
         if self.settings.os not in ("FreeBSD", "Linux", "Windows"):
             raise ConanInvalidConfiguration(f"{self.ref} does not support the O.S. {self.settings.os}.")
 
