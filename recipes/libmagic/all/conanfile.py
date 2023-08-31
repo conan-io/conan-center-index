@@ -50,6 +50,10 @@ class LibmagicConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows is not supported yet")
+        if cross_building(self):
+            # TODO: Cross-compilation requires a build-context version of 'file' executable to be available.
+            # It might be possible to build the project for the 'build' platform first to make it work.
+            raise ConanInvalidConfiguration("Cross-compilation is not supported yet")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
