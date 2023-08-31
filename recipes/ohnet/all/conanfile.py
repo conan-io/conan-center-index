@@ -25,6 +25,7 @@ class OhNetConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    short_paths = True
 
     def _get_openhome_architecture(self, args):
         if is_apple_os(self):
@@ -35,6 +36,9 @@ class OhNetConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build_requirements(self):
+        self.tool_requires("rsync/3.2.7")
 
     def generate(self):
         if is_msvc(self):
