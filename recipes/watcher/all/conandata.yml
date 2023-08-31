@@ -27,6 +27,10 @@ sources:
     url: "https://github.com/e-dant/watcher/archive/release/0.4.3.tar.gz"
     sha256: "8603b45edfa5023752d9e2fdd731efe5a556a542aaf03f6be0e69c68f552b25a"
 patches:
+  "0.9.0":
+    - patch_file: "patches/0.9.0-include-atomic.patch"
+      patch_description: "fix max macro error in windows"
+      patch_type: "portability"
   "0.5.5":
     - patch_file: "patches/0.5.5-fix-limits_max.patch"
       patch_description: "fix max macro error in windows"

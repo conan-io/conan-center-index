@@ -1,0 +1,12 @@
+diff --git a/include/wtr/watcher.hpp b/include/wtr/watcher.hpp
+index 7fa556c..9e53bca 100644
+--- a/include/wtr/watcher.hpp
++++ b/include/wtr/watcher.hpp
+@@ -1247,6 +1247,7 @@ inline auto watch(
+ 
+ #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 7, 0)) || defined(__ANDROID_API__)
+ 
++#include <atomic>
+ #include <cassert>
+ #include <cstring>
+ #include <filesystem>
