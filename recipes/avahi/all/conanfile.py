@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.build import can_run
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import copy, get, load, rmdir, rm
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
