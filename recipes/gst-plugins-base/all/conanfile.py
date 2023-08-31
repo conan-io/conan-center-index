@@ -149,46 +149,38 @@ class GStPluginsBaseConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def generate(self):
-        # TODO: fill in generate()
-        tc = PkgConfigDeps(self)
-        tc.generate()
-
     def _gl_config(self):
-        if not self._gl_api or not self._gl_platform or not self._gl_winsys:
-            gl_api = set()
-            gl_platform = set()
-            gl_winsys = set()  # TODO: winrt, dispamnx, viv-fb, gbm, android
-            if self.options.get_safe("with_egl"):
-                gl_api.add("opengl")
-                gl_platform.add("egl")
-                gl_winsys.add("egl")
-            if self.options.get_safe("with_xorg"):
-                gl_api.add("opengl")
-                gl_platform.add("glx")
-                gl_winsys.add("x11")
-            if self.options.get_safe("with_wayland"):
-                gl_api.add("opengl")
-                gl_platform.add("egl")
-                gl_winsys.add("wayland")
-            if self.settings.os == "Macos":
-                gl_api.add("opengl")
-                gl_platform.add("cgl")
-                gl_winsys.add("cocoa")
-            elif self.settings.os in ["iOS", "tvOS", "watchOS"]:
-                gl_api.add("gles2")
-                gl_platform.add("eagl")
-                gl_winsys.add("eagl")
-            elif self.settings.os == "Windows":
-                gl_api.add("opengl")
-                gl_platform.add("wgl")
-                gl_winsys.add("win32")
-            self._gl_api = list(gl_api)
-            self._gl_platform = list(gl_platform)
-            self._gl_winsys = list(gl_winsys)
-        return self._gl_api, self._gl_platform, self._gl_winsys
+        gl_api = set()
+        gl_platform = set()
+        gl_winsys = set()  # TODO: winrt, dispamnx, viv-fb, gbm, android
+        if self.options.get_safe("with_egl"):
+            gl_api.add("opengl")
+            gl_platform.add("egl")
+            gl_winsys.add("egl")
+        if self.options.get_safe("with_xorg"):
+            gl_api.add("opengl")
+            gl_platform.add("glx")
+            gl_winsys.add("x11")
+        if self.options.get_safe("with_wayland"):
+            gl_api.add("opengl")
+            gl_platform.add("egl")
+            gl_winsys.add("wayland")
+        if self.settings.os == "Macos":
+            gl_api.add("opengl")
+            gl_platform.add("cgl")
+            gl_winsys.add("cocoa")
+        elif is_apple_os(self):
+            gl_api.add("gles2")
+            gl_platform.add("eagl")
+            gl_winsys.add("eagl")
+        elif self.settings.os == "Windows":
+            gl_api.add("opengl")
+            gl_platform.add("wgl")
+            gl_winsys.add("win32")
+        return list(gl_api), list(gl_platform), list(gl_winsys)
 
-    def _configure_meson(self):
+
+    def generate(self):
         def add_compiler_flag(value):
             tc.c_args.append(value)
             tc.cpp_args.append(value)
@@ -234,6 +226,9 @@ class GStPluginsBaseConan(ConanFile):
         tc.project_options["x11"] = "enabled" if self.options.get_safe("with_xorg") else "disabled"
         tc.project_options["xshm"] = "enabled" if self.options.get_safe("with_xorg") else "disabled"
         tc.project_options["xvideo"] = "enabled" if self.options.get_safe("with_xorg") else "disabled"
+        tc.generate()
+
+        tc = PkgConfigDeps(self)
         tc.generate()
 
     def build(self):
