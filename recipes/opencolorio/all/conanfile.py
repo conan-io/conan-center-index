@@ -71,6 +71,10 @@ class OpenColorIOConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
+        if Version(self.version) >= "2.3.0" and \
+            self.settings.compiler == "gcc" and \
+            Version(self.settings.compiler.version) < "6.0":
+            raise ConanInvalidConfiguration(f"{self.ref} requires gcc >= 6.0")
 
         # opencolorio>=2.2.0 requires minizip-ng with with_zlib
         if Version(self.version) >= "2.2.0" and \
