@@ -65,6 +65,7 @@ required_for_references:
 - aws-c-s3
 - aws-c-sdkutils
 - aws-checksums
+- aws-crt-cpp
 - aws-kvs-pic
 - aws-libfabric
 - b2
@@ -478,6 +479,7 @@ required_for_references:
 - kainjow-mustache
 - kaitai_struct_cpp_stl_runtime
 - kangaru
+- kcp
 - kdbindings
 - keychain
 - khrplatform
