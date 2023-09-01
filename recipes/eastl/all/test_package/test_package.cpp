@@ -11,7 +11,7 @@ void *operator new[](size_t size, size_t alignment, size_t alignmentOffset, cons
 }
 
 int main() {
-    constexpr eastl::string_view string = "string_view";
+    EA_CPP14_CONSTEXPR eastl::string_view string = "string_view";
     eastl::hash_map<int, int> map;
     map[0] = 1;
     return 0;
