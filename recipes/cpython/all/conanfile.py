@@ -173,12 +173,12 @@ class CPythonConan(ConanFile):
                and (self.settings.compiler != "Visual Studio" or tools.Version(self._version_number_only) >= "3.8")
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/1.3")
         if self._supports_modules:
-            self.requires("openssl/1.1.1l")
-            self.requires("expat/2.4.1")
+            self.requires("openssl/1.1.1v")
+            self.requires("expat/2.5.0")
             if self._with_libffi:
-                self.requires("libffi/3.2.1")
+                self.requires("libffi/3.4.4")
             if tools.Version(self._version_number_only) < "3.8":
                 self.requires("mpdecimal/2.4.2")
             elif tools.Version(self._version_number_only) < "3.10":
@@ -186,26 +186,26 @@ class CPythonConan(ConanFile):
             else:
                 self.requires("mpdecimal/2.5.0")  # FIXME: no 2.5.1 to troubleshoot apple
         if self.settings.os != "Windows":
-            if not tools.is_apple_os(self.settings.os):
-                self.requires("libuuid/1.0.3")
-            self.requires("libxcrypt/4.4.25")
+            if not is_apple_os(self):
+                self.requires("util-linux-libuuid/2.39")
+            self.requires("libxcrypt/4.4.35")
         if self.options.get_safe("with_bz2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_gdbm", False):
-            self.requires("gdbm/1.19")
+            self.requires("gdbm/1.23")
         if self.options.get_safe("with_nis", False):
             # TODO: Add nis when available.
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.36.0")
+            self.requires("sqlite3/3.43.1")
         if self.options.get_safe("with_tkinter"):
             self.requires("tk/8.6.10")
         if self.options.get_safe("with_curses", False):
-            self.requires("ncurses/6.2")
+            self.requires("ncurses/6.4")
         if self.options.get_safe("with_bsddb", False):
             self.requires("libdb/5.3.28")
         if self.options.get_safe("with_lzma", False):
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.4")
 
     def _configure_autotools(self):
         if self._autotools:
@@ -679,10 +679,10 @@ class CPythonConan(ConanFile):
                 "mpdecimal::mpdecimal",
             ]
             if self._with_libffi:
-                self.cpp_info.components["_hidden"].requires.append("libffi::libffi")
+                self.cpp_info.components["_hidden"].requires.append("util-linux-libuuid::util-linux-libuuid")
             if self.settings.os != "Windows":
                 if not tools.is_apple_os(self.settings.os):
-                    self.cpp_info.components["_hidden"].requires.append("libuuid::libuuid")
+                    self.cpp_info.components["_hidden"].requires.append("util-linux-libuuid::util-linux-libuuid")
                 self.cpp_info.components["_hidden"].requires.append("libxcrypt::libxcrypt")
             if self.options.with_bz2:
                 self.cpp_info.components["_hidden"].requires.append("bzip2::bzip2")
