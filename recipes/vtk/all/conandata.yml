@@ -26,3 +26,6 @@ patches:
     - patch_file: "patches/9.2.6-allow-GL_TEXTURE_2D_ARRAY.patch"
       patch_type: "conan"
       patch_description: "Patch for recipe-author's benefit, more to come, will upstream full patch later"
+    - patch_file: "patches/9.2.6-fix-vtkSEPReader.patch"
+      patch_type: "conan"
+      patch_description: "Fix for GCC-13"
