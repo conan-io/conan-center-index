@@ -96,7 +96,7 @@ class Mpg123Conan(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.5")
+            self.tool_requires("pkgconf/2.0.2")
         if self.settings.arch in ["x86", "x86_64"]:
             self.tool_requires("yasm/1.3.0")
         if self._settings_build.os == "Windows":
