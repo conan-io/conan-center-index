@@ -583,6 +583,7 @@ required_for_references:
 - libnfnetlink
 - libnfs
 - libnghttp2
+- libnice
 - libnl
 - libnoise
 - libnop
