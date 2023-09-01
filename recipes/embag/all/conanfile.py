@@ -3,7 +3,8 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rm, replace_in_file
+from conan.tools.files import get, copy, rm
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -32,8 +33,8 @@ class EmbagConan(ConanFile):
 
     def export_sources(self):
         copy(self, "CMakeLists.txt",
-            src=self.recipe_folder,
-            dst=os.path.join(self.export_sources_folder, "src"))
+             src=self.recipe_folder,
+             dst=os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -67,13 +68,7 @@ class EmbagConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        # Disable a C++11 workaround that is broken on MSVC
-        replace_in_file(self, os.path.join(self.source_folder, "lib", "util.h"),
-                        "#if __cplusplus < 201402L", "#if false")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -91,3 +86,6 @@ class EmbagConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
+        if is_msvc(self):
+            # For a #if __cplusplus < 201402L check in lib/util.h, which is a public header
+            self.cpp_info.cxxflags.append("/Zc:__cplusplus")
