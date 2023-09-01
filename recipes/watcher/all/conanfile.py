@@ -5,6 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.apple import is_apple_os
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.49.0"
@@ -88,6 +89,8 @@ class WatcherConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+        if Version(self.version) >= "0.9.0" and is_msvc(self):
+            self.cpp_info.cxx_flags = ["/Zc:__cplusplus /EHsc"]
 
         if is_apple_os(self):
             self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
