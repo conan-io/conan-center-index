@@ -99,7 +99,7 @@ class OpenvinoConan(ConanFile):
 
     @property
     def _gpu_option_available(self):
-        return self.settings.os != "Macos"
+        return self.settings.os != "Macos" and self._target_x86_64
 
     @property
     def _preprocessing_available(self):
@@ -134,7 +134,7 @@ class OpenvinoConan(ConanFile):
             del self.options.enable_gpu
 
     def configure(self):
-        # suffix = "" if Version(conan_version).major < "2" else "/*"
+        suffix = "" if Version(conan_version).major < "2" else "/*"
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if self._protobuf_required:
@@ -198,7 +198,7 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_INTEL_CPU"] = self.options.enable_cpu
         if self._gpu_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GPU"] = self.options.enable_gpu
-            toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = self.options.shared
+            toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = False # self.options.shared
         if self._gna_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GNA"] = False
         # SW plugins
