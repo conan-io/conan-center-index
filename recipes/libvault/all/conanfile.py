@@ -49,7 +49,7 @@ class LibvaultConan(ConanFile):
 
     def requirements(self):
         # public header VaultClient.h includes curl/curl.h and use several functions
-        self.requires("libcurl/8.2.0", transitive_headers=True, transitive_libs=True)
+        self.requires("libcurl/8.2.1", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         compiler = str(self.settings.compiler)
