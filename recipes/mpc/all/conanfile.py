@@ -39,8 +39,8 @@ class MpcConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def requirements(self):
-        self.requires("gmp/6.2.1", transitive_headers=True)
-        self.requires("mpfr/4.1.0", transitive_headers=True)
+        self.requires("gmp/6.3.0", transitive_headers=True)
+        self.requires("mpfr/4.2.0", transitive_headers=True)
 
     def validate(self):
         # FIXME: add msvc support, upstream has a makefile.vc
