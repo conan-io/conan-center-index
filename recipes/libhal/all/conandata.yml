@@ -5,3 +5,8 @@ sources:
   "0.0.0":
     url: "https://github.com/libhal/libhal/archive/refs/tags/0.0.0.tar.gz"
     sha256: "f49d6cee9adfe9d98212ba77aa955c88994693185d4870b86a6e12bad4eb9915"
+patches:
+  "0.0.0":
+    - patch_file: "patches/0.0.0-0001-fix-spaceship-op.patch"
+      patch_description: "fix spaceship operator return type"
+      patch_type: "portability"
