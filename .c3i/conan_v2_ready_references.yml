@@ -278,6 +278,7 @@ required_for_references:
 - elfio
 - embree3
 - emio
+- emsdk
 - enet
 - enhex-generic_serialization
 - enhex-strong_type
