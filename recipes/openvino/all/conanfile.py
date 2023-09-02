@@ -132,14 +132,14 @@ class OpenvinoConan(ConanFile):
             del self.options.fPIC
         if not self._gpu_option_available:
             del self.options.enable_gpu
-        # Intel GPU plugin is not well validated in static build
-        if not self.options.shared:
-            self.options.rm_safe("enable_gpu")
 
     def configure(self):
         suffix = "" if Version(conan_version).major < "2" else "/*"
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        else:
+            # Intel GPU plugin is not well validated in static build
+            self.options.rm_safe("enable_gpu")
         if self._protobuf_required:
             # static build + TF FE requires full protobuf, otherwise we can use lite version
             # TODO: how to handle it?
@@ -199,7 +199,7 @@ class OpenvinoConan(ConanFile):
         # HW plugins
         toolchain.cache_variables["ENABLE_INTEL_CPU"] = self.options.enable_cpu
         if self._gpu_option_available:
-            toolchain.cache_variables["ENABLE_INTEL_GPU"] = self.options.get_safe("enable_gpu")
+            toolchain.cache_variables["ENABLE_INTEL_GPU"] = self.options.get_safe("enable_gpu", False)
             toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = False # self.options.shared
         if self._gna_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GNA"] = False
