@@ -55,7 +55,7 @@ class QCoroConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.build_requires("cmake/3.27.1")
+        self.build_requires("cmake/3.27.4")
 
     def requirements(self):
         self.requires("qt/6.5.2")
