@@ -145,8 +145,7 @@ class OpenvinoConan(ConanFile):
                 # we need to use static protobuf to overcome potential issues with multiple registrations inside
                 # protobuf when frontends (implemented as plugins) are loaded multiple times in runtime
                 # TODO: how to handle it?
-                # self.options[f"protobuf{suffix}"].shared = False
-                pass
+                self.options[f"protobuf{suffix}"].shared = False
         if self.options.enable_tf_lite_frontend:
             # only flatc is required for TF Lite FE plus headers
             # TODO: how to handle it?
