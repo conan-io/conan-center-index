@@ -132,6 +132,9 @@ class OpenvinoConan(ConanFile):
             del self.options.fPIC
         if not self._gpu_option_available:
             del self.options.enable_gpu
+        # Intel GPU plugin is not well validated in static build
+        if not self.options.shared:
+            self.options.rm_safe("enable_gpu")
 
     def configure(self):
         suffix = "" if Version(conan_version).major < "2" else "/*"

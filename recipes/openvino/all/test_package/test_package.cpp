@@ -19,11 +19,11 @@ int test_available_devices() {
 #else
     OV_FAIL(ov_core_get_property(core, "CPU", "AVAILABLE_DEVICES", &ret));
 #endif
-// #ifdef ENABLE_INTEL_GPU
-//     OV_SUCCESS(ov_core_get_property(core, "GPU", "AVAILABLE_DEVICES", &ret));
-// #else
-//     OV_FAIL(ov_core_get_property(core, "GPU", "AVAILABLE_DEVICES", &ret));
-// #endif
+#ifdef ENABLE_INTEL_GPU
+    OV_SUCCESS(ov_core_get_property(core, "GPU", "AVAILABLE_DEVICES", &ret));
+#else
+    OV_FAIL(ov_core_get_property(core, "GPU", "AVAILABLE_DEVICES", &ret));
+#endif
 #ifdef ENABLE_AUTO
     OV_SUCCESS(ov_core_get_property(core, "AUTO", "SUPPORTED_METRICS", &ret));
     OV_SUCCESS(ov_core_get_property(core, "MULTI", "SUPPORTED_METRICS", &ret));
