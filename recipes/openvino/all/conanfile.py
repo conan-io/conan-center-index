@@ -199,7 +199,7 @@ class OpenvinoConan(ConanFile):
         # HW plugins
         toolchain.cache_variables["ENABLE_INTEL_CPU"] = self.options.enable_cpu
         if self._gpu_option_available:
-            toolchain.cache_variables["ENABLE_INTEL_GPU"] = self.options.enable_gpu
+            toolchain.cache_variables["ENABLE_INTEL_GPU"] = self.options.get_safe("enable_gpu")
             toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = False # self.options.shared
         if self._gna_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GNA"] = False
