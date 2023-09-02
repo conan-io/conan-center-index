@@ -90,7 +90,7 @@ class WatcherConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
         if Version(self.version) >= "0.9.0" and is_msvc(self):
-            self.cpp_info.cxx_flags = ["/permissive-"]
+            self.cpp_info.cxxflags = ["/permissive-"]
 
         if is_apple_os(self):
             self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
