@@ -245,6 +245,9 @@ class QtConan(ConanFile):
         if self.settings.compiler == "clang" and "libstdc++" in str(self.settings.compiler.libcxx):
             raise ConanInvalidConfiguration("Qt needs recent libstdc++, with charconv. please switch to gcc, or to libc++")
 
+        if self.settings.os == "Macos" and self.dependencies["double-conversion"].options.shared:
+            raise ConanInvalidConfiguration("Test recipe fails because of Macos' SIP. Contributions are welcome.")
+
         if self.options.get_safe("qtwebengine"):
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds of Qt WebEngine are not supported")
@@ -290,6 +293,9 @@ class QtConan(ConanFile):
 
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
+
+        if self.options.get_safe("qtspeech") and not self.options.qtdeclarative:
+            raise ConanInvalidConfiguration("qtspeech requires qtdeclarative, cf QTBUG-108381")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -1199,24 +1205,8 @@ class QtConan(ConanFile):
             _create_module("MultimediaWidgets", ["Multimedia", "Widgets", "Gui"])
             if self.options.qtdeclarative and qt_quick_enabled:
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
-            _create_plugin("QM3uPlaylistPlugin", "qtmultimedia_m3u", "playlistformats", [])
             if self.options.with_gstreamer:
-                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gst-plugins-base::gst-plugins-base"])
-                _create_plugin("QGstreamerAudioDecoderServicePlugin", "gstaudiodecoder", "mediaservice", [])
-                _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
-                _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
-            if self.settings.os == "Linux":
-                _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
-                _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
-            if self.settings.os == "Windows":
-                _create_plugin("AudioCaptureServicePlugin", "qtmedia_audioengine", "mediaservice", [])
-                _create_plugin("DSServicePlugin", "dsengine", "mediaservice", [])
-                _create_plugin("QWindowsAudioPlugin", "qtaudio_windows", "audio", [])
-            if self.settings.os == "Macos":
-                _create_plugin("AudioCaptureServicePlugin", "qtmedia_audioengine", "mediaservice", [])
-                _create_plugin("AVFMediaPlayerServicePlugin", "qavfmediaplayer", "mediaservice", [])
-                _create_plugin("AVFServicePlugin", "qavfcamera", "mediaservice", [])
-                _create_plugin("CoreAudioPlugin", "qtaudio_coreaudio", "audio", [])
+                _create_plugin("QGstreamerMediaPlugin", "gstreamermediaplugin", "multimedia", ["gst-plugins-base::gst-plugins-base"])
 
         if self.options.get_safe("qtpositioning"):
             _create_module("Positioning", [])
@@ -1269,6 +1259,19 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("qtwebview"):
             _create_module("WebView", ["Core", "Gui"])
+
+        if self.options.get_safe("qtspeech"):
+            _create_module("TextToSpeech", [])
+
+        if self.options.get_safe("qthttpserver"):
+            http_server_deps = ["Core", "Network"]
+            if self.options.get_safe("qtwebsockets"):
+                http_server_deps.append("WebSockets")
+            _create_module("HttpServer", http_server_deps)
+
+        if self.options.get_safe("qtgrpc"):
+            _create_module("Protobuf", [])
+            _create_module("Grpc", ["Core", "Protobuf", "Network"])
 
         if self.settings.os in ["Windows", "iOS"]:
             if self.settings.os == "Windows":
