@@ -29,18 +29,18 @@ class SnitchConan(ConanFile):
         "with_default_color": [True, False],
         "with_success_decompose": [True, False],
         "with_reporters": [None, "ANY"],
-        "max_test_cases": "ANY", # integer
-        "max_nested_sections": "ANY", # integer
-        "max_expr_length": "ANY", # integer
-        "max_message_length": "ANY", # integer
-        "max_test_name_length": "ANY", # integer
-        "max_tag_length": "ANY", # integer
-        "max_captures": "ANY", # integer
-        "max_capture_length": "ANY", # integer
-        "max_unique_tags": "ANY", # integer
-        "max_command_line_args": "ANY", # integer
-        "max_registered_reporters": "ANY", # integer
-        "max_path_length": "ANY" # integer
+        "max_test_cases": ["ANY"], # integer
+        "max_nested_sections": ["ANY"], # integer
+        "max_expr_length": ["ANY"], # integer
+        "max_message_length": ["ANY"], # integer
+        "max_test_name_length": ["ANY"], # integer
+        "max_tag_length": ["ANY"], # integer
+        "max_captures": ["ANY"], # integer
+        "max_capture_length": ["ANY"], # integer
+        "max_unique_tags": ["ANY"], # integer
+        "max_command_line_args": ["ANY"], # integer
+        "max_registered_reporters": ["ANY"], # integer
+        "max_path_length": ["ANY"] # integer
     }
     default_options = {
         "shared": False,
