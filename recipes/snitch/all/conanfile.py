@@ -112,6 +112,7 @@ class SnitchConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+
         # Basic configuration
         tc.cache_variables["SNITCH_DO_TEST"] = False
         tc.cache_variables["SNITCH_UNITY_BUILD"] = True
@@ -171,11 +172,14 @@ class SnitchConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "snitch")
-        self.cpp_info.set_property("cmake_target_name", "snitch::snitch")
         self.cpp_info.set_property("pkg_config_name", "snitch")
-        if not self.options.header_only:
+        self.cpp_info.set_property("cmake_file_name", "snitch")
+        if self.options.header_only:
+            self.cpp_info.set_property("cmake_target_name", "snitch::snitch-header-only")
+        else:
+            self.cpp_info.set_property("cmake_target_name", "snitch::snitch")
             self.cpp_info.libs = ['snitch']
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
