@@ -5,4 +5,10 @@ find_package(arg_router REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE arg_router::arg_router)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+    target_compile_options(${PROJECT_NAME} PRIVATE /Zc:__cplusplus)
+else()
+    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+endif()
