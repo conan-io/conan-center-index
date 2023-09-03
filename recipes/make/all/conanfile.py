@@ -1,8 +1,9 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, download, check_sha256, unzip
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars
+from conan.errors import ConanException
 import os
 
 required_conan_version = ">=1.53.0"
@@ -38,8 +39,20 @@ class MakeConan(ConanFile):
         del self.info.settings.compiler
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        for data in self.conan_data["sources"][self.version]:
+            url = data["url"]
+            sha = data["sha256"]
+            filename = url[url.rfind("/")+1:]
+            try:
+                download(self, url, filename, sha256=sha)
+            except ConanException as e:
+                if "NewConnectionError" in str(e):
+                    continue
+                raise e
+
+            unzip(self, filename, destination=self.source_folder, strip_root=True)
+            os.remove(filename)
+            break
 
     def generate(self):
         if is_msvc(self):
