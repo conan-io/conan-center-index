@@ -1,0 +1,9 @@
+sources:
+  "cci.20230615":
+    url: "https://github.com/marcomagdy/ulid/archive/a14ff0987bc327cca60333ac3bfda37e42a71f2d.zip"
+    sha256: "e7884fee1a6973a7a83ab07bf229d3e86d6e59afabc7418be318aa3f42af5872"
+patches:
+  "cci.20230615":
+    - patch_file: "patches/cci.20230615-msvc-fix.patch"
+      patch_description: "MSVC compile fix patch"
+      patch_type: "portability"
