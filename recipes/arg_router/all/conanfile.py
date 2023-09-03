@@ -85,3 +85,5 @@ class ArgRouterConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.requires = ["boost::headers", "span-lite::span-lite"]
+        if self.settings.os == "Windows" and Version(self.version) < "1.4.0":
+            self.cpp_info.defines.append("NOMINMAX")
