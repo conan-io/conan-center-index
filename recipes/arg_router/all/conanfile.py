@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -22,7 +23,7 @@ class ArgRouterConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "20" if str(self.settings.compiler) == "msvc" else "17"
+        return "20" if is_msvc(self) else "17"
 
     @property
     def _min_compilers_version(self):
@@ -30,7 +31,7 @@ class ArgRouterConan(ConanFile):
             "apple-clang": "10",
             "clang": "10",
             "gcc": "9",
-            "msvc": "191",
+            "msvc": "193",
             "Visual Studio": "17",
         }
 
@@ -38,7 +39,7 @@ class ArgRouterConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.74.0")
+        self.requires("boost/1.83.0")
         self.requires("span-lite/0.10.3")
 
     def package_id(self):
