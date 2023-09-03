@@ -106,4 +106,4 @@ class ZstdConan(ConanFile):
         if self.options.build_programs:
             # TODO: Remove after dropping Conan 1.x from ConanCenterIndex
             bindir = os.path.join(self.package_folder, "bin")
-            self.runenv_info.prepend_path("PATH", bindir)
+            self.env_info.PATH.append(bindir)
