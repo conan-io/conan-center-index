@@ -106,6 +106,11 @@ class OpenvinoConan(ConanFile):
         return Version(self.version) < "2023.2.0"
 
     @property
+    def _onnx_version(self):
+        if Version(self.version) == "2023.1.0":
+            return "1.13.1"
+
+    @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "7",
@@ -137,24 +142,19 @@ class OpenvinoConan(ConanFile):
         suffix = "" if Version(conan_version).major < "2" else "/*"
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        else:
-            # Intel GPU plugin is not well validated in static build
-            self.options.rm_safe("enable_gpu")
         if self._protobuf_required:
             # static build + TF FE requires full protobuf, otherwise we can use lite version
-            # TODO: how to handle it?
+            # TODO: how to handle it? 'protobuf/*:lite=True' is not available in ConanCenter
             # self.options[f"protobuf{suffix}"].lite = True # self.options.shared or not self.options.enable_tf_frontend
             if self.options.shared:
                 # we need to use static protobuf to overcome potential issues with multiple registrations inside
                 # protobuf when frontends (implemented as plugins) are loaded multiple times in runtime
-                # TODO: how to handle it?
                 self.options[f"protobuf{suffix}"].shared = False
         if self.options.enable_tf_lite_frontend:
             # only flatc is required for TF Lite FE plus headers
-            # TODO: how to handle it?
+            # TODO: how to handle it? 'flatbuffers/*:header_only=True' is not available in ConanCenter
             # self.options[f"flatbuffers{suffix}"].header_only = True
             pass
-        # TODO: look at vulkan-validationlayers for dependencies files
 
     def build_requirements(self):
         if self._target_arm:
@@ -179,9 +179,8 @@ class OpenvinoConan(ConanFile):
         if self.options.enable_tf_frontend:
             self.requires("snappy/[>=1.1.7]")
         if self.options.enable_onnx_frontend:
-            self.requires("onnx/1.13.1")
+            self.requires(f"onnx/{self._onnx_version}")
         if self.options.enable_tf_lite_frontend:
-            # TODO: how to have only flatc and headers?
             self.requires("flatbuffers/22.9.24")
         if self._preprocessing_available:
             self.requires("ade/0.1.2a")
@@ -199,7 +198,7 @@ class OpenvinoConan(ConanFile):
         # HW plugins
         toolchain.cache_variables["ENABLE_INTEL_CPU"] = self.options.enable_cpu
         if self._gpu_option_available:
-            toolchain.cache_variables["ENABLE_INTEL_GPU"] = self.options.get_safe("enable_gpu", False)
+            toolchain.cache_variables["ENABLE_INTEL_GPU"] = self.options.enable_gpu
             toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = False # self.options.shared
         if self._gna_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GNA"] = False
@@ -292,10 +291,12 @@ class OpenvinoConan(ConanFile):
 
         openvino_runtime = self.cpp_info.components["Runtime"]
         openvino_runtime.set_property("cmake_target_name", "openvino::runtime")
-        openvino_runtime.requires = ["onetbb::onetbb", "pugixml::pugixml"]
+        openvino_runtime.requires = ["onetbb::libtbb", "pugixml::pugixml"]
         openvino_runtime.libs = ["openvino_c", "openvino"]
         if self._preprocessing_available:
             openvino_runtime.requires.append("ade::ade")
+        if self._target_x86_64:
+            openvino_runtime.requires.append("xbyak::xbyak")
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             openvino_runtime.system_libs = ["m", "dl", "pthread"]
         if self.settings.os == "Windows":
@@ -345,10 +346,10 @@ class OpenvinoConan(ConanFile):
                                           "openvino_shape_inference", "openvino_itt",
                                           # utils goes last since all others depend on it
                                           "openvino_util"])
-            # set 'openvino' once again for transformations objects files
+            # set 'openvino' once again for transformations objects files (cyclic dependency)
             # openvino_runtime.libs.append("openvino")
-            full_openvino_lib_path = f"{self.package_folder}/lib/openvino.lib" if self.settings.os == "Windows" else \
-                                     f"{self.package_folder}/lib/libopenvino.a"
+            full_openvino_lib_path = os.path.join(self.package_folder, "lib", "openvino.lib").replace("\\", "/") if self.settings.os == "Windows" else \
+                                     os.path.join(self.package_folder, "lib", "libopenvino.a")
             openvino_runtime.system_libs.insert(0, full_openvino_lib_path)
 
         if self.options.get_safe("enable_gpu"):
@@ -384,5 +385,4 @@ class OpenvinoConan(ConanFile):
             openvino_tensorflow_lite = self.cpp_info.components["TensorFlowLite"]
             openvino_tensorflow_lite.set_property("cmake_target_name", "openvino::frontend::tensorflow_lite")
             openvino_tensorflow_lite.libs = ["openvino_tensorflow_lite_frontend"]
-            # TODO: try to remove flatbuffers from 'requires', because only headers are used privately
             openvino_tensorflow_lite.requires = ["Runtime", "flatbuffers::flatbuffers"]
