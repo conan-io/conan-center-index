@@ -6,17 +6,14 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def layout(self):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires(self.tested_reference_str)
-
-    def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
+        self.requires(self.tested_reference_str, run=True)
 
     def build(self):
         cmake = CMake(self)
@@ -31,4 +28,4 @@ class TestPackageConan(ConanFile):
         png_file = os.path.join(self.source_folder, "logo.png")
         self.run(f"{bin_path} {png_file}", env="conanrun")
 
-        self.run(f"zstd --version")
+        self.run(f"zstd --version", env="conanrun")
