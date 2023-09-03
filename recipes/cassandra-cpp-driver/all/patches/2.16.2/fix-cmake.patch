@@ -1,0 +1,201 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c615094..b10d9c9 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -164,7 +164,7 @@ endif()
+ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR
+    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+   # Enable C++11 support to use std::atomic
+-  if(CASS_USE_STD_ATOMIC)
++  if(1)
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+   endif()
+ 
+diff --git a/cmake/Dependencies.cmake b/cmake/Dependencies.cmake
+index 9052472..4701133 100644
+--- a/cmake/Dependencies.cmake
++++ b/cmake/Dependencies.cmake
+@@ -21,28 +21,28 @@ if(NOT LIBUV_ROOT_DIR)
+ endif()
+ 
+ # Ensure libuv was found
+-find_package(Libuv "1.0.0")
+-if(WIN32 AND NOT LIBUV_FOUND)
++find_package(libuv "1.0.0")
++if(WIN32 AND NOT libuv_FOUND)
+   message(STATUS "Unable to Locate libuv: Third party build step will be performed")
+   include(ExternalProject-libuv)
+-elseif(NOT LIBUV_FOUND)
++elseif(NOT libuv_FOUND)
+   message(FATAL_ERROR "Unable to Locate libuv: libuv v1.0.0+ is required")
+ endif()
+ 
+-if(LIBUV_VERSION VERSION_LESS "1.0")
+-  message(FATAL_ERROR "Libuv version ${LIBUV_VERSION} is not "
++if(libuv_VERSION VERSION_LESS "1.0")
++  message(FATAL_ERROR "Libuv version ${libuv_VERSION} is not "
+     " supported. Please updgrade to libuv version 1.0 or greater in order to "
+     "utilize the driver.")
+ endif()
+ 
+-if(LIBUV_VERSION VERSION_LESS "1.6")
+-  message(WARNING "Libuv version ${LIBUV_VERSION} does not support custom "
++if(libuv_VERSION VERSION_LESS "1.6")
++  message(WARNING "Libuv version ${libuv_VERSION} does not support custom "
+     "memory allocators (version 1.6 or greater required)")
+ endif()
+ 
+ # Assign libuv include and libraries
+-set(CASS_INCLUDES ${CASS_INCLUDES} ${LIBUV_INCLUDE_DIRS})
+-set(CASS_LIBS ${CASS_LIBS} ${LIBUV_LIBRARIES})
++set(CASS_INCLUDES ${CASS_INCLUDES} ${libuv_INCLUDE_DIRS})
++set(CASS_LIBS ${CASS_LIBS} ${libuv_LIBRARIES})
+ 
+ # libuv and gtests require thread library
+ if(NOT WIN32)
+@@ -192,3 +192,20 @@ if(CASS_USE_BOOST_ATOMIC)
+   endif()
+ endif()
+ 
++#------------------------
++# RapidJSON
++#------------------------
++find_package(RapidJSON REQUIRED CONFIG)
++set(CASS_LIBS ${CASS_LIBS} rapidjson)
++
++#------------------------
++# http_parser
++#------------------------
++find_package(http_parser REQUIRED CONFIG)
++set(CASS_LIBS ${CASS_LIBS} http_parser::http_parser)
++
++#------------------------
++# minizip
++#------------------------
++find_package(minizip REQUIRED CONFIG)
++set(CASS_LIBS ${CASS_LIBS} minizip::minizip)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index d662718..088a153 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,6 +1,42 @@
+ include(CheckSymbolExists)
+ include(CheckCXXSourceCompiles)
+ 
++#------------------------
++# Libuv
++#------------------------
++
++if(NOT WIN32)
++  set(CMAKE_THREAD_PREFER_PTHREAD 1)
++  set(THREADS_PREFER_PTHREAD_FLAG 1)
++endif()
++
++find_package(Threads REQUIRED)
++set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_THREAD_LIBS_INIT}")
++set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_THREAD_LIBS_INIT}")
++if(NOT WIN32 AND ${CMAKE_VERSION} VERSION_LESS "3.1.0")
++  # FindThreads in CMake versions < v3.1.0 do not have the THREADS_PREFER_PTHREAD_FLAG to prefer -pthread
++  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
++  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
++endif()
++
++#------------------------
++# Boost
++#------------------------
++
++if(CASS_USE_BOOST_ATOMIC)
++  # Ensure Boost auto linking is disabled (defaults to auto linking on Windows)
++  if(WIN32)
++    add_definitions(-DBOOST_ALL_NO_LIB)
++  endif()
++
++  # Determine if additional Boost definitions are required for driver/executables
++  if(NOT WIN32)
++    # Handle explicit initialization warning in atomic/details/casts
++    add_definitions(-Wno-missing-field-initializers)
++  endif()
++endif()
++
++
+ file(GLOB SOURCES *.cpp *.hpp)
+ 
+ if(APPLE)
+@@ -38,18 +74,14 @@ endif()
+ 
+ add_subdirectory(third_party/curl)
+ add_subdirectory(third_party/hdr_histogram)
+-add_subdirectory(third_party/http-parser)
+-add_subdirectory(third_party/minizip)
+ add_subdirectory(third_party/sparsehash)
+ 
+ list(APPEND INCLUDE_DIRS 
+-  third_party/curl
+-  third_party/hdr_histogram
+-  third_party/http-parser
+-  third_party/minizip
+-  third_party/mt19937_64
+-  third_party/rapidjson/rapidjson
+-  third_party/sparsehash/src)
++  third_party/curl # FIXME: Use conan package
++  third_party/hdr_histogram # FIXME: Use conan package
++  third_party/mt19937_64 # FIXME: Use conan package
++  third_party/sparsehash/src # FIXME: Use conan package
++)
+ 
+ list(APPEND INCLUDE_DIRS ${CASS_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+ 
+@@ -69,13 +101,6 @@ if(WIN32)
+   endif()
+ endif()
+ 
+-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32 -Wno-undefined-var-template -Werror")
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-implicit-int-float-conversion")
+-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # To many superfluous warnings generated with GCC when using -Wconversion (see: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=40752)
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+-endif()
+-
+ #------------------------------
+ # Build configured header
+ #------------------------------
+@@ -122,7 +147,6 @@ configure_file(
+   ${CASS_ROOT_DIR}/driver_config.hpp.in 
+   ${CMAKE_CURRENT_SOURCE_DIR}/driver_config.hpp)
+ 
+-
+ #------------------------------
+ # Targets
+ #------------------------------
+@@ -132,8 +156,7 @@ if(CASS_BUILD_SHARED)
+     ${SOURCES}
+     $<TARGET_OBJECTS:curl_hostcheck>
+     $<TARGET_OBJECTS:hdr_histogram>
+-    $<TARGET_OBJECTS:http-parser>
+-    $<TARGET_OBJECTS:minizip>)
++  )
+   target_link_libraries(cassandra ${CASS_LIBS})
+   target_include_directories(cassandra PRIVATE ${INCLUDE_DIRS} ${CASS_INCLUDES})
+ 
+@@ -169,8 +192,7 @@ if(CASS_BUILD_STATIC)
+     ${SOURCES}
+     $<TARGET_OBJECTS:curl_hostcheck_static>
+     $<TARGET_OBJECTS:hdr_histogram_static>
+-    $<TARGET_OBJECTS:http-parser_static>
+-    $<TARGET_OBJECTS:minizip_static>)
++  )
+   target_link_libraries(cassandra_static ${CASS_LIBS})
+   target_include_directories(cassandra_static PRIVATE ${INCLUDE_DIRS} ${CASS_INCLUDES})
+ 
+@@ -275,11 +297,6 @@ if(CASS_BUILD_SHARED)
+       endif()
+     endif()
+   endif()
+-  if(WIN32)
+-    install(FILES $<TARGET_PDB_FILE:cassandra>
+-      DESTINATION "${INSTALL_DLL_EXE_DIR}"
+-      OPTIONAL)
+-  endif()
+ endif()
+ 
+ if(CASS_BUILD_STATIC)
