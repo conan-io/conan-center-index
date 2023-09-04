@@ -354,6 +354,9 @@ class BotanConan(ConanFile):
         if self.options.system_cert_bundle:
             build_flags.append('--system-cert-bundle={}'.format(self.options.system_cert_bundle))
 
+        if self.conf.get("tools.build:sysroot"):
+            build_flags.append(f'--with-sysroot-dir={self.conf.get("tools.build:sysroot")}')
+
         if self.options.with_bzip2:
             build_flags.append('--with-bzip2')
             build_flags.extend(self._dependency_build_flags('bzip2'))
