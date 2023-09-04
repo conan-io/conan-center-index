@@ -1,4 +1,4 @@
 sources:
-  "1.2.1":
-    url: "https://github.com/cschreib/snitch/archive/refs/tags/v1.2.1.tar.gz"
-    sha256: "7bfdb493af701395ac7c39717335d4bfe44d10cb644d023059e3170365602cca"
+  "1.2.2":
+    url: "https://github.com/cschreib/snitch/archive/refs/heads/cmake.zip"
+    sha256: "3b2053c6dacded5e1f60ff3244c08523a09e00239c678960adbc5ea56a0de59c"
