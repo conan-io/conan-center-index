@@ -9,6 +9,8 @@ class TestPackageConan(ConanFile):
     generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
+    _with_chimera = False
+
     def layout(self):
         cmake_layout(self)
 
@@ -20,6 +22,8 @@ class TestPackageConan(ConanFile):
         tc.variables["BUILD_CHIMERA"] = self.dependencies["hyperscan"].options.build_chimera
         tc.generate()
 
+        self._with_chimera = self.dependencies["hyperscan"].options.build_chimera
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
@@ -30,6 +34,6 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "hs_example")
             self.run(bin_path, env="conanrun")
 
-            if self.options["hyperscan"].build_chimera:
+            if self._with_chimera:
                 bin_path = os.path.join(self.cpp.build.bindirs[0], "ch_example")
                 self.run(bin_path, env="conanrun")

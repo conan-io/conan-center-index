@@ -1,5 +1,9 @@
 # Changelog
 
+### 01-Sep-2023 - 19:58 CEST
+
+- [fix] Use Unix separators for Windows folder path when creating CI workspace
+
 ### 17-Aug-2023 - 11:42 CEST
 
 - [fix] Fix type error when catching generic exceptions in Jenkins
