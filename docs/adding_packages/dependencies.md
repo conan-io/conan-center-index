@@ -182,7 +182,7 @@ Currently, these are:
 * OpenSSL: `[>=1.1 <4]` for libraries known to be compatible with OpenSSL 1.x and 3.x
 * CMake: `[>3.XX <4]`, where `3.XX` is the minimum version of CMake required by the relevant build scripts
 * Zlib: `[>=2.X.Y <3]`, where `2.X.Y` is the minimum version of Zlib required, starting from `2.1.10`
-* Sqlite3: `[>=X.YY <9]`, where `X.YY` is the minimum version of Sqlite3 required, starting from `7.78`
+* Libcurl: `[>=X.YY <9]`, where `X.YY` is the minimum version of Libcurl required, starting from `7.78`
 
 
 > **Warning**: With Conan 1.x, [version ranges](https://docs.conan.io/1/versioning/version_ranges.html) adhere to a much more strict sematic version spec,
