@@ -138,12 +138,12 @@ class GtsamConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.82.0", transitive_headers=True)
+        self.requires("boost/1.83.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.with_TBB:
-            self.requires("onetbb/2021.9.0", transitive_headers=True)
+            self.requires("onetbb/2021.10.0", transitive_headers=True)
         if self.options.default_allocator == "tcmalloc":
-            self.requires("gperftools/2.10.0")
+            self.requires("gperftools/2.11.0")
         # TODO: add use_vendored_metis=False option
         # if self.options.support_nested_dissection and not self.options.use_vendored_metis:
         #     # Used in a public header here:
