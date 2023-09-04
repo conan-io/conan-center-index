@@ -33,9 +33,11 @@ class Libnetfilter_queueConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
+    def validate(self):
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("libnetfilter_queue is only supported on Linux")
+            raise ConanInvalidConfiguration(f"{self.ref} is only supported on Linux.")
+
+    def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
