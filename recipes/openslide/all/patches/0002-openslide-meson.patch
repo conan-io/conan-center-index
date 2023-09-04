@@ -1,0 +1,298 @@
+diff -urN a/meson.build b/meson.build
+--- a/meson.build	1969-12-31 19:00:00.000000000 -0500
++++ b/meson.build	2023-01-13 19:30:51.096309972 -0500
+@@ -0,0 +1,134 @@
++project(
++  'openslide', 'c',
++  version : '3.4.1',
++  license : 'LGPL-2.1-only',
++  default_options : [
++    'buildtype=debugoptimized',
++    'c_std=gnu99',
++    'warning_level=2',
++  ],
++  # limited by Ubuntu 20.04
++  meson_version : '>=0.53',
++)
++# Shared library version.  Follow SemVer rules, except that major 0 isn't
++# special.
++soversion = '0.4.1'
++
++conf = configuration_data()
++
++# Calculate derived versions
++version = meson.project_version()
++version_suffix = get_option('version_suffix')
++if version_suffix != ''
++  suffixed_version = '@0@-@1@'.format(version, version_suffix)
++  message('Using version string ' + suffixed_version)
++else
++  suffixed_version = version
++endif
++parts = (version + '.0.0.0').split('.')
++windows_versioninfo = '@0@,@1@,@2@,@3@'.format(
++  parts[0], parts[1], parts[2], parts[3]
++)
++conf.set_quoted('VERSION', version)
++conf.set_quoted('SUFFIXED_VERSION', suffixed_version)
++# unquoted versions
++versions = {
++  'VERSION': version,
++  'SUFFIXED_VERSION': suffixed_version,
++  'WINDOWS_VERSIONINFO': windows_versioninfo,
++}
++
++# Compiler flags
++cc = meson.get_compiler('c')
++cc_native = meson.get_compiler('c', native : true)
++add_project_arguments(
++  cc.get_supported_arguments(
++    '-Wstrict-prototypes',
++    '-Wmissing-prototypes',
++    '-Wmissing-declarations',
++    '-Wnested-externs',
++    '-fno-common',
++  ),
++  '-DG_DISABLE_SINGLE_INCLUDES',
++  '-DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_26',
++  '-DGLIB_VERSION_MAX_ALLOWED=GLIB_VERSION_MIN_REQUIRED',
++  language : 'c'
++)
++add_project_link_arguments(
++  cc.get_supported_link_arguments(
++    '-Wl,--no-undefined',
++  ),
++  language : 'c'
++)
++conf.set('HAVE_UINTPTR_T', 1)
++
++# fopen cloexec flag
++if host_machine.system() == 'windows'
++  message('Using "N" flag for close-on-exec (Windows)')
++  conf.set_quoted('FOPEN_CLOEXEC_FLAG', 'N')
++else
++  code = '''
++  #include <stdio.h>
++  #include <unistd.h>
++  #include <fcntl.h>
++
++  int main(int argc, char **argv) {
++    FILE *fp = fopen("/dev/null", "re");
++    if (fp != NULL) {
++      int fd = fileno(fp);
++      if (fd != -1) {
++        long ret = fcntl(fd, F_GETFD);
++        if (ret != -1 && (ret & FD_CLOEXEC)) {
++          return 0;
++        }
++      }
++    }
++    return 1;
++  }
++  '''
++  result = cc.run(code, name : 'check fopen() close-on-exec flag')
++  if result.compiled() and result.returncode() == 0
++    # glibc >= 2.7, FreeBSD >= 10.0, NetBSD >= 6.0
++    message('Using "e" flag for close-on-exec')
++    conf.set_quoted('FOPEN_CLOEXEC_FLAG', 'e')
++  else
++    message('Using no close-on-exec flag (unknown or cross compile)')
++    conf.set_quoted('FOPEN_CLOEXEC_FLAG', '')
++  endif
++endif
++
++# Math library, host and build
++foreach i : [[cc, 'libm_dep'], [cc_native, 'libm_native_dep']]
++  if not i[0].has_function('floor', prefix : '#include <math.h>')
++    set_variable(i[1], i[0].find_library('m'))
++  else
++    set_variable(i[1], declare_dependency())
++  endif
++endforeach
++
++# Dependencies
++zlib_dep       = dependency('zlib')
++jpeg_dep       = dependency('libjpeg')
++png_dep        = dependency('libpng', version : '>1.2')
++openjpeg_dep   = dependency('libopenjp2', version : '>=2.1.0')
++tiff_dep       = dependency('libtiff-4')
++glib_dep       = dependency('glib-2.0', version : '>=2.56')
++gio_dep        = dependency('gio-2.0')
++gobject_dep    = dependency('gobject-2.0')
++gthread_dep    = dependency('gthread-2.0')
++cairo_dep      = dependency('cairo', version : '>=1.2')
++gdk_pixbuf_dep = dependency('gdk-pixbuf-2.0', version : '>=2.14')
++xml_dep        = dependency('libxml-2.0')
++sqlite_dep     = dependency('sqlite3', version : '>=3.14')
++conf.set('HAVE_OPENJPEG2', 1)
++
++# config.h
++configure_file(
++  output : 'config.h',
++  configuration : conf,
++)
++config_h_include = include_directories('.')
++
++# Subdirs
++subdir('src')
++subdir('tools')
+diff -urN a/meson_options.txt b/meson_options.txt
+--- a/meson_options.txt	1969-12-31 19:00:00.000000000 -0500
++++ b/meson_options.txt	2023-01-13 19:21:04.223639354 -0500
+@@ -0,0 +1,12 @@
++option(
++  'version_suffix',
++  type : 'string',
++  description : 'Suffix to append to the package version string',
++)
++option(
++  'doc',
++  type : 'feature',
++  value : 'auto',
++  yield : true,
++  description : 'Unused',
++)
+diff -urN a/src/meson.build b/src/meson.build
+--- a/src/meson.build	1969-12-31 19:00:00.000000000 -0500
++++ b/src/meson.build	2023-01-13 19:30:08.308187751 -0500
+@@ -0,0 +1,109 @@
++# generate openslide-tables.c
++make_tables = executable(
++  'make-tables', 'make-tables.c',
++  dependencies : [libm_native_dep],
++  native : true,
++)
++openslide_tables_c = custom_target(
++  'make openslide-tables',
++  output : 'openslide-tables.c',
++  command : [make_tables, '@OUTPUT@'],
++)
++
++# Windows resources
++openslide_dll_manifest = configure_file(
++  input : 'openslide-dll.manifest.in',
++  output : 'openslide-dll.manifest',
++  configuration : versions,
++)
++openslide_dll_rc = configure_file(
++  input : 'openslide-dll.rc.in',
++  output : 'openslide-dll.rc',
++  configuration : versions,
++)
++if host_machine.system() == 'windows'
++  openslide_dll_o = import('windows').compile_resources(
++    openslide_dll_rc,
++    depend_files : [openslide_dll_manifest],
++  )
++else
++  openslide_dll_o = files()
++endif
++
++# Public headers
++openslide_headers = [
++  'openslide.h',
++  'openslide-features.h',
++]
++include_subdir = 'openslide'
++install_headers(
++  openslide_headers,
++  subdir : include_subdir,
++)
++
++# Library
++openslide_sources = [
++  'openslide.c',
++  'openslide-cache.c',
++  openslide_dll_o,
++  'openslide-decode-gdkpixbuf.c',
++  'openslide-decode-jp2k.c',
++  'openslide-decode-jpeg.c',
++  'openslide-decode-png.c',
++  'openslide-decode-sqlite.c',
++  'openslide-decode-tiff.c',
++  'openslide-decode-tifflike.c',
++  'openslide-decode-xml.c',
++  'openslide-error.c',
++  'openslide-grid.c',
++  'openslide-hash.c',
++  'openslide-jdatasrc.c',
++  openslide_tables_c,
++  'openslide-util.c',
++  'openslide-vendor-aperio.c',
++  'openslide-vendor-generic-tiff.c',
++  'openslide-vendor-hamamatsu.c',
++  'openslide-vendor-leica.c',
++  'openslide-vendor-mirax.c',
++  'openslide-vendor-philips.c',
++  'openslide-vendor-sakura.c',
++  'openslide-vendor-trestle.c',
++  'openslide-vendor-ventana.c',
++]
++libopenslide = library('openslide',
++  openslide_sources,
++  version : soversion,
++  c_args : ['-D_OPENSLIDE_BUILDING_DLL', '-DG_LOG_DOMAIN="Openslide"'],
++  gnu_symbol_visibility : 'hidden',
++  include_directories : config_h_include,
++  dependencies : [
++    glib_dep,
++    gio_dep,
++    gobject_dep,
++    gthread_dep,
++    gdk_pixbuf_dep,
++    cairo_dep,
++    sqlite_dep,
++    xml_dep,
++    tiff_dep,
++    openjpeg_dep,
++    jpeg_dep,
++    png_dep,
++    zlib_dep,
++    libm_dep,
++  ],
++  install : true,
++)
++openslide_dep = declare_dependency(
++  include_directories : include_directories('.'),
++  link_with : libopenslide,
++)
++import('pkgconfig').generate(
++  libopenslide,
++  description : 'A library for reading whole slide images.',
++  subdirs : include_subdir,
++  url : 'https://openslide.org',
++)
++if meson.version().version_compare('>=0.54')
++  meson.override_dependency('openslide', openslide_dep)
++endif
+diff -urN a/tools/meson.build b/tools/meson.build
+--- a/tools/meson.build	1969-12-31 19:00:00.000000000 -0500
++++ b/tools/meson.build	2023-01-13 19:32:26.852583499 -0500
+@@ -0,0 +1,27 @@
++tools_deps = [
++  openslide_dep,
++  glib_dep,
++]
++
++tools = [
++  ['openslide-quickhash1sum', tools_deps],
++  ['openslide-show-properties', tools_deps],
++  ['openslide-write-png', [tools_deps, png_dep]],
++]
++foreach t : tools
++  executable(
++    t[0],
++    t[0] + '.c',
++    'openslide-tools-common.c',
++    dependencies : t[1],
++    include_directories : config_h_include,
++    install : true,
++  )
++  install_man(
++    configure_file(
++      input : t[0] + '.1.in',
++      output : t[0] + '.1',
++      configuration : versions,
++    )
++  )
++endforeach

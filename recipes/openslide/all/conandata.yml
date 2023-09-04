@@ -1,0 +1,17 @@
+sources:
+  "3.4.1":
+    url: "https://github.com/openslide/openslide/releases/download/v3.4.1/openslide-3.4.1.tar.gz"
+    sha256: "fed08fab8a9b1ded95a34e196652291127ebe392c11f9bc13d26e760295a102d"
+patches:
+  "3.4.1":
+    - patch_file: "patches/0002-openslide-meson.patch"
+      patch_description: "backport of Meson config from Git main"
+      patch_type: "backport"
+    - patch_file: "patches/0003-fixes-for-msvc.patch"
+      patch_description: "fix resource file for msvc build"
+      patch_type: "backport"
+    - patch_file: "patches/0004-portable-attribute-constructor.patch"
+      patch_description: "portable attribute constructor"
+      patch_type: "backport"
+
+
