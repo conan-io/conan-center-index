@@ -57,7 +57,6 @@ class GLibConan(ConanFile):
         if self.settings.os == "Neutrino":
             del self.options.with_elf
 
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -79,7 +78,6 @@ class GLibConan(ConanFile):
             self.requires("libselinux/3.3")
         if self.settings.os != "Linux":
             # for Linux, gettext is provided by libc
-            self.requires("libgettext/0.22", transitive_headers=True, transitive_libs=True)
             self.requires("libgettext/0.22", transitive_headers=True, transitive_libs=True)
 
         if is_apple_os(self):
@@ -109,7 +107,6 @@ class GLibConan(ConanFile):
 
         if self.settings.os == "Neutrino":
             tc.cross_build["host"]["system"] = "qnx"
-            tc.properties["qnx_version"] = self.settings.get_safe('os.version')
             tc.c_args = ["-Wno-nonnull", "-Wno-format-nonliteral", "-Wno-unused-variable", "-Wno-unused-function", "-Wno-sign-compare", "-Wno-error=implicit-function-declaration", "-Wno-int-conversion"]
             tc.c_link_args.append("-lm")
             tc.c_link_args.append("-lsocket")
@@ -123,14 +120,6 @@ class GLibConan(ConanFile):
             "subdir('fuzzing')",
             "#subdir('fuzzing')",
         )  # https://gitlab.gnome.org/GNOME/glib/-/issues/2152
-        if Version(self.version) < "2.73.2":
-            for filename in [
-                os.path.join(self.source_folder, "meson.build"),
-                os.path.join(self.source_folder, "glib", "meson.build"),
-                os.path.join(self.source_folder, "gobject", "meson.build"),
-                os.path.join(self.source_folder, "gio", "meson.build"),
-            ]:
-                replace_in_file(self, filename, "subdir('tests')", "#subdir('tests')")
         if self.settings.os != "Linux" and self.settings.os != "Neutrino":
             # allow to find gettext
             replace_in_file(self,
@@ -222,13 +211,10 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gmodule-export-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
             self.cpp_info.components["gmodule-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
             self.cpp_info.components["glib-2.0"].system_libs.append("m")
-
-            if self.settings.os.version == "7.0":
-                self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("dl")
-                self.cpp_info.components["gio-2.0"].system_libs.append("dl")
-            elif self.settings.os.version == "7.1":
-                self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("c")
-                self.cpp_info.components["gio-2.0"].system_libs.append("c")
+            self.cpp_info.components["glib-2.0"].system_libs.append("socket")
+            self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("c")
+            self.cpp_info.components["gio-2.0"].system_libs.append("c")
+            self.cpp_info.components["gio-2.0"].system_libs.append("socket")
 
         if self.settings.os == "Windows":
             self.cpp_info.components["glib-2.0"].system_libs += ["ws2_32", "ole32", "shell32", "user32", "advapi32"]
