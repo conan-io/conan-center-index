@@ -25,7 +25,7 @@ class TracyConan(ConanFile):
         "no_callstack_inlines": ([True, False], False),
         "only_localhost": ([True, False], False),
         "no_broadcast": ([True, False], False),
-        "only_ipv": ([True, False], False),
+        "only_ipv4": ([True, False], False),
         "no_code_transfer": ([True, False], False),
         "no_context_switch": ([True, False], False),
         "no_exit": ([True, False], False),
