@@ -97,8 +97,6 @@ class Nghttp2Conan(ConanFile):
         # disable unneeded auto-picked dependencies
         tc.variables["WITH_LIBXML2"] = False
         tc.variables["WITH_JEMALLOC"] = self.options.get_safe("with_jemalloc", False)
-        if Version(self.version) < "1.47.0":
-            tc.variables["WITH_SPDYLAY"] = False
         if Version(self.version) < "1.52.0":
             tc.variables["ENABLE_ASIO_LIB"] = self.options.with_asio
         if is_apple_os(self):
