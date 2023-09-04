@@ -65,6 +65,7 @@ required_for_references:
 - aws-c-s3
 - aws-c-sdkutils
 - aws-checksums
+- aws-crt-cpp
 - aws-kvs-pic
 - aws-libfabric
 - b2
@@ -277,9 +278,11 @@ required_for_references:
 - elfio
 - embree3
 - emio
+- emsdk
 - enet
 - enhex-generic_serialization
 - enhex-strong_type
+- enkits
 - entityx
 - entt
 - enum-flags
@@ -426,6 +429,7 @@ required_for_references:
 - http_parser
 - hunspell
 - hwloc
+- hyperscan
 - icecream-cpp
 - icu
 - id3v2lib
@@ -478,6 +482,7 @@ required_for_references:
 - kainjow-mustache
 - kaitai_struct_cpp_stl_runtime
 - kangaru
+- kcp
 - kdbindings
 - keychain
 - khrplatform
@@ -581,6 +586,7 @@ required_for_references:
 - libnfnetlink
 - libnfs
 - libnghttp2
+- libnice
 - libnl
 - libnoise
 - libnop
@@ -678,6 +684,7 @@ required_for_references:
 - lz4
 - lzfse
 - lzham
+- lzip
 - lzma_sdk
 - lzo
 - m4
@@ -791,6 +798,7 @@ required_for_references:
 - objectbox
 - objectbox-generator
 - observer-ptr-lite
+- octo-logger-cpp
 - octomap
 - odbc
 - ode
@@ -916,6 +924,7 @@ required_for_references:
 - pybind11_json
 - pystring
 - qcbor
+- qdbm
 - qhull
 - qpdf
 - qpoases
