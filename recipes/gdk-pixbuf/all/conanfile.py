@@ -80,7 +80,7 @@ class GdkPixbufConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
-        if self.settings.os == "Macos" and self.settings.compiler.version < 13:
+        if self.settings.os == "Macos" and self.settings.compiler in ["clang", "apple-clang"] and Version(self.settings.compiler.version) < "13":
             # when running gdk-pixbuf-query-loaders
             # dyld: malformed mach-o: load commands size (97560) > 32768
             raise ConanInvalidConfiguration("This package does not support Macos currently")
