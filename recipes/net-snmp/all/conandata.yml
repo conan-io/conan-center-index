@@ -5,6 +5,14 @@ sources:
 patches:
   "5.9.3":
     - patch_file: patches/0001-fix-openssl-linking-msvc.patch
+      patch_type: portability
+      patch_description: fix linking to openssl in msvc
     - patch_file: patches/0004-fix-apple-arm64-build.patch
+      patch_type: portability
+      patch_description: fix apple arm64 build
     - patch_file: patches/0005-exclude_syslog.patch
+      patch_type: portability
+      patch_description: fix for including syslog.h instead of sys/syslog.h
     - patch_file: patches/0006-include_select.patch
+      patch_type: portability
+      patch_description: fix for including select.h if present
