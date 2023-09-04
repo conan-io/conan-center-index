@@ -126,6 +126,10 @@ class BotanConan(ConanFile):
         if Version(self.version) >= '2.14.0':
             del self.options.single_amalgamation
 
+        # Support for the OpenSSL provider was removed in 2.19.2
+        if Version(self.version) >= '2.19.2':
+            del self.options.with_openssl
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -133,7 +137,7 @@ class BotanConan(ConanFile):
     def requirements(self):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
-        if self.options.with_openssl:
+        if self.options.get_safe('with_openssl', False):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
@@ -354,7 +358,7 @@ class BotanConan(ConanFile):
             build_flags.append('--with-bzip2')
             build_flags.extend(self._dependency_build_flags('bzip2'))
 
-        if self.options.with_openssl:
+        if self.options.get_safe('with_openssl', False):
             build_flags.append('--with-openssl')
             build_flags.extend(self._dependency_build_flags('openssl'))
 
