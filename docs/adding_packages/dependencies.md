@@ -174,15 +174,18 @@ for consumer, we do impose some limits on Conan features to provide a smoother f
 * [`python_requires`](https://docs.conan.io/1/reference/conanfile/other.html#python-requires) are not allowed.
 
 ### Version Ranges
- 
+
 Version ranges are a useful Conan feature, [documentation here](https://docs.conan.io/2/tutorial/versioning/version_ranges.html).
 With the introduction of Conan 2.0, we are currently working to allow the use of version ranges and are allowing this for a handful of dependencies.
 Currently, these are:
 
 * OpenSSL: `[>=1.1 <4]` for libraries known to be compatible with OpenSSL 1.x and 3.x
-* CMake: `[>3.XX <4]`, where `3.XX` is the minimum version of CMake required by the relevant build scripts.
+* CMake: `[>3.XX <4]`, where `3.XX` is the minimum version of CMake required by the relevant build scripts
+* Zlib: `[>=2.X.Y <3]`, where `2.X.Y` is the minimum version of Zlib required, starting from `2.1.10`
+* Sqlite3: `[>=X.YY <9]`, where `X.YY` is the minimum version of Sqlite3 required, starting from `7.78`
 
-> **Warning**: With Conan 1.x, [version ranges](https://docs.conan.io/1/versioning/version_ranges.html) adhere to a much more strict sematic version spec, 
+
+> **Warning**: With Conan 1.x, [version ranges](https://docs.conan.io/1/versioning/version_ranges.html) adhere to a much more strict sematic version spec,
 > OpenSSL 1.1.x does not follow this so the client will not resolve to that range and will pick a 3.x version. In order to select a lower version you
 > can user the defunct `--require-override openssl/1.1.1t@` from the command line, or override from the recipe with `self.requires(openssl/1.1.1t, override=True)`
 > to ensure a lower version is picked.
