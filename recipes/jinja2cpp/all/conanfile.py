@@ -56,7 +56,7 @@ class Jinja2cppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.82.0")
+        self.requires("boost/1.83.0")
         self.requires("expected-lite/0.6.3", transitive_headers=True)
         self.requires("optional-lite/3.5.0", transitive_headers=True)
         self.requires("rapidjson/cci.20220822")
@@ -66,7 +66,7 @@ class Jinja2cppConan(ConanFile):
             self.requires("fmt/6.2.1") # not compatible with fmt >= 7.0.0
         else:
             self.requires("nlohmann_json/3.11.2")
-            self.requires("fmt/10.1.0")
+            self.requires("fmt/10.1.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
