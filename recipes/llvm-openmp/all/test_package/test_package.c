@@ -1,10 +1,12 @@
 #include <omp.h>
 
-#include <iostream>
+#include <stdio.h>
 
 int main()
 {
-    int num_threads = std::max(5, omp_get_num_procs());
+    int num_threads = omp_get_num_procs();
+    if (num_threads < 5)
+        num_threads = 5;
     omp_set_num_threads(num_threads);
     int actual_number;
     #pragma omp parallel
@@ -15,8 +17,8 @@ int main()
        }
     }
     if(actual_number != num_threads){
-        std::cout << "Something went wrong. Expecting " << num_threads << " threads but found " << actual_number << ".\n";
-        std::cout << "There are probably missing compiler flags.\n";
+        printf("Something went wrong. Expecting %d threads but found %d.\n", num_threads, actual_number);
+        printf("There are probably missing compiler flags.\n");
         return 1;
     }
     return 0;
