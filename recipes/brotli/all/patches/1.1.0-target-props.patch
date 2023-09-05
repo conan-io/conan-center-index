@@ -1,0 +1,28 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 61378cd..4de317b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -112,7 +112,6 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+   add_definitions(-DOS_FREEBSD)
+ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+   add_definitions(-DOS_MACOSX)
+-  set(CMAKE_MACOS_RPATH TRUE)
+   set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+ endif()
+ 
+@@ -171,14 +170,10 @@ endif()
+ # Build the brotli executable
+ add_executable(brotli c/tools/brotli.c)
+ target_link_libraries(brotli ${BROTLI_LIBRARIES})
++set_target_properties(brotli PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT ON)
+ 
+ # Installation
+ if(NOT BROTLI_BUNDLED_MODE)
+-  install(
+-    TARGETS brotli
+-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+-  )
+-
+   install(
+     TARGETS ${BROTLI_LIBRARIES_CORE}
+     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
