@@ -276,11 +276,14 @@ required_for_references:
 - egl-headers
 - eigen
 - elfio
+- embag
 - embree3
 - emio
+- emsdk
 - enet
 - enhex-generic_serialization
 - enhex-strong_type
+- enkits
 - entityx
 - entt
 - enum-flags
@@ -427,6 +430,7 @@ required_for_references:
 - http_parser
 - hunspell
 - hwloc
+- hyperscan
 - icecream-cpp
 - icu
 - id3v2lib
@@ -681,6 +685,7 @@ required_for_references:
 - lz4
 - lzfse
 - lzham
+- lzip
 - lzma_sdk
 - lzo
 - m4
@@ -794,6 +799,7 @@ required_for_references:
 - objectbox
 - objectbox-generator
 - observer-ptr-lite
+- octo-logger-cpp
 - octomap
 - odbc
 - ode
@@ -919,6 +925,7 @@ required_for_references:
 - pybind11_json
 - pystring
 - qcbor
+- qdbm
 - qhull
 - qpdf
 - qpoases
