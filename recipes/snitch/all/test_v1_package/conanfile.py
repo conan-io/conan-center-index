@@ -8,8 +8,8 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        tc.variables["WITH_SHORTHAND"] = self.dependencies[self.tested_reference_str].options.with_shorthand_macros
-        tc.variables["HEADER_ONLY"] = self.dependencies[self.tested_reference_str].options.header_only
+        cmake.definitions["WITH_SHORTHAND"] = self.options["snitch"].with_shorthand_macros
+        cmake.definitions["HEADER_ONLY"] = self.options["snitch"].header_only
         cmake.configure()
         cmake.build()
 
