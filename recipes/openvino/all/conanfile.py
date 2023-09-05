@@ -143,6 +143,8 @@ class OpenvinoConan(ConanFile):
         suffix = "" if Version(conan_version).major < "2" else "/*"
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        elif self._gpu_option_available:
+            self.options.rm_safe("enable_gpu")
         if self._protobuf_required:
             # static build + TF FE requires full protobuf, otherwise we can use lite version
             # TODO: how to handle it? 'protobuf/*:lite=True' is not available in ConanCenter
@@ -201,7 +203,7 @@ class OpenvinoConan(ConanFile):
         # HW plugins
         toolchain.cache_variables["ENABLE_INTEL_CPU"] = self.options.enable_cpu
         if self._gpu_option_available:
-            toolchain.cache_variables["ENABLE_INTEL_GPU"] = self.options.enable_gpu
+            toolchain.cache_variables["ENABLE_INTEL_GPU"] = self.options.get_safe("enable_gpu", False)
             toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = False # self.options.shared
         if self._gna_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GNA"] = False
