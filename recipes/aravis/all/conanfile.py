@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import can_run, cross_building
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
@@ -63,7 +63,7 @@ class AravisConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.77.2", transitive_headers=True, transitive_libs=True, run=can_run(self))
+        self.requires("glib/2.77.2", transitive_headers=True, transitive_libs=True)
         self.requires("libxml2/2.10.3")
         self.requires("zlib/1.2.13")
         if self.options.usb:
@@ -85,8 +85,7 @@ class AravisConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/1.0.0")
-        if not can_run(self):
-            self.tool_requires("glib/2.77.2")
+        self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if self.options.introspection:
