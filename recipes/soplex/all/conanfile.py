@@ -81,9 +81,9 @@ class SoPlexConan(ConanFile):
         if self.options.with_gmp:
             # transitive libs as anything using soplex requires __gmpz_init_set_si
             # see https://github.com/conan-io/conan-center-index/pull/16017#issuecomment-1495688452
-            self.requires("gmp/6.2.1", transitive_headers=True, transitive_libs=True)
+            self.requires("gmp/6.3.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_boost:
-            self.requires("boost/1.81.0", transitive_headers=True)  # also update Boost_VERSION_MACRO below!
+            self.requires("boost/1.83.0", transitive_headers=True)  # also update Boost_VERSION_MACRO below!
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -92,7 +92,7 @@ class SoPlexConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["GMP"] = self.options.with_gmp
         tc.variables["BOOST"] = self.options.with_boost
-        tc.variables["Boost_VERSION_MACRO"] = "108100"
+        tc.variables["Boost_VERSION_MACRO"] = "108300"
         if self.options.with_gmp:
             tc.cache_variables["GMP_INCLUDE_DIRS"] = ";".join(self.dependencies["gmp"].cpp_info.includedirs)
             tc.cache_variables["GMP_LIBRARIES"] = "gmp::gmp"
