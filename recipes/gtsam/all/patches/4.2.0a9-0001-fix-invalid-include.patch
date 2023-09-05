@@ -1,0 +1,12 @@
+diff --git a/gtsam/sfm/DsfTrackGenerator.h b/gtsam/sfm/DsfTrackGenerator.h
+--- a/gtsam/sfm/DsfTrackGenerator.h	(revision c57988fe554e7213c77fe379c1d7c483de26ad33)
++++ b/gtsam/sfm/DsfTrackGenerator.h	(revision 26a37d62103a9b3b828d36e8b1a76f875ed842e3)
+@@ -22,7 +22,7 @@
+ 
+ #include <Eigen/Core>
+ #include <map>
+-#include <optional>
++#include <boost/optional.hpp>
+ #include <vector>
+ 
+ namespace gtsam {

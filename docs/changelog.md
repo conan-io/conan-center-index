@@ -1,5 +1,33 @@
 # Changelog
 
+### 01-Sep-2023 - 19:58 CEST
+
+- [fix] Use Unix separators for Windows folder path when creating CI workspace
+
+### 17-Aug-2023 - 11:42 CEST
+
+- [fix] Fix type error when catching generic exceptions in Jenkins
+- [fix] Bump dependencies no longer allow version range
+- [feature] Show recipe revision on the pull-request summary table
+
+### 04-Aug-2023 - 10:26 CEST
+
+- [feature] Enable Conan 2.0.8
+- [feature] Enable Conan 1.60.2
+- [feature] Update Jenkins server version
+- [hotfix] Better error management when having CI build timeout
+
+### 19-Jul-2023 - 09:45 CEST
+
+- [fix] Fix message processing if no message is passed.
+- [fix] Fix automatic merge priority to follow the correct PR order.
+- [fix] Waiting for Conan 2.x result after building Conan 1.x.
+- [fix] Bump version should not be tagged when removing old versions.
+- [feature] Improve internal logs to get more information about epochs.
+- [feature] Add an option to disable some jobs.
+- [feature] Disable branch indexing job runs on cci multibranch job.
+- [feature] Enable Conan 2.0.8
+
 ### 04-May-2023 - 16:05 CEST
 
 - [bugfix] Fix cppstd issues when selecting the value to use in profiles.

@@ -1,10 +1,7 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup(TARGETS)
-
-find_package(cotila CONFIG REQUIRED)
+find_package(cotila REQUIRED CONFIG)
 
 add_executable(test_package test_package.cpp)
 target_compile_features(test_package PRIVATE cxx_std_17)

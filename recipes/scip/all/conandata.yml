@@ -1,0 +1,4 @@
+sources:
+  "8.0.3":
+    url: "https://github.com/scipopt/scip/archive/refs/tags/v803.tar.gz"
+    sha256: "fe7636f8165a8c9298ff55ed3220d084d4ea31ba9b69d2733beec53e0e4335d6"

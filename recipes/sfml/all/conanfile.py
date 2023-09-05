@@ -63,10 +63,11 @@ class SfmlConan(ConanFile):
             self.requires("freetype/2.13.0")
             self.requires("stb/cci.20220909")
         if self.options.audio:
-            # FIXME: use cci's minimp3
             self.requires("flac/1.4.2")
             self.requires("openal-soft/1.22.2")
             self.requires("vorbis/1.3.7")
+            if Version(self.version) >= "2.6.0":
+                self.requires("minimp3/cci.20211201")
 
     def validate(self):
         if self.settings.os not in ["Windows", "Linux", "FreeBSD", "Android", "Macos", "iOS"]:
@@ -203,6 +204,9 @@ class SfmlConan(ConanFile):
         def opengles_ios():
             return ["OpenGLES"] if self.settings.os == "iOS" else []
 
+        def objc():
+            return ["-ObjC"] if not self.options.shared and self.settings.os == "Macos" else []
+
         suffix = "" if self.options.shared else "-s"
         suffix += "-d" if self.settings.build_type == "Debug" else ""
 
@@ -235,6 +239,7 @@ class SfmlConan(ConanFile):
                     "frameworks": foundation() + appkit() + iokit() + carbon() +
                                   uikit() + coregraphics() + quartzcore() +
                                   coreservices() + coremotion() + opengles_ios(),
+                    "exelinkflags": objc(),
                 },
             })
         if self.options.graphics:
@@ -255,11 +260,14 @@ class SfmlConan(ConanFile):
                 },
             })
         if self.options.audio:
+            audio_requires = ["system", "flac::flac", "openal-soft::openal-soft", "vorbis::vorbis"]
+            if Version(self.version) >= "2.6.0":
+                audio_requires.append("minimp3::minimp3")
             sfml_components.update({
                 "audio": {
                     "target": "sfml-audio",
                     "libs": [f"sfml-audio{suffix}"],
-                    "requires": ["system", "flac::flac", "openal-soft::openal-soft", "vorbis::vorbis"],
+                    "requires": audio_requires,
                     "system_libs": android(),
                 },
             })
@@ -278,6 +286,7 @@ class SfmlConan(ConanFile):
                 requires = values.get("requires", [])
                 system_libs = values.get("system_libs", [])
                 frameworks = values.get("frameworks", [])
+                exelinkflags = values.get("exelinkflags", [])
                 # TODO: Properly model COMPONENTS names in CMakeDeps for find_package() call
                 #       (see https://github.com/conan-io/conan/issues/10258)
                 #       It should be:
@@ -291,6 +300,7 @@ class SfmlConan(ConanFile):
                 self.cpp_info.components[component].requires = requires
                 self.cpp_info.components[component].system_libs = system_libs
                 self.cpp_info.components[component].frameworks = frameworks
+                self.cpp_info.components[component].exelinkflags = exelinkflags
 
                 # TODO: to remove in conan v2 once cmake_find_package* generators removed
                 self.cpp_info.components[component].build_modules["cmake_find_package"] = [self._module_file_rel_path]

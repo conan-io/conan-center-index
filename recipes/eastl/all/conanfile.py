@@ -10,7 +10,9 @@ from conan.tools.files import (
     export_conandata_patches,
     get,
     replace_in_file,
+    rmdir,
 )
+from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
@@ -47,7 +49,8 @@ class EastlConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "14",
-            "gcc": "5",
+            "msvc": "190",
+            "gcc": "5" if Version(self.version) < "3.21.12" else "6",
             "clang": "3.2",
             "apple-clang": "4.3",
         }
@@ -77,14 +80,12 @@ class EastlConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        
+        if is_msvc(self) and check_min_vs(self, "193", raise_invalid=False) and Version(self.version) < "3.21.12":
+            raise ConanInvalidConfiguration(f"{self.ref} is not compatible with Visual Studio 2022, please use version >= 3.21.12")
 
     def source(self):
-        get(
-            self,
-            **self.conan_data["sources"][self.version],
-            destination=self.source_folder,
-            strip_root=True,
-        )
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -124,6 +125,7 @@ class EastlConan(ConanFile):
         )
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "doc"))
 
     def package_info(self):
         self.cpp_info.libs = ["EASTL"]

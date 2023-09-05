@@ -1,9 +1,16 @@
 sources:
+  "3.0.1":
+    url: "https://github.com/jrouwe/JoltPhysics/archive/refs/tags/v3.0.1.tar.gz"
+    sha256: "7ebb40bf2dddbcf0515984582aaa197ddd06e97581fd55b98cb64f91b243b8a6"
   "2.0.1":
     url: "https://github.com/jrouwe/JoltPhysics/archive/refs/tags/v2.0.1.tar.gz"
     sha256: "96ae2e8691c4802e56bf2587da30f2cc86b8abe82a78bc2398065bd87dd718af"
 patches:
+  "3.0.1":
+    - patch_file: "patches/3.0.1-0001-fix-cmake.patch"
+      patch_description: "Fix CMakeLists: no warnings as errors, allow shared, add install target, and add profile & debug_renderer options"
+      patch_type: "conan"
   "2.0.1":
-    - patch_file: "patches/0001-fix-cmake.patch"
+    - patch_file: "patches/2.0.1-0001-fix-cmake.patch"
       patch_description: "Fix CMakeLists: no warnings as errors, allow shared, add install target, and add profile & debug_renderer options"
       patch_type: "conan"
