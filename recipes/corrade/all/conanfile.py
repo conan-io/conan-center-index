@@ -5,10 +5,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.microsoft import is_msvc
-from conan.tools.microsoft.visual import check_min_vs
+from conan.tools.microsoft import is_msvc, check_min_vs
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.52.0"
 
 
 class CorradeConan(ConanFile):
@@ -193,8 +192,8 @@ class CorradeConan(ConanFile):
             self.env_info.PATH.append(bindir)
 
         # pkg_config: Add more explicit naming to generated files (avoid filesystem collision).
-        for key, cmp in self.cpp_info.components.items():
-            self.cpp_info.components[key].set_property("pkg_config_name", f"{self.name}_{key}")
+        for key, component in self.cpp_info.components.items():
+            component.set_property("pkg_config_name", f"{self.name}_{key}")
 
         self.cpp_info.names["cmake_find_package"] = "Corrade"
         self.cpp_info.names["cmake_find_package_multi"] = "Corrade"
