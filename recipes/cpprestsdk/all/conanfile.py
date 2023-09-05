@@ -57,7 +57,7 @@ class CppRestSDKConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0")
+        self.requires("boost/1.83.0")
         self.requires("openssl/[>=1.1 <4]")
         if self.options.with_compression:
             self.requires("zlib/1.2.13")
