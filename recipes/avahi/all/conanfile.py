@@ -1,7 +1,8 @@
 import os
 
 from conan import ConanFile
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.build import can_run
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -53,7 +54,7 @@ class AvahiConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux.")
 
     def build_requirements(self):
-        self.tool_requires("glib/2.77.1")
+        self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.5")
 
@@ -63,6 +64,8 @@ class AvahiConan(ConanFile):
     def generate(self):
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
+        if can_run(self):
+            VirtualRunEnv(self).generate(scope="build")
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--enable-compat-libdns_sd")
         tc.configure_args.append("--disable-gtk3")
