@@ -36,6 +36,7 @@ required_for_references:
 - args-parser
 - argtable2
 - argtable3
+- arrow
 - arsenalgear
 - artery-font-format
 - asio
@@ -61,8 +62,10 @@ required_for_references:
 - aws-c-http
 - aws-c-io
 - aws-c-mqtt
+- aws-c-s3
 - aws-c-sdkutils
 - aws-checksums
+- aws-crt-cpp
 - aws-kvs-pic
 - aws-libfabric
 - b2
@@ -96,6 +99,7 @@ required_for_references:
 - boost
 - boost-ext-ut
 - boost-leaf
+- boostdep
 - box2d
 - breakpad
 - brigand
@@ -240,6 +244,7 @@ required_for_references:
 - dirent
 - discount
 - djinni-generator
+- dlib
 - dlpack
 - docopt.cpp
 - doctest
@@ -254,6 +259,7 @@ required_for_references:
 - drwav
 - dtl
 - duckdb
+- duktape
 - eabase
 - earcut
 - eastl
@@ -270,11 +276,14 @@ required_for_references:
 - egl-headers
 - eigen
 - elfio
+- embag
 - embree3
 - emio
+- emsdk
 - enet
 - enhex-generic_serialization
 - enhex-strong_type
+- enkits
 - entityx
 - entt
 - enum-flags
@@ -312,6 +321,7 @@ required_for_references:
 - flatbush
 - flecs
 - flex
+- fltk
 - fmt
 - fmtlog
 - fontconfig
@@ -401,6 +411,7 @@ required_for_references:
 - harfbuzz
 - hash-library
 - hazelcast-cpp-client
+- hdf4
 - hdf5
 - hdrhistogram-c
 - heatshrink
@@ -419,6 +430,7 @@ required_for_references:
 - http_parser
 - hunspell
 - hwloc
+- hyperscan
 - icecream-cpp
 - icu
 - id3v2lib
@@ -443,6 +455,7 @@ required_for_references:
 - iqa
 - irrxml
 - iso8601lib
+- itk
 - itlib
 - ittapi
 - ixwebsocket
@@ -470,6 +483,7 @@ required_for_references:
 - kainjow-mustache
 - kaitai_struct_cpp_stl_runtime
 - kangaru
+- kcp
 - kdbindings
 - keychain
 - khrplatform
@@ -573,6 +587,7 @@ required_for_references:
 - libnfnetlink
 - libnfs
 - libnghttp2
+- libnice
 - libnl
 - libnoise
 - libnop
@@ -637,6 +652,7 @@ required_for_references:
 - libx264
 - libx265
 - libxcrypt
+- libxft
 - libxls
 - libxlsxwriter
 - libxml2
@@ -669,6 +685,7 @@ required_for_references:
 - lz4
 - lzfse
 - lzham
+- lzip
 - lzma_sdk
 - lzo
 - m4
@@ -758,6 +775,7 @@ required_for_references:
 - neargye-semver
 - netcdf
 - nettle
+- newmat
 - nextsilicon-cpp-subprocess
 - nfrechette-acl
 - ninja
@@ -781,12 +799,14 @@ required_for_references:
 - objectbox
 - objectbox-generator
 - observer-ptr-lite
+- octo-logger-cpp
 - octomap
 - odbc
 - ode
 - ogdf
 - ogg
 - ois
+- onedpl
 - onetbb
 - oniguruma
 - onnx
@@ -815,8 +835,10 @@ required_for_references:
 - openjpeg
 - openmesh
 - openmvg
+- openpam
 - openssl
 - opensubdiv
+- opentdf-client
 - opentelemetry-cpp
 - opentelemetry-proto
 - opentracing-cpp
@@ -839,6 +861,7 @@ required_for_references:
 - pbtools
 - pcapplusplus
 - pcg-cpp
+- pcl
 - pcre
 - pcre2
 - pdfgen
@@ -854,6 +877,7 @@ required_for_references:
 - picobench
 - picojson
 - picosha2
+- pipes
 - pixman
 - pkgconf
 - platform.delegates
@@ -901,6 +925,7 @@ required_for_references:
 - pybind11_json
 - pystring
 - qcbor
+- qdbm
 - qhull
 - qpdf
 - qpoases
@@ -934,6 +959,7 @@ required_for_references:
 - readosm
 - recastnavigation
 - reckless
+- rectanglebinpack
 - rectpack2d
 - redis-plus-plus
 - refl-cpp
@@ -946,7 +972,9 @@ required_for_references:
 - rmm
 - roaring
 - robin-hood-hashing
+- rpclib
 - rply
+- rsync
 - rtklib
 - rtm
 - rtmidi
@@ -996,6 +1024,7 @@ required_for_references:
 - sml
 - snappy
 - snowhouse
+- sobjectizer
 - soci
 - sofa
 - sokol
