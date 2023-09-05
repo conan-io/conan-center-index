@@ -276,6 +276,7 @@ required_for_references:
 - egl-headers
 - eigen
 - elfio
+- embag
 - embree3
 - emio
 - emsdk
