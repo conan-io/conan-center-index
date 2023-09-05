@@ -58,7 +58,7 @@ class QwtConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/5.15.9")
+        self.requires("qt/5.15.9", transitive_headers=True)
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self):
