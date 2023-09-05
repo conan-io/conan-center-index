@@ -14,6 +14,7 @@ class ObjectboxCConan(ConanFile):
     homepage = "https://github.com/objectbox/objectbox-c"
     topics = ("performance", "database", "flatbuffers")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "shared-library"
     options = {
         "with_sync": [True, False],
     }
