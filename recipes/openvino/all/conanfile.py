@@ -7,6 +7,7 @@ from conan.tools.files import get, rmdir
 import os
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.8"
+local_build = False
 
 class OpenvinoConan(ConanFile):
     name = "openvino"
@@ -121,16 +122,16 @@ class OpenvinoConan(ConanFile):
         }
 
     def source(self):
-        # pass
-        get(self, **self.conan_data["sources"][self.version]["openvino"], strip_root=True)
-        get(self, **self.conan_data["sources"][self.version]["onednn_cpu"], strip_root=True,
-            destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/onednn")
-        get(self, **self.conan_data["sources"][self.version]["mlas"], strip_root=True,
-            destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/mlas")
-        get(self, **self.conan_data["sources"][self.version]["arm_compute"], strip_root=True,
-            destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/ComputeLibrary")
-        get(self, **self.conan_data["sources"][self.version]["onednn_gpu"], strip_root=True,
-            destination=f"{self.source_folder}/src/plugins/intel_gpu/thirdparty/onednn_gpu")
+        if not local_build:
+            get(self, **self.conan_data["sources"][self.version]["openvino"], strip_root=True)
+            get(self, **self.conan_data["sources"][self.version]["onednn_cpu"], strip_root=True,
+                destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/onednn")
+            get(self, **self.conan_data["sources"][self.version]["mlas"], strip_root=True,
+                destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/mlas")
+            get(self, **self.conan_data["sources"][self.version]["arm_compute"], strip_root=True,
+                destination=f"{self.source_folder}/src/plugins/intel_cpu/thirdparty/ComputeLibrary")
+            get(self, **self.conan_data["sources"][self.version]["onednn_gpu"], strip_root=True,
+                destination=f"{self.source_folder}/src/plugins/intel_gpu/thirdparty/onednn_gpu")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -186,9 +187,11 @@ class OpenvinoConan(ConanFile):
             self.requires("ade/0.1.2a")
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
-        # cmake_layout(self, src_folder="/openvino",
-        #                    build_folder="/openvino-release-conan")
+        if local_build:
+            cmake_layout(self, src_folder="/Users/sandye51/Documents/Programming/git_repo/openvino",
+                               build_folder="/Users/sandye51/Documents/Programming/builds/openvino-release-conan")
+        else:
+            cmake_layout(self, src_folder="src")
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -238,8 +241,9 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_SAMPLES"] = False
         toolchain.cache_variables["ENABLE_TEMPLATE"] = False
         toolchain.cache_variables["CMAKE_VERBOSE_MAKEFILE"] = True
-        # toolchain.cache_variables["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
-        # toolchain.cache_variables["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
+        if local_build:
+            toolchain.cache_variables["CMAKE_CXX_COMPILER_LAUNCHER"] = "ccache"
+            toolchain.cache_variables["CMAKE_C_COMPILER_LAUNCHER"] = "ccache"
         toolchain.generate()
 
     def validate(self):
@@ -260,7 +264,7 @@ class OpenvinoConan(ConanFile):
         if self.settings.os == "Emscripten":
             raise ConanInvalidConfiguration(f"{self.ref} does not support Emscripten")
 
-        if self.settings.build_type == "Debug":
+        if self.settings.build_type == "Debug" and not local_build:
             raise ConanInvalidConfiguration(f"{self.ref} does not support Debug build type")
 
         # GPU does not support oneDNN in static build configuration, warn about it
