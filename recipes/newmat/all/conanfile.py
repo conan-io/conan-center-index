@@ -26,7 +26,7 @@ class NewmatConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_c_subscripts": False,
+        "with_c_subscripts": True,
     }
 
     def export_sources(self):
