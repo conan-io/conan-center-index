@@ -13,7 +13,7 @@ required_conan_version = ">=1.53.0"
 class ImaglConan(ConanFile):
     name = "imagl"
     license = "LGPL-3.0-only"
-    homepage = "https://gitlab-lepuy.iut.uca.fr/opengl/imagl"
+    homepage = "https://github.com/Woazim/imaGL"
     url = "https://github.com/conan-io/conan-center-index"
     description = "A lightweight library to load image for OpenGL application."
     topics = ("opengl", "texture", "image")
