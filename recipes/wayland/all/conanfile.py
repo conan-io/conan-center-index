@@ -84,8 +84,8 @@ class WaylandConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["libdir"] = "lib"
         tc.project_options["datadir"] = "res"
-        tc.project_options["libraries"] = self.options.enable_libraries
-        tc.project_options["dtd_validation"] = self.options.enable_dtd_validation
+        tc.project_options["libraries"] = bool(self.options.enable_libraries)
+        tc.project_options["dtd_validation"] = bool(self.options.enable_dtd_validation)
         tc.project_options["documentation"] = False
         if cross_building(self):
             tc.project_options["build.pkg_config_path"] = self.generators_folder
