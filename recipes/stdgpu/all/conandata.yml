@@ -1,22 +1,7 @@
 sources:
-  "cci.20230507":
-    url: "https://github.com/stotko/stdgpu/archive/32e05173d82a1a4f28bb7d9d59b17b122f315dd8.zip"
-    sha256: "ff3a79b045a98882edde5bc5bd19674db1465cee8ed357df9a6b9e52f9395861"
+  "cci.20230903":
+    url: "https://github.com/stotko/stdgpu/archive/50530de7ebcff49c49955c445f06d376cc6cae4c.zip"
+    sha256: "a72689274149d31b3a40ea3bbc259a22c85fcb7f3f768e863671d81546a795a7"
   "1.3.0":
     url: "https://github.com/stotko/stdgpu/archive/refs/tags/1.3.0.tar.gz"
     sha256: "c527dabc6735d8b320b316e9a5b120d258d49c2b7ff9689c8a9b5ad474532a05"
-patches:
-  "cci.20230507":
-    - patch_file: "patches/cci.20230507-use-thrust-from-conan.patch"
-      patch_description: "Use Thrust from Conan"
-      patch_type: "conan"
-    - patch_file: "patches/cci.20230507-unset-thrust-define.patch"
-      patch_description: "Fix repeated application of THRUST_DEVICE_SYSTEM define"
-      patch_type: "conan"
-  "1.3.0":
-    - patch_file: "patches/1.3.0-use-thrust-from-conan.patch"
-      patch_description: "Use Thrust from Conan"
-      patch_type: "conan"
-    - patch_file: "patches/1.3.0-unset-thrust-define.patch"
-      patch_description: "Fix repeated application of THRUST_DEVICE_SYSTEM define"
-      patch_type: "conan"

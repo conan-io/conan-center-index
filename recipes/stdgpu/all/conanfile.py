@@ -6,7 +6,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -70,9 +70,6 @@ class StdgpuConan(ConanFile):
                 "msvc": "192",
                 "Visual Studio": "16",
             }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -149,10 +146,18 @@ class StdgpuConan(ConanFile):
         tc.preprocessor_definitions["THRUST_IGNORE_CUB_VERSION_CHECK"] = "1"
         tc.generate()
         deps = CMakeDeps(self)
+        # FIXME: should be set by the thrust recipe instead
+        deps.set_property("thrust", "cmake_find_mode", "both")
         deps.generate()
 
+    def _patch_sources(self):
+        for backend in ["cuda", "openmp"]:
+            # Fix repeated application of THRUST_DEVICE_SYSTEM define
+            replace_in_file(self, os.path.join(self.source_folder, "src", "stdgpu", backend, "CMakeLists.txt"),
+                            "THRUST_DEVICE_SYSTEM=", ") # THRUST_DEVICE_SYSTEM=")
+
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
