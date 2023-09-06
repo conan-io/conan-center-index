@@ -16,13 +16,13 @@ int test_available_devices() {
     ov_core_t* core = NULL;
     char* ret = NULL;
     OV_SUCCESS(ov_core_create(&core));
-// #ifdef ENABLE_INTEL_CPU
-//     OV_SUCCESS(ov_core_get_property(core, "CPU", "AVAILABLE_DEVICES", &ret));
-//     std::cout << "CPU has passed with SUCCESS" << std::endl;
-// #else
-//     OV_FAIL(ov_core_get_property(core, "CPU", "AVAILABLE_DEVICES", &ret));
-//     std::cout << "CPU has passed with FAIL" << std::endl;
-// #endif
+#ifdef ENABLE_INTEL_CPU
+    OV_SUCCESS(ov_core_get_property(core, "CPU", "AVAILABLE_DEVICES", &ret));
+    std::cout << "CPU has passed with SUCCESS" << std::endl;
+#else
+    OV_FAIL(ov_core_get_property(core, "CPU", "AVAILABLE_DEVICES", &ret));
+    std::cout << "CPU has passed with FAIL" << std::endl;
+#endif
 // #ifdef ENABLE_INTEL_GPU
 //     OV_SUCCESS(ov_core_get_property(core, "GPU", "AVAILABLE_DEVICES", &ret));
 //     std::cout << "GPU has passed with SUCCESS" << std::endl;
