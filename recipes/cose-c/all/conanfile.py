@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import collect_libs, copy, get, rmdir, rename, replace_in_file
 
@@ -35,11 +36,13 @@ class CoseCConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
 
     def requirements(self):
         self.requires("cn-cbor/1.0.0", transitive_headers=True)
@@ -54,14 +57,14 @@ class CoseCConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        tc.variables["COSE_C_COVERALLS"] = False
-        tc.variables["COSE_C_BUILD_TESTS"] = False
-        tc.variables["COSE_C_BUILD_DOCS"] = False
-        tc.variables["COSE_C_BUILD_DUMPER"] = False
-        tc.variables["COSE_C_USE_MBEDTLS"] = self.options.with_ssl == "mbedtls"
-        tc.variables["COSE_C_USE_FIND_PACKAGE"] = True
-        tc.variables["COSE_C_EXPORT_TARGETS"] = True
+        tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.cache_variables["COSE_C_COVERALLS"] = False
+        tc.cache_variables["COSE_C_BUILD_TESTS"] = False
+        tc.cache_variables["COSE_C_BUILD_DOCS"] = False
+        tc.cache_variables["COSE_C_BUILD_DUMPER"] = False
+        tc.cache_variables["COSE_C_USE_MBEDTLS"] = self.options.with_ssl == "mbedtls"
+        tc.cache_variables["COSE_C_USE_FIND_PACKAGE"] = True
+        tc.cache_variables["COSE_C_EXPORT_TARGETS"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("openssl", "cmake_file_name", "OPENSSL")
