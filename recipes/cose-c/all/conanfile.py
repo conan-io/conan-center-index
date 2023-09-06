@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir, rename
+from conan.tools.files import collect_libs, copy, get, rmdir, rename, replace_in_file
 
 required_conan_version = ">=1.53.0"
 
@@ -27,9 +27,6 @@ class CoseCConan(ConanFile):
         "fPIC": True,
         "with_ssl": "openssl",
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -66,18 +63,26 @@ class CoseCConan(ConanFile):
         tc.variables["COSE_C_USE_FIND_PACKAGE"] = True
         tc.variables["COSE_C_EXPORT_TARGETS"] = True
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("openssl", "cmake_file_name", "OPENSSL")
+        deps.set_property("mbedtls", "cmake_target_name", "mbedtls")
+        deps.generate()
 
-        tc = CMakeDeps(self)
-        tc.generate()
+    def _patch_sources(self):
+        # For ${OPENSSL_LIBRARIES} and ${OPENSSL_INCLUDE_DIR}
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "OpenSSL", "OPENSSL")
 
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
