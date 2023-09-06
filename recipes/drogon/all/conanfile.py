@@ -57,6 +57,8 @@ class DrogonConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.8.4":
+            del self.options.with_yaml_cpp
 
     def configure(self):
         if self.options.shared:
@@ -128,8 +130,8 @@ class DrogonConan(ConanFile):
             self.requires("sqlite3/3.42.0")
         if self.options.get_safe("with_redis"):
             self.requires("hiredis/1.2.0")
-        if self.options.with_yaml_cpp:
-            self.requires("yaml-cpp/0.7.0")
+        if self.options.get_safe("with_yaml_cpp", False):
+            self.requires("yaml-cpp/0.8.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -146,7 +148,7 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_DROGON_SHARED"] = self.options.shared
         tc.variables["BUILD_DOC"] = False
         tc.variables["BUILD_BROTLI"] = self.options.with_brotli
-        tc.variables["BUILD_YAML_CONFIG"] = self.options.with_yaml_cpp
+        tc.variables["BUILD_YAML_CONFIG"] = self.options.get_safe("with_yaml_cpp", False)
         tc.variables["BUILD_POSTGRESQL"] = self.options.get_safe("with_postgres", False)
         tc.variables["BUILD_POSTGRESQL_BATCH"] = self.options.get_safe("with_postgres_batch", False)
         tc.variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)
