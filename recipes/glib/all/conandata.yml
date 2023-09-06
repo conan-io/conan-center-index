@@ -1,4 +1,16 @@
 sources:
+  "2.77.3":
+    url: "https://download.gnome.org/sources/glib/2.77/glib-2.77.3.tar.xz"
+    sha256: "1753f963bb680b28a83d6e2095f63d0d4b94244675bcd2603850b2ebc1ac6a61"
+  "2.77.2":
+    url: "https://download.gnome.org/sources/glib/2.77/glib-2.77.2.tar.xz"
+    sha256: "16279739e4d30ec47be3e82909f5aeaaa41a8206bae3bead10a23fb2deff02a6"
+  "2.77.1":
+    url: "https://download.gnome.org/sources/glib/2.77/glib-2.77.1.tar.xz"
+    sha256: "dce8d0c9e916d8c81a64436bd4ee4d6515a52dd3d157c994e1cdb9b3d6300a03"
+  "2.77.0":
+    url: "https://download.gnome.org/sources/glib/2.77/glib-2.77.0.tar.xz"
+    sha256: "1897fd8ad4ebb523c32fabe7508c3b0b039c089661ae1e7917df0956a320ac4d"
   "2.76.3":
     url: "https://download.gnome.org/sources/glib/2.76/glib-2.76.3.tar.xz"
     sha256: "c0be444e403d7c3184d1f394f89f0b644710b5e9331b54fa4e8b5037813ad32a"

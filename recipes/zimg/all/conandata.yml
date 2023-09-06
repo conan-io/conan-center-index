@@ -1,4 +1,7 @@
 sources:
+  "3.0.5":
+    url: "https://github.com/sekrit-twc/zimg/archive/refs/tags/release-3.0.5.tar.gz"
+    sha256: "a9a0226bf85e0d83c41a8ebe4e3e690e1348682f6a2a7838f1b8cbff1b799bcf"
   "3.0.4":
     url: "https://github.com/sekrit-twc/zimg/archive/refs/tags/release-3.0.4.tar.gz"
     sha256: "219d1bc6b7fde1355d72c9b406ebd730a4aed9c21da779660f0a4c851243e32f"
@@ -15,6 +18,9 @@ sources:
     url: "https://github.com/sekrit-twc/zimg/archive/release-2.9.3.tar.gz"
     sha256: "a15c0483fbe945ffe695a1a989bc43b3381c8bf33e2d1760464ec21d32cdf30b"
 patches:
+  "3.0.5":
+    - patch_file: "patches/0001-msvc-remove-windows-target-platform.patch"
+    - patch_file: "patches/0002-msvc-solution.patch"
   "3.0.4":
     - patch_file: "patches/0001-msvc-remove-windows-target-platform.patch"
     - patch_file: "patches/0002-msvc-solution.patch"

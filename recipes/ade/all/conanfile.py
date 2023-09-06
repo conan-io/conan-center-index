@@ -16,6 +16,7 @@ class AdeConan(ConanFile):
     description = "Graph construction, manipulation, and processing framework"
     topics = ("graphs", "opencv")
 
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],

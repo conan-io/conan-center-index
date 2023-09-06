@@ -12,19 +12,21 @@ required_conan_version = ">=1.53.0"
 class LibcoroConan(ConanFile):
     name = "libcoro"
     description = "C++20 coroutine library"
-    homepage = "https://github.com/jbaldwin/libcoro"
     topics = ("coroutines", "concurrency", "tasks", "executors", "networking")
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/jbaldwin/libcoro"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_networking": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_networking": True,
     }
 
     @property
@@ -43,6 +45,8 @@ class LibcoroConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "0.8":
+            del self.options.with_networking
 
     def configure(self):
         if self.options.shared:
@@ -52,8 +56,8 @@ class LibcoroConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/3.1.0", transitive_headers=True)
-        self.requires("c-ares/1.19.0", transitive_headers=True)
+        self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
+        self.requires("c-ares/1.19.1", transitive_headers=True)
         self.requires("tl-expected/1.1.0", transitive_headers=True)
 
     def validate(self):
@@ -77,6 +81,9 @@ class LibcoroConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["LIBCORO_BUILD_TESTS"] = False
         tc.variables["LIBCORO_BUILD_EXAMPLES"] = False
+        if Version(self.version) >= "0.8":
+            tc.variables["LIBCORO_EXTERNAL_DEPENDENCIES"] = True
+            tc.variables["LIBCORO_FEATURE_NETWORKING"] = self.options.with_networking
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -96,6 +103,9 @@ class LibcoroConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libcoro")
         self.cpp_info.set_property("cmake_target_name", "libcoro::libcoro")
-        self.cpp_info.libs = ["libcoro"]
+        if Version(self.version) >= "0.8":
+            self.cpp_info.libs = ["coro"]
+        else:
+            self.cpp_info.libs = ["libcoro"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
