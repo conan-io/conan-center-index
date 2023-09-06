@@ -668,6 +668,7 @@ required_for_references:
 - linux-syscall-support
 - litehtml
 - llhttp
+- llvm-openmp
 - lmdb
 - lodepng
 - log.c
@@ -1115,6 +1116,7 @@ required_for_references:
 - type_safe
 - tz
 - ua-nodeset
+- uchardet
 - uni-algo
 - unicorn
 - unity
