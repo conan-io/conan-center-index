@@ -85,28 +85,27 @@ int test_available_frontends() {
 #else
     OV_FAIL(frontend_found("pytorch"));
 #endif
-// Currently, commented because of dynamic protobuf usage, which is invalid
-// #ifdef ENABLE_ONNX_FRONTEND
-//     OV_SUCCESS(frontend_found("onnx"));
-// #else
-//     OV_FAIL(frontend_found("onnx"));
-// #endif
-// #ifdef ENABLE_TF_FRONTEND
-//     OV_SUCCESS(frontend_found("tf"));
-// #else
-//     OV_FAIL(frontend_found("tf"));
-// #endif
-// #ifdef ENABLE_PADDLE_FRONTEND
-//     OV_SUCCESS(frontend_found("paddle"));
-// #else
-//     OV_FAIL(frontend_found("paddle"));
-// #endif
+#ifdef ENABLE_ONNX_FRONTEND
+    OV_SUCCESS(frontend_found("onnx"));
+#else
+    OV_FAIL(frontend_found("onnx"));
+#endif
+#ifdef ENABLE_TF_FRONTEND
+    OV_SUCCESS(frontend_found("tf"));
+#else
+    OV_FAIL(frontend_found("tf"));
+#endif
+#ifdef ENABLE_PADDLE_FRONTEND
+    OV_SUCCESS(frontend_found("paddle"));
+#else
+    OV_FAIL(frontend_found("paddle"));
+#endif
     return 0;
 }
 
 int main() {
     OV_SUCCESS(test_available_devices());
-    // OV_SUCCESS(test_available_frontends());
+    OV_SUCCESS(test_available_frontends());
 
     return 0;
 }
