@@ -6,6 +6,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -149,10 +150,12 @@ class StdgpuConan(ConanFile):
         # FIXME: should be set by the thrust recipe instead
         deps.set_property("thrust", "cmake_find_mode", "both")
         deps.generate()
+        env = VirtualBuildEnv(self)
+        env.generate()
 
     def _patch_sources(self):
+        # Fix repeated application of the THRUST_DEVICE_SYSTEM define
         for backend in ["cuda", "openmp"]:
-            # Fix repeated application of THRUST_DEVICE_SYSTEM define
             replace_in_file(self, os.path.join(self.source_folder, "src", "stdgpu", backend, "CMakeLists.txt"),
                             "THRUST_DEVICE_SYSTEM=", ") # THRUST_DEVICE_SYSTEM=")
 
