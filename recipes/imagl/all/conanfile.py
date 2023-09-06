@@ -76,11 +76,14 @@ class ImaglConan(ConanFile):
         if not is_msvc(self):
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
 
         # INFO: Special check for clang that can only be linked to libc++
         if self.settings.compiler == "clang" and self.settings.get_safe("compiler.libcxx") != "libc++":
-            raise ConanInvalidConfiguration(f"{self.ref} requires some C++{self._min_cppstd} features, which are available in libc++ for clang compiler yet.")
+            raise ConanInvalidConfiguration("imagl requires some C++20 features, which are available in libc++ for clang compiler.")
+
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
