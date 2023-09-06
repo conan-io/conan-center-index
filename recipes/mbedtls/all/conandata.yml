@@ -20,3 +20,6 @@ sources:
   "2.23.0":
     url: "https://github.com/Mbed-TLS/mbedtls/archive/mbedtls-2.23.0.tar.gz"
     sha256: "5c8998217402aa1fc734f4afaeac38fad2421470fac4b3abc112bd46391054fe"
+  "2.16.12":
+    url: "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/mbedtls-2.16.12.tar.gz"
+    sha256: "0afb4a4ce5b771f2fb86daee786362fbe48285f05b73cd205f46a224ec031783"
