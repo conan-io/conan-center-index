@@ -18,5 +18,5 @@ sources:
 patches:
   "0.6.5":
     - patch_file: "patches/0.6.5-0001-fix-for-gcc13.patch"
-      patch_type: "conan"
+      patch_type: "portability"
       patch_description: "Extra header required for gcc13"
