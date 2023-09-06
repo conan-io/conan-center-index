@@ -229,6 +229,8 @@ class OpenvinoConan(ConanFile):
             toolchain.cache_variables["ENABLE_SYSTEM_SNAPPY"] = True
         if self.options.enable_tf_lite_frontend:
             toolchain.cache_variables["ENABLE_SYSTEM_FLATBUFFERS"] = True
+        if self.options.get_safe("enable_gpu"):
+            toolchain.cache_variables["ENABLE_SYSTEM_OPENCL"] = True
         # misc
         if self._preprocessing_available:
             toolchain.cache_variables["ENABLE_GAPI_PREPROCESSING"] = True

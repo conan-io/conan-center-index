@@ -105,7 +105,7 @@ int test_available_frontends() {
 }
 
 int main() {
-    // OV_SUCCESS(test_available_devices());
+    OV_SUCCESS(test_available_devices());
     // OV_SUCCESS(test_available_frontends());
 
     return 0;
