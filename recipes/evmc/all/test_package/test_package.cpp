@@ -1,3 +1,6 @@
+#include <iostream>
+#include <cstdlib>
+
 #include <evmc/evmc.h>
 #include <evmc/evmc.hpp>
 #include <evmc/filter_iterator.hpp>
@@ -8,6 +11,9 @@
 #include <evmc/mocked_host.hpp>
 #include <evmc/utils.h>
 
-int main(int argc, char **) {
-    return 0;
+int main() {
+    const auto table = evmc_get_instruction_names_table(EVMC_BYZANTIUM);
+    std::cout << "HEX 0x80: " << evmc::hex(0x80) << std::endl;
+
+    return EXIT_SUCCESS;
 }
