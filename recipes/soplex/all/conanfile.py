@@ -77,13 +77,14 @@ class SoPlexConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("zlib/1.2.13", transitive_headers=True)
         if self.options.with_gmp:
             # transitive libs as anything using soplex requires __gmpz_init_set_si
             # see https://github.com/conan-io/conan-center-index/pull/16017#issuecomment-1495688452
             self.requires("gmp/6.3.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_boost:
             self.requires("boost/1.83.0", transitive_headers=True)  # also update Boost_VERSION_MACRO below!
+        else:
+            self.requires("zlib/1.3", transitive_headers=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
