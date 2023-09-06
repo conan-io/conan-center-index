@@ -477,16 +477,16 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["core"].set_property("cmake_target_name", "AWS::aws-sdk-cpp-core")
         self.cpp_info.components["core"].set_property("pkg_config_name", "aws-sdk-cpp-core")
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
-        self.cpp_info.components["core"].requires = ["aws-c-common::aws-c-common-lib"]
+        self.cpp_info.components["core"].requires = ["aws-c-common::aws-c-common"]
         if self._use_aws_crt_cpp:
             self.cpp_info.components["core"].requires.extend([
-                "aws-c-cal::aws-c-cal-lib",
-                "aws-c-http::aws-c-http-lib",
-                "aws-c-io::aws-c-io-lib",
-                "aws-crt-cpp::aws-crt-cpp-lib",
+                "aws-c-cal::aws-c-cal",
+                "aws-c-http::aws-c-http",
+                "aws-c-io::aws-c-io",
+                "aws-crt-cpp::aws-crt-cpp",
             ])
         else:
-            self.cpp_info.components["core"].requires.append("aws-c-event-stream::aws-c-event-stream-lib")
+            self.cpp_info.components["core"].requires.append("aws-c-event-stream::aws-c-event-stream")
 
         # other components
         enabled_sdks = [sdk for sdk in self._sdks if self.options.get_safe(sdk)]
