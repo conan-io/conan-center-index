@@ -19,6 +19,7 @@ class SoPlexConan(ConanFile):
     homepage = "https://soplex.zib.de"
     topics = ("simplex", "solver", "linear", "programming")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
