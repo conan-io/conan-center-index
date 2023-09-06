@@ -48,7 +48,7 @@ class CoseCConan(ConanFile):
         self.requires("cn-cbor/1.0.0", transitive_headers=True)
 
         if self.options.with_ssl == "mbedtls":
-            self.requires("mbedtls/2.25.0", transitive_headers=True)
+            self.requires("mbedtls/2.16.12", transitive_headers=True)
         else:
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
 
