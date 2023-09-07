@@ -29,7 +29,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            for variant in ["basic", "openmp", "cuda"]:
+            for variant in ["basic", "openmp", "cuda", "hip"]:
                 bin_path = os.path.join(self.cpp.build.bindir, f"test_package_{variant}")
                 if os.path.exists(bin_path):
                     self.run(bin_path, env="conanrun")
