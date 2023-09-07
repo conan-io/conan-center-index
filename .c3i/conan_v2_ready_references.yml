@@ -68,6 +68,7 @@ required_for_references:
 - aws-crt-cpp
 - aws-kvs-pic
 - aws-libfabric
+- aws-sdk-cpp
 - b2
 - b64
 - backport-cpp
@@ -511,6 +512,7 @@ required_for_references:
 - libatomic_ops
 - libattr
 - libavif
+- libb2
 - libbacktrace
 - libbigwig
 - libbsd
@@ -1107,8 +1109,10 @@ required_for_references:
 - tllist
 - tlx
 - toml11
+- tracy
 - trantor
 - tree-sitter
+- tree-sitter-c
 - troldal-zippy
 - trompeloeil
 - tsl-hopscotch-map
