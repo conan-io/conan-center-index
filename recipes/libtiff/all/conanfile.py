@@ -73,7 +73,7 @@ class LibtiffConan(ConanFile):
         elif self.options.jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.0")
         elif self.options.jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.1")
+            self.requires("mozjpeg/4.1.3")
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.zstd:
