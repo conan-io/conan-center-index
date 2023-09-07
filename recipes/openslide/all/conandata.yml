@@ -13,5 +13,3 @@ patches:
     - patch_file: "patches/0004-portable-attribute-constructor.patch"
       patch_description: "portable attribute constructor"
       patch_type: "backport"
-
-

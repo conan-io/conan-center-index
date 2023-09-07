@@ -16,7 +16,6 @@ required_conan_version = ">=1.53.0"
 
 class PackageConan(ConanFile):
     name = "openslide"
-    version = "3.4.1"
     description = "OpenSlide is a C library for reading whole slide image files (also known as virtual slides)."
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
