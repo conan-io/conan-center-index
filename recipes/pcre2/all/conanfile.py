@@ -65,7 +65,7 @@ class PCRE2Conan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.10 <2]")
         if self.options.get_safe("with_bzip2"):
             self.requires("bzip2/1.0.8")
 
