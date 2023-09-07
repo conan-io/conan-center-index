@@ -28,5 +28,8 @@ if (STDGPU_BACKEND STREQUAL "openmp")
     target_link_libraries(${PROJECT_NAME}_openmp stdgpu::stdgpu)
 endif()
 
-add_executable(${PROJECT_NAME}_basic test_package_basic.cpp)
-target_link_libraries(${PROJECT_NAME}_basic stdgpu::stdgpu)
+if (NOT stdgpu_VERSION_STRING STREQUAL "1.3.0")
+    # v1.3.0 does not have stdgpu/device.h
+    add_executable(${PROJECT_NAME}_basic test_package_basic.cpp)
+    target_link_libraries(${PROJECT_NAME}_basic stdgpu::stdgpu)
+endif()
