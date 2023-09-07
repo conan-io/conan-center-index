@@ -1,0 +1,57 @@
+diff --git a/cmake/helpers/GdalGenerateConfig.cmake b/cmake/helpers/GdalGenerateConfig.cmake
+--- a/cmake/helpers/GdalGenerateConfig.cmake
++++ b/cmake/helpers/GdalGenerateConfig.cmake
+@@ -44,6 +44,10 @@
+         elseif(_lib STREQUAL "general")
+             continue()
+         endif()
++        if(_lib IN_LIST _seen_libs)
++            continue()
++        endif()
++        list(APPEND _seen_libs "${_lib}")
+         gdal_resolve_link_genex(_lib "${_lib}")
+         if(_lib)
+             list(APPEND _libs "${_lib}")
+diff --git a/cmake/helpers/GdalDriverHelper.cmake b/cmake/helpers/GdalDriverHelper.cmake
+--- a/cmake/helpers/GdalDriverHelper.cmake
++++ b/cmake/helpers/GdalDriverHelper.cmake
+@@ -233,9 +233,9 @@
+     endif ()
+ endfunction()
+ 
+-function(gdal_target_interfaces _TARGET)
++function(gdal_target_interfaces _TARGET _seen_libs)
+     foreach (_LIB IN ITEMS ${ARGN})
+-        if (TARGET ${_LIB})
++        if (TARGET ${_LIB} AND NOT ${_LIB} IN_LIST _seen_libs)
+             get_property(_res TARGET ${_LIB} PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+             if (_res)
+                 target_include_directories(${_TARGET} PRIVATE ${_res})
+@@ -247,6 +247,10 @@
+             get_property(_res TARGET ${_LIB} PROPERTY INTERFACE_COMPILE_OPTIONS)
+             if (_res)
+                 target_compile_options(${_TARGET} PRIVATE ${_res})
++            endif ()
++            get_property(_res TARGET ${_LIB} PROPERTY INTERFACE_LINK_LIBRARIES)
++            if (_res)
++                gdal_target_interfaces(${_TARGET} "${_seen_libs};${ARGN}" ${_res})
+             endif ()
+         endif ()
+     endforeach ()
+@@ -283,7 +287,7 @@
+     if (RES)
+         target_link_libraries(${target} PRIVATE ${_DRIVER_PRIVATE})
+     else ()
+-        gdal_target_interfaces(${target} ${_DRIVER_PRIVATE})
++        gdal_target_interfaces(${target} "" ${_DRIVER_PRIVATE})
+         gdal_add_private_link_libraries(${_DRIVER_PRIVATE})
+     endif ()
+ endfunction()
+@@ -310,6 +314,7 @@
+             endif()
+         endif()
+     endforeach()
++
+ endmacro()
+ 
+ # gdal_dependent_format(format desc depend) do followings:

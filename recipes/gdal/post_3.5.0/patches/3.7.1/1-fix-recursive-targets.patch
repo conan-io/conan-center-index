@@ -1,0 +1,69 @@
+diff --git a/cmake/helpers/GdalGenerateConfig.cmake b/cmake/helpers/GdalGenerateConfig.cmake
+--- a/cmake/helpers/GdalGenerateConfig.cmake
++++ b/cmake/helpers/GdalGenerateConfig.cmake
+@@ -44,6 +44,10 @@
+         elseif(_lib STREQUAL "general")
+             continue()
+         endif()
++        if(_lib IN_LIST _seen)
++            continue()
++        endif()
++        list(APPEND _seen "${_lib}")
+         gdal_resolve_link_genex(_lib "${_lib}")
+         if(_lib)
+             list(APPEND _libs "${_lib}")
+@@ -64,7 +68,10 @@
+     while(_input MATCHES "^(.*)\\\$<([^:>]*):*([^>]*)>")
+         set(_match "${CMAKE_MATCH_0}")
+         set(_first "${CMAKE_MATCH_1}")
+-        gdal_evaluate_link_genex(_second "${CMAKE_MATCH_2}" "${CMAKE_MATCH_3}")
++        if(NOT _first IN_LIST _genex_seen)
++            gdal_evaluate_link_genex(_second "${CMAKE_MATCH_2}" "${CMAKE_MATCH_3}")
++        endif()
++        list(APPEND _genex_seen "${_first}")
+         string(REPLACE "${_match}" "${_first}${_second}" _input "${_input}")
+     endwhile()
+     set("${_result}" "${_input}" PARENT_SCOPE)
+diff --git a/cmake/helpers/GdalDriverHelper.cmake b/cmake/helpers/GdalDriverHelper.cmake
+--- a/cmake/helpers/GdalDriverHelper.cmake
++++ b/cmake/helpers/GdalDriverHelper.cmake
+@@ -233,9 +233,9 @@
+     endif ()
+ endfunction()
+ 
+-function(gdal_target_interfaces _TARGET)
++function(gdal_target_interfaces _TARGET _seen_libs)
+     foreach (_LIB IN ITEMS ${ARGN})
+-        if (TARGET ${_LIB})
++        if (TARGET ${_LIB} AND NOT ${_LIB} IN_LIST _seen_libs)
+             get_property(_res TARGET ${_LIB} PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+             if (_res)
+                 target_include_directories(${_TARGET} PRIVATE ${_res})
+@@ -250,7 +250,7 @@
+             endif ()
+             get_property(_res TARGET ${_LIB} PROPERTY INTERFACE_LINK_LIBRARIES)
+             if (_res)
+-                gdal_target_interfaces(${_TARGET} ${_res})
++                gdal_target_interfaces(${_TARGET} "${_seen_libs};${ARGN}" ${_res})
+             endif ()
+         endif ()
+     endforeach ()
+@@ -280,9 +280,6 @@
+     set(_oneValueArgs)
+     set(_multiValueArgs PRIVATE)
+     cmake_parse_arguments(_DRIVER "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
+-    if (NOT _DRIVER_PRIVATE)
+-        message(FATAL_ERROR "gdal_target_link_libraries(): PRIVATE is a mandatory argument.")
+-    endif ()
+     is_plugin(RES ${target})
+     if (RES)
+         target_link_libraries(${target} PRIVATE ${_DRIVER_PRIVATE})
+@@ -295,7 +292,7 @@
+             endif()
+         endforeach()
+     else ()
+-        gdal_target_interfaces(${target} ${_DRIVER_PRIVATE})
++        gdal_target_interfaces(${target} "" ${_DRIVER_PRIVATE})
+         gdal_add_private_link_libraries(${_DRIVER_PRIVATE})
+     endif ()
+ 
