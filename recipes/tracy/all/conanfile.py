@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -25,7 +26,7 @@ class TracyConan(ConanFile):
         "no_callstack_inlines": ([True, False], False),
         "only_localhost": ([True, False], False),
         "no_broadcast": ([True, False], False),
-        "only_ipv": ([True, False], False),
+        "only_ipv4": ([True, False], False),
         "no_code_transfer": ([True, False], False),
         "no_context_switch": ([True, False], False),
         "no_exit": ([True, False], False),
@@ -35,6 +36,10 @@ class TracyConan(ConanFile):
         "no_frame_image": ([True, False], False),
         "no_system_tracing": ([True, False], False),
         "delayed_init": ([True, False], False),
+        "manual_lifetime": ([True, False], False),
+        "fibers": ([True, False], False),
+        "no_crash_handler": ([True, False], False),
+        "timer_fallback": ([True, False], False),
     }
     options = {
         "shared": [True, False],
@@ -50,6 +55,17 @@ class TracyConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        if Version(self.version) < "0.9":
+            self.options.rm_safe("manual_lifetime")
+            self.options.rm_safe("fibers")
+            self.options.rm_safe("no_crash_handler")
+            self.options.rm_safe("timer_fallback")
+
+            del self._tracy_options["manual_lifetime"]
+            del self._tracy_options["fibers"]
+            del self._tracy_options["no_crash_handler"]
+            del self._tracy_options["timer_fallback"]
 
     def configure(self):
         if self.options.shared:
