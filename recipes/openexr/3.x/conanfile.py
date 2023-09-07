@@ -38,6 +38,9 @@ class OpenEXRConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         self.requires("zlib/[>=1.2.10 <2]")
         # Note: OpenEXR and Imath are versioned independently.
@@ -46,9 +49,6 @@ class OpenEXRConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
