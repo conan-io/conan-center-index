@@ -54,7 +54,7 @@ class VerySimpleSmtpsConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "10",
+            "gcc": "9",
             "clang": "9",
             "apple-clang": "10",
         }
@@ -128,8 +128,8 @@ class VerySimpleSmtpsConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         # remove bundled xxhash
-        # rm(self, "whateer.*", os.path.join(self.source_folder, "lib"))
-        # replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "...", "")
+        rm(self, "whateer.*", os.path.join(self.source_folder, "lib"))
+        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "...", "")
 
     def build(self):
         self._patch_sources()  # It can be apply_conandata_patches(self) only in case no more patches are needed
@@ -147,6 +147,9 @@ class VerySimpleSmtpsConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+
+        if self.options.shared:
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
         # In shared lib/executable files, meson set install_name (macOS) to lib dir absolute path instead of @rpath, it's not relocatable, so fix it
         fix_apple_shared_install_name(self)
