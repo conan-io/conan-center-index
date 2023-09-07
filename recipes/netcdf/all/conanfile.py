@@ -71,7 +71,7 @@ class NetcdfConan(ConanFile):
                 self.requires("hdf5/1.14.1")
 
         if self.options.dap or self.options.byterange:
-            self.requires("libcurl/8.2.1")
+            self.requires("libcurl/[>=7.88 <9]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
