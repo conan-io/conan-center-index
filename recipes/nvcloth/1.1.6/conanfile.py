@@ -6,7 +6,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, rmdir, copy, replace_in_file, patch, export_conandata_patches
 from conan.tools.env import Environment
 from conan.tools.scm import Version
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 
@@ -49,29 +49,33 @@ class NvclothConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
 
-        if self.settings.os in ["Windows", "Macos"]:
-            self.options.shared = False
-        elif self.settings.os in ["iOS", "Android"]:
-            self.options.shared = False
-        else:
-            self.options.shared = False
-
     def configure(self):
-        if self.options.shared:
+        if self.settings.os in ["Windows", "Macos"]:
+            # static builds are not supported
+            self.options.rm_safe("shared")
+            self.package_type = "shared-library"
+        elif self.settings.os in ["iOS", "Android"]:
+            # shared builds are not supported
+            self.options.rm_safe("shared")
+            self.package_type = "static-library"
+
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def generate(self):
-        cmake = CMakeToolchain(self)
-        if not self.options.shared:
-            cmake.variables["PX_STATIC_LIBRARIES"] = 1
-        cmake.variables["STATIC_WINCRT"] = is_msvc_static_runtime(self)
+        tc = CMakeToolchain(self)
 
-        cmake.variables["NV_CLOTH_ENABLE_CUDA"] = self.options.use_cuda
-        cmake.variables["NV_CLOTH_ENABLE_DX11"] = self.options.use_dx11
+        if self.options.get_safe("shared") is not None:
+            if not self.options.get_safe("shared"):
+                tc.variables["PX_STATIC_LIBRARIES"] = 1
+        tc.variables["STATIC_WINCRT"] = is_msvc_static_runtime(self)
 
-        cmake.variables["TARGET_BUILD_PLATFORM"] = self._get_target_build_platform()
+        tc.variables["NV_CLOTH_ENABLE_CUDA"] = self.options.use_cuda
+        tc.variables["NV_CLOTH_ENABLE_DX11"] = self.options.use_dx11
 
-        cmake.generate()
+        tc.variables["TARGET_BUILD_PLATFORM"] = self._get_target_build_platform()
+
+        tc.generate()
         cmake = CMakeDeps(self)
         cmake.generate()
 
@@ -180,6 +184,6 @@ class NvclothConan(ConanFile):
         self.cpp_info.libdirs = ['lib']
         self.cpp_info.bindirs = ['bin']
 
-        if not self.options.shared:
+        if self.options.get_safe("shared") == False:
             if self.settings.os in ("FreeBSD", "Linux"):
                 self.cpp_info.system_libs.append("m")
