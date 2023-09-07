@@ -13,7 +13,7 @@ class MinizipConan(ConanFile):
     license = "Zlib"
     description = "An experimental package to read and write files in .zip format, written on top of zlib"
     topics = ("zip", "compression", "inflate")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
