@@ -38,7 +38,7 @@ class VerySimpleSmtpsConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
+        "fPIC": False,
     }
 
     required_packages = [
