@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, collect_libs, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, collect_libs
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -128,8 +128,8 @@ class VerySimpleSmtpsConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         # remove bundled xxhash
-        rm(self, "whateer.*", os.path.join(self.source_folder, "lib"))
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "...", "")
+        # rm(self, "whateer.*", os.path.join(self.source_folder, "lib"))
+        # replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "...", "")
 
     def build(self):
         self._patch_sources()  # It can be apply_conandata_patches(self) only in case no more patches are needed
