@@ -72,6 +72,9 @@ class StdgpuConan(ConanFile):
                 "Visual Studio": "16",
             }
 
+    def export_sources(self):
+        copy(self, "cmake/*", dst=self.export_sources_folder, src=self.recipe_folder)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -171,6 +174,9 @@ class StdgpuConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
+        copy(self, "*.cmake",
+             dst=os.path.join(self.package_folder, "lib", "cmake"),
+             src=os.path.join(self.export_sources_folder, "cmake"))
 
     def _configure_system_openmp(self):
         openmp_flags = []
@@ -198,3 +204,9 @@ class StdgpuConan(ConanFile):
         if self.options.backend == "openmp":
             if self.options.openmp == "system":
                 self._configure_system_openmp()
+        elif self.options.backend == "cuda":
+            module_path = os.path.join("lib", "cmake", "stdgpu-dependencies-cuda.cmake")
+            self.cpp_info.set_property("cmake_build_modules", [module_path])
+        elif self.options.backend == "hip":
+            module_path = os.path.join("lib", "cmake", "stdgpu-dependencies-hip.cmake")
+            self.cpp_info.set_property("cmake_build_modules", [module_path])
