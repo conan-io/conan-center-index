@@ -6,6 +6,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, rmdir, copy, replace_in_file, patch, export_conandata_patches
 from conan.tools.env import Environment
 from conan.tools.scm import Version
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 
@@ -49,7 +50,7 @@ class NvclothConan(ConanFile):
             self.options.rm_safe("fPIC")
 
         if self.settings.os in ["Windows", "Macos"]:
-            self.options.shared = True
+            self.options.shared = False
         elif self.settings.os in ["iOS", "Android"]:
             self.options.shared = False
         else:
@@ -158,6 +159,7 @@ class NvclothConan(ConanFile):
         copy(self, "*.dylib*", dst=os.path.join(self.package_folder, "lib"), src=nvcloth_build_subfolder, keep_path=False)
         copy(self, "*.dll", dst=os.path.join(self.package_folder, "bin"), src=nvcloth_build_subfolder, keep_path=False)
         copy(self, "*.so", dst=os.path.join(self.package_folder, "lib"), src=nvcloth_build_subfolder, keep_path=False)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         if self.settings.build_type == "Debug":
