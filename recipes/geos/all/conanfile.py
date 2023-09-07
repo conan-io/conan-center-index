@@ -87,6 +87,7 @@ class GeosConan(ConanFile):
             tc.cache_variables["BUILD_BENCHMARKS"] = False
         else:
             tc.variables["BUILD_BENCHMARKS"] = False
+            tc.cache_variables["CMAKE_BUILD_TYPE"] = str(self.settings.build_type)
         if self._has_inline_option:
             tc.variables["DISABLE_GEOS_INLINE"] = not self.options.inline
         tc.variables["BUILD_TESTING"] = False
