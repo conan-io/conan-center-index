@@ -235,7 +235,6 @@ class VulkanValidationLayersConan(ConanFile):
         if self.settings.os == "Macos":
             runtime_lib_discovery_path = "DYLD_LIBRARY_PATH"
         for libdir in [os.path.join(self.package_folder, libdir) for libdir in self.cpp_info.libdirs]:
-            self.output.info(f"Prepending {libdir} to {runtime_lib_discovery_path}")
             self.runenv_info.prepend_path(runtime_lib_discovery_path, libdir)
 
         # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
