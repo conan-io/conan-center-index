@@ -1,14 +1,13 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.microsoft import is_msvc
 
 import os
 
 required_conan_version = ">=1.53.0"
+
 
 class LibjxlConan(ConanFile):
     name = "libjxl"
@@ -51,17 +50,12 @@ class LibjxlConan(ConanFile):
         if Version(self.version) < "0.7.0":
             self.requires("highway/0.12.2")
         else:
-            self.requires("highway/1.0.6")
+            self.requires("highway/1.0.7")
         self.requires("lcms/2.14")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
-
-        # FIXME: In cci's CI, execution error (error code 3221225781) is raised on msvc in shared build.
-        # This error can't be reproduced outside cci's CI.
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.name} does not support shared libraries on msvc.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -110,7 +104,7 @@ class LibjxlConan(ConanFile):
 
     def package_info(self):
         # jxl
-        self.cpp_info.components["jxl"].names["pkg_config"] = "libjxl"
+        self.cpp_info.components["jxl"].set_property("pkg_config_name", "libjxl")
         self.cpp_info.components["jxl"].libs = [self._lib_name("jxl")]
         self.cpp_info.components["jxl"].requires = ["brotli::brotli",
                                                     "highway::highway",
@@ -119,24 +113,19 @@ class LibjxlConan(ConanFile):
         # in shared build, install jxl only.
         # https://github.com/libjxl/libjxl/blob/v0.5.0/lib/jxl.cmake#L544-L546
         if not self.options.shared:
-            self.cpp_info.components["jxl_dec"].names["pkg_config"] = "libjxl_dec"
+            self.cpp_info.components["jxl_dec"].set_property("pkg_config_name", "libjxl_dec")
             self.cpp_info.components["jxl_dec"].libs = [self._lib_name("jxl_dec")]
             self.cpp_info.components["jxl_dec"].requires = ["brotli::brotli",
                                                             "highway::highway",
                                                             "lcms::lcms"]
 
         # jxl_threads
-        self.cpp_info.components["jxl_threads"].names["pkg_config"] = \
-            "libjxl_threads"
-        self.cpp_info.components["jxl_threads"].libs = \
-            [self._lib_name("jxl_threads")]
-        if self.settings.os == "Linux":
+        self.cpp_info.components["jxl_threads"].set_property("pkg_config_name", "libjxl_threads")
+        self.cpp_info.components["jxl_threads"].libs = [self._lib_name("jxl_threads")]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["jxl_threads"].system_libs = ["pthread"]
 
         if not self.options.shared and stdcpp_library(self):
-            self.cpp_info.components["jxl"].system_libs.append(
-                stdcpp_library(self))
-            self.cpp_info.components["jxl_dec"].system_libs.append(
-                stdcpp_library(self))
-            self.cpp_info.components["jxl_threads"].system_libs.append(
-                stdcpp_library(self))
+            self.cpp_info.components["jxl"].system_libs.append(stdcpp_library(self))
+            self.cpp_info.components["jxl_dec"].system_libs.append(stdcpp_library(self))
+            self.cpp_info.components["jxl_threads"].system_libs.append(stdcpp_library(self))
