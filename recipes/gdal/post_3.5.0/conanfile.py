@@ -176,11 +176,11 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.2.0")
         if self.options.with_arrow:
-            self.requires("arrow/12.0.0")
+            self.requires("arrow/13.0.0")
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
-            self.requires("c-blosc/1.21.4")
+            self.requires("c-blosc/1.21.5")
         if self.options.with_cfitsio:
             self.requires("cfitsio/4.2.0")
         if self.options.with_cryptopp:
@@ -207,7 +207,7 @@ class GdalConan(ConanFile):
         if self.options.with_hdf5:
             self.requires("hdf5/1.14.1")
         if self.options.with_heif:
-            self.requires("libheif/1.13.0")
+            self.requires("libheif/1.16.2")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -252,7 +252,7 @@ class GdalConan(ConanFile):
             self.requires("pdfium/cci.20210730")
         if self.options.with_pg:
             # libpq 15+ is not supported
-            self.requires("libpq/14.7")
+            self.requires("libpq/14.9")
         if self.options.with_png:
             self.requires("libpng/1.6.40")
         if self.options.with_podofo:
