@@ -83,5 +83,5 @@ class NewmatConan(ConanFile):
 
         self.cpp_info.includedirs.append(os.path.join("include", "newmat"))
         if self.options.with_c_subscripts:
-            self.cpp_info.defines = ["SETUP_C_SUBSCRIPTS"]
+            self.cpp_info.defines.append("SETUP_C_SUBSCRIPTS")
 
