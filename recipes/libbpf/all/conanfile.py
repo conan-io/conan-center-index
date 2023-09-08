@@ -40,7 +40,7 @@ class LibbpfConan(ConanFile):
     def requirements(self):
         self.requires("linux-headers-generic/5.14.9")
         self.requires("libelf/0.8.13")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.settings.os != "Linux":
