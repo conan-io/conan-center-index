@@ -34,7 +34,7 @@ class OpenCascadeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "LGPL-2.1-or-later"
     topics = ("opencascade", "occt", "3d", "modeling", "cad")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -118,14 +118,14 @@ class OpenCascadeConan(ConanFile):
             return True
 
     def requirements(self):
-        self.requires("tcl/8.6.13")
+        self.requires("tcl/8.6.10")
         if self._link_tk:
             self.requires("tk/8.6.10")
         self.requires("freetype/2.13.0")
         if self._link_opengl:
             self.requires("opengl/system")
         if self._is_linux:
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/2.13.93")
             self.requires("xorg/system")
         # TODO: add vtk support?
         if self.options.with_ffmpeg:
@@ -268,7 +268,7 @@ class OpenCascadeConan(ConanFile):
             occt_csf_cmake,
             'set (CSF_FREETYPE "freetype")',
             'set (CSF_FREETYPE "{}")'.format(
-                " ".join(self.deps_cpp_info["freetype"].libs)
+                " ".join(self.dependencies["freetype"].cpp_info.libs)
             ),
         )
 
@@ -288,7 +288,7 @@ class OpenCascadeConan(ConanFile):
                 self, cmakelists, 'OCCT_INCLUDE_CMAKE_FILE ("adm/cmake/tk")', ""
             )
             csf_tk_libs = 'set (CSF_TclTkLibs "{}")'.format(
-                " ".join(self.deps_cpp_info["tk"].libs)
+                " ".join(self.dependencies["tk"].cpp_info.libs)
             )
             replace_in_file(
                 self, occt_csf_cmake, 'set (CSF_TclTkLibs   "tk86")', csf_tk_libs
@@ -311,7 +311,7 @@ class OpenCascadeConan(ConanFile):
                     occt_csf_cmake,
                     'set (CSF_fontconfig "fontconfig")',
                     'set (CSF_fontconfig "{}")'.format(
-                        " ".join(self.deps_cpp_info["fontconfig"].libs)
+                        " ".join(self.dependencies["fontconfig"].cpp_info.libs)
                     ),
                 )
             else:
@@ -320,7 +320,7 @@ class OpenCascadeConan(ConanFile):
                     occt_csf_cmake,
                     'set (CSF_fontconfig  "fontconfig")',
                     'set (CSF_fontconfig  "{}")'.format(
-                        " ".join(self.deps_cpp_info["fontconfig"].libs)
+                        " ".join(self.dependencies["fontconfig"].cpp_info.libs)
                     ),
                 )
         ## onetbb
@@ -334,7 +334,7 @@ class OpenCascadeConan(ConanFile):
                 occt_csf_cmake,
                 'set (CSF_TBB "tbb tbbmalloc")',
                 'set (CSF_TBB "{}")'.format(
-                    " ".join(self.deps_cpp_info["onetbb"].libs)
+                    " ".join(self.dependencies["onetbb"].cpp_info.libs)
                 ),
             )
         ## ffmpeg
@@ -348,7 +348,7 @@ class OpenCascadeConan(ConanFile):
                 occt_csf_cmake,
                 'set (CSF_FFmpeg "avcodec avformat swscale avutil")',
                 'set (CSF_FFmpeg "{}")'.format(
-                    " ".join(self.deps_cpp_info["ffmpeg"].libs)
+                    " ".join(self.dependencies["ffmpeg"].cpp_info.libs)
                 ),
             )
         ## freeimage
@@ -362,7 +362,7 @@ class OpenCascadeConan(ConanFile):
                 occt_csf_cmake,
                 'set (CSF_FreeImagePlus "freeimage")',
                 'set (CSF_FreeImagePlus "{}")'.format(
-                    " ".join(self.deps_cpp_info["freeimage"].libs)
+                    " ".join(self.dependencies["freeimage"].cpp_info.libs)
                 ),
             )
         ## openvr
@@ -376,7 +376,7 @@ class OpenCascadeConan(ConanFile):
                 occt_csf_cmake,
                 'set (CSF_OpenVR "openvr_api")',
                 'set (CSF_OpenVR "{}")'.format(
-                    " ".join(self.deps_cpp_info["openvr"].libs)
+                    " ".join(self.dependencies["openvr"].cpp_info.libs)
                 ),
             )
         ## rapidjson
@@ -493,15 +493,15 @@ class OpenCascadeConan(ConanFile):
         self._create_modules_json_file(occt_modules)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            self,
-            os.path.join(self.package_folder, self._cmake_module_file_rel_path),
-            {
-                target: "OpenCASCADE::{}".format(target)
-                for module in occt_modules.values()
-                for target in module
-            },
-        )
+        # self._create_cmake_module_alias_targets(
+        #     self,
+        #     os.path.join(self.package_folder, self._cmake_module_file_rel_path),
+        #     {
+        #         target: "OpenCASCADE::{}".format(target)
+        #         for module in occt_modules.values()
+        #         for target in module
+        #     },
+        # )
 
     @staticmethod
     def _create_cmake_module_alias_targets(conanfile, module_file, targets):
