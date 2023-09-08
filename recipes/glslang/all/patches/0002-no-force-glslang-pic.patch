@@ -1,5 +1,17 @@
+diff --git a/OGLCompilersDLL/CMakeLists.txt b/OGLCompilersDLL/CMakeLists.txt
+index 71a5675d..1fc3649f 100644
+--- a/OGLCompilersDLL/CMakeLists.txt
++++ b/OGLCompilersDLL/CMakeLists.txt
+@@ -35,7 +35,6 @@ set(SOURCES InitializeDll.cpp InitializeDll.h)
+ 
+ add_library(OGLCompiler STATIC ${SOURCES})
+ set_property(TARGET OGLCompiler PROPERTY FOLDER glslang)
+-set_property(TARGET OGLCompiler PROPERTY POSITION_INDEPENDENT_CODE ON)
+ 
+ if(WIN32)
+     source_group("Source" FILES ${SOURCES})
 diff --git a/SPIRV/CMakeLists.txt b/SPIRV/CMakeLists.txt
-index a80e74ed..264261f1 100644
+index a80e74ed..78db5f73 100644
 --- a/SPIRV/CMakeLists.txt
 +++ b/SPIRV/CMakeLists.txt
 @@ -73,7 +73,6 @@ set(SPVREMAP_HEADERS
@@ -10,6 +22,60 @@ index a80e74ed..264261f1 100644
      VERSION   "${GLSLANG_VERSION}"
      SOVERSION "${GLSLANG_VERSION_MAJOR}")
  target_include_directories(SPIRV PUBLIC
+@@ -86,7 +85,6 @@ if (ENABLE_SPVREMAPPER)
+     add_library(SPVRemapper ${LIB_TYPE} ${SPVREMAP_SOURCES} ${SPVREMAP_HEADERS})
+     set_target_properties(SPVRemapper PROPERTIES
+         FOLDER glslang
+-        POSITION_INDEPENDENT_CODE ON
+         VERSION   "${GLSLANG_VERSION}"
+         SOVERSION "${GLSLANG_VERSION_MAJOR}")
+ endif()
+diff --git a/glslang/CMakeLists.txt b/glslang/CMakeLists.txt
+index d4df9396..7541b09f 100644
+--- a/glslang/CMakeLists.txt
++++ b/glslang/CMakeLists.txt
+@@ -166,7 +166,6 @@ set(GLSLANG_HEADERS
+ add_library(glslang ${LIB_TYPE} ${BISON_GLSLParser_OUTPUT_SOURCE} ${GLSLANG_SOURCES} ${GLSLANG_HEADERS})
+ set_target_properties(glslang PROPERTIES
+     FOLDER glslang
+-    POSITION_INDEPENDENT_CODE ON
+     VERSION   "${GLSLANG_VERSION}"
+     SOVERSION "${GLSLANG_VERSION_MAJOR}")
+ target_link_libraries(glslang PRIVATE OGLCompiler OSDependent MachineIndependent)
+@@ -199,8 +198,7 @@ add_library(glslang-default-resource-limits STATIC ${RESOURCELIMITS_SOURCES} ${R
+ set_target_properties(glslang-default-resource-limits PROPERTIES
+     VERSION "${GLSLANG_VERSION}"
+     SOVERSION "${GLSLANG_VERSION_MAJOR}"
+-    FOLDER glslang
+-    POSITION_INDEPENDENT_CODE ON)
++    FOLDER glslang)
+ 
+ target_include_directories(glslang-default-resource-limits PUBLIC
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+diff --git a/glslang/OSDependent/Unix/CMakeLists.txt b/glslang/OSDependent/Unix/CMakeLists.txt
+index f6b1c6af..185e40e5 100644
+--- a/glslang/OSDependent/Unix/CMakeLists.txt
++++ b/glslang/OSDependent/Unix/CMakeLists.txt
+@@ -33,7 +33,6 @@
+ 
+ add_library(OSDependent STATIC ossource.cpp ../osinclude.h)
+ set_property(TARGET OSDependent PROPERTY FOLDER glslang)
+-set_property(TARGET OSDependent PROPERTY POSITION_INDEPENDENT_CODE ON)
+ 
+ # Link pthread
+ set(THREADS_PREFER_PTHREAD_FLAG ON)
+diff --git a/glslang/OSDependent/Windows/CMakeLists.txt b/glslang/OSDependent/Windows/CMakeLists.txt
+index 882133ab..5302bb93 100644
+--- a/glslang/OSDependent/Windows/CMakeLists.txt
++++ b/glslang/OSDependent/Windows/CMakeLists.txt
+@@ -35,7 +35,6 @@ set(SOURCES ossource.cpp ../osinclude.h)
+ 
+ add_library(OSDependent STATIC ${SOURCES})
+ set_property(TARGET OSDependent PROPERTY FOLDER glslang)
+-set_property(TARGET OSDependent PROPERTY POSITION_INDEPENDENT_CODE ON)
+ 
+ # MinGW GCC complains about function pointer casts to void*.
+ # Turn that off with -fpermissive.
 diff --git a/hlsl/CMakeLists.txt b/hlsl/CMakeLists.txt
 index 058a67b0..89687025 100644
 --- a/hlsl/CMakeLists.txt

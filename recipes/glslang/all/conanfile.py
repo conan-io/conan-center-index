@@ -58,7 +58,7 @@ class GlslangConan(ConanFile):
     @property
     def _get_compatible_spirv_tools_version(self):
         return {
-            "12.3.1": "1.3.243.0",
+            "13.0.0": "1.3.243.0",
             "11.7.0": "2021.4",
             "11.6.0": "2021.3",
             "11.5.0": "2021.2",
@@ -129,15 +129,15 @@ class GlslangConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        glslang_version = Version(self.version)
         # Do not force PIC if static (but keep it if shared, because OGLCompiler, OSDependent,
         # GenericCodeGen and MachineIndependent are still static and linked to glslang shared)
-        if not self.options.shared:
+        if not self.options.shared and glslang_version < "13.0.0":
             cmake_files_to_fix = [
                 {"target": "OGLCompiler", "relpath": os.path.join("OGLCompilersDLL", "CMakeLists.txt")},
                 {"target": "OSDependent", "relpath": os.path.join("glslang", "OSDependent", "Unix","CMakeLists.txt")},
                 {"target": "OSDependent", "relpath": os.path.join("glslang", "OSDependent", "Windows","CMakeLists.txt")},
             ]
-            glslang_version = Version(self.version)
             if glslang_version < "12.3.1":
                 cmake_files_to_fix.append({"target": "SPIRV"      , "relpath": os.path.join("SPIRV", "CMakeLists.txt")})
                 cmake_files_to_fix.append({"target": "SPVRemapper", "relpath": os.path.join("SPIRV", "CMakeLists.txt")})
@@ -178,7 +178,10 @@ class GlslangConan(ConanFile):
         has_genericcodegen = (glslang_version < "7.0.0" or glslang_version >= "11.0.0") and not self.options.shared
         has_osdependent = glslang_version < "1.3.231" or glslang_version >= "7.0.0" or not self.options.shared
         has_oglcompiler = glslang_version < "1.3.231" or glslang_version >= "7.0.0" or not self.options.shared
-
+        # no longer available for version 13.0.0
+        if glslang_version >= "13.0.0" and self.options.shared == True:
+            has_osdependent = False
+            has_oglcompiler = False
         # glslang
         self.cpp_info.components["glslang-core"].set_property("cmake_target_name", "glslang::glslang")
         self.cpp_info.components["glslang-core"].names["cmake_find_package"] = "glslang"

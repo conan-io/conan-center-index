@@ -20,9 +20,9 @@ sources:
   "1.3.204.0":
     url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/sdk-1.3.204.0.tar.gz"
     sha256: "c6bec993194377944fb8d6d585a90e1288994660782d709e30fa1d91810d6820"
-  "12.3.1":
-    url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/12.3.1.tar.gz"
-    sha256: "a57836a583b3044087ac51bb0d5d2d803ff84591d55f89087fc29ace42a8b9a8"
+  "13.0.0":
+    url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/13.0.0.tar.gz"
+    sha256: "bcda732434f829aa74414ea0e06d329ec8ac28637c38a0de45e17c8fd25a4715"
   "11.7.0":
     url: "https://github.com/KhronosGroup/glslang/archive/refs/tags/11.7.0.tar.gz"
     sha256: "b6c83864c3606678d11675114fa5f358c519fe1dad9a781802bcc87fb8fa32d5"
@@ -43,7 +43,7 @@ patches:
   "1.3.236.0":
     - patch_file: "patches/1.3.236.0-0001-no-force-glslang-pic.patch"
       patch_type: "conan"
-      patch_description: "adapt PIC settings"      
+      patch_description: "adapt PIC settings"
   "1.3.231.1":
     - patch_file: "patches/0001-no-force-glslang-pic.patch"
       patch_type: "conan"
@@ -64,10 +64,7 @@ patches:
     - patch_file: "patches/0001-no-force-glslang-pic.patch"
       patch_type: "conan"
       patch_description: "adapt PIC settings"
-  "12.3.1":
-    - patch_file: "patches/0001-no-force-glslang-pic.patch"
-      patch_type: "conan"
-      patch_description: "adapt PIC settings"
+  "13.0.0":
     - patch_file: "patches/0002-no-force-glslang-pic.patch"
       patch_type: "conan"
       patch_description: "adapt PIC settings"
