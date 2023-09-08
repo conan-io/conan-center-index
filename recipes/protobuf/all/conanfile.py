@@ -70,7 +70,7 @@ class ProtobufConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/[>=1.2.10 <2]")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
