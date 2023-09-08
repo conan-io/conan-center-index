@@ -36,7 +36,7 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13", transitive_headers=True)
+            self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()
