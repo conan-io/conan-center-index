@@ -52,7 +52,7 @@ class MBedTLSConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
