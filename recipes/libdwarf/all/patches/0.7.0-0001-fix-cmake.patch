@@ -105,7 +105,15 @@ index 913274b8..8515e2b0 100644
  	set(LIBDIR lib${SUFFIX})
  	set(BINDIR bin${SUFFIX})
  
-@@ -126,6 +128,9 @@ install(
+@@ -105,7 +107,6 @@ foreach(i RANGE ${targetCount})
+ endforeach()
+ 
+ # add_library(libdwarf)
+-configure_file(libdwarf.pc.cmake libdwarf.pc @ONLY )
+ 
+ # The install has to be here, not in
+ # another CMakeLists.txt  to make install work properly
+@@ -126,9 +127,9 @@ install(
  )
  install(DIRECTORY libdwarf DESTINATION include/
      FILES_MATCHING PATTERN "*.h")
@@ -115,3 +123,6 @@ index 913274b8..8515e2b0 100644
  install(
      FILES ${CMAKE_CURRENT_SOURCE_DIR}/libdwarf.h
      DESTINATION include/libdwarf)
+-install( FILES ${PROJECT_BINARY_DIR}/src/lib/libdwarf/libdwarf.pc
+-    DESTINATION lib/pkgconfig
+-)
