@@ -1,7 +1,6 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, replace_in_file, copy
-from conan.tools.layout import basic_layout
 import os
 
 required_conan_version = ">=1.53.0"
@@ -16,7 +15,7 @@ class TreeSitterCConan(ConanFile):
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     package_type = "library"
-    generators = "CMakeToolchain", "CMakeDeps"
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -26,11 +25,21 @@ class TreeSitterCConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "CMakeToolchain", "CMakeDeps"
+
     exports_sources = "CMakeLists.txt"
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
+
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=(self.export_sources_folder + "/src"))
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["TREE_SITTER_C_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -59,7 +68,7 @@ class TreeSitterCConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        cmake.configure()
         cmake.build()
 
     def package(self):
