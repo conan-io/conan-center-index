@@ -184,7 +184,9 @@ Currently, these are:
 * Libcurl: `[>=X.YY <9]`, where `X.YY` is the minimum version of Libcurl required, starting from `7.78`
 
 > **Note**: You might also see Zlib ranges in some PR by CCI maintainers.
-> We're adding them little by little to avoid missing binaries and conflict errors. We'll update this page when PRs are free to add new ranges
+> We're adding them little by little to avoid missing binaries and conflict errors.
+> Please do not open PRs moving Zlib to ranges for now, we'll update this page when PRs are free to add new ranges.
+
 
 
 > **Warning**: With Conan 1.x, [version ranges](https://docs.conan.io/1/versioning/version_ranges.html) adhere to a much more strict sematic version spec,
