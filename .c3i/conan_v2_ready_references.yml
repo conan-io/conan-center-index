@@ -26,6 +26,7 @@ required_for_references:
 - apr
 - apr-util
 - apriltag
+- aravis
 - archicad-apidevkit
 - arcus
 - arduinojson
@@ -437,6 +438,7 @@ required_for_references:
 - id3v2lib
 - iir1
 - im95able-rea
+- imagl
 - imake
 - imath
 - imgui
@@ -617,6 +619,7 @@ required_for_references:
 - libserial
 - libsgp4
 - libsigcpp
+- libsixel
 - libslz
 - libsmacker
 - libsndfile
@@ -802,6 +805,8 @@ required_for_references:
 - objectbox
 - objectbox-generator
 - observer-ptr-lite
+- octo-encryption-cpp
+- octo-keygen-cpp
 - octo-logger-cpp
 - octomap
 - odbc
@@ -1212,6 +1217,7 @@ required_for_references:
 - zlib
 - zlib-ng
 - zmarok-semver
+- zmqpp
 - zookeeper-client-c
 - zpp_bits
 - zstd
