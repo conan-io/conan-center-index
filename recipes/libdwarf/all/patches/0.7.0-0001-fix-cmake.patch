@@ -2,15 +2,17 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 index dd09dde8..8162a985 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -129,6 +129,7 @@ check_include_file( "libelf/libelf.h" HAVE_LIBELF_LIBELF_H)
+@@ -129,6 +129,9 @@ check_include_file( "libelf/libelf.h" HAVE_LIBELF_LIBELF_H)
  
  ### cmake provides no way to guarantee uint32_t present.
  ### configure does guarantee that.
-+find_package(libelf)
++if (BUILD_DWARFGEN)
++  find_package(libelf REQUIRED)
++endif()
  if(HAVE_STDINT_H)
    check_c_source_compiles("
    #include <stdint.h>
-@@ -192,7 +193,8 @@ elseif(HAVE_LIBELF_LIBELF_H)
+@@ -192,7 +195,8 @@ elseif(HAVE_LIBELF_LIBELF_H)
  endif()
  
  if (HAVE_LIBELF_H OR HAVE_LIBELF_LIBELF_H)
@@ -20,7 +22,7 @@ index dd09dde8..8162a985 100644
    message(STATUS "libelf header ${PLAIN_JUST_LIBELF} checking for elf64_getehdr")
    check_symbol_exists( elf64_getehdr ${PLAIN_JUST_LIBELF} HAVE_ELF64_GETEHDR)
    message(STATUS "libelf header ${PLAIN_JUST_LIBELF} checking for elf64_getshdr")
-@@ -216,6 +218,9 @@ if (DWARF_WITH_LIBELF)
+@@ -216,6 +220,9 @@ if (DWARF_WITH_LIBELF)
    message(STATUS "checking using elf header ... ${HAVE_LOCATION_OF_LIBELFHEADER}")
    message(STATUS "checking using libelf header ... ${JUST_LIBELF}")
  
@@ -30,7 +32,7 @@ index dd09dde8..8162a985 100644
  check_c_source_compiles("
    #include ${HAVE_LOCATION_OF_LIBELFHEADER}
    int main()
-@@ -361,7 +366,6 @@ message(STATUS "Building api tests   ... ${DOTESTS}")
+@@ -361,7 +368,6 @@ message(STATUS "Building api tests   ... ${DOTESTS}")
  ### end what was configure.cmake
  
  # This references cmake/FindLibElf.cmake. See cmake documentation.
@@ -38,7 +40,7 @@ index dd09dde8..8162a985 100644
  list(APPEND CMAKE_REQUIRED_INCLUDES ${LIBELF_INCLUDE_DIRS})
  
  configure_file(cmake/config.h.cmake config.h)
-@@ -384,7 +388,6 @@ if(BUILD_SHARED)
+@@ -384,7 +390,6 @@ if(BUILD_SHARED)
  endif()
  
  add_subdirectory(src/lib/libdwarf)
