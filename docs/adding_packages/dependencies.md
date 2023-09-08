@@ -181,8 +181,10 @@ Currently, these are:
 
 * OpenSSL: `[>=1.1 <4]` for libraries known to be compatible with OpenSSL 1.x and 3.x
 * CMake: `[>3.XX <4]`, where `3.XX` is the minimum version of CMake required by the relevant build scripts
-* Zlib: `[>=1.X.Y <2]`, where `1.X.Y` is the minimum version of Zlib required, starting from `1.2.10`
 * Libcurl: `[>=X.YY <9]`, where `X.YY` is the minimum version of Libcurl required, starting from `7.78`
+
+> **Note**: You might also see Zlib ranges in some PR by CCI maintainers.
+> We're adding them little by little to avoid missing binaries and conflict errors. We'll update this page when PRs are free to add new ranges
 
 
 > **Warning**: With Conan 1.x, [version ranges](https://docs.conan.io/1/versioning/version_ranges.html) adhere to a much more strict sematic version spec,
