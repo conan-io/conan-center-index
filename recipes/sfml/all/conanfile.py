@@ -63,10 +63,11 @@ class SfmlConan(ConanFile):
             self.requires("freetype/2.13.0")
             self.requires("stb/cci.20220909")
         if self.options.audio:
-            # FIXME: use cci's minimp3
             self.requires("flac/1.4.2")
             self.requires("openal-soft/1.22.2")
             self.requires("vorbis/1.3.7")
+            if Version(self.version) >= "2.6.0":
+                self.requires("minimp3/cci.20211201")
 
     def validate(self):
         if self.settings.os not in ["Windows", "Linux", "FreeBSD", "Android", "Macos", "iOS"]:
@@ -259,11 +260,14 @@ class SfmlConan(ConanFile):
                 },
             })
         if self.options.audio:
+            audio_requires = ["system", "flac::flac", "openal-soft::openal-soft", "vorbis::vorbis"]
+            if Version(self.version) >= "2.6.0":
+                audio_requires.append("minimp3::minimp3")
             sfml_components.update({
                 "audio": {
                     "target": "sfml-audio",
                     "libs": [f"sfml-audio{suffix}"],
-                    "requires": ["system", "flac::flac", "openal-soft::openal-soft", "vorbis::vorbis"],
+                    "requires": audio_requires,
                     "system_libs": android(),
                 },
             })

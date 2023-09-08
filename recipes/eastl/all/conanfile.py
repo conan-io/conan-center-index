@@ -12,6 +12,7 @@ from conan.tools.files import (
     replace_in_file,
     rmdir,
 )
+from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
@@ -79,6 +80,9 @@ class EastlConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        
+        if is_msvc(self) and check_min_vs(self, "193", raise_invalid=False) and Version(self.version) < "3.21.12":
+            raise ConanInvalidConfiguration(f"{self.ref} is not compatible with Visual Studio 2022, please use version >= 3.21.12")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

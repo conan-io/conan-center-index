@@ -38,6 +38,7 @@ class AsioGrpcConan(ConanFile):
         return {
             "gcc": "7",
             "Visual Studio": "15.7",
+            "msvc": "191",
             "clang": "6",
             "apple-clang": "11",
         }
@@ -57,9 +58,9 @@ class AsioGrpcConan(ConanFile):
     def requirements(self):
         self.requires("grpc/1.50.1")
         if self._local_allocator_option == "boost_container" or self.options.backend == "boost":
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.83.0")
         if self.options.backend == "asio":
-            self.requires("asio/1.24.0")
+            self.requires("asio/1.28.1")
         if self.options.backend == "unifex":
             self.requires("libunifex/cci.20220430")
 

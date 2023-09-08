@@ -73,6 +73,12 @@ class CpppeglibConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+
+        # Since 1.8.4, cpp-peglib is named as peglib
+        if Version(self.version) >= "1.8.4":
+            self.cpp_info.set_property("cmake_file_name", "peglib")
+            self.cpp_info.set_property("cmake_target_name", "peglib")
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
             self.cpp_info.cxxflags.append("-pthread")
