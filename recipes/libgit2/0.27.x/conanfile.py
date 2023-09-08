@@ -70,7 +70,7 @@ class LibGit2Conan(ConanFile):
         if self.options.with_libssh2:
             self.requires("libssh2/1.11.0")
         if self.settings.os != "Windows":
-            self.requires("libcurl/8.1.2")
+            self.requires("libcurl/[>=X.YY <9]")
         if self._need_openssl:
             self.requires("openssl/[>=1.1 <4]")
 
