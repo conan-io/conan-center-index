@@ -57,7 +57,7 @@ class LimereportConan(ConanFile):
             self.build_requires("zint/2.10.0")
 
     def requirements(self):
-        self.requires("qt/5.15.9")
+        self.requires("qt/6.4.2")
 
 
     def source(self):
