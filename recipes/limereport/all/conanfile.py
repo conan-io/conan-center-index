@@ -5,6 +5,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.apple import fix_apple_shared_install_name
+from conan.errors import ConanInvalidConfiguration
 import os
 
 
