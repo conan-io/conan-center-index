@@ -259,6 +259,7 @@ required_for_references:
 - drmp3
 - drogon
 - drwav
+- dsp-filters
 - dtl
 - duckdb
 - duktape
@@ -668,6 +669,7 @@ required_for_references:
 - libzip
 - libzippp
 - lief
+- lightpcapng
 - linmath.h
 - linux-headers-generic
 - linux-syscall-support
@@ -1099,7 +1101,9 @@ required_for_references:
 - threadpool
 - thrift
 - thrust
+- tidy-html5
 - timsort
+- tinkerforge-bindings
 - tiny-dnn
 - tinycthread
 - tinycthreadpool
