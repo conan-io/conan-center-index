@@ -98,6 +98,8 @@ class SnitchConan(ConanFile):
         if self.options.header_only:
             # In header-only mode, the OS and compiler don't matter.
             self.settings.clear()
+            # We still need a build_type for the rest; just force it to Release.
+            self.settings.build_type = 'Release'
             # Shared vs static is also irrelevant, so should be removed.
             del self.options.shared
 
