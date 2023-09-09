@@ -97,6 +97,10 @@ class SnitchConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def package_id(self):
+        if self.info.options.header_only:
+            self.info.settings.clear()
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
