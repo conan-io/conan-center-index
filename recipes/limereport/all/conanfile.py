@@ -58,9 +58,9 @@ class LimereportConan(ConanFile):
 
     def validate(self):
         if Version(self.dependencies["qt"].ref.version) < "6.0.0":
-            if not (self.dependencies["qt"].options.quickcontrols and self.dependencies["qt"].options.quickcontrols2):
+            if not (self.dependencies["qt"].options.qtquickcontrols and self.dependencies["qt"].options.qtquickcontrols2):
                 raise ConanInvalidConfiguration(f"{self.ref} requires qt quickcontrols and quickcontrols2")
-        if not (self.dependencies["qt"].options.svg and self.dependencies["qt"].options.tools):
+        if not (self.dependencies["qt"].options.qtsvg and self.dependencies["qt"].options.qttools):
             raise ConanInvalidConfiguration(f"{self.ref} requires qt svg and tools")
 
     def source(self):
