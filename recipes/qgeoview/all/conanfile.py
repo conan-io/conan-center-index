@@ -35,7 +35,7 @@ class QGeoViewConan(ConanFile):
         self.options["qt"].shared = True
 
     def requirements(self):
-        self.requires("qt/6.4.2")
+        self.requires("qt/6.5.3")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
