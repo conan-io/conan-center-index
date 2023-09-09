@@ -125,11 +125,6 @@ class SnitchConan(ConanFile):
         tc.cache_variables["SNITCH_WITH_EXCEPTIONS"] = self.options.with_exceptions
         tc.cache_variables["SNITCH_WITH_TIMINGS"] = self.options.with_timings
         tc.cache_variables["SNITCH_WITH_SHORTHAND_MACROS"] = self.options.with_shorthand_macros
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "11":
-            # GCC prior to 11 is missing std::bit_cast
-            tc.cache_variables["SNITCH_CONSTEXPR_FLOAT_USE_BITCAST"] = False
-        else:
-            tc.cache_variables["SNITCH_CONSTEXPR_FLOAT_USE_BITCAST"] = True
         tc.cache_variables["SNITCH_DEFAULT_WITH_COLOR"] = self.options.with_default_color
         tc.cache_variables["SNITCH_DECOMPOSE_SUCCESSFUL_ASSERTIONS"] = self.options.with_success_decompose
 
