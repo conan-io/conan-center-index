@@ -25,10 +25,6 @@ class LimereportConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_zint": False,
-        "qt/*:qtquickcontrols" : True,
-        "qt/*:qtquickcontrols2": True,
-        "qt/*:qtsvg": True,
-        "qt/*:qttools": True
     }
 
     def config_options(self):
@@ -59,6 +55,12 @@ class LimereportConan(ConanFile):
     def requirements(self):
         self.requires("qt/6.4.2")
 
+    def validate(self):
+        if Version(self.dependencies["qt"].ref.version) < "6.0.0":
+            if not (self.dependencies["qt"].options.quickcontrols and self.dependencies["qt"].options.quickcontrols2):
+                raise ConanInvalidConfiguration(f"{self.ref} requires qt quickcontrols and quickcontrols2")
+        if not (self.dependencies["qt"].options.svg and self.dependencies["qt"].options.tools):
+            raise ConanInvalidConfiguration(f"{self.ref} requires qt svg and tools")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
