@@ -178,9 +178,6 @@ class SnitchConan(ConanFile):
             self.cpp_info.set_property("cmake_target_name", "snitch::snitch")
             self.cpp_info.libs = ['snitch']
 
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.names["cmake_find_package"] = "snitch"
         self.cpp_info.names["cmake_find_package_multi"] = "snitch"
