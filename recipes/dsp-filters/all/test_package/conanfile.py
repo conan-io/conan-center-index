@@ -15,12 +15,15 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
-            self.run(bin_path, env="conanrun")
+        if not can_run(self):
+            return
+        
+        bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+        self.run(bin_path, env="conanrun")
