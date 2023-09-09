@@ -87,18 +87,24 @@ class SnitchConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
+            # Position-independent code is irrelevant on Windows; this is UNIX only.
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared or self.options.header_only:
+            # Position-independent code is only relevant for static builds.
+            self.options.rm_safe("fPIC")
+
         if self.options.header_only:
-            self.info.settings.clear()
-            self.options.rm_safe("fPIC")
+            # In header-only mode, the OS and compiler don't matter.
+            self.settings.clear()
+            # Shared vs static is also irrelevant, so should be removed.
             del self.options.shared
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def package_id(self):
         if self.info.options.header_only:
+            # In header-only mode, the OS and compiler don't matter.
+            # However do not clear options; they influence the content of the header file.
             self.info.settings.clear()
 
     def layout(self):
