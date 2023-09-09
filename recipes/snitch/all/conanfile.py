@@ -194,4 +194,4 @@ class SnitchConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "snitch"
         self.cpp_info.components["_snitch"].names["cmake_find_package"] = target
         self.cpp_info.components["_snitch"].names["cmake_find_package_multi"] = target
-        self.cpp_info.components["_snitch"].set_property("cmake_target_name", f"fmt::{target}")
+        self.cpp_info.components["_snitch"].set_property("cmake_target_name", f"snitch::{target}")
