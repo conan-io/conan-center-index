@@ -171,6 +171,8 @@ class SnitchConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "snitch")
         if self.options.header_only:
             self.cpp_info.set_property("cmake_target_name", "snitch::snitch-header-only")
+            self.cpp_info.bindirs = []
+            self.cpp_info.libdirs = []
         else:
             self.cpp_info.set_property("cmake_target_name", "snitch::snitch")
             self.cpp_info.libs = ['snitch']
