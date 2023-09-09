@@ -15,16 +15,16 @@ required_conan_version = ">=1.54.0"
 
 class mFASTConan(ConanFile):
     name = "mfast"
-    license = "LGPL-3.0"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://objectcomputing.com/"
     description = (
         "mFAST is a high performance C++ encoding/decoding library for FAST "
         "(FIX Adapted for STreaming) protocol"
     )
+    license = "LGPL-3.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://objectcomputing.github.io/mFAST/"
     topics = ("fast", "fix", "fix-adapted-for-streaming",
               "financial-information-exchange", "libraries", "cpp")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -71,10 +71,12 @@ class mFASTConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # mfast<=1.22.0 doesn't support boost>=1.76.0
+        # see https://github.com/objectcomputing/mFAST/issues/118
         self.requires("boost/1.75.0")
         self.requires("tinyxml2/9.0.0")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.40.1")
+            self.requires("sqlite3/3.43.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
