@@ -96,12 +96,6 @@ class SnitchConan(ConanFile):
             self.options.rm_safe("fPIC")
 
         if self.options.header_only:
-            # In header-only mode, the OS, architecture, and compiler don't matter.
-            del self.settings.os
-            del self.settings.compiler
-            del self.settings.arch
-            # Build type also doesn't matter, but some of the code needs it; just force it to Release.
-            self.settings.build_type = 'Release'
             # Shared vs static is also irrelevant, so should be removed.
             del self.options.shared
 
