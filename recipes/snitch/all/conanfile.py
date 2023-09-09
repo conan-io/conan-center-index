@@ -88,11 +88,12 @@ class SnitchConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.options.header_only:
-            del self.options.fPIC
-            del self.options.shared
 
     def configure(self):
+        if self.options.header_only:
+            self.info.settings.clear()
+            self.options.rm_safe("fPIC")
+            del self.options.shared
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
