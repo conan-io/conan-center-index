@@ -9,7 +9,7 @@
      include("GNUInstallDirs")
      set(AOM_PKG_CONFIG_FILE "${AOM_CONFIG_DIR}/aom.pc")
  
-@@ -81,7 +81,8 @@ macro(setup_aom_install_targets)
+@@ -79,7 +79,8 @@ macro(setup_aom_install_targets)
      endif()
  
      if(BUILD_SHARED_LIBS)
