@@ -47,7 +47,7 @@ class CrowConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         if Version(self.version) >= "1.0":
             if self.options.with_ssl:
-                self.requires("openssl/1.1.1v")
+                self.requires("openssl/[>=1.1 <3]")
             if self.options.with_compression:
                 self.requires("zlib/1.2.13")
 
