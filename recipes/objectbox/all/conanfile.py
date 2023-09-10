@@ -22,6 +22,7 @@ class ObjectboxCConan(ConanFile):
     default_options = {
         "with_sync": False,
     }
+    upload_policy="skip"
 
     def export_sources(self):
         export_conandata_patches(self)
