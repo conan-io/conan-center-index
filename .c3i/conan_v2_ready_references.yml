@@ -26,6 +26,7 @@ required_for_references:
 - apr
 - apr-util
 - apriltag
+- aravis
 - archicad-apidevkit
 - arcus
 - arduinojson
@@ -68,6 +69,7 @@ required_for_references:
 - aws-crt-cpp
 - aws-kvs-pic
 - aws-libfabric
+- aws-sdk-cpp
 - b2
 - b64
 - backport-cpp
@@ -436,6 +438,7 @@ required_for_references:
 - id3v2lib
 - iir1
 - im95able-rea
+- imagl
 - imake
 - imath
 - imgui
@@ -511,6 +514,7 @@ required_for_references:
 - libatomic_ops
 - libattr
 - libavif
+- libb2
 - libbacktrace
 - libbigwig
 - libbsd
@@ -615,6 +619,7 @@ required_for_references:
 - libserial
 - libsgp4
 - libsigcpp
+- libsixel
 - libslz
 - libsmacker
 - libsndfile
@@ -800,6 +805,8 @@ required_for_references:
 - objectbox
 - objectbox-generator
 - observer-ptr-lite
+- octo-encryption-cpp
+- octo-keygen-cpp
 - octo-logger-cpp
 - octomap
 - odbc
@@ -1107,8 +1114,10 @@ required_for_references:
 - tllist
 - tlx
 - toml11
+- tracy
 - trantor
 - tree-sitter
+- tree-sitter-c
 - troldal-zippy
 - trompeloeil
 - tsl-hopscotch-map
@@ -1208,6 +1217,7 @@ required_for_references:
 - zlib
 - zlib-ng
 - zmarok-semver
+- zmqpp
 - zookeeper-client-c
 - zpp_bits
 - zstd
