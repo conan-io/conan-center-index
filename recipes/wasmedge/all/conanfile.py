@@ -27,8 +27,8 @@ class WasmedgeConan(ConanFile):
         }.get(str(self.info.settings.compiler), "gcc")
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.compiler.rm_safe("libcxx")
+        self.settings.compiler.rm_safe("cppstd")
 
     def validate(self):
         try:
