@@ -28,7 +28,7 @@ sources:
     sha256: "a0cff299621e2ef885aba219c498fa39a7d9a7ddf47585a118fd66c64ad1b312"
 patches:
   "3.7.0":
-    - patch_file: "patches/0001-3.4.0-fix-install.patch"
+    - patch_file: "patches/0001-3.7.0-fix-install.patch"
       patch_type: conan
       patch_description: Install just aom library without aom_static.
   "3.6.1":
