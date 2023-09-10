@@ -89,7 +89,8 @@ class WatcherConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-        if Version(self.version) >= "0.9.0" and is_msvc(self):
+        # it is only for watcher/0.9.0. see https://github.com/e-dant/watcher/issues/36
+        if Version(self.version) == "0.9.0" and is_msvc(self):
             self.cpp_info.cxxflags = ["/permissive-"]
 
         if is_apple_os(self):
