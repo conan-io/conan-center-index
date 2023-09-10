@@ -24,6 +24,10 @@ sources:
     url: "https://github.com/libarchive/libarchive/releases/download/v3.4.0/libarchive-3.4.0.tar.gz"
     sha256: "8643d50ed40c759f5412a3af4e353cffbce4fdf3b5cf321cb72cacf06b2d825e"
 patches:
+  "3.7.1":
+    - patch_file: "patches/0006-fix-msvc-build.patch"
+      patch_description: "Fix MSVC build"
+      patch_type: "conan"
   "3.6.2":
     - patch_file: "patches/0001-3.6.2-zlib-winapi.patch"
       patch_description: "Remove broken ZLIB WINAPI check"
