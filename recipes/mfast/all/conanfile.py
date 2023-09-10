@@ -73,7 +73,7 @@ class mFASTConan(ConanFile):
     def requirements(self):
         # mfast<=1.22.0 doesn't support boost>=1.76.0
         # see https://github.com/objectcomputing/mFAST/issues/118
-        self.requires("boost/1.75.0")
+        self.requires("boost/1.75.0", transitive_headers=True)
         self.requires("tinyxml2/9.0.0")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.43.0")
