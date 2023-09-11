@@ -42,8 +42,7 @@ class LibHALConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "2.0.0":
-            self.requires("boost/1.83.0", transitive_headers=True)
+        self.requires("boost/1.83.0", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()
