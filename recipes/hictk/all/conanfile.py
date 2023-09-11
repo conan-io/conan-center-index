@@ -42,8 +42,8 @@ class HictkConan(ConanFile):
         self.requires("fast_float/5.2.0", transitive_headers=True)
         if self.options.with_eigen:
             self.requires("eigen/3.4.0", transitive_headers=True)
-        self.requires("fmt/10.0.0", transitive_headers=True)
-        self.requires("hdf5/1.14.0", transitive_headers=True)
+        self.requires("fmt/10.1.0", transitive_headers=True)
+        self.requires("hdf5/1.14.1", transitive_headers=True)
         self.requires("highfive/2.7.1", transitive_headers=True)
         self.requires("libdeflate/1.18", transitive_headers=True)
         self.requires("parallel-hashmap/1.3.11", transitive_headers=True)
