@@ -46,23 +46,22 @@ class GobjectIntrospectionConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.77.1")
+        self.requires("glib/2.77.3", transitive_headers=True)
 
     def build_requirements(self):
         if Version(self.version) >= "1.71.0":
-            self.tool_requires("meson/1.2.0")
+            self.tool_requires("meson/1.2.1")
         else:
             # https://gitlab.gnome.org/GNOME/gobject-introspection/-/issues/414
             self.tool_requires("meson/1.2.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.5")
+            self.tool_requires("pkgconf/2.0.2")
         if self.settings.os == "Windows":
             self.tool_requires("winflexbison/2.5.24")
         else:
             self.tool_requires("flex/2.6.4")
             self.tool_requires("bison/3.8.2")
-        if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires("glib/<host_version>")
+        self.tool_requires("glib/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
