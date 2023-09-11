@@ -53,7 +53,7 @@ class PbcConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("gmp/6.3.0")
+        self.requires("gmp/6.3.0", transitive_headers=True)
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
