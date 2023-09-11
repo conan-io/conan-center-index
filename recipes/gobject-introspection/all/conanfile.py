@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
@@ -48,6 +49,10 @@ class GobjectIntrospectionConan(ConanFile):
     def requirements(self):
         glib_minor = Version(self.version).minor
         self.requires(f"glib/[>=2.{glib_minor}]", transitive_headers=True)
+
+    def validate(self):
+        if self.dependencies["glib"].options.shared:
+            raise ConanInvalidConfiguration("gobject-introspection can't be built with shared glib")
 
     def build_requirements(self):
         self.tool_requires("meson/1.2.1")
