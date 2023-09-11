@@ -77,7 +77,7 @@ class PackageConan(ConanFile):
         self.requires("libcurl/8.2.1")
 
         if self.options.build_pcap:
-            self.requires("libtins/4.4")
+            self.requires("libtins/4.5")
 
         if self.options.build_osf:
             # Used in fb_generated/*.h
