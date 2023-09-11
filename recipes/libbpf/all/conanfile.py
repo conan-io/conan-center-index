@@ -14,6 +14,8 @@ class LibbpfConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libbpf/libbpf"
     topics = ("berkeley-packet-filter", "bpf", "ebpf", "network", "tracing")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -88,5 +90,9 @@ class LibbpfConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libbpf"
         self.cpp_info.libs = ["bpf"]
+        self.cpp_info.set_property("pkg_config_name", "libbpf")
+
+        # TODO: Remove once v1 is no longer needed
+        self.cpp_info.names["pkg_config"] = "libbpf"
+
