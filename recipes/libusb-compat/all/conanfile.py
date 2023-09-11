@@ -192,7 +192,8 @@ class LibUSBCompatConan(ConanFile):
                 os.path.join(self.source_folder, "libusb", "CMakeLists.txt"),
                 cmakelists_in.format(libusb_sources=" ".join(sources), libusb_headers=" ".join(headers)),
             )
-            replace_in_file(self, "config.h", "\n#define API_EXPORTED", "\n#define API_EXPORTED //")
+            replace_in_file(self, os.path.join(self.source_folder, "config.h"),
+                            "\n#define API_EXPORTED", "\n#define API_EXPORTED //")
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
