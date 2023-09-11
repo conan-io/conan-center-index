@@ -1,4 +1,7 @@
 sources:
+  "2.3":
+    url: "https://github.com/axboe/liburing/archive/liburing-2.3.tar.gz"
+    sha256: "60b367dbdc6f2b0418a6e0cd203ee0049d9d629a36706fcf91dfb9428bae23c8"
   "2.2":
     url: "https://github.com/axboe/liburing/archive/liburing-2.2.tar.gz"
     sha256: "e092624af6aa244ade2d52181cc07751ac5caba2f3d63e9240790db9ed130bbc"

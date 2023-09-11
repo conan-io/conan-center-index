@@ -51,7 +51,8 @@ class LiburingConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("linux-headers-generic/5.13.9")
+        if Version(self.version) < "2.3":
+            self.requires("linux-headers-generic/5.13.9")
 
     def validate(self):
         # FIXME: use kernel version of build/host machine.
