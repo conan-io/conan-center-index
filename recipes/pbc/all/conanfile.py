@@ -49,7 +49,7 @@ class PbcConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("gmp/6.2.1")
+        self.requires("gmp/6.3.0")
 
     def build_requirements(self):
         self.tool_requires("bison/3.8.2")
