@@ -15,10 +15,10 @@ required_conan_version = ">=1.53.0"
 class Nghttp2Conan(ConanFile):
     name = "libnghttp2"
     description = "HTTP/2 C Library and tools"
-    topics = ("http", "http2")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://nghttp2.org"
-    license = "MIT"
+    topics = ("http", "http2")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -73,7 +73,7 @@ class Nghttp2Conan(ConanFile):
         if self.options.with_hpack:
             self.requires("jansson/2.14")
         if self.options.get_safe("with_asio"):
-            self.requires("boost/1.82.0")
+            self.requires("boost/1.83.0")
 
     def validate(self):
         if self.options.get_safe("with_asio") and is_msvc(self):
@@ -97,8 +97,6 @@ class Nghttp2Conan(ConanFile):
         # disable unneeded auto-picked dependencies
         tc.variables["WITH_LIBXML2"] = False
         tc.variables["WITH_JEMALLOC"] = self.options.get_safe("with_jemalloc", False)
-        if Version(self.version) < "1.47.0":
-            tc.variables["WITH_SPDYLAY"] = False
         if Version(self.version) < "1.52.0":
             tc.variables["ENABLE_ASIO_LIB"] = self.options.with_asio
         if is_apple_os(self):
