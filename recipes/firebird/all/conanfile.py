@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, get, chdir, replace_in_file
+from conan.tools.files import copy, get, chdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 
@@ -75,7 +75,6 @@ class FirebirdConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Disable building of examples, plugins and executables.
         # Only executables required for the build are included.
         # https://github.com/FirebirdSQL/firebird/blob/v4.0.2/builds/posix/Makefile.in#L281-L305
