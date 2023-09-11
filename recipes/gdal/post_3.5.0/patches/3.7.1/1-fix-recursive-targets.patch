@@ -58,12 +58,13 @@ diff --git a/cmake/helpers/GdalDriverHelper.cmake b/cmake/helpers/GdalDriverHelp
      is_plugin(RES ${target})
      if (RES)
          target_link_libraries(${target} PRIVATE ${_DRIVER_PRIVATE})
-@@ -295,7 +292,7 @@
+@@ -295,7 +292,8 @@
              endif()
          endforeach()
      else ()
 -        gdal_target_interfaces(${target} ${_DRIVER_PRIVATE})
 +        gdal_target_interfaces(${target} "" ${_DRIVER_PRIVATE})
          gdal_add_private_link_libraries(${_DRIVER_PRIVATE})
++        target_link_libraries(${ARGV})
      endif ()
  

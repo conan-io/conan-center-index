@@ -38,7 +38,7 @@ diff --git a/cmake/helpers/GdalDriverHelper.cmake b/cmake/helpers/GdalDriverHelp
              endif ()
          endif ()
      endforeach ()
-@@ -276,14 +280,11 @@
+@@ -276,15 +280,12 @@
      set(_oneValueArgs)
      set(_multiValueArgs PRIVATE)
      cmake_parse_arguments(_DRIVER "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
@@ -52,5 +52,6 @@ diff --git a/cmake/helpers/GdalDriverHelper.cmake b/cmake/helpers/GdalDriverHelp
 -        gdal_target_interfaces(${target} ${_DRIVER_PRIVATE})
 +        gdal_target_interfaces(${target} "" ${_DRIVER_PRIVATE})
          gdal_add_private_link_libraries(${_DRIVER_PRIVATE})
++        target_link_libraries(${ARGV})
      endif ()
  endfunction()
