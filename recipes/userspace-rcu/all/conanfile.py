@@ -55,9 +55,8 @@ class UserspaceRCUConan(ConanFile):
         tc.generate()
 
     def build(self):
-        with chdir(self, self.source_folder):
-            self.run("./bootstrap")
         autotools = Autotools(self)
+        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
