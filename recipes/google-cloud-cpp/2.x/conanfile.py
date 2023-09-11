@@ -143,18 +143,18 @@ class GoogleCloudCppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def requirements(self):
-        self.requires("protobuf/3.21.9", transitive_headers=True)
-        self.requires("grpc/1.50.1", transitive_headers=True)
+        self.requires("protobuf/[>=3.21]", transitive_headers=True)
+        self.requires("grpc/[>=1.50]", transitive_headers=True)
         self.requires("nlohmann_json/3.10.0")
         self.requires("crc32c/1.1.1")
-        self.requires("abseil/20220623.0", transitive_headers=True)
+        self.requires("abseil/[>=20220623.0]", transitive_headers=True)
         self.requires("libcurl/7.88.1")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/1.2.13")
 
     def build_requirements(self):
         # For the grpc-cpp-plugin executable
-        self.tool_requires("grpc/1.50.1")
+        self.tool_requires("grpc/[>=1.50]")
 
     def generate(self):
         tc = CMakeToolchain(self)
