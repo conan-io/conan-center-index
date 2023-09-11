@@ -42,7 +42,7 @@ class OpenEXRConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/[>=1.2.10 <2]")
+        self.requires("zlib/[>=1.2.11 <2]")
         # Note: OpenEXR and Imath are versioned independently.
         self.requires("imath/3.1.9", transitive_headers=True)
 
