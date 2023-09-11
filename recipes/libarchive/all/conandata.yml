@@ -25,7 +25,16 @@ sources:
     sha256: "8643d50ed40c759f5412a3af4e353cffbce4fdf3b5cf321cb72cacf06b2d825e"
 patches:
   "3.7.1":
-    - patch_file: "patches/0006-fix-msvc-build.patch"
+    - patch_file: "patches/0001-3.7.1-zlib-winapi.patch"
+      patch_description: "Remove broken ZLIB WINAPI check"
+      patch_type: "portability"
+    - patch_file: "patches/0003-3.7.1-cmake.patch"
+      patch_description: "Make CMake build-system compatible with Conan"
+      patch_type: "conan"
+    - patch_file: "patches/0005-3.7.1-try-compile-cmakedeps.patch"
+      patch_description: "Patch try_compile check to work with imported CMake targets from Conan packages"
+      patch_type: "conan"
+    - patch_file: "patches/0006-3.7.1-fix-msvc-build.patch"
       patch_description: "Fix MSVC build"
       patch_type: "conan"
   "3.6.2":
@@ -38,7 +47,7 @@ patches:
     - patch_file: "patches/0005-3.6.2-try-compile-cmakedeps.patch"
       patch_description: "Patch try_compile check to work with imported CMake targets from Conan packages"
       patch_type: "conan"
-    - patch_file: "patches/0006-fix-msvc-build.patch"
+    - patch_file: "patches/0006-3.6.2-fix-msvc-build.patch"
       patch_description: "Fix MSVC build"
       patch_type: "conan"
   "3.6.1":
