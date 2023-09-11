@@ -32,6 +32,10 @@ class PbcConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -52,8 +56,11 @@ class PbcConan(ConanFile):
         self.requires("gmp/6.3.0")
 
     def build_requirements(self):
-        self.tool_requires("bison/3.8.2")
-        self.tool_requires("flex/2.6.4")
+        if self._settings_build.os == "Windows":
+            self.tool_requires("winflexbison/2.5.24")
+        else:
+            self.tool_requires("flex/2.6.4")
+            self.tool_requires("bison/3.8.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
