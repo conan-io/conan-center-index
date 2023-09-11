@@ -6,7 +6,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, get, chdir, replace_in_file
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.54.0"
@@ -41,13 +41,13 @@ class FirebirdConan(ConanFile):
         #   - abseil (for int128)
         #   - libtommath
         #   - re2
-        # Not currently available ConanCenter:
+        # Not currently available in ConanCenter:
         #   - cloop
         #   - decNumber
         #   - libtomcrypt
         #   - SfIO
         #   - ttmath
-        pass
+        self.requires("zlib/1.2.13")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
@@ -71,6 +71,8 @@ class FirebirdConan(ConanFile):
         # Reduce the amount of warnings
         tc.extra_cxxflags.append("-Wno-unused-result")
         tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -111,9 +113,9 @@ class FirebirdConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = ["fbclient", "ib_util", "decFloat", "edit", "re2", "tomcrypt", "tommath"]
-
         self.cpp_info.set_property("pkg_config_name", "firebird")
+
+        self.cpp_info.libs = ["fbclient", "ib_util", "decFloat", "edit", "re2", "tomcrypt", "tommath"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
