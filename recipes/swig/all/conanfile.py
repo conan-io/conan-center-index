@@ -43,6 +43,8 @@ class SwigConan(ConanFile):
             self.requires("pcre2/10.42")
         else:
             self.requires("pcre/8.45")
+        if self.settings.os == "Macos":
+            self.requires("libgettext/0.22")
 
     def package_id(self):
         del self.info.settings.compiler
