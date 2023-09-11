@@ -4,7 +4,7 @@ import re
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, copy, rmdir, load, save
+from conan.tools.files import get, copy, rmdir, load, save, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 
 required_conan_version = ">=1.53.0"
@@ -35,6 +35,10 @@ class PackageConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libudev/system")
 
+    def build_requirements(self):
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/2.0.2")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -61,6 +65,8 @@ class PackageConan(ConanFile):
         cmakelists_content = load(self, cmakelists_path)
         patched_content = re.sub(r"add_subdirectory\((?!({})\)).+\)".format("|".join(allowed_subdirs)), r"", cmakelists_content)
         save(self, cmakelists_path, patched_content)
+        # Adjust the pkg-config target for libnl
+        replace_in_file(self, cmakelists_path, "libnl-3.0 libnl-route-3.0", "libnl")
 
     def build(self):
         self._patch_sources()
