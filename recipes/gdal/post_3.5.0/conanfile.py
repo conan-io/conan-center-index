@@ -308,7 +308,7 @@ class GdalConan(ConanFile):
             raise ConanInvalidConfiguration(msg)
 
         if self.options.with_poppler and self.dependencies["poppler"].options.with_libjpeg != self.options.with_jpeg:
-            msg = "poppler:with_libjpeg and gdal:with_jpeg must be set to the same value, either libjpeg or" " libjpeg-turbo."
+            msg = "poppler:with_libjpeg and gdal:with_jpeg must be set to the same value, either libjpeg or libjpeg-turbo."
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
 
