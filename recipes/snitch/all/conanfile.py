@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, save
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -96,7 +96,7 @@ class SnitchConan(ConanFile):
             self.options.rm_safe("fPIC")
 
         if self.options.header_only:
-            # Shared vs static is also irrelevant, so should be removed.
+            # Shared vs static is irrelevant in header-only mode, so should be removed.
             del self.options.shared
 
     def package_id(self):
@@ -187,6 +187,8 @@ class SnitchConan(ConanFile):
             self.cpp_info.components["_snitch"].libdirs = []
         else:
             self.cpp_info.components["_snitch"].libs = ['snitch']
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.names["cmake_find_package"] = "snitch"
