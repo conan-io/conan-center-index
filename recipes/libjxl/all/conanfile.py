@@ -44,8 +44,8 @@ class LibjxlConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("brotli/1.0.9")
-        self.requires("highway/0.12.2")
+        self.requires("brotli/1.1.0")
+        self.requires("highway/0.12.2") # newer versions are not compatible
         self.requires("lcms/2.14")
 
     def source(self):
