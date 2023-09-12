@@ -161,7 +161,11 @@ class StdgpuConan(ConanFile):
         # Fix repeated application of the THRUST_DEVICE_SYSTEM define
         for backend in ["cuda", "openmp"]:
             replace_in_file(self, os.path.join(self.source_folder, "src", "stdgpu", backend, "CMakeLists.txt"),
-                            "THRUST_DEVICE_SYSTEM=", ") # THRUST_DEVICE_SYSTEM=")
+                            "THRUST_DEVICE_SYSTEM=",
+                            ") # THRUST_DEVICE_SYSTEM=")
+        replace_in_file(self, os.path.join(self.source_folder, "src", "stdgpu", "openmp", "CMakeLists.txt"),
+                        "find_package(OpenMP 2.0 REQUIRED)",
+                        "find_package(OpenMP REQUIRED)")
 
     def build(self):
         self._patch_sources()
