@@ -37,9 +37,6 @@ class OhNetConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def build_requirements(self):
-        self.tool_requires("rsync/3.2.7")
-
     def generate(self):
         if is_msvc(self):
             tc = NMakeToolchain(self)
@@ -58,6 +55,7 @@ class OhNetConan(ConanFile):
             else:
                 args = []
                 args = self._get_openhome_architecture(args)
+                args.append("rsync=no")
                 autotools = Autotools(self)
                 autotools.make(args=args, target=targets)
 
