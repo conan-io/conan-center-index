@@ -47,7 +47,7 @@ class LibspngConan(ConanFile):
         if self.options.with_miniz:
             self.requires("miniz/3.0.2")
         else:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

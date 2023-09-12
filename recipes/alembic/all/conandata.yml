@@ -1,4 +1,7 @@
 sources:
+  "1.8.5":
+    url: "https://github.com/alembic/alembic/archive/1.8.5.tar.gz"
+    sha256: "180a12f08d391cd89f021f279dbe3b5423b1db751a9898540c8059a45825c2e9"
   "1.8.3":
     url: "https://github.com/alembic/alembic/archive/1.8.3.tar.gz"
     sha256: "b0bc74833bff118a869e81e6acb810a58797e77ef63143954b2f8e817c7f65cb"
@@ -6,6 +9,10 @@ sources:
     url: "https://github.com/alembic/alembic/archive/refs/tags/1.8.2.tar.gz"
     sha256: "3f1c466ee1600578689b32b1f2587066d3259704ec7ed1fcf80c324d01274f48"
 patches:
+  "1.8.5":
+    - patch_file: "patches/1.8.5-0001-fix-cmake.patch"
+      patch_description: "Disable a line in a CMakeLists.txt to build with shared=True"
+      patch_type: "portability"
   "1.8.3":
     - patch_file: "patches/1.8.2-0001-fix-cmake.patch"
   "1.8.2":

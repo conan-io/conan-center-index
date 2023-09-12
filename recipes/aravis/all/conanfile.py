@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, rm, rmdir
@@ -12,16 +12,18 @@ from conan.tools.scm import Version
 import os
 import glob
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
 
 class AravisConan(ConanFile):
     name = "aravis"
+    description = "A vision library for genicam based cameras."
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AravisProject/aravis"
-    description = "A vision library for genicam based cameras."
     topics = ("usb", "camera")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -48,7 +50,7 @@ class AravisConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.packet_socket
 
     def configure(self):
@@ -63,13 +65,14 @@ class AravisConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.75.2")
-        self.requires("libxml2/2.10.3")
+        # glib-object.h and gio/gio.h are used in several public headers
+        self.requires("glib/2.77.2", transitive_headers=True)
+        self.requires("libxml2/2.11.4")
         self.requires("zlib/1.2.13")
         if self.options.usb:
             self.requires("libusb/1.0.26")
         if self.options.gst_plugin:
-            self.requires("gstreamer/1.19.2")
+            self.requires("gstreamer/1.22.3")
             self.requires("gst-plugins-base/1.19.2")
 
     def validate(self):
@@ -77,18 +80,17 @@ class AravisConan(ConanFile):
             raise ConanInvalidConfiguration("Static runtime is not supported on Windows due to GLib issues")
         if self.options.shared and not self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration("Shared Aravis cannot link to static GLib")
-        if self.settings.os == "Macos" and self.dependencies["glib"].options.shared:
+        if is_apple_os(self) and self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration(
                 "macOS builds are disabled when glib is shared until "
                 "conan-io/conan#7324 gets merged to fix macOS SIP issue #8443"
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
-        if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires("glib/2.75.2")
+        self.tool_requires("meson/1.2.1")
+        self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/1.9.5")
         if self.options.introspection:
             self.tool_requires("gobject-introspection/1.72.0")
 
