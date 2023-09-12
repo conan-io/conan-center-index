@@ -13,10 +13,10 @@ class OpenTelemetryProtoConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/open-telemetry/opentelemetry-proto"
     description = "Protobuf definitions for the OpenTelemetry protocol (OTLP)"
-    topics = ("opentelemetry", "telemetry", "otlp", "pre-built")
+    topics = ("opentelemetry", "telemetry", "otlp")
 
-    package_type = "build-scripts"
-    settings = "os", "arch", "compiler", "build_type"
+    package_type = "unknown"
+    settings = ()
 
     def layout(self):
         basic_layout(self, src_folder="src")
