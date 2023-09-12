@@ -40,7 +40,7 @@ class OhNetConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
