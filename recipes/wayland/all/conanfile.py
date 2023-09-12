@@ -60,7 +60,7 @@ class WaylandConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("meson/1.2.1")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.2")
+            self.tool_requires("pkgconf/2.0.3")
         if cross_building(self):
             self.tool_requires(str(self.ref))
 
