@@ -83,31 +83,31 @@ class GStPluginsBaseConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("gstreamer/1.22.3", transitive_headers=True)
-        self.requires("glib/2.77.2", transitive_headers=True, force=True)  # FIXME: remove force
-        self.requires("zlib/1.2.13")
+        self.requires("gstreamer/1.22.6", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True, force=True)  # FIXME: remove force
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_libalsa"):
-            self.requires("libalsa/1.2.7.2")
+            self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_xorg"):
-            self.requires("xorg/system", transitive_headers=True)
+            self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
         if self.options.with_gl:
             self.requires("opengl/system")
             if self.settings.os == "Windows":
-                self.requires("wglext/cci.20200813", transitive_headers=True)
-                self.requires("glext/cci.20210420", transitive_headers=True)
+                self.requires("wglext/cci.20200813", transitive_headers=True, transitive_libs=True)
+                self.requires("glext/cci.20210420", transitive_headers=True, transitive_libs=True)
             if self.options.get_safe("with_egl"):
-                self.requires("egl/system", transitive_headers=True)
+                self.requires("egl/system", transitive_headers=True, transitive_libs=True)
             if self.options.get_safe("with_wayland"):
-                self.requires("wayland/1.22.0", transitive_headers=True)
-                self.requires("wayland-protocols/1.31")
+                self.requires("wayland/1.22.0", transitive_headers=True, transitive_libs=True)
+                self.requires("wayland-protocols/1.33")
             if self.options.with_graphene:
                 self.requires("graphene/1.10.8")
             if self.options.with_libpng:
-                self.requires("libpng/1.6.40")
+                self.requires("libpng/[>=1.6 <2]")
             if self.options.with_libjpeg == "libjpeg":
                 self.requires("libjpeg/9e")
             elif self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/3.0.0")
+                self.requires("libjpeg-turbo/3.0.2")
         if self.options.with_ogg:
             self.requires("ogg/1.3.5")
         if self.options.with_opus:
@@ -117,7 +117,8 @@ class GStPluginsBaseConan(ConanFile):
         if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
         if self.options.with_pango:
-            self.requires("pango/1.50.14")
+            self.requires("pango/1.51.0")
+        self.requires("fontconfig/2.15.0", override=True) # FIXME
 
     def validate(self):
         if not self.dependencies["glib"].options.shared and self.options.shared:
@@ -132,11 +133,11 @@ class GStPluginsBaseConan(ConanFile):
             raise ConanInvalidConfiguration("OpenGL support with Wayland requires 'with_egl' turned on!")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.5")
+            self.tool_requires("pkgconf/2.1.0")
         if self.settings.os == "Windows":
-            self.tool_requires("winflexbison/2.5.24")
+            self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
