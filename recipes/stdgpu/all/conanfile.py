@@ -152,6 +152,7 @@ class StdgpuConan(ConanFile):
         deps = CMakeDeps(self)
         # FIXME: should be set by the thrust recipe instead
         deps.set_property("thrust", "cmake_find_mode", "both")
+        deps.set_property("openmp", "cmake_find_mode", "both")
         deps.generate()
         env = VirtualBuildEnv(self)
         env.generate()
