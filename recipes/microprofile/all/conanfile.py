@@ -91,7 +91,7 @@ class MicroprofileConan(ConanFile):
         if self.options.enable_timer == "gl":
             self.requires("opengl/system")
         if self.options.enable_timer == "vulkan":
-            self.requires("vulkan-loader/1.3.239.0")
+            self.requires("vulkan-loader/1.3.243.0")
 
     def _validate_int_options(self):
         positive_int_options = [
