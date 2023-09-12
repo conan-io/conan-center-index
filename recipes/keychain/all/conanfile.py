@@ -38,7 +38,7 @@ class KeychainConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os == "Linux":
-            self.tool_requires("pkgconf/2.0.2")
+            self.tool_requires("pkgconf/2.0.3")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
