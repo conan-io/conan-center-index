@@ -13,7 +13,7 @@ class TinyExrConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/syoyo/tinyexr"
     topics = ("exr", "header-only")
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_z": ["zlib", "miniz"],
@@ -38,7 +38,7 @@ class TinyExrConan(ConanFile):
 
     def requirements(self):
         if self.options.with_z == "miniz":
-            self.requires("miniz/3.0.1")
+            self.requires("miniz/3.0.2")
         else:
             self.requires("zlib/1.2.13")
         if self.options.with_zfp:

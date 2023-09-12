@@ -1,4 +1,4 @@
 sources:
   "2.39":
-    url: "https://github.com/util-linux/util-linux/archive/refs/tags/v2.39.tar.gz"
-    sha256: "186cb427cd6b4654f381357b60af7ffb0ae9bb50d7af7d87e0723858f7318b80"
+    url: "https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.39/util-linux-2.39.tar.xz"
+    sha256: "32b30a336cda903182ed61feb3e9b908b762a5e66fe14e43efb88d37162075cb"
