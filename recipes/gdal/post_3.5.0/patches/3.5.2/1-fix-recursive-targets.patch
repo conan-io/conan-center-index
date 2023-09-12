@@ -38,7 +38,7 @@ diff --git a/cmake/helpers/GdalDriverHelper.cmake b/cmake/helpers/GdalDriverHelp
              endif ()
          endif ()
      endforeach ()
-@@ -276,15 +280,12 @@
+@@ -276,14 +280,12 @@
      set(_oneValueArgs)
      set(_multiValueArgs PRIVATE)
      cmake_parse_arguments(_DRIVER "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
