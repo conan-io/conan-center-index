@@ -47,6 +47,7 @@ class GobjectIntrospectionConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
+        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/blob/1.76.1/meson.build?ref_type=tags#L127-131
         glib_minor = Version(self.version).minor
         self.requires(f"glib/[>=2.{glib_minor}]", transitive_headers=True)
 
