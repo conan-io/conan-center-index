@@ -88,10 +88,12 @@ class OhNetConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["ohNet"].libs = ["ohNet"]
         self.cpp_info.components["ohNet"].set_property("cmake_target_name", "ohNet")
+        self.cpp_info.components["ohNet"].system_libs = ["pthread", "m"]
 
         self.cpp_info.components["ohNetCore"].libs = ["ohNetCore"]
         self.cpp_info.components["ohNetCore"].frameworks.extend(["CoreFoundation", "IOKit", "SystemConfiguration"])
         self.cpp_info.components["ohNetCore"].set_property("cmake_target_name", "ohNetCore")
+        self.cpp_info.components["ohNetCore"].system_libs = ["pthread", "m"]
 
         self.cpp_info.components["ohNetDevices"].libs = ["ohNetDevices"]
         self.cpp_info.components["ohNetDevices"].set_property("cmake_target_name", "ohNetDevices")
