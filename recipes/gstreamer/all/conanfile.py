@@ -60,7 +60,7 @@ class GStreamerConan(ConanFile):
         # No longer the case, but see: https://github.com/conan-io/conan-center-index/pull/13400#issuecomment-1551565573 for context
         self.tool_requires("glib/2.78.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.2")
+            self.tool_requires("pkgconf/2.0.3")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
         if self.settings.os == 'Windows':
