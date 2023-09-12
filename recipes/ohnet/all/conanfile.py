@@ -34,6 +34,14 @@ class OhNetConan(ConanFile):
                 args.extend([f"openhome_architecture={openhome_architecture}", f"detected_openhome_architecture={openhome_architecture}"])
         return args
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -72,7 +80,7 @@ class OhNetConan(ConanFile):
             if is_msvc(self):
                 self.run(f"nmake /f OhNet.mak install installdir={self.package_folder} installlibdir={installlibdir} installincludedir={installincludedir}")
             else:
-                args = [f"prefix={self.package_folder}", f"installlibdir={installlibdir}", f"installincludedir={installincludedir}"]
+                args = [f"prefix={self.package_folder}", f"installlibdir={installlibdir}", f"installincludedir={installincludedir}", "rsync=no"]
                 args = self._get_openhome_architecture(args)
                 autotools = Autotools(self)
                 autotools.make(args=args, target="install-libs install-includes")
