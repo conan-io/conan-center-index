@@ -1,4 +1,4 @@
 sources:
-  "0.18.8":
-    url: "https://github.com/unum-cloud/usearch/archive/v0.18.8.tar.gz"
-    sha256: "069072fa5ad6817f24fa1d2599dac41263c78096bccb97382d6447c733df279d"
+  "2.4.0":
+    url: "https://github.com/unum-cloud/usearch/archive/v2.4.0.tar.gz"
+    sha256: "cc9ed7cf978b53a44f3a383b6172734647d4b6c4d9868b286b67be6202e6ba1b"
