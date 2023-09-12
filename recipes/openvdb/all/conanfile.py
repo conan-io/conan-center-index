@@ -144,13 +144,14 @@ class OpenVDBConan(ConanFile):
     def requirements(self):
         # https://github.com/AcademySoftwareFoundation/openvdb/blob/v10.0.1/doc/dependencies.txt#L36-L84
         self.requires("boost/1.83.0", transitive_headers=True)
+        # Shared builds fail when the transitive_libs=True params below are not explicitly set for some reason
         if Version(self.version) >= "9.0.0":
             self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
         else:
             self.requires("onetbb/2020.3.3", transitive_headers=True, transitive_libs=True)
         if Version(self.version) < "8.1.0" or self.options.use_imath_half:
             # OpenVDB does not support the separate imath/3.* package, unfortunately.
-            self.requires("openexr/2.5.7", transitive_headers=True)
+            self.requires("openexr/2.5.7", transitive_headers=True, transitive_libs=True)
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_blosc:
