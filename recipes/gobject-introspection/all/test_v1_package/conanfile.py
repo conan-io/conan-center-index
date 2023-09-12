@@ -6,6 +6,10 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi", "pkg_config"
 
+    def build_requirements(self):
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/2.0.3")
+
     def build(self):
         if self.settings.os != 'Windows':
             with tools.environment_append({'PKG_CONFIG_PATH': "."}):
@@ -21,6 +25,6 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
+            bin_path = os.path.join("bin", "test_basic")
             self.run(bin_path, run_environment=True)
 
