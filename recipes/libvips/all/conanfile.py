@@ -116,7 +116,7 @@ class LibvipsConan(ConanFile):
 
     def requirements(self):
         self.requires("expat/2.5.0")
-        self.requires("glib/2.77.2", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_cfitsio:
             self.requires("cfitsio/4.2.0")
         if self.options.with_cgif:
