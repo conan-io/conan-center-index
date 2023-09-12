@@ -49,7 +49,7 @@ class LibFtdi(ConanFile):
     def requirements(self):
         self.requires("libusb-compat/0.1.7", transitive_headers=True)
         if self.options.enable_cpp_wrapper:
-            self.requires("boost/1.82.0")
+            self.requires("boost/1.83.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

@@ -57,7 +57,7 @@ class LibFtdiConan(ConanFile):
     def requirements(self):
         self.requires("libusb/1.0.26", transitive_headers=True)
         if self.options.enable_cpp_wrapper:
-            self.requires("boost/1.82.0")
+            self.requires("boost/1.83.0")
 
     def validate(self):
         if is_msvc(self) and self.options.use_streaming:
