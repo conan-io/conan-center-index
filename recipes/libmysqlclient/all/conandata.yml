@@ -11,9 +11,6 @@ sources:
   "8.0.30":
     url: "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.30.tar.gz"
     sha256: "c988d5c6ba9a56692a6cd6e9813465b5fc9368ed4b461df97059a2fc160c8b84"
-  "8.0.25":
-    url: "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.25.tar.gz"
-    sha256: "c16aa9cf621bc028efba2bb11f3c36a323b125fa0d108ff92fab60e46309206e"
 patches:
   "8.1.0":
     - patch_file: "patches/0006-fix-cpp20-build-8.1.0.patch"
