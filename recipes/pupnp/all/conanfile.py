@@ -96,7 +96,7 @@ class PupnpConan(ConanFile):
         features["samples"] = False
         features["blocking_tcp_connections"] = self.options["blocking-tcp"]
         for opt in ("ipv6", "reuseaddr", "webserver", "client", "device", "largefile", "tools", "debug"):
-            features[opt] = self.options[opt]
+            features[opt] = self.options.get_safe(opt)
         for feature, enabled in features.items():
             what = "enable" if enabled else "disable"
             tc.configure_args.append(f"--{what}-{feature}")
