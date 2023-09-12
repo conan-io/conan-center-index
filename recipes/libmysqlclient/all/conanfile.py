@@ -36,14 +36,14 @@ class LibMysqlClientCConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17" if Version(self.version) >= "8.0.27" else "11"
+        return "17"
 
     @property
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16",
             "msvc": "192",
-            "gcc": "7" if Version(self.version) >= "8.0.27" else "5.3",
+            "gcc": "7",
             "clang": "6",
         }
 
@@ -62,10 +62,7 @@ class LibMysqlClientCConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) < "8.0.30":
-            self.requires("openssl/1.1.1u")
-        else:
-            self.requires("openssl/[>=1.1 <4]")
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/1.2.13")
         self.requires("zstd/1.5.5")
         self.requires("lz4/1.9.4")
@@ -94,11 +91,6 @@ class LibMysqlClientCConan(ConanFile):
         # https://github.com/mysql/mysql-server/blob/mysql-8.0.17/cmake/libutils.cmake#L333-L335
         if self.settings.compiler == "apple-clang" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared library")
-
-        # mysql < 8.0.29 uses `requires` in source code. It is the reserved keyword in C++20.
-        # https://github.com/mysql/mysql-server/blob/mysql-8.0.0/include/mysql/components/services/dynamic_loader.h#L270
-        if self.settings.compiler.get_safe("cppstd") == "20" and Version(self.version) < "8.0.29":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support C++20")
 
     def build_requirements(self):
         if is_apple_os(self):
@@ -195,6 +187,10 @@ class LibMysqlClientCConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "install_macros.cmake"),
                         "  INSTALL_DEBUG_SYMBOLS(",
                         "  # INSTALL_DEBUG_SYMBOLS(")
+
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "FIND_PACKAGE(Doxygen)",
+                        "# FIND_PACKAGE(Doxygen)")
 
     def generate(self):
         vbenv = VirtualBuildEnv(self)
