@@ -81,14 +81,14 @@ class LibdrmConan(ConanFile):
         if self.options.intel:
             self.requires("libpciaccess/0.17")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("linux-headers-generic/5.14.9")
+            self.requires("linux-headers-generic/5.15.128")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("libdrm supports only Linux or FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.0")
+        self.tool_requires("meson/1.2.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
