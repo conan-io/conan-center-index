@@ -74,7 +74,7 @@ class SdbusCppConan(ConanFile):
                     self.name, self._minimum_cpp_standard, self.info.settings.compiler, self.info.settings.compiler.version))
 
     def build_requirements(self):
-        self.tool_requires("pkgconf/2.0.2")
+        self.tool_requires("pkgconf/2.0.3")
         if self.options.with_code_gen:
             self.tool_requires("expat/2.5.0")
 
