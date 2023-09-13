@@ -39,7 +39,7 @@ class MqttCPPConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.82.0")
+        self.requires("boost/1.83.0")
 
     def package_id(self):
         self.info.clear()
