@@ -1143,7 +1143,14 @@ required_for_references:
 - tree-sitter-c
 - troldal-zippy
 - trompeloeil
+- tscns
+- tsil
+- tsl-array-hash
+- tsl-hat-trie
 - tsl-hopscotch-map
+- tsl-ordered-map
+- tsl-robin-map
+- tsl-sparse-map
 - turtle
 - type_safe
 - tz
