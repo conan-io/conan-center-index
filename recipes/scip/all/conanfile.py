@@ -34,6 +34,10 @@ class SCIPConan(ConanFile):
         "with_tpi": False,
         "with_sym": "bliss",
     }
+    soplex_version_belonging_to_me = {
+        "8.0.4": "6.0.4",
+        "8.0.3": "6.0.3"
+    }
 
     @property
     def _min_cppstd(self):
@@ -79,7 +83,7 @@ class SCIPConan(ConanFile):
             self.requires("gmp/6.3.0")
         if self.options.with_sym == "bliss":
             self.requires("bliss/0.77")
-        self.requires("soplex/6.0.3")
+        self.requires(f"soplex/{self.soplex_version_belonging_to_me[self.version]}")
 
     def configure(self):
         self.options["soplex"].with_gmp = self.options.with_gmp
