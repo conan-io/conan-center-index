@@ -23,7 +23,7 @@ class MqttCPPConan(ConanFile):
     no_copy_source = True
 
     @property
-    def _min_cppst(self):
+    def _min_cppstd(self):
         return 14
 
     @property
