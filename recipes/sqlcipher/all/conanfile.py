@@ -71,7 +71,7 @@ class SqlcipherConan(ConanFile):
             raise ConanInvalidConfiguration("commoncrypto is only supported on Macos")
 
     def build_requirements(self):
-        self.tool_requires("tcl/8.6.11")
+        self.tool_requires("tcl/8.6.13")
         if not is_msvc(self):
             self.tool_requires("gnu-config/cci.20210814")
             if self._settings_build.os == "Windows":
