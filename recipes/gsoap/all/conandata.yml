@@ -10,3 +10,9 @@ sources:
   "2.8.116":
     url: "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/gsoap/gsoap_2.8.116.zip"
     sha256: "2a41e42aaddbcd603b99004af95bb83559dbd4fd2d842920f003d24867599192"
+  "2.8.115":
+    url: "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/gsoap/gsoap_2.8.115.zip"
+    sha256: "6f6813b189d201022254a2879cc8ee005bdb1bcf126bc03238710f19ec4e7268"
+  "2.8.114":
+    url: "https://c3i.jfrog.io/artifactory/cci-sources-backup/sources/gsoap/gsoap_2.8.114.zip"
+    sha256: "aa70a999258100c170a3f8750c1f91318a477d440f6a28117f68bc1ded32327f"
