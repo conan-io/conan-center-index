@@ -39,7 +39,7 @@ class So5extraConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("sobjectizer/5.7.5")
+        self.requires("sobjectizer/5.8.0")
 
     def package_id(self):
         self.info.clear()
