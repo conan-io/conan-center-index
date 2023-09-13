@@ -1,5 +1,3 @@
-
-# To test, please run: conan create all/conanfile.py --version 2.4.0
 import os
 
 from conan import ConanFile
