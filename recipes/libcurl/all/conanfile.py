@@ -303,7 +303,7 @@ class LibcurlConan(ConanFile):
                                   "AC_CHECK_LIB(z,",
                                   f"AC_CHECK_LIB({zlib_name},")
             replace_in_file(self, configure_ac,
-                                  "-lz ",
+                                  "-lz",
                                   f"-l{zlib_name} ")
 
         if self._is_mingw and self.options.shared:
