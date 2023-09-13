@@ -1,8 +1,4 @@
-#ifdef CTPG_PLACED_CPTG_FOLDER
 #include "ctpg/ctpg.hpp"
-#else
-#include "ctpg.hpp"
-#endif
 
 #include <iostream>
 
