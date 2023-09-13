@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 2f0cb07c..95150292 100644
+index 2f0cb07c..a895805f 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -27,11 +27,11 @@ endif
@@ -128,7 +128,7 @@ index 2f0cb07c..95150292 100644
    else
 -    gcc_min_ver = $(shell ${CROSS_COMPILE}gcc -dumpversion | cut -f2 -d'.')
 -    version_specific_cflags = $(shell if [ $(gcc_min_ver) -ge 6 ]; then echo '-Wno-psabi'; fi)
-+    version_specific_cflags = ''
++    version_specific_cflags = 
 +    ifeq ($(CC), gcc)
 +      gcc_min_ver = $(shell ${CROSS_COMPILE}gcc -dumpversion | cut -f2 -d'.')
 +      gcc_ge_6 = $(shell if [ $(gcc_min_ver) -ge 6 ]; then echo 'yes'; fi)
