@@ -841,7 +841,8 @@ Qml2Imports = bin/archdatadir/qml
 Translations = bin/datadir/translations
 Documentation = bin/datadir/doc
 Examples = bin/datadir/examples""")
-        copy(self, "*LICENSE*", os.path.join(self.source_folder, "qt5/"), os.path.join(self.package_folder, "licenses"))
+        copy(self, "*LICENSE*", os.path.join(self.source_folder, "qt5/"), os.path.join(self.package_folder, "licenses"),
+             excludes="qtbase/examples/*")
         for module in self._submodules:
             if not self.options.get_safe(module):
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
