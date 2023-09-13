@@ -80,7 +80,6 @@ class SCIPConan(ConanFile):
         if self.options.with_sym == "bliss":
             self.requires("bliss/0.77")
         self.requires("soplex/6.0.3")
-        self.requires("zlib/1.2.13")
 
     def configure(self):
         self.options["soplex"].with_gmp = self.options.with_gmp
