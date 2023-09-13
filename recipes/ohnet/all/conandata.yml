@@ -2,3 +2,8 @@ sources:
   "1.36.5113":
     url: "https://github.com/openhome/ohNet/archive/refs/tags/ohNet_1.36.5113.tar.gz"
     sha256: "fb71d92fac37cb6fd0688c0d53689c5ab96cf2de7060b72555d05a1831f4e2a4"
+patches:
+  "1.36.5113":
+    - patch_file: "patches/0001-makefile-universal.patch"
+      patch_description: "Reduce gcc-centricity in Makefile"
+      patch_type: "conan"

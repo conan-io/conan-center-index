@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, chdir, copy, mkdir
+from conan.tools.files import get, chdir, copy, mkdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.apple import is_apple_os
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.microsoft import is_msvc, NMakeToolchain
@@ -45,6 +45,9 @@ class OhNetConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def generate(self):
         if is_msvc(self):
             tc = NMakeToolchain(self)
@@ -55,6 +58,7 @@ class OhNetConan(ConanFile):
             tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         targets = "ohNetDll TestsNative proxies devices"
 
         with chdir(self, self.source_folder):
