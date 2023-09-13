@@ -186,7 +186,7 @@ class CPythonConan(ConanFile):
             else:
                 self.requires("mpdecimal/2.5.0")  # FIXME: no 2.5.1 to troubleshoot apple
         if self.settings.os != "Windows":
-            if not is_apple_os(self):
+            if not tools.is_apple_os(self.settings.os):
                 self.requires("util-linux-libuuid/2.39")
             self.requires("libxcrypt/4.4.35")
         if self.options.get_safe("with_bz2"):
