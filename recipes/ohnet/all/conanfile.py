@@ -88,12 +88,14 @@ class OhNetConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["ohNet"].libs = ["ohNet"]
         self.cpp_info.components["ohNet"].set_property("cmake_target_name", "ohNet")
-        self.cpp_info.components["ohNet"].system_libs = ["pthread", "m"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["ohNet"].system_libs.extend(["pthread", "m"])
 
         self.cpp_info.components["ohNetCore"].libs = ["ohNetCore"]
         self.cpp_info.components["ohNetCore"].frameworks.extend(["CoreFoundation", "IOKit", "SystemConfiguration"])
         self.cpp_info.components["ohNetCore"].set_property("cmake_target_name", "ohNetCore")
-        self.cpp_info.components["ohNetCore"].system_libs = ["pthread", "m"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["ohNetCore"].system_libs.extend(["pthread", "m"])
 
         self.cpp_info.components["ohNetDevices"].libs = ["ohNetDevices"]
         self.cpp_info.components["ohNetDevices"].set_property("cmake_target_name", "ohNetDevices")
@@ -103,3 +105,13 @@ class OhNetConan(ConanFile):
 
         self.cpp_info.components["TestFramework"].libs = ["TestFramework"]
         self.cpp_info.components["TestFramework"].set_property("cmake_target_name", "TestFramework")
+        self.cpp_info.components["TestFramework"].requires = ["ohNetCore"]
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "ohNet"
+        self.cpp_info.names["cmake_find_package_multi"] = "ohNet"
+        self.cpp_info.names["pkg_config"] = "ohNet"
+        for component in ["ohNetCore", "OhNetDevices", "ohNetProxies", "TestFramework"]:
+            self.cpp_info.components[component].names["cmake_find_package"] = component
+            self.cpp_info.components[component].names["cmake_find_package_multi"] = component
+            self.cpp_info.components[component].set_property("cmake_target_name", component)
