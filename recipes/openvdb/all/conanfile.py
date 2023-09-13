@@ -163,13 +163,9 @@ class OpenVDBConan(ConanFile):
             self.requires("log4cplus/1.2.2", transitive_headers=True)
 
     def _check_compiler_version(self):
-        def lazy_lt_semver(v1, v2):
-            # Needed to ignore any minor versions if not specified in settings.compiler.version
-            return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))
-
         compiler = str(self.settings.compiler)
         minimum_version = self._compilers_min_version.get(compiler, False)
-        if minimum_version and lazy_lt_semver(self.settings.compiler.version, minimum_version):
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.name} requires a {compiler} version greater than {minimum_version}"
             )
