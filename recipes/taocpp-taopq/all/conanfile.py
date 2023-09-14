@@ -16,7 +16,7 @@ class TaoCPPTaopqConan(ConanFile):
     homepage = "https://github.com/taocpp/taopq"
     description = "C++ client library for PostgreSQL"
     topics = ("cpp17", "postgresql", "libpq", "data-base", "sql")
-
+    package_type = "library"
     settings = "os", "arch", "build_type", "compiler"
     options = {
         "shared": [True, False],
