@@ -68,6 +68,8 @@ class OhNetConan(ConanFile):
                 args = []
                 args = self._get_openhome_architecture(args)
                 args.append("rsync=no")
+                if str(self.settings.compiler.libcxx) == "libc++":
+                    args.extend(["CPPFLAGS=-stdlib=libc++", "LDFLAGS=-stdlib=libc++"])
                 autotools = Autotools(self)
                 autotools.make(args=args, target=targets)
 

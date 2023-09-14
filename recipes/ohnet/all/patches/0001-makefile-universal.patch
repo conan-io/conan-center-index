@@ -1,7 +1,29 @@
+diff --git a/Common.mak b/Common.mak
+index a479b12a..82e5db60 100644
+--- a/Common.mak
++++ b/Common.mak
+@@ -386,7 +386,7 @@ $(objdir)dnssd_clientshim.$(objext) : $(mDNSdir)/dnssd_clientshim.c $(headers)
+ $(objdir)dnssd_clientlib.$(objext) : $(mDNSdir)/dnssd_clientlib.c $(headers)
+ 	$(compiler)dnssd_clientlib.$(objext) -c $(cflags_third_party) $(includes) $(mDNSdir)/dnssd_clientlib.c
+ $(objdir)MdnsPlatform.$(objext) : OpenHome/Net/Device/Bonjour/MdnsPlatform.cpp $(headers)
+-	$(compiler)MdnsPlatform.$(objext) -c $(cflags_third_party) $(includes) OpenHome/Net/Device/Bonjour/MdnsPlatform.cpp
++	$(compiler)MdnsPlatform.$(objext) -c $(cppflags) $(cflags_third_party) $(includes) OpenHome/Net/Device/Bonjour/MdnsPlatform.cpp
+ $(objdir)MdnsProvider.$(objext) : OpenHome/Net/Device/Bonjour/MdnsProvider.cpp $(headers)
+ 	$(compiler)MdnsProvider.$(objext) -c $(cppflags) $(includes) OpenHome/Net/Device/Bonjour/MdnsProvider.cpp
+ $(objdir)Md5.$(objext) : OpenHome/md5.c $(headers)
 diff --git a/Makefile b/Makefile
-index 2f0cb07c..a895805f 100644
+index 2f0cb07c..0a808dee 100644
 --- a/Makefile
 +++ b/Makefile
+@@ -6,7 +6,7 @@ rsync ?= yes
+ ifeq ($(rsync),yes)
+ cp = rsync -u
+ else
+-cp = cp -u
++cp = cp
+ endif
+ 
+ ifeq ($(debug),1)
 @@ -27,11 +27,11 @@ endif
  
  # Figure out platform, openhome_system and openhome_architecture
@@ -150,6 +172,21 @@ index 2f0cb07c..a895805f 100644
    ar = $(version_specific_library_path) ${CROSS_COMPILE}ar rc $(objdir)
  endif
  
+@@ -358,11 +364,11 @@ endian ?= LITTLE
+ cflags_base = $(CFLAGS) -fexceptions -Wall $(version_specific_cflags_third_party) -pipe -D_GNU_SOURCE -D_REENTRANT -DDEFINE_$(endian)_ENDIAN -DDEFINE_TRACE $(debug_specific_cflags) -fvisibility=hidden $(platform_cflags)
+ cflags_third_party = $(cflags_base) -Wno-int-to-pointer-cast
+ ifeq ($(nocpp11), yes)
+-    cppflags = $(cflags_base) -Werror
++    cppflags = $(CPPFLAGS) $(cflags_base) -Werror
+ else ifeq ($(platform),Mac)
+-    cppflags = $(cflags_base) -std=c++11 -Werror
++    cppflags = $(CPPFLAGS) $(cflags_base) -std=c++11 -Werror
+ else
+-    cppflags = $(cflags_base) -std=c++0x -Werror
++    cppflags = $(CPPFLAGS) $(cflags_base) -std=c++0x -Werror
+ endif
+ cflags = $(cflags_base) -Werror
+ inc_build = Build/Include
 @@ -390,7 +396,7 @@ else ifeq ($(MACHINE), Darwin)
  	link_dll = $(version_specific_library_path) clang++ -pthread  $(platform_linkflags) -shared -stdlib=libc++
  else
