@@ -63,7 +63,7 @@ class LibtiffConan(ConanFile):
 
     def requirements(self):
         if self.options.zlib:
-            self.requires("zlib/[>=1.2.10 <2]")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.libdeflate:
             self.requires("libdeflate/1.18")
         if self.options.lzma:
