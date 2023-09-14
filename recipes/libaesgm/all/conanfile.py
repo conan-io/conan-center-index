@@ -9,7 +9,7 @@ required_conan_version = ">=1.53.0"
 class LibaesgmConan(ConanFile):
     name = "libaesgm"
     description = "Library implementation of AES (Rijndael) cryptographic methods"
-    license = "BSD"
+    license = "LicenseRef-libaesgm-BSD"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xmake-mirror/libaesgm"
     topics = ("aes", "cryptographic")
