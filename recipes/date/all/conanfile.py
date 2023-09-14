@@ -138,3 +138,4 @@ class DateConan(ConanFile):
             self.cpp_info.components["date-tz"].defines.extend(defines)
         else:
             self.cpp_info.defines.append("DATE_HEADER_ONLY")
+            self.cpp_info.libdirs = []
