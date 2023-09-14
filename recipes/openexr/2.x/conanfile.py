@@ -76,8 +76,8 @@ class OpenEXRConan(ConanFile):
             # 7f9e1b410de92de244329b614cf551b30bc30421 (included in 2.5.2).
             for lib in ("OpenEXR", "IlmBase"):
                 replace_in_file(self, os.path.join(self.source_folder,  lib, "config", "LibraryDefine.cmake"),
-                                      "${CMAKE_COMMAND} -E chdir ${CMAKE_INSTALL_FULL_LIBDIR}",
-                                      "${CMAKE_COMMAND} -E chdir ${CMAKE_INSTALL_FULL_BINDIR}")
+                                      "${CMAKE_INSTALL_FULL_LIBDIR}",
+                                      "${CMAKE_INSTALL_FULL_BINDIR}")
 
         # Add  "_d" suffix to lib file names.
         if pkg_version < "2.5.7" and self.settings.build_type == "Debug":
