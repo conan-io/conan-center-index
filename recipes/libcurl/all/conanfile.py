@@ -622,6 +622,10 @@ class LibcurlConan(ConanFile):
 
         tc.cache_variables["CURL_CA_FALLBACK"] = self.options.with_ca_fallback
 
+        # TODO: remove this when https://github.com/conan-io/conan/issues/12180 will be fixed.
+        if  Version(self.version) >= "8.3.0":
+            tc.variables["HAVE_SSL_SET0_WBIO"] = False
+
         tc.generate()
 
         deps = CMakeDeps(self)
