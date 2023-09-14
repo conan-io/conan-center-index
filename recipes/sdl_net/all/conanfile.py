@@ -42,7 +42,8 @@ class SdlnetConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("sdl/2.28.2")
+        # SDL_net.h includes SDL.h, SDL_endian.h and SDL_version.h
+        self.requires("sdl/2.28.2", transitive_headers=True)
 
     def validate(self):
         if Version(self.version).major != Version(self.dependencies["sdl"].ref.version).major:
