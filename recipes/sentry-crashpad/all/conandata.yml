@@ -18,5 +18,6 @@ sources:
 patches:
   "0.6.5":
     - patch_file: "patches/0.6.5-0001-fix-for-gcc13.patch"
-      patch_type: "portability"
+      patch_type: "backport"
       patch_description: "Extra header required for gcc13"
+      patch_source: "https://chromium-review.googlesource.com/c/chromium/mini_chromium/+/4847514"
