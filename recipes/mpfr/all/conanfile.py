@@ -17,13 +17,13 @@ required_conan_version = ">=1.58.0"
 
 class MpfrConan(ConanFile):
     name = "mpfr"
-    package_type = "library"
     description = "The MPFR library is a C library for multiple-precision floating-point computations with " \
                   "correct rounding"
-    topics = ("mpfr", "multiprecision", "math", "mathematics")
+    license = "LGPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.mpfr.org/"
-    license = "LGPL-3.0-or-later"
+    topics = ("multiprecision", "math", "mathematics")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -54,7 +54,7 @@ class MpfrConan(ConanFile):
 
     def requirements(self):
         if self.options.exact_int == "gmp":
-            self.requires("gmp/6.2.1", transitive_headers=True)
+            self.requires("gmp/6.3.0", transitive_headers=True)
         elif self.options.exact_int == "mpir":
             self.requires("mpir/3.0.0")
 
