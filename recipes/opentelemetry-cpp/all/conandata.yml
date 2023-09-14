@@ -1,4 +1,7 @@
 sources:
+  "1.9.1":
+    url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/v1.9.1.tar.gz"
+    sha256: "668de24f81c8d36d75092ad9dcb02a97cd41473adbe72485ece05e336db48249"
   "1.8.1":
     url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/v1.8.1.tar.gz"
     sha256: "3d640201594b07f08dade9cd1017bd0b59674daca26223b560b9bb6bf56264c2"
@@ -25,6 +28,10 @@ sources:
     sha256: "32f12ff15ec257e3462883f84bc291c2d5dc30055604c12ec4b46a36dfa3f189"
 
 patches:
+  "1.9.1":
+    - patch_file: "patches/1.9.1-0001-fix-cmake.patch"
+      patch_description: "fix lack of linking libraries due to conan not generating the variables that are expected"
+      patch_type: "conan"
   "1.8.1":
     - patch_file: "patches/1.8.1-0001-fix-cmake.patch"
       patch_description: "fix lack of linking libraries due to conan not generating the variables that are expected"

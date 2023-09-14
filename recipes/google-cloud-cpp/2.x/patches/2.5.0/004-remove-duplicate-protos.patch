@@ -1,0 +1,108 @@
+diff --git a/google/cloud/speech/CMakeLists.txt b/google/cloud/speech/CMakeLists.txt
+index 4cc2e0a..59546c7 100644
+--- a/google/cloud/speech/CMakeLists.txt
++++ b/google/cloud/speech/CMakeLists.txt
+@@ -46,19 +46,18 @@ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+ endif ()
+ 
+-include(CompileProtos)
+-google_cloud_cpp_load_protolist(
+-    proto_list
+-    "${PROJECT_SOURCE_DIR}/external/googleapis/protolists/speech.list")
+-google_cloud_cpp_load_protodeps(
+-    proto_deps
+-    "${PROJECT_SOURCE_DIR}/external/googleapis/protodeps/speech.deps")
+-google_cloud_cpp_grpcpp_library(
+-    google_cloud_cpp_speech_protos # cmake-format: sort
+-    ${proto_list} PROTO_PATH_DIRECTORIES "${EXTERNAL_GOOGLEAPIS_SOURCE}"
+-    "${PROTO_INCLUDE_DIR}")
+-external_googleapis_set_version_and_alias(speech_protos)
+-target_link_libraries(google_cloud_cpp_speech_protos PUBLIC ${proto_deps})
++add_library(google_cloud_cpp_speech_protos INTERFACE)
++target_link_libraries(google_cloud_cpp_speech_protos
++                      INTERFACE google-cloud-cpp::cloud_speech_protos)
++set_target_properties(
++    google_cloud_cpp_speech_protos
++    PROPERTIES EXPORT_NAME google-cloud-cpp::speech_protos
++               VERSION "${PROJECT_VERSION}"
++               SOVERSION "${PROJECT_VERSION_MAJOR}")
++target_compile_options(google_cloud_cpp_speech_protos
++                       INTERFACE ${GOOGLE_CLOUD_CPP_EXCEPTIONS_FLAG})
++add_library(google-cloud-cpp::speech_protos ALIAS
++            google_cloud_cpp_speech_protos)
+ 
+ file(
+     GLOB source_files
+diff --git a/google/cloud/texttospeech/CMakeLists.txt b/google/cloud/texttospeech/CMakeLists.txt
+index 0fdc54a..c43aa51 100644
+--- a/google/cloud/texttospeech/CMakeLists.txt
++++ b/google/cloud/texttospeech/CMakeLists.txt
+@@ -36,19 +36,18 @@ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+ endif ()
+ 
+-include(CompileProtos)
+-google_cloud_cpp_load_protolist(
+-    proto_list
+-    "${PROJECT_SOURCE_DIR}/external/googleapis/protolists/texttospeech.list")
+-google_cloud_cpp_load_protodeps(
+-    proto_deps
+-    "${PROJECT_SOURCE_DIR}/external/googleapis/protodeps/texttospeech.deps")
+-google_cloud_cpp_grpcpp_library(
+-    google_cloud_cpp_texttospeech_protos # cmake-format: sort
+-    ${proto_list} PROTO_PATH_DIRECTORIES "${EXTERNAL_GOOGLEAPIS_SOURCE}"
+-    "${PROTO_INCLUDE_DIR}")
+-external_googleapis_set_version_and_alias(texttospeech_protos)
+-target_link_libraries(google_cloud_cpp_texttospeech_protos PUBLIC ${proto_deps})
++add_library(google_cloud_cpp_texttospeech_protos INTERFACE)
++target_link_libraries(google_cloud_cpp_texttospeech_protos
++                      INTERFACE google-cloud-cpp::cloud_texttospeech_protos)
++set_target_properties(
++    google_cloud_cpp_texttospeech_protos
++    PROPERTIES EXPORT_NAME google-cloud-cpp::texttospeech_protos
++               VERSION "${PROJECT_VERSION}"
++               SOVERSION "${PROJECT_VERSION_MAJOR}")
++target_compile_options(google_cloud_cpp_texttospeech_protos
++                       INTERFACE ${GOOGLE_CLOUD_CPP_EXCEPTIONS_FLAG})
++add_library(google-cloud-cpp::texttospeech_protos ALIAS
++            google_cloud_cpp_texttospeech_protos)
+ 
+ file(
+     GLOB source_files
+diff --git a/google/cloud/trace/CMakeLists.txt b/google/cloud/trace/CMakeLists.txt
+index 99a04f5..0afc230 100644
+--- a/google/cloud/trace/CMakeLists.txt
++++ b/google/cloud/trace/CMakeLists.txt
+@@ -35,18 +35,19 @@ if (PROTO_INCLUDE_DIR)
+     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
+ endif ()
+ 
+-include(CompileProtos)
+-google_cloud_cpp_load_protolist(
+-    proto_list
+-    "${PROJECT_SOURCE_DIR}/external/googleapis/protolists/trace.list")
+-google_cloud_cpp_load_protodeps(
+-    proto_deps "${PROJECT_SOURCE_DIR}/external/googleapis/protodeps/trace.deps")
+-google_cloud_cpp_grpcpp_library(
+-    google_cloud_cpp_trace_protos # cmake-format: sort
+-    ${proto_list} PROTO_PATH_DIRECTORIES "${EXTERNAL_GOOGLEAPIS_SOURCE}"
+-    "${PROTO_INCLUDE_DIR}")
+-external_googleapis_set_version_and_alias(trace_protos)
+-target_link_libraries(google_cloud_cpp_trace_protos PUBLIC ${proto_deps})
++add_library(google_cloud_cpp_trace_protos INTERFACE)
++target_link_libraries(
++    google_cloud_cpp_trace_protos
++    INTERFACE google-cloud-cpp::devtools_cloudtrace_v2_trace_protos
++              google-cloud-cpp::devtools_cloudtrace_v2_tracing_protos)
++set_target_properties(
++    google_cloud_cpp_trace_protos
++    PROPERTIES EXPORT_NAME google-cloud-cpp::trace_protos
++               VERSION "${PROJECT_VERSION}"
++               SOVERSION "${PROJECT_VERSION_MAJOR}")
++target_compile_options(google_cloud_cpp_trace_protos
++                       INTERFACE ${GOOGLE_CLOUD_CPP_EXCEPTIONS_FLAG})
++add_library(google-cloud-cpp::trace_protos ALIAS google_cloud_cpp_trace_protos)
+ 
+ file(
+     GLOB source_files
