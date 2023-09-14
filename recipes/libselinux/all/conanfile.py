@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
@@ -20,7 +20,14 @@ class LibSELinuxConan(ConanFile):
     topics = ("linux", "selinux", "security", "security-enhanced")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/SELinuxProject/selinux"
-    license = "Unlicense"
+    license = (
+        # https://github.com/SELinuxProject/selinux/blob/main/libselinux/LICENSE
+        # For the libselinux component: public domain with a limited liability clause
+        "LicenseRef-LICENSE-libselinux",
+        # https://github.com/SELinuxProject/selinux/blob/main/libsepol/LICENSE
+        # For the libsepol component: LGPL-2.1
+        "LGPL-2.1",
+    )
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -105,8 +112,21 @@ class LibSELinuxConan(ConanFile):
         with chdir(self, os.path.join(self._selinux_source_folder)):
             autotools.make()
 
-    def package(self):
+    def _copy_licenses(self):
         copy(self, "LICENSE", self._selinux_source_folder, os.path.join(self.package_folder, "licenses"))
+        rename(self, os.path.join(self.package_folder, "licenses", "LICENSE"),
+               os.path.join(self.package_folder, "licenses", "LICENSE-libselinux"))
+        if Version(self.version) >= "3.5":
+            copy(self, "LICENSE", self._sepol_source_folder, os.path.join(self.package_folder, "licenses"))
+            rename(self, os.path.join(self.package_folder, "licenses", "LICENSE"),
+                   os.path.join(self.package_folder, "licenses", "LICENSE-libsepol"))
+        else:
+            copy(self, "COPYING", self._sepol_source_folder, os.path.join(self.package_folder, "licenses"))
+            rename(self, os.path.join(self.package_folder, "licenses", "COPYING"),
+                   os.path.join(self.package_folder, "licenses", "LICENSE-libsepol"))
+
+    def package(self):
+        self._copy_licenses()
         for library in [self._sepol_source_folder, self._selinux_source_folder]:
             copy(self, "*.h", os.path.join(library, "include"), os.path.join(self.package_folder, "include"))
             if self.options.shared:
