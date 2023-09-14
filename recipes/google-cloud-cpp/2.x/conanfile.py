@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.build import can_run, check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
@@ -157,12 +157,26 @@ class GoogleCloudCppConan(ConanFile):
         self.tool_requires("grpc/[>=1.50]")
 
     def generate(self):
+        # Set up environment so that we can run grpc-cpp-plugin at build time
+        VirtualBuildEnv(self).generate()
+        if can_run(self):
+            VirtualRunEnv(self).generate(scope="build")
+
+        # Environment so that the compiled test executable can load shared libraries
+        runenv = VirtualRunEnv(self)
+        runenv.generate()
+
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE"] = ",".join(self._components())
+
+        # Additional logic to override the make program on MacOS if /usr/bin/make is found by CMake
+        # which otherwise prevents the propagation of DYLD_LIBRARY_PATH as set by the VirtualBuildEnv
+        project_include = os.path.join(self.source_folder, "macos_make_override.cmake")
+        tc.cache_variables["CMAKE_PROJECT_google-cloud-cpp_INCLUDE"] = project_include
         tc.generate()
-        VirtualRunEnv(self).generate(scope="build")
+
         deps = CMakeDeps(self)
         deps.generate()
 
