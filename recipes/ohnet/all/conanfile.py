@@ -63,7 +63,7 @@ class OhNetConan(ConanFile):
 
         with chdir(self, self.source_folder):
             if is_msvc(self):
-                self.run(f"nmake /f {targets}")
+                self.run(f"nmake /f OhNet.mak {targets}")
             else:
                 args = []
                 args = self._get_openhome_architecture(args)
