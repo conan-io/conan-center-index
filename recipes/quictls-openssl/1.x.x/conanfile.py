@@ -81,6 +81,7 @@ class OpenSSLConan(ConanFile):
     license = "OpenSSL"
     topics = ("openssl", "ssl", "tls", "encryption", "security")
     description = "A toolkit for the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols"
+    provides = "openssl"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
