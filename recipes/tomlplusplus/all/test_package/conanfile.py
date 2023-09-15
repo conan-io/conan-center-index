@@ -17,8 +17,6 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def generate(self):
-        if Version(self.dependencies["tomlplusplus"].ref.version) < "1.3.0":
-            self.single_header_only = True
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8":
             self.single_header_only = True
 
