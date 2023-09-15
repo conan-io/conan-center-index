@@ -15,6 +15,7 @@ class TscnsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/MengRao/tscns/"
     topics = ("timestamp", "x86_64", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     @property
@@ -37,7 +38,7 @@ class TscnsConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
