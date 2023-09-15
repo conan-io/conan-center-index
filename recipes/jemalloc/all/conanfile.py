@@ -19,6 +19,8 @@ class JemallocConan(ConanFile):
     license = "BSD-2-Clause"
     homepage = "https://jemalloc.net/"
     topics = ("conan", "jemalloc", "malloc", "free")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -130,7 +132,7 @@ class JemallocConan(ConanFile):
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
             "--enable-cxx" if self.options.enable_cxx else "--disable-cxx",
             "--enable-fill" if self.options.enable_fill else "--disable-fill",
-            "--enable-xmalloc" if self.options.enable_cxx else "--disable-xmalloc",
+            "--enable-xmalloc" if self.options.enable_xmalloc else "--disable-xmalloc",
             "--enable-readlinkat" if self.options.enable_readlinkat else "--disable-readlinkat",
             "--enable-syscall" if self.options.enable_syscall else "--disable-syscall",
             "--enable-lazy-lock" if self.options.enable_lazy_lock else "--disable-lazy-lock",
