@@ -96,12 +96,17 @@ class OhNetConan(ConanFile):
         self.cpp_info.components["ohNet"].set_property("cmake_target_name", "ohNet")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ohNet"].system_libs.extend(["pthread", "m"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["ohNet"].system_libs.extend(["iphlpapi", "ws2_32", "dbghelp"])
 
         self.cpp_info.components["ohNetCore"].libs = ["ohNetCore"]
-        self.cpp_info.components["ohNetCore"].frameworks.extend(["CoreFoundation", "IOKit", "SystemConfiguration"])
         self.cpp_info.components["ohNetCore"].set_property("cmake_target_name", "ohNetCore")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ohNetCore"].system_libs.extend(["pthread", "m"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["ohNet"].system_libs.extend(["iphlpapi", "ws2_32", "dbghelp"])
+        elif self.settings.os == "Macos":
+            self.cpp_info.components["ohNetCore"].frameworks.extend(["CoreFoundation", "IOKit", "SystemConfiguration"])
 
         self.cpp_info.components["ohNetDevices"].libs = ["ohNetDevices"]
         self.cpp_info.components["ohNetDevices"].set_property("cmake_target_name", "ohNetDevices")
