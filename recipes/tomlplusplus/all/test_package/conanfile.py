@@ -1,29 +1,35 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
-
-    def requirements(self):
-        self.requires(self.tested_reference_str)
 
     def layout(self):
         cmake_layout(self)
 
-    def build(self):
-        cmake = CMake(self)
-        if Version(self.dependencies[self.tested_reference_str].version) < "1.3.0":
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def generate(self):
+        if Version(self.dependencies["tomlplusplus"].ref.version) < "1.3.0":
             self.single_header_only = True
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8":
             self.single_header_only = True
-        variables = {"TOMLPP_BUILD_SINGLE_ONLY": True} if hasattr(self, "single_header_only") else None
-        cmake.configure(variables=variables)
+
+        tc = CMakeToolchain(self)
+        if hasattr(self, "single_header_only"):
+            tc.variables["TOMLPP_BUILD_SINGLE_ONLY"] = True
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def test(self):
