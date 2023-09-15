@@ -69,4 +69,4 @@ class WinMDConan(ConanFile):
         self.cpp_info.libdirs = []
         if not is_msvc(self):
             # ignore shadowing errors
-            self.cpp_info.cppflags = ['-fpermissive']
+            self.cpp_info.cxxflags = ['-fpermissive']
