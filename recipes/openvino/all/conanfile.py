@@ -1,4 +1,4 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
@@ -62,24 +62,6 @@ class OpenvinoConan(ConanFile):
         "enable_paddle_frontend": True,
         "enable_pytorch_frontend": True
     }
-    options_description = {
-        "shared": "Builds OpenVINO as shared libraries",
-        "fPIC": "Enables / Disables the -fPIC option. Only valid for shared=True",
-        # HW plugins
-        "enable_cpu": "Builds CPU plugin",
-        "enable_gpu": "Builds GPU plugin",
-        # SW plugins
-        "enable_auto": "Builds AUTO plugin",
-        "enable_hetero": "Builds HETERO plugin",
-        "enable_auto_batch": "Builds BATCH plugin",
-        # Frontends
-        "enable_ir_frontend": "Builds IR frontend",
-        "enable_onnx_frontend": "Builds ONNX frontend",
-        "enable_tf_frontend": "Builds TensorFlow frontend",
-        "enable_tf_lite_frontend": "Builds TensorFlow Lite frontend",
-        "enable_paddle_frontend": "Builds PaddlePaddle frontend",
-        "enable_pytorch_frontend": "Builds PyTorch frontend"
-    }
 
     @property
     def _protobuf_required(self):
@@ -142,14 +124,12 @@ class OpenvinoConan(ConanFile):
             del self.options.enable_gpu
 
     def configure(self):
-        suffix = "" if Version(conan_version).major < "2" else "/*"
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self._protobuf_required:
-            if self.options.shared:
+            if self._protobuf_required:
                 # we need to use static protobuf to overcome potential issues with multiple registrations inside
                 # protobuf when frontends (implemented as plugins) are loaded multiple times in runtime
-                self.options[f"protobuf{suffix}"].shared = False
+                self.options["protobuf"].shared = False
         # disable GPU plugin when clang is used; plugin has issues with static variables initialization
         if self.settings.compiler == "clang" and self.options.get_safe("enable_gpu"):
             self.options.enable_gpu = False
@@ -166,22 +146,22 @@ class OpenvinoConan(ConanFile):
             self.tool_requires("cmake/[>=3.18]")
 
     def requirements(self):
-        self.requires("onetbb/[>=2021.3.0]")
-        self.requires("pugixml/[>=1.10]")
+        self.requires("onetbb/2021.9.0")
+        self.requires("pugixml/1.13")
         if self._target_x86_64:
-            self.requires("xbyak/[>=6.62]")
+            self.requires("xbyak/6.73")
         if self.options.get_safe("enable_gpu"):
             self.requires("opencl-icd-loader/2023.04.17")
         if self._protobuf_required:
             self.requires("protobuf/3.21.12")
         if self.options.enable_tf_frontend:
-            self.requires("snappy/[>=1.1.7]")
+            self.requires("snappy/1.1.10")
         if self.options.enable_onnx_frontend:
             self.requires(f"onnx/{self._onnx_version}")
         if self.options.enable_tf_lite_frontend:
             self.requires("flatbuffers/22.9.24")
         if self._preprocessing_available:
-            self.requires("ade/0.1.2a")
+            self.requires("ade/0.1.2c")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -235,7 +215,6 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_NCC_STYLE"] = False
         toolchain.cache_variables["ENABLE_SAMPLES"] = False
         toolchain.cache_variables["ENABLE_TEMPLATE"] = False
-        toolchain.cache_variables["CMAKE_VERBOSE_MAKEFILE"] = True
         toolchain.generate()
 
     def validate_build(self):
