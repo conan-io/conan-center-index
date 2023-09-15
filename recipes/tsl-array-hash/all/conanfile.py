@@ -29,8 +29,7 @@ class TslArrayHashConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -44,7 +43,6 @@ class TslArrayHashConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "tsl::array_hash")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "tsl-array-hash"
@@ -56,4 +54,3 @@ class TslArrayHashConan(ConanFile):
         self.cpp_info.components["array_hash"].set_property("cmake_target_name", "tsl::array_hash")
         self.cpp_info.components["array_hash"].bindirs = []
         self.cpp_info.components["array_hash"].libdirs = []
-        self.cpp_info.components["array_hash"].resdirs = []
