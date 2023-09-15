@@ -18,7 +18,7 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:make_program", check_type=str):
-            self.tool_requires("make/4.3")
+            self.tool_requires("make/4.4")
 
     def layout(self):
         basic_layout(self)
