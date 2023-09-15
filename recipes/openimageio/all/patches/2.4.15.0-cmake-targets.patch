@@ -400,10 +400,10 @@ index 56a84b305..e539fddf5 100644
              ${CMAKE_DL_LIBS}
          )
 diff --git src/ptex.imageio/CMakeLists.txt src/ptex.imageio/CMakeLists.txt
-index eac3fb4af..97ec0d70c 100644
+index eac3fb4af..d5be6a294 100644
 --- src/ptex.imageio/CMakeLists.txt
 +++ src/ptex.imageio/CMakeLists.txt
-@@ -2,8 +2,8 @@
+@@ -2,8 +2,9 @@
  # SPDX-License-Identifier: Apache-2.0
  # https://github.com/OpenImageIO/oiio
  
@@ -411,6 +411,7 @@ index eac3fb4af..97ec0d70c 100644
 +if (ptex_FOUND)
      add_oiio_plugin (ptexinput.cpp
 -                     LINK_LIBRARIES Ptex::Ptex_dynamic ZLIB::ZLIB
-+                     LINK_LIBRARIES Ptex::Ptex ZLIB::ZLIB
++                     LINK_LIBRARIES ${ptex_LIBRARIES} ZLIB::ZLIB
++                     INCLUDE_DIRS ${ptex_INCLUDE_DIRS}
                       DEFINITIONS "-DUSE_PTEX")
  endif ()
