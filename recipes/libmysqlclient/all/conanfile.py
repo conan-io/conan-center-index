@@ -236,6 +236,9 @@ class LibMysqlClientCConan(ConanFile):
         tc.cache_variables["WITH_SSL"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
 
         tc.cache_variables["WITH_ZLIB"] = "system"
+
+        # Remove to ensure reproducible build, this only affects docs generation
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
