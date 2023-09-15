@@ -49,7 +49,7 @@ class OpenVDBConan(ConanFile):
         "use_colored_output": False,
         "use_delayed_loading": False,
         "use_explicit_instantiation": False,
-        "use_imath_half": False,
+        "use_imath_half": True,
         "with_blosc": True,
         "with_exr": "deprecated",
         "with_log4cplus": False,
