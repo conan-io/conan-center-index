@@ -54,10 +54,10 @@ class TomlPlusPlusConan(ConanFile):
             )
 
         if self.settings.compiler == "apple-clang" and Version(self.version) < "2.3.0":
-            raise ConanInvalidConfiguration(f"apple-clang is not supported in versions < 2.3.0")
+            raise ConanInvalidConfiguration("apple-clang is not supported in versions < 2.3.0")
 
         if is_msvc(self) and Version(self.version) == "2.1.0":
-            raise ConanInvalidConfiguration(f"msvc is unable to build version 2.1.0")
+            raise ConanInvalidConfiguration("msvc is unable to build version 2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
