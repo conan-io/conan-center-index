@@ -10,17 +10,22 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def requirements(self):
-        self.requires(self.tested_reference_str)
+        self.requires(self.tested_reference_str, run=can_run(self))
 
     def layout(self):
         cmake_layout(self)
 
     def generate(self):
-        tc = CMakeToolchain(self)
-        tc.generate()
         # Environment so that the compiled test executable can load shared libraries
         runenv = VirtualRunEnv(self)
-        runenv.generate(scope="run")
+        runenv.generate()
+
+        # Environment so that the compiled test executable can load shared libraries
+        if can_run(self):
+            VirtualRunEnv(self).generate(scope="run")
+
+        tc = CMakeToolchain(self)
+        tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 

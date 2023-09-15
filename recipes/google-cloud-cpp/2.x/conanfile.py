@@ -73,7 +73,7 @@ class GoogleCloudCppConan(ConanFile):
     }
 
     def export_sources(self):
-        copy(self, "macos_cmake_override.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
+        copy(self, "macos_make_override.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
         export_conandata_patches(self)
 
     def config_options(self):
@@ -163,10 +163,6 @@ class GoogleCloudCppConan(ConanFile):
         if can_run(self):
             VirtualRunEnv(self).generate(scope="build")
 
-        # Environment so that the compiled test executable can load shared libraries
-        runenv = VirtualRunEnv(self)
-        runenv.generate()
-
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
@@ -174,7 +170,7 @@ class GoogleCloudCppConan(ConanFile):
 
         # Additional logic to override the make program on MacOS if /usr/bin/make is found by CMake
         # which otherwise prevents the propagation of DYLD_LIBRARY_PATH as set by the VirtualBuildEnv
-        project_include = os.path.join(self.source_folder, "macos_cmake_override.cmake")
+        project_include = os.path.join(self.source_folder, "macos_make_override.cmake")
         tc.cache_variables["CMAKE_PROJECT_google-cloud-cpp_INCLUDE"] = project_include
         tc.generate()
 
