@@ -17,6 +17,7 @@ class TomlPlusPlusConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/marzer/tomlplusplus"
     license = "MIT"
+    package_type = "header-library"
     settings = ("compiler", "arch", "os", "build_type")
     no_copy_source = True
 
