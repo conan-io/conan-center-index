@@ -78,12 +78,12 @@ class LLVMOpenMpConan(ConanFile):
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if minimum_version and Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not support.")
-        if (
-            Version(self.version) <= "10.0.0"
-            and is_apple_os(self)
-            and self.settings.arch == "armv8"
-        ):
-            raise ConanInvalidConfiguration("ARM v8 not supported")
+        if is_apple_os(self) and self.settings.arch == "armv8":
+            if Version(self.version) <= "10.0.0":
+                raise ConanInvalidConfiguration("ARM v8 not supported")
+            if Version(self.version) != "11" and self.settings.build_type == "Debug":
+                # All versions except for v11 crash with a segfault for the simple test_package.cpp test
+                raise ConanInvalidConfiguration("Debug mode not supported for ARM v8")
 
     def build_requirements(self):
         if Version(self.version) >= "17":
