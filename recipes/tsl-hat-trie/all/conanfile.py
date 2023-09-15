@@ -21,7 +21,7 @@ class TslHatTrieConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("tsl-array-hash/0.7.1", transitive_headers=True)
+        self.requires("tsl-array-hash/0.7.1")
 
     def package_id(self):
         self.info.clear()
