@@ -41,7 +41,8 @@ class VcglibConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("eigen/3.4.0")
+        # vcglib public headers include several eigen headers (for example vcg/math/matrix44.h includes Eigen/Core)
+        self.requires("eigen/3.4.0", transitive_headers=True)
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
