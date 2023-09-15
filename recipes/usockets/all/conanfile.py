@@ -127,7 +127,7 @@ class UsocketsConan(ConanFile):
         elif self.options.eventloop == "gcd":
             self.requires("libdispatch/5.3.2")
         elif self.options.eventloop == "boost":
-            self.requires("boost/1.82.0")
+            self.requires("boost/1.83.0")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not self._uses_msbuild:
