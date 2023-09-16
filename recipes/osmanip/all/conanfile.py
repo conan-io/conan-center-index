@@ -47,10 +47,11 @@ class OsmanipConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.83.0")
+        # osmanip/progressbar/progress_bar.hpp includes arsenalgear/constants.hpp
         if Version(self.version) < "4.2.0":
-            self.requires("arsenalgear/1.2.2")
+            self.requires("arsenalgear/1.2.2", transitive_headers=True)
         else:
-            self.requires("arsenalgear/2.1.0")
+            self.requires("arsenalgear/2.1.0", transitive_headers=True)
 
     @property
     def _min_cppstd(self):
