@@ -223,29 +223,25 @@ class TclConan(ConanFile):
         self.cpp_info.libs = libs
         self.cpp_info.system_libs = systemlibs
         self.cpp_info.set_property("cmake_file_name", "TCL")
-        self.cpp_info.names["cmake_find_package"] = "TCL"
-        self.cpp_info.names["cmake_find_package_multi"] = "TCL"
 
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreFoundation"]
             self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
 
-        tcl_library = os.path.join(self.package_folder, "lib", "{}{}".format(self.name, ".".join(self.version.split(".")[:2])))
-        self.output.info("Setting TCL_LIBRARY environment variable to {}".format(tcl_library))
-        self.runenv_info.define_path('TCL_LIBRARY', tcl_library)
-        self.env_info.TCL_LIBRARY = tcl_library
+        tcl_library = os.path.join(self.package_folder, "lib", "tcl{}".format(".".join(self.version.split(".")[:2])))
+        self.runenv_info.define_path("TCL_LIBRARY", tcl_library)
 
         tcl_root = self.package_folder
-        self.output.info("Setting TCL_ROOT environment variable to {}".format(tcl_root))
-        self.runenv_info.define_path('TCL_ROOT', tcl_root)
-        self.env_info.TCL_ROOT = tcl_root
+        self.runenv_info.define_path("TCL_ROOT", tcl_root)
 
         tclsh_list = list(filter(lambda fn: fn.startswith("tclsh"), os.listdir(os.path.join(self.package_folder, "bin"))))
         tclsh = os.path.join(self.package_folder, "bin", tclsh_list[0])
-        self.output.info("Setting TCLSH environment variable to {}".format(tclsh))
-        self.runenv_info.define_path('TCLSH', tclsh)
-        self.env_info.TCLSH = tclsh
+        self.runenv_info.define_path("TCLSH", tclsh)
 
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Adding PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
+        # TODO: to remove in conan v2
+        self.cpp_info.names["cmake_find_package"] = "TCL"
+        self.cpp_info.names["cmake_find_package_multi"] = "TCL"
+        self.env_info.TCL_LIBRARY = tcl_library
+        self.env_info.TCL_ROOT = tcl_root
+        self.env_info.TCLSH = tclsh
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
