@@ -144,6 +144,12 @@ class OpenCascadeConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
         if (
             self.settings.compiler == "clang"
             and self.settings.compiler.version == "6.0"
@@ -248,7 +254,8 @@ class OpenCascadeConan(ConanFile):
             self,
             occt_toolkit_cmake,
             "if (BUILD_SHARED_LIBS OR EXECUTABLE_PROJECT)",
-            "if (True)",
+            "if (True)", 
+            strict=False
         )
 
         # Inject dependencies from conan, and avoid to rely on upstream custom CMake files
