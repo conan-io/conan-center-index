@@ -198,7 +198,7 @@ class TclConan(ConanFile):
                         "\nTCL_SRC_DIR",
                         "\n#TCL_SRC_DIR")
 
-        #fix_apple_shared_install_name(self)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         libs = []
