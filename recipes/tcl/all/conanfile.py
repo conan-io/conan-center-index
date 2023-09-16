@@ -15,7 +15,7 @@ class TclConan(ConanFile):
     license = "TCL"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tcl.tk"
-    topics = ("tcl", "scripting", "programming")
+    topics = ("scripting", "programming")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
