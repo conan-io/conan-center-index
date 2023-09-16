@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
@@ -67,8 +67,8 @@ class OctoLoggerCPPConan(ConanFile):
             )
         if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++":
             raise ConanInvalidConfiguration(f"{self.ref} does not support clang with libc++. Use libstdc++ instead.")
-        if is_msvc(self) and self.settings.compiler.runtime in ["MTd", "MT"]:
-            raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC MT/MTd configurations, only MD/MDd is supported")
+        if is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC static runtime. Use dynamic runtime instead.")
         if self.options.get_safe("with_aws"):
             if not self.dependencies["aws-sdk-cpp"].options.logs:
                 raise ConanInvalidConfiguration(f"{self.ref} requires the option aws-sdk-cpp:logs=True")
