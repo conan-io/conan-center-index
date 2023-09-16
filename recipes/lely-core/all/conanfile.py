@@ -218,6 +218,7 @@ class LelyConan(ConanFile):
             "util": {"requires": ["libc"], "system_libs": ["m"]},
         }
         for component, dependencies in components.items():
+            self.cpp_info.components[component].set_property("pkg_config_name", f"liblely-{component}")
             self.cpp_info.components[component].libs = [f"lely-{component}"]
             self.cpp_info.components[component].requires = dependencies.get(
                 "requires", []
