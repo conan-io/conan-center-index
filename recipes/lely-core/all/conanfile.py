@@ -1,18 +1,19 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import (
+    apply_conandata_patches,
+    copy,
+    export_conandata_patches,
+    get,
+    rm,
+    rmdir,
+)
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.layout import basic_layout
-from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.files import (
-    export_conandata_patches,
-    apply_conandata_patches,
-    get,
-    copy,
-    rmdir,
-    rm,
-)
-from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
 
@@ -127,6 +128,9 @@ class LelyConan(ConanFile):
                 f"{self.ref} can only be compiled with GCC currently"
             )
 
+    def build_requirements(self):
+        self.tool_requires("libtool/2.4.7")
+
     def source(self):
         get(
             self,
@@ -139,6 +143,9 @@ class LelyConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         at_toolchain = AutotoolsToolchain(self)
         at_toolchain.configure_args += [
             "--disable-cython",
