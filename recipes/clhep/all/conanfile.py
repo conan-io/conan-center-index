@@ -6,8 +6,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
-
+required_conan_version = ">=2.0.9"
 
 class ClhepConan(ConanFile):
     name = "clhep"
@@ -16,6 +15,7 @@ class ClhepConan(ConanFile):
     topics = ("cern", "hep", "high energy", "physics", "geometry", "algebra")
     homepage = "http://proj-clhep.web.cern.ch/proj-clhep"
     url = "https://github.com/conan-io/conan-center-index"
+    implements = ["auto_shared_fpic"]
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -32,14 +32,6 @@ class ClhepConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -113,18 +105,3 @@ class ClhepConan(ConanFile):
             self.cpp_info.components[conan_comp].system_libs = system_libs
             self.cpp_info.components[conan_comp].requires = requires
 
-            # TODO: to remove in conan v2 once cmake_find_package* generators removed
-            self.cpp_info.components[conan_comp].names["cmake_find_package"] = cmake_target
-            self.cpp_info.components[conan_comp].names["cmake_find_package_multi"] = cmake_target
-            self.cpp_info.components[conan_comp].names["pkg_config"] = pkg_config_name
-            self.cpp_info.components["clheplib"].requires.append(conan_comp)
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "CLHEP"
-        self.cpp_info.names["cmake_find_package_multi"] = "CLHEP"
-        self.cpp_info.names["pkg_config"] = "clhep"
-        self.cpp_info.components["clheplib"].names["cmake_find_package"] = f"CLHEP{suffix}"
-        self.cpp_info.components["clheplib"].names["cmake_find_package_multi"] = f"CLHEP{suffix}"
-        self.cpp_info.components["clheplib"].set_property("cmake_target_name", f"CLHEP::CLHEP{suffix}")
-        self.cpp_info.components["clheplib"].names["pkg_config"] = "clhep"
-        self.cpp_info.components["clheplib"].set_property("pkg_config_name", "clhep")
