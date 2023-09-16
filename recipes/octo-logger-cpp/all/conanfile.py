@@ -100,6 +100,8 @@ class OctoLoggerCPPConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "octo-logger-cpp")
+        self.cpp_info.set_property("cmake_target_name", "octo::octo-logger-cpp")
         self.cpp_info.libs = ["octo-logger-cpp"]
         self.cpp_info.requires = ["fmt::fmt"]
         if self.options.get_safe("with_aws"):
