@@ -6,6 +6,7 @@ from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, NMakeToolchain, NMakeDeps
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.55.0"
@@ -215,34 +216,30 @@ class TclConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "TCL")
+
         libs = []
-        systemlibs = []
         libdirs = []
         for root, _, _ in os.walk(os.path.join(self.package_folder, "lib"), topdown=False):
             newlibs = collect_libs(self, root)
             if newlibs:
                 libs.extend(newlibs)
                 libdirs.append(root)
-        if self.settings.os == "Windows":
-            systemlibs.extend(["ws2_32", "netapi32", "userenv"])
-        elif self.settings.os in ("FreeBSD", "Linux"):
-            systemlibs.extend(["dl", "m", "pthread"])
-
-        defines = []
-        if not self.options.shared:
-            defines.append("STATIC_BUILD")
-        self.cpp_info.defines = defines
-
-        self.cpp_info.libdirs = libdirs
         self.cpp_info.libs = libs
-        self.cpp_info.system_libs = systemlibs
-        self.cpp_info.set_property("cmake_file_name", "TCL")
+        self.cpp_info.libdirs = libdirs
 
-        if self.settings.os == "Macos":
-            self.cpp_info.frameworks = ["CoreFoundation"]
-            self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["ws2_32", "netapi32", "userenv"])
+        elif self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
+        elif is_apple_os(self):
+            self.cpp_info.frameworks.append("CoreFoundation")
 
-        tcl_library = os.path.join(self.package_folder, "lib", "tcl{}".format(".".join(self.version.split(".")[:2])))
+        if is_msvc(self) and not self.options.shared:
+            self.cpp_info.defines.append("STATIC_BUILD")
+
+        tcl_version = Version(self.version)
+        tcl_library = os.path.join(self.package_folder, "lib", f"tcl{tcl_version.major}.{tcl_version.minor}")
         self.runenv_info.define_path("TCL_LIBRARY", tcl_library)
 
         tcl_root = self.package_folder
