@@ -40,7 +40,7 @@ class UVWasiConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libuv/1.46.0")
+        self.requires("libuv/1.46.0", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -50,6 +50,7 @@ class UVWasiConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["WITH_SYSTEM_LIBUV"] = True
         tc.variables["UVWASI_BUILD_TESTS"] = False
+        tc.variables["INSTALL_UVWASI"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

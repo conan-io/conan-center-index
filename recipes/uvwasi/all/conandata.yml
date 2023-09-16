@@ -1,13 +1,9 @@
 sources:
-  "0.0.18":
-    url: "https://github.com/nodejs/uvwasi/archive/refs/tags/v0.0.18.tar.gz"
-    sha256: "4e5d2447df0922eda42488c411cd07806f0a6b55e7f98edecd5562b317daf8e3"
+  "0.0.19":
+    url: "https://github.com/nodejs/uvwasi/archive/refs/tags/v0.0.19.tar.gz"
+    sha256: "b04983b6707e822115184ead2c0b0e2c3b2cd409a4300999967e026ad988d867"
 patches:
-  "0.0.18":
-    - patch_file: "patches/0.0.18-0001-add-installer.patch"
-      patch_description: "add installation"
-      patch_type: "conan"
-      patch_source: "https://github.com/nodejs/uvwasi/pull/210"
-    - patch_file: "patches/0.0.18-0002-fix-cmake.patch"
+  "0.0.19":
+    - patch_file: "patches/0.0.19-0001-fix-cmake.patch"
       patch_description: "use cci's libuv, separate static and shared build, disable visibility=hidden"
       patch_type: "conan"
