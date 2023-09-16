@@ -167,6 +167,7 @@ class GoogleCloudCppConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE"] = ",".join(self._components())
+        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_WERROR"] = False
 
         # Additional logic to override the make program on MacOS if /usr/bin/make is found by CMake
         # which otherwise prevents the propagation of DYLD_LIBRARY_PATH as set by the VirtualBuildEnv
