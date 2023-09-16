@@ -1,9 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.scm import Version
 
 import os
 
@@ -11,11 +11,15 @@ required_conan_version = ">=1.53.0"
 
 class OsmanipConan(ConanFile):
     name = "osmanip"
-    description = "Library with useful output stream tools like: color and style manipulators, progress bars and terminal graphics."
+    description = (
+        "Library with useful output stream tools like: color and style "
+        "manipulators, progress bars and terminal graphics."
+    )
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/JustWhit3/osmanip"
     topics = ("manipulator", "iostream", "output-stream", "iomanip")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -38,44 +42,42 @@ class OsmanipConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
-        self.requires("boost/1.81.0")
+        self.requires("boost/1.83.0")
         if Version(self.version) < "4.2.0":
             self.requires("arsenalgear/1.2.2")
         else:
-            self.requires("arsenalgear/2.0.1")
+            self.requires("arsenalgear/2.1.0")
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 17
 
     @property
     def _compiler_required_cpp17(self):
         return {
-            "Visual Studio": "16",
+            "Visual Studio": "15",
             "msvc": "191",
             "gcc": "8",
             "clang": "7",
-            "apple-clang": "12.0",
+            "apple-clang": "12",
         }
 
     def validate(self):
-        if self.info.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
-        minimum_version = self._compiler_required_cpp17.get(str(self.info.settings.compiler), False)
-        if minimum_version:
-            if Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
-        else:
-            self.output.warn(f"{self.ref} requires C++{self._minimum_cpp_standard}. Your compiler is unknown. Assuming it supports C++{self._minimum_cpp_standard}")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+        minimum_version = self._compiler_required_cpp17.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
