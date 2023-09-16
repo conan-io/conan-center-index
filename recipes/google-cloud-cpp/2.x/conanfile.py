@@ -149,7 +149,7 @@ class GoogleCloudCppConan(ConanFile):
         self.requires("nlohmann_json/[>=3.10]")
         self.requires("crc32c/[>=1.1]")
         self.requires("abseil/[>=20220623.0]", transitive_headers=True)
-        self.requires("libcurl/[>7.66]")
+        self.requires("libcurl/[>=7.47]")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/[>=1.2]")
 
