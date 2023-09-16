@@ -1,12 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, NMakeToolchain
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, NMakeToolchain, NMakeDeps
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.55.0"
 
 
 class TclConan(ConanFile):
@@ -69,7 +71,16 @@ class TclConan(ConanFile):
         if is_msvc(self):
             tc = NMakeToolchain(self)
             tc.generate()
+
+            deps = NMakeDeps(self)
+            deps.generate()
         else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+            if not cross_building(self):
+                env = VirtualRunEnv(self)
+                env.generate(scope="build")
+
             tc = AutotoolsToolchain(self, prefix=self.package_folder)
             def yes_no(v): return "yes" if v else "no"
             tc.configure_args.extend([
@@ -78,6 +89,9 @@ class TclConan(ConanFile):
                 "--enable-64bit={}".format(yes_no(self.settings.arch == "x86_64")),
             ])
             tc.generate()
+
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def _get_default_build_system_subdir(self):
         return {
