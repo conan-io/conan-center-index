@@ -2,16 +2,8 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import (
-    apply_conandata_patches,
-    copy,
-    export_conandata_patches,
-    get,
-    rm,
-    rmdir,
-)
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.layout import basic_layout
 
@@ -20,15 +12,12 @@ required_conan_version = ">=1.53.0"
 
 class LelyConan(ConanFile):
     name = "lely-core"
-
-    # Optional metadata
     license = "Apache-2.0"
     homepage = "https://gitlab.com/lely_industries/lely-core/"
     url = "https://github.com/conan-io/conan-center-index"
     description = "The Lely core libraries are a collection of C and C++ libraries and tools, providing high-performance I/O and sensor/actuator control for robotics and IoT applications. The libraries are cross-platform and have few dependencies. They can be even be used on bare-metal microcontrollers with as little as 32 kB RAM."
     topics = ("canopen",)
-
-    # Binary configuration
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -109,12 +98,16 @@ class LelyConan(ConanFile):
         "coapp-slave": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.os != "Linux":
@@ -132,22 +125,14 @@ class LelyConan(ConanFile):
         self.tool_requires("libtool/2.4.7")
 
     def source(self):
-        get(
-            self,
-            **self.conan_data["sources"][self.version],
-            destination=self.source_folder,
-            strip_root=True,
-        )
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
 
-        at_toolchain = AutotoolsToolchain(self)
-        at_toolchain.configure_args += [
+        tc = AutotoolsToolchain(self)
+        tc.configure_args += [
             "--disable-cython",
             "--disable-python",
             "--disable-tools",
@@ -155,7 +140,7 @@ class LelyConan(ConanFile):
             "--disable-maintainer-mode",
         ]
         if self.options.get_safe("ecss-compliance"):
-            at_toolchain.configure_args.append("--enable-ecss-compliance")
+            tc.configure_args.append("--enable-ecss-compliance")
 
         disable_options = {
             "threads",
@@ -195,16 +180,11 @@ class LelyConan(ConanFile):
         }
         for option in disable_options:
             if not self.options.get_safe(option):
-                at_toolchain.configure_args.append(f"--disable-{option}")
+                tc.configure_args.append(f"--disable-{option}")
 
-        at_toolchain.generate()
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+        tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.autoreconf()
         autotools.configure()
@@ -213,7 +193,6 @@ class LelyConan(ConanFile):
     def package(self):
         autotools = Autotools(self)
         autotools.install()
-        fix_apple_shared_install_name(self)
 
         copy(
             self,
