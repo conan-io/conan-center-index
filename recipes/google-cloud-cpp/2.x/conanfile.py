@@ -146,12 +146,12 @@ class GoogleCloudCppConan(ConanFile):
     def requirements(self):
         self.requires("protobuf/[>=3.21]", transitive_headers=True)
         self.requires("grpc/[>=1.50]", transitive_headers=True)
-        self.requires("nlohmann_json/3.10.0")
-        self.requires("crc32c/1.1.1")
+        self.requires("nlohmann_json/[>=3.10]")
+        self.requires("crc32c/[>=1.1]")
         self.requires("abseil/[>=20220623.0]", transitive_headers=True)
-        self.requires("libcurl/7.88.1")
+        self.requires("libcurl/[>7.66]")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2]")
 
     def build_requirements(self):
         # For the grpc-cpp-plugin executable
