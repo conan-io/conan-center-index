@@ -65,7 +65,7 @@ class CairommConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-            self.dependencies["cairo"].options.shared = True
+            self.options["cairo"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -175,6 +175,8 @@ class CairommConan(ConanFile):
 
         component_requires = ["libsigcpp::libsigcpp", "cairo::cairo_"]
         if self.is_conan2:
+            # TODO required only because cairo recipe needs updating to declare
+            #  transitive header dependency on freetype
             component_requires.append("freetype::freetype")
         self.cpp_info.components[cairomm_lib_name].requires = component_requires
 

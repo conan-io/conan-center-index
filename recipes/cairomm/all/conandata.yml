@@ -12,9 +12,9 @@ sources:
 patches:
   "1.16.1":
     - patch_file: "patches/enable_static_lib_1_16_1.patch"
-    - patch_description: "enable static library build on MSVC"
-    - patch_type: "portability"
+      patch_description: "enable static library build on MSVC"
+      patch_type: "portability"
   "1.14.3":
     - patch_file: "patches/enable_static_lib_1_14_3.patch"
-    - patch_description: "enable static library build on MSVC"
-    - patch_type: "portability"
+      patch_description: "enable static library build on MSVC"
+      patch_type: "portability"
