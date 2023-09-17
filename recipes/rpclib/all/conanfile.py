@@ -38,7 +38,7 @@ class rpclibConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
-            "msvc": "14.1",
+            "msvc": "191",
             "gcc": "5",
             "clang": "5",
             "apple-clang": "5.1",
