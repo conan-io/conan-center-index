@@ -45,7 +45,9 @@ class LibavrocppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.83.0")
+        # libavrocpp public headers include several boost headers
+        # (for example avro/Node.hh includes boost/noncopyable.hpp)
+        self.requires("boost/1.83.0", transitive_headers=True)
         self.requires("snappy/1.1.10")
 
     def validate(self):
