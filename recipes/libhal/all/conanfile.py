@@ -20,6 +20,7 @@ class LibHALConan(ConanFile):
     topics = ("peripherals", "hardware", "abstraction", "devices", "hal", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
     def _min_cppstd(self):
@@ -32,7 +33,7 @@ class LibHALConan(ConanFile):
             "Visual Studio": "17",
             "msvc": "193",
             "clang": "13",
-            "apple-clang": "14.0.0"
+            "apple-clang": "14"
         }
 
     def export_sources(self):
