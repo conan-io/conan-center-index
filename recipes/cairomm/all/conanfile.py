@@ -79,7 +79,7 @@ class CairommConan(ConanFile):
             minimum_version = self._compilers_minimum_version_17.get(str(self.settings.compiler), False)
             if minimum_version and Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                    f"{self.ref} requires C++17, which your compiler does not support."
                 )
 
         if self.options.shared and not self.dependencies["cairo"].options.shared:
