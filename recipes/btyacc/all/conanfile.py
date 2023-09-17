@@ -59,7 +59,7 @@ class BtyaccConan(ConanFile):
         content = textwrap.dedent("""\
             set(BTYACC_EXECUTABLE "${CMAKE_CURRENT_LIST_DIR}/../btyacc")
             if(NOT EXISTS "${BTYACC_EXECUTABLE}")
-              set(BTYACC_EXECUTABLE "${BTYACC_EXECUTABLE}.exe")
+                set(BTYACC_EXECUTABLE "${BTYACC_EXECUTABLE}.exe")
             endif()
         """)
         save(self, os.path.join(self.package_folder, self._cmake_variables), content)
