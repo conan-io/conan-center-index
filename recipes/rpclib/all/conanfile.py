@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, export_conandata_patches, get, rmdir, rename, mkdir
+from conan.tools.files import copy, get, mkdir, rename, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime
 
 required_conan_version = ">=1.53.0"
@@ -31,9 +31,6 @@ class rpclibConan(ConanFile):
     @property
     def _min_cppstd(self):
         return "11"
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
