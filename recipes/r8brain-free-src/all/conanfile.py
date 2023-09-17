@@ -1,27 +1,33 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
+from conan.tools.files import get, copy
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-
+required_conan_version = ">=1.53.0"
 
 class R8brainFreeSrcConan(ConanFile):
     name = "r8brain-free-src"
+    description = "High-quality pro audio sample rate converter / resampler C++ library"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/avaneev/r8brain-free-src"
-    description = "High-quality pro audio sample rate converter / resampler C++ library"
     topics = ("audio", "sample-rate", "conversion", "audio-processing", "resampler")
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "fft": ["ooura", "pffft", "pffft_double", ]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "fft": "ooura",
+    }
     exports_sources = ["CMakeLists.txt"]
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -29,33 +35,53 @@ class R8brainFreeSrcConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            raise ConanInvalidConfiguration("Shared r8brain-free-src cannot be built with Visual Studio")
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        if self.options.fft == "pffft":
+            self.requires("pffft/cci.20210511")
+        # TODO: use pffft_double package when possible
+
+    def validate(self):
+        if self.options.fft == "ooura" and is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} cannot be built shared with Visual Studio")
+
+        if self.options.fft == "pffft_double" and Version(self.version) < "4.10":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support pffft_double")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "r8brain-free-src-version-{}".format(self.version)
-        os.rename(extracted_folder, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["R8BRAIN_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["R8BRAIN_WITH_PFFFT"] = self.options.fft == "pffft"
+        tc.variables["R8BRAIN_WITH_PFFFT_DOUBLE"] = self.options.fft == "pffft_double"
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["r8brain"]
-        
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["pthread", "m",])
+
+        if self.options.fft == "pffft":
+            self.cpp_info.defines.append("R8B_PFFFT")
+        if self.options.fft == "pffft_double":
+            self.cpp_info.defines.append("R8B_PFFFT_DOUBLE")

@@ -13,9 +13,10 @@ if(MSVC)
     target_compile_definitions(pffft PRIVATE _USE_MATH_DEFINES)
     set_property(TARGET pffft PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 endif()
-find_library(MATH_LIBRARY m)
-if(MATH_LIBRARY)
-    target_link_libraries(pffft PRIVATE ${MATH_LIBRARY})
+include(CheckFunctionExists)
+check_function_exists(round HAVE_MATH_SYSTEM)
+if(NOT HAVE_MATH_SYSTEM)
+    target_link_libraries(pffft PRIVATE m)
 endif()
 
 install(

@@ -3,11 +3,12 @@ import shutil
 import tarfile
 from fnmatch import fnmatch
 
-from conan import ConanFile, Version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -19,18 +20,25 @@ class FruitConan(ConanFile):
     homepage = "https://github.com/google/fruit"
     license = "Apache-2.0"
     topics = ("injection", "framework")
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "use_boost": [True, False],
-               "fPIC": [True, False]}
-    default_options = {"shared": False, "use_boost": True, "fPIC": True}
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_boost": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_boost": True,
+    }
 
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def configure(self):
         if self.options.shared:
@@ -40,8 +48,8 @@ class FruitConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.use_boost:
-            self.requires("boost/1.80.0")
+        if self.options.with_boost:
+            self.requires("boost/1.83.0")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -86,7 +94,7 @@ class FruitConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["FRUIT_USES_BOOST"] = self.options.use_boost
+        tc.cache_variables["FRUIT_USES_BOOST"] = self.options.with_boost
         tc.variables["FRUIT_ENABLE_COVERAGE"] = False
         tc.variables["RUN_TESTS_UNDER_VALGRIND"] = False
         tc.variables["CMAKE_CXX_STANDARD"] = 11

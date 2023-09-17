@@ -362,18 +362,18 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
+            self.requires("libjpeg-turbo/2.1.5")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
         if self.options.get_safe("with_png"):
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
         if self.options.get_safe("with_jasper"):
             self.requires("jasper/4.0.0")
         if self.options.get_safe("with_openexr"):
             # opencv 2.x doesn't support openexr >= 3
             self.requires("openexr/2.5.7")
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.4.0")
+            self.requires("libtiff/4.5.1")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
 

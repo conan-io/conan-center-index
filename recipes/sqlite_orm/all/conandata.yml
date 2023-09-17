@@ -1,4 +1,10 @@
 sources:
+  "1.8.2":
+    url: "https://github.com/fnc12/sqlite_orm/archive/refs/tags/v1.8.2.tar.gz"
+    sha256: "56e0c7729800637a8061658d0fdad4424d2cdde77b063d23cc1b76aa20339072"
+  "1.8.1":
+    url: "https://github.com/fnc12/sqlite_orm/archive/v1.8.1.tar.gz"
+    sha256: "3fbe40d4bb7884a29a9a5764baa27e150ef53940895eb097014202bee3f06644"
   "1.8":
     url: "https://github.com/fnc12/sqlite_orm/archive/v1.8.tar.gz"
     sha256: "90893bb0035daf9803ad9e6d45b3e67f48b5515e69ed3a7577feffed7a9f3309"
@@ -14,3 +20,6 @@ sources:
 patches:
   "1.7":
     - patch_file: "patches/0001-declare-is-upsert-clause.patch"
+      patch_description: "declare is_upsert_clause declaration"
+      patch_type: "portability"
+      patch_source: "https://github.com/fnc12/sqlite_orm/pull/821"

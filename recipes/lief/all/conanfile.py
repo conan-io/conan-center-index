@@ -1,14 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.57.0"
 
 class LiefConan(ConanFile):
     name = "lief"
@@ -17,6 +17,7 @@ class LiefConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lief-project/LIEF"
     topics = ("executable", "elf", "pe", "mach-o")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -48,8 +49,20 @@ class LiefConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
-        return 11
+    def _min_cppstd(self):
+        return "14" if self.options.with_frozen else "11"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "14": {
+                "gcc": "6",
+                "clang": "5",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -62,39 +75,41 @@ class LiefConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
-
-        if ((self.info.settings.compiler == "Visual Studio" and Version(self.info.settings.compiler.version) <= "14")
-            or
-            (self.info.settings.compiler == "msvc" and Version(self.info.settings.compiler.version) <= "190")) \
-            and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio <= 14 with shared:True")
-
-        if self.info.settings.compiler.get_safe("libcxx") == "libstdc++":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support libstdc++")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("mbedtls/3.2.1")
         if Version(self.version) < "0.12.2":
             self.requires("rang/3.2")
-        self.requires("mbedtls/3.2.1")
+        else:
+            self.requires("utfcpp/3.2.3")
+            # lief doesn't supprot spdlog/1.11.0 with fmt/9.x yet.
+            self.requires("spdlog/1.10.0")
+            self.requires("boost/1.81.0", transitive_headers=True)
+            self.requires("tcb-span/cci.20220616", transitive_headers=True)
         if self.options.with_json:
             self.requires("nlohmann_json/3.11.2")
         if self.options.with_frozen:
             self.requires("frozen/1.1.1")
-        if Version(self.version) >= "0.12.2":
-            self.requires("utfcpp/3.2.2")
-            # lief doesn't supprot spdlog/1.11.0 with fmt/9.x yet.
-            self.requires("spdlog/1.10.0")
-            self.requires("boost/1.81.0")
-            self.requires("tcb-span/cci.20220616")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+        if self.options.shared and is_msvc(self) and not check_min_vs(self, "191", raise_invalid=False):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio < 15 with shared:True")
+
+        if self.settings.compiler.get_safe("libcxx") == "libstdc++":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support libstdc++")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -122,6 +137,10 @@ class LiefConan(ConanFile):
             tc.variables["LIEF_EXTERNAL_SPDLOG"] = True
             tc.variables["LIEF_OPT_EXTERNAL_LEAF"] = True
             tc.variables["LIEF_OPT_EXTERNAL_SPAN"] = True
+        if Version(self.version) >= "0.13.0":
+            tc.variables["LIEF_INSTALL"] = True
+            tc.variables["LIEF_EXTERNAL_SPAN_DIR"] = self.dependencies["tcb-span"].cpp_info.includedirs[0].replace("\\", "/")
+            tc.variables["LIEF_EXTERNAL_LEAF_DIR"] = self.dependencies["boost"].cpp_info.includedirs[0].replace("\\", "/")
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -157,8 +176,5 @@ class LiefConan(ConanFile):
             self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "LIEF"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "LIEF"
         self.cpp_info.names["cmake_find_package"] = "LIEF"
         self.cpp_info.names["cmake_find_package_multi"] = "LIEF"
-        self.cpp_info.names["pkg_config"] = "LIEF"

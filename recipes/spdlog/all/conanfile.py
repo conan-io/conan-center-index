@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.files import get, copy, rmdir, replace_in_file, apply_conandata_patches, export_conandata_patches
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -12,6 +12,7 @@ required_conan_version = ">=1.53.0"
 
 class SpdlogConan(ConanFile):
     name = "spdlog"
+    package_type = "library"
     description = "Fast C++ logging library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/gabime/spdlog"
@@ -35,32 +36,38 @@ class SpdlogConan(ConanFile):
         "no_exceptions": False,
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared or self.options.header_only:
+        if self.options.get_safe("shared") or self.options.header_only:
             self.options.rm_safe("fPIC")
         if self.options.header_only:
-            del self.options.shared
+            self.options.rm_safe("shared")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "1.11.0":
-            self.requires("fmt/9.1.0", transitive_headers=True)
-        elif Version(self.version) >= "1.10.0":
-            self.requires("fmt/8.1.1", transitive_headers=True)
-        elif Version(self.version) >= "1.9.0":
-            self.requires("fmt/8.0.1", transitive_headers=True)
-        elif Version(self.version) >= "1.7.0":
-            self.requires("fmt/7.1.3", transitive_headers=True)
-        elif Version(self.version) >= "1.5.0":
-            self.requires("fmt/6.2.1", transitive_headers=True)
-        else:
-            self.requires("fmt/6.0.0", transitive_headers=True)
+        self_version = Version(self.version)
+        fmt_version = "7.1.3"
+
+        if self_version >= "1.12.0":
+            fmt_version = "10.1.1"
+        elif self_version >= "1.11.0":
+            fmt_version = "10.0.0"
+        elif self_version >= "1.10.0":
+            fmt_version = "8.1.1"
+        elif self_version >= "1.9.0":
+            fmt_version = "8.0.1"
+        elif self_version >= "1.7.0":
+            fmt_version = "7.1.3"
+
+        self.requires(f"fmt/{fmt_version}", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
         if self.info.options.header_only:
@@ -104,6 +111,7 @@ class SpdlogConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "utils.cmake"), "/WX", "")
 
     def build(self):
+        apply_conandata_patches(self)
         self._disable_werror()
         if not self.options.header_only:
             cmake = CMake(self)
@@ -113,7 +121,11 @@ class SpdlogConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if self.options.header_only:
-            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
+            copy(self,
+                 src=os.path.join(self.source_folder, "include"),
+                 pattern="*.h", dst=os.path.join(self.package_folder, "include"),
+                 # Unvendor bundled dependencies https://github.com/gabime/spdlog/commit/18495bf25dad3a4e8c2fe3777a5f79acecde27e3
+                 excludes=("spdlog/fmt/bundled/*"))
         else:
             cmake = CMake(self)
             cmake.install()
@@ -132,7 +144,9 @@ class SpdlogConan(ConanFile):
         self.cpp_info.components["libspdlog"].defines.append("SPDLOG_FMT_EXTERNAL")
         self.cpp_info.components["libspdlog"].requires = ["fmt::fmt"]
 
-        if not self.options.header_only:
+        if self.options.header_only:
+            self.cpp_info.components["libspdlog"].libdirs = []
+        else:
             suffix = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.components["libspdlog"].libs = [f"spdlog{suffix}"]
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_COMPILED_LIB")

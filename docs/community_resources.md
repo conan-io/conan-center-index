@@ -24,6 +24,7 @@ recipe files and posts a message.
   - The results can be found here: https://ericlemanissier.github.io/conan-center-conflicting-prs/
 - [Pending Review](https://github.com/prince-chrismc/conan-center-index-pending-review)
   - The results can be found here: https://prince-chrismc.github.io/conan-center-index-pending-review/
+- [Pull Request In Progress Status](https://ericlemanissier.github.io/conan-center-pr-status/in_progress_jobs)
 - [System Package Checks](https://github.com/bincrafters/system-packages-checks): Builds automatically all `system` versions of recipes merged on CCI
 and being pull requested on a selection of Linux distributions and FreeBSD
   - The results can be found here: https://bincrafters.github.io/system-packages-checks/

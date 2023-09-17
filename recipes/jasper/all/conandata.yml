@@ -3,11 +3,11 @@ sources:
     url: "https://github.com/jasper-software/jasper/releases/download/version-4.0.0/jasper-4.0.0.tar.gz"
     sha256: "39514e1b53a5333fcff817e19565371f016ea536c36fd2d13a9c4d8da8f0be0c"
   "3.0.6":
-    url: "https://github.com/jasper-software/jasper/archive/refs/tags/version-3.0.6.tar.gz"
-    sha256: "c79961bc00158f5b5dc5f5fcfa792fde9bebb024432689d0f9e3f95a097d0ec3"
+    url: "https://github.com/jasper-software/jasper/releases/download/version-3.0.6/jasper-3.0.6.tar.gz"
+    sha256: "169be004d91f6940c649a4f854ada2755d4f35f62b0555ce9e1219c778cffc09"
   "2.0.33":
-    url: "https://github.com/jasper-software/jasper/archive/refs/tags/version-2.0.33.tar.gz"
-    sha256: "38b8f74565ee9e7fec44657e69adb5c9b2a966ca5947ced5717cde18a7d2eca6"
+    url: "https://github.com/jasper-software/jasper/releases/download/version-2.0.33/jasper-2.0.33.tar.gz"
+    sha256: "28d28290cc2eaf70c8756d391ed8bcc8ab809a895b9a67ea6e89da23a611801a"
 patches:
   "4.0.0":
     - patch_file: "patches/4.0.0-0001-skip-rpath.patch"

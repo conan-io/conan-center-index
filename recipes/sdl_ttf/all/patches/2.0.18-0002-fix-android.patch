@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,7 +12,7 @@ endif()
+ cmake_minimum_required(VERSION 3.0)
+ project(SDL_ttf C)
+ 
+-if (ANDROID)
++if (0)
+     option(TTF_WITH_HARFBUZZ "use harfbuzz to improve text shaping" OFF)
+ 
+     add_library(SDL2_ttf SHARED)

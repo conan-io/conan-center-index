@@ -1,0 +1,25 @@
+From e49b6030bd57b7aa3f0e4e42cb7ccc5fee876184 Mon Sep 17 00:00:00 2001
+From: Anonymous Maarten <anonymous.maarten@gmail.com>
+Date: Sat, 23 Jul 2022 17:28:28 +0200
+Subject: [PATCH] cmake: DEPRECATION property is available on CMake 3.17+
+
+---
+ CMakeLists.txt | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ebbe692d..64854ad3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -401,6 +401,9 @@ endif()
+ add_library(SDL2::ttf INTERFACE IMPORTED GLOBAL)
+ set_target_properties(SDL2::ttf PROPERTIES
+     INTERFACE_LINK_LIBRARIES "SDL2_ttf"
+-    DEPRECATION "Use SDL2_ttf::SDL2_ttf or SDL2_ttf::SDL2_ttf-static instead"
+ )
+-
++if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.17")
++    set_target_properties(SDL2::ttf PROPERTIES
++        DEPRECATION "Use SDL2_ttf::SDL2_ttf or SDL2_ttf::SDL2_ttf-static instead"
++    )
++endif()

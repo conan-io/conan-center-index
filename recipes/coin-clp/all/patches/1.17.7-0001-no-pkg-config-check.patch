@@ -1,0 +1,13 @@
+--- Clp/Makefile.in
++++ Clp/Makefile.in
+@@ -924,8 +924,8 @@
+ 
+ install-data-hook:
+ 	@$(mkdir_p) "$(addlibsdir)"
+-@COIN_HAS_PKGCONFIG_TRUE@	PKG_CONFIG_PATH=@COIN_PKG_CONFIG_PATH@:$(DESTDIR)$(pkgconfiglibdir) \
+-@COIN_HAS_PKGCONFIG_TRUE@	$(PKG_CONFIG) --libs clp > $(addlibsdir)/clp_addlibs.txt
++@COIN_HAS_PKGCONFIG_TRUE@	#PKG_CONFIG_PATH=@COIN_PKG_CONFIG_PATH@:$(DESTDIR)$(pkgconfiglibdir) \
++@COIN_HAS_PKGCONFIG_TRUE@	#$(PKG_CONFIG) --libs clp > $(addlibsdir)/clp_addlibs.txt
+ @COIN_CXX_IS_CL_TRUE@@COIN_HAS_PKGCONFIG_FALSE@	echo "-libpath:`$(CYGPATH_W) @abs_lib_dir@` libClpSolver.lib libClp.lib @CLPLIB_LIBS_INSTALLED@" > $(addlibsdir)/clp_addlibs.txt
+ @COIN_CXX_IS_CL_FALSE@@COIN_HAS_PKGCONFIG_FALSE@	echo -L@abs_lib_dir@ -lClp @CLPLIB_LIBS_INSTALLED@ > $(addlibsdir)/clp_addlibs.txt
+ 

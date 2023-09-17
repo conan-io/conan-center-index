@@ -17,6 +17,7 @@ class Catch2Conan(ConanFile):
     license = "BSL-1.0"
     homepage = "https://github.com/catchorg/Catch2"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -24,6 +25,7 @@ class Catch2Conan(ConanFile):
         "with_prefix": [True, False],
         "default_reporter": [None, "ANY"],
         "console_width": [None, "ANY"],
+        "no_posix_signals": [True, False],
     }
     default_options = {
         "shared": False,
@@ -31,6 +33,7 @@ class Catch2Conan(ConanFile):
         "with_prefix": False,
         "default_reporter": None,
         "console_width": "80",
+        "no_posix_signals": False,
     }
 
     @property
@@ -71,10 +74,10 @@ class Catch2Conan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler doesn't support",
             )
@@ -89,7 +92,7 @@ class Catch2Conan(ConanFile):
                                             f"got '{self.options.console_width}'") from e
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -101,6 +104,7 @@ class Catch2Conan(ConanFile):
         tc.variables["CATCH_CONFIG_CONSOLE_WIDTH"] = self.options.console_width
         if self.options.default_reporter:
             tc.variables["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
+        tc.variables["CATCH_CONFIG_NO_POSIX_SIGNALS"] = self.options.no_posix_signals
         tc.generate()
 
     def build(self):

@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibaomAv1Conan(ConanFile):
@@ -16,6 +16,7 @@ class LibaomAv1Conan(ConanFile):
     homepage = "https://aomedia.googlesource.com/aom"
     license = "BSD-2-Clause"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -33,8 +34,7 @@ class LibaomAv1Conan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,15 +44,9 @@ class LibaomAv1Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def build_requirements(self):
         if self.options.get_safe("assembly", False):
@@ -64,10 +58,11 @@ class LibaomAv1Conan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=Version(self.version) >= "3.3.0")
+        get(self, **self.conan_data["sources"][self.version], strip_root=Version(self.version) >= "3.3.0")
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_EXAMPLES"] = False
         tc.variables["ENABLE_TESTS"] = False
@@ -84,8 +79,6 @@ class LibaomAv1Conan(ConanFile):
         # Requires C99 or higher
         tc.variables["CMAKE_C_STANDARD"] = "99"
         tc.generate()
-        env = VirtualBuildEnv(self)
-        env.generate()
 
     def build(self):
         apply_conandata_patches(self)

@@ -1,0 +1,49 @@
+diff --git a/include/common/reader.h b/include/common/reader.h
+index b3bba38..39f1f87 100644
+--- a/include/common/reader.h
++++ b/include/common/reader.h
+@@ -11,6 +11,7 @@
+ 
+ #include <string>
+ #include <vector>
++#include <cstdint>
+ 
+ namespace CppCommon {
+ 
+diff --git a/include/string/string_utils.inl b/include/string/string_utils.inl
+index 1315e63..1a225c8 100644
+--- a/include/string/string_utils.inl
++++ b/include/string/string_utils.inl
+@@ -6,6 +6,8 @@
+     \copyright MIT License
+ */
+ 
++#include <cstdint>
++
+ namespace CppCommon {
+ 
+ inline bool StringUtils::IsBlank(char ch)
+diff --git a/include/system/uuid.h b/include/system/uuid.h
+index bc3c2ea..cf768ea 100644
+--- a/include/system/uuid.h
++++ b/include/system/uuid.h
+@@ -13,6 +13,7 @@
+ 
+ #include <array>
+ #include <string>
++#include <cstdint>
+ 
+ namespace CppCommon {
+ 
+diff --git a/source/string/encoding.cpp b/source/string/encoding.cpp
+index 5a0e633..65dc7e6 100644
+--- a/source/string/encoding.cpp
++++ b/source/string/encoding.cpp
+@@ -13,6 +13,7 @@
+ #include <codecvt>
+ #include <locale>
+ #include <vector>
++#include <cstdint>
+ 
+ namespace CppCommon {
+ 

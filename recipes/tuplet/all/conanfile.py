@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.50.0"
@@ -15,22 +16,34 @@ class TupletConan(ConanFile):
     homepage = "https://github.com/codeinred/tuplet"
     description = "A fast, simple tuple implementation that implements tuple as an aggregate"
     topics = ("tuple", "trivially-copyable", "modern-cpp")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
     def _min_cppstd(self):
-        return "20"
+        return "20" if Version(self.version) < "2.0.0" else "17"
 
     @property
     def _compilers_minimum_version(self):
+        if self._min_cppstd == "20":
+            return {
+                "gcc": "11",
+                "Visual Studio": "17",
+                "msvc": "193",
+                "clang": "13",
+                "apple-clang": "13"
+            }
         return {
-            "gcc": "11",
-            "Visual Studio": "17",
-            "msvc": "193",
-            "clang": "13",
-            "apple-clang": "13"
+            "gcc": "8",
+            "Visual Studio": "16",
+            "msvc": "192",
+            "clang": "7",
+            "apple-clang": "12"
         }
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -51,14 +64,10 @@ class TupletConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(compiler, False)
         if minimum_version and loose_lt_semver(version, minimum_version):
             raise ConanInvalidConfiguration(
-                f"{self.name} {self.version} requires C++20, which your compiler ({compiler}-{version}) does not support")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
+                f"{self.ref} requires C++{self._min_cppstd} which your compiler ({compiler}-{version}) does not support")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

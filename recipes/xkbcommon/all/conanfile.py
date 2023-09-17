@@ -15,6 +15,7 @@ required_conan_version = ">=1.53.0"
 
 class XkbcommonConan(ConanFile):
     name = "xkbcommon"
+    package_type = "library"
     description = "keymap handling library for toolkits and window systems"
     topics = ("keyboard", "wayland", "x11", "xkb")
     url = "https://github.com/conan-io/conan-center-index"
@@ -56,38 +57,40 @@ class XkbcommonConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         self.requires("xkeyboard-config/system")
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.options.get_safe("xkbregistry"):
-            self.requires("libxml2/2.10.3")
+            self.requires("libxml2/2.11.4")
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.21.0")
             if not self._has_build_profile:
-                self.requires("wayland-protocols/1.27")
+                self.requires("wayland-protocols/1.31")
 
     def validate(self):
-        if self.info.settings.os not in ["Linux", "FreeBSD"]:
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(f"{self.ref} is only compatible with Linux and FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.1.0")
         self.tool_requires("bison/3.8.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if self._has_build_profile and self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/1.21.0")
-            self.tool_requires("wayland-protocols/1.27")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
+            self.tool_requires("wayland-protocols/1.31")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = MesonToolchain(self)
         tc.project_options["enable-docs"] = False
         tc.project_options["enable-wayland"] = self.options.get_safe("with_wayland", False)
@@ -103,9 +106,6 @@ class XkbcommonConan(ConanFile):
             pkg_config_deps.build_context_activated = ["wayland", "wayland-protocols"]
             pkg_config_deps.build_context_suffix = {"wayland": "_BUILD", "wayland-protocols": "_BUILD"}
         pkg_config_deps.generate()
-
-        virtual_build_env = VirtualBuildEnv(self)
-        virtual_build_env.generate()
 
     def build(self):
         if self.options.get_safe("with_wayland"):
@@ -145,9 +145,9 @@ class XkbcommonConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
-        fix_apple_shared_install_name(self)
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.components["libxkbcommon"].set_property("pkg_config_name", "xkbcommon")

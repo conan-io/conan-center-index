@@ -1,11 +1,7 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
+cmake_minimum_required(VERSION 3.6)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
-
-include(FindPkgConfig)
-
+find_package(PkgConfig REQUIRED)
 pkg_check_modules(OsiClp REQUIRED IMPORTED_TARGET osi-clp)
 
 add_executable(${PROJECT_NAME} test_package.cpp)

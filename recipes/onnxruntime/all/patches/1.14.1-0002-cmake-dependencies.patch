@@ -1,0 +1,166 @@
+diff --git a/cmake/external/abseil-cpp.cmake b/cmake/external/abseil-cpp.cmake
+index 54d2f9c5c1..3195ef15a0 100644
+--- a/cmake/external/abseil-cpp.cmake
++++ b/cmake/external/abseil-cpp.cmake
+@@ -22,6 +22,7 @@ FetchContent_Declare(
+     URL ${DEP_URL_abseil_cpp}
+     URL_HASH SHA1=${DEP_SHA1_abseil_cpp}
+     PATCH_COMMAND ${ABSL_PATCH_COMMAND}
++    FIND_PACKAGE_ARGS REQUIRED CONFIG NAMES absl
+ )
+ 
+ onnxruntime_fetchcontent_makeavailable(abseil_cpp)
+diff --git a/cmake/external/eigen.cmake b/cmake/external/eigen.cmake
+index 266dd534af..3c7cb77891 100644
+--- a/cmake/external/eigen.cmake
++++ b/cmake/external/eigen.cmake
+@@ -14,8 +14,11 @@ else ()
+         FetchContent_Declare(
+         eigen
+         URL https://gitlab.com/libeigen/eigen/-/archive/d10b27fe37736d2944630ecd7557cefa95cf87c9/eigen-d10b27fe37736d2944630ecd7557cefa95cf87c9.zip
++        FIND_PACKAGE_ARGS REQUIRED CONFIG NAMES Eigen3
+ 		)
+     endif()
+-    FetchContent_Populate(eigen)
+-    set(eigen_INCLUDE_DIRS  "${eigen_SOURCE_DIR}")
++    # FetchContent_Populate(eigen)
++    # set(eigen_INCLUDE_DIRS  "${eigen_SOURCE_DIR}")
++    onnxruntime_fetchcontent_makeavailable(eigen)
++    get_target_property(eigen_INCLUDE_DIRS Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
+ endif()
+diff --git a/cmake/external/onnxruntime_external_deps.cmake b/cmake/external/onnxruntime_external_deps.cmake
+index f85336e8bb..b051ff0be1 100644
+--- a/cmake/external/onnxruntime_external_deps.cmake
++++ b/cmake/external/onnxruntime_external_deps.cmake
+@@ -97,7 +97,7 @@ FetchContent_Declare(
+     flatbuffers
+     URL ${DEP_URL_flatbuffers}
+     URL_HASH SHA1=${DEP_SHA1_flatbuffers}
+-    FIND_PACKAGE_ARGS 1.12.0...<2.0.0 NAMES Flatbuffers
++    FIND_PACKAGE_ARGS NAMES flatbuffers
+ )
+ 
+ #Here we support two build mode:
+@@ -136,6 +136,7 @@ FetchContent_Declare(
+       date
+       URL ${DEP_URL_date}
+       URL_HASH SHA1=${DEP_SHA1_date}
++      FIND_PACKAGE_ARGS NAMES date
+     )
+ onnxruntime_fetchcontent_makeavailable(date)
+ 
+@@ -145,6 +146,7 @@ FetchContent_Declare(
+   mp11
+   URL ${DEP_URL_mp11}
+   URL_HASH SHA1=${DEP_SHA1_mp11}
++  FIND_PACKAGE_ARGS NAMES Boost
+ )
+ 
+ set(JSON_BuildTests OFF CACHE INTERNAL "")
+@@ -263,6 +265,7 @@ FetchContent_Declare(
+     safeint
+     URL ${DEP_URL_safeint}
+     URL_HASH SHA1=${DEP_SHA1_safeint}
++    FIND_PACKAGE_ARGS NAMES safeint
+ )
+ 
+ # The next line will generate an error message "fatal: not a git repository", but it is ok. It is from flatbuffers
+@@ -359,6 +362,7 @@ FetchContent_Declare(
+   URL ${DEP_URL_onnx}
+   URL_HASH SHA1=${DEP_SHA1_onnx}
+   PATCH_COMMAND ${ONNXRUNTIME_ONNX_PATCH_COMMAND}
++  FIND_PACKAGE_ARGS NAMES onnx ONNX
+ )
+ 
+ 
+@@ -386,8 +390,6 @@ endif()
+ set(GSL_TARGET "Microsoft.GSL::GSL")
+ set(GSL_INCLUDE_DIR "$<TARGET_PROPERTY:${GSL_TARGET},INTERFACE_INCLUDE_DIRECTORIES>")
+ 
+-add_library(safeint_interface INTERFACE)
+-target_include_directories(safeint_interface INTERFACE ${safeint_SOURCE_DIR})
+ 
+ # XNNPACK EP
+ if (onnxruntime_USE_XNNPACK)
+@@ -416,9 +418,9 @@ set(onnxruntime_EXTERNAL_LIBRARIES ${onnxruntime_EXTERNAL_LIBRARIES_XNNPACK} WIL
+ # The other libs do not have the problem. All the sources are already there. We can compile them in any order.
+ set(onnxruntime_EXTERNAL_DEPENDENCIES onnx_proto flatbuffers::flatbuffers)
+ 
+-target_compile_definitions(onnx PUBLIC $<TARGET_PROPERTY:onnx_proto,INTERFACE_COMPILE_DEFINITIONS> PRIVATE "__ONNX_DISABLE_STATIC_REGISTRATION")
++# target_compile_definitions(onnx PUBLIC $<TARGET_PROPERTY:onnx_proto,INTERFACE_COMPILE_DEFINITIONS> PRIVATE "__ONNX_DISABLE_STATIC_REGISTRATION")
+ if (NOT onnxruntime_USE_FULL_PROTOBUF)
+-  target_compile_definitions(onnx PUBLIC "__ONNX_NO_DOC_STRINGS")
++  # target_compile_definitions(onnx PUBLIC "__ONNX_NO_DOC_STRINGS")
+ endif()
+ 
+ if (onnxruntime_RUN_ONNX_TESTS)
+diff --git a/cmake/external/wil.cmake b/cmake/external/wil.cmake
+index d38535c4a1..8b181871f9 100644
+--- a/cmake/external/wil.cmake
++++ b/cmake/external/wil.cmake
+@@ -11,12 +11,18 @@ FetchContent_Declare(
+ )
+ #We can not use FetchContent_MakeAvailable(microsoft_wil) at here, since their cmake file
+ #always executes install command without conditions.
+-FetchContent_Populate(microsoft_wil)
+-if(NOT wil_FOUND)
++#FetchContent_Populate(microsoft_wil)
++#if(NOT wil_FOUND)
++#  add_library(WIL INTERFACE)
++#  add_library(WIL::WIL ALIAS WIL)
++#
++#  # The interface's include directory.
++#  target_include_directories(WIL INTERFACE
++#    $<BUILD_INTERFACE:${microsoft_wil_SOURCE_DIR}/include>)
++#endif()
++if(WIN32)
++  FetchContent_MakeAvailable(microsoft_wil)
++else()
+   add_library(WIL INTERFACE)
+   add_library(WIL::WIL ALIAS WIL)
+-
+-  # The interface's include directory.
+-  target_include_directories(WIL INTERFACE
+-    $<BUILD_INTERFACE:${microsoft_wil_SOURCE_DIR}/include>)
+-endif()
+\ No newline at end of file
++endif()
+diff --git a/cmake/external/xnnpack.cmake b/cmake/external/xnnpack.cmake
+index 1fc2c6ccdc..a2c28957f9 100644
+--- a/cmake/external/xnnpack.cmake
++++ b/cmake/external/xnnpack.cmake
+@@ -25,12 +25,15 @@ set(FXDIV_SOURCE_DIR ${fxdiv_SOURCE_DIR})
+ 
+ FetchContent_Declare(pthreadpool URL ${DEP_URL_pthreadpool} URL_HASH SHA1=${DEP_SHA1_pthreadpool})
+ onnxruntime_fetchcontent_makeavailable(pthreadpool)
+-FetchContent_Declare(googlexnnpack URL ${DEP_URL_googlexnnpack}  URL_HASH SHA1=${DEP_SHA1_googlexnnpack}
+-PATCH_COMMAND ${Patch_EXECUTABLE} --binary --ignore-whitespace -p1 < ${PROJECT_SOURCE_DIR}/patches/xnnpack/AddEmscriptenAndIosSupport.patch)
++FetchContent_Declare(
++    googlexnnpack
++    URL ${DEP_URL_googlexnnpack}
++    URL_HASH SHA1=${DEP_SHA1_googlexnnpack}
++    PATCH_COMMAND ${Patch_EXECUTABLE} --binary --ignore-whitespace -p1 < ${PROJECT_SOURCE_DIR}/patches/xnnpack/AddEmscriptenAndIosSupport.patch
++    FIND_PACKAGE_ARGS NAMES xnnpack
++)
+ 
+ onnxruntime_fetchcontent_makeavailable(googlexnnpack)
+-set(XNNPACK_DIR ${googlexnnpack_SOURCE_DIR})
+-set(XNNPACK_INCLUDE_DIR ${XNNPACK_DIR}/include)
+ 
+ set(onnxruntime_EXTERNAL_LIBRARIES_XNNPACK XNNPACK pthreadpool)
+ 
+diff --git a/cmake/onnxruntime_providers.cmake b/cmake/onnxruntime_providers.cmake
+index 7a99bac233..bbf1955494 100644
+--- a/cmake/onnxruntime_providers.cmake
++++ b/cmake/onnxruntime_providers.cmake
+@@ -1561,10 +1561,6 @@ if (onnxruntime_USE_XNNPACK)
+   add_dependencies(onnxruntime_providers_xnnpack onnx ${onnxruntime_EXTERNAL_DEPENDENCIES})
+   set_target_properties(onnxruntime_providers_xnnpack PROPERTIES FOLDER "ONNXRuntime")
+ 
+-  install(DIRECTORY ${ONNXRUNTIME_INCLUDE_DIR}/core/providers/xnnpack
+-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/onnxruntime/core/providers
+-  )
+-
+   set_target_properties(onnxruntime_providers_xnnpack PROPERTIES LINKER_LANGUAGE CXX)
+ 
+   if (NOT onnxruntime_BUILD_SHARED_LIB)

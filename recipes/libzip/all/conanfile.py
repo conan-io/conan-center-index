@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibZipConan(ConanFile):
@@ -15,7 +15,7 @@ class LibZipConan(ConanFile):
     homepage = "https://github.com/nih-at/libzip"
     license = "BSD-3-Clause"
     topics = ("zip", "zip-archives", "zip-editing")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -47,7 +47,7 @@ class LibZipConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if not self._has_zstd_support:
-            del self.options.zstd
+            del self.options.with_zstd
         # Default crypto backend on windows
         if self.settings.os == "Windows":
             self.options.crypto = "win32"
@@ -68,23 +68,22 @@ class LibZipConan(ConanFile):
             self.requires("bzip2/1.0.8")
 
         if self.options.with_lzma:
-            self.requires("xz_utils/5.2.5")
+            self.requires("xz_utils/5.4.2")
 
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.5")
 
         if self.options.crypto == "openssl":
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
         elif self.options.crypto == "mbedtls":
             self.requires("mbedtls/3.2.1")
 
     def validate(self):
-        if self.info.options.crypto == "win32" and self.info.settings.os != "Windows":
+        if self.options.crypto == "win32" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Windows is required to use win32 crypto libraries")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -101,49 +100,13 @@ class LibZipConan(ConanFile):
         tc.variables["ENABLE_MBEDTLS"] = self.options.crypto == "mbedtls"
         tc.variables["ENABLE_OPENSSL"] = self.options.crypto == "openssl"
         tc.variables["ENABLE_WINDOWS_CRYPTO"] = self.options.crypto == "win32"
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
-        top_cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        # Honor zstd enabled
-        if self._has_zstd_support:
-            def zstd_find_package_pattern(version):
-                if version >= "1.9.2":
-                    return "find_package(Zstd 1.3.6)"
-                else:
-                    return "find_package(Zstd)"
-            lib_cmakelists = os.path.join(self.source_folder, "lib", "CMakeLists.txt")
-            replace_in_file(self, top_cmakelists, zstd_find_package_pattern(Version(self.version)), "find_package(zstd)")
-            replace_in_file(self, top_cmakelists, "Zstd_FOUND", "zstd_FOUND")
-            replace_in_file(
-                self,
-                lib_cmakelists,
-                "Zstd::Zstd",
-                "$<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>",
-            )
-        # Do not pollute rpath of installed binaries
-        replace_in_file(
-            self,
-            top_cmakelists,
-            "set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})",
-            "",
-        )
-        replace_in_file(
-            self,
-            top_cmakelists,
-            "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
-            "",
-        )
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

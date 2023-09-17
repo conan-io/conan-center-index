@@ -1,0 +1,24 @@
+--- a/lib/mosquitto.c
++++ b/lib/mosquitto.c
+@@ -23,6 +23,9 @@ Contributors:
+ #include <sys/time.h>
+ #include <strings.h>
+ #endif
++#ifdef __APPLE__
++#include <mach/mach_time.h>
++#endif
+ 
+ #include "logging_mosq.h"
+ #include "mosquitto.h"
+--- a/src/logging.c
++++ b/src/logging.c
+@@ -22,6 +22,9 @@ Contributors:
+ #include <syslog.h>
+ #endif
+ #include <time.h>
++#ifdef __APPLE__
++#include <sys/time.h>
++#endif
+ 
+ #ifdef WITH_DLT
+ #include <sys/stat.h>

@@ -1,0 +1,27 @@
+diff --git a/gettext-tools/misc/autopoint.in b/gettext-tools/misc/autopoint.in
+index 3a24eee..a53c65a 100644
+--- a/gettext-tools/misc/autopoint.in
++++ b/gettext-tools/misc/autopoint.in
+@@ -27,9 +27,10 @@ archive_version=@ARCHIVE_VERSION@
+ 
+ # Set variables
+ # - gettext_datadir     directory where the data files are stored.
+-prefix="@prefix@"
+-datarootdir="@datarootdir@"
+-: ${gettext_datadir="@datadir@/gettext"}
++scriptdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
++prefix="$scriptdir/.."
++datarootdir="$prefix/res"
++: ${gettext_datadir="${datarootdir}/gettext"}
+ : ${AUTOM4TE=autom4te}
+ 
+ # func_tmpdir
+@@ -130,7 +131,7 @@ func_find_prefixes ()
+ }
+ if test "@RELOCATABLE@" = yes; then
+   exec_prefix="@exec_prefix@"
+-  bindir="@bindir@"
++  bindir="$prefix/bin"
+   orig_installdir="$bindir" # see Makefile.am's *_SCRIPTS variables
+   func_find_curr_installdir # determine curr_installdir
+   func_find_prefixes

@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, check_min_vs
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rm, rmdir, save
@@ -8,17 +9,19 @@ from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class Antlr4CppRuntimeConan(ConanFile):
     name = "antlr4-cppruntime"
-    homepage = "https://github.com/antlr/antlr4/tree/master/runtime/Cpp"
     description = "C++ runtime support for ANTLR (ANother Tool for Language Recognition)"
-    topics = ("antlr", "parser", "runtime")
-    url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-3-Clause"
-    settings = "os", "compiler", "build_type", "arch"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/antlr/antlr4/tree/master/runtime/Cpp"
+    topics = ("antlr", "parser", "runtime")
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -30,23 +33,19 @@ class Antlr4CppRuntimeConan(ConanFile):
     short_paths = True
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         # Antlr 4.9.3 requires C++11 while newer versions require C++17
-        return 17 if Version(self.version) >= "4.10" else 11
+        return "17" if Version(self.version) >= "4.10" else "11"
 
     @property
-    def _minimum_compiler_versions_cpp17(self):
+    def _compilers_minimum_version(self):
         return {
-            "gcc": "7",
-            "clang": "5",
-            "apple-clang": "9.1"
-        }
-
-    def _check_minimum_compiler_version_cpp17(self):
-        compiler = self.info.settings.compiler
-        min_compiler_version = self._minimum_compiler_versions_cpp17.get(str(compiler), False)
-        if min_compiler_version and Version(compiler.version) < min_compiler_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not support.")
+            "17": {
+                "gcc": "7",
+                "clang": "5",
+                "apple-clang": "9.1",
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -57,20 +56,22 @@ class Antlr4CppRuntimeConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # As of 4.11, antlr4-cppruntime no longer requires libuuid.
-        # Reference: [C++] Remove libuuid dependency (https://github.com/antlr/antlr4/pull/3787)
+        # 1. As of 4.10, antlr4-cppruntime no longer requires `utfcpp`.
+        # Reference: [C++] Implement standalone Unicode encoding and decoding handling
+        #      Link: https://github.com/antlr/antlr4/pull/3398
+        # 2. As of 4.11, antlr4-cppruntime no longer requires `libuuid`.
+        # Reference: [C++] Remove libuuid dependency
+        #      Link: https://github.com/antlr/antlr4/pull/3787
         # Note that the above PR points that libuuid can be removed from 4.9.3, 4.10 and 4.10.1 as well.
         # We have patched the CMakeLists.txt to drop the dependency on libuuid from aforementioned antlr versions.
-        self.requires("utfcpp/3.2.1")
+        if Version(self.version) < "4.10":
+            self.requires("utfcpp/3.2.3")
 
     def validate(self):
         # Compilation of this library on version 15 claims C2668 Error.
@@ -78,16 +79,17 @@ class Antlr4CppRuntimeConan(ConanFile):
         # Guard: The minimum MSVC version is 16 or 1920 (which already supports C++17)
         check_min_vs(self, "192")
 
-        # Check the minimum C++ standard
-        min_cppstd = self._minimum_cpp_standard
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, min_cppstd)
-        # Check the minimum compiler version
-        if min_cppstd == 17:
-            self._check_minimum_compiler_version_cpp17()
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -97,6 +99,12 @@ class Antlr4CppRuntimeConan(ConanFile):
         if is_msvc(self):
             tc.cache_variables["WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
         tc.variables["WITH_DEMO"] = False
+        # As of ANTLR 4.12.0, one can choose to build the shared/static library only instead of both of them
+        # Related Issue: https://github.com/antlr/antlr4/issues/3993
+        # Related PR: https://github.com/antlr/antlr4/pull/3996
+        if Version(self.version) >= "4.12":
+            tc.variables["ANTLR_BUILD_SHARED"] = self.options.shared
+            tc.variables["ANTLR_BUILD_STATIC"] = not self.options.shared
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -125,6 +133,8 @@ class Antlr4CppRuntimeConan(ConanFile):
         # FIXME: this also removes lib/cmake/antlr4-generator
         # This cmake config script is needed to provide the cmake function `antlr4_generate`
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+
+        fix_apple_shared_install_name(self)
 
         # TODO: to remove in conan v2 once cmake_find_package* generatores removed
         self._create_cmake_module_alias_targets(
@@ -158,7 +168,9 @@ class Antlr4CppRuntimeConan(ConanFile):
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("ANTLR4CPP_STATIC")
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["m", "pthread"]
+        elif is_apple_os(self):
+            self.cpp_info.frameworks = ["CoreFoundation"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generatores removed
         self.cpp_info.filenames["cmake_find_package"] = "antlr4-runtime"

@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5a21eed9..94135f07 100644
+index 5a21eed..399a8ed 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -18,50 +18,50 @@ if(DOXYGEN_FOUND)
+@@ -18,50 +18,51 @@ if(DOXYGEN_FOUND)
  endif()
  
  # CMake module path
@@ -59,7 +59,7 @@ index 5a21eed9..94135f07 100644
  
  # Link libraries
 -list(APPEND LINKLIBS ${OPENSSL_LIBRARIES})
-+list(APPEND LINKLIBS CONAN_PKG::openssl)
++list(APPEND LINKLIBS OpenSSL::SSL)
  if(WIN32)
 -  list(APPEND LINKLIBS ${CRYPT_LIBRARIES})
 -  list(APPEND LINKLIBS ${WINSOCK_LIBRARIES})
@@ -67,7 +67,8 @@ index 5a21eed9..94135f07 100644
 +  list(APPEND LINKLIBS mswsock ws2_32)
  endif()
 -list(APPEND LINKLIBS cppcommon)
-+list(APPEND LINKLIBS CONAN_PKG::cppcommon)
++find_package(cppcommon REQUIRED)
++list(APPEND LINKLIBS cppcommon::cppcommon)
  
  # OpenSSL libraries
  message(STATUS "OpenSSL version: ${OPENSSL_VERSION} ${OPENSSL_INCLUDE_DIR} ${OPENSSL_LIBRARIES}")
@@ -78,12 +79,13 @@ index 5a21eed9..94135f07 100644
  
  # Library
  file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h")
-@@ -70,14 +70,15 @@ file(GLOB_RECURSE LIB_SOURCE_FILES "source/*.cpp")
+@@ -70,14 +71,16 @@ file(GLOB_RECURSE LIB_SOURCE_FILES "source/*.cpp")
  add_library(cppserver ${LIB_HEADER_FILES} ${LIB_INLINE_FILES} ${LIB_SOURCE_FILES})
  set_target_properties(cppserver PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries")
  target_include_directories(cppserver PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 -target_link_libraries(cppserver ${LINKLIBS} asio)
-+target_link_libraries(cppserver ${LINKLIBS} CONAN_PKG::asio)
++find_package(asio REQUIRED)
++target_link_libraries(cppserver ${LINKLIBS} asio::asio)
 +target_compile_features(cppserver PUBLIC cxx_std_17)
  list(APPEND INSTALL_TARGETS cppserver)
  list(APPEND LINKLIBS cppserver)
@@ -96,7 +98,7 @@ index 5a21eed9..94135f07 100644
    file(GLOB EXAMPLE_HEADER_FILES "examples/*.h")
    file(GLOB EXAMPLE_INLINE_FILES "examples/*.inl")
    file(GLOB EXAMPLE_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/examples" "examples/*.cpp")
-@@ -90,8 +91,8 @@ if(NOT CPPSERVER_MODULE)
+@@ -90,8 +93,8 @@ if(NOT CPPSERVER_MODULE)
      list(APPEND INSTALL_TARGETS ${EXAMPLE_TARGET})
      list(APPEND INSTALL_TARGETS_PDB ${EXAMPLE_TARGET})
    endforeach()
@@ -107,7 +109,7 @@ index 5a21eed9..94135f07 100644
    file(GLOB BENCHMARK_HEADER_FILES "performance/*.h")
    file(GLOB BENCHMARK_INLINE_FILES "performance/*.inl")
    file(GLOB BENCHMARK_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/performance" "performance/*.cpp")
-@@ -104,8 +105,8 @@ if(NOT CPPSERVER_MODULE)
+@@ -104,8 +107,8 @@ if(NOT CPPSERVER_MODULE)
      list(APPEND INSTALL_TARGETS ${BENCHMARK_TARGET})
      list(APPEND INSTALL_TARGETS_PDB ${BENCHMARK_TARGET})
    endforeach()
@@ -118,7 +120,7 @@ index 5a21eed9..94135f07 100644
    file(GLOB TESTS_HEADER_FILES "tests/*.h")
    file(GLOB TESTS_INLINE_FILES "tests/*.inl")
    file(GLOB TESTS_SOURCE_FILES "tests/*.cpp")
-@@ -119,15 +120,15 @@ if(NOT CPPSERVER_MODULE)
+@@ -119,15 +122,15 @@ if(NOT CPPSERVER_MODULE)
    # CTest
    enable_testing()
    add_test(cppserver-tests cppserver-tests --durations yes --order lex)

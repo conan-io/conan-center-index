@@ -4,7 +4,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class crc32cConan(ConanFile):
@@ -15,6 +15,7 @@ class crc32cConan(ConanFile):
     homepage = "https://github.com/google/crc32c"
     license = "BSD-3-Clause"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,29 +26,32 @@ class crc32cConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _min_cppstd(self):
+        return "11"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-    def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if not valid_min_cppstd(self, 11):
-            tc.variables["CMAKE_CXX_STANDARD"] = 11
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.variables["CRC32C_BUILD_TESTS"] = False
         tc.variables["CRC32C_BUILD_BENCHMARKS"] = False
         tc.variables["CRC32C_INSTALL"] = True

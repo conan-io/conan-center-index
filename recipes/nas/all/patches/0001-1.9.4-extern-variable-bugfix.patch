@@ -1,0 +1,13 @@
+diff --git a/server/dia/main.c b/server/dia/main.c
+index 83601ae..e5d2287 100644
+--- a/server/dia/main.c
++++ b/server/dia/main.c
+@@ -76,7 +76,7 @@ static char *AuServerName(void);
+ extern char *display;
+ 
+ static int restart = 0;
+-FILE *yyin;                     /* for the config parser */
++extern FILE *yyin;                     /* for the config parser */
+ 
+ void
+ NotImplemented()

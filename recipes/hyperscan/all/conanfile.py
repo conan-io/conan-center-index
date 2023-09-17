@@ -16,6 +16,7 @@ class HyperscanConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.hyperscan.io"
     topics = ("regex", "regular expressions")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -57,7 +58,7 @@ class HyperscanConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0")
+        self.requires("boost/1.83.0")
         if self.options.build_chimera:
             self.requires("pcre/8.45")
 
@@ -88,6 +89,7 @@ class HyperscanConan(ConanFile):
         tc.variables["BUILD_AVX512"] = self.options.build_avx512
         tc.variables["FAT_RUNTIME"] = self.options.fat_runtime
         tc.variables["BUILD_CHIMERA"] = self.options.build_chimera
+        tc.variables["BUILD_EXAMPLES"] = False
         if self.options.dump_support != "auto":
             tc.variables["DUMP_SUPPORT"] = self.options.dump_support
         tc.generate()

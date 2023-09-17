@@ -68,10 +68,10 @@ class NetcdfConan(ConanFile):
                 # So we will require the older hdf5 to keep the older behaviour.
                 self.requires("hdf5/1.12.0")
             else:
-                self.requires("hdf5/1.13.1")
+                self.requires("hdf5/1.14.0")
 
         if self.options.dap or self.options.byterange:
-            self.requires("libcurl/7.86.0")
+            self.requires("libcurl/7.88.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)

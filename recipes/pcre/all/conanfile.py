@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class PCREConan(ConanFile):
@@ -16,6 +16,7 @@ class PCREConan(ConanFile):
     topics = ("regex", "regexp", "PCRE")
     license = "BSD-3-Clause"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -49,8 +50,7 @@ class PCREConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -58,42 +58,35 @@ class PCREConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if not self.options.build_pcrecpp:
-            try:
-                del self.settings.compiler.libcxx
-            except Exception:
-                pass
-            try:
-                del self.settings.compiler.cppstd
-            except Exception:
-                pass
+            self.settings.rm_safe("compiler.cppstd")
+            self.settings.rm_safe("compiler.libcxx")
         if not self.options.build_pcregrep:
             del self.options.with_bzip2
             del self.options.with_zlib
         if self.options.with_unicode_properties:
             self.options.with_utf = True
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.get_safe("with_bzip2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if not self.info.options.build_pcre_8 and not self.info.options.build_pcre_16 and not self.info.options.build_pcre_32:
+        if not self.options.build_pcre_8 and not self.options.build_pcre_16 and not self.options.build_pcre_32:
             raise ConanInvalidConfiguration("At least one of build_pcre_8, build_pcre_16 or build_pcre_32 must be enabled")
-        if self.info.options.build_pcrecpp and not self.info.options.build_pcre_8:
+        if self.options.build_pcrecpp and not self.options.build_pcre_8:
             raise ConanInvalidConfiguration("build_pcre_8 must be enabled for the C++ library support")
-        if self.info.options.build_pcregrep and not self.info.options.build_pcre_8:
+        if self.options.build_pcregrep and not self.options.build_pcre_8:
             raise ConanInvalidConfiguration("build_pcre_8 must be enabled for the pcregrep program")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -186,9 +179,7 @@ class PCREConan(ConanFile):
                 self.cpp_info.components["libpcre32"].defines.append("PCRE_STATIC=1")
 
         if self.options.build_pcregrep:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH environment variable: {bin_path}")
-            self.env_info.PATH.append(bin_path)
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
             # FIXME: This is a workaround to avoid ConanException. zlib and bzip2
             # are optional requirements of pcregrep executable, not of any pcre lib.
             if self.options.with_bzip2:

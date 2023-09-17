@@ -14,16 +14,19 @@ class ExpatConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libexpat/libexpat"
     topics = ("xml", "parsing")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "char_type": ["char", "wchar_t", "ushort"],
+        "large_size": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "char_type": "char",
+        "large_size": False,
     }
 
     def export_sources(self):
@@ -43,7 +46,7 @@ class ExpatConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -56,6 +59,7 @@ class ExpatConan(ConanFile):
         if is_msvc(self):
             tc.variables["EXPAT_MSVC_STATIC_CRT"] = is_msvc_static_runtime(self)
         tc.variables["EXPAT_BUILD_PKGCONFIG"] = False
+        tc.variables["EXPAT_LARGE_SIZE"] = self.options.large_size
         tc.generate()
 
     def build(self):
@@ -87,6 +91,8 @@ class ExpatConan(ConanFile):
             self.cpp_info.defines.append("XML_UNICODE")
         elif self.options.get_safe("char_type") == "wchar_t":
             self.cpp_info.defines.append("XML_UNICODE_WCHAR_T")
+        if self.options.large_size:
+            self.cpp_info.defines.append("XML_LARGE_SIZE")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

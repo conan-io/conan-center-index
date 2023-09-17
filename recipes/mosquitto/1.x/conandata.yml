@@ -1,4 +1,12 @@
 sources:
   "1.6.12":
-    sha256: 18b1f455c83645f8aaecff1f6d623898ff630eba391352fcc7a2c241a9d9556a
-    url: https://github.com/eclipse/mosquitto/archive/v1.6.12.tar.gz
+    url: "https://mosquitto.org/files/source/mosquitto-1.6.12.tar.gz"
+    sha256: "548d73d19fb787dd0530334e398fd256ef3a581181678488a741a995c4f007fb"
+patches:
+  "1.6.12":
+    - patch_file: "patches/1.6.12-0001-fix-cmake.patch"
+      patch_description: "Several CMake fixes: installation and system libs on Windows, bad CMakeLists initialization"
+      patch_type: "conan"
+    - patch_file: "patches/1.6.12-0002-fix-macos.patch"
+      patch_description: "Add missing includes for macOS"
+      patch_type: "conan"

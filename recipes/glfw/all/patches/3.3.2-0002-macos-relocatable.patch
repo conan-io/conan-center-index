@@ -1,0 +1,11 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -160,8 +160,6 @@ if (BUILD_SHARED_LIBS)
+         # Add -fno-common to work around a bug in Apple's GCC
+         target_compile_options(glfw PRIVATE "-fno-common")
+ 
+-        set_target_properties(glfw PROPERTIES
+-                              INSTALL_NAME_DIR "${CMAKE_INSTALL_LIBDIR}")
+     endif()
+ 
+     if (UNIX)

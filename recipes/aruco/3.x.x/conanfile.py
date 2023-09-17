@@ -1,18 +1,20 @@
-from conans import ConanFile, tools, CMake
-import functools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import collect_libs, copy, get, rmdir
 import os
 
-required_conan_version = ">=1.36.0"
+required_conan_version = ">=1.53.0"
 
 
 class ArucoConan(ConanFile):
     name = "aruco"
     description = "Augmented reality library based on OpenCV "
-    topics = ("aruco", "augmented reality")
+    topics = ("augmented-reality", "robotics", "markers")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.uco.es/investiga/grupos/ava/node/26"
     license = "GPL-3.0-only"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [False, True],
@@ -23,59 +25,51 @@ class ArucoConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake", "cmake_find_package"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("opencv/4.5.5")
         self.requires("eigen/3.4.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["ARUCO_DEVINSTALL"] = True
-        cmake.definitions["BUILD_TESTS"] = False
-        cmake.definitions["BUILD_GLSAMPLES"] = False
-        cmake.definitions["BUILD_UTILS"] = False
-        cmake.definitions["BUILD_DEBPACKAGE"] = False
-        cmake.definitions["BUILD_SVM"] = False
-        cmake.definitions["INSTALL_DOC"] = False
-        cmake.definitions["USE_OWN_EIGEN3"] = False
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ARUCO_DEVINSTALL"] = True
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_GLSAMPLES"] = False
+        tc.variables["BUILD_UTILS"] = False
+        tc.variables["BUILD_DEBPACKAGE"] = False
+        tc.variables["BUILD_SVM"] = False
+        tc.variables["INSTALL_DOC"] = False
+        tc.variables["USE_OWN_EIGEN3"] = False
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "aruco")
         self.cpp_info.includedirs.append(os.path.join("include", "aruco"))
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)

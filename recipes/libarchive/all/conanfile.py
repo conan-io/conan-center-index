@@ -16,6 +16,7 @@ class LibarchiveConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libarchive.org"
     license = "BSD-2-Clause"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -75,23 +76,26 @@ class LibarchiveConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.10.3")
+            self.requires("libxml2/2.11.4")
         if self.options.with_expat:
             self.requires("expat/2.5.0")
         if self.options.with_iconv:
             self.requires("libiconv/1.17")
         if self.options.with_pcreposix:
-            self.requires("pcre/8.45")
+            self.requires("pcre/10.42")
         if self.options.with_nettle:
             self.requires("nettle/3.8.1")
         if self.options.with_openssl:
-            self.requires("openssl/3.0.7")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_libb2:
             self.requires("libb2/20190723")
         if self.options.with_lz4:
@@ -99,25 +103,21 @@ class LibarchiveConan(ConanFile):
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.0")
+            self.requires("xz_utils/5.4.2")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.5")
         if self.options.get_safe("with_mbedtls"):
             self.requires("mbedtls/3.2.1")
 
     def validate(self):
-        if self.info.settings.os != "Windows" and self.info.options.with_cng:
+        if self.settings.os != "Windows" and self.options.with_cng:
             # TODO: add cng when available in CCI
             raise ConanInvalidConfiguration("cng recipe not yet available in CCI.")
-        if self.info.options.with_expat and self.info.options.with_libxml2:
+        if self.options.with_expat and self.options.with_libxml2:
             raise ConanInvalidConfiguration("libxml2 and expat options are exclusive. They cannot be used together as XML engine")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         cmake_deps = CMakeDeps(self)
@@ -154,6 +154,9 @@ class LibarchiveConan(ConanFile):
         if Version(self.version) >= "3.4.2":
             tc.variables["ENABLE_MBEDTLS"] = self.options.with_mbedtls
         tc.variables["ENABLE_XATTR"] = self.options.with_xattr
+        # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
+        if is_msvc(self):
+            tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
 
     def build(self):

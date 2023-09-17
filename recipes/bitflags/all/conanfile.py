@@ -17,35 +17,42 @@ class BitFlags(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/m-peko/bitflags"
     license = "MIT"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
-    def _minimum_compilers_version(self):
-        return {"apple-clang": "5", "clang": "5", "gcc": "7", "Visual Studio": "14"}
+    def _min_cppstd(self):
+        return "11"
 
     @property
-    def _minimum_cpp_standard(self):
-        return 11
+    def _compilers_minimum_version(self):
+        return {
+            "apple-clang": "5",
+            "clang": "5",
+            "gcc": "7",
+            "Visual Studio": "14",
+            "msvc": "190",
+        }
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        try:
-            if Version(self.settings.compiler.version) < self._minimum_compilers_version[str(self.settings.compiler)]:
-                raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports C++{self._minimum_cpp_standard}.")
-        except KeyError:
-            self.output.warn("Unknown compiler encountered. Assuming it supports C++11.")
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
+            )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True,
-            destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -56,4 +63,3 @@ class BitFlags(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "bitflags::bitflags")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []

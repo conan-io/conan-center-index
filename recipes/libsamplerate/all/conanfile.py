@@ -6,7 +6,7 @@ from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 
 class LibsamplerateConan(ConanFile):
@@ -16,10 +16,11 @@ class LibsamplerateConan(ConanFile):
         "performing sample rate conversion of audio data."
     )
     license = "BSD-2-Clause"
-    topics = ("libsamplerate", "audio", "resample-audio-files")
+    topics = ("audio", "resample-audio-files")
     homepage = "https://github.com/libsndfile/libsamplerate"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,37 +37,29 @@ class LibsamplerateConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-
-    def build_requirements(self):
-        if is_apple_os(self) and self.options.shared and Version(self.version) >= "0.2.2":
-            # At least CMake 3.17 (see https://github.com/libsndfile/libsamplerate/blob/0.2.2/src/CMakeLists.txt#L110-L119)
-            self.tool_requires("cmake/3.24.0")
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        if is_apple_os(self) and self.options.shared and Version(self.version) >= "0.2.2":
+            # see https://github.com/libsndfile/libsamplerate/blob/0.2.2/src/CMakeLists.txt#L110-L119
+            self.tool_requires("cmake/[>=3.17 <4]")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         tc = CMakeToolchain(self)
         tc.variables["LIBSAMPLERATE_EXAMPLES"] = False
         tc.variables["LIBSAMPLERATE_INSTALL"] = True
         tc.variables["BUILD_TESTING"] = False
         tc.generate()
-
-        env = VirtualBuildEnv(self)
-        env.generate()
 
     def _patch_sources(self):
         # Disable upstream logic about msvc runtime policy, called before conan toolchain resolution

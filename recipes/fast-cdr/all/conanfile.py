@@ -4,10 +4,11 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import collect_libs, copy, get, rm, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.54.0"
 
 
 class FastCDRConan(ConanFile):
@@ -18,6 +19,7 @@ class FastCDRConan(ConanFile):
     description = "eProsima FastCDR library for serialization"
     topics = ("dds", "middleware", "serialization")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -34,15 +36,19 @@ class FastCDRConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        if Version(self.version) >= "1.1.0":
+            self.tool_requires("cmake/[>=3.16.3 <4]")
+
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if self.info.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
+        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             # This combination leads to an fast-cdr error when linking
             # linking dynamic '*.dll' and static MT runtime
             # see https://github.com/eProsima/Fast-CDR/blob/v1.0.21/include/fastcdr/eProsima_auto_link.h#L37
@@ -50,14 +56,11 @@ class FastCDRConan(ConanFile):
             raise ConanInvalidConfiguration("Mixing a dll eprosima library with a static runtime is a bad idea")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_STATIC"] = not self.options.shared
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):

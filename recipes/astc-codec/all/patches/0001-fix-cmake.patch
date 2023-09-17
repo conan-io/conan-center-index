@@ -1,0 +1,76 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -11,7 +11,7 @@
+ # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ # License for the specific language governing permissions and limitations under
+ # the License.
+-cmake_minimum_required(VERSION 3.1.0)
++cmake_minimum_required(VERSION 3.8)
+ project(astc-codec)
+ 
+ option(OPTION_ASTC_TESTS "Build all the unit tests." ON)
+@@ -20,7 +20,6 @@ option(OPTION_ASTC_TESTS "Build all the unit tests." ON)
+ # yet bringing in.
+ option(OPTION_BUILD_FUZZER "Build the fuzzer tests." OFF)
+ 
+-set (CMAKE_CXX_STANDARD 11)
+ if(OPTION_ASTC_TESTS)
+   enable_testing()
+ 
+@@ -44,3 +43,13 @@ endif()
+ 
+ add_subdirectory(src/base)
+ add_subdirectory(src/decoder)
++
++include(GNUInstallDirs)
++install(DIRECTORY include/astc-codec DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
++install(
++    TARGETS astc-codec
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
++install(TARGETS astc_inspector_cli DESTINATION ${CMAKE_INSTALL_BINDIR})
+--- a/src/decoder/CMakeLists.txt
++++ b/src/decoder/CMakeLists.txt
+@@ -11,10 +11,11 @@
+ # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ # License for the specific language governing permissions and limitations under
+ # the License.
+-add_library(footprint footprint.cc)
++add_library(footprint OBJECT footprint.cc)
++target_compile_features(footprint PUBLIC cxx_std_11)
+ target_link_libraries(footprint base)
+ 
+-add_library(astc_utils
++add_library(astc_utils OBJECT
+             astc_file.cc
+             endpoint_codec.cc
+             integer_sequence_codec.cc
+@@ -24,17 +25,24 @@ add_library(astc_utils
+             physical_astc_block.cc
+             quantization.cc
+             weight_infill.cc)
++target_compile_features(astc_utils PUBLIC cxx_std_11)
+ target_link_libraries(astc_utils PRIVATE base footprint)
+ target_include_directories(astc_utils PRIVATE ../..)
++if(BUILD_SHARED_LIBS)
++    set_target_properties(footprint PROPERTIES POSITION_INDEPENDENT_CODE ON)
++    set_target_properties(astc_utils PROPERTIES POSITION_INDEPENDENT_CODE ON)
++endif()
+ 
+ add_library(astc-codec codec.cc)
+-target_link_libraries(astc-codec PRIVATE astc_utils)
++target_compile_features(astc-codec PRIVATE cxx_std_11)
++set_target_properties(astc-codec PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
++target_link_libraries(astc-codec PRIVATE astc_utils footprint)
+ target_include_directories(astc-codec PUBLIC ../../include)
+ target_include_directories(astc-codec PRIVATE ../..)
+ 
+ add_executable(astc_inspector_cli tools/astc_inspector_cli.cc)
+ target_include_directories(astc_inspector_cli PRIVATE ../..)
+-target_link_libraries(astc_inspector_cli PRIVATE astc_utils)
++target_link_libraries(astc_inspector_cli PRIVATE astc_utils footprint)
+ 
+ #
+ # Testing

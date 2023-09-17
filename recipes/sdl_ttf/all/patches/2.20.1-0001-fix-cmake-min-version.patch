@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -325,7 +325,7 @@ if(SDL2TTF_INSTALL)
+         COMPONENT devel
+     )
+ 
+-    if(SDL2TTF_BUILD_SHARED_LIBS)
++    if(0)
+         # Only create a .pc file for a shared SDL2_ttf
+         set(prefix "${CMAKE_INSTALL_PREFIX}")
+         set(exec_prefix "\${prefix}")

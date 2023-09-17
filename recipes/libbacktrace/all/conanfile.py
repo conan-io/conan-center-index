@@ -1,14 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibbacktraceConan(ConanFile):
@@ -18,6 +18,7 @@ class LibbacktraceConan(ConanFile):
     homepage = "https://github.com/ianlancetaylor/libbacktrace"
     license = "BSD-3-Clause"
     topics = ("backtrace", "stack-trace")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -31,10 +32,6 @@ class LibbacktraceConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -54,20 +51,19 @@ class LibbacktraceConan(ConanFile):
 
     def validate(self):
         check_min_vs(self, "180")
-        if is_msvc(self) and self.info.options.shared:
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration("libbacktrace shared is not supported with Visual Studio")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         if is_msvc(self):
             self.tool_requires("automake/1.16.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -77,12 +73,10 @@ class LibbacktraceConan(ConanFile):
         if is_msvc(self):
             # https://github.com/conan-io/conan/issues/6514
             tc.extra_cflags.append("-FS")
-        tc.generate()
-
+        env = tc.environment()
         if is_msvc(self):
-            env = Environment()
-            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
-            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            compile_wrapper = unix_path(self, self.conf.get("user.automake:compile-wrapper"))
+            ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper"))
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
@@ -91,7 +85,7 @@ class LibbacktraceConan(ConanFile):
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
-            env.vars(self).save_script("conanbuild_libbacktrace_msvc")
+        tc.generate(env)
 
     def build(self):
         apply_conandata_patches(self)
@@ -102,8 +96,7 @@ class LibbacktraceConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # see https://github.com/conan-io/conan/issues/12006
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
         lib_folder = os.path.join(self.package_folder, "lib")
         rm(self, "*.la", lib_folder)
         fix_apple_shared_install_name(self)

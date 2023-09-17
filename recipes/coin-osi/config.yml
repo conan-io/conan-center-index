@@ -1,5 +1,5 @@
 versions:
-  "0.108.6":
-    folder: "all"
   "0.108.7":
+    folder: "all"
+  "0.108.6":
     folder: "all"

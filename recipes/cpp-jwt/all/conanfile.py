@@ -1,74 +1,92 @@
-from conans import ConanFile, tools, CMake
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
-from conans.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.52.0"
 
 
 class CppJwtConan(ConanFile):
     name = "cpp-jwt"
-    homepage = "https://github.com/arun11299/cpp-jwt"
     description = "A C++ library for handling JWT tokens"
-    topics = ("jwt", "auth", "header-only")
-    url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
-    exports_sources = ["patches/*"]
     license = "MIT"
-    _cmake = None
+    topics = ("jwt", "auth", "header-only")
+    homepage = "https://github.com/arun11299/cpp-jwt"
+    url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return "14"
 
-    def requirements(self):
-        self.requires("openssl/1.1.1d")
-        self.requires("nlohmann_json/3.7.3")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def configure(self):
-        minimal_cpp_standard = "14"
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, minimal_cpp_standard)
-
-        minimal_version = {
+    @property
+    def _compilers_minimum_version(self):
+        return {
             "gcc": "6.4",
             "clang": "5",
             "apple-clang": "10",
-            "Visual Studio": "15"
+            "Visual Studio": "15",
+            "msvc": "191",
         }
 
-        compiler = str(self.settings.compiler)
-        if compiler not in minimal_version:
-            self.output.warn(
-                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
-            self.output.warn(
-                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
-            return
+    def export_sources(self):
+        export_conandata_patches(self)
 
-        version = tools.Version(self.settings.compiler.version)
-        if version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration(
-                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["CPP_JWT_BUILD_EXAMPLES"] = False
-            self._cmake.definitions["CPP_JWT_BUILD_TESTS"] = False
-            self._cmake.definitions["CPP_JWT_USE_VENDORED_NLOHMANN_JSON"] = False
-            self._cmake.configure(source_folder=self._source_subfolder)
-        return self._cmake
-
-    def package(self):
-        tools.patch(**self.conan_data["patches"][self.version])
-        self.copy(pattern="LICENSE*", dst="licenses",
-                  src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+    def requirements(self):
+        self.requires("nlohmann_json/3.11.2")
+        self.requires("openssl/1.1.1s")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        def loose_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CPP_JWT_BUILD_EXAMPLES"] = False
+        tc.variables["CPP_JWT_BUILD_TESTS"] = False
+        tc.variables["CPP_JWT_USE_VENDORED_NLOHMANN_JSON"] = False
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def build(self):
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib"))
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "cpp-jwt")
+        self.cpp_info.set_property("cmake_target_name", "cpp-jwt::cpp-jwt")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

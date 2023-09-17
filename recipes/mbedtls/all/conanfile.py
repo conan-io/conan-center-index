@@ -19,6 +19,7 @@ class MBedTLSConan(ConanFile):
     homepage = "https://tls.mbed.org"
     license = "Apache-2.0"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -54,18 +55,17 @@ class MBedTLSConan(ConanFile):
             self.requires("zlib/1.2.13")
 
     def validate(self):
-        if self.info.settings.os == "Windows" and self.info.options.shared:
+        if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared build on Windows")
 
-        if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "5":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             # The command line flags set are not supported on older versions of gcc
             raise ConanInvalidConfiguration(
-                f"{self.ref} does not support {self.info.settings.compiler}-{self.info.settings.compiler.version}"
+                f"{self.ref} does not support {self.settings.compiler}-{self.settings.compiler.version}"
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root = True)
+        get(self, **self.conan_data["sources"][self.version], strip_root = True)
 
     def generate(self):
         tc = CMakeToolchain(self)
