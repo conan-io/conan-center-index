@@ -174,6 +174,9 @@ class ArmadilloConan(ConanFile):
                 "The wrapper requires the use of an external RNG. Set use_extern_rng=True and try again."
             )
 
+        if not self.options.shared and self.options.use_wrapper:
+            raise ConanInvalidConfiguration("Building the armadillo run-time wrapper library requires armadillo/*:shared=True")
+
     def requirements(self):
         # Optional requirements
         # TODO: "atlas/3.10.3" # Pending https://github.com/conan-io/conan-center-index/issues/6757
