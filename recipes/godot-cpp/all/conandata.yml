@@ -1,0 +1,9 @@
+sources:
+  "4.1.1":
+    url: "https://github.com/godotengine/godot-cpp/archive/godot-4.1.1-stable.tar.gz"
+    sha256: "ed8d9be78451cd90fe9078d3be1d8826896520f4accd184e1dc9ea6534353655"
+patches:
+  "4.1.1":
+    - patch_file: "patches/4.x.x-0001-add-cmake-install.patch"
+      patch_description: "add install commands to CMakeLists.txt"
+      patch_type: "conan"

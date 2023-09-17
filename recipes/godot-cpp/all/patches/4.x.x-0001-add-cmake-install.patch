@@ -1,0 +1,20 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0ee99aa..1e48a64 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -210,3 +210,15 @@ set_target_properties(${PROJECT_NAME}
+ 		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
+ 		OUTPUT_NAME "${OUTPUT_NAME}"
+ )
++
++install(TARGETS ${PROJECT_NAME})
++
++install(FILES "gdextension/gdextension_interface.h"
++  DESTINATION "include"
++)
++
++install(DIRECTORY
++  "include/godot_cpp"
++  "${CMAKE_CURRENT_BINARY_DIR}/gen/include/godot_cpp"
++  DESTINATION "include"
++)

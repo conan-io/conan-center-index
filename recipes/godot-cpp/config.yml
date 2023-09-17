@@ -5,3 +5,5 @@ versions:
     folder: 3.x.x
   "cci.3.2-20200130":
     folder: 3.x.x
+  "4.1.1":
+    folder: all
