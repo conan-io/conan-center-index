@@ -82,9 +82,13 @@ class rpclibConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "rpclib::rpc")
         self.cpp_info.set_property("pkg_config_name", "rpclib")
 
+        # TODO: back to global scope after Conan 2.0
+        self.cpp_info.components["_rpc"].libs = ["rpc"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["_rpc"].system_libs.append("pthread")
+
         # TODO: Remove after Conan 2.0
         self.cpp_info.components["_rpc"].names["cmake_find_package"] = "rpc"
         self.cpp_info.components["_rpc"].names["cmake_find_package_multi"] = "rpc"
-        self.cpp_info.components["_rpc"].libs = ["rpc"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["_rpc"].system_libs = ["pthread"]
+        self.cpp_info.components["_rpc"].set_property("cmake_target_name", "rpclib::rpc")
+        self.cpp_info.components["_rpc"].set_property("pkg_config_name", "rpclib")
