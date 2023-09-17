@@ -91,7 +91,6 @@ class LibvaultConan(ConanFile):
         tc.variables["ENABLE_TEST"] = False
         tc.variables["ENABLE_INTEGRATION_TEST"] = False
         tc.variables["ENABLE_COVERAGE"] = False
-        tc.variables["LINK_CURL"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
