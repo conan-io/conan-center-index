@@ -80,7 +80,7 @@ class CairoConan(ConanFile):
             del self.options.with_xlib_xrender
             del self.options.with_xcb
             del self.options.with_symbol_lookup
-        if self.settings.os in ["Macos", "Windows"]:
+        if self.settings.os in ["Macos", "Windows"] or Version(self.version) >= "1.17.8":
             del self.options.with_opengl
 
     def configure(self):
@@ -152,6 +152,7 @@ class CairoConan(ConanFile):
         pkg_deps = PkgConfigDeps(self)
         pkg_deps.generate()
 
+        version = Version(self.version)
         options = dict()
         options["tests"] = "disabled"
         options["zlib"] = is_enabled(self.options.with_zlib)
@@ -170,17 +171,20 @@ class CairoConan(ConanFile):
             options["gl-backend"] = "glesv2"
         elif self.options.get_safe("with_opengl") == "gles3":
             options["gl-backend"] = "glesv3"
-        else:
+        elif version < "1.17.8":
             options["gl-backend"] = "disabled"
-        options["glesv2"] = is_enabled(self.options.get_safe("with_opengl") == "gles2")
-        options["glesv3"] = is_enabled(self.options.get_safe("with_opengl") == "gles3")
+
+        # OpenGL support was removed in 1.17.8
+        if version < "1.17.8":
+            options["glesv2"] = is_enabled(self.options.get_safe("with_opengl") == "gles2")
+            options["glesv3"] = is_enabled(self.options.get_safe("with_opengl") == "gles3")
+
         options["tee"] = is_enabled(self.options.tee)
         options["symbol-lookup"] = is_enabled(self.options.get_safe("with_symbol_lookup"))
 
         # future options to add, see meson_options.txt.
         # for now, disabling explicitly, to avoid non-reproducible auto-detection of system libs
 
-        version = Version(self.version)
         if version < "1.17.6":
             options["cogl"] = "disabled"  # https://gitlab.gnome.org/GNOME/cogl
             options["directfb"] = "disabled"
