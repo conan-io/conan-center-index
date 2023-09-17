@@ -57,7 +57,9 @@ class BeautyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.79.0"),
+        # beauty public headers include some boost headers.
+        # For example beauty/application.hpp includes boost/asio.hpp
+        self.requires("boost/1.79.0", transitive_headers=True),
         self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
