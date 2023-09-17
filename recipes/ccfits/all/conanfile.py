@@ -41,7 +41,8 @@ class CcfitsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cfitsio/4.2.0")
+        # transitive_headers: CCfits/CCfits.h includes fitsio.h
+        self.requires("cfitsio/4.2.0", transitive_headers=True)
 
     def validate_build(self):
         if Version(self.version) >= "2.6":
