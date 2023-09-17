@@ -11,7 +11,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 
@@ -31,16 +31,10 @@ class CairommConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    exports_sources = "patches/**"
     short_paths = True
 
     @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
+    def _compilers_minimum_version_17(self):
         return {
             "gcc": "7",
             "clang": "7",
@@ -51,6 +45,8 @@ class CairommConan(ConanFile):
     def _abi_version(self):
         return "1.16" if Version(self.version) >= "1.16.0" else "1.0"
 
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -74,12 +70,19 @@ class CairommConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            if self.settings.compiler.get_safe("cppstd"):
-                if self._abi_version == "1.16":
-                    check_min_cppstd(self, 17)
-                else:
-                    check_min_cppstd(self, 11)
-        if self.options.shared and not self.options["cairo"].shared:
+            if self._abi_version == "1.16":
+                check_min_cppstd(self, 17)
+            else:
+                check_min_cppstd(self, 11)
+
+        if not is_msvc(self) and self._abi_version == "1.16":
+            minimum_version = self._compilers_minimum_version_17.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
+
+        if self.options.shared and not self.dependencies["cairo"].options.shared:
             raise ConanInvalidConfiguration(
                 "Linking against static cairo would cause shared cairomm to link "
                 "against static glib which can cause problems."
@@ -151,6 +154,8 @@ class CairommConan(ConanFile):
 
         for dir_to_remove in ["pkgconfig", f"cairomm-{self._abi_version}"]:
             rmdir(self, os.path.join(self.package_folder, "lib", dir_to_remove))
+
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         cairomm_lib_name = f"cairomm-{self._abi_version}"
