@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
@@ -48,6 +48,14 @@ class CcfitsConan(ConanFile):
         if Version(self.version) >= "2.6":
             if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, 11)
+        else:
+            if conan_version >= "2":
+                # FIXME: c3i linter complains, but function is there
+                # https://docs.conan.io/2.0/reference/tools/build.html?highlight=check_min_cppstd#conan-tools-build-check-max-cppstd
+                import sys
+                check_max_cppstd = getattr(sys.modules["conan.tools.build"], "check_max_cppstd")
+                # C++17 and higher not supported in ccfits < 2.6 due to auto_ptr
+                check_max_cppstd(self, 14)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
