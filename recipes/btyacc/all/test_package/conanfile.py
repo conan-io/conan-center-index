@@ -1,23 +1,29 @@
-import functools
-import os
-
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.cmake import CMake, CMakeDeps, cmake_layout
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "CMakeToolchain", "VirtualBuildEnv"
+    test_type = "explicit"
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+    def layout(self):
+        cmake_layout(self)
+
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
+
+    def generate(self):
+        deps = CMakeDeps(self)
+        deps.build_context_activated = ["btyacc"]
+        deps.generate()
 
     def build(self):
-        if not tools.cross_building(self):
-            self._configure_cmake().build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            self._configure_cmake().test()
+        if can_run(self):
+            self.run(f"ctest --output-on-failure -C {self.settings.build_type}", env="conanrun")
