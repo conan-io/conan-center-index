@@ -13,6 +13,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
+from conan import __version__ as conan_version
 
 
 class CairommConan(ConanFile):
@@ -22,6 +23,7 @@ class CairommConan(ConanFile):
     license = "LGPL-2.0"
     description = "cairomm is a C++ wrapper for the cairo graphics library."
     topics = ["cairo", "wrapper", "graphics"]
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -34,16 +36,24 @@ class CairommConan(ConanFile):
     short_paths = True
 
     @property
+    def _abi_version(self):
+        return "1.16" if Version(self.version) >= "1.16.0" else "1.0"
+
+    @property
+    def _min_cppstd(self):
+        return "17" if self._abi_version == "1.16" else "11"
+
+    @property
+    def is_conan2(self):
+        return Version(conan_version) >= "2.0.0"
+
+    @property
     def _compilers_minimum_version_17(self):
         return {
             "gcc": "7",
             "clang": "7",
             "apple-clang": "10",
         }
-
-    @property
-    def _abi_version(self):
-        return "1.16" if Version(self.version) >= "1.16.0" else "1.0"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -61,25 +71,25 @@ class CairommConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cairo/1.17.6")
+        self.requires("cairo/1.17.6", transitive_headers=True)
+        if self.is_conan2:
+            # TODO remove once cairo has added transitive headers arg
+            self.requires("freetype/2.13.0", transitive_headers=True)
 
         if self._abi_version == "1.16":
-            self.requires("libsigcpp/3.0.7")
+            self.requires("libsigcpp/3.0.7", transitive_headers=True)
         else:
-            self.requires("libsigcpp/2.10.8")
+            self.requires("libsigcpp/2.10.8", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            if self._abi_version == "1.16":
-                check_min_cppstd(self, 17)
-            else:
-                check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
 
         if not is_msvc(self) and self._abi_version == "1.16":
             minimum_version = self._compilers_minimum_version_17.get(str(self.settings.compiler), False)
             if minimum_version and Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++17, which your compiler does not support."
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
 
         if self.options.shared and not self.dependencies["cairo"].options.shared:
@@ -162,7 +172,11 @@ class CairommConan(ConanFile):
         self.cpp_info.components[cairomm_lib_name].set_property("pkg_config_name", cairomm_lib_name)
         self.cpp_info.components[cairomm_lib_name].includedirs = [os.path.join("include", cairomm_lib_name)]
         self.cpp_info.components[cairomm_lib_name].libs = [cairomm_lib_name]
-        self.cpp_info.components[cairomm_lib_name].requires = ["libsigcpp::libsigcpp", "cairo::cairo_"]
+
+        component_requires = ["libsigcpp::libsigcpp", "cairo::cairo_"]
+        if self.is_conan2:
+            component_requires.append("freetype::freetype")
+        self.cpp_info.components[cairomm_lib_name].requires = component_requires
 
         if is_apple_os(self):
             self.cpp_info.components[cairomm_lib_name].frameworks = ["CoreFoundation"]
