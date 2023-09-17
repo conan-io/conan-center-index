@@ -157,14 +157,11 @@ class CairommConan(ConanFile):
         self.cpp_info.components[cairomm_lib_name].set_property("pkg_config_name", cairomm_lib_name)
         self.cpp_info.components[cairomm_lib_name].includedirs = [os.path.join("include", cairomm_lib_name)]
         self.cpp_info.components[cairomm_lib_name].libs = [cairomm_lib_name]
+        self.cpp_info.components[cairomm_lib_name].requires = ["libsigcpp::libsigcpp", "cairo::cairo_"]
 
         if is_apple_os(self):
             self.cpp_info.components[cairomm_lib_name].frameworks = ["CoreFoundation"]
 
-        if self._abi_version == "1.16":
-            self.cpp_info.components[cairomm_lib_name].requires = ["libsigcpp::sigc++", "cairo::cairo_"]
-        else:
-            self.cpp_info.components[cairomm_lib_name].requires = ["libsigcpp::sigc++-2.0", "cairo::cairo_"]
 
     def package_id(self):
         if not self.dependencies["cairo"].options.shared:
