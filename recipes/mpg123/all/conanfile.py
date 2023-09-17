@@ -83,7 +83,7 @@ class Mpg123Conan(ConanFile):
 
     def requirements(self):
         if self.options.module == "libalsa":
-            self.requires("libalsa/1.2.7.2")
+            self.requires("libalsa/1.2.10")
         if self.options.module == "tinyalsa":
             self.requires("tinyalsa/2.0.0")
 
