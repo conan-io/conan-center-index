@@ -300,7 +300,7 @@ class ArrowConan(ConanFile):
         if self.options.with_mimalloc:
             self.requires("mimalloc/1.7.6")
         if self.options.with_boost:
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.82.0")
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
         if self.options.with_glog:
@@ -377,6 +377,10 @@ class ArrowConan(ConanFile):
 
         if Version(self.version) < "6.0.0" and self.options.get_safe("simd_level") == "default":
             raise ConanInvalidConfiguration(f"In {self.ref}, simd_level options is not supported `default` value.")
+
+    def build_requirements(self):
+        if Version(self.version) >= "13.0.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

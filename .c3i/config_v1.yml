@@ -41,7 +41,6 @@ tasks:
       - name: "license/cla"
       - name: "continuous-integration/jenkins/pr-merge"
       - name: "c3i/conan-v2/pr-merge"
-        required_for_references: "conan_v2_ready_references.yml"
   build_single_reference:
     package_id_cache_type: "none"
     timeout_minutes: 600
