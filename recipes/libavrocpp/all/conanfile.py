@@ -14,6 +14,7 @@ class LibavrocppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://avro.apache.org/"
     topics = ("serialization", "deserialization","avro")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
