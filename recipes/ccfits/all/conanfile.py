@@ -41,7 +41,7 @@ class CcfitsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cfitsio/4.1.0")
+        self.requires("cfitsio/4.2.0")
 
     def validate_build(self):
         if Version(self.version) >= "2.6":
