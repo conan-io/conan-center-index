@@ -134,6 +134,10 @@ class SerfConan(ConanFile):
             return "dll"
         return "so"
 
+    @property
+    def _version_major(self):
+        return Version(self.version).major
+
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         with chdir(self, self.source_folder):
