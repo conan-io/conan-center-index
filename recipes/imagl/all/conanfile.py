@@ -3,6 +3,7 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -31,18 +32,16 @@ class ImaglConan(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        return 20
+
+    @property
     def _compilers_minimum_version(self):
-        minimum_versions = {
+        return {
                 "gcc": "9",
-                "Visual Studio": "16.2",
-                "msvc": "19.22",
                 "clang": "10",
                 "apple-clang": "11"
         }
-        if Version(self.version) <= "0.1.1" or Version(self.version) == "0.2.0":
-            minimum_versions["Visual Studio"] = "16.5"
-            minimum_versions["msvc"] = "19.25"
-        return minimum_versions
 
     @property
     def _supports_jpeg(self):
@@ -66,32 +65,25 @@ class ImaglConan(ConanFile):
 
     def requirements(self):
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.40")
         if self._supports_jpeg and self.options.with_jpeg:
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, 20)
-        def lazy_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        check_min_vs(self, 192)
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
 
-        #Special check for clang that can only be linked to libc++
+        # INFO: Special check for clang that can only be linked to libc++
         if self.settings.compiler == "clang" and self.settings.get_safe("compiler.libcxx") != "libc++":
             raise ConanInvalidConfiguration("imagl requires some C++20 features, which are available in libc++ for clang compiler.")
 
-        compiler_version = str(self.settings.get_safe("compiler.version"))
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn("imaGL requires C++20. Your compiler is unknown. Assuming it supports C++20.")
-        elif lazy_lt_semver(compiler_version, minimum_version):
-            raise ConanInvalidConfiguration("imaGL requires some C++20 features, which your {} {} compiler does not support.".format(str(self.settings.compiler), compiler_version))
-        else:
-            print("Your compiler is {} {} and is compatible.".format(str(self.settings.compiler), compiler_version))
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -120,6 +112,6 @@ class ImaglConan(ConanFile):
     def package_info(self):
         debug_suffix = "d" if self.settings.build_type == "Debug" else ""
         static_suffix = "" if self.options.shared else "s"
-        self.cpp_info.libs = ["imaGL{}{}".format(debug_suffix, static_suffix)]
+        self.cpp_info.libs = [f"imaGL{debug_suffix}{static_suffix}"]
         if not self.options.shared:
             self.cpp_info.defines = ["IMAGL_STATIC=1"]
