@@ -144,6 +144,7 @@ endif()"""
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = self._configure_cmake()
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
@@ -156,7 +157,9 @@ endif()"""
         self.cpp_info.set_property("cmake_file_name", "OpenBLAS")
         self.cpp_info.set_property("cmake_target_name", "OpenBLAS::OpenBLAS")
         self.cpp_info.set_property("pkg_config_name", "openblas")
-        cmake_component_name = "pthread" if self.options.use_thread else "serial" # TODO: ow to model this in CMakeDeps?
+        cmake_component_name = "pthread" if self.options.use_thread else "serial"  # TODO: how to model this in CMakeDeps?
+        self.cpp_info.components["openblas_component"].set_property(
+            "cmake_target_name", "OpenBLAS::" + cmake_component_name)  # 'pthread' causes issues without namespace
         self.cpp_info.components["openblas_component"].set_property("pkg_config_name", "openblas")
         self.cpp_info.components["openblas_component"].includedirs.append(
             os.path.join("include", "openblas")
