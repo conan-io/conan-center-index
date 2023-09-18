@@ -378,6 +378,10 @@ class ArrowConan(ConanFile):
         if Version(self.version) < "6.0.0" and self.options.get_safe("simd_level") == "default":
             raise ConanInvalidConfiguration(f"In {self.ref}, simd_level options is not supported `default` value.")
 
+    def build_requirements(self):
+        if Version(self.version) >= "13.0.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             filename=f"apache-arrow-{self.version}.tar.gz", strip_root=True)
@@ -526,9 +530,6 @@ class ArrowConan(ConanFile):
         cmake =CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "cpp"))
         cmake.build()
-
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16 <4]")
 
     def package(self):
         copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)

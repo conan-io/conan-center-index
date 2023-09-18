@@ -21,7 +21,7 @@ const TSLanguage *tree_sitter_c(void);
 ]])
 
 add_library(${PROJECT_NAME}
-    src/src/parser.c
+    src/parser.c
 )
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
@@ -29,8 +29,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 target_include_directories(${PROJECT_NAME}
     PRIVATE
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/lib/include>
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/src>
+        $<BUILD_INTERFACE:${TREE_SITTER_C_SRC_DIR}/src>
 )
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
