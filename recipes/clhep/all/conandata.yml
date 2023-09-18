@@ -13,4 +13,3 @@ patches:
   "2.4.6.4":
     - patch_file: "patches/fix-cmake-2_4_6_4.patch"
     - patch_file: "patches/msvc-2015-no-SFINAE.patch"
-
