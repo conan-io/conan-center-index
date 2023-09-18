@@ -25,8 +25,8 @@ index 48908ead..8789432c 100644
  endif()
  
  project(${quickfix_PROJECT_NAME} VERSION 0.1 LANGUAGES CXX C)
-+include(${PROJECT_BINARY_DIR}/../conanbuildinfo.cmake)
-+conan_basic_setup()
++
++
  message("-- Project name ${CMAKE_PROJECT_NAME}")
  
  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
