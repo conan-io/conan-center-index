@@ -6,7 +6,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=1.53.0"
 
 class ClhepConan(ConanFile):
     name = "clhep"
@@ -30,6 +30,14 @@ class ClhepConan(ConanFile):
 
     short_paths = True
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -44,7 +52,6 @@ class ClhepConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -53,6 +60,7 @@ class ClhepConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "CLHEP"))
         cmake.build()
@@ -104,4 +112,3 @@ class ClhepConan(ConanFile):
             self.cpp_info.components[conan_comp].libs = [lib_name]
             self.cpp_info.components[conan_comp].system_libs = system_libs
             self.cpp_info.components[conan_comp].requires = requires
-
