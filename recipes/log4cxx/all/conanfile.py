@@ -63,14 +63,10 @@ class Log4cxxConan(ConanFile):
 
     def validate(self):
         # TODO: if compiler doesn't support C++17, boost can be used instead
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "17")
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 17)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warning(
-                "log4cxx requires C++17. Your compiler is unknown. Assuming it supports C++17."
-            )
-        elif Version(self.settings.compiler.version) < minimum_version:
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("log4cxx requires a compiler that supports at least C++17")
 
     def build_requirements(self):
@@ -80,23 +76,20 @@ class Log4cxxConan(ConanFile):
 
     def source(self):
         # OSError: [WinError 123] The filename, directory name, or volume label syntax is incorrect:
-        # 'source_subfolder\\src\\test\\resources\\output\\xyz\\:'
+        # 'src\\test\\resources\\output\\xyz\\:'
         pattern = "*[!:]"
         get(self, **self.conan_data["sources"][self.version], strip_root=True, pattern=pattern)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_TESTING"] = False
-        tc.variables["LOG4CXX_INSTALL_PDB"] = self.settings.os == "Windows"
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["LOG4CXX_INSTALL_PDB"] = False
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
