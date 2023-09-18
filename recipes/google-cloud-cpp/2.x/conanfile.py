@@ -73,7 +73,6 @@ class GoogleCloudCppConan(ConanFile):
     }
 
     def export_sources(self):
-        copy(self, "macos_make_override.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
         export_conandata_patches(self)
 
     def config_options(self):
@@ -168,11 +167,6 @@ class GoogleCloudCppConan(ConanFile):
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE"] = ",".join(self._components())
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE_WERROR"] = False
-
-        # Additional logic to override the make program on MacOS if /usr/bin/make is found by CMake
-        # which otherwise prevents the propagation of DYLD_LIBRARY_PATH as set by the VirtualBuildEnv
-        project_include = os.path.join(self.source_folder, "macos_make_override.cmake")
-        tc.cache_variables["CMAKE_PROJECT_google-cloud-cpp_INCLUDE"] = project_include
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -187,9 +181,14 @@ class GoogleCloudCppConan(ConanFile):
         #     https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/RuntimeProtections/RuntimeProtections.html
         settings_build = getattr(self, "settings_build", self.settings)
         if settings_build.os == "Macos":
-            replace_in_file(self, os.path.join(self.source_folder, "cmake/CompileProtos.cmake"),
-                            "$<TARGET_FILE:protobuf::protoc>",
-                            '${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" $<TARGET_FILE:protobuf::protoc>')
+            if Version(self.version) < '2.12.0':
+                replace_in_file(self, os.path.join(self.source_folder, "cmake/CompileProtos.cmake"),
+                                "$<TARGET_FILE:protobuf::protoc>",
+                                '${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" $<TARGET_FILE:protobuf::protoc>')
+            else:
+                replace_in_file(self, os.path.join(self.source_folder, "cmake/CompileProtos.cmake"),
+                                "${Protobuf_PROTOC_EXECUTABLE} ARGS",
+                                '${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" ${Protobuf_PROTOC_EXECUTABLE} ARGS')
 
     def build(self):
         self._patch_sources()
