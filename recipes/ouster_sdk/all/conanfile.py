@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir, rm
+from conan.tools.files import get, copy, rmdir, rm, save, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -73,8 +73,10 @@ class PackageConan(ConanFile):
         # Used in ouster/sensor_http.h
         self.requires("jsoncpp/1.9.5", transitive_headers=True)
         self.requires("spdlog/1.12.0")
-        self.requires("fmt/10.1.0")
-        self.requires("libcurl/8.2.1")
+        self.requires("fmt/10.1.1")
+        self.requires("libcurl/[>=7.78 <9]")
+        # Replaces vendored optional-lite
+        self.requires("optional-lite/3.5.0", transitive_headers=True)
 
         if self.options.build_pcap:
             self.requires("libtins/4.5")
@@ -114,7 +116,18 @@ class PackageConan(ConanFile):
         deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
         deps.generate()
 
+    def _patch_sources(self):
+        # Unvendor optional-lite
+        rmdir(self, os.path.join(self.source_folder, "ouster_client", "include", "optional-lite"))
+        replace_in_file(self, os.path.join(self.source_folder, "ouster_client", "CMakeLists.txt"),
+                        " include/optional-lite", "")
+        save(self, os.path.join(self.source_folder, "ouster_client", "CMakeLists.txt"),
+             "find_package(optional-lite REQUIRED)\n"
+             "target_link_libraries(ouster_client PUBLIC nonstd::optional-lite)\n",
+             append=True)
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -124,6 +137,7 @@ class PackageConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
@@ -132,15 +146,13 @@ class PackageConan(ConanFile):
 
         self.cpp_info.components["ouster_client"].set_property("cmake_target_name", "OusterSDK::ouster_client")
         self.cpp_info.components["ouster_client"].libs = ["ouster_client"]
-        self.cpp_info.components["ouster_client"].includedirs.append(
-            os.path.join("include", "optional-lite")
-        )
         self.cpp_info.components["ouster_client"].requires = [
             "eigen::eigen",
             "jsoncpp::jsoncpp",
             "spdlog::spdlog",
             "fmt::fmt",
             "libcurl::libcurl",
+            "optional-lite::optional-lite",
         ]
 
         if self.options.build_osf:
