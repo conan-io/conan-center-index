@@ -121,6 +121,9 @@ class LLVMOpenMpConan(ConanFile):
         apply_conandata_patches(self)
         replace_in_file(self,os.path.join(self.source_folder, "runtime", "CMakeLists.txt"),
                         "add_subdirectory(test)", "")
+        if Version(self.version) >= "12":
+            replace_in_file(self,os.path.join(self.source_folder, "libomptarget", "CMakeLists.txt"),
+                            "if (NOT LIBOMPTARGET_LLVM_INCLUDE_DIRS)", "if (FALSE)")
 
     def build(self):
         self._patch_sources()
