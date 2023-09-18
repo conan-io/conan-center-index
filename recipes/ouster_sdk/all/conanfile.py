@@ -39,7 +39,7 @@ class PackageConan(ConanFile):
         "build_osf": "Build Ouster OSF library.",
         "build_pcap": "Build pcap utils.",
         "build_viz": "Build Ouster visualizer.",
-        "eigen_max_align_bytes": "Eigen max aligned bytes.",
+        "eigen_max_align_bytes": "Force maximum alignment of Eigen data to 32 bytes.",
     }
 
     @property
@@ -71,7 +71,7 @@ class PackageConan(ConanFile):
         # Used in ouster/types.h
         self.requires("eigen/3.4.0", transitive_headers=True)
         # Used in ouster/sensor_http.h
-        self.requires("jsoncpp/1.9.5", transitive_headers=True)
+        self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
         self.requires("spdlog/1.12.0")
         self.requires("fmt/10.1.1")
         self.requires("libcurl/[>=7.78 <9]")
@@ -85,7 +85,7 @@ class PackageConan(ConanFile):
             # Used in fb_generated/*.h
             self.requires("flatbuffers/23.5.26", transitive_headers=True)
             self.requires("libpng/1.6.40")
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/1.2.13", transitive_libs=True)
 
         if self.options.build_viz:
             self.requires("glad/0.1.36")
