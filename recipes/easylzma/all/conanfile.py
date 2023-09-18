@@ -68,7 +68,7 @@ class EazylzmaConan(ConanFile):
     def package(self):
         save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
 
-        for pattern in ["*.lib", "*.a", "*.so", "*.dylib"]:
+        for pattern in ["*.lib", "*.a", "*.so*", "*.dylib"]:
             copy(self, pattern,
                  dst=os.path.join(self.package_folder, "lib"),
                  src=self.build_folder,
@@ -78,8 +78,7 @@ class EazylzmaConan(ConanFile):
              src=self.build_folder,
              keep_path=False)
 
-        copy(self,
-             "easylzma/*",
+        copy(self, "easylzma/*",
              dst=os.path.join(self.package_folder, "include"),
              src=os.path.join(self.source_folder, "src"))
 
