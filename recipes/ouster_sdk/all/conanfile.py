@@ -158,6 +158,7 @@ class PackageConan(ConanFile):
         if self.options.build_osf:
             self.cpp_info.components["ouster_osf"].set_property("cmake_target_name", "OusterSDK::ouster_osf")
             self.cpp_info.components["ouster_osf"].libs = ["ouster_osf"]
+            self.cpp_info.components["ouster_osf"].includedirs.append(os.path.join("include", "fb_generated"))
             self.cpp_info.components["ouster_osf"].requires = [
                 "ouster_client",
                 "flatbuffers::flatbuffers",
