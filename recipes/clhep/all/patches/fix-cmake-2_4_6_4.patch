@@ -1,0 +1,72 @@
+--- a/CLHEP/CMakeLists.txt
++++ b/CLHEP/CMakeLists.txt
+@@ -121,10 +121,8 @@ add_subdirectory(RefCount)
+ add_subdirectory(Exceptions)
+ 
+ # libCLHEP.a and libCLHEP.so
+-clhep_build_libclhep( ${CLHEP_libraries} )
+ 
+ # provide tools for other packages to include CLHEP easily
+-clhep_toolchain()
+ 
+ # - Build docucumentation if required
+ if(CLHEP_BUILD_DOCS)
+@@ -151,4 +149,3 @@ if(CLHEP_BUILD_DOCS)
+ endif()
+ 
+ # Custom Packaging
+-include(ClhepPackaging)
+--- a/CLHEP/cmake/Modules/ClhepBuildTest.cmake
++++ b/CLHEP/cmake/Modules/ClhepBuildTest.cmake
+@@ -17,6 +17,8 @@ include(ClhepParseArgs)
+ 
+ 
+ macro( clhep_test testname )
++# disable tests
++if(FALSE)
+   clhep_parse_args( CTST "LIBS;DEPENDS" "SIMPLE;FAIL;NOLIB" ${ARGN})
+ 
+   # automake/autoconf variables for ${testname}.sh.in 
+@@ -68,4 +70,5 @@ macro( clhep_test testname )
+     endif()
+   endif()
+   
++endif()
+ endmacro( clhep_test )
+--- a/CLHEP/cmake/Modules/ClhepBuildLibrary.cmake
++++ b/CLHEP/cmake/Modules/ClhepBuildLibrary.cmake
+@@ -30,29 +30,24 @@ macro(clhep_build_library package)
+   endif()
+ 
+   # Add the libraries and set properties
+-  ADD_LIBRARY(${package}  SHARED ${CLHEP_${package}_SOURCES})
+-  ADD_LIBRARY(${package}S STATIC ${CLHEP_${package}_SOURCES})
++  # Build shared or static, not both, because:
++  # - slower build
++  # - lot of issues because output names are the same + msvc shared is broken
++  ADD_LIBRARY(${package} ${CLHEP_${package}_SOURCES})
+   SET_TARGET_PROPERTIES (${package}
+       PROPERTIES 
+         OUTPUT_NAME CLHEP-${package}-${VERSION}
+       )
+-  SET_TARGET_PROPERTIES(${package}S
+-      PROPERTIES 
+-        OUTPUT_NAME CLHEP-${package}-${VERSION}
+-      )
+ 
+   # Do not add -Dname_EXPORTS to the command-line when building files in this
+   # target. Doing so is actively harmful for the modules build because it
+   # creates extra module variants, and not useful because we don't use these
+   # macros.
+   SET_TARGET_PROPERTIES(${package} PROPERTIES DEFINE_SYMBOL "")
+-  SET_TARGET_PROPERTIES(${package}S PROPERTIES DEFINE_SYMBOL "")
+-
+   target_link_libraries(${package}  ${package_library_list} )
+-  target_link_libraries(${package}S ${package_library_list_static} )
+ 
+   # Install the libraries
+-  INSTALL (TARGETS ${package} ${package}S
++  INSTALL (TARGETS ${package}
+       EXPORT CLHEPLibraryDepends
+       RUNTIME DESTINATION bin
+       LIBRARY DESTINATION lib${LIB_SUFFIX}
