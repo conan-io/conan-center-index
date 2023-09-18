@@ -48,7 +48,7 @@ class YyjsonConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         if Version(self.version) >= "0.8.0":
-            tc.variables["YYJSON_DISABLE_UTF8_VALIDATION"] = not self.options.with_utf8_validation
+            tc.variables["YYJSON_DISABLE_UTF8_VALIDATION"] = not bool(self.options.with_utf8_validation)
         tc.generate()
 
     def build(self):
