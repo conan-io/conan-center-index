@@ -1,0 +1,52 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -297,7 +297,7 @@
+ # OpenMP (optional)
+ option(WITH_OPENMP "Build with parallelization using OpenMP" TRUE)
+ if(WITH_OPENMP)
+-  find_package(OpenMP COMPONENTS C CXX)
++  find_package(OpenMP REQUIRED COMPONENTS C CXX)
+ endif()
+ if(OpenMP_FOUND)
+   string(APPEND CMAKE_C_FLAGS " ${OpenMP_C_FLAGS}")
+@@ -319,11 +319,11 @@
+ find_package(Threads REQUIRED)
+ 
+ # Eigen (required)
+-find_package(Eigen 3.3 REQUIRED)
++find_package(EIGEN REQUIRED CONFIG)
+ include_directories(SYSTEM ${EIGEN_INCLUDE_DIRS})
+ 
+ # FLANN (required)
+-find_package(FLANN 1.9.1 REQUIRED)
++find_package(FLANN CONFIG)
+ if(NOT (${FLANN_LIBRARY_TYPE} MATCHES ${PCL_FLANN_REQUIRED_TYPE}) AND NOT (${PCL_FLANN_REQUIRED_TYPE} MATCHES "DONTCARE"))
+   message(FATAL_ERROR "Flann was selected with ${PCL_FLANN_REQUIRED_TYPE} but found as ${FLANN_LIBRARY_TYPE}")
+ endif()
+@@ -359,7 +359,7 @@
+ # LibPNG
+ option(WITH_PNG "PNG file support" TRUE)
+ if(WITH_PNG)
+-  find_package(PNG)
++  find_package(PNG REQUIRED CONFIG)
+   if(PNG_FOUND)
+     set(HAVE_PNG ON)
+     include_directories(SYSTEM "${PNG_INCLUDE_DIR}")
+@@ -369,7 +369,7 @@
+ # Qhull
+ option(WITH_QHULL "Include convex-hull operations" TRUE)
+ if(WITH_QHULL)
+-  find_package(Qhull)
++  find_package(QHULL REQUIRED CONFIG)
+   if(NOT (${QHULL_LIBRARY_TYPE} MATCHES ${PCL_QHULL_REQUIRED_TYPE}) AND NOT (${PCL_QHULL_REQUIRED_TYPE} MATCHES "DONTCARE"))
+     message(FATAL_ERROR "Qhull was selected with ${PCL_QHULL_REQUIRED_TYPE} but found as ${QHULL_LIBRARY_TYPE}")
+   endif()
+@@ -404,7 +404,7 @@
+ #Find PCAP
+ option(WITH_PCAP "pcap file capabilities in Velodyne HDL driver" TRUE)
+ if(WITH_PCAP)
+-  find_package(Pcap)
++  find_package(PCAP REQUIRED CONFIG)
+ endif()
+ 
+ # OpenGL and GLUT
