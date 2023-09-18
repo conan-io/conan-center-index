@@ -31,10 +31,18 @@ class LLVMOpenMpConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "build_libomptarget": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "build_libomptarget": False,
+    }
+    options_description = {
+        "build_libomptarget": (
+            "Build the LLVM OpenMP Offloading Runtime Library (libomptarget) "
+            "in addition to the OpenMP Runtime Library (libomp)."
+        )
     }
 
     def _supports_compiler(self):
@@ -64,6 +72,10 @@ class LLVMOpenMpConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+    def requirements(self):
+        if self.options.build_libomptarget and Version(self.version) >= "13":
+            self.requires(f"llvm-core/{self.version}")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -113,16 +125,16 @@ class LLVMOpenMpConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["OPENMP_STANDALONE_BUILD"] = True
         tc.variables["LIBOMP_ENABLE_SHARED"] = self.options.shared
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            tc.variables["OPENMP_ENABLE_LIBOMPTARGET"] = self.options.shared
+        tc.variables["OPENMP_ENABLE_LIBOMPTARGET"] = self.options.build_libomptarget
         tc.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
         replace_in_file(self,os.path.join(self.source_folder, "runtime", "CMakeLists.txt"),
                         "add_subdirectory(test)", "")
-        if Version(self.version) >= "12":
-            replace_in_file(self,os.path.join(self.source_folder, "libomptarget", "CMakeLists.txt"),
+        if Version(self.version).major == 12:
+            # v12 can be built without LLVM includes
+            replace_in_file(self, os.path.join(self.source_folder, "libomptarget", "CMakeLists.txt"),
                             "if (NOT LIBOMPTARGET_LLVM_INCLUDE_DIRS)", "if (FALSE)")
 
     def build(self):
