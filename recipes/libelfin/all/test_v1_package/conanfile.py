@@ -15,5 +15,5 @@ class TestPackageConan(ConanFile):
         if tools.cross_building(self.settings):
             return
         bin_path = os.path.join("bin", "test_package")
-        elf_path = os.path.join(self.source_folder, "hello")
-        self.run("{} {}".format(bin_path, elf_path), run_environment=True)
+        elf_path = os.path.join(self.source_folder, os.pardir, "test_package", "hello")
+        self.run(f"{bin_path} {elf_path}", run_environment=True)
