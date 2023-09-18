@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 
 required_conan_version = ">=1.53.0"
@@ -51,6 +51,7 @@ class SleefConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["BUILD_STATIC_TEST_BINS"] = False
         tc.cache_variables["ENABLE_LTO"] = False
         tc.cache_variables["BUILD_LIBM"] = True
@@ -81,6 +82,7 @@ class SleefConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "sleef")
