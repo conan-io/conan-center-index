@@ -30,7 +30,8 @@ class PatchElfConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "17": {
-                "gcc": "6",
+                # patchelf/0.18.0 requires gcc >= 8
+                "gcc": "8",
                 "clang": "5",
                 "apple-clang": "10",
                 "Visual Studio": "15",
