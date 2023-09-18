@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, save
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
@@ -67,7 +68,6 @@ class EazylzmaConan(ConanFile):
 
     def package(self):
         save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
-
         for pattern in ["*.lib", "*.a", "*.so*", "*.dylib"]:
             copy(self, pattern,
                  dst=os.path.join(self.package_folder, "lib"),
@@ -77,10 +77,10 @@ class EazylzmaConan(ConanFile):
              dst=os.path.join(self.package_folder, "bin"),
              src=self.build_folder,
              keep_path=False)
-
         copy(self, "easylzma/*",
              dst=os.path.join(self.package_folder, "include"),
              src=os.path.join(self.source_folder, "src"))
+        fix_apple_shared_install_name(self)
 
     @property
     def _libname(self):
