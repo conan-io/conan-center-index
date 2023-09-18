@@ -1,4 +1,7 @@
 sources:
+  "cci.20210405":
+    url: "https://github.com/shibatch/sleef/archive/85440a5e87dae36ca1b891de14bc83b441ae7c43.tar.gz"
+    sha256: "e3cd869293441ee1611ca0d272838e48aa5ec514876420dc7973d24563d71981"
   "3.5.1":
     url: "https://github.com/shibatch/sleef/archive/3.5.1.tar.gz"
     sha256: "415ee9b1bcc5816989d3d4d92afd0cd3f9ee89cbd5a33eb008e69751e40438ab"

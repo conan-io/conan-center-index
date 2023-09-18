@@ -51,24 +51,22 @@ class SleefConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_STATIC_TEST_BINS"] = False
-        tc.variables["ENABLE_LTO"] = False
-        tc.variables["BUILD_LIBM"] = True
-        tc.variables["BUILD_DFT"] = False
-        tc.variables["BUILD_QUAD"] = False
-        tc.variables["BUILD_GNUABI_LIBS"] = False
-        tc.variables["BUILD_TESTS"] = False
-        tc.variables["BUILD_INLINE_HEADERS"] = False
-        tc.variables["SLEEF_TEST_ALL_IUT"] = False
-        tc.variables["SLEEF_SHOW_CONFIG"] = True
-        tc.variables["SLEEF_SHOW_ERROR_LOG"] = False
-        tc.variables["ENFORCE_TESTER"] = False
-        tc.variables["ENFORCE_TESTER3"] = False
-        tc.variables["ENABLE_ALTDIV"] = False
-        tc.variables["ENABLE_ALTSQRT"] = False
-        tc.variables["DISABLE_FFTW"] = True
-        tc.generate()
-        tc = CMakeDeps(self)
+        tc.cache_variables["BUILD_STATIC_TEST_BINS"] = False
+        tc.cache_variables["ENABLE_LTO"] = False
+        tc.cache_variables["BUILD_LIBM"] = True
+        tc.cache_variables["BUILD_DFT"] = False
+        tc.cache_variables["BUILD_QUAD"] = False
+        tc.cache_variables["BUILD_GNUABI_LIBS"] = False
+        tc.cache_variables["BUILD_TESTS"] = False
+        tc.cache_variables["BUILD_INLINE_HEADERS"] = False
+        tc.cache_variables["SLEEF_TEST_ALL_IUT"] = False
+        tc.cache_variables["SLEEF_SHOW_CONFIG"] = True
+        tc.cache_variables["SLEEF_SHOW_ERROR_LOG"] = False
+        tc.cache_variables["ENFORCE_TESTER"] = False
+        tc.cache_variables["ENFORCE_TESTER3"] = False
+        tc.cache_variables["ENABLE_ALTDIV"] = False
+        tc.cache_variables["ENABLE_ALTSQRT"] = False
+        tc.cache_variables["DISABLE_FFTW"] = True
         tc.generate()
 
     def build(self):
