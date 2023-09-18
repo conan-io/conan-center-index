@@ -50,8 +50,9 @@ class LibpropertiesConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["LIBPROPERTIES_INSTALL"] = True
-        tc.variables["LIBPROPERTIES_TEST"] = False
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["LIBPROPERTIES_INSTALL"] = True
+        tc.cache_variables["LIBPROPERTIES_TEST"] = False
         tc.generate()
 
     def build(self):
