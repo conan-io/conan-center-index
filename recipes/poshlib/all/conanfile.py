@@ -54,13 +54,13 @@ class PoshlibConan(ConanFile):
             self,
             os.path.join(self.source_folder, "posh.h"),
             "defined _ARM",
-            "defined _ARM || defined __arm64 || defined __aarch64__",
+            "defined _ARM || defined __arm64 || defined __arm64__ || defined __aarch64__",
         )
 
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.export_sources_folder)
+        cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
 
     def package(self):
