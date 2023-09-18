@@ -40,7 +40,7 @@ class LibbpfConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("linux-headers-generic/5.14.9")
+        self.requires("linux-headers-generic/5.14.9", transitive_headers=True)
         self.requires("libelf/0.8.13")
         self.requires("zlib/[>=1.2.11 <2]")
 
