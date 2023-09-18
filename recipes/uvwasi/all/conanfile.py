@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
@@ -66,5 +66,10 @@ class UVWasiConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+
     def package_info(self):
         self.cpp_info.libs = ["uvwasi" if self.options.shared else "uvwasi_a"]
+
+        self.cpp_info.set_property("pkg_config_name", "uvwasi")
