@@ -12,6 +12,7 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://kaitai.io/"
     topics = ("parsers", "streams", "dsl", "kaitai struct")
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_zlib": [True, False],
