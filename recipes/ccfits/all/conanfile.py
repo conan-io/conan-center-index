@@ -50,8 +50,10 @@ class CcfitsConan(ConanFile):
                 check_min_cppstd(self, 11)
         else:
             if conan_version >= "2":
-                # FIXME: global import once v1 is not longer used, the check_max_cppstd function was never backported to v1
-                from conan.tools.build import check_max_cppstd  # pylint: disable=import-error
+                # FIXME: c3i linter complains, but function is there
+                # https://docs.conan.io/2.0/reference/tools/build.html?highlight=check_min_cppstd#conan-tools-build-check-max-cppstd
+                import sys
+                check_max_cppstd = getattr(sys.modules["conan.tools.build"], "check_max_cppstd")
                 # C++17 and higher not supported in ccfits < 2.6 due to auto_ptr
                 check_max_cppstd(self, 14)
 
