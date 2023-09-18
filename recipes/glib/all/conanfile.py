@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, load
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -70,7 +70,7 @@ class GLibConan(ConanFile):
         if self.options.get_safe("with_elf"):
             self.requires("libelf/0.8.13")
         if self.options.get_safe("with_mount"):
-            self.requires("libmount/2.39")
+            self.requires("libmount/2.36.2")
         if self.options.get_safe("with_selinux"):
             self.requires("libselinux/3.3")
         if self.settings.os != "Linux":
@@ -81,9 +81,9 @@ class GLibConan(ConanFile):
             self.requires("libiconv/1.17")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/1.1.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.5")
+            self.tool_requires("pkgconf/1.9.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -133,11 +133,7 @@ class GLibConan(ConanFile):
     def build(self):
         self._patch_sources()
         meson = Meson(self)
-        try:
-            meson.configure()
-        except:
-            self.output.warning(load(self, "meson-logs/meson-log.txt"))
-            raise
+        meson.configure()
         meson.build()
 
     def package(self):
