@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package CXX C)
 
+if(NOT DEFINED ENV{ACADO_TEMPLATE_PATHS})
+    message(FATAL_ERROR "ACADO_TEMPLATE_PATHS environment variable not set")
+endif()
+
 set(CMAKE_CXX_STANDARD 11)
 
 find_package(ACADO REQUIRED CONFIG)
