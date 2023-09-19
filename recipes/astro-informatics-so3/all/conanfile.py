@@ -40,7 +40,7 @@ class AstroInformaticsSO3(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("ssht/1.4.0", transitive_headers=True)
+        self.requires("ssht/1.4.0", transitive_headers=True, transitive_libs=True)
         self.requires("fftw/3.3.10")
 
     def validate(self):
