@@ -13,7 +13,7 @@ from conan.tools.scm import Version
 required_conan_version = ">=1.53.0"
 
 
-class DjinniSuppotLib(ConanFile):
+class DjinniSupportLib(ConanFile):
     name = "djinni-support-lib"
     description = "Djinni is a tool for generating cross-language type declarations and interface bindings"
     license = "Apache-2.0"
@@ -171,3 +171,5 @@ class DjinniSuppotLib(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
