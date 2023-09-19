@@ -65,7 +65,7 @@ class LibrdkafkaConan(ConanFile):
     def requirements(self):
         self.requires("lz4/1.9.4")
         if self.options.zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.zstd:
             self.requires("zstd/1.5.5")
         if self.options.ssl:
