@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
@@ -88,6 +88,8 @@ class NcbiCxxToolkit(ConanFile):
     def _translate_req(self, key):
         if "Boost" in key:
             key = "Boost"
+        if key == "BerkeleyDB" and conan_version.major > "1":
+            return None
         if key in self._tk_requirements["disabled"].keys():
             if self.settings.os in self._tk_requirements["disabled"][key]:
                 return None
