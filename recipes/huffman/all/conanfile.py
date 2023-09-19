@@ -51,12 +51,9 @@ class HuffmanConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "huffman.c"),
+        replace_in_file(self, os.path.join(self.source_folder, "huffman.c"),
             "#ifdef WIN32",
-            "#if defined _WIN32 || defined __CYGWIN__",
-        )
+            "#if defined _WIN32 || defined __CYGWIN__")
 
     def build(self):
         self._patch_sources()
@@ -65,11 +62,11 @@ class HuffmanConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs.append("huffman")
+        self.cpp_info.libs = ["huffman"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
