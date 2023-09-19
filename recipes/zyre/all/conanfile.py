@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -63,11 +63,20 @@ class ZyreConan(ConanFile):
         if not self.options.shared:
             tc.preprocessor_definitions["ZYRE_STATIC"] = ""
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("zeromq", "cmake_file_name", "LIBZMQ")
+        deps.set_property("czmq", "cmake_file_name", "CZMQ")
+        deps.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "find_package(libzmq REQUIRED)", "find_package(LIBZMQ REQUIRED CONFIG)")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "find_package(czmq REQUIRED)", "find_package(CZMQ REQUIRED CONFIG)")
 
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
