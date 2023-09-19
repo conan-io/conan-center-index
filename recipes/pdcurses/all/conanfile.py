@@ -1,8 +1,7 @@
 import os
 import re
-import textwrap
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualBuildEnv
@@ -17,7 +16,7 @@ required_conan_version = ">=1.53.0"
 class PDCursesConan(ConanFile):
     name = "pdcurses"
     description = "PDCurses - a curses library for environments that don't fit the termcap/terminfo model"
-    license = ("LicenseRef-LICENSE")
+    license = "LicenseRef-LICENSE"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pdcurses.org/"
     topics = ("curses", "ncurses")
@@ -44,28 +43,26 @@ class PDCursesConan(ConanFile):
             del self.options.fPIC
         if self.settings.os not in ["FreeBSD", "Linux"]:
             del self.options.with_x11
+        if is_apple_os(self):
+            # Only the sdl2 subsystem is supported on macOS
+            self.options.with_sdl = True
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-        if is_apple_os(self):
-            # Only the sdl2 subsystem is supported on macOS
-            self.options.with_sdl = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_sdl:
-            self.requires(f"sdl/2.28.2")
+            self.requires("sdl/2.28.2", transitive_libs=True)
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
 
     def validate(self):
-        if self.options.with_sdl and conan_version < "2.0.10":
-            raise ConanInvalidConfiguration("with_sdl option requires conan >= 2.0.10")
         if self.options.with_sdl and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("with_sdl option is not yet supported on Windows")
         if self.settings.os != "Windows" and not self.options.get_safe("with_x11") and not self.options.with_sdl:
@@ -91,14 +88,22 @@ class PDCursesConan(ConanFile):
             tc = AutotoolsToolchain(self)
             tc.configure_args.append("--prefix={}".format(unix_path(self, self.package_folder)))
             tc.configure_args.append("--enable-widec" if self.options.enable_widec else "--disable-widec")
-            if self.settings.os == "Windows" and self.options.shared:
+            if self.options.shared:
                 tc.make_args.append("DLL=Y")
-            tc.generate()
             if self.options.with_sdl:
-                from conan.tools.gnu import MakeDeps
                 self.dependencies["sdl"].cpp_info.includedirs.append(os.path.join("include", "SDL2"))
-                deps = MakeDeps(self)
-                deps.generate()
+                sdl_info = self.dependencies["sdl"].cpp_info.aggregated_components()
+                def_flags = " ".join(f"-D{x}" for x in sdl_info.defines)
+                includedir_flags = " ".join(f"-I{x}" for x in sdl_info.includedirs)
+                libdir_flags = " ".join(f"-L{x}" for x in sdl_info.libdirs)
+                lib_flags = " ".join(f"-l{x}" for x in (sdl_info.libs + sdl_info.system_libs))
+                tc.make_args += [
+                    f"CFLAGS={includedir_flags} {def_flags}",
+                    f"LDFLAGS={libdir_flags} {lib_flags}",
+                ]
+                if self.options.enable_widec:
+                    tc.make_args.append("WIDE=Y")
+            tc.generate()
 
     def _patch_sources(self):
         if is_msvc(self):
@@ -127,22 +132,8 @@ class PDCursesConan(ConanFile):
                 autotools.make()
         if self.options.with_sdl:
             with chdir(self, os.path.join(self.source_folder, "sdl2")):
-                replace_in_file(self, "Makefile",
-                                "BUILD		=",
-                                 textwrap.dedent(f"""\
-                                    include {self.generators_folder}/conandeps.mk
-                                    CFLAGS              += $(CONAN_CFLAGS)
-                                    CFLAGS              += $(addprefix -I, $(CONAN_INCLUDE_DIRS))
-                                    CPPFLAGS            += $(addprefix -D, $(CONAN_DEFINES))
-                                    LDFLAGS             += $(addprefix -L, $(CONAN_LIB_DIRS))
-                                    LDLIBS              += $(addprefix -l, $(CONAN_LIBS))
-                                    EXELINKFLAGS        += $(CONAN_EXELINKFLAGS)
-                                    BUILD		="""))
                 autotools = Autotools(self)
-                args = []
-                if self.options.enable_widec:
-                    args.append("WIDE=Y")
-                autotools.make(args=args)
+                autotools.make()
 
 
     def _build_msvc(self):
