@@ -39,6 +39,9 @@ class GlslangConan(ConanFile):
     }
 
     short_paths = True
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.18]")
+
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
@@ -74,9 +77,9 @@ class GlslangConan(ConanFile):
        
         if self.settings.compiler.get_safe("cppstd"):
             glslang_version = Version(self.version)
-            if glslang_version >= "13.0.0" 
+            if glslang_version >= "13.0.0": 
                 check_min_cppstd(self, 17)
-            else        
+            else:    
                 check_min_cppstd(self, 11)
 
         # see https://github.com/KhronosGroup/glslang/issues/2283
