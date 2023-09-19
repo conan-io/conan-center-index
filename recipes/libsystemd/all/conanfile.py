@@ -82,7 +82,7 @@ class LibsystemdConan(ConanFile):
     @property
     def _so_version(self):
         meson_build = os.path.join(self.source_folder, "meson.build")
-        with open(meson_build, "r") as build_file:
+        with open(meson_build, "r", encoding="utf-8") as build_file:
             for line in build_file:
                 match = re.match(r"^libsystemd_version = '(.*)'$", line)
                 if match:
