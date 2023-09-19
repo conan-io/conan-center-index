@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -95,6 +95,8 @@ class PackageConan(ConanFile):
                 self.requires("xorg/system")
 
     def validate(self):
+        if conan_version.major < 2 and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows builds require Conan >= 2.0")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
