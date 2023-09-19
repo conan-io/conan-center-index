@@ -184,7 +184,7 @@ class SDLImageConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        suffix = "d" if self.settings.build_type == "Debug" else ""
+        lib_postfix = "d" if Version(self.version) >= 2.6 and self.settings.build_type == "Debug" else ""
 
         self.cpp_info.set_property("cmake_file_name", "SDL2_image")
         self.cpp_info.set_property("cmake_target_name", "SDL2_image::SDL2_image")
@@ -192,7 +192,7 @@ class SDLImageConan(ConanFile):
             self.cpp_info.set_property("cmake_target_aliases", ["SDL2_image::SDL2_image-static"])
         self.cpp_info.set_property("pkg_config_name", "SDL2_image")
         # TODO: back to global scope in conan v2 once legacy generators removed
-        self.cpp_info.components["_sdl_image"].libs = [f"SDL2_image{suffix}"]
+        self.cpp_info.components["_sdl_image"].libs = [f"SDL2_image{lib_postfix}"]
         self.cpp_info.components["_sdl_image"].includedirs.append(os.path.join("include", "SDL2"))
 
         # TODO: to remove in conan v2 once legacy generators removed
