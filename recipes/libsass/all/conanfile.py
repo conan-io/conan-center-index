@@ -100,8 +100,8 @@ class LibsassConan(ConanFile):
                              '<PropertyGroup Label="VS2019'))
             if props_path:
                 replace_in_file(self, vcxproj_file,
-                                r'<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />',
-                                rf'{import_conan_generators}<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />')
+                                'msbuild/2003">',
+                                f'msbuild/2003">\n{import_conan_generators}')
         else:
             makefile = os.path.join(self.source_folder, "Makefile")
             replace_in_file(self, makefile, "+= -O2", "+=")
