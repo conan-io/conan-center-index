@@ -286,7 +286,7 @@ class GdalConan(ConanFile):
             self.requires("libxml2/2.10.3")
 
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/1.3")
 
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")

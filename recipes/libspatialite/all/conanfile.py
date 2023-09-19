@@ -86,7 +86,7 @@ class LibspatialiteConan(ConanFile):
 
     def requirements(self):
         self.requires("sqlite3/3.42.0")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/1.3")
         if self.options.with_proj:
             self.requires("proj/9.1.1")
         if self.options.with_iconv:

@@ -89,7 +89,7 @@ class DCMTKConan(ConanFile):
         if self.options.with_libxml2:
             self.requires("libxml2/2.10.3")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/1.3")
         if self.options.with_openssl:
             if self.settings.os == "Windows":
                 # FIXME: CMake configuration fails to detect Openssl 1.1 on Windows.

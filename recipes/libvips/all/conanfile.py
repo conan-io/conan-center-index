@@ -163,7 +163,7 @@ class LibvipsConan(ConanFile):
         if self.options.with_webp:
             self.requires("libwebp/1.3.0")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/1.3")
 
     def validate(self):
         if self.options.vapi and not self.options.introspection:

@@ -254,7 +254,7 @@ class GdalConan(ConanFile):
         if Version(self.version) >= "3.1.0":
             self.requires("flatbuffers/2.0.5")
         if self.options.get_safe("with_zlib", True):
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/1.3")
         if self.options.get_safe("with_libdeflate"):
             self.requires("libdeflate/1.18")
         if self.options.with_libiconv:
