@@ -19,7 +19,7 @@ class LibiglConan(ConanFile):
     homepage = "https://libigl.github.io/"
     topics = ("geometry", "matrices", "algorithms", "header-only")
 
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -27,9 +27,8 @@ class LibiglConan(ConanFile):
     }
     default_options = {
         "fPIC": True,
-        "header_only": True,
+        "header_only": False,
     }
-    no_copy_source = True
 
     @property
     def _minimum_cpp_standard(self):
@@ -60,31 +59,25 @@ class LibiglConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("eigen/3.4.0", transitive_headers=True)
+        # Eigen v3.4+ is not compatible
+        self.requires("eigen/3.3.9", transitive_headers=True)
 
     def package_id(self):
         if self.info.options.header_only:
             self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warning(
-                f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support."
-            )
-        else:
-            if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.name} requires C++{self._minimum_cpp_standard} support. The current compiler"
-                    f" {self.settings.compiler} {self.settings.compiler.version} does not support it."
-                )
+        if "arm" in self.settings.arch or "x86" is self.settings.arch:
+            raise ConanInvalidConfiguration(f"Not available for arm. Requested arch: {self.settings.arch}")
         if is_msvc_static_runtime(self) and not self.options.header_only:
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
-        if "arm" in self.settings.arch or "x86" is self.settings.arch:
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if min_version and Version(self.settings.compiler.version) < min_version:
             raise ConanInvalidConfiguration(
-                f"Not available for arm. Requested arch: {self.settings.arch}"
+                f"{self.name} requires C++{self._minimum_cpp_standard} support. The current compiler"
+                f" {self.settings.compiler} {self.settings.compiler.version} does not support it."
             )
 
     def source(self):
@@ -92,38 +85,42 @@ class LibiglConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["LIBIGL_EXPORT_TARGETS"] = True
-        tc.variables["LIBIGL_USE_STATIC_LIBRARY"] = not self.options.header_only
+        tc.cache_variables["LIBIGL_INSTALL"] = True
+        tc.cache_variables["LIBIGL_EXPORT_TARGETS"] = True
+        tc.cache_variables["LIBIGL_USE_STATIC_LIBRARY"] = not self.options.header_only
+        tc.cache_variables["LIBIGL_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0048"] = "NEW"
 
         # All these dependencies are needed to build the examples or the tests
-        tc.variables["LIBIGL_BUILD_TUTORIALS"] = "OFF"
-        tc.variables["LIBIGL_BUILD_TESTS"] = "OFF"
-        tc.variables["LIBIGL_BUILD_PYTHON"] = "OFF"
+        tc.cache_variables["LIBIGL_BUILD_TUTORIALS"] = False
+        tc.cache_variables["LIBIGL_BUILD_TESTS"] = False
+        tc.cache_variables["LIBIGL_BUILD_PYTHON"] = False
 
-        tc.variables["LIBIGL_WITH_CGAL"] = False
-        tc.variables["LIBIGL_WITH_COMISO"] = False
-        tc.variables["LIBIGL_WITH_CORK"] = False
-        tc.variables["LIBIGL_WITH_EMBREE"] = False
-        tc.variables["LIBIGL_WITH_MATLAB"] = False
-        tc.variables["LIBIGL_WITH_MOSEK"] = False
-        tc.variables["LIBIGL_WITH_OPENGL"] = False
-        tc.variables["LIBIGL_WITH_OPENGL_GLFW"] = False
-        tc.variables["LIBIGL_WITH_OPENGL_GLFW_IMGUI"] = False
-        tc.variables["LIBIGL_WITH_PNG"] = False
-        tc.variables["LIBIGL_WITH_TETGEN"] = False
-        tc.variables["LIBIGL_WITH_TRIANGLE"] = False
-        tc.variables["LIBIGL_WITH_XML"] = False
-        tc.variables["LIBIGL_WITH_PYTHON"] = "OFF"
-        tc.variables["LIBIGL_WITH_PREDICATES"] = False
+        tc.cache_variables["LIBIGL_WITH_CGAL"] = False
+        tc.cache_variables["LIBIGL_WITH_COMISO"] = False
+        tc.cache_variables["LIBIGL_WITH_CORK"] = False
+        tc.cache_variables["LIBIGL_WITH_EMBREE"] = False
+        tc.cache_variables["LIBIGL_WITH_MATLAB"] = False
+        tc.cache_variables["LIBIGL_WITH_MOSEK"] = False
+        tc.cache_variables["LIBIGL_WITH_OPENGL"] = False
+        tc.cache_variables["LIBIGL_WITH_OPENGL_GLFW"] = False
+        tc.cache_variables["LIBIGL_WITH_OPENGL_GLFW_IMGUI"] = False
+        tc.cache_variables["LIBIGL_WITH_PNG"] = False
+        tc.cache_variables["LIBIGL_WITH_TETGEN"] = False
+        tc.cache_variables["LIBIGL_WITH_TRIANGLE"] = False
+        tc.cache_variables["LIBIGL_WITH_XML"] = False
+        tc.cache_variables["LIBIGL_WITH_PYTHON"] = False
+        tc.cache_variables["LIBIGL_WITH_PREDICATES"] = False
         tc.generate()
 
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        libigl_cmake = os.path.join(self.source_folder, "cmake", "libigl.cmake")
-        replace_in_file(self, libigl_cmake, "-fPIC", "")
-        replace_in_file(self, libigl_cmake, "INTERFACE_POSITION_INDEPENDENT_CODE ON", "")
+        if Version(self.version) < "2.4.0":
+            libigl_cmake = os.path.join(self.source_folder, "cmake", "libigl.cmake")
+            replace_in_file(self, libigl_cmake, "-fPIC", "")
+            replace_in_file(self, libigl_cmake, "INTERFACE_POSITION_INDEPENDENT_CODE ON", "")
 
     def build(self):
         self._patch_sources()
