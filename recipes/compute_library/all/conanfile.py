@@ -4,6 +4,7 @@ from conan.tools.files import get, copy, rm, chdir
 from conan.tools.build import check_min_cppstd, cross_building, build_jobs
 from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv
+from conan.tools.gnu import AutotoolsDeps
 from conan.tools.layout import basic_layout
 import os
 
@@ -29,7 +30,7 @@ class ComputeLibraryConan(ConanFile):
     default_options = {
         "shared": False,
         "enable_openmp": False,
-        "enable_opencl": False,
+        "enable_opencl": True,
         "enable_neon": True,
     }
 
@@ -47,11 +48,14 @@ class ComputeLibraryConan(ConanFile):
 
     def config_options(self):
         # INFO: Neon option is reserved to arm architecture
-        if "arm" in str(self.settings.arch):
+        if "arm" not in str(self.settings.arch):
             del self.options.enable_neon
-        # INFO: OpenCL option only works with g++, according to the documentation
+        # INFO: OpenMP option only works with g++, according to the documentation
         if self.settings.compiler == "clang":
             del self.options.enable_openmp
+        # INFO: OpenCL fails to build with MacOS
+        if self.settings.os == "Macos":
+            self.options.enable_opencl = False
 
     def configure(self):
         if self.options.shared:
@@ -62,6 +66,10 @@ class ComputeLibraryConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("scons/4.3.0")
+
+    def requirements(self):
+        if self.options.enable_opencl:
+            self.requires("opencl-headers/2023.04.17")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -81,21 +89,24 @@ class ComputeLibraryConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        tc = AutotoolsDeps(self)
+        tc.generate()
         tc = VirtualBuildEnv(self)
         tc.generate(scope="build")
 
     def build(self):
         # INFO: Using scons to build the library we don't have control over shared/static and install step, it is done all together always
+        # INFO: https://arm-software.github.io/ComputeLibrary/latest/how_to_build.xhtml
         yes_no = lambda v: "1" if v else "0"
         debug = yes_no(self.settings.build_type == "Debug")
-        os = str(self.settings.os).lower()
+        build_os = str(self.settings.os).lower()
         arch = {"armv8": "armv8a", "x86": "x86_32", "armv7": "armv7a", "armv7hf": "armv7a-hf"}.get(str(self.settings.arch), str(self.settings.arch))
         neon = yes_no(self.options.get_safe("enable_neon"))
         opencl = yes_no(self.options.enable_opencl)
         openmp = yes_no(self.options.get_safe("enable_openmp"))
         build = "cross_compile" if cross_building(self) else "native"
         with chdir(self, self.source_folder):
-            self.run(f"scons Werror=0 validation_tests=0 examples=0 openmp={openmp} debug={debug} neon={neon} opencl={opencl} os={os} arch={arch} build={build} build_dir={self.build_folder} install_dir={self.package_folder} -j{build_jobs(self)}", env="conanbuildenv")
+            self.run(f"scons Werror=0 validation_tests=0 examples=0 openmp={openmp} debug={debug} neon={neon} opencl={opencl} os={build_os} arch={arch} build={build} build_dir={self.build_folder} install_dir={self.package_folder} -j{build_jobs(self)}", env="conanbuild")
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
