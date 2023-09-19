@@ -8,8 +8,3 @@ sources:
       url:
         - https://fmi-standard.org/assets/releases/FMI_for_ModelExchange_v1.0.1.zip
       sha256: "966c948707531c5a764b70fa7bbe23030da962d8a939e01dc8bc9af9d8264cd1"
-patches:
-  "1.0.1":
-    - patch_file: "patches/001-add-license-file.patch"
-      patch_description: "Add library license file"
-      patch_type: "conan"

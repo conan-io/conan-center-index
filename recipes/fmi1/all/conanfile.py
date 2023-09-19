@@ -1,7 +1,7 @@
 from os import path
 from conan import ConanFile
-from conan.tools.files import (
-    get, copy, apply_conandata_patches, export_conandata_patches)
+from conan.errors import ConanException
+from conan.tools.files import copy, get, load, save
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.52.0"
@@ -18,8 +18,15 @@ class PackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True  # True OK because patch only adds new file
 
-    def export_sources(self):
-        export_conandata_patches(self)
+    def _extract_copyright(self):
+        fmiFunctions_h = load(self, path.join(self.source_folder, "cosim", "fmiFunctions.h"))
+        copyright_start = "Copyright(c)"
+        copyright_end = "DAMAGE."
+        start_index = fmiFunctions_h.find(copyright_start)
+        stop_index = fmiFunctions_h.find(copyright_end)
+        if start_index == -1 or stop_index == -1:
+            raise ConanException("Could not extract license from fmiFunctions.h file.")
+        return fmiFunctions_h[start_index:stop_index+len(copyright_end)]
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -34,15 +41,10 @@ class PackageConan(ConanFile):
             destination="modex", strip_root=True)
 
     def build(self):
-        apply_conandata_patches(self)
+        pass
 
     def package(self):
-        copy(
-            self,
-            pattern="LICENSE",
-            dst=path.join(self.package_folder, "licenses"),
-            src=self.source_folder
-        )
+        save(self, path.join(self.package_folder, "licenses", "LICENSE"), self._extract_copyright())
         for comp in ["modex", "cosim"]:
             copy(
                 self,
