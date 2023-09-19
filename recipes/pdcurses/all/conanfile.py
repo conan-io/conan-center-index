@@ -4,6 +4,7 @@ import re
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get, load, replace_in_file, rmdir, save, rename
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -67,6 +68,8 @@ class PDCursesConan(ConanFile):
             raise ConanInvalidConfiguration("with_sdl option is not yet supported on Windows")
         if self.settings.os != "Windows" and not self.options.get_safe("with_x11") and not self.options.with_sdl:
             raise ConanInvalidConfiguration("At least one of with_x11 or with_sdl options must be enabled")
+        if cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building is not supported")
 
     def build_requirements(self):
         if not is_msvc(self):
