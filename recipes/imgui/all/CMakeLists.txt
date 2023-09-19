@@ -5,8 +5,15 @@ set(MISC_DIR ${IMGUI_SRC_DIR}/misc)
 set(EXTRA_FONTS_DIR ${MISC_DIR}/fonts)
 set(IMGUI_EXPORT_HEADERS imgui_export_headers.h)
 
-file(GLOB SOURCE_FILES ${IMGUI_SRC_DIR}/*.cpp ${IMGUI_SRC_DIR}/misc/cpp/*.cpp)
-file(GLOB HEADER_FILES ${IMGUI_SRC_DIR}/*.h ${IMGUI_SRC_DIR}/misc/cpp/imgui_stdlib.h)
+file(GLOB SOURCE_FILES ${IMGUI_SRC_DIR}/*.cpp )
+file(GLOB HEADER_FILES ${IMGUI_SRC_DIR}/*.h 
+                        # Include extensions when installing the headers
+                        # but dont compile them into the library
+                        ${IMGUI_SRC_DIR}/misc/cpp/imgui_stdlib.h 
+                        ${IMGUI_SRC_DIR}/misc/cpp/imgui_stdlib.cpp 
+                        ${IMGUI_SRC_DIR}/misc/freetype/imgui_freetype.h 
+                        ${IMGUI_SRC_DIR}/misc/freetype/imgui_freetype.cpp)
+
 file(GLOB EXTRA_FONTS_FILES ${EXTRA_FONTS_DIR}/*.ttf)
 if (MSVC)
     file(GLOB EXTRA_NATVIS_FILES ${MISC_DIR}/natvis/*.natvis)
