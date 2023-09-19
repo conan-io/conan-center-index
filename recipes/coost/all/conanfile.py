@@ -91,22 +91,15 @@ class CoostConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.libs = ["co"]
+
         self.cpp_info.set_property("cmake_file_name", "coost")
         self.cpp_info.set_property("cmake_target_name", "coost::co")
-        # TODO: back to global scope in conan v2 once legacy generators removed
-        self.cpp_info.components["co"].set_property("pkg_config_name", "coost")
-        self.cpp_info.components["co"].libs = ["co"]
+        self.cpp_info.set_property("pkg_config_name", "coost")
+
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["co"].system_libs = ["pthread", "dl"]
+            self.cpp_info.system_libs = ["pthread", "dl", "m"]
         if self.settings.os == "Linux":
-            self.cpp_info.components["co"].requires.append("libbacktrace::libbacktrace")
+            self.cpp_info.requires.append("libbacktrace::libbacktrace")
         if self.settings.os == "Windows":
-            self.cpp_info.components["co"].system_libs = ["ws2_32"]
-
-        # TODO: to remove in conan v2 once legacy generators removed
-        self.cpp_info.components["co"].set_property("cmake_target_name", "coost::co")
-
-        if self.options.with_libcurl:
-            self.cpp_info.components["co"].requires.append("libcurl::libcurl")
-        if self.options.with_libcurl or self.options.with_openssl:
-            self.cpp_info.components["co"].requires.append("openssl::openssl")
+            self.cpp_info.system_libs = ["ws2_32"]
