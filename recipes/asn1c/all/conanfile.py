@@ -9,7 +9,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class Asn1cConan(ConanFile):
@@ -99,3 +99,4 @@ class Asn1cConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
+        self.env_info.SUPPORT_PATH = support_path

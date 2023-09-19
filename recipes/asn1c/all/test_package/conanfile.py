@@ -8,11 +8,8 @@ from conan.tools.files import copy
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv", "VirtualBuildEnv"
     test_type = "explicit"
-
-    def requirements(self):
-        self.requires(self.tested_reference_str)
 
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
