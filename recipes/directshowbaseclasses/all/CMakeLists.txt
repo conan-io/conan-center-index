@@ -17,6 +17,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${DSROOT})
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNICODE=1 _UNICODE=1)
 
-include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
   PUBLIC_HEADER DESTINATION include)
