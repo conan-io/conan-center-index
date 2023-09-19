@@ -62,6 +62,10 @@ class LLVMOpenMpConan(ConanFile):
             "apple-clang": "10",
         }
 
+    @property
+    def _version_major(self):
+        return Version(self.version).major
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -74,7 +78,7 @@ class LLVMOpenMpConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        if self.options.build_libomptarget and Version(self.version) >= "13":
+        if self.options.build_libomptarget and self._version_major >= 13:
             self.requires(f"llvm-core/{self.version}")
 
     def layout(self):
@@ -84,31 +88,31 @@ class LLVMOpenMpConan(ConanFile):
         if not self._supports_compiler():
             raise ConanInvalidConfiguration("llvm-openmp doesn't support compiler: "
                                             f"{self.settings.compiler} on OS: {self.settings.os}.")
-        if Version(self.version) >= "17":
+        if self._version_major >= 17:
             if self.settings.compiler.cppstd:
                 check_min_cppstd(self, 17)
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if minimum_version and Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not support.")
         if is_apple_os(self) and self.settings.arch == "armv8":
-            if Version(self.version) <= "10.0.0":
+            if self._version_major <= 10:
                 raise ConanInvalidConfiguration("ARM v8 not supported")
-            if Version(self.version) != "11" and self.settings.build_type == "Debug":
+            if self._version_major != 11 and self.settings.build_type == "Debug":
                 # All versions except for v11 crash with a segfault for the simple test_package.cpp test
                 raise ConanInvalidConfiguration("Debug mode not supported for ARM v8")
 
     def build_requirements(self):
-        if Version(self.version) >= "17":
+        if self._version_major >= 17:
             self.tool_requires("cmake/[>=3.20 <4]")
 
     def source(self):
-        if Version(self.version) > "14":
+        if self._version_major >= 15:
             get(self, **self.conan_data["sources"][self.version]["openmp"], strip_root=True)
             get(self, **self.conan_data["sources"][self.version]["cmake"], strip_root=True, destination=self.export_sources_folder)
             copy(self, "*.cmake",
                  src=os.path.join(self.export_sources_folder, "Modules"),
                  dst=os.path.join(self.source_folder, "cmake"))
-        elif Version(self.version) == "14":
+        elif self._version_major == 14:
             # v14 source archives also includes a cmake/ directory in the archive root
             get(self, **self.conan_data["sources"][self.version], destination=self.export_sources_folder)
             rmdir(self, self.source_folder)
@@ -132,7 +136,7 @@ class LLVMOpenMpConan(ConanFile):
         apply_conandata_patches(self)
         replace_in_file(self,os.path.join(self.source_folder, "runtime", "CMakeLists.txt"),
                         "add_subdirectory(test)", "")
-        if Version(self.version).major == 12:
+        if self._version_major == 12:
             # v12 can be built without LLVM includes
             replace_in_file(self, os.path.join(self.source_folder, "libomptarget", "CMakeLists.txt"),
                             "if (NOT LIBOMPTARGET_LLVM_INCLUDE_DIRS)", "if (FALSE)")
