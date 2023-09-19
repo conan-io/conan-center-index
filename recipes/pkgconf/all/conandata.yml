@@ -1,4 +1,7 @@
 sources:
+  "2.0.3":
+    url: "https://distfiles.ariadne.space/pkgconf/pkgconf-2.0.3.tar.xz"
+    sha256: "cabdf3c474529854f7ccce8573c5ac68ad34a7e621037535cbc3981f6b23836c"
   "2.0.2":
     url: "https://distfiles.ariadne.space/pkgconf/pkgconf-2.0.2.tar.xz"
     sha256: "ea5a25ef8f251eb5377ec0e21c75fb61894433cfbdbf0b2559ba33e4c2664401"
@@ -15,6 +18,8 @@ sources:
     url: "https://distfiles.ariadne.space/pkgconf/pkgconf-1.7.3.tar.xz"
     sha256: "b846aea51cf696c3392a0ae58bef93e2e72f8e7073ca6ad1ed8b01c85871f9c0"
 patches:
+  "2.0.3":
+    - patch_file: "patches/1.9.3-0003-PKG_CONF_PATH-allow-colon+semicolon-separator.patch"
   "2.0.2":
     - patch_file: "patches/1.9.3-0003-PKG_CONF_PATH-allow-colon+semicolon-separator.patch"
   "1.9.5":
