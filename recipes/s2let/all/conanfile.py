@@ -44,7 +44,7 @@ class S2let(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("astro-informatics-so3/1.3.4", transitive_headers=True)
+        self.requires("astro-informatics-so3/1.3.4", transitive_headers=True, transitive_libs=True)
         if self.options.with_cfitsio:
             self.requires("cfitsio/4.2.0")
 
