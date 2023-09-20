@@ -1,0 +1,9 @@
+sources:
+  "4.5.11":
+    url: "https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.5.11.tar.gz"
+    sha256: "c68072724bba03a05bd0c37e2c9e7f541afba798ee3e535ee82643c833b8f88f"
+patches:
+  "4.5.11":
+    - patch_file: "patches/4.5.1-0001-fix-cmake.patch"
+      patch_description: "disable test, use cci package"
+      patch_type: "conan"
