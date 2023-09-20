@@ -41,7 +41,7 @@ class CnpyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13", transitive_headers=True, transitive_libs=True)
+        self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
