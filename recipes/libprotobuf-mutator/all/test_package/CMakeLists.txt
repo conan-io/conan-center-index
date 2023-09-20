@@ -12,3 +12,4 @@ protobuf_generate_cpp(
 add_executable(${PROJECT_NAME} ${MSG_PROTO_SRCS} test_package.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(${PROJECT_NAME} libprotobuf-mutator::libprotobuf-mutator)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
