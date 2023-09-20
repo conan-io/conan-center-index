@@ -16,7 +16,7 @@ class PackageConan(ConanFile):
     homepage = "https://github.com/phmkopp/vtu11"
     topics = ("vtu", "c++11", "header-only")
 
-    package_type = "header-only"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
     options = {
