@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, rmdir, copy
 from conan.tools.microsoft import is_msvc
@@ -55,8 +55,6 @@ class Nghttp3Conan(ConanFile):
         if is_apple_os(self):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
             tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
-        tc.generate()
-        tc = CMakeDeps(self)
         tc.generate()
         tc = VirtualBuildEnv(self)
         tc.generate(scope="build")
