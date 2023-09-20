@@ -31,6 +31,9 @@ patches:
     - patch_file: "patches/0005-3.6.2-try-compile-cmakedeps.patch"
       patch_description: "Patch try_compile check to work with imported CMake targets from Conan packages"
       patch_type: "conan"
+    - patch_file: "patches/0006-fix-msvc-build.patch"
+      patch_description: "Fix MSVC build"
+      patch_type: "conan"
   "3.6.1":
     - patch_file: "patches/0001-3.6.0-zlib-winapi.patch"
       patch_description: "Remove broken ZLIB WINAPI check"
@@ -62,7 +65,7 @@ patches:
     - patch_file: "patches/0001-3.4.3-zlib-winapi.patch"
       patch_description: "Remove broken ZLIB WINAPI check"
       patch_type: "portability"
-    - patch_file: "patches/0003-3.4.3-cmake.patch"
+    - patch_file: "patches/0003-3.5.1-cmake.patch"
       patch_description: "Make CMake cooperate with Conan"
       patch_type: "conan"
   "3.4.3":

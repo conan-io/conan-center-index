@@ -1,4 +1,7 @@
 sources:
+  "1.0.0-beta.14":
+    sha256: f9e44a1d6a70a6d39b9e45df76eac928e69f5318e5a957fd5c0efdf45dacaf5e
+    url: https://github.com/taocpp/json/archive/1.0.0-beta.14.tar.gz
   "1.0.0-beta.13":
     sha256: 2513b32d1883277f78071ff1cc55d4f35a979fffdaddf6412d3cb67852ce68b5
     url: https://github.com/taocpp/json/archive/1.0.0-beta.13.tar.gz
