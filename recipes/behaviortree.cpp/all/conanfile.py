@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -108,10 +108,20 @@ class BehaviorTreeCPPConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("zeromq", "cmake_file_name", "ZMQ")
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        # Let Conan handle -fPIC
+        replace_in_file(self, cmakelists, "set(CMAKE_POSITION_INDEPENDENT_CODE ON)\n", "")
+        # Disable -Werror
+        replace_in_file(self, cmakelists, " /WX", "", strict=False)
+        replace_in_file(self, cmakelists, " -Werror=return-type", "", strict=False)
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
