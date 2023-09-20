@@ -2,8 +2,8 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 import os
-
 
 required_conan_version = ">=1.53.0"
 
@@ -67,6 +67,10 @@ class PackageConan(ConanFile):
 
         if self.options.with_zlib:
             self.cpp_info.defines = ["VTU11_ENABLE_ZLIB"]
+
+        # The library uses __cplusplus for feature detection, ensure vs returns the proper one
+        if is_msvc(self):
+            self.cpp_info.cxxflags.append("/Zc:__cplusplus")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "vtu11"
