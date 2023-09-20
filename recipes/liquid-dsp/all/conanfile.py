@@ -38,30 +38,6 @@ class LiquidDspConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _libname(self):
-        if self.settings.os == "Windows":
-            return "libliquid"
-        return "liquid"
-
-    @property
-    def _target_name(self):
-        if is_apple_os(self):
-            if not self.options.shared:
-                return "libliquid.ar"
-            return "libliquid.dylib"
-        if not self.options.shared:
-            return "libliquid.a"
-        return "libliquid.so"
-
-    @property
-    def _lib_pattern(self):
-        if is_apple_os(self) and not self.options.shared:
-            return "libliquid.a"
-        if self.settings.os != "Windows":
-            return self._target_name
-        return "libliquid.lib"
-
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "generate_link_library.bat", src=self.recipe_folder, dst=self.export_sources_folder)
@@ -126,6 +102,16 @@ class LiquidDspConan(ConanFile):
         if self.settings.os == "Windows":
             apply_conandata_patches(self)
 
+    @property
+    def _target_name(self):
+        if is_apple_os(self):
+            if not self.options.shared:
+                return "libliquid.ar"
+            return "libliquid.dylib"
+        if not self.options.shared:
+            return "libliquid.a"
+        return "libliquid.so"
+
     def _gen_link_library(self):
         if is_msvc(self) and self.options.shared:
             self.run("cmd /c generate_link_library.bat")
@@ -153,6 +139,14 @@ class LiquidDspConan(ConanFile):
         self._rename_libraries()
         self._gen_link_library()
 
+    @property
+    def _lib_pattern(self):
+        if is_apple_os(self) and not self.options.shared:
+            return "libliquid.a"
+        if self.settings.os != "Windows":
+            return self._target_name
+        return "libliquid.lib"
+
     def package(self):
         copy(self, "LICENSE",
              dst=os.path.join(self.package_folder, "licenses"),
@@ -166,6 +160,12 @@ class LiquidDspConan(ConanFile):
         copy(self, self._lib_pattern,
              dst=os.path.join(self.package_folder, "lib"),
              src=self.source_folder)
+
+    @property
+    def _libname(self):
+        if self.settings.os == "Windows":
+            return "libliquid"
+        return "liquid"
 
     def package_info(self):
         self.cpp_info.libs = [self._libname]
