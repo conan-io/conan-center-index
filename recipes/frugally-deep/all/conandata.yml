@@ -1,7 +1,7 @@
 sources:
-  "0.15.22-p0":
-    url: "https://github.com/Dobiasd/frugally-deep/archive/v0.15.22-p0.tar.gz"
-    sha256: "195f8ddc2a605550ad929daf130f62c31fb4742afe9f0f8705b313c243009c95"
+  "0.15.23-p0":
+    url: "https://github.com/Dobiasd/frugally-deep/archive/v0.15.23-p0.tar.gz"
+    sha256: "430c3b8ecf99d1fa90a44bb1d6fc435e0e6bec95d57a5a0a5c15802711eb231b"
   "0.15.19-p0":
     url: "https://github.com/Dobiasd/frugally-deep/archive/v0.15.19-p0.tar.gz"
     sha256: "acaba428ae19ef8d57a53b3767373cd96770c190dd57909e52d2759be89ac942"
