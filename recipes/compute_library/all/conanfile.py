@@ -4,9 +4,10 @@ from conan.tools.files import get, copy, rm, chdir
 from conan.tools.build import check_min_cppstd, cross_building, build_jobs
 from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.gnu import AutotoolsDeps
+from conan.tools.gnu import AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 import os
+import sys
 
 
 required_conan_version = ">=1.53.0"
@@ -93,7 +94,7 @@ class ComputeLibraryConan(ConanFile):
         if "arm" not in str(self.settings.arch) and "x86" not in str(self.settings.arch):
             # INFO: https://github.com/ARM-software/ComputeLibrary#supported-architecturestechnologies
             raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.arch}. It is only supported on arm and x86.")
-        if "x86" in str(self.settings.arch) and not self.options.get_safe("enable_opencl", False):
+        if "x86" in str(self.settings.arch) and self.settings.os != "Macos" and not self.options.get_safe("enable_opencl", False):
             raise ConanInvalidConfiguration(f"{self.ref} can be built for x86_64 targets only with enable_neon=False and enable_opencl=True.")
         if self.settings.os == "Linux" and self.settings.compiler == "clang":
             # INFO: https://arm-software.github.io/ComputeLibrary/latest/how_to_build.xhtml#S1_2_linux
@@ -103,6 +104,8 @@ class ComputeLibraryConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.generate()
         tc = AutotoolsDeps(self)
         tc.generate()
         tc = VirtualBuildEnv(self)
@@ -120,7 +123,7 @@ class ComputeLibraryConan(ConanFile):
         openmp = yes_no(self.options.get_safe("enable_openmp"))
         build = "cross_compile" if cross_building(self) else "native"
         with chdir(self, self.source_folder):
-            self.run(f"scons Werror=0 validation_tests=0 examples=0 openmp={openmp} debug={debug} neon={neon} opencl={opencl} os={build_os} arch={arch} build={build} build_dir={self.build_folder} install_dir={self.package_folder} -j{build_jobs(self)}", env="conanbuild")
+            self.run(f"scons Werror=0 validation_tests=0 examples=0 gemm_tuner=0 openmp={openmp} debug={debug} neon={neon} opencl={opencl} os={build_os} arch={arch} build={build} build_dir={self.build_folder} install_dir={self.package_folder} -j{build_jobs(self)}", env="conanbuild")
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
