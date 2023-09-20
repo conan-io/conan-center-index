@@ -14,7 +14,9 @@ class PackageConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/phmkopp/vtu11"
-    topics = ("vtu", "c++11")
+    topics = ("vtu", "c++11", "header-only")
+
+    package_type = "header-only"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
     options = {
@@ -28,15 +30,12 @@ class PackageConan(ConanFile):
     def _min_cppstd(self):
         return 11
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def package_id(self):
         self.info.clear()
@@ -47,10 +46,6 @@ class PackageConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def build(self):
-        if valid_min_cppstd(self, 17):
-            apply_conandata_patches(self)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
