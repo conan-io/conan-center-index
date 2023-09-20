@@ -49,12 +49,14 @@ class SystemcComponentsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/10.1.1")
+        self.requires("fmt/8.1.1")
         self.requires("zlib/1.2.13")
         self.requires("boost/1.83.0")
         self.requires("gsl-lite/0.41.0")
         self.requires("spdlog/1.12.0")
         self.requires("systemc/2.3.4")
+        if Version(self.version) >= "2023.06":
+            self.requires("yaml-cpp/0.8.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -80,8 +82,10 @@ class SystemcComponentsConan(ConanFile):
         if self.settings.os == "Windows":
             tc.variables["SCC_LIMIT_TRACE_TYPE_LIST"] = True
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("systemc", "cmake_file_name", "SystemC")
+        deps.set_property("yaml-cpp", "cmake_target_name", "yaml-cpp::yaml-cpp")
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
