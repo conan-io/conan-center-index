@@ -3,14 +3,14 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import can_run, cross_building, valid_min_cppstd, check_min_cppstd
+from conan.tools.build import cross_building, valid_min_cppstd, check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
 
 class GrpcConan(ConanFile):
@@ -94,9 +94,9 @@ class GrpcConan(ConanFile):
             self.requires("abseil/20230125.3", transitive_headers=True, transitive_libs=True)
         self.requires("c-ares/1.19.1")
         self.requires("openssl/[>=1.1 <4]")
+        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
         self.requires("re2/20230301")
         self.requires("zlib/1.2.13")
-        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True, run=can_run(self))
 
     def package_id(self):
         del self.info.options.secure
@@ -112,16 +112,14 @@ class GrpcConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._cxxstd_required)
 
-        if self.options.shared and \
-           (not self.dependencies["protobuf"].options.shared):
+        if self.options.shared and not self.dependencies.host["protobuf"].options.shared:
             raise ConanInvalidConfiguration(
                 "If built as shared protobuf must be shared as well. "
                 "Please, use `protobuf:shared=True`.",
             )
 
     def build_requirements(self):
-        if not can_run(self):
-            self.tool_requires("protobuf/3.21.12")
+        self.tool_requires("protobuf/<host_version>")
         if cross_building(self):
             # when cross compiling we need pre compiled grpc plugins for protoc
             self.tool_requires(f"grpc/{self.version}")
@@ -132,8 +130,6 @@ class GrpcConan(ConanFile):
     def generate(self):
         # Set up environment so that we can run grpc-cpp-plugin at build time
         VirtualBuildEnv(self).generate()
-        if can_run(self):
-            VirtualRunEnv(self).generate(scope="build")
 
         # This doesn't work yet as one would expect, because the install target builds everything
         # and we need the install target because of the generated CMake files

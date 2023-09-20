@@ -1,36 +1,26 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
-from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
+    generatores = "CMakeDeps", "VirtualBuildEnv", "VirtualRunEnv"
     test_type = "explicit"
 
     def layout(self):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires(self.tested_reference_str, run=can_run(self))
+        self.requires(self.tested_reference_str)
 
     def build_requirements(self):
-        if not can_run(self):
-            # For the grpc-cpp-plugin executable at build time
-            self.tool_requires(self.tested_reference_str)
+        # For the grpc-cpp-plugin executable at build time
+        self.tool_requires(self.tested_reference_str)
 
     def generate(self):
-        # Set up environment so that we can run grpc-cpp-plugin at build time
-        VirtualBuildEnv(self).generate()
-        if can_run(self):
-            VirtualRunEnv(self).generate(scope="build")
-
-        # Environment so that the compiled test executable can load shared libraries
-        runenv = VirtualRunEnv(self)
-        runenv.generate()
-
         tc = CMakeToolchain(self)
         tc.cache_variables["TEST_ACTUAL_SERVER"] = not (is_msvc(self)
                                                         and str(self.settings.compiler.version) in ("15", "191")
@@ -41,9 +31,6 @@ class TestPackageConan(ConanFile):
         project_include = os.path.join(self.source_folder, "macos_make_override.cmake")
         tc.cache_variables["CMAKE_PROJECT_test_package_INCLUDE"] = project_include
         tc.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def build(self):
         cmake = CMake(self)
