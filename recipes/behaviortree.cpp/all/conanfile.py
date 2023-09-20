@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, save
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -70,6 +70,7 @@ class BehaviorTreeCPPConan(ConanFile):
         self.requires("ncurses/6.4")
         self.requires("zeromq/4.3.4")
         self.requires("cppzmq/4.10.0")
+        self.requires("minitrace/cci.20230905")
 
     def validate(self):
         if self.info.settings.os == "Windows" and self.info.options.shared:
@@ -119,6 +120,15 @@ class BehaviorTreeCPPConan(ConanFile):
         # Disable -Werror
         replace_in_file(self, cmakelists, " /WX", "", strict=False)
         replace_in_file(self, cmakelists, " -Werror=return-type", "", strict=False)
+        # Unvendor minitrace
+        rmdir(self, os.path.join(self.source_folder, "3rdparty", "minitrace"))
+        replace_in_file(self, cmakelists, "3rdparty/minitrace/minitrace.cpp", "")
+        save(self, cmakelists,
+             "\nfind_package(minitrace REQUIRED CONFIG)\n"
+             "target_link_libraries(${BTCPP_LIBRARY} PRIVATE minitrace::minitrace)\n",
+             append=True)
+        replace_in_file(self, os.path.join(self.source_folder, "src", "loggers", "bt_minitrace_logger.cpp"),
+                        "minitrace/minitrace.h", "minitrace.h")
 
     def build(self):
         self._patch_sources()
@@ -146,7 +156,12 @@ class BehaviorTreeCPPConan(ConanFile):
         postfix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components[libname].libs = [f"{libname}{postfix}"]
-        self.cpp_info.components[libname].requires = ["zeromq::zeromq", "cppzmq::cppzmq", "ncurses::ncurses"]
+        self.cpp_info.components[libname].requires = [
+            "zeromq::zeromq",
+            "cppzmq::cppzmq",
+            "ncurses::ncurses",
+            "minitrace::minitrace",
+        ]
         if self.options.with_coroutines:
             self.cpp_info.components[libname].requires.append("boost::coroutine")
         if self.settings.os in ("Linux", "FreeBSD"):
