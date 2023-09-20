@@ -36,13 +36,13 @@ class GodotCppConan(ConanFile):
             "Linux": "linux",
             "Macos": "darwin",
             "Windows": "windows",
-        }[self.settings.get_safe("os")]
-        build_type = self.settings.get_safe("build_type").lower()
+        }[str(self.settings.os)]
+        build_type = str(self.settings.build_type).lower()
 
-        if self.settings.get_safe("os") == "Android":
+        if self.settings.os == "Android":
             self.cpp_info.libs= [f"godot-cpp.{platform}.{build_type}"]
         else:
-            bits = 64 if self.settings.get_safe("arch") in ["x86_64", "armv8"] else 32
+            bits = 64 if self.settings.arch in ["x86_64", "armv8"] else 32
             self.cpp_info.libs= [f"godot-cpp.{platform}.{build_type}.{bits}"]
 
     def source(self):
