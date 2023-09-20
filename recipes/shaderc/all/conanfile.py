@@ -43,16 +43,19 @@ class ShadercConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     @property
-    def _compatible_spirv_version(self):
+    def _spirv_version(self):
         return {
-            "2021.1": "1.3.224.0"
+            # TODO: bump me once newer versions are available on CCI
+            # "2023.6": "1.3.261.1",
+            "2023.6": "1.3.243.0",
+            "2021.1": "1.3.224.0",
         }[str(self.version)]
 
     def requirements(self):
         # transitive_headers=True is not required for any of the dependencies
-        self.requires(f"glslang/{self._compatible_spirv_version}")
-        self.requires(f"spirv-tools/{self._compatible_spirv_version}")
-        self.requires(f"spirv-headers/{self._compatible_spirv_version}")
+        self.requires(f"glslang/{self._spirv_version}")
+        self.requires(f"spirv-tools/{self._spirv_version}")
+        self.requires(f"spirv-headers/{self._spirv_version}")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
