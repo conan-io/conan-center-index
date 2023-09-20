@@ -13,7 +13,7 @@ from conan.tools.scm import Version
 
 from helpers import parse_proto_libraries
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
 
 class GoogleAPIS(ConanFile):
