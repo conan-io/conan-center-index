@@ -55,7 +55,7 @@ class ComputeLibraryConan(ConanFile):
             del self.options.enable_openmp
         # INFO: OpenCL fails to build with MacOS
         if self.settings.os == "Macos":
-            self.options.enable_opencl = False
+            del self.options.enable_opencl
 
     def configure(self):
         if self.options.shared:
@@ -68,7 +68,7 @@ class ComputeLibraryConan(ConanFile):
         self.tool_requires("scons/4.3.0")
 
     def requirements(self):
-        if self.options.enable_opencl:
+        if self.options.get_safe("enable_opencl"):
             self.requires("opencl-headers/2023.04.17")
 
     def validate(self):
@@ -77,13 +77,27 @@ class ComputeLibraryConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
-        supported_os = ["Android", "Linux", "OpenBSD", "Macos", "Tizen"]
+        # INFO: https://github.com/ARM-software/ComputeLibrary#supported-systems
+        supported_os = ["Android", "Linux", "OpenBSD", "Macos", "Tizen", "Windows"]
         if str(self.settings.os) not in supported_os:
             raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.os}. It is only supported on {supported_os}.")
+        if self.settings.os == "Windows":
+            if cross_building(self):
+                # INFO: https://arm-software.github.io/ComputeLibrary/latest/how_to_build.xhtml#S1_6_windows_host
+                raise ConanInvalidConfiguration(f"Using scons directly from the Windows command line is known to cause problems. Please, try native native build on Windows ARM or cross-build on Linux Ubuntu.")
+            if "arm" in str(self.settings.arch):
+                # INFO: https://arm-software.github.io/ComputeLibrary/latest/how_to_build.xhtml#S1_6_3_WoA
+                self.output.warn("Native builds on Windows are experimental and some features from the library interacting with the OS are missing.")
+            if "x86" in str(self.settings.arch):
+                raise ConanInvalidConfiguration(f"{self.ref} does not support native builds on Windows x86/x86_64. It is only supported on Windows ARM.")
         if "arm" not in str(self.settings.arch) and "x86" not in str(self.settings.arch):
+            # INFO: https://github.com/ARM-software/ComputeLibrary#supported-architecturestechnologies
             raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.arch}. It is only supported on arm and x86.")
-        if "x86" in str(self.settings.arch) and (self.options.get_safe("enable_neon") or not self.options.enable_opencl):
+        if "x86" in str(self.settings.arch) and not self.options.get_safe("enable_opencl", False):
             raise ConanInvalidConfiguration(f"{self.ref} can be built for x86_64 targets only with enable_neon=False and enable_opencl=True.")
+        if self.settings.os == "Linux" and self.settings.compiler == "clang":
+            # INFO: https://arm-software.github.io/ComputeLibrary/latest/how_to_build.xhtml#S1_2_linux
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Linux with clang. It is only supported on Linux with gcc.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -102,7 +116,7 @@ class ComputeLibraryConan(ConanFile):
         build_os = str(self.settings.os).lower()
         arch = {"armv8": "armv8a", "x86": "x86_32", "armv7": "armv7a", "armv7hf": "armv7a-hf"}.get(str(self.settings.arch), str(self.settings.arch))
         neon = yes_no(self.options.get_safe("enable_neon"))
-        opencl = yes_no(self.options.enable_opencl)
+        opencl = yes_no(self.options.get_safe("enable_opencl", False))
         openmp = yes_no(self.options.get_safe("enable_openmp"))
         build = "cross_compile" if cross_building(self) else "native"
         with chdir(self, self.source_folder):
