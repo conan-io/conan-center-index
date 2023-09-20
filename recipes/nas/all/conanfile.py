@@ -3,7 +3,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, get, download, export_conandata_patches, apply_conandata_patches, rm, copy, load, save
+from conan.tools.files import chdir, get, export_conandata_patches, apply_conandata_patches, rm, copy, load, save
 from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
 import os
 
@@ -17,7 +17,7 @@ class NasRecipe(ConanFile):
     topics = ("audio", "sound")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.radscan.com/nas.html"
-    license = "LicenseRef-"
+    license = "DocumentRef-wave.h:LicenseRef-MIT-advertising"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
