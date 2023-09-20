@@ -68,6 +68,7 @@ class BehaviorTreeCPPConan(ConanFile):
         self.requires("zeromq/4.3.4")
         self.requires("cppzmq/4.10.0")
         self.requires("minitrace/cci.20230905")
+        self.requires("tinyxml2/9.0.0")
 
     def validate(self):
         if self.info.settings.os == "Windows" and self.info.options.shared:
@@ -114,8 +115,9 @@ class BehaviorTreeCPPConan(ConanFile):
         # Let Conan handle -fPIC
         replace_in_file(self, cmakelists, "set(CMAKE_POSITION_INDEPENDENT_CODE ON)\n", "")
         # Disable -Werror
-        replace_in_file(self, cmakelists, " /WX", "", strict=False)
-        replace_in_file(self, cmakelists, " -Werror=return-type", "", strict=False)
+        if Version(self.version) < "4.3":
+            replace_in_file(self, cmakelists, " /WX", "", strict=False)
+            replace_in_file(self, cmakelists, " -Werror=return-type", "", strict=False)
         # Unvendor minitrace
         rmdir(self, os.path.join(self.source_folder, "3rdparty", "minitrace"))
         replace_in_file(self, cmakelists, "3rdparty/minitrace/minitrace.cpp", "")
@@ -125,6 +127,16 @@ class BehaviorTreeCPPConan(ConanFile):
              append=True)
         replace_in_file(self, os.path.join(self.source_folder, "src", "loggers", "bt_minitrace_logger.cpp"),
                         "minitrace/minitrace.h", "minitrace.h")
+        # Unvendor tinyxml2
+        rmdir(self, os.path.join(self.source_folder, "3rdparty", "tinyxml2"))
+        replace_in_file(self, cmakelists, "3rdparty/tinyxml2/tinyxml2.cpp", "")
+        save(self, cmakelists,
+             "\nfind_package(tinyxml2 REQUIRED CONFIG)\n"
+             "target_link_libraries(${BTCPP_LIBRARY} PRIVATE tinyxml2::tinyxml2)\n",
+             append=True)
+        replace_in_file(self, os.path.join(self.source_folder, "src", "xml_parsing.cpp"),
+                        "tinyxml2/tinyxml2.h", "tinyxml2.h")
+
 
     def build(self):
         self._patch_sources()
@@ -157,6 +169,7 @@ class BehaviorTreeCPPConan(ConanFile):
             "cppzmq::cppzmq",
             "ncurses::ncurses",
             "minitrace::minitrace",
+            "tinyxml2::tinyxml2",
         ]
         if self.options.with_coroutines:
             self.cpp_info.components[libname].requires.append("boost::coroutine")
