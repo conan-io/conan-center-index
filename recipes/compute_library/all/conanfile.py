@@ -123,7 +123,7 @@ class ComputeLibraryConan(ConanFile):
         openmp = yes_no(self.options.get_safe("enable_openmp"))
         build = "cross_compile" if cross_building(self) else "native"
         with chdir(self, self.source_folder):
-            self.run(f"scons Werror=0 validation_tests=0 examples=0 gemm_tuner=0 openmp={openmp} debug={debug} neon={neon} opencl={opencl} os={build_os} arch={arch} build={build} build_dir={self.build_folder} install_dir={self.package_folder} -j{build_jobs(self)}", env="conanbuild")
+            self.run(f"scons Werror=0 validation_tests=0 examples=0 gemm_tuner=0 openmp={openmp} debug={debug} neon={neon} opencl={opencl} os={build_os} arch={arch} build={build} build_dir={self.build_folder} install_dir={self.package_folder} -j{build_jobs(self)} toolchain_prefix=''", env="conanbuild")
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
