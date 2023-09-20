@@ -37,13 +37,7 @@ class SrtConan(ConanFile):
 
     @property
     def _has_posix_threads(self):
-        return not (
-            self.settings.os == "Windows"
-            and (
-                is_msvc(self)
-                or (self.settings.compiler == "gcc" and self.settings.compiler.get_safe("threads") == "win32")
-            )
-        )
+        return not (is_msvc(self) or self.settings.compiler.get_safe("threads") == "win32")
 
     def export_sources(self):
         export_conandata_patches(self)
