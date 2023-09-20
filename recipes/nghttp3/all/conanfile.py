@@ -44,10 +44,6 @@ class Nghttp3Conan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def validate(self):
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
-            raise ConanInvalidConfiguration(f"{self.ref} requires GCC >= 6.0")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
