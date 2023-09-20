@@ -1,4 +1,7 @@
 sources:
+  "cci.20230920":
+    url: "https://github.com/nothings/stb/archive/5736b15f7ea0ffb08dd38af21067c314d6a3aae9.zip"
+    sha256: "b6601f182fa4bc04dd0f135e38231e8a2c6c9e7901c66a942871f03285713b05"
   "cci.20220909":
     url: "https://github.com/nothings/stb/archive/8b5f1f37b5b75829fc72d38e7b5d4bcbf8a26d55.zip"
     sha256: "93a16ee3e866e719feec459f6f132cce932c5ec751eb38e3ec1975f911353d2e"
