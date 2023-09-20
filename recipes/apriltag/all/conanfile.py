@@ -61,6 +61,8 @@ class ApriltagConan(ConanFile):
         if Version(self.version) >= "3.1.4":
             tc.variables["BUILD_PYTHON_WRAPPER"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        if self.settings.os == "Windows":
+            tc.preprocessor_definitions["NOMINMAX"] = ""
         tc.generate()
         if is_msvc(self):
             deps = CMakeDeps(self)
@@ -89,3 +91,4 @@ class ApriltagConan(ConanFile):
             self.cpp_info.system_libs = ["m", "pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["winmm"]
+            self.cpp_info.defines.append("NOMINMAX")
