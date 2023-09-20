@@ -69,6 +69,7 @@ class BehaviorTreeCPPConan(ConanFile):
         self.requires("cppzmq/4.10.0")
         self.requires("minitrace/cci.20230905")
         self.requires("tinyxml2/9.0.0")
+        self.requires("foonathan-lexy/2022.12.1")
 
     def validate(self):
         if self.info.settings.os == "Windows" and self.info.options.shared:
@@ -136,7 +137,11 @@ class BehaviorTreeCPPConan(ConanFile):
              append=True)
         replace_in_file(self, os.path.join(self.source_folder, "src", "xml_parsing.cpp"),
                         "tinyxml2/tinyxml2.h", "tinyxml2.h")
-
+        # Unvendor lexy
+        rmdir(self, os.path.join(self.source_folder, "3rdparty", "lexy"))
+        replace_in_file(self, cmakelists,
+                        "add_subdirectory(3rdparty/lexy)",
+                        "find_package(lexy REQUIRED CONFIG)")
 
     def build(self):
         self._patch_sources()
@@ -170,6 +175,7 @@ class BehaviorTreeCPPConan(ConanFile):
             "ncurses::ncurses",
             "minitrace::minitrace",
             "tinyxml2::tinyxml2",
+            "foonathan-lexy::foonathan-lexy",
         ]
         if self.options.with_coroutines:
             self.cpp_info.components[libname].requires.append("boost::coroutine")
