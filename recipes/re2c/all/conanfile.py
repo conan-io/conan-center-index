@@ -12,7 +12,7 @@ required_conan_version = ">=1.53.0"
 
 class Re2CConan(ConanFile):
     name = "re2c"
-    description = "re2c is a free and open-source lexer generator for C, C++ and Go."
+    description = "re2c is a free and open-source lexer generator for C/C++, Go and Rust."
     license = "Unlicense"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://re2c.org/"
