@@ -16,14 +16,12 @@ class XegeConan(ConanFile):
     homepage = "https://xege.org/"
     topics = ("ege", "graphics", "gui")
 
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
 
@@ -31,12 +29,12 @@ class XegeConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.settings.os != "Windows":
-            raise ConanInvalidConfiguration("This library is only compatible with Windows")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("This library is only compatible with Windows")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -57,15 +55,11 @@ class XegeConan(ConanFile):
         copy(self, "*.h",
              dst=os.path.join(self.package_folder, "include"),
              src=os.path.join(self.source_folder, "src"))
-        for pattern in ["*.lib", "*.so*", "*.a"]:
+        for pattern in ["*.lib", "*.a"]:
             copy(self, pattern,
                  dst=os.path.join(self.package_folder, "lib"),
                  src=self.build_folder,
                  keep_path=False)
-        copy(self, "*.dll",
-             dst=os.path.join(self.package_folder, "bin"),
-             src=self.build_folder,
-             keep_path=False)
 
     def package_info(self):
         if self.settings.arch == "x86_64":
