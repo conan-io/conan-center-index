@@ -1,15 +1,15 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.build import can_run, stdcpp_library
+from conan.tools.build import stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs, rm, rename
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
 
 class ProjConan(ConanFile):
@@ -57,25 +57,21 @@ class ProjConan(ConanFile):
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2")
-        self.requires("sqlite3/3.42.0", run=can_run(self))
+        self.requires("sqlite3/3.42.0")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.5.1")
         if self.options.get_safe("with_curl"):
             self.requires("libcurl/8.2.1")
 
     def build_requirements(self):
-        if not can_run(self):
-            self.tool_requires("sqlite3/3.42.0")
+        self.tool_requires("sqlite3/<host_version")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if can_run(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
 
         tc = CMakeToolchain(self)
         tc.variables["USE_THREAD"] = self.options.threadsafe
@@ -135,10 +131,7 @@ class ProjConan(ConanFile):
             else:
                 cmake_sqlite_call = "generate_proj_db.cmake"
                 pattern = "\"${EXE_SQLITE3}\""
-            if can_run(self):
-                lib_paths = self.dependencies["sqlite3"].cpp_info.libdirs
-            else:
-                lib_paths = self.dependencies.build["sqlite3"].cpp_info.libdirs
+            lib_paths = self.dependencies.build["sqlite3"].cpp_info.libdirs
             replace_in_file(self,
                 os.path.join(self.source_folder, "data", cmake_sqlite_call),
                 f"COMMAND {pattern}",
