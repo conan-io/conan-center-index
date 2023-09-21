@@ -82,6 +82,7 @@ class LightGBMConan(ConanFile):
         for lib in ["fmt", "fast_double_parser"]:
             replace_in_file(self, common_h, f"../../../external_libs/{lib}/include/", "")
         # Add dependencies
+        replace_in_file(self, cmakelists_path, "include_directories(${EIGEN_DIR})", "")
         extra_cmake_content = (
             "find_package(fmt REQUIRED CONFIG)\n"
             "find_package(Eigen3 REQUIRED CONFIG)\n"
