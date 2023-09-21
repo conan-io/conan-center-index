@@ -7,7 +7,6 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 import os
-import sys
 
 
 required_conan_version = ">=1.53.0"
