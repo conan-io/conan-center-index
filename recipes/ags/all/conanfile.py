@@ -6,7 +6,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import collect_libs, copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, check_min_vs
-from conan.tools.microsoft.visual import vs_ide_version
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
@@ -54,12 +53,21 @@ class AGSConan(ConanFile):
 
     @property
     def _vs_ide_year(self):
-        return {
-            "14": "2015",
-            "15": "2017",
-            "16": "2019",
-            "17": "2022",
-        }[str(vs_ide_version(self))]
+        compiler_version = str(self.settings.compiler.version)
+        if str(self.settings.compiler) == "Visual Studio":
+            return {
+                "14": "2015",
+                "15": "2017",
+                "16": "2019",
+                "17": "2022",
+            }[compiler_version]
+        else:
+            return {
+                "190": "2015",
+                "191": "2017",
+                "192": "2019",
+                "193": "2022",
+            }[compiler_version]
 
     @property
     def _win_arch(self):
