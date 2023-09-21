@@ -134,6 +134,26 @@ class Libfreenect2Conan(ConanFile):
         elif is_apple_os(self):
             self.cpp_info.frameworks.extend(["VideoToolbox", "CoreFoundation", "CoreMedia", "CoreVideo"])
 
+        self.cpp_info.requires += [
+            "libusb::libusb",
+            "libjpeg-turbo::jpeg",
+            "libjpeg-turbo::turbojpeg",
+        ]
+        if self.options.with_opencl:
+            self.cpp_info.requires += [
+                "opencl-headers::opencl-headers",
+                "opencl-icd-loader::opencl-icd-loader",
+            ]
+        if self.options.with_opengl:
+            self.cpp_info.requires += [
+                "opengl::opengl",
+                "glfw::glfw",
+            ]
+        if self.options.get_safe("with_vaapi"):
+            self.cpp_info.requires += ["vaapi::vaapi"]
+        if self.options.with_cuda:
+            self.cpp_info.requires += ["cuda-samples::cuda-samples"]
+
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "freenect2"
         self.cpp_info.names["cmake_find_package_multi"] = "freenect2"
