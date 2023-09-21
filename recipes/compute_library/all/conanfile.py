@@ -102,7 +102,7 @@ class ComputeLibraryConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support Linux with clang. It is only supported on Linux with gcc.")
         if "armv8" not in str(self.settings.arch) and self.options.enable_multi_isa:
             raise ConanInvalidConfiguration(f"{self.ref} does not support multi_isa option for {self.settings.arch}. It is only supported on armv8.")
-        if self.settings.arch == "armv8" and self.build_settings.arch == "x86_64" and self.settings.os == "Macos":
+        if self.settings.arch == "armv8" and self.settings_build.arch == "x86_64" and self.settings.os == "Macos":
             raise ConanInvalidConfiguration(f"Mac Intel is not supported for armv8-a. Please, use Mac M1 as native build.")
 
     def source(self):
