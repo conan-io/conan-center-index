@@ -31,7 +31,8 @@ target_include_directories(${LIBRARY_NAME} PRIVATE ${SOURCE_DIR})
 target_link_libraries(${LIBRARY_NAME} PRIVATE rapidjson SystemC::systemc)
 set_target_properties(${LIBRARY_NAME} PROPERTIES
                       WINDOWS_EXPORT_ALL_SYMBOLS TRUE
-                      VERSION ${CONAN_PACKAGE_VERSION})
+                      VERSION ${CONAN_PACKAGE_VERSION}
+                      COMPILE_FEATURES cxx_std_11)
 target_compile_definitions(${LIBRARY_NAME} PRIVATE SC_INCLUDE_FX)
 
 install(TARGETS ${LIBRARY_NAME}

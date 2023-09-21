@@ -44,7 +44,7 @@ class SystemccciConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("systemc/2.3.4", transitive_headers=True)
+        self.requires("systemc/2.3.4", transitive_headers=True, transitive_libs=True)
         self.requires("rapidjson/cci.20220822")
 
     def validate(self):
