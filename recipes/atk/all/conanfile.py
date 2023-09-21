@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
@@ -10,7 +9,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
 
 class AtkConan(ConanFile):
@@ -32,6 +31,10 @@ class AtkConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -49,7 +52,7 @@ class AtkConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.76.3")
+        self.requires("glib/2.78.0")
 
     def validate(self):
         if self.options.shared and not self.dependencies["glib"].options.shared:
@@ -62,11 +65,11 @@ class AtkConan(ConanFile):
             raise ConanInvalidConfiguration("this specific configuration is prevented due to internal c3i limitations")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.1.1")
+        self.tool_requires("meson/1.2.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
-        if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires("glib/2.76.3")
+            self.tool_requires("pkgconf/2.0.3")
+        if not self._is_legacy_one_profile:
+            self.tool_requires("glib/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -74,7 +77,7 @@ class AtkConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if not cross_building(self):
+        if self._is_legacy_one_profile:
             env = VirtualRunEnv(self)
             env.generate(scope="build")
         tc = MesonToolchain(self)
