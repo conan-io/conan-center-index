@@ -21,24 +21,18 @@ class GodotCppConan(ConanFile):
     homepage = "https://github.com/godotengine/godot-cpp"
     topics = ("game-engine", "game-development", "c++")
 
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -47,9 +41,7 @@ class GodotCppConan(ConanFile):
         self.requires(f"godot_headers/{self.version}", transitive_headers=True)
 
     def package_id(self):
-        if self.info.settings.build_type == "Debug":
-            self.info.settings.build_type = "Debug"
-        else:
+        if self.info.settings.build_type != "Debug":
             self.info.settings.build_type = "Release"
 
     def validate(self):
@@ -93,6 +85,10 @@ class GodotCppConan(ConanFile):
         return 32 if self.settings.arch in ["x86"] else 64
 
     @property
+    def _godot_headers(self):
+        return self.dependencies["godot_headers"].cpp_info
+
+    @property
     def _custom_api_file(self):
         return f"{self._godot_headers.resdirs[0]}/api.json"
 
@@ -124,10 +120,6 @@ class GodotCppConan(ConanFile):
     @property
     def _libname(self):
         return f"godot-cpp.{self._platform}.{self._target}.{self._bits}"
-
-    @property
-    def _godot_headers(self):
-        return self.dependencies["godot_headers"].cpp_info
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
