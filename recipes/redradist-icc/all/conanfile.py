@@ -1,9 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import export_conandata_patches, get
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -60,32 +60,29 @@ class ICCConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
+        if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
 
-        os = self.settings.os
-        if os not in ("Windows", "Linux"):
-            raise ConanInvalidConfiguration(f"OS {os} is not supported")
+        if is_apple_os(self):
+            raise ConanInvalidConfiguration(f"OS {self.settings.os} is not supported")
+
+        def lazy_lt_semver(v1, v2):
+            # To allow version "9" >= "9.4" for apple-clang
+            return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))
 
         compiler = self.settings.compiler
-        try:
-            min_version = self._minimum_compilers_version[str(compiler)]
-            if Version(compiler.version) < min_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.name} requires C++{self._minimum_cpp_standard} features "
-                    f"which are not supported by compiler {compiler} {compiler.version}")
-        except KeyError:
-            self.output.warning(
-                f"{self.name} recipe lacks information about the {compiler} compiler, "
-                f"support for the required C++{self._minimum_cpp_standard} features is assumed"
-            )
+        min_version = self._minimum_compilers_version.get(str(compiler))
+        if min_version and lazy_lt_semver(compiler.version, min_version):
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires C++{self._minimum_cpp_standard} features "
+                f"which are not supported by compiler {compiler} {compiler.version}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ICC_BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["ICC_BUILD_SHARED"] = self.options.shared
         tc.generate()
 
     def build(self):
