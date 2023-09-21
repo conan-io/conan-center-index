@@ -92,7 +92,7 @@ class LibpngConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if Version(self.version) < "1.6" and self.settings.arch == "armv8" and is_apple_os(self):
