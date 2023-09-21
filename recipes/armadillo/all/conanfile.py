@@ -7,7 +7,7 @@ from conan.tools.build import cross_building
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class ArmadilloConan(ConanFile):
@@ -275,6 +275,8 @@ class ArmadilloConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["armadillo"]
         self.cpp_info.set_property("pkg_config_name", "armadillo")
+        self.cpp_info.set_property("cmake_file_name", "Armadillo")
+        self.cpp_info.set_property("cmake_target_name", "Armadillo::Armadillo")
 
         if self.options.get_safe("use_extern_rng"):
             self.cpp_info.defines.append("ARMA_USE_EXTERN_RNG")
