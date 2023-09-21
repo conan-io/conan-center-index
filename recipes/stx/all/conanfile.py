@@ -4,8 +4,8 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get
-from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.files import collect_libs, copy, get, replace_in_file
+from conan.tools.microsoft import check_min_vs
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -99,16 +99,25 @@ class STXConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["STX_BUILD_SHARED"] = self.options.shared
-        tc.variables["STX_ENABLE_BACKTRACE"] = self.options.backtrace
-        tc.variables["STX_ENABLE_PANIC_BACKTRACE"] = self.options.panic_handler == "backtrace"
-        tc.variables["STX_OVERRIDE_PANIC_HANDLER"] = self.options.panic_handler == None
-        tc.variables["STX_VISIBLE_PANIC_HOOK"] = self.options.visible_panic_hook
+        tc.cache_variables["STX_BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["STX_ENABLE_BACKTRACE"] = self.options.backtrace
+        tc.cache_variables["STX_ENABLE_PANIC_BACKTRACE"] = self.options.panic_handler == "backtrace"
+        tc.cache_variables["STX_OVERRIDE_PANIC_HANDLER"] = self.options.panic_handler == None
+        tc.cache_variables["STX_VISIBLE_PANIC_HOOK"] = self.options.visible_panic_hook
+        tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
+    def _patch_sources(self):
+        # Let Conan control static/shared build
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        " STATIC ", " ")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake-modules", "add_project_library.cmake"),
+                        " STATIC ", " ")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
