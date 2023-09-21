@@ -1,4 +1,4 @@
 sources:
-  "47.0":
-    url: "https://github.com/linux-rdma/rdma-core/releases/download/v47.0/rdma-core-47.0.tar.gz"
-    sha256: "8041edd0bbe64e367cb3d2251af0a9dd7402e0e85b6e9412f0b7ae125bc97950"
+  "48.0":
+    url: "https://github.com/linux-rdma/rdma-core/releases/download/v48.0/rdma-core-48.0.tar.gz"
+    sha256: "78282756a281f12f0c2baedd207d6a16ad6b3ca68b87acddbf085e2f780b4840"
