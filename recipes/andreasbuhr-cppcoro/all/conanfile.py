@@ -103,9 +103,9 @@ class AndreasbuhrCppCoroConan(ConanFile):
         comp.libs = ["cppcoro"]
 
         if self.settings.os in ["Linux", "FreeBSD"] and self.options.shared:
-            comp.system_libs = ["pthread"]
+            comp.system_libs = ["pthread", "m"]
         if self.settings.os == "Windows":
-            comp.system_libs = ["synchronization"]
+            comp.system_libs = ["synchronization", "mswsock", "ws2_32"]
 
         if is_msvc(self):
             comp.cxxflags.append("/await")
