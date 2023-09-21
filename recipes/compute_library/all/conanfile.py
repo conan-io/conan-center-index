@@ -27,12 +27,14 @@ class ComputeLibraryConan(ConanFile):
         "enable_openmp": [True, False],
         "enable_opencl": [True, False],
         "enable_neon": [True, False],
+        "enable_multi_isa": [True, False],
     }
     default_options = {
         "shared": False,
         "enable_openmp": False,
         "enable_opencl": True,
         "enable_neon": True,
+        "enable_multi_isa": False,
     }
 
     @property
@@ -121,9 +123,10 @@ class ComputeLibraryConan(ConanFile):
         neon = yes_no(self.options.get_safe("enable_neon"))
         opencl = yes_no(self.options.get_safe("enable_opencl", False))
         openmp = yes_no(self.options.get_safe("enable_openmp"))
+        multi_isa = yes_no(self.options.get_safe("enable_multi_isa"))
         build = "cross_compile" if cross_building(self) else "native"
         with chdir(self, self.source_folder):
-            self.run(f"scons Werror=0 validation_tests=0 examples=0 gemm_tuner=0 openmp={openmp} debug={debug} neon={neon} opencl={opencl} os={build_os} arch={arch} build={build} build_dir={self.build_folder} install_dir={self.package_folder} -j{build_jobs(self)} toolchain_prefix=''", env="conanbuild")
+            self.run(f"scons Werror=0 validation_tests=0 examples=0 gemm_tuner=0 multi_isa={multi_isa} openmp={openmp} debug={debug} neon={neon} opencl={opencl} os={build_os} arch={arch} build={build} build_dir={self.build_folder} install_dir={self.package_folder} -j{build_jobs(self)} toolchain_prefix=''", env="conanbuild")
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
