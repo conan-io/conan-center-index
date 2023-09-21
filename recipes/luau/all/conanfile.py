@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
@@ -17,18 +16,14 @@ class LuauConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://luau-lang.org/"
     topics = ("lua", "scripting", "typed", "embed")
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [False, True],
-        "fPIC": [True, False],
         "with_cli": [True, False],
         "with_web": [True, False],
         "native_code_gen": [True, False],
     }
     default_options = {
-        "shared": False,
-        "fPIC": True,
         "with_cli": False,
         "with_web": False,
         "native_code_gen": False,
@@ -41,7 +36,7 @@ class LuauConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "8" if Version(self.version) < "0.549" else "9",
+            "gcc": "9",
             "clang": "7",
             "apple-clang": "12",
             "Visual Studio": "15",
@@ -51,16 +46,6 @@ class LuauConan(ConanFile):
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        if Version(self.version) < "0.549":
-            del self.options.native_code_gen
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -74,9 +59,6 @@ class LuauConan(ConanFile):
                 f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
             )
 
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} does not support shared build in MSVC")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -87,17 +69,12 @@ class LuauConan(ConanFile):
         tc.variables["LUAU_BUILD_WEB"] = self.options.with_web
         tc.variables["LUAU_WERROR"] = False
         tc.variables["LUAU_STATIC_CRT"] = False
-        if Version(self.version) >= "0.549":
-            tc.variables["LUAU_NATIVE"] = self.options.native_code_gen
+        tc.variables["LUAU_NATIVE"] = self.options.native_code_gen
         tc.variables["LUAU_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if Version(self.version) >= "0.548" and self.options.shared:
-            replace_in_file(self, os.path.join(self.source_folder, "VM", "include", "luaconf.h"),
-                "#define LUAI_FUNC __attribute__((visibility(\"hidden\"))) extern",
-                "#define LUAI_FUNC extern")
 
     def build(self):
         self._patch_sources()
@@ -139,8 +116,7 @@ class LuauConan(ConanFile):
         self.cpp_info.components["CodeGen"].libs = ["Luau.CodeGen"]
         self.cpp_info.components["CodeGen"].set_property("cmake_target_name", "Luau::CodeGen")
         self.cpp_info.components["CodeGen"].requires = ["Ast"]
-        if Version(self.version) >= "0.548":
-            self.cpp_info.components["CodeGen"].requires.append("VM")
+        self.cpp_info.components["CodeGen"].requires.append("VM")
 
         if self.options.with_cli:
             bin_path = os.path.join(self.package_folder, "bin")

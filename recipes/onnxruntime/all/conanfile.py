@@ -68,12 +68,12 @@ class OnnxRuntimeConan(ConanFile):
         version = Version(self.version)
         return {
             "1.14": "1.13.1",
-            "1.15": "1.14.0",
+            "1.15": "1.14.1",
         }[f"{version.major}.{version.minor}"]
 
     def requirements(self):
         self.requires("abseil/20230125.3")
-        self.requires("protobuf/3.21.9")
+        self.requires("protobuf/3.21.12")
         self.requires("date/3.0.1")
         self.requires("re2/20230801")
         self.requires(f"onnx/{self._onnx_version}")
@@ -87,7 +87,7 @@ class OnnxRuntimeConan(ConanFile):
         if self.settings.os != "Windows":
             self.requires("nsync/1.26.0")
         else:
-            self.requires("wil/1.0.230629.1")
+            self.requires("wil/1.0.230824.2")
         if self.options.with_xnnpack:
             self.requires("xnnpack/cci.20220801")
 
