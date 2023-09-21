@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, collect_libs, copy, get, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -44,6 +45,8 @@ class LibisalConan(ConanFile):
     def validate(self):
         if self.settings.arch not in ["x86", "x86_64", "armv8"]:
             raise ConanInvalidConfiguration("CPU Architecture not supported")
+        if self.version == "2.30.0" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("Version 2.30.0 does not support armv8")
 
     def build_requirements(self):
         self.tool_requires("nasm/2.15.05")
@@ -54,12 +57,17 @@ class LibisalConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         if is_msvc(self):
             tc = NMakeToolchain(self)
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
-            tc.generate()
+            # ./configure bugs out if $AS executable has an absolute path
+            env = tc.environment()
+            env.define("AS", "nasm")
+            tc.generate(env)
 
     def build(self):
         with chdir(self, self.source_folder):
