@@ -33,6 +33,10 @@ class GStreamerConan(ConanFile):
     }
 
     @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
     def _is_legacy_one_profile(self):
         return not hasattr(self, "settings_build")
 
@@ -67,7 +71,7 @@ class GStreamerConan(ConanFile):
             self.tool_requires("pkgconf/2.0.3")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
-        if self.settings.os == 'Windows':
+        if self._settings_build.os == 'Windows':
             self.tool_requires("winflexbison/2.5.24")
         else:
             self.tool_requires("bison/3.8.2")
