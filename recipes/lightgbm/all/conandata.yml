@@ -1,7 +1,7 @@
 sources:
-  "4.0.0":
-    url: "https://github.com/microsoft/LightGBM/archive/refs/tags/v4.0.0.tar.gz"
-    sha256: "affb82a5a9d88949ffea634c0c33485ba966d42b1f5f838caa7c068447c99c1e"
+  "4.1.0":
+    url: "https://github.com/microsoft/LightGBM/archive/refs/tags/v4.1.0.tar.gz"
+    sha256: "eb896dc21c7afec95d10327777f6e77163b5bcd35f6ce5d152e6feefbe3328a5"
   "3.3.5":
     url: "https://github.com/microsoft/LightGBM/archive/refs/tags/v3.3.5.tar.gz"
     sha256: "16fb9e299ced37be5ac69dd510e7323337e623019c9c578628c43b285f764be7"
