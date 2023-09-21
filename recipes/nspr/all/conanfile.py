@@ -4,6 +4,7 @@ import shutil
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
 from conan.tools.env import Environment
 from conan.tools.files import chdir, copy, get, rename, replace_in_file, rmdir, mkdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -62,6 +63,8 @@ class NsprConan(ConanFile):
         if Version(self.version) < "4.29":
             if is_apple_os(self) and self.settings.arch == "armv8":
                 raise ConanInvalidConfiguration("NSPR does not support mac M1 before 4.29")
+        if cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building is not supported")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
