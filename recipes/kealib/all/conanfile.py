@@ -44,7 +44,7 @@ class KealibConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("hdf5/1.14.1", transitive_headers=True)
+        self.requires("hdf5/1.14.1", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         hdf5_opts = self.dependencies["hdf5"].options
@@ -56,9 +56,9 @@ class KealibConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["HDF5_USE_STATIC_LIBRARIES"] = not self.dependencies["hdf5"].options.shared
-        tc.variables["HDF5_PREFER_PARALLEL"] = self.dependencies["hdf5"].options.parallel
-        tc.variables["LIBKEA_WITH_GDAL"] = False
+        tc.cache_variables["HDF5_USE_STATIC_LIBRARIES"] = not self.dependencies["hdf5"].options.shared
+        tc.cache_variables["HDF5_PREFER_PARALLEL"] = self.dependencies["hdf5"].options.parallel
+        tc.cache_variables["LIBKEA_WITH_GDAL"] = False
         tc.generate()
 
         tc = CMakeDeps(self)
