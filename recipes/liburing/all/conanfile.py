@@ -58,14 +58,15 @@ class Liburing(ConanFile):
                 "liburing is supported only on linux")
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder='src')
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        whether = lambda x: "" if x else None
+        def whether(condition):
+            return "" if condition else None
         tc.update_configure_args({
             "--nolibc": whether(not self.options.get_safe("with_libc")),
             "--enable-shared": None,
@@ -92,7 +93,7 @@ class Liburing(ConanFile):
         with chdir(self, self.source_folder):
             at = Autotools(self)
             at.install(
-                args=["ENABLE_SHARED={}".format(1 if self.options.shared else 0)]
+                args=[f"ENABLE_SHARED={1 if self.options.shared else 0}"]
             )
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
