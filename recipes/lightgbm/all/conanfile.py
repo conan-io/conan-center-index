@@ -50,10 +50,9 @@ class LightGBMConan(ConanFile):
     def requirements(self):
         self.requires("eigen/3.4.0")
         self.requires("fast_double_parser/0.7.0", transitive_headers=True)
-        self.requires("fmt/10.0.0", transitive_headers=True)
-        # FIXME: enable when llvm-openmp has been migrated to Conan v2
-        # if self.options.with_openmp and self.settings.compiler in ("clang", "apple-clang"):
-        #     self.requires("llvm-openmp/12.0.1")
+        self.requires("fmt/10.1.1", transitive_headers=True)
+        if self.options.with_openmp and self.settings.compiler in ["clang", "apple-clang"]:
+            self.requires("llvm-openmp/12.0.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
