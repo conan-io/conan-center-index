@@ -90,16 +90,16 @@ class IceoryxConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "2.0.0":
-            self.tool_requires("cmake/[>=3.16]")
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["TOML_CONFIG"] = self.options.toml_config
+        tc.cache_variables["TOML_CONFIG"] = self.options.toml_config
         if Version(self.version) >= "2.0.0":
-            tc.variables["DOWNLOAD_TOML_LIB"] = False
+            tc.cache_variables["DOWNLOAD_TOML_LIB"] = False
         tc.generate()
         tc = CMakeDeps(self)
         tc.set_property("cpptoml", "cmake_target_name", "cpptoml")
@@ -107,20 +107,16 @@ class IceoryxConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # Honor fPIC option
-        iceoryx_utils = "iceoryx_hoofs" if Version(self.version) >= "2.0.0" else "iceoryx_utils"
-        for cmake_file in [
-            os.path.join("iceoryx_binding_c", "CMakeLists.txt"),
-            os.path.join("iceoryx_posh", "CMakeLists.txt"),
-            os.path.join(iceoryx_utils, "CMakeLists.txt"),
-        ]:
-            replace_in_file(self, os.path.join(self.source_folder, cmake_file),
-                            "POSITION_INDEPENDENT_CODE ON", "")
+        for cmake_file in self.source_path.rglob("CMakeLists.txt"):
+            # Honor fPIC option
+            replace_in_file(self, cmake_file, "POSITION_INDEPENDENT_CODE ON", "", strict=False)
+            # Use acl::acl target, since acl fails to link
+            replace_in_file(self, cmake_file, " acl", " acl::acl", strict=False)
 
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.export_sources_folder)
+        cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
 
     def package(self):
