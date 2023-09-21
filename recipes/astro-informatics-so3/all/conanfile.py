@@ -41,7 +41,7 @@ class AstroInformaticsSO3(ConanFile):
 
     def requirements(self):
         self.requires("ssht/1.4.0", transitive_headers=True, transitive_libs=True)
-        self.requires("fftw/3.3.10")
+        self.requires("fftw/3.3.9")
 
     def validate(self):
         if is_msvc(self):
