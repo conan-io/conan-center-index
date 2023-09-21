@@ -43,8 +43,8 @@ class FlintConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("gmp/6.2.1", transitive_headers=True)
-        self.requires("mpfr/4.2.0", transitive_headers=True)
+        self.requires("gmp/6.3.0", transitive_headers=True)
+        self.requires("mpfr/4.2.1", transitive_headers=True)
         if is_msvc(self):
             self.requires("pthreads4w/3.0.0")
 
@@ -53,21 +53,22 @@ class FlintConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_TESTING"] = False
-        tc.variables["BUILD_DOCS"] = False
-        tc.variables["WITH_NTL"] = False
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_DOCS"] = False
+        tc.cache_variables["WITH_NTL"] = False
         # IPO/LTO breaks clang builds
-        tc.variables["IPO_SUPPORTED"] = False
+        tc.cache_variables["IPO_SUPPORTED"] = False
         # No BLAS yet
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_CBLAS"] = True
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_CBLAS"] = True
         # handle run in a cross-build
         if cross_building(self):
-            tc.variables["FLINT_USES_POPCNT_EXITCODE"] = "1"
-            tc.variables["FLINT_USES_POPCNT_EXITCODE__TRYRUN_OUTPUT"] = ""
+            tc.cache_variables["FLINT_USES_POPCNT_EXITCODE"] = "1"
+            tc.cache_variables["FLINT_USES_POPCNT_EXITCODE__TRYRUN_OUTPUT"] = ""
         tc.generate()
 
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("pthreads4w", "cmake_file_name", "PThreads")
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
