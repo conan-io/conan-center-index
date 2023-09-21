@@ -6,5 +6,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            self.run(
-                f"scdoc < {os.path.join(self.source_folder,'test_package.1.scd')}", run_environment=True)
+            scd_path = os.path.join(self.source_folder, os.pardir, "test_package", "test_package.1.scd")
+            self.run(f"scdoc < {scd_path}", run_environment=True)
