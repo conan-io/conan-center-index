@@ -22,6 +22,26 @@ class PackageConan(ConanFile):
 
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "build_libefa": [True, False],
+        "build_libibnetdisc": [True, False],
+        "build_libmana": [True, False],
+        "build_libmlx4": [True, False],
+        "build_libmlx5": [True, False],
+        "build_librdmacm": [True, False],
+    }
+    default_options = {
+        "build_libefa": True,
+        "build_libibnetdisc": True,
+        "build_libmana": True,
+        "build_libmlx4": True,
+        "build_libmlx5": False,
+        "build_librdmacm": False,
+    }
+
+    @property
+    def _optional_components(self):
+        return ["libefa", "libibnetdisc", "libmana", "libmlx4", "libmlx5", "librdmacm"]
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
@@ -61,6 +81,10 @@ class PackageConan(ConanFile):
         # Build only the libraries and disable everything else
         allowed_subdirs = ["ccan", "kernel-boot", "kernel-headers", "libibmad", "libibnetdisc", "libibumad", "libibverbs",
                            "librdmacm", "providers/efa", "providers/mana", "providers/mlx4", "providers/mlx5", "util"]
+        allowed_subdirs = [
+            subdir for subdir in allowed_subdirs
+            if self.options.get_safe(f"build_{subdir.replace('providers/', 'lib')}", True)
+        ]
         cmakelists_path = os.path.join(self.source_folder, "CMakeLists.txt")
         cmakelists_content = load(self, cmakelists_path)
         patched_content = re.sub(r"add_subdirectory\((?!({})\)).+\)".format("|".join(allowed_subdirs)), r"", cmakelists_content)
@@ -87,14 +111,18 @@ class PackageConan(ConanFile):
     def package_info(self):
         for lib in ["libefa", "libibmad", "libibnetdisc", "libibumad",
                     "libibverbs", "libmana", "libmlx4", "libmlx5", "librdmacm"]:
-            component = self.cpp_info.components[lib]
-            component.libs = [lib.replace("lib", "")]
-            component.requires = ["libudev::libudev", "libnl::libnl"]
-            component.set_property("pkg_config_name", lib)
+            if self.options.get_safe(f"build_{lib}", True):
+                component = self.cpp_info.components[lib]
+                component.libs = [lib.replace("lib", "")]
+                component.requires = ["libudev::libudev", "libnl::libnl"]
+                component.set_property("pkg_config_name", lib)
 
         for lib in ["libefa", "libmana", "libmlx4", "libmlx5", "librdmacm"]:
-            self.cpp_info.components[lib].requires += ["libibverbs"]
+            if lib in self.cpp_info.components:
+                self.cpp_info.components[lib].requires += ["libibverbs"]
         self.cpp_info.components["libibmad"].requires += ["libibumad"]
-        self.cpp_info.components["libibnetdisc"].requires += ["libibmad", "libibumad"]
+        if self.options.build_libibnetdisc:
+            self.cpp_info.components["libibnetdisc"].requires += ["libibmad", "libibumad"]
         for lib in ["libefa", "libibverbs", "libmana", "libmlx4", "libmlx5", "librdmacm"]:
-            self.cpp_info.components[lib].system_libs = ["pthread"]
+            if lib in self.cpp_info.components:
+                self.cpp_info.components[lib].system_libs = ["pthread"]
