@@ -105,8 +105,10 @@ class ProjConan(ConanFile):
         if Version(self.version) >= "8.1.0":
             tc.variables["NLOHMANN_JSON_ORIGIN"] = "external"
         tc.variables["CMAKE_MACOSX_BUNDLE"] = False
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        if self.settings.os == "Linux":
+            # Workaround for: https://github.com/conan-io/conan/issues/13560
+            libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
+            tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
         tc.generate()
 
         deps = CMakeDeps(self)
