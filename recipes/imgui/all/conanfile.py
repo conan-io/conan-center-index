@@ -77,6 +77,12 @@ class IMGUIConan(ConanFile):
         copy(self, pattern="imgui_impl_*",
             dst=os.path.join(self.package_folder, "res", "bindings"),
             src=backends_folder)
+        copy(self, pattern="*.*",
+            dst=os.path.join(self.package_folder, "res", "misc", "cpp"),
+            src=os.path.join(self.source_folder, "misc", "cpp"))
+        copy(self, pattern="*.*",
+            dst=os.path.join(self.package_folder, "res", "misc", "freetype"),
+            src=os.path.join(self.source_folder, "misc", "freetype"))
         cmake = CMake(self)
         cmake.install()
 
