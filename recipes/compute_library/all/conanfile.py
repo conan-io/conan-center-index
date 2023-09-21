@@ -101,6 +101,10 @@ class ComputeLibraryConan(ConanFile):
         if self.settings.os == "Linux" and self.settings.compiler == "clang":
             # INFO: https://arm-software.github.io/ComputeLibrary/latest/how_to_build.xhtml#S1_2_linux
             raise ConanInvalidConfiguration(f"{self.ref} does not support Linux with clang. It is only supported on Linux with gcc.")
+        if "armv8" not in str(self.settings.arch) and self.options.enable_multi_isa:
+            raise ConanInvalidConfiguration(f"{self.ref} does not support multi_isa option for {self.settings.arch}. It is only supported on armv8.")
+        if self.settings.arch == "armv8" and self.build_settings.arch == "x86_64" and self.settings.os == "Macos":
+            raise ConanInvalidConfiguration(f"Mac Intel is not supported for armv8-a. Please, use Mac M1 as native build.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -123,7 +127,7 @@ class ComputeLibraryConan(ConanFile):
         neon = yes_no(self.options.get_safe("enable_neon"))
         opencl = yes_no(self.options.get_safe("enable_opencl", False))
         openmp = yes_no(self.options.get_safe("enable_openmp"))
-        multi_isa = yes_no(self.options.get_safe("enable_multi_isa"))
+        multi_isa = yes_no(self.options.enable_multi_isa)
         build = "cross_compile" if cross_building(self) else "native"
         with chdir(self, self.source_folder):
             self.run(f"scons Werror=0 validation_tests=0 examples=0 gemm_tuner=0 multi_isa={multi_isa} openmp={openmp} debug={debug} neon={neon} opencl={opencl} os={build_os} arch={arch} build={build} build_dir={self.build_folder} install_dir={self.package_folder} -j{build_jobs(self)} toolchain_prefix=''", env="conanbuild")
