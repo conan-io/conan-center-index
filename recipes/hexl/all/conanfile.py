@@ -2,11 +2,9 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
-from conan.tools.build import cross_building
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches
-from conan.tools.files import get, rmdir
+from conan.tools.files import copy, replace_in_file, get, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -48,9 +46,6 @@ class HexlConan(ConanFile):
             "apple-clang": "11",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -63,7 +58,7 @@ class HexlConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpu_features/0.8.0")
+        self.requires("cpu_features/0.9.0")
 
         if self.settings.build_type == "Debug":
             self.requires("easyloggingpp/9.97.0")
@@ -77,16 +72,12 @@ class HexlConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.name} requires C++17, which your compiler does not support."
                 )
-        else:
-            self.output.warning(
-                f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17."
-            )
 
         if self.settings.arch not in ["x86", "x86_64"]:
-            raise ConanInvalidConfiguration("Hexl only supports x86 architecture")
+            raise ConanInvalidConfiguration("Hexl only supports x86 architectures")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.24]")
+        self.tool_requires("cmake/[>=3.24 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -94,32 +85,46 @@ class HexlConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
-        tc.variables["HEXL_BENCHMARK"] = False
-        tc.variables["HEXL_TESTING"] = False
-        tc.variables["HEXL_EXPERIMENTAL"] = self.options.experimental
+        tc.cache_variables["HEXL_BENCHMARK"] = False
+        tc.cache_variables["HEXL_TESTING"] = False
+        tc.cache_variables["HEXL_EXPERIMENTAL"] = self.options.experimental
 
         if self.options.fpga_compatibility_dyadic_multiply and self.options.fpga_compatibility_keyswitch:
-            tc.variables["HEXL_FPGA_COMPATIBILITY"] = 3
+            tc.cache_variables["HEXL_FPGA_COMPATIBILITY"] = 3
         elif self.options.fpga_compatibility_dyadic_multiply:
-            tc.variables["HEXL_FPGA_COMPATIBILITY"] = 1
+            tc.cache_variables["HEXL_FPGA_COMPATIBILITY"] = 1
         elif self.options.fpga_compatibility_keyswitch:
-            tc.variables["HEXL_FPGA_COMPATIBILITY"] = 2
+            tc.cache_variables["HEXL_FPGA_COMPATIBILITY"] = 2
         else:
-            tc.variables["HEXL_FPGA_COMPATIBILITY"] = 0
+            tc.cache_variables["HEXL_FPGA_COMPATIBILITY"] = 0
 
-        tc.variables["HEXL_SHARED_LIB"] = self.options.shared
-        tc.variables["HEXL_CROSS_COMPILED"] = cross_building(self)
+        tc.cache_variables["HEXL_SHARED_LIB"] = self.options.shared
+        tc.cache_variables["HEXL_CROSS_COMPILED"] = cross_building(self)
 
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+        tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
 
         tc.generate()
 
         tc = CMakeDeps(self)
         tc.set_property("easyloggingpp", "cmake_file_name", "EASYLOGGINGPP")
+        tc.set_property("easyloggingpp", "cmake_target_name", "easyloggingpp")
         tc.generate()
 
+    def _patch_sources(self):
+        rmdir(self, os.path.join(self.package_folder, "cmake", "third-party"))
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "hexl", "CMakeLists.txt"),
+                        "set_target_properties(hexl PROPERTIES POSITION_INDEPENDENT_CODE ON)", "")
+        # Should come from compiler.sanitizer=Address
+        replace_in_file(self, os.path.join(self.source_folder, "hexl", "CMakeLists.txt"),
+                        "hexl_add_asan_flag(hexl)", "")
+        if cross_building(self):
+            replace_in_file(self, os.path.join(self.source_folder, "hexl", "CMakeLists.txt"),
+                            "-march=native", "")
+
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -133,25 +138,21 @@ class HexlConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Hexl")
+        self.cpp_info.set_property("cmake_target_name", "Hexl::hexl")
+        self.cpp_info.set_property("pkg_config_name", "hexl")
+
+        if not is_msvc(self) and self.settings.build_type == "Debug":
+            self.cpp_info.libs = ["hexl_debug"]
+        else:
+            self.cpp_info.libs = ["hexl"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread", "m"]
+
+        self.cpp_info.requires.append("cpu_features::libcpu_features")
+        if self.settings.build_type == "Debug":
+            self.cpp_info.requires.append("easyloggingpp::easyloggingpp")
+
         # TODO: Remove in Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "Hexl"
         self.cpp_info.names["cmake_find_package_multi"] = "Hexl"
-
-        if self.settings.build_type == "Debug":
-            if not is_msvc(self):
-                self.cpp_info.components["Hexl"].libs = ["hexl_debug"]
-            else:
-                self.cpp_info.components["Hexl"].libs = ["hexl"]
-
-            self.cpp_info.components["Hexl"].requires.append("easyloggingpp::easyloggingpp")
-        else:
-            self.cpp_info.components["Hexl"].libs = ["hexl"]
-
-        self.cpp_info.components["Hexl"].names["cmake_find_package"] = "hexl"
-        self.cpp_info.components["Hexl"].names["cmake_find_package_multi"] = "hexl"
-        self.cpp_info.components["Hexl"].set_property("cmake_target_name", "Hexl::hexl")
-        self.cpp_info.components["Hexl"].set_property("pkg_config_name", "hexl")
-        self.cpp_info.components["Hexl"].requires.append("cpu_features::libcpu_features")
-
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["Hexl"].system_libs = ["pthread", "m"]
