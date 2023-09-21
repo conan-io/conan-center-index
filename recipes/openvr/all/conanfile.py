@@ -48,7 +48,7 @@ class OpenvrConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("jsoncpp/1.9.5")
+        self.requires("jsoncpp/1.9.5", transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -63,10 +63,10 @@ class OpenvrConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_SHARED"] = self.options.shared
-        tc.variables["BUILD_UNIVERSAL"] = False
+        tc.cache_variables["BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["BUILD_UNIVERSAL"] = False
         # Let Conan handle the stdlib setting, even if we are using libc++
-        tc.variables["USE_LIBCXX"] = False
+        tc.cache_variables["USE_LIBCXX"] = False
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
