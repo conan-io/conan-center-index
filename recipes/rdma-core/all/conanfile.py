@@ -51,13 +51,13 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libnl/3.7.0")
+        self.requires("libnl/3.8.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libudev/system")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.2")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -109,20 +109,23 @@ class PackageConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "etc"))
 
     def package_info(self):
-        for lib in ["libefa", "libibmad", "libibnetdisc", "libibumad",
-                    "libibverbs", "libmana", "libmlx4", "libmlx5", "librdmacm"]:
-            if self.options.get_safe(f"build_{lib}", True):
-                component = self.cpp_info.components[lib]
-                component.libs = [lib.replace("lib", "")]
-                component.requires = ["libudev::libudev", "libnl::libnl"]
-                component.set_property("pkg_config_name", lib)
+        def _add_component(name, requires, pthread=False):
+            if not self.options.get_safe(f"build_{name}", True):
+                return
+            component = self.cpp_info.components[name]
+            component.set_property("pkg_config_name", name)
+            component.libs = [name.replace("lib", "")]
+            component.requires = requires + ["libudev::libudev"]
+            if pthread and self.settings.os in ["Linux", "FreeBSD"]:
+                component.system_libs = ["pthread"]
 
-        for lib in ["libefa", "libmana", "libmlx4", "libmlx5", "librdmacm"]:
-            if lib in self.cpp_info.components:
-                self.cpp_info.components[lib].requires += ["libibverbs"]
-        self.cpp_info.components["libibmad"].requires += ["libibumad"]
-        if self.options.build_libibnetdisc:
-            self.cpp_info.components["libibnetdisc"].requires += ["libibmad", "libibumad"]
-        for lib in ["libefa", "libibverbs", "libmana", "libmlx4", "libmlx5", "librdmacm"]:
-            if lib in self.cpp_info.components:
-                self.cpp_info.components[lib].system_libs = ["pthread"]
+        _add_component("libefa", ["libibverbs"], pthread=True)
+        _add_component("libibmad", ["libibumad"])
+        _add_component("libibnetdisc", ["libibmad", "libibumad"])
+        _add_component("libibumad", [])
+        _add_component("libibverbs", ["libnl::nl", "libnl::nl-route"], pthread=True)
+        _add_component("libmana", ["libibverbs"], pthread=True)
+        _add_component("libmlx4", ["libibverbs"], pthread=True)
+        _add_component("libmlx5", ["libibverbs"], pthread=True)
+        _add_component("librdmacm", ["libibverbs", "libnl::nl", "libnl::nl-route"], pthread=True)
+
