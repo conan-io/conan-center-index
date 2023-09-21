@@ -22,7 +22,7 @@ class ensmallenRecipe(ConanFile):
         self.info.clear()
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("armadillo/12.2.0", transitive_headers=True, transitive_libs=True)
