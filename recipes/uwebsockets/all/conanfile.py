@@ -51,7 +51,7 @@ class UwebsocketsConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_libdeflate"):
             self.requires("libdeflate/1.14")
 
