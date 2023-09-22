@@ -8,14 +8,13 @@ required_conan_version = ">=1.55.0"
 
 class ensmallenRecipe(ConanFile):
     name = "ensmallen"
-    package_type = "header-library"
-
-    # Optional metadata
+    description = "ensmallen is a high quality C++ library for non-linear numerical optimization."
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "ensmallen is a high quality C++ library for non-linear numerical optimization."
-    topics = ("optimization", "numerical")
+    homepage = "https://github.com/mlpack/ensmallen"
+    topics = ("optimization", "numerical", "header-only")
 
+    package_type = "header-library"
     settings = "os", "compiler", "build_type", "arch"
 
     def package_id(self):
@@ -25,7 +24,7 @@ class ensmallenRecipe(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("armadillo/12.2.0", transitive_headers=True, transitive_libs=True)
+        self.requires("armadillo/12.2.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
