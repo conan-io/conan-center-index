@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout
-from conan.tools.files import get, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import apply_conandata_patches, copy, get, export_conandata_patches
+import os
 
 class GodotCppConan(ConanFile):
     name = "godot-cpp"
@@ -29,6 +30,7 @@ class GodotCppConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         platform = {
