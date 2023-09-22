@@ -77,7 +77,7 @@ class IMGUIConan(ConanFile):
         copy(self, pattern="imgui_impl_*",
             dst=os.path.join(self.package_folder, "res", "bindings"),
             src=backends_folder)
-        copy(self, pattern="imgui_*.cpp",
+        copy(self, pattern="imgui*.cpp",
             dst=os.path.join(self.package_folder, "res", "src"),
             src=os.path.join(self.source_folder))
         copy(self, pattern="*.*",
