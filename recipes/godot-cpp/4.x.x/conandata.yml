@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/4.x.x-0001-add-cmake-install.patch"
       patch_description: "add install commands to CMakeLists.txt"
       patch_type: "conan"
+    - patch_file: "patches/4.x.x-0002-output-names-for-multi-config-generators.patch"
+      patch_description: "ensure the output name is set correctly on Multi-Config CMake generators"
+      patch_type: "conan"

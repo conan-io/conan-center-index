@@ -1,0 +1,26 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1e48a64..f8f106d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -194,11 +194,8 @@ string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
+ if(ANDROID)
+ 	# Added the android abi after system name
+ 	set(SYSTEM_NAME ${SYSTEM_NAME}.${ANDROID_ABI})
+-
+-	# Android does not have the bits at the end if you look at the main godot repo build
+-	set(OUTPUT_NAME "godot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}")
+ else()
+-	set(OUTPUT_NAME "godot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}.${BITS}")
++	set(OUTPUT_NAME_SUFFIX ".${BITS}")
+ endif()
+ 
+ set_target_properties(${PROJECT_NAME}
+@@ -208,7 +205,7 @@ set_target_properties(${PROJECT_NAME}
+ 		ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
+ 		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
+ 		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
+-		OUTPUT_NAME "${OUTPUT_NAME}"
++		OUTPUT_NAME "${PROJECT_NAME}.${SYSTEM_NAME}.$<LOWER_CASE:$<CONFIG>>${OUTPUT_NAME_SUFFIX}"
+ )
+ 
+ install(TARGETS ${PROJECT_NAME})
