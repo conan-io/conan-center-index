@@ -6,7 +6,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -28,13 +28,17 @@ class GoogleAPIS(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        }
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
-        }
+    }
     exports = "helpers.py"
     short_paths = True
+
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
@@ -68,7 +72,8 @@ class GoogleAPIS(ConanFile):
             raise ConanInvalidConfiguration("If built as shared, protobuf must be shared as well. Please, use `protobuf:shared=True`")
 
     def build_requirements(self):
-        self.tool_requires("protobuf/<host_version>")
+        if not self._is_legacy_one_profile:
+            self.tool_requires("protobuf/<host_version>")
 
         # CMake >= 3.20 is required. There is a proto with dots in the name 'k8s.min.proto' and CMake fails to generate project files
         self.tool_requires("cmake/[>=3.20 <4]")
@@ -78,6 +83,8 @@ class GoogleAPIS(ConanFile):
 
     def generate(self):
         VirtualBuildEnv(self).generate()
+        if self._is_legacy_one_profile:
+            VirtualRunEnv(self).generate(scope="build")
         tc = CMakeToolchain(self)
         tc.generate()
         deps = CMakeDeps(self)
