@@ -61,7 +61,7 @@ class ProjConan(ConanFile):
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2")
-        self.requires("sqlite3/3.43.1", run=self._is_legacy_one_profile)
+        self.requires("sqlite3/3.43.1")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_curl"):
