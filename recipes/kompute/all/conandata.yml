@@ -1,0 +1,4 @@
+sources:
+  "0.8.1":
+    url: "https://github.com/KomputeProject/kompute/archive/refs/tags/v0.8.1.tar.gz"
+    sha256: "22319baaadf308f13782a1d6ddbb2a20da68932b618544c42e2c28e670c53adf"
