@@ -134,9 +134,16 @@ class ProtobufConan(ConanFile):
         protoc_rel_path = "{}bin/{}".format("".join(["../"] * module_folder_depth), protoc_filename)
         protoc_target = textwrap.dedent("""\
             if(NOT TARGET protobuf::protoc)
+                # Workaround for legacy "cmake" generator in case of cross-build
                 if(CMAKE_CROSSCOMPILING)
-                    find_program(PROTOC_PROGRAM protoc PATHS ENV PATH NO_DEFAULT_PATH)
+                    find_program(PROTOC_PROGRAM NAMES protoc PATHS ENV PATH NO_DEFAULT_PATH)
                 endif()
+                # And here this will work fine with "CMakeToolchain" (for native & cross-build)
+                # and legacy "cmake" generator in case of native build
+                if(NOT PROTOC_PROGRAM)
+                    find_program(PROTOC_PROGRAM NAMES protoc)
+                endif()
+                # Last resort: we search in package folder directly
                 if(NOT PROTOC_PROGRAM)
                     set(PROTOC_PROGRAM \"${{CMAKE_CURRENT_LIST_DIR}}/{protoc_rel_path}\")
                 endif()
