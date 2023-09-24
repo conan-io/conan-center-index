@@ -220,7 +220,7 @@ class OpenCVConan(ConanFile):
     short_paths = True
 
     @property
-    def _is_one_profile(self):
+    def _is_legacy_one_profile(self):
         return not hasattr(self, "settings_build")
 
     @property
@@ -1184,7 +1184,7 @@ class OpenCVConan(ConanFile):
             )
 
     def build_requirements(self):
-        if self.options.get_safe("with_protobuf") and not self._is_one_profile:
+        if self.options.get_safe("with_protobuf") and not self._is_legacy_one_profile:
             self.tool_requires("protobuf/<host_version>")
 
     def source(self):
@@ -1265,7 +1265,7 @@ class OpenCVConan(ConanFile):
 
     def generate(self):
         if self.options.get_safe("with_protobuf"):
-            if self._is_one_profile:
+            if self._is_legacy_one_profile:
                 VirtualRunEnv(self).generate(scope="build")
             else:
                 VirtualBuildEnv(self).generate()
