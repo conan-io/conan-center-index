@@ -11,7 +11,7 @@ from conan.tools.microsoft import is_msvc, check_min_vs
 import glob
 import os
 
-required_conan_version = ">=1.56.0 <2 || >=2.0.6"
+required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
 class GStreamerConan(ConanFile):
     name = "gstreamer"
