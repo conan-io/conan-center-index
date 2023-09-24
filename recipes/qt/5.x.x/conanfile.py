@@ -15,7 +15,7 @@ import os
 import textwrap
 import shutil
 
-required_conan_version = ">=1.59.0"
+required_conan_version = ">=1.60.0 <2 || >=2.0.6"
 
 
 class QtConan(ConanFile):
@@ -442,7 +442,7 @@ class QtConan(ConanFile):
                 self.tool_requires("bison/3.8.2")
                 self.tool_requires("flex/2.6.4")
         if self.options.qtwayland:
-            self.tool_requires("wayland/1.22.0")
+            self.tool_requires("wayland/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
