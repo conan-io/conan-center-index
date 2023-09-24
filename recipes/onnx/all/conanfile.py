@@ -10,7 +10,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
 
 class OnnxConan(ConanFile):
