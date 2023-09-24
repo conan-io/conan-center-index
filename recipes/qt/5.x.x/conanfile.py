@@ -475,18 +475,6 @@ class QtConan(ConanFile):
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         if self.settings.os == "Windows":
             env.prepend_path("PATH", os.path.join(self.source_folder, "qt5", "gnuwin32", "bin"))
-        if self._settings_build.os == "Macos":
-            # On macOS, SIP resets DYLD_LIBRARY_PATH injected by VirtualBuildEnv & VirtualRunEnv
-            dyld_library_path = "$DYLD_LIBRARY_PATH"
-            dyld_library_path_build = vbe.vars().get("DYLD_LIBRARY_PATH")
-            if dyld_library_path_build:
-                dyld_library_path = f"{dyld_library_path_build}:{dyld_library_path}"
-            if not cross_building(self):
-                dyld_library_path_host = vre.vars().get("DYLD_LIBRARY_PATH")
-                if dyld_library_path_host:
-                    dyld_library_path = f"{dyld_library_path_host}:{dyld_library_path}"
-            save(self, "bash_env", f'export DYLD_LIBRARY_PATH="{dyld_library_path}"')
-            env.define_path("BASH_ENV", os.path.abspath("bash_env"))
         env.vars(self).save_script("conan_qt_env_file")
 
     def _make_program(self):
@@ -801,6 +789,19 @@ class QtConan(ConanFile):
         if self._settings_build.os == "Linux" and self.settings.compiler == "clang":
             args += ['QMAKE_CXXFLAGS+="-ftemplate-depth=1024"']
 
+        if self._settings_build.os == "Macos":
+            # On macOS, SIP resets DYLD_LIBRARY_PATH injected by VirtualBuildEnv & VirtualRunEnv.
+            # Qt builds several executables (moc etc) which are called later on during build of
+            # libraries, and these executables link to several external dependencies in requirements().
+            # If these external libs are shared, moc calls fail because its dylib dependencies
+            # are not found (unless they can be accidentally found in system paths).
+            # So the workaround is to add libdirs of these external dependencies to LC_RPATH
+            # of runtime artifacts.
+            if not cross_building(self):
+                for libpath in VirtualRunEnv(self).vars().get("DYLD_LIBRARY_PATH", "").split(":"):
+                    # see https://doc.qt.io/qt-5/qmake-variable-reference.html#qmake-rpathdir
+                    args += [f"QMAKE_RPATHDIR+=\"{libpath}\""]
+
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             args += ["-qt-webengine-ffmpeg",
                      "-system-webengine-opus",
@@ -1047,7 +1048,7 @@ Examples = bin/datadir/examples""")
             "exec_prefix=${prefix}",
         ]
         self.cpp_info.components["qtCore"].set_property("pkg_config_custom_content", "\n".join(pkg_config_vars))
-        
+
         if self.settings.os == "Windows":
             module = "WinMain"
             componentname = f"qt{module}"
