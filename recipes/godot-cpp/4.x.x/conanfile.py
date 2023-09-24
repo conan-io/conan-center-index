@@ -25,7 +25,7 @@ class GodotCppConan(ConanFile):
         export_conandata_patches(self)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def package(self):
         cmake = CMake(self)
