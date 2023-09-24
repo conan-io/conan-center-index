@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION "3.1")
+cmake_minimum_required(VERSION "3.15")
+
 project("test_package" LANGUAGES CXX)
 
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup()
+find_package("godot-cpp" REQUIRED)
 
 add_executable("${PROJECT_NAME}" "test_package.cpp")
-target_link_libraries("${PROJECT_NAME}" ${CONAN_LIBS})
-set_property(TARGET "${PROJECT_NAME}" PROPERTY CXX_STANDARD "14")
+target_link_libraries("${PROJECT_NAME}" PRIVATE "godot-cpp::godot-cpp")
+target_compile_features("${PROJECT_NAME}" PRIVATE "cxx_std_14")

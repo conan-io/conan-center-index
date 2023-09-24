@@ -1,8 +1,11 @@
 import glob
 import os
 
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get, rename
+from conan.tools.scm import Version
 
 
 class GodotCppConan(ConanFile):
@@ -21,11 +24,11 @@ class GodotCppConan(ConanFile):
 
     @property
     def _custom_api_file(self):
-        return "{}/api.json".format(self._godot_headers.res_paths[0])
+        return "{}/api.json".format(self._godot_headers.resdirs[0])
 
     @property
     def _headers_dir(self):
-        return self._godot_headers.include_paths[0]
+        return self._godot_headers.includedirs[0]
 
     @property
     def _platform(self):
@@ -58,11 +61,14 @@ class GodotCppConan(ConanFile):
 
     @property
     def _godot_headers(self):
-        return self.deps_cpp_info["godot_headers"]
+        return self.dependencies["godot_headers"].cpp_info
+
+    def _destination_dir(self, path):
+        return os.path.join(self.package_folder, path)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        tools.rename(glob.glob("godot-cpp-*")[0], self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version])
+        rename(self, glob.glob("godot-cpp-*")[0], self._source_subfolder)
 
     def requirements(self):
         self.requires("godot_headers/{}".format(self.version))
@@ -70,7 +76,7 @@ class GodotCppConan(ConanFile):
     def configure(self):
         minimal_cpp_standard = "14"
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, minimal_cpp_standard)
+            check_min_cppstd(self, minimal_cpp_standard)
 
         minimal_version = {
             "gcc": "5",
@@ -87,7 +93,7 @@ class GodotCppConan(ConanFile):
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
             return
 
-        version = tools.Version(self.settings.compiler.version)
+        version = Version(self.settings.compiler.version)
         if version < minimal_version[compiler]:
             if compiler in ["apple-clang", "clang"]:
                 raise ConanInvalidConfiguration(
@@ -104,7 +110,7 @@ class GodotCppConan(ConanFile):
             " ".join([
                 "scons",
                 "-C{}".format(self._source_subfolder),
-                "-j{}".format(tools.cpu_count()),
+                "-j{}".format(os.cpu_count()),
                 "generate_bindings=yes",
                 "use_custom_api_file=yes",
                 "bits={}".format(self._bits),
@@ -118,10 +124,10 @@ class GodotCppConan(ConanFile):
         )
 
     def package(self):
-        self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
-        self.copy("*.hpp", dst="include/godot-cpp", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*.a", dst="lib", src=os.path.join(self._source_subfolder, "bin"))
-        self.copy("*.lib", dst="lib", src=os.path.join(self._source_subfolder, "bin"))
+        copy(self, "LICENSE*", dst=self._destination_dir("licenses"), src=self._source_subfolder)
+        copy(self, "*.hpp", dst=self._destination_dir("include/godot-cpp"), src=os.path.join(self._source_subfolder, "include"))
+        copy(self, "*.a", dst=self._destination_dir("lib"), src=os.path.join(self._source_subfolder, "bin"))
+        copy(self, "*.lib", dst=self._destination_dir("lib"), src=os.path.join(self._source_subfolder, "bin"))
 
     def package_info(self):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
@@ -136,7 +142,5 @@ class GodotCppConan(ConanFile):
         ]
 
     def package_id(self):
-        if self._target == "release":
+        if self.info.settings.build_type != "Debug":
             self.info.settings.build_type = "Release"
-        else:
-            self.info.settings.build_type = "Debug"
