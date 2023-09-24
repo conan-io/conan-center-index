@@ -7,7 +7,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
 
 class QwtConan(ConanFile):
@@ -44,6 +44,10 @@ class QwtConan(ConanFile):
         "polar": True,
     }
 
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -59,7 +63,7 @@ class QwtConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/5.15.9", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/5.15.10", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self):
@@ -75,19 +79,19 @@ class QwtConan(ConanFile):
             raise ConanInvalidConfiguration("qwt:designer=True requires qt:qttools=True, qt::gui=True and qt::widgets=True")
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires("qt/5.15.7")
+        if not self._is_legacy_one_profile:
+            self.tool_requires("qt/<host_version>")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        if hasattr(self, "settings_build") and cross_building(self):
-            env = VirtualBuildEnv(self)
-            env.generate()
-        else:
+        if self._is_legacy_one_profile:
             env = VirtualRunEnv(self)
             env.generate(scope="build")
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
 
         tc = CMakeToolchain(self)
         tc.variables["QWT_DLL"] = self.options.shared
