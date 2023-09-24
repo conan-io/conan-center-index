@@ -15,6 +15,7 @@ class GodotCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/godotengine/godot-cpp"
     topics = ("game-engine", "game-development", "c++")
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     build_requires = ["scons/3.1.2"]
 
@@ -71,7 +72,7 @@ class GodotCppConan(ConanFile):
         rename(self, glob.glob("godot-cpp-*")[0], self._source_subfolder)
 
     def requirements(self):
-        self.requires(f"godot_headers/{self.version}")
+        self.requires(f"godot_headers/{self.version}", transitive_headers=True)
 
     def configure(self):
         minimal_cpp_standard = "14"
