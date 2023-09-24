@@ -9,7 +9,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
-required_conan_version = ">=1.56.0 <2 || >=2.0.6"
+required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
 
 class AtkConan(ConanFile):
