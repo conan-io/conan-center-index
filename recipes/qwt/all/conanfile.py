@@ -69,13 +69,13 @@ class QwtConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Qwt recipe does not support cross-compilation yet")
         qt_options = self.dependencies["qt"].options
-        if self.info.options.widgets and not qt_options.widgets:
+        if self.options.widgets and not qt_options.widgets:
             raise ConanInvalidConfiguration("qwt:widgets=True requires qt:widgets=True")
-        if self.info.options.svg and not qt_options.qtsvg:
+        if self.options.svg and not qt_options.qtsvg:
             raise ConanInvalidConfiguration("qwt:svg=True requires qt:qtsvg=True")
-        if self.info.options.opengl and qt_options.opengl == "no":
+        if self.options.opengl and qt_options.opengl == "no":
             raise ConanInvalidConfiguration("qwt:opengl=True is not compatible with qt:opengl=no")
-        if self.info.options.designer and not (qt_options.qttools and qt_options.gui and qt_options.widgets):
+        if self.options.designer and not (qt_options.qttools and qt_options.gui and qt_options.widgets):
             raise ConanInvalidConfiguration("qwt:designer=True requires qt:qttools=True, qt::gui=True and qt::widgets=True")
 
     def build_requirements(self):
