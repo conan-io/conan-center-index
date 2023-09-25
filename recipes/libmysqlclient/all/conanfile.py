@@ -196,13 +196,6 @@ class LibMysqlClientCConan(ConanFile):
                         "  INSTALL_DEBUG_SYMBOLS(",
                         "  # INSTALL_DEBUG_SYMBOLS(")
 
-        # No upstream option to disable build of documentation,
-        # so find_package(Doxygen) is removed to ensure reproducible build without docs
-        # even if Doxygen is installed on system
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "FIND_PACKAGE(Doxygen)",
-                        "# FIND_PACKAGE(Doxygen)")
-
     def generate(self):
         vbenv = VirtualBuildEnv(self)
         vbenv.generate()
