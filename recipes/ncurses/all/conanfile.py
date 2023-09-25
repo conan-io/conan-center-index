@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
-from conan.tools.files import get, export_conandata_patches, apply_conandata_patches, save, copy
+from conan.tools.files import get, export_conandata_patches, apply_conandata_patches, save, copy, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, check_min_vs, unix_path
 from conan.tools.build import cross_building
 from conan.tools.scm import Version
@@ -233,14 +233,14 @@ class NCursesConan(ConanFile):
         """))
 
     def package(self):
-        # return
-        copy(self, "COPYING", src=self.source_folder, dst="licenses")
         autotools = Autotools(self)
         autotools.install()
 
         os.unlink(os.path.join(self.package_folder, "bin", "ncurses{}{}-config".format(self._suffix, self._major_version)))
 
         self._create_cmake_module_alias_targets(os.path.join(self.package_folder, self._module_subfolder, self._module_file))
+        rmdir(self, os.path.join(self.package_folder, "home"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     @property
     def _suffix(self):
