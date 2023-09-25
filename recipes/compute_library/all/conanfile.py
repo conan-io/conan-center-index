@@ -43,7 +43,7 @@ class ComputeLibraryConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "10",
+            "gcc": "6",
             "clang": "5",
             "apple-clang": "5.1",
         }
