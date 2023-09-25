@@ -61,7 +61,7 @@ class AtSpi2CoreConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
-        if Version(self.Version) < "2.48.0":
+        if Version(self.version) < "2.48.0":
             if self.settings.os == "Windows":
                 raise ConanInvalidConfiguration("Windows is supported before version 2.48.0")
 
