@@ -53,13 +53,17 @@ class AtSpi2CoreConan(ConanFile):
         self.requires("glib/2.77.0")
         if self.options.with_x11:
             self.requires("xorg/system")
-        self.requires("dbus/1.15.6")
+        if self.settings.os != "Windows":
+            self.requires("dbus/1.15.6")
 
     def validate(self):
         if self.options.shared and not  self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
+        if Version(self.Version) < "2.48.0":
+            if self.settings.os == "Windows":
+                raise ConanInvalidConfiguration("Windows is supported before version 2.48.0")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -78,6 +82,9 @@ class AtSpi2CoreConan(ConanFile):
         else:
             tc.project_options["introspection"] = "no"
             tc.project_options["x11"] = "yes" if self.options.with_x11 else "no"
+        if self.settings.os == "Windows":
+            tc.project_options["atk_only"] = "true"
+            
         tc.project_options["docs"] = "false"
         tc.generate()
         tc = PkgConfigDeps(self)
@@ -108,17 +115,19 @@ class AtSpi2CoreConan(ConanFile):
 
 
     def package_info(self):
-        self.cpp_info.components["atspi"].libs = ['atspi']
-        self.cpp_info.components["atspi"].includedirs = ["include/at-spi-2.0"]
-        self.cpp_info.components["atspi"].requires = ["dbus::dbus", "glib::glib"]
-        self.cpp_info.components["atspi"].set_property("pkg_config_name", "atspi-2")
+        if self.settings.os != "Windows":
+            self.cpp_info.components["atspi"].libs = ['atspi']
+            self.cpp_info.components["atspi"].includedirs = ["include/at-spi-2.0"]
+            self.cpp_info.components["atspi"].requires = ["dbus::dbus", "glib::glib"]
+            self.cpp_info.components["atspi"].set_property("pkg_config_name", "atspi-2")
 
         self.cpp_info.components["atk"].libs = ["atk-1.0"]
         self.cpp_info.components["atk"].includedirs = ['include/atk-1.0']
         self.cpp_info.components["atk"].requires = ["glib::glib"]
         self.cpp_info.components["atk"].set_property("pkg_config_name", 'atk')
 
-        self.cpp_info.components["atk-bridge"].libs = ['atk-bridge-2.0']
-        self.cpp_info.components["atk-bridge"].includedirs = [os.path.join('include', 'at-spi2-atk', '2.0')]
-        self.cpp_info.components["atk-bridge"].requires = ["dbus::dbus", "atk", "glib::glib", "atspi"]
-        self.cpp_info.components["atk-bridge"].set_property("pkg_config_name", 'atk-bridge-2.0')
+        if self.settings.os != "Windows":
+            self.cpp_info.components["atk-bridge"].libs = ['atk-bridge-2.0']
+            self.cpp_info.components["atk-bridge"].includedirs = [os.path.join('include', 'at-spi2-atk', '2.0')]
+            self.cpp_info.components["atk-bridge"].requires = ["dbus::dbus", "atk", "glib::glib", "atspi"]
+            self.cpp_info.components["atk-bridge"].set_property("pkg_config_name", 'atk-bridge-2.0')
