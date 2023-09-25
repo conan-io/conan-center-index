@@ -63,7 +63,10 @@ class AtSpi2CoreConan(ConanFile):
             )
         if Version(self.version) < "2.49.1":
             if self.settings.os == "Windows":
-                raise ConanInvalidConfiguration("Windows is supported before version 2.49.1")
+                raise ConanInvalidConfiguration("Windows is not supported before version 2.49.1")
+        if Version(self.version) < "2.50.0":
+            if self.settings.os == "Macos":
+                raise ConanInvalidConfiguration("macos is not supported before version 2.50.0")
 
     def layout(self):
         basic_layout(self, src_folder="src")
