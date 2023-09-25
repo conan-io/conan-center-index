@@ -71,6 +71,13 @@ class VerySimpleSmtpsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Pistache is only support by Linux.")
+
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
+            raise ConanInvalidConfiguration("very-simple-smtps can not use libc++")
+
         # for plain C projects only
         # self.settings.rm_safe("compiler.libcxx")
         # self.settings.rm_safe("compiler.cppstd")
