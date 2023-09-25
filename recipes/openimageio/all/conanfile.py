@@ -91,7 +91,7 @@ class OpenImageIOConan(ConanFile):
 
     def requirements(self):
         # Required libraries
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("boost/1.78.0")
         self.requires("libtiff/4.5.1")
         self.requires("openexr/2.5.7")
