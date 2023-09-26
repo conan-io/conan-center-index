@@ -17,7 +17,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ZINT_WITH_QT"] = self.dependencies["zint"].options.with_qt
+        tc.variables["ZINT_WITH_QT"] = self.dependencies[self.tested_reference_str].options.with_qt
         tc.generate()
 
     def build(self):
@@ -29,6 +29,6 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
-            if self.options["zint"].with_qt:
+            if self.dependencies[self.tested_reference_str].options.with_qt:
                 bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package_cpp")
                 self.run(bin_path, env="conanrun")
