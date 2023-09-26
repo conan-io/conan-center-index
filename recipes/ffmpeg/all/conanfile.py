@@ -606,6 +606,9 @@ class FFMpegConan(ConanFile):
             if not check_min_vs(self, "190", raise_invalid=False):
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 tc.extra_defines.append("inline=__inline")
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "15":
+            # Workaround for link error "ld: building exports trie: duplicate symbol '_av_ac3_parse_header'"
+            tc.extra_ldflags.append("-Wl,-ld_classic")
         if cross_building(self):
             args.append(f"--target-os={self._target_os}")
             if is_apple_os(self) and self.options.with_audiotoolbox:
