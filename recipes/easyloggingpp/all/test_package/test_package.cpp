@@ -10,11 +10,12 @@ void myCrashHandler(int sig) {
 }
 #endif
 
-int main() {
+int main(int argc, char* argv[]) {
+   START_EASYLOGGINGPP(argc, argv);
    LOG(INFO) << "My first info log using default logger";
-   #ifdef ELPP_FEATURE_CRASH_LOG
+#ifdef ELPP_FEATURE_CRASH_LOG
    LOG(INFO) << "Installed crash handler";
    el::Helpers::setCrashHandler(myCrashHandler);
-   #endif
+#endif
    return 0;
 }
