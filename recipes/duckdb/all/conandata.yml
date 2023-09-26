@@ -1,4 +1,7 @@
 sources:
+  "0.9.0":
+    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.9.0.tar.gz"
+    sha256: "3dbf3326a831bf0797591572440e81a3d6d668f8e33a25ce04efae19afc3a23d"
   "0.8.1":
     url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.8.1.tar.gz"
     sha256: "a0674f7e320dc7ebcf51990d7fc1c0e7f7b2c335c08f5953702b5285e6c30694"
@@ -18,6 +21,13 @@ sources:
     url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.5.1.tar.gz"
     sha256: "3dab7ba0d0f8d024d3c73fd3d4fb8834203c31d7b0ddb1e8539ee266e11b0e9b"
 patches:
+  "0.9.0":
+    - patch_file: "patches/0.9.0-0001-fix-cmake.patch"
+      patch_description: "install static of shared library, add installation for odbc extention"
+      patch_type: "portability"
+    - patch_file: "patches/0.6.0-0002-include-stdlib.patch"
+      patch_description: "include stdlib for abort function"
+      patch_type: "portability"
   "0.8.1":
     - patch_file: "patches/0.8.1-0001-fix-cmake.patch"
       patch_description: "install static of shared library, add installation for odbc extention"
