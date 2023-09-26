@@ -180,7 +180,6 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_subset:
             self.cpp_info.libs.append("harfbuzz-subset")
         self.cpp_info.libs.append("harfbuzz")
-        self.cpp_info.includedirs.append(os.path.join("include", "harfbuzz"))
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
         if self.settings.os == "Windows" and not self.options.shared:
