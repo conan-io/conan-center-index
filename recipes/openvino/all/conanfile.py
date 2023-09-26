@@ -338,10 +338,7 @@ class OpenvinoConan(ConanFile):
                                           # utils goes last since all others depend on it
                                           "openvino_util"])
             # set 'openvino' once again for transformations objects files (cyclic dependency)
-            # openvino_runtime.libs.append("openvino")
-            full_openvino_lib_path = os.path.join(self.package_folder, "lib", "openvino.lib").replace("\\", "/") if self.settings.os == "Windows" else \
-                                     os.path.join(self.package_folder, "lib", "libopenvino.a")
-            openvino_runtime.system_libs.insert(0, full_openvino_lib_path)
+            openvino_runtime.libs.append("openvino")
             # Add definition to prevent symbols importing
             openvino_runtime.defines = ["OPENVINO_STATIC_LIBRARY"]
 
