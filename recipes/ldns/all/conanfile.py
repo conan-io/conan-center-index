@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import XCRun
+from conan.tools.apple import fix_apple_shared_install_name, XCRun
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm
@@ -111,6 +111,7 @@ class LdnsConan(ConanFile):
             autotools.install(target=target)
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["ldns"]
