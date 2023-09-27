@@ -68,7 +68,7 @@ class GetDnsConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("openssl/3.1.2")
+        self.requires("openssl/3.1.3")
         if self._with_libev:
             self.requires("libev/4.33")
         if self.options.with_libevent:
