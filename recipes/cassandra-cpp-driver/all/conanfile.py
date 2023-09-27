@@ -14,6 +14,7 @@ class CassandraCppDriverConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://docs.datastax.com/en/developer/cpp-driver/"
     topics = ("cassandra", "cpp-driver", "database")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
