@@ -84,6 +84,8 @@ class XlsxioConan(ConanFile):
         if Version(self.version) >= "0.2.34":
             tc.variables["WITH_MINIZIP_NG"] = self.options.with_minizip_ng
         tc.variables["WITH_WIDE"] = self.options.with_wide
+        # Relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
         tc = CMakeDeps(self)
