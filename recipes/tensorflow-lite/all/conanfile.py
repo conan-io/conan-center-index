@@ -77,13 +77,17 @@ class TensorflowLiteConan(ConanFile):
         self.requires("eigen/3.4.0")
         self.requires("farmhash/cci.20190513")
         self.requires("fft/cci.20061228")
-        self.requires("flatbuffers/23.3.3", transitive_headers=True)
+        if self.version < Version("2.14.0"):
+            self.requires("flatbuffers/23.3.3", transitive_headers=True)
+        else:
+            self.requires("flatbuffers/23.5.26", transitive_headers=True)
         self.requires("gemmlowp/cci.20210928")
         self.requires("ruy/cci.20220628")
+        self.requires("cpuinfo/cci.20230118", override=True)
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
         if self.options.with_xnnpack:
-            self.requires("xnnpack/cci.20220801")
+            self.requires("xnnpack/cci.20230715")
             # https://github.com/tensorflow/tensorflow/blob/359c3cdfc5fabac82b3c70b3b6de2b0a8c16874f/tensorflow/lite/delegates/xnnpack/xnnpack_delegate.cc#L165
             self.requires("pthreadpool/cci.20210218")
         if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
