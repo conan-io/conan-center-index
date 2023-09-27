@@ -106,10 +106,7 @@ class XlsxioConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "xlsxio")
-        self.cpp_info.set_property("cmake_module_file_name", "xlsxio")
-        self.cpp_info.set_property("pkg_config_name", "xlsxio")
 
         ziplib = "minizip::minizip"
         if self.options.with_libzip:
@@ -120,7 +117,6 @@ class XlsxioConan(ConanFile):
         xlsxio_macro = "BUILD_XLSXIO_SHARED" if self.options.shared else "BUILD_XLSXIO_STATIC"
 
         self.cpp_info.components["xlsxio_read"].set_property("cmake_target_name", "xlsxio::xlsxio_read")
-        self.cpp_info.components["xlsxio_read"].set_property("cmake_module_target_name", "xlsxio::xlsxio_read")
         self.cpp_info.components["xlsxio_read"].set_property("pkg_config_name", "libxlsxio_read")
         self.cpp_info.components["xlsxio_read"].libs = ["xlsxio_read"]
         self.cpp_info.components["xlsxio_read"].requires = ["expat::expat", ziplib]
@@ -129,7 +125,6 @@ class XlsxioConan(ConanFile):
         self.cpp_info.components["xlsxio_read"].defines.append(xlsxio_macro)
 
         self.cpp_info.components["xlsxio_write"].set_property("cmake_target_name", "xlsxio::xlsxio_write")
-        self.cpp_info.components["xlsxio_write"].set_property("cmake_module_target_name", "xlsxio::xlsxio_write")
         self.cpp_info.components["xlsxio_write"].set_property("pkg_config_name", "libxlsxio_write")
         self.cpp_info.components["xlsxio_write"].libs = ["xlsxio_write"]
         self.cpp_info.components["xlsxio_write"].requires = ["expat::expat", ziplib]
@@ -139,7 +134,6 @@ class XlsxioConan(ConanFile):
 
         if self.options.with_wide:
             self.cpp_info.components["xlsxio_readw"].set_property("cmake_target_name", "xlsxio::xlsxio_readw")
-            self.cpp_info.components["xlsxio_readw"].set_property("cmake_module_target_name", "xlsxio::xlsxio_readw")
             self.cpp_info.components["xlsxio_readw"].set_property("pkg_config_name", "libxlsxio_readw")
             self.cpp_info.components["xlsxio_readw"].libs = ["xlsxio_readw"]
             self.cpp_info.components["xlsxio_readw"].requires = ["expat::expat", ziplib]
