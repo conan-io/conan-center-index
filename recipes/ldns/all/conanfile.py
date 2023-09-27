@@ -18,7 +18,7 @@ class LdnsConan(ConanFile):
     homepage = "https://www.nlnetlabs.nl/projects/ldns"
     description = "LDNS is a DNS library that facilitates DNS tool programming"
     topics = ("dns")
-
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
