@@ -73,7 +73,7 @@ class CassandraCppDriverConan(ConanFile):
             self.requires("boost/1.83.0")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
         if self.options.use_atomic == "boost":
