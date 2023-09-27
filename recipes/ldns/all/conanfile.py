@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, XCRun
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm
+from conan.tools.files import copy, get, rm
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 import os
@@ -28,13 +28,6 @@ class LdnsConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -100,7 +93,6 @@ class LdnsConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
