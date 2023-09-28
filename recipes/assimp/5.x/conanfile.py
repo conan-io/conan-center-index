@@ -183,15 +183,22 @@ class AssimpConan(ConanFile):
         if self._depends_on_draco:
             self.requires("draco/1.5.6")
         if self._depends_on_clipper:
-            self.requires("clipper/4.10.0")  # Only 4.x supported
+            if self.version >= "5.3.0":
+                self.requires("clipper/6.4.2")  # This is the version used in assimp 5.3.1
+            else:
+                self.requires("clipper/4.10.0")  # Only 4.x supported
         if self._depends_on_stb:
             self.requires("stb/cci.20220909")
         if self._depends_on_openddlparser:
             self.requires("openddl-parser/0.5.0")
 
     def validate(self):
-        if self._depends_on_clipper and Version(self.dependencies["clipper"].ref.version).major != "4":
-            raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
+        if self.version >= "5.3.0":
+            expected = 6
+        else:
+            expected = 4
+        if self._depends_on_clipper and Version(self.dependencies["clipper"].ref.version).major != expected:
+            raise ConanInvalidConfiguration(f"Only 'clipper/{expected}.x' is supported")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

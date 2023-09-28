@@ -1,4 +1,7 @@
 sources:
+  "5.3.1":
+    url: "https://github.com/assimp/assimp/archive/refs/tags/v5.3.1.tar.gz"
+    sha256: "a07666be71afe1ad4bc008c2336b7c688aca391271188eb9108d0c6db1be53f1"
   "5.2.2":
     url: "https://github.com/assimp/assimp/archive/refs/tags/v5.2.2.tar.gz"
     sha256: "ad76c5d86c380af65a9d9f64e8fc57af692ffd80a90f613dfc6bd945d0b80bb4"
@@ -15,6 +18,8 @@ sources:
     url: "https://github.com/assimp/assimp/archive/refs/tags/v5.0.0.tar.gz"
     sha256: "b0110a91650d6bb4000e3d5c2185bf77b0ff0a2e7a284bc2c4af81b33988b63c"
 patches:
+  "5.3.1":
+    - patch_file: "patches/0007-unvendor-deps-5.3.x.patch"
   "5.2.2":
     - patch_file: "patches/0005-fix-unzip.patch"
     - patch_file: "patches/0006-unvendor-deps-5.2.x.patch"
