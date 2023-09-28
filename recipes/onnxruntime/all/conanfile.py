@@ -41,13 +41,16 @@ class OnnxRuntimeConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        return {
+        result = {
             "Visual Studio": "16",
             "msvc": "192",
-            "gcc": "7",
+            "gcc": "9",
             "clang": "5",
             "apple-clang": "10",
         }
+        if Version(self.version) < "1.16.0":
+            result["gcc"] = "7"
+        return result
 
     def export_sources(self):
         export_conandata_patches(self)
