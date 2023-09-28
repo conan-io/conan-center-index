@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake
+from conan.tools.build import can_run
 from conan.errors import ConanException
 import os
 
@@ -21,8 +22,9 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not os.path.isdir(os.path.join(self.build_folder, "html")):
-            raise ConanException("doxygen did not create html documentation directory")
+        if can_run(self):
+            if not os.path.isdir(os.path.join(self.build_folder, "html")):
+                raise ConanException("doxygen did not create html documentation directory")
 
-        self.output.info("Version:")
-        self.run("doxygen --version")
+            self.output.info("Doxygen Version:")
+            self.run("doxygen --version")
