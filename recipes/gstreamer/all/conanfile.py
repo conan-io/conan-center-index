@@ -55,6 +55,7 @@ class GStreamerConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
+
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
