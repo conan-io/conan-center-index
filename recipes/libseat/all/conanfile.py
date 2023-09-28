@@ -81,6 +81,7 @@ class LibseatConan(ConanFile):
         tc.project_options["examples"] = "disabled"
         tc.project_options["man-pages"] = "disabled"
         tc.project_options["defaultpath"] = "" if self.options.defaultpath is None else str(self.options.defaultpath)
+        tc.c_args.append("-Wno-error")
         tc.generate()
 
     def _patch_sources(self):
