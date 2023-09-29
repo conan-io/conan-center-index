@@ -71,7 +71,7 @@ class OpenTDFConan(ConanFile):
         self.requires("ms-gsl/2.1.0")
         self.requires("nlohmann_json/3.11.1")
         self.requires("jwt-cpp/0.4.0")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         # Use newer boost+libxml2 after 1.3.6
         if Version(self.version) <= "1.3.6":
             self.requires("boost/1.79.0")
