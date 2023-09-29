@@ -49,7 +49,7 @@ class LibBigWigConan(ConanFile):
         if self.options.with_zlibng:
             self.requires("zlib-ng/2.1.3")
         else:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.info.settings.os == "Windows":
