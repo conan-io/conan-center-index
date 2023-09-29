@@ -77,7 +77,7 @@ class SoPlexConan(ConanFile):
 
     def requirements(self):
         # transitive libs as anything using soplex requires gzread, gzwrite, gzclose, gzopen
-        self.requires("zlib/1.2.13", transitive_headers=True, transitive_libs=True)
+        self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True, transitive_libs=True)
         if self.options.with_gmp:
             # transitive libs as anything using soplex requires __gmpz_init_set_si
             # see https://github.com/conan-io/conan-center-index/pull/16017#issuecomment-1495688452
