@@ -361,7 +361,7 @@ class PclConan(ConanFile):
         return is_available and is_used
 
     def requirements(self):
-        self.requires("boost/1.82.0", transitive_headers=True)
+        self.requires("boost/1.83.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self._is_enabled("flann"):
             self.requires("flann/1.9.2", transitive_headers=True)
@@ -370,7 +370,7 @@ class PclConan(ConanFile):
         if self._is_enabled("qhull"):
             self.requires("qhull/8.0.1", transitive_headers=True)
         if self._is_enabled("qt"):
-            self.requires("qt/6.5.1")
+            self.requires("qt/6.5.2")
         if self._is_enabled("libusb"):
             self.requires("libusb/1.0.26", transitive_headers=True)
         if self._is_enabled("pcap"):
