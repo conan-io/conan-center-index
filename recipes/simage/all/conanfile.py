@@ -18,13 +18,13 @@ class SImageConan(ConanFile):
     package_type = "library"
 
     options = {"shared" : [True, False],
-               "jasper" : [True, False],
-               "qt" : [5, 6, None],
+               "with_jasper" : [True, False],
+               "with_qt" : [5, 6, None],
                "fPIC" : [True, False]}
 
     default_options = {"shared" : False,
-                       "jasper" : False,
-                       "qt" : None,
+                       "with_jasper" : False,
+                       "with_qt" : None,
                        "fPIC" : True}
 
     def layout(self):
@@ -47,11 +47,11 @@ class SImageConan(ConanFile):
         self.requires("libtiff/4.6.0")
         self.requires("ogg/1.3.5")
         self.requires("vorbis/1.3.7")
-        if self.options.jasper:
+        if self.options.with_jasper:
             self.requires("jasper/4.0.0")
-        if self.options.get_safe("qt", 5):
+        if self.options.get_safe("with_qt", 5):
             self.requires("qt/5.15.10")
-        elif self.options.get_safe("qt", 6):
+        elif self.options.get_safe("with_qt", 6):
             self.requires("qt/6.5.2")
 
     def source(self):
@@ -62,7 +62,7 @@ class SImageConan(ConanFile):
         tc.cache_variables["SIMAGE_BUILD_EXAMPLES"] = False
         tc.cache_variables["SIMAGE_BUILD_TESTS"] = False
         tc.cache_variables["SIMAGE_BUILD_SHARED_LIBS"] = self.options.shared
-        tc.cache_variables["SIMAGE_LIBJASPER_SUPPORT"] = self.options.jasper
+        tc.cache_variables["SIMAGE_LIBJASPER_SUPPORT"] = self.options.with_jasper
 
         #simage uses internal FindVorbis with non-standard target names,
         #and furthermore (weirdly) uses the CMake variables directly not targets.
@@ -74,7 +74,7 @@ class SImageConan(ConanFile):
 
         if self.options.qt is not None:
             tc.cache_variables["SIMAGE_USE_QIMAGE"] = True
-            tc.cache_variables["SIMAGE_USE_QT6"] = self.options.qt == 6
+            tc.cache_variables["SIMAGE_USE_QT6"] = self.options.with_qt == 6
 
         deps = CMakeDeps(self)
         #simage internal FindVorbis uses non-standard target names
