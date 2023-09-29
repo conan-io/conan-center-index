@@ -186,10 +186,10 @@ class ArmadilloConan(ConanFile):
         # See https://gitlab.com/conradsnicta/armadillo-code/-/issues/227 for more information.
         if self.options.use_hdf5 and Version(self.version) < "12":
             # Use the conan dependency if the system lib isn't being used
-            self.requires("hdf5/1.14.0")
+            self.requires("hdf5/1.14.0", transitive_headers=True, transitive_libs=True)
 
         if self.options.use_blas == "openblas":
-            self.requires("openblas/0.3.20")
+            self.requires("openblas/0.3.20", transitive_libs=True)
         if (
             self.options.use_blas == "intel_mkl"
             and self.options.use_lapack == "intel_mkl"
