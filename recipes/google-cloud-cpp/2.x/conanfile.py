@@ -145,7 +145,7 @@ class GoogleCloudCppConan(ConanFile):
         self.requires("abseil/20220623.0", transitive_headers=True)
         self.requires("libcurl/7.88.1")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
         # For the grpc-cpp-plugin executable
