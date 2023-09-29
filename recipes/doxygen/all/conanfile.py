@@ -85,7 +85,7 @@ class DoxygenConan(ConanFile):
         tc.variables["win_static"] = is_msvc_static_runtime(self)
         if self.settings.os == "Linux" and "libstdc++" in self.settings.compiler.libcxx:
             # INFO: Link C++ library statically on Linux so that it can run on systems with an older C++ runtime
-            tc.cache_variables["CMAKE_EXE_LINKER_FLAGS"] = "-static-libstdc++ -static-libgcc"
+            tc.cache_variables["CMAKE_EXE_LINKER_FLAGS"] = "-static"
         tc.generate()
 
         deps = CMakeDeps(self)
