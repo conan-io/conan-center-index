@@ -83,9 +83,6 @@ class DoxygenConan(ConanFile):
         tc.variables["build_search"] = self.options.enable_search
         tc.variables["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
         tc.variables["win_static"] = is_msvc_static_runtime(self)
-        if self.settings.os == "Linux" and "libstdc++" in self.settings.compiler.libcxx:
-            # INFO: Link C++ library statically on Linux so that it can run on systems with an older C++ runtime
-            tc.cache_variables["CMAKE_EXE_LINKER_FLAGS"] = "-static"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -106,6 +103,8 @@ class DoxygenConan(ConanFile):
         self.cpp_info.set_property("cmake_find_mode", "none")
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread", "m"]
 
         # TODO: to remove in conan v2
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
