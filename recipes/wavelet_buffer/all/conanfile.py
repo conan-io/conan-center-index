@@ -60,7 +60,7 @@ class WaveletBufferConan(ConanFile):
 
     def requirements(self):
         self.requires("blaze/3.8", transitive_headers=True)
-        self.requires("cimg/3.2.6")
+        self.requires("cimg/3.3.0")
         if self.options.jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.0")
         else:
