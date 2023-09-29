@@ -8,21 +8,35 @@ def get_include_root(conanfile: ConanFile, depname: str) -> str:
     return str(pth)
 
 
-
 class SImageConan(ConanFile):
     name = "simage"
     settings = "os", "arch", "compiler", "build_type"
+    description = "library for loading, manipulating and saving images, movies and audio"
+    license = "ISC"
+    homepage = "https://www.coin3d.org/"
+    url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
 
     options = {"shared" : [True, False],
                "jasper" : [True, False],
-               "qt" : [5, 6, None]}
+               "qt" : [5, 6, None],
+               "fPIC" : [True, False]}
 
     default_options = {"shared" : False,
                        "jasper" : False,
-                       "qt" : None}
+                       "qt" : None,
+                       "fPIC" : True}
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         self.requires("libsndfile/1.2.2")
@@ -98,4 +112,3 @@ class SImageConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "simage"
         self.cpp_info.names["cmake_find_package_multi"] = "simage"
         self.cpp_info.names["pkg_config"] = "simage"
-
