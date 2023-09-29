@@ -1,10 +1,11 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -409,6 +410,11 @@ class OpenCVConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "viz module can't be enabled yet. It requires VTK which is not available in conan-center."
             )
+        # FIXME: check_max_cppstd is only available for Conan 2.x. Remove it after dropping support for Conan 1.x
+        if Version(conan_version).major == 2:
+            from conan.tools.build import check_max_cppstd
+            # INFO: OpenCV 2.x uses std::random_shuffle and mem_fun_ref. Both removed in C++17.
+            check_max_cppstd(self, "14")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
