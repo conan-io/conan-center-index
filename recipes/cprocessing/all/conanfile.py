@@ -18,10 +18,8 @@ class CProcessingConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/maksmakuta/CProcessing"
     topics = ("processing", "opengl", "sketch", "header-only")
-
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     @property
     def _min_cppstd(self):
@@ -32,7 +30,7 @@ class CProcessingConan(ConanFile):
         return {
             "gcc": "9",
             "Visual Studio": "16.2",
-            "msvc": "19.22",
+            "msvc": "192",
             "clang": "10",
             "apple-clang": "11",
         }
@@ -41,10 +39,10 @@ class CProcessingConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glfw/3.3.7")
+        self.requires("glfw/3.3.8")
         self.requires("glm/0.9.9.8")
         self.requires("glew/2.2.0")
-        self.requires("stb/cci.20210910")
+        self.requires("stb/cci.20220909")
         self.requires("opengl/system")
 
     def package_id(self):
@@ -80,12 +78,3 @@ class CProcessingConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
-        self.cpp_info.set_property("cmake_file_name", "CProcessing")
-        self.cpp_info.set_property("cmake_target_name", "CProcessing::CProcessing")
-
-        #  TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "CProcessing"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "CProcessing"
-        self.cpp_info.names["cmake_find_package"] = "CProcessing"
-        self.cpp_info.names["cmake_find_package_multi"] = "CProcessing"
