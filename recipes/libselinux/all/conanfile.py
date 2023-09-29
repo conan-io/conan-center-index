@@ -27,7 +27,7 @@ class LibSELinuxConan(ConanFile):
         "LicenseRef-LICENSE-libselinux",
         # https://github.com/SELinuxProject/selinux/blob/main/libsepol/LICENSE
         # For the libsepol component: LGPL-2.1
-        "LGPL-2.1",
+        "LGPL-2.1-or-later",
     )
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
