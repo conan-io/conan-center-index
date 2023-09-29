@@ -87,10 +87,6 @@ class CairoConan(ConanFile):
         self.requires("pixman/0.40.0")
         self.requires("libpng/1.6.40")
 
-    def package_id(self):
-        if self.info.options.get_safe("with_glib") and not self.dependencies["glib"].options.shared:
-            self.info.requires["glib"].full_package_mode()
-
     def validate(self):
         if is_msvc(self):
             # TODO autotools build results in LNK1127 error from a library in the WindowsSDK on CCI
