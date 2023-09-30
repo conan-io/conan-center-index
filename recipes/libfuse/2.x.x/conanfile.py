@@ -14,7 +14,8 @@ class LibfuseConan(ConanFile):
     homepage = "https://github.com/libfuse/libfuse"
     license = "LGPL-2.1"
     description = "The reference implementation of the Linux FUSE interface"
-    topics = ("fuse", "libfuse", "filesystem", "linux")
+    topics = ("fuse", "filesystem", "linux")
+
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -26,9 +27,13 @@ class LibfuseConan(ConanFile):
         "fPIC": True,
     }
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
@@ -72,6 +77,5 @@ class LibfuseConan(ConanFile):
         self.cpp_info.system_libs = ["pthread"]
         # libfuse requires this define to compile successfully
         self.cpp_info.defines = ["_FILE_OFFSET_BITS=64"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("dl")
-
