@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, rm, rmdir, collect_libs
+from conan.tools.files import get, rm, rmdir, collect_libs, copy
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
 import pathlib
 
@@ -100,6 +100,11 @@ class SImageConan(ConanFile):
         rmdir(self, str( (pkgdir / "lib") / "cmake"))
         rmdir(self, str( (pkgdir / "lib") / "pkgconfig"))
         rmdir(self, str(pkgdir / "bin"))
+
+        license_folder = str(pathlib.Path(self.package_folder) / "licenses")
+        copy(self, "COPYING", self.source_folder, license_folder)
+        copy(self, "LICENSE", self.source_folder, license_folder)
+        copy(self, "LICENSE.mpeg2enc", self.source_folder, license_folder)
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
