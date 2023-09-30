@@ -30,6 +30,7 @@ class CocoyaxiConan(ConanFile):
         "with_libcurl": False,
         "with_openssl": False,
     }
+    deprecated = "coost"
 
     def config_options(self):
         if self.settings.os == "Windows":
