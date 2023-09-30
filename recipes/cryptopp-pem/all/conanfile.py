@@ -110,7 +110,7 @@ class CryptoPPPEMConan(ConanFile):
         return readme[readme.find("## License"):]
 
     def package(self):
-        save(self, os.path.join(self.package_folder, "licenses"), self._extract_license())
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
