@@ -1,3 +1,4 @@
+from conan.tools.files import save
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -7,7 +8,7 @@ required_conan_version = ">=1.33.0"
 
 class MicroprofileConan(ConanFile):
     name = "microprofile"
-    license = "Unlicense"
+    license = "DocumentRef-README.md:LicenseRef-Unlicense"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jonasmr/microprofile"
     description = "Microprofile is a embeddable profiler in a few files, written in C++"
@@ -130,7 +131,6 @@ class MicroprofileConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version][0], strip_root=True, destination=self._source_subfolder)
-        tools.download(filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     def build(self):
         self._create_defines_file(os.path.join(self._source_subfolder, "microprofile.config.h"))
@@ -148,8 +148,12 @@ class MicroprofileConan(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def _extract_license(self):
+        readme = load(self, os.path.join(self._source_subfolder, "LICENSE"),)
+        return readme[readme.find("# License"):]
+
     def package(self):
-        self.copy("LICENSE", dst="licenses")
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
         cmake = self._configure_cmake()
         cmake.install()
 
