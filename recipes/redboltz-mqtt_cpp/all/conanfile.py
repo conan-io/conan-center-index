@@ -30,7 +30,8 @@ class MqttCPPConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "6",
-            "Visual Studio": "15.0",
+            "Visual Studio": "15",
+            "msvc": "191",
             "clang": "5",
             "apple-clang": "10",
         }
@@ -49,11 +50,10 @@ class MqttCPPConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.name} requires C++14, which your compiler does not support.")
-        else:
-            self.output.warning(f"{self.name} requires C++14. Your compiler is unknown. Assuming it supports C++14.")
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
