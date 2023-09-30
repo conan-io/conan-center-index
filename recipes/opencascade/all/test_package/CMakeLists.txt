@@ -1,17 +1,14 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package CXX)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
 # Test components
-find_package(OpenCASCADE COMPONENTS FoundationClasses ModelingData ModelingAlgorithms CONFIG)
+find_package(OpenCASCADE REQUIRED FoundationClasses ModelingData ModelingAlgorithms CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} TKMath TKGeomBase TKTopAlgo TKBRep)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
+target_link_libraries(${PROJECT_NAME} PRIVATE TKMath TKGeomBase TKTopAlgo TKBRep)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
 
 # Test global conan target
 add_executable(${PROJECT_NAME}_global test_package.cpp)
-target_link_libraries(${PROJECT_NAME}_global CONAN_PKG::opencascade)
-set_property(TARGET ${PROJECT_NAME}_global PROPERTY CXX_STANDARD 11)
+target_link_libraries(${PROJECT_NAME}_global PRIVATE opencascade::opencascade)
+target_compile_features(${PROJECT_NAME}_global PRIVATE cxx_std_11)
