@@ -64,8 +64,6 @@ class YogaConan(ConanFile):
         apply_conandata_patches(self)
         tc = CMakeToolchain(self)
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
 
     def build(self):
         cmake = CMake(self)
