@@ -257,11 +257,11 @@ class FFMpegConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/1.3")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.2")
+            self.requires("xz_utils/5.4.4")
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
         if self.options.with_freetype:
