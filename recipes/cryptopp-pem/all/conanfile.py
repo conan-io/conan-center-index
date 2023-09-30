@@ -1,3 +1,4 @@
+from conan.tools.files import load, save
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -11,7 +12,8 @@ class CryptoPPPEMConan(ConanFile):
     name = "cryptopp-pem"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.cryptopp.com/wiki/PEM_Pack"
-    license = "Unlicense"
+    # TODO: Fix license syntax, this is not proper spdx terminology
+    license = "DocumentRef-README.md:LicenseRef-Cryptopp-Pem-PublicDomain"
     description = "The PEM Pack is a partial implementation of message encryption which allows you to read and write PEM encoded keys and parameters, including encrypted private keys."
     topics = ("cryptopp", "crypto", "cryptographic", "security", "PEM")
 
@@ -63,9 +65,10 @@ class CryptoPPPEMConan(ConanFile):
         shutil.move(os.path.join(src_folder, "CMakeLists.txt"), os.path.join(dst_folder, "CMakeLists.txt"))
         shutil.move(os.path.join(src_folder, "cryptopp-config.cmake"), os.path.join(dst_folder, "cryptopp-config.cmake"))
         tools.rmdir(src_folder)
-        
-        # Get license
-        tools.download("https://unlicense.org/UNLICENSE", "UNLICENSE", sha256="7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c")
+        # LICENSE not packaged with release tar
+        tools.download("https://raw.githubusercontent.com/noloader/cryptopp-pem/0cfc1a8590f2395cd5b976be0e95e10de9a15a92/README.md",
+                       os.path.join(self._source_subfolder, "LICENSE"),
+                       sha256="efa5140027e396a3844f9f48d65e014c9a710939ac02e22d32c33a51e1750eef")
 
     def _patch_sources(self):
         if self.settings.os == "Android" and "ANDROID_NDK_HOME" in os.environ:
@@ -97,13 +100,17 @@ class CryptoPPPEMConan(ConanFile):
     def requirements(self):
         self.requires("cryptopp/" + self.version)
 
-    def build(self):                      
+    def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
+    def _extract_license(self):
+        readme = load(self, os.path.join(self._source_subfolder, "LICENSE"),)
+        return readme[readme.find("## License"):]
+
     def package(self):
-        self.copy(pattern="UNLICENSE", dst="licenses")
+        save(self, os.path.join(self.package_folder, "licenses"), self._extract_license())
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
