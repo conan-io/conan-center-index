@@ -16,7 +16,7 @@ class SImageConan(ConanFile):
     homepage = "https://www.coin3d.org/"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "library"
-
+    topics = ("image", "video")
     options = {"shared" : [True, False],
                "with_jasper" : [True, False],
                "with_qt" : [5, 6, None],
