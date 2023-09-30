@@ -453,7 +453,7 @@ class OpenCascadeConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._cmake_module_file_rel_path),
-            {target: f"OpenCASCADE::{target}" for module in occt_modules.values() for target in module},
+            {target: f"opencascade::{target}" for module in occt_modules.values() for target in module},
         )
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
@@ -590,7 +590,7 @@ class OpenCascadeConan(ConanFile):
         _register_components(occt_modules)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "OpenCASCADE"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenCASCADE"
+        self.cpp_info.filenames["cmake_find_package"] = "OpenCASCADE"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCASCADE"
         if self.options.shared:
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
