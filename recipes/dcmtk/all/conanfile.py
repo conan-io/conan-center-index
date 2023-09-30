@@ -102,7 +102,7 @@ class DCMTKConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         # DICOM Data Dictionaries are required
-        tc.variables["CMAKE_INSTALL_DATADIR"] = self._dcm_datadictionary_path
+        tc.variables["CMAKE_INSTALL_DATADIR"] = self._dcm_datadictionary_path.replace("\\", "/")
         tc.cache_variables["DCMTK_USE_FIND_PACKAGE"] = True
         tc.variables["BUILD_APPS"] = self.options.with_applications
         tc.variables["DCMTK_WITH_TIFF"] = self.options.with_libtiff
@@ -144,19 +144,22 @@ class DCMTKConan(ConanFile):
         if self.options.with_openssl:
             # Workaround for CMakeDeps bug
             # see https://github.com/conan-io/conan/issues/12012 & https://github.com/conan-io/conan/issues/12180
-            openssl = self.dependencies["openssl"]
+            openssl = self.dependencies.host["openssl"]
             openssl_cpp_info = openssl.cpp_info.aggregated_components()
             openssl_includes = [p.replace("\\", "/") for p in openssl_cpp_info.includedirs]
             openssl_defs = [d for d in openssl_cpp_info.defines]
-            openssl_libdirs = ["-L{}".format(p.replace("\\", "/")) for p in openssl_cpp_info.libdirs]
+            libdirs_flag = "/LIBPATH:" if is_msvc(self) else "-L"
+            openssl_libdirs = ["{}{}".format(libdirs_flag, p.replace("\\", "/")) for p in openssl_cpp_info.libdirs]
             openssl_libs = [l for l in openssl_cpp_info.libs]
             openssl_system_libs = [s for s in openssl_cpp_info.system_libs]
             openssl_frameworks = [f"-framework {f}" for f in openssl_cpp_info.frameworks]
-            for dep, _ in openssl.dependencies.items():
-                openssl_dep_cpp_info = self.dependencies[dep.ref.name].cpp_info.aggregated_components()
+            for _, dependency in openssl.dependencies.items():
+                if not dependency.context == "host":
+                    continue
+                openssl_dep_cpp_info = dependency.cpp_info.aggregated_components()
                 openssl_includes.extend([p.replace("\\", "/") for p in openssl_dep_cpp_info.includedirs])
                 openssl_defs.extend(d for d in openssl_dep_cpp_info.defines)
-                openssl_libdirs.extend(["-L{}".format(p.replace("\\", "/")) for p in openssl_dep_cpp_info.libdirs])
+                openssl_libdirs.extend(["{}{}".format(libdirs_flag, p.replace("\\", "/")) for p in openssl_dep_cpp_info.libdirs])
                 openssl_libs.extend([l for l in openssl_dep_cpp_info.libs])
                 openssl_system_libs.extend([s for s in openssl_dep_cpp_info.system_libs])
                 openssl_frameworks.extend([f"-framework {f}" for f in openssl_dep_cpp_info.frameworks])
