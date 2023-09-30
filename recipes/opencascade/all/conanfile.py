@@ -195,10 +195,23 @@ class OpenCascadeConan(ConanFile):
         occt_csf_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_csf.cmake")
         occt_defs_flags_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_defs_flags.cmake")
 
-        # Avoid to add system include/libs directories
+        # Avoid to add system include/libs directories and inject directories from conan dependencies instead
         for cmake_file in [cmakelists, cmakelists_tools]:
-            replace_in_file(self, cmake_file, "if (3RDPARTY_INCLUDE_DIRS)", "if(0)")
-            replace_in_file(self, cmake_file, "if (3RDPARTY_LIBRARY_DIRS)", "if(0)")
+            deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
+            includedirs = ";".join([p.replace("\\", "/") for dep in deps for p in dep.cpp_info.aggregated_components().includedirs])
+            replace_in_file(
+                self,
+                cmake_file,
+                "if (3RDPARTY_INCLUDE_DIRS)",
+                f"set(3RDPARTY_INCLUDE_DIRS \"{includedirs}\")\nif (3RDPARTY_INCLUDE_DIRS)",
+            )
+            libdirs = ";".join([p.replace("\\", "/") for dep in deps for p in dep.cpp_info.aggregated_components().libdirs])
+            replace_in_file(
+                self,
+                cmake_file,
+                "if (3RDPARTY_LIBRARY_DIRS)",
+                f"set(3RDPARTY_LIBRARY_DIRS \"{libdirs}\")\nif (3RDPARTY_LIBRARY_DIRS)",
+            )
 
         # Do not fail due to "fragile" upstream logic to find dependencies
         replace_in_file(self, cmakelists, "if (3RDPARTY_NOT_INCLUDED)", "if(0)")
