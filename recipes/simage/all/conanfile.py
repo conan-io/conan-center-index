@@ -72,7 +72,7 @@ class SImageConan(ConanFile):
         tc.cache_variables["OGG_ROOT"] = get_include_root(self, "ogg")
         tc.generate()
 
-        if self.options.qt is not None:
+        if self.options.with_qt is not None:
             tc.cache_variables["SIMAGE_USE_QIMAGE"] = True
             tc.cache_variables["SIMAGE_USE_QT6"] = self.options.with_qt == 6
 
