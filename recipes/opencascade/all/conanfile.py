@@ -424,7 +424,7 @@ class OpenCascadeConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         for license_file in ["LICENSE_LGPL_21.txt", "OCCT_LGPL_EXCEPTION.txt"]:
-            copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package, "licenses"))
+            copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.settings.build_type == "Debug":
