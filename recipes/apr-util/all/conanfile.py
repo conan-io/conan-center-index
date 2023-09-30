@@ -210,7 +210,7 @@ class AprUtilConan(ConanFile):
         self.runenv_info.define_path("APR_UTIL_ROOT", self.package_folder)
 
         deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
-        libdirs = [p for dep in deps for p in dep.cpp_info.aggregated_components().includedirs]
+        libdirs = [p for dep in deps for p in dep.cpp_info.aggregated_components().libdirs]
         aprutil_ldflags = " ".join([f"-L{p}" for p in libdirs])
         self.runenv_info.define("APRUTIL_LDFLAGS", aprutil_ldflags)
 
