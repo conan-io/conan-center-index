@@ -7,7 +7,6 @@ from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.54.0"
 
@@ -239,8 +238,6 @@ class DCMTKConan(ConanFile):
         def xml2():
             return ["libxml2::libxml2"] if self.options.with_libxml2 else []
 
-        charls = "charls" if Version(self.version) < "3.6.6" else "dcmtkcharls"
-
         return {
             "ofstd"   : charset_conversion(),
             "oflog"   : ["ofstd"],
@@ -252,8 +249,8 @@ class DCMTKConan(ConanFile):
             "ijg8"    : [],
             "ijg12"   : [],
             "ijg16"   : [],
-            "dcmjpls" : ["ofstd", "oflog", "dcmdata", "dcmimgle", "dcmimage", charls],
-            charls    : ["ofstd", "oflog"],
+            "dcmjpls" : ["ofstd", "oflog", "dcmdata", "dcmimgle", "dcmimage", "dcmtkcharls"],
+            "dcmtkcharls": ["ofstd", "oflog"],
             "dcmtls"  : ["ofstd", "dcmdata", "dcmnet"] + openssl(),
             "dcmnet"  : ["ofstd", "oflog", "dcmdata"] + tcpwrappers(),
             "dcmsr"   : ["ofstd", "oflog", "dcmdata", "dcmimgle", "dcmimage"] + xml2(),
