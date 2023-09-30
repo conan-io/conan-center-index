@@ -55,7 +55,7 @@ class LibenvppConan(ConanFile):
         self.tool_requires("cmake/[>=3.16 <4]")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -90,4 +90,4 @@ class LibenvppConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["envpp"]
+        self.cpp_info.libs = ["envpp" if self.settings.os != "Windows" else "libenvpp"]

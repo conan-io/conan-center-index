@@ -2,15 +2,7 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 index e3ecffb..49cae57 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -21,7 +21,6 @@ if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
- 	set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>DLL)
- endif()
- 
--option(BUILD_SHARED_LIBS "Build shared libs" OFF)
- option(LIBENVPP_TESTS "Build libenvpp tests." ${LIBENVPP_MASTER_PROJECT})
- option(LIBENVPP_EXAMPLES "Build libenvpp examples." ${LIBENVPP_MASTER_PROJECT})
- option(LIBENVPP_CHECKS "Enable additional runtime checks in release (always on in debug or when tests are enabled)." OFF)
-@@ -54,6 +53,7 @@ function(libenvpp_set_compiler_parameters TARGET)
+@@ -54,6 +54,7 @@ function(libenvpp_set_compiler_parameters TARGET)
  endfunction()
  
  # External dependencies.
@@ -27,7 +19,7 @@ index e3ecffb..49cae57 100644
  
  if(LIBENVPP_TESTS)
  	FetchContent_Declare(Catch2
-@@ -133,6 +135,8 @@ endif()
+@@ -133,6 +134,8 @@ endif()
  
  # Installation target.
  if(LIBENVPP_INSTALL)
