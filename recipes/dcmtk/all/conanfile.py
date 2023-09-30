@@ -145,20 +145,21 @@ class DCMTKConan(ConanFile):
             # Workaround for CMakeDeps bug
             # see https://github.com/conan-io/conan/issues/12012 & https://github.com/conan-io/conan/issues/12180
             openssl = self.dependencies["openssl"]
-            openssl_includes = [p.replace("\\", "/") for p in openssl.cpp_info.aggregated_components().includedirs]
-            openssl_defs = [d for d in openssl.cpp_info.aggregated_components().defines]
-            openssl_libdirs = ["-L{}".format(p.replace("\\", "/")) for p in openssl.cpp_info.aggregated_components().libdirs]
-            openssl_libs = [l for l in openssl.cpp_info.aggregated_components().libs]
-            openssl_system_libs = [s for s in openssl.cpp_info.aggregated_components().system_libs]
-            openssl_frameworks = [f"-framework {f}" for f in openssl.cpp_info.aggregated_components().frameworks]
+            openssl_cpp_info = openssl.cpp_info.aggregated_components()
+            openssl_includes = [p.replace("\\", "/") for p in openssl_cpp_info.includedirs]
+            openssl_defs = [d for d in openssl_cpp_info.defines]
+            openssl_libdirs = ["-L{}".format(p.replace("\\", "/")) for p in openssl_cpp_info.libdirs]
+            openssl_libs = [l for l in openssl_cpp_info.libs]
+            openssl_system_libs = [s for s in openssl_cpp_info.system_libs]
+            openssl_frameworks = [f"-framework {f}" for f in openssl_cpp_info.frameworks]
             for dep, _ in openssl.dependencies.items():
-                openssl_dep = self.dependencies[dep.ref.name]
-                openssl_includes.extend([p.replace("\\", "/") for p in openssl_dep.cpp_info.aggregated_components().includedirs])
-                openssl_defs.extend(d for d in openssl_dep.cpp_info.aggregated_components().defines)
-                openssl_libdirs.extend(["-L{}".format(p.replace("\\", "/")) for p in openssl_dep.cpp_info.aggregated_components().libdirs])
-                openssl_libs.extend([l for l in openssl_dep.cpp_info.aggregated_components().libs])
-                openssl_system_libs.extend([s for s in openssl_dep.cpp_info.aggregated_components().system_libs])
-                openssl_frameworks.extend([f"-framework {f}" for f in openssl_dep.cpp_info.aggregated_components().frameworks])
+                openssl_dep_cpp_info = self.dependencies[dep.ref.name].cpp_info.aggregated_components()
+                openssl_includes.extend([p.replace("\\", "/") for p in openssl_dep_cpp_info.includedirs])
+                openssl_defs.extend(d for d in openssl_dep_cpp_info.defines)
+                openssl_libdirs.extend(["-L{}".format(p.replace("\\", "/")) for p in openssl_dep_cpp_info.libdirs])
+                openssl_libs.extend([l for l in openssl_dep_cpp_info.libs])
+                openssl_system_libs.extend([s for s in openssl_dep_cpp_info.system_libs])
+                openssl_frameworks.extend([f"-framework {f}" for f in openssl_dep_cpp_info.frameworks])
 
             cmake_required_includes = ";".join(openssl_includes)
             cmake_required_definitions = ";".join(openssl_defs)
