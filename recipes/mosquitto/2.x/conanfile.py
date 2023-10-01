@@ -12,11 +12,12 @@ required_conan_version = ">=1.53.0"
 
 class Mosquitto(ConanFile):
     name = "mosquitto"
+    description = """Eclipse Mosquitto MQTT library, broker and more"""
     license = "EPL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://mosquitto.org"
-    description = """Eclipse Mosquitto MQTT library, broker and more"""
     topics = ("MQTT", "IoT", "eclipse")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -66,9 +67,9 @@ class Mosquitto(ConanFile):
         if self.options.ssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("cjson"):
-            self.requires("cjson/1.7.14")
+            self.requires("cjson/1.7.16")
         if self.options.get_safe("websockets"):
-            self.requires("libwebsockets/4.2.0")
+            self.requires("libwebsockets/4.3.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
