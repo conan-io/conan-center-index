@@ -32,9 +32,11 @@ class DCMTKConan(ConanFile):
         "with_libpng": [True, False],
         "with_libtiff": [True, False],
         "with_tcpwrappers": [True, False],
-        "builtin_dictionary": [None, True, False],
+        "default_dict": ["builtin", "external", "none"],
+        "builtin_dictionary": [None, True, False, "deprecated"],
+        "use_dcmdictpath": [True, False],
         "builtin_private_tags": [True, False],
-        "external_dictionary": [None, True, False],
+        "external_dictionary": [None, True, False, "deprecated"],
         "wide_io": [True, False],
         "enable_stl": [True, False],
     }
@@ -50,9 +52,11 @@ class DCMTKConan(ConanFile):
         "with_libpng": True,
         "with_libtiff": True,
         "with_tcpwrappers": False,
-        "builtin_dictionary": None,
+        "default_dict": "external",
+        "builtin_dictionary": "deprecated",
+        "use_dcmdictpath": True,
         "builtin_private_tags": False,
-        "external_dictionary": None,
+        "external_dictionary": "deprecated",
         "wide_io": False,
         "enable_stl": True,
     }
@@ -64,10 +68,24 @@ class DCMTKConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
             self.options.rm_safe("with_tcpwrappers")
+            self.options.default_dict = "builtin"
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        # Deprecated options
+        if self.options.builtin_dictionary != "deprecated":
+            self.output.warning("builtin_dictionary option is deprecated. Use default_dict option instead.")
+            if self.options.builtin_dictionary:
+                self.options.default_dict = "builtin"
+            elif self.options.builtin_dictionary == False:
+                self.options.default_dict = "external"
+        if self.options.external_dictionary != "deprecated":
+            self.output.warning("external_dictionary option is deprecated. Use use_dcmdictpath option instead.")
+            if self.options.external_dictionary:
+                self.options.use_dcmdictpath = True
+            elif self.options.external_dictionary == False:
+                self.options.use_dcmdictpath = False
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -89,6 +107,11 @@ class DCMTKConan(ConanFile):
             self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_tcpwrappers"):
             self.requires("tcp-wrappers/7.6")
+
+    def package_id(self):
+        # Deprecated options don't contribute to package id
+        del self.info.options.builtin_dictionary
+        del self.info.options.external_dictionary
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self) and \
@@ -124,10 +147,8 @@ class DCMTKConan(ConanFile):
         tc.variables["DCMTK_ENABLE_STL"] = self.options.enable_stl
         tc.variables["DCMTK_ENABLE_CXX11"] = True
         tc.variables["DCMTK_ENABLE_MANPAGE"] = False
-        if self.options.external_dictionary is not None:
-            tc.variables["DCMTK_DEFAULT_DICT"] = self.options.external_dictionary
-        if self.options.builtin_dictionary is not None:
-            tc.variables["DCMTK_ENABLE_BUILTIN_DICTIONARY"] = self.options.builtin_dictionary
+        tc.cache_variables["DCMTK_DEFAULT_DICT"] = self.options.default_dict
+        tc.variables["DCMTK_USE_DCMDICTPATH"] = self.options.use_dcmdictpath
         if self.settings.os == "Windows":
             tc.variables["DCMTK_OVERWRITE_WIN32_COMPILER_FLAGS"] = False
         if is_msvc(self):
@@ -298,14 +319,16 @@ class DCMTKConan(ConanFile):
             if self.options.with_multithreading:
                 self.cpp_info.components["ofstd"].system_libs.append("pthread")
 
-        dcmdictpath = os.path.join(self._dcm_datadictionary_path, "dcmtk", "dicom.dic")
-        self.runenv_info.define_path("DCMDICTPATH", dcmdictpath)
-        if self.options.with_applications:
-            self.buildenv_info.define_path("DCMDICTPATH", dcmdictpath)
+        if self.options.default_dict == "builtin":
+            dcmdictpath = os.path.join(self._dcm_datadictionary_path, "dcmtk", "dicom.dic")
+            self.runenv_info.define_path("DCMDICTPATH", dcmdictpath)
+            if self.options.with_applications:
+                self.buildenv_info.define_path("DCMDICTPATH", dcmdictpath)
 
         # TODO: to remove in conan v2
         self.cpp_info.filenames["cmake_find_package"] = "DCMTK"
         self.cpp_info.filenames["cmake_find_package_multi"] = "DCMTK"
-        self.env_info.DCMDICTPATH = dcmdictpath
+        if self.options.default_dict == "builtin":
+            self.env_info.DCMDICTPATH = dcmdictpath
         if self.options.with_applications:
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
