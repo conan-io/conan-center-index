@@ -61,7 +61,7 @@ class AtSpi2CoreConan(ConanFile):
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.settings.os != "Windows":
-            self.requires("dbus/1.15.6")
+            self.requires("dbus/1.15.6", run=True)
 
     def validate(self):
         if self.options.shared and not  self.dependencies["glib"].options.shared:
