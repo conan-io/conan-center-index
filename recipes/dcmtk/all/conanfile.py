@@ -154,7 +154,7 @@ class DCMTKConan(ConanFile):
             openssl_system_libs = [s for s in openssl_cpp_info.system_libs]
             openssl_frameworks = [f"-framework {f}" for f in openssl_cpp_info.frameworks]
             for _, dependency in openssl.dependencies.items():
-                if not dependency.context == "host":
+                if dependency.context != "host":
                     continue
                 openssl_dep_cpp_info = dependency.cpp_info.aggregated_components()
                 openssl_includes.extend([p.replace("\\", "/") for p in openssl_dep_cpp_info.includedirs])
