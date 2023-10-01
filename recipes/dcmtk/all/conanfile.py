@@ -238,7 +238,7 @@ class DCMTKConan(ConanFile):
         # TODO: to remove once support of cmake_find_package* dropped
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
-            {target: f"dcmtk::{target}" for target in self._dcmtk_components}
+            {target: f"DCMTK::{target}" for target in self._dcmtk_components}
         )
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
@@ -319,7 +319,10 @@ class DCMTKConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "DCMTK")
 
         for target_lib, requires in self._dcmtk_components.items():
-            self.cpp_info.components[target_lib].set_property("cmake_target_name", target_lib)
+            self.cpp_info.components[target_lib].set_property("cmake_target_name", f"DCMTK::{target_lib}")
+            # Before 3.6.7, targets were not namespaced, therefore they are also exposed for conveniency
+            self.cpp_info.components[target_lib].set_property("cmake_target_aliases", [target_lib])
+
             self.cpp_info.components[target_lib].libs = [target_lib]
             self.cpp_info.components[target_lib].includedirs.append(os.path.join("include", "dcmtk"))
             self.cpp_info.components[target_lib].requires = requires
@@ -344,8 +347,8 @@ class DCMTKConan(ConanFile):
                 self.buildenv_info.define_path("DCMDICTPATH", dcmdictpath)
 
         # TODO: to remove in conan v2
-        self.cpp_info.filenames["cmake_find_package"] = "DCMTK"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "DCMTK"
+        self.cpp_info.names["cmake_find_package"] = "DCMTK"
+        self.cpp_info.names["cmake_find_package_multi"] = "DCMTK"
         if self.options.default_dict == "external":
             self.env_info.DCMDICTPATH = dcmdictpath
         if self.options.with_applications:
