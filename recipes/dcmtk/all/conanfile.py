@@ -159,45 +159,63 @@ class DCMTKConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
+    def _collect_cmake_required(self, dependency):
+        dep = self.dependencies.host[dependency]
+        dep_cpp_info = dep.cpp_info.aggregated_components()
+        dep_includes = [p.replace("\\", "/") for p in dep_cpp_info.includedirs]
+        dep_defs = [d for d in dep_cpp_info.defines]
+        libdirs_flag = "/LIBPATH:" if is_msvc(self) else "-L"
+        dep_libdirs = ["{}{}".format(libdirs_flag, p.replace("\\", "/")) for p in dep_cpp_info.libdirs]
+        dep_libs = [l for l in dep_cpp_info.libs]
+        dep_system_libs = [s for s in dep_cpp_info.system_libs]
+        dep_frameworks = [f"-framework {f}" for f in dep_cpp_info.frameworks]
+        for _, trans_dependency in dep.dependencies.items():
+            if trans_dependency.context != "host":
+                continue
+            trans_dep_cpp_info = trans_dependency.cpp_info.aggregated_components()
+            dep_includes.extend([p.replace("\\", "/") for p in trans_dep_cpp_info.includedirs])
+            dep_defs.extend(d for d in trans_dep_cpp_info.defines)
+            dep_libdirs.extend(["{}{}".format(libdirs_flag, p.replace("\\", "/")) for p in trans_dep_cpp_info.libdirs])
+            dep_libs.extend([l for l in trans_dep_cpp_info.libs])
+            dep_system_libs.extend([s for s in trans_dep_cpp_info.system_libs])
+            dep_frameworks.extend([f"-framework {f}" for f in trans_dep_cpp_info.frameworks])
+
+        return {
+            "includes": ";".join(dep_includes),
+            "definitions": ";".join(dep_defs),
+            "link_options": ";".join(dep_libdirs + dep_frameworks),
+            "libraries": ";".join(dep_libs + dep_system_libs),
+        }
+
     def _patch_sources(self):
         apply_conandata_patches(self)
 
+        # Workaround for CMakeDeps bug with check_* like functions.
+        # See https://github.com/conan-io/conan/issues/12012 & https://github.com/conan-io/conan/issues/12180
         if self.options.with_openssl:
-            # Workaround for CMakeDeps bug
-            # see https://github.com/conan-io/conan/issues/12012 & https://github.com/conan-io/conan/issues/12180
-            openssl = self.dependencies.host["openssl"]
-            openssl_cpp_info = openssl.cpp_info.aggregated_components()
-            openssl_includes = [p.replace("\\", "/") for p in openssl_cpp_info.includedirs]
-            openssl_defs = [d for d in openssl_cpp_info.defines]
-            libdirs_flag = "/LIBPATH:" if is_msvc(self) else "-L"
-            openssl_libdirs = ["{}{}".format(libdirs_flag, p.replace("\\", "/")) for p in openssl_cpp_info.libdirs]
-            openssl_libs = [l for l in openssl_cpp_info.libs]
-            openssl_system_libs = [s for s in openssl_cpp_info.system_libs]
-            openssl_frameworks = [f"-framework {f}" for f in openssl_cpp_info.frameworks]
-            for _, dependency in openssl.dependencies.items():
-                if dependency.context != "host":
-                    continue
-                openssl_dep_cpp_info = dependency.cpp_info.aggregated_components()
-                openssl_includes.extend([p.replace("\\", "/") for p in openssl_dep_cpp_info.includedirs])
-                openssl_defs.extend(d for d in openssl_dep_cpp_info.defines)
-                openssl_libdirs.extend(["{}{}".format(libdirs_flag, p.replace("\\", "/")) for p in openssl_dep_cpp_info.libdirs])
-                openssl_libs.extend([l for l in openssl_dep_cpp_info.libs])
-                openssl_system_libs.extend([s for s in openssl_dep_cpp_info.system_libs])
-                openssl_frameworks.extend([f"-framework {f}" for f in openssl_dep_cpp_info.frameworks])
-
-            cmake_required_includes = ";".join(openssl_includes)
-            cmake_required_definitions = ";".join(openssl_defs)
-            cmake_required_link_options = ";".join(openssl_libdirs + openssl_frameworks)
-            cmake_required_libraries = ";".join(openssl_libs + openssl_system_libs)
+            cmake_required = self._collect_cmake_required("openssl")
             replace_in_file(
                 self,
                 os.path.join(self.source_folder, "CMake", "dcmtkPrepare.cmake"),
                 "set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${OPENSSL_LIBS} ${THREAD_LIBS})",
                 textwrap.dedent(f"""\
-                    list(APPEND CMAKE_REQUIRED_INCLUDES "{cmake_required_includes}")
-                    list(APPEND CMAKE_REQUIRED_DEFINITIONS "{cmake_required_definitions}")
-                    list(APPEND CMAKE_REQUIRED_LINK_OPTIONS "{cmake_required_link_options}")
-                    list(APPEND CMAKE_REQUIRED_LIBRARIES "{cmake_required_libraries}")
+                    list(APPEND CMAKE_REQUIRED_INCLUDES "{cmake_required['includes']}")
+                    list(APPEND CMAKE_REQUIRED_DEFINITIONS "{cmake_required['definitions']}")
+                    list(APPEND CMAKE_REQUIRED_LINK_OPTIONS "{cmake_required['link_options']}")
+                    list(APPEND CMAKE_REQUIRED_LIBRARIES "{cmake_required['libraries']}")
+                """),
+            )
+
+        if self.options.charset_conversion == "libiconv":
+            cmake_required = self._collect_cmake_required("libiconv")
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "CMake", "3rdparty.cmake"),
+                "set(CMAKE_REQUIRED_LIBRARIES ${LIBICONV_LIBS})",
+                textwrap.dedent(f"""\
+                    list(APPEND CMAKE_REQUIRED_DEFINITIONS "{cmake_required['definitions']}")
+                    list(APPEND CMAKE_REQUIRED_LINK_OPTIONS "{cmake_required['link_options']}")
+                    list(APPEND CMAKE_REQUIRED_LIBRARIES "{cmake_required['libraries']}")
                 """),
             )
 
