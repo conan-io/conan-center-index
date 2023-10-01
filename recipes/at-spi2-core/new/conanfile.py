@@ -53,6 +53,8 @@ class AtSpi2CoreConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.5")
         self.tool_requires("glib/<host_version>")
+        if self.settings.os != "Windows":
+            self.tool_requires("dbus/<host_version>")
 
     def requirements(self):
         self.requires("glib/2.77.0")
