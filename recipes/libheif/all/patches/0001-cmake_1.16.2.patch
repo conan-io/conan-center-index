@@ -20,6 +20,18 @@ index de15948..589eab5 100644
  
  option(ENABLE_PLUGIN_LOADING "Support loading of plugins" ON)
  set(PLUGIN_DIRECTORY "${CMAKE_INSTALL_FULL_LIBDIR}/libheif" CACHE STRING "Plugin install directory")
+@@ -74,9 +74,9 @@
+         find_package(${packageName})
+     endif ()
+
+-    if (${variableName}_FOUND AND WITH_${variableName}_PLUGIN AND PLUGIN_LOADING_SUPPORTED_AND_ENABLED)
++    if (${packageName}_FOUND AND WITH_${packageName}_PLUGIN AND PLUGIN_LOADING_SUPPORTED_AND_ENABLED)
+         set(msg "found (plugin)")
+-    elseif (${variableName}_FOUND)
++    elseif (${packageName}_FOUND)
+         set(msg "found (built-in)")
+     elseif (WITH_${variableName})
+         set(msg "not found")
 @@ -88,11 +88,11 @@ macro(plugin_option variableName packageName displayName displayType defaultPlug
      unset(msg)
  endmacro()

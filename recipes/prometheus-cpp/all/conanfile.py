@@ -68,7 +68,7 @@ class PrometheusCppConan(ConanFile):
         if self.options.with_push:
             self.requires("libcurl/8.0.1")
         if self.options.get_safe("with_compression"):
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
