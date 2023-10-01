@@ -111,7 +111,11 @@ class AtSpi2CoreConan(ConanFile):
             "libxml_dep = dependency('libxml-2.0', version: libxml_req_version)",
             "#libxml_dep = dependency('libxml-2.0', version: libxml_req_version)")
         meson = Meson(self)
-        meson.configure()
+        try:
+            meson.configure()
+        except ConanException:
+            self.output.info(open("meson-logs/meson-log.txt", 'r').read())
+            raise
         meson.build()
 
     def package(self):
