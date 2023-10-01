@@ -319,7 +319,7 @@ class DCMTKConan(ConanFile):
             if self.options.with_multithreading:
                 self.cpp_info.components["ofstd"].system_libs.append("pthread")
 
-        if self.options.default_dict == "builtin":
+        if self.options.default_dict == "external":
             dcmdictpath = os.path.join(self._dcm_datadictionary_path, "dcmtk", "dicom.dic")
             self.runenv_info.define_path("DCMDICTPATH", dcmdictpath)
             if self.options.with_applications:
@@ -328,7 +328,7 @@ class DCMTKConan(ConanFile):
         # TODO: to remove in conan v2
         self.cpp_info.filenames["cmake_find_package"] = "DCMTK"
         self.cpp_info.filenames["cmake_find_package_multi"] = "DCMTK"
-        if self.options.default_dict == "builtin":
+        if self.options.default_dict == "external":
             self.env_info.DCMDICTPATH = dcmdictpath
         if self.options.with_applications:
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
