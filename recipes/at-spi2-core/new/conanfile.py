@@ -53,15 +53,13 @@ class AtSpi2CoreConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.5")
         self.tool_requires("glib/<host_version>")
-        if self.settings.os != "Windows":
-            self.tool_requires("dbus/<host_version>")
 
     def requirements(self):
         self.requires("glib/2.77.0")
         if self.options.with_x11:
             self.requires("xorg/system")
-        if self.settings.os != "Windows":
-            self.requires("dbus/1.15.6", run=True)
+        if self.settings.os == "Linux":
+            self.requires("dbus/1.15.6")
 
     def validate(self):
         if self.options.shared and not  self.dependencies["glib"].options.shared:
@@ -92,7 +90,7 @@ class AtSpi2CoreConan(ConanFile):
         else:
             tc.project_options["introspection"] = "no"
             tc.project_options["x11"] = "yes" if self.options.with_x11 else "no"
-        if self.settings.os == "Windows":
+        if self.settings.os != "Linux":
             tc.project_options["atk_only"] = "true"
             
         tc.project_options["docs"] = "false"
@@ -132,7 +130,7 @@ class AtSpi2CoreConan(ConanFile):
 
 
     def package_info(self):
-        if self.settings.os != "Windows":
+        if self.settings.os == "Linux":
             self.cpp_info.components["atspi"].libs = ['atspi']
             self.cpp_info.components["atspi"].includedirs = ["include/at-spi-2.0"]
             self.cpp_info.components["atspi"].requires = ["dbus::dbus", "glib::glib"]
@@ -143,7 +141,7 @@ class AtSpi2CoreConan(ConanFile):
         self.cpp_info.components["atk"].requires = ["glib::glib"]
         self.cpp_info.components["atk"].set_property("pkg_config_name", 'atk')
 
-        if self.settings.os != "Windows":
+        if self.settings.os == "Linux":
             self.cpp_info.components["atk-bridge"].libs = ['atk-bridge-2.0']
             self.cpp_info.components["atk-bridge"].includedirs = [os.path.join('include', 'at-spi2-atk', '2.0')]
             self.cpp_info.components["atk-bridge"].requires = ["dbus::dbus", "atk", "glib::glib", "atspi"]
