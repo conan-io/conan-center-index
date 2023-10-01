@@ -174,7 +174,7 @@ class DCMTKConan(ConanFile):
                 continue
             trans_dep_cpp_info = trans_dependency.cpp_info.aggregated_components()
             dep_includes.extend([p.replace("\\", "/") for p in trans_dep_cpp_info.includedirs])
-            dep_defs.extend(d for d in trans_dep_cpp_info.defines)
+            dep_defs.extend([d for d in trans_dep_cpp_info.defines])
             dep_libdirs.extend(["{}{}".format(libdirs_flag, p.replace("\\", "/")) for p in trans_dep_cpp_info.libdirs])
             dep_libs.extend([l for l in trans_dep_cpp_info.libs])
             dep_system_libs.extend([s for s in trans_dep_cpp_info.system_libs])
