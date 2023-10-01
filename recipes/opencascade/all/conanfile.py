@@ -195,22 +195,36 @@ class OpenCascadeConan(ConanFile):
         occt_csf_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_csf.cmake")
         occt_defs_flags_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_defs_flags.cmake")
 
-        # Avoid to add system include/libs directories and inject directories from conan dependencies instead
+        # Inject interface definitions of dependencies because opencascade
+        # does not always link to CMake imported targets
+        sorted_deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
+        deps_defines = " ".join([f"-D{d}" for dep in sorted_deps for d in dep.cpp_info.aggregated_components().defines])
+        replace_in_file(
+            self,
+            cmakelists,
+            "project (OCCT)",
+            textwrap.dedent(f"""\
+                project (OCCT)
+                add_definitions({deps_defines})
+            """),
+        )
+
+        # Avoid to add system include/libs directories and inject directories
+        # from conan dependencies instead
         for cmake_file in [cmakelists, cmakelists_tools]:
-            deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
-            includedirs = ";".join([p.replace("\\", "/") for dep in deps for p in dep.cpp_info.aggregated_components().includedirs])
+            deps_includedirs = ";".join([p.replace("\\", "/") for dep in sorted_deps for p in dep.cpp_info.aggregated_components().includedirs])
             replace_in_file(
                 self,
                 cmake_file,
                 "if (3RDPARTY_INCLUDE_DIRS)",
-                f"set(3RDPARTY_INCLUDE_DIRS \"{includedirs}\")\nif (3RDPARTY_INCLUDE_DIRS)",
+                f"set(3RDPARTY_INCLUDE_DIRS \"{deps_includedirs}\")\nif (3RDPARTY_INCLUDE_DIRS)",
             )
-            libdirs = ";".join([p.replace("\\", "/") for dep in deps for p in dep.cpp_info.aggregated_components().libdirs])
+            deps_libdirs = ";".join([p.replace("\\", "/") for dep in sorted_deps for p in dep.cpp_info.aggregated_components().libdirs])
             replace_in_file(
                 self,
                 cmake_file,
                 "if (3RDPARTY_LIBRARY_DIRS)",
-                f"set(3RDPARTY_LIBRARY_DIRS \"{libdirs}\")\nif (3RDPARTY_LIBRARY_DIRS)",
+                f"set(3RDPARTY_LIBRARY_DIRS \"{deps_libdirs}\")\nif (3RDPARTY_LIBRARY_DIRS)",
             )
 
         # Do not fail due to "fragile" upstream logic to find dependencies
