@@ -21,7 +21,10 @@ class LibNPYConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14
+        # Author didn't explicitly make it C++11 compatible, but turns out it is,
+        # maybe this changes in a future version but for now it's set to C++11
+        # See https://github.com/llohse/libnpy/issues/35#issuecomment-1727327678
+        return 11
 
     @property
     def _compilers_minimum_version(self):
