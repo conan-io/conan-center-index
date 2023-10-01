@@ -138,7 +138,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_ptex:
             self.requires("ptex/2.4.0")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.3.1")
+            self.requires("libwebp/1.3.2")
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
 
