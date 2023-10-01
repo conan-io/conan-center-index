@@ -10,6 +10,11 @@ class ensmallenTestConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        # Required for consumers of armadillo>=12.2.0 due to upstream changes
+        # and armadillo/*:use_hdf5=True by default.
+        # See https://github.com/conan-io/conan-center-index/pull/17320 for more
+        # information.
+        self.requires("hdf5/1.14.1")
 
     def build(self):
         cmake = CMake(self)
