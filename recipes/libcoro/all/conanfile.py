@@ -119,7 +119,7 @@ class LibcoroConan(ConanFile):
         else:
             self.cpp_info.libs = ["libcoro"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread", "m"]
 
         if Version(self.version) >= "0.9":
             if self.options.with_networking:
