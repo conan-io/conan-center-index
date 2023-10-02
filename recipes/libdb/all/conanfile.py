@@ -95,8 +95,48 @@ class LibdbConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        if is_msvc(self):
+            import_conan_generators = ""
+            for props_file in ["conantoolchain.props", "conandeps.props"]:
+                props_path = os.path.join(self.generators_folder, props_file)
+                if os.path.exists(props_path):
+                    import_conan_generators += f"<Import Project=\"{props_path}\" />"
+            projects = ["db", "db_sql", "db_stl"]
+            if self.options.with_tcl:
+                projects.append("db_tcl")
+            for project in projects:
+                # =================================
+                # TODO: To remove once https://github.com/conan-io/conan/pull/12817 is available in conan client
+                project_file = os.path.join(self.source_folder, "build_windows", "VS10", f"{project}.vcxproj")
+                toolset = MSBuildToolchain(self).toolset
+                replace_in_file(
+                    self, project_file,
+                    "</ProjectConfiguration>",
+                    f"  <PlatformToolset>{toolset}</PlatformToolset>\n    </ProjectConfiguration>",
+                )
+                replace_in_file(
+                    self, project_file,
+                    "</CharacterSet>",
+                    f"</CharacterSet>\n    <PlatformToolset>{toolset}</PlatformToolset>",
+                )
+                if import_conan_generators:
+                    replace_in_file(
+                        self, project_file,
+                        "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\"/>",
+                        f"{import_conan_generators}<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\"/>",
+                    )
+                # =================================
 
-        if not is_msvc(self):
+            for file in glob.glob(os.path.join(self.source_folder, "build_windows", "VS10", "*.vcxproj")):
+                pass
+                # The WindowsTargetPlatformVersion selected below will depend on what Windows SDK is installed.
+                replace_in_file(self, file,
+                                      "<PropertyGroup Label=\"Globals\">",
+                                      # 10.0 should select the "latest" SDK available, but doesn't always work. It may be necessary to specify a specific version
+                                      #"<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
+                                      "<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.20348.0</WindowsTargetPlatformVersion>")
+                                      #"<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>")
+        else:
             for subdir in [
                 "dist",
                 os.path.join("lang", "sql", "jdbc"),
@@ -108,22 +148,14 @@ class LibdbConan(ConanFile):
                 shutil.copy(self.dependencies.build["gnu-config"].conf_info.get("user.gnu-config:config_guess"),
                             os.path.join(self.source_folder, subdir, "config.guess"))
 
-        for file in glob.glob(os.path.join(self.source_folder, "build_windows", "VS10", "*.vcxproj")):
-            # The WindowsTargetPlatformVersion selected below will depend on what Windows SDK is installed.
-            replace_in_file(self, file,
-                                  "<PropertyGroup Label=\"Globals\">",
-                                  # 10.0 should select the "latest" SDK available, but doesn't always work. It may be necessary to specify a specific version
-                                  "<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
-                                  #"<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.20348.0</WindowsTargetPlatformVersion>")
-                                  #"<PropertyGroup Label=\"Globals\"><WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>")
+            dist_configure = os.path.join(self.source_folder, "dist", "configure")
+            replace_in_file(self, dist_configure, "../$sqlite_dir", "$sqlite_dir")
+            replace_in_file(self, dist_configure,
+                                  "\n    --disable-option-checking)",
+                                  "\n    --datarootdir=*)"
+                                  "\n      ;;"
+                                  "\n    --disable-option-checking)")
 
-        dist_configure = os.path.join(self.source_folder, "dist", "configure")
-        replace_in_file(self, dist_configure, "../$sqlite_dir", "$sqlite_dir")
-        replace_in_file(self, dist_configure,
-                              "\n    --disable-option-checking)",
-                              "\n    --datarootdir=*)"
-                              "\n      ;;"
-                              "\n    --disable-option-checking)")
 
     def generate(self):
         if is_msvc(self):
@@ -131,8 +163,8 @@ class LibdbConan(ConanFile):
             tc.generate()
 
             deps = MSBuildDeps(self)
-
             deps.generate()
+
         else:
             tc = AutotoolsToolchain(self)
             tc.configure_args.append("--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug")
@@ -176,34 +208,12 @@ class LibdbConan(ConanFile):
     def build(self):
         self._patch_sources()
         if is_msvc(self):
-            #self._build_msvc()
+            msbuild = MSBuild(self)
             projects = ["db", "db_sql", "db_stl"]
             if self.options.with_tcl:
                 projects.append("db_tcl")
-            msbuild = MSBuild(self)
             for project in projects:
-                # =================================
-                # TODO: To remove once https://github.com/conan-io/conan/pull/12817 is available in conan client
                 project_file = os.path.join(self.source_folder, "build_windows", "VS10", f"{project}.vcxproj")
-                conantoolchain_props = os.path.join(self.generators_folder, "conantoolchain.props")
-                toolset = MSBuildToolchain(self).toolset
-                replace_in_file(
-                    self, project_file,
-                    "</ProjectConfiguration>",
-                    f"  <PlatformToolset>{toolset}</PlatformToolset>\n    </ProjectConfiguration>",
-                )
-                replace_in_file(
-                    self, project_file,
-                    "</CharacterSet>",
-                    f"</CharacterSet>\n    <PlatformToolset>{toolset}</PlatformToolset>",
-                )
-                replace_in_file(
-                    self, project_file,
-                    "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\"/>",
-                    f"<Import Project=\"{conantoolchain_props}\"/>\n  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\"/>",
-                )
-                # =================================
-
                 build_type = "{}{}".format(
                     "" if self.options.shared else "Static ",
                     "Debug" if self.settings.build_type == "Debug" else "Release",
