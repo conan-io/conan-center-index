@@ -9,7 +9,8 @@ index d9d9aa3..826e99b 100644
 -target_include_directories(ls-qpack PRIVATE deps/xxhash/)
  if(LSQPACK_XXH)
 +    find_package(xxHash REQUIRED CONFIG)
-     target_sources(ls-qpack PRIVATE deps/xxhash/xxhash.c)
+-    target_sources(ls-qpack PRIVATE deps/xxhash/xxhash.c)
++    # target_sources(ls-qpack PRIVATE deps/xxhash/xxhash.c)
 +    target_link_libraries(ls-qpack PUBLIC xxHash::xxhash)
  endif()
  
