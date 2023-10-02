@@ -12,7 +12,7 @@ class NewmatConan(ConanFile):
     name = "newmat"
     description = "Manipulate a variety of types of matrices using standard matrix operations."
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://newmat.net"
+    homepage = "http://www.robertnz.net/nm11.htm"
     topics = ("matrix")
     license = "LicenseRef-newmat"
     package_type = "library"
@@ -26,7 +26,7 @@ class NewmatConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_c_subscripts": True,
+        "with_c_subscripts": False,
     }
 
     def export_sources(self):
