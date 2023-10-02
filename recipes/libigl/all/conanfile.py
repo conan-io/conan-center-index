@@ -14,6 +14,8 @@ required_conan_version = ">=1.52.0"
 class LibiglConan(ConanFile):
     name = "libigl"
     description = "Simple C++ geometry processing library"
+    # As per https://libigl.github.io/license/, the library itself is MPL-2, components are not
+    # No issue as we don't build them, but if done so in the future, please update this field!
     license = "MPL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libigl.github.io/"
@@ -63,6 +65,9 @@ class LibiglConan(ConanFile):
     def requirements(self):
         # Eigen v3.4+ is not compatible
         self.requires("eigen/3.3.9", transitive_headers=True)
+    
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def package_id(self):
         if self.info.options.header_only:
@@ -133,7 +138,8 @@ class LibiglConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        copy(self, "LICENSE.GPL", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        # If components are built and packaged in the future, uncomment this line, their license is different
+        # copy(self, "LICENSE.GPL", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "LICENSE.MPL2", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
         rmdir(self, os.path.join(self.package_folder, "share"))
