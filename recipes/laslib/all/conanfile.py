@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, save
 from conan.tools.build import stdcpp_library
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
@@ -54,8 +54,10 @@ class LASlibConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        save(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(LASlib/src)")
+        save(self, os.path.join(self.source_folder, "LASlib", "example", "CMakeLists.txt"), "")
         cmake = CMake(self)
-        cmake.configure(build_script_folder="LASlib")
+        cmake.configure()
         cmake.build()
 
     def package(self):

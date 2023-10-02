@@ -1,48 +1,18 @@
 diff --git a/LASlib/CMakeLists.txt b/LASlib/CMakeLists.txt
-index 5efb193..4c6fb04 100644
+index 5efb193..6037262 100644
 --- a/LASlib/CMakeLists.txt
 +++ b/LASlib/CMakeLists.txt
-@@ -8,5 +8,4 @@ else()
- 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+@@ -9,4 +9,4 @@ else()
  endif()
  
--add_subdirectory(LASlib/src)
+ add_subdirectory(LASlib/src)
 -add_subdirectory(LASlib/example)
-+add_subdirectory(src)
++
 diff --git a/LASlib/src/CMakeLists.txt b/LASlib/src/CMakeLists.txt
-index 1b170bf..5d5ecf6 100644
+index 1b170bf..6a114eb 100644
 --- a/LASlib/src/CMakeLists.txt
 +++ b/LASlib/src/CMakeLists.txt
-@@ -62,8 +62,8 @@ foreach(file ${LAZ_SRC})
- endforeach(file)
- 
- file(GLOB_RECURSE LAS_INCLUDES
--	${CMAKE_SOURCE_DIR}/LASzip/src/*.hpp 
--	${CMAKE_SOURCE_DIR}/LASlib/inc/*.hpp
-+	${CMAKE_SOURCE_DIR}/../LASzip/src/*.hpp 
-+	${CMAKE_SOURCE_DIR}/inc/*.hpp
- )
- 
- add_library(LASlib ${LAS_SRC} ${LAZ_SRC_FULL})
-@@ -74,15 +74,10 @@ if (BUILD_SHARED_LIBS)
- endif()
- 
- target_include_directories(LASlib PUBLIC
--  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/LASlib/inc>
--  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/LASzip/src>
-+  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/inc>
-+  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/../LASzip/src>
-   $<INSTALL_INTERFACE:include/LASlib>
- )
--set_target_properties(LASlib PROPERTIES
--	ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../lib
--	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../lib
--	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../lib
--)
- 
- if(MSVC)
-    target_compile_options(LASlib PRIVATE /Zi)
-@@ -101,15 +96,7 @@ endif()
+@@ -101,15 +101,7 @@ endif()
  
  install(FILES ${LAS_INCLUDES} DESTINATION include/LASlib)
  
