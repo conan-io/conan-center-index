@@ -11,7 +11,7 @@ import os
 required_conan_version = ">=1.53.0"
 
 class PackageConan(ConanFile):
-    name = "package"
+    name = "cpptrace"
     description = "short description"
     license = ("MIT", "LGPL-2.1-only", "BSD-2-Clause-Views")
     url = "https://github.com/conan-io/conan-center-index"
@@ -31,7 +31,6 @@ class PackageConan(ConanFile):
     @property
     def _min_cppstd(self):
         return 11
-
 
     def config_options(self):
         if self.settings.os == "Windows":
