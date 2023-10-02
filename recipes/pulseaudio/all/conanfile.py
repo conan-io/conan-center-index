@@ -136,6 +136,51 @@ class PulseAudioConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
+        self._check_for_removed_glibc_symbols()
+
+    def _check_for_removed_glibc_symbols(self):
+        from conan.tools.scm import Version
+        from conan.errors import ConanException
+        import re
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            return
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= 10:
+            return
+        external_symbols = self._list_external_elf_symbols()
+        finite_math_pattern = re.compile(r"\w*__\w+_finite")
+        removed_glibc_symbols = {"__dn_expand", "__res_nquery", "__xmknod", "__xmknodat"}
+        finite_math_warnings = []
+        for file, symbols in external_symbols.items():
+            forbidden_symbols = [sym for sym in symbols if finite_math_pattern.fullmatch(sym) or sym in removed_glibc_symbols]
+            if forbidden_symbols:
+                finite_math_warnings.append(f"{file}: {', '.join(sorted(forbidden_symbols))}")
+        if finite_math_warnings:
+            raise ConanException(f"Package contains files that link against functions removed from glibc >= v2.31:\n"
+                                 + "\n".join(sorted(finite_math_warnings))
+                                 + "\nPlease add -fno-finite-math-only to compiler flags to disable the use of these functions in optimizations.")
+
+    def _list_external_elf_symbols(self):
+        import subprocess
+        def _objdump(path, is_dynamic):
+            cmd = ["objdump", "--dynamic-syms" if is_dynamic else "--syms", path]
+            objdump_output = subprocess.check_output(cmd, cwd=self.package_folder).decode()
+            return [l.rsplit(" ", 1)[-1] for l in objdump_output.splitlines() if "*UND*" in l]
+
+        def _is_elf(path):
+            with path.open("rb") as f:
+                return f.read(4) == b"\x7fELF"
+
+        symbols = {}
+        for file in (self.package_path / "lib").rglob("*.a"):
+            if file.is_file() and not file.is_symlink():
+                symbols[file] = _objdump(file, is_dynamic=False)
+        for file in (self.package_path / "lib").rglob("*.so*"):
+            if file.is_file() and not file.is_symlink() and _is_elf(file):
+                symbols[file] = _objdump(file, is_dynamic=True)
+        for file in (self.package_path / "bin").rglob("*"):
+            if (file.is_file() and not file.is_symlink() and os.access(file, os.X_OK) and _is_elf(file)):
+                symbols[file] = _objdump(file, is_dynamic=True)
+        return {k.relative_to(self.package_path): v for k, v in symbols.items()}
 
     def package_info(self):
         self.cpp_info.components["pulse"].set_property("pkg_config_name", "libpulse")
