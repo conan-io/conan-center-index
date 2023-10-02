@@ -86,7 +86,7 @@ class PackageConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = ["package_lib"]
+        self.cpp_info.libs = ["cpptrace"]
 
         self.cpp_info.set_property("cmake_module_file_name", "cpptrace")
         self.cpp_info.set_property("cmake_module_target_name", "cpptrace")
