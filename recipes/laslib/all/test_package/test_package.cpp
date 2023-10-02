@@ -1,5 +1,5 @@
 #include <iostream>
-#include "laslib/lasreader.hpp"
+#include "LASlib/lasreader.hpp"
 
 int main(void) {
 
