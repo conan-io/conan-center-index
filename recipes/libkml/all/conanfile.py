@@ -46,7 +46,7 @@ class LibkmlConan(ConanFile):
         self.requires("expat/2.5.0")
         self.requires("minizip/1.2.13")
         self.requires("uriparser/0.9.7")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
