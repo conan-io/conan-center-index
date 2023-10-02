@@ -169,18 +169,28 @@ class mFASTConan(ConanFile):
         fast_type_filename = "fast_type_gen" + extension
         module_folder_depth = len(os.path.normpath(self._new_mfast_config_dir).split(os.path.sep))
         fast_type_rel_path = "{}bin/{}".format("".join(["../"] * module_folder_depth), fast_type_filename)
-        exec_target_content = textwrap.dedent("""\
+        exec_target_content = textwrap.dedent(f"""\
             if(NOT TARGET fast_type_gen)
+                # Locate fast_type_gen executable
+                ## Workaround for legacy "cmake" generator in case of cross-build
                 if(CMAKE_CROSSCOMPILING)
-                    find_program(MFAST_EXECUTABLE fast_type_gen PATHS ENV PATH NO_DEFAULT_PATH)
+                    find_program(MFAST_EXECUTABLE NAMES fast_type_gen PATHS ENV PATH NO_DEFAULT_PATH)
                 endif()
+                ## And here this will work fine with "CMakeToolchain" (for native & cross-build)
+                ## and legacy "cmake" generator in case of native build
+                if(NOT MFAST_EXECUTABLE)
+                    find_program(MFAST_EXECUTABLE NAMES fast_type_gen)
+                endif()
+                ## Last resort: we search in package folder directly
                 if(NOT MFAST_EXECUTABLE)
                     get_filename_component(MFAST_EXECUTABLE "${{CMAKE_CURRENT_LIST_DIR}}/{fast_type_rel_path}" ABSOLUTE)
                 endif()
+
+                # Create executable imported target fast_type_gen
                 add_executable(fast_type_gen IMPORTED)
                 set_property(TARGET fast_type_gen PROPERTY IMPORTED_LOCATION ${{MFAST_EXECUTABLE}})
             endif()
-        """.format(fast_type_rel_path=fast_type_rel_path))
+        """)
         module_abs_path = os.path.join(self.package_folder, self._fast_type_gen_target_file)
         old_content = load(self, module_abs_path)
         new_content = exec_target_content + old_content
