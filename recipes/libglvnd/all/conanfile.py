@@ -11,7 +11,7 @@ required_conan_version = ">=1.50.0"
 class LibGlvndConan(ConanFile):
     name = "libglvnd"
     description = "The GL Vendor-Neutral Dispatch library"
-    license = "LicenseRef-LICENSE"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.freedesktop.org/glvnd/libglvnd"
     topics = ("dispatch", "egl", "gl", "glx", "opengl", "vendor-neutral")
