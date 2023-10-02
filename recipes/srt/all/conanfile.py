@@ -82,17 +82,15 @@ class SrtConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            'set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")',
-            'list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")',
-        )
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")',
+                        'list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")')
         if not self._has_posix_threads and not self._has_stdcxx_sync:
-            save(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                "find_package(pthreads4w REQUIRED)\n"
-                "link_libraried(pthreads4w::pthreads4w)\n",
-                append=True)
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "include(FindThreads)",
+                            ("find_package(pthreads4w REQUIRED)\n"
+                             "link_libraries(pthreads4w::pthreads4w)\n"
+                             "include(FindThreads)"))
 
     def build(self):
         self._patch_sources()
