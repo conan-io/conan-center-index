@@ -24,7 +24,7 @@ class mFASTConan(ConanFile):
     )
     topics = ("fast", "fix", "fix-adapted-for-streaming",
               "financial-information-exchange", "libraries", "cpp")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
