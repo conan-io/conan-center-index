@@ -72,7 +72,6 @@ class PackageConan(ConanFile):
         tc.generate(scope="build")
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
