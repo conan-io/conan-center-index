@@ -1,0 +1,34 @@
+From dc7777f1212cc64c46a12cfd55ab76276a77ac56 Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Wed, 24 May 2023 16:28:20 +0200
+Subject: [PATCH 3/3] Ensure conan friendly cmakelists
+
+---
+ CMakeLists.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b01aba5..56ca3ee 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -200,7 +200,7 @@ endif()
+ 
+ add_subdirectory(ThirdParty/c99_snprintf)
+ 
+-SET(CMAKE_MODULE_PATH ${FMILIBRARYHOME}/Config.cmake)
++list(APPEND CMAKE_MODULE_PATH ${FMILIBRARYHOME}/Config.cmake)
+ 
+ include(jmutil)
+ include(fmixml)
+@@ -230,7 +230,7 @@ configure_file (
+   "${FMILibrary_BINARY_DIR}/fmilib_config.h"
+   ) 
+ 
+-set(FMILIB_SHARED_SUBLIBS ${FMIXML_LIBRARIES} ${FMIZIP_LIBRARIES} ${FMICAPI_LIBRARIES} expat minizip zlib c99snprintf)
++set(FMILIB_SHARED_SUBLIBS ${FMIXML_LIBRARIES} ${FMIZIP_LIBRARIES} ${FMICAPI_LIBRARIES} c99snprintf)
+ set(FMILIB_SUBLIBS ${FMIIMPORT_LIBRARIES} ${JMUTIL_LIBRARIES} ${FMILIB_SHARED_SUBLIBS})
+ set(FMILIB_SHARED_SRC ${FMIIMPORTSOURCE} ${JMUTILSOURCE} ${FMIIMPORTHEADERS})
+ 
+-- 
+2.30.2
+

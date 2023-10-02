@@ -1,0 +1,47 @@
+From df411a1782a608cbfdc46c9ecafb0a4faae0151f Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Wed, 24 May 2023 16:46:58 +0200
+Subject: [PATCH] Debug testing
+
+---
+ Config.cmake/runtime_test.cmake | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/Config.cmake/runtime_test.cmake b/Config.cmake/runtime_test.cmake
+index d61137f..0765268 100644
+--- a/Config.cmake/runtime_test.cmake
++++ b/Config.cmake/runtime_test.cmake
+@@ -26,7 +26,7 @@ endif()
+ 
+ #Create function that zipz the dummy FMUs 
+ add_executable (compress_test_fmu_zip ${RTTESTDIR}/compress_test_fmu_zip.c)
+-target_link_libraries (compress_test_fmu_zip ${FMIZIP_LIBRARIES})
++target_link_libraries (compress_test_fmu_zip ${FMIZIP_LIBRARIES} minizip::minizip)
+ 
+ set_target_properties(
+ 	jm_vector_test jm_locale_test compress_test_fmu_zip
+@@ -116,7 +116,7 @@ function(compress_fmu OUTPUT_FOLDER_T MODEL_IDENTIFIER_T FILE_NAME_CS_ME_EXT_T T
+ 	
+ endfunction(compress_fmu)
+ 
+-set(FMILIBFORTEST fmilib)
++set(FMILIBFORTEST fmilib minizip::minizip expat::expat)
+ 
+ if(FMILIB_BUILD_SHARED_LIB AND (FMILIB_LINK_TEST_TO_SHAREDLIB OR NOT FMILIB_BUILD_STATIC_LIB))
+ 	set(FMILIBFORTEST fmilib_shared)
+@@ -128,10 +128,10 @@ endif()
+ message(STATUS "Tests will be linked with ${FMILIBFORTEST}"  )
+ 
+ add_executable (fmi_zip_zip_test ${RTTESTDIR}/FMI1/fmi_zip_zip_test.c )
+-target_link_libraries (fmi_zip_zip_test ${FMIZIP_LIBRARIES})
++target_link_libraries (fmi_zip_zip_test ${FMIZIP_LIBRARIES} minizip::minizip)
+ 
+ add_executable (fmi_zip_unzip_test ${RTTESTDIR}/FMI1/fmi_zip_unzip_test.c )
+-target_link_libraries (fmi_zip_unzip_test ${FMIZIP_LIBRARIES})
++target_link_libraries (fmi_zip_unzip_test ${FMIZIP_LIBRARIES} minizip::minizip)
+ 
+ add_executable (fmi_import_test 
+ 					${RTTESTDIR}/fmi_import_test.c
+-- 
+2.30.2
+

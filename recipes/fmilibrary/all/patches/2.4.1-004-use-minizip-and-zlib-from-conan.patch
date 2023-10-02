@@ -1,0 +1,55 @@
+From 3195c7ee77f40cde7231357e6f6e8cf247fc3452 Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Wed, 24 May 2023 16:26:15 +0200
+Subject: [PATCH 2/3] Use minizip and zlib from conan
+
+---
+ Config.cmake/fmizip.cmake | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/Config.cmake/fmizip.cmake b/Config.cmake/fmizip.cmake
+index 091fc4d..7618d51 100644
+--- a/Config.cmake/fmizip.cmake
++++ b/Config.cmake/fmizip.cmake
+@@ -19,28 +19,32 @@ if(NOT FMIZIPDIR)
+ 	# set(DOXYFILE_EXTRA_SOURCES "${DOXYFILE_EXTRA_SOURCES} \"${FMIZIPDIR}/include\"")
+ 
+     set(FMIZIP_LIBRARIES fmizip)
+-	
+-    add_subdirectory(Config.cmake/Minizip)
+-	
+-	include_directories("${FMIZIPDIR}/include" "${FMILIB_THIRDPARTYLIBS}/Minizip/minizip" "${FMILIB_THIRDPARTYLIBS}/FMI" "${FMILIB_THIRDPARTYLIBS}/Zlib/zlib-1.2.6" "${FMILibrary_BINARY_DIR}/zlib")
++
++    #add_subdirectory(Config.cmake/Minizip)
++
++    include_directories("${FMIZIPDIR}/include" "${FMILIB_THIRDPARTYLIBS}/FMI")
+ 
+ set(FMIZIPSOURCE
+   ${FMIZIPDIR}/src/fmi_zip_unzip.c
+   ${FMIZIPDIR}/src/fmi_zip_zip.c
++  ${FMIZIPDIR}/src/minizip.c
++  ${FMIZIPDIR}/src/miniunz.c
+ )
+ 
+ set(FMIZIPHEADERS
+ #  src/fmi_zip_unzip_impl.h
+   ${FMIZIPDIR}/include/FMI/fmi_zip_unzip.h
+   ${FMIZIPDIR}/include/FMI/fmi_zip_zip.h
++  ${FMIZIPDIR}/include/minizip.h
++  ${FMIZIPDIR}/include/miniunz.h
+ )
+ 
+ #include_directories("${FMILIB_THIRDPARTYLIBS}/zlib/lib/VS2005/win32")
+ 
+-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DZLIB_STATIC")
++find_package(minizip CONFIG REQUIRED)
+ 
+ add_library(fmizip ${FMILIBKIND} ${FMIZIPSOURCE} ${FMIZIPHEADERS})
+ 
+-target_link_libraries(fmizip minizip jmutils)
++target_link_libraries(fmizip minizip::minizip jmutils)
+ 
+ endif(NOT FMIZIPDIR)
+-- 
+2.30.2
+

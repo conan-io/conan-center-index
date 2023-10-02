@@ -1,0 +1,29 @@
+sources:
+  "2.4.1":
+    url:
+      - "https://github.com/modelon-community/fmi-library/archive/refs/tags/2.4.1.tar.gz"
+    sha256: "8199d3e9423494b714b9c4e42f055248457a7c9162df3d4652000aa9a10b8316"
+patches:
+  "2.4.1":
+    - patch_file: "patches/2.4.1-001-static-c99snprintf.patch"
+      patch_description: "Always build c99snprintf as static library"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/open-simulation-platform/conan-fmilibrary/blob/master/build-static-c99snprintf.patch"
+    - patch_file: "patches/2.4.1-002-add-minizip-tools-as-functions.patch"
+      patch_description: "Add minizip and miniunz as functions instead of executables"
+      patch_type: "conan"
+    - patch_file: "patches/2.4.1-003-use-expat-from-conan.patch"
+      patch_description: "Use expat from conan instead of internal"
+      patch_type: "conan"
+    - patch_file: "patches/2.4.1-004-use-minizip-and-zlib-from-conan.patch"
+      patch_description: "Use minizip (and zlib) from conan instead of internal"
+      patch_type: "conan"
+    - patch_file: "patches/2.4.1-005-ensure-conan-friendly-cmakelists.patch"
+      patch_description: "Do minor changes to CMakeLists for conan friendliness"
+      patch_type: "conan"
+    - patch_file: "patches/2.4.1-006-link-external-targets.patch"
+      patch_description: "Link external targets no longer merged in fmilib"
+      patch_type: "conan"
+    - patch_file: "patches/2.4.1-007-enable-testing.patch"
+      patch_description: "Ensure that tests can be run with cmake"
+      patch_type: "conan"

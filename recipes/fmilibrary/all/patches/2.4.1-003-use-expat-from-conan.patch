@@ -1,0 +1,43 @@
+From b7d707b76a5c447d30ef67bd4eb9f3a9e9faffd7 Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Wed, 24 May 2023 16:23:04 +0200
+Subject: [PATCH 1/3] Use expat from conan
+
+---
+ Config.cmake/fmixml.cmake | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/Config.cmake/fmixml.cmake b/Config.cmake/fmixml.cmake
+index ddd3c1f..c60322c 100644
+--- a/Config.cmake/fmixml.cmake
++++ b/Config.cmake/fmixml.cmake
+@@ -137,6 +137,7 @@ set(FMIXMLSOURCE
+ 	src/FMI2/fmi2_xml_variable.c
+ )
+ 
++if(FALSE)
+ include(ExternalProject)
+ 
+ # The *_POSTFIX variables are set because it makes it easier to determine the name of
+@@ -213,7 +214,9 @@ endif()
+ 
+ set(EXPAT_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ExpatEx/install/include)
+ 
+-include_directories("${EXPAT_INCLUDE_DIRS}" "${FMILIB_THIRDPARTYLIBS}/FMI/" "${FMIXMLGENDIR}/FMI1" "${FMIXMLGENDIR}/FMI2")
++endif()
++find_package(expat CONFIG REQUIRED)
++include_directories("${FMILIB_THIRDPARTYLIBS}/FMI/" "${FMIXMLGENDIR}/FMI1" "${FMIXMLGENDIR}/FMI2")
+ 
+ PREFIXLIST(FMIXMLSOURCE  ${FMIXMLDIR}/)
+ PREFIXLIST(FMIXMLHEADERS ${FMIXMLDIR}/)
+@@ -232,6 +235,6 @@ if(MSVC)
+     target_compile_definitions(fmixml PUBLIC XML_STATIC)
+ endif()
+ 
+-target_link_libraries(fmixml ${JMUTIL_LIBRARIES} expat)
++target_link_libraries(fmixml ${JMUTIL_LIBRARIES} expat::expat)
+ 
+ endif(NOT FMIXMLDIR)
+-- 
+2.30.2
+

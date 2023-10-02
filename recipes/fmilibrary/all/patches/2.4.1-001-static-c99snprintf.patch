@@ -1,0 +1,25 @@
+From e4ad54090e455289ac23a45867b17c8dca88e704 Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Tue, 19 Sep 2023 08:59:53 +0200
+Subject: [PATCH] Link c99snprintf statically
+
+---
+ ThirdParty/c99_snprintf/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ThirdParty/c99_snprintf/CMakeLists.txt b/ThirdParty/c99_snprintf/CMakeLists.txt
+index 6f513b4..6c9b676 100644
+--- a/ThirdParty/c99_snprintf/CMakeLists.txt
++++ b/ThirdParty/c99_snprintf/CMakeLists.txt
+@@ -119,7 +119,7 @@ add_definitions(${DEFINES})
+ 
+ file(WRITE ${CMAKE_BINARY_DIR}/c99snprintf_defs "${DEFINES}")
+ 
+-add_library(c99snprintf c99-snprintf_1.1/snprintf.c)
++add_library(c99snprintf STATIC c99-snprintf_1.1/snprintf.c)
+ 
+ if(CYGWIN) 
+ message("not tested")
+-- 
+2.30.2
+
