@@ -16,6 +16,8 @@ class NmosCppConan(ConanFile):
     homepage = "https://github.com/sony/nmos-cpp"
     topics = ("amwa", "nmos", "is-04", "is-05", "is-07", "is-08", "is-09", "broadcasting", "network", "media")
 
+    # https://github.com/sony/nmos-cpp/blob/master/Development/cmake/NmosCppLibraries.cmake#L947
+    package_type = "static-library"
     settings = "os", "compiler", "build_type", "arch"
     # for now, no "shared" option support
     options = {
@@ -46,10 +48,10 @@ class NmosCppConan(ConanFile):
 
     def requirements(self):
         # for now, consistent with project's conanfile.txt
-        self.requires("boost/1.80.0")
+        self.requires("boost/1.83.0")
         self.requires("cpprestsdk/2.10.18")
         self.requires("websocketpp/0.8.2")
-        self.requires("openssl/1.1.1s")
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("json-schema-validator/2.2.0")
         self.requires("nlohmann_json/3.11.2")
         self.requires("zlib/[>=1.2.11 <2]")
@@ -65,7 +67,7 @@ class NmosCppConan(ConanFile):
 
     def build_requirements(self):
         # nmos-cpp needs CMake 3.17 or higher but CCI doesn't allow version ranges
-        self.build_requires("cmake/3.24.2")
+        self.build_requires("cmake/[>=3.17 <4]")
 
     def validate(self):
         if self.info.settings.os in ["Macos"]:
@@ -252,5 +254,4 @@ class NmosCppConan(ConanFile):
 
         # add nmos-cpp-registry and nmos-cpp-node to the path
         bin_path = os.path.join(self.package_folder, bindir)
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
