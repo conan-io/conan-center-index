@@ -54,6 +54,8 @@ class LibiglConan(ConanFile):
     def configure(self):
         if self.options.header_only:
             self.options.rm_safe("fPIC")
+            # No automatic detection for non "library" package-types, manually override
+            self.package_type = "header-library"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
