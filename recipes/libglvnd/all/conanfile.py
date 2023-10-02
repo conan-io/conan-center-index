@@ -14,7 +14,7 @@ class LibGlvndConan(ConanFile):
     license = "LicenseRef-LICENSE"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.freedesktop.org/glvnd/libglvnd"
-    topics = ("gl", "vendor-neutral", "dispatch")
+    topics = ("dispatch", "egl", "gl", "glx", "opengl", "vendor-neutral")
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "asm": [True, False],
