@@ -110,7 +110,7 @@ class DrogonConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires boost on C++14")
 
     def requirements(self):
-        self.requires("trantor/1.5.13", transitive_headers=True, transitive_libs=True)
+        self.requires("trantor/1.5.14", transitive_headers=True, transitive_libs=True)
         self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/[>=1.2.11 <2]")
@@ -127,7 +127,7 @@ class DrogonConan(ConanFile):
         if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.1.0")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.42.0")
+            self.requires("sqlite3/3.42.1")
         if self.options.get_safe("with_redis"):
             self.requires("hiredis/1.2.0")
         if self.options.get_safe("with_yaml_cpp", False):
