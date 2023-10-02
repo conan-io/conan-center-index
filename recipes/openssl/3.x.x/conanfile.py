@@ -515,8 +515,8 @@ class OpenSSLConan(ConanFile):
 
     def build(self):
         self._make()
-        condifdata_pm = self._adjust_path(os.path.join(self.source_folder, "configdata.pm"))
-        self.run(f"{self._perl} {condifdata_pm} --dump")
+        configdata_pm = self._adjust_path(os.path.join(self.source_folder, "configdata.pm"))
+        self.run(f"{self._perl} {configdata_pm} --dump")
 
     @property
     def _make_program(self):
