@@ -16,6 +16,7 @@ class LibGlvndConan(ConanFile):
     homepage = "https://gitlab.freedesktop.org/glvnd/libglvnd"
     topics = ("dispatch", "egl", "gl", "glx", "opengl", "vendor-neutral")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "asm": [True, False],
         "x11": [True, False],
