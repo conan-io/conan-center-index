@@ -153,8 +153,9 @@ class OpenSSLConan(ConanFile):
     default_options["openssldir"] = None
 
     @property
-    def _is_clangcl(self):
-        return self.settings.compiler == "clang" and self.settings.os == "Windows"
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+               self.settings.compiler.get_safe("runtime")
 
     @property
     def _is_mingw(self):
@@ -162,7 +163,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _use_nmake(self):
-        return self._is_clangcl or is_msvc(self)
+        return self._is_clang_cl or is_msvc(self)
 
     @property
     def _settings_build(self):
@@ -247,8 +248,7 @@ class OpenSSLConan(ConanFile):
                     self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         VirtualBuildEnv(self).generate()
@@ -275,11 +275,12 @@ class OpenSSLConan(ConanFile):
         gen_info["LDFLAGS"] = tc.ldflags
         if self._full_version < "1.1.0" and not self.options.get_safe("no_zlib"):
             zlib_cpp_info = self.dependencies["zlib"].cpp_info.aggregated_components()
-            gen_info["zlib_include_path"] = zlib_cpp_info.includedirs[0]
-            if self.settings.os == "Windows":
-                gen_info["zlib_lib_path"] = f"{zlib_cpp_info.libdirs[0]}/{zlib_cpp_info.libs[0]}.lib"
+            gen_info["zlib_include_path"] = zlib_cpp_info.includedirs[0].replace("\\", "/")
+            if is_msvc(self) or self._is_clang_cl:
+                gen_info["zlib_lib_path"] = os.path.join(zlib_cpp_info.libdirs[0], f"{zlib_cpp_info.libs[0]}.lib").replace("\\", "/")
             else:
-                gen_info["zlib_lib_path"] = zlib_cpp_info.libdirs[0]  # Just path, linux will find the right file
+                # Just path, GNU like compilers will find the right file
+                gen_info["zlib_lib_path"] = zlib_cpp_info.libdirs[0].replace("\\", "/")
         save(self, "gen_info.conf", json.dumps(gen_info))
         tc = AutotoolsDeps(self)
         tc.generate()
@@ -557,7 +558,7 @@ class OpenSSLConan(ConanFile):
 
         if self.settings.os == "Neutrino":
             args.append("no-asm -lsocket -latomic")
-        if self._is_clangcl:
+        if self._is_clang_cl:
             # #error <stdatomic.h> is not yet supported when compiling as C, but this is planned for a future release.
             args.append("-D__STDC_NO_ATOMICS__")
         if self._full_version < "1.1.0":
@@ -652,7 +653,7 @@ class OpenSSLConan(ConanFile):
         if self.settings.os in ["iOS", "tvOS", "watchOS"] and self.conf.get("tools.apple:enable_bitcode", check_type=bool):
             cflags.append("-fembed-bitcode")
             cxxflags.append("-fembed-bitcode")
-        
+
         config = config_template.format(targets=targets,
                                         target=self._target,
                                         ancestor=ancestor,
@@ -712,7 +713,7 @@ class OpenSSLConan(ConanFile):
         with self._make_context():
             with chdir(self, self.source_folder):
                 # workaround for clang-cl not producing .pdb files
-                if self._is_clangcl:
+                if self._is_clang_cl:
                     save(self, "ossl_static.pdb", "")
                 args = " ".join(self._configure_args)
                 self.output.info(self._configure_args)

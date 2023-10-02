@@ -90,6 +90,19 @@ class OpenSSLConan(ConanFile):
     default_options["openssldir"] = None
 
     @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+               self.settings.compiler.get_safe("runtime")
+
+    @property
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+
+    @property
+    def _use_nmake(self):
+        return self._is_clang_cl or is_msvc(self)
+
+    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
@@ -111,9 +124,20 @@ class OpenSSLConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         if not self.options.no_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
+
+    def validate(self):
+        if self.settings.os == "Emscripten":
+            if not all((self.options.no_asm, self.options.no_threads, self.options.no_stdio)):
+                raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio}=True")
+
+        if self.settings.os == "iOS" and self.options.shared:
+            raise ConanInvalidConfiguration("OpenSSL 3 does not support building shared libraries for iOS")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -126,32 +150,8 @@ class OpenSSLConan(ConanFile):
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
 
-    def validate(self):
-        if self.settings.os == "Emscripten":
-            if not all((self.options.no_asm, self.options.no_threads, self.options.no_stdio)):
-                raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio}=True")
-            
-        if self.settings.os == "iOS" and self.options.shared:
-            raise ConanInvalidConfiguration("OpenSSL 3 does not support building shared libraries for iOS")
-            
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
-    @property
-    def _is_clangcl(self):
-        return self.settings.compiler == "clang" and self.settings.os == "Windows"
-
-    @property
-    def _is_mingw(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
-
-    @property
-    def _use_nmake(self):
-        return self._is_clangcl or is_msvc(self)
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _target(self):
@@ -374,13 +374,13 @@ class OpenSSLConan(ConanFile):
             args.append("no-asm -lsocket -latomic")
 
         if not self.options.no_zlib:
-            zlib_info = self.dependencies["zlib"].cpp_info.aggregated_components()
-            include_path = zlib_info.includedirs[0]
-            if self.settings.os == "Windows":
-                lib_path = "%s/%s.lib" % (zlib_info.libdirs[0], zlib_info.libs[0])
+            zlib_cpp_info = self.dependencies["zlib"].cpp_info.aggregated_components()
+            include_path = zlib_cpp_info.includedirs[0]
+            if is_msvc(self) or self._is_clang_cl:
+                lib_path = os.path.join(zlib_cpp_info.libdirs[0], f"{zlib_cpp_info.libs[0]}.lib")
             else:
-                # Just path, linux will find the right file
-                lib_path = zlib_info.libdirs[0]
+                # Just path, GNU like compilers will find the right file
+                lib_path = zlib_cpp_info.libdirs[0]
             if self._settings_build.os == "Windows":
                 # clang-cl doesn't like backslashes in #define CFLAGS (builldinf.h -> cversion.c)
                 include_path = include_path.replace("\\", "/")
@@ -392,8 +392,8 @@ class OpenSSLConan(ConanFile):
                 args.append("zlib")
 
             args.extend([
-                '--with-zlib-include="%s"' % include_path,
-                '--with-zlib-lib="%s"' % lib_path
+                f'--with-zlib-include="{include_path}"',
+                f'--with-zlib-lib="{lib_path}"',
             ])
 
         for option_name in self.default_options.keys():
@@ -401,7 +401,7 @@ class OpenSSLConan(ConanFile):
                 self.output.info(f"Activated option: {option_name}")
                 args.append(option_name.replace("_", "-"))
         return args
-    
+
     def generate(self):
         tc = AutotoolsToolchain(self)
         env = tc.environment()
@@ -438,7 +438,7 @@ class OpenSSLConan(ConanFile):
         defines = " ".join(defines)
         defines = 'defines => add("%s"),' % defines if defines else ""
         targets = "my %targets"
-        includes = "" 
+        includes = ""
         if self.settings.os == "Windows":
             includes = includes.replace("\\", "/")  # OpenSSL doesn't like backslashes
 
@@ -497,7 +497,7 @@ class OpenSSLConan(ConanFile):
     def _make(self):
         with chdir(self, self.source_folder):
             # workaround for clang-cl not producing .pdb files
-            if self._is_clangcl:
+            if self._is_clang_cl:
                 save(self, "ossl_static.pdb", "")
             args = " ".join(self._configure_args)
 
