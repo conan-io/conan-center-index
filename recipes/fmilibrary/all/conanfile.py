@@ -1,10 +1,9 @@
 from os import path
 import posixpath
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.files import (
+    apply_conandata_patches, export_conandata_patches, get, copy, rmdir)
 from conan.tools.scm import Version
 from conan.tools.env import Environment
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -58,15 +57,6 @@ class PackageConan(ConanFile):
         self.requires("expat/2.4.9")
         self.requires("minizip/1.2.13")
         # c99_snprintf -> should be externalised
-
-    def build_requirements(self):
-        if self.version >= Version("3.0a2") and self.options.with_fmus:
-            self.test_requires("catch2/2.13.10")
-
-    def validate(self):
-        if self.version >= Version("3.0a2") and self.options.with_fmus:
-            if self.settings.compiler.get_safe("cppstd"):
-                check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
