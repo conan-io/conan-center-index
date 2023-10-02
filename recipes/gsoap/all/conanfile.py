@@ -52,7 +52,7 @@ class GsoapConan(ConanFile):
     def requirements(self):
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
         if cross_building(self, skip_x64_x86=True) and hasattr(self, "settings_build"):
