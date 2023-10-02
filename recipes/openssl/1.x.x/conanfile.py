@@ -275,12 +275,12 @@ class OpenSSLConan(ConanFile):
         gen_info["LDFLAGS"] = tc.ldflags
         if self._full_version < "1.1.0" and not self.options.get_safe("no_zlib"):
             zlib_cpp_info = self.dependencies["zlib"].cpp_info.aggregated_components()
-            gen_info["zlib_include_path"] = zlib_cpp_info.includedirs[0].replace("\\", "/")
-            if is_msvc(self) or self._is_clang_cl:
-                gen_info["zlib_lib_path"] = os.path.join(zlib_cpp_info.libdirs[0], f"{zlib_cpp_info.libs[0]}.lib").replace("\\", "/")
+            gen_info["zlib_include_path"] = self._adjust_path(zlib_cpp_info.includedirs[0])
+            if self._use_nmake:
+                gen_info["zlib_lib_path"] = self._adjust_path(os.path.join(zlib_cpp_info.libdirs[0], f"{zlib_cpp_info.libs[0]}.lib"))
             else:
                 # Just path, GNU like compilers will find the right file
-                gen_info["zlib_lib_path"] = zlib_cpp_info.libdirs[0].replace("\\", "/")
+                gen_info["zlib_lib_path"] = self._adjust_path(zlib_cpp_info.libdirs[0])
         save(self, "gen_info.conf", json.dumps(gen_info))
         tc = AutotoolsDeps(self)
         tc.generate()
@@ -492,7 +492,9 @@ class OpenSSLConan(ConanFile):
         replace_in_file(self, configure, r"s/^AR=\s*ar/AR= $ar/;", r"s/^AR=\s*ar\b/AR= $ar/;",encoding="latin_1")
 
     def _adjust_path(self, path):
-        return path.replace("\\", "/") if self._settings_build.os == "Windows" else path
+        if self._use_nmake:
+            return path.replace("\\", "/")
+        return unix_path(self, path)
 
     def _patch_makefile_org(self):
         # https://wiki.openssl.org/index.php/Compilation_and_Installation#Modifying_Build_Settings
@@ -568,9 +570,6 @@ class OpenSSLConan(ConanFile):
                 gen_info = json.loads(load(self, os.path.join(self.generators_folder, "gen_info.conf")))
                 include_path = gen_info["zlib_include_path"]
                 lib_path     = gen_info["zlib_lib_path"]
-                # clang-cl doesn't like backslashes in #define CFLAGS (builldinf.h -> cversion.c)
-                include_path = self._adjust_path(include_path)
-                lib_path     = self._adjust_path(lib_path)
 
                 if self.dependencies["zlib"].options.shared:
                     args.append("zlib-dynamic")

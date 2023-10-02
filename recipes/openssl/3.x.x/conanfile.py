@@ -338,6 +338,11 @@ class OpenSSLConan(ConanFile):
             return "/etc/ssl"
         return os.path.join(self.package_folder, "res")
 
+    def _adjust_path(self, path):
+        if self._use_nmake:
+            return path.replace("\\", "/")
+        return unix_path(self, path)
+
     @property
     def _configure_args(self):
         openssldir = self.options.openssldir or self._get_default_openssl_dir()
@@ -375,16 +380,12 @@ class OpenSSLConan(ConanFile):
 
         if not self.options.no_zlib:
             zlib_cpp_info = self.dependencies["zlib"].cpp_info.aggregated_components()
-            include_path = zlib_cpp_info.includedirs[0]
-            if is_msvc(self) or self._is_clang_cl:
-                lib_path = os.path.join(zlib_cpp_info.libdirs[0], f"{zlib_cpp_info.libs[0]}.lib")
+            include_path = self._adjust_path(zlib_cpp_info.includedirs[0])
+            if self._use_nmake:
+                lib_path = self._adjust_path(os.path.join(zlib_cpp_info.libdirs[0], f"{zlib_cpp_info.libs[0]}.lib"))
             else:
                 # Just path, GNU like compilers will find the right file
-                lib_path = zlib_cpp_info.libdirs[0]
-            if self._settings_build.os == "Windows":
-                # clang-cl doesn't like backslashes in #define CFLAGS (builldinf.h -> cversion.c)
-                include_path = include_path.replace("\\", "/")
-                lib_path = lib_path.replace("\\", "/")
+                lib_path = self._adjust_path(zlib_cpp_info.libdirs[0])
 
             if self.dependencies["zlib"].options.shared:
                 args.append("zlib-dynamic")
@@ -438,9 +439,6 @@ class OpenSSLConan(ConanFile):
         defines = " ".join(defines)
         defines = 'defines => add("%s"),' % defines if defines else ""
         targets = "my %targets"
-        includes = ""
-        if self.settings.os == "Windows":
-            includes = includes.replace("\\", "/")  # OpenSSL doesn't like backslashes
 
         if self._asm_target:
             ancestor = '[ "%s", asm("%s") ]' % (self._ancestor_target, self._asm_target)
