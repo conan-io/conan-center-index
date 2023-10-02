@@ -1,13 +1,3 @@
-diff --git a/LASlib/CMakeLists.txt b/LASlib/CMakeLists.txt
-index 5efb193..6037262 100644
---- a/LASlib/CMakeLists.txt
-+++ b/LASlib/CMakeLists.txt
-@@ -9,4 +9,4 @@ else()
- endif()
- 
- add_subdirectory(LASlib/src)
--add_subdirectory(LASlib/example)
-+
 diff --git a/LASlib/src/CMakeLists.txt b/LASlib/src/CMakeLists.txt
 index 1b170bf..6a114eb 100644
 --- a/LASlib/src/CMakeLists.txt
