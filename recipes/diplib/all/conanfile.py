@@ -1,4 +1,5 @@
-from conan import ConanFile, ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
 from conan.tools.files import get
 
@@ -44,7 +45,7 @@ class diplibConan(ConanFile):
 
     def configure(self):
         # if we don't build the viewer we don't need the backends
-        if not self.enable_viewer:
+        if not self.options.enable_viewer:
             self.options.rm_safe("with_glfw")
             self.options.rm_safe("with_freeglut")
 
@@ -65,7 +66,6 @@ class diplibConan(ConanFile):
             else:
                 self.requires("libjpeg/9e")
 
-        self.requires("fftw/3.3.10")
 
         if self.options.enable_viewer:
             self.requires("opengl/system")
@@ -84,7 +84,7 @@ class diplibConan(ConanFile):
             self.requires("fftw/3.3.10")
 
     def validate_build(self):
-        viewer_backend: bool = self.options.with_glfw or self.options.with_freeglut
+        viewer_backend: bool = self.options.get_safe("with_glfw", False) or self.options.get_safe("with_freeglut", False)
         if self.options.enable_viewer and not viewer_backend:
             self.output.error("must enable at least one viewer backend if enable_viewer=True")
             self.output.error("you must set one or both of with_freeglut and with_glfw to True")
