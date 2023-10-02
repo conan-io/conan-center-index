@@ -43,9 +43,9 @@ class OpenTDFConan(ConanFile):
         return {
             "Visual Studio": "17" if Version(self.version) < "1.1.5" else "15",
             "msvc": "193" if Version(self.version) < "1.1.5" else "191",
-            "gcc": "7.5.0",
+            "gcc": "7.5",
             "clang": "12",
-            "apple-clang": "12.0.0",
+            "apple-clang": "12",
         }
 
     def config_options(self):
@@ -64,7 +64,7 @@ class OpenTDFConan(ConanFile):
         if Version(self.version) >= "1.5.0":
             self.requires("openssl/[>=3.1 <4]")
         else:
-            self.requires("openssl/1.1.1u")
+            self.requires("openssl/1.1.1w")
         # Uses magic_enum for 1.4.0 and newer
         if Version(self.version) >= "1.4.0":
             self.requires("magic_enum/0.8.2")
@@ -164,3 +164,6 @@ class OpenTDFConan(ConanFile):
             self.cpp_info.components["libopentdf"].requires.append("libarchive::libarchive")
         if Version(self.version) >= "1.4.0":
             self.cpp_info.components["libopentdf"].requires.append("magic_enum::magic_enum")
+        
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
