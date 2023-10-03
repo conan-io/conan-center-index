@@ -1,0 +1,4 @@
+sources:
+  "1.6.1":
+    url: "https://github.com/wjakob/nanobind/archive/refs/tags/v1.6.1.tar.gz"
+    sha256: "6acf2cfef781b8b7d82a8c298c1bfe7ccb4dd0de06626b69ed1c99a71a93e78d"
