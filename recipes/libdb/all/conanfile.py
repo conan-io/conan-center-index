@@ -186,6 +186,11 @@ class LibdbConan(ConanFile):
 
             if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "12":
                 tc.extra_cflags.append("-Wno-error=implicit-function-declaration")
+            if self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= "15":
+                # -Wimplicit-function-declaration is default as of clang 15
+                # https://releases.llvm.org/15.0.0/tools/clang/docs/ReleaseNotes.html#improvements-to-clang-s-diagnostics
+                # https://releases.llvm.org/16.0.0/tools/clang/docs/ReleaseNotes.html#potentially-breaking-changes
+                tc.extra_cflags.append("-Wno-error=implicit-function-declaration")
 
             tc.generate()
 
