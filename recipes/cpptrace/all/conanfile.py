@@ -8,7 +8,7 @@ import os
 
 required_conan_version = ">=1.53.0"
 
-class PackageConan(ConanFile):
+class CpptraceConan(ConanFile):
     name = "cpptrace"
     description = "Cpptrace is a lightweight C++ stacktrace library supporting C++11 and greater on Linux, macOS, and Windows including MinGW and Cygwin environments. The goal: Make stack traces simple for once."
     license = ("MIT", "LGPL-2.1-only", "BSD-2-Clause-Views")
