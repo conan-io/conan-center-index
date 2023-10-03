@@ -88,4 +88,3 @@ class LibdisplayInfoConan(ConanFile):
         self.cpp_info.libs = ["display-info"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m"])
-        self.runenv_info.prepend_path("PATH", os.path.join(self.package_folder, "bin"))
