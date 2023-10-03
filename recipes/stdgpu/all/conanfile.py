@@ -1,6 +1,4 @@
 import os
-import re
-from io import StringIO
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -98,7 +96,7 @@ class StdgpuConan(ConanFile):
         else:
             # The baseline Thrust version provided by Nvidia and Conan is not compatible with HIP.
             self.output.warning("HIP support requires Thrust with ROCm. "
-                                "Use Thrust from system instead of Conan.")
+                                "Using Thrust from system instead of Conan.")
         if self.options.backend == "openmp":
             if self.options.openmp == "llvm":
                 self.requires("llvm-openmp/12.0.1", transitive_headers=True, transitive_libs=True)
