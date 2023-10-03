@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, move_folder_contents, mkdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, move_folder_contents
 import os
 
 required_conan_version = ">=1.52.0"
@@ -26,6 +26,9 @@ class RecastNavigationConan(ConanFile):
 
     short_paths = True
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -49,14 +52,8 @@ class RecastNavigationConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
         tc.generate()
 
-    def _patch_sources(self):
-        if self.version == "cci.20200511":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "project(RecastNavigation)",
-                            "project(RecastNavigation)\ninclude(GNUInstallDirs)")
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

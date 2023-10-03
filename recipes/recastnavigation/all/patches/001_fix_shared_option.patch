@@ -1,0 +1,50 @@
+--- DebugUtils/CMakeLists.txt	2020-05-11 12:26:17.000000000 -0400
++++ DebugUtils/CMakeLists.txt	2020-08-07 12:40:03.921473100 -0400
+@@ -26,6 +26,7 @@
+         )
+
+ install(TARGETS DebugUtils
++        RUNTIME DESTINATION bin
+         ARCHIVE DESTINATION lib
+         LIBRARY DESTINATION lib
+         COMPONENT library
+--- Detour/CMakeLists.txt	2020-05-11 12:26:17.000000000 -0400
++++ Detour/CMakeLists.txt	2020-08-07 12:40:36.783319300 -0400
+@@ -20,6 +10,7 @@
+         )
+
+ install(TARGETS Detour
++        RUNTIME DESTINATION bin
+         ARCHIVE DESTINATION lib
+         LIBRARY DESTINATION lib
+         COMPONENT library
+--- DetourCrowd/CMakeLists.txt	2020-05-11 12:26:17.000000000 -0400
++++ DetourCrowd/CMakeLists.txt	2020-08-07 12:41:02.664066800 -0400
+@@ -24,6 +24,7 @@
+         )
+
+ install(TARGETS DetourCrowd
++        RUNTIME DESTINATION bin
+         ARCHIVE DESTINATION lib
+         LIBRARY DESTINATION lib
+         COMPONENT library
+--- DetourTileCache/CMakeLists.txt	2020-05-11 12:26:17.000000000 -0400
++++ DetourTileCache/CMakeLists.txt	2020-08-07 12:41:30.253060000 -0400
+@@ -25,6 +25,7 @@
+
+
+ install(TARGETS DetourTileCache
++        RUNTIME DESTINATION bin
+         ARCHIVE DESTINATION lib
+         LIBRARY DESTINATION lib
+         COMPONENT library
+--- Recast/CMakeLists.txt	2020-05-11 12:26:17.000000000 -0400
++++ Recast/CMakeLists.txt	2020-08-07 12:41:53.370875500 -0400
+@@ -20,6 +20,7 @@
+         )
+
+ install(TARGETS Recast
++        RUNTIME DESTINATION bin
+         ARCHIVE DESTINATION lib
+         LIBRARY DESTINATION lib
+         COMPONENT library
