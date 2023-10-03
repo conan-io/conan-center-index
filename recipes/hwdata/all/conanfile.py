@@ -39,7 +39,7 @@ class HwDataConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.arch
-        del self.info.settings.build_typ
+        del self.info.settings.build_type
         del self.info.settings.compiler
         del self.info.settings.os
 
