@@ -1,9 +1,9 @@
-from conan.tools.files import save
+from conan.tools.files import save, load
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 
 class MicroprofileConan(ConanFile):
