@@ -98,25 +98,16 @@ class StdgpuConan(ConanFile):
         else:
             # The baseline Thrust version provided by Nvidia and Conan is not compatible with HIP.
             self.output.warning("HIP support requires Thrust with ROCm. "
-                                "Will Thrust from system instead of Conan.")
+                                "Use Thrust from system instead of Conan.")
         if self.options.backend == "openmp":
             if self.options.openmp == "llvm":
                 self.requires("llvm-openmp/12.0.1", transitive_headers=True, transitive_libs=True)
             else:
                 self.output.info("Using OpenMP backend with system OpenMP")
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            output = StringIO()
-            self.run("cmake --version", output)
-            cmake_version = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())[1]
-            return Version(cmake_version) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
-        if Version(self.version) > "1.3.0" and not self._cmake_new_enough("3.18"):
-            self.tool_requires("cmake/[>=3.18]")
+        if Version(self.version) > "1.3.0":
+            self.tool_requires("cmake/[>=3.18 <4]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
