@@ -71,7 +71,7 @@ class CpptraceConan(ConanFile):
         variables = {}
         if not self.options.shared:
             variables["CPPTRACE_STATIC"] = True
-        cmake.configure()
+        cmake.configure(variables)
         cmake.build()
 
     def package(self):
