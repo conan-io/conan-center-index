@@ -57,7 +57,7 @@ class SevenBitConfConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("taocpp-json/1.0.0-beta.13", transitive_headers=True)
+        self.requires("taocpp-json/1.0.0-beta.14", transitive_headers=True)
 
     def package_id(self):
         if self.info.options.header_only:
@@ -137,4 +137,3 @@ class SevenBitConfConan(ConanFile):
 
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.append("m")
-

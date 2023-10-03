@@ -1,5 +1,13 @@
 # Changelog
 
+### 25-Sep-2023 - 14:33 CEST
+
+- [feature] Label PRs that have missing dependencies.
+- [feature] Remove check regression for Conan v2 pipeline.
+- [feature] Start deprecating epochs support in profile configurations.
+- [fix] Run TapaholesRepo job only once per week.
+- [fix] Run ListPackages job only once per week.
+
 ### 01-Sep-2023 - 19:58 CEST
 
 - [fix] Use Unix separators for Windows folder path when creating CI workspace.
