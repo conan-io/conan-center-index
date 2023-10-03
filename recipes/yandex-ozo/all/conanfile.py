@@ -39,7 +39,7 @@ class YandexOzoConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.83.0")
+        self.requires("boost/1.79.0")
         self.requires("resource_pool/cci.20210322")
         self.requires("libpq/15.4")
 
@@ -67,12 +67,16 @@ class YandexOzoConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        copy(self, "*", dst=os.path.join("include", "ozo"), src=os.path.join(self.source_folder, "include", "ozo"))
+        copy(self, "*.h",
+             dst=os.path.join(self.package_folder, "include", "ozo"),
+             src=os.path.join(self.source_folder, "include", "ozo"))
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
     def package_info(self):
         self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
 
         main_comp = self.cpp_info.components["_ozo"]
         main_comp.requires = ["boost::boost", "boost::system", "boost::thread", "boost::coroutine", "resource_pool::resource_pool", "libpq::pq"]
