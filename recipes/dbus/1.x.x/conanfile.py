@@ -73,7 +73,7 @@ class DbusConan(ConanFile):
         if self.options.get_safe("with_systemd"):
             self.requires("libsystemd/253.10")
         if self.options.with_selinux:
-            self.requires("libselinux/3.3")
+            self.requires("libselinux/3.5")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
 
