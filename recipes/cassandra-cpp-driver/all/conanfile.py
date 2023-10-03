@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rm
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import check_min_cppstd
+from conan.tools.apple import fix_apple_shared_install_name
 import os
 
 required_conan_version = ">=1.53.0"
@@ -66,7 +67,7 @@ class CassandraCppDriverConan(ConanFile):
 
         if self.options.with_zlib:
             self.requires("minizip/1.2.13")
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
         if self.options.use_atomic == "boost":
             self.requires("boost/1.82.0")
@@ -146,6 +147,7 @@ class CassandraCppDriverConan(ConanFile):
         copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["cassandra" if self.options.shared else "cassandra_static"]
@@ -155,3 +157,6 @@ class CassandraCppDriverConan(ConanFile):
                 "crypt32", "ws2_32", "userenv", "version"])
             if not self.options.shared:
                 self.cpp_info.defines = ["CASS_STATIC"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m"]
+
