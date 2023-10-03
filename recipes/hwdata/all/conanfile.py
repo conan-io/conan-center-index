@@ -37,6 +37,12 @@ class HwDataConan(ConanFile):
         basic_layout(self, src_folder="src")
         self.folders.build = "src"
 
+    def package_id(self):
+        del self.info.settings.arch
+        del self.info.settings.build_typ
+        del self.info.settings.compiler
+        del self.info.settings.os
+
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.win_bash = True
