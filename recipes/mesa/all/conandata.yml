@@ -1,0 +1,4 @@
+sources:
+  "23.2.1":
+    url: "https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-23.2.1/mesa-23.2.1.tar.bz2"
+    sha256: "67a39f5c9eb83d0027c4340d2965738f334575160a9fc30b9175a99a84aebfdc"
