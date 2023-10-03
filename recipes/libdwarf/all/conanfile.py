@@ -48,7 +48,7 @@ class LibdwarfConan(ConanFile):
 
     def requirements(self):
         self.requires("libelf/0.8.13")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
