@@ -1,23 +1,39 @@
 # Changelog
 
+### 25-Sep-2023 - 14:33 CEST
+
+- [feature] Label PRs that have missing dependencies.
+- [feature] Remove check regression for Conan v2 pipeline.
+- [feature] Start deprecating epochs support in profile configurations.
+- [fix] Run TapaholesRepo job only once per week.
+- [fix] Run ListPackages job only once per week.
+
 ### 01-Sep-2023 - 19:58 CEST
 
-- [fix] Use Unix separators for Windows folder path when creating CI workspace
+- [fix] Use Unix separators for Windows folder path when creating CI workspace.
 
-### 17-Aug-2023 - 11:42 CEST
+### 31-August-2023 - 12:57 CEST
+
+- [feature] Support specific PR number for Automatic Merge.
+- [feature] Use temporary folder for build workspace.
+- [fix] Rename BuildSingleReference folder to bsr to overcome Windows long path.
+- [fix] Remove graph info from logs to avoid long loading.
+- [fix] Remove deprecated search index for Conan Center.
+
+### 17-August-2023 - 11:42 CEST
 
 - [fix] Fix type error when catching generic exceptions in Jenkins
 - [fix] Bump dependencies no longer allow version range
 - [feature] Show recipe revision on the pull-request summary table
 
-### 04-Aug-2023 - 10:26 CEST
+### 04-August-2023 - 10:26 CEST
 
 - [feature] Enable Conan 2.0.8
 - [feature] Enable Conan 1.60.2
 - [feature] Update Jenkins server version
 - [hotfix] Better error management when having CI build timeout
 
-### 19-Jul-2023 - 09:45 CEST
+### 19-July-2023 - 09:45 CEST
 
 - [fix] Fix message processing if no message is passed.
 - [fix] Fix automatic merge priority to follow the correct PR order.
