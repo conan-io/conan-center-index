@@ -3,7 +3,7 @@ import shutil
 import textwrap
 
 from conan import ConanFile
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.scm import Version
@@ -110,6 +110,7 @@ class CryptoPPPEMConan(ConanFile):
                 "cryptopp-pem-static": "cryptopp-pem::cryptopp-pem-static"
             }
         )
+        fix_apple_shared_install_name(self)
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
