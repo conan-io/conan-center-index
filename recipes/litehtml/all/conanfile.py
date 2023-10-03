@@ -54,7 +54,7 @@ class LitehtmlConan(ConanFile):
     def requirements(self):
         # FIXME: add gumbo requirement (it is vendored right now)
         if self.options.with_icu:
-            self.requires("icu/72.1")
+            self.requires("icu/73.2")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
