@@ -15,8 +15,8 @@ class DetoursConan(ConanFile):
     description = "Detours is a software package for monitoring and instrumenting API calls on Windows"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/antlr/antlr4/tree/master/runtime/Cpp"
-    topics = ("monitoror", "instrumenting", "hook", "injection")
+    homepage = "https://github.com/microsoft/Detours"
+    topics = ("monitoring", "instrumenting", "hook", "injection", "windows")
 
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
