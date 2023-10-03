@@ -1,4 +1,4 @@
 sources:
-  "5.3.2":
-    sha256: d18ad8f24e3461108d8e2e0c838c8fca671f808ab8d06a2c32a7065f321995a1
-    url: https://github.com/apple/swift-corelibs-libdispatch/archive/swift-5.3.2-RELEASE.tar.gz
+  "5.9":
+    sha256: db30ccf6b20963112ab3aad256c2e49a18041a9806cf2f05854fe63a90d688c2
+    url: https://github.com/apple/swift-corelibs-libdispatch/archive/swift-5.9-RELEASE.tar.gz
