@@ -77,4 +77,3 @@ class LibEvdevConan(ConanFile):
         self.cpp_info.includedirs = [os.path.join("include", f"libevdev-{Version(self.version).major}.0")]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "rt"])
-        self.runenv_info.prepend_path("PATH", os.path.join(self.package_folder, "bin"))
