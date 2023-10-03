@@ -11,10 +11,10 @@ required_conan_version = ">=1.57.0"
 
 class CubicInterpolationConan(ConanFile):
     name = "cubicinterpolation"
-    homepage = "https://github.com/MaxSac/cubic_interpolation"
-    license = "MIT"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "Leightweight interpolation library based on boost and eigen."
+    license = "MIT"
+    homepage = "https://github.com/MaxSac/cubic_interpolation"
+    url = "https://github.com/conan-io/conan-center-index"
     topics = ("interpolation", "splines", "cubic", "bicubic", "boost", "eigen3")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -26,8 +26,6 @@ class CubicInterpolationConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    _cmake = None
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -45,15 +43,14 @@ class CubicInterpolationConan(ConanFile):
 
     def requirements(self):
         # TODO: update boost dependency as soon as we deprecate conan1.x (see discussion in #11207)
-        self.requires("boost/1.75.0")
-        self.requires("eigen/3.3.9")
+        self.requires("boost/1.83.0")
+        self.requires("eigen/3.4.0")
 
     @property
     def _required_boost_components(self):
         return ["filesystem", "math", "serialization"]
 
     def validate(self):
-
         miss_boost_required_comp = any(getattr(self.dependencies["boost"].options, f"without_{boost_comp}", True) for boost_comp in self._required_boost_components)
         if self.dependencies["boost"].options.header_only or miss_boost_required_comp:
             raise ConanInvalidConfiguration(
@@ -64,7 +61,7 @@ class CubicInterpolationConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "14")
 
-        if not check_min_vs(self, 192, raise_invalid=False):    
+        if not check_min_vs(self, 192, raise_invalid=False):
             raise ConanInvalidConfiguration(f"{self.ref} currently Visual Studio < 2019 not yet supported in this recipe. Contributions are welcome")
 
         if is_msvc(self) and self.options.shared:
@@ -74,7 +71,7 @@ class CubicInterpolationConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = CMakeToolchain(self)  
+        tc = CMakeToolchain(self)
         tc.variables["BUILD_EXAMPLE"] = False
         tc.variables["BUILD_DOCUMENTATION"] = False
         tc.generate()
