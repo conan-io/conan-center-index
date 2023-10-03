@@ -72,7 +72,10 @@ class VerySimpleSmtpsConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-        if (self.settings.compiler == "clang" or self.settings.compiler == "apple-clang") and self.settings.compiler.libcxx == "libc++":
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("very-simple-smtps is only supported by Linux")
+
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
             raise ConanInvalidConfiguration("very-simple-smtps can not use libc++")
 
         # for plain C projects only
