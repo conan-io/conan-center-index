@@ -1,0 +1,4 @@
+sources:
+  "1.0.1":
+    url: "https://github.com/llohse/libnpy/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "43452a4db1e8c1df606c64376ea1e32789124051d7640e7e4e8518ab4f0fba44"

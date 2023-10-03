@@ -49,7 +49,7 @@ class KModConan(ConanFile):
         if self.options.with_xz:
             self.requires("xz_utils/5.4.2")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
 

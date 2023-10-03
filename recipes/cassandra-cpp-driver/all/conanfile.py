@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rm
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import check_min_cppstd
-from conan.tools.apple import fix_apple_shared_install_name
 import os
 
 required_conan_version = ">=1.53.0"
@@ -14,7 +13,8 @@ class CassandraCppDriverConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://docs.datastax.com/en/developer/cpp-driver/"
-    topics = ("cassandra", "cpp-driver", "database",)
+    topics = ("cassandra", "cpp-driver", "database")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -70,10 +70,10 @@ class CassandraCppDriverConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
         if self.options.use_atomic == "boost":
-            self.requires("boost/1.82.0")
+            self.requires("boost/1.83.0")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
         if self.options.use_atomic == "boost":
@@ -123,6 +123,8 @@ class CassandraCppDriverConan(ConanFile):
 
         if self.settings.os == "Linux":
             tc.variables["CASS_USE_TIMERFD"] = self.options.use_timerfd
+        # Relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -147,7 +149,6 @@ class CassandraCppDriverConan(ConanFile):
         copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["cassandra" if self.options.shared else "cassandra_static"]
