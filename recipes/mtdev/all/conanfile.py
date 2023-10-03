@@ -64,4 +64,3 @@ class MtdevConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["mtdev"]
-        self.runenv_info.prepend_path("PATH", os.path.join(self.package_folder, "bin"))
