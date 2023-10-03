@@ -108,6 +108,11 @@ class Libx265Conan(ConanFile):
         if self.settings.os == "Android":
             replace_in_file(self, cmakelists, "list(APPEND PLATFORM_LIBS pthread)", "")
             replace_in_file(self, cmakelists, "list(APPEND PLATFORM_LIBS rt)", "")
+        # The finite-math-only optimization has no effect and can cause linking errors
+        # when linked against glibc >= 2.31
+        replace_in_file(self, cmakelists,
+                        "add_definitions(-ffast-math)",
+                        "add_definitions(-ffast-math -fno-finite-math-only)")
 
     def build(self):
         self._patch_sources()
