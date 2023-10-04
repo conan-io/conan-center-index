@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, mkdir, rename, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime
 
 required_conan_version = ">=1.53.0"
@@ -72,10 +72,6 @@ class rpclibConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if self.settings.os == "Windows" and self.options.shared:
-            mkdir(self, self.package_path / "bin")
-            for dll in (self.package_path / "lib").glob("*.dll"):
-                rename(self, dll, self.package_path / "bin" / dll.name)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "rpclib")
