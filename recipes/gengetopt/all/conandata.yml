@@ -7,4 +7,3 @@ patches:
     - patch_file: "patches/remove_test_and_docs.patch"
       patch_type: conan
       patch_description: Prevent building of the tests and documentation
-      strip: 2

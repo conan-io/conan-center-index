@@ -1,7 +1,7 @@
 Index: all/src/configure.ac
 ===================================================================
---- all.orig/src/configure.ac
-+++ all/src/configure.ac
+--- a/configure.ac
++++ b/configure.ac
 @@ -119,50 +119,8 @@ AC_CONFIG_FILES([
  	gl/Makefile
  	src/Makefile
@@ -56,8 +56,8 @@ Index: all/src/configure.ac
  AC_OUTPUT
 Index: all/src/Makefile.am
 ===================================================================
---- all.orig/src/Makefile.am
-+++ all/src/Makefile.am
+--- a/Makefile.am
++++ b/Makefile.am
 @@ -18,7 +18,7 @@
  ACLOCAL_AMFLAGS = -I m4 -I gl/m4
  
@@ -69,8 +69,8 @@ Index: all/src/Makefile.am
  
 Index: all/src/src/Makefile.am
 ===================================================================
---- all.orig/src/src/Makefile.am
-+++ all/src/src/Makefile.am
+--- a/src/Makefile.am
++++ b/src/Makefile.am
 @@ -16,7 +16,7 @@
  # with gengetopt; see the file COPYING. If not, write to the Free Software 
  # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
