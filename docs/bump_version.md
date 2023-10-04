@@ -18,7 +18,7 @@ Once you detect which version should be updated, please, first check if the proj
 
 ## What should be modified when bumping a version?
 
-Only the `config.yml` and `conandata.yml` should be updated with that new version:
+Only the `config.yml` and `conandata.yml` should be updated with that new version: 
 
 ```yaml
 # config.yml
