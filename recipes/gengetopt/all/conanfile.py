@@ -1,7 +1,7 @@
 from conan import ConanFile
-from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
+from conan.tools.gnu import Autotools
 from conan.tools.layout import basic_layout
-from conan.tools.files import get, mkdir, apply_conandata_patches
+from conan.tools.files import get, mkdir, apply_conandata_patches, rmdir, copy
 
 import pathlib
 
@@ -19,11 +19,13 @@ class gengetoptConan(ConanFile):
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "patches/*.patch"
+    generators = "AutotoolsDeps", "AutotoolsToolchain"
 
     def build_requirements(self):
-        self.tool_requires("gengen/1.4.2")
         self.tool_requires("flex/2.6.4")
         self.tool_requires("bison/3.8.2")
+        self.tool_requires("automake/1.16.5")
+        self.tool_requires("autoconf/2.71")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -32,12 +34,6 @@ class gengetoptConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
-
-    def generate(self):
-        deps = AutotoolsDeps(self)
-        deps.generate()
-        at_toolchain = AutotoolsToolchain(self)
-        at_toolchain.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -52,6 +48,17 @@ class gengetoptConan(ConanFile):
         autotools.install()
 
         lic_path = pathlib.Path(self.package_folder) / "licenses"
-        mkdir(lic_path)
+        mkdir(self, lic_path)
         copy(self, "COPYING", self.source_folder, lic_path)
         copy(self, "LICENSE", self.source_folder, lic_path)
+
+        share_path = pathlib.Path(self.package_folder) / "share"
+        rmdir(self, share_path)
+
+
+    def package_info(self):
+        self.cpp_info.includedirs.clear()
+        self.cpp_info.libdirs.clear()
+
+    def package_id(self):
+        del self.info.settings.compiler
