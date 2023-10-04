@@ -69,8 +69,8 @@ class AravisConan(ConanFile):
                 if not (1 <= gv_n_buffers_val ):
                     raise ConanInvalidConfiguration(
                         f"gv_n_buffers_val must be greater than 1 Provided: {gv_n_buffers_val}")
-            except ValueError:
-                raise ConanInvalidConfiguration("gv_n_buffers_val must be an integer.")
+            except ValueError as e:
+                raise ConanInvalidConfiguration("gv_n_buffers_val must be an integer.") from e
 
 
     def layout(self):
