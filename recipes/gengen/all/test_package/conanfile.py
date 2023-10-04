@@ -5,9 +5,10 @@ from conan.tools.layout import basic_layout
 
 class gengenTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
+    test_type = "explicit"
 
-    def requirements(self):
-        self.test_requires(self.tested_reference_str)
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def layout(self):
         basic_layout(self)
