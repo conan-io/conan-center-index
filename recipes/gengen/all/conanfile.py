@@ -51,4 +51,4 @@ class gengenConan(ConanFile):
 
     def package_id(self):
         # Only consumed as a compiled application
-        del self.settings.compiler
+        del self.info.settings.compiler
