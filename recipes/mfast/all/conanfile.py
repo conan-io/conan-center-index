@@ -71,7 +71,8 @@ class mFASTConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.75.0")
+        # transitive_headers=True because mfast/mfast_export.h includes boost/config.hpp
+        self.requires("boost/1.75.0", transitive_headers=True)
         self.requires("tinyxml2/9.0.0")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.43.1")
