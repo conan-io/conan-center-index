@@ -1,0 +1,39 @@
+name: 'Limit PRs open per user'
+description: 'Get all changed files in a Pull Request'
+author: 'danimtb'
+inputs:
+  files:
+    description: "Limit the number of open pull-request that user can have open at the same time"
+    required: false
+    default: ""
+  limit:
+    description: "Maximum number of PRs an author can open"
+    required: true
+    default: "10"
+  comment:
+    description: "Comment to post in the github PR when the limit of open PRs is reached"
+    required: true
+    default: "This is a comment"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/github-script@v6
+      with:
+        script: |
+          const creator = context.payload.sender.login
+          const opts = github.rest.issues.listForRepo.endpoint.merge({
+            ...context.issue,
+            creator,
+            is: 'pr'
+            state: 'open',
+            sort: 'created',
+            order: 'asc'
+          })
+          const prs = await github.paginate(opts)
+
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: Your number of PRs open is ${{ prs.length }} :wink:`
+          })

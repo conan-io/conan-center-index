@@ -1,0 +1,18 @@
+name: "[service] Alert Community"
+
+on:
+  pull_request_target:
+    types: [opened]
+
+env:
+  PYVER: "3.10"
+
+jobs:
+  comment:
+    # if: github.repository == 'conan-io/conan-center-index'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/prs_user_limit
+        with:
+          limit: 27
+          comment: "my comment"
