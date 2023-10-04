@@ -30,7 +30,7 @@ runs:
       id: check-prs
       shell: python
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
         import os
         from github import Github
