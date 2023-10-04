@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get, rmdir, rename, replace_in_file
+from conan.tools.files import collect_libs, copy, get, rmdir, replace_in_file
 
 required_conan_version = ">=1.53.0"
 
@@ -89,8 +89,6 @@ class CoseCConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        for dll in (self.package_path / "lib").glob("*.dll"):
-            rename(self, dll, self.package_path / "bin" / dll.name)
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
