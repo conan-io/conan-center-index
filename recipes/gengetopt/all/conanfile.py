@@ -13,6 +13,7 @@ class gengetoptConan(ConanFile):
     # Optional metadata
     license = "GPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.gnu.org/software/gengetopt/gengetopt.html"
     description = "A tool to write command line option parsing code for C programs."
     topics = ("gnu", "generator", "parsing", "command-line")
 
