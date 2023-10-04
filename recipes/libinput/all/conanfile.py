@@ -53,8 +53,8 @@ class LibinputConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("mtdev/1.1.6")
-        self.requires("libevdev/1.13.1")
+        self.requires("mtdev/1.1.6", transitive_libs=True)
+        self.requires("libevdev/1.13.1", transitive_libs=True)
 
         if self.options.debug_gui:
             self.requires("cairo/1.17.6")
