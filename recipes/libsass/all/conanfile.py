@@ -1,21 +1,27 @@
 from conan import ConanFile
-from conan.tools.files import get, chdir, save, replace_in_file, rmdir, rm
-from conan.tools.microsoft import is_msvc
-from conans import AutoToolsBuildEnvironment, MSBuild, tools
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, chdir, copy, save, replace_in_file, rmdir, rm
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, MSBuild, MSBuildDeps, MSBuildToolchain, unix_path
 import os
 import re
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibsassConan(ConanFile):
     name = "libsass"
     license = "MIT"
-    homepage = "libsass.org"
+    homepage = "https://sass-lang.com/libsass"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "A C/C++ implementation of a Sass compiler"
-    topics = ("Sass", "LibSass", "compiler")
+    description = "Libsass is a C/C++ port of the Sass CSS precompiler."
+    topics = ("css", "precompiler", "sass")
     settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False]
@@ -25,11 +31,9 @@ class LibsassConan(ConanFile):
         "fPIC": True
     }
 
-    _autotools = None
-
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     @property
     def _is_mingw(self):
@@ -41,107 +45,98 @@ class LibsassConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self.settings.os != "Windows":
-            self.tool_requires("libtool/2.4.7")
+        self.tool_requires("libtool/2.4.7")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+        if is_msvc(self):
+            self.tool_requires("automake/1.16.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
-        args = []
-        args.append("--disable-tests")
-        args.append("--enable-%s" % ("shared" if self.options.shared else "static"))
-        args.append("--disable-%s" % ("static" if self.options.shared else "shared"))
-        self._autotools.configure(args=args)
-        return self._autotools
+    def generate(self):
+        autotools_toolchain = AutotoolsToolchain(self)
+        autotools_toolchain.configure_args.append(f"--enable-tests=no")
+        autotools_toolchain.extra_defines.append(f"LIBSASS_VERSION=\"\\\\\"{self.version}\\\\\"\"")
+        autotools_toolchain.generate()
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
+        if self._is_mingw:
+            env = Environment()
+            env.define("BUILD", "shared" if self.options.shared else "static")
+            env.define("PREFIX", unix_path(self, self.package_folder))
+            # Don't force static link to mingw libs, leave this decision to consumer (through LDFLAGS in env)
+            env.define("STATIC_ALL", "0")
+            env.define("STATIC_LIBGCC", "0")
+            env.define("STATIC_LIBSTDCPP", "0")
+            env.vars(self).save_script("conanbuild_mingw")
+        if is_msvc(self):
+            env = Environment()
+            automake_conf = self.dependencies.build["automake"].conf_info
+            compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
+            ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            env.define("NM", "dumpbin -symbols")
+            env.define("OBJDUMP", ":")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+            env.vars(self).save_script("conanbuild_msvc")
 
-    def _build_autotools(self):
-        with chdir(self, self._source_subfolder):
-            save(self, path="VERSION", content=f"{self.version}")
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")))
-            autotools = self._configure_autotools()
-            autotools.make()
-
-    @property
-    def _make_program(self):
-        return tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make") or tools.which("mingw32-make"))
-
-    def _build_mingw(self):
-        makefile = os.path.join(self._source_subfolder, "Makefile")
-        replace_in_file(self, makefile, "CFLAGS   += -O2", "")
-        replace_in_file(self, makefile, "CXXFLAGS += -O2", "")
-        replace_in_file(self, makefile, "LDFLAGS  += -O2", "")
-        with chdir(self, self._source_subfolder):
-            env_vars = AutoToolsBuildEnvironment(self).vars
-            env_vars.update({
-                "BUILD": "shared" if self.options.shared else "static",
-                "PREFIX": tools.unix_path(os.path.join(self.package_folder)),
-                # Don't force static link to mingw libs, leave this decision to consumer (through LDFLAGS in env)
-                "STATIC_ALL": "0",
-                "STATIC_LIBGCC": "0",
-                "STATIC_LIBSTDCPP": "0",
-            })
-            with tools.environment_append(env_vars):
-                self.run(f"{self._make_program} -f Makefile")
-
-    def _build_visual_studio(self):
-        with chdir(self, self._source_subfolder):
-            properties = {
-                "LIBSASS_STATIC_LIB": "" if self.options.shared else "true",
-                "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
-            }
-            platforms = {
-                "x86": "Win32",
-                "x86_64": "Win64"
-            }
-            msbuild = MSBuild(self)
-            msbuild.build(os.path.join("win", "libsass.sln"), platforms=platforms, properties=properties)
+    # def _build_visual_studio(self):
+    #     with chdir(self, self._source_subfolder):
+    #         properties = {
+    #             "LIBSASS_STATIC_LIB": "" if self.options.shared else "true",
+    #             "WholeProgramOptimization": "true" if any(re.finditer("(^| )[/-]GL($| )", tools.get_env("CFLAGS", ""))) else "false",
+    #         }
+    #         platforms = {
+    #             "x86": "Win32",
+    #             "x86_64": "Win64"
+    #         }
+    #         msbuild = MSBuild(self)
+    #         msbuild.build(os.path.join("win", "libsass.sln"), platforms=platforms, properties=properties)
 
     def build(self):
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        autotools.configure()
         if self._is_mingw:
-            self._build_mingw()
-        elif is_msvc(self):
-            self._build_visual_studio()
-        else:
-            self._build_autotools()
+            replace_in_file(self, os.path.join(self.source_folder, "Makefile"), "CFLAGS   += -O2", "")
+            replace_in_file(self, os.path.join(self.source_folder, "Makefile"), "CXXFLAGS += -O2", "")
+            replace_in_file(self, os.path.join(self.source_folder, "Makefile"), "LDFLAGS  += -O2", "")
+        autotools.make()
 
-    def _install_autotools(self):
-        with chdir(self, self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rm(self, "*.la", self.package_folder, recursive=True)
+    # def _install_mingw(self):
+    #     copy(self, "*.h", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
+    #     copy(self, "*.dll", dst="bin", src=os.path.join(self._source_subfolder, "lib"))
+    #     copy(self, "*.a", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
 
-    def _install_mingw(self):
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*.dll", dst="bin", src=os.path.join(self._source_subfolder, "lib"))
-        self.copy("*.a", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
-
-    def _install_visual_studio(self):
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*.dll", dst="bin", src=os.path.join(self._source_subfolder, "win", "bin"), keep_path=False)
-        self.copy("*.lib", dst="lib", src=os.path.join(self._source_subfolder, "win", "bin"), keep_path=False)
+    # def _install_visual_studio(self):
+    #     self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
+    #     self.copy("*.dll", dst="bin", src=os.path.join(self._source_subfolder, "win", "bin"), keep_path=False)
+    #     self.copy("*.lib", dst="lib", src=os.path.join(self._source_subfolder, "win", "bin"), keep_path=False)
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        if self._is_mingw:
-            self._install_mingw()
-        elif is_msvc(self):
-            self._install_visual_studio()
-        else:
-            self._install_autotools()
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install()
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libsass"
-        self.cpp_info.libs = ["libsass" if is_msvc(self) else "sass"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        self.cpp_info.libs = ["sass"]
+        if self.settings.os in ["FreeBSD", "Linux"]:
             self.cpp_info.system_libs.extend(["dl", "m"])
-        if not self.options.shared and tools.stdcpp_library(self):
-            self.cpp_info.system_libs.append(tools.stdcpp_library(self))
+        if not self.options.shared and stdcpp_library(self):
+            self.cpp_info.system_libs.append(stdcpp_library(self))
