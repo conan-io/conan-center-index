@@ -21,4 +21,4 @@ jobs:
       - uses: ./.github/actions/prs_user_limit
         with:
           limit: "2"
-          comment: "my comment"
+          comment: "Hi @{username}, you have reached the limit of open pull-requests :dart:\\n\\nPlease consider working on the open ones first and help us improve the experience for everyone using conan-center-index :handshake:\\n\\n- :open_file_folder: Your open pull-requests: {user_open_prs_str} ({user_open_prs_len})\\n- :no_entry: Limit: {limit}\\n\\n Thank you :smile:"
