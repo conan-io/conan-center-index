@@ -7,8 +7,6 @@ sources:
     sha256: "bd5b5009ca914c8fa7944b92ea6b4ca6fb7d146f65d526f21bf8b3c6a0520e44"
 patches:
   "0.12.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-find-apr.patch"
+    - patch_file: "patches/0001-find-apr.patch"
   "0.12.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-find-apr.patch"
+    - patch_file: "patches/0001-find-apr.patch"
