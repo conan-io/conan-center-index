@@ -105,6 +105,7 @@ class UtilLinuxLibuuidConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "sbin"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "usr"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
