@@ -1,0 +1,4 @@
+sources:
+  "2.8.0":
+    url: "https://github.com/linuxwacom/libwacom/releases/download/libwacom-2.8.0/libwacom-2.8.0.tar.xz"
+    sha256: "bb04b12c8688d0ff6a108d47a38d2057d572c4d7227d78138abd5fd0ba59f215"
