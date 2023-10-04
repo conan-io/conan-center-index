@@ -44,8 +44,7 @@ class CpptraceConan(ConanFile):
 
     def requirements(self):
         # TODO: libdwarf has a recipe but it's horribly outdated. For now relying on bundled libdwarf.
-        self.requires("libelf/0.8.13")
-        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("zlib")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -66,6 +65,7 @@ class CpptraceConan(ConanFile):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         if not self.options.shared:
             tc.variables["CPPTRACE_STATIC"] = True
+        tc.variables["CMAKE_DWARF_FINDPACKAGE_Z"] = True
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()

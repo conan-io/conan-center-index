@@ -9,3 +9,6 @@ patches:
     - patch_file: "patches/0.2.0/0001-fixes.patch"
       patch_type: "portability"
       patch_description: "Fixes for cmake and some warnings"
+    - patch_file: "patches/0.2.0/0002-cmake.patch"
+      patch_type: "fixes"
+      patch_description: "Option to find_package zlib and remove the HAS_ADDR2LINE CHECK"
