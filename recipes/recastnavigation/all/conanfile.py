@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, move_folder_contents
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, move_folder_contents, rmdir
 import os
 
 required_conan_version = ">=1.52.0"
@@ -62,6 +62,8 @@ class RecastNavigationConan(ConanFile):
         copy(self, "License.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.version == "cci.20200511":
             # Move the includes under recastnavigation/ prefix for future compatibility
             mkdir(self, os.path.join(self.package_folder, "include", "recastnavigation"))
