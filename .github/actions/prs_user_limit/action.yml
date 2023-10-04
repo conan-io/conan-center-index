@@ -59,8 +59,8 @@ runs:
         user_open_prs = [p for p in open_prs if p.user.login == username]
 
         # Check the number of open PRs and the specified limit
-        limit = int(os.environ["limit"])
+        limit = int(${{ github.event.inputs.limit }})
         if len(user_open_prs) >= limit:
             # Post a comment on the current pull request if the limit is reached
             comment_text = os.environ["comment"]
-            pr.create_issue_comment(comment_text)
+            pr.create_issue_comment(${{ github.event.inputs.comment }})
