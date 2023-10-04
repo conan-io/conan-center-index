@@ -1,25 +1,8 @@
-Index: src/Makefile.am
+Index: all/src/configure.ac
 ===================================================================
---- a/Makefile.am
-+++ b/Makefile.am
-@@ -18,7 +18,7 @@
- ACLOCAL_AMFLAGS = -I m4 -I gl/m4
- 
- EXTRA_DIST = configure TODO LICENSE gl/m4/gnulib-cache.m4
--SUBDIRS = gl src doc tests
-+SUBDIRS = gl src
- 
- gengetoptdoc_DATA = ChangeLog COPYING NEWS THANKS INSTALL README LICENSE
- 
-Index: src/configure.ac
-===================================================================
---- a/configure.ac
-+++ b/configure.ac
-@@ -115,54 +115,10 @@ AH_TEMPLATE(HAVE_LONG_LONG)
- 
- AC_CONFIG_FILES([
- 	Makefile
--	doc/Makefile
+--- all.orig/src/configure.ac
++++ all/src/configure.ac
+@@ -119,50 +119,8 @@ AC_CONFIG_FILES([
  	gl/Makefile
  	src/Makefile
  	src/skels/Makefile
@@ -30,10 +13,11 @@ Index: src/configure.ac
 -	tests/test_conf_parser_ov2.c
 -	tests/test_conf_parser_ov3.c
 -	tests/test_conf_parser_ov4.c
- ])
+-])
  
 -AC_DEFUN([AC_CONFIG_TEST_SH], [AC_CONFIG_FILES([$1], [chmod -- +x $1])])
--
++])
+ 
 -AC_CONFIG_TEST_SH([tests/more_than_once.sh])
 -AC_CONFIG_TEST_SH([tests/no_optgiven.sh])
 -AC_CONFIG_TEST_SH([tests/test_all_opts.sh])
@@ -70,3 +54,29 @@ Index: src/configure.ac
 -AC_CONFIG_TEST_SH([tests/valgrind_tests.sh])
  
  AC_OUTPUT
+Index: all/src/Makefile.am
+===================================================================
+--- all.orig/src/Makefile.am
++++ all/src/Makefile.am
+@@ -18,7 +18,7 @@
+ ACLOCAL_AMFLAGS = -I m4 -I gl/m4
+ 
+ EXTRA_DIST = configure TODO LICENSE gl/m4/gnulib-cache.m4
+-SUBDIRS = gl src doc tests
++SUBDIRS = gl src
+ 
+ gengetoptdoc_DATA = ChangeLog COPYING NEWS THANKS INSTALL README LICENSE
+ 
+Index: all/src/src/Makefile.am
+===================================================================
+--- all.orig/src/src/Makefile.am
++++ all/src/src/Makefile.am
+@@ -16,7 +16,7 @@
+ # with gengetopt; see the file COPYING. If not, write to the Free Software 
+ # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
+ 
+-SUBDIRS = skels tests
++SUBDIRS = skels
+ 
+ bin_PROGRAMS = gengetopt
+ 
