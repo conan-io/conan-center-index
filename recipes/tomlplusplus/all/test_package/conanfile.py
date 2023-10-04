@@ -18,7 +18,7 @@ class TestPackageConan(ConanFile):
     
     @property
     def _single_header_only(self):
-        return self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8":
+        return self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8"
 
     def generate(self):
         tc = CMakeToolchain(self)
