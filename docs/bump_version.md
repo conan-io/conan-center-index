@@ -26,7 +26,7 @@ versions:
   "1.1.0":       <-- New version added. It should be protected by quotes
     folder: all  <-- Folder name where conandata.yml is installed
   "1.0.0":
-    folder: all
+    folder: all   
 ```
 
 ```yaml
