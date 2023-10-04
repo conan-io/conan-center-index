@@ -296,7 +296,7 @@ class LibcurlConan(ConanFile):
         replace_in_file(self, top_makefile, "include src/Makefile.inc", "")
 
         # zlib naming is not always very consistent
-        if self.options.with_zlib:
+        if self.options.with_zlib and Version(self.version) < "8.3.0":
             configure_ac = os.path.join(self.source_folder, "configure.ac")
             zlib_name = self.dependencies["zlib"].cpp_info.aggregated_components().libs[0]
             replace_in_file(self, configure_ac,
