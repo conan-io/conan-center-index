@@ -41,7 +41,7 @@ class gengenConan(ConanFile):
         autotools.install()
 
         #copy license to package folder
-        lic_path = str(pathlib.Path(self.package_folder) / "licences")
+        lic_path = str(pathlib.Path(self.package_folder) / "licenses")
         mkdir(self, lic_path)
         copy(self, "COPYING", self.source_folder, lic_path)
 
