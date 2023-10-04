@@ -35,5 +35,5 @@ runs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: `Your number of PRs open is ${{ prs.length }} :wink:`
+            body: `Your number of PRs open is ${prs.length} :wink:`
           })
