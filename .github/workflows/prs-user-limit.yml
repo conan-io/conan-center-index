@@ -6,7 +6,9 @@ on:
     types: [opened]
 
 env:
-  PYVER: "3.10"
+  PYTHONPATH: ${{github.workspace}}
+  PYVER: "3.8"
+  REQUIREMENTS: "PyGithub==2.1.1"
 
 jobs:
   comment:
