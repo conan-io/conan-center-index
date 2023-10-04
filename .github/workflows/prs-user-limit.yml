@@ -1,6 +1,7 @@
 name: "[service] PRs open limit"
 
 on:
+  pull_request:
   pull_request_target:
     types: [opened]
 
