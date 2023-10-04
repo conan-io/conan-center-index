@@ -49,6 +49,10 @@ class gengenConan(ConanFile):
         share_dir = str(pathlib.Path(self.package_folder) / "share")
         rmdir(self, share_dir)
 
+    def package_info(self):
+        self.cpp_info.includedirs.clear()
+        self.cpp_info.libdirs.clear()
+
     def package_id(self):
         # Only consumed as a compiled application
         del self.info.settings.compiler
