@@ -55,6 +55,7 @@ class LibliftoffConan(ConanFile):
 
     def generate(self):
         tc = MesonToolchain(self)
+        tc.project_options["werror"] = False
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
