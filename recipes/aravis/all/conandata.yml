@@ -7,6 +7,7 @@ sources:
       sha256: "0c0eb5a76109f29180c09c7e6a23fd403633bf22bbe8468a0ae44995c4449f46"
 patches:
     "0.8.29":
-      - patch_file: "patches/0.8.19-gst-shared-lib.patch"
+      - patch_file: "patches/0.8.29-gst-shared-lib.patch"
     "0.8.20":
       - patch_file: "patches/0.8.19-gst-shared-lib.patch"
+
