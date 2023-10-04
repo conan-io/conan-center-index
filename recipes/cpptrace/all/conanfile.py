@@ -64,6 +64,8 @@ class CpptraceConan(ConanFile):
         tc.variables["PACKAGE_CUSTOM_DEFINITION"] = True
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        if not self.options.shared:
+            tc.variables["CPPTRACE_STATIC"] = True
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -73,10 +75,7 @@ class CpptraceConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        variables = {}
-        if not self.options.shared:
-            variables["CPPTRACE_STATIC"] = True
-        cmake.configure(variables)
+        cmake.configure()
         cmake.build()
 
     def package(self):
