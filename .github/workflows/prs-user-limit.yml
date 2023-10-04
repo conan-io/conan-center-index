@@ -20,5 +20,5 @@ jobs:
           ref: master
       - uses: ./.github/actions/prs_user_limit
         with:
-          limit: 27
+          limit: "27"
           comment: "my comment"
