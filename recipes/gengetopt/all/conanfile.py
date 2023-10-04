@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
 from conan.tools.layout import basic_layout
-from conan.tools.files import get, mkdir
+from conan.tools.files import get, mkdir, apply_conandata_patches
 
 import pathlib
 
@@ -39,11 +39,10 @@ class gengetoptConan(ConanFile):
         at_toolchain.generate()
 
     def build(self):
-
-        self.run("which gengen")
+        apply_conandata_patches(self)
 
         autotools = Autotools(self)
-#        autotools.autoreconf()
+        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 

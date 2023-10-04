@@ -2,3 +2,8 @@ sources:
   "2.23":
     url: "http://ftp.gnu.org/gnu/gengetopt/gengetopt-2.23.tar.xz"
     sha256: "b941aec9011864978dd7fdeb052b1943535824169d2aa2b0e7eae9ab807584ac"
+patches:
+  "2.23":
+    - patch_file: "patches/remove_test_and_docs.patch"
+      patch_type: conan
+      patch_description: Prevent building of the tests and documentation
