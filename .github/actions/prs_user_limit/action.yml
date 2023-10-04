@@ -34,6 +34,7 @@ runs:
       run: |
         import os
         from github import Github
+        import json
 
         # Create a Github instance with your token
         g = Github(os.environ["GITHUB_TOKEN"])
