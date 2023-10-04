@@ -20,35 +20,43 @@ runs:
     - uses: actions/setup-python@v4
       with:
         python-version: "3.8"
+
     - name: Install requirements
       shell: bash
       run: |
         pip install PyGithub==2.1.1
+
     - name: Check open PRs
       id: check-prs
       shell: python
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        import os
         from github import Github
 
-        # Authentication is defined via github.Auth
-        from github import Auth
+        # Create a Github instance with your token
+        g = Github(os.environ["GITHUB_TOKEN"])
 
-        # using an access token
-        auth = Auth.Token(os.environ["GITHUB_TOKEN"])
+        # Get the repository full name and pull request number from the event payload
+        with open(os.environ["GITHUB_EVENT_PATH"], "r") as event_file:
+            event_payload = json.load(event_file)
+        repo_full_name = event_payload["repository"]["full_name"]
+        pr_number = event_payload["pull_request"]["number"]
 
-        # First create a Github instance:
+        # Define the username whose PRs you want to check
+        username = "${{ github.event.pull_request.user.login }}"
 
-        # Public Web Github
-        g = Github(auth=auth)
+        # Get the repository and pull request objects
+        repo = g.get_repo(repo_full_name)
+        pr = repo.get_pull(pr_number)
 
-        # Github Enterprise with custom hostname
-        g = Github(base_url="https://api.github.com/api/v3", auth=auth)
+        # Get the list of open pull requests created by the user
+        open_prs = [pr for pr in repo.get_pulls(state="open", user=username)]
 
-        # Then play with your Github objects:
-        for repo in g.get_user().get_repos():
-            print(repo.name)
-
-        # To close connections after use
-        g.close()
+        # Check the number of open PRs and the specified limit
+        limit = int(os.environ["limit"])
+        if len(open_prs) >= limit:
+            # Post a comment on the current pull request if the limit is reached
+            comment_text = os.environ["comment"]
+            pr.create_issue_comment(comment_text)
