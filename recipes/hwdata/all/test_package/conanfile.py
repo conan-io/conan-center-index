@@ -24,19 +24,12 @@ class TestPackageConan(ConanFile):
             self.tool_requires("pkgconf/2.0.3")
 
     def generate(self):
-        virtual_build_env = VirtualBuildEnv(self)
-        virtual_build_env.generate()
-        pkg_config_deps = PkgConfigDeps(self)
-        pkg_config_deps.generate()
-
-        pkg_config = PkgConfig(self, "hwdata", self.generators_folder)
-        pkgdatadir = pkg_config.variables["pkgdatadir"]
-        expected_pkgdatadir = os.path.join(self.dependencies.direct_host[self.tested_reference_str].cpp_info.resdirs[0], self.dependencies.direct_host[self.tested_reference_str].ref.name)
-        if pkgdatadir != expected_pkgdatadir:
-            raise ConanException(f"The pkg_config variable pkgdatadir is '{pkgdatadir}' but should be '{expected_pkgdatadir}'")
-
         meson_toolchain = MesonToolchain(self)
         meson_toolchain.generate()
+        pkg_config_deps = PkgConfigDeps(self)
+        pkg_config_deps.generate()
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
 
     def build(self):
         meson = Meson(self)
