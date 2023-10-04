@@ -14,12 +14,13 @@ ALL_TESTS = dict()
 
 def add_test(fn):
     global ALL_TESTS
-    name = fn.__name__[fn.__name__.find("_")+1:]
+    name = fn.__name__[fn.__name__.find("_") + 1 :]
 
     def inner_fn():
         print("testing {}".format(name))
         sys.stdout.flush()
         fn()
+
     ALL_TESTS[name] = inner_fn
     return fn
 
@@ -30,13 +31,13 @@ def test_expat():
 
     # 3 handler functions
     def start_element(name, attrs):
-        print('Start element:', name, attrs)
+        print("Start element:", name, attrs)
 
     def end_element(name):
-        print('End element:', name)
+        print("End element:", name)
 
     def char_data(data):
-        print('Character data:', repr(data))
+        print("Character data:", repr(data))
 
     p = xml.parsers.expat.ParserCreate()
 
@@ -44,7 +45,8 @@ def test_expat():
     p.EndElementHandler = end_element
     p.CharacterDataHandler = char_data
 
-    p.Parse("""<?xml version="1.0"?>
+    p.Parse(
+        """<?xml version="1.0"?>
     <parent id="top"><child1 name="paul">Text goes here</child1>
     <child2 name="fred">More text</child2>
     </parent>""", 1)
@@ -85,10 +87,8 @@ def test_spam():
     if "This is an example spam doc." not in spam.__doc__:
         raise Exception("spam.__doc__ does not contain the expected text")
 
-    cmd = {
-        "Windows": "dir",
-    }.get(platform.system(), "ls")
-    print("About to run spam.system(\"{}\")".format(cmd))
+    cmd = {"Windows": "dir"}.get(platform.system(), "ls")
+    print('About to run spam.system("{}")'.format(cmd))
     sys.stdout.flush()
 
     spam.system(cmd)
@@ -133,6 +133,7 @@ def test_lzma():
 @add_test
 def test_sqlite3():
     import sqlite3
+
     conn = sqlite3.connect("sqlite3.db")
 
     c = conn.cursor()
@@ -141,16 +142,16 @@ def test_sqlite3():
     c.execute("INSERT INTO stocks VALUES ('2006-01-05','BUY','RHAT',100,35.14)")
     conn.commit()
 
-    t = ('RHAT',)
-    c.execute('SELECT * FROM stocks WHERE symbol=?', t)
+    t = ("RHAT",)
+    c.execute("SELECT * FROM stocks WHERE symbol=?", t)
 
     # Larger example that inserts many records at a time
     purchases = [
-        ('2006-03-28', 'BUY', 'IBM', 1000, 45.00),
-        ('2006-04-05', 'BUY', 'MSFT', 1000, 72.00),
-        ('2006-04-06', 'SELL', 'IBM', 500, 53.00),
+        ("2006-03-28", "BUY", "IBM", 1000, 45.00),
+        ("2006-04-05", "BUY", "MSFT", 1000, 72.00),
+        ("2006-04-06", "SELL", "IBM", 500, 53.00),
     ]
-    c.executemany('INSERT INTO stocks VALUES (?,?,?,?,?)', purchases)
+    c.executemany("INSERT INTO stocks VALUES (?,?,?,?,?)", purchases)
     conn.commit()
     conn.close()
     conn = sqlite3.connect("sqlite3.db")
@@ -165,7 +166,7 @@ def test_sqlite3():
 
 @add_test
 def test_decimal():
-    if sys.version_info >= (3, ):
+    if sys.version_info >= (3,):
         # Check whether the _decimal package was built successfully
         import _decimal as decimal
     else:
