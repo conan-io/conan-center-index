@@ -1,5 +1,4 @@
 #include <ege.h>
-#include <windows.h>
 
 using namespace ege;
 
