@@ -19,7 +19,7 @@ runs:
   steps:
     - uses: actions/setup-python@v4
       with:
-        python-version: 3.8
+        python-version: "3.8"
     - name: Install requirements
         run: |
           pip install PyGithub==2.1.1
