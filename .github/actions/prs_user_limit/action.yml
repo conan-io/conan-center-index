@@ -2,10 +2,6 @@ name: 'Limit PRs open per user'
 description: 'Get all changed files in a Pull Request'
 author: 'danimtb'
 inputs:
-  files:
-    description: "Limit the number of open pull-request that user can have open at the same time"
-    required: false
-    default: ""
   limit:
     description: "Maximum number of PRs an author can open"
     required: true
@@ -59,10 +55,10 @@ runs:
         user_open_prs = [p for p in open_prs if p.user.login == username]
 
         # Check the number of open PRs and the specified limit
-        limit = int(${{ github.event.inputs.limit }})
+        limit = int(${{ inputs.limit }})
         if len(user_open_prs) > limit:
             # Post a comment on the current pull request if the limit is reached
-            comment_text = "${{ github.event.inputs.comment }}"
+            comment_text = "${{ inputs.comment }}"
             if comment_text.strip():
                 pr.create_issue_comment(comment_text)
             else:
