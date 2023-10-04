@@ -4,6 +4,7 @@ from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, export_conandata_patches
 import os
 
 required_conan_version = ">=1.53.0"
@@ -54,6 +55,9 @@ class CpptraceConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def generate(self):
         tc = CMakeToolchain(self)
         # Boolean values are preferred instead of "ON"/"OFF"
@@ -67,6 +71,7 @@ class CpptraceConan(ConanFile):
         tc.generate(scope="build")
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         variables = {}
         if not self.options.shared:

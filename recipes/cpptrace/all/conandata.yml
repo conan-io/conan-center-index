@@ -4,3 +4,8 @@ sources:
     url:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.2.0.tar.gz"
     sha256: "4df18423b01317946e95295c5a0df66f13b3e16867771fb00a298618b32d730e"
+patches:
+  "0.2.0":
+    - patch_file: "patches/0.2.0/0001-fixes.patch"
+      patch_type: "portability"
+      patch_description: "Fixes for cmake and some warnings"

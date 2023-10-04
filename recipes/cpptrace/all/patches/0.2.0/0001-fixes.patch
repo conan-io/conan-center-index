@@ -1,0 +1,53 @@
+diff --git CMakeLists.txt CMakeLists.txt
+index ea088e9..8828ad2 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -202,8 +202,6 @@ endif()
+
+ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+-
+ set(
+   sources
+   src/cpptrace.cpp
+@@ -228,6 +226,7 @@ if(CPPTRACE_STATIC)
+   add_library(cpptrace STATIC ${sources} include/cpptrace/cpptrace.hpp)
+ else()
+   add_library(cpptrace SHARED ${sources} include/cpptrace/cpptrace.hpp)
++  set_property(TARGET cpptrace PROPERTY POSITION_INDEPENDENT_CODE ON)
+ endif()
+
+ target_include_directories(
+diff --git bundled/libdwarf/CMakeLists.txt bundled/libdwarf/CMakeLists.txt
+index bc30c88..b272e94 100644
+--- bundled/libdwarf/CMakeLists.txt
++++ bundled/libdwarf/CMakeLists.txt
+@@ -421,12 +421,10 @@ set(
+
+ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+-### libassert uses relocs, -fpic has to be used to allow shared libs to link libassert as a static library.
+-##set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+-
+ include(GNUInstallDirs)
+
+-add_library(dwarf STATIC ${libdwarf_sources} ${libdwarf_headers})
++add_library(dwarf OBJECT ${libdwarf_sources} ${libdwarf_headers})
++set_property(TARGET dwarf PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+ target_compile_definitions(dwarf PUBLIC LIBDWARF_BUILD)
+
+diff --git src/unwind/unwind_with_dbghelp.cpp src/unwind/unwind_with_dbghelp.cpp
+index c6f035a..375ee2e 100644
+--- src/unwind/unwind_with_dbghelp.cpp
++++ src/unwind/unwind_with_dbghelp.cpp
+@@ -121,7 +121,7 @@ namespace detail {
+                     // On x86/x64/arm, as far as I can tell, the frame return address is always one after the call
+                     // So we just decrement to get the pc back inside the `call` / `bl`
+                     // This is done with _Unwind too but conditionally based on info from _Unwind_GetIPInfo.
+-                    trace.push_back(frame.AddrPC.Offset - 1);
++                    trace.push_back(static_cast<uintptr_t>(frame.AddrPC.Offset) - 1);
+                 }
+             } else {
+                 // base
