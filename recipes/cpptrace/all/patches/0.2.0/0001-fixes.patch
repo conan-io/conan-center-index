@@ -49,11 +49,46 @@ index bc30c88..b272e94 100644
 
  target_compile_definitions(dwarf PUBLIC LIBDWARF_BUILD)
 
+diff --git src/symbols/symbols_with_libdwarf.cpp src/symbols/symbols_with_libdwarf.cpp
+index ea52632..314a402 100644
+--- src/symbols/symbols_with_libdwarf.cpp
++++ src/symbols/symbols_with_libdwarf.cpp
+@@ -458,7 +458,8 @@ namespace libdwarf {
+                     &table_count,
+                     &line_context
+                 );
+-                VERIFY(table_count >= 0 && table_count <= 2, "Unknown dwarf line table count");
++                static_assert(std::is_unsigned<decltype(table_count)>::value, "Expected unsigned Dwarf_Small");
++                VERIFY(/*table_count >= 0 &&*/ table_count <= 2, "Unknown dwarf line table count");
+                 if(ret == DW_DLV_NO_ENTRY) {
+                     // TODO: Failing silently for now
+                     return;
+@@ -674,7 +675,8 @@ namespace libdwarf {
+                     }
+                 }
+                 if(resolver_object.has_value() && get_cache_mode() == cache_mode::prioritize_speed) {
+-                    resolver_map.insert({obj_name, std::move(resolver_object).unwrap()});
++                    // .emplace needed, for some reason .insert tries to copy <= gcc 7.2
++                    resolver_map.emplace(obj_name, std::move(resolver_object).unwrap());
+                 }
+             } catch(...) {
+                 if(!should_absorb_trace_exceptions()) {
 diff --git src/unwind/unwind_with_dbghelp.cpp src/unwind/unwind_with_dbghelp.cpp
-index c6f035a..375ee2e 100644
+index c6f035a..995cdd3 100644
 --- src/unwind/unwind_with_dbghelp.cpp
 +++ src/unwind/unwind_with_dbghelp.cpp
-@@ -121,7 +121,7 @@ namespace detail {
+@@ -21,6 +21,10 @@
+
+ namespace cpptrace {
+ namespace detail {
++    #if IS_MSVC
++    #pragma warning(push)
++    #pragma warning(disable: 4740) // warning C4740: flow in or out of inline asm code suppresses global optimization
++    #endif
+     CPPTRACE_FORCE_NO_INLINE
+     std::vector<uintptr_t> capture_frames(size_t skip, size_t max_depth) {
+         skip++;
+@@ -121,7 +138,7 @@ namespace detail {
                      // On x86/x64/arm, as far as I can tell, the frame return address is always one after the call
                      // So we just decrement to get the pc back inside the `call` / `bl`
                      // This is done with _Unwind too but conditionally based on info from _Unwind_GetIPInfo.
@@ -62,3 +97,13 @@ index c6f035a..375ee2e 100644
                  }
              } else {
                  // base
+@@ -135,6 +152,9 @@ namespace detail {
+         }
+         return trace;
+     }
++    #if IS_MSVC
++    #pragma warning(pop)
++    #endif
+ }
+ }
+
