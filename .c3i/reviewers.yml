@@ -37,7 +37,7 @@ reviewers:
     type: "community"
     request_reviews: false
   - user: "prince-chrismc"
-    type: "team"
+    type: "community"
     request_reviews: false
   - user: "Croydon"
     type: "community"
