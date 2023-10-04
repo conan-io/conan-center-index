@@ -21,8 +21,8 @@ runs:
       with:
         python-version: "3.8"
     - name: Install requirements
-        run: |
-          pip install PyGithub==2.1.1
+      run: |
+        pip install PyGithub==2.1.1
     - name: Check open PRs
       id: check-prs
       shell: python
