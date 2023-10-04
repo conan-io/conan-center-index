@@ -33,6 +33,7 @@ class AravisConan(ConanFile):
         "gst_plugin": [True, False],
         "tools": [True, False],
         "introspection": [True, False],
+        "gv_n_buffers": ["ANY"],
     }
     default_options = {
         "shared": False,
@@ -42,6 +43,7 @@ class AravisConan(ConanFile):
         "gst_plugin": False,
         "tools": True,
         "introspection": False,
+        "gv_n_buffers": 16,
     }
 
     def export_sources(self):
@@ -60,6 +62,16 @@ class AravisConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         if self.options.shared:
             self.options["glib"].shared = True
+
+        if self.options.gv_n_buffers:            
+            try:
+                gv_n_buffers_val = int(str(self.options.gv_n_buffers))
+                if not (1 <= gv_n_buffers_val ):
+                    raise ConanInvalidConfiguration(
+                        f"gv_n_buffers_val must be greater than 1 Provided: {gv_n_buffers_val}")
+            except ValueError:
+                raise ConanInvalidConfiguration("gv_n_buffers_val must be an integer.")
+
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -113,6 +125,8 @@ class AravisConan(ConanFile):
         tc.project_options["viewer"] = "disabled"
         tc.project_options["tests"] = False
         tc.project_options["documentation"] = "disabled"
+        tc.project_options["gv-n-buffers"] = int(str(self.options.gv_n_buffers))
+        tc.project_options["fast-heartbeat"] = False
         if self.settings.get_safe("compiler.runtime"):
             tc.project_options["b_vscrt"] = msvc_runtime_flag(self).lower()
         tc.generate()
