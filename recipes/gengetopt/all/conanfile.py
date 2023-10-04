@@ -18,6 +18,7 @@ class gengetoptConan(ConanFile):
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
+    exports_sources = "patches/*.patch"
 
     def build_requirements(self):
         self.tool_requires("gengen/1.4.2")
