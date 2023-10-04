@@ -4,7 +4,7 @@ import os
 from conan import ConanFile
 from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
 from conan.tools.layout import basic_layout
-from conan.tools.files import chdir
+from conan.tools.files import chdir, get
 
 
 class gengetoptConan(ConanFile):
@@ -21,13 +21,14 @@ class gengetoptConan(ConanFile):
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
 
-    # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "configure.ac", "Makefile.am", "src/*"
 
-    
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder,
+            strip_root=True)
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def generate(self):
         deps = AutotoolsDeps(self)
