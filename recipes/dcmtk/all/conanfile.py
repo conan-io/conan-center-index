@@ -145,7 +145,7 @@ class DCMTKConan(ConanFile):
         tc.variables["DCMTK_WIDE_CHAR_FILE_IO_FUNCTIONS"] = self.options.wide_io
         tc.variables["DCMTK_WIDE_CHAR_MAIN_FUNCTION"] = self.options.wide_io
         # Upstream CMakeLists really expects ON value and no other value (like TRUE) in its internal logic
-        # to enable STL features (see DCMTK_TEST_ENABLE_STL_FEATURE function in GenerateDCMTKConfigure.cmake())
+        # to enable STL features (see DCMTK_TEST_ENABLE_STL_FEATURE() function in CMake/GenerateDCMTKConfigure.cmake)
         tc.variables["DCMTK_ENABLE_STL"] = "ON" if self.options.enable_stl else "OFF"
         tc.variables["DCMTK_ENABLE_CXX11"] = True
         tc.variables["DCMTK_ENABLE_MANPAGE"] = False
