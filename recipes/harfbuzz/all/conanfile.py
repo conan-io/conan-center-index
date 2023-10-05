@@ -87,9 +87,8 @@ class HarfbuzzConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
-        if Version(self.version) >= "4.4.0":
-            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
-                raise ConanInvalidConfiguration("New versions of harfbuzz require at least gcc 7")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
+            raise ConanInvalidConfiguration("New versions of harfbuzz require at least gcc 7")
 
         if self.options.with_glib and self.dependencies["glib"].options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
