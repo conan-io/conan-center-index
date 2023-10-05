@@ -232,7 +232,10 @@ class MpdecimalConan(ConanFile):
 
     def package_info(self):
         if is_msvc(self):
-            self.cpp_info.libs = [f"libmpdec-{self.version}.dll"]
+            if self.options.shared:
+                self.cpp_info.libs = [f"libmpdec-{self.version}.dll"]
+            else:
+                self.cpp_info.libs = [f"libmpdec-{self.version}"]
         else:
             self.cpp_info.libs = ["mpdec"]
         if self.options.shared:
