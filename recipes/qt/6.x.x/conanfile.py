@@ -418,6 +418,7 @@ class QtConan(ConanFile):
             vre.generate(scope="build")
         # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
         env = Environment()
+        env.unset("VCPKG_ROOT")
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         env.vars(self).save_script("conanbuildenv_pkg_config_path")
         if self._settings_build.os == "Macos":
@@ -575,8 +576,7 @@ class QtConan(ConanFile):
         if Version(self.version) >= "6.5.0":
             cpp_std_map["23"] = "FEATURE_cxx2b"
 
-        tc.variables[cpp_std_map.get(current_cpp_std, "FEATURE_cxx17")] = "ON"
-        tc.cache_variables["QT_USE_VCPKG"] = False
+        tc.variables[cpp_std_map.get(current_cpp_std, "FEATURE_cxx17")] = "ON" 
 
         tc.generate()
 
