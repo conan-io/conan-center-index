@@ -5,6 +5,6 @@
 int main(int argc, char* args[]) {
     SDL_version v;
     SDL_GetVersion(&v);
-    printf("SDL version %i.%i.%i\n", int(v.major), int(v.minor), int(v.patch));
+    printf("SDL version %u.%u.%u\n", v.major, v.minor, v.patch);
     return 0;
 }
