@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, valid_min_cppstd, check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
@@ -63,6 +63,10 @@ class GrpcConan(ConanFile):
     def _cxxstd_required(self):
         return 14 if Version(self.version) >= "1.47" else 11
 
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
+
     def export_sources(self):
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
         copy(self, f"cmake/{self._grpc_plugin_template}", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
@@ -119,7 +123,8 @@ class GrpcConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("protobuf/<host_version>")
+        if not self._is_legacy_one_profile:
+            self.tool_requires("protobuf/<host_version>")
         if cross_building(self):
             # when cross compiling we need pre compiled grpc plugins for protoc
             self.tool_requires(f"grpc/{self.version}")
@@ -130,6 +135,8 @@ class GrpcConan(ConanFile):
     def generate(self):
         # Set up environment so that we can run grpc-cpp-plugin at build time
         VirtualBuildEnv(self).generate()
+        if self._is_legacy_one_profile:
+            VirtualRunEnv(self).generate(scope="build")
 
         # This doesn't work yet as one would expect, because the install target builds everything
         # and we need the install target because of the generated CMake files
