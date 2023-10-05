@@ -576,7 +576,7 @@ class QtConan(ConanFile):
             cpp_std_map["23"] = "FEATURE_cxx2b"
 
         tc.variables[cpp_std_map.get(current_cpp_std, "FEATURE_cxx17")] = "ON"
-        tc.cache_variables["QT_USE_VCPKG"] = "OFF"
+        tc.cache_variables["QT_USE_VCPKG"] = False
 
         tc.generate()
 
