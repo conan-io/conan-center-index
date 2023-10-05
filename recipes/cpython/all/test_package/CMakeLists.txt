@@ -3,10 +3,10 @@ project(test_package C)
 
 find_package(cpython REQUIRED CONFIG)
 
-set(CACHE PY_VERSION_MAJOR "" CACHE STRING "MAJOR version of python")
-set(CACHE PY_VERSION_MAJOR_MINOR "" CACHE STRING "MAJOR.MINOR version of python")
-set(CACHE PY_VERSION "" CACHE STRING "Required version of python")
-set(CACHE PY_VERSION_SUFFIX "" CACHE STRING "Suffix of python")
+set(PY_VERSION_MAJOR "" CACHE STRING "MAJOR version of python")
+set(PY_VERSION_MAJOR_MINOR "" CACHE STRING "MAJOR.MINOR version of python")
+set(PY_VERSION "" CACHE STRING "Required version of python")
+set(PY_VERSION_SUFFIX "" CACHE STRING "Suffix of python")
 
 set(Python_ADDITIONAL_VERSIONS ${PY_VERSION}${PY_VERSION_SUFFIX} ${PY_VERSION_MAJOR_MINOR}${PY_VERSION_SUFFIX} ${PY_VERSION_MAJOR}${PY_VERSION_SUFFIX} ${PY_VERSION} ${PY_VERSION_MAJOR_MINOR} ${PY_VERSION_MAJOR})
 message("Using Python_ADDITIONAL_VERSIONS: ${Python_ADDITIONAL_VERSIONS}")
@@ -72,7 +72,7 @@ if(BUILD_MODULE)
     endif()
 
     option(USE_FINDPYTHON_X "Use new-style FindPythonX module")
-    if(USE_FINDPYTHON_X AND NOT (CMAKE_VERSION VERSION_LESS "3.16"))
+    if(USE_FINDPYTHON_X AND NOT CMAKE_VERSION VERSION_LESS "3.16")
         # Require CMake 3.16 because this version introduces Python${PY_VERSION_MAJOR}_FIND_ABI
         find_package(Python${PY_VERSION_MAJOR} REQUIRED COMPONENTS Interpreter Development)
         message("Python${PY_VERSION_MAJOR}_EXECUTABLE: ${Python${PY_VERSION_MAJOR}_EXECUTABLE}")

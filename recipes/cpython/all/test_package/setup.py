@@ -8,8 +8,8 @@ if hasattr(os, "add_dll_directory"):
         if os.path.isdir(directory):
             os.add_dll_directory(directory)
 
-PY2 = (2, 0) <= sys.version_info < (3, 0)
-PY3 = (3, 0) <= sys.version_info < (4, 0)
+PY2 = sys.version_info[0] == 2
+PY3 = sys.version_info[0] == 3
 
 if PY2:
     subdir = "py2"
@@ -20,12 +20,13 @@ elif PY3:
 else:
     raise Exception
 
+script_dir = os.path.dirname(os.path.realpath(__file__))
 
 setup(
     name="test_package",
     version="1.0",
     use_2to3=True,
     ext_modules=[
-        Extension("spam", [os.path.join(subdir, "test_module.c")]),
+        Extension("spam", [os.path.join(script_dir, subdir, "test_module.c")]),
     ],
 )
