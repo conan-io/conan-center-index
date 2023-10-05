@@ -262,6 +262,8 @@ class CPythonConan(ConanFile):
             # Building _testembed fails due to missing pthread/rt symbols
             tc.ldflags.append("-lpthread")
 
+        tc.make_args += ["DESTDIR=", "prefix=", "exec_prefix="]
+
         build = None
         if cross_building(self) and not cross_building(self, skip_x64_x86=True):
             # Building from x86_64 to x86 is not a "real" cross build, so set build == host
