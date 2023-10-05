@@ -52,6 +52,12 @@ class MpfrConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def layout(self):
+        if self.settings.os == "Windows":
+            cmake_layout(self, src_folder="src")
+        else:
+            basic_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.exact_int == "gmp":
             self.requires("gmp/6.3.0", transitive_headers=True)
@@ -64,15 +70,8 @@ class MpfrConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
-    def layout(self):
-        if self.settings.os == "Windows":
-            cmake_layout(self, src_folder="src")
-        else:
-            basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         if not cross_building(self):
@@ -183,6 +182,7 @@ class MpfrConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "mpfr")
         self.cpp_info.libs = ["mpfr"]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines = ["MPFR_DLL"]
