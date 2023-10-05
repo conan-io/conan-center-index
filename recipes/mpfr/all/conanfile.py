@@ -1,16 +1,20 @@
-from conan import ConanFile
-from conan.tools.files import save, load, copy, get, rmdir, replace_in_file, apply_conandata_patches
-from conan.tools.layout import basic_layout
-from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
-from conan.tools.microsoft import is_msvc, check_min_vs, unix_path
-from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualRunEnv
-from conan.tools.build import cross_building
-from conan.errors import ConanException
 import os
 import re
 import shlex
+
+from conan import ConanFile
+from conan.errors import ConanException
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import (
+    apply_conandata_patches, copy, export_conandata_patches, get, load,
+    replace_in_file, rm, rmdir, save
+)
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, check_min_vs, unix_path
 
 required_conan_version = ">=1.58.0"
 
@@ -28,7 +32,7 @@ class MpfrConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "exact_int": ["mpir", "gmp",],
+        "exact_int": ["mpir", "gmp"],
     }
     default_options = {
         "shared": False,
@@ -36,11 +40,13 @@ class MpfrConan(ConanFile):
         "exact_int": "gmp",
     }
 
-    exports_sources = "CMakeLists.txt.in", "patches/**"
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        copy(self, "CMakeLists.txt.in", src=self.recipe_folder, dst=self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -74,6 +80,8 @@ class MpfrConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
@@ -105,7 +113,7 @@ class MpfrConan(ConanFile):
 
         if self.options.exact_int == "mpir":
             tc.extra_cflags.append(f"-I{self.build_folder}")
-        if is_msvc(self):
+        if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
             tc.extra_cflags.append("-FS")
 
         env = tc.environment()
@@ -176,10 +184,10 @@ class MpfrConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.install()
-            fix_apple_shared_install_name(self)
-            os.unlink(os.path.join(self.package_folder, "lib", "libmpfr.la"))
             rmdir(self, os.path.join(self.package_folder, "share"))
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "mpfr")
