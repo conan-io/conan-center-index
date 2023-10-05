@@ -54,6 +54,9 @@ class AravisConan(ConanFile):
             del self.options.fPIC
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.packet_socket
+        if Version(self.version).patch < 25:
+            del self.options.gv_n_buffers
+
 
     def configure(self):
         if self.options.shared:
@@ -63,7 +66,7 @@ class AravisConan(ConanFile):
         if self.options.shared:
             self.options["glib"].shared = True
 
-        if self.options.gv_n_buffers:            
+        if self.options.get_safe("gv_n_buffers"):
             try:
                 gv_n_buffers_val = int(str(self.options.gv_n_buffers))
                 if not (1 <= gv_n_buffers_val ):
@@ -125,7 +128,10 @@ class AravisConan(ConanFile):
         tc.project_options["viewer"] = "disabled"
         tc.project_options["tests"] = False
         tc.project_options["documentation"] = "disabled"
-        tc.project_options["gv-n-buffers"] = int(str(self.options.gv_n_buffers))
+
+        if nbuf := self.options.get_safe("gv_n_buffers"):
+            tc.project_options["gv-n-buffers"] = int(str(self.options.gv_n_buffers))
+
         tc.project_options["fast-heartbeat"] = False
         if self.settings.get_safe("compiler.runtime"):
             tc.project_options["b_vscrt"] = msvc_runtime_flag(self).lower()
