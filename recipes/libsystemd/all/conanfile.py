@@ -70,6 +70,14 @@ class LibsystemdConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Only Linux supported")
+        if os.getenv('NOT_ON_C3I', '0') == '0' and Version(self.version) >= "253.10" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "9":
+            raise ConanInvalidConfiguration(f"{self.name}/{self.version} and newer is not supported with gcc 9 on C3I until gcc 9.3 or newer is used\n"\
+                                            "If your using gcc 9.3 or newer, set environment variable NOT_ON_C3I=1")
+        if Version(self.version) >= "253.10" and self.settings.compiler == "gcc":
+            if Version(self.settings.compiler.version) == "9":
+                self.output.warn(f"{self.name}/{self.version} and newer requires gcc 9.3 or newer")
+            elif Version(self.settings.compiler.version) in ["9.1", "9.2"]:
+                raise ConanInvalidConfiguration(f"{self.name}/{self.version} and newer cannot be built with gcc 9.1 or 9.2")
 
     def build_requirements(self):
         self.tool_requires("meson/1.3.0")
