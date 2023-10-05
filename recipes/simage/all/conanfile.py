@@ -92,14 +92,13 @@ class SImageConan(ConanFile):
         cm.install()
         rm(self, "*.cmake", self.package_folder, True)
         rm(self, "*.pc", self.package_folder, True)
-        pkgdir =  pathlib.Path(self.package_folder)
 
-        #remove simage-config binary, won't work properly anyway
-        #also remove installed cmake and pkg-config files
-        rmdir(self, str(pkgdir / "share"))
-        rmdir(self, str( (pkgdir / "lib") / "cmake"))
-        rmdir(self, str( (pkgdir / "lib") / "pkgconfig"))
-        rmdir(self, str(pkgdir / "bin"))
+        # remove simage-config binary, won't work properly anyway
+        # also remove installed cmake and pkg-config files
+        rmdir(self, self.package_path / "share")
+        rmdir(self, self.package_path / "lib" / "cmake")
+        rmdir(self, self.package_path / "lib" / "pkgconfig")
+        rmdir(self, self.package_path / "bin")
 
         license_folder = str(pathlib.Path(self.package_folder) / "licenses")
         copy(self, "COPYING", self.source_folder, license_folder)
