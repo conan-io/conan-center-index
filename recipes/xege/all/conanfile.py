@@ -18,16 +18,6 @@ class XegeConan(ConanFile):
 
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "fPIC": True,
-    }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def layout(self):
         cmake_layout(self, src_folder="src")
