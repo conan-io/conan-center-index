@@ -61,7 +61,7 @@ runs:
         # Check the number of open PRs and the specified limit
         if len(user_open_prs) > limit:
             # Post a comment on the current pull request if the limit is reached
-            user_open_prs_str = "#" + ", #".join(user_open_prs)
+            user_open_prs_str = "#" + ", #".join([str(pr.number) for pr in user_open_prs])
             user_open_prs_len = len(user_open_prs)
             comment_text = comment.format(limit=limit, username=username, user_open_prs_str=user_open_prs_str, user_open_prs_len=user_open_prs_len)
             pr.create_issue_comment(comment_text)
