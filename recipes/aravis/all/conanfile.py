@@ -129,7 +129,7 @@ class AravisConan(ConanFile):
         tc.project_options["tests"] = False
         tc.project_options["documentation"] = "disabled"
 
-        if nbuf := self.options.get_safe("gv_n_buffers"):
+        if  self.options.get_safe("gv_n_buffers"):
             tc.project_options["gv-n-buffers"] = int(str(self.options.gv_n_buffers))
 
         tc.project_options["fast-heartbeat"] = False
