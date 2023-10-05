@@ -126,7 +126,7 @@ index 2642c9f..38f02c1 100644
  ## Table of Contents <!-- omit in toc -->
 
 diff --git bundled/libdwarf/CMakeLists.txt bundled/libdwarf/CMakeLists.txt
-index bc30c88..71abcb0 100644
+index bc30c88..148e5df 100644
 --- bundled/libdwarf/CMakeLists.txt
 +++ bundled/libdwarf/CMakeLists.txt
 @@ -217,74 +217,85 @@ check_c_source_compiles([=[
@@ -297,12 +297,16 @@ index bc30c88..71abcb0 100644
 
  target_compile_definitions(dwarf PUBLIC LIBDWARF_BUILD)
 
-@@ -436,7 +445,7 @@ target_include_directories(
+@@ -436,7 +445,11 @@ target_include_directories(
    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
  )
 
 -target_link_libraries(dwarf PUBLIC ${LIBELF_LIBRARIES} ${DW_FZLIB} ${DW_FZSTD})
-+target_link_libraries(dwarf PUBLIC ${DW_FZLIB} ${DW_FZSTD})
++if(CMAKE_DWARF_FINDPACKAGE_Z)
++  target_link_libraries(dwarf PUBLIC ZLIB::ZLIB)
++else()
++  target_link_libraries(dwarf PUBLIC ${DW_FZLIB} ${DW_FZSTD})
++endif()
 
  # TODO: Something will have to be figured out for dynamic linking, but for now there's nothing to install
  # if(NOT CMAKE_SKIP_INSTALL_RULES)
