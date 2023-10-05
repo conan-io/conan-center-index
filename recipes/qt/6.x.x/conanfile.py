@@ -636,6 +636,8 @@ class QtConan(ConanFile):
             # use official variable name https://cmake.org/cmake/help/latest/module/FindFontconfig.html
             replace_in_file(self, os.path.join(self.source_folder, "qtbase", "src", "gui", "configure.cmake"), "FONTCONFIG_FOUND", "Fontconfig_FOUND")
 
+        replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", "QtAutoDetect.cmake") , "qt_auto_detect_vcpkg()", "# qt_auto_detect_vcpkg()")
+
     def _xplatform(self):
         if self.settings.os == "Linux":
             if self.settings.compiler == "gcc":
