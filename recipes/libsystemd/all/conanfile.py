@@ -203,12 +203,8 @@ class LibsystemdConan(ConanFile):
                  self.build_folder, os.path.join(self.package_folder, "lib"))
             copy(self, f"libsystemd.so.{self._so_version}",
                  self.build_folder, os.path.join(self.package_folder, "lib"))
-            copy(self, "libudev.so", self.build_folder,
-                 os.path.join(self.package_folder, "lib"))
-            copy(self, "libudev.so.{}".format(self._so_version.split('.')),
-                 self.build_folder, os.path.join(self.package_folder, "lib"))
-            copy(self, f"libudev.so.{self._so_version}",
-                 self.build_folder, os.path.join(self.package_folder, "lib"))
+            copy(self, "libudev.so", self.build_folder, os.path.join(self.package_folder, "lib"))
+            copy(self, "libudev.so.*", self.build_folder, os.path.join(self.package_folder, "lib"))
         else:
             copy(self, "libsystemd.a", self.build_folder,
                  os.path.join(self.package_folder, "lib"))
