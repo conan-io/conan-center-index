@@ -170,7 +170,7 @@ class MpfrConan(ConanFile):
             autotools.make(args=["V=0"])
 
     def package(self):
-        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "COPYING.LESSER", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if self.settings.os == "Windows":
             cmake = CMake(self)
             cmake.install()
