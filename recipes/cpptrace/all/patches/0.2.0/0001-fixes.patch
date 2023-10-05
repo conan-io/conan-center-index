@@ -126,10 +126,10 @@ index 2642c9f..38f02c1 100644
  ## Table of Contents <!-- omit in toc -->
 
 diff --git bundled/libdwarf/CMakeLists.txt bundled/libdwarf/CMakeLists.txt
-index bc30c88..4227dd2 100644
+index bc30c88..71abcb0 100644
 --- bundled/libdwarf/CMakeLists.txt
 +++ bundled/libdwarf/CMakeLists.txt
-@@ -217,74 +217,83 @@ check_c_source_compiles([=[
+@@ -217,74 +217,85 @@ check_c_source_compiles([=[
    }]=] HAVE_STDAFX_H)
  #message(STATUS "Checking have windows stdafx.h... ${HAVE_STDAFX_H}")
 
@@ -277,10 +277,12 @@ index bc30c88..4227dd2 100644
 +else()
 +  find_package(ZLIB REQUIRED)
 +  set(DW_FZLIB "ZLIB")
++  set(HAVE_ZLIB TRUE)
++  set(HAVE_ZLIB_H TRUE)
  endif()
 
  check_c_source_compiles([=[
-@@ -421,12 +430,10 @@ set(
+@@ -421,12 +432,10 @@ set(
 
  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
@@ -295,7 +297,7 @@ index bc30c88..4227dd2 100644
 
  target_compile_definitions(dwarf PUBLIC LIBDWARF_BUILD)
 
-@@ -436,7 +443,7 @@ target_include_directories(
+@@ -436,7 +445,7 @@ target_include_directories(
    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
  )
 
