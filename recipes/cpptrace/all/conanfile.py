@@ -11,7 +11,7 @@ required_conan_version = ">=1.53.0"
 
 class CpptraceConan(ConanFile):
     name = "cpptrace"
-    description = "Cpptrace is a lightweight C++ stacktrace library supporting C++11 and greater on Linux, macOS, and Windows including MinGW and Cygwin environments. The goal: Make stack traces simple for once."
+    description = "Simple, portable, and self-contained stacktrace library for C++11 and newer "
     license = ("MIT", "LGPL-2.1-only", "BSD-2-Clause-Views")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jeremy-rifkin/cpptrace"
