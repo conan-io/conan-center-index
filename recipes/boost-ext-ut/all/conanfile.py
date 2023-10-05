@@ -71,6 +71,10 @@ class UTConan(ConanFile):
                         f"{self.ref} requires C++{self._minimum_cpp_standard} support. "
                         f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
+    def build_requirements(self):
+        if Version(self.version) >= "2.0.0":
+            self.tool_requires("cmake/[>=3.21 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -84,7 +88,7 @@ class UTConan(ConanFile):
         if disable_module:
             tc.cache_variables["BOOST_UT_DISABLE_MODULE"] = disable_module
         tc.generate()
-    
+
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
