@@ -1,7 +1,8 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.gnu import Autotools
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, mkdir, apply_conandata_patches, rmdir, copy
+from conan.tools.scm import Version
 
 import pathlib
 
@@ -60,6 +61,11 @@ class gengetoptConan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs.clear()
         self.cpp_info.libdirs.clear()
+
+        if Version(conan_version).major < 2:
+            binpath = pathlib.Path(self.package_folder) / "bin"
+            self.env_info.PATH.append(str(binpath))
+
 
     def package_id(self):
         del self.info.settings.compiler

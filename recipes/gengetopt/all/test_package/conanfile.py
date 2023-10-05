@@ -10,6 +10,9 @@ class gengetoptTestConan(ConanFile):
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
 
+    def build(self):
+        self.output.info("no need to build another executable!")
+        
     def layout(self):
         basic_layout(self)
 
