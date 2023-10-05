@@ -126,7 +126,7 @@ index 2642c9f..38f02c1 100644
  ## Table of Contents <!-- omit in toc -->
 
 diff --git bundled/libdwarf/CMakeLists.txt bundled/libdwarf/CMakeLists.txt
-index bc30c88..62244b3 100644
+index bc30c88..4227dd2 100644
 --- bundled/libdwarf/CMakeLists.txt
 +++ bundled/libdwarf/CMakeLists.txt
 @@ -217,74 +217,83 @@ check_c_source_compiles([=[
@@ -275,8 +275,8 @@ index bc30c88..62244b3 100644
 +    set(DW_FZSTD "zstd")
 +  endif()
 +else()
-+  find_package(z REQUIRED)
-+  set(DW_FZLIB "z")
++  find_package(ZLIB REQUIRED)
++  set(DW_FZLIB "ZLIB")
  endif()
 
  check_c_source_compiles([=[
