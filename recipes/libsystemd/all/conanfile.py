@@ -101,6 +101,7 @@ class LibsystemdConan(ConanFile):
         env.generate()
 
         tc = MesonToolchain(self)
+        tc.project_options["werror"] = False
         tc.project_options["selinux"] = ("true" if self.options.with_selinux
                                          else "false")
         tc.project_options["lz4"] = ("true" if self.options.with_lz4
