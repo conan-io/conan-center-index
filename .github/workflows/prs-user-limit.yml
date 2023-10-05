@@ -1,14 +1,8 @@
-name: "[service] PRs open limit"
+name: "[service] Check open pull-requests per user"
 
 on:
-  pull_request:
   pull_request_target:
     types: [opened]
-
-env:
-  PYTHONPATH: ${{github.workspace}}
-  PYVER: "3.8"
-  REQUIREMENTS: "PyGithub==2.1.1"
 
 jobs:
   comment:
@@ -18,7 +12,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: master
-      - uses: ./.github/actions/prs_user_limit
+      - uses: ./.github/actions/check-open-prs-per-user
         with:
-          limit: "2"
-          comment: "Hi @{username}, you have reached the limit of open pull-requests :dart:\\n\\nPlease consider working on the open ones first and help us improve the experience for everyone using conan-center-index :handshake:\\n\\n- :open_file_folder: Your open pull-requests: {user_open_prs_str} ({user_open_prs_len})\\n- :no_entry: Limit: {limit}\\n\\n Thank you :smile:"
+          threshold: "2"
+          comment: "Hi @{username}, we see you have some pull-requests still open :open_file_folder:\\n\\nPlease consider working on those first and help us improve the experience for everyone using conan-center-index :handshake:\\n\\n Thank you! :smile:"
