@@ -112,7 +112,6 @@ class AtSpi2CoreConan(ConanFile):
             "#libxml_dep = dependency('libxml-2.0', version: libxml_req_version)")
         meson = Meson(self)
         meson.configure()
-            raise
         meson.build()
 
     def package(self):
