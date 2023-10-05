@@ -107,12 +107,4 @@ class SImageConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
-
-        self.cpp_info.set_property("cmake_file_name", "simage")
-        self.cpp_info.set_property("cmake_target_name", "simage::simage")
         self.cpp_info.set_property("pkg_config_name", "simage")
-
-        #legacy cmake generators support (to be removed eventually)
-        self.cpp_info.names["cmake_find_package"] = "simage"
-        self.cpp_info.names["cmake_find_package_multi"] = "simage"
-        self.cpp_info.names["pkg_config"] = "simage"
