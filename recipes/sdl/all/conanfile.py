@@ -197,9 +197,6 @@ class SDLConan(ConanFile):
             tc.variables["CMAKE_OSX_ARCHITECTURES"] = {
                 "armv8": "arm64",
             }.get(str(self.settings.arch), str(self.settings.arch))
-        cmake_required_includes = []  # List of directories used by CheckIncludeFile (https://cmake.org/cmake/help/latest/module/CheckIncludeFile.html)
-        cmake_extra_ldflags = []
-        cmake_extra_libs = []
 
         if self.settings.os != "Windows" and not self.options.shared:
             tc.variables["SDL_STATIC_PIC"] = self.options.fPIC
@@ -228,17 +225,11 @@ class SDLConan(ConanFile):
             tc.variables["SDL_PULSEAUDIO"] = self.options.pulse
             if self.options.pulse:
                 tc.variables["SDL_PULSEAUDIO_SHARED"] = self.dependencies["pulseaudio"].options.shared
-                pulseaudio_cpp_info = self.dependencies["pulseaudio"].cpp_info.aggregated_components()
-                cmake_extra_libs += pulseaudio_cpp_info.libs
-                cmake_extra_ldflags += [f"-L{p}" for p in pulseaudio_cpp_info.libdirs]
-                cmake_extra_ldflags += ["-lxcb", "-lrt"]  # FIXME: SDL sources doesn't take into account transitive dependencies
             tc.variables["SDL_SNDIO"] = self.options.sndio
             if self.options.sndio:
                 tc.variables["SDL_SNDIO_SHARED"] = self.dependencies["sndio"].options.shared
             tc.variables["SDL_NAS"] = self.options.nas
             if self.options.nas:
-                cmake_extra_ldflags += ["-lXau"]  # FIXME: SDL sources doesn't take into account transitive dependencies
-                cmake_required_includes += self.dependencies["nas"].cpp_info.aggregated_components().includedirs
                 tc.variables["SDL_NAS_SHARED"] = self.dependencies["nas"].options.shared
             tc.variables["SDL_X11"] = self.options.x11
             if self.options.x11:
@@ -268,7 +259,6 @@ class SDLConan(ConanFile):
             if self.options.wayland:
                 # FIXME: Otherwise 2.0.16 links with system wayland (from egl/system requirement)
                 wayland_host = self.dependencies["wayland"] if self._is_legacy_one_profile else self.dependencies.host["wayland"]
-                cmake_extra_ldflags += [f"-L{p}" for p in wayland_host.cpp_info.aggregated_components().libdirs]
                 tc.variables["SDL_WAYLAND_SHARED"] = wayland_host.options.shared
 
                 wayland_build = self.dependencies["wayland"] if self._is_legacy_one_profile else self.dependencies.build["wayland"]
@@ -285,12 +275,19 @@ class SDLConan(ConanFile):
             tc.variables["SDL2_DISABLE_SDL2MAIN"] = not self.options.sdl2main
 
         # Add extra information collected from the deps
-        tc.variables["EXTRA_LDFLAGS"] = ";".join(cmake_extra_ldflags)
-        tc.variables["CMAKE_REQUIRED_INCLUDES"] = ";".join(cmake_required_includes)
-        all_deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
-        cmake_extra_cflags = [f"-I{p}" for dep in all_deps for p in dep.cpp_info.aggregated_components().includedirs]
-        tc.variables["EXTRA_CFLAGS"] = ";".join(cmake_extra_cflags)
-        tc.variables["EXTRA_LIBS"] = ";".join(cmake_extra_libs)
+        if not is_msvc(self):
+            all_deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
+            deps_includes = [p for dep in all_deps for p in dep.cpp_info.aggregated_components().includedirs]
+            tc.variables["CMAKE_REQUIRED_INCLUDES"] = ";".join(deps_includes)
+            extra_cflags = [f"-I{p}" for p in deps_includes]
+            extra_cflags += [f"-D{define}" for dep in all_deps for define in dep.cpp_info.aggregated_components().defines]
+            tc.variables["EXTRA_CFLAGS"] = ";".join(extra_cflags)
+            extra_ldflags = [f"-L{p}" for dep in all_deps for p in dep.cpp_info.aggregated_components().libdirs]
+            tc.variables["EXTRA_LDFLAGS"] = ";".join(extra_ldflags)
+            extra_libs = [lib for dep in all_deps for lib in dep.cpp_info.aggregated_components().libs]
+            extra_libs += [lib for dep in all_deps for lib in dep.cpp_info.aggregated_components().system_libs]
+            tc.variables["EXTRA_LIBS"] = ";".join(extra_libs)
+
         tc.generate()
 
         CMakeDeps(self).generate()
