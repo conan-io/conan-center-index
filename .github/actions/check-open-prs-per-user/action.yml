@@ -1,15 +1,15 @@
-name: 'Limit PRs open per user'
-description: 'Get all changed files in a Pull Request'
+name: 'Open pull-requests per user'
+description: 'Check the number of pull-requests open per user, if the number is higher than the threshold, post a nice comment'
 author: 'danimtb'
 inputs:
-  limit:
-    description: "Maximum number of PRs an author can open"
+  threshold:
+    description: "Maximum number of pull-requests open per user"
     required: true
     default: "10"
   comment:
-    description: "Comment to post in the github PR when the limit of open PRs is reached"
+    description: "Comment to post in the pull-request when the limit of open PRs is reached"
     required: true
-    default: "This is a comment"
+    default: "You have some pull-requests open. Please consider working on them first :smile:"
 runs:
   using: "composite"
   steps:
@@ -27,12 +27,13 @@ runs:
       shell: python
       env:
         GITHUB_TOKEN: ${{ github.token }}
+        PYTHONPATH: ${{github.workspace}}
       run: |
         import os
         from github import Github
         import json
 
-        limit = int(${{ inputs.limit }})
+        threshold = int(${{ inputs.threshold }})
         comment = "${{ inputs.comment }}"
         username = "${{ github.event.pull_request.user.login }}"
 
@@ -58,10 +59,13 @@ runs:
         # Filter open PRs created by the specified username
         user_open_prs = [p for p in open_prs if p.user.login == username]
 
-        # Check the number of open PRs and the specified limit
-        if len(user_open_prs) > limit:
-            # Post a comment on the current pull request if the limit is reached
+        # Sort user open PRs by their creation date in ascending order
+        user_open_prs = sorted(user_open_prs, key=lambda p: p.created_at)
+
+        # Check the number of open PRs and the specified threshold
+        if len(user_open_prs) > threshold:
+            # Post a comment on the current pull request if the threshold is reached
             user_open_prs_str = "#" + ", #".join([str(pr.number) for pr in user_open_prs])
             user_open_prs_len = len(user_open_prs)
-            comment_text = comment.format(limit=limit, username=username, user_open_prs_str=user_open_prs_str, user_open_prs_len=user_open_prs_len)
+            comment_text = comment.format(threshold=threshold, username=username, user_open_prs_str=user_open_prs_str, user_open_prs_len=user_open_prs_len)
             pr.create_issue_comment(comment_text)
