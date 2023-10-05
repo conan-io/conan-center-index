@@ -612,6 +612,14 @@ class LibcurlConan(ConanFile):
                 tc.variables["CURL_DISABLE_NTLM"] = True
         tc.variables["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
 
+        # Bypass a dynamic symbol check added in upstream commit dee310d54261
+        # that fails when run against Conan's generated CMake dependency files
+        #
+        # TODO: this should set HAVE_SSL_SET0_WBIO to "False" when libressl
+        # provides the OpenSSL dependency
+        if self.options.with_ssl in ("openssl", "wolfssl"):
+            tc.variables["HAVE_SSL_SET0_WBIO"] = True
+
         if self.options.with_ca_bundle:
             tc.cache_variables["CURL_CA_BUNDLE"] = str(self.options.with_ca_bundle)
         else:
