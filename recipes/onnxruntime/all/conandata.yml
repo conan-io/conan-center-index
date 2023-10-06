@@ -33,6 +33,9 @@ patches:
     - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
       patch_description: "allow to build with abseil built without c++17 support"
       patch_type: "portability"
+    - patch_file: "patches/1.15.1-0002-cuda-gsl.patch"
+      patch_description: "CMake: fix GSL and cuda"
+      patch_type: "conan"
   "1.14.1":
     - patch_file: "patches/1.14.1-0001-cmake-dependencies.patch"
       patch_description: "CMake: ensure conan dependencies are used (upstreamed future versions)"
@@ -52,3 +55,6 @@ patches:
       patch_description: "Ensures the forward compatibility with the newest versions of re2 library."
       patch_type: "portability"
       patch_source: "https://github.com/microsoft/onnxruntime/commit/126e7bf15fa4af8621814b82a3f7bd0d786f0239.patch"
+    - patch_file: "patches/1.14.1-0006-cuda-gsl.patch"
+      patch_description: "CMake: fix GSL and cuda"
+      patch_type: "conan"
