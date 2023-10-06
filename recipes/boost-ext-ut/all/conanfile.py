@@ -33,8 +33,8 @@ class UTConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "apple-clang": "11" if Version(self.version) < "1.1.8" else "12",
-            "clang": "9",
-            "gcc": "9",
+            "clang": "9" if Version(self.version) < "2.0.0" else "10",
+            "gcc": "9" if Version(self.version) < "2.0.0" else "10",
         }
 
     def export_sources(self):
