@@ -24,7 +24,7 @@ class CPythonConan(ConanFile):
     homepage = "https://www.python.org"
     topics = ("python", "cpython", "language", "script")
 
-    package_type = "application"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
