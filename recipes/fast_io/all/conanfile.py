@@ -8,12 +8,13 @@ import os
 
 required_conan_version = ">=1.52.0"
 
+
 class FastIoConan(ConanFile):
     name = "fast_io"
     description = "fast_io is a C++ io exception-safe RAII library based on C++ 20 Concepts. It is at least 10 times faster than cstdio than iostream."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage ="https://github.com/expnkx/fast_io/"
+    homepage = "https://github.com/cppfastio/fast_io"
     topics = ("cstdio", "iostream", "io", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
@@ -28,7 +29,9 @@ class FastIoConan(ConanFile):
         return {
             "gcc": "11",
             "clang": "10",
-            "apple-clang": "12",
+            # Apple-Clang 13 is not enough in this case,
+            # partial support for concepts
+            "apple-clang": "14",
             "Visual Studio": "16",
             "msvc": "192",
         }
