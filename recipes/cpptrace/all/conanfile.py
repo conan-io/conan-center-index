@@ -44,7 +44,9 @@ class CpptraceConan(ConanFile):
 
     def requirements(self):
         # TODO: libdwarf has a recipe but it's horribly outdated. For now relying on bundled libdwarf.
-        self.requires("zlib/[>=1.2.11 <2]")
+        # libdwarf will be used on unix and mingw
+        if not (self.settings.os == "Windows" and self.settings.compiler != "gcc"):
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
