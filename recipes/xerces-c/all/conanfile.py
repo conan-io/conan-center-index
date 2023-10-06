@@ -7,7 +7,7 @@ from conan.tools.files import apply_conandata_patches, collect_libs, copy, expor
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
 
 class XercesCConan(ConanFile):
