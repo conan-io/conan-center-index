@@ -7,7 +7,7 @@ from conan.tools.files import apply_conandata_patches, collect_libs, copy, expor
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
 
 
 class XercesCConan(ConanFile):
@@ -99,7 +99,7 @@ class XercesCConan(ConanFile):
 
     def build_requirements(self):
         if self.options.message_loader == "icu" and not can_run(self):
-            self.tool_requires("icu/73.2")
+            self.tool_requires("icu/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
