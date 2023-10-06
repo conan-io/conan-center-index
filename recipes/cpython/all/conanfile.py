@@ -163,7 +163,9 @@ class CPythonConan(ConanFile):
         if self.options.get_safe("with_tkinter"):
             self.requires("tk/8.6.10")
         if self.options.get_safe("with_curses", False):
-            self.requires("ncurses/6.4")
+            # Used in a public header
+            # https://github.com/python/cpython/blob/v3.10.13/Include/py_curses.h#L34
+            self.requires("ncurses/6.4", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_bsddb", False):
             self.requires("libdb/5.3.28")
         if self.options.get_safe("with_lzma", False):
