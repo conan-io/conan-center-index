@@ -8,6 +8,7 @@ from conan.errors import ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import mkdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -41,7 +42,7 @@ class CmakePython3Abi(object):
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeDeps"
     test_type = "explicit"
 
     def requirements(self):
@@ -55,8 +56,12 @@ class TestPackageConan(ConanFile):
         return self.dependencies["cpython"].conf_info.get("user.cpython:python", check_type=str)
 
     @property
-    def _py_version(self):
+    def _clean_py_version(self):
         return re.match(r"^[0-9.]+", str(self.dependencies["cpython"].ref.version)).group(0)
+
+    @property
+    def _py_version(self):
+        return Version(self.dependencies["cpython"].ref.version)
 
     @property
     def _pymalloc(self):
@@ -64,7 +69,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _cmake_abi(self):
-        if Version(self.dependencies["cpython"].ref.version) < "3.8":
+        if self._py_version < "3.8":
             return CmakePython3Abi(debug=self.settings.build_type == "Debug", pymalloc=self._pymalloc, unicode=False)
         else:
             return CmakePython3Abi(debug=self.settings.build_type == "Debug", pymalloc=False, unicode=False)
@@ -81,13 +86,13 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        version = Version(self.dependencies["cpython"].ref.version)
+        version = self._py_version
         py_major = str(version.major)
         tc.cache_variables["BUILD_MODULE"] = self._supports_modules
         tc.cache_variables["PY_VERSION_MAJOR"] = py_major
         tc.cache_variables["PY_VERSION_MAJOR_MINOR"] = f"{version.major}.{version.minor}"
         tc.cache_variables["PY_FULL_VERSION"] = str(version)
-        tc.cache_variables["PY_VERSION"] = self._py_version
+        tc.cache_variables["PY_VERSION"] = self._clean_py_version
         tc.cache_variables["PY_VERSION_SUFFIX"] = self._cmake_abi.suffix
         tc.cache_variables["PYTHON_EXECUTABLE"] = self._python
         tc.cache_variables["USE_FINDPYTHON_X".format(py_major)] = self._cmake_try_FindPythonX
@@ -98,13 +103,28 @@ class TestPackageConan(ConanFile):
         tc.cache_variables[f"Python{py_major}_FIND_REGISTRY"] = "NEVER"
         tc.cache_variables[f"Python{py_major}_FIND_IMPLEMENTATIONS"] = "CPython"
         tc.cache_variables[f"Python{py_major}_FIND_STRATEGY"] = "LOCATION"
-        if not is_msvc(self) and self._py_version <  "3.8":
+        if not is_msvc(self) and self._clean_py_version < "3.8":
             tc.cache_variables[f"Python{py_major}_FIND_ABI"] = self._cmake_abi.cmake_arg
         tc.generate()
 
+        VirtualRunEnv(self).generate(scope="run")
+        VirtualRunEnv(self).generate(scope="build")
+
+    def build(self):
+        if not cross_building(self, skip_x64_x86=True):
+            command = f"{self._python} --version"
+            buffer = StringIO()
+            self.run(command, stdout=buffer, ignore_errors=True)
+            self.output.info(f"output: {buffer.getvalue()}")
+            self.run(command)
+
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
         if not cross_building(self, skip_x64_x86=True):
             if self._supports_modules:
-                modsrcfolder = "py2" if version.major == 2 else "py3"
+                modsrcfolder = "py2" if self._py_version.major == 2 else "py3"
                 mkdir(self, os.path.join(self.build_folder, modsrcfolder))
                 for fn in os.listdir(os.path.join(self.source_folder, modsrcfolder)):
                     shutil.copy(
@@ -127,21 +147,8 @@ class TestPackageConan(ConanFile):
                 ]
                 if self.settings.build_type == "Debug":
                     setup_args.append("--debug")
-                python = self.dependencies["cpython"].conf_info.get("user.cpython:python", check_type=str)
                 args = " ".join(f'"{a}"' for a in setup_args)
-                self.run(f"{python} {args}")
-
-    def build(self):
-        if not cross_building(self, skip_x64_x86=True):
-            command = f"{self._python} --version"
-            buffer = StringIO()
-            self.run(command, stdout=buffer, ignore_errors=True)
-            self.output.info(f"output: {buffer.getvalue()}")
-            self.run(command)
-
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+                self.run(f"{self._python} {args}")
 
     def _test_module(self, module, should_work):
         try:
@@ -167,9 +174,9 @@ class TestPackageConan(ConanFile):
             self.run(f"{self._python} -c \"import sys; print('.'.join(str(s) for s in sys.version_info[:3]))\"", buffer)
             self.output.info(buffer.getvalue())
             version_detected = buffer.getvalue().splitlines()[-1].strip()
-            if self._py_version != version_detected:
+            if self._clean_py_version != version_detected:
                 raise ConanException(
-                    f"python reported wrong version. Expected {self._py_version}. Got {version_detected}."
+                    f"python reported wrong version. Expected {self._clean_py_version}. Got {version_detected}."
                 )
 
             if self._supports_modules:
