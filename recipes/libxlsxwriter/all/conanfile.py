@@ -17,6 +17,7 @@ class LibxlsxwriterConan(ConanFile):
     topics = ("excel", "xlsx")
     description = "A C library for creating Excel XLSX files"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -55,9 +56,9 @@ class LibxlsxwriterConan(ConanFile):
 
     def requirements(self):
         self.requires("minizip/1.2.13")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.md5 == "openssl":
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if Version(self.version) < "1.0.6" and self.info.options.md5 == "openssl":
