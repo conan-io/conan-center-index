@@ -1,5 +1,5 @@
 project('test_package', 'c')
-package_dep = dependency('atspi-2')
+package_dep = dependency('atk')
 executable('test_package',
             sources : ['test_package.c'],
             dependencies : [package_dep])
