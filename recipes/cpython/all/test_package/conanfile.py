@@ -146,18 +146,15 @@ class TestPackageConan(ConanFile):
     def _test_module(self, module, should_work):
         try:
             self.run(f"{self._python} {self.source_folder}/test_package.py -b {self.build_folder} -t {module}")
-            works = True
-        except ConanException as e:
-            works = False
-            exception = e
-        if should_work == works:
-            self.output.info("Result of test was expected.")
-        else:
-            if works:
-                raise ConanException(f"Module '{module}' works, but should not have worked")
-            else:
+        except ConanException:
+            if should_work:
                 self.output.warning(f"Module '{module}' does not work, but should have worked")
-                raise exception
+                raise
+            self.output.info("Module failed as expected")
+            return
+        if not should_work:
+            raise ConanException(f"Module '{module}' works, but should not have worked")
+        self.output.info("Module worked as expected")
 
     def _cpython_option(self, name):
         return self.dependencies["cpython"].options.get_safe(name, False)
