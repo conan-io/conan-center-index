@@ -1,11 +1,6 @@
 sources:
   # Newer versions at the top
-  "0.2.0":
+  "0.2.1":
     url:
-      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.2.0.tar.gz"
-    sha256: "4df18423b01317946e95295c5a0df66f13b3e16867771fb00a298618b32d730e"
-patches:
-  "0.2.0":
-    - patch_file: "patches/0.2.0/0001-fixes.patch"
-      patch_type: "portability"
-      patch_description: "Fixes for cmake and some warnings"
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.2.1.tar.gz"
+    sha256: "3184f404c61b6b8ba6fe7c64fc40d1c3d6d87df59bcacf1845d846101bc22f9a"
