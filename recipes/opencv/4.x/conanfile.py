@@ -1008,7 +1008,7 @@ class OpenCVConan(ConanFile):
 
     def requirements(self):
         # core module dependencies
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.parallel == "tbb":
