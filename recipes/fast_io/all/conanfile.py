@@ -28,7 +28,7 @@ class FastIoConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "11",
-            "clang": "10",
+            "clang": "12",
             # Apple-Clang 13 is not enough in this case,
             # partial support for concepts
             "apple-clang": "14",
