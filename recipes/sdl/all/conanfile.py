@@ -275,8 +275,8 @@ class SDLConan(ConanFile):
             tc.variables["SDL2_DISABLE_SDL2MAIN"] = not self.options.sdl2main
 
         # Add extra information collected from the deps
+        all_deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
         if not is_msvc(self):
-            all_deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
             deps_includes = [p for dep in all_deps for p in dep.cpp_info.aggregated_components().includedirs]
             tc.variables["CMAKE_REQUIRED_INCLUDES"] = ";".join(deps_includes)
             extra_cflags = [f"-I{p}" for p in deps_includes]
