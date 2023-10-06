@@ -361,7 +361,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_icu", False):
             self.requires("icu/73.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/8.1.1")
+            self.requires("harfbuzz/8.2.1")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/3.0.0")
@@ -404,13 +404,13 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
-            self.requires("dbus/1.15.6")
+            self.requires("dbus/1.15.8")
         if self.options.qtwayland:
             self.requires("wayland/1.22.0")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_atspi"):
-            self.requires("at-spi2-core/2.49.1")
+            self.requires("at-spi2-core/2.50.0")
         if self.options.get_safe("with_md4c", False):
             self.requires("md4c/0.4.8")
 
@@ -437,7 +437,7 @@ class QtConan(ConanFile):
             self.tool_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self._settings_build.os == "Windows":
-                self.tool_requires("winflexbison/2.5.24")
+                self.tool_requires("winflexbison/2.5.25")
             else:
                 self.tool_requires("bison/3.8.2")
                 self.tool_requires("flex/2.6.4")
