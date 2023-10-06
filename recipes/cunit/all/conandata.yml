@@ -5,6 +5,11 @@ sources:
 patches:
   "2.1-3":
     - patch_file: "patches/0001-configure-in-msvc-shortcuts.patch"
-      base_path: "source_subfolder"
+      patch_description: "configure snprintf for msvc"
+      patch_type: "conan"
     - patch_file: "patches/0002-snprintf-msvc.patch"
-      base_path: "source_subfolder"
+      patch_description: "only set snprintf for older VS compiler"
+      patch_type: "conan"
+    - patch_file: "patches/0003-fix-copy-docs.patch"
+      patch_description: "use correct docs dir for install docs"
+      patch_type: "conan"

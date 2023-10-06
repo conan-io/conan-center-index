@@ -1,0 +1,40 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 2e9861f8..08b149f1 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -108,7 +108,7 @@ elseif(${PLATFORM} MATCHES "Android")
+   add_if_flag_compiles(-Wa,--noexecstack CMAKE_C_FLAGS)
+   add_if_flag_compiles(-no-canonical-prefixes CMAKE_C_FLAGS)
+   add_definitions(-DANDROID -D__ANDROID_API__=21)
+-  include_directories(external/android/native_app_glue)
++  include_directories(${ANDROID_NDK}/sources/android/native_app_glue)
+   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs,libatomic.a -Wl,--build-id -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -Wl,--warn-shared-textrel -Wl,--fatal-warnings -uANativeActivity_onCreate")
+ 
+   find_library(OPENGL_LIBRARY OpenGL)
+diff --git a/src/core.c b/src/core.c
+index e6d27e5f..fb7014b0 100644
+--- a/src/core.c
++++ b/src/core.c
+@@ -186,7 +186,7 @@
+ 
+     // Support retrieving native window handlers
+     #if defined(_WIN32)
+-        #define GLFW_EXPOSE_NATIVE_WIN32
++
+         #include <GLFW/glfw3native.h>       // WARNING: It requires customization to avoid windows.h inclusion!
+ 
+         #if !defined(SUPPORT_BUSY_WAIT_LOOP)
+@@ -3346,10 +3346,12 @@ static bool InitGraphicsDevice(int width, int height)
+     glfwSwapInterval(0);        // No V-Sync by default
+ #endif
+ 
+-#if defined(PLATFORM_DESKTOP)
++#if defined(PLATFORM_DESKTOP) || defined(PLATFORM_WEB)
+     // Load OpenGL 3.3 extensions
+     // NOTE: GLFW loader function is passed as parameter
+     rlLoadExtensions(glfwGetProcAddress);
++#else
++    rlLoadExtensions(eglGetProcAddress);
+ #endif
+ 
+     // Try to enable GPU V-Sync, so frames are limited to screen refresh rate (60Hz -> 60 FPS)

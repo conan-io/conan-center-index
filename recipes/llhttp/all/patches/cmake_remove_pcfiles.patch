@@ -1,0 +1,18 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt.new
+@@ -62,14 +62,10 @@
+     EXPORT llhttp
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+   )
+
+-  install(FILES
+-    ${CMAKE_CURRENT_SOURCE_DIR}/libllhttp.pc
+-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+-  )
+-
+   # This is required to work with FetchContent
+   install(EXPORT llhttp
+         FILE llhttp-config.cmake

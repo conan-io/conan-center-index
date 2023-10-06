@@ -1,0 +1,24 @@
+diff --git a/trantor/utils/MsgBuffer.h b/trantor/utils/MsgBuffer.h
+index 29817f6..f1d677e 100644
+--- a/trantor/utils/MsgBuffer.h
++++ b/trantor/utils/MsgBuffer.h
+@@ -18,6 +18,7 @@
+ #include <vector>
+ #include <string>
+ #include <algorithm>
++#include <cstdint>
+ #include <stdio.h>
+ #include <assert.h>
+ #include <string.h>
+diff --git a/trantor/utils/Utilities.cc b/trantor/utils/Utilities.cc
+index 978dac8..0611e20 100644
+--- a/trantor/utils/Utilities.cc
++++ b/trantor/utils/Utilities.cc
+@@ -25,6 +25,7 @@
+ #include <codecvt>
+ #endif  // __cplusplus
+ #endif  // _WIN32
++#include <cstdint>
+ 
+ namespace trantor
+ {

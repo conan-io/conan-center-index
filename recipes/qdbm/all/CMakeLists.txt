@@ -1,11 +1,7 @@
-cmake_minimum_required(VERSION 3.1)
-
+cmake_minimum_required(VERSION 3.12)
 project(qdbm_wrapper VERSION "${CONAN_qdbm_VERSION}" LANGUAGES C)
 
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup(TARGETS KEEP_RPATHS)
-
-set(QDBM_SRC_DIR ${PROJECT_SOURCE_DIR}/source_subfolder)
+set(QDBM_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 
 # ---- Dependencies ----
 
@@ -64,9 +60,7 @@ set_target_properties(
 # ---- Install ----
 
 include(GNUInstallDirs)
-
-install(
-    TARGETS qdbm
+install(TARGETS qdbm
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"

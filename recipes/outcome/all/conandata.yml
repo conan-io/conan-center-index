@@ -1,4 +1,10 @@
 sources:
+  "2.2.7":
+    url: "https://github.com/ned14/outcome/archive/v2.2.7.tar.gz"
+    sha256: "553fd03bb9684be19dfa251bfa0064e69e30a95b6b0ba9a62d68f8ec4e31662a"
+  "2.2.4":
+    url: "https://github.com/ned14/outcome/archive/v2.2.4.tar.gz"
+    sha256: "29ad35c1980cf7f75294bb52df678c6a08817228e880fac8454cd6ac390fa1fc"
   "2.2.3":
     url: "https://github.com/ned14/outcome/archive/v2.2.3.tar.gz"
     sha256: "31cc987d73b2625a70f35083ccff26d1c2634d89304f1ea606a294da36cb2958"

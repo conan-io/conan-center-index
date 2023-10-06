@@ -1,8 +1,22 @@
 sources:
+  "0.10.4":
+    url: "https://github.com/eclipse-cyclonedds/cyclonedds/archive/0.10.4.tar.gz"
+    sha256: "fe7bb5a4348e31656a935f72dec909a7d2b0fcf10840614fb552f08eb2da8484"
+  "0.10.3":
+    url: "https://github.com/eclipse-cyclonedds/cyclonedds/archive/refs/tags/0.10.3.tar.gz"
+    sha256: "bc79696209febfe66d97e7af6b11e92f9db663caf608a922b6c201b1d6a5eb62"
   "0.10.2":
     url: "https://github.com/eclipse-cyclonedds/cyclonedds/archive/refs/tags/0.10.2.tar.gz"
     sha256: "bc84e137e0c8a055b8cd97fbeafec94e36de1b0c2e88800896a82384fd867ae5"
 patches:
+  "0.10.4":
+    - patch_file: "patches/0.10.2-0001-fix-find-iceoryx.patch"
+      patch_description: "Fix cmake find for iceoryx package"
+      patch_type: "conan"
+  "0.10.3":
+    - patch_file: "patches/0.10.2-0001-fix-find-iceoryx.patch"
+      patch_description: "Fix cmake find for iceoryx package"
+      patch_type: "conan"
   "0.10.2":
     - patch_file: "patches/0.10.2-0001-fix-find-iceoryx.patch"
       patch_description: "Fix cmake find for iceoryx package"

@@ -15,6 +15,7 @@ endif()
 set(BINARY_TO_COMPRESSED_BIN binary_to_compressed_c)
 
 add_executable(${BINARY_TO_COMPRESSED_BIN} ${EXTRA_FONTS_DIR}/binary_to_compressed_c.cpp)
+target_compile_features(${BINARY_TO_COMPRESSED_BIN} PRIVATE cxx_std_11)
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 set_target_properties(${PROJECT_NAME} PROPERTIES
