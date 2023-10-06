@@ -113,7 +113,7 @@ class OpenSSLConan(ConanFile):
 
     def requirements(self):
         if not self.options.no_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -657,6 +657,8 @@ class OpenSSLConan(ConanFile):
         elif self.settings.os == "Neutrino":
             self.cpp_info.components["crypto"].system_libs.append("atomic")
             self.cpp_info.components["ssl"].system_libs.append("atomic")
+            self.cpp_info.components["crypto"].system_libs.append("socket")
+            self.cpp_info.components["ssl"].system_libs.append("socket")
 
         self.cpp_info.components["crypto"].set_property("cmake_target_name", "OpenSSL::Crypto")
         self.cpp_info.components["crypto"].set_property("pkg_config_name", "libcrypto")

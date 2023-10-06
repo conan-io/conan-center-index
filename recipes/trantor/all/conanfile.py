@@ -38,7 +38,7 @@ class TrantorConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "5",
-            "Visual Studio": "15.0",
+            "Visual Studio": "15",
             "msvc": "191",
             "clang": "5",
             "apple-clang": "10",
@@ -61,7 +61,7 @@ class TrantorConan(ConanFile):
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.19.0")
+            self.requires("c-ares/1.19.1")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
