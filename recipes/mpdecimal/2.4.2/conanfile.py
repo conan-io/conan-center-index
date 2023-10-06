@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rmdir, mkdir, rename
@@ -229,6 +229,7 @@ class MpdecimalConan(ConanFile):
                 autotools = Autotools(self)
                 autotools.install()
             rmdir(self, os.path.join(self.package_folder, "share"))
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
         if is_msvc(self):
