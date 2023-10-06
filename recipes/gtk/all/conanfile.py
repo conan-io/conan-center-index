@@ -121,8 +121,6 @@ class GtkConan(ConanFile):
         if self.settings.os == "Linux":
             if self._gtk4:
                 self.requires("xkbcommon/1.4.1")
-            if self._gtk3:
-                self.requires("at-spi2-atk/2.38.0")
             if self.options.with_wayland:
                 if self._gtk3:
                     self.requires("xkbcommon/1.4.1")
@@ -130,7 +128,7 @@ class GtkConan(ConanFile):
             if self.options.with_x11:
                 self.requires("xorg/system")
         if self._gtk3:
-            self.requires("atk/2.38.0")
+            self.requires("at-spi2-core/2.50.0")
         self.requires("libepoxy/1.5.10")
         if self.options.with_pango:
             self.requires("pango/1.50.7")
@@ -218,12 +216,12 @@ class GtkConan(ConanFile):
             self.cpp_info.components["gdk-3.0"].names["pkg_config"] = "gdk-3.0"
 
             self.cpp_info.components["gtk+-3.0"].libs = ["gtk-3"]
-            self.cpp_info.components["gtk+-3.0"].requires = ["gdk-3.0", "atk::atk"]
+            self.cpp_info.components["gtk+-3.0"].requires = ["gdk-3.0", "at-spi2-core::atk"]
             if self.settings.compiler != "Visual Studio":
                 self.cpp_info.components["gtk+-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
             self.cpp_info.components["gtk+-3.0"].requires.extend(["gdk-pixbuf::gdk-pixbuf", "glib::gio-2.0"])
             if self.settings.os == "Linux":
-                self.cpp_info.components["gtk+-3.0"].requires.append("at-spi2-atk::at-spi2-atk")
+                self.cpp_info.components["gtk+-3.0"].requires.append("at-spi2-core::atk-bridge")
             self.cpp_info.components["gtk+-3.0"].requires.append("libepoxy::libepoxy")
             if self.options.with_pango:
                 self.cpp_info.components["gtk+-3.0"].requires.append('pango::pangoft2')
@@ -233,7 +231,7 @@ class GtkConan(ConanFile):
             self.cpp_info.components["gtk+-3.0"].names["pkg_config"] = "gtk+-3.0"
 
             self.cpp_info.components["gail-3.0"].libs = ["gailutil-3"]
-            self.cpp_info.components["gail-3.0"].requires = ["gtk+-3.0", "atk::atk"]
+            self.cpp_info.components["gail-3.0"].requires = ["gtk+-3.0", "at-spi2-core::atk"]
             self.cpp_info.components["gail-3.0"].includedirs = [os.path.join("include", "gail-3.0")]
             self.cpp_info.components["gail-3.0"].names["pkg_config"] = "gail-3.0"
         elif self._gtk4:
