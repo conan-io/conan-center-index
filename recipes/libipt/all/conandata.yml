@@ -1,4 +1,7 @@
 sources:
+  "2.0.6":
+    url: "https://github.com/intel/libipt/archive/v2.0.6.tar.gz"
+    sha256: "631f4ebc81e12c0493288af3cc307b0de5b65f018d3e3839c87014b0d26acd75"
   "2.0.5":
     url: https://github.com/intel/libipt/archive/refs/tags/v2.0.5.tar.gz
     sha256: 95acf499fdf0a0f5ebd07587bb443c702b1fd79f7d869749824234388b9bff80

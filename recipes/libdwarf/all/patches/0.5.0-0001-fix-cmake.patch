@@ -6,7 +6,7 @@ index 4f58f43..69e0238 100644
  
  ### cmake provides no way to guarantee uint32_t present.
  ### configure does guarantee that.
-+find_package(libelf REQUIRED)
++find_package(libelf)
  if(HAVE_STDINT_H)
    check_c_source_compiles("
    #include <stdint.h>
@@ -103,3 +103,13 @@ index 0b7d578..62b67da 100644
  	set(LIBDIR lib${SUFFIX})
  	set(BINDIR bin${SUFFIX})
  
+@@ -119,6 +121,9 @@ install(
+ )
+ install(DIRECTORY libdwarf DESTINATION include/
+     FILES_MATCHING PATTERN "*.h")
++install(
++    FILES ${CMAKE_CURRENT_SOURCE_DIR}/dwarf.h
++    DESTINATION include/libdwarf)
+ install(
+     FILES ${CMAKE_CURRENT_SOURCE_DIR}/libdwarf.h
+     DESTINATION include/libdwarf)
