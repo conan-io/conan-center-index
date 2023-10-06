@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
@@ -88,6 +89,8 @@ class UTConan(ConanFile):
         if disable_module:
             tc.cache_variables["BOOST_UT_DISABLE_MODULE"] = disable_module
         tc.generate()
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
 
     def build(self):
         apply_conandata_patches(self)
