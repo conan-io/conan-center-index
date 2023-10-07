@@ -5,7 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
@@ -32,9 +32,11 @@ class UTConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "apple-clang": "11" if Version(self.version) < "1.1.8" else "12",
+            "apple-clang": "12" if Version(self.version) < "2.0.0" else "13",
             "clang": "9" if Version(self.version) < "2.0.0" else "10",
             "gcc": "9" if Version(self.version) < "2.0.0" else "10",
+            "msvc": "192",
+            "Visual Studio": "14",
         }
 
     def export_sources(self):
@@ -55,9 +57,13 @@ class UTConan(ConanFile):
         if Version(self.version) <= "1.1.8" and is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.ref} may not be built with MSVC. "
                                             "Please use at least version 1.1.9 with MSVC.")
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires at least version {minimum_version} of the {self.settings.compiler} compiler."
+            )
 
         if is_msvc(self):
-            check_min_vs(self, "192")
             if not self.options.get_safe("disable_module", True):
                 self.output.warn("The 'disable_module' option must be enabled when using MSVC.")
         if not is_msvc(self):
