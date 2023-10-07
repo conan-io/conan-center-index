@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools import files
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake
@@ -35,7 +35,8 @@ class TestPackageConan(ConanFile):
             # It will not provide all the functions
             # but it will cover enough to check that what we compiled is correct
             files.rm(self, "wpcap.dll", bindir)
-            files.copy(self, "pcap.dll", src=self.dependencies['libpcap'].cpp_info.bindirs[0], dst=os.path.join(str(self.build_path), bindir))
+            libpcap_bin_path = self.deps_cpp_info["libpcap"].bin_paths[0] if conan_version < "2" else self.dependencies["libpcap"].cpp_info.bindirs[0]
+            files.copy(self, "pcap.dll", src=libpcap_bin_path, dst=os.path.join(str(self.build_path), bindir))
             files.rename(self, os.path.join(bindir, "pcap.dll"), os.path.join(bindir, "wpcap.dll"))
 
             self.run(os.path.join(bindir, "test_package"), env="conanrun")
