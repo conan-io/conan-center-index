@@ -49,26 +49,17 @@ class UlfiusConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def requirements(self):
-        self.requires("orcania/2.3.1")
-        self.requires("libmicrohttpd/0.9.75")
+        self.requires("orcania/2.3.1", transitive_headers=True)
+        self.requires("libmicrohttpd/0.9.75", transitive_headers=True)
         if self.options.with_yder:
-            self.requires("yder/1.4.18")
+            self.requires("yder/1.4.18", transitive_headers=True)
         if self.options.with_jansson:
-            self.requires("jansson/2.14")
+            self.requires("jansson/2.14", transitive_headers=True)
         if self.options.with_libcurl:
             self.requires("libcurl/8.2.1")
 
