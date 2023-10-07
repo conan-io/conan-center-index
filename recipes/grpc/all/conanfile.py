@@ -397,7 +397,6 @@ class GrpcConan(ConanFile):
         self.cpp_info.resdirs = ["res"]
         ssl_roots_file_path = os.path.join(self.package_folder, "res", "grpc", "roots.pem")
         self.runenv_info.define_path("GRPC_DEFAULT_SSL_ROOTS_FILE_PATH", ssl_roots_file_path)
-        self.env_info.GRPC_DEFAULT_SSL_ROOTS_FILE_PATH = ssl_roots_file_path # remove in conan v2?
 
         for component, values in self._grpc_components.items():
             target = values.get("lib")
@@ -424,13 +423,12 @@ class GrpcConan(ConanFile):
         self.cpp_info.set_property("cmake_build_modules", grpc_modules)
 
         if any(self.options.get_safe(plugin_option) for plugin_option in self._grpc_plugins.keys()):
-            bindir = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bindir))
-            self.env_info.PATH.append(bindir)
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "gRPC"
         self.cpp_info.names["cmake_find_package_multi"] = "gRPC"
+        self.env_info.GRPC_DEFAULT_SSL_ROOTS_FILE_PATH = ssl_roots_file_path
         if grpc_modules:
             self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package"] = grpc_modules
             self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package_multi"] = grpc_modules
