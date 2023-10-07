@@ -30,27 +30,19 @@ class YderConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os != "Linux":
             del self.options.with_libsystemd
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def requirements(self):
         self.requires("orcania/2.3.1")
         if self.options.get_safe("with_libsystemd"):
-            self.requires("libsystemd/251.4")
+            self.requires("libsystemd/253.10")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
