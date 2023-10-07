@@ -31,17 +31,17 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bindir = self.cpp.build.bindirs[0]
+            bindir = self.cpp.build.bindir
             # Use libpcap DLL as a replacement for npcap DLL
             # It will not provide all the functions
             # but it will cover enough to check that what we compiled is correct
             files.rm(self, "wpcap.dll", bindir)
-            files.copy(self, "pcap.dll", src=self.deps_cpp_info['libpcap'].bin_paths[0], dst=bindir)
+            files.copy(self, "pcap.dll", src=self.dependencies['libpcap'].cpp_info.bindirs[0], dst=os.path.join(str(self.build_path), bindir))
             files.rename(self, os.path.join(bindir, "pcap.dll"), os.path.join(bindir, "wpcap.dll"))
 
             bin_path = os.path.join(bindir, "test_package")
             output = StringIO()
-            self.run(bin_path, env="conanrun", output=output)
+            self.run(bin_path, env="conanrun", stdout=output)
             test_output = output.getvalue()
             print(test_output)
             assert "libpcap version 1.10.1" in test_output
