@@ -27,13 +27,13 @@ class FastIoConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "11",
-            "clang": "12",
+            "gcc": "13",
+            "clang": "15",
             # Apple-Clang 13 is not enough in this case,
             # partial support for concepts
             "apple-clang": "14",
-            "Visual Studio": "16",
-            "msvc": "192",
+            "Visual Studio": "17",
+            "msvc": "193",
         }
 
     def layout(self):
