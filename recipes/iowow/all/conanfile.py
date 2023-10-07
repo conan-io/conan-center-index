@@ -7,10 +7,10 @@ required_conan_version = ">=1.53.0"
 
 class IowowConan(ConanFile):
     name = "iowow"
-    description = "The skiplist based persistent key/value storage engine"
+    description = "A C utility library and persistent key/value storage engine."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/Softmotions/iowow"
+    homepage = "https://iowow.softmotions.com/"
     topics = ("database", "nosql", "key-value", "kvstore", "skiplist", "ejdb")
     package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
@@ -58,7 +58,6 @@ class IowowConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-
 
     def package_info(self):
         self.cpp_info.libs = ["iowow-1"]
