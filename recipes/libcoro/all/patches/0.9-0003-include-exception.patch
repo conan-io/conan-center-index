@@ -1,0 +1,15 @@
+diff --git a/inc/coro/generator.hpp b/inc/coro/generator.hpp
+index ede42d0..b103fb8 100644
+--- a/inc/coro/generator.hpp
++++ b/inc/coro/generator.hpp
+@@ -1,8 +1,8 @@
+ #pragma once
+-
+ #include <coroutine>
+ #include <type_traits>
+-
++#include <exception>
++#include <iterator>
+ namespace coro
+ {
+ template<typename T>
