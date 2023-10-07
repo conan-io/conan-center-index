@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools import files
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake
-from io import StringIO
 import os
 
 
