@@ -58,7 +58,7 @@ class LibSixelConan(ConanFile):
 
     def requirements(self):
         if self.options.with_curl:
-            self.requires("libcurl/8.2.0")
+            self.requires("libcurl/8.2.1")
         if self.options.with_gd:
             self.requires("libgd/2.3.3")
         if self.options.with_gdk_pixbuf2:
@@ -75,9 +75,9 @@ class LibSixelConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.0")
+        self.tool_requires("meson/1.2.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.5")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
