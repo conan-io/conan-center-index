@@ -8,3 +8,6 @@ patches:
       patch_description: "Some fixes for macOS"
       patch_type: "portability"
       patch_source: "https://github.com/Softmotions/iowow/pull/56"
+    - patch_file: "patches/1.4.16-0002-fix-uint64_t-format.patch"
+      patch_description: "fix uint64_t printf format"
+      patch_type: "portability"
