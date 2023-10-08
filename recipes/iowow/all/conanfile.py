@@ -1,6 +1,8 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -38,6 +40,10 @@ class IowowConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on Visual Studio")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
