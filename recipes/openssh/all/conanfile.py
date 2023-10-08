@@ -114,6 +114,7 @@ class PackageConan(ConanFile):
 
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
+            "--without-zlib-version-check",
             "--with-openssl={}".format("yes" if self.options.with_openssl else "no"), 
             "--with-pam={}".format("yes" if self.options.with_pam else "no"),
         ])
