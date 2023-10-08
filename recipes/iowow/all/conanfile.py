@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
@@ -22,6 +22,9 @@ class IowowConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,6 +50,7 @@ class IowowConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
