@@ -487,7 +487,7 @@ class AwsSdkCppConan(ConanFile):
 
     def _create_cmake_module_variables(self, module_file):
         # see https://github.com/aws/aws-sdk-cpp/wiki/Example-CMake-Scripts-to-Build-Your-Project-Against-the-CPP-SDK
-        content = textwrap.dedent(f"""\
+        content = textwrap.dedent("""\
             if(NOT DEFINED AWSSDK_LINK_LIBRARIES)
                 set(AWSSDK_LINK_LIBRARIES aws-sdk-cpp::aws-sdk-cpp)
             endif()
