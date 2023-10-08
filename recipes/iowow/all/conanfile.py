@@ -44,6 +44,7 @@ class IowowConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_BUILD_TYPE"] = self.settings.build_type
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["PACKAGE_ZIP"] = False
         tc.variables["PACKAGE_TGZ"] = False
