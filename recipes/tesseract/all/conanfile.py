@@ -29,6 +29,7 @@ class TesseractConan(ConanFile):
         "with_training": [True, False],
         "with_libcurl": [True, False],
         "with_libarchive": [True, False],
+        "with_tiff": [True, False],
     }
     default_options = {
         "shared": False,
@@ -38,6 +39,7 @@ class TesseractConan(ConanFile):
         "with_training": False,
         "with_libcurl": True,
         "with_libarchive": True,
+        "with_tiff": True,
     }
 
     @property
@@ -69,6 +71,9 @@ class TesseractConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        else:
+            # tiff is only used directly on Windows for the tesseract executable
+            del self.options.with_tiff
         if Version(self.version) < "5.0.0":
             del self.options.with_libcurl
             del self.options.with_libarchive
@@ -82,6 +87,8 @@ class TesseractConan(ConanFile):
 
     def requirements(self):
         self.requires("leptonica/1.82.0")
+        if self.options.get_safe("with_tiff", default=False):
+            self.requires("libtiff/4.6.0")
         # libarchive is required for 4.x so default value is true
         if self.options.get_safe("with_libarchive", default=True):
             self.requires("libarchive/3.7.1")
@@ -97,6 +104,14 @@ class TesseractConan(ConanFile):
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+        leptonica = self.dependencies["leptonica"]
+        leptonica_with_tiff = leptonica.options.with_tiff
+        self_with_tiff = self.options.get_safe("with_tiff", leptonica_with_tiff)
+        if self_with_tiff != leptonica_with_tiff:
+            raise ConanInvalidConfiguration(
+                f"{self.ref}:with_tiff={self_with_tiff} != {leptonica.ref}:with_tiff={leptonica_with_tiff}."
             )
 
         if self.options.with_training:
@@ -204,6 +219,8 @@ class TesseractConan(ConanFile):
         self.cpp_info.components["libtesseract"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["libtesseract"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         self.cpp_info.components["libtesseract"].set_property("pkg_config_name", "tesseract")
+        if self.options.get_safe("with_tiff", default=False):
+            self.cpp_info.requires.append("libtiff::libtiff")
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
     @property
