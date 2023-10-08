@@ -1,24 +1,30 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
-from conan.tools.files import get, collect_libs
+from conan.tools.files import get, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import collect_libs, rmdir, mkdir, copy
 from conan.tools.build import check_min_cppstd
-import os
-
+import pathlib
 
 class diplibConan(ConanFile):
     name = "diplib"
     settings = "os", "compiler", "arch", "build_type"
 
-    options = {
-        # options that control which external dependencies are used
-        "with_fftw" : [True, False],
-        "with_freeglut" : [True, False],
-        "with_freetype" : [True, False],
-        "with_glfw" : [True, False],
-        "jpeg" : [None, "libjpeg-turbo", "libjpeg"],
-        "with_libtiff" : [True, False],
-        "with_zlib" : [True, False],
+    options = { "jpeg" : [None, "libjpeg-turbo", "libjpeg"],
+                "with_glfw" : [True, False],
+                "with_freeglut" : [True, False],
+                "openmp" : [True, False],
+                "enable_viewer" : [True, False],
+                "with_zlib" : [True, False],
+                "enable_ics" : [True, False],
+                "with_tiff" : [True, False],
+                "unicode" : [True, False],
+                "always_128bit_prng" : [True, False],
+                "with_fftw" : [True, False],
+                "asserts" : [True, False],
+                "shared" : [True, False],
+                "fPIC": [True, False]
+               }
 
         # options that build extra functionality into the library,
         # but do not need extra external dependencies to do so
@@ -82,8 +88,10 @@ class diplibConan(ConanFile):
 
 
     def requirements(self):
+        #need a patch for these two, to use external
         self.requires("eigen/3.4.0")
-        # libics not available in CCI but when that is we will add it below too
+        # libics not available in CCI but when that is we will do it too
+        # self.requires("libics/??")
 
 
         if self.options.jpeg is not None:
@@ -110,6 +118,8 @@ class diplibConan(ConanFile):
             if getattr(self.options, f"with_{name}"):
                 self.requires(f"{name}/{version}")
 
+        if self.options.with_fftw:
+            self.requires("fftw/3.3.10")
 
     def validate_build(self):
 
@@ -126,6 +136,9 @@ class diplibConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -165,48 +178,21 @@ class diplibConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _get_cmakecache_value(self, val: str) -> bool:
-        cachepath = os.path.join(self.build_folder, "CMakeCache.txt")
-        with open("CMakeCache.txt", "r") as f:
-            for line in f:
-                if val in line and "//" not in line:
-                    valuestr = line.split("=")[1].strip()
-                    if valuestr not in ["ON", "OFF", "TRUE", "FALSE", "1", "0"]:
-                        raise RuntimeError(f"failed to parse  value: {valuestr}")
-                    value: bool = valuestr in ["ON", "TRUE", "1"]
-                    break
-            else:
-                raise RuntimeError(f"didn't find variable {val}  in the cmake cache")
-
-        return value
-
 
     def build(self):
+        apply_conandata_patches(self)
         cm = CMake(self)
         cm.configure()
-
-        # Check that we got the right logic for building the viewer
-        # doing this check defensively because it's only indirectly activated
-        # when we don't feed it openGL etc etc
-        viewerbuild = self._get_cmakecache_value("DIP_BUILD_DIPVIEWER")
-        if viewerbuild != self.options.enable_viewer:
-            raise ValueError("mismatch between CMake viewer build setting and recipe option setting")
-
         cm.build()
 
     def package(self):
         cm = CMake(self)
         cm.install()
-
-        # #these need to go into the package id
-        # self._rng_128 = self._get_cmakecache_value("HAS_128_INT")
-        # self.output.info(f"128 bit generator configured? {self._rng_128}")
-        # self._pretty_function = self._get_cmakecache_value("HAS_PRETTY_FUNCTION")
-        # self.output.info(f"pretty functions present? {self._pretty_function}")
+        cmakefolder = pathlib.Path(self.package_folder) / "lib" / "cmake"
+        rmdir(self, cmakefolder)
+        licfolder = pathlib.Path(self.package_folder) / "licenses"
+        mkdir(self, licfolder)
+        copy(self, "LICENSE.txt", self.source_folder, licfolder)
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs()
-        
-        #read the compile definitions from cmake file
-        
-        
+        self.cpp_info.libs = collect_libs(self)
