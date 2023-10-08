@@ -40,7 +40,7 @@ class CppJwtConan(ConanFile):
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2")
-        self.requires("openssl/1.1.1s")
+        self.requires("openssl/[>=1.1 <4]")
 
     def package_id(self):
         self.info.clear()
