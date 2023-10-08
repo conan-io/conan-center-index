@@ -80,7 +80,8 @@ class Fastnoise2Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["FastNoise"]
+        lib_suffix = "D" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = [f"FastNoise{lib_suffix}"]
 
         self.cpp_info.set_property("cmake_file_name", "FastNoise2")
         self.cpp_info.set_property("cmake_target_name", "FastNoise2::FastNoise")
