@@ -489,7 +489,13 @@ class AwsSdkCppConan(ConanFile):
         # see https://github.com/aws/aws-sdk-cpp/wiki/Example-CMake-Scripts-to-Build-Your-Project-Against-the-CPP-SDK
         content = textwrap.dedent("""\
             if(NOT DEFINED AWSSDK_LINK_LIBRARIES)
-                set(AWSSDK_LINK_LIBRARIES aws-sdk-cpp::aws-sdk-cpp)
+                if(TARGET aws-sdk-cpp::aws-sdk-cpp)
+                    # for CMakeDeps
+                    set(AWSSDK_LINK_LIBRARIES aws-sdk-cpp::aws-sdk-cpp)
+                elseif(TARGET AWS::AWS)
+                    # for cmake_find_package/cmake_find_package_multi
+                    set(AWSSDK_LINK_LIBRARIES AWS::AWS)
+                endif()
             endif()
         """)
         save(self, module_file, content)
