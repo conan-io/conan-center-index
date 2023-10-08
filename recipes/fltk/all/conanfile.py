@@ -64,7 +64,7 @@ class FltkConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("libjpeg/9e")
         self.requires("libpng/1.6.40")
         if self.settings.os in ["Linux", "FreeBSD"]:
