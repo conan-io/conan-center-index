@@ -39,8 +39,6 @@ class TcpWrappersConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if is_msvc(self):
-            raise ConanInvalidConfiguration("Visual Studio is not supported")
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
@@ -50,6 +48,8 @@ class TcpWrappersConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("Visual Studio is not supported")
         if cross_building(self):
             raise ConanInvalidConfiguration("Cross-building is not current supported.")
 
@@ -105,6 +105,5 @@ class TcpWrappersConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["wrap"]
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.PATH.append(bin_path)
+        # TODO: to remove once conan v1 not supported anymore
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
