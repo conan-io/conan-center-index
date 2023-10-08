@@ -1,10 +1,11 @@
 import os
+import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -482,12 +483,26 @@ class AwsSdkCppConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         self._create_project_cmake_module()
+        self._create_cmake_module_variables(os.path.join(self.package_folder, self._extra_cmake_vars_rel_path))
+
+    def _create_cmake_module_variables(self, module_file):
+        # see https://github.com/aws/aws-sdk-cpp/wiki/Example-CMake-Scripts-to-Build-Your-Project-Against-the-CPP-SDK
+        content = textwrap.dedent(f"""\
+            if(NOT DEFINED AWSSDK_LINK_LIBRARIES)
+                set(AWSSDK_LINK_LIBRARIES aws-sdk-cpp::aws-sdk-cpp)
+            endif()
+        """)
+        save(self, module_file, content)
+
+    @property
+    def _extra_cmake_vars_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "AWSSDK")
 
         sdk_plugin_conf = os.path.join(self._res_folder, "cmake", "sdk_plugin_conf.cmake")
-        self.cpp_info.set_property("cmake_build_modules", [sdk_plugin_conf])
+        self.cpp_info.set_property("cmake_build_modules", [sdk_plugin_conf, self._extra_cmake_vars_rel_path])
 
         # core component
         self.cpp_info.components["core"].set_property("cmake_target_name", "AWS::aws-sdk-cpp-core")
@@ -531,6 +546,8 @@ class AwsSdkCppConan(ConanFile):
             component_alias = f"aws-sdk-cpp-{sdk}_alias" # to emulate COMPONENTS names for find_package()
             self.cpp_info.components[component_alias].names["cmake_find_package"] = sdk
             self.cpp_info.components[component_alias].names["cmake_find_package_multi"] = sdk
+            self.cpp_info.components[component_alias].build_modules["cmake_find_package"] = [self._extra_cmake_vars_rel_path]
+            self.cpp_info.components[component_alias].build_modules["cmake_find_package_multi"] = [self._extra_cmake_vars_rel_path]
             self.cpp_info.components[component_alias].requires = [sdk]
 
         # specific system_libs, frameworks and requires of components
