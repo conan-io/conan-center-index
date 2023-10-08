@@ -87,3 +87,6 @@ class Fastnoise2Conan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "FastNoise2")
         self.cpp_info.set_property("cmake_target_name", "FastNoise2::FastNoise")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
