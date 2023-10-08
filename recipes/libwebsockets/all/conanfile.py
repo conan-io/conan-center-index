@@ -225,7 +225,7 @@ class LibwebsocketsConan(ConanFile):
 
         if self.options.with_ssl == "openssl":
             # Cannot add the [>=1.1 <4] range, as it seems openssl3 makes it fail
-            self.requires("openssl/1.1.1t", transitive_headers=True)
+            self.requires("openssl/1.1.1w", transitive_headers=True)
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/2.25.0")
         elif self.options.with_ssl == "wolfssl":
