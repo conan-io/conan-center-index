@@ -6,7 +6,10 @@ patches:
   "3.6.7":
     - patch_file: "patches/3.6.7-0001-cmake-robust-deps-handling.patch"
       patch_description: "CMake: robust discovery with find_package() and use imported targets"
-      patch_type: conan
+      patch_type: "conan"
     - patch_file: "patches/3.6.7-0002-cmake-check-openssl-symbol.patch"
       patch_description: "CMake: fix OpenSSL compatibility checks"
-      patch_type: conan
+      patch_type: "conan"
+    - patch_file: "patches/3.6.7-0003-ambiguous-overload-operator-equal.patch"
+      patch_description: "Fix ambiguous overload for operator== between DB_SerializedTagKey and DcmTagKey"
+      patch_type: "portability"
