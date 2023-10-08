@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, rm
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
@@ -78,6 +78,7 @@ class Fastnoise2Conan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         lib_suffix = "D" if self.settings.build_type == "Debug" else ""
