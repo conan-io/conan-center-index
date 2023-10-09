@@ -42,9 +42,7 @@ class diplibConan(ConanFile):
         #standard build options
         "fPIC": [True, False],
         "shared" : [True, False],
-
-
-    }
+        }
 
     default_options = { "with_fftw" : False,
                         "with_freeglut" : True,
