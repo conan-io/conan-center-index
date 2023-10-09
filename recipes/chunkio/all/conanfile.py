@@ -12,6 +12,7 @@ class ChunkIOConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/edsiper/chunkio"
     topics = ("chunk", "io", "memory", "file")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -45,6 +46,7 @@ class ChunkIOConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["CIO_LIB_STATIC"] = not self.options.shared
         tc.variables["CIO_LIB_SHARED"] = self.options.shared
         tc.generate()
@@ -65,3 +67,5 @@ class ChunkIOConan(ConanFile):
         self.cpp_info.libs = [target_name]
         if not self.options.shared:
             self.cpp_info.libs.append("cio-crc32")
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("shlwapi")
