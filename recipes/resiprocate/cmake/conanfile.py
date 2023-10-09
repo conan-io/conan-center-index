@@ -102,4 +102,5 @@ class ResiprocateConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["resip", "rutil", "dum"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.append("pthread")
