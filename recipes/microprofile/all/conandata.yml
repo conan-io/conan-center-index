@@ -5,6 +5,3 @@ sources:
 patches:
     "3.1":
         - patch_file: "patches/sources_fix.patch"
-          base_path: "source_subfolder"
-        - patch_file: "patches/cmake.patch"
-          base_path: "source_subfolder"
