@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.system import package_manager
 from conan.tools.gnu import PkgConfig
+import platform
 
 required_conan_version = ">=1.50.0"
 
@@ -35,8 +36,15 @@ class SysConfigOpenGLConan(ConanFile):
         pacman = package_manager.PacMan(self)
         pacman.install(["libglvnd"], update=True, check=True)
 
+        is_opensuse_tumbleweed: bool = False
+        if self.settings.os == "Linux":
+            is_opensuse_tumbleweed: bool = "tumbleweed" in platform.freedesktop_os_release()["ID"]
+
         zypper = package_manager.Zypper(self)
-        zypper.install(["Mesa-libGL-devel", "glproto-devel"], update=True, check=True)
+        if is_opensuse_tumbleweed:
+            zypper.install(["Mesa-libGL-devel"], update=True, check=True)
+        else:
+            zypper.install(["Mesa-libGL-devel", "glproto-devel"], update=True, check=True)
 
         pkg = package_manager.Pkg(self)
         pkg.install(["libglvnd"], update=True, check=True)
