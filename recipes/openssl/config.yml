@@ -14,8 +14,6 @@ versions:
     folder: "1.x.x"
   1.1.1u:
     folder: "1.x.x"
-  1.1.1t:
-    folder: "1.x.x"
   # 1.0.2x releases
   1.0.2u:
     folder: "1.x.x"
