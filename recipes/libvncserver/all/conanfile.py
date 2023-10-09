@@ -104,15 +104,6 @@ class LibVncServerConan(ConanFile):
         if self.options.with_xcb:
             self.requires("xorg/system")
 
-        self.requires("libffi/3.4.4", override=True)
-        self.requires("freetype/2.13.0", override=True)
-        self.requires("fontconfig/2.14.2", override=True)
-        self.requires("libmount/2.39", override=True)
-        self.requires("libcap/2.69", override=True)
-        self.requires("libalsa/1.2.7.2", override=True)
-        self.requires("libxml2/2.11.4", override=True)
-        self.requires("wayland/1.22.0", override=True)
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
