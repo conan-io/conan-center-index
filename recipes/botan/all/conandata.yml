@@ -17,6 +17,12 @@ sources:
   "3.0.0":
     url: "https://github.com/randombit/botan/archive/3.0.0.tar.gz"
     sha256: "8bafe2e965fa9ccf92ef5741165d735c9fbbe6376c373bbf5702495ad2dfb814"
+  "3.1.0":
+    url: "https://github.com/randombit/botan/archive/3.1.0.tar.gz"
+    sha256: "f3680ab11122e581ac08993f149bf519030c7be13b32f5ac1e6bef0a2e6bb88e"
+  "3.1.1":
+    url: "https://github.com/randombit/botan/archive/3.1.1.tar.gz"
+    sha256: "2d0af0c3a7140572f3f7f1a22865f9c5eadc102a7fa58f03314709b0bee26c11"
 patches:
   "2.18.2":
     - patch_file: "patches/fix-amalgamation-build.patch"
@@ -24,5 +30,13 @@ patches:
       patch_type: "portability"
   "3.0.0":
     - patch_file: "patches/backport-getrandom-via-syscall-to-3.0.0.patch"
+      patch_description: "Backport a fix to support getrandom() with glibc < 2.25"
+      patch_type: "portability"
+  "3.1.0":
+    - patch_file: "patches/backport-getrandom-via-syscall-to-3.1.0.patch"
+      patch_description: "Backport a fix to support getrandom() with glibc < 2.25"
+      patch_type: "portability"
+  "3.1.1":
+    - patch_file: "patches/backport-getrandom-via-syscall-to-3.1.0.patch"
       patch_description: "Backport a fix to support getrandom() with glibc < 2.25"
       patch_type: "portability"
