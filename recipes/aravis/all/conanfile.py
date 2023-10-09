@@ -78,7 +78,7 @@ class AravisConan(ConanFile):
 
     def requirements(self):
         # glib-object.h and gio/gio.h are used in several public headers
-        self.requires("glib/2.77.2", transitive_headers=True)
+        self.requires("glib/2.78.0", transitive_headers=True)
         self.requires("libxml2/2.11.4")
         self.requires("zlib/1.2.13")
         if self.options.usb:
@@ -86,6 +86,8 @@ class AravisConan(ConanFile):
         if self.options.gst_plugin:
             self.requires("gstreamer/1.22.3")
             self.requires("gst-plugins-base/1.19.2")
+        if self.options.introspection:
+            self.requires("gobject-introspection/1.72.0")
 
     def validate(self):
         if is_msvc_static_runtime(self):
@@ -103,8 +105,7 @@ class AravisConan(ConanFile):
         self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.5")
-        if self.options.introspection:
-            self.tool_requires("gobject-introspection/1.72.0")
+        
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -124,7 +125,8 @@ class AravisConan(ConanFile):
         tc.project_options["viewer"] = "disabled"
         tc.project_options["tests"] = False
         tc.project_options["documentation"] = "disabled"
-        tc.project_options["gv-n-buffers"] = int(str(self.options.gv_n_buffers))
+        if Version(self.version) > "0.8.20":
+            tc.project_options["gv-n-buffers"] = int(str(self.options.gv_n_buffers))
         tc.project_options["fast-heartbeat"] = False
         if self.settings.get_safe("compiler.runtime"):
             tc.project_options["b_vscrt"] = msvc_runtime_flag(self).lower()
