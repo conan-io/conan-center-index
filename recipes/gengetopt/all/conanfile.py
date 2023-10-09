@@ -21,10 +21,11 @@ class gengetoptConan(ConanFile):
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "patches/*.patch"
-    generators = "AutotoolsDeps", "AutotoolsToolchain"
+    generators = "AutotoolsDeps", "AutotoolsToolchain", "VirtualRunEnv"
 
     def build_requirements(self):
         if self.settings.os == "Windows":
+            self.tool_requires("msys2/cci.latest")
             self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("flex/2.6.4")
