@@ -69,6 +69,7 @@ class ResiprocateConan(ConanFile):
         tc.variables["USE_CONTRIB"] = False
         tc.variables["USE_DTLS"] = self.options.with_ssl
         tc.variables["USE_NUGET"] = False
+        tc.variables["VERSIONED_SONAME"] = False
         tc.variables["WITH_C_ARES"] = True
         tc.variables["WITH_SSL"] = self.options.with_ssl
         if self.settings.os in ["Linux"]:
