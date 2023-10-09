@@ -22,3 +22,7 @@ patches:
     - patch_file: "patches/fix-amalgamation-build.patch"
       patch_description: "Backport a fix for amalgamation build"
       patch_type: "portability"
+  "3.0.0":
+    - patch_file: "patches/backport-getrandom-via-syscall-to-3.0.0.patch"
+      patch_description: "Backport a fix to support getrandom() with glibc < 2.25"
+      patch_type: "portability"
