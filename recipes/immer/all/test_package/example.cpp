@@ -1,5 +1,5 @@
 #include "immer/vector.hpp"
-#include <assert.h>
+#include <cassert>
 
 int main() {
   const auto v0 = immer::vector<int>{};

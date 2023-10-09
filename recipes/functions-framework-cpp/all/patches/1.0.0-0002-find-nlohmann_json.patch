@@ -1,0 +1,22 @@
+diff --git a/google/cloud/functions/CMakeLists.txt b/google/cloud/functions/CMakeLists.txt
+index f7cac3a..38f7449 100644
+--- a/google/cloud/functions/CMakeLists.txt
++++ b/google/cloud/functions/CMakeLists.txt
+@@ -23,6 +23,7 @@ configure_file(internal/version_info.h.in
+ find_package(absl REQUIRED)
+ find_package(Boost REQUIRED COMPONENTS program_options)
+ find_package(Threads REQUIRED)
++find_package(nlohmann_json REQUIRED)
+ 
+ add_library(
+     functions_framework_cpp # cmake-format: sort
+@@ -76,7 +77,8 @@ target_include_directories(functions_framework_cpp SYSTEM
+                            PUBLIC $<INSTALL_INTERFACE:include>)
+ target_link_libraries(
+     functions_framework_cpp PUBLIC absl::time Boost::headers
+-                                   Boost::program_options Threads::Threads)
++                                   Boost::program_options Threads::Threads
++                                   nlohmann_json::nlohmann_json)
+ target_compile_definitions(functions_framework_cpp
+                            PUBLIC BOOST_BEAST_USE_STD_STRING_VIEW)
+ set_target_properties(

@@ -1,0 +1,4 @@
+sources:
+  "2013.1.1":
+    url: "https://github.com/xmake-mirror/libaesgm/archive/refs/tags/2013.1.1.tar.gz"
+    sha256: "102353a486126c91ccab791c3e718d056d8fbb1be488da81b26561bc7ef4f363"

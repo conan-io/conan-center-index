@@ -1,4 +1,7 @@
 sources:
+  "2.3.8":
+    url: "https://www.x.org/archive/individual/lib/libXft-2.3.8.tar.xz"
+    sha256: "5e8c3c4bc2d4c0a40aef6b4b38ed2fb74301640da29f6528154b5009b1c6dd49"
   "2.3.6":
     url: "https://www.x.org/archive/individual/lib/libXft-2.3.6.tar.gz"
     sha256: "b7e59f69e0bbabe9438088775f7e5a7c16a572e58b11f9722519385d38192df5"
@@ -11,4 +14,3 @@ patches:
       patch_description: "fix gcc 5 and gcc 11 compilation"
       patch_type: "portability"
       patch_source: "https://gitlab.freedesktop.org/xorg/lib/libxft/-/merge_requests/17"
-      base_path: "source_subfolder"

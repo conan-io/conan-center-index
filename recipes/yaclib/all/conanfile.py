@@ -1,9 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain
-from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches, save
-from conan.tools.layout import cmake_layout
 from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
