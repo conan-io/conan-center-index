@@ -5,5 +5,5 @@ sources:
 patches:
   "4.5.12":
     - patch_file: "patches/4.5.12-0001-fix-cmake.patch"
-      patch_description: "disable test, use cci package"
+      patch_description: "disable test/cpack, use cci package"
       patch_type: "conan"
