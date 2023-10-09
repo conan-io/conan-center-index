@@ -32,7 +32,7 @@ class UTConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "apple-clang": "12" if Version(self.version) < "2.0.0" else "13",
+            "apple-clang": "12" if Version(self.version) < "2.0.0" else "14",
             "clang": "9" if Version(self.version) < "2.0.0" else "10",
             "gcc": "9" if Version(self.version) < "2.0.0" else "10",
             "msvc": "192",
