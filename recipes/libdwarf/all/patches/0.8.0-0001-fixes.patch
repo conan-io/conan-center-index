@@ -1,0 +1,23 @@
+diff --git src/lib/libdwarf/CMakeLists.txt src/lib/libdwarf/CMakeLists.txt
+index 09908bba..95f82530 100644
+--- src/lib/libdwarf/CMakeLists.txt
++++ src/lib/libdwarf/CMakeLists.txt
+@@ -119,7 +119,7 @@ foreach(i RANGE ${targetCount})
+ 		ARCHIVE DESTINATION ${LIBDIR})
+ endforeach()
+ 
+-configure_file(libdwarf.pc.cmake libdwarf.pc @ONLY )
++#configure_file(libdwarf.pc.cmake libdwarf.pc @ONLY )
+ 
+ # The install has to be here, not in
+ # another CMakeLists.txt  to make install work properly
+@@ -144,6 +144,6 @@ install(
+ install(
+     FILES ${CMAKE_CURRENT_SOURCE_DIR}/dwarf.h
+     DESTINATION include/libdwarf)
+-install( FILES ${PROJECT_BINARY_DIR}/src/lib/libdwarf/libdwarf.pc
+-    DESTINATION lib/pkgconfig
+-)
++#install( FILES ${PROJECT_BINARY_DIR}/src/lib/libdwarf/libdwarf.pc
++#    DESTINATION lib/pkgconfig
++#)
