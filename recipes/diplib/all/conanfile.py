@@ -8,41 +8,44 @@ import pathlib
 
 class diplibConan(ConanFile):
     name = "diplib"
+    description = "a one-stop library and development environment for quantitative image analysis"
     settings = "os", "compiler", "arch", "build_type"
+    homepage = "https://diplib.org"
+    license = "Apache-2.0"
+    topics = ("image")
+    package_type = "library"
 
     options = { "jpeg" : [None, "libjpeg-turbo", "libjpeg"],
                 "with_glfw" : [True, False],
                 "with_freeglut" : [True, False],
-                "openmp" : [True, False],
                 "enable_viewer" : [True, False],
                 "with_zlib" : [True, False],
                 "enable_ics" : [True, False],
-                "with_tiff" : [True, False],
+                "with_libtiff" : [True, False],
+                "with_freetype" : [True, False],
                 "unicode" : [True, False],
                 "always_128bit_prng" : [True, False],
                 "with_fftw" : [True, False],
                 "asserts" : [True, False],
                 "shared" : [True, False],
-                "fPIC": [True, False]
+                "fPIC": [True, False],
+
+                # options that build extra functionality into the library,
+                # but do not need extra external dependencies to do so
+                "enable_ics" : [True, False],
+                "enable_viewer" : [True, False],
+
+                # options that change behaviour of the library
+                "always_128bit_prng" : [True, False],
+                "asserts" : [True, False],
+                "multithreading" : [True, False],
+                "stack_trace" : [True, False],
+                "unicode" : [True, False],
+
+                #standard build options
+                "fPIC": [True, False],
+                "shared" : [True, False],
                }
-
-        # options that build extra functionality into the library,
-        # but do not need extra external dependencies to do so
-        "enable_ics" : [True, False],
-        "enable_viewer" : [True, False],
-
-
-        # options that change behaviour of the library
-        "always_128bit_prng" : [True, False],
-        "asserts" : [True, False],
-        "multithreading" : [True, False],
-        "stack_trace" : [True, False],
-        "unicode" : [True, False],
-
-        #standard build options
-        "fPIC": [True, False],
-        "shared" : [True, False],
-        }
 
     default_options = { "with_fftw" : False,
                         "with_freeglut" : True,
@@ -92,7 +95,7 @@ class diplibConan(ConanFile):
         # self.requires("libics/??")
 
 
-        if self.options.jpeg is not None:
+        if self.options.get_safe("jpeg") != None:
             if self.options.jpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/3.0.0")
             else:
@@ -194,3 +197,12 @@ class diplibConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.set_property("cmake_target_name", "DIPlib::DIP")
+        self.cpp_info.set_property("cmake_file_name", "DIPlib")
+
+        #Conan v1 compatibility
+        self.cpp_info.names["cmake_find_package"] = "DIPlib::DIP"
+        self.cpp_info.names["cmake_find_package_multi"] = "DIPlib::DIP"
+
+        #NOTE: should probably model requirements here but upstream CMake file doesn't
+        # do it, so...
