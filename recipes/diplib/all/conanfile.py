@@ -130,8 +130,8 @@ class diplibConan(ConanFile):
             self.output.error("you must set one or both of with_freeglut and with_glfw to True")
             raise ConanInvalidConfiguration("invalid viewer backend configuration")
 
-        check_min_cppstd(self, 14)
-
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 14)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
