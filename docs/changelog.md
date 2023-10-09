@@ -1,5 +1,22 @@
 # Changelog
 
+### 06-Oct-2023 - 10:15 CEST
+
+- [feature] Label PRs with version conflict properly
+- [feature] Add motivation message when under maintenance
+- [feature] Wait for sibling job in master right before promote
+- [fix] No longer run Conan v2 export step
+- [fix] Ensure build order follows only static first
+- [fix] Disable quiet period for all jobs except CCI multibranch
+
+### 25-Sep-2023 - 14:33 CEST
+
+- [feature] Label PRs that have missing dependencies.
+- [feature] Remove check regression for Conan v2 pipeline.
+- [feature] Start deprecating epochs support in profile configurations.
+- [fix] Run TapaholesRepo job only once per week.
+- [fix] Run ListPackages job only once per week.
+
 ### 01-Sep-2023 - 19:58 CEST
 
 - [fix] Use Unix separators for Windows folder path when creating CI workspace.

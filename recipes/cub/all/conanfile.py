@@ -7,7 +7,7 @@ from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.50.0"
 
 
 class CubConan(ConanFile):
@@ -29,7 +29,7 @@ class CubConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
-            "msvc": "14.1",
+            "msvc": "191",
             "gcc": "5",
             "clang": "5",
             "apple-clang": "5.1",
@@ -73,10 +73,8 @@ class CubConan(ConanFile):
 
         # Follows the naming conventions of the official CMake config file:
         # https://github.com/NVIDIA/cub/blob/main/cub/cmake/cub-config.cmake
-
         self.cpp_info.set_property("cmake_file_name", "cub")
         self.cpp_info.set_property("cmake_target_name", "CUB::CUB")
-        self.cpp_info.set_property("pkg_config_name", "cub")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "cub"
