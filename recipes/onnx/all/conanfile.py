@@ -84,7 +84,7 @@ class OnnxConan(ConanFile):
         tc.variables["ONNX_WERROR"] = False
         tc.variables["ONNX_COVERAGE"] = False
         tc.variables["ONNX_BUILD_TESTS"] = False
-        tc.variables["ONNX_USE_LITE_PROTO"] = False
+        tc.variables["ONNX_USE_LITE_PROTO"] = self.dependencies.host["protobuf"].options.lite
         tc.variables["ONNX_ML"] = True
         if Version(self.version) < "1.13.0":
             tc.variables["ONNXIFI_ENABLE_EXT"] = False
