@@ -1,9 +1,6 @@
-import os
-
 from conan import ConanFile
-from conan.errors import ConanException
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.gnu import PkgConfig, PkgConfigDeps
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.layout import basic_layout
 
