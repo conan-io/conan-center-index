@@ -114,14 +114,11 @@ class diplibConan(ConanFile):
             "fftw" : "3.3.10",
             "freetype" : "2.13.0",
             "libtiff" : "4.6.0",
-            "zlib" : "1.2.13"}                       
+            "zlib" : "[>=1.2.11 <2]"}                       
 
         for name, version in libversions.items():
             if getattr(self.options, f"with_{name}"):
                 self.requires(f"{name}/{version}")
-
-        if self.options.with_fftw:
-            self.requires("fftw/3.3.10")
 
     def validate_build(self):
 
