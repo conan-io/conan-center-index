@@ -152,7 +152,7 @@ class MicroprofileConan(ConanFile):
         cmake.build()
 
     def _extract_license(self):
-        readme = load(self, os.path.join(self._source_subfolder, "LICENSE"),)
+        readme = load(self, os.path.join(self.source_folder, "README.md"),)
         return readme[readme.find("# License"):]
 
     def package(self):
