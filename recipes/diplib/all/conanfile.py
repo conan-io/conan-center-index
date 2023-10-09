@@ -4,6 +4,7 @@ from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
 from conan.tools.files import get, apply_conandata_patches, export_conandata_patches
 from conan.tools.files import collect_libs, rmdir, mkdir, copy
 from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 import pathlib
 
 class diplibConan(ConanFile):
@@ -121,6 +122,9 @@ class diplibConan(ConanFile):
                 self.requires(f"{name}/{version}")
 
     def validate_build(self):
+
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < Version(7):
+            raise ConanInvalidConfiguration("cannot build on gcc < 7")
 
         #check that if we're building viewer, we have at least one backend selected
         viewer_backend: bool = self.options.get_safe("with_glfw", False) or self.options.get_safe("with_freeglut", False)
