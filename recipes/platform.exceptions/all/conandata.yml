@@ -1,7 +1,10 @@
 sources:
-  "0.2.0":
-    url: https://github.com/linksplatform/Exceptions/archive/refs/tags/0.4.0_0.2.0.zip
-    sha256: 9e4513da667e41f0bbe776123747ac63958972edb00eaee300c495ae3b39eb9b
+  "0.5.0":
+    url: "https://github.com/linksplatform/Exceptions/archive/csharp_0.5.0.tar.gz"
+    sha256: "5fbdd49adf7840431a581d0bfe61a5d247398a1fe622101b3985714d11d411f4"
   "0.3.0":
-    url: https://github.com/linksplatform/Exceptions/archive/refs/tags/cpp_0.3.0.zip
-    sha256: 08506f334098e8c9106ff357efd7f68b83a3c1f4dc03b6b97b6229b14737d0ce
+    url: "https://github.com/linksplatform/Exceptions/archive/refs/tags/cpp_0.3.0.zip"
+    sha256: "08506f334098e8c9106ff357efd7f68b83a3c1f4dc03b6b97b6229b14737d0ce"
+  "0.2.0":
+    url: "https://github.com/linksplatform/Exceptions/archive/refs/tags/0.4.0_0.2.0.zip"
+    sha256: "9e4513da667e41f0bbe776123747ac63958972edb00eaee300c495ae3b39eb9b"

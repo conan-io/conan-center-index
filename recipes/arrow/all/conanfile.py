@@ -336,7 +336,7 @@ class ArrowConan(ConanFile):
             self.options.get_safe("runtime_simd_level") != None:
             self.requires("xsimd/9.0.1")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
             self.requires("zstd/1.5.2")
         if self.options.with_re2:
@@ -377,6 +377,10 @@ class ArrowConan(ConanFile):
 
         if Version(self.version) < "6.0.0" and self.options.get_safe("simd_level") == "default":
             raise ConanInvalidConfiguration(f"In {self.ref}, simd_level options is not supported `default` value.")
+
+    def build_requirements(self):
+        if Version(self.version) >= "13.0.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -526,9 +530,6 @@ class ArrowConan(ConanFile):
         cmake =CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "cpp"))
         cmake.build()
-
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16 <4]")
 
     def package(self):
         copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
