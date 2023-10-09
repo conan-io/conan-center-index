@@ -21,4 +21,6 @@ class TestPackageConan(ConanFile):
             except ConanException:
                 # FIXME: libm.so.6: version `GLIBC_2.29' not found
                 # Doxygen built with a newer glibc than the one in the test image
+                value = buffer.getvalue()
+                self.output.error(f"Doxygen failed to run: {value}")
                 assert "GLIBC" in buffer.getvalue()
