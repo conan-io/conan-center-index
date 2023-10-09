@@ -10,6 +10,7 @@ class diplibConan(ConanFile):
     name = "diplib"
     description = "a one-stop library and development environment for quantitative image analysis"
     settings = "os", "compiler", "arch", "build_type"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://diplib.org"
     license = "Apache-2.0"
     topics = ("image")
