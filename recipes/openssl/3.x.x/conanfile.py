@@ -479,7 +479,7 @@ class OpenSSLConan(ConanFile):
     def _run_make(self, targets=None, parallel=True, install=False):
         command = [self._make_program]
         if install:
-            command.append(f"DESTDIR={self.package_folder}")
+            command.append(f"DESTDIR={self._adjust_path(self.package_folder)}")
         if targets:
             command.extend(targets)
         if not self._use_nmake:
