@@ -1,4 +1,7 @@
 sources:
+  "0.8.0":
+    url: "https://www.prevanders.net/libdwarf-0.8.0.tar.xz"
+    sha256: "771814a66b5aadacd8381b22d8a03b9e197bd35c202d27e19fb990e9b6d27b17"
   "0.7.0":
     url: "https://www.prevanders.net/libdwarf-0.7.0.tar.xz"
     sha256: "23b71829de875fa5842e49f232c8ee1a5043805749738bc61424d9abc1189f38"
