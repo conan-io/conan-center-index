@@ -103,10 +103,6 @@ class AravisConan(ConanFile):
             )
 
     def build_requirements(self):
-#        self.tool_requires("meson/1.2.2")
-        # windows build: meson/1.0.0 works
-        # windows buils: self.tool_requires("meson/1.2.0") works
-
         #windows build: meson/1.2.1 works, meson/1.2.2 breaks for some reason!
         if self.settings.os == "Windows":
             self.tool_requires("meson/[<1.2.2]")
