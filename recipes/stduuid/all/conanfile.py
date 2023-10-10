@@ -41,7 +41,7 @@ class StduuidConan(ConanFile):
         export_conandata_patches(self)
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def config_options(self):
         if Version(self.version) == "1.0":
