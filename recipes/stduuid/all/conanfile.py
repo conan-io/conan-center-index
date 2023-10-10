@@ -37,36 +37,18 @@ class StduuidConan(ConanFile):
             "Visual Studio": "15",
         }
 
-    @property
-    def _std_span_minimum_version(self):
-        # TODO double check these
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "10",
-            "msvc": "192",
-            "Visual Studio": "16",
-        }
-
     def _supports_std_span(self):
         # Air on the side of caution, if we are not certain then we should return false.
         
+        # std::span is a "small" enough feature that generally compilers will support
+        # it if C++20 is supported, so just check for the latter.
         if self.settings.compiler.get_safe("cppstd"):
-            # This first check alone should almost always be correct on its own, as if you're on
-            # C++20, your compiler probably supports std::span.
             try:
                 check_min_cppstd(self, "20", False)
             except ConanInvalidConfiguration:
                 return False
         else:
             self.output.info("compiler.cppstd not set, assuming std::span not supported")
-            return False
-
-        compiler_minimum_version = self._std_span_minimum_version.get(str(self.settings.compiler), False)
-        if not compiler_minimum_version:
-            self.output.info(f"Unsure if compiler '{self.settings.compiler}' supports std::span, assuming no.")
-            return False
-        if Version(self.settings.compiler.version) < compiler_minimum_version:
             return False
 
         return True
@@ -98,12 +80,10 @@ class StduuidConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         uuid_h_file = os.path.join(self.build_folder, "..", "include", "uuid.h")
-        #replace_in_file(self, uuid_h_file, "#ifdef LIBUUID_CPP20_OR_GREATER", "#if __cpp_lib_span")
         if self.options.with_cxx20_span:
             replace_in_file(self, uuid_h_file, "#ifdef LIBUUID_CPP20_OR_GREATER", "#if 1")
             replace_in_file(self, uuid_h_file, "#ifdef __cpp_lib_span", "#if 1")
