@@ -21,10 +21,12 @@ class DoxygenConan(ConanFile):
     options = {
         "enable_parse": [True, False],
         "enable_search": [True, False],
+        "enable_app": [True, False],
     }
     default_options = {
         "enable_parse": True,
         "enable_search": True,
+        "enable_app": False,
     }
 
     @property
@@ -53,6 +55,9 @@ class DoxygenConan(ConanFile):
         if self.options.enable_search:
             self.requires("xapian-core/1.4.19")
             self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.enable_app:
+            # FIXME: Doxygen uses upper case CMake variables to link/include IConv. This is not supported by CMakeDeps
+            self.requires("libiconv/1.17")
 
     def compatibility(self):
         return [{"settings": [("build_type", "Release")]}]
@@ -78,6 +83,7 @@ class DoxygenConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["build_parse"] = self.options.enable_parse
         tc.variables["build_search"] = self.options.enable_search
+        tc.variables["build_app"] = self.options.enable_app
         tc.variables["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
         tc.variables["win_static"] = is_msvc_static_runtime(self)
         tc.generate()
