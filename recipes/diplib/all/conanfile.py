@@ -80,11 +80,13 @@ class diplibConan(ConanFile):
         #because that's what the CMakeLists.txt does. On other platforms it's True
         if self.settings.os == "Macos":
             self.options.with_freeglut = False
+            self.options.multithreading = False
 
 
         #currently CCI doesn't seem to be able to build OpenMP on clang
         #this is a bit of a hack, as on a user build, will often have libomp
         #installed. Thus do not want to flag this as an invalid configuration
+        # same is true for macOS above
         if self.settings.os == "Linux" and self.settings.compiler == "clang":
             self.options.multithreading = False
 
