@@ -13,6 +13,7 @@ required_conan_version = ">=1.54.0"
 class MongoCxxConan(ConanFile):
     name = "mongo-cxx-driver"
     license = "Apache-2.0"
+    version = "3.8.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://mongocxx.org"
     description = "C++ Driver for MongoDB"
