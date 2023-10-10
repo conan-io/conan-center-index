@@ -1,0 +1,13 @@
+sources:
+  0.10.0:
+    url: https://github.com/google/s2geometry/archive/refs/tags/v0.10.0.zip
+    sha256: d03ae5566e9957c5b3bc6e0e62603370d1450feaf093d204d27b7af9e4d14909
+patches:
+  0.10.0:
+    - patch_description: "Bump CMAKE_CXX_STANDARD to 14"
+      patch_file: "patches/bump_cmake_cxx_standard.patch"
+      patch_source: "https://github.com/google/s2geometry/issues/317"
+      patch_type: "portability"
+    - patch_description: "Add message to static_assert to be compatible with c++14 (MSVC)"
+      patch_file: "patches/add_message_to_static_assert.patch"
+      patch_type: "portability"

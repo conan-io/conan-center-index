@@ -1,16 +1,15 @@
 cmake_minimum_required(VERSION 3.4)
 project(cgltf C)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+set(SOURCES_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 
 set(SRC_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/cgltf.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/cgltf_write.c
+  ${SOURCES_DIR}/cgltf.c
+  ${SOURCES_DIR}/cgltf_write.c
 )
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/cgltf.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/cgltf_write.h
+  ${SOURCES_DIR}/cgltf.h
+  ${SOURCES_DIR}/cgltf_write.h
 )
 
 add_library(${PROJECT_NAME} ${SRC_FILES})
@@ -20,10 +19,5 @@ if(MSVC AND BUILD_SHARED_LIBS)
 endif()
 
 include(GNUInstallDirs)
-install(
-  TARGETS ${PROJECT_NAME}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
+install(TARGETS ${PROJECT_NAME})
 install(FILES ${HEADER_FILES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
