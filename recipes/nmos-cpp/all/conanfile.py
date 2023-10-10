@@ -66,18 +66,13 @@ class NmosCppConan(ConanFile):
             self.requires("avahi/0.8")
 
     def build_requirements(self):
-        # nmos-cpp needs CMake 3.17 or higher but CCI doesn't allow version ranges
-        self.build_requires("cmake/[>=3.17 <4]")
+        self.tool_requires("cmake/[>=3.17 <4]")
 
     def validate(self):
         if self.info.settings.os in ["Macos"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not currently supported on {self.info.settings.os}. Contributions welcomed.")
         if self.info.settings.compiler.get_safe("cppstd"):
             build.check_min_cppstd(self, 11)
-
-    def package_id(self):
-        self.info.requires["boost"].minor_mode()
-        self.info.requires["nlohmann_json"].patch_mode()
 
     def layout(self):
         cmake_layout(self, src_folder="src")
