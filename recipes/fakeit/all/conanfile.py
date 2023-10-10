@@ -40,7 +40,7 @@ class FakeItConan(ConanFile):
         elif self.options.integration == "gtest":
             self.requires("gtest/1.14.0")
         elif self.options.integration == "qtest":
-            self.requires("qt/6.5.2")
+            self.requires("qt/6.5.3")
         elif self.options.integration == "standalone":
             pass
         else:
