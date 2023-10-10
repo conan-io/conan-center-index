@@ -11,22 +11,27 @@ sources:
   "2.4.7.1":
     url: "https://github.com/OpenImageIO/oiio/archive/refs/tags/v2.4.7.1.tar.gz"
     sha256: "fd298f71e44c6776863db4b37c4a1388dba0d2eb37378afea95ab07a7cd6ecd4"
+  "2.4.15.0":
+    url: "https://github.com/OpenImageIO/oiio/archive/refs/tags/v2.4.15.0.tar.gz"
+    sha256: "b2d76e3880d25d3b005f7c694811a991ccebb6e396965959d194f79c369ff390"
 patches:
   "2.2.7.0":
     - patch_file: "patches/2.2.7.0-cmake-targets.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
   "2.2.18.0":
     - patch_file: "patches/2.2.18.0-cmake-targets.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
   "2.3.7.2":
     - patch_file: "patches/2.3.7.2-cmake-targets.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
   "2.4.7.1":
     - patch_file: "patches/2.4.7.1-cmake-targets.patch"
-      base_path: "source_subfolder"
       patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
       patch_type: "conan"
     - patch_file: "patches/2.4.7.1-fix-msvc2017.patch"
-      base_path: "source_subfolder"
       patch_description: "Fix compile error with MSVC 2017"
       patch_type: "official"
+  "2.4.15.0":
+    - patch_file: "patches/2.4.15.0-cmake-targets.patch"
+      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
+      patch_type: "conan"

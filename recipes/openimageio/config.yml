@@ -8,4 +8,4 @@ versions:
   "2.4.7.1":
     folder: all
   "2.4.15.0":
-    folder: conan2
+    folder: all
