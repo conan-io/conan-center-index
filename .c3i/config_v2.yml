@@ -35,10 +35,11 @@ tasks:
   build_single_reference:
     package_id_cache_type: "none"
     timeout_minutes: 600
-    large_timeout_minutes: 800
+    large_timeout_minutes: 900
     large_timeout_references:
       - boost
       - qt
+      - llvm
   cci:
     conan_v2_run_export: false
     detailed_status_checks: false
