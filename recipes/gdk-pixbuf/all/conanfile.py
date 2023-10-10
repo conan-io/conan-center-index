@@ -63,17 +63,17 @@ class GdkPixbufConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.77.0", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_libpng:
             self.requires("libpng/1.6.40")
         if self.options.with_libtiff:
-            self.requires("libtiff/4.4.0")
+            self.requires("libtiff/4.6.0")
         if self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.5")
+            self.requires("libjpeg-turbo/3.0.0")
         elif self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.1")
+            self.requires("mozjpeg/4.1.3")
 
     def validate(self):
         if self.options.shared and not self.dependencies["glib"].options.shared:
@@ -90,9 +90,9 @@ class GdkPixbufConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.2.2")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
         self.tool_requires("glib/<host_version>")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
