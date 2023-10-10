@@ -370,7 +370,7 @@ class PclConan(ConanFile):
         if self._is_enabled("qhull"):
             self.requires("qhull/8.0.1", transitive_headers=True)
         if self._is_enabled("qt"):
-            self.requires("qt/6.5.2")
+            self.requires("qt/6.5.3")
         if self._is_enabled("libusb"):
             self.requires("libusb/1.0.26", transitive_headers=True)
         if self._is_enabled("pcap"):
