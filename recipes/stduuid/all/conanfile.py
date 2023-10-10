@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, replace_in_file
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
@@ -25,7 +25,7 @@ class StduuidConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "20" if self.options.with_cxx20_span else "17"
+        return "20" if self.options.get_safe("with_cxx20_span") else "17"
 
     @property
     def _compilers_minimum_version(self):
@@ -36,32 +36,25 @@ class StduuidConan(ConanFile):
             "msvc": "191",
             "Visual Studio": "15",
         }
-
-    def _supports_std_span(self):
-        # Air on the side of caution, if we are not certain then we should return false.
-        
-        # std::span is a "small" enough feature that generally compilers will support
-        # it if C++20 is supported, so just check for the latter.
-        if self.settings.compiler.get_safe("cppstd"):
-            try:
-                check_min_cppstd(self, "20", False)
-            except ConanInvalidConfiguration:
-                return False
-        else:
-            self.output.info("compiler.cppstd not set, assuming std::span not supported")
-            return False
-
-        return True
     
-    def config_options(self):
-        # By default, use std::span if we're certain the profile supports it.
-        self.options.with_cxx20_span = self._supports_std_span()
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self)
 
+    def config_options(self):
+        if Version(self.version) == "1.0":
+            # Version 1.0 unconditionally depends on gsl span
+            del self.options.with_cxx20_span
+        else:
+            # Conditionally set the default value of with_cxx20_span
+            # if cppstd is set and is 20 or greater
+            self.options.with_cxx20_span = (self.settings.compiler.get_safe("cppstd")
+                                            and valid_min_cppstd(self, 20))
+
     def requirements(self):
-        if not self.options.with_cxx20_span:
+        if not self.options.get_safe("with_cxx20_span") or Version(self.version) == "1.0":
             self.requires("ms-gsl/4.0.0", transitive_headers=True)
         if self.settings.os == "Linux" and Version(self.version) <= "1.0":
             self.requires("util-linux-libuuid/2.39", transitive_headers=True, transitive_libs=True)
@@ -81,15 +74,10 @@ class StduuidConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def build(self):
-        uuid_h_file = os.path.join(self.build_folder, "..", "include", "uuid.h")
-        if self.options.with_cxx20_span:
-            replace_in_file(self, uuid_h_file, "#ifdef LIBUUID_CPP20_OR_GREATER", "#if 1")
-            replace_in_file(self, uuid_h_file, "#ifdef __cpp_lib_span", "#if 1")
-        else:
-            replace_in_file(self, uuid_h_file, "#ifdef LIBUUID_CPP20_OR_GREATER", "#if 0")
-            replace_in_file(self, uuid_h_file, "#ifdef __cpp_lib_span", "#if 0")
+        pass
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -98,3 +86,5 @@ class StduuidConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        if self.options.get_safe("with_cxx20_span"):
+            self.cpp_info.defines = ["LIBUUID_CPP20_OR_GREATER"]
