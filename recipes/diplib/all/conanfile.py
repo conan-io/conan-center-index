@@ -47,6 +47,7 @@ class diplibConan(ConanFile):
                 #standard build options
                 "fPIC": [True, False],
                 "shared" : [True, False],
+
                }
 
     default_options = { "with_fftw" : False,
@@ -79,6 +80,13 @@ class diplibConan(ConanFile):
         #because that's what the CMakeLists.txt does. On other platforms it's True
         if self.settings.os == "Macos":
             self.options.with_freeglut = False
+
+
+        #currently CCI doesn't seem to be able to build OpenMP on clang
+        #this is a bit of a hack, as on a user build, will often have libomp
+        #installed. Thus do not want to flag this as an invalid configuration
+        if self.settings.os == "Linux" and self.settings.compiler == "clang":
+            self.options.multithreading = False
 
     def configure(self):
         # if we don't build the viewer we don't need the backends
@@ -122,7 +130,6 @@ class diplibConan(ConanFile):
                 self.requires(f"{name}/{version}")
 
     def validate_build(self):
-
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < Version(7):
             raise ConanInvalidConfiguration("cannot build on gcc < 7")
 
