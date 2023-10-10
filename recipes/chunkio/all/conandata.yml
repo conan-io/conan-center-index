@@ -11,6 +11,3 @@ patches:
       patch_description: "fix wrong target"
       patch_type: "bugfix"
       patch_source: "https://github.com/fluent/chunkio/issues/104"
-    - patch_file: "patches/1.1.6-0003-disable-pic.patch"
-      patch_description: "disable CMAKE_POSITION_INDEPENDENT_CODE"
-      patch_type: "conan"
