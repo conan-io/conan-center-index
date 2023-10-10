@@ -673,4 +673,3 @@ class OpenSSLConan(ConanFile):
 
         # For legacy 1.x downstream consumers, remove once recipe is 2.0 only:
         self.env_info.OPENSSL_MODULES = openssl_modules_dir
-
