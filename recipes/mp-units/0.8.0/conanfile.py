@@ -5,7 +5,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
-from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.59.0"
@@ -42,7 +41,6 @@ class MPUnitsConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        # Note that apple-clang and msvc are disabled for now, their C++ 20 implementations are not up to speed
         return {"gcc": "10.3", "clang": "12", "apple-clang": "13", "msvc": "192"}
 
     @property
@@ -81,9 +79,6 @@ class MPUnitsConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires at least {compiler} {min_version} ({compiler.version} in use)"
             )
-        
-        if is_msvc(self) or compiler == "apple-clang":
-            raise ConanInvalidConfiguration(f"{self.ref} disabled for {compiler} as their C++20 implementation is not up to speed yet")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
