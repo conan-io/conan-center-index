@@ -30,6 +30,14 @@ class LASlibConan(ConanFile):
     @property
     def _min_cppstd(self):
         return 17
+    
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "10",
+        }
 
     def export_sources(self):
         export_conandata_patches(self)
