@@ -1,0 +1,32 @@
+From 4ebdd569049ac48a3867a59537cea769fa319e8f Mon Sep 17 00:00:00 2001
+From: Karel Zak <kzak@redhat.com>
+Date: Wed, 20 Mar 2024 15:03:05 +0100
+Subject: [PATCH] lib/sha1: fix for old glibc
+
+Fixes: https://github.com/util-linux/util-linux/issues/2830
+References: http://github.com/util-linux/util-linux/commit/a8902e4cdd6149e5124383b25db8688dcdacd790
+Signed-off-by: Karel Zak <kzak@redhat.com>
+---
+ lib/sha1.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/lib/sha1.c b/lib/sha1.c
+index 32ef5b9ca9..3edff122c4 100644
+--- a/lib/sha1.c
++++ b/lib/sha1.c
+@@ -156,11 +156,15 @@ void ul_SHA1Transform(uint32_t state[5], const unsigned char buffer[64])
+ 	state[3] += d;
+ 	state[4] += e;
+ 	/* Wipe variables */
++#ifdef HAVE_EXPLICIT_BZERO
+ 	explicit_bzero(&a, sizeof(a));
+ 	explicit_bzero(&b, sizeof(b));
+ 	explicit_bzero(&c, sizeof(c));
+ 	explicit_bzero(&d, sizeof(d));
+ 	explicit_bzero(&e, sizeof(e));
++#else
++	a = b = c = d = e = 0;
++#endif
+ #ifdef UL_SHA1HANDSOFF
+ 	memset(block, '\0', sizeof(block));
+ #endif
