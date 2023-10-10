@@ -10,6 +10,10 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     test_type = "explicit"
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def layout(self):
         basic_layout(self)
 
@@ -20,7 +24,8 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         pkg_config_deps = PkgConfigDeps(self)
-        pkg_config_deps.build_context_activated = ["hwdata"]
+        if self._settings_build:
+            pkg_config_deps.build_context_activated = ["hwdata"]
         pkg_config_deps.generate()
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
