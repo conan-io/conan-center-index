@@ -206,5 +206,5 @@ class MicroprofileConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread", "m"]
         self.cpp_info.defines.append("MICROPROFILE_USE_CONFIG")
