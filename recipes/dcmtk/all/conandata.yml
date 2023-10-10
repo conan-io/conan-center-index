@@ -11,5 +11,6 @@ patches:
       patch_description: "CMake: fix OpenSSL compatibility checks"
       patch_type: "conan"
     - patch_file: "patches/3.6.7-0003-ambiguous-overload-operator-equal.patch"
-      patch_description: "Fix ambiguous overload for operator== between DB_SerializedTagKey and DcmTagKey"
+      patch_description: "C++20: Fix ambiguous overload for operator== between DB_SerializedTagKey and DcmTagKey"
       patch_type: "portability"
+      patch_source: "https://github.com/DCMTK/dcmtk/pull/88"
