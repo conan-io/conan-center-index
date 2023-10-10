@@ -30,7 +30,7 @@ class LibinputConan(ConanFile):
     }
     default_options = {
         "epoll_dir": None,
-        "debug_gui": True,
+        "debug_gui": False,
         "with_libudev": "systemd",
         # todo Package libwacom and enable this option by default.
         "with_libwacom": False,
