@@ -15,7 +15,7 @@ class LibVncServerConan(ConanFile):
     homepage = "https://github.com/LibVNC/libvncserver"
     license = "GPL"
     description = ("A library for easy implementation of a VNC server")
-    topics = ("VncServer", "VNC", "RFB")
+    topics = ("vncserver", "vnc", "rfb")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
