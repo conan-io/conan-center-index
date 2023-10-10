@@ -50,7 +50,7 @@ class StduuidConan(ConanFile):
         else:
             # Conditionally set the default value of with_cxx20_span
             # if cppstd is set and is 20 or greater
-            self.options.with_cxx20_span = (self.settings.compiler.get_safe("cppstd")
+            self.options.with_cxx20_span = (self.settings.compiler.get_safe("cppstd", False)
                                             and valid_min_cppstd(self, 20))
 
     def requirements(self):
