@@ -1,6 +1,8 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.52.0"
@@ -20,6 +22,11 @@ class EmbeddedRingbufcppConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
+
+    def validate(self):
+        # embedded_ringbuf_cpp uses #warning preprocessor directive
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio and msvc.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
