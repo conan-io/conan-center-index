@@ -1,7 +1,5 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.errors import ConanException
-from io import StringIO
 
 
 class TestPackageConan(ConanFile):
@@ -14,12 +12,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            buffer = StringIO()
             self.output.info("Doxygen Version:")
-            try:
-                self.run(f"{self.recipe_folder}/doxygen --version", buffer)
-            except ConanException:
-                # FIXME: libm.so.6: version `GLIBC_2.29' not found
-                # Doxygen built with a newer glibc than the one in the test image
-                value = buffer.getvalue()
-                self.output.error(f"Doxygen failed to run: {value}")
+            self.run("doxygen --version")
