@@ -8,7 +8,7 @@
 #include <libinput.h>
 
 static int
-open_restricted(const char *path, int flags, void */*user_data*/)
+open_restricted(const char *path, int flags, void *user_data)
 {
 	int fd = open(path, flags);
 	return fd < 0 ? -1 : fd;

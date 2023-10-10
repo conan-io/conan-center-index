@@ -39,8 +39,8 @@ class LibinputConan(ConanFile):
     }
 
     def configure(self):
-        self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
         if not self.options.debug_gui:
             self.options.rm_safe("with_wayland")
             self.options.rm_safe("with_x11")
