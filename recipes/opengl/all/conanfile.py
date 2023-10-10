@@ -1,9 +1,17 @@
 from conan import ConanFile
 from conan.tools.system import package_manager
 from conan.tools.gnu import PkgConfig
+from coann.tools.files import load
 import platform
 
 required_conan_version = ">=1.50.0"
+
+
+def get_linux_platform_id(conanfile):
+    os_release = load(conanfile, "/etc/os-release")
+    lines = [_.split("=") for _ in os_release.split()]
+    kws = {_[0] : _[0].strip() for _ in lines if len(lines) ==2}
+    return kws.get("ID","").strip('\"')
 
 
 class SysConfigOpenGLConan(ConanFile):
@@ -32,13 +40,13 @@ class SysConfigOpenGLConan(ConanFile):
 
         apt = package_manager.Apt(self)
         apt.install_substitutes(["libgl-dev"], ["libgl1-mesa-dev"], update=True, check=True)
-
         pacman = package_manager.PacMan(self)
         pacman.install(["libglvnd"], update=True, check=True)
 
         is_opensuse_tumbleweed: bool = False
         if self.settings.os == "Linux":
-            is_opensuse_tumbleweed: bool = "tumbleweed" in platform.freedesktop_os_release()["ID"]
+            platformid = get_linux_platform_id(self)
+            is_opensuse_tumbleweed = "tumbleweed" in platformid
 
         zypper = package_manager.Zypper(self)
         if is_opensuse_tumbleweed:
