@@ -76,8 +76,6 @@ class LibinputConan(ConanFile):
     def validate(self):
         if not self.settings.os in ["FreeBSD", "Linux"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
-        # if self.options.debug_gui and not (self.options.with_wayland or self.options.with_x11):
-        #     raise ConanInvalidConfiguration(f"The debug_gui option for {self.ref} is not yet supported. Contributions welcome.")
         if self.options.with_libwacom:
             raise ConanInvalidConfiguration(f"The with_libwacom option for {self.ref} is not yet supported. Contributions welcome.")
 
