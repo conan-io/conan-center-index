@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, load, replace_in_file, copy, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, load, replace_in_file, copy, rmdir, collect_libs
 from conan.tools.scm import Version
 import os
 
@@ -149,3 +149,13 @@ class LibVncServerConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "LibVncServer")
+        self.cpp_info.set_property("cmake_target_name", "libvncserver::libvncserver")
+        #self.cpp_info.libs = ["libvncserver", "libvncclient"]
+        self.cpp_info.libs = ['vncserver']
+        #self.cpp_info.libs = collect_libs(self)
+        #print(self.cpp_info.libs)
+
+        self.cpp_info.components["libvncclient"].set_property("cmake_target_name", "LibVncClient")
+        self.cpp_info.components["libvncclient"].libs = ['vncclient']
+        self.cpp_info.components["libvncclient"].set_property("cmake_target_name", "libvncserver::libvncclient")
+
