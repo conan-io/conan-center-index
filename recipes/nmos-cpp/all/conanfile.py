@@ -48,8 +48,10 @@ class NmosCppConan(ConanFile):
 
     def requirements(self):
         # for now, consistent with project's conanfile.txt
-        self.requires("boost/1.83.0")
-        self.requires("cpprestsdk/2.10.18")
+        # INFO: details/system_error.h: #include <boost/system/system_error.hpp>
+        self.requires("boost/1.83.0", transitive_headers=True)
+        # INFO: json_ops.h exposes cpprest/json.h
+        self.requires("cpprestsdk/2.10.18", transitive_headers=True)
         self.requires("websocketpp/0.8.2")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("json-schema-validator/2.2.0")
@@ -224,6 +226,7 @@ class NmosCppConan(ConanFile):
             libdir = os.path.join(libdir, config_install_dir)
         self.cpp_info.bindirs = [bindir]
         self.cpp_info.libdirs = [libdir]
+        self.cpp_info.requires = ["nlohmann_json::nlohmann_json", "zlib::zlib"]
 
         def _register_components():
             components_json_file = files.load(self, self._components_helper_filepath)
