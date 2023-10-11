@@ -26,6 +26,7 @@ class QtConan(ConanFile):
                    "qtserialport", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
                    "qtremoteobjects", "qtpositioning", "qtlanguageserver",
                    "qtspeech", "qthttpserver", "qtquick3dphysics", "qtgrpc", "qtquickeffectmaker"]
+    _submodules += ["qtgraphs"] # new modules for qt 6.6.0
 
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
