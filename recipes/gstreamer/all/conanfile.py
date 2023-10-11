@@ -63,7 +63,7 @@ class GStreamerConan(ConanFile):
             raise ConanInvalidConfiguration("shared GStreamer cannot link to static GLib")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/1.2.2")
         # There used to be an issue with glib being shared by default but its dependencies being static
         # No longer the case, but see: https://github.com/conan-io/conan-center-index/pull/13400#issuecomment-1551565573 for context
         if not self._is_legacy_one_profile:
@@ -73,7 +73,7 @@ class GStreamerConan(ConanFile):
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
         if self._settings_build.os == 'Windows':
-            self.tool_requires("winflexbison/2.5.24")
+            self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
