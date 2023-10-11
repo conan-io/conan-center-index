@@ -1,7 +1,7 @@
 sources:
   "0.9.0":
     url: "https://github.com/danvratil/qcoro/archive/refs/tags/v0.9.0.tar.gz"
-    sha256: "f2d5db5b6419dba323c15f6d3912b95e5660151dcf9fe18867646b0c0af8dbd6"
+    sha256: "cfaf6b778450f06adac4ce5e353eb6eae213a3b62b8c8740520d58cf9fe3ec1a"
   "0.4.0":
     url: "https://github.com/danvratil/qcoro/archive/refs/tags/v0.4.0.tar.gz"
     sha256: "0e68b3f0ce7bf521ffbdd731464d2d60d8d7a39a749b551ed26855a1707d86d1"
