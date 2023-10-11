@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 
@@ -47,6 +47,8 @@ class ConanRecipe(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        # Relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
     def build(self):
@@ -60,7 +62,6 @@ class ConanRecipe(ConanFile):
              src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["serial"]
