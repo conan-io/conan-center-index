@@ -296,7 +296,7 @@ class SDLConan(ConanFile):
         env = Environment()
         lib_paths = [lib for dep in all_deps for lib in dep.cpp_info.aggregated_components().libdirs]
         env.define_path("LIBRARY_PATH", os.pathsep.join(lib_paths))
-        env.vars(self).save_script("sdl_env")
+        env.vars(self).save_script("sdl_library_path")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
