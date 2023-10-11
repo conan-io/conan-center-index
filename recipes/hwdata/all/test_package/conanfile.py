@@ -32,7 +32,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         pkg_config = PkgConfig(self, "hwdata", self.generators_folder)
-        self.output.info(pkg_config.variables["pkgdatadir"])
         assert len(pkg_config.variables["pkgdatadir"]) > 0
 
     def test(self):
