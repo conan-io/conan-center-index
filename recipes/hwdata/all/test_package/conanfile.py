@@ -1,5 +1,3 @@
-import os
-
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import PkgConfig, PkgConfigDeps
