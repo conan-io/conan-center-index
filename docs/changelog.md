@@ -1,5 +1,14 @@
 # Changelog
 
+### 06-Oct-2023 - 10:15 CEST
+
+- [feature] Label PRs with version conflict properly
+- [feature] Add motivation message when under maintenance
+- [feature] Wait for sibling job in master right before promote
+- [fix] No longer run Conan v2 export step
+- [fix] Ensure build order follows only static first
+- [fix] Disable quiet period for all jobs except CCI multibranch
+
 ### 25-Sep-2023 - 14:33 CEST
 
 - [feature] Label PRs that have missing dependencies.
