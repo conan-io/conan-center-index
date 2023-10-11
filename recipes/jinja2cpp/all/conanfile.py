@@ -86,7 +86,9 @@ class Jinja2cppConan(ConanFile):
         tc.variables["JINJA2CPP_STRICT_WARNINGS"] = False
         tc.variables["JINJA2CPP_BUILD_SHARED"] = self.options.shared
         tc.variables["JINJA2CPP_DEPS_MODE"] = "conan-build"
-        tc.variables["JINJA2CPP_CXX_STANDARD"] = self.settings.compiler.get_safe("cppstd", 14)
+        cppstd = self.settings.compiler.get_safe("cppstd")
+        if cppstd:
+            tc.cache_variables["JINJA2CPP_CXX_STANDARD"] = str(cppstd).replace("gnu", "")
         if is_msvc(self):
             # Runtime type configuration for Jinja2C++ should be strictly '/MT' or '/MD'
             runtime = "/MD" if "MD" in msvc_runtime_flag(self) else "/MT"
