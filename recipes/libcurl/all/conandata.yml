@@ -1,7 +1,7 @@
 sources:
-  "8.3.0":
-    url: "https://curl.se/download/curl-8.3.0.tar.gz"
-    sha256: "d3a19aeea301085a56c32bc0f7d924a818a7893af253e41505d1e26d7db8e95a"
+  "8.4.0":
+    url: "https://curl.se/download/curl-8.4.0.tar.gz"
+    sha256: "816e41809c043ff285e8c0f06a75a1fa250211bbfb2dc0a037eeef39f1a9e427"
   "8.2.1":
     url: "https://curl.se/download/curl-8.2.1.tar.gz"
     sha256: "f98bdb06c0f52bdd19e63c4a77b5eb19b243bcbbd0f5b002b9f3cba7295a3a42"
