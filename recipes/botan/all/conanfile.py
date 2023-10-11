@@ -138,7 +138,7 @@ class BotanConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.get_safe('with_openssl', False):
-            self.requires("openssl/[>=1.1 <3]")
+            self.requires("openssl/1.1.1s")
         if self.options.with_zlib:
             self.requires("zlib/1.2.13")
         if self.options.with_sqlite3:
