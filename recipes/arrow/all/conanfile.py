@@ -139,6 +139,7 @@ class ArrowConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -499,6 +500,8 @@ class ArrowConan(ConanFile):
             tc.variables["ARROW_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
         if self.options.with_llvm:
             tc.variables["LLVM_DIR"] = self.dependencies["llvm-core"].package_folder.replace("\\", "/")
+
+        tc.cache_variables["CMAKE_PROJECT_arrow_INCLUDE"] = os.path.join(self.source_folder, "conan_cmake_project_include.cmake")
         tc.generate()
 
         deps = CMakeDeps(self)

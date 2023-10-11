@@ -55,7 +55,11 @@ class LibTasn1Conan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio")
 
     def build_requirements(self):
-        self.tool_requires("bison/3.8.2")
+        if self._settings_build.os == "Windows":
+            self.tool_requires("winflexbison/2.5.25")
+        else:
+            self.tool_requires("bison/3.8.2")
+
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
