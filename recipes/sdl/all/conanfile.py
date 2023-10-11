@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -85,9 +85,6 @@ class SDLConan(ConanFile):
     def _is_legacy_one_profile(self):
         return not hasattr(self, "settings_build")
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         # Don't depend on iconv on macOS by default
         # SDL2 depends on many system freamworks,
@@ -152,7 +149,7 @@ class SDLConan(ConanFile):
 
     def validate(self):
         # SDL>=2.0.18 requires xcode 12 or higher because it uses CoreHaptics.
-        if Version(self.version) >= "2.0.18" and is_apple_os(self) and Version(self.settings.compiler.version) < "12":
+        if is_apple_os(self) and Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("{}/{} requires xcode 12 or higher".format(self.name, self.version))
 
         if self.settings.os == "Linux":
@@ -164,10 +161,6 @@ class SDLConan(ConanFile):
                 raise ConanInvalidConfiguration("Package for 'esd' is not available (yet)")
             if self.options.directfb:
                 raise ConanInvalidConfiguration("Package for 'directfb' is not available (yet)")
-
-    def package_id(self):
-        if Version(self.version) < "2.0.22":
-            del self.info.options.sdl2main
 
     def build_requirements(self):
         if self.settings.os == "Macos" and cross_building(self):
@@ -271,8 +264,7 @@ class SDLConan(ConanFile):
         elif self.settings.os == "Windows":
             tc.variables["SDL_DIRECTX"] = self.options.directx
 
-        if Version(self.version) >= "2.0.22":
-            tc.variables["SDL2_DISABLE_SDL2MAIN"] = not self.options.sdl2main
+        tc.variables["SDL2_DISABLE_SDL2MAIN"] = not self.options.sdl2main
 
         # Add extra information collected from the deps
         all_deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
@@ -299,8 +291,6 @@ class SDLConan(ConanFile):
         env.vars(self).save_script("sdl_library_path")
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         if self.settings.os == "Macos":
             if self.options.iconv:
@@ -319,7 +309,7 @@ class SDLConan(ConanFile):
                         '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
 
         # Ensure to find wayland-scanner from wayland recipe in build requirements (or requirements if 1 profile)
-        if self.options.get_safe("wayland") and Version(self.version) >= "2.0.18":
+        if self.options.get_safe("wayland"):
             replace_in_file(self,
                 os.path.join(self.source_folder, "cmake", "sdlchecks.cmake"),
                 "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
@@ -354,7 +344,7 @@ class SDLConan(ConanFile):
 
         # SDL2
         lib_postfix = postfix
-        if self.version >= "2.0.24" and is_msvc(self) and not self.options.shared:
+        if is_msvc(self) and not self.options.shared:
             lib_postfix = "-static" + postfix
 
         self.cpp_info.components["libsdl2"].set_property("cmake_target_name", "SDL2::SDL2")
