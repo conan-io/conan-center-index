@@ -153,10 +153,10 @@ class SDLConan(ConanFile):
                 self.requires("nas/1.9.5")
             if self.options.wayland:
                 self.requires("wayland/1.22.0")
-                self.requires("xkbcommon/1.4.1")
+                self.requires("xkbcommon/1.6.0")
                 self.requires("egl/system")
             if self.options.libunwind:
-                self.requires("libunwind/1.6.2")
+                self.requires("libunwind/1.7.2")
 
     def validate(self):
         # SDL>=2.0.18 requires xcode 12 or higher because it uses CoreHaptics.
@@ -184,9 +184,9 @@ class SDLConan(ConanFile):
             # set. This could be because you are using a Mac OS X version less than 10.5
             # or because CMake's platform configuration is corrupt.
             # FIXME: Remove once CMake on macOS/M1 CI runners is upgraded.
-            self.tool_requires("cmake/3.25.3")
+            self.tool_requires("cmake/3.27.7")
         if self.settings.os == "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
         if hasattr(self, "settings_build") and self.options.get_safe("wayland"):
             self.build_requires("wayland/1.22.0")  # Provides wayland-scanner
 
