@@ -73,7 +73,7 @@ class OpenColorIOConan(ConanFile):
         # opencolorio>=2.2.0 requires minizip-ng with with_zlib
         if Version(self.version) >= "2.2.0" and \
             not self.dependencies["minizip-ng"].options.get_safe("with_zlib", False):
-            raise ConanInvalidConfiguration(f"{self.ref} requires minizip-ng with with_zlib = True.")
+            raise ConanInvalidConfiguration(f"{self.ref} requires minizip-ng with with_zlib = True. On Apple platforms with_libcomp = False is also needed to enable the with_zlib option.")
 
         if Version(self.version) == "1.1.1" and self.options.shared and self.dependencies["yaml-cpp"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires static build yaml-cpp")
