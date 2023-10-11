@@ -16,6 +16,7 @@ class YACLibConan(ConanFile):
     homepage = "https://github.com/YACLib/YACLib"
     license = "MIT"
     topics = ("async", "parallel", "concurrency")
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
 
     _yaclib_flags = {
