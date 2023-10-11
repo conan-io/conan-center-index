@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 1.60.2
+  version: 1.61.0
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
