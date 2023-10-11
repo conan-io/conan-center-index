@@ -8,22 +8,18 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     test_type = "explicit"
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def layout(self):
         basic_layout(self)
 
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
     def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.0.3")
 
     def generate(self):
         pkg_config_deps = PkgConfigDeps(self)
-        if self._settings_build:
-            pkg_config_deps.build_context_activated = ["hwdata"]
         pkg_config_deps.generate()
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
