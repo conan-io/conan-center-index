@@ -53,7 +53,7 @@ class QCoroConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/6.5.2")
+        self.requires("qt/6.5.3")
 
     def validate(self):
         if self.settings.compiler.cppstd:
