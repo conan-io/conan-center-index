@@ -11,4 +11,4 @@ class TestPackageConan(ConanFile):
         self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        self.run("uncrustify --version", env="conanrun")
+        self.run("uncrustify --version")
