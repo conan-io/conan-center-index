@@ -27,6 +27,7 @@ class TeemoConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    deprecated = "zoe"
 
     @property
     def _min_cppstd(self):
