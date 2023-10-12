@@ -293,7 +293,7 @@ class OpenvinoConan(ConanFile):
         openvino_runtime = self.cpp_info.components["Runtime"]
         openvino_runtime.set_property("cmake_target_name", "openvino::runtime")
         openvino_runtime.requires = ["onetbb::libtbb", "pugixml::pugixml"]
-        openvino_runtime.libs = ["openvino_c", "openvino"]
+        openvino_runtime.libs = ["openvino"]
         if self._preprocessing_available:
             openvino_runtime.requires.append("ade::ade")
         if self._target_x86_64:
@@ -363,6 +363,11 @@ class OpenvinoConan(ConanFile):
             openvino_runtime.requires.extend(["opencl-icd-loader::opencl-icd-loader", "rapidjson::rapidjson"])
             if self.settings.os == "Windows":
                 openvino_runtime.system_libs.append("setupapi")
+
+        openvino_runtime_c = self.cpp_info.components["Runtime_C"]
+        openvino_runtime_c.set_property("cmake_target_name", "openvino::runtime::c")
+        openvino_runtime_c.libs = ["openvino_c"]
+        openvino_runtime_c.requires = ["Runtime"]
 
         if self.options.enable_onnx_frontend:
             openvino_onnx = self.cpp_info.components["ONNX"]
