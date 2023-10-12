@@ -2,8 +2,8 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
 from conan.tools.microsoft import is_msvc, check_min_vs
 
 required_conan_version = ">=1.53.0"
@@ -25,10 +25,15 @@ class Nmslib(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "build_extras": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "build_extras": True,
+    }
+    options_description = {
+        "build_extras": "Add support for Signature Quadratic Form Distance (SQFD)",
     }
 
     def export_sources(self):
@@ -45,6 +50,11 @@ class Nmslib(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        if self.options.build_extras:
+            # Eigen is only used internally, no need for transitive_*
+            self.requires("eigen/3.4.0")
+
     def validate(self):
         check_min_vs(self, 190)  # TODO: add reason in message
         if is_msvc(self) and self.options.shared:
@@ -57,13 +67,23 @@ class Nmslib(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["WITH_EXTRAS"] = self.options.build_extras
+        if self.options.build_extras:
+            tc.preprocessor_definitions["WITH_EXTRAS"] = "1"
         tc.variables["WITHOUT_TESTS"] = True
         # Relocatable shared libs on macOS
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "similarity_search", "CMakeLists.txt"),
+                        "EIGEN3", "Eigen3")
 
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "similarity_search"))
         cmake.build()
@@ -81,3 +101,5 @@ class Nmslib(ConanFile):
             self.cpp_info.system_libs = ["pthread", "m"]
             if self.settings.arch in ["x86", "x86_64"]:
                 self.cpp_info.system_libs.append("mvec")
+        if self.options.build_extras:
+            self.cpp_info.defines.append("WITH_EXTRAS")
