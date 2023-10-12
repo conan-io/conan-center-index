@@ -13,7 +13,7 @@ required_conan_version = ">=1.53.0"
 class LibseatConan(ConanFile):
     name = "libseat"
     description = ("A minimal seat management daemon, and a universal seat management library")
-    topics = "login", "seat"
+    topics = ("login", "session", "seat", "seatd")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sr.ht/~kennylevinsen/seatd/"
     license = "MIT"
@@ -22,20 +22,20 @@ class LibseatConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "libseat_logind": ["auto", "disabled", "elogind", "systemd"],
-        "libseat_builtin": [True, False],
-        "libseat_seatd": [True, False],
-        "server": [True, False],
+        "builtin": [True, False],
         "defaultpath": [None, "ANY"],
+        "logind": [False, "elogind", "systemd"],
+        "seatd": [True, False],
+        "server": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "libseat_logind": "auto",
-        "libseat_builtin": False,
-        "libseat_seatd": True,
-        "server": True,
         "defaultpath": None,
+        "builtin": False,
+        "logind": "auto",
+        "seatd": True,
+        "server": True,
     }
 
     def export_sources(self):
@@ -51,17 +51,17 @@ class LibseatConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.libseat_logind in ["auto", "systemd"]:
-            self.requires("libsystemd/253.6")
+        if self.options.logind == "systemd":
+            self.requires("libsystemd/253.10")
 
     def validate(self):
         if not self.settings.os in ["FreeBSD", "Linux"]:
             raise ConanInvalidConfiguration(f"{self.ref} only supports FreeBSD and Linux")
-        if self.options.libseat_logind == "elogind":
+        if self.options.logind == "elogind":
             raise ConanInvalidConfiguration(f"{self.ref} may not be built with elogind support since there is no elogind Conan package yet")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/1.2.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.0.3")
 
@@ -69,20 +69,20 @@ class LibseatConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-        pkg_config_deps = PkgConfigDeps(self)
-        pkg_config_deps.generate()
         tc = MesonToolchain(self)
-        tc.project_options["libseat-logind"] = str(self.options.libseat_logind)
-        tc.project_options["libseat-builtin"] = "enabled" if self.options.libseat_builtin else "disabled"
-        tc.project_options["libseat-seatd"] = "enabled" if self.options.libseat_seatd else "disabled"
+        tc.project_options["libseat-builtin"] = "enabled" if self.options.builtin else "disabled"
+        tc.project_options["libseat-logind"] = str(self.options.logind) if self.options.logind else "disabled"
+        tc.project_options["libseat-seatd"] = "enabled" if self.options.seatd else "disabled"
         tc.project_options["server"] = "enabled" if self.options.server else "disabled"
         tc.project_options["examples"] = "disabled"
         tc.project_options["man-pages"] = "disabled"
         tc.project_options["defaultpath"] = "" if self.options.defaultpath is None else str(self.options.defaultpath)
         tc.c_args.append("-Wno-error")
         tc.generate()
+        pkg_config_deps = PkgConfigDeps(self)
+        pkg_config_deps.generate()
+        env = VirtualBuildEnv(self)
+        env.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -104,9 +104,9 @@ class LibseatConan(ConanFile):
         self.cpp_info.libs = ["seat"]
         self.cpp_info.system_libs.append("rt")
         pkgconfig_variables = {
-            "have_seatd": "true" if self.options.libseat_seatd else "false",
-            "have_logind": "true" if self.options.libseat_logind else "false",
-            "have_builtin": "true" if self.options.libseat_builtin else "false",
+            "have_builtin": self.options.builtin,
+            "have_logind": "true" if self.options.logind else "false",
+            "have_seatd": self.options.seatd,
         }
         self.cpp_info.set_property(
             "pkg_config_custom_content",
