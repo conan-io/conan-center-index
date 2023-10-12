@@ -45,7 +45,7 @@ class PcapplusplusConan(ConanFile):
         tc.generate()
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def build(self):
         cmake = CMake(self)
