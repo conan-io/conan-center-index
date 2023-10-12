@@ -61,3 +61,7 @@ class PcapplusplusConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["Pcap++", "Packet++", "Common++"]
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks = ["CoreFoundation", "SystemConfiguration"]
+        elif self.settings.os == "Windows":
+           self.cpp_info.system_libs = ["ws2_32", "iphlpapi"]
