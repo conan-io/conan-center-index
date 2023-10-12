@@ -34,7 +34,7 @@ class XorgConan(ConanFile):
                      "libxcb-keysyms1-dev", "libxcb-randr0-dev", "libxcb-shape0-dev", "libxcb-sync-dev", "libxcb-xfixes0-dev",
                      "libxcb-xinerama0-dev", "libxcb-dri3-dev", "uuid-dev", "libxcb-cursor-dev", "libxcb-dri2-0-dev",
                      "libxcb-dri3-dev", "libxcb-present-dev", "libxcb-xinput-dev", "libxcb-composite0-dev", "libxcb-ewmh-dev",
-                     "libxcb-res0-dev", "xwayland-dev"], update=True, check=True)
+                     "libxcb-res0-dev", "xwayland"], update=True, check=True)
         apt.install_substitutes(
             ["libxcb-util-dev"], ["libxcb-util0-dev"], update=True, check=True)
 
