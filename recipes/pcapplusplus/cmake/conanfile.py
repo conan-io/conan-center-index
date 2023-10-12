@@ -65,3 +65,5 @@ class PcapplusplusConan(ConanFile):
             self.cpp_info.frameworks = ["CoreFoundation", "SystemConfiguration"]
         elif self.settings.os == "Windows":
            self.cpp_info.system_libs = ["ws2_32", "iphlpapi"]
+        self.cpp_info.set_property("cmake_file_name", "PcapPlusPlus")
+        self.cpp_info.set_property("cmake_target_name", "PcapPlusPlus::PcapPlusPlus")
