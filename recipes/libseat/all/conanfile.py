@@ -33,7 +33,7 @@ class LibseatConan(ConanFile):
         "fPIC": True,
         "defaultpath": None,
         "builtin": False,
-        "logind": "auto",
+        "logind": False,
         "seatd": True,
         "server": True,
     }
