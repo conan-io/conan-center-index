@@ -124,7 +124,7 @@ class FltkConan(ConanFile):
                 "CoreText", "CoreVideo", "Foundation", "IOKit", "OpenGL",
             ]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["gdi32", "imm32", "msimg32", "ole32", "oleaut32", "uuid"]
+            self.cpp_info.system_libs = ["gdi32", "imm32", "msimg32", "ole32", "oleaut32", "uuid", "comctl32"]
             if self.options.get_safe("with_gdiplus"):
                 self.cpp_info.system_libs.append("gdiplus")
 
