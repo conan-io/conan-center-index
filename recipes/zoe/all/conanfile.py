@@ -48,13 +48,13 @@ class ZoeConan(ConanFile):
         self.requires("libcurl/8.2.1")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         if self.info.settings.compiler == "apple-clang" and Version(self.info.settings.compiler.version) < "12.0":
             raise ConanInvalidConfiguration(f"{self.ref} can not build on apple-clang < 12.0.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
