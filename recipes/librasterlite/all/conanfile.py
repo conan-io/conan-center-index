@@ -58,7 +58,7 @@ class LibrasterliteConan(ConanFile):
         self.requires("libpng/1.6.40")
         self.requires("libspatialite/5.0.1")
         self.requires("libtiff/4.6.0")
-        self.requires("sqlite3/3.43.1")
+        self.requires("sqlite3/3.43.2")
 
     def build_requirements(self):
         if not is_msvc(self):
