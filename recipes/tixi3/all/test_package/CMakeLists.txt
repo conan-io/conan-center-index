@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.12)
-project(Tixi-Conan-TestPackage CXX)
+cmake_minimum_required(VERSION 3.15)
+project(test_package CXX)
 
 find_package(tixi3 REQUIRED)
 
-add_executable(tixi3_conan_test main.cpp)
-target_link_libraries(tixi3_conan_test PRIVATE tixi3)
+add_executable(${PROJECT_NAME} main.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE tixi3)

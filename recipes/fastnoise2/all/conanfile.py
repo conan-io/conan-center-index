@@ -1,23 +1,20 @@
-import os
-
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, copy, rmdir, rm
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
-from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.53.0"
 
-
-class S2GeometryConan(ConanFile):
-    name = "s2geometry"
-    description = "Computational geometry and spatial indexing on the sphere"
-    license = "Apache-2.0"
+class Fastnoise2Conan(ConanFile):
+    name = "fastnoise2"
+    description = "Modular node graph based noise generation library using SIMD, C++17 and templates"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/google/s2geometry"
-    topics = ("geometry", "spherical-geometry", "spatial-indexing")
+    homepage = "https://github.com/Auburn/FastNoise2"
+    topics = ("procedural-generation", "terrain-generation", "noise")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -31,20 +28,17 @@ class S2GeometryConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14
+        return 17
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "5",
+            "gcc": "8",
             "clang": "7",
-            "apple-clang": "10",
-            "Visual Studio": "15",
-            "msvc": "191",
+            "apple-clang": "12",
+            "Visual Studio": "16",
+            "msvc": "192",
         }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -57,36 +51,24 @@ class S2GeometryConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def requirements(self):
-        self.requires("abseil/20230125.3", transitive_headers=True, transitive_libs=True)
-        self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
-
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared with Visual Studio")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["GOOGLETEST_ROOT"] = False
-        tc.variables["BUILD_EXAMPLES"] = False
-        tc.generate()
-        tc = CMakeDeps(self)
+        tc.variables["FASTNOISE2_NOISETOOL"] = False
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -95,6 +77,16 @@ class S2GeometryConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.libs = ["s2"]
+        lib_suffix = "D" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = [f"FastNoise{lib_suffix}"]
+
+        self.cpp_info.set_property("cmake_file_name", "FastNoise2")
+        self.cpp_info.set_property("cmake_target_name", "FastNoise2::FastNoise")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
