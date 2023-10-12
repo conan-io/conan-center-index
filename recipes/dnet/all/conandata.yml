@@ -1,4 +1,4 @@
 sources:
-  "1.16.4":
-    url: "https://github.com/Jihadist/libdnet/archive/19c7040bc92ddf04139a6b566d811d8cd9c3d736.tar.gz"
-    sha256: "f3dd8f65dfb6ac4249e4160cf46063e422ff7e83638188832b5313c73301fda3"
+  "1.17.0":
+    url: "https://github.com/ofalk/libdnet/archive/refs/tags/libdnet-1.17.0.tar.gz"
+    sha256: "6be1ed0763151ede4c9665a403f1c9d974b2ffab2eacdb26b22078e461aae1dc"
