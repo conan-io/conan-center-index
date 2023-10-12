@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
@@ -39,7 +40,7 @@ class XkbcommonConan(ConanFile):
 
     @property
     def _has_build_profile(self):
-        return hasattr(self, "settings_build")
+        return hasattr(self, "settings_build") and cross_building(self)
 
     @property
     def _has_xkbregistry_option(self):
