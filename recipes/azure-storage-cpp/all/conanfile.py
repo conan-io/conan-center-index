@@ -1,11 +1,10 @@
 import os
 
+from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import get, collect_libs, apply_conandata_patches, copy
-
-from conan import ConanFile
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime
+from conan.tools.files import get, collect_libs, copy
+from conan.tools.microsoft import check_min_vs
 
 required_conan_version = ">=1.33.0"
 
@@ -91,9 +90,7 @@ class AzureStorageCppConan(ConanFile):
         #     raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def build(self):
-        # apply_conandata_patches(self)
         cmake = CMake(self)
-        # cmake.configure(build_script_folder="Microsoft.WindowsAzure.Storage")
         cmake.configure()
         cmake.build()
 
