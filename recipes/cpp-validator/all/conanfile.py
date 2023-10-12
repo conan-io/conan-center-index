@@ -30,7 +30,7 @@ class CPPValidatorConan(ConanFile):
         return {
             "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "5",
+            "gcc": "7",
             "clang": "5",
             "apple-clang": "5.1",
         }
