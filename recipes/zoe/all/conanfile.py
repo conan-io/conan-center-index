@@ -79,7 +79,8 @@ class ZoeConan(ConanFile):
 
     def package_info(self):
         libname = "zoe" if self.options.shared else "zoe-static"
-        self.cpp_info.libs = [libname]
+        libpostfix = "-d" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = [f"{libname}{libpostfix}"]
 
         if self.options.shared:
             self.cpp_info.defines.append("ZOE_EXPORTS")
