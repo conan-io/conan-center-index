@@ -1,10 +1,11 @@
-from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import (
     apply_conandata_patches, collect_libs, copy, export_conandata_patches, get,
     replace_in_file, rmdir
 )
 import os
+
+from conan import ConanFile
 
 required_conan_version = ">=1.53.0"
 
@@ -57,8 +58,8 @@ class CppRestSDKConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.83.0")
-        self.requires("openssl/[>=1.1 <4]")
+        self.requires("boost/[>=1.75.0 <2]")
+        self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
         if self.options.with_compression:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_websockets:
