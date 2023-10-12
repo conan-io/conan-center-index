@@ -115,6 +115,10 @@ class StdgpuConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        if self.options.backend == "cuda" and self.dependencies["thrust"].options.device_system != "cuda":
+            raise ConanInvalidConfiguration(f"{self.ref} option backend=cuda should use '-o thrust/*:device_system=cuda' as well.")
+        if self.options.backend == "openmp" and self.dependencies["thrust"].options.device_system != "omp":
+            raise ConanInvalidConfiguration(f"{self.ref} option backend=openmp should use '-o thrust/*:device_system=omp' as well.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
