@@ -10,7 +10,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
 
 class XkbcommonConan(ConanFile):
@@ -69,7 +69,7 @@ class XkbcommonConan(ConanFile):
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0")
             if not self._has_build_profile:
-                self.requires("wayland-protocols/1.31")
+                self.requires("wayland-protocols/1.32")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
@@ -82,7 +82,7 @@ class XkbcommonConan(ConanFile):
             self.tool_requires("pkgconf/2.0.3")
         if self._has_build_profile and self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/<host_version>")
-            self.tool_requires("wayland-protocols/1.31")
+            self.tool_requires("wayland-protocols/1.32")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
