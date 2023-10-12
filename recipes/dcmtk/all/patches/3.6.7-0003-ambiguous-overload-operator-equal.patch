@@ -1,64 +1,26 @@
---- a/dcmqrdb/libsrc/dcmqrdbi.cc
-+++ b/dcmqrdb/libsrc/dcmqrdbi.cc
-@@ -1216,12 +1216,13 @@ OFCondition DcmQueryRetrieveIndexDatabaseHandle::hierarchicalCompare (
-          */
+--- a/dcmqrdb/include/dcmtk/dcmqrdb/dcmqridx.h
++++ b/dcmqrdb/include/dcmtk/dcmqrdb/dcmqridx.h
+@@ -122,10 +122,22 @@ struct DCMTK_DCMQRDB_EXPORT DB_SerializedTagKey
+     inline DB_SerializedTagKey(const DcmTagKey& rhs) { *this = rhs; }
+     inline DB_SerializedTagKey& operator=(const DcmTagKey& tk) { key[0] = tk.getGroup(); key[1] = tk.getElement(); return *this; }
+     inline operator DcmTagKey() const { return DcmTagKey( key[0], key[1] ); }
+-    inline bool operator==(const DB_SerializedTagKey& rhs) const { return key[0] == rhs.key[0] && key[1] == rhs.key[1]; }
+     Uint16 key[2];
+ };
  
-         DB_GetUIDTag (level, &XTag) ;
-+        const DB_SerializedTagKey XTagDBSerialized = XTag;
++inline bool operator==(const DB_SerializedTagKey& lhs, const DB_SerializedTagKey& rhs)
++{
++    return lhs.key[0] == rhs.key[0] && lhs.key[1] == rhs.key[1];
++}
++inline bool operator==(const DB_SerializedTagKey& lhs, const DcmTagKey& rhs)
++{
++    return lhs == DB_SerializedTagKey(rhs);
++}
++inline bool operator==(const DcmTagKey& lhs, const DB_SerializedTagKey& rhs)
++{
++    return rhs == lhs;
++}
++
+ /* ENSURE THAT DBVERSION IS INCREMENTED WHENEVER ONE OF THESE STRUCTS IS MODIFIED */
  
-         /** Find Element with this XTag in Identifier list
-          */
- 
-         for (plist = phandle->findRequestList ; plist ; plist = plist->next)
--            if (plist->elem. XTag == XTag)
-+            if (plist->elem. XTag == XTagDBSerialized)
-                 break ;
- 
-         /** Element not found
-@@ -1237,7 +1238,7 @@ OFCondition DcmQueryRetrieveIndexDatabaseHandle::hierarchicalCompare (
-          */
- 
-         for (i = 0 ; i < NBPARAMETERS ; i++)
--            if (idxRec->param [i]. XTag == XTag)
-+            if (idxRec->param [i]. XTag == XTagDBSerialized)
-                 break ;
- 
-         /** Compare with Single value matching
-@@ -1370,7 +1371,8 @@ OFCondition DcmQueryRetrieveIndexDatabaseHandle::startFindRequest(
-         DcmElement* dcelem = findRequestIdentifiers->getElement(elemIndex);
- 
-         elem.XTag = dcelem->getTag().getXTag();
--        if (elem.XTag == DCM_QueryRetrieveLevel || DB_TagSupported(elem.XTag)) {
-+        const DB_SerializedTagKey DCM_QueryRetrieveLevelDBSerialized = DCM_QueryRetrieveLevel;
-+        if (elem.XTag == DCM_QueryRetrieveLevelDBSerialized || DB_TagSupported(elem.XTag)) {
-             elem.ValueLength = dcelem->getLength();
-             if (elem.ValueLength == 0) {
-                 elem.PValueField = NULL ;
-@@ -1387,7 +1389,7 @@ OFCondition DcmQueryRetrieveIndexDatabaseHandle::startFindRequest(
-             /** If element is the Query Level, store it in handle
-              */
- 
--            if (elem.XTag == DCM_QueryRetrieveLevel && elem.PValueField) {
-+            if (elem.XTag == DCM_QueryRetrieveLevelDBSerialized && elem.PValueField) {
-                 char *pc ;
-                 char level [50] ;
- 
-@@ -2055,7 +2057,8 @@ OFCondition DcmQueryRetrieveIndexDatabaseHandle::startMoveRequest(
-         DcmElement* dcelem = moveRequestIdentifiers->getElement(elemIndex);
- 
-         elem.XTag = dcelem->getTag().getXTag();
--        if (elem.XTag == DCM_QueryRetrieveLevel || DB_TagSupported(elem.XTag)) {
-+        const DB_SerializedTagKey DCM_QueryRetrieveLevelDBSerialized = DCM_QueryRetrieveLevel;
-+        if (elem.XTag == DCM_QueryRetrieveLevelDBSerialized || DB_TagSupported(elem.XTag)) {
-             elem.ValueLength = dcelem->getLength();
-             if (elem.ValueLength == 0) {
-                 elem.PValueField = NULL ;
-@@ -2073,7 +2076,7 @@ OFCondition DcmQueryRetrieveIndexDatabaseHandle::startMoveRequest(
-             /** If element is the Query Level, store it in handle
-              */
- 
--            if (elem. XTag == DCM_QueryRetrieveLevel && elem.PValueField) {
-+            if (elem. XTag == DCM_QueryRetrieveLevelDBSerialized && elem.PValueField) {
-                 char *pc ;
-                 char level [50] ;
- 
+ struct DCMTK_DCMQRDB_EXPORT DB_SerializedCharPtr
