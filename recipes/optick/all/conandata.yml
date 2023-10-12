@@ -1,0 +1,8 @@
+sources:
+  # Newer versions at the top
+  "1.4.0.0":
+    url:
+    - "https://github.com/bombomby/optick/archive/refs/tags/1.4.0.0.zip"
+    sha256: "c5ec6024864b97de405c0df51b70eec2a6b1a6d416011e4ab97fa3bfd80e8c07"
+patches:
+  # Newer versions at the top
