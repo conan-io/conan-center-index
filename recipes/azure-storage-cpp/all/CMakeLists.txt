@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 2.8.12)
 project(cmake_wrapper)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(LibXML2 REQUIRED)
 
-add_subdirectory("source_subfolder/Microsoft.WindowsAzure.Storage")
+set(LibXML2_INCLUDE_DIR ${libxml2_INCLUDE_DIRS})
+
+add_subdirectory("Microsoft.WindowsAzure.Storage")

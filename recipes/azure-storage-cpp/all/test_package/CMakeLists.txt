@@ -3,9 +3,6 @@ project(PackageTest CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
-
 find_package(azure-storage-cpp REQUIRED CONFIG)
 
 add_executable(example example.cpp)
