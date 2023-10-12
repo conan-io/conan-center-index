@@ -18,7 +18,6 @@ class DepotToolsConan(ConanFile):
 
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
     short_paths = True
 
     def export_sources(self):
@@ -28,9 +27,7 @@ class DepotToolsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
-        del self.info.settings.arch
-        del self.info.settings.build_type
-        del self.info.settings.compiler
+        self.info.clear()
 
     def _dereference_symlinks(self):
         """
@@ -39,7 +36,7 @@ class DepotToolsConan(ConanFile):
         `OSError: Invalid argument` rather than actually following the symlinks.
         Therefore, this workaround simply copies the destination file over the symlink
         """
-        if self.info.settings.os != "Windows":
+        if self.settings.os != "Windows":
             return
 
         for root, dirs, files in os.walk(self.source_folder):
@@ -50,10 +47,9 @@ class DepotToolsConan(ConanFile):
                 shutil.copy(os.path.join(root, dest), symlink, follow_symlinks=False)
                 self.output.info("Replaced symlink '%s' with its destination file '%s'" % (symlink, dest))
 
-    def source(self):
+    def build(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
         self._dereference_symlinks()
-
         apply_conandata_patches(self)
 
     def _fix_permissions(self):
