@@ -41,10 +41,6 @@ class LimereportConan(ConanFile):
             "apple-clang": "8"
         }
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
