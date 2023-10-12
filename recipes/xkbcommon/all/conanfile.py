@@ -98,8 +98,7 @@ class XkbcommonConan(ConanFile):
         tc.project_options["enable-x11"] = self.options.with_x11
         if self._has_xkbregistry_option:
             tc.project_options["enable-xkbregistry"] = self.options.xkbregistry
-        if self._has_build_profile:
-            tc.project_options["build.pkg_config_path"] = self.generators_folder
+        tc.project_options["build.pkg_config_path"] = self.generators_folder
         tc.generate()
 
         pkg_config_deps = PkgConfigDeps(self)
