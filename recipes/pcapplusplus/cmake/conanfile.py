@@ -1,11 +1,11 @@
 import os
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.errors import ConanInvalidConfiguration
 
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=1.52.0"
 
 class PcapplusplusConan(ConanFile):
     name = "pcapplusplus"
@@ -43,6 +43,9 @@ class PcapplusplusConan(ConanFile):
         tc.variables["PCAPPP_BUILD_TESTS"] = False
         tc.variables["PCAPPP_BUILD_EXAMPLES"] = False
         tc.generate()
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)
