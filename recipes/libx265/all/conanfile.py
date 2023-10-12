@@ -150,7 +150,7 @@ class Libx265Conan(ConanFile):
             if self.options.shared:
                 self.cpp_info.defines.append("X265_API_IMPORTS")
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["dl", "pthread", "m"])
+            self.cpp_info.system_libs.extend(["dl", "pthread", "m", "rt"])
             if not self.options.shared:
                 self.cpp_info.sharedlinkflags = ["-Wl,-Bsymbolic,-znoexecstack"]
         elif self.settings.os == "Android":
