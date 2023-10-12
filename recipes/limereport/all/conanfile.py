@@ -76,6 +76,8 @@ class LimereportConan(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
 
+    def configure(self):
+        self.options.rm_safe("fPIC")
 
     def build(self):
         cmake = CMake(self)
