@@ -1,18 +1,3 @@
---- Source/ZenLib/Conf.cpp
-+++ Source/ZenLib/Conf.cpp
-@@ -24,8 +24,8 @@
- 
- //End of line
- #ifdef WINDOWS
--    const Char* EOL=__T("\r\n");
--    const Char  PathSeparator=__T('\\');
-+    ZEN_IMPEXP const Char* EOL=__T("\r\n");
-+    ZEN_IMPEXP const Char  PathSeparator=__T('\\');
- #endif
- #ifdef UNIX
-     const Char* EOL=__T("\n");
-diff --git a/source_subfolder/Source/ZenLib/Conf.h b/source_subfolder/Source/ZenLib/Conf.h
-index 18264cf..d989fdb 100644
 --- Source/ZenLib/Conf.h
 +++ Source/ZenLib/Conf.h
 @@ -234,9 +234,22 @@
