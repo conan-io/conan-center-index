@@ -67,7 +67,7 @@ class FoxgloveWebSocketConan(ConanFile):
 
     def requirements(self):
         self.requires("nlohmann_json/3.10.5", transitive_headers=True)
-        self.requires("websocketpp/0.8.2", transitive_headers=True)
+        self.requires("websocketpp/0.8.2", transitive_headers=True, transitive_libs=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
