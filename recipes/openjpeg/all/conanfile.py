@@ -144,6 +144,7 @@ class OpenjpegConan(ConanFile):
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
         self.cpp_info.set_property("pkg_config_name", "libopenjp2")
         self.cpp_info.includedirs.append(os.path.join("include", self._openjpeg_subdir))
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
         self.cpp_info.libs = ["openjp2"]
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("OPJ_STATIC")
