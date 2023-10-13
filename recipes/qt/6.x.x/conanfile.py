@@ -301,7 +301,7 @@ class QtConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_pcre2:
@@ -321,7 +321,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_icu", False):
             self.requires("icu/73.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/8.0.1")
+            self.requires("harfbuzz/8.2.1")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.5")
@@ -353,7 +353,7 @@ class QtConan(ConanFile):
             self.requires("xkbcommon/1.5.0")
             self.requires("wayland/1.22.0")
         if self.options.with_brotli:
-            self.requires("brotli/1.0.9")
+            self.requires("brotli/1.1.0")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
             self.requires("expat/2.5.0")
             self.requires("opus/1.3.1")
@@ -376,7 +376,7 @@ class QtConan(ConanFile):
         self.tool_requires("cmake/[>=3.21.1 <4]")
         self.tool_requires("ninja/1.11.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.5")
+            self.tool_requires("pkgconf/2.0.2")
         if self.settings.os == "Windows":
             self.tool_requires('strawberryperl/5.32.1.1')
 
@@ -424,6 +424,7 @@ class QtConan(ConanFile):
             vre.generate(scope="build")
         # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
         env = Environment()
+        env.unset("VCPKG_ROOT")
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         env.vars(self).save_script("conanbuildenv_pkg_config_path")
         if self._settings_build.os == "Macos":
@@ -582,6 +583,8 @@ class QtConan(ConanFile):
             cpp_std_map["23"] = "FEATURE_cxx2b"
 
         tc.variables[cpp_std_map.get(current_cpp_std, "FEATURE_cxx17")] = "ON"
+        tc.variables["QT_USE_VCPKG"] = False
+        tc.cache_variables["QT_USE_VCPKG"] = False
 
         tc.generate()
 
@@ -632,6 +635,8 @@ class QtConan(ConanFile):
         if Version(self.version) <= "6.4.0":
             # use official variable name https://cmake.org/cmake/help/latest/module/FindFontconfig.html
             replace_in_file(self, os.path.join(self.source_folder, "qtbase", "src", "gui", "configure.cmake"), "FONTCONFIG_FOUND", "Fontconfig_FOUND")
+
+        replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", "QtAutoDetect.cmake") , "qt_auto_detect_vcpkg()", "# qt_auto_detect_vcpkg()")
 
     def _xplatform(self):
         if self.settings.os == "Linux":
