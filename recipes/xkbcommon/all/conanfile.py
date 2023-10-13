@@ -40,7 +40,7 @@ class XkbcommonConan(ConanFile):
 
     @property
     def _has_build_profile(self):
-        return hasattr(self, "settings_build") and cross_building(self)
+        return hasattr(self, "settings_build")
 
     @property
     def _has_xkbregistry_option(self):
