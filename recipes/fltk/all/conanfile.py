@@ -72,7 +72,6 @@ class FltkConan(ConanFile):
             self.requires("glu/system")
             self.requires("fontconfig/2.14.2")
             self.requires("xorg/system")
-            self.requires("libxft/2.3.6")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -86,6 +85,7 @@ class FltkConan(ConanFile):
         tc.variables["OPTION_USE_THREADS"] = self.options.with_threads
         tc.variables["OPTION_BUILD_HTML_DOCUMENTATION"] = False
         tc.variables["OPTION_BUILD_PDF_DOCUMENTATION"] = False
+        tc.variables["OPTION_USE_XFT"] = False
         if self.options.abi_version:
             tc.variables["OPTION_ABI_VERSION"] = self.options.abi_version
         tc.generate()
