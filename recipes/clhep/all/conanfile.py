@@ -8,6 +8,7 @@ import os
 
 required_conan_version = ">=1.53.0"
 
+
 class ClhepConan(ConanFile):
     name = "clhep"
     description = "Class Library for High Energy Physics."
@@ -29,6 +30,9 @@ class ClhepConan(ConanFile):
 
     short_paths = True
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -36,9 +40,6 @@ class ClhepConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
