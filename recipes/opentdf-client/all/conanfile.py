@@ -73,7 +73,7 @@ class OpenTDFConan(ConanFile):
         self.requires("jwt-cpp/0.6.0")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("boost/1.83.0")
-        self.requires("libxml2/2.11.4")
+        self.requires("libxml2/2.11.5")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
