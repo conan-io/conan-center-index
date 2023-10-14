@@ -231,7 +231,7 @@ class MesaConan(ConanFile):
             return "wayland"
         if self._system_has_kms_drm:
             return "drm"
-        if is_apple_os(self.settings.os):
+        if is_apple_os(self):
             return "surfaceless"
         if self.settings.os == "Windows":
             return "windows"
