@@ -568,7 +568,7 @@ class MesaConan(ConanFile):
         tc.project_options["intel-clc"] = "system" if self.options.get_safe("intel_clc") == "system" else ("enabled" if self.options.get_safe("intel_clc") else "disabled")
         tc.project_options["intel-xe-kmd"] = "enabled" if self.options.get_safe("intel_xe_kmd") else "disabled"
         tc.project_options["llvm"] = "enabled" if self.options.get_safe("with_llvm") else "disabled"
-        tc.project_options["libunwind"] = "enabled" if self.options.with_libunwind else "disabled"
+        tc.project_options["libunwind"] = "enabled" if self.options.get_safe("with_libunwind") else "disabled"
         if self.options.get_safe("min_windows_version"):
             tc.project_options["min-windows-version"] = self.options.min_windows_version
         tc.project_options["opengl"] = self.options.get_safe("opengl", default=True)
