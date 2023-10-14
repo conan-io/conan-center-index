@@ -1,4 +1,5 @@
 import importlib
+import os
 import sys
 from pathlib import PurePath
 
@@ -55,6 +56,7 @@ class TestPackageConan(ConanFile):
 
     def _test_swig_module(self):
         sys.path.append(self.build_folder)
+        sys.path.append(os.path.join(self.build_folder, str(self.settings.build_type)))
         # Could also simply use 'import PackageTest' but this makes pylint angry
         PackageTest = importlib.import_module("PackageTest")
         assert PackageTest.gcd(12, 16) == 4

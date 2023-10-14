@@ -9,7 +9,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
 
 class SwigConan(ConanFile):
@@ -20,7 +20,7 @@ class SwigConan(ConanFile):
     homepage = "http://www.swig.org"
     topics = ("python", "java", "wrapper")
 
-    package_type = "application"
+    package_type = "build-scripts"
     settings = "os", "arch", "compiler", "build_type"
 
     @property
@@ -43,7 +43,7 @@ class SwigConan(ConanFile):
             self.requires("pcre2/10.42")
         else:
             self.requires("pcre/8.45")
-        if self.settings.os == "Macos":
+        if is_apple_os(self):
             self.requires("libgettext/0.22")
 
     def package_id(self):
@@ -61,6 +61,10 @@ class SwigConan(ConanFile):
         else:
             self.tool_requires("bison/3.8.2")
         self.tool_requires("automake/1.16.5")
+        if self._use_pcre2:
+            self.tool_requires("pcre2/<host_version>")
+        else:
+            self.tool_requires("pcre/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -70,14 +74,17 @@ class SwigConan(ConanFile):
         build_env.generate()
 
         tc = AutotoolsToolchain(self)
+        env = tc.environment()
+
         pcre = "pcre2" if self._use_pcre2 else "pcre"
         tc.configure_args += [
             f"--host={self.settings.arch}",
             "--with-swiglibdir=${prefix}/bin/swiglib",
             f"--with-{pcre}-prefix={self.dependencies[pcre].package_folder}",
         ]
+        if self._use_pcre2:
+            env.define("PCRE2_LIBS", " ".join("-l" + lib for lib in self.dependencies["pcre2"].cpp_info.libs))
 
-        env = tc.environment()
         if self.settings.os in ["Linux", "FreeBSD"]:
             tc.configure_args.append("LIBS=-ldl")
             tc.extra_defines.append("HAVE_UNISTD_H=1")
