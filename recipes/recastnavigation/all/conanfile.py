@@ -74,22 +74,26 @@ class RecastNavigationConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "recastnavigation")
         self.cpp_info.set_property("pkg_config_name", "recastnavigation")
 
+        suffix = ""
+        if self.settings.build_type == "Debug" and self.version != "cci.20200511":
+            suffix = "-d"
+
         self.cpp_info.components["Recast"].set_property("cmake_target_name", "RecastNavigation::Recast")
-        self.cpp_info.components["Recast"].libs = ["Recast"]
+        self.cpp_info.components["Recast"].libs = ["Recast" + suffix]
 
         self.cpp_info.components["Detour"].set_property("cmake_target_name", "RecastNavigation::Detour")
-        self.cpp_info.components["Detour"].libs = ["Detour"]
+        self.cpp_info.components["Detour"].libs = ["Detour" + suffix]
 
         self.cpp_info.components["DetourCrowd"].set_property("cmake_target_name", "RecastNavigation::DetourCrowd")
-        self.cpp_info.components["DetourCrowd"].libs = ["DetourCrowd"]
+        self.cpp_info.components["DetourCrowd"].libs = ["DetourCrowd" + suffix]
         self.cpp_info.components["DetourCrowd"].requires = ["Detour"]
 
         self.cpp_info.components["DetourTileCache"].set_property("cmake_target_name", "RecastNavigation::DetourTileCache")
-        self.cpp_info.components["DetourTileCache"].libs = ["DetourTileCache"]
+        self.cpp_info.components["DetourTileCache"].libs = ["DetourTileCache" + suffix]
         self.cpp_info.components["DetourTileCache"].requires = ["Detour"]
 
         self.cpp_info.components["DebugUtils"].set_property("cmake_target_name", "RecastNavigation::DebugUtils")
-        self.cpp_info.components["DebugUtils"].libs = ["DebugUtils"]
+        self.cpp_info.components["DebugUtils"].libs = ["DebugUtils" + suffix]
         self.cpp_info.components["DebugUtils"].requires = ["Recast", "Detour", "DetourTileCache"]
 
         if self.version == "cci.20200511":
