@@ -47,7 +47,7 @@ class QxmppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("qt/6.5.3")
+        self.requires("qt/6.6.0")
         if self.options.with_gstreamer:
             self.requires("gstreamer/1.22.3")
             self.requires("glib/2.78.0")
