@@ -228,6 +228,18 @@ class MesaConan(ConanFile):
         return self.settings.os != "Windows"
 
     @property
+    def _has_with_libselinux_option(self):
+        return self.settings.os == "Linux"
+
+    @property
+    def _has_with_libudev_option(self):
+        return self.settings.os == "Linux"
+
+    @property
+    def _has_with_libunwind_option(self):
+        return self.settings.os in ["Linux", "FreeBSD"]
+
+    @property
     def _default_egl_native_platform_option(self):
         if self.settings.os == "Android":
             return "android"
@@ -317,6 +329,12 @@ class MesaConan(ConanFile):
             self.options.rm_safe("platform_sdk_version")
         if not self._has_with_libglvnd_option:
             self.options.rm_safe("with_libglvnd")
+        if not self._has_with_libselinux_option:
+            self.options.rm_safe("with_libselinux")
+        if not self._has_with_libudev_option:
+            self.options.rm_safe("with_libudev")
+        if not self._has_with_libunwind_option:
+            self.options.rm_safe("with_libunwind")
 
         if not self._has_platforms_android_option:
             self.options.rm_safe("platforms_android")
