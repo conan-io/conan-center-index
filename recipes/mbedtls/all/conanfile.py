@@ -121,6 +121,14 @@ class MBedTLSConan(ConanFile):
             for component in self.cpp_info.components:
                 self.cpp_info.components[component].requires.append("zlib::zlib")
 
+        if is_msvc(self):
+            if check_min_vs(self, 190, raise_invalid=False):
+                snprintf_macro = "MBEDTLS_PLATFORM_SNPRINTF_MACRO=snprintf"
+            else:
+                snprintf_macro = "MBEDTLS_PLATFORM_SNPRINTF_MACRO=MBEDTLS_PLATFORM_STD_SNPRINTF"
+            for component in self.cpp_info.components:
+                self.cpp_info.components[component].defines.append(snprintf_macro)
+
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "MbedTLS"
         self.cpp_info.names["cmake_find_package_multi"] = "MbedTLS"
