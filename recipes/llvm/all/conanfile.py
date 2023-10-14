@@ -262,7 +262,7 @@ class Llvm(ConanFile):
                     raise ConanInvalidConfiguration(
                         "Compiler version too low for this package. If you want to try it set enable_unsafe_mode=True")
             elif self.settings.compiler == "clang":
-                if self.settings.compiler.libcxx in ['libc++']:
+                if self.is_linux() and self.settings.compiler.libcxx in ['libc++']:
                     # libc++ compiles but test linkage fails
                     raise ConanInvalidConfiguration(
                         "Configured compiler.libcxx=libc++ will fail in test_package linking. If you want to try it set enable_unsafe_mode=True")
