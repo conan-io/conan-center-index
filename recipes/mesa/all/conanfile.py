@@ -179,6 +179,10 @@ class MesaConan(ConanFile):
                 return True
         return False
 
+    @property
+    def _with_libdrm(self):
+        return self.settings.os in ["Linux", "FreeBSD"]
+
     # @property
     # def _with_dri(self):
     #     return self.options.get_safe("glx") == "dri" or self.options.get_safe("egl")
@@ -399,8 +403,8 @@ class MesaConan(ConanFile):
     def requirements(self):
         self.requires("libgettext/0.22")
 
-        # todo Require libdrm with specific driver support when specific drivers in Mesa are enabled
-        self.requires("libdrm/2.4.114")
+        if self._with_libdrm:
+            self.requires("libdrm/2.4.114")
 
         if self._requires_expat:
             self.requires("expat/2.5.0")
@@ -449,19 +453,19 @@ class MesaConan(ConanFile):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, 11)
 
-        if self.options.get_safe("egl") and not self.dependencies["libglvnd"].options.egl:
+        if self.options.get_safe("egl") and self.options.get_safe("with_libglvnd") and not self.dependencies["libglvnd"].options.egl:
             raise ConanInvalidConfiguration("The egl option requires the egl option of libglvnd to be enabled")
 
-        if ((self.options.get_safe("vulkan_drivers_amd") and not self.options.get_safe("platforms_windows")) or self.options.get_safe("gallium_drivers_radeonsi")) and not self.dependencies["libdrm"].options.amdgpu:
+        if ((self.options.get_safe("vulkan_drivers_amd") and not self.options.get_safe("platforms_windows")) or self.options.get_safe("gallium_drivers_radeonsi")) and self._with_libdrm and not self.dependencies["libdrm"].options.amdgpu:
             raise ConanInvalidConfiguration("The vulkan_drivers_amd option when not on Windows and gallium_drivers_radeonsi option require the amdgpu option of libdrm to be enabled")
 
-        if self.options.get_safe("gallium_drivers_i915") and not self.dependencies["libdrm"].options.intel:
+        if self.options.get_safe("gallium_drivers_i915") and self._with_libdrm and not self.dependencies["libdrm"].options.intel:
             raise ConanInvalidConfiguration("The gallium_drivers_i915 option requires the intel option of libdrm to be enabled")
 
-        if self.options.get_safe("gallium_drivers_nouveau") and not self.dependencies["libdrm"].options.nouveau:
+        if self.options.get_safe("gallium_drivers_nouveau") and self._with_libdrm and not self.dependencies["libdrm"].options.nouveau:
             raise ConanInvalidConfiguration("The gallium_drivers_nouveau option requires the nouveau option of libdrm to be enabled")
 
-        if (self.options.get_safe("gallium_drivers_r300") or self.options.get_safe("gallium_drivers_r600") or self.options.get_safe("gallium_drivers_radeonsi")) and not self.dependencies["libdrm"].options.radeon:
+        if (self.options.get_safe("gallium_drivers_r300") or self.options.get_safe("gallium_drivers_r600") or self.options.get_safe("gallium_drivers_radeonsi")) and self._with_libdrm and not self.dependencies["libdrm"].options.radeon:
             raise ConanInvalidConfiguration("The gallium_drivers_r300, gallium_drivers_r600, and gallium_drivers_radeonsi options require the radeon option of libdrm to be enabled")
 
         if (self.options.get_safe("gallium_drivers_radeonsi") or self.options.get_safe("vulkan_drivers_swrast")) and not self.options.get_safe("with_llvm"):
@@ -470,16 +474,16 @@ class MesaConan(ConanFile):
         if self.options.get_safe("gallium_drivers_tegra") and not self.options.get_safe("gallium_drivers_nouveau"):
             raise ConanInvalidConfiguration("The gallium_drivers_tegra option requires the gallium_drivers_nouveau option to be enabled")
 
-        if self.options.get_safe("gles1") and not self.dependencies["libglvnd"].options.gles1:
+        if self.options.get_safe("gles1") and self.options.get_safe("with_libglvnd") and not self.dependencies["libglvnd"].options.gles1:
             raise ConanInvalidConfiguration("The gles1 option requires the gles1 option of libglvnd to be enabled")
 
-        if self.options.get_safe("gles2") and not self.dependencies["libglvnd"].options.gles2:
+        if self.options.get_safe("gles2") and self.options.get_safe("with_libglvnd") and not self.dependencies["libglvnd"].options.gles2:
             raise ConanInvalidConfiguration("The gles2 option requires the gles2 option of libglvnd to be enabled")
 
         if self.options.get_safe("glx") and not (self.options.get_safe("platforms_x11") and self._with_any_opengl):
             raise ConanInvalidConfiguration("The glx option requires platforms_x11 and at least one OpenGL API option to be enabled")
 
-        if self.options.get_safe("glx") and not self.dependencies["libglvnd"].options.glx:
+        if self.options.get_safe("glx") and self.options.get_safe("with_libglvnd") and not self.dependencies["libglvnd"].options.glx:
             raise ConanInvalidConfiguration("The glx option requires the glx option of libglvnd to be enabled")
 
         if self.settings.os in ["Macos", "Windows"]:
