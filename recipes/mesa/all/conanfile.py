@@ -411,7 +411,7 @@ class MesaConan(ConanFile):
 
         if self.options.get_safe("platforms_wayland"):
             self.requires("wayland/1.22.0")
-            self.requires("wayland-protocols/1.31")
+            self.requires("wayland-protocols/1.32")
 
         if self.options.get_safe("platforms_x11"):
             self.requires("libxshmfence/1.3")
@@ -424,7 +424,7 @@ class MesaConan(ConanFile):
             self.requires("libglvnd/1.5.0")
 
         if self.options.get_safe("with_libselinux"):
-            self.requires("libselinux/3.3")
+            self.requires("libselinux/3.5")
 
         if self.options.get_safe("with_libudev") == "systemd":
             self.requires("libsystemd/253.10")
