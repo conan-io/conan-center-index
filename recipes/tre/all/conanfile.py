@@ -1,14 +1,12 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
-from conan.tools.cmake import cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -26,6 +24,9 @@ class TreConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -39,44 +40,50 @@ class TreConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def validate(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows builds are not supported yet")
-
     def build_requirements(self):
-        self.tool_requires("libtool/2.4.7")
+        if self.settings.os != "Windows":
+            self.tool_requires("libtool/2.4.7")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
-        tc = AutotoolsToolchain(self)
-        tc.generate()
-
-    def _patch_sources(self):
-        if self.settings.os == "Windows" and not is_msvc(self):
-            replace_in_file(self, os.path.join(self.source_folder, "win32", "tre.def"), "tre.dll", "libtre.dll")
+        if self.settings.os == "Windows":
+            tc = CMakeToolchain(self)
+            tc.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+            if not cross_building(self):
+                env = VirtualRunEnv(self)
+                env.generate(scope="build")
+            tc = AutotoolsToolchain(self)
+            tc.generate()
 
     def build(self):
-        self._patch_sources()
-        autotools = Autotools(self)
-        autotools.autoreconf()
-        autotools.configure()
-        autotools.make()
+        if self.settings.os == "Windows":
+            copy(self, "CMakeLists.txt", src=self.export_sources_folder, dst=self.source_folder)
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
+        else:
+            autotools = Autotools(self)
+            autotools.autoreconf()
+            autotools.configure()
+            autotools.make()
 
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        autotools = Autotools(self)
-        autotools.install()
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        fix_apple_shared_install_name(self)
+        if self.settings.os == "Windows":
+            cmake = CMake(self)
+            cmake.install()
+        else:
+            autotools = Autotools(self)
+            autotools.install()
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "tre")
