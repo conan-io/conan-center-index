@@ -118,6 +118,7 @@ class QtConan(ConanFile):
         "disabled_features": "",
     }
     default_options.update({module: False for module in _submodules})
+    del default_options["qtshadertools"]
 
     short_paths = True
 
@@ -1200,7 +1201,7 @@ class QtConan(ConanFile):
             _create_plugin("QUACppPlugin", "uacpp_backend", "opcua", ["Network", "OpcUa"])
 
         if self.options.get_safe("qtmultimedia"):
-            multimedia_reqs = ["Network", "Gui"]
+            multimedia_reqs = ["Network", "Gui", "ShaderTools"]
             if self.options.get_safe("with_libalsa", False):
                 multimedia_reqs.append("libalsa::libalsa")
             if self.options.with_openal:
