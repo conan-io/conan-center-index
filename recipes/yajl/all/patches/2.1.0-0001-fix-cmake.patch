@@ -1,15 +1,18 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -12,7 +12,7 @@
+@@ -12,7 +12,10 @@
  # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  
 -CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 +CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
++if(POLICY CMP0026)
++    cmake_policy(SET CMP0026 OLD)
++endif()
  
  PROJECT(YetAnotherJSONParser C)
  
-@@ -26,6 +26,7 @@ IF (NOT CMAKE_BUILD_TYPE)
+@@ -26,6 +29,7 @@ IF (NOT CMAKE_BUILD_TYPE)
    SET(CMAKE_BUILD_TYPE "Release")
  ENDIF (NOT CMAKE_BUILD_TYPE)
  
@@ -17,7 +20,7 @@
  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
  
  IF (WIN32)
-@@ -61,16 +62,13 @@ ELSE (WIN32)
+@@ -61,16 +65,13 @@ ELSE (WIN32)
    SET(CMAKE_C_FLAGS_DEBUG "-DDEBUG -g")
    SET(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -O2 -Wuninitialized")
  ENDIF (WIN32)
@@ -45,11 +48,10 @@
  
  # set up some paths
  SET (libDir ${CMAKE_CURRENT_BINARY_DIR}/../${YAJL_DIST_NAME}/lib)
-@@ -36,21 +35,19 @@ SET (shareDir ${CMAKE_CURRENT_BINARY_DIR}/../${YAJL_DIST_NAME}/share/pkgconfig)
- SET(LIBRARY_OUTPUT_PATH ${libDir})
+@@ -37,20 +36,19 @@ SET(LIBRARY_OUTPUT_PATH ${libDir})
  
  ADD_LIBRARY(yajl_s STATIC ${SRCS} ${HDRS} ${PUB_HDRS})
--
+ 
 +target_compile_features(yajl_s PRIVATE c_std_99)
  ADD_LIBRARY(yajl SHARED ${SRCS} ${HDRS} ${PUB_HDRS})
 +target_compile_features(yajl PRIVATE c_std_99)
@@ -72,7 +74,7 @@
  
  #### build up an sdk as a post build step
  
-@@ -78,7 +75,7 @@ INCLUDE_DIRECTORIES(${incDir}/..)
+@@ -78,7 +76,7 @@ INCLUDE_DIRECTORIES(${incDir}/..)
  # at build time you may specify the cmake variable LIB_SUFFIX to handle
  # 64-bit systems which use 'lib64'
  INSTALL(TARGETS yajl
