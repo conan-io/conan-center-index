@@ -216,9 +216,6 @@ class Llvm(ConanFile):
                     raise ConanInvalidConfiguration(
                         "Generating libLLVM is not supported on MSVC"
                     )
-                if not str(self.settings.compiler.runtime) in ['MD', 'MT', 'MTd', 'MDd']:
-                    raise ConanInvalidConfiguration(
-                        "Current setting for compiler runtime isn't one of MD, MT, MTd, MDd which is required for LLVM and I have no clue how to map it. Feel free to contribute it.")
 
         try:
             re.compile(str(self.options.keep_binaries_regex))
@@ -427,10 +424,22 @@ class Llvm(ConanFile):
         }
         if is_msvc(self):
             build_type = str(self.settings.build_type).upper()
+            runtime = str(self.settings.compiler.runtime)
+            if not runtime in ['MD', 'MT', 'MTd', 'MDd']:
+                runtime_type = str(self.settings.compiler.runtime_type)
+                if runtime_type == "Debug" and runtime == "static":
+                    runtime = 'MTd'
+                elif runtime_type == "Debug" and runtime == "dynamic":
+                    runtime = 'MTd'
+                elif runtime_type == "Release" and runtime == "static":
+                    runtime = 'MT'
+                elif runtime_type == "Release" and runtime == "dynamic":
+                    runtime = 'MD'
             cmake_definitions.update(
                 {
+                    # will be replaced in llvm 18 by CMAKE_MSVC_RUNTIME_LIBRARY
                     # llvm expects: MD, MT, MTd, MDd
-                    f"LLVM_USE_CRT_{build_type}": self.settings.compiler.runtime
+                    f"LLVM_USE_CRT_{build_type}": runtime
                 }
             )
         # Conan Center Index CI optimization, in build_type=Debug the CI is killing it because of high memory usage:
