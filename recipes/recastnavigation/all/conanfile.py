@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, move_folder_contents, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, move_folder_contents, rmdir, rm
 import os
 
 required_conan_version = ">=1.52.0"
@@ -64,6 +64,7 @@ class RecastNavigationConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
         if self.version == "cci.20200511":
             # Move the includes under recastnavigation/ prefix for future compatibility
             mkdir(self, os.path.join(self.package_folder, "include", "recastnavigation"))
