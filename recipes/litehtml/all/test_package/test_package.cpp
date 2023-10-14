@@ -9,7 +9,7 @@ int main() {
     constexpr size_t length = 10;
 
     std::string string = "the quick brown fox jumps over the lazy dog";
-    litehtml::tstring_view view(string.c_str() + offset, length);
+    litehtml::tstring_view view(static_cast<litehtml::tstring_view::const_pointer>(string.c_str() + offset), length);
 
     for (auto c : view) {
         std::cout << c << std::endl;
