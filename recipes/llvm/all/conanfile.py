@@ -7,6 +7,7 @@ from conan.errors import ConanInvalidConfiguration
 from collections import defaultdict
 from conan.errors import ConanException
 from conan.tools.scm import Version
+from pathlib import Path
 import os
 import shutil
 import glob
@@ -100,6 +101,9 @@ class Llvm(ConanFile):
             'with_ffi': [True, False],
             'with_zlib': [True, False],
             'with_xml2': [True, False],
+            'with_curl': [True, False],
+            'with_zstd': [True, False],
+            'with_httplib': [True, False],
             'keep_binaries_regex': ['ANY'],
 
             # options removed in package id
@@ -140,7 +144,11 @@ class Llvm(ConanFile):
             'with_z3': False,
             'with_ffi': False,
             'with_zlib': True,
-            # XXX default True, issues with liblldb.so and conan: Findlibxml2.cmake not provided
+            # TODO curl 7.76.0 check is failing in config-ix.cmake
+            'with_curl': False,
+            'with_zstd': True,
+            'with_httplib': False,
+            # TODO default True, issues with liblldb.so and conan: Findlibxml2.cmake not provided
             'with_xml2': False,
             'keep_binaries_regex': '^$',
 
@@ -182,6 +190,17 @@ class Llvm(ConanFile):
             self.options.rm_safe("fPIC")  # FPIC MANAGEMENT (KB-H007)
             self.output.warning(
                 "BUILD_SHARED_LIBS is only recommended for use by LLVM developers. If you want to build LLVM as a shared library, you should use the LLVM_BUILD_LLVM_DYLIB option.")
+
+        release = Version(self.version).major
+        unsupported_options = []
+        if release < 14:
+            unsupported_options.append('with_curl')
+        if release < 15:
+            unsupported_options.append('with_zstd')
+            unsupported_options.append('with_httplib')
+        for opt in unsupported_options:
+            self.output.warning(f"{opt} is unsupported in llvm {release}")
+            self.options.rm_safe(opt)
 
     def validate(self):
         if self.is_windows():
@@ -266,13 +285,27 @@ class Llvm(ConanFile):
 
     def requirements(self):
         if self.options.with_ffi:
+            # no version requirement in llvm 13-16
             self.requires('libffi/[>3.4.0 <4.0.0]')
         if self.options.get_safe('with_zlib', False):
+            # no version requirement in llvm 13-16
             self.requires('zlib/[>1.2.0 <2.0.0]')
         if self.options.get_safe('with_xml2', False):
-            self.requires('libxml2/[>2.9.0 <3.0.0]')
+            # version requirement from llvm 13-16
+            self.requires('libxml2/[>=2.5.3 <3.0.0]')
         if self.options.get_safe('with_z3', False):
-            self.requires('z3/[>4.8.0 <5.0.0]')
+            # version requirement from llvm 13-16
+            self.requires('z3/[>=4.7.1 <5.0.0]')
+        if self.options.get_safe('with_curl', False):
+            # no version requirement in llvm 14-16
+            # TODO currently no version works, add version range if successfully tested
+            self.requires('libcurl/7.76.0')
+        if self.options.get_safe('with_zstd', False):
+            # no version number in llvm 15-16
+            self.requires('zstd/[>=1.3.5 <2.0.0]')
+        if self.options.get_safe('with_httplib', False):
+            # no version number in llvm 15-16
+            self.requires('cpp-httplib/[>=0.5.4 <1.0.0]')
 
     def build_requirements(self):
         # Older cmake versions may have issues generating the graphviz output used
@@ -301,6 +334,10 @@ class Llvm(ConanFile):
             ', '.join(enabled_projects)))
         self.output.info('Enabled LLVM runtimes: {}'.format(
             ', '.join(enabled_runtimes)))
+
+        is_zstd_static = False
+        if self.options.get_safe('with_zstd', False):
+            is_zstd_static = not self.dependencies["zstd"].options.shared
 
         cmake = CMake(self)
         # https://releases.llvm.org/13.0.0/docs/CMake.html
@@ -361,12 +398,17 @@ class Llvm(ConanFile):
             'LLVM_USE_OPROFILE': False,
             'LLVM_USE_PERF': self.options.use_perf,
             'LLVM_ENABLE_Z3_SOLVER': self.options.with_z3,
+            'LLVM_Z3_INSTALL_DIR': Path(self.dependencies["z3"].package_folder).resolve().as_posix() if self.options.with_z3 else "",
             'LLVM_ENABLE_LIBPFM': False,
             'LLVM_ENABLE_LIBEDIT': False,
             'LLVM_ENABLE_FFI': self.options.with_ffi,
             # FORCE_ON adds required to find_package
             'LLVM_ENABLE_ZLIB': 'FORCE_ON' if self.options.get_safe('with_zlib', False) else False,
             'LLVM_ENABLE_LIBXML2': 'FORCE_ON' if self.options.get_safe('with_xml2', False) else False,
+            'LLVM_ENABLE_CURL': 'FORCE_ON' if self.options.get_safe('with_curl', False) else False,
+            'LLVM_ENABLE_ZSTD': 'FORCE_ON' if self.options.get_safe('with_zstd', False) else False,
+            'LLVM_USE_STATIC_ZSTD': is_zstd_static,
+            'LLVM_ENABLE_HTTPLIB': 'FORCE_ON' if self.options.get_safe('with_httplib', False) else False,
             'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects),
             'LLVM_ENABLE_RUNTIMES': ';'.join(enabled_runtimes),
             'LLVM_USE_SANITIZER': self.options.llvm_use_sanitizer,
