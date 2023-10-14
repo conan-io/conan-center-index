@@ -16,6 +16,7 @@ class ZoeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/winsoft666/zoe"
     topics = ("downloader", "libcurl", "speed-limit", "ftp", "http")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
