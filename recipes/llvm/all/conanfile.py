@@ -198,6 +198,10 @@ class Llvm(ConanFile):
         if release < 15:
             unsupported_options.append('with_zstd')
             unsupported_options.append('with_httplib')
+        # TODO fix with_zstd and llvm 17
+        if release >= 17:
+            self.output.warning(f"with_zstd will fail in llvm 17 with conan 2")
+            unsupported_options.append('with_zstd')
         for opt in unsupported_options:
             self.output.warning(f"{opt} is unsupported in llvm {release}")
             self.options.rm_safe(opt)
@@ -246,7 +250,7 @@ class Llvm(ConanFile):
 
         if self.options.conan_center_index_limits:
             # XXX conandata.yml is reduced in cci ci to exactly one version so we can't look it up
-            if not str(self.version) in ['13.0.1', '14.0.6', '15.0.7', '16.0.6']:
+            if not str(self.version) in ['13.0.1', '14.0.6', '15.0.7', '16.0.6', '17.0.2']:
                 raise ConanInvalidConfiguration(
                     "llvm version is disabled for conan center index ci because its not the latest patch level in the configuration without the ci would run for multiple days. You can enable it with option conan_center_index_limits=False.")
             if self.settings.build_type == "Debug":
@@ -292,26 +296,25 @@ class Llvm(ConanFile):
 
     def requirements(self):
         if self.options.with_ffi:
-            # no version requirement in llvm 13-16
+            # no version requirement in llvm 13-17
             self.requires('libffi/[>3.4.0 <4.0.0]')
         if self.options.get_safe('with_zlib', False):
-            # no version requirement in llvm 13-16
+            # no version requirement in llvm 13-17
             self.requires('zlib/[>1.2.0 <2.0.0]')
         if self.options.get_safe('with_xml2', False):
-            # version requirement from llvm 13-16
+            # min version requirement from llvm 13-17
             self.requires('libxml2/[>=2.5.3 <3.0.0]')
         if self.options.get_safe('with_z3', False):
-            # version requirement from llvm 13-16
+            # min version requirement from llvm 13-17
             self.requires('z3/[>=4.7.1 <5.0.0]')
         if self.options.get_safe('with_curl', False):
-            # no version requirement in llvm 14-16
-            # TODO currently no version works, add version range if successfully tested
-            self.requires('libcurl/7.76.0')
+            # no version requirement in llvm 14-17
+            self.requires('libcurl/[>=7.76.0 <9.0.0]')
         if self.options.get_safe('with_zstd', False):
-            # no version number in llvm 15-16
+            # no version number in llvm 15-17
             self.requires('zstd/[>=1.3.5 <2.0.0]')
         if self.options.get_safe('with_httplib', False):
-            # no version number in llvm 15-16
+            # no version number in llvm 15-17
             self.requires('cpp-httplib/[>=0.5.4 <1.0.0]')
 
     def build_requirements(self):
