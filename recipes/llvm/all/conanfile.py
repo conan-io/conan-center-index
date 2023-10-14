@@ -255,6 +255,13 @@ class Llvm(ConanFile):
             if self.options.shared:
                 raise ConanInvalidConfiguration(
                     "Shared builds are disabled for cci ci for max total build time reasons. You can enable it with option conan_center_index_limits=False.")
+            if self.is_linux():
+                if self.settings.compiler == "clang" and self.settings.compiler.version != "12":
+                    raise ConanInvalidConfiguration(
+                        "Compiler is excluded from cci ci to reduce ci time. You can enable it with option conan_center_index_limits=False.")
+                if self.settings.compiler == "gcc" and self.settings.compiler.version != "10":
+                    raise ConanInvalidConfiguration(
+                        "Compiler is excluded from cci ci to reduce ci time. You can enable it with option conan_center_index_limits=False.")
 
         if not self.options.enable_unsafe_mode:
             if self.settings.compiler == "gcc":
