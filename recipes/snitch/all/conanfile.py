@@ -14,7 +14,7 @@ class SnitchConan(ConanFile):
     description = "Lightweight C++20 testing framework"
     topics = ("snitch", "unit-test")
     license = "BSL-1.0"
-    homepage = "https://github.com/cschreib/snitch"
+    homepage = "https://github.com/snitch-org/snitch"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"

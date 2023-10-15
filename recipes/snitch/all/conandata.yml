@@ -1,4 +1,4 @@
 sources:
   "1.2.2":
-    url: "https://github.com/cschreib/snitch/archive/refs/tags/v1.2.2.tar.gz"
+    url: "https://github.com/snitch-org/snitch/archive/refs/tags/v1.2.2.zip"
     sha256: "67301cc8dd4135f1c70b4111b1343b4a6e981eaa688506cdd197a3b055d418f3"
