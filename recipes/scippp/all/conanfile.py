@@ -67,7 +67,7 @@ class ScipPlusPlus(ConanFile):
 
     def requirements(self):
         # see https://github.com/scipopt/SCIPpp/blob/1.0.0/conanfile.py#L25
-        self.requires("scip/8.0.3", transitive_headers=True)
+        self.requires("scip/8.0.4", transitive_headers=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
