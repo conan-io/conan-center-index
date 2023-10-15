@@ -3,9 +3,11 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir
+from conan.tools.build import check_min_cppstd
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -24,11 +26,17 @@ class InihConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_inireader": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_inireader": True,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 11
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -37,18 +45,24 @@ class InihConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
+        # INIReader is written in C++
+        if not self.options.with_inireader:
+            self.settings.rm_safe("compiler.libcxx")
+            self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def validate(self):
+        # since 57, INIReader requires C++11
+        if Version(self.version) >= "57" and self.options.with_inireader and \
+            self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
         if self.options.shared and is_msvc(self):
             raise ConanInvalidConfiguration("Shared inih is not supported with msvc")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.2.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -58,7 +72,10 @@ class InihConan(ConanFile):
         env.generate()
         tc = MesonToolchain(self)
         tc.project_options["distro_install"] = True
-        tc.project_options["with_INIReader"] = True
+        tc.project_options["with_INIReader"] = self.options.with_inireader
+        # since 57, INIReader requires C++11
+        if Version(self.version) >= "57" and not is_msvc(self):
+            tc.cpp_args.append("-std=c++11")
         tc.generate()
 
     def build(self):
@@ -80,9 +97,10 @@ class InihConan(ConanFile):
         self.cpp_info.components["libinih"].set_property("pkg_config_name", "inih")
         self.cpp_info.components["libinih"].libs = ["inih"]
 
-        self.cpp_info.components["inireader"].set_property("pkg_config_name", "INIReader")
-        self.cpp_info.components["inireader"].libs = ["INIReader"]
-        self.cpp_info.components["inireader"].requires = ["libinih"]
+        if self.options.with_inireader:
+            self.cpp_info.components["inireader"].set_property("pkg_config_name", "INIReader")
+            self.cpp_info.components["inireader"].libs = ["INIReader"]
+            self.cpp_info.components["inireader"].requires = ["libinih"]
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""

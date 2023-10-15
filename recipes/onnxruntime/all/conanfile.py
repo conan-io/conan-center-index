@@ -41,10 +41,18 @@ class OnnxRuntimeConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
+        if Version(self.version) < "1.16.0":
+            return {
+                "Visual Studio": "16",
+                "msvc": "192",
+                "gcc": "7",
+                "clang": "5",
+                "apple-clang": "10",
+            }
         return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "8",
+            "Visual Studio": "17",
+            "msvc": "193",
+            "gcc": "9",
             "clang": "5",
             "apple-clang": "10",
         }
@@ -68,26 +76,27 @@ class OnnxRuntimeConan(ConanFile):
         version = Version(self.version)
         return {
             "1.14": "1.13.1",
-            "1.15": "1.14.0",
+            "1.15": "1.14.1",
+            "1.16": "1.14.1",
         }[f"{version.major}.{version.minor}"]
 
     def requirements(self):
-        self.requires("abseil/20230125.2")
-        self.requires("protobuf/3.21.9")
+        self.requires("abseil/20230125.3")
+        self.requires("protobuf/3.21.12")
         self.requires("date/3.0.1")
-        self.requires("re2/20230301")
+        self.requires("re2/20230801")
         self.requires(f"onnx/{self._onnx_version}")
         self.requires("flatbuffers/1.12.0")
-        self.requires("boost/1.81.0", headers=True, libs=False, run=False)  # for mp11, header only, no need for libraries to link/run
+        self.requires("boost/1.83.0", headers=True, libs=False, run=False)  # for mp11, header only, no need for libraries to link/run
         self.requires("safeint/3.0.28")
         self.requires("nlohmann_json/3.11.2")
         self.requires("eigen/3.4.0")
         self.requires("ms-gsl/4.0.0")
-        self.requires("cpuinfo/cci.20220228")
+        self.requires("cpuinfo/cci.20220618")
         if self.settings.os != "Windows":
-            self.requires("nsync/1.25.0")
+            self.requires("nsync/1.26.0")
         else:
-            self.requires("wil/1.0.230202.1")
+            self.requires("wil/1.0.230824.2")
         if self.options.with_xnnpack:
             self.requires("xnnpack/cci.20220801")
 
@@ -97,7 +106,7 @@ class OnnxRuntimeConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                f"{self.ref} requires minimum compiler version {minimum_version}."
             )
 
     def validate_build(self):
@@ -119,7 +128,8 @@ class OnnxRuntimeConan(ConanFile):
         # disable downloading dependencies to ensure conan ones are used
         tc.variables["FETCHCONTENT_FULLY_DISCONNECTED"] = True
         if self.version >= Version("1.15.0") and self.options.shared:
-            tc.variables["Python_EXECUTABLE"] = sys.executable
+            # Need to replace windows path seperators with linux path seperators to keep CMake from crashing
+            tc.variables["Python_EXECUTABLE"] = sys.executable.replace("\\", "/")
 
         tc.variables["onnxruntime_BUILD_SHARED_LIB"] = self.options.shared
         tc.variables["onnxruntime_USE_FULL_PROTOBUF"] = not self.dependencies["protobuf"].options.lite
@@ -248,7 +258,10 @@ class OnnxRuntimeConan(ConanFile):
                 onnxruntime_libs.append("providers_xnnpack")
             self.cpp_info.libs = [f"onnxruntime_{lib}" for lib in onnxruntime_libs]
 
-        self.cpp_info.includedirs.append("include/onnxruntime/core/session")
+        if Version(self.version) < "1.16.0" or not self.options.shared:
+            self.cpp_info.includedirs.append("include/onnxruntime/core/session")
+        else:
+            self.cpp_info.includedirs.append("include/onnxruntime")
 
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
@@ -258,5 +271,8 @@ class OnnxRuntimeConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("shlwapi")
 
+        # https://github.com/microsoft/onnxruntime/blob/v1.16.0/cmake/CMakeLists.txt#L1759-L1763
+        self.cpp_info.set_property("cmake_file_name", "onnxruntime")
+        self.cpp_info.set_property("cmake_target_name", "onnxruntime::onnxruntime")
         # https://github.com/microsoft/onnxruntime/blob/v1.14.1/cmake/CMakeLists.txt#L1584
         self.cpp_info.set_property("pkg_config_name", "onnxruntime")

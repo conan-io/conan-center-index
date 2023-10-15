@@ -56,14 +56,14 @@ class CfitsioConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.threadsafe and self.settings.os == "Windows" and \
            self.settings.compiler.get_safe("threads") != "posix":
             self.requires("pthreads4w/3.0.0")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_curl"):
-            self.requires("libcurl/8.0.0")
+            self.requires("libcurl/8.2.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

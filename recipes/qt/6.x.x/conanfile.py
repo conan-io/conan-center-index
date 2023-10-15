@@ -26,6 +26,7 @@ class QtConan(ConanFile):
                    "qtserialport", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
                    "qtremoteobjects", "qtpositioning", "qtlanguageserver",
                    "qtspeech", "qthttpserver", "qtquick3dphysics", "qtgrpc", "qtquickeffectmaker"]
+    _submodules += ["qtgraphs"] # new modules for qt 6.6.0
 
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
@@ -245,6 +246,9 @@ class QtConan(ConanFile):
         if self.settings.compiler == "clang" and "libstdc++" in str(self.settings.compiler.libcxx):
             raise ConanInvalidConfiguration("Qt needs recent libstdc++, with charconv. please switch to gcc, or to libc++")
 
+        if self.settings.os == "Macos" and self.dependencies["double-conversion"].options.shared:
+            raise ConanInvalidConfiguration("Test recipe fails because of Macos' SIP. Contributions are welcome.")
+
         if self.options.get_safe("qtwebengine"):
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds of Qt WebEngine are not supported")
@@ -291,13 +295,16 @@ class QtConan(ConanFile):
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
 
+        if self.options.get_safe("qtspeech") and not self.options.qtdeclarative:
+            raise ConanInvalidConfiguration("qtspeech requires qtdeclarative, cf QTBUG-108381")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.openssl:
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
         if self.options.get_safe("with_vulkan"):
@@ -305,30 +312,30 @@ class QtConan(ConanFile):
             if is_apple_os(self):
                 self.requires("moltenvk/1.2.2")
         if self.options.with_glib:
-            self.requires("glib/2.76.1")
+            self.requires("glib/2.77.0")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
-            self.requires("double-conversion/3.2.1")
+            self.requires("double-conversion/3.3.0")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
             self.requires("freetype/2.13.0")
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.13.93")
+            self.requires("fontconfig/2.14.2")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/72.1")
+            self.requires("icu/73.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/6.0.0")
+            self.requires("harfbuzz/8.2.1")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.1.5")
             else:
                 self.requires("libjpeg/9e")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.41.1")
+            self.requires("sqlite3/3.42.0")
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.31")
         if self.options.with_pq:
-            self.requires("libpq/14.7")
+            self.requires("libpq/15.3")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.11")
@@ -345,9 +352,9 @@ class QtConan(ConanFile):
             self.requires("zstd/1.5.5")
         if self.options.qtwayland:
             self.requires("xkbcommon/1.5.0")
-            self.requires("wayland/1.21.0")
+            self.requires("wayland/1.22.0")
         if self.options.with_brotli:
-            self.requires("brotli/1.0.9")
+            self.requires("brotli/1.1.0")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
             self.requires("expat/2.5.0")
             self.requires("opus/1.3.1")
@@ -360,22 +367,22 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
-            self.requires("dbus/1.15.2")
+            self.requires("dbus/1.15.6")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_md4c", False):
             self.requires("md4c/0.4.8")
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.25.3")
+        self.tool_requires("cmake/[>=3.21.1 <4]")
         self.tool_requires("ninja/1.11.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.2")
         if self.settings.os == "Windows":
             self.tool_requires('strawberryperl/5.32.1.1')
 
         if self.options.get_safe("qtwebengine"):
-            self.tool_requires("nodejs/16.3.0")
+            self.tool_requires("nodejs/18.15.0")
             self.tool_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
@@ -385,7 +392,7 @@ class QtConan(ConanFile):
                 self.tool_requires("winflexbison/2.5.24")
 
         if self.options.qtwayland:
-            self.tool_requires("wayland/1.21.0")
+            self.tool_requires("wayland/1.22.0")
         if cross_building(self):
             self.tool_requires(f"qt/{self.version}")
 
@@ -418,6 +425,7 @@ class QtConan(ConanFile):
             vre.generate(scope="build")
         # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
         env = Environment()
+        env.unset("VCPKG_ROOT")
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         env.vars(self).save_script("conanbuildenv_pkg_config_path")
         if self._settings_build.os == "Macos":
@@ -562,7 +570,7 @@ class QtConan(ConanFile):
             tc.variables["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
 
         if self.settings.os == "Windows":
-            tc.variables["HOST_PERL"] = getattr(self, "user_info_build", self.deps_user_info)["strawberryperl"].perl
+            tc.variables["HOST_PERL"] = self.dependencies.build["strawberryperl"].conf_info.get("user.strawberryperl:perl", check_type=str)
                                #"set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
                                #"set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
                                #"set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
@@ -576,6 +584,8 @@ class QtConan(ConanFile):
             cpp_std_map["23"] = "FEATURE_cxx2b"
 
         tc.variables[cpp_std_map.get(current_cpp_std, "FEATURE_cxx17")] = "ON"
+        tc.variables["QT_USE_VCPKG"] = False
+        tc.cache_variables["QT_USE_VCPKG"] = False
 
         tc.generate()
 
@@ -595,9 +605,9 @@ class QtConan(ConanFile):
 
     def source(self):
         destination = self.source_folder
-        if self.settings.os == "Windows":
+        if self.info.settings.os == "Windows":
             # Don't use os.path.join, or it removes the \\?\ prefix, which enables long paths
-            destination = f"\\\\?\\{self.source_folder}"
+            destination = rf"\\?\{self.source_folder}"
         get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=destination)
 
@@ -626,6 +636,8 @@ class QtConan(ConanFile):
         if Version(self.version) <= "6.4.0":
             # use official variable name https://cmake.org/cmake/help/latest/module/FindFontconfig.html
             replace_in_file(self, os.path.join(self.source_folder, "qtbase", "src", "gui", "configure.cmake"), "FONTCONFIG_FOUND", "Fontconfig_FOUND")
+
+        replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", "QtAutoDetect.cmake") , "qt_auto_detect_vcpkg()", "# qt_auto_detect_vcpkg()")
 
     def _xplatform(self):
         if self.settings.os == "Linux":
@@ -950,6 +962,8 @@ class QtConan(ConanFile):
             core_reqs.append("zstd::zstd")
         if self.options.with_glib:
             core_reqs.append("glib::glib")
+        if self.options.openssl:
+            core_reqs.append("openssl::openssl") # used by QCryptographicHash
 
         _create_module("Core", core_reqs)
         pkg_config_vars = [
@@ -1197,24 +1211,8 @@ class QtConan(ConanFile):
             _create_module("MultimediaWidgets", ["Multimedia", "Widgets", "Gui"])
             if self.options.qtdeclarative and qt_quick_enabled:
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
-            _create_plugin("QM3uPlaylistPlugin", "qtmultimedia_m3u", "playlistformats", [])
             if self.options.with_gstreamer:
-                _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gst-plugins-base::gst-plugins-base"])
-                _create_plugin("QGstreamerAudioDecoderServicePlugin", "gstaudiodecoder", "mediaservice", [])
-                _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
-                _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
-            if self.settings.os == "Linux":
-                _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
-                _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
-            if self.settings.os == "Windows":
-                _create_plugin("AudioCaptureServicePlugin", "qtmedia_audioengine", "mediaservice", [])
-                _create_plugin("DSServicePlugin", "dsengine", "mediaservice", [])
-                _create_plugin("QWindowsAudioPlugin", "qtaudio_windows", "audio", [])
-            if self.settings.os == "Macos":
-                _create_plugin("AudioCaptureServicePlugin", "qtmedia_audioengine", "mediaservice", [])
-                _create_plugin("AVFMediaPlayerServicePlugin", "qavfmediaplayer", "mediaservice", [])
-                _create_plugin("AVFServicePlugin", "qavfcamera", "mediaservice", [])
-                _create_plugin("CoreAudioPlugin", "qtaudio_coreaudio", "audio", [])
+                _create_plugin("QGstreamerMediaPlugin", "gstreamermediaplugin", "multimedia", ["gst-plugins-base::gst-plugins-base"])
 
         if self.options.get_safe("qtpositioning"):
             _create_module("Positioning", [])
@@ -1268,6 +1266,19 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtwebview"):
             _create_module("WebView", ["Core", "Gui"])
 
+        if self.options.get_safe("qtspeech"):
+            _create_module("TextToSpeech", [])
+
+        if self.options.get_safe("qthttpserver"):
+            http_server_deps = ["Core", "Network"]
+            if self.options.get_safe("qtwebsockets"):
+                http_server_deps.append("WebSockets")
+            _create_module("HttpServer", http_server_deps)
+
+        if self.options.get_safe("qtgrpc"):
+            _create_module("Protobuf", [])
+            _create_module("Grpc", ["Core", "Protobuf", "Network"])
+
         if self.settings.os in ["Windows", "iOS"]:
             if self.settings.os == "Windows":
                 self.cpp_info.components["qtEntryPointImplementation"].set_property("cmake_target_name", "Qt6::EntryPointImplementation")
@@ -1314,6 +1325,7 @@ class QtConan(ConanFile):
                 self.cpp_info.components["qtCore"].frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
+                self.cpp_info.components["qtNetwork"].system_libs.append("resolv")
                 self.cpp_info.components["qtNetwork"].frameworks.append("SystemConfiguration")
                 if self.options.with_gssapi:
                     self.cpp_info.components["qtNetwork"].frameworks.append("GSS")

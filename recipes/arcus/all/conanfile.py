@@ -15,15 +15,15 @@ class ArcusConan(ConanFile):
                   "creating a socket in a thread and using this socket to send " \
                   "and receive messages based on the Protocol Buffers library."
     license = "LGPL-3.0-or-later"
-    topics = ("protobuf", "socket", "cura")
-    homepage = "https://github.com/Ultimaker/libArcus"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/Ultimaker/libArcus"
+    topics = ("protobuf", "socket", "cura")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-
     }
     default_options = {
         "shared": False,

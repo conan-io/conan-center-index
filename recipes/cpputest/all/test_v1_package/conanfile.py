@@ -16,6 +16,3 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
-            if self.options["cpputest"].with_extensions:
-                bin_extensions_path = os.path.join("bin", "test_package_with_extensions")
-                self.run(bin_extensions_path, run_environment=True)

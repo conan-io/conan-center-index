@@ -1,5 +1,9 @@
-#include <vector>
+// Workaround for pipes not finding size_t
+#include <cstddef>
+
 #include <pipes/pipes.hpp>
+
+#include <vector>
 
 int main() {
     auto source = std::vector<int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};

@@ -1,29 +1,33 @@
 import os
-from conans import CMake, ConanFile, tools
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
+
+required_conan_version = ">=1.53.0"
+
 
 class DuktapeConan(ConanFile):
     name = "duktape"
-    license = "MIT"
     description = "Duktape is an embeddable Javascript engine, with a focus on portability and compact footprint."
-    topics = ("javascript", "engine", "embeddable", "compact")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://duktape.org"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    topics = ("javascript", "engine", "embeddable", "compact")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -31,44 +35,41 @@ class DuktapeConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder) 
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if self.settings.os == "Windows" and self.options.shared:
+            # Duktape has a configure script with a number of options.
+            # However, it requires python 2 and PyYAML package
+            # which is quite an unusual combination to have.
+            # The most crucial option is --dll which enables
+            # DUK_F_DLL_BUILD and the following defines.
+            tc.preprocessor_definitions["DUK_EXTERNAL_DECL"] = "extern __declspec(dllexport)"
+            tc.preprocessor_definitions["DUK_EXTERNAL"] = "__declspec(dllexport)"
+        tc.generate()
 
     def build(self):
-        # Duktape has configure script with a number of options.
-        # However it requires python 2 and PyYAML package
-        # which is quite an unusual combination to have.
-        # The most crucial option is --dll which just flips this define.
-        if self.settings.os == "Windows" and self.options.shared:
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "src", "duk_config.h"),
-                "#undef DUK_F_DLL_BUILD",
-                "#define DUK_F_DLL_BUILD",
-            )
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=self.export_sources_folder)
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.txt",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["duktape"]
-        if not self.options.shared and str(self.settings.os) in (
-            "Linux",
-            "FreeBSD",
-            "SunOS",
-        ):
+        if not self.options.shared and self.settings.os in ("Linux", "FreeBSD", "SunOS"):
             self.cpp_info.system_libs = ["m"]

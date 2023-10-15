@@ -1,4 +1,10 @@
 sources:
+  "0.16":
+    url: "https://github.com/epezent/implot/archive/v0.16.tar.gz"
+    sha256: "961df327d8a756304d1b0a67316eebdb1111d13d559f0d3415114ec0eb30abd1"
+  "0.15":
+    url: "https://github.com/epezent/implot/archive/v0.15.tar.gz"
+    sha256: "4c20f22fbfbe4ad055f3d344581918d62cde72070b233dad75419a4334f82146"
   "0.14":
     url: "https://github.com/epezent/implot/archive/v0.14.tar.gz"
     sha256: "1613af3e6554c0a74de20c6e60e9bce5ce35c2d4f9e1aa5ff963f7fe2d48af88"

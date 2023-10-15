@@ -126,7 +126,7 @@ class OpenTelemetryCppConan(ConanFile):
             self.requires("thrift/0.17.0")
 
             if Version(self.version) >= "1.3.0":
-                self.requires("boost/1.81.0")
+                self.requires("boost/1.82.0")
 
     @property
     def _required_boost_components(self):
@@ -146,8 +146,9 @@ class OpenTelemetryCppConan(ConanFile):
         if self.options.get_safe("with_otlp_http") and not self.options.with_otlp:
             raise ConanInvalidConfiguration("Option 'with_otlp_http' requires 'with_otlp'")
 
-        if not self.dependencies["grpc"].options.cpp_plugin:
-            raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
+        if self.options.get_safe("with_otlp_grpc"):
+            if not self.dependencies["grpc"].options.cpp_plugin:
+                raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
 
         boost_required_comp = any(self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
                                        for boost_comp in self._required_boost_components)
@@ -159,8 +160,10 @@ class OpenTelemetryCppConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("protobuf/3.21.9")
-        self.tool_requires("grpc/1.50.1")
+        if self.options.with_otlp:
+            self.tool_requires("protobuf/3.21.9")
+            if self.options.get_safe("with_otlp_grpc"):
+                self.tool_requires("grpc/1.50.1")
 
     def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent("""\
@@ -440,6 +443,7 @@ class OpenTelemetryCppConan(ConanFile):
             self.options.with_elasticsearch
         ):
             self.cpp_info.components[self._http_client_name].requires.append("libcurl::libcurl")
+            self.cpp_info.components[self._http_client_name].requires.append("openssl::openssl")
 
         if self.options.get_safe("with_otlp_http"):
             self.cpp_info.components["opentelemetry_exporter_otlp_http_client"].requires.extend([
