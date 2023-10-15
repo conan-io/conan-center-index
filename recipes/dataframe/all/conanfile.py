@@ -13,13 +13,13 @@ required_conan_version = ">=1.53.0"
 
 class DataFrameConan(ConanFile):
     name = "dataframe"
-    license = "BSD-3-Clause"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/hosseinmoein/DataFrame"
     description = (
         "C++ DataFrame for statistical, Financial, and ML analysis -- in modern C++ "
         "using native types, continuous memory storage, and no pointers are involved"
     )
+    license = "BSD-3-Clause"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/hosseinmoein/DataFrame"
     topics = (
         "dataframe",
         "data-science",
@@ -37,7 +37,6 @@ class DataFrameConan(ConanFile):
         "financial-engineering",
         "large-data",
     )
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -72,8 +71,6 @@ class DataFrameConan(ConanFile):
             },
         }.get(self._min_cppstd, {})
 
-        return {}
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -94,12 +91,16 @@ class DataFrameConan(ConanFile):
 
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+
+        if Version(self.version) >= "2.2.0" and \
+            self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "13.0.0" and \
+            self.settings.compiler.libcxx == "libc++":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 13.0.0 with libc++.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
