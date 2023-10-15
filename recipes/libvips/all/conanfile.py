@@ -120,7 +120,7 @@ class LibvipsConan(ConanFile):
         if self.options.with_cfitsio:
             self.requires("cfitsio/4.2.0")
         if self.options.with_cgif:
-            self.requires("cgif/0.3.0")
+            self.requires("cgif/0.3.2")
         if self.options.with_exif:
             self.requires("libexif/0.6.24")
         if self.options.with_fftw:
@@ -128,7 +128,7 @@ class LibvipsConan(ConanFile):
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.14.2")
         if self.options.with_heif:
-            self.requires("libheif/1.13.0")
+            self.requires("libheif/1.16.2")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
