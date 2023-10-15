@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
+from conan.tools.apple import is_apple_os
 import os
 
 required_conan_version = ">=1.50.0"
@@ -12,11 +13,10 @@ required_conan_version = ">=1.50.0"
 class NumCppConan(ConanFile):
     name = "numcpp"
     description = "A Templatized Header Only C++ Implementation of the Python NumPy Library"
-    topics = ("python", "numpy", "numeric")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/dpilger26/NumCpp"
-    license = "MIT"
-
+    topics = ("python", "numpy", "numeric", "header-library")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -27,7 +27,6 @@ class NumCppConan(ConanFile):
         "with_boost" : True,
         "threads" : False,
     }
-
     no_copy_source = True
 
     @property
@@ -106,6 +105,9 @@ class NumCppConan(ConanFile):
             self.cpp_info.defines.append("NO_MULTITHREAD")
         if Version(self.version) >= "2.5.0" and self.options.threads:
             self.cpp_info.defines.append("NUMCPP_USE_MULTITHREAD")
+        # since 2.12.0, numcpp uses TRUE/FALSE symbol which are defined by macOS SDK
+        if Version(self.version) >= "2.12.0" and is_apple_os(self):
+            self.cpp_info.defines.append("NOBOOL")
 
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
