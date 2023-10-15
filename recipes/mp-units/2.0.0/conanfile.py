@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.59.0"
@@ -41,7 +42,8 @@ class MPUnitsConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        return {"gcc": "10.3", "clang": "12", "apple-clang": "13", "msvc": "192"}
+        # Note that apple-clang and msvc are disabled for now, their C++ 20 implementations are not up to speed
+        return {"gcc": "11", "clang": "16"}
 
     @property
     def _use_libfmt(self):
@@ -61,7 +63,7 @@ class MPUnitsConan(ConanFile):
         if self._use_libfmt:
             self.requires("fmt/10.1.0")
         if self._use_range_v3:
-            self.requires("range-v3/0.12.0")
+            self.requires("range-v3/0.11.0")
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
@@ -79,6 +81,11 @@ class MPUnitsConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires at least {compiler} {min_version} ({compiler.version} in use)"
             )
+        
+        # Note that apple-clang and msvc are disabled for now, their C++ 20 implementations are not up to speed
+        # Re-enable once newer versions with better support come out
+        if is_msvc(self) or compiler == "apple-clang":
+            raise ConanInvalidConfiguration(f"{self.ref} disabled for {compiler} as their C++20 implementation is not up to speed yet")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -88,7 +95,7 @@ class MPUnitsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["UNITS_USE_LIBFMT"] = self._use_libfmt
+        tc.variables["MP_UNITS_USE_LIBFMT"] = self._use_libfmt
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -127,29 +134,32 @@ class MPUnitsConan(ConanFile):
         self.cpp_info.components["core-fmt"].requires = ["core"]
         if self._use_libfmt:
             self.cpp_info.components["core-fmt"].requires.append("fmt::fmt")
+        self.cpp_info.components["utility"].requires = ["core", "isq", "si", "angular"]
         self.cpp_info.components["isq"].requires = ["core"]
-        self.cpp_info.components["isq-natural"].requires = ["isq"]
+        self.cpp_info.components["angular"].requires = ["isq"]
+        self.cpp_info.components["isq_angular"].requires = ["isq", "angular"]
+        self.cpp_info.components["natural"].requires = ["isq"]
         self.cpp_info.components["si"].requires = ["isq"]
-        self.cpp_info.components["si-cgs"].requires = ["si"]
-        self.cpp_info.components["si-fps"].requires = ["si-international"]
-        self.cpp_info.components["si-hep"].requires = ["si"]
-        self.cpp_info.components["si-iau"].requires = ["si"]
-        self.cpp_info.components["si-imperial"].requires = ["si"]
-        self.cpp_info.components["si-international"].requires = ["si"]
-        self.cpp_info.components["si-typographic"].requires = ["si"]
-        self.cpp_info.components["si-uscs"].requires = ["si"]
-        self.cpp_info.components["isq-iec80000"].requires = ["si"]
+        self.cpp_info.components["cgs"].requires = ["si"]
+        self.cpp_info.components["hep"].requires = ["si"]
+        self.cpp_info.components["iau"].requires = ["si"]
+        self.cpp_info.components["imperial"].requires = ["si"]
+        self.cpp_info.components["international"].requires = ["si"]
+        self.cpp_info.components["typographic"].requires = ["usc"]
+        self.cpp_info.components["usc"].requires = ["international"]
+        self.cpp_info.components["iec80000"].requires = ["isq", "si"]
         self.cpp_info.components["systems"].requires = [
             "isq",
-            "isq-natural",
+            "angular",
+            "isq_angular",
+            "natural",
             "si",
-            "si-cgs",
-            "si-fps",
-            "si-hep",
-            "si-iau",
-            "si-imperial",
-            "si-international",
-            "si-typographic",
-            "si-uscs",
-            "isq-iec80000",
+            "cgs",
+            "hep",
+            "iau",
+            "imperial",
+            "international",
+            "typographic",
+            "usc",
+            "iec80000",
         ]
