@@ -91,7 +91,7 @@ class ClipboardLiteConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.requires.extend(["xorg::xcb", "xorg::x11", "xorg::xfixes"])
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["m", "pthread"])
         elif is_apple_os(self):
             self.cpp_info.frameworks = ['Cocoa', 'Carbon', 'CoreFoundation', 'Foundation', 'AppKit']
         elif self.settings.os == "Windows":
