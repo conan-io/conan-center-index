@@ -11,8 +11,5 @@ int main(void) {
         })
         ->run();
 
-    std::string txt = "pasted text";
-    clipboard->copy(txt);
-
     return 0;
 }
