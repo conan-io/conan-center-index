@@ -16,6 +16,7 @@ class TupletConan(ConanFile):
     homepage = "https://github.com/codeinred/tuplet"
     description = "A fast, simple tuple implementation that implements tuple as an aggregate"
     topics = ("tuple", "trivially-copyable", "modern-cpp")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -41,6 +42,9 @@ class TupletConan(ConanFile):
             "apple-clang": "12"
         }
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def package_id(self):
         self.info.clear()
 
@@ -62,12 +66,8 @@ class TupletConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd} which your compiler ({compiler}-{version}) does not support")
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

@@ -1,4 +1,7 @@
 sources:
+  "1.0.1":
+    url: "https://github.com/eyalz800/zpp_throwing/archive/v1.0.1.tar.gz"
+    sha256: "c15651ad36f9ddcb51e6244b0a78dbdebf7be8748b3e7ffe1c7339f0e41fd411"
   "1.0":
     url: "https://github.com/eyalz800/zpp_throwing/archive/refs/tags/v1.0.tar.gz"
     sha256: "e02ef0e028e436ed4382b14796550f48c1d2b5ae02910f10b5b9fe097981ea2f"

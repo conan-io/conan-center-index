@@ -85,12 +85,16 @@ class OneTBBConan(ConanFile):
         if self._tbbbind_explicit_hwloc:
             self.options["hwloc"].shared = True
 
-    def requirements(self):
-        if self._tbbbind_build:
-            self.requires("hwloc/2.9.1")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        if self._tbbbind_build:
+            self.requires("hwloc/2.9.2")
+
+    def build_requirements(self):
+        if not self._tbbbind_explicit_hwloc and not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.5")
 
     def package_id(self):
         if Version(self.version) < "2021.5.0":
@@ -109,6 +113,8 @@ class OneTBBConan(ConanFile):
                     "Please consider fixing at least the aforementioned issue in upstream."
                 )
             self.output.warning("oneTBB strongly discourages usage of static linkage")
+
+    def validate(self):
         if self._tbbbind_explicit_hwloc and not self.dependencies["hwloc"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires hwloc:shared=True to be built.")
 
@@ -126,17 +132,21 @@ class OneTBBConan(ConanFile):
         if Version(self.version) >= "2021.6.0" and self.options.get_safe("tbbproxy"):
             toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.tbbproxy
         toolchain.variables["TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH"] = not self._tbbbind_build
+        if self._tbbbind_explicit_hwloc:
+            hwloc_package_folder = self.dependencies["hwloc"].package_folder
+            hwloc_lib_name = "hwloc.lib" if self.settings.os == "Windows" else "libhwloc.so"
+            toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_LIBRARY_PATH"] = \
+                os.path.join(hwloc_package_folder, "lib", hwloc_lib_name).replace("\\", "/")
+            toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_INCLUDE_PATH"] = \
+                os.path.join(hwloc_package_folder, "include").replace("\\", "/")
+            if self.settings.os == "Windows":
+                toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_DLL_PATH"] = \
+                    os.path.join(hwloc_package_folder, "bin", "hwloc.dll").replace("\\", "/")
+        toolchain.generate()
+
         if self._tbbbind_build:
             deps = PkgConfigDeps(self)
             deps.generate()
-        if self._tbbbind_explicit_hwloc:
-            hwloc_package_folder = self.dependencies["hwloc"].package_folder.replace("\\", "/")
-            hwloc_lib_name = "hwloc.lib" if self.settings.os == "Windows" else "libhwloc.so"
-            toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_LIBRARY_PATH"] = os.path.join(hwloc_package_folder, "lib", hwloc_lib_name)
-            toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_INCLUDE_PATH"] = os.path.join(hwloc_package_folder, "include")
-            if self.settings.os == "Windows":
-                toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_DLL_PATH"] = os.path.join(hwloc_package_folder, "bin", "hwloc.dll")
-        toolchain.generate()
 
     def build(self):
         apply_conandata_patches(self)

@@ -339,7 +339,7 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_pcre2:

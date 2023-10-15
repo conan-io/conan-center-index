@@ -67,9 +67,9 @@ class CBlosc2Conan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_zlib in ["zlib-ng", "zlib-ng-compat"]:
-            self.requires("zlib-ng/2.1.2")
+            self.requires("zlib-ng/2.1.3")
         elif self.options.with_zlib == "zlib":
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
 
@@ -132,6 +132,8 @@ class CBlosc2Conan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
 
         # Remove MS runtime files
         for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:

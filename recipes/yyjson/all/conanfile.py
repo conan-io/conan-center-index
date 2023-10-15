@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -18,15 +19,19 @@ class YyjsonConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_utf8_validation": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_utf8_validation": True,
     }
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "0.8.0":
+            del self.options.with_utf8_validation
 
     def configure(self):
         if self.options.shared:
@@ -42,6 +47,8 @@ class YyjsonConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) >= "0.8.0":
+            tc.variables["YYJSON_DISABLE_UTF8_VALIDATION"] = not bool(self.options.with_utf8_validation)
         tc.generate()
 
     def build(self):

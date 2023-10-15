@@ -1,4 +1,7 @@
 sources:
+  "5.15.128":
+    url: "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.128.tar.gz"
+    sha256: "4ce1331bb3877bc92581ec5faff76d63d19e7b1fa174acdda1f5cba4a8f2abf7"
   "5.14.9":
     url: "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.14.9.tar.gz"
     sha256: "b5cd37e6d193c8f6a98e41ce6f9d97260d178e0a3cfc43d7ff684f67c6c25f29"

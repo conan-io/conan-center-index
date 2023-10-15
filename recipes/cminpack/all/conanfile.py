@@ -1,9 +1,9 @@
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools import files
 from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=1.45.0"
+required_conan_version = ">=1.54.0"
 
 
 class CMinpackConan(ConanFile):
@@ -14,7 +14,7 @@ class CMinpackConan(ConanFile):
     topics = ("nonlinear", "solver")
     homepage = "http://devernay.free.fr/hacks/cminpack/"
     license = "LicenseRef-CopyrightMINPACK.txt"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,40 +25,27 @@ class CMinpackConan(ConanFile):
         "fPIC": True,
     }
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["BUILD_EXAMPLES"] = "OFF"
-        tc.variables["CMINPACK_LIB_INSTALL_DIR"] = "lib"
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-        tc.generate()
-
-    def layout(self):
-        cmake_layout(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
-        # cminpack is a c library
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_EXAMPLES"] = "OFF"
+        tc.variables["CMINPACK_LIB_INSTALL_DIR"] = "lib"
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -66,12 +53,11 @@ class CMinpackConan(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "CopyrightMINPACK.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-
-        files.rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        files.copy(self, "CopyrightMINPACK.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        files.rmdir(self, os.path.join(self.package_folder, "share")) # contains cmake config files
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share")) # contains cmake config files
 
     def _library_postfix(self):
         postfix = ""
@@ -92,7 +78,7 @@ class CMinpackConan(ConanFile):
         self.cpp_info.components["cminpack-double"].names["cmake_find_package"] = "cminpack"
         self.cpp_info.components["cminpack-double"].names["cmake_find_package_multi"] = "cminpack"
         self.cpp_info.components["cminpack-double"].names["pkg_config"] = "cminpack"
-        
+
         # the single precision version
         self.cpp_info.components['cminpack-single'].libs = ['cminpacks' + self._library_postfix()]
         self.cpp_info.components['cminpack-single'].includedirs.append(minpack_include_dir)
@@ -101,7 +87,6 @@ class CMinpackConan(ConanFile):
         self.cpp_info.components["cminpack-single"].names["cmake_find_package"] = "cminpacks"
         self.cpp_info.components["cminpack-single"].names["cmake_find_package_multi"] = "cminpacks"
         self.cpp_info.components["cminpack-single"].names["pkg_config"] = "cminpacks"
-
 
         if self.settings.os != "Windows":
             self.cpp_info.components['cminpack-double'].system_libs.append("m")

@@ -68,5 +68,15 @@ class EarcutPackage(ConanFile):
         copy(self, "LICENSE", self.source_folder,
              os.path.join(self.package_folder, "licenses"))
 
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "earcut_hpp")
+        self.cpp_info.set_property("cmake_target_name", "earcut_hpp::earcut_hpp")
+        
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "earcut_hpp"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "earcut_hpp"
+        self.cpp_info.names["cmake_find_package"] = "earcut_hpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "earcut_hpp"
+
     def package_id(self):
         self.info.clear()

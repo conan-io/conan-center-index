@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -9,11 +10,10 @@ required_conan_version = ">=1.53.0"
 class BrotliConan(ConanFile):
     name = "brotli"
     description = "Brotli compression format"
-    topics = ("brotli", "compression")
+    license = "MIT",
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/brotli"
-    license = "MIT",
-
+    topics = ("brotli", "compression")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -78,8 +78,9 @@ class BrotliConan(ConanFile):
             tc.preprocessor_definitions["BROTLI_DEBUG"] = 1
         if self.options.enable_log:
             tc.preprocessor_definitions["BROTLI_ENABLE_LOG"] = 1
-        # To install relocatable shared libs on Macos
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if Version(self.version) < "1.1.0":
+            # To install relocatable shared libs on Macos
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
     def build(self):
@@ -125,6 +126,6 @@ class BrotliConan(ConanFile):
 
     def _get_decorated_lib(self, name):
         libname = name
-        if not self.options.shared:
+        if Version(self.version) < "1.1.0" and not self.options.shared:
             libname += "-static"
         return libname

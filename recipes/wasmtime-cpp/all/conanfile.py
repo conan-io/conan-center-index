@@ -43,7 +43,7 @@ class WasmtimeCppConan(ConanFile):
             "0.39.0": "0.39.1",
             "1.0.0": "1.0.1",
             "6.0.0": "6.0.1",
-            "9.0.0": "9.0.1",
+            "9.0.0": "12.0.2",
         }
         self.requires(f"wasmtime/{version_map.get(version, version)}")
 

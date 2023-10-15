@@ -17,6 +17,7 @@ class PackageConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/CD3/libInterpolate"
     topics = ("math", "spline", "interpolation", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -28,12 +29,11 @@ class PackageConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
-            "msvc": "19.0",
+            "msvc": "191",
             "gcc": "7",
             "clang": "4",
             "apple-clang": "10",
         }
-
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -41,6 +41,9 @@ class PackageConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.80.0", transitive_headers=True)
         self.requires("eigen/3.3.7", transitive_headers=True)
+
+    def package_id(self):
+        self.info.clear()
 
     def validate(self):
         if Version(self.version) < "2.6.4" and self.settings.os != "Linux":
@@ -79,9 +82,6 @@ class PackageConan(ConanFile):
             dst=os.path.join(self.package_folder, "include"),
             src=os.path.join(self.source_folder, "src"),
         )
-
-    def package_id(self):
-        self.info.clear()
 
     def package_info(self):
         self.cpp_info.bindirs = []

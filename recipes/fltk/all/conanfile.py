@@ -64,7 +64,7 @@ class FltkConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("libjpeg/9e")
         self.requires("libpng/1.6.40")
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -111,22 +111,24 @@ class FltkConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "fltk::fltk")
         self.cpp_info.libs = collect_libs(self)
 
-        if self.options.shared and self.settings.os == "Windows":
-            self.cpp_info.defines.append("FL_DLL")
         if self.settings.os in ("Linux", "FreeBSD"):
             if self.options.with_threads:
                 self.cpp_info.system_libs.extend(["pthread", "dl"])
             if self.options.with_gl:
                 self.cpp_info.system_libs.extend(["GL", "GLU"])
-        if is_apple_os(self):
+        elif is_apple_os(self):
             self.cpp_info.frameworks = [
                 "AppKit", "ApplicationServices", "Carbon", "Cocoa", "CoreFoundation", "CoreGraphics",
                 "CoreText", "CoreVideo", "Foundation", "IOKit", "OpenGL",
             ]
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["gdi32", "imm32", "msimg32", "ole32", "oleaut32", "uuid"]
+        elif self.settings.os == "Windows":
+            if self.options.shared:
+                self.cpp_info.defines.append("FL_DLL")
+            self.cpp_info.system_libs = ["gdi32", "imm32", "msimg32", "ole32", "oleaut32", "uuid", "comctl32"]
             if self.options.get_safe("with_gdiplus"):
                 self.cpp_info.system_libs.append("gdiplus")
+            if self.options.with_gl:
+                self.cpp_info.system_libs.append("opengl32")
 
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.names["cmake_find_package"] = "fltk"

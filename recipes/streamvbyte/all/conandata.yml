@@ -6,4 +6,9 @@ patches:
   "1.0.0":
     - patch_file: "patches/1.0.0-0001-fix-cmake.patch"
       patch_description: "fix install destination"
-      patch_type: "conan"
+      patch_source: "https://github.com/lemire/streamvbyte/pull/67"
+      patch_type: "portability"
+    - patch_file: "patches/1.0.0-0002-relocatable-shared-macos.patch"
+      patch_description: "Relocatable shared lib for macOS"
+      patch_source: "https://github.com/lemire/streamvbyte/pull/66"
+      patch_type: "portability"

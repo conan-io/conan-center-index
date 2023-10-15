@@ -1,8 +1,8 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
@@ -105,6 +105,10 @@ class GdbmConan(ConanFile):
                 "--without-libiconv-prefix",
                 "--without-libintl-prefix"
             ])
+        if is_apple_os(self):
+            # Inject -headerpad_max_install_names, otherwise fix_apple_shared_install_name() may fail.
+            # See https://github.com/conan-io/conan-center-index/issues/20002
+            tc.extra_ldflags.append("-headerpad_max_install_names")
         tc.generate()
         autotools_deps = AutotoolsDeps(self)
         autotools_deps.generate()

@@ -53,18 +53,18 @@ class SerdeppConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nameof/0.10.1")
-        self.requires("magic_enum/0.7.3")
+        self.requires("nameof/0.10.3")
+        self.requires("magic_enum/0.9.3")
         if self.options.with_toml11:
-            self.requires("toml11/3.7.0")
+            self.requires("toml11/3.7.1")
         if self.options.with_yamlcpp:
-            self.requires("yaml-cpp/0.7.0")
+            self.requires("yaml-cpp/0.8.0")
         if self.options.with_rapidjson:
             self.requires("rapidjson/1.1.0")
         if self.options.with_fmt:
-            self.requires("fmt/8.1.1")
+            self.requires("fmt/10.1.0")
         if self.options.with_nlohmann_json:
-            self.requires("nlohmann_json/3.10.5")
+            self.requires("nlohmann_json/3.11.2")
 
     def package_id(self):
         self.info.clear()

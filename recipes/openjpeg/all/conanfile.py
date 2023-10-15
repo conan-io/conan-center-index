@@ -82,12 +82,30 @@ class OpenjpegConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", self._openjpeg_subdir))
-
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_vars_rel_path)
+        )
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
+            os.path.join(self.package_folder, self._module_target_rel_path),
             {"openjp2": "OpenJPEG::OpenJPEG"}
         )
+
+    def _create_cmake_module_variables(self, module_file):
+        content = textwrap.dedent(f"""\
+            set(OPENJPEG_FOUND TRUE)
+            if(DEFINED OpenJPEG_INCLUDE_DIRS)
+                set(OPENJPEG_INCLUDE_DIRS ${{OpenJPEG_INCLUDE_DIRS}})
+            endif()
+            if(DEFINED OpenJPEG_LIBRARIES)
+                set(OPENJPEG_LIBRARIES ${{OpenJPEG_LIBRARIES}})
+            endif()
+            set(OPENJPEG_MAJOR_VERSION "{Version(self.version).major}")
+            set(OPENJPEG_MINOR_VERSION "{Version(self.version).minor}")
+            set(OPENJPEG_BUILD_VERSION "{Version(self.version).patch}")
+            set(OPENJPEG_BUILD_SHARED_LIBS {"TRUE" if self.options.shared else "FALSE"})
+        """)
+        save(self, module_file, content)
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
@@ -101,7 +119,11 @@ class OpenjpegConan(ConanFile):
         save(self, module_file, content)
 
     @property
-    def _module_file_rel_path(self):
+    def _module_vars_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
+
+    @property
+    def _module_target_rel_path(self):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     @property
@@ -112,6 +134,7 @@ class OpenjpegConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenJPEG")
         self.cpp_info.set_property("cmake_target_name", "openjp2")
+        self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
         self.cpp_info.set_property("pkg_config_name", "libopenjp2")
         self.cpp_info.includedirs.append(os.path.join("include", self._openjpeg_subdir))
         self.cpp_info.libs = ["openjp2"]
@@ -125,6 +148,6 @@ class OpenjpegConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "OpenJPEG"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenJPEG"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_target_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_target_rel_path]
         self.cpp_info.names["pkg_config"] = "libopenjp2"

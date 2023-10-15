@@ -1,8 +1,8 @@
 diff --git a/gzguts.h b/gzguts.h
-index c78cb40..4e9ec4f 100644
+index 990a4d2..6378d46 100644
 --- a/gzguts.h
 +++ b/gzguts.h
-@@ -43,7 +43,7 @@
+@@ -39,7 +39,7 @@
  #  include <io.h>
  #endif
  

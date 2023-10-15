@@ -53,9 +53,9 @@ class LiunwindConan(ConanFile):
 
     def requirements(self):
         if self.options.minidebuginfo:
-            self.requires("xz_utils/5.4.2")
+            self.requires("xz_utils/5.4.4")
         if self.options.zlibdebuginfo:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:

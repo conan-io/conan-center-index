@@ -1,0 +1,4 @@
+sources:
+  "0.15.0":
+    url: "https://github.com/ngtcp2/nghttp3/releases/download/v0.15.0/nghttp3-0.15.0.tar.gz"
+    sha256: "3c56d9fa6f1b58b37bd7b1b53eaf16cd71118bc2d5cadbc904f09d6f6466b42f"

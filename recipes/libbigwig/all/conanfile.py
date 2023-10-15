@@ -45,11 +45,11 @@ class LibBigWigConan(ConanFile):
         if self.options.with_curl:
             # transitive_headers=True is required due to includes in bigWigIO.h
             # https://github.com/dpryan79/libBigWig/blob/master/bigWigIO.h#L5
-            self.requires("libcurl/8.1.2", transitive_headers=True)
+            self.requires("libcurl/8.2.1", transitive_headers=True)
         if self.options.with_zlibng:
             self.requires("zlib-ng/2.1.3")
         else:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.info.settings.os == "Windows":

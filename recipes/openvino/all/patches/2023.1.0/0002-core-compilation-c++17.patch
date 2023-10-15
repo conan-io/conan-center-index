@@ -1,0 +1,46 @@
+diff --git a/src/frontends/common/src/utils.cpp b/src/frontends/common/src/utils.cpp
+index 8ef7481551..3a0db585fd 100644
+--- a/src/frontends/common/src/utils.cpp
++++ b/src/frontends/common/src/utils.cpp
+@@ -12,10 +12,6 @@
+ #    include <dlfcn.h>
+ #    include <limits.h>
+ #    include <unistd.h>
+-#    ifdef OPENVINO_ENABLE_UNICODE_PATH_SUPPORT
+-#        include <codecvt>
+-#        include <locale>
+-#    endif
+ #else
+ #    if defined(WINAPI_FAMILY) && !WINAPI_PARTITION_DESKTOP
+ #        error "Only WINAPI_PARTITION_DESKTOP is supported, because of GetModuleHandleEx[A|W]"
+diff --git a/src/frontends/paddle/src/input_model.cpp b/src/frontends/paddle/src/input_model.cpp
+index 6987b3285e..287fa5e54a 100644
+--- a/src/frontends/paddle/src/input_model.cpp
++++ b/src/frontends/paddle/src/input_model.cpp
+@@ -13,14 +13,10 @@
+ #include "openvino/frontend/paddle/node_context.hpp"
+ #include "openvino/opsets/opset7.hpp"
+ #include "openvino/util/common_util.hpp"
++#include "openvino/util/file_util.hpp"
+ #include "paddle_utils.hpp"
+ #include "place.hpp"
+ 
+-#if defined(OPENVINO_ENABLE_UNICODE_PATH_SUPPORT) && defined(_WIN32)
+-#    include <codecvt>
+-#    include <locale>
+-#endif
+-
+ namespace ov {
+ namespace frontend {
+ namespace paddle {
+@@ -169,9 +165,7 @@ std::basic_string<T> get_const_path(const std::basic_string<T>& folder_with_weig
+ #if defined(OPENVINO_ENABLE_UNICODE_PATH_SUPPORT) && defined(_WIN32)
+ template <>
+ std::basic_string<wchar_t> get_const_path(const std::basic_string<wchar_t>& folder, const std::string& name) {
+-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+-    std::wstring _name = converter.from_bytes(name);
+-    return folder + paddle::get_path_sep<wchar_t>() + _name;
++    return folder + paddle::get_path_sep<wchar_t>() + ov::util::string_to_wstring(name);
+ }
+ #endif
+ 

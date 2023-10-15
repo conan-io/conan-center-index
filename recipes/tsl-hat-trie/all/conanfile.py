@@ -14,7 +14,7 @@ class TslHatTrieConan(ConanFile):
     topics = ("string", "trie", "structure", "hash map", "hash set")
     homepage = "https://github.com/Tessil/hat-trie"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
@@ -31,8 +31,7 @@ class TslHatTrieConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         rmdir(self, os.path.join(self.source_folder, "include", "tsl", "array-hash"))
@@ -48,7 +47,6 @@ class TslHatTrieConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "tsl::hat_trie")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "tsl-hat-trie"
@@ -61,4 +59,3 @@ class TslHatTrieConan(ConanFile):
         self.cpp_info.components["hat_trie"].set_property("cmake_target_name", "tsl::hat_trie")
         self.cpp_info.components["hat_trie"].bindirs = []
         self.cpp_info.components["hat_trie"].libdirs = []
-        self.cpp_info.components["hat_trie"].resdirs = []

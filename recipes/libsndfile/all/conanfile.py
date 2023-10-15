@@ -58,12 +58,12 @@ class LibsndfileConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_alsa"):
-            self.requires("libalsa/1.2.7.2")
+            self.requires("libalsa/1.2.10")
         if self.options.with_external_libs:
             self.requires("ogg/1.3.5")
             self.requires("vorbis/1.3.7")
             self.requires("flac/1.4.2")
-            self.requires("opus/1.3.1")
+            self.requires("opus/1.4")
         if self.options.get_safe("with_mpeg", False):
             self.requires("mpg123/1.31.2")
             self.requires("libmp3lame/3.100")

@@ -42,14 +42,14 @@ class CrowConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0")
+        self.requires("boost/1.83.0")
         if self.version == "0.2":
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
         if Version(self.version) >= "1.0":
             if self.options.with_ssl:
-                self.requires("openssl/1.1.1s")
+                self.requires("openssl/[>=1.1 <3]")
             if self.options.with_compression:
-                self.requires("zlib/1.2.13")
+                self.requires("zlib/[>=1.2.11 <2]")
 
     def package_id(self):
         self.info.settings.clear()
@@ -121,10 +121,13 @@ class CrowConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Crow")
         self.cpp_info.set_property("cmake_target_name", "Crow::Crow")
 
+        if Version(self.version) == "0.2":
+            self.cpp_info.requires.append("openssl::ssl")
+
         if Version(self.version) >= "1.0":
             if self.options.with_ssl:
                 self.cpp_info.defines.append("CROW_ENABLE_SSL")
-                self.cpp_info.requires.append("OpenSSL::ssl")
+                self.cpp_info.requires.append("openssl::ssl")
             if self.options.with_compression:
                 self.cpp_info.defines.append("CROW_ENABLE_COMPRESSION")
                 self.cpp_info.requires.append("zlib::zlib")

@@ -1,59 +1,73 @@
-from conans.errors import ConanInvalidConfiguration
-from conans import ConanFile, tools
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.52.0"
+
 
 class CTPGConan(ConanFile):
     name = "ctpg"
-    license = "MIT"
     description = (
         "Compile Time Parser Generator is a C++ single header library which takes a language description as a C++ code "
         "and turns it into a LR1 table parser with a deterministic finite automaton lexical analyzer, all in compile time."
     )
-    topics = ("regex", "parser", "grammar", "compile-time")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/peter-winter/ctpg"
-    settings = "compiler",
+    topics = ("regex", "parser", "grammar", "compile-time", "header-only")
+
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    _compiler_required_cpp17 = {
-        "Visual Studio": "16",
-        "gcc": "8",
-        "clang": "12",
-        "apple-clang": "12.0",
-    }
+    @property
+    def _min_cppstd(self):
+        return 17
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "8",
+            "clang": "12",
+            "apple-clang": "12.0",
+            "msvc": "192",
+            "Visual Studio": "16",
+        }
 
-    def validate(self):
-        ## TODO: In ctpg<=1.3.5, Visual Studio C++ failed to compile ctpg with "error MSB6006: "CL.exe" exited with code -1073741571."
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("{} does not support Visual Studio currently.".format(self.name))
-
-        if self.settings.get_safe("compiler.cppstd"):
-            tools.check_min_cppstd(self, "17")
-
-        minimum_version = self._compiler_required_cpp17.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
-        else:
-            self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy("LICENSE*", "licenses", self._source_subfolder)
-        if tools.Version(self.version) >= "1.3.7":
-            self.copy("ctpg.hpp",
-                os.path.join("include", "ctpg"), 
-                os.path.join(self._source_subfolder, "include", "ctpg"))
-        else:
-            self.copy("ctpg.hpp", "include", os.path.join(self._source_subfolder, "include"))
+        copy(self, "LICENSE*",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        include_dir = os.path.join("include", "ctpg")
+        copy(self, "ctpg.hpp",
+             dst=os.path.join(self.package_folder, include_dir),
+             src=os.path.join(self.source_folder, include_dir))
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

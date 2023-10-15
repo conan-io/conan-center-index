@@ -1,4 +1,5 @@
 #include <omp.h>
+
 #include <iostream>
 
 int main()
@@ -15,7 +16,7 @@ int main()
     }
     if(actual_number != num_threads){
         std::cout << "Something went wrong. Expecting " << num_threads << " threads but found " << actual_number << ".\n";
-        std::cout << "There are probably missing compiler flags.\n" ;
+        std::cout << "There are probably missing compiler flags.\n";
         return 1;
     }
     return 0;

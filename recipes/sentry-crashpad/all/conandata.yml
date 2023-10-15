@@ -14,3 +14,10 @@ sources:
   "0.4.18":
     url: "https://github.com/getsentry/sentry-native/releases/download/0.4.18/sentry-native.zip"
     sha256: "41fdf6499cd8576142beb03104badcc9e0b80b8ef27080ca71cd4408cc1d7ece"
+
+patches:
+  "0.6.5":
+    - patch_file: "patches/0.6.5-0001-fix-for-gcc13.patch"
+      patch_type: "backport"
+      patch_description: "Extra header required for gcc13"
+      patch_source: "https://chromium-review.googlesource.com/c/chromium/mini_chromium/+/4847514"

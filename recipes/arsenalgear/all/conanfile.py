@@ -57,7 +57,7 @@ class ArsenalgearConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) < "2.0.0":
-            self.requires("boost/1.82.0")
+            self.requires("boost/1.83.0")
             if self.settings.os in ["Linux", "Macos"]:
                 # exprtk is used in public header of arsenalgear
                 # https://github.com/JustWhit3/arsenalgear-cpp/blob/v1.2.2/include/math.hpp

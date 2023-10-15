@@ -1,0 +1,32 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6849ce40..e7c9fbee 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -854,14 +854,14 @@ IF(NOT OPENSSL_FOUND)
+   ENDIF(LIBMD_FOUND)
+ ENDIF(NOT OPENSSL_FOUND)
+ 
+-#
+ # How to prove that CRYPTO functions, which have several names on various
+ # platforms, just see if archive_digest.c can compile and link against
+ # required libraries.
+-#
+ MACRO(CHECK_CRYPTO ALGORITHMS IMPLEMENTATION)
++    include(CMakePushCheckState)
+     FOREACH(ALGORITHM ${ALGORITHMS})
+       IF(NOT ARCHIVE_CRYPTO_${ALGORITHM})
++      cmake_push_check_state()
+       STRING(TOLOWER "${ALGORITHM}" lower_algorithm)
+       STRING(TOUPPER "${ALGORITHM}" algorithm)
+       IF ("${IMPLEMENTATION}" MATCHES "^OPENSSL$" AND NOT OPENSSL_FOUND)
+@@ -881,8 +881,8 @@ MACRO(CHECK_CRYPTO ALGORITHMS IMPLEMENTATION)
+ 	IF ("${IMPLEMENTATION}" MATCHES "^OPENSSL$" AND OPENSSL_FOUND)
+ 	    SET(TRY_CRYPTO_REQUIRED_INCLUDES
+ 	      "${TRY_CRYPTO_REQUIRED_INCLUDES};${OPENSSL_INCLUDE_DIR}")
+-	    SET(TRY_CRYPTO_REQUIRED_LIBS
+-	        "-DLINK_LIBRARIES:STRING=${OPENSSL_LIBRARIES}")
++        SET(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
++
+ 	ELSEIF("${IMPLEMENTATION}" MATCHES "^MBEDTLS$" AND MBEDTLS_FOUND)
+ 	    SET(TRY_CRYPTO_REQUIRED_INCLUDES
+ 	      "${TRY_CRYPTO_REQUIRED_INCLUDES};${MBEDTLS_INCLUDE_DIRS}")

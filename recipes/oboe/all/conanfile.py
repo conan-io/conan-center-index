@@ -15,7 +15,7 @@ class OboeConan(ConanFile):
     topics = ("android", "audio")
     homepage = "https://github.com/google/oboe"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type",
     options = {
         "shared": [True, False],
@@ -33,14 +33,14 @@ class OboeConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def validate(self):
         if self.settings.os != "Android":
             raise ConanInvalidConfiguration("oboe supports Android only")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 17)
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

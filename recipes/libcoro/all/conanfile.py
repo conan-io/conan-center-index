@@ -22,11 +22,15 @@ class LibcoroConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_networking": [True, False],
+        "with_ssl": [True, False],
+        "with_threading": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_networking": True,
+        "with_ssl": True,
+        "with_threading": True,
     }
 
     @property
@@ -47,6 +51,9 @@ class LibcoroConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) < "0.8":
             del self.options.with_networking
+        if Version(self.version) < "0.9":
+            del self.options.with_ssl
+            del self.options.with_threading
 
     def configure(self):
         if self.options.shared:
@@ -56,7 +63,8 @@ class LibcoroConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
+        if "with_ssl" not in self.options or self.options.with_ssl:
+            self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
         self.requires("c-ares/1.19.1", transitive_headers=True)
         self.requires("tl-expected/1.1.0", transitive_headers=True)
 
@@ -84,6 +92,9 @@ class LibcoroConan(ConanFile):
         if Version(self.version) >= "0.8":
             tc.variables["LIBCORO_EXTERNAL_DEPENDENCIES"] = True
             tc.variables["LIBCORO_FEATURE_NETWORKING"] = self.options.with_networking
+        if Version(self.version) >= "0.9":
+            tc.variables["LIBCORO_FEATURE_THREADING"] = self.options.with_threading
+            tc.variables["LIBCORO_FEATURE_SSL"] = self.options.with_ssl
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -108,4 +119,12 @@ class LibcoroConan(ConanFile):
         else:
             self.cpp_info.libs = ["libcoro"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread", "m"]
+
+        if Version(self.version) >= "0.9":
+            if self.options.with_networking:
+                self.cpp_info.defines.append("LIBCORO_FEATURE_NETWORKING")
+            if self.options.with_ssl:
+                self.cpp_info.defines.append("LIBCORO_FEATURE_SSL")
+            if self.options.with_threading:
+                self.cpp_info.defines.append("LIBCORO_FEATURE_THREADING")

@@ -1,4 +1,10 @@
 sources:
+  "1.57.0":
+    url: "https://github.com/nghttp2/nghttp2/archive/v1.57.0.tar.gz"
+    sha256: "3c0b4e023dddf2afa087aa4409f7dbe03c099b4c63655e7545a607035085848a"
+  "1.56.0":
+    url: "https://github.com/nghttp2/nghttp2/archive/v1.56.0.tar.gz"
+    sha256: "63dd705b524eec3c843b8e4e24914600a30c2804a113e8e5baeeb9695d09590a"
   "1.55.1":
     url: "https://github.com/nghttp2/nghttp2/archive/v1.55.1.tar.gz"
     sha256: "b89dece5bc3382b82c22db8dc8d1e062258cb7af8e4ad55278fa7149645a588d"
@@ -23,22 +29,10 @@ sources:
   "1.48.0":
     url: "https://github.com/nghttp2/nghttp2/releases/download/v1.48.0/nghttp2-1.48.0.tar.xz"
     sha256: "47d8f30ee4f1bc621566d10362ca1b3ac83a335c63da7144947c806772d016e4"
-  "1.47.0":
-    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.47.0/nghttp2-1.47.0.tar.xz"
-    sha256: "68271951324554c34501b85190f22f2221056db69f493afc3bbac8e7be21e7cc"
-  "1.46.0":
-    url: "https://github.com/nghttp2/nghttp2/releases/download/v1.46.0/nghttp2-1.46.0.tar.xz"
-    sha256: "1a68cc4a5732afb735baf50aaac3cb3a6771e49f744bd5db6c49ab5042f12a43"
 patches:
   "1.49.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
     - patch_file: "patches/fix-findLibevent.cmake"
   "1.48.0":
-    - patch_file: "patches/fix-findJemalloc.cmake"
-    - patch_file: "patches/fix-findLibevent.cmake"
-  "1.47.0":
-    - patch_file: "patches/fix-findJemalloc.cmake"
-    - patch_file: "patches/fix-findLibevent.cmake"
-  "1.46.0":
     - patch_file: "patches/fix-findJemalloc.cmake"
     - patch_file: "patches/fix-findLibevent.cmake"

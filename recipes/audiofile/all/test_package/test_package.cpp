@@ -1,3 +1,6 @@
+// workaround for a missing include in v1.0.9 and earlier
+#include <limits>
+
 #include <AudioFile.h>
 
 #include <iostream>

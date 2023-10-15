@@ -16,7 +16,7 @@ class TaoCPPTaopqConan(ConanFile):
     homepage = "https://github.com/taocpp/taopq"
     description = "C++ client library for PostgreSQL"
     topics = ("cpp17", "postgresql", "libpq", "data-base", "sql")
-
+    package_type = "library"
     settings = "os", "arch", "build_type", "compiler"
     options = {
         "shared": [True, False],
@@ -53,7 +53,8 @@ class TaoCPPTaopqConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libpq/14.5")
+        # libpq-fe.h is included by many public headers of taocpp-taopq, and also uses some symbols of the lib (see https://github.com/conan-io/conan-center-index/pull/19825#issuecomment-1720996359)
+        self.requires("libpq/15.4", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):

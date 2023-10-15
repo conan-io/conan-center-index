@@ -16,8 +16,9 @@ class LibwebsocketsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/warmcat/libwebsockets"
     license = "MIT"
-    topics = ("libwebsockets", "websocket")
+    topics = ("websocket")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -212,7 +213,7 @@ class LibwebsocketsConan(ConanFile):
             self.requires("libev/4.33")
 
         if self.options.with_zlib == "zlib":
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         elif self.options.with_zlib == "miniz":
             self.requires("miniz/2.2.0")
 
@@ -224,7 +225,7 @@ class LibwebsocketsConan(ConanFile):
 
         if self.options.with_ssl == "openssl":
             # Cannot add the [>=1.1 <4] range, as it seems openssl3 makes it fail
-            self.requires("openssl/1.1.1t", transitive_headers=True)
+            self.requires("openssl/1.1.1w", transitive_headers=True)
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/2.25.0")
         elif self.options.with_ssl == "wolfssl":
@@ -270,7 +271,7 @@ class LibwebsocketsConan(ConanFile):
 
     def _find_library(self, libname, dep):
         prefix = "lib" if self.settings.os != "Windows" else ""
-        for path in self.dependencies[dep].cpp_info.libdirs:  
+        for path in self.dependencies[dep].cpp_info.libdirs:
             lib_fullpath = os.path.join(path, prefix + libname + self._get_library_extension(dep))
             self.output.info("Dependency library full path : " + str(lib_fullpath))
             if os.path.isfile(lib_fullpath):
@@ -426,13 +427,13 @@ class LibwebsocketsConan(ConanFile):
 
     def _patch_sources(self):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        replace_in_file(self, 
+        replace_in_file(self,
             cmakelists,
             "SET(CMAKE_INSTALL_NAME_DIR \"${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}${LIB_SUFFIX}\")",
             "",
         )
         if Version(self.version) == "4.0.15" and self.options.with_ssl:
-            replace_in_file(self, 
+            replace_in_file(self,
                 cmakelists,
                 "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib)",
                 "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib crypt32.lib)"
