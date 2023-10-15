@@ -70,8 +70,9 @@ class FltkConan(ConanFile):
         self.requires("libjpeg/9e")
         self.requires("libpng/1.6.40")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("opengl/system")
-            self.requires("glu/system")
+            if self.options.with_gl:
+                self.requires("opengl/system")
+                self.requires("glu/system")
             self.requires("fontconfig/2.14.2")
             self.requires("xorg/system")
             if self.options.with_xft:
@@ -124,8 +125,10 @@ class FltkConan(ConanFile):
         elif is_apple_os(self):
             self.cpp_info.frameworks = [
                 "AppKit", "ApplicationServices", "Carbon", "Cocoa", "CoreFoundation", "CoreGraphics",
-                "CoreText", "CoreVideo", "Foundation", "IOKit", "OpenGL",
+                "CoreText", "CoreVideo", "Foundation", "IOKit",
             ]
+            if self.options.with_gl:
+                self.cpp_info.frameworks.append("OpenGL")
         elif self.settings.os == "Windows":
             if self.options.shared:
                 self.cpp_info.defines.append("FL_DLL")
