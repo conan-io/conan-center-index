@@ -83,6 +83,13 @@ class NumCppConan(ConanFile):
                 f"{self.ref} doesn't support clang<12 with libstdc++11 due to filesystem library.",
             )
 
+        # since 2.12.0, numcpp uses TRUE/FALSE symbol which are defined by macOSX SDK
+        # https://github.com/dpilger26/NumCpp/issues/204
+        if Version(self.version) == "2.12.0" and self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} doesn't support apple-clang by defining TRUE/FALSE symbols",
+            )
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -105,9 +112,6 @@ class NumCppConan(ConanFile):
             self.cpp_info.defines.append("NO_MULTITHREAD")
         if Version(self.version) >= "2.5.0" and self.options.threads:
             self.cpp_info.defines.append("NUMCPP_USE_MULTITHREAD")
-        # since 2.12.0, numcpp uses TRUE/FALSE symbol which are defined by macOS SDK
-        if Version(self.version) >= "2.12.0" and is_apple_os(self):
-            self.cpp_info.defines.append("NOBOOL")
 
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
