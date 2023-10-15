@@ -247,9 +247,10 @@ class Llvm(ConanFile):
 
         if self.options.conan_center_index_limits:
             # XXX conandata.yml is reduced in cci ci to exactly one version so we can't look it up
-            if not str(self.version) in ['13.0.1', '14.0.6', '15.0.7', '16.0.6', '17.0.2']:
+            # 14 needed for a follow up pr, 16 and 17 are identical in requirements
+            if not str(self.version) in ['14.0.6', '17.0.2']:
                 raise ConanInvalidConfiguration(
-                    "llvm version is disabled for conan center index ci because its not the latest patch level in the configuration without the ci would run for multiple days. You can enable it with option conan_center_index_limits=False.")
+                    "llvm version is disabled for conan center index ci. We have a tight ci budget for such a huge recipe. You can enable it with option conan_center_index_limits=False.")
             if self.settings.build_type == "Debug":
                 raise ConanInvalidConfiguration(
                     "LLVM Debug builds are disabled as a workaround of conan center index ci memory limits. You can enable it with option conan_center_index_limits=False.")
