@@ -1,0 +1,4 @@
+sources:
+  "3.4":
+    url: "https://github.com/smasherprog/clipboard_lite/archive/refs/tags/3.4.tar.gz"
+    sha256: "d8206c9c97381645b1a5a6662414d199f46fb4e160d0f914774ed8dcc0369cc4"
