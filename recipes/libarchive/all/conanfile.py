@@ -107,7 +107,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.get_safe("with_mbedtls"):
-            self.requires("mbedtls/3.4.1")
+            self.requires("mbedtls/3.5.0")
 
     def validate(self):
         if self.settings.os != "Windows" and self.options.with_cng:
