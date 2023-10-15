@@ -330,8 +330,9 @@ class LibcurlConan(ConanFile):
             return
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # TODO: check this patch, it's suspicious
-        replace_in_file(self, cmakelists,
-                              "include(CurlSymbolHiding)", "")
+        if Version(self.version) < "8.4.0":
+            replace_in_file(self, cmakelists,
+                                "include(CurlSymbolHiding)", "")
 
         # brotli
         if Version(self.version) < "8.2.0":
