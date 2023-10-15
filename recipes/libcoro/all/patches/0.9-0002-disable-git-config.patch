@@ -1,0 +1,21 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ef0eea4..4c342e3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,11 +12,11 @@ if (NOT "$ENV{version}" STREQUAL "")
+ endif()
+ 
+ # Set the githooks directory to auto format and update the readme.
+-message("${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR} -> git config --local core.hooksPath .githooks")
+-execute_process(
+-    COMMAND git config --local core.hooksPath .githooks
+-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-)
++#message("${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR} -> git config --local core.hooksPath .githooks")
++#execute_process(
++#    COMMAND git config --local core.hooksPath .githooks
++#    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
++#)
+ 
+ option(LIBCORO_EXTERNAL_DEPENDENCIES "Use Cmake find_package to resolve dependencies instead of embedded libraries, Default=OFF." OFF)
+ option(LIBCORO_BUILD_TESTS           "Build the tests, Default=ON." ON)
