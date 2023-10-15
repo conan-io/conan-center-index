@@ -17,6 +17,7 @@ class QCustomPlotConan(ConanFile):
     homepage = "https://www.qcustomplot.com"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -45,9 +46,9 @@ class QCustomPlotConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= "2.0.0":
-            self.requires("qt/6.4.1")
+            self.requires("qt/6.6.0")
         else:
-            self.requires("qt/5.15.7")
+            self.requires("qt/5.15.11")
         if self.options.with_opengl and self.settings.os == "Windows":
             self.requires("opengl/system")
 
@@ -64,8 +65,7 @@ class QCustomPlotConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
