@@ -242,6 +242,14 @@ class MesaConan(ConanFile):
         return self.settings.os in ["Linux", "FreeBSD"]
 
     @property
+    def _has_shader_cache_option(self):
+        return self.settings.os != "Windows"
+
+    @property
+    def _default_egl_option(self):
+        return self.settings.os != "Windows"
+
+    @property
     def _default_egl_native_platform_option(self):
         if self.settings.os == "Android":
             return "android"
@@ -337,6 +345,8 @@ class MesaConan(ConanFile):
             self.options.rm_safe("with_libudev")
         if not self._has_with_libunwind_option:
             self.options.rm_safe("with_libunwind")
+        if not self._has_shader_cache_option:
+            self.options.rm_safe("shader_cache")
 
         if not self._has_platforms_android_option:
             self.options.rm_safe("platforms_android")
@@ -349,6 +359,7 @@ class MesaConan(ConanFile):
         if not self._has_platforms_x11_option:
             self.options.rm_safe("platforms_x11")
 
+        self.options.egl = self._default_egl_option
         self.options.egl_native_platform = self._default_egl_native_platform_option
 
         self.options.gallium_drivers_asahi = self._default_gallium_driver_option("asahi")
@@ -394,6 +405,7 @@ class MesaConan(ConanFile):
 
     def configure(self):
         if not self.options.shared_glapi:
+            self.options.rm_safe("egl")
             self.options.rm_safe("gles1")
             self.options.rm_safe("gles2")
 
@@ -472,6 +484,9 @@ class MesaConan(ConanFile):
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, 11)
+
+        if self.options.get_safe("egl") and not self.options.get_safe("shared_glapi"):
+            raise ConanInvalidConfiguration("The egl option requires the the shared_glapi option to be enabled")
 
         if self.options.get_safe("egl") and self.options.get_safe("with_libglvnd") and not self.dependencies["libglvnd"].options.egl:
             raise ConanInvalidConfiguration("The egl option requires the egl option of libglvnd to be enabled")
