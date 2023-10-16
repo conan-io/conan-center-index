@@ -1,8 +1,6 @@
 import os
-import shutil
 
 from conan import ConanFile
-from conan.errors import ConanException
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake
 
@@ -27,8 +25,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not shutil.which("flatcc"):
-            raise ConanException("flatcc executable not found on PATH")
         if can_run(self):
             self.run("flatcc --version")
             bin_path = os.path.join(self.cpp.build.bindir, "monster")
