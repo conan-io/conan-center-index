@@ -55,6 +55,7 @@ class MesaConan(ConanFile):
         "gallium_omx": [False, 'bellagio', 'tizonia'],
         "gallium_va": [True, False],
         "gallium_vdpau": [True, False],
+        "gallium_windows_dll_name": ["ANY"],
         "gallium_xa": [True, False],
         "gbm": [True, False],
         "gles1": [True, False],
@@ -112,6 +113,7 @@ class MesaConan(ConanFile):
         "gallium_omx": False,
         "gallium_va": False,
         "gallium_vdpau": False,
+        "gallium_windows_dll_name": "libgallium_wgl",
         "gallium_xa": False,
         "gbm": True,
         "gles1": True,
@@ -356,6 +358,9 @@ class MesaConan(ConanFile):
         if not self._has_xmlconfig_option:
             self.options.rm_safe("xmlconfig")
 
+        if self.settings.os != "Windows":
+            self.options.rm_safe("gallium_windows_dll_name")
+
         if not self._has_platforms_android_option:
             self.options.rm_safe("platforms_android")
         if not self._has_platforms_haiku_option:
@@ -580,12 +585,14 @@ class MesaConan(ConanFile):
         tc.project_options["gallium-omx"] = "disabled" if not self.options.get_safe("gallium_omx") else str(self.options.get_safe("gallium_omx"))
         tc.project_options["gallium-va"] = "enabled" if self.options.get_safe("gallium_va") else "disabled"
         tc.project_options["gallium-vdpau"] = "enabled" if self.options.get_safe("gallium_vdpau") else "disabled"
+        tc.project_options["gallium-windows-dll-name"] = self.options.get_safe("gallium_windows_dll_name", default="libgallium_wgl")
         tc.project_options["gallium-xa"] = "enabled" if self.options.get_safe("gallium_xa") else "disabled"
         tc.project_options["gbm"] = "enabled" if self.options.get_safe("gbm") else "disabled"
         tc.project_options["gles1"] = "enabled" if self.options.get_safe("gles1") else "disabled"
         tc.project_options["gles2"] = "enabled" if self.options.get_safe("gles2") else "disabled"
         if self.options.get_safe("with_libglvnd"):
             tc.project_options["glvnd"] = self.options.get_safe("with_libglvnd", default=False)
+        tc.project_options["glvnd-vendor-name"] = self.options.get_safe("glvnd_vendor_name", default="mesa")
         tc.project_options["glx"] = "disabled" if not self.options.get_safe("glx") else str(self.options.get_safe("glx"))
         tc.project_options["glx-direct"] = self.options.get_safe("glx_direct", default=True)
         tc.project_options["imagination-srv"] = self.options.get_safe("imagination_srv", default=False)
@@ -675,7 +682,10 @@ class MesaConan(ConanFile):
             "pkg_config_custom_content",
             "\n".join(f"{key}={value}" for key,value in dri_pkg_config_variables.items()))
         if self.settings.os == "Windows":
+            self.cpp_info.components["gallium_wgl"].libs = [str(self.options.gallium_windows_dll_name)]
+            self.cpp_info.components["gallium_wgl"].system_libs.append("ws2_32")
             self.cpp_info.components["opengl32"].libs = ["opengl32"]
+            self.cpp_info.components["opengl32"].requires = ["gallium_wgl"]
             self.cpp_info.components["opengl32"].system_libs.append("opengl32")
         if self.options.get_safe("egl"):
             self.cpp_info.components["egl"].libs = ["EGL_mesa"]
@@ -694,8 +704,6 @@ class MesaConan(ConanFile):
             self.cpp_info.components["gbm"].set_property(
                 "pkg_config_custom_content",
                 "\n".join(f"{key}={value}" for key,value in gbm_pkg_config_variables.items()))
-        if self.options.get_safe("shared_glapi"):
-            self.cpp_info.components["glapi"].libs = ["glapi"]
         if self.options.get_safe("glx"):
             self.cpp_info.components["glx"].libs = ["GLX_mesa"]
             if self.options.get_safe("with_libglvnd"):
@@ -711,6 +719,8 @@ class MesaConan(ConanFile):
                 self.cpp_info.components["gl"].system_libs.extend(["m", "pthread"])
             if self.settings.os == "Windows":
                 self.cpp_info.components["gl"].system_libs.extend(["gdi32", "opengl32"])
+        if self.options.get_safe("shared_glapi"):
+            self.cpp_info.components["glapi"].libs = ["glapi"]
         if self.options.get_safe("osmesa"):
             self.cpp_info.components["osmesa"].libs = ["OSMesa"]
             self.cpp_info.components["osmesa"].set_property("pkg_config_name", "osmesa")
