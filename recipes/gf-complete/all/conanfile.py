@@ -108,9 +108,7 @@ class GfCompleteConan(ConanFile):
             env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
-        if is_msvc(self):
-            tc.extra_cxxflags.append("-FS")
-        elif "x86" in self.settings.arch:
+        if not is_msvc(self) and "x86" in self.settings.arch:
             tc.extra_cxxflags.append("-mstackrealign")
         yes_no = lambda v: "yes" if v else "no"
         if "arm" in self.settings.arch:
@@ -131,8 +129,8 @@ class GfCompleteConan(ConanFile):
             automake_conf = self.dependencies.build["automake"].conf_info
             compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
             ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
-            env.define("CC", f"{compile_wrapper} cl -nologo")
-            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("CC", f"{compile_wrapper} cl -nologo /FS")
+            env.define("CXX", f"{compile_wrapper} cl -nologo /FS")
             env.define("LD", "link -nologo")
             env.define("AR", f'{ar_wrapper} "lib -nologo"')
             env.define("NM", "dumpbin -symbols")
