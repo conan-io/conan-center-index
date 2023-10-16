@@ -97,10 +97,13 @@ class DataFrameConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if Version(self.version) >= "2.2.0" and \
-            self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "13.0.0" and \
-            self.settings.compiler.libcxx == "libc++":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 13.0.0 with libc++.")
+        if Version(self.version) >= "2.2.0":
+            if (self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "13.0.0" and \
+                self.settings.compiler.libcxx == "libc++"):
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 13.0.0 with libc++.")
+            if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14.0.0":
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support apple-clang < 14.0.0.")
+
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
