@@ -216,7 +216,7 @@ class NCursesConan(ConanFile):
         save(ConanFile, module_file, textwrap.dedent("""\
             set(CURSES_FOUND ON)
             get_target_property(CURSES_INCLUDE_DIRS  ncurses::libcurses INTERFACE_INCLUDE_DIRECTORIES)
-            get_target_property(CURSES_LIBRARIES     ncurses::libcurses INTERFACE_LINK_LIBRARIES)
+            set(CURSES_LIBRARIES     ncurses::libcurses)
             get_target_property(_curses_compile_opts ncurses::libcurses INTERFACE_COMPILE_OPTIONS)
             get_target_property(_curses_compile_defs ncurses::libcurses INTERFACE_COMPILE_DEFINITIONS)
             set(CURSES_CFLAGS ${_curses_compile_opts} ${_curses_compile_defs})
