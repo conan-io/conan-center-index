@@ -85,7 +85,7 @@ class NCursesConan(ConanFile):
                 self.requires("naive-tsearch/0.1.1")
 
     def validate(self):
-        if cross_building(self) and ("arm" in self.settings.arch or "arm" in self._settings_build.arch):
+        if cross_building(self) and ("arm" in str(self.settings.arch) or "arm" in str(self._settings_build.arch)):
             # FIXME: Cannot build ncurses from x86_64 to armv8 (Apple M1).  Cross building from Linux/x86_64 to Mingw/x86_64 works flawless.
             # FIXME: Need access to environment of build profile to set build compiler (BUILD_CC/CC_FOR_BUILD)
             raise ConanInvalidConfiguration("Cross building to/from arm is (currently) not supported")
