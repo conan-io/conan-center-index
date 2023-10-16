@@ -108,6 +108,11 @@ class LiefConan(ConanFile):
         if self.settings.compiler.get_safe("libcxx") == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} does not support libstdc++")
 
+        # FIXME: Visual 2022 does has a bug: developercommunity.visualstudio.com/t/Internal-compiler-error-compiler-file-m/10376323
+        # fatal  error C1001: Internal compiler error. [C:\J2\w\prod-v2\bsr\14710\ccfaa\p\b\lief70856170ca89f\b\build\LIB_LIEF.vcxproj]
+        if is_msvc(self) and self.settings.compiler.version in ["17", "193"]:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built by Visual Studio 2022 due internal compiler error. See developercommunity.visualstudio.com/t/Internal-compiler-error-compiler-file-m/10376323")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
