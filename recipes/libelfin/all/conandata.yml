@@ -7,3 +7,4 @@ patches:
     - patch_file: "patches/commit-9d0db16d0a0b3c4f8aaa60a3e4dab295df34b6b2.patch"
     - patch_file: "patches/const-fix.patch"
       patch_source: "https://github.com/aclements/libelfin/pull/54"
+      patch_type: "bugfix"

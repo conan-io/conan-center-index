@@ -56,10 +56,14 @@ class LibelfinConan(ConanFile):
         tc.variables["libelfin_VERSION"] = self.version
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        copy(self, "CMakeLists.txt", src=self.export_sources_folder, dst=self.source_folder)
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.export_sources_folder)
+        cmake.configure()
         cmake.build()
 
     def package(self):

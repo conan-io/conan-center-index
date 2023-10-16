@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(PythonInterp 3 REQUIRED)
 
-set(src ${CMAKE_CURRENT_LIST_DIR}/src)
+set(src ${CMAKE_CURRENT_LIST_DIR})
 
 file(GLOB_RECURSE elf_sources ${src}/elf/*.cc)
 set(elf_headers
