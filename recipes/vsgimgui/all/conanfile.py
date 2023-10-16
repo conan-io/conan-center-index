@@ -53,7 +53,7 @@ class VsgImGuiConan(ConanFile):
        
     def requirements(self):
         self.requires("vulkan-loader/1.3.239.0", transitive_headers=True)
-        self.requires("vsg/[>1.0.5]")
+        self.requires("vsg/1.0.5")
         self.requires("imgui/1.89.5")
         self.requires("implot/0.14")
         #self.requires("vsgxchange/1.0.2")
