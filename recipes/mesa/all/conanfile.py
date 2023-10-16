@@ -672,10 +672,16 @@ class MesaConan(ConanFile):
         self.cpp_info.components["dri"].set_property(
             "pkg_config_custom_content",
             "\n".join(f"{key}={value}" for key,value in dri_pkg_config_variables.items()))
+        if self.options.get_safe("opengl"): # todo? and not self.options.get_safe("shared_glapi"):
+            self.cpp_info.components["opengl"].libs = ["opengl"]
+            if self.settings.os == "Windows":
+                self.cpp_info.components["opengl"].system_libs.append("opengl32")
         if self.options.get_safe("egl"):
             self.cpp_info.components["egl"].libs = ["EGL_mesa"]
             if self.options.get_safe("with_libglvnd"):
                 self.cpp_info.components["egl"].requires.append("libglvnd::egl")
+            if self.settings.os == "Windows":
+                self.cpp_info.components["egl"].system_libs.append("opengl32")
         if self.options.get_safe("gbm"):
             self.cpp_info.components["gbm"].libs = ["gbm"]
             self.cpp_info.components["gbm"].set_property("pkg_config_name", "gbm")
@@ -687,7 +693,8 @@ class MesaConan(ConanFile):
             self.cpp_info.components["gbm"].set_property(
                 "pkg_config_custom_content",
                 "\n".join(f"{key}={value}" for key,value in gbm_pkg_config_variables.items()))
-        self.cpp_info.components["glapi"].libs = ["glapi"]
+        if self.options.get_safe("shared_glapi"):
+            self.cpp_info.components["glapi"].libs = ["glapi"]
         if self.options.get_safe("glx"):
             self.cpp_info.components["glx"].libs = ["GLX_mesa"]
             if self.options.get_safe("with_libglvnd"):
