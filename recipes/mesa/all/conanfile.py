@@ -656,12 +656,14 @@ class MesaConan(ConanFile):
     def package_info(self):
         if self.options.get_safe("gallium_drivers_d3d12"):
             self.cpp_info.components["d3d"].set_property("pkg_config_name", "d3d")
-            self.cpp_info.components["d3d"].requires = "libdrm::libdrm"
+            if self._with_libdrm:
+                self.cpp_info.components["d3d"].requires.append("libdrm::libdrm")
             # todo define pkg-config custom content for the `moduledir` variable
             # todo How to determine this?
             # self.cpp_info.components["d3d"].set_property("component_version", "1.0.0")
         self.cpp_info.components["dri"].set_property("pkg_config_name", "dri")
-        self.cpp_info.components["dri"].requires = ["libdrm::libdrm"]
+        if self._with_libdrm:
+            self.cpp_info.components["dri"].requires.append("libdrm::libdrm")
         self.cpp_info.components["dri"].set_property("component_version", self.version)
         dri_pkg_config_variables = {
             # Can't use libdir here as it is libdir1 when using the PkgConfigDeps generator.
@@ -672,7 +674,8 @@ class MesaConan(ConanFile):
             "\n".join(f"{key}={value}" for key,value in dri_pkg_config_variables.items()))
         if self.options.get_safe("egl"):
             self.cpp_info.components["egl"].libs = ["EGL_mesa"]
-            self.cpp_info.components["egl"].requires = ["libglvnd::egl"]
+            if self.options.get_safe("with_libglvnd"):
+                self.cpp_info.components["egl"].requires.append("libglvnd::egl")
         if self.options.get_safe("gbm"):
             self.cpp_info.components["gbm"].libs = ["gbm"]
             self.cpp_info.components["gbm"].set_property("pkg_config_name", "gbm")
@@ -687,7 +690,8 @@ class MesaConan(ConanFile):
         self.cpp_info.components["glapi"].libs = ["glapi"]
         if self.options.get_safe("glx"):
             self.cpp_info.components["glx"].libs = ["GLX_mesa"]
-            self.cpp_info.components["glx"].requires = ["libglvnd::glx"]
+            if self.options.get_safe("with_libglvnd"):
+                self.cpp_info.components["glx"].requires.append("libglvnd::glx")
         if self.options.get_safe("osmesa"):
             self.cpp_info.components["osmesa"].libs = ["OSMesa"]
             self.cpp_info.components["osmesa"].set_property("pkg_config_name", "osmesa")
