@@ -11,13 +11,8 @@ sources:
   "1.0.8":
     url: "https://github.com/vsg-dev/VulkanSceneGraph/archive/refs/tags/v1.0.8.tar.gz"
     sha256: "0017cbb1c06b6c62c3ca2a222f083aecbc4ef0b6fc9b9e173cb8d3f005d13e62"
-  "1.0.9":
-    url: "https://github.com/vsg-dev/VulkanSceneGraph/archive/v1.0.9.tar.gz"
-    sha256: "9a62be7facc13c391c33dc8356b147a3b86f531ea72a28f6b2c364777e761412"
 patches:
   "1.0.5":
     - patch_file: "patches/0002-glslang-dependency.patch"
-  "1.0.8":
-    - patch_file: "patches/0001-glslang-dependency.patch"
   "1.0.8":
     - patch_file: "patches/0001-glslang-dependency.patch"
