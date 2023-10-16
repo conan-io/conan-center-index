@@ -149,7 +149,7 @@ class SDLConan(ConanFile):
             self.requires("libiconv/1.17")
         if self.settings.os == "Linux":
             if self.options.alsa:
-                self.requires("libalsa/1.2.7.2")
+                self.requires("libalsa/1.2.10")
             if self.options.pulse:
                 self.requires("pulseaudio/14.2")
             if self.options.opengl:
@@ -157,7 +157,7 @@ class SDLConan(ConanFile):
             if self.options.nas:
                 self.requires("nas/1.9.5")
             if self.options.wayland:
-                self.requires("wayland/1.21.0")
+                self.requires("wayland/1.22.0")
                 self.requires("xkbcommon/1.4.1")
                 self.requires("egl/system")
             if self.options.libunwind:
@@ -193,7 +193,7 @@ class SDLConan(ConanFile):
         if self.settings.os == "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if hasattr(self, "settings_build") and self.options.get_safe("wayland"):
-            self.build_requires("wayland/1.21.0")  # Provides wayland-scanner
+            self.build_requires("wayland/1.22.0")  # Provides wayland-scanner
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True,
