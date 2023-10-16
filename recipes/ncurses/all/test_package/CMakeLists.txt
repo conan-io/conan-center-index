@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES C)
 
 set(CURSES_NEED_NCURSES TRUE)
-find_package(Curses REQUIRED)
+find_package(Curses CONFIG REQUIRED)
 
 if(NOT CURSES_HAVE_NCURSES_NCURSES_H)
     message(FATAL_ERROR "ncurses/ncurses.h is not available (CURSES_HAVE_NCURSES_NCURSES_H)")
