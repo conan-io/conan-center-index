@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, rmdir
 from conan.tools.microsoft import is_msvc
@@ -231,6 +231,7 @@ class JerryScriptStackConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.components["libjerry-port-default"].set_property("pkg_config_name", "libjerry-port-default")
