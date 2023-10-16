@@ -23,7 +23,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = MesonToolchain(self)
-        tc.project_options["egl"] = "enabled" if self.dependencies[self.tested_reference_str].options.egl else "disabled"
+        tc.project_options["egl"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("egl") else "disabled"
         tc.generate()
 
 
