@@ -11,7 +11,7 @@ required_conan_version = ">=1.53.0"
 
 class ZoeConan(ConanFile):
     name = "zoe"
-    description = "C++ File Download Library."
+    description = "A multi-protocol, multi-threaded, resumable, cross-platform, open source, C++ file download library."
     license = "GPL-3.0-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/winsoft666/zoe"
