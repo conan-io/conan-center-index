@@ -741,7 +741,4 @@ class MesaConan(ConanFile):
             self.cpp_info.components["opengl32"].requires = ["gallium_wgl"]
             self.cpp_info.components["opengl32"].system_libs.append("opengl32")
 
-        # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
-        # if self.settings.os in ["Linux", "FreeBSD"]:
-            # self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
         self.runenv_info.prepend_path("LIBGL_DRIVERS_PATH", os.path.join(self.package_folder, 'lib', 'dri'))
