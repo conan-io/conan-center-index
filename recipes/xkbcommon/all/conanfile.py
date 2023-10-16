@@ -67,7 +67,7 @@ class XkbcommonConan(ConanFile):
         if self.options.get_safe("xkbregistry"):
             self.requires("libxml2/2.11.4")
         if self.options.get_safe("with_wayland"):
-            self.requires("wayland/1.22.0")
+            self.requires("wayland/1.22.0", run=not self._has_build_profile)
             if not self._has_build_profile:
                 self.requires("wayland-protocols/1.31")
 
@@ -97,8 +97,6 @@ class XkbcommonConan(ConanFile):
         tc.project_options["enable-x11"] = self.options.with_x11
         if self._has_xkbregistry_option:
             tc.project_options["enable-xkbregistry"] = self.options.xkbregistry
-        if self._has_build_profile:
-            tc.project_options["build.pkg_config_path"] = self.generators_folder
         tc.generate()
 
         pkg_config_deps = PkgConfigDeps(self)
@@ -112,11 +110,6 @@ class XkbcommonConan(ConanFile):
             meson_build_file = os.path.join(self.source_folder, "meson.build")
             # Patch the build system to use the pkg-config files generated for the build context.
 
-            if Version(self.version) >= "1.5.0":
-                get_pkg_config_var = "get_variable(pkgconfig: "
-            else:
-                get_pkg_config_var = "get_pkgconfig_variable("
-
             if self._has_build_profile:
                 replace_in_file(self, meson_build_file,
                                 "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
@@ -124,18 +117,6 @@ class XkbcommonConan(ConanFile):
                 replace_in_file(self, meson_build_file,
                                 "wayland_protocols_dep = dependency('wayland-protocols', version: '>=1.12', required: false)",
                                 "wayland_protocols_dep = dependency('wayland-protocols_BUILD', version: '>=1.12', required: false, native: true)")
-            else:
-                replace_in_file(self, meson_build_file,
-                                "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
-                                "# wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)")
-
-                replace_in_file(self, meson_build_file,
-                                "if not wayland_client_dep.found() or not wayland_protocols_dep.found() or not wayland_scanner_dep.found()",
-                                "if not wayland_client_dep.found() or not wayland_protocols_dep.found()")
-
-                replace_in_file(self, meson_build_file,
-                                f"wayland_scanner = find_program(wayland_scanner_dep.{get_pkg_config_var}'wayland_scanner'))",
-                                "wayland_scanner = find_program('wayland-scanner')")
 
         meson = Meson(self)
         meson.configure()
