@@ -51,7 +51,7 @@ class TestPackageConan(ConanFile):
                 libs = load(self, os.path.join(self.build_folder, "libs")).split(" ")
                 output = StringIO()
                 self.run(f"bash {bindir}/pcre2-config --libs8", output)
-                conf = output.getvalue().strip().split(" ")
+                conf = next(l for l in output.getvalue().splitlines() if l.lower().startswith("-l")).strip().split(" ")
                 assert f"-L{libdir}" in conf, f"Expected '-L{libdir}' not set by pcre2-config: {conf}"
                 for param in conf:
                     if param.startswith("-l"):
