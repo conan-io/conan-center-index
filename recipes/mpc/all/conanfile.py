@@ -14,16 +14,22 @@ required_conan_version = ">=1.54.0"
 
 class MpcConan(ConanFile):
     name = "mpc"
-    package_type = "library"
     description = "GNU MPC is a C library for the arithmetic of complex numbers with arbitrarily high precision " \
                   "and correct rounding of the result"
-    topics = ("conan", "mpc", "multiprecision", "math", "mathematics")
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://www.multiprecision.org/mpc/home.html"
     license = "LGPL-3.0-or-later"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.multiprecision.org/"
+    topics = ("multiprecision", "math", "mathematics")
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    package_type = "library"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -38,14 +44,17 @@ class MpcConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
-        self.requires("gmp/6.2.1", transitive_headers=True)
-        self.requires("mpfr/4.1.0", transitive_headers=True)
+        self.requires("gmp/6.3.0", transitive_headers=True)
+        self.requires("mpfr/4.2.0", transitive_headers=True)
 
     def validate(self):
         # FIXME: add msvc support, upstream has a makefile.vc
         if is_msvc(self):
-            raise ConanInvalidConfiguration("mpc can be built with msvc, but it's not supported yet in this recipe.")
+            raise ConanInvalidConfiguration(f"{self.ref} can be built with msvc, but it's not supported yet in this recipe.")
 
     @property
     def _settings_build(self):
@@ -57,12 +66,8 @@ class MpcConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)

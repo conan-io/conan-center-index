@@ -63,10 +63,10 @@ class LibMysqlClientCConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) < "8.0.30":
-            self.requires("openssl/1.1.1u")
+            self.requires("openssl/1.1.1w")
         else:
             self.requires("openssl/[>=1.1 <4]")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zstd/1.5.5")
         self.requires("lz4/1.9.4")
         if self.settings.os == "FreeBSD":
@@ -104,7 +104,7 @@ class LibMysqlClientCConan(ConanFile):
         if is_apple_os(self):
             self.tool_requires("cmake/[>=3.18 <4]")
         if self.settings.os == "FreeBSD" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -133,7 +133,6 @@ class LibMysqlClientCConan(ConanFile):
                                 f"# SET({lib.upper()}_WARN_GIVEN)",
                                 strict=False)
 
-        rmdir(self, os.path.join(self.source_folder, "extra"))
         for folder in ["client", "man", "mysql-test", "libbinlogstandalone"]:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             f"ADD_SUBDIRECTORY({folder})\n",
@@ -230,6 +229,9 @@ class LibMysqlClientCConan(ConanFile):
         tc.cache_variables["WITH_SSL"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
 
         tc.cache_variables["WITH_ZLIB"] = "system"
+
+        # Remove to ensure reproducible build, this only affects docs generation
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         tc.generate()
 
         deps = CMakeDeps(self)

@@ -1,4 +1,7 @@
 sources:
+  "3.2.17":
+    url: "https://github.com/simdutf/simdutf/archive/v3.2.17.tar.gz"
+    sha256: "c24e3eec1e08522a09b33e603352e574f26d367a7701bf069a65881f64acd519"
   "3.2.15":
     url: "https://github.com/simdutf/simdutf/archive/v3.2.15.tar.gz"
     sha256: "c26d2e2e9124e1c20335d3880d74c8b0d74a5e247ba82ef82d15df4ccc413bcd"
@@ -30,6 +33,10 @@ sources:
     url: "https://github.com/simdutf/simdutf/archive/v1.0.1.tar.gz"
     sha256: "e7832ba58fb95fe00de76dbbb2f17d844a7ad02a6f5e3e9e5ce9520e820049a0"
 patches:
+  "3.2.17":
+    - patch_file: "patches/3.2.17-0001-fix-cmake.patch"
+      patch_description: "remove static build, enable rpath on macOS"
+      patch_type: "conan"
   "3.2.15":
     - patch_file: "patches/3.2.14-0001-fix-cmake.patch"
       patch_description: "remove static build, enable rpath on macOS"

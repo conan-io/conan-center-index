@@ -96,21 +96,21 @@ class WtConan(ConanFile):
         if Version(self.version) < "4.9.0":
             self.requires("boost/1.80.0", transitive_headers = True)
         else:
-            self.requires("boost/1.82.0", transitive_headers = True)
+            self.requires("boost/1.83.0", transitive_headers = True)
         if self.options.connector_http:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.42.0")
+            self.requires("sqlite3/3.43.0")
         if self.options.get_safe("with_mysql"):
-            self.requires("libmysqlclient/8.0.31", transitive_headers=True, transitive_libs=True)
+            self.requires("libmysqlclient/8.1.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_postgres"):
-            self.requires("libpq/15.3", transitive_headers=True, transitive_libs=True)
+            self.requires("libpq/15.4", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
             self.requires("odbc/2.3.11")
         if self.options.get_safe("with_unwind"):
-            self.requires("libunwind/1.7.0")
+            self.requires("libunwind/1.7.2")
 
     def validate(self):
         miss_boost_required_comp = any(self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)

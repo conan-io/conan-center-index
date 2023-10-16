@@ -7,6 +7,7 @@ from conan.tools.build import can_run
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
+    test_type = "explicit"
 
     def generate(self):
         tc = CMakeToolchain(self)

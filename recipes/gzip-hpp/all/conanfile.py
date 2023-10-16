@@ -27,7 +27,7 @@ class GzipHppConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13", transitive_headers=True)
+        self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()

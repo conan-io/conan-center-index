@@ -1,9 +1,10 @@
 from conan import ConanFile
-from conan.tools.files import get, copy
-from conan.tools.build import check_min_cppstd
-from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.errors import ConanInvalidConfiguration
-from conan import Version
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.scm import Version
 import os
 
 
@@ -32,6 +33,9 @@ class LefticusToolsConan(ConanFile):
             "clang": "13",
             "apple-clang": "14",
         }
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
