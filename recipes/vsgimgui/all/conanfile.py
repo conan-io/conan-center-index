@@ -26,8 +26,6 @@ class VsgImGuiConan(ConanFile):
         "shared": False,
         "fPIC": True, 
     }
-    #to keep backends for imgui
-    keep_imports = True
 
     @property
     def _min_cppstd(self):
@@ -90,9 +88,10 @@ class VsgImGuiConan(ConanFile):
 
         deps.generate()
 
-    def imports(self):
-        self.copy("imgui_impl_vulkan.*", dst=os.path.join(self.source_folder,"src", "imgui", "backends"), src="./res/bindings")
-                  
+        copy(self, "imgui_impl_vulkan.*", os.path.join(self.dependencies["imgui"].package_folder, "res", "bindings"), 
+                   os.path.join(self.source_folder, "src", "imgui", "backends"))
+ 
+
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
@@ -123,8 +122,3 @@ class VsgImGuiConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "vsgImGui"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "vsgImGui"
-        self.cpp_info.names["cmake_find_package"] = "VSGIMGUI"
-        self.cpp_info.names["cmake_find_package_multi"] = "vsgImGui"
