@@ -150,7 +150,7 @@ class NCursesConan(ConanFile):
             "--without-profile",
             "--with-sp-funcs",
             "--disable-rpath",
-            "--datarootdir={}".format(unix_path(self, os.path.join(self.package_folder, "res"))),
+            "--datarootdir=${prefix}/res",
             "--disable-pc-files",
         ])
         if self.settings.os == "Windows":
