@@ -741,4 +741,7 @@ class MesaConan(ConanFile):
             self.cpp_info.components["opengl32"].requires = ["gallium_wgl"]
             self.cpp_info.components["opengl32"].system_libs.append("opengl32")
 
-        self.runenv_info.prepend_path("LIBGL_DRIVERS_PATH", os.path.join(self.package_folder, 'lib', 'dri'))
+        libgl_drivers_path = os.path.join(self.package_folder, "lib", "dri")
+        if self.settings.os == "Windows":
+            libgl_drivers_path = os.path.join(self.package_folder, "bin")
+        self.runenv_info.prepend_path("LIBGL_DRIVERS_PATH", libgl_drivers_path)
