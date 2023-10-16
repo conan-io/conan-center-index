@@ -280,6 +280,9 @@ class NCursesConan(ConanFile):
         self.cpp_info.components["libcurses"].libs = ["ncurses" + self._lib_suffix]
         self.cpp_info.components["libcurses"].names["pkg_config"] = "ncurses" + self._lib_suffix
         self.cpp_info.components["libcurses"].includedirs.append(os.path.join("include", "ncurses" + self._suffix))
+        self.cpp_info.components["libcurses"].build_modules["cmake_find_package"] = [module_rel_path]
+        self.cpp_info.components["libcurses"].build_modules["cmake_find_package_multi"] = [module_rel_path]
+
         if not self.options.shared:
             self.cpp_info.components["libcurses"].defines = ["NCURSES_STATIC"]
             if self.settings.os == "Linux":
