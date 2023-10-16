@@ -84,6 +84,10 @@ class LASlibConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+        # Copy the libraries
+        if self.options.shared:
+            self.copy(pattern="*.dll", dst="bin", keep_path=False)
+
         # some files extensions and folders are not allowed.
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
