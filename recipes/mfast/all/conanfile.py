@@ -19,9 +19,9 @@ class mFASTConan(ConanFile):
         "mFAST is a high performance C++ encoding/decoding library for FAST "
         "(FIX Adapted for STreaming) protocol"
     )
+    license = "LGPL-3.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://objectcomputing.github.io/mFAST/"
-    license = "LGPL-3.0"
     topics = ("fast", "fix", "fix-adapted-for-streaming",
               "financial-information-exchange", "libraries", "cpp")
     package_type = "library"
