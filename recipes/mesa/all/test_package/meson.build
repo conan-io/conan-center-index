@@ -10,7 +10,7 @@ if get_option('egl').enabled()
 endif
 
 if host_machine.system() == 'windows'
-    opengl32_dep = dependency('opengl32')
+    opengl32_dep = dependency('mesa-opengl32')
     dependencies += opengl32_dep
 endif
 
