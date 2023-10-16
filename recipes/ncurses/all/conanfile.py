@@ -72,18 +72,18 @@ class NCursesConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         self.options.with_ticlib = self._with_ticlib
         self.options.with_tinfo  = self._with_tinfo
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if not self.options.with_cxx:
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
+            self.settings.rm_safe("compiler.libcxx")
+            self.settings.rm_safe("compiler.cppstd")
         if not self.options.with_widec:
-            del self.options.with_extended_colors
+            self.options.rm_safe("with_extended_colors")
 
     def requirements(self):
         if self.options.with_pcre2:
