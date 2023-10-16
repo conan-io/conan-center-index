@@ -47,6 +47,7 @@ class MesaConan(ConanFile):
         "allow_kcmp": [True, False],
         "dri3": [True, False],
         "egl": [True, False],
+        "egl_lib_suffix": [None, "ANY"],
         "egl_native_platform": ["android", "drm", "haiku", "surfaceless", "wayland", "windows", "x11"],
         "gallium_d3d10umd": [True, False],
         "gallium_d3d12_video": [True, False],
@@ -105,6 +106,7 @@ class MesaConan(ConanFile):
         "android_libbacktrace": True,
         "dri3": True,
         "egl": True,
+        "egl_lib_suffix": None,
         "egl_native_platform": "wayland",
         "gallium_d3d10umd": False,
         "gallium_d3d12_video": False,
@@ -349,6 +351,8 @@ class MesaConan(ConanFile):
             self.options.rm_safe("platform_sdk_version")
         if not self._has_with_libglvnd_option:
             self.options.rm_safe("with_libglvnd")
+        else:
+            self.options.rm_safe("egl_lib_suffix")
         if not self._has_with_libselinux_option:
             self.options.rm_safe("with_libselinux")
         if not self._has_with_libudev_option:
@@ -374,7 +378,6 @@ class MesaConan(ConanFile):
         if not self._has_platforms_x11_option:
             self.options.rm_safe("platforms_x11")
 
-        # self.options.egl = self._default_egl_option
         self.options.egl_native_platform = self._default_egl_native_platform_option
 
         self.options.gallium_drivers_asahi = self._default_gallium_driver_option("asahi")
@@ -401,8 +404,6 @@ class MesaConan(ConanFile):
 
         self.options.glx = self._default_glx_option
 
-        # self.options.shared_glapi = self._default_shared_glapi_option
-
         self.options.vulkan_drivers_amd = self._default_vulkan_driver_option("amd")
         self.options.vulkan_drivers_broadcom = self._default_vulkan_driver_option("broadcom")
         self.options.vulkan_drivers_freedreno = self._default_vulkan_driver_option("freedreno")
@@ -426,6 +427,9 @@ class MesaConan(ConanFile):
 
         if self.options.get_safe("xmlconfig"):
             self.options.rm_safe("with_expat")
+
+        if self.options.get_safe("with_libglvnd"):
+            self.options.rm_safe("egl_lib_suffix")
 
         if self.options.get_safe("egl"):
             self.options["libglvnd"].egl = True
@@ -575,6 +579,7 @@ class MesaConan(ConanFile):
         tc.project_options["datasources"] = [datasource for datasource in datasources_list if self.options.get_safe(f"datasources_{datasource}")]
         tc.project_options["dri3"] = "enabled" if self.options.get_safe("dri3") else "disabled"
         tc.project_options["egl"] = "enabled" if self.options.get_safe("egl") else "disabled"
+        tc.project_options["egl-lib-suffix"] = str(self.options.egl_lib_suffix) if self.options.get_safe("egl_lib_suffix") else ""
         tc.project_options["egl-native-platform"] = str(self.options.egl_native_platform)
         tc.project_options["enable-glcpp-tests"] = False
         tc.project_options["expat"] = "enabled" if self._requires_expat else "disabled"
@@ -692,7 +697,7 @@ class MesaConan(ConanFile):
             self.cpp_info.components["opengl32"].requires = ["gallium_wgl"]
             self.cpp_info.components["opengl32"].system_libs.append("opengl32")
         if self.options.get_safe("egl"):
-            self.cpp_info.components["egl"].libs = ["EGL_mesa"]
+            self.cpp_info.components["egl"].libs = [f"EGL_{self.options.glvnd_vendor_name}" if self.options.get_safe("with_libglvnd") else f"EGL{self.options.get_safe('egl_lib_suffix', default='')}"]
             if self.options.get_safe("with_libglvnd"):
                 self.cpp_info.components["egl"].requires.append("libglvnd::egl")
             if self.settings.os == "Windows":
