@@ -255,7 +255,8 @@ class MesaConan(ConanFile):
 
     @property
     def _default_egl_option(self):
-        return self.settings.os != "Windows"
+        return True
+        # return self.settings.os != "Windows"
 
     @property
     def _default_egl_native_platform_option(self):
@@ -278,7 +279,8 @@ class MesaConan(ConanFile):
 
     @property
     def _default_shared_glapi_option(self):
-        return self.settings.os != "Windows"
+        return True
+        # return self.settings.os != "Windows"
 
     def _default_gallium_driver_option(self, option: str):
         return {
@@ -372,7 +374,7 @@ class MesaConan(ConanFile):
         if not self._has_platforms_x11_option:
             self.options.rm_safe("platforms_x11")
 
-        self.options.egl = self._default_egl_option
+        # self.options.egl = self._default_egl_option
         self.options.egl_native_platform = self._default_egl_native_platform_option
 
         self.options.gallium_drivers_asahi = self._default_gallium_driver_option("asahi")
@@ -399,7 +401,7 @@ class MesaConan(ConanFile):
 
         self.options.glx = self._default_glx_option
 
-        self.options.shared_glapi = self._default_shared_glapi_option
+        # self.options.shared_glapi = self._default_shared_glapi_option
 
         self.options.vulkan_drivers_amd = self._default_vulkan_driver_option("amd")
         self.options.vulkan_drivers_broadcom = self._default_vulkan_driver_option("broadcom")
