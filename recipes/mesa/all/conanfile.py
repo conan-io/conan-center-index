@@ -39,6 +39,8 @@ class MesaConan(ConanFile):
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
+    # Reduce the cost of copying a lot of source code.
+    no_copy_source = True
     options = {
         "android_stub": [True, False],
         "android_libbacktrace": [True, False],
