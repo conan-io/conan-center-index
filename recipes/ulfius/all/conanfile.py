@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class UlfiusConan(ConanFile):
@@ -16,6 +16,8 @@ class UlfiusConan(ConanFile):
     topics = ("web", "http", "rest", "endpoint", "json", "websocket")
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
