@@ -15,7 +15,7 @@ class ZoeConan(ConanFile):
     license = "GPL-3.0-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/winsoft666/zoe"
-    topics = ("downloader", "libcurl", "speed-limit", "ftp", "http")
+    topics = ("curl", "download", "file", "ftp", "multithreading", "http", "libcurl", "rate-limit")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
