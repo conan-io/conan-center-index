@@ -7,3 +7,4 @@ patches:
     - patch_file: "patches/0001-include-string.patch"
       patch_description: "include string header"
       patch_type: "portability"
+      patch_source: "https://github.com/smasherprog/clipboard_lite/pull/3"
