@@ -691,7 +691,10 @@ class MesaConan(ConanFile):
             "pkg_config_custom_content",
             "\n".join(f"{key}={value}" for key,value in dri_pkg_config_variables.items()))
         if self.options.get_safe("egl"):
-            self.cpp_info.components["egl"].libs = [f"EGL_{self.options.glvnd_vendor_name}" if self.options.get_safe("with_libglvnd") else f"EGL{self.options.get_safe('egl_lib_suffix', default='', check_type=str)}"]
+            suffix = self.options.egl_lib_suffix if self.options.get_safe("egl_lib_suffix") else ""
+            if self.options.get_safe("with_libglvnd"):
+                suffix = f"_{self.options.glvnd_vendor_name}"
+            self.cpp_info.components["egl"].libs = [f"EGL{suffix}"]
             if self.options.get_safe("with_libglvnd"):
                 self.cpp_info.components["egl"].requires.append("libglvnd::egl")
             if self.settings.os == "Windows":
