@@ -59,6 +59,7 @@ class MesaConan(ConanFile):
         "gbm": [True, False],
         "gles1": [True, False],
         "gles2": [True, False],
+        "glvnd_vendor_name": ["ANY"],
         "glx": [False, 'dri', 'xlib'],
         "glx_direct": [True, False],
         "imagination_srv": [True, False],
@@ -115,6 +116,7 @@ class MesaConan(ConanFile):
         "gbm": True,
         "gles1": True,
         "gles2": True,
+        "glvnd_vendor_name": "mesa",
         "glx": "dri",
         "glx_direct": True,
         "imagination_srv": False,
@@ -672,10 +674,9 @@ class MesaConan(ConanFile):
         self.cpp_info.components["dri"].set_property(
             "pkg_config_custom_content",
             "\n".join(f"{key}={value}" for key,value in dri_pkg_config_variables.items()))
-        if self.options.get_safe("opengl"): # todo? and not self.options.get_safe("shared_glapi"):
-            self.cpp_info.components["opengl"].libs = ["opengl"]
-            if self.settings.os == "Windows":
-                self.cpp_info.components["opengl"].system_libs.append("opengl32")
+        if self.settings.os == "Windows":
+            self.cpp_info.components["opengl32"].libs = ["opengl32"]
+            self.cpp_info.components["opengl32"].system_libs.append("opengl32")
         if self.options.get_safe("egl"):
             self.cpp_info.components["egl"].libs = ["EGL_mesa"]
             if self.options.get_safe("with_libglvnd"):
@@ -699,6 +700,17 @@ class MesaConan(ConanFile):
             self.cpp_info.components["glx"].libs = ["GLX_mesa"]
             if self.options.get_safe("with_libglvnd"):
                 self.cpp_info.components["glx"].requires.append("libglvnd::glx")
+            gl_lib_name = f"GLX_{self.options.glvnd_vendor_name}" if self.options.get_safe("with_libglvnd") else "GL"
+            self.cpp_info.components["gl"].libs = [gl_lib_name]
+            if self.options.get_safe("with_xorg"):
+                # todo Refine these more.
+                self.cpp_info.components["gl"].requires.extend(["xorg::x11", "xorg::xcb", "xorg::xcb-glx", "xorg::xcb-shm", "xorg::x11-xcb", "xorg::xcb-dri2", "xorg::xext", "xorg::xfixes"])
+                if self.options.get_safe("with_glx") == "dri":
+                    self.cpp_info.components["gl"].requires.append("xorg::xxf86vm")
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["gl"].system_libs.extend(["m", "pthread"])
+            if self.settings.os == "Windows":
+                self.cpp_info.components["gl"].system_libs.extend(["gdi32", "opengl32"])
         if self.options.get_safe("osmesa"):
             self.cpp_info.components["osmesa"].libs = ["OSMesa"]
             self.cpp_info.components["osmesa"].set_property("pkg_config_name", "osmesa")
