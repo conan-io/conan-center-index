@@ -410,12 +410,12 @@ class MesaConan(ConanFile):
         self.options.with_llvm = self._system_has_kms_drm and (self.settings.arch in ["mips", "mips64", "x86", "x86_64"] or str(self.settings.arch).startswith("arm"))
 
     def configure(self):
-        if not self.options.shared_glapi:
+        if not self.options.get_safe("shared_glapi"):
             self.options.rm_safe("egl")
             self.options.rm_safe("gles1")
             self.options.rm_safe("gles2")
 
-        if self.options.xmlconfig:
+        if self.options.get_safe("xmlconfig"):
             self.options.rm_safe("with_expat")
 
         if self.options.get_safe("egl"):
@@ -614,7 +614,7 @@ class MesaConan(ConanFile):
         tc.project_options["vulkan-beta"] = self.options.get_safe("vulkan_beta", default=False)
         tc.project_options["vulkan-drivers"] = [vulkan_driver.replace("_experimental", "-experimental") for vulkan_driver in vulkan_drivers_list if self.options.get_safe(f"vulkan_drivers_{vulkan_driver}")]
         tc.project_options["vulkan-layers"] = [vulkan_layer.replace("_experimental", "-experimental") for vulkan_layer in vulkan_layers_list if self.options.get_safe(f"vulkan_layers_{vulkan_layer}")]
-        tc.project_options["xmlconfig"] = "enabled" if self.options.xmlconfig else "disabled"
+        tc.project_options["xmlconfig"] = "enabled" if self.options.get_safe("xmlconfig") else "disabled"
         tc.project_options["zlib"] = "enabled" if self.options.with_zlib else "disabled"
         tc.project_options["zstd"] = "enabled" if self.options.with_zstd else "disabled"
         if cross_building(self):
