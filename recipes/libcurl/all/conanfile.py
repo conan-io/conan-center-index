@@ -626,6 +626,9 @@ class LibcurlConan(ConanFile):
         # TODO: remove this when https://github.com/conan-io/conan/issues/12180 will be fixed.
         if  Version(self.version) >= "8.3.0":
             tc.variables["HAVE_SSL_SET0_WBIO"] = False
+        if  Version(self.version) >= "8.4.0":
+            tc.variables["HAVE_OPENSSL_SRP"] = True
+            tc.variables["HAVE_SSL_CTX_SET_QUIC_METHOD"] = True
 
         tc.generate()
 
