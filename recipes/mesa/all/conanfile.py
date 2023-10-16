@@ -239,11 +239,15 @@ class MesaConan(ConanFile):
 
     @property
     def _has_with_libunwind_option(self):
-        return self.settings.os in ["Linux", "FreeBSD"]
+        return self.settings.os in ["FreeBSD", "Linux"]
 
     @property
     def _has_shader_cache_option(self):
         return self.settings.os != "Windows"
+
+    @property
+    def _has_xmlconfig_option(self):
+        return self.settings.os not in ["Android", "Windows"]
 
     @property
     def _default_egl_option(self):
@@ -347,6 +351,8 @@ class MesaConan(ConanFile):
             self.options.rm_safe("with_libunwind")
         if not self._has_shader_cache_option:
             self.options.rm_safe("shader_cache")
+        if not self._has_xmlconfig_option:
+            self.options.rm_safe("xmlconfig")
 
         if not self._has_platforms_android_option:
             self.options.rm_safe("platforms_android")
