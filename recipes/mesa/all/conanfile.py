@@ -594,7 +594,7 @@ class MesaConan(ConanFile):
         tc.project_options["libunwind"] = "enabled" if self.options.get_safe("with_libunwind") else "disabled"
         if self.options.get_safe("min_windows_version"):
             tc.project_options["min-windows-version"] = self.options.min_windows_version
-        tc.project_options["opengl"] = self.options.get_safe("opengl", default=True)
+        tc.project_options["opengl"] = self.options.get_safe("opengl", default=False)
         tc.project_options["osmesa"] = self.options.get_safe("osmesa", default=False)
         tc.project_options["perfetto"] = self.options.get_safe("perfetto", default=False)
         if self.options.get_safe("platform_sdk_version"):
