@@ -121,7 +121,7 @@ class JerryScriptStackConan(ConanFile):
         if is_apple_os(self):
             del self.options.jerry_math  # forced to False
             del self.options.link_time_optimization  # forced to False
-            del self.options.strip  # forced to False
+            del self.options.strip_symbols  # forced to False
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
