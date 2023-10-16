@@ -72,7 +72,10 @@ class FastDDSConan(ConanFile):
     def requirements(self):
         self.requires("tinyxml2/9.0.0")
         self.requires("asio/1.28.0")  # This is now a package_type = header
-        self.requires("fast-cdr/1.0.27", transitive_headers=True, transitive_libs=True)
+        if (Version(self.version) < "2.12.0"):
+            self.requires("fast-cdr/1.0.27", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("fast-cdr/2.0.0", transitive_headers=True, transitive_libs=True)
         self.requires("foonathan-memory/0.7.3")
         if self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]")
