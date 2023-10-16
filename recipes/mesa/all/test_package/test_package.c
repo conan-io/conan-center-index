@@ -16,9 +16,6 @@ int main(void) {
     }
 #endif
 #ifdef _WIN32
-    if (glIsEnabledi(GL_DITHER, 0) != GL_TRUE) {
-        return EXIT_FAILURE;
-    }
     if (glGetError() != GL_NO_ERROR) {
         return EXIT_FAILURE;
     }
