@@ -21,7 +21,7 @@ datasources_list = ["freedreno", "intel", "panfrost"]
 freedreno_kmds_list = ["kgsl", "msm", "virtio"]
 gallium_drivers_list = ["asahi", "crocus", "d3d12", 'etnaviv', 'freedreno', 'i915', 'iris', 'kmsro', 'lima', 'r300', 'r600', 'radeonsi', 'nouveau', 'panfrost', 'svga', 'swrast', 'tegra', 'v3d', 'vc4', 'virgl', 'zink']
 platforms_list = ["android", "haiku", "wayland", "windows", "x11"]
-tools_list = ["all", "asahi", "dlclose-skip", 'drm-shim', 'etnaviv', 'freedreno', 'glsl', 'imagination', 'intel', 'intel-ui', 'lima', 'nir', 'nouveau', 'panfrost']
+tools_list = ["all", "asahi", "dlclose_skip", 'drm-shim', 'etnaviv', 'freedreno', 'glsl', 'imagination', 'intel', 'intel-ui', 'lima', 'nir', 'nouveau', 'panfrost']
 video_codecs_list = ['h264dec', 'h264enc', 'h265dec', 'h265enc', 'vc1dec']
 vulkan_drivers_list = ['amd', 'broadcom', 'freedreno', 'imagination_experimental', 'intel', 'intel_hasvk', 'microsoft_experimental', 'nouveau_experimental', 'panfrost', 'swrast', 'virtio']
 vulkan_layers_list = ['amd', 'broadcom', 'freedreno', 'imagination_experimental', 'intel', 'intel_hasvk', 'microsoft_experimental', 'nouveau_experimental', 'panfrost', 'swrast', 'virtio']
@@ -618,7 +618,7 @@ class MesaConan(ConanFile):
         tc.project_options["shader-cache-max-size"] = str(self.options.get_safe("shader_cache_max_size")) if self.options.get_safe("shader_cache_max_size") else ""
         tc.project_options["shared-glapi"] = "enabled" if self.options.get_safe("shared_glapi") else "disabled"
         tc.project_options["sse2"] = self.options.get_safe("sse2", default=True)
-        tc.project_options["tools"] = [tool for tool in tools_list if self.options.get_safe(f"tools_{tool}")]
+        tc.project_options["tools"] = [tool.replace("_", "-") for tool in tools_list if self.options.get_safe(f"tools_{tool}")]
         tc.project_options["valgrind"] = "disabled"
         tc.project_options["video-codecs"] = [video_codec for video_codec in video_codecs_list if self.options.get_safe(f"video_codecs_{video_codec}")]
         tc.project_options["vmware-mks-stats"] = self.options.get_safe("vmware_mks_stats", default=False)
