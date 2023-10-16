@@ -14,11 +14,11 @@ required_conan_version = ">=1.53.0"
 
 class Nghttp3Conan(ConanFile):
     name = "nghttp3"
-    description = "HTTP/2 C Library and tools"
-    topics = ("http", "http3")
+    description = "HTTP/3 library written in C"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://nghttp2.org/nghttp3/"
-    license = "MIT"
+    topics = ("http", "http3", "quic", "qpack")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -30,9 +30,6 @@ class Nghttp3Conan(ConanFile):
         "fPIC": True,
     }
 
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.20 <4]")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,6 +40,9 @@ class Nghttp3Conan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.20 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
