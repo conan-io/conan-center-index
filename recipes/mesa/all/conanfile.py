@@ -52,7 +52,7 @@ class MesaConan(ConanFile):
         "gallium_d3d12_video": [True, False],
         'gallium_extra_hud': [True, False],
         "gallium_nine": [True, False],
-        "gallium_omx": [False, 'bellagio', 'tizonia'],
+        "gallium_omx": [False, "bellagio", "tizonia"],
         "gallium_va": [True, False],
         "gallium_vdpau": [True, False],
         "gallium_windows_dll_name": ["ANY"],
@@ -585,14 +585,16 @@ class MesaConan(ConanFile):
         tc.project_options["gallium-omx"] = "disabled" if not self.options.get_safe("gallium_omx") else str(self.options.get_safe("gallium_omx"))
         tc.project_options["gallium-va"] = "enabled" if self.options.get_safe("gallium_va") else "disabled"
         tc.project_options["gallium-vdpau"] = "enabled" if self.options.get_safe("gallium_vdpau") else "disabled"
-        tc.project_options["gallium-windows-dll-name"] = self.options.get_safe("gallium_windows_dll_name", default="libgallium_wgl")
+        if self.options.get_safe("gallium_windows_dll_name"):
+            tc.project_options["gallium-windows-dll-name"] = str(self.options.gallium_windows_dll_name)
         tc.project_options["gallium-xa"] = "enabled" if self.options.get_safe("gallium_xa") else "disabled"
         tc.project_options["gbm"] = "enabled" if self.options.get_safe("gbm") else "disabled"
         tc.project_options["gles1"] = "enabled" if self.options.get_safe("gles1") else "disabled"
         tc.project_options["gles2"] = "enabled" if self.options.get_safe("gles2") else "disabled"
         if self.options.get_safe("with_libglvnd"):
             tc.project_options["glvnd"] = self.options.get_safe("with_libglvnd", default=False)
-        tc.project_options["glvnd-vendor-name"] = self.options.get_safe("glvnd_vendor_name", default="mesa")
+        if self.options.get_safe("glvnd_vendor_name"):
+            tc.project_options["glvnd-vendor-name"] = str(self.options.glvnd_vendor_name)
         tc.project_options["glx"] = "disabled" if not self.options.get_safe("glx") else str(self.options.get_safe("glx"))
         tc.project_options["glx-direct"] = self.options.get_safe("glx_direct", default=True)
         tc.project_options["imagination-srv"] = self.options.get_safe("imagination_srv", default=False)
