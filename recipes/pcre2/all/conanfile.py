@@ -118,6 +118,11 @@ class PCRE2Conan(ConanFile):
         replace_in_file(self, cmakelists,
                               "RUNTIME DESTINATION bin",
                               "RUNTIME DESTINATION bin BUNDLE DESTINATION bin")
+        # pcre2-config does not correctly include '-static' in static library names
+        if Version(self.version) >= "10.38" and is_msvc(self) and not self.options.shared:
+            replace_in_file(self, cmakelists,
+                            "CONFIGURE_FILE(libpcre2-posix.pc.in",
+                            'string(PREPEND LIB_POSTFIX "-static")\nCONFIGURE_FILE(libpcre2-posix.pc.in')
 
     def build(self):
         self._patch_sources()
@@ -166,7 +171,7 @@ class PCRE2Conan(ConanFile):
 
         if self.options.build_pcre2grep:
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)
             # FIXME: This is a workaround to avoid ConanException. zlib and bzip2
             # are optional requirements of pcre2grep executable, not of any pcre2 lib.
