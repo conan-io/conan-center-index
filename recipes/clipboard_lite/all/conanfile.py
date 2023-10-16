@@ -97,7 +97,7 @@ class ClipboardLiteConan(ConanFile):
             self.cpp_info.requires.extend(["xorg::xcb", "xorg::x11", "xorg::xfixes"])
             self.cpp_info.system_libs.extend(["m", "pthread"])
         elif is_apple_os(self):
-            self.cpp_info.frameworks = ['Cocoa', 'Carbon', 'CoreFoundation', 'Foundation', 'AppKit']
+            self.cpp_info.frameworks = ['Cocoa', 'Carbon', 'CoreFoundation', 'CoreGraphics', 'Foundation', 'AppKit']
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend([
                 "shlwapi",
