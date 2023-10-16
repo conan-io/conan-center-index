@@ -5,7 +5,7 @@ import textwrap
 from conan import ConanFile
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, export_conandata_patches, get, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, collect_libs, export_conandata_patches, get, replace_in_file, rmdir, save, download, load
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -16,7 +16,8 @@ class CryptoPPPEMConan(ConanFile):
     description = ("The PEM Pack is a partial implementation of message encryption "
                    "which allows you to read and write PEM encoded keys and parameters, "
                    "including encrypted private keys.")
-    license = "Public domain"
+    # TODO: Fix license syntax, this is not proper spdx terminology
+    license = "DocumentRef-README.md:LicenseRef-Cryptopp-Pem-PublicDomain"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.cryptopp.com/wiki/PEM_Pack"
     topics = ("cryptopp", "crypto", "cryptographic", "security", "PEM")
@@ -62,6 +63,11 @@ class CryptoPPPEMConan(ConanFile):
         shutil.move(os.path.join(src_folder, "CMakeLists.txt"), os.path.join(dst_folder, "CMakeLists.txt"))
         shutil.move(os.path.join(src_folder, "cryptopp-config.cmake"), os.path.join(dst_folder, "cryptopp-config.cmake"))
         rmdir(self, src_folder)
+        # LICENSE not packaged with release tar
+        download("https://raw.githubusercontent.com/noloader/cryptopp-pem/0cfc1a8590f2395cd5b976be0e95e10de9a15a92/README.md",
+                 os.path.join(self._source_subfolder, "LICENSE"),
+                 sha256="efa5140027e396a3844f9f48d65e014c9a710939ac02e22d32c33a51e1750eef")
+
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -95,10 +101,12 @@ class CryptoPPPEMConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    def _extract_license(self):
+        readme = load(self, os.path.join(self._source_subfolder, "LICENSE"),)
+        return readme[readme.find("## License"):]
+
     def package(self):
-        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"),
-             "Everything in this repo is release under Public Domain code. "
-             "If the license or terms is unpalatable for you, then don't feel obligated to use it or commit.")
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
