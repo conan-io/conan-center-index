@@ -1,0 +1,6 @@
+option(
+  'egl',
+  type : 'feature',
+  value : 'disabled',
+  description : 'Build support for EGL platform'
+)
