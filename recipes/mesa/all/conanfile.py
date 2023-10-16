@@ -690,14 +690,8 @@ class MesaConan(ConanFile):
         self.cpp_info.components["dri"].set_property(
             "pkg_config_custom_content",
             "\n".join(f"{key}={value}" for key,value in dri_pkg_config_variables.items()))
-        if self.settings.os == "Windows":
-            self.cpp_info.components["gallium_wgl"].libs = [str(self.options.gallium_windows_dll_name)]
-            self.cpp_info.components["gallium_wgl"].system_libs.append("ws2_32")
-            self.cpp_info.components["opengl32"].libs = ["opengl32"]
-            self.cpp_info.components["opengl32"].requires = ["gallium_wgl"]
-            self.cpp_info.components["opengl32"].system_libs.append("opengl32")
         if self.options.get_safe("egl"):
-            self.cpp_info.components["egl"].libs = [f"EGL_{self.options.glvnd_vendor_name}" if self.options.get_safe("with_libglvnd") else f"EGL{self.options.get_safe('egl_lib_suffix', default='')}"]
+            self.cpp_info.components["egl"].libs = [f"EGL_{self.options.glvnd_vendor_name}" if self.options.get_safe("with_libglvnd") else f"EGL{self.options.get_safe('egl_lib_suffix', default='', check_type=str)}"]
             if self.options.get_safe("with_libglvnd"):
                 self.cpp_info.components["egl"].requires.append("libglvnd::egl")
             if self.settings.os == "Windows":
@@ -736,6 +730,13 @@ class MesaConan(ConanFile):
             # self.cpp_info.components["osmesa"].set_property("component_version", "8.0.0")
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.extend(["m", "pthread"])
+
+        if self.settings.os == "Windows":
+            self.cpp_info.components["gallium_wgl"].libs = [str(self.options.gallium_windows_dll_name)]
+            self.cpp_info.components["gallium_wgl"].system_libs.append("ws2_32")
+            self.cpp_info.components["opengl32"].libs = ["opengl32"]
+            self.cpp_info.components["opengl32"].requires = ["gallium_wgl"]
+            self.cpp_info.components["opengl32"].system_libs.append("opengl32")
 
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         # if self.settings.os in ["Linux", "FreeBSD"]:
