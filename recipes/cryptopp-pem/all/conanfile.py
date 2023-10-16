@@ -59,13 +59,12 @@ class CryptoPPPEMConan(ConanFile):
         # Get CMakeLists
         get(self, **self.conan_data["sources"][self.version]["cmake"])
         src_folder = os.path.join(self.source_folder, "cryptopp-cmake-" + suffix)
-        dst_folder = self.source_folder
-        shutil.move(os.path.join(src_folder, "CMakeLists.txt"), os.path.join(dst_folder, "CMakeLists.txt"))
-        shutil.move(os.path.join(src_folder, "cryptopp-config.cmake"), os.path.join(dst_folder, "cryptopp-config.cmake"))
+        shutil.move(os.path.join(src_folder, "CMakeLists.txt"), os.path.join(self.source_folder, "CMakeLists.txt"))
+        shutil.move(os.path.join(src_folder, "cryptopp-config.cmake"), os.path.join(self.source_folder, "cryptopp-config.cmake"))
         rmdir(self, src_folder)
         # LICENSE not packaged with release tar
-        download("https://raw.githubusercontent.com/noloader/cryptopp-pem/0cfc1a8590f2395cd5b976be0e95e10de9a15a92/README.md",
-                 os.path.join(self._source_subfolder, "LICENSE"),
+        download(self, "https://raw.githubusercontent.com/noloader/cryptopp-pem/0cfc1a8590f2395cd5b976be0e95e10de9a15a92/README.md",
+                 os.path.join(self.source_folder, "LICENSE"),
                  sha256="efa5140027e396a3844f9f48d65e014c9a710939ac02e22d32c33a51e1750eef")
 
 
@@ -102,7 +101,7 @@ class CryptoPPPEMConan(ConanFile):
         cmake.build()
 
     def _extract_license(self):
-        readme = load(self, os.path.join(self._source_subfolder, "LICENSE"),)
+        readme = load(self, os.path.join(self.source_folder, "LICENSE"),)
         return readme[readme.find("## License"):]
 
     def package(self):
