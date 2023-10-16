@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, load, replace_in_file, copy, rmdir, collect_libs
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -13,7 +13,7 @@ class LibVncServerConan(ConanFile):
     package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/LibVNC/libvncserver"
-    license = "GPL"
+    license = "GPL-2.0"
     description = ("A library for easy implementation of a VNC server")
     topics = ("vncserver", "vnc", "rfb")
 
@@ -21,7 +21,6 @@ class LibVncServerConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_examples": [True, False],
         "with_zlib": [True, False],
         "with_lzo": [True, False],
         "with_libjpeg": ["libjpeg", "libjpeg-turbo", False],
@@ -39,7 +38,6 @@ class LibVncServerConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_examples": True,
         "with_zlib": True,
         "with_lzo": True,
         "with_libjpeg": "libjpeg",
@@ -58,9 +56,8 @@ class LibVncServerConan(ConanFile):
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(f"conan is not yet supporting {self.ref} on {self.settings.os}.")
-
-    def export_sources(self):
-        export_conandata_patches(self)
+        if self.options.with_libgcrypt:
+            raise ConanInvalidConfiguration("The libgcrypt is not available in ConanCenterIndex yet.")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -71,6 +68,10 @@ class LibVncServerConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+
+    def build_requirements(self):
+        if self.options.with_systemd:
+            self.tool_requires("pkgconf/2.0.3")
 
     def requirements(self):
         if self.options.with_zlib:
@@ -84,7 +85,7 @@ class LibVncServerConan(ConanFile):
         if self.options.with_libpng:
             self.requires("libpng/1.6.40")
         if self.options.with_sdl:
-            self.requires("sdl/[>=2 <3]")
+            self.requires("sdl/2.28.2")
         if self.options.with_gtk:
             self.requires("gtk/4.7.0")
         if self.options.with_libssh2:
@@ -92,7 +93,6 @@ class LibVncServerConan(ConanFile):
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_systemd:
-            self.requires("pkgconf/[>=2 <3]")
             self.requires("libsystemd/253.10")
         if self.options.with_libgcrypt:
             #self.requires("libgcrypt/1.8.4")
@@ -130,11 +130,11 @@ class LibVncServerConan(ConanFile):
         tc.variables["WITH_FFMPEG"] = self.options.with_ffmpeg
         tc.variables["WITH_SASL"] = self.options.with_sasl
         tc.variables["WITH_XCB"] = self.options.with_xcb
-
+        tc.generate()
+        tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -147,15 +147,15 @@ class LibVncServerConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_file_name", "LibVncServer")
+        self.cpp_info.set_property("cmake_file_name", "LibVNCServer")
         self.cpp_info.set_property("cmake_target_name", "libvncserver::libvncserver")
-        #self.cpp_info.libs = ["libvncserver", "libvncclient"]
-        self.cpp_info.libs = ['vncserver']
-        #self.cpp_info.libs = collect_libs(self)
-        #print(self.cpp_info.libs)
+        self.cpp_info.components["server"].set_property("cmake_target_name", "LibVNCServer::vncserver")
+        self.cpp_info.components["server"].libs = ['vncserver']
+        self.cpp_info.components["server"].system_libs = ['pthread']
 
-        self.cpp_info.components["libvncclient"].set_property("cmake_target_name", "LibVncClient")
-        self.cpp_info.components["libvncclient"].libs = ['vncclient']
-        self.cpp_info.components["libvncclient"].set_property("cmake_target_name", "libvncserver::libvncclient")
+        self.cpp_info.components["client"].set_property("cmake_target_name", "LibVNCServer::vncclient")
+        self.cpp_info.components["client"].libs = ['vncclient']
+        self.cpp_info.components["client"].system_libs = ['pthread']
+        self.cpp_info.components["server"].set_property("pkg_config_name", "libvncserver")
+        self.cpp_info.components["client"].set_property("pkg_config_name", "libvncclient")
 
