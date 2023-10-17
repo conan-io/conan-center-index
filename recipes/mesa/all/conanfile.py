@@ -497,6 +497,10 @@ class MesaConan(ConanFile):
         }[option]
 
     @property
+    def _default_vulkan_layers_device_select(self):
+        return not (self.settings.os == "Windows" and self.settings.get_safe("os.subsystem") is None)
+
+    @property
     def _system_has_kms_drm(self):
         return self.settings.os in ["Android", "FreeBSD", "Linux", "SunOS"]
 
@@ -632,6 +636,7 @@ class MesaConan(ConanFile):
         self.options.vulkan_drivers_swrast = self._default_vulkan_driver_option(
             "virtio"
         )
+        self.options.vulkan_layers_device_select = self._default_vulkan_layers_device_select
 
         # LLVM is required if either of the conditions for gallium_drivers_radeonsi or vulkan_drivers_swrast are met.
         self.options.with_llvm = self._system_has_kms_drm and (
@@ -878,6 +883,12 @@ class MesaConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "The vulkan_drivers_swrast option requires the gallium_drivers_swrast option to be enabled"
             )
+
+        if self.options.get_safe("vulkan_layers_device_select") and (self.settings.os == "Windows" and self.settings.get_safe("os.subsystem") is None):
+            raise ConanInvalidConfiguration(
+                "The vulkan_layers_device_select requires unistd.h, which is not available on Windows when self.settings.os.subsystem is None"
+            )
+
 
     def build_requirements(self):
         self.tool_requires("meson/1.2.2")
