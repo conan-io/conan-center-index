@@ -31,8 +31,6 @@ class MMFileConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-
-    def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support Windows")
 
