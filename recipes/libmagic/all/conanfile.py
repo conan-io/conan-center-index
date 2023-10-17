@@ -13,7 +13,7 @@ required_conan_version = ">=1.52.0"
 class LibmagicConan(ConanFile):
     name = "libmagic"
     description = "Magic number recognition library - detect files with data in particular fixed formats."
-    license = "LicenseRef-COPYING" # Modified BSD 2-Clause
+    license = "DocumentRef-COPYING:LicenseRef-BSD-2-Clause-File"  # Modified BSD 2-Clause that states no restrictions on US export
     homepage = "https://github.com/file/file"
     url = "https://github.com/conan-io/conan-center-index"
     topics = "magic", "file format"
@@ -44,10 +44,9 @@ class LibmagicConan(ConanFile):
 
     def requirements(self):
         self.requires("bzip2/1.0.8")
-        # TODO: migrate lzip to Conan v2
-        # self.requires("lzip/1.22")
+        self.requires("lzip/1.23")
         self.requires("xz_utils/5.4.2")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zstd/1.5.5")
 
     def validate(self):
@@ -73,7 +72,7 @@ class LibmagicConan(ConanFile):
         tc = AutotoolsToolchain(self)
         # Set from 'auto' to explicitly enabled
         tc.configure_args.append("--enable-bzlib")
-        tc.configure_args.append("--disable-lzlib")
+        tc.configure_args.append("--enable-lzlib")
         tc.configure_args.append("--enable-xzlib")
         tc.configure_args.append("--enable-zlib")
         tc.configure_args.append("--enable-zstdlib")
