@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 3.8)
-project(test_package CXX)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
 
 find_package(log4cxx REQUIRED CONFIG)
 
