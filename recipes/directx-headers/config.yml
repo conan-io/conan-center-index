@@ -1,0 +1,5 @@
+versions:
+  "1.711.3-preview":
+    folder: all
+  "1.610.2":
+    folder: all

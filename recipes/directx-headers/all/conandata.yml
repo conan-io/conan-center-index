@@ -1,0 +1,7 @@
+sources:
+  "1.711.3-preview":
+    url: "https://github.com/microsoft/DirectX-Headers/archive/refs/tags/v1.711.3-preview.tar.gz"
+    sha256: "fad57451096836ef38c3c6c4fe4f3ca77c2e77d9c788a0a680ef6a42f88a5f25"
+  "1.610.2":
+    url: "https://github.com/microsoft/DirectX-Headers/archive/refs/tags/v1.610.2.tar.gz"
+    sha256: "59492497e99bd3c23f8f8aa8a709f4d7b5bc5bd5057efa8c568bbad40015a8b2"
