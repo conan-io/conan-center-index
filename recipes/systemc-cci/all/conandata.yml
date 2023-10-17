@@ -5,8 +5,5 @@ sources:
 patches:
   "1.0.0":
     - patch_file: "patches/broker.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/cci_param_untyped_handle.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/cci_value_converter.patch"
-      base_path: "source_subfolder"
