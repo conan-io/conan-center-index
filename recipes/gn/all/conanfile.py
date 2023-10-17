@@ -7,7 +7,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import chdir, copy, get, load, save, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars
@@ -73,8 +73,15 @@ class GnConan(ConanFile):
         return str(self.settings.os).lower()
 
     def generate(self):
+        # Make sure CXX env var is set, otherwise gn defaults it to clang++
+        # https://gn.googlesource.com/gn/+/refs/heads/main/build/gen.py#386
         env = VirtualBuildEnv(self)
+        compilers_by_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+        cxx = compilers_by_conf.get("cpp") or env.vars().get("CXX")
         env.generate()
+        env = Environment()
+        env.define("CXX", cxx)
+        env.vars(self).save_script("conanbuild_ninja")
 
         if is_msvc(self):
             vcvars = VCVars(self)
