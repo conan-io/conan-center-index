@@ -67,7 +67,6 @@ class CryptoPPPEMConan(ConanFile):
                  os.path.join(self.source_folder, "LICENSE"),
                  sha256="efa5140027e396a3844f9f48d65e014c9a710939ac02e22d32c33a51e1750eef")
 
-
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
@@ -82,8 +81,12 @@ class CryptoPPPEMConan(ConanFile):
         if is_apple_os(self) and self.settings.arch == "armv8" and Version(self.version) <= "8.4.0":
             tc.variables["CMAKE_CXX_FLAGS"] = "-march=armv8-a"
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+
+        # cryptopp-pem expects cryptopp headers to be without a cryptopp/ prefix
+        cryptopp_info = self.dependencies["cryptopp"].cpp_info.components["libcryptopp"]
+        cryptopp_info.includedirs.append(os.path.join(self.dependencies["cryptopp"].package_folder, "include", "cryptopp"))
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         if self.settings.os == "Android" and "ANDROID_NDK_HOME" in os.environ:
