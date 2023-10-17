@@ -726,9 +726,9 @@ class MesaConan(ConanFile):
         if self.options.get_safe("with_libunwind"):
             self.requires("libunwind/1.7.2")
 
-        if self.options.get_safe("with_llvm"):
-            # todo Update this to use the new llvm package when it is merged.
-            self.requires("llvm-core/13.0.0")
+        # todo Update this to use the new llvm package when it is merged.
+        # if self.options.get_safe("with_llvm"):
+            # self.requires("llvm-core/13.0.0")
 
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
