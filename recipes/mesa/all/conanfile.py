@@ -872,12 +872,13 @@ class MesaConan(ConanFile):
                 "The glx option requires the glx option of libglvnd to be enabled"
             )
 
-        if self.settings.os in ["Macos", "Windows"]:
-            for vulkan_driver in vulkan_drivers_list:
-                if self.options.get_safe(f"vulkan_drivers_{vulkan_driver}"):
-                    raise ConanInvalidConfiguration(
-                        "Vulkan is not supported on Macos or Windows yet"
-                    )
+        # todo Does the swrast Vulkan driver work on macOS?
+        # if self.settings.os == "Macos":
+        #     for vulkan_driver in vulkan_drivers_list:
+        #         if self.options.get_safe(f"vulkan_drivers_{vulkan_driver}"):
+        #             raise ConanInvalidConfiguration(
+        #                 "Vulkan is not supported on Macos or Windows yet"
+        #             )
 
         if self.options.get_safe("vulkan_drivers_swrast") and not self.options.get_safe(
             "gallium_drivers_swrast"
