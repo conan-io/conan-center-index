@@ -4,7 +4,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir, rename
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 import os
 
@@ -71,14 +71,12 @@ class LibmagicConan(ConanFile):
             env.generate(scope="build")
         tc = AutotoolsToolchain(self)
         # Set from 'auto' to explicitly enabled
-        tc.configure_args.append("--enable-bzlib")
+        tc.configure_args.append(f"--enable-bzlib={self.dependencies['bzip2'].package_folder}")
         tc.configure_args.append(f"--enable-lzlib={self.dependencies['lzip'].package_folder}")
-        tc.configure_args.append("--enable-xzlib")
-        tc.configure_args.append("--enable-zlib")
-        tc.configure_args.append("--enable-zstdlib")
+        tc.configure_args.append(f"--enable-xzlib={self.dependencies['xz_utils'].package_folder}")
+        tc.configure_args.append(f"--enable-zlib={self.dependencies['zlib'].package_folder}")
+        tc.configure_args.append(f"--enable-zstdlib={self.dependencies['zstd'].package_folder}")
         tc.generate()
-        deps = AutotoolsDeps(self)
-        deps.generate()
 
     def build(self):
         autotools = Autotools(self)
