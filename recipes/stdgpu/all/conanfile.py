@@ -76,8 +76,6 @@ class StdgpuConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.options.backend != "openmp":
-            del self.options.openmp
 
     def configure(self):
         if self.options.shared:
@@ -86,6 +84,10 @@ class StdgpuConan(ConanFile):
             self.options["thrust"].device_system = "cuda"
         elif self.options.backend == "openmp":
             self.options["thrust"].device_system = "omp"
+
+    def package_id(self):
+        if self.info.options.backend != "openmp":
+            del self.info.options.openmp
 
     def layout(self):
         cmake_layout(self, src_folder="src")
