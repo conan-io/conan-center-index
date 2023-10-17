@@ -250,6 +250,8 @@ class NCursesConan(ConanFile):
             self.cpp_info.components["libcurses"].requires += ["tinfo"]
         if self.options.with_cxx:
             _add_component("curses++", lib_name="ncurses++", requires=["libcurses"])
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["libcurses++"].system_libs += ["util"]
         if self.options.with_ticlib:
             _add_component("ticlib", lib_name="tic", requires=["libcurses"])
 
