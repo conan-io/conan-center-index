@@ -1,5 +1,8 @@
 import os
-from conans import ConanFile, tools, CMake
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.files import rmdir, get, copy
+from conan.tools.scm import Version
 from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.33.0"
@@ -15,7 +18,6 @@ class AndreasbuhrCppCoroConan(ConanFile):
     provides = "cppcoro"
 
     exports_sources = "CMakeLists.txt"
-    generators = "cmake"
 
     options = {
         "shared": [True, False],
@@ -25,8 +27,6 @@ class AndreasbuhrCppCoroConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -49,10 +49,10 @@ class AndreasbuhrCppCoroConan(ConanFile):
         # We can't simply check for C++20, because clang and MSVC support the coroutine TS despite not having labeled (__cplusplus macro) C++20 support
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+            self.output.warning("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
+            if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires coroutine TS support. The current compiler {} {} does not support it.".format(
                     self.name, self.settings.compiler, self.settings.compiler.version))
 
@@ -67,46 +67,46 @@ class AndreasbuhrCppCoroConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            if self.settings.os == "Windows" and self.options.shared:
-                self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = "ON"
-            self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if self.settings.os == "Windows" and self.options.shared:
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = "ON"
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.libs = ["cppcoro"]
+
+        if self.settings.os == "Linux" and self.options.shared:
+            self.cpp_info.system_libs = ["pthread"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["synchronization"]
+
+        if self.settings.compiler == "msvc":
+            self.cpp_info.cxxflags.append("/await")
+        elif self.settings.compiler == "gcc":
+            self.cpp_info.cxxflags.append("-fcoroutines")
+            self.cpp_info.defines.append("CPPCORO_COMPILER_SUPPORTS_SYMMETRIC_TRANSFER=1")
+        elif self.settings.compiler == "clang" or self.settings.compiler == "apple-clang":
+            self.cpp_info.cxxflags.append("-fcoroutines-ts")
+
+        self.cpp_info.set_property("cmake_file_name", "cppcoro")
+        self.cpp_info.set_property("cmake_target_name", "cppcoro::cppcoro")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "cppcoro"
         self.cpp_info.filenames["cmake_find_package_multi"] = "cppcoro"
         self.cpp_info.names["cmake_find_package"] = "cppcoro"
         self.cpp_info.names["cmake_find_package_multi"] = "cppcoro"
-
-        comp = self.cpp_info.components["cppcoro"]
-        comp.names["cmake_find_package"] = "cppcoro"
-        comp.names["cmake_find_package_multi"] = "cppcoro"
-        comp.libs = ["cppcoro"]
-
-        if self.settings.os == "Linux" and self.options.shared:
-            comp.system_libs = ["pthread"]
-        if self.settings.os == "Windows":
-            comp.system_libs = ["synchronization"]
-
-        if self.settings.compiler == "Visual Studio":
-            comp.cxxflags.append("/await")
-        elif self.settings.compiler == "gcc":
-            comp.cxxflags.append("-fcoroutines")
-            comp.defines.append("CPPCORO_COMPILER_SUPPORTS_SYMMETRIC_TRANSFER=1")
-        elif self.settings.compiler == "clang" or self.settings.compiler == "apple-clang":
-            comp.cxxflags.append("-fcoroutines-ts")
