@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import Environment
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
@@ -245,15 +245,21 @@ class NCursesConan(ConanFile):
         _add_component("panel", requires=["libcurses"])
         _add_component("menu", requires=["libcurses"])
         _add_component("form", requires=["libcurses"])
+
         if self.options.with_tinfo:
             _add_component("tinfo")
             self.cpp_info.components["libcurses"].requires += ["tinfo"]
+
+        if self.options.with_ticlib:
+            _add_component("ticlib", lib_name="tic", requires=["libcurses"])
+
         if self.options.with_cxx:
             _add_component("curses++", lib_name="ncurses++", requires=["libcurses"])
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["libcurses++"].system_libs += ["util"]
-        if self.options.with_ticlib:
-            _add_component("ticlib", lib_name="tic", requires=["libcurses"])
+                self.cpp_info.components["libcurses++"].system_libs.append("util")
+            libcxx = stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.components["libcurses++"].system_libs.append(libcxx)
 
         if is_msvc(self):
             self.cpp_info.components["libcurses"].requires += [
