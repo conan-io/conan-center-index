@@ -638,7 +638,7 @@ class MesaConan(ConanFile):
         self.options.vulkan_drivers_swrast = self._default_vulkan_driver_option(
             "swrast"
         )
-        self.options.vulkan_drivers_swrast = self._default_vulkan_driver_option(
+        self.options.vulkan_drivers_virtio = self._default_vulkan_driver_option(
             "virtio"
         )
         self.options.vulkan_layers_device_select = self._default_vulkan_layers_device_select_option
