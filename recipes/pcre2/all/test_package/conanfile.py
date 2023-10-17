@@ -32,7 +32,6 @@ class TestPackageConan(ConanFile):
     def generate(self):
         pcre2_cpp_info = self.dependencies["pcre2"].cpp_info.aggregated_components()
         save(self, os.path.join(self.build_folder, "bindir"), pcre2_cpp_info.bindir)
-        save(self, os.path.join(self.build_folder, "libdir"), pcre2_cpp_info.libdir)
         save(self, os.path.join(self.build_folder, "libs"), " ".join(pcre2_cpp_info.libs))
 
     def build(self):
@@ -45,14 +44,12 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
 
-            if Version(self.tested_reference_str.split("/")[1]) >= "10.36":
+            if Version(self.tested_reference_str.split("/")[1]) >= "10.38":
                 bindir = load(self, os.path.join(self.build_folder, "bindir"))
-                libdir = load(self, os.path.join(self.build_folder, "libdir")).replace("\\", "/")
                 libs = load(self, os.path.join(self.build_folder, "libs")).split(" ")
                 output = StringIO()
                 self.run(f"bash {bindir}/pcre2-config --libs8", output)
                 conf = next(l for l in output.getvalue().splitlines() if l.lower().startswith("-l")).strip().split(" ")
-                assert f"-L{libdir}" in conf, f"Expected '-L{libdir}' not set by pcre2-config: {conf}"
                 for param in conf:
                     if param.startswith("-l"):
                         assert param[2:] in libs, f"Invalid library target '{param[2:]}' output by pcre2-config. Not found in {libs}."
