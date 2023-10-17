@@ -149,7 +149,7 @@ class GfCompleteConan(ConanFile):
             linkflags = []
             cxxflags = []
             cflags = []
-            for dependency in self.dependencies.values():
+            for dependency in reversed(self.dependencies.host.topological_sort.values()):
                 deps_cpp_info = dependency.cpp_info.aggregated_components()
                 includedirs.extend(deps_cpp_info.includedirs)
                 defines.extend(deps_cpp_info.defines)
