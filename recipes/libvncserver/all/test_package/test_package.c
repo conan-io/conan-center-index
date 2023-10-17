@@ -1,15 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <rfb/rfbproto.h>
-#include <libvncserver/auth.h>
+#include <rfb/rfb.h>
 
 
 int main(void) {
-
-    unsigned char bytes [CHALLENGESIZE] = {0};
-    rfbRandomBytes(&bytes);
-    printf("Random bytes: %s\n", bytes);
+    rfbFileTransferData fileTransfer;
+    fileTransfer.fd = 5;
 
     return EXIT_SUCCESS;
 }
