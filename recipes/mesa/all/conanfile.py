@@ -488,11 +488,11 @@ class MesaConan(ConanFile):
             "microsoft_experimental": False,
             "nouveau_experimental": False,
             "panfrost": False,
-            "swrast": True # self._system_has_kms_drm todo Does this work on macOS?
-            and (
-                self.settings.arch in ["mips", "mips64", "x86", "x86_64"]
-                or str(self.settings.arch).startswith("arm")
-            ),
+            "swrast": True, # self._system_has_kms_drm todo Does this work on macOS?
+            # and (
+            #     self.settings.arch in ["mips", "mips64", "x86", "x86_64"]
+            #     or str(self.settings.arch).startswith("arm")
+            # ),
             "virtio": False,
         }[option]
 
