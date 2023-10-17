@@ -23,6 +23,9 @@ sources:
   "3.17.1":
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.17.1.tar.gz"
     sha256: "036d66d6eec216160dd898cfb162e9d82c1904627642667cc32b104d407bb411"
+  "3.5.1":
+    sha256: 826425182ee43990731217b917c5c3ea7190cfda141af4869e6d4ad9085a740f
+    url: https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.5.1.tar.gz
 patches:
   "3.21.12":
     - patch_file: "patches/protobuf-3.21.12-upstream-macos-macros.patch"
