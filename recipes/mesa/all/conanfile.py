@@ -575,8 +575,8 @@ class MesaConan(ConanFile):
             "dep_wl_scanner = dependency('wayland-scanner_BUILD', native: true)")
 
     def source(self):
-        self._patch_sources()
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = MesonToolchain(self)
