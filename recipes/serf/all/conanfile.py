@@ -51,7 +51,7 @@ class SerfConan(ConanFile):
 
     def requirements(self):
         self.requires("apr-util/1.6.1", transitive_headers=True)
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("openssl/[>=1.1 <4]")
 
     def build_requirements(self):
