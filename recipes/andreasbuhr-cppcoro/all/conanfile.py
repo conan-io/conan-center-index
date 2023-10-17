@@ -1,11 +1,11 @@
 import os
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import rmdir, get, copy
 from conan.tools.scm import Version
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.49.0"
 
 class AndreasbuhrCppCoroConan(ConanFile):
     name = "andreasbuhr-cppcoro"
@@ -17,8 +17,6 @@ class AndreasbuhrCppCoroConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     provides = "cppcoro"
 
-    exports_sources = "CMakeLists.txt"
-
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -29,10 +27,6 @@ class AndreasbuhrCppCoroConan(ConanFile):
     }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "15",
@@ -41,9 +35,12 @@ class AndreasbuhrCppCoroConan(ConanFile):
             "apple-clang": "10",
         }
 
+    def layout(self):
+        cmake_layout(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         # We can't simply check for C++20, because clang and MSVC support the coroutine TS despite not having labeled (__cplusplus macro) C++20 support
@@ -64,10 +61,10 @@ class AndreasbuhrCppCoroConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -81,7 +78,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE.txt", dst="licenses", src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
