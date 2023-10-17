@@ -47,7 +47,7 @@ class ShapelibConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
-        tc.variables["USE_RPATH"] = False
+        tc.cache_variables["USE_RPATH"] = False
         tc.generate()
 
     def build(self):
