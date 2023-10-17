@@ -18,10 +18,16 @@ class PcapplusplusConan(ConanFile):
     settings = "os", "arch", "build_type", "compiler"
     options = {
         "immediate_mode": [True, False],
+        "fPIC": [True, False],
     }
     default_options = {
         "immediate_mode": False,
+        "fPIC": True,
     }
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def requirements(self):
         if self.settings.os == "Windows":
