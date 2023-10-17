@@ -68,14 +68,6 @@ class AndreasbuhrCppCoroConan(ConanFile):
                 f" {self.settings.compiler} {self.settings.compiler.version} does not support it."
             )
 
-        # Currently clang expects coroutine to be implemented in a certain way (under std::experimental::), while libstdc++ puts them under std::
-        # There are also other inconsistencies, see https://bugs.llvm.org/show_bug.cgi?id=48172
-        # This should be removed after both gcc and clang implement the final coroutine TS
-        if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libstdc++":
-            raise ConanInvalidConfiguration(
-                f"{self.name} does not support clang with libstdc++. Use libc++ instead."
-            )
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -111,7 +103,8 @@ class AndreasbuhrCppCoroConan(ConanFile):
         elif self.settings.compiler == "gcc":
             self.cpp_info.cxxflags.append("-fcoroutines")
             self.cpp_info.defines.append("CPPCORO_COMPILER_SUPPORTS_SYMMETRIC_TRANSFER=1")
-        elif self.settings.compiler in ["clang", "apple-clang"]:
+        elif ((self.settings.compiler == "clang" and Version(self.settings.compiler.version).major < 17) or
+              self.settings.compiler == "apple-clang"): # apple-clang has not released a version with LLVM 17+ yet
             self.cpp_info.cxxflags.append("-fcoroutines-ts")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
