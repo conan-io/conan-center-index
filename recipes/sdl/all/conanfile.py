@@ -85,6 +85,11 @@ class SDLConan(ConanFile):
     def _is_legacy_one_profile(self):
         return not hasattr(self, "settings_build")
 
+    @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+               self.settings.compiler.get_safe("runtime")
+
     def config_options(self):
         # Don't depend on iconv on macOS by default
         # SDL2 depends on many system freamworks,
@@ -94,7 +99,7 @@ class SDLConan(ConanFile):
 
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if is_msvc(self):
+            if (is_msvc(self) or self._is_clang_cl):
                 del self.options.iconv
         if self.settings.os != "Linux":
             del self.options.alsa
@@ -193,7 +198,7 @@ class SDLConan(ConanFile):
 
         if self.settings.os != "Windows" and not self.options.shared:
             tc.variables["SDL_STATIC_PIC"] = self.options.fPIC
-        if is_msvc(self) and not self.options.shared:
+        if (is_msvc(self) or self._is_clang_cl) and not self.options.shared:
             tc.variables["HAVE_LIBC"] = True
         tc.variables["SDL_SHARED"] = self.options.shared
         tc.variables["SDL_STATIC"] = not self.options.shared
@@ -343,9 +348,10 @@ class SDLConan(ConanFile):
         postfix = "d" if self.settings.os != "Android" and self.settings.build_type == "Debug" else ""
 
         # SDL2
-        lib_postfix = postfix
-        if is_msvc(self) and not self.options.shared:
-            lib_postfix = "-static" + postfix
+        if (is_msvc(self) or self._is_clang_cl) and not self.options.shared:
+            lib_postfix = f"-static{postfix}"
+        else:
+            lib_postfix = postfix
 
         self.cpp_info.components["libsdl2"].set_property("cmake_target_name", "SDL2::SDL2")
         if not self.options.shared:

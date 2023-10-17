@@ -1,10 +1,8 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conan.tools.build import cross_building
-from conans import ConanFile, CMake
 
-
-class TestPackageConan(ConanFile):
+class LibsassTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi"
 
@@ -14,6 +12,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not cross_building(self):
-            bin_path = os.path.join("bin", "tixi3_conan_test")
+        if not tools.cross_building(self):
+            bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
