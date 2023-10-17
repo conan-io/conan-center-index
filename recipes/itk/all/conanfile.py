@@ -78,7 +78,7 @@ class ITKConan(ConanFile):
         self.requires("libtiff/4.5.1")
         self.requires("openjpeg/2.5.0")
         self.requires("onetbb/2021.9.0")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.options.shared and not self.dependencies["hdf5"].options.shared:

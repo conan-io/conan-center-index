@@ -103,7 +103,7 @@ class SentryNativeConan(ConanFile):
 
     def requirements(self):
         if self.options.transport == "curl":
-            self.requires("libcurl/8.0.1")
+            self.requires("libcurl/8.2.1")
         if self.options.backend == "crashpad":
             if self.options.with_crashpad == "sentry":
                 self.requires(f"sentry-crashpad/{self.version}")
@@ -115,7 +115,7 @@ class SentryNativeConan(ConanFile):
             if self.options.with_breakpad == "google":
                 self.requires("breakpad/cci.20210521")
         if self.options.get_safe("qt"):
-            self.requires("qt/5.15.9")
+            self.requires("qt/5.15.11")
             self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
@@ -137,7 +137,7 @@ class SentryNativeConan(ConanFile):
             self.tool_requires("cmake/[>=3.16.4 <4]")
         if self.options.backend == "breakpad":
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/1.9.3")
+                self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])

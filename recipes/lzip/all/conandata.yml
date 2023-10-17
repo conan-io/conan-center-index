@@ -1,20 +1,23 @@
 sources:
+  "1.23":
+    url:
+      - "http://download.savannah.gnu.org/releases/lzip/lzip-1.23.tar.gz"
+      - "https://download-mirror.savannah.gnu.org/releases/lzip/lzip-1.23.tar.gz"
+    sha256: "4792c047ddf15ef29d55ba8e68a1a21e0cb7692d87ecdf7204419864582f280d"
   "1.22":
-    url: [
-      "http://download.savannah.gnu.org/releases/lzip/lzip-1.22.tar.gz",
-      "https://download-mirror.savannah.gnu.org/releases/lzip/lzip-1.22.tar.gz",
-    ]
+    url:
+      - "http://download.savannah.gnu.org/releases/lzip/lzip-1.22.tar.gz"
+      - "https://download-mirror.savannah.gnu.org/releases/lzip/lzip-1.22.tar.gz"
     sha256: "c3342d42e67139c165b8b128d033b5c96893a13ac5f25933190315214e87a948"
   "1.21":
-    url: [
-      "http://download.savannah.gnu.org/releases/lzip/lzip-1.21.tar.gz",
-      "https://download-mirror.savannah.gnu.org/releases/lzip/lzip-1.21.tar.gz",
-    ]
+    url:
+      - "http://download.savannah.gnu.org/releases/lzip/lzip-1.21.tar.gz"
+      - "https://download-mirror.savannah.gnu.org/releases/lzip/lzip-1.21.tar.gz"
     sha256: "e48b5039d3164d670791f9c5dbaa832bf2df080cb1fbb4f33aa7b3300b670d8b"
 patches:
+  "1.23":
+    - patch_file: "patches/1.23-0001-any-compiler.patch"
   "1.22":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.22-0001-any-compiler.patch"
+    - patch_file: "patches/1.22-0001-any-compiler.patch"
   "1.21":
-    - base_path: "source_subfolder"
-      patch_file: "patches/1.21-0001-any-compiler.patch"
+    - patch_file: "patches/1.21-0001-any-compiler.patch"
