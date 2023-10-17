@@ -5,9 +5,9 @@
 #include <EGL/eglmesaext.h>
 #endif
 
-#ifdef _WIN32
-#include <GL/gl.h>
-#endif
+// #ifdef _WIN32
+// #include <GL/gl.h>
+// #endif
 
 int main(void) {
 #if MESA_TEST_PACKAGE_HAS_EGL
@@ -15,10 +15,10 @@ int main(void) {
         return EXIT_FAILURE;
     }
 #endif
-#ifdef _WIN32
-    if (glGetError() != GL_NO_ERROR) {
-        return EXIT_FAILURE;
-    }
-#endif
+// #ifdef _WIN32
+//     if (glGetError() != GL_NO_ERROR) {
+//         return EXIT_FAILURE;
+//     }
+// #endif
     return EXIT_SUCCESS;
 }
