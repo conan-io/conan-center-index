@@ -155,7 +155,7 @@ class SDLConan(ConanFile):
     def validate(self):
         # SDL>=2.0.18 requires xcode 12 or higher because it uses CoreHaptics.
         if is_apple_os(self) and Version(self.settings.compiler.version) < "12":
-            raise ConanInvalidConfiguration("{}/{} requires xcode 12 or higher".format(self.name, self.version))
+            raise ConanInvalidConfiguration(f"{self.ref} requires xcode 12 or higher")
 
         if self.settings.os == "Linux":
             if self.options.sndio:
