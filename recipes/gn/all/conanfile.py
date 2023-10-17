@@ -8,7 +8,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, copy, get, load, save
+from conan.tools.files import chdir, copy, get, load, save, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars
 from conan.tools.scm import Version
@@ -90,16 +90,19 @@ class GnConan(ConanFile):
 
     def build(self):
         with chdir(self, self.source_folder):
-            # Generate dummy header to be able to run `build/ben.py` with `--no-last-commit-position`. This allows running the script without the tree having to be a git checkout.
-            save(
-                self,
-                os.path.join("src", "gn", "last_commit_position.h"),
+            # Generate dummy header to be able to run `build/gen.py` with `--no-last-commit-position`.
+            # This allows running the script without the tree having to be a git checkout.
+            save(self, os.path.join(self.source_folder, "src", "gn", "last_commit_position.h"),
                 textwrap.dedent("""\
                     #pragma once
                     #define LAST_COMMIT_POSITION "1"
                     #define LAST_COMMIT_POSITION_NUM 1
                     """),
             )
+            # Disable GenerateLastCommitPosition()
+            replace_in_file(self, os.path.join(self.source_folder, "build/gen.py"),
+                            "def GenerateLastCommitPosition(host, header):",
+                            "def GenerateLastCommitPosition(host, header):\n  return")
             self.run(f"{sys.executable} build/gen.py " + load(self, "configure_args"))
             # Try sleeping one second to avoid time skew of the generated ninja.build file (and having to re-run build/gen.py)
             time.sleep(1)
