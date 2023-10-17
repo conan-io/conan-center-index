@@ -7,7 +7,6 @@ from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
@@ -41,13 +40,7 @@ class XkbcommonConan(ConanFile):
     def _has_build_profile(self):
         return hasattr(self, "settings_build")
 
-    @property
-    def _has_xkbregistry_option(self):
-        return Version(self.version) >= "1.0.0"
-
     def config_options(self):
-        if not self._has_xkbregistry_option:
-            del self.options.xkbregistry
         if self.settings.os != "Linux":
             del self.options.with_wayland
 
@@ -64,7 +57,7 @@ class XkbcommonConan(ConanFile):
         self.requires("xkeyboard-config/system")
         if self.options.with_x11:
             self.requires("xorg/system")
-        if self.options.get_safe("xkbregistry"):
+        if self.options.xkbregistry:
             self.requires("libxml2/2.11.4")
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0", run=not self._has_build_profile)
@@ -95,8 +88,7 @@ class XkbcommonConan(ConanFile):
         tc.project_options["enable-docs"] = False
         tc.project_options["enable-wayland"] = self.options.get_safe("with_wayland", False)
         tc.project_options["enable-x11"] = self.options.with_x11
-        if self._has_xkbregistry_option:
-            tc.project_options["enable-xkbregistry"] = self.options.xkbregistry
+        tc.project_options["enable-xkbregistry"] = self.options.xkbregistry
         tc.project_options["build.pkg_config_path"] = self.generators_folder
         tc.generate()
 
@@ -152,8 +144,7 @@ class XkbcommonConan(ConanFile):
             if not self._has_build_profile:
                 self.cpp_info.components["xkbcli-interactive-wayland"].requires.append("wayland-protocols::wayland-protocols")
 
-        if Version(self.version) >= "1.0.0":
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
         # unofficial, but required to avoid side effects (libxkbcommon component
         # "steals" the default global pkg_config name)
