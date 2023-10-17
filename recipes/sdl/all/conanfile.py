@@ -322,7 +322,7 @@ class SDLConan(ConanFile):
         # Add extra information collected from the deps
         tc.variables["EXTRA_LDFLAGS"] = ";".join(cmake_extra_ldflags)
         tc.variables["CMAKE_REQUIRED_INCLUDES"] = ";".join(cmake_required_includes)
-        cmake_extra_cflags = ["-I{}".format(path) for _, dep in self.dependencies.items() for path in dep.cpp_info.includedirs]
+        cmake_extra_cflags = ["-I{}".format(path.replace("\\", "/")) for _, dep in self.dependencies.items() for path in dep.cpp_info.includedirs]
         tc.variables["EXTRA_CFLAGS"] = ";".join(cmake_extra_cflags)
         tc.variables["EXTRA_LIBS"] = ";".join(cmake_extra_libs)
         tc.generate()
