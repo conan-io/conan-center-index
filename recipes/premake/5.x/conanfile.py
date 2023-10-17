@@ -6,11 +6,10 @@ import shutil
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, check_min_vs
-from conan.tools.microsoft.visual import vs_ide_version
 
 required_conan_version = ">=1.53.0"
 
@@ -58,13 +57,19 @@ class PremakeConan(ConanFile):
 
     @property
     def _ide_version(self):
-        return {
-            "12": "2013",
-            "14": "2015",
-            "15": "2017",
-            "16": "2019",
-            "17": "2022",
-        }[vs_ide_version(self)]
+        compiler_version = str(self.settings.compiler.version)
+        if str(self.settings.compiler) == "Visual Studio":
+            return {"17": "2022",
+                    "16": "2019",
+                    "15": "2017",
+                    "14": "2015",
+                    "12": "2013"}.get(compiler_version)
+        else:
+            return {"193": "2022",
+                    "192": "2019",
+                    "191": "2017",
+                    "190": "2015",
+                    "180": "2013"}.get(compiler_version)
 
     @property
     def _msvc_build_dir(self):
