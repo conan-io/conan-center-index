@@ -86,7 +86,7 @@ class LASlibConan(ConanFile):
 
         # Copy the libraries
         if self.options.shared:
-            self.copy(pattern="*.dll", dst="bin", keep_path=False)
+            copy(self, pattern="*.dll", src=self.package_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
 
         # some files extensions and folders are not allowed.
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
