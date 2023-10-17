@@ -1,8 +1,12 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.files import get, copy, rmdir, collect_libs
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class SobjectizerConan(ConanFile):
@@ -27,80 +31,85 @@ class SobjectizerConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def _compiler_support_lut(self):
+        if self.version >= Version("5.8.0"):
+            # Since v5.8.0 requirements to compilers were updated:
+            return {
+                "gcc": "10",
+                "clang": "11",
+                "apple-clang": "13",
+                "Visual Studio": "17",
+                "msvc": "192"
+            }
+
+        return {
+            "gcc": "7",
+            "clang": "6",
+            "apple-clang": "10",
+            "Visual Studio": "15",
+            "msvc": "191"
+        }
 
     def validate(self):
         minimal_cpp_standard = "17"
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, minimal_cpp_standard)
-        minimal_version = {
-            "gcc": "7",
-            "clang": "6",
-            "apple-clang": "10",
-            "Visual Studio": "15"
-        }
+            check_min_cppstd(self, minimal_cpp_standard)
+        minimal_version = self._compiler_support_lut()
+
         compiler = str(self.settings.compiler)
         if compiler not in minimal_version:
-            self.output.warn(
+            self.output.warning(
                 "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
-            self.output.warn(
+            self.output.warning(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
             return
 
-        version = tools.Version(self.settings.compiler.version)
+        version = Version(self.settings.compiler.version)
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["SOBJECTIZER_BUILD_SHARED"] = self.options.shared
+        tc.variables["SOBJECTIZER_BUILD_STATIC"] = not self.options.shared
+        tc.variables["SOBJECTIZER_INSTALL"] = True
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
+        tc.generate()
 
-        self._cmake = CMake(self)
-        self._cmake.definitions["SOBJECTIZER_BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["SOBJECTIZER_BUILD_STATIC"] = not self.options.shared
-        self._cmake.definitions["SOBJECTIZER_INSTALL"] = True
+        cmake_deps = CMakeDeps(self)
+        cmake_deps.generate()
 
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "dev", "so_5"))
         cmake.build()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        self.copy("license*", src=self._source_subfolder, dst="licenses",  ignore_case=True, keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         cmake_target = "SharedLib" if self.options.shared else "StaticLib"
         self.cpp_info.set_property("cmake_file_name", "sobjectizer")
         self.cpp_info.set_property("cmake_target_name", "sobjectizer::{}".format(cmake_target))
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["_sobjectizer"].libs = tools.collect_libs(self)
+        self.cpp_info.components["_sobjectizer"].libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_sobjectizer"].system_libs = ["pthread", "m"]
         if not self.options.shared:

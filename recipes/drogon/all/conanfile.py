@@ -57,6 +57,8 @@ class DrogonConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.8.4":
+            del self.options.with_yaml_cpp
 
     def configure(self):
         if self.options.shared:
@@ -108,28 +110,28 @@ class DrogonConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires boost on C++14")
 
     def requirements(self):
-        self.requires("trantor/1.5.11", transitive_headers=True, transitive_libs=True)
+        self.requires("trantor/1.5.14", transitive_headers=True, transitive_libs=True)
         self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os == "Linux":
-            self.requires("libuuid/1.0.3")
+            self.requires("util-linux-libuuid/2.39")
         if self.options.with_profile:
             self.requires("coz/cci.20210322")
         if self.options.with_boost:
-            self.requires("boost/1.82.0", transitive_headers=True)
+            self.requires("boost/1.83.0", transitive_headers=True)
         if self.options.with_brotli:
             self.requires("brotli/1.0.9")
         if self.options.get_safe("with_postgres"):
-            self.requires("libpq/14.7")
+            self.requires("libpq/15.4")
         if self.options.get_safe("with_mysql"):
-            self.requires("libmysqlclient/8.0.31")
+            self.requires("libmysqlclient/8.1.0")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.42.0")
+            self.requires("sqlite3/3.42.1")
         if self.options.get_safe("with_redis"):
-            self.requires("hiredis/1.1.0")
-        if self.options.with_yaml_cpp:
-            self.requires("yaml-cpp/0.7.0")
+            self.requires("hiredis/1.2.0")
+        if self.options.get_safe("with_yaml_cpp", False):
+            self.requires("yaml-cpp/0.8.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -146,7 +148,7 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_DROGON_SHARED"] = self.options.shared
         tc.variables["BUILD_DOC"] = False
         tc.variables["BUILD_BROTLI"] = self.options.with_brotli
-        tc.variables["BUILD_YAML_CONFIG"] = self.options.with_yaml_cpp
+        tc.variables["BUILD_YAML_CONFIG"] = self.options.get_safe("with_yaml_cpp", False)
         tc.variables["BUILD_POSTGRESQL"] = self.options.get_safe("with_postgres", False)
         tc.variables["BUILD_POSTGRESQL_BATCH"] = self.options.get_safe("with_postgres_batch", False)
         tc.variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)

@@ -1,4 +1,10 @@
 versions:
+  "1.8.7":
+    folder: "all"
+  "1.8.6":
+    folder: "all"
+  "1.8.5":
+    folder: "all"
   "1.8.4":
     folder: "all"
   "1.8.3":

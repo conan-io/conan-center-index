@@ -1,4 +1,4 @@
 sources:
-  "cci.20150416":
-    url: "https://gist.github.com/panzi/6856583/archive/1eca2ab34f2301b9641aa73d1016b951fff3fc39.zip"
-    sha256: "488d5d08215f657e769b31764013ef845355832cc6f1d165e1809fa5fe168eeb"
+  "cci.20220509":
+    url: "https://gist.github.com/panzi/6856583/archive/f6512b0830a4e9e06b26e32fc2509d67bbfa93d8.zip"
+    sha256: "88593bad9a1050779e98f93194b028566df575e06da9f8a60e44fa97a36b92f8"

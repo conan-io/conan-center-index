@@ -108,29 +108,14 @@ class AutoconfConan(ConanFile):
         # TODO: These variables can be removed since the scripts now locate the resources
         #       relative to themselves.
         dataroot_path = os.path.join(self.package_folder, "res", "autoconf")
-        self.output.info(f"Defining AC_MACRODIR environment variable: {dataroot_path}")
         self.buildenv_info.define_path("AC_MACRODIR", dataroot_path)
-
-        self.output.info(f"Defining autom4te_perllibdir environment variable: {dataroot_path}")
         self.buildenv_info.define_path("autom4te_perllibdir", dataroot_path)
 
         bin_path = os.path.join(self.package_folder, "bin")
-
-        autoconf_bin = os.path.join(bin_path, "autoconf")
-        self.output.info(f"Defining AUTOCONF environment variable: {autoconf_bin}")
-        self.buildenv_info.define_path("AUTOCONF", autoconf_bin)
-
-        autoreconf_bin = os.path.join(bin_path, "autoreconf")
-        self.output.info(f"Defining AUTORECONF environment variable: {autoreconf_bin}")
-        self.buildenv_info.define_path("AUTORECONF", autoreconf_bin)
-
-        autoheader_bin = os.path.join(bin_path, "autoheader")
-        self.output.info(f"Defining AUTOHEADER environment variable: {autoheader_bin}")
-        self.buildenv_info.define_path("AUTOHEADER", autoheader_bin)
-
-        autom4te_bin = os.path.join(bin_path, "autom4te")
-        self.output.info(f"Defining AUTOM4TE environment variable: {autom4te_bin}")
-        self.buildenv_info.define_path("AUTOM4TE", autom4te_bin)
+        self.buildenv_info.define_path("AUTOCONF", os.path.join(bin_path, "autoconf"))
+        self.buildenv_info.define_path("AUTORECONF", os.path.join(bin_path, "autoreconf"))
+        self.buildenv_info.define_path("AUTOHEADER", os.path.join(bin_path, "autoheader"))
+        self.buildenv_info.define_path("AUTOM4TE", os.path.join(bin_path, "autom4te"))
 
         # TODO: to remove in conan v2
         self.env_info.PATH.append(bin_path)

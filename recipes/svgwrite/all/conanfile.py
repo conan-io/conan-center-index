@@ -56,7 +56,7 @@ class SvgwriteConan(ConanFile):
 
     def requirements(self):
         self.requires("span-lite/0.10.3", transitive_headers=True)
-        self.requires("fmt/10.0.0")
+        self.requires("fmt/10.1.0")
 
     def validate(self):
         if self.settings.compiler.cppstd:

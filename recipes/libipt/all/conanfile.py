@@ -1,30 +1,34 @@
-from conans import ConanFile, CMake, tools
+import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+
+required_conan_version = ">=1.53.0"
+
 
 class LibIptConan(ConanFile):
     name = "libipt"
-    license = "BSD-3-Clause"
-    homepage = "https://github.com/intel/libipt"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "Intel(R) Processor Trace Decoder Library"
+    license = "BSD-3-Clause"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/intel/libipt"
     topics = ("profiling", "tracing")
-    settings = "os", "compiler", "build_type", "arch"
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
-            "shared": [True, False],
-            "fPIC": [True, False],
+        "shared": [True, False],
+        "fPIC": [True, False],
     }
     default_options = {
-            "shared": False,
-            "fPIC": True,
+        "shared": False,
+        "fPIC": True,
     }
 
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -32,43 +36,35 @@ class LibIptConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
-        pass
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-               strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["libipt"] if self.settings.os == "Windows" else ["ipt"]
-        self.cpp_info.set_property("cmake_file_name", "libipt")
-        self.cpp_info.set_property("cmake_target_name", "libipt::libipt")
-
+        if self.settings.os == "Windows":
+            self.cpp_info.libs = ["libipt"]
+        else:
+            self.cpp_info.libs = ["ipt"]
