@@ -1,4 +1,7 @@
 sources:
+  "4.3.26":
+    url: "https://github.com/CopernicaMarketingSoftware/AMQP-CPP/archive/v4.3.26.tar.gz"
+    sha256: "2baaab702f3fd9cce40563dc1e23f433cceee7ec3553bd529a98b1d3d7f7911c"
   "4.3.24":
     url: "https://github.com/CopernicaMarketingSoftware/AMQP-CPP/archive/v4.3.24.tar.gz"
     sha256: "c3312f8af813cacabf6c257dfaf41bf9e66606bbf7d62d085a9b7da695355245"
@@ -9,6 +12,16 @@ sources:
     url: "https://github.com/CopernicaMarketingSoftware/AMQP-CPP/archive/v4.1.7.tar.gz"
     sha256: "71b504f21f62b69c76b371fe7044e0dfc6d42650a15c267431c5084badb0ade7"
 patches:
+  "4.3.26":
+    - patch_file: "patches/4.3.24-0001-cmake-link-openssl.patch"
+    - patch_file: "patches/4.3.24-0002-cmake-install-dll-export-msvc.patch"
+      patch_description: "windows: Fix install directory of DLL and export symbols if msvc"
+      patch_type: "portability"
+      patch_source: "https://github.com/CopernicaMarketingSoftware/AMQP-CPP/pull/515"
+    - patch_file: "patches/4.3.24-0003-cmake-link-ws2_32.patch"
+      patch_description: "Link to ws2_32 if windows"
+      patch_type: "portability"
+      patch_source: "https://github.com/CopernicaMarketingSoftware/AMQP-CPP/pull/514"
   "4.3.24":
     - patch_file: "patches/4.3.24-0001-cmake-link-openssl.patch"
     - patch_file: "patches/4.3.24-0002-cmake-install-dll-export-msvc.patch"
