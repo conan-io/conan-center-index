@@ -448,6 +448,9 @@ class MesaConan(ConanFile):
         if self.options.get_safe("glx"):
             self.options["libglvnd"].glx = True
 
+        if self.options.get_safe("gallium_d3d12_video"):
+            self.options.gallium_drivers_d3d12 = True
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -495,6 +498,9 @@ class MesaConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
 
+        if  self.options.get_safe("gallium_drivers_d3d12") or self.options.get_safe("gallium_d3d12_video") or self.options.get_safe("vulkan_drivers_microsoft_experimental"):
+            self.requires("directx-headers/1.610.2")
+
         if self.options.get_safe("tools_freedreno"):
             self.requires("libarchive/3.7.1")
             self.requires("libxml2/2.11.4")
@@ -509,6 +515,9 @@ class MesaConan(ConanFile):
 
         if self.options.get_safe("egl") and self.options.get_safe("with_libglvnd") and not self.dependencies["libglvnd"].options.egl:
             raise ConanInvalidConfiguration("The egl option requires the egl option of libglvnd to be enabled")
+
+        if self.options.get_safe("gallium_d3d12_video") and not self.options.get_safe("gallium_drivers_d3d12"):
+            raise ConanInvalidConfiguration("The gallium_d3d12_video option requires the gallium_drivers_d3d12 option to be enabled")
 
         if ((self.options.get_safe("vulkan_drivers_amd") and not self.options.get_safe("platforms_windows")) or self.options.get_safe("gallium_drivers_radeonsi")) and self._with_libdrm and not self.dependencies["libdrm"].options.amdgpu:
             raise ConanInvalidConfiguration("The vulkan_drivers_amd option when not on Windows and gallium_drivers_radeonsi option require the amdgpu option of libdrm to be enabled")
