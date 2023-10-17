@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv
@@ -61,6 +61,7 @@ class OnnxRuntimeConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "cmake/*", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -94,13 +95,13 @@ class OnnxRuntimeConan(ConanFile):
         self.requires("nlohmann_json/3.11.3")
         self.requires("eigen/3.4.0")
         self.requires("ms-gsl/4.0.0")
-        self.requires("cpuinfo/cci.20220618")
+        self.requires("cpuinfo/cci.20230118")
         if self.settings.os != "Windows":
             self.requires("nsync/1.26.0")
         else:
             self.requires("wil/1.0.231028.1")
         if self.options.with_xnnpack:
-            self.requires("xnnpack/cci.20220801")
+            self.requires("xnnpack/cci.20230715")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -130,7 +131,7 @@ class OnnxRuntimeConan(ConanFile):
         # disable downloading dependencies to ensure conan ones are used
         tc.variables["FETCHCONTENT_FULLY_DISCONNECTED"] = True
         if self.version >= Version("1.15.0") and self.options.shared:
-            # Need to replace windows path seperators with linux path seperators to keep CMake from crashing
+            # Need to replace windows path separators with linux path separators to keep CMake from crashing
             tc.variables["Python_EXECUTABLE"] = sys.executable.replace("\\", "/")
 
         tc.variables["onnxruntime_BUILD_SHARED_LIB"] = self.options.shared
@@ -211,22 +212,31 @@ class OnnxRuntimeConan(ConanFile):
         tc.variables["onnxruntime_ENABLE_ROCM_PROFILING"] = False
         tc.variables["onnxruntime_USE_CANN"] = False
         tc.generate()
+
         deps = CMakeDeps(self)
-
-        if self.dependencies["flatbuffers"].options.shared:
-            deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
-
         deps.set_property("boost::headers", "cmake_target_name", "Boost::mp11")
+        deps.set_property("cpuinfo", "cmake_target_name", "cpuinfo")
         deps.set_property("date", "cmake_target_name", "date_interface")
+        deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
         deps.set_property("safeint", "cmake_target_name", "safeint_interface")
         deps.set_property("xnnpack", "cmake_target_name", "XNNPACK")
-
         deps.generate()
+
         vbe = VirtualBuildEnv(self)
         vbe.generate(scope="build")
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        copy(self, "onnxruntime_external_deps.cmake",
+             src=os.path.join(self.export_sources_folder, "cmake"),
+             dst=os.path.join(self.source_folder, "cmake", "external"))
+        # Avoid parsing of git commit info
+        if Version(self.version) >= "15.0":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "CMakeLists.txt"),
+                            "if (Git_FOUND)", "if (FALSE)")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         # https://github.com/microsoft/onnxruntime/blob/v1.14.1/cmake/CMakeLists.txt#L792
         # onnxruntime is builds its targets with COMPILE_WARNING_AS_ERROR ON
