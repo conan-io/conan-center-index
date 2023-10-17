@@ -73,15 +73,8 @@ class GnConan(ConanFile):
         return str(self.settings.os).lower()
 
     def generate(self):
-        # Make sure CXX env var is set, otherwise gn defaults it to clang++
-        # https://gn.googlesource.com/gn/+/refs/heads/main/build/gen.py#386
         env = VirtualBuildEnv(self)
-        compilers_by_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
-        cxx = compilers_by_conf.get("cpp") or env.vars().get("CXX")
         env.generate()
-        env = Environment()
-        env.define("CXX", cxx)
-        env.vars(self).save_script("conanbuild_ninja")
 
         if is_msvc(self):
             vcvars = VCVars(self)
@@ -106,13 +99,22 @@ class GnConan(ConanFile):
                     #define LAST_COMMIT_POSITION_NUM 1
                     """),
             )
+
             # Disable GenerateLastCommitPosition()
             replace_in_file(self, os.path.join(self.source_folder, "build/gen.py"),
                             "def GenerateLastCommitPosition(host, header):",
                             "def GenerateLastCommitPosition(host, header):\n  return")
+
+            # Make sure CXX env var is set, otherwise gn defaults it to clang++
+            # https://gn.googlesource.com/gn/+/refs/heads/main/build/gen.py#386
+            compilers_by_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+            os.environ["CXX"] = compilers_by_conf.get("cpp") or VirtualBuildEnv(self).vars().get("CXX")
+
             self.run(f"{sys.executable} build/gen.py " + load(self, "configure_args"))
+
             # Try sleeping one second to avoid time skew of the generated ninja.build file (and having to re-run build/gen.py)
             time.sleep(1)
+
             build_args = ["-C", "out", f"-j{os.cpu_count()}"]
             self.run("ninja " + " ".join(build_args))
 
