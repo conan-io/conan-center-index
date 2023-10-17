@@ -4,7 +4,7 @@ from conan.tools.files import get, replace_in_file, rmdir, copy
 
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2.0.12"
 
 class ensmallenRecipe(ConanFile):
     name = "ensmallen"
@@ -33,6 +33,7 @@ class ensmallenRecipe(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("armadillo", "cmake_file_name", "Armadillo")
         deps.set_property("armadillo", "cmake_target_name", "Armadillo::Armadillo")
+        deps.set_property("armadillo", "cmake_config_version_compat", "AnyNewerVersion")
         deps.generate()
         tc = CMakeToolchain(self)
         tc.variables["USE_OPENMP"] = False
@@ -40,14 +41,6 @@ class ensmallenRecipe(ConanFile):
 
 
     def build(self):
-        # Remove hard requirement on armadillo 9.800.0
-        # This is a minimum requirement, use latest
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "find_package(Armadillo 9.800.0 REQUIRED)",
-            "find_package(Armadillo REQUIRED)",
-        )
         cmake = CMake(self)
         cmake.configure()
 
@@ -61,5 +54,3 @@ class ensmallenRecipe(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.set_property("cmake_file_name", "Ensmallen")
-        self.cpp_info.set_property("cmake_target_name", "Ensmallen::Ensmallen")
