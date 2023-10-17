@@ -1,4 +1,7 @@
 sources:
+  "1.24":
+    url: "https://github.com/tronkko/dirent/archive/1.24.tar.gz"
+    sha256: "37009127a65bb1ddc47d06c097321f87f45ca2e998b2ec3bf2e0b2b19649d6f9"
   "1.23.2":
     url: "https://github.com/tronkko/dirent/archive/1.23.2.tar.gz"
     sha256: "f72d39e3c39610b6901e391b140aa69b51e0eb99216939ed5e547b5dad03afb1"
