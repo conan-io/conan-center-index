@@ -92,6 +92,7 @@ class ArmGnuToolchain(ConanFile):
             raise ConanInvalidConfiguration(
                 "The compiler version must be one of the following: "
                 f"{supported_compiler_versions}.")
+
         major_version = str(self.version).split(".")[0]
         major_compiler_settings_version = compiler_version.split(".")[0]
         if major_version != major_compiler_settings_version:
