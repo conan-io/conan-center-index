@@ -82,17 +82,9 @@ vulkan_drivers_list = [
     "virtio",
 ]
 vulkan_layers_list = [
-    "amd",
-    "broadcom",
-    "freedreno",
-    "imagination_experimental",
-    "intel",
-    "intel_hasvk",
-    "microsoft_experimental",
-    "nouveau_experimental",
-    "panfrost",
-    "swrast",
-    "virtio",
+    "device_select",
+    "intel_nullhw",
+    "overlay",
 ]
 
 
@@ -1099,7 +1091,7 @@ class MesaConan(ConanFile):
             if self.options.get_safe(f"vulkan_drivers_{vulkan_driver}")
         ]
         tc.project_options["vulkan-layers"] = [
-            vulkan_layer.replace("_experimental", "-experimental")
+            vulkan_layer.replace("_", "-")
             for vulkan_layer in vulkan_layers_list
             if self.options.get_safe(f"vulkan_layers_{vulkan_layer}")
         ]
