@@ -17,7 +17,6 @@ class EthashConan(ConanFile):
     homepage = "https://github.com/chfast/ethash"
     topics = ("ethereum", "mining", "proof-of-work")
     package_type = "library"
-    tool_requires = "cmake/[>=3.16.2 <4]"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -43,14 +42,17 @@ class EthashConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+    
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16.2 <4]")
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.variables["ETHASH_INSTALL_CMAKE_CONFIG"] = False
         tc.generate()
 
     def validate(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("ethash does not support windows")
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
@@ -70,7 +72,7 @@ class EthashConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure({"ETHASH_INSTALL_CMAKE_CONFIG": False})
+        cmake.configure()
         cmake.build()
 
     def package(self):
