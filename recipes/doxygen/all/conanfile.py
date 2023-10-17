@@ -56,7 +56,7 @@ class DoxygenConan(ConanFile):
             self.requires("xapian-core/1.4.19")
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.enable_app or self.options.enable_parse:
-            # FIXME: Doxygen uses upper case CMake variables to link/include IConv. This is not supported by CMakeDeps
+            # INFO: Doxygen uses upper case CMake variables to link/include IConv, so we are using patches for targets.
             self.requires("libiconv/1.17")
 
     def compatibility(self):
