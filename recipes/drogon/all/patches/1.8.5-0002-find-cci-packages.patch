@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e3e7fcf..b82cb66 100755
+index e3e7fcf..d1032da 100755
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -198,9 +198,9 @@ else()
@@ -15,15 +15,15 @@ index e3e7fcf..b82cb66 100755
  
  # yamlcpp
  if(BUILD_YAML_CONFIG)
-@@ -217,7 +217,7 @@ if(BUILD_YAML_CONFIG)
+@@ -212,7 +212,7 @@ if(BUILD_YAML_CONFIG)
+                 message(STATUS "yaml-cpp not used")
+             else()
+                 message(STATUS "yaml-cpp found ")
+-                target_link_libraries(${PROJECT_NAME} PUBLIC ${YAML_CPP_LINK_LIBRARY})
++                target_link_libraries(${PROJECT_NAME} PUBLIC yaml-cpp)
+                 target_compile_definitions(${PROJECT_NAME} PUBLIC HAS_YAML_CPP)
              endif()
          else()
-             message(STATUS "yaml-cpp found ")
--            target_link_libraries(${PROJECT_NAME} PUBLIC ${YAML_CPP_LIBRARIES})
-+            target_link_libraries(${PROJECT_NAME} PUBLIC yaml-cpp)
-             target_compile_definitions(${PROJECT_NAME} PUBLIC HAS_YAML_CPP)
-         endif()
-     else()
 @@ -442,7 +442,7 @@ if (BUILD_SQLITE)
      find_package(SQLite3 QUIET)
      find_package(unofficial-sqlite3 QUIET)
