@@ -90,6 +90,10 @@ class SDLConan(ConanFile):
         return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
                self.settings.compiler.get_safe("runtime")
 
+    @property
+    def _is_cl_frontend(self):
+        return is_msvc(self) or self._is_clang_cl
+
     def config_options(self):
         # Don't depend on iconv on macOS by default
         # SDL2 depends on many system freamworks,
@@ -99,7 +103,7 @@ class SDLConan(ConanFile):
 
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if (is_msvc(self) or self._is_clang_cl):
+            if self._is_cl_frontend:
                 del self.options.iconv
         if self.settings.os != "Linux":
             del self.options.alsa
@@ -198,7 +202,7 @@ class SDLConan(ConanFile):
 
         if self.settings.os != "Windows" and not self.options.shared:
             tc.variables["SDL_STATIC_PIC"] = self.options.fPIC
-        if (is_msvc(self) or self._is_clang_cl) and not self.options.shared:
+        if self._is_cl_frontend and not self.options.shared:
             tc.variables["HAVE_LIBC"] = True
         tc.variables["SDL_SHARED"] = self.options.shared
         tc.variables["SDL_STATIC"] = not self.options.shared
@@ -273,7 +277,7 @@ class SDLConan(ConanFile):
 
         # Add extra information collected from the deps
         all_deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
-        if not is_msvc(self):
+        if not self._is_cl_frontend:
             deps_includes = [p for dep in all_deps for p in dep.cpp_info.aggregated_components().includedirs]
             tc.variables["CMAKE_REQUIRED_INCLUDES"] = ";".join(deps_includes)
             extra_cflags = [f"-I{p}" for p in deps_includes]
@@ -348,7 +352,7 @@ class SDLConan(ConanFile):
         postfix = "d" if self.settings.os != "Android" and self.settings.build_type == "Debug" else ""
 
         # SDL2
-        if (is_msvc(self) or self._is_clang_cl) and not self.options.shared:
+        if self._is_cl_frontend and not self.options.shared:
             lib_postfix = f"-static{postfix}"
         else:
             lib_postfix = postfix
