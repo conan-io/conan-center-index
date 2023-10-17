@@ -119,8 +119,8 @@ class OnnxRuntimeConan(ConanFile):
             )
 
     def build_requirements(self):
-        # Required by upstream https://github.com/microsoft/onnxruntime/blob/v1.14.1/cmake/CMakeLists.txt#L5
-        self.tool_requires("cmake/[>=3.24 <4]")
+        # Required by upstream https://github.com/microsoft/onnxruntime/blob/v1.16.1/cmake/CMakeLists.txt#L5
+        self.tool_requires("cmake/[>=3.26 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
