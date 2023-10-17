@@ -253,7 +253,7 @@ class MesaConan(ConanFile):
         "with_libselinux": False,
         "with_libudev": "systemd",
         "with_libunwind": True,
-        "with_llvm": False,
+        "with_llvm": True,
         # "with_lmsensors": True,
         "with_zlib": True,
         "with_zstd": True,
