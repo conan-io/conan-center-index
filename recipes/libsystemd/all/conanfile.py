@@ -70,9 +70,9 @@ class LibsystemdConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Only Linux supported")
-        if os.getenv('NOT_ON_C3I', '0') == '0' and Version(self.version) >= "253.10" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "9":
+        if not self.conf.get('user.c3i.skip:libsystemd', default=False, check_type=bool) and Version(self.version) >= "253.10" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "9":
             raise ConanInvalidConfiguration(f"{self.name}/{self.version} and newer is not supported with gcc 9 on C3I until gcc 9.3 or newer is used\n"\
-                                            "If your using gcc 9.3 or newer, set environment variable NOT_ON_C3I=1")
+                                            "If your using gcc 9.3 or newer, set the conf variable user.c3i.skip:libsystemd to True")
         if Version(self.version) >= "253.10" and self.settings.compiler == "gcc":
             if Version(self.settings.compiler.version) == "9":
                 self.output.warn(f"{self.name}/{self.version} and newer requires gcc 9.3 or newer")
