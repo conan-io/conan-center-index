@@ -5,7 +5,7 @@ from conan.tools.env import Environment
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, unix_path
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, unix_path, check_min_vs
 from conan.tools.scm import Version
 import os
 
@@ -153,7 +153,7 @@ class NCursesConan(ConanFile):
                 "ac_cv_func_setvbuf_reversed=no",
             ])
             tc.extra_cxxflags.append("-EHsc")
-            if Version(self.settings.compiler.version) >= 12:
+            if check_min_vs(self, 180, raise_invalid=False):
                 tc.extra_cxxflags.append("-FS")
         if (self.settings.os, self.settings.compiler) == ("Windows", "gcc"):
             # add libssp (gcc support library) for some missing symbols (e.g. __strcpy_chk)
