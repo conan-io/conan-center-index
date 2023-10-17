@@ -48,8 +48,8 @@ class QuaZIPConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/5.15.9")
-        self.requires("zlib/1.2.13")
+        self.requires("qt/5.15.9", transitive_headers=True, transitive_libs=True)
+        self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
         if Version(self.version) >= "1.4":
             self.requires("bzip2/1.0.8")
 
