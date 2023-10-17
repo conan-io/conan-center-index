@@ -566,7 +566,16 @@ class MesaConan(ConanFile):
         if self.options.get_safe("vulkan_drivers_amd") or self.options.get_safe("vulkan_drivers_intel") or self.options.get_safe("vulkan_layers_overlay"):
             self.tool_requires("glslang/11.7.0")
 
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "meson.build"),
+            "dep_wl_scanner = dependency('wayland-scanner', native: true)",
+            "dep_wl_scanner = dependency('wayland-scanner_BUILD', native: true)")
+
     def source(self):
+        self._patch_sources()
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
@@ -645,16 +654,7 @@ class MesaConan(ConanFile):
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "meson.build"),
-            "dep_wl_scanner = dependency('wayland-scanner', native: true)",
-            "dep_wl_scanner = dependency('wayland-scanner_BUILD', native: true)")
-
     def build(self):
-        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
