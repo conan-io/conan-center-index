@@ -531,6 +531,13 @@ class MesaConan(ConanFile):
             or self.options.get_safe("gles2")
         )
 
+    @property
+    def _with_any_vulkan_driver(self):
+        for vulkan_driver in vulkan_drivers_list:
+            if self.options.get_safe(f"vulkan_drivers_{vulkan_driver}"):
+                return True
+        return False
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -748,6 +755,8 @@ class MesaConan(ConanFile):
             self.options.get_safe("gallium_drivers_d3d12")
             or self.options.get_safe("gallium_d3d12_video")
             or self.options.get_safe("vulkan_drivers_microsoft_experimental")
+            or (self.settings.os == "Windows" and self.options.get_safe("gallium_drivers_zink"))
+            or (self.settings.os == "Windows" and self._with_any_vulkan_driver)
         ):
             self.requires("directx-headers/1.610.2")
 
