@@ -87,7 +87,7 @@ class LibspatialiteConan(ConanFile):
     def requirements(self):
         # sqlite.h is included by spatialite/sqlite.h public header
         self.requires("sqlite3/3.42.0", transitive_headers=True)
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_proj:
             self.requires("proj/9.2.1")
         if self.options.with_iconv:
