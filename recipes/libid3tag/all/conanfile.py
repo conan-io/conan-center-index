@@ -35,7 +35,7 @@ class LibId3TagConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     @property
     def _is_msvc(self):
