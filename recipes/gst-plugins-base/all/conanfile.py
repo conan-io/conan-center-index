@@ -98,7 +98,7 @@ class GStPluginsBaseConan(ConanFile):
             del self.options.with_xorg
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("glib/2.72.0")
         self.requires("gstreamer/1.19.2")
         if self.options.get_safe("with_libalsa"):
