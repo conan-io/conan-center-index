@@ -87,7 +87,7 @@ class XorgConan(ConanFile):
                      "xcb-renderutil", "xcb-shape", "xcb-shm", "xcb-sync", "xcb-xfixes",
                      "xcb-xinerama", "xcb", "xcb-atom", "xcb-aux", "xcb-event", "xcb-util",
                      "xcb-dri3", "xcb-cursor", "xcb-dri2", "xcb-dri3", "xcb-glx", "xcb-present",
-                     "xcb-xinput", "xcb-composite", "xcb-ewmh", "xcb-res", "xwayland"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
+                     "xcb-composite", "xcb-ewmh", "xcb-res", "xwayland"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
             pkg_config = PkgConfig(self, name)
             pkg_config.fill_cpp_info(
                 self.cpp_info.components[name], is_system=self.settings.os != "FreeBSD")
