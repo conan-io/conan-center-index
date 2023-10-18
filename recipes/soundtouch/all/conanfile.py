@@ -54,7 +54,7 @@ class SoundTouchConan(ConanFile):
         tc.cache_variables["OPENMP"] = self.options.with_openmp
         # The finite-math-only optimization has no effect and can cause linking errors
         # when linked against glibc >= 2.31
-        tc.blocks["generic_system"].template = tc.blocks["cmake_flags_init"].template + """
+        tc.blocks["cmake_flags_init"].template = tc.blocks["cmake_flags_init"].template + """
                string(APPEND CMAKE_CXX_FLAGS_INIT " -fno-finite-math-only")
                string(APPEND CMAKE_C_FLAGS_INIT " -fno-finite-math-only")
            """
