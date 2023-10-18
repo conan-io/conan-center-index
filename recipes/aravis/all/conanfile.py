@@ -104,10 +104,7 @@ class AravisConan(ConanFile):
 
     def build_requirements(self):
         #windows build: meson/1.2.1 works, meson/1.2.2 breaks for some reason!
-        if self.settings.os == "Windows":
-            self.tool_requires("meson/[<1.2.2]")
-        else:
-            self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/1.2.1")
         self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
