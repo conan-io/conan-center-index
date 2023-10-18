@@ -3,7 +3,7 @@ from conan.tools.files import get, chdir, copy, mkdir, export_conandata_patches,
 from conan.tools.apple import is_apple_os
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, NMakeToolchain
-from conans.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.53.0"
