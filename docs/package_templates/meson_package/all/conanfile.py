@@ -35,10 +35,11 @@ class PackageConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "feature": [True, False],
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
+        "feature": True,
     }
 
     @property
@@ -110,6 +111,7 @@ class PackageConan(ConanFile):
         tc = MesonToolchain(self)
         # In case need to pass definitions directly to the compiler
         tc.preprocessor_definitions["MYDEFINE"] = "MYDEF_VALUE"
+        tc.project_options["feature"] = "enabled" if self.options.get_safe("feature") else "disabled"
         # Meson project options may vary their types
         tc.project_options["tests"] = False
         tc.generate()
