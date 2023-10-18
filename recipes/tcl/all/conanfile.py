@@ -1,12 +1,15 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, NMakeToolchain
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, NMakeToolchain, NMakeDeps
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.55.0"
 
 
 class TclConan(ConanFile):
@@ -15,7 +18,7 @@ class TclConan(ConanFile):
     license = "TCL"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tcl.tk"
-    topics = ("tcl", "scripting", "programming")
+    topics = ("scripting", "programming")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -69,7 +72,16 @@ class TclConan(ConanFile):
         if is_msvc(self):
             tc = NMakeToolchain(self)
             tc.generate()
+
+            deps = NMakeDeps(self)
+            deps.generate()
         else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+            if not cross_building(self):
+                env = VirtualRunEnv(self)
+                env.generate(scope="build")
+
             tc = AutotoolsToolchain(self, prefix=self.package_folder)
             def yes_no(v): return "yes" if v else "no"
             tc.configure_args.extend([
@@ -78,6 +90,9 @@ class TclConan(ConanFile):
                 "--enable-64bit={}".format(yes_no(self.settings.arch == "x86_64")),
             ])
             tc.generate()
+
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def _get_default_build_system_subdir(self):
         return {
@@ -198,54 +213,46 @@ class TclConan(ConanFile):
                         "\nTCL_SRC_DIR",
                         "\n#TCL_SRC_DIR")
 
-        #fix_apple_shared_install_name(self)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "TCL")
+
         libs = []
-        systemlibs = []
         libdirs = []
         for root, _, _ in os.walk(os.path.join(self.package_folder, "lib"), topdown=False):
             newlibs = collect_libs(self, root)
             if newlibs:
                 libs.extend(newlibs)
                 libdirs.append(root)
-        if self.settings.os == "Windows":
-            systemlibs.extend(["ws2_32", "netapi32", "userenv"])
-        elif self.settings.os in ("FreeBSD", "Linux"):
-            systemlibs.extend(["dl", "m", "pthread"])
-
-        defines = []
-        if not self.options.shared:
-            defines.append("STATIC_BUILD")
-        self.cpp_info.defines = defines
-
-        self.cpp_info.libdirs = libdirs
         self.cpp_info.libs = libs
-        self.cpp_info.system_libs = systemlibs
-        self.cpp_info.set_property("cmake_file_name", "TCL")
-        self.cpp_info.names["cmake_find_package"] = "TCL"
-        self.cpp_info.names["cmake_find_package_multi"] = "TCL"
+        self.cpp_info.libdirs = libdirs
 
-        if self.settings.os == "Macos":
-            self.cpp_info.frameworks = ["CoreFoundation"]
-            self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["ws2_32", "netapi32", "userenv"])
+        elif self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
+        elif is_apple_os(self):
+            self.cpp_info.frameworks.append("CoreFoundation")
 
-        tcl_library = os.path.join(self.package_folder, "lib", "{}{}".format(self.name, ".".join(self.version.split(".")[:2])))
-        self.output.info("Setting TCL_LIBRARY environment variable to {}".format(tcl_library))
-        self.runenv_info.define_path('TCL_LIBRARY', tcl_library)
-        self.env_info.TCL_LIBRARY = tcl_library
+        if is_msvc(self) and not self.options.shared:
+            self.cpp_info.defines.append("STATIC_BUILD")
+
+        tcl_version = Version(self.version)
+        tcl_library = os.path.join(self.package_folder, "lib", f"tcl{tcl_version.major}.{tcl_version.minor}")
+        self.runenv_info.define_path("TCL_LIBRARY", tcl_library)
 
         tcl_root = self.package_folder
-        self.output.info("Setting TCL_ROOT environment variable to {}".format(tcl_root))
-        self.runenv_info.define_path('TCL_ROOT', tcl_root)
-        self.env_info.TCL_ROOT = tcl_root
+        self.runenv_info.define_path("TCL_ROOT", tcl_root)
 
         tclsh_list = list(filter(lambda fn: fn.startswith("tclsh"), os.listdir(os.path.join(self.package_folder, "bin"))))
         tclsh = os.path.join(self.package_folder, "bin", tclsh_list[0])
-        self.output.info("Setting TCLSH environment variable to {}".format(tclsh))
-        self.runenv_info.define_path('TCLSH', tclsh)
-        self.env_info.TCLSH = tclsh
+        self.runenv_info.define_path("TCLSH", tclsh)
 
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Adding PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
+        # TODO: to remove in conan v2
+        self.cpp_info.names["cmake_find_package"] = "TCL"
+        self.cpp_info.names["cmake_find_package_multi"] = "TCL"
+        self.env_info.TCL_LIBRARY = tcl_library
+        self.env_info.TCL_ROOT = tcl_root
+        self.env_info.TCLSH = tclsh
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

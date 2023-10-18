@@ -52,7 +52,7 @@ class LibsystemdConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcap/2.68")
+        self.requires("libcap/2.69")
         self.requires("libmount/2.39")
         if Version(self.version) >= "253.6":
             self.requires("libxcrypt/4.4.35")
@@ -61,7 +61,7 @@ class LibsystemdConan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_xz:
-            self.requires("xz_utils/5.4.2")
+            self.requires("xz_utils/5.4.4")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
 
@@ -70,11 +70,11 @@ class LibsystemdConan(ConanFile):
             raise ConanInvalidConfiguration("Only Linux supported")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.1.1")
+        self.tool_requires("meson/1.2.2")
         self.tool_requires("m4/1.4.19")
         self.tool_requires("gperf/3.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
