@@ -39,6 +39,7 @@ class PackageConan(ConanFile):
     }
     default_options = {
         "shared": False,
+        "fPIC": True,
         "feature": True,
     }
 
