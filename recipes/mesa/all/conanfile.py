@@ -438,6 +438,10 @@ class MesaConan(ConanFile):
     def _default_glx_option(self):
         if self.settings.os in ["Android", "Windows"]:
             return False
+        # https://github.com/Mesa3D/mesa/actions/runs/4754558919
+        # The GLX dri option on macOS no longer builds.
+        elif self.settings.os == "Macos":
+            return "xlib"
         return "dri"
 
     @property
