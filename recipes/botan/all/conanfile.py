@@ -130,7 +130,7 @@ class BotanConan(ConanFile):
         if self.options.with_openssl:
             self.requires("openssl/1.1.1o")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.38.5")
         if self.options.with_boost:
