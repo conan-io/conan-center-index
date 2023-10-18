@@ -93,7 +93,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
         if self.settings.os == "Linux" and self.options.shared:
             self.cpp_info.system_libs = ["pthread"]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["synchronization"]
+            self.cpp_info.system_libs = ["synchronization", "ws2_32", "mswsock"]
 
         if self.settings.compiler == "msvc":
             self.cpp_info.cxxflags.append("/await")
