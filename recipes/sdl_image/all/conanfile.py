@@ -76,8 +76,6 @@ class SDLImageConan(ConanFile):
         if not is_apple_os(self):
             del self.options.imageio
         if Version(self.version) < "2.6":
-            if self.settings.os != "Windows":
-                del self.options.wic
             del self.options.qoi
             del self.options.with_avif
             del self.options.with_jxl
