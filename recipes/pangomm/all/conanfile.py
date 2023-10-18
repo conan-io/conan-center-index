@@ -65,7 +65,7 @@ class PangommConan(ConanFile):
         # FIXME: temporary fix for dependency versions mismatch
         # once dependencies versions are bumped remove these requirements
         self.requires("expat/2.4.8")
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("glib/2.72.1")
 
         if self._is_2_48_api:
