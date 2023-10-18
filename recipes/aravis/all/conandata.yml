@@ -2,7 +2,7 @@ sources:
     "0.8.29":
         url: "https://github.com/AravisProject/aravis/releases/download/0.8.29/aravis-0.8.29.tar.xz"
         sha256: "12e5f2f0e1a966c3a6dce0a42d96b2f24497f42ae6051d6f026811124e986963"
-    "0.8.25":
+    "0.8.25":  # latest version that supports GenDC data format (supported by U3V 1.1)
         url: "https://github.com/AravisProject/aravis/releases/download/0.8.25/aravis-0.8.25.tar.xz"
         sha256: "3ba18f941ae4e2c898fed1f63c4ce67ea41a800a902ee5684eef4ffdb87f1c09"
     "0.8.20":
