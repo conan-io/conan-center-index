@@ -110,7 +110,7 @@ class LiefConan(ConanFile):
 
         # FIXME: Visual 2022 does has a bug: developercommunity.visualstudio.com/t/Internal-compiler-error-compiler-file-m/10376323
         # fatal  error C1001: Internal compiler error. [C:\J2\w\prod-v2\bsr\14710\ccfaa\p\b\lief70856170ca89f\b\build\LIB_LIEF.vcxproj]
-        if is_msvc(self) and self.settings.compiler.version in ["17", "193"]:
+        if is_msvc(self) and str(self.settings.compiler.version) in ["17", "193"]:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built by Visual Studio 2022 due internal compiler error. See developercommunity.visualstudio.com/t/Internal-compiler-error-compiler-file-m/10376323")
 
     def source(self):
