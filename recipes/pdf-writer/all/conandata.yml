@@ -1,12 +1,12 @@
 sources:
-  "4.6":
-    url: "https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.6.tar.gz"
-    sha256: "e27f5a28c4f15a23bebc35d58091dc9c138fa902dbb3f60a6f491d55db5d522b"
+  "4.6.1":
+    url: "https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.6.1.tar.gz"
+    sha256: "6e95fcb26ec679fa12ce6638d35a591e80960b35956a142d9a80b9a8c80ca824"
   "4.5.12":
     url: "https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.5.12.tar.gz"
     sha256: "40fcbaa66fc46fcb588ceda119ba8839ff6d2c886191ac5e68ed702475c7336e"
 patches:
-  "4.6":
+  "4.6.1":
     - patch_file: "patches/4.5.12-0001-fix-cmake.patch"
       patch_description: "disable test/cpack, use cci package"
       patch_type: "conan"
