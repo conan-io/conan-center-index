@@ -67,7 +67,7 @@ class ElfutilsConan(ConanFile):
             self.output.warn("Compiler %s is not gcc." % self.settings.compiler)
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.38.5")
         if self.options.with_bzlib:
