@@ -72,7 +72,7 @@ class LibGit2Conan(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("http_parser/2.9.4")
         if self.options.with_libssh2:
             self.requires("libssh2/1.10.0")
