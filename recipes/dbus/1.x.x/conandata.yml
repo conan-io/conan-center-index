@@ -1,4 +1,7 @@
 sources:
+  "1.15.8":
+    url: "https://dbus.freedesktop.org/releases/dbus/dbus-1.15.8.tar.xz"
+    sha256: "84fc597e6ec82f05dc18a7d12c17046f95bad7be99fc03c15bc254c4701ed204"
   "1.15.6":
     url: "https://dbus.freedesktop.org/releases/dbus/dbus-1.15.6.tar.xz"
     sha256: "f97f5845f9c4a5a1fb3df67dfa9e16b5a3fd545d348d6dc850cb7ccc9942bd8c"
