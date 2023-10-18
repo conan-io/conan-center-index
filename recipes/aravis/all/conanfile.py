@@ -54,7 +54,7 @@ class AravisConan(ConanFile):
             del self.options.fPIC
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.packet_socket
-        if Version(self.version).patch < 25:
+        if Version(self.version) < "8.25":
             del self.options.gv_n_buffers
 
 
