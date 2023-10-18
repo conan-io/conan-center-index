@@ -117,8 +117,8 @@ class ProjConan(ConanFile):
                 lib_paths = self.dependencies.build["sqlite3"].cpp_info.libdirs
             replace_in_file(self,
                 os.path.join(self.source_folder, "data", "generate_proj_db.cmake"),
-                f"COMMAND \"${EXE_SQLITE3}\"",
-                f"COMMAND ${{CMAKE_COMMAND}} -E env \"DYLD_LIBRARY_PATH={':'.join(lib_paths)}\" \"${EXE_SQLITE3}\""
+                "COMMAND \"${EXE_SQLITE3}\"",
+                "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=" + ':'.join(lib_paths) + "\" \"${EXE_SQLITE3}\""
             )
 
     def build(self):
