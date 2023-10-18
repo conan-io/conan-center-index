@@ -105,7 +105,7 @@ class SDLImageConan(ConanFile):
             self.requires("libpng/1.6.40")
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.2")
-        if self.options.with_avif:
+        if self.options.get_safe("with_avif"):
             self.requires("libavif/1.0.1")
 
     def validate(self):
@@ -190,6 +190,9 @@ class SDLImageConan(ConanFile):
             copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         lib_postfix = "d" if Version(self.version) >= 2.6 and self.settings.build_type == "Debug" else ""
