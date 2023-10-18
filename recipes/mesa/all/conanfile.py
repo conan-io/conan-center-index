@@ -385,7 +385,7 @@ class MesaConan(ConanFile):
 
     @property
     def _has_with_libglvnd_option(self):
-        return self.settings.os != "Windows"
+        return self.settings.os in ["FreeBSD", "Linux"]
 
     @property
     def _has_with_libselinux_option(self):
