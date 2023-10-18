@@ -60,7 +60,7 @@ class RubyConan(ConanFile):
             return "-O2sy-"
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("gmp/6.1.2")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1o")
