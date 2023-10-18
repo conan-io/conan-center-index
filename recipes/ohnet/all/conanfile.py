@@ -2,7 +2,8 @@ from conan import ConanFile
 from conan.tools.files import get, chdir, copy, mkdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.apple import is_apple_os
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.microsoft import is_msvc, NMakeToolchain
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, NMakeToolchain
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.53.0"
@@ -42,6 +43,10 @@ class OhNetConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def validate(self):
+        if is_msvc(self) and (self.options.shared or msvc_runtime_flag(self).startswith('MD')):
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared builds with Visual Studio yet")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -60,10 +65,13 @@ class OhNetConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         targets = "ohNetDll TestsNative proxies devices"
+        additional_options=""
 
         with chdir(self, self.source_folder):
             if is_msvc(self):
-                self.run(f"nmake /f OhNet.mak {targets}")
+                if self.settings.build_type == "Debug":
+                    additional_options += " debug=1"
+                self.run(f"nmake /f OhNet.mak {targets} {additional_options}")
             else:
                 args = []
                 args = self._get_openhome_architecture(args)
@@ -76,6 +84,7 @@ class OhNetConan(ConanFile):
     def package(self):
         installlibdir = os.path.join(self.package_folder, "lib")
         installincludedir = os.path.join(self.package_folder, "include")
+        additional_options=""
 
         copy(self, "License.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
@@ -84,7 +93,9 @@ class OhNetConan(ConanFile):
 
         with chdir(self, self.source_folder):
             if is_msvc(self):
-                self.run(f"nmake /f OhNet.mak install installdir={self.package_folder} installlibdir={installlibdir} installincludedir={installincludedir}")
+                if self.settings.build_type == "Debug":
+                    additional_options += " debug=1"
+                self.run(f"nmake /f OhNet.mak install installdir={self.package_folder} installlibdir={installlibdir} installincludedir={installincludedir} {additional_options}")
             else:
                 args = [f"prefix={self.package_folder}", f"installlibdir={installlibdir}", f"installincludedir={installincludedir}", "rsync=no"]
                 args = self._get_openhome_architecture(args)
@@ -104,7 +115,7 @@ class OhNetConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ohNetCore"].system_libs.extend(["pthread", "m"])
         elif self.settings.os == "Windows":
-            self.cpp_info.components["ohNet"].system_libs.extend(["iphlpapi", "ws2_32", "dbghelp"])
+            self.cpp_info.components["ohNetCore"].system_libs.extend(["iphlpapi", "ws2_32", "dbghelp"])
         elif self.settings.os == "Macos":
             self.cpp_info.components["ohNetCore"].frameworks.extend(["CoreFoundation", "IOKit", "SystemConfiguration"])
 
