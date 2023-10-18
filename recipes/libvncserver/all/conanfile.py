@@ -56,8 +56,6 @@ class LibVncServerConan(ConanFile):
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(f"conan is not yet supporting {self.ref} on {self.settings.os}.")
-        if self.options.with_libgcrypt:
-            raise ConanInvalidConfiguration("The libgcrypt is not available in ConanCenterIndex yet.")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -87,7 +85,7 @@ class LibVncServerConan(ConanFile):
         if self.options.with_sdl:
             self.requires("sdl/2.28.2")
         if self.options.with_gtk:
-            self.requires("gtk/4.7.0")
+            self.requires("gtk/system")
         if self.options.with_libssh2:
             self.requires("libssh2/1.11.0")
         if self.options.with_openssl:
