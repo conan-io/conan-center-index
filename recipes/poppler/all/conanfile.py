@@ -119,7 +119,7 @@ class PopplerConan(ConanFile):
         if self.options.with_libcurl:
             self.requires("libcurl/7.84.0")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     @property
     def _minimum_compilers_version(self):
