@@ -79,6 +79,8 @@ class SDLImageConan(ConanFile):
             del self.options.qoi
             del self.options.with_avif
             del self.options.with_jxl
+        if self.settings.os != "Windows":
+            del self.options.wic
 
     def configure(self):
         if self.options.shared:
@@ -192,6 +194,7 @@ class SDLImageConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "SDL2_image.framework"))
 
     def package_info(self):
         lib_postfix = "d" if Version(self.version) >= 2.6 and self.settings.build_type == "Debug" else ""
