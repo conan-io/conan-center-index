@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir
 from conan.tools.layout import basic_layout
@@ -20,12 +21,18 @@ class DirectXHeadersConan(ConanFile):
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
 
+    @property
+    def _min_cppstd(self):
+        return 11
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def validate(self):
         if not self.settings.os in ["Linux", "Windows"]:
             raise ConanInvalidConfiguration(f"{self.name} is not supported on {self.settings.os}")
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
     def build_requirements(self):
         self.tool_requires("meson/1.2.2")
