@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 2.0.9
+  version: 2.0.12
   backup_sources:
     upload_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
     download_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
@@ -35,10 +35,11 @@ tasks:
   build_single_reference:
     package_id_cache_type: "none"
     timeout_minutes: 600
-    large_timeout_minutes: 800
+    large_timeout_minutes: 900
     large_timeout_references:
       - boost
       - qt
+      - llvm
   cci:
     conan_v2_run_export: false
     detailed_status_checks: false
