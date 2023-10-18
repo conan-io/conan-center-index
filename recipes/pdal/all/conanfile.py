@@ -82,7 +82,7 @@ class PdalConan(ConanFile):
         if self.options.with_laszip:
             self.requires("laszip/3.4.3")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.5")
         if self.options.get_safe("with_unwind"):
