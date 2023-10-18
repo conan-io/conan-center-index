@@ -658,12 +658,6 @@ class MesaConan(ConanFile):
         self.options.vulkan_layers_device_select = self._default_vulkan_layers_device_select_option
         self.options.vulkan_layers_overlay = self._default_vulkan_layers_overlay_option
 
-        # LLVM is required if either of the conditions for gallium_drivers_radeonsi or vulkan_drivers_swrast are met.
-        self.options.with_llvm = self._system_has_kms_drm and (
-            self.settings.arch in ["mips", "mips64", "x86", "x86_64"]
-            or str(self.settings.arch).startswith("arm")
-        )
-
     def configure(self):
         if not self.options.get_safe("shared_glapi"):
             self.options.rm_safe("egl")
