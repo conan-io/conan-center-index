@@ -2,3 +2,9 @@ sources:
   "23.2.1":
     url: "https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-23.2.1/mesa-23.2.1.tar.bz2"
     sha256: "67a39f5c9eb83d0027c4340d2965738f334575160a9fc30b9175a99a84aebfdc"
+patches:
+  "23.2.1":
+    - patch_file: "patches/23.2.1-0001-Require-directx-headers-when-building-wsi_common_win.patch"
+      patch_description: "Fix the directx-headers dependency to be included when it is needed"
+      patch_source: "https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/25791"
+      patch_type: "portability"

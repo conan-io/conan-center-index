@@ -1,0 +1,36 @@
+From 7e33dabfc28ba4c04c35e29af121a6e6ff911f67 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Wed, 18 Oct 2023 11:59:46 -0500
+Subject: [PATCH] Require directx-headers when building wsi_common_win32.cpp
+
+The src/vulkan/wsi/wsi_common_win32.cpp file includes directx/d3d12.h, but does not always link directx-headers.
+This is problematic when attempting to build the swrast Vulkan driver without one of with_gallium_d3d12, with_microsoft_cl, with_microsoft_vk.
+It may also be problematic when attempting to build the zink Gallium driver without one of those.
+This commit fixes the checks for the directx-headers dependency to be required in these additional situations where wsi_common_win32.cpp is compiled.
+---
+ meson.build | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 59732981b8a..ae9dc4b2ad3 100644
+--- a/meson.build
++++ b/meson.build
+@@ -511,13 +511,13 @@ if with_gallium_kmsro and (with_platform_x11 and not with_dri3)
+ endif
+ 
+ dep_dxheaders = null_dep
+-if with_gallium_d3d12 or with_microsoft_clc or with_microsoft_vk
++if with_gallium_d3d12 or with_microsoft_clc or with_microsoft_vk or (with_platform_windows and (with_any_vk or with_gallium_zink))
+   dep_dxheaders = dependency('directx-headers', required : false)
+   if not dep_dxheaders.found()
+     dep_dxheaders = dependency('DirectX-Headers',
+       version : '>= 1.610.0',
+       fallback : ['DirectX-Headers', 'dep_dxheaders'],
+-      required : with_gallium_d3d12 or with_microsoft_vk
++      required : with_gallium_d3d12 or with_microsoft_vk or (with_platform_windows and (with_any_vk or with_gallium_zink))
+     )
+   endif
+ endif
+-- 
+2.41.0
+
