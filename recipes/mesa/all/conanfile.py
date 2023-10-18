@@ -292,6 +292,20 @@ class MesaConan(ConanFile):
     )
 
     @property
+    def _min_cppstd(self):
+        return 11
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "apple-clang": "13",
+            "clang": "5",
+            "gcc": "8",
+            "msvc": "192",
+            "Visual Studio": "16",
+        }
+
+    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
@@ -750,7 +764,13 @@ class MesaConan(ConanFile):
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires at least version {minimum_version} of {self.settings.compiler}"
+            )
 
         if self.options.get_safe("egl") and not self.options.get_safe("shared_glapi"):
             raise ConanInvalidConfiguration(
