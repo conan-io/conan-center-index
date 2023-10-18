@@ -99,14 +99,14 @@ class OpenCascadeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("tcl/8.6.10")
+        self.requires("tcl/8.6.13")
         if self._link_tk:
             self.requires("tk/8.6.10")
         self.requires("freetype/2.13.0")
         if self._link_opengl:
             self.requires("opengl/system")
         if self._is_linux:
-            self.requires("fontconfig/2.13.93")
+            self.requires("fontconfig/2.14.2")
             self.requires("xorg/system")
         # TODO: add vtk support?
         if self.options.with_ffmpeg:
@@ -116,7 +116,7 @@ class OpenCascadeConan(ConanFile):
         if self.options.with_openvr:
             self.requires("openvr/1.16.8")
         if self.options.with_rapidjson:
-            self.requires("rapidjson/1.1.0")
+            self.requires("rapidjson/cci.20220822")
         if self.options.get_safe("with_draco"):
             self.requires("draco/1.5.6")
         if self.options.with_tbb:
