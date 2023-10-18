@@ -487,7 +487,7 @@ class MesaConan(ConanFile):
             "vc4": self._system_has_kms_drm
             and str(self.settings.arch).startswith("arm"),
             "virgl": self._system_has_kms_drm,
-            "zink": False,
+            "zink": self.settings.os == "Macos",
         }[option]
 
     def _default_vulkan_driver_option(self, option: str):
