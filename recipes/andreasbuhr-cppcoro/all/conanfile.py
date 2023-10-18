@@ -63,6 +63,11 @@ class AndreasbuhrCppCoroConan(ConanFile):
                     f"{self.name} requires coroutine TS support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it."
                 )
 
+        # Older versions of clang expects coroutine to be put under std::experimental::, while libstdc++ puts them under std::,
+        # See https://bugs.llvm.org/show_bug.cgi?id=48172 for more context.
+        if self.settings.compiler == "clang" and self.settings.compiler.version < Version("14") and self.settings.compiler.get_safe("libcxx") == "libstdc++":
+            raise ConanInvalidConfiguration("{self.name} does not support clang<14 with libstdc++. Use libc++ or upgrade to clang 14+ instead.")
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
