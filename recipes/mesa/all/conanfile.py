@@ -350,6 +350,10 @@ class MesaConan(ConanFile):
     #     return self._with_dri or self.settings.os in ["Android", "Windows"]
 
     @property
+    def _has_dri3_option(self):
+        return self._system_has_kms_drm
+
+    @property
     def _has_gbm_option(self):
         return self._system_has_kms_drm
 
@@ -553,6 +557,8 @@ class MesaConan(ConanFile):
             self.options.rm_safe("android_stub")
         if not self._has_android_libbacktrace_option:
             self.options.rm_safe("android_libbacktrace")
+        if not self._has_dri3_option:
+            self.options.rm_safe("dri3")
         if not self._has_gbm_option:
             self.options.rm_safe("gbm")
         if not self._has_min_windows_version_option:
