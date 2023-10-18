@@ -569,6 +569,9 @@ class MesaConan(ConanFile):
         if not self._has_xmlconfig_option:
             self.options.rm_safe("xmlconfig")
 
+        if self.settings.os == "Macos":
+            self.options.rm_safe("egl")
+
         if self.settings.os != "Windows":
             self.options.rm_safe("gallium_windows_dll_name")
 
