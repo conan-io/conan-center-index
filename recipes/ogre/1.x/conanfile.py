@@ -112,7 +112,7 @@ class ogrecmakeconan(ConanFile):
         self.requires("freetype/2.11.1")
         self.requires("poco/1.11.2")
         self.requires("tbb/2020.3")
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zziplib/0.13.71")
         self.requires("openssl/1.1.1o", override=True)
         self.requires("xorg/system")
