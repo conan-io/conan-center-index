@@ -173,7 +173,7 @@ class CPythonConan(ConanFile):
                and (self.settings.compiler != "Visual Studio" or tools.Version(self._version_number_only) >= "3.8")
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self._supports_modules:
             self.requires("openssl/1.1.1l")
             self.requires("expat/2.4.1")
