@@ -53,7 +53,7 @@ class LibXMLPlusPlus(ConanFile):
     def requirements(self):
         self.requires("libxml2/2.11.4")
         if Version(self.version) <= "2.42.1":
-            self.requires("glibmm/2.66.4", transitive_headers=True)
+            self.requires("glibmm/2.66.4", transitive_headers=True, transitive_libs=True)
         else:
             self.requires("glibmm/2.75.0")
 
