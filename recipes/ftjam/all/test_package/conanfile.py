@@ -2,7 +2,7 @@ import os
 import shutil
 
 from conan import ConanFile
-from conan.tools.build import can_run, cross_building
+from conan.tools.build import can_run
 from conan.tools.layout import basic_layout
 
 
@@ -20,14 +20,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         for f in ("header.h", "main.c", "source.c", "Jamfile"):
             shutil.copy(os.path.join(self.source_folder, f), os.path.join(self.build_folder, f))
-        if not cross_building(self):
-            # assert os.path.isfile(os.environ.get("JAM"))
-            # vars = AutoToolsBuildEnvironment(self).vars
-            # vars["CCFLAGS"] = vars["CFLAGS"]
-            # vars["C++FLAGS"] = vars["CXXFLAGS"]
-            # vars["LINKFLAGS"] = vars["LDFLAGS"]
-            # vars["LINKLIBS"] = vars["LIBS"]
-            # with environment_append(self, vars):
+        if can_run(self):
             self.run("jam -d7")
 
     def test(self):

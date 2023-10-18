@@ -124,18 +124,17 @@ class FtjamConan(ConanFile):
         jam_bin = os.path.join(jam_path, "jam")
         if self.settings.os == "Windows":
             jam_bin += ".exe"
-        self.output.info(f"Setting JAM environment variable: {jam_bin}")
         self.buildenv.define_path("JAM", jam_bin)
         self.runenv.define_path("JAM", jam_bin)
 
         # toolset of the system using ftjam
         jam_toolset = self._jam_toolset(self.settings.os, self.settings.compiler)
         if jam_toolset:
-            self.output.info(f"Setting JAM_TOOLSET environment variable: {jam_toolset}")
             self.buildenv.define("JAM_TOOLSET", jam_toolset)
             self.runenv.define("JAM_TOOLSET", jam_toolset)
-            self.env_info.JAM_TOOLSET = jam_toolset
 
-        self.output.info(f"Appending PATH environment variable: {jam_path}")
+        # TODO: Legacy, to be removed on Conan 2.0
         self.env_info.PATH.append(jam_path)
         self.env_info.JAM = jam_bin
+        if jam_toolset:
+            self.env_info.JAM_TOOLSET = jam_toolset
