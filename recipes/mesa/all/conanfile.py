@@ -722,7 +722,8 @@ class MesaConan(ConanFile):
 
         if self.options.get_safe("platforms_x11"):
             self.requires("libxshmfence/1.3")
-            self.requires("xorg/system")
+            if self.settings.os in ["FreeBSD", "Linux"]:
+                self.requires("xorg/system")
 
         if self.options.with_libelf:
             self.requires("libelf/0.8.13")
