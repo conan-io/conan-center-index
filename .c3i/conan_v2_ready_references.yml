@@ -110,6 +110,7 @@ required_for_references:
 - brotli
 - brynet
 - bshoshany-thread-pool
+- btyacc
 - bullet3
 - butteraugli
 - bvdberg-ctest
@@ -294,6 +295,7 @@ required_for_references:
 - eigen
 - elfio
 - embag
+- embedded_ringbuf_cpp
 - embree3
 - emio
 - emsdk
@@ -325,6 +327,7 @@ required_for_references:
 - fast_double_parser
 - fast_float
 - fastgltf
+- fastnoise2
 - fastpfor
 - fastprng
 - fernandovelcic-hexdump
@@ -350,6 +353,7 @@ required_for_references:
 - foonathan-memory
 - forestdb
 - foxglove-schemas-protobuf
+- foxglove-websocket
 - foxi
 - fp16
 - fpgen
@@ -581,6 +585,7 @@ required_for_references:
 - libgd
 - libgeotiff
 - libgettext
+- libglvnd
 - libgpg-error
 - libgphoto2
 - libgpiod
@@ -789,6 +794,7 @@ required_for_references:
 - mongo-c-driver
 - mongo-cxx-driver
 - morton-nd
+- mosquitto
 - mozilla-build
 - mozjpeg
 - mp-units
@@ -836,6 +842,7 @@ required_for_references:
 - nodejs
 - nodesoup
 - norm
+- npcap
 - nsync
 - ntv2
 - nudb
@@ -917,6 +924,7 @@ required_for_references:
 - pcl
 - pcre
 - pcre2
+- pdf-writer
 - pdfgen
 - pdqsort
 - perf
@@ -981,6 +989,7 @@ required_for_references:
 - pybind11
 - pybind11_json
 - pystring
+- qarchive
 - qcbor
 - qdbm
 - qhull
@@ -990,10 +999,12 @@ required_for_references:
 - qt
 - quantlib
 - quaternions
+- quazip
 - quickfix
 - quickjs
 - quill
 - quirc
+- qwt
 - r8brain-free-src
 - rabbitmq-c
 - ragel
@@ -1180,6 +1191,7 @@ required_for_references:
 - tinyspline
 - tinyxml
 - tinyxml2
+- tixi3
 - tk
 - tl
 - tl-expected
@@ -1191,6 +1203,7 @@ required_for_references:
 - tmxlite
 - tng
 - toml11
+- tomlplusplus
 - tracy
 - transwarp
 - trantor
@@ -1246,6 +1259,7 @@ required_for_references:
 - vincentlaucsb-csv-parser
 - vir-simd
 - visit_struct
+- vk-bootstrap
 - vo-amrwbenc
 - volk
 - vorbis

@@ -20,10 +20,12 @@ class FoxgloveWebSocketConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "asio": ["boost", "standalone"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "asio": "standalone"
     }
 
     settings = "os", "arch", "compiler", "build_type"
@@ -65,13 +67,15 @@ class FoxgloveWebSocketConan(ConanFile):
 
     def requirements(self):
         self.requires("nlohmann_json/3.10.5", transitive_headers=True)
-        self.requires("websocketpp/0.8.2")
+        self.requires("websocketpp/0.8.2", transitive_headers=True, transitive_libs=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if self.settings.os == "Windows" and self.options.shared:
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
     def config_options(self):
@@ -79,7 +83,7 @@ class FoxgloveWebSocketConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        self.options["websocketpp"].asio = "standalone"
+        self.options["websocketpp"].asio = self.options.asio
 
         if self.options.shared:
             self.options.rm_safe("fPIC")

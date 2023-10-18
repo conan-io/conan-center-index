@@ -1,6 +1,3 @@
-Fix undefined reference with Visual Studio 2015
-see https://tracker.dev.opencascade.org/view.php?id=31922
-
 --- a/src/Graphic3d/Graphic3d_Camera.cxx
 +++ b/src/Graphic3d/Graphic3d_Camera.cxx
 @@ -1576,18 +1576,19 @@ bool Graphic3d_Camera::ZFitAll (const Standard_Real theScaleFactor,

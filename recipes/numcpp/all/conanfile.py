@@ -12,11 +12,10 @@ required_conan_version = ">=1.50.0"
 class NumCppConan(ConanFile):
     name = "numcpp"
     description = "A Templatized Header Only C++ Implementation of the Python NumPy Library"
-    topics = ("python", "numpy", "numeric")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/dpilger26/NumCpp"
-    license = "MIT"
-
+    topics = ("python", "numpy", "numeric", "header-library")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -27,8 +26,8 @@ class NumCppConan(ConanFile):
         "with_boost" : True,
         "threads" : False,
     }
-
     no_copy_source = True
+    short_paths = True
 
     @property
     def _min_cppstd(self):
@@ -82,6 +81,13 @@ class NumCppConan(ConanFile):
             self.settings.compiler.libcxx == "libstdc++11":
             raise ConanInvalidConfiguration(
                 f"{self.ref} doesn't support clang<12 with libstdc++11 due to filesystem library.",
+            )
+
+        # since 2.12.0, numcpp uses TRUE/FALSE symbol which are defined by macOSX SDK
+        # https://github.com/dpilger26/NumCpp/issues/204
+        if Version(self.version) == "2.12.0" and self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} doesn't support apple-clang by defining TRUE/FALSE symbols",
             )
 
     def source(self):
