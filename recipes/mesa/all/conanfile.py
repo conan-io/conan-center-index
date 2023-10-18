@@ -521,7 +521,7 @@ class MesaConan(ConanFile):
 
     @property
     def _default_vulkan_layers_device_select_option(self):
-        return not (self.settings.os == "Windows" and self.settings.get_safe("os.subsystem") is None)
+        return not ((self.settings.os == "Windows" and self.settings.get_safe("os.subsystem") is None) or self.settings.os == "Macos")
 
     @property
     def _default_vulkan_layers_overlay_option(self):
