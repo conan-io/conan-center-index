@@ -154,7 +154,7 @@ class OpenSceneGraphConanFile(ConanFile):
         if self.options.with_tiff:
             self.requires("libtiff/4.5.1")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
