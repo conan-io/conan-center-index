@@ -8,5 +8,11 @@ sources:
 patches:
   "3.2.0":
     - patch_file: "patches/v3.2.0-gcc5-bug-workaround.patch"
+      patch_type: "bugfix"
+      patch_description: "GCC requires but does not emit defaulted constructors in certain cases"
+      patch_source: "https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82336"
   "3.1.9":
     - patch_file: "patches/v3.1.4-gcc5-bug-workaround.patch"
+      patch_type: "bugfix"
+      patch_description: "GCC requires but does not emit defaulted constructors in certain cases"
+      patch_source: "https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82336"
