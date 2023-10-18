@@ -4,8 +4,6 @@ from conan.tools.build import can_run, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs, rm, rename
-from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 import os
 
 
