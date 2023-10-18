@@ -102,7 +102,7 @@ class MsixConan(ConanFile):
         if self.options.crypto_lib == "openssl":
             self.requires("openssl/1.1.1q")
         if self.options.use_external_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.xml_parser == "xerces":
             self.requires("xerces-c/3.2.3")
 
