@@ -5,6 +5,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.scm import Version
 import os
 
 
@@ -31,7 +32,7 @@ class DirectXHeadersConan(ConanFile):
     def validate(self):
         if not self.settings.os in ["Linux", "Windows"]:
             raise ConanInvalidConfiguration(f"{self.name} is not supported on {self.settings.os}")
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
 
     def build_requirements(self):
