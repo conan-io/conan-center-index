@@ -24,6 +24,7 @@ required_conan_version = ">=1.53.0"
 
 
 # todo The Python mako module is required to build.
+# macOS: https://github.com/Mesa3D/mesa/blob/main/.github/workflows/macos.yml
 
 datasources_list = ["freedreno", "intel", "panfrost"]
 freedreno_kmds_list = ["kgsl", "msm", "virtio"]
@@ -312,6 +313,10 @@ class MesaConan(ConanFile):
     @property
     def _requires_expat(self):
         return self.options.get_safe("with_expat") or self.options.xmlconfig
+
+    @property
+    def _requires_moltenvk(self):
+        return is_apple_os(self) and self.options.get_safe("gallium_drivers_zink")
 
     @property
     def _has_allow_kcmp_option(self):
@@ -769,6 +774,9 @@ class MesaConan(ConanFile):
             self.requires("libxml2/2.11.4")
             self.requires("lua/5.4.6")
 
+        if self._requires_moltenvk:
+            self.requires("moltenvk/1.2.2")
+
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
@@ -1082,6 +1090,8 @@ class MesaConan(ConanFile):
         )
         if self.options.get_safe("min_windows_version"):
             tc.project_options["min-windows-version"] = self.options.min_windows_version
+        if self._requires_moltenvk:
+            tc.project_options["moltenvk-dir"] = self.dependencies["moltenvk"].package_folder
         tc.project_options["opengl"] = self.options.get_safe("opengl", default=False)
         tc.project_options["osmesa"] = self.options.get_safe("osmesa", default=False)
         tc.project_options["perfetto"] = self.options.get_safe(
