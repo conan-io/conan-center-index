@@ -90,10 +90,12 @@ class AeronConan(ConanFile):
         tc.cache_variables["AERON_BUILD_DOCUMENTATION"] = False
         tc.cache_variables["AERON_INSTALL_TARGETS"] = True
         tc.cache_variables["AERON_ENABLE_NONSTANDARD_OPTIMIZATIONS"] = True
-        # The finite-math-only optimization has no effect and will cause linking errors
+        # The finite-math-only optimization has no effect and can cause linking errors
         # when linked against glibc >= 2.31
-        tc.variables["CMAKE_C_FLAGS"] = "-fno-finite-math-only"
-        tc.variables["CMAKE_CXX_FLAGS"] = "-fno-finite-math-only"
+        tc.blocks["cmake_flags_init"].template += (
+            'string(APPEND CMAKE_CXX_FLAGS_INIT " -fno-finite-math-only")\n'
+            'string(APPEND CMAKE_C_FLAGS_INIT " -fno-finite-math-only")\n'
+        )
         tc.generate()
 
     def _patch_sources(self):
