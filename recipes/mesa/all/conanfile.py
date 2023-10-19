@@ -155,7 +155,6 @@ class MesaConan(ConanFile):
         "min_windows_version": ["7", "8", "10", "11"],
         "opengl": [True, False],
         "osmesa": [True, False],
-        "perfetto": [True, False],
         "platform_sdk_version": ["ANY"],
         "radv_build_id": ["ANY"],
         "shader_cache": [True, False],
@@ -173,6 +172,7 @@ class MesaConan(ConanFile):
         "with_libunwind": [True, False],
         "with_llvm": [True, False],
         # "with_lmsensors": [True, False],
+        "with_perfetto": [True, False],
         "with_zstd": [True, False],
         "with_zlib": [True, False],
         "xmlconfig": [True, False],
@@ -243,7 +243,6 @@ class MesaConan(ConanFile):
         "min_windows_version": "8",
         "opengl": True,
         "osmesa": False,
-        "perfetto": False,
         "platform_sdk_version": "25",
         "radv_build_id": None,
         "shader_cache": True,
@@ -261,6 +260,7 @@ class MesaConan(ConanFile):
         "with_libunwind": True,
         "with_llvm": True,
         # "with_lmsensors": True,
+        "with_perfetto": False,
         "with_zlib": True,
         "with_zstd": True,
         "xmlconfig": True,
@@ -769,6 +769,9 @@ class MesaConan(ConanFile):
         # if self.options.get_safe("with_llvm"):
             # self.requires("llvm-core/13.0.0")
 
+        if self.options.get_safe("with_perfetto"):
+            self.requires("perfetto/37.0")
+
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
 
@@ -1110,7 +1113,7 @@ class MesaConan(ConanFile):
         tc.project_options["opengl"] = self.options.get_safe("opengl", default=False)
         tc.project_options["osmesa"] = self.options.get_safe("osmesa", default=False)
         tc.project_options["perfetto"] = self.options.get_safe(
-            "perfetto", default=False
+            "with_perfetto", default=False
         )
         if self.options.get_safe("platform_sdk_version"):
             tc.project_options[
