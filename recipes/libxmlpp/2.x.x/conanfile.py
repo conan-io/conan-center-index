@@ -60,8 +60,15 @@ class LibXMLPlusPlus(ConanFile):
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration(f"{self.name} recipe is not yet available for Macos")
+        if Version(self.version) < "2.91.1":
+            from conan import conan_version
+            import sys
+            if conan_version.major == 2:
+                # FIXME: linter complains, but function is there
+                # https://docs.conan.io/2.0/reference/tools/build.html?highlight=check_min_cppstd#conan-tools-build-check-max-cppstd
+                check_max_cppstd = getattr(sys.modules['conan.tools.build'], 'check_max_cppstd')
+                # INFO: error: no template named 'auto_ptr' in namespace 'std'. Removed in C++17.
+                check_max_cppstd(self, 14)
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
