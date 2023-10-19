@@ -350,9 +350,9 @@ class MesaConan(ConanFile):
     # def _with_dri(self):
     #     return self.options.get_safe("glx") == "dri" or self.options.get_safe("egl")
 
-    # @property
-    # def _has_egl_option(self):
-    #     return self._with_dri or self.settings.os in ["Android", "Windows"]
+    @property
+    def _has_egl_option(self):
+        return not is_apple_os(self)
 
     @property
     def _has_dri3_option(self):
@@ -588,7 +588,7 @@ class MesaConan(ConanFile):
         if not self._has_xmlconfig_option:
             self.options.rm_safe("xmlconfig")
 
-        if is_apple_os(self):
+        if not self._has_egl_option:
             self.options.rm_safe("egl")
 
         if self.settings.os != "Windows":
