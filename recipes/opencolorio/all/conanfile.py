@@ -51,7 +51,7 @@ class OpenColorIOConan(ConanFile):
             self.requires("openexr/2.5.7")
         else:
             self.requires("openexr/3.1.7")
-            self.requires("imath/3.1.6")
+            self.requires("imath/3.1.9")
 
         self.requires("yaml-cpp/0.7.0")
         if Version(self.version) < "2.0.0":
