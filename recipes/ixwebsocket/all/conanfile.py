@@ -121,6 +121,8 @@ class IXWebSocketConan(ConanFile):
                                   "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION bin")
         # INFO: IXWebSocketHttpHeaders.cpp consumes WSAEINVAL but there is no winsock2.h included
         replace_in_file(self, os.path.join(self.source_folder, "ixwebsocket", "IXWebSocketHttpHeaders.cpp"), '#include "IXSocket.h"', '#include "IXNetSystem.h"\n#include "IXSocket.h"')
+        # INFO: IXHttpClient.cpp consumes WSAEINVAL but there is no winsock2.h included
+         replace_in_file(self, os.path.join(self.source_folder, "ixwebsocket", "IXHttpClient.h"), '#include "IXSocket.h"', '#include "IXNetSystem.h"\n#include "IXSocket.h"')
 
     def build(self):
         self._patch_sources()
