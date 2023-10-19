@@ -86,8 +86,8 @@ class ZstdConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
         if self.options.shared and self.options.build_programs:
-            # If we built programs we always build static libs,
-            # but if we only want shared libs in the package then remove the static libs
+            # If we build programs we have to build static libs (see logic in generate()),
+            # but if shared is True, we only want shared lib in package folder.
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
             rm(self, "*_static.*", os.path.join(self.package_folder, "lib"))
 
