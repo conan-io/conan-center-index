@@ -101,7 +101,8 @@ class OhNetConan(ConanFile):
                 args = self._get_openhome_architecture(args)
                 autotools = Autotools(self)
                 autotools.make(args=args, target="install-libs install-includes")
-                fix_apple_shared_install_name(self)
+                if is_apple_os(self):
+                    fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.components["ohNet"].libs = ["ohNet"]
