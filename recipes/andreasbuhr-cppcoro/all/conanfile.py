@@ -3,6 +3,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import rmdir, get, copy
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
@@ -11,7 +12,7 @@ required_conan_version = ">=1.53.0"
 class AndreasbuhrCppCoroConan(ConanFile):
     name = "andreasbuhr-cppcoro"
     description = "A library of C++ coroutine abstractions for the coroutines TS"
-    topics = ("conan", "cpp", "async", "coroutines")
+    topics = ("cpp", "async", "coroutines")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/andreasbuhr/cppcoro"
     license = "MIT"
@@ -87,7 +88,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder,"licenses"), src=self.source_folder)
+        copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
@@ -95,12 +96,12 @@ class AndreasbuhrCppCoroConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["cppcoro"]
 
-        if self.settings.os == "Linux" and self.options.shared:
-            self.cpp_info.system_libs = ["pthread"]
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.shared:
+            self.cpp_info.system_libs = ["pthread", "m"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["synchronization", "ws2_32", "mswsock"]
 
-        if self.settings.compiler == "msvc":
+        if is_msvc(self):
             self.cpp_info.cxxflags.append("/await")
         elif self.settings.compiler == "gcc":
             self.cpp_info.cxxflags.append("-fcoroutines")
