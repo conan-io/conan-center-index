@@ -424,7 +424,6 @@ class MesaConan(ConanFile):
     @property
     def _default_egl_option(self):
         return True
-        # return self.settings.os != "Windows"
 
     @property
     def _default_egl_native_platform_option(self):
@@ -589,7 +588,7 @@ class MesaConan(ConanFile):
         if not self._has_xmlconfig_option:
             self.options.rm_safe("xmlconfig")
 
-        if self.settings.os == "Macos":
+        if is_apple_os(self):
             self.options.rm_safe("egl")
 
         if self.settings.os != "Windows":
@@ -656,35 +655,39 @@ class MesaConan(ConanFile):
 
         self.options.glx = self._default_glx_option
 
-        self.options.vulkan_driver_amd = self._default_vulkan_driver_option("amd")
-        self.options.vulkan_driver_broadcom = self._default_vulkan_driver_option(
-            "broadcom"
-        )
-        self.options.vulkan_driver_freedreno = self._default_vulkan_driver_option(
-            "freedreno"
-        )
-        self.options.vulkan_driver_imagination_experimental = (
-            self._default_vulkan_driver_option("imagination_experimental")
-        )
-        self.options.vulkan_driver_intel = self._default_vulkan_driver_option("intel")
-        self.options.vulkan_driver_intel_hasvk = self._default_vulkan_driver_option(
-            "intel_hasvk"
-        )
-        self.options.vulkan_driver_microsoft_experimental = (
-            self._default_vulkan_driver_option("microsoft_experimental")
-        )
-        self.options.vulkan_driver_nouveau_experimental = (
-            self._default_vulkan_driver_option("nouveau_experimental")
-        )
-        self.options.vulkan_driver_panfrost = self._default_vulkan_driver_option(
-            "panfrost"
-        )
-        self.options.vulkan_driver_swrast = self._default_vulkan_driver_option(
-            "swrast"
-        )
-        self.options.vulkan_driver_virtio = self._default_vulkan_driver_option(
-            "virtio"
-        )
+        if is_apple_os(self):
+            [self.options.rm_safe(vulkan_driver) for vulkan_driver in vulkan_drivers]
+        else:
+            self.options.vulkan_driver_amd = self._default_vulkan_driver_option("amd")
+            self.options.vulkan_driver_broadcom = self._default_vulkan_driver_option(
+                "broadcom"
+            )
+            self.options.vulkan_driver_freedreno = self._default_vulkan_driver_option(
+                "freedreno"
+            )
+            self.options.vulkan_driver_imagination_experimental = (
+                self._default_vulkan_driver_option("imagination_experimental")
+            )
+            self.options.vulkan_driver_intel = self._default_vulkan_driver_option("intel")
+            self.options.vulkan_driver_intel_hasvk = self._default_vulkan_driver_option(
+                "intel_hasvk"
+            )
+            self.options.vulkan_driver_microsoft_experimental = (
+                self._default_vulkan_driver_option("microsoft_experimental")
+            )
+            self.options.vulkan_driver_nouveau_experimental = (
+                self._default_vulkan_driver_option("nouveau_experimental")
+            )
+            self.options.vulkan_driver_panfrost = self._default_vulkan_driver_option(
+                "panfrost"
+            )
+            self.options.vulkan_driver_swrast = self._default_vulkan_driver_option(
+                "swrast"
+            )
+            self.options.vulkan_driver_virtio = self._default_vulkan_driver_option(
+                "virtio"
+            )
+
         self.options.vulkan_layer_device_select = self._default_vulkan_layer_device_select_option
         self.options.vulkan_layer_overlay = self._default_vulkan_layer_overlay_option
 
@@ -767,7 +770,7 @@ class MesaConan(ConanFile):
 
         # todo Update this to use the new llvm package when it is merged.
         # if self.options.get_safe("with_llvm"):
-            # self.requires("llvm-core/13.0.0")
+        #    self.requires("llvm/17.0.2")
 
         if self.options.get_safe("with_perfetto"):
             self.requires("perfetto/37.0")
@@ -928,13 +931,12 @@ class MesaConan(ConanFile):
                 "The glx option requires the glx option of libglvnd to be enabled"
             )
 
-        # todo Does the swrast Vulkan driver work on macOS?
-        # if self.settings.os == "Macos":
-        #     for vulkan_driver in vulkan_drivers:
-        #         if self.options.get_safe(f"vulkan_driver_{vulkan_driver}"):
-        #             raise ConanInvalidConfiguration(
-        #                 "Vulkan is not supported on Macos or Windows yet"
-        #             )
+        if is_apple_os(self):
+            for vulkan_driver in vulkan_drivers:
+                if self.options.get_safe(f"vulkan_driver_{vulkan_driver}"):
+                    raise ConanInvalidConfiguration(
+                        f"Vulkan drivers are not supported on {self.settings.os}"
+                    )
 
         if self.options.get_safe("vulkan_driver_swrast") and not self.options.get_safe(
             "gallium_driver_swrast"
@@ -962,10 +964,6 @@ class MesaConan(ConanFile):
             self.tool_requires("wayland/<host_version>")
         if self._settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.25")
-            # todo Needed?
-            # self.win_bash = True
-            # if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-            #     self.tool_requires("msys2/cci.latest")
         else:
             self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
