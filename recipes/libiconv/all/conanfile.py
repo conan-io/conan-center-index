@@ -9,7 +9,8 @@ from conan.tools.files import (
     get,
     rename,
     rm,
-    rmdir
+    rmdir,
+    replace_in_file
 )
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -119,8 +120,15 @@ class LibiconvConan(ConanFile):
             env.define("win32_target", "_WIN32_WINNT_VISTA")
         tc.generate(env)
 
-    def build(self):
+    def _apply_resource_patch(self):
+        if self.settings.arch == "x86":
+            windres_options_path = os.path.join(self.source_folder, "windows", "windres-options")
+            self.output.info("Applying {} resource patch: {}".format(self.settings.arch, windres_options_path))
+            replace_in_file(self, windres_options_path, '#   PACKAGE_VERSION_SUBMINOR', '#   PACKAGE_VERSION_SUBMINOR\necho "--target=pe-i386"', strict=True)
+
+    def build(self): 
         apply_conandata_patches(self)
+        self._apply_resource_patch()
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
