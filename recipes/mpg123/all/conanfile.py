@@ -83,7 +83,7 @@ class Mpg123Conan(ConanFile):
 
     def requirements(self):
         if self.options.module == "libalsa":
-            self.requires("libalsa/1.2.7.2")
+            self.requires("libalsa/1.2.10")
         if self.options.module == "tinyalsa":
             self.requires("tinyalsa/2.0.0")
 
@@ -96,7 +96,7 @@ class Mpg123Conan(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
         if self.settings.arch in ["x86", "x86_64"]:
             self.tool_requires("yasm/1.3.0")
         if self._settings_build.os == "Windows":
@@ -153,7 +153,10 @@ class Mpg123Conan(ConanFile):
             ])
             if is_apple_os(self):
                 # Needed for fix_apple_shared_install_name invocation in package method
-                tc.extra_cflags = ["-headerpad_max_install_names"]
+                tc.extra_cflags += ["-headerpad_max_install_names"]
+            # The finite-math-only optimization has no effect and will cause linking errors
+            # when linked against glibc >= 2.31
+            tc.extra_cflags += ["-fno-finite-math-only"]
             tc.generate()
             tc = AutotoolsDeps(self)
             tc.generate()

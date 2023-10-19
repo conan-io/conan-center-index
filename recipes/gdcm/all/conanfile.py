@@ -62,7 +62,7 @@ class GDCMConan(ConanFile):
         if self.options.with_zlibng:
             self.requires("zlib-ng/2.0.7")
         else:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os != "Windows":
             self.requires("util-linux-libuuid/2.39")
             if Version(self.version) >= Version("3.0.20"):
