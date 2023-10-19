@@ -988,10 +988,13 @@ class MesaConan(ConanFile):
         self._patch_sources()
 
     def generate(self):
+        boolean = lambda option: self.options.get_safe(option, default=False)
         feature = lambda option: "enabled" if self.options.get_safe(option) else "disabled"
-        string = lambda option: str(self.options.get_safe(option)) if self.options.get_safe(option) else ""
+        def string(option, default=""):
+            return str(self.options.get_safe(option)) if self.options.get_safe(option) else default
+
         tc = MesonToolchain(self)
-        tc.project_options["android-stub"] = self.options.get_safe("android_stub")
+        tc.project_options["android-stub"] = boolean("android_stub")
         tc.project_options["android-libbacktrace"] = feature("android_libbacktrace")
         tc.project_options["allow-kcmp"] = feature("allow_kcmp")
         tc.project_options["build-aco-tests"] = False
@@ -1012,20 +1015,16 @@ class MesaConan(ConanFile):
             for freedreno_kmd in freedreno_kmds
             if self.options.get_safe(f"freedreno_kmd_{freedreno_kmd}")
         ]
-        tc.project_options["gallium-d3d10umd"] = self.options.get_safe("gallium_d3d10umd")
+        tc.project_options["gallium-d3d10umd"] = boolean("gallium_d3d10umd")
         tc.project_options["gallium-d3d12-video"] = feature("gallium_d3d12_video")
         tc.project_options["gallium-drivers"] = [
             gallium_driver
             for gallium_driver in gallium_drivers
             if self.options.get_safe(f"gallium_driver_{gallium_driver}")
         ]
-        tc.project_options["gallium-extra-hud"] = self.options.get_safe("gallium_extra_hud")
-        tc.project_options["gallium-nine"] = self.options.get_safe("gallium_nine")
-        tc.project_options["gallium-omx"] = (
-            "disabled"
-            if not self.options.get_safe("gallium_omx")
-            else str(self.options.get_safe("gallium_omx"))
-        )
+        tc.project_options["gallium-extra-hud"] = boolean("gallium_extra_hud")
+        tc.project_options["gallium-nine"] = boolean("gallium_nine")
+        tc.project_options["gallium-omx"] = string("gallium_omx", default="disabled")
         tc.project_options["gallium-va"] = feature("gallium_va")
         tc.project_options["gallium-vdpau"] = feature("gallium_vdpau")
         if self.options.get_safe("gallium_windows_dll_name"):
@@ -1036,15 +1035,11 @@ class MesaConan(ConanFile):
         tc.project_options["gbm"] = feature("gbm")
         tc.project_options["gles1"] = feature("gles1")
         tc.project_options["gles2"] = feature("gles2")
-        tc.project_options["glvnd"] = self.options.get_safe("with_libglvnd")
-        tc.project_options["glvnd-vendor-name"] = str(self.options.get_safe("glvnd_vendor_name", "mesa"))
-        tc.project_options["glx"] = (
-            "disabled"
-            if not self.options.get_safe("glx")
-            else str(self.options.get_safe("glx"))
-        )
-        tc.project_options["glx-direct"] = self.options.get_safe("glx_direct")
-        tc.project_options["imagination-srv"] = self.options.get_safe("imagination_srv")
+        tc.project_options["glvnd"] = boolean("with_libglvnd")
+        tc.project_options["glvnd-vendor-name"] = string("glvnd_vendor_name", default="mesa")
+        tc.project_options["glx"] = string("glx", default="disabled")
+        tc.project_options["glx-direct"] = boolean("glx_direct")
+        tc.project_options["imagination-srv"] = boolean("imagination_srv")
         tc.project_options["install-intel-gpu-tests"] = False
         tc.project_options["intel-clc"] = (
             "system"
@@ -1058,9 +1053,9 @@ class MesaConan(ConanFile):
             tc.project_options["min-windows-version"] = self.options.min_windows_version
         if self._requires_moltenvk:
             tc.project_options["moltenvk-dir"] = self.dependencies["moltenvk"].package_folder
-        tc.project_options["opengl"] = self.options.get_safe("opengl")
-        tc.project_options["osmesa"] = self.options.get_safe("osmesa")
-        tc.project_options["perfetto"] = self.options.get_safe("with_perfetto")
+        tc.project_options["opengl"] = boolean("opengl")
+        tc.project_options["osmesa"] = boolean("osmesa")
+        tc.project_options["perfetto"] = boolean("with_perfetto")
         if self.options.get_safe("platform_sdk_version"):
             tc.project_options[
                 "platform-sdk-version"
@@ -1071,12 +1066,12 @@ class MesaConan(ConanFile):
             if self.options.get_safe(f"platform_{platform}")
         ]
         tc.project_options["radv-build-id"] = string("radv_build_id")
-        tc.project_options["selinux"] = self.options.get_safe("with_libselinux")
+        tc.project_options["selinux"] = boolean("with_libselinux")
         tc.project_options["shader-cache"] = feature("shader_cache")
-        tc.project_options["shader-cache-default"] = self.options.get_safe("shader_cache_default")
+        tc.project_options["shader-cache-default"] = boolean("shader_cache_default")
         tc.project_options["shader-cache-max-size"] = string("shader_cache_max_size")
         tc.project_options["shared-glapi"] = feature("shared_glapi")
-        tc.project_options["sse2"] = self.options.get_safe("sse2")
+        tc.project_options["sse2"] = boolean("sse2")
         tc.project_options["tools"] = [
             tool.replace("_", "-")
             for tool in tools
@@ -1088,8 +1083,8 @@ class MesaConan(ConanFile):
             for video_codec in video_codecs
             if self.options.get_safe(f"video_codec_{video_codec}")
         ]
-        tc.project_options["vmware-mks-stats"] = self.options.get_safe("vmware_mks_stats")
-        tc.project_options["vulkan-beta"] = self.options.get_safe("vulkan_beta")
+        tc.project_options["vmware-mks-stats"] = boolean("vmware_mks_stats")
+        tc.project_options["vulkan-beta"] = boolean("vulkan_beta")
         tc.project_options["vulkan-drivers"] = [
             vulkan_driver.replace("_experimental", "-experimental")
             for vulkan_driver in vulkan_drivers
