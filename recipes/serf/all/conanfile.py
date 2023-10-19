@@ -108,7 +108,7 @@ class SerfConan(ConanFile):
         if is_msvc(self):
             kwargs["TARGET_ARCH"] = str(self.settings.arch)
             kwargs["MSVC_VERSION"] = "{:.1f}".format(float(msvs_toolset(self).lstrip("v")) / 10)
-            kwargs["OPENSSL_LIBS"] = os.pathsep.join(f"{lib}.lib" for lib in self.dependencies["openssl"].cpp_info.libs)
+            kwargs["OPENSSL_LIBS"] = os.pathsep.join(f"{lib}.lib" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs)
 
         escape_str = lambda x: f'"{x}"'
         scons_args = " ".join([escape_str(s) for s in args] + [f"{k}={escape_str(v)}" for k, v in kwargs.items()])
