@@ -34,7 +34,7 @@ class XorgConan(ConanFile):
                      "libxcb-keysyms1-dev", "libxcb-randr0-dev", "libxcb-shape0-dev", "libxcb-sync-dev", "libxcb-xfixes0-dev",
                      "libxcb-xinerama0-dev", "libxcb-dri3-dev", "uuid-dev", "libxcb-cursor-dev", "libxcb-dri2-0-dev",
                      "libxcb-dri3-dev", "libxcb-present-dev", "libxcb-composite0-dev", "libxcb-ewmh-dev",
-                     "libxcb-res0-dev", "xwayland"], update=True, check=True)
+                     "libxcb-res0-dev"], update=True, check=True)
         apt.install_substitutes(
             ["libxcb-util-dev"], ["libxcb-util0-dev"], update=True, check=True)
 
@@ -44,7 +44,7 @@ class XorgConan(ConanFile):
                            "libxkbfile-devel", "libXrandr-devel", "libXres-devel", "libXScrnSaver-devel",
                            "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                            "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
-                           "xcb-util-devel", "libuuid-devel", "xcb-util-cursor-devel", "xorg-x11-server-Xwayland-devel"], update=True, check=True)
+                           "xcb-util-devel", "libuuid-devel", "xcb-util-cursor-devel"], update=True, check=True)
 
         dnf = package_manager.Dnf(self)
         dnf.install(["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
@@ -52,7 +52,7 @@ class XorgConan(ConanFile):
                            "libxkbfile-devel", "libXrandr-devel", "libXres-devel", "libXScrnSaver-devel",
                            "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                            "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
-                           "xcb-util-devel", "libuuid-devel", "xcb-util-cursor-devel", "xorg-x11-server-Xwayland-devel"], update=True, check=True)
+                           "xcb-util-devel", "libuuid-devel", "xcb-util-cursor-devel"], update=True, check=True)
 
         zypper = package_manager.Zypper(self)
         zypper.install(["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
@@ -60,18 +60,18 @@ class XorgConan(ConanFile):
                               "libxkbfile-devel", "libXrandr-devel", "libXres-devel", "libXss-devel",
                               "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                               "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
-                              "xcb-util-devel", "libuuid-devel", "xcb-util-cursor-devel", "xwayland-devel"], update=True, check=True)
+                              "xcb-util-devel", "libuuid-devel", "xcb-util-cursor-devel"], update=True, check=True)
 
         pacman = package_manager.PacMan(self)
         pacman.install(["libxcb", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
                               "libxdamage", "libxdmcp", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
                               "libxss", "libxvmc", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
-                              "libxxf86vm", "libxv", "xcb-util", "util-linux-libs", "xcb-util-cursor", "xorg-xwayland"], update=True, check=True)
+                              "libxxf86vm", "libxv", "xcb-util", "util-linux-libs", "xcb-util-cursor"], update=True, check=True)
 
         package_manager.Pkg(self).install(["libX11", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
                            "libxdamage", "libxdmcp", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
                            "libXScrnSaver", "libxvmc", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
-                           "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util", "xcb-util-cursor", "xwayland-devel"], update=True, check=True)
+                           "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util", "xcb-util-cursor"], update=True, check=True)
 
     def package_info(self):
         if conan_version.major >= 2:
@@ -87,7 +87,7 @@ class XorgConan(ConanFile):
                      "xcb-renderutil", "xcb-shape", "xcb-shm", "xcb-sync", "xcb-xfixes",
                      "xcb-xinerama", "xcb", "xcb-atom", "xcb-aux", "xcb-event", "xcb-util",
                      "xcb-dri3", "xcb-cursor", "xcb-dri2", "xcb-dri3", "xcb-glx", "xcb-present",
-                     "xcb-composite", "xcb-ewmh", "xcb-res", "xwayland"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
+                     "xcb-composite", "xcb-ewmh", "xcb-res"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
             pkg_config = PkgConfig(self, name)
             pkg_config.fill_cpp_info(
                 self.cpp_info.components[name], is_system=self.settings.os != "FreeBSD")
