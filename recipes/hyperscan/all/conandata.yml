@@ -1,12 +1,22 @@
 sources:
+  "5.4.2":
+    url: "https://github.com/intel/hyperscan/archive/v5.4.2.tar.gz"
+    sha256: "32b0f24b3113bbc46b6bfaa05cf7cf45840b6b59333d078cc1f624e4c40b2b99"
   "5.4.0":
     url: "https://github.com/intel/hyperscan/archive/v5.4.0.tar.gz"
     sha256: "e51aba39af47e3901062852e5004d127fa7763b5dbbc16bcca4265243ffa106f"
 patches:
-  "5.4.0":
-    - patch_file: "patches/0001-fix-cmake.patch"
+  "5.4.2":
+    - patch_file: "patches/5.4.2-0001-fix-cmake.patch"
       patch_description: "modify cmake files to build with conan"
       patch_type: "conan"
-    - patch_file: "patches/0002-use-ue2-make_unique.patch"
+    - patch_file: "patches/5.4.2-0002-use-ue2-make_unique.patch"
+      patch_description: "add ue2:: prefix to make_unique for name collision"
+      patch_type: "portability"
+  "5.4.0":
+    - patch_file: "patches/5.4.0-0001-fix-cmake.patch"
+      patch_description: "modify cmake files to build with conan"
+      patch_type: "conan"
+    - patch_file: "patches/5.4.0-0002-use-ue2-make_unique.patch"
       patch_description: "add ue2:: prefix to make_unique for name collision"
       patch_type: "portability"
