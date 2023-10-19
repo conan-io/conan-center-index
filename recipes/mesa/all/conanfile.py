@@ -122,6 +122,7 @@ class MesaConan(ConanFile):
         "android_stub": [True, False],
         "android_libbacktrace": [True, False],
         "allow_kcmp": [True, False],
+        "draw_use_llvm": [True, False],
         "dri3": [True, False],
         "egl": [True, False],
         "egl_lib_suffix": [None, "ANY"],
@@ -139,6 +140,8 @@ class MesaConan(ConanFile):
         "gallium_extra_hud": [True, False],
         "gallium_nine": [True, False],
         "gallium_omx": [False, "bellagio", "tizonia"],
+        "gallium_opencl": [False, "icd", "standalone"],
+        "gallium_rusticl": [True, False],
         "gallium_va": [True, False],
         "gallium_vdpau": [True, False],
         "gallium_windows_dll_name": ["ANY"],
@@ -152,7 +155,9 @@ class MesaConan(ConanFile):
         "imagination_srv": [True, False],
         "intel_clc": [True, False, "system"],
         "intel_xe_kmd": [True, False],
+        "microsoft_clc": [True, False],
         "min_windows_version": ["7", "8", "10", "11"],
+        "opencl_spirv": [True, False],
         "opengl": [True, False],
         "osmesa": [True, False],
         "platform_sdk_version": ["ANY"],
@@ -161,6 +166,7 @@ class MesaConan(ConanFile):
         "shader_cache_default": [True, False],
         "shader_cache_max_size": ["ANY"],
         "shared_glapi": [True, False],
+        "spirv_to_dxil": [True, False],
         "sse2": [True, False],
         "vmware_mks_stats": [True, False],
         "vulkan_beta": [True, False],
@@ -192,15 +198,10 @@ class MesaConan(ConanFile):
             for gallium_driver in gallium_drivers
         }
     )
-    options.update(
-        {f"platform_{platform}": [True, False] for platform in platforms}
-    )
+    options.update({f"platform_{platform}": [True, False] for platform in platforms})
     options.update({f"tool_{tool}": [True, False] for tool in tools})
     options.update(
-        {
-            f"video_codec_{video_codec}": [True, False]
-            for video_codec in video_codecs
-        }
+        {f"video_codec_{video_codec}": [True, False] for video_codec in video_codecs}
     )
     options.update(
         {
@@ -218,6 +219,7 @@ class MesaConan(ConanFile):
         "allow_kcmp": True,
         "android_stub": False,
         "android_libbacktrace": True,
+        "draw_use_llvm": True,
         "dri3": True,
         "egl": True,
         "egl_lib_suffix": None,
@@ -227,6 +229,8 @@ class MesaConan(ConanFile):
         "gallium_extra_hud": False,
         "gallium_nine": False,
         "gallium_omx": False,
+        "gallium_opencl": False,
+        "gallium_rusticl": False,
         "gallium_va": False,
         "gallium_vdpau": False,
         "gallium_windows_dll_name": "libgallium_wgl",
@@ -240,11 +244,14 @@ class MesaConan(ConanFile):
         "imagination_srv": False,
         "intel_clc": False,
         "intel_xe_kmd": False,
+        "microsoft_clc": False,
         "min_windows_version": "8",
+        "opencl_spirv": False,
         "opengl": True,
         "osmesa": False,
         "platform_sdk_version": "25",
         "radv_build_id": None,
+        "spirv_to_dxil": False,
         "shader_cache": True,
         "shader_cache_default": True,
         "shader_cache_max_size": None,
@@ -280,18 +287,13 @@ class MesaConan(ConanFile):
             for gallium_driver in gallium_drivers
         }
     )
-    default_options.update(
-        {f"platform_{platform}": True for platform in platforms}
-    )
+    default_options.update({f"platform_{platform}": True for platform in platforms})
     default_options.update({f"tool_{tool}": False for tool in tools})
     default_options.update(
         {f"video_codec_{video_codec}": False for video_codec in video_codecs}
     )
     default_options.update(
-        {
-            f"vulkan_driver_{vulkan_driver}": False
-            for vulkan_driver in vulkan_drivers
-        }
+        {f"vulkan_driver_{vulkan_driver}": False for vulkan_driver in vulkan_drivers}
     )
     default_options.update(
         {f"vulkan_layer_{vulkan_layer}": True for vulkan_layer in vulkan_layers}
@@ -367,6 +369,10 @@ class MesaConan(ConanFile):
         return self.settings.arch == "x86_64"
 
     @property
+    def _has_microsoft_clc_option(self):
+        return self.settings.os in ["Linux", "Windows"]
+
+    @property
     def _has_min_windows_version_option(self):
         return self.settings.os == "Windows"
 
@@ -402,6 +408,14 @@ class MesaConan(ConanFile):
         )
 
     @property
+    def _has_spirv_to_dxil_option(self):
+        return True
+
+    @property
+    def _has_shader_cache_option(self):
+        return self.settings.os != "Windows"
+
+    @property
     def _has_with_libglvnd_option(self):
         return self.settings.os in ["FreeBSD", "Linux"]
 
@@ -416,10 +430,6 @@ class MesaConan(ConanFile):
     @property
     def _has_with_libunwind_option(self):
         return self.settings.os in ["FreeBSD", "Linux"]
-
-    @property
-    def _has_shader_cache_option(self):
-        return self.settings.os != "Windows"
 
     @property
     def _has_xmlconfig_option(self):
@@ -453,9 +463,21 @@ class MesaConan(ConanFile):
         return "dri"
 
     @property
+    def _default_microsoft_clc_option(self):
+        return self.settings.os == "Windows"
+
+    @property
+    def _default_opencl_spirv_option(self):
+        return (
+            self.options.get_safe("gallium_opencl")
+            or self.options.get_safe("gallium_rusticl")
+            or self.options.get_safe("intel_clc")
+            or self.options.get_safe("microsoft_clc")
+        )
+
+    @property
     def _default_shared_glapi_option(self):
         return True
-        # return self.settings.os != "Windows"
 
     def _default_gallium_driver_option(self, option: str):
         return {
@@ -533,7 +555,13 @@ class MesaConan(ConanFile):
 
     @property
     def _default_vulkan_layer_device_select_option(self):
-        return not ((self.settings.os == "Windows" and self.settings.get_safe("os.subsystem") is None) or self.settings.os == "Macos")
+        return not (
+            (
+                self.settings.os == "Windows"
+                and self.settings.get_safe("os.subsystem") is None
+            )
+            or self.settings.os == "Macos"
+        )
 
     @property
     def _default_vulkan_layer_overlay_option(self):
@@ -541,8 +569,33 @@ class MesaConan(ConanFile):
         return not is_msvc(self)
 
     @property
+    def _requires_libclc(self):
+        return (
+            self.options.get_safe("gallium_opencl")
+            or self.options.get_safe("gallium_rusticl")
+            or self.options.get_safe("intel_clc")
+            or self.options.get_safe("microsoft_clc")
+        )
+
+    @property
+    def _requires_llvm(self):
+        return (
+            self.options.get_safe("gallium_opencl")
+            or self.options.get_safe("gallium_rusticl")
+            or self.options.get_safe("intel_clc")
+            or self.options.get_safe("microsoft_clc")
+        )
+
+    @property
     def _system_has_kms_drm(self):
         return self.settings.os in ["Android", "FreeBSD", "Linux", "SunOS"]
+
+    @property
+    def _with_any_gallium_driver(self):
+        for gallium_driver in gallium_drivers:
+            if self.options.get_safe(f"gallium_driver_{gallium_driver}"):
+                return True
+        return False
 
     @property
     def _with_any_opengl(self):
@@ -575,10 +628,16 @@ class MesaConan(ConanFile):
             self.options.rm_safe("gbm")
         if not self._has_intel_clc_option:
             self.options.rm_safe("intel_clc")
+        if not self._has_microsoft_clc_option:
+            self.options.rm_safe("microsoft_clc")
         if not self._has_min_windows_version_option:
             self.options.rm_safe("min_windows_version")
         if not self._has_platform_sdk_version_option:
             self.options.rm_safe("platform_sdk_version")
+        if not self._has_spirv_to_dxil_option:
+            self.options.rm_safe("spirv_to_dxil")
+        if not self._has_shader_cache_option:
+            self.options.rm_safe("shader_cache")
         if not self._has_with_libglvnd_option:
             self.options.rm_safe("with_libglvnd")
         else:
@@ -589,8 +648,6 @@ class MesaConan(ConanFile):
             self.options.rm_safe("with_libudev")
         if not self._has_with_libunwind_option:
             self.options.rm_safe("with_libunwind")
-        if not self._has_shader_cache_option:
-            self.options.rm_safe("shader_cache")
         if not self._has_xmlconfig_option:
             self.options.rm_safe("xmlconfig")
 
@@ -611,17 +668,16 @@ class MesaConan(ConanFile):
         if not self._has_platform_x11_option:
             self.options.rm_safe("platform_x11")
 
+        if is_apple_os(self):
+            [self.options.rm_safe(vulkan_driver) for vulkan_driver in vulkan_drivers]
+
         self.options.egl_native_platform = self._default_egl_native_platform_option
 
-        self.options.gallium_driver_asahi = self._default_gallium_driver_option(
-            "asahi"
-        )
+        self.options.gallium_driver_asahi = self._default_gallium_driver_option("asahi")
         self.options.gallium_driver_crocus = self._default_gallium_driver_option(
             "crocus"
         )
-        self.options.gallium_driver_d3d12 = self._default_gallium_driver_option(
-            "d3d12"
-        )
+        self.options.gallium_driver_d3d12 = self._default_gallium_driver_option("d3d12")
         self.options.gallium_driver_etnaviv = self._default_gallium_driver_option(
             "etnaviv"
         )
@@ -630,9 +686,7 @@ class MesaConan(ConanFile):
         )
         self.options.gallium_driver_i915 = self._default_gallium_driver_option("i915")
         self.options.gallium_driver_iris = self._default_gallium_driver_option("iris")
-        self.options.gallium_driver_kmsro = self._default_gallium_driver_option(
-            "kmsro"
-        )
+        self.options.gallium_driver_kmsro = self._default_gallium_driver_option("kmsro")
         self.options.gallium_driver_lima = self._default_gallium_driver_option("lima")
         self.options.gallium_driver_r300 = self._default_gallium_driver_option("r300")
         self.options.gallium_driver_r600 = self._default_gallium_driver_option("r600")
@@ -649,52 +703,47 @@ class MesaConan(ConanFile):
         self.options.gallium_driver_swrast = self._default_gallium_driver_option(
             "swrast"
         )
-        self.options.gallium_driver_tegra = self._default_gallium_driver_option(
-            "tegra"
-        )
+        self.options.gallium_driver_tegra = self._default_gallium_driver_option("tegra")
         self.options.gallium_driver_v3d = self._default_gallium_driver_option("v3d")
         self.options.gallium_driver_vc4 = self._default_gallium_driver_option("vc4")
-        self.options.gallium_driver_virgl = self._default_gallium_driver_option(
-            "virgl"
-        )
+        self.options.gallium_driver_virgl = self._default_gallium_driver_option("virgl")
         self.options.gallium_driver_zink = self._default_gallium_driver_option("zink")
 
         self.options.glx = self._default_glx_option
 
-        if is_apple_os(self):
-            [self.options.rm_safe(vulkan_driver) for vulkan_driver in vulkan_drivers]
-        else:
-            self.options.vulkan_driver_amd = self._default_vulkan_driver_option("amd")
-            self.options.vulkan_driver_broadcom = self._default_vulkan_driver_option(
-                "broadcom"
-            )
-            self.options.vulkan_driver_freedreno = self._default_vulkan_driver_option(
-                "freedreno"
-            )
-            self.options.vulkan_driver_imagination_experimental = (
-                self._default_vulkan_driver_option("imagination_experimental")
-            )
-            self.options.vulkan_driver_intel = self._default_vulkan_driver_option("intel")
-            self.options.vulkan_driver_intel_hasvk = self._default_vulkan_driver_option(
-                "intel_hasvk"
-            )
-            self.options.vulkan_driver_microsoft_experimental = (
-                self._default_vulkan_driver_option("microsoft_experimental")
-            )
-            self.options.vulkan_driver_nouveau_experimental = (
-                self._default_vulkan_driver_option("nouveau_experimental")
-            )
-            self.options.vulkan_driver_panfrost = self._default_vulkan_driver_option(
-                "panfrost"
-            )
-            self.options.vulkan_driver_swrast = self._default_vulkan_driver_option(
-                "swrast"
-            )
-            self.options.vulkan_driver_virtio = self._default_vulkan_driver_option(
-                "virtio"
-            )
+        self.options.microsoft_clc = self._default_microsoft_clc_option
 
-        self.options.vulkan_layer_device_select = self._default_vulkan_layer_device_select_option
+        self.options.opencl_spirv = self._default_opencl_spirv_option
+
+        self.options.vulkan_driver_amd = self._default_vulkan_driver_option("amd")
+        self.options.vulkan_driver_broadcom = self._default_vulkan_driver_option(
+            "broadcom"
+        )
+        self.options.vulkan_driver_freedreno = self._default_vulkan_driver_option(
+            "freedreno"
+        )
+        self.options.vulkan_driver_imagination_experimental = (
+            self._default_vulkan_driver_option("imagination_experimental")
+        )
+        self.options.vulkan_driver_intel = self._default_vulkan_driver_option("intel")
+        self.options.vulkan_driver_intel_hasvk = self._default_vulkan_driver_option(
+            "intel_hasvk"
+        )
+        self.options.vulkan_driver_microsoft_experimental = (
+            self._default_vulkan_driver_option("microsoft_experimental")
+        )
+        self.options.vulkan_driver_nouveau_experimental = (
+            self._default_vulkan_driver_option("nouveau_experimental")
+        )
+        self.options.vulkan_driver_panfrost = self._default_vulkan_driver_option(
+            "panfrost"
+        )
+        self.options.vulkan_driver_swrast = self._default_vulkan_driver_option("swrast")
+        self.options.vulkan_driver_virtio = self._default_vulkan_driver_option("virtio")
+
+        self.options.vulkan_layer_device_select = (
+            self._default_vulkan_layer_device_select_option
+        )
         self.options.vulkan_layer_overlay = self._default_vulkan_layer_overlay_option
 
     def configure(self):
@@ -708,6 +757,9 @@ class MesaConan(ConanFile):
 
         if self.options.get_safe("with_libglvnd"):
             self.options.rm_safe("egl_lib_suffix")
+
+        if not self.options.get_safe("with_llvm"):
+            self.options.rm_safe("draw_use_llvm")
 
         if self.options.get_safe("egl"):
             self.options["libglvnd"].egl = True
@@ -735,6 +787,10 @@ class MesaConan(ConanFile):
 
         if self.options.get_safe("gallium_d3d12_video"):
             self.options.gallium_driver_d3d12 = True
+
+        # todo
+        # if self._requires_libclc:
+        #     self.dependencies["llvm"].options.with_project_libclc = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -790,8 +846,12 @@ class MesaConan(ConanFile):
         if (
             self.options.get_safe("gallium_driver_d3d12")
             or self.options.get_safe("gallium_d3d12_video")
+            or self.options.get_safe("microsoft_clc")
             or self.options.get_safe("vulkan_driver_microsoft_experimental")
-            or (self.settings.os == "Windows" and self.options.get_safe("gallium_driver_zink"))
+            or (
+                self.settings.os == "Windows"
+                and self.options.get_safe("gallium_driver_zink")
+            )
             or (self.settings.os == "Windows" and self._with_any_vulkan_driver)
         ):
             self.requires("directx-headers/1.610.2")
@@ -808,8 +868,13 @@ class MesaConan(ConanFile):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version.get(
+            str(self.settings.compiler), False
+        )
+        if (
+            minimum_version
+            and Version(self.settings.compiler.version) < minimum_version
+        ):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires at least version {minimum_version} of {self.settings.compiler}"
             )
@@ -828,18 +893,18 @@ class MesaConan(ConanFile):
                 "The egl option requires the egl option of libglvnd to be enabled"
             )
 
+        if self.options.get_safe("gallium_d3d10umd") and not self.options.get_safe(
+            "gallium_driver_swrast"
+        ):
+            raise ConanInvalidConfiguration(
+                "The gallium_d3d10umd option requires the gallium_driver_swrast option to be enabled"
+            )
+
         if self.options.get_safe("gallium_d3d12_video") and not self.options.get_safe(
             "gallium_driver_d3d12"
         ):
             raise ConanInvalidConfiguration(
                 "The gallium_d3d12_video option requires the gallium_driver_d3d12 option to be enabled"
-            )
-
-        if self.options.get_safe(
-            "gallium_driver_d3d10umd"
-        ) and not self.options.get_safe("gallium_driver_swrast"):
-            raise ConanInvalidConfiguration(
-                "The gallium_driver_d3d10umd option requires the gallium_driver_swrast option to be enabled"
             )
 
         if (
@@ -904,6 +969,29 @@ class MesaConan(ConanFile):
             )
 
         if (
+            self.options.get_safe("gallium_opencl")
+            and not self._with_any_gallium_driver
+        ):
+            raise ConanInvalidConfiguration(
+                "The gallium_opencl option requires atleast one gallium driver to be enabled"
+            )
+
+        if self.options.get_safe("gallium_opencl") and not self.options.get_safe(
+            "with_llvm"
+        ):
+            raise ConanInvalidConfiguration(
+                "The gallium_opencl option requires the with_llvm option to be enabled"
+            )
+
+        if (
+            self.options.get_safe("gallium_rusticl")
+            and not self._with_any_gallium_driver
+        ):
+            raise ConanInvalidConfiguration(
+                "The gallium_rusticl option requires atleast one gallium driver to be enabled"
+            )
+
+        if (
             self.options.get_safe("gles1")
             and self.options.get_safe("with_libglvnd")
             and not self.dependencies["libglvnd"].options.gles1
@@ -937,6 +1025,22 @@ class MesaConan(ConanFile):
                 "The glx option requires the glx option of libglvnd to be enabled"
             )
 
+        if (
+            self.options.get_safe("gallium_rusticl")
+            or self.options.get_safe("intel_clc")
+            or self.options.get_safe("microsoft_clc")
+        ) and not self.options.get_safe("opencl_spirv"):
+            raise ConanInvalidConfiguration(
+                "The gallium_rusticl, intel_clc, and microsoft_clc options require the opencl_spirv option to be enabled"
+            )
+
+        if self.options.get_safe("vmware_mks_stats") and not self.options.get_safe(
+            "gallium_driver_svga"
+        ):
+            raise ConanInvalidConfiguration(
+                "The vmware_mks_stats option requires the gallium_driver_svga option to be enabled"
+            )
+
         if is_apple_os(self):
             for vulkan_driver in vulkan_drivers:
                 if self.options.get_safe(f"vulkan_driver_{vulkan_driver}"):
@@ -951,7 +1055,10 @@ class MesaConan(ConanFile):
                 "The vulkan_driver_swrast option requires the gallium_driver_swrast option to be enabled"
             )
 
-        if self.options.get_safe("vulkan_layer_device_select") and (self.settings.os == "Windows" and self.settings.get_safe("os.subsystem") is None):
+        if self.options.get_safe("vulkan_layer_device_select") and (
+            self.settings.os == "Windows"
+            and self.settings.get_safe("os.subsystem") is None
+        ):
             raise ConanInvalidConfiguration(
                 "The vulkan_layer_device_select option requires unistd.h, which is not available on Windows when self.settings.os.subsystem is None"
             )
@@ -961,6 +1068,20 @@ class MesaConan(ConanFile):
                 "The vulkan_layer_overlay option doesn't compile with MSVC"
             )
 
+        # todo
+        # if self._requires_libclc and not (self.options.get_safe("with_llvm") and self.dependencies["llvm"].options.with_project_libclc):
+        #     raise ConanInvalidConfiguration(
+        #         "The gallium_opencl, gallium_rusticl, intel_clc, and microsoft_clc options require libclc from LLVM"
+        #     )
+
+        # todo
+        if self.options.get_safe("opencl_spirv") and not (
+            self.options.get_safe("with_llvm")
+            and self.dependencies["llvm"].options.with_project_libclc
+        ):
+            raise ConanInvalidConfiguration(
+                "The opencl_spirv option requires  from LLVM"
+            )
 
     def build_requirements(self):
         self.tool_requires("meson/1.2.2")
@@ -979,6 +1100,11 @@ class MesaConan(ConanFile):
             or self.options.get_safe("vulkan_layer_overlay")
         ):
             self.tool_requires("glslang/11.7.0")
+        # todo if self._requires_libclc and self.dependencies["llvm"].options.shared == False and self.options.with_zstd:
+        if self._requires_libclc and self.options.with_zstd:
+            self.tool_requires("zstd/<host_version>")
+        if self.options.get_safe("opencl_spirv"):
+            self.tool_requires("spirv-tools/1.3.243.0")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -995,9 +1121,16 @@ class MesaConan(ConanFile):
 
     def generate(self):
         boolean = lambda option: self.options.get_safe(option, default=False)
-        feature = lambda option: "enabled" if self.options.get_safe(option) else "disabled"
+        feature = (
+            lambda option: "enabled" if self.options.get_safe(option) else "disabled"
+        )
+
         def string(option, default=""):
-            return str(self.options.get_safe(option)) if self.options.get_safe(option) else default
+            return (
+                str(self.options.get_safe(option))
+                if self.options.get_safe(option)
+                else default
+            )
 
         tc = MesonToolchain(self)
         tc.project_options["android-stub"] = boolean("android_stub")
@@ -1010,10 +1143,13 @@ class MesaConan(ConanFile):
             for datasource in datasources
             if self.options.get_safe(f"datasource_{datasource}")
         ]
+        tc.project_options["draw-use-llvm"] = boolean("draw_use_llvm")
         tc.project_options["dri3"] = feature("dri3")
         tc.project_options["egl"] = feature("egl")
         tc.project_options["egl-lib-suffix"] = string("egl_lib_suffix")
-        tc.project_options["egl-native-platform"] = str(self.options.get_safe("egl_native_platform"))
+        tc.project_options["egl-native-platform"] = str(
+            self.options.get_safe("egl_native_platform")
+        )
         tc.project_options["enable-glcpp-tests"] = False
         tc.project_options["expat"] = "enabled" if self._requires_expat else "disabled"
         tc.project_options["freedreno-kmds"] = [
@@ -1031,6 +1167,10 @@ class MesaConan(ConanFile):
         tc.project_options["gallium-extra-hud"] = boolean("gallium_extra_hud")
         tc.project_options["gallium-nine"] = boolean("gallium_nine")
         tc.project_options["gallium-omx"] = string("gallium_omx", default="disabled")
+        tc.project_options["gallium-opencl"] = string(
+            "gallium_opencl", default="disabled"
+        )
+        tc.project_options["gallium-rusticl"] = boolean("gallium_rusticl")
         tc.project_options["gallium-va"] = feature("gallium_va")
         tc.project_options["gallium-vdpau"] = feature("gallium_vdpau")
         if self.options.get_safe("gallium_windows_dll_name"):
@@ -1042,7 +1182,9 @@ class MesaConan(ConanFile):
         tc.project_options["gles1"] = feature("gles1")
         tc.project_options["gles2"] = feature("gles2")
         tc.project_options["glvnd"] = boolean("with_libglvnd")
-        tc.project_options["glvnd-vendor-name"] = string("glvnd_vendor_name", default="mesa")
+        tc.project_options["glvnd-vendor-name"] = string(
+            "glvnd_vendor_name", default="mesa"
+        )
         tc.project_options["glx"] = string("glx", default="disabled")
         tc.project_options["glx-direct"] = boolean("glx_direct")
         tc.project_options["imagination-srv"] = boolean("imagination_srv")
@@ -1055,10 +1197,14 @@ class MesaConan(ConanFile):
         tc.project_options["intel-xe-kmd"] = feature("intel_xe_kmd")
         tc.project_options["llvm"] = feature("with_llvm")
         tc.project_options["libunwind"] = feature("with_libunwind")
+        tc.project_options["microsoft-clc"] = feature("microsoft_clc")
         if self.options.get_safe("min_windows_version"):
             tc.project_options["min-windows-version"] = self.options.min_windows_version
         if self._requires_moltenvk:
-            tc.project_options["moltenvk-dir"] = self.dependencies["moltenvk"].package_folder
+            tc.project_options["moltenvk-dir"] = self.dependencies[
+                "moltenvk"
+            ].package_folder
+        tc.project_options["opencl-spirv"] = boolean("opencl_spirv")
         tc.project_options["opengl"] = boolean("opengl")
         tc.project_options["osmesa"] = boolean("osmesa")
         tc.project_options["perfetto"] = boolean("with_perfetto")
@@ -1073,6 +1219,7 @@ class MesaConan(ConanFile):
         ]
         tc.project_options["radv-build-id"] = string("radv_build_id")
         tc.project_options["selinux"] = boolean("with_libselinux")
+        tc.project_options["spirv-to-dxil"] = boolean("spirv_to_dxil")
         tc.project_options["shader-cache"] = feature("shader_cache")
         tc.project_options["shader-cache-default"] = boolean("shader_cache_default")
         tc.project_options["shader-cache-max-size"] = string("shader_cache_max_size")
