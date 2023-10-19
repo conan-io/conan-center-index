@@ -50,7 +50,7 @@ class SerfConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("apr-util/1.6.1", transitive_headers=True)
+        self.requires("apr-util/1.6.1", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("openssl/[>=1.1 <4]")
 
@@ -159,7 +159,7 @@ class SerfConan(ConanFile):
         else:
             ext_to_remove = self._static_ext if self.options.shared else self._shared_ext
             for fn in os.listdir(os.path.join(self.package_folder, "lib")):
-                if any(re.finditer(rf"\\.{ext_to_remove}(\.?|$)", fn)):
+                if any(re.finditer("\\.{}(\.?|$)".format(ext_to_remove), fn)):
                     os.unlink(os.path.join(self.package_folder, "lib", fn))
 
     def package_info(self):
