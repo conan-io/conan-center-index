@@ -149,6 +149,7 @@ class LiefConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("mbedtls", "cmake_find_mode", "both")
         deps.generate()
 
     def build(self):
