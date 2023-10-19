@@ -85,6 +85,7 @@ class SerfConan(ConanFile):
         includedirs = sum([dep.cpp_info.includedirs for dep in self.dependencies.values()], [])
         cflags = sum([dep.cpp_info.cflags for dep in self.dependencies.values()], [])
         cflags += autotools.cflags
+        libs = sum([dep.cpp_info.libs for dep in self.dependencies.values()], [])
         if self.options.get_safe("fPIC"):
             cflags.append("-fPIC")
         kwargs = {
@@ -101,6 +102,7 @@ class SerfConan(ConanFile):
             "CPPFLAGS": " ".join([f"-D{d}" for d in autotools.defines] + [f"-I'{unix_path(self, inc)}'" for inc in includedirs]),
             "CC": self._cc,
             "SOURCE_LAYOUT": "False",
+            "LIBS": " ".join(libs),
         }
 
         if is_msvc(self):
