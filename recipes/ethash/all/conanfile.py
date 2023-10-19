@@ -39,6 +39,8 @@ class EthashConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if not self.options.build_ethash:
+            self.options.rm_safe("build_global_context")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -52,12 +54,6 @@ class EthashConan(ConanFile):
             "clang": "5",
             "apple-clang": "10",
         }
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        if not self.options.build_ethash:
-            self.options.rm_safe("build_global_context")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16.2 <4]")
