@@ -70,7 +70,7 @@
 
 ### 12-April-2023 - 16:18 CEST
 
-- [feature] Add ListPackages job the posibility to update a list via PR
+- [feature] Add ListPackages job the possibility to update a list via PR
 - [feature] Add c3i-conan2-ready label when modifying .c3i/conan_v2_ready_references.yml
 - [hotfix] Use Conan helpers to update Conan Center page
 - [hotfix] Automatic Merge reduces the number of requests for each execution
@@ -171,7 +171,7 @@
 
 ### 15-December-2022 - 11:12 CET
 
-- [feature] Set github feeback title via config file (`feedback_title`).
+- [feature] Set github feedback title via config file (`feedback_title`).
 - [fix] Fix log summary html table for shared option with Conan v2.
 - [fix] ValidateInfra: Remove same OS version check for Macos nodes.
 
@@ -729,7 +729,7 @@
 
 - Raise error if zero packages are generated
 - Remove "No beta user" label if corresponding check pass
-- [engineering] Unify catchs and simplify slackSend function
+- [engineering] Unify catches and simplify slackSend function
 - [engineering] Pipeline step to create all packages in stages
 - [engineering] Pipeline step to compute and reduce 'packageID'
 - [engineering] Simplify 'ComputePackageIDs' command

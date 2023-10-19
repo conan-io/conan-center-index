@@ -50,7 +50,7 @@ In order to create reproducible builds, we also "commit-lock" to the latest comm
 ### License Attribute
 
 The license attribute is a mandatory field which provides the legal information that summarizes the contents saved in the package. These follow the
-[SPDX license](https://spdx.org/licenses/) as a standard. This is for consummers, in particular in the enterprise sector, that do rely on SDPX compliant identifiers so that they can flag this as a custom license text.
+[SPDX license](https://spdx.org/licenses/) as a standard. This is for consumers, in particular in the enterprise sector, that do rely on SDPX compliant identifiers so that they can flag this as a custom license text.
 
 * If the library has a license that has a SPDX identifier, use the [short Identifiers](https://spdx.dev/ids/).
 * If the library has a license text that does not match a SPDX identifier, including custom wording disclaiming copyright or dedicating the words to the ["public domain"](https://fairuse.stanford.edu/overview/public-domain/welcome/), use the [SPDX License Expressions](https://spdx.github.io/spdx-spec/v2-draft/SPDX-license-expressions/), this can follow:

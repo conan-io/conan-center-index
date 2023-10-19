@@ -96,7 +96,7 @@ class SomeRecipe(ConanFile):
 
 #### **<a name="KB-H011">#KB-H011</a>: "LIBCXX MANAGEMENT"**
 
-If the library is detected as a pure C library (sources doesn't conatain any file with the following extensions: ["cc", "cpp", "cxx", "c++m", "cppm", "cxxm", "h++", "hh", "hxx", "hpp"]) then it has to remove the [compiler.libcxx](https://docs.conan.io/1/reference/config_files/settings.yml.html#c-standard-libraries-aka-compiler-libcxx) subsetting, because the cpp standard library shouldn't affect the binary ID:
+If the library is detected as a pure C library (sources doesn't contain any file with the following extensions: ["cc", "cpp", "cxx", "c++m", "cppm", "cxxm", "h++", "hh", "hxx", "hpp"]) then it has to remove the [compiler.libcxx](https://docs.conan.io/1/reference/config_files/settings.yml.html#c-standard-libraries-aka-compiler-libcxx) subsetting, because the cpp standard library shouldn't affect the binary ID:
 
 ```python
 class SomeRecipe(ConanFile):
@@ -139,7 +139,7 @@ See also: [Why are CMake find/config files and pkg-config files not packaged?](f
 
 #### **<a name="KB-H017">#KB-H017</a>: "PDB FILES NOT ALLOWED"**
 
-Because of the big size of the [PDB](https://github.com/Microsoft/microsoft-pdb) files (Program Databse, a debug information format) and the issues using them changing the original folders, the PDB files are not allowed to be packaged.
+Because of the big size of the [PDB](https://github.com/Microsoft/microsoft-pdb) files (Program Database, a debug information format) and the issues using them changing the original folders, the PDB files are not allowed to be packaged.
 
 See also: [Why PDB files are not allowed?](faqs.md#why-pdb-files-are-not-allowed).
 
@@ -164,7 +164,7 @@ For the legal reasons, and in order to reduce the size of packages, it's not all
 
 #### **<a name="KB-H022">#KB-H022</a>: "CPPSTD MANAGEMENT"**
 
-If the library is detected as a pure C library (sources doesn't conatain any file with the following extensions: ["cc", "cpp", "cxx", "c++m", "cppm", "cxxm", "h++", "hh", "hxx", "hpp"]) then it has to remove the [compiler.cppstd](https://docs.conan.io/1/howtos/manage_cpp_standard.html) subsetting, because the cpp standard library shouldn't affect the binary ID:
+If the library is detected as a pure C library (sources doesn't contain any file with the following extensions: ["cc", "cpp", "cxx", "c++m", "cppm", "cxxm", "h++", "hh", "hxx", "hpp"]) then it has to remove the [compiler.cppstd](https://docs.conan.io/1/howtos/manage_cpp_standard.html) subsetting, because the cpp standard library shouldn't affect the binary ID:
 
 ```python
 class SomeRecipe(ConanFile):
@@ -199,7 +199,7 @@ The [test_package](https://docs.conan.io/1/creating_packages/getting_started.htm
 
 #### **<a name="KB-H025">#KB-H025</a>: "META LINES"**
 
-The following metadata lines (and similiar) are not allowed in recipes:
+The following metadata lines (and similar) are not allowed in recipes:
 
 - [Shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)) to specify Python version:
 
@@ -325,7 +325,7 @@ By default, all packages should be built as static library (the option ``shared`
 
 #### **<a name="KB-H051">#KB-H051</a>: "DEFAULT OPTIONS AS DICTIONARY"**
 
-The attribue [default_options](https://docs.conan.io/1/reference/conanfile/attributes.html#default-options) should be a dictionary, for example `default_options = {'shared': False, 'fPIC': True}`.
+The attribute [default_options](https://docs.conan.io/1/reference/conanfile/attributes.html#default-options) should be a dictionary, for example `default_options = {'shared': False, 'fPIC': True}`.
 
 #### **<a name="KB-H052">#KB-H052</a>: "CONFIG.YML HAS NEW VERSION"**
 
