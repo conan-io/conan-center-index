@@ -31,6 +31,10 @@ class Log4cxxConan(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        return 17
+
+    @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "7",
@@ -55,7 +59,7 @@ class Log4cxxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("apr/1.7.0")
+        self.requires("apr/1.7.4")
         self.requires("apr-util/1.6.1")
         self.requires("expat/2.5.0")
         if self.settings.os != "Windows":
@@ -63,11 +67,10 @@ class Log4cxxConan(ConanFile):
 
     def validate(self):
         # TODO: if compiler doesn't support C++17, boost can be used instead
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 17)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("log4cxx requires a compiler that supports at least C++17")
+            raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports at least C++{self._min_cppstd}")
 
     def build_requirements(self):
         if self.settings.os != "Windows":
