@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import get, chdir, copy, mkdir, export_conandata_patches, apply_conandata_patches
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, NMakeToolchain
 from conan.errors import ConanInvalidConfiguration
@@ -101,6 +101,7 @@ class OhNetConan(ConanFile):
                 args = self._get_openhome_architecture(args)
                 autotools = Autotools(self)
                 autotools.make(args=args, target="install-libs install-includes")
+                fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.components["ohNet"].libs = ["ohNet"]
