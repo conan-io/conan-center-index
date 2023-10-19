@@ -593,7 +593,7 @@ class LibcurlConan(ConanFile):
         else:
             tc.variables["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
         if Version(self.version) >= "7.81.0":
-            tc.variables["CIRL_USE_MBEDTLS"] = self.options.with_ssl == "mbedtls"
+            tc.variables["CURL_USE_MBEDTLS"] = self.options.with_ssl == "mbedtls"
         else:
             tc.variables["CMAKE_USE_MBEDTLS"] = self.options.with_ssl == "mbedtls"
         tc.variables["USE_NGHTTP2"] = self.options.with_nghttp2
