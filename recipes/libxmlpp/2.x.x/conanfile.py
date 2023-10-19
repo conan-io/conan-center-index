@@ -60,7 +60,8 @@ class LibXMLPlusPlus(ConanFile):
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
-
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration(f"{self.name} recipe is not yet available for Macos")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
