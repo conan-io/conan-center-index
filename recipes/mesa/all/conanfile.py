@@ -363,6 +363,10 @@ class MesaConan(ConanFile):
         return self._system_has_kms_drm
 
     @property
+    def _has_intel_clc_option(self):
+        return self.settings.arch == "x86_64"
+
+    @property
     def _has_min_windows_version_option(self):
         return self.settings.os == "Windows"
 
@@ -569,6 +573,8 @@ class MesaConan(ConanFile):
             self.options.rm_safe("dri3")
         if not self._has_gbm_option:
             self.options.rm_safe("gbm")
+        if not self._has_intel_clc_option:
+            self.options.rm_safe("intel_clc")
         if not self._has_min_windows_version_option:
             self.options.rm_safe("min_windows_version")
         if not self._has_platform_sdk_version_option:
