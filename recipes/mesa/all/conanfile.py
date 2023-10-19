@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.cmake import CMakeDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches,
@@ -788,6 +789,21 @@ class MesaConan(ConanFile):
         if self.options.get_safe("gallium_d3d12_video"):
             self.options.gallium_driver_d3d12 = True
 
+        if (
+            self.options.get_safe("gallium_rusticl")
+            or self.options.get_safe("intel_clc")
+            or self.options.get_safe("microsoft_clc")
+        ):
+            self.options.opencl_spirv = True
+
+        if (
+            self.options.get_safe("vulkan_driver_amd")
+            or self.options.get_safe("vulkan_driver_intel")
+            or self.options.get_safe("vulkan_layer_overlay")
+        ):
+            self.options["glslang"].build_executables = True
+            self.options["glslang"].enable_optimizer = False
+
         # todo
         # if self._requires_libclc:
         #     self.dependencies["llvm"].options.with_project_libclc = True
@@ -831,8 +847,11 @@ class MesaConan(ConanFile):
             self.requires("libunwind/1.7.2")
 
         # todo Update this to use the new llvm package when it is merged.
-        # if self.options.get_safe("with_llvm"):
-        #    self.requires("llvm/17.0.2")
+        if self.options.get_safe("with_llvm"):
+            self.requires("llvm/17.0.2")
+
+        if self.options.get_safe("opencl_spirv"):
+            self.requires("spirv-tools/1.3.243.0")
 
         if self.options.get_safe("with_perfetto"):
             self.requires("perfetto/37.0")
@@ -1077,10 +1096,10 @@ class MesaConan(ConanFile):
         # todo
         if self.options.get_safe("opencl_spirv") and not (
             self.options.get_safe("with_llvm")
-            and self.dependencies["llvm"].options.with_project_libclc
+            and self.dependencies.direct_host["llvm"].options.with_project_libclc
         ):
             raise ConanInvalidConfiguration(
-                "The opencl_spirv option requires  from LLVM"
+                "The opencl_spirv option requires the with_project_libclc option to be enabled for the llvm package"
             )
 
     def build_requirements(self):
@@ -1101,10 +1120,10 @@ class MesaConan(ConanFile):
         ):
             self.tool_requires("glslang/11.7.0")
         # todo if self._requires_libclc and self.dependencies["llvm"].options.shared == False and self.options.with_zstd:
+        # if self.options.get_safe("with_llvm"):
+        #     self.tool_requires("llvm/<host_version>")
         if self._requires_libclc and self.options.with_zstd:
             self.tool_requires("zstd/<host_version>")
-        if self.options.get_safe("opencl_spirv"):
-            self.tool_requires("spirv-tools/1.3.243.0")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -1224,6 +1243,10 @@ class MesaConan(ConanFile):
         tc.project_options["shader-cache-default"] = boolean("shader_cache_default")
         tc.project_options["shader-cache-max-size"] = string("shader_cache_max_size")
         tc.project_options["shared-glapi"] = feature("shared_glapi")
+        if self.options.get_safe("with_llvm"):
+            tc.project_options["shared-llvm"] = (
+                "enabled" if self.dependencies["llvm"].options.shared else "disabled"
+            )
         tc.project_options["sse2"] = boolean("sse2")
         tc.project_options["tools"] = [
             tool.replace("_", "-")
@@ -1258,6 +1281,9 @@ class MesaConan(ConanFile):
         pkg_config_deps.build_context_activated = ["wayland"]
         pkg_config_deps.build_context_suffix = {"wayland": "_BUILD"}
         pkg_config_deps.generate()
+        if self.options.get_safe("with_llvm"):
+            cmake_deps = CMakeDeps(self)
+            cmake_deps.generate()
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
 
