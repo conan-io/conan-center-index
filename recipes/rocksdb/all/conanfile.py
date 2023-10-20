@@ -146,7 +146,7 @@ class RocksDB(ConanFile):
         # not available yet in CCI
         tc.variables["WITH_NUMA"] = False
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            tc.variables["CMAKE_CXX_FLAGS"] = "-march=armv8-a"
+            tc.cache_variables["CMAKE_CXX_FLAGS"] = "-march=armv8-a"
         tc.generate()
 
         deps = CMakeDeps(self)
