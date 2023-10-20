@@ -45,6 +45,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
     def requirements(self):
         self.requires("protobuf/3.21.12")
         self.requires("rapidjson/cci.20220822")
+        self.requires("boost/1.83.0")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("lz4/1.9.4")
         self.requires("zstd/1.5.5")
@@ -61,6 +62,11 @@ class MysqlConnectorCPPRecipe(ConanFile):
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if minimum_version and Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
+
+        if self.settings.os == "Windows":
+            # FIXME: CMake.build(): No dependency data available when merging static library
+            #                       C:\Users\conan\.conan2\p\b\mysql2bd71efa92a64\b\build\jdbc\Release\mysqlcppconn-static.lib
+            raise ConanInvalidConfiguration(f"Conan recipe for '{self.ref}' is still not working on Windows. Contributions are welcome!")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -102,6 +108,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
         tc.cache_variables["WITH_LZ4"] = self._package_folder_dep("lz4")
         tc.cache_variables["WITH_ZSTD"] = self._package_folder_dep("zstd")
         tc.cache_variables["WITH_PROTOBUF"] = self._package_folder_dep("protobuf")
+        tc.cache_variables["WITH_BOOST"] = self._package_folder_dep("boost")
         tc.generate()
 
     def _patch_sources(self):
@@ -116,9 +123,15 @@ class MysqlConnectorCPPRecipe(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"), "ext::protobuf-lite", "ext::protobuf")
         # INFO: Disable protobuf-lite to use Conan protobuf targets instead
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "core", "CMakeLists.txt"), "ext::protobuf-lite", "ext::protobuf")
+        # INFO: Not able to link in case not finding OpenSSL first, passing folders paths is not enough
+        replace_in_file(self, os.path.join(self.source_folder, "jdbc", "cmake", "DepFindMySQL.cmake"), "target_link_libraries(MySQL::client-static", "find_package(OpenSSL CONFIG REQUIRED)\ntarget_link_libraries(MySQL::client-static")
         if self.settings.os == "Windows":
-            # INFO: On Windows, zlib library name is zlib
-            replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "add_ext(zlib zlib.h z ext_zlib)", "add_ext(zlib zlib.h zlib ext_zlib)")
+            # INFO: On Windows, libraries names change
+            zlib = "zdll" if self.dependencies["zlib"].options.shared else "zlib"
+            zstd = "zstd" if self.dependencies["zstd"].options.shared else "zstd_static"
+            replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "add_ext(zlib zlib.h z ext_zlib)", f"add_ext(zlib zlib.h {zlib} ext_zlib)")
+            replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"), "ext::z ext::lz4 ext::zstd", f"ext::{zlib} ext::lz4 ext::{zstd}")
+            replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "add_ext(zstd zstd.h zstd ext_zstd)", f"add_ext(zstd zstd.h {zstd} ext_zstd)")
 
     def build(self):
         self._patch_sources()
