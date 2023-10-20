@@ -68,7 +68,8 @@ class Log4cxxConan(ConanFile):
     def validate(self):
         # TODO: if compiler doesn't support C++17, boost can be used instead
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports at least C++{self._min_cppstd}")
 
