@@ -20,7 +20,7 @@ index 5455a08..420fbd4 100644
  # yaml-cpp
  # https://github.com/jbeder/yaml-cpp
 -find_package(yaml-cpp 0.7.0 REQUIRED)
-+find_package(yaml-cpp 0.8.0 REQUIRED)
++find_package(yaml-cpp REQUIRED)
  
  # pystring
  # https://github.com/imageworks/pystring
@@ -29,7 +29,7 @@ index 5455a08..420fbd4 100644
  # minizip-ng
  # https://github.com/zlib-ng/minizip-ng
 -find_package(minizip-ng 3.0.7 REQUIRED)
-+find_package(minizip 3.0.9 REQUIRED)
++find_package(minizip REQUIRED)
  
  if(OCIO_BUILD_APPS)
  
@@ -38,7 +38,7 @@ index 5455a08..420fbd4 100644
      # lcms2
      # https://github.com/mm2/Little-CMS
 -    find_package(lcms2 2.2 REQUIRED)
-+    find_package(lcms 2.2 REQUIRED)
++    find_package(lcms REQUIRED)
  endif()
  
  if(OCIO_BUILD_OPENFX)
