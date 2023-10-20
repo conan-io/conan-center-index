@@ -3,7 +3,7 @@ import re
 
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, mkdir, rm, rmdir, save
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -108,7 +108,9 @@ class SerfConan(ConanFile):
         if is_msvc(self):
             kwargs["TARGET_ARCH"] = str(self.settings.arch)
             kwargs["MSVC_VERSION"] = "{:.1f}".format(float(msvs_toolset(self).lstrip("v")) / 10)
-            kwargs["OPENSSL_LIBS"] = os.pathsep.join(f"{lib}.lib" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs)
+            env = Environment()
+            env.define("OPENSSL_LIBS", os.pathsep.join(f"{lib}.lib" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs))
+            env.vars(self).save_script("conanbuild_msvc")
 
         escape_str = lambda x: f'"{x}"'
         scons_args = " ".join([escape_str(s) for s in args] + [f"{k}={escape_str(v)}" for k, v in kwargs.items()])
