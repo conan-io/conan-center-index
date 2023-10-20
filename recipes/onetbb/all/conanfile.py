@@ -90,7 +90,7 @@ class OneTBBConan(ConanFile):
 
     def requirements(self):
         if self._tbbbind_build:
-            self.requires("hwloc/2.9.2")
+            self.requires("hwloc/2.9.3")
 
     def build_requirements(self):
         if not self._tbbbind_explicit_hwloc and not self.conf.get("tools.gnu:pkg_config", check_type=str):
