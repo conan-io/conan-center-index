@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #if defined(_MSC_VER)
-// nghttp2 defaults to int
+/* nghttp3 defaults to int */
 typedef int ssize_t;
 #endif
 #include <nghttp3/nghttp3.h>
