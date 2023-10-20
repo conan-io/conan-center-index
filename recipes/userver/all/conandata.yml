@@ -1,0 +1,4 @@
+sources:
+  "cci.20240219":
+    url: "https://github.com/userver-framework/userver/archive/8b4e3a0250d37f1192d2fa263ecdf1fe32153028.tar.gz"
+    sha256: "8d72b8f9a90d79c7aea40b2cbb97d4dc7f6330a0e1b87de69cb30425025c426e"
