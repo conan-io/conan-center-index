@@ -56,6 +56,7 @@ class CrossGUIDConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["XG_TESTS"] = False
         tc.generate()
         dpes = CMakeDeps(self)
