@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.apple import is_apple_os
 import os
 
 required_conan_version = ">=1.53.0"
@@ -76,6 +77,7 @@ class CrossGUIDConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-
         if self.settings.os == "Android":
             self.cpp_info.defines.append("GUID_ANDROID")
+        if is_apple_os(self):
+            self.cpp_info.frameworks.append("CoreFoundation")
