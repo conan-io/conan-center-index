@@ -1,28 +1,30 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.43.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.52.0"
 
 
 class KittenConan(ConanFile):
     name = "kitten"
     description = "A small C++ library inspired by Category Theory focused on functional composition."
-    homepage = "https://github.com/rvarago/kitten"
-    url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    topics = ("category-theory", "composition", "monadic-interface", "declarative-programming")
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/rvarago/kitten"
+    topics = ("category-theory", "composition", "monadic-interface", "declarative-programming", "header-only")
 
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-
     no_copy_source = True
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
-    _cmake = None
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 17
 
     @property
     def _minimum_compilers_version(self):
@@ -33,50 +35,46 @@ class KittenConan(ConanFile):
             "apple-clang": "10",
         }
 
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
-
-        def loose_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
-
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if min_version and loose_lt_semver(str(self.settings.compiler.version), min_version):
-            raise ConanInvalidConfiguration(
-                "{} requires C++17, which your compiler does not support.".format(self.name)
-            )
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if min_version and Version(self.settings.compiler.version) < min_version:
+            raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd}, which your compiler does not support.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTS"] = False
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
         self.cpp_info.set_property("cmake_file_name", "kitten")
         self.cpp_info.set_property("cmake_target_name", "rvarago::kitten")
+        self.cpp_info.components["libkitten"].set_property("cmake_target_name", "rvarago::kitten")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "kitten"
@@ -85,4 +83,3 @@ class KittenConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "rvarago"
         self.cpp_info.components["libkitten"].names["cmake_find_package"] = "kitten"
         self.cpp_info.components["libkitten"].names["cmake_find_package_multi"] = "kitten"
-        self.cpp_info.components["libkitten"].set_property("cmake_target_name", "rvarago::kitten")

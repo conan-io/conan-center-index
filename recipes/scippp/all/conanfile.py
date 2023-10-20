@@ -12,7 +12,6 @@ class ScipPlusPlus(ConanFile):
     name = "scippp"
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps"
-    exports_sources = "CMakeLists.txt", "source/*", "include/*"
     description = "SCIP++ is a C++ wrapper for SCIP's C interface"
     package_type = "library"
     topics = ("mip", "solver", "linear", "programming")
