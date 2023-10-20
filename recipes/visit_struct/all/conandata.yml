@@ -1,4 +1,7 @@
 sources:
+  "1.1.0":
+    url: "https://github.com/cbeck88/visit_struct/archive/refs/tags/v1.1.0.tar.gz"
+    sha256: "73a84f2d8a8844bc03a919163b27ee3b3f85d8c64f6151ce098ca50dbed6be51"
   "1.0":
-    url: "https://github.com/garbageslam/visit_struct/archive/refs/tags/v1.0.tar.gz"
+    url: "https://github.com/cbeck88/visit_struct/archive/refs/tags/v1.0.tar.gz"
     sha256: "7e5d727bd9fbe444d182840625f5eb21f2cf67f06f3aeab27a2d7c4724b3c09c"

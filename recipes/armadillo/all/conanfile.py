@@ -2,6 +2,8 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.build import cross_building
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -26,6 +28,7 @@ class ArmadilloConan(ConanFile):
         "hdf5",
     )
     settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -98,6 +101,16 @@ class ArmadilloConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+        if self.options.use_blas == "openblas":
+            # Note that if you're relying on this to build LAPACK, you _must_ have
+            # a fortran compiler installed. If you don't, OpenBLAS will build successfully but
+            # without LAPACK support, which isn't obvious.
+            # This can be achieved by setting the FC environment variable or the conf tools.build:compiler_executables={"fortran": "/path/to/fortran"}
+            # in your conan profile.
+            self.options["openblas"].build_lapack = (
+                self.options.use_lapack == "openblas"
+            )
+
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
@@ -108,6 +121,11 @@ class ArmadilloConan(ConanFile):
         ):
             raise ConanInvalidConfiguration(
                 "framework_accelerate can only be used on Macos"
+            )
+
+        if self.options.use_hdf5 and Version(self.version) > "12" and cross_building(self):
+            raise ConanInvalidConfiguration(
+                "Armadillo does not support cross building with hdf5. Set use_hdf5=False and try again."
             )
 
         for value, options in self._co_dependencies.items():
@@ -146,7 +164,7 @@ class ArmadilloConan(ConanFile):
         )
 
         for opt in deprecated_opts:
-            self.output.warn(
+            self.output.warning(
                 f"DEPRECATION NOTICE: Value {opt} uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
             )
 
@@ -156,6 +174,9 @@ class ArmadilloConan(ConanFile):
                 "The wrapper requires the use of an external RNG. Set use_extern_rng=True and try again."
             )
 
+        if not self.options.shared and self.options.use_wrapper:
+            raise ConanInvalidConfiguration("Building the armadillo run-time wrapper library requires armadillo/*:shared=True")
+
     def requirements(self):
         # Optional requirements
         # TODO: "atlas/3.10.3" # Pending https://github.com/conan-io/conan-center-index/issues/6757
@@ -163,19 +184,17 @@ class ArmadilloConan(ConanFile):
         # TODO: "arpack/1.0" # Pending https://github.com/conan-io/conan-center-index/issues/6755
         # TODO: "flexiblas/3.0.4" # Pending https://github.com/conan-io/conan-center-index/issues/6827
 
-        if self.options.use_hdf5:
+        # The armadillo library no longer takes any responsibility for linking hdf5 as of v12.x. This means
+        # it will have to be linked manually by consumers if desired.
+        # See https://gitlab.com/conradsnicta/armadillo-code/-/issues/227 for more information.
+        if self.options.use_hdf5 and Version(self.version) < "12":
             # Use the conan dependency if the system lib isn't being used
-            self.requires("hdf5/1.12.0")
+            # Libraries not required to be propagated transitively when the armadillo run-time wrapper is used
+            self.requires("hdf5/1.14.1", transitive_headers=True, transitive_libs=not self.options.use_wrapper)
 
         if self.options.use_blas == "openblas":
-            self.requires("openblas/0.3.15")
-            # Note that if you're relying on this to build LAPACK, you _must_ have
-            # a fortran compiler installed. If you don't, OpenBLAS will build successfully but
-            # without LAPACK support, which isn't obvious.
-            # This can be achieved by setting the FC environment variable in your conan profile
-            self.options["openblas"].build_lapack = (
-                self.options.use_lapack == "openblas"
-            )
+            # Libraries not required to be propagated transitively when the armadillo run-time wrapper is used
+            self.requires("openblas/0.3.20", transitive_libs=not self.options.use_wrapper)
         if (
             self.options.use_blas == "intel_mkl"
             and self.options.use_lapack == "intel_mkl"
@@ -187,7 +206,7 @@ class ArmadilloConan(ConanFile):
                 self.options.use_blas == "intel_mkl"
                 or self.options.use_lapack == "intel_mkl"
             ):
-                self.output.warn(
+                self.output.warning(
                     "The intel-mkl package does not exist in CCI. To use an Intel MKL package, override this requirement with your own recipe."
                 )
             self.requires("intel-mkl/2021.4")

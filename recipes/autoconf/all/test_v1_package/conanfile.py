@@ -34,6 +34,8 @@ class TestPackageConan(ConanFile):
         self.run("{} --help".format(os.path.join(self.build_folder, "configure").replace("\\", "/")),
                  win_bash=tools.os_info.is_windows)
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if is_msvc(self):
+            autotools.flags.append("-FS")
         with self._build_context():
             autotools.configure()
             autotools.make()

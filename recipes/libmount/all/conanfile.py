@@ -17,7 +17,7 @@ class LibmountConan(ConanFile):
     topics = ("mount", "linux", "util-linux")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git"
-    license = "GPL-2.0-or-later"
+    license = "LGPL-2.1-or-later"
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -61,7 +61,8 @@ class LibmountConan(ConanFile):
         autotools.make()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", src=os.path.join(self.source_folder, "libmount"), dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING.LGPL-2.1-or-later", src=os.path.join(self.source_folder, "Documentation", "licenses"), dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "sbin"))

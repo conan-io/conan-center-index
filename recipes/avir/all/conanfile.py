@@ -8,23 +8,24 @@ required_conan_version = ">=1.50.0"
 
 class AVIRConan(ConanFile):
     name = "avir"
+    description = "High-quality pro image resizing / scaling C++ library, image resize"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "High-quality pro image resizing / scaling C++ library, image resize"
-    topics = ("image-processing", "image-resizer", "lanczos", )
     homepage = "https://github.com/avaneev/avir"
+    topics = ("image-processing", "image-resizer", "lanczos", "header-only")
+
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-
-    def package_id(self):
-        self.info.clear()
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def package_id(self):
+        self.info.clear()
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

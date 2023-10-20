@@ -5,17 +5,17 @@ from conan.tools.files import get, save
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class TinyXmlConan(ConanFile):
     name = "tinyxml"
     description = "TinyXML is a simple, small, C++ XML parser that can be easily integrated into other programs."
     license = "Zlib"
-    topics = ("xml", "parser")
-    homepage = "http://www.grinninglizard.com/tinyxml/"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "http://www.grinninglizard.com/tinyxml/"
+    topics = ("xml", "parser")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,7 +25,7 @@ class TinyXmlConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_stl": False,
+        "with_stl": True,
     }
 
     exports_sources = "CMakeLists.txt"
@@ -36,10 +36,7 @@ class TinyXmlConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -49,8 +46,7 @@ class TinyXmlConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported by Visual Studio")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

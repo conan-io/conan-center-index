@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2315da5..1d8de96 100644
+index a4a9284a..f5dbccac 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -9,7 +9,7 @@ endif()
@@ -18,9 +18,9 @@ index 2315da5..1d8de96 100644
 -  LIST(APPEND ADDITIONAL_LIBS ${ZLIB_LIBRARIES})
 +  LIST(APPEND ADDITIONAL_LIBS ZLIB::ZLIB)
    IF(WIN32 AND NOT CYGWIN)
-     set(ZLIB_WINAPI yes)
-     IF(ZLIB_WINAPI)
-@@ -490,7 +490,7 @@ IF(LIBLZMA_FOUND)
+ 
+ 
+@@ -497,7 +497,7 @@ IF(LIBLZMA_FOUND)
    SET(HAVE_LIBLZMA 1)
    SET(HAVE_LZMA_H 1)
    CMAKE_PUSH_CHECK_STATE()
@@ -29,7 +29,7 @@ index 2315da5..1d8de96 100644
    SET(CMAKE_REQUIRED_LIBRARIES ${LIBLZMA_LIBRARIES})
    INCLUDE_DIRECTORIES(${LIBLZMA_INCLUDE_DIRS})
    LIST(APPEND ADDITIONAL_LIBS ${LIBLZMA_LIBRARIES})
-@@ -507,7 +507,7 @@ IF(LIBLZMA_FOUND)
+@@ -514,7 +514,7 @@ IF(LIBLZMA_FOUND)
  ELSE(LIBLZMA_FOUND)
  # LZMA not found and will not be used.
  ENDIF(LIBLZMA_FOUND)
@@ -38,7 +38,7 @@ index 2315da5..1d8de96 100644
  MARK_AS_ADVANCED(CLEAR LIBLZMA_LIBRARY)
  
  #
-@@ -577,7 +577,7 @@ IF(ENABLE_LZ4)
+@@ -584,7 +584,7 @@ IF(ENABLE_LZ4)
    ENDIF (LZ4_INCLUDE_DIR)
  
    FIND_PATH(LZ4_INCLUDE_DIR lz4.h)
@@ -47,7 +47,7 @@ index 2315da5..1d8de96 100644
    INCLUDE(FindPackageHandleStandardArgs)
    FIND_PACKAGE_HANDLE_STANDARD_ARGS(LZ4 DEFAULT_MSG LZ4_LIBRARY LZ4_INCLUDE_DIR)
  ELSE(ENABLE_LZ4)
-@@ -799,7 +799,7 @@ ENDIF(ENABLE_NETTLE)
+@@ -806,7 +806,7 @@ ENDIF(ENABLE_NETTLE)
  # Find OpenSSL
  # (Except on Mac, where OpenSSL is deprecated.)
  #
@@ -57,46 +57,41 @@ index 2315da5..1d8de96 100644
    IF(OPENSSL_FOUND)
      SET(HAVE_LIBCRYPTO 1)
 diff --git a/libarchive/CMakeLists.txt b/libarchive/CMakeLists.txt
-index ff7ade0..1438819 100644
+index ff7ade00..8c867130 100644
 --- a/libarchive/CMakeLists.txt
 +++ b/libarchive/CMakeLists.txt
-@@ -243,11 +243,14 @@ ELSEIF(ARCHIVE_ACL_SUNOS)
+@@ -242,13 +242,13 @@ ELSEIF(ARCHIVE_ACL_SUNOS)
+   LIST(APPEND libarchive_SOURCES archive_disk_acl_sunos.c)
  ENDIF()
  
- # Libarchive is a shared library
+-# Libarchive is a shared library
 +if (BUILD_SHARED_LIBS)
  ADD_LIBRARY(archive SHARED ${libarchive_SOURCES} ${include_HEADERS})
  TARGET_INCLUDE_DIRECTORIES(archive PUBLIC .)
  TARGET_LINK_LIBRARIES(archive ${ADDITIONAL_LIBS})
  SET_TARGET_PROPERTIES(archive PROPERTIES SOVERSION ${SOVERSION})
  
+-# archive_static is a static library
 +else()
-+
- # archive_static is a static library
  ADD_LIBRARY(archive_static STATIC ${libarchive_SOURCES} ${include_HEADERS})
  TARGET_LINK_LIBRARIES(archive_static ${ADDITIONAL_LIBS})
-@@ -257,13 +260,21 @@ SET_TARGET_PROPERTIES(archive_static PROPERTIES COMPILE_DEFINITIONS
+ SET_TARGET_PROPERTIES(archive_static PROPERTIES COMPILE_DEFINITIONS
+@@ -257,13 +257,13 @@ SET_TARGET_PROPERTIES(archive_static PROPERTIES COMPILE_DEFINITIONS
  IF(NOT WIN32 OR CYGWIN)
    SET_TARGET_PROPERTIES(archive_static PROPERTIES OUTPUT_NAME archive)
  ENDIF(NOT WIN32 OR CYGWIN)
+-
 +endif()
- 
  IF(ENABLE_INSTALL)
-   # How to install the libraries
+-  # How to install the libraries
 -  INSTALL(TARGETS archive archive_static
 -          RUNTIME DESTINATION bin
 -          LIBRARY DESTINATION lib
 -          ARCHIVE DESTINATION lib)
 +  if (BUILD_SHARED_LIBS)
-+    INSTALL(TARGETS archive
-+            RUNTIME DESTINATION bin
-+            LIBRARY DESTINATION lib
-+            ARCHIVE DESTINATION lib)
++    INSTALL(TARGETS archive RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 +  else()
-+    INSTALL(TARGETS archive_static
-+              RUNTIME DESTINATION bin
-+              LIBRARY DESTINATION lib
-+              ARCHIVE DESTINATION lib)
++    INSTALL(TARGETS archive_static RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 +  endif()
    INSTALL_MAN(${libarchive_MANS})
    INSTALL(FILES ${include_HEADERS} DESTINATION include)

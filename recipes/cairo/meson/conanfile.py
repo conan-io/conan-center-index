@@ -88,8 +88,6 @@ class CairoConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-        if self.options.with_glib and self.options.shared:
-            self.options["glib"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -101,15 +99,15 @@ class CairoConan(ConanFile):
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_freetype:
             self.requires("freetype/2.13.0")
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.13.93")
+            self.requires("fontconfig/2.14.2")
         if self.options.with_png:
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
         if self.options.with_glib:
-            self.requires("glib/2.76.1")
+            self.requires("glib/2.78.0")
         if self.settings.os == "Linux":
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
@@ -121,10 +119,6 @@ class CairoConan(ConanFile):
                 self.requires("khrplatform/cci.20200529")
         if self.options.get_safe("with_opengl") and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("egl/system")
-
-    def package_id(self):
-        if self.info.options.with_glib and not self.dependencies["glib"].options.shared:
-            self.info.requires["glib"].full_package_mode()
 
     def validate(self):
         if self.options.get_safe("with_xlib_xrender") and not self.options.get_safe("with_xlib"):
@@ -141,9 +135,9 @@ class CairoConan(ConanFile):
                 )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.2.2")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

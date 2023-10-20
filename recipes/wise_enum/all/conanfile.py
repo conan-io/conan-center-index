@@ -1,7 +1,13 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class WiseEnumConan(ConanFile):
@@ -22,49 +28,55 @@ class WiseEnumConan(ConanFile):
     homepage = "https://github.com/quicknir/wise_enum"
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSL-1.0"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return "11"
 
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "11")
-
-        compiler = str(self.settings.compiler)
-        compiler_version = tools.Version(self.settings.compiler.version)
-
-        minimal_version = {
-           "gcc": "5"
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "5",
         }
-        unsupported = {"Visual Studio"}
-        if compiler in unsupported:
-            raise ConanInvalidConfiguration(
-                "{} does not support  {} compiler".format(self.name, compiler)
-            )
 
-        if compiler in minimal_version and compiler_version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration(
-                "{} requires {} compiler {} or newer [is: {}]".format(self.name, compiler, minimal_version[compiler], compiler_version)
-            )
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("Visual Studio is not supported")
+
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        pass
 
     def package(self):
-        self.copy("*.h", dst="include", src=self._source_subfolder)
-        self.copy("LICENSE", dst="licenses" , src=self._source_subfolder)
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "WiseEnum")
         self.cpp_info.set_property("cmake_target_name", "WiseEnum::wise_enum")
         self.cpp_info.set_property("pkg_config_name", "WiseEnum")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "WiseEnum"
@@ -74,3 +86,5 @@ class WiseEnumConan(ConanFile):
         self.cpp_info.components["_wise_enum"].names["cmake_find_package_multi"] = "wise_enum"
         self.cpp_info.components["_wise_enum"].set_property("cmake_target_name", "WiseEnum::wise_enum")
         self.cpp_info.components["_wise_enum"].set_property("pkg_config_name", "WiseEnum")
+        self.cpp_info.components["_wise_enum"].bindirs = []
+        self.cpp_info.components["_wise_enum"].libdirs = []

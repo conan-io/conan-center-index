@@ -1,0 +1,117 @@
+diff --git a/include/b64/cdecode.h b/include/b64/cdecode.h
+index d6ff24c..889614f 100644
+--- a/include/b64/cdecode.h
++++ b/include/b64/cdecode.h
+@@ -13,6 +13,11 @@ For details, see http://sourceforge.net/projects/libb64
+ #define BASE64_CDEC_VER_MAJOR   2
+ #define BASE64_CDEC_VER_MINOR   0
+ 
++#ifdef __cplusplus
++extern "C"
++{
++#endif
++
+ typedef enum
+ {
+ 	step_a, step_b, step_c, step_d
+@@ -24,11 +29,15 @@ typedef struct
+ 	char plainchar;
+ } base64_decodestate;
+ 
+-extern void base64_init_decodestate(base64_decodestate* state_in);
++void base64_init_decodestate(base64_decodestate* state_in);
++
++size_t base64_decode_maxlength(size_t encode_len);
+ 
+-extern size_t base64_decode_maxlength(size_t encode_len);
++int base64_decode_value(signed char value_in);
++size_t base64_decode_block(const char* code_in, const size_t length_in, void* plaintext_out, base64_decodestate* state_in);
+ 
+-extern int base64_decode_value(signed char value_in);
+-extern size_t base64_decode_block(const char* code_in, const size_t length_in, void* plaintext_out, base64_decodestate* state_in);
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif /* BASE64_CDECODE_H */
+diff --git a/include/b64/cencode.h b/include/b64/cencode.h
+index 96b0cdb..9b70877 100644
+--- a/include/b64/cencode.h
++++ b/include/b64/cencode.h
+@@ -13,6 +13,11 @@ For details, see http://sourceforge.net/projects/libb64
+ #define BASE64_CENC_VER_MAJOR	2
+ #define BASE64_CENC_VER_MINOR	0
+ 
++#ifdef __cplusplus
++extern "C"
++{
++#endif
++
+ typedef enum
+ {
+ 	step_A, step_B, step_C
+@@ -31,12 +36,16 @@ typedef struct
+ 	char result;
+ } base64_encodestate;
+ 
+-extern void base64_init_encodestate(base64_encodestate* state_in);
++void base64_init_encodestate(base64_encodestate* state_in);
++
++size_t base64_encode_length(size_t plain_len, base64_encodestate* state_in);
+ 
+-extern size_t base64_encode_length(size_t plain_len, base64_encodestate* state_in);
++char base64_encode_value(signed char value_in);
++size_t base64_encode_block(const void* plaintext_in, const size_t length_in, char* code_out, base64_encodestate* state_in);
++size_t base64_encode_blockend(char* code_out, base64_encodestate* state_in);
+ 
+-extern char base64_encode_value(signed char value_in);
+-extern size_t base64_encode_block(const void* plaintext_in, const size_t length_in, char* code_out, base64_encodestate* state_in);
+-extern size_t base64_encode_blockend(char* code_out, base64_encodestate* state_in);
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif /* BASE64_CENCODE_H */
+diff --git a/include/b64/decode.h b/include/b64/decode.h
+index b2362e5..bfff27c 100644
+--- a/include/b64/decode.h
++++ b/include/b64/decode.h
+@@ -12,10 +12,8 @@ For details, see http://sourceforge.net/projects/libb64
+ 
+ namespace base64
+ {
+-	extern "C"
+-	{
+-		#include "cdecode.h"
+-	}
++
++#include "cdecode.h"
+ 
+ 	struct decoder
+ 	{
+@@ -69,4 +67,3 @@ namespace base64
+ 
+ 
+ #endif // BASE64_DECODE_H
+-
+diff --git a/include/b64/encode.h b/include/b64/encode.h
+index c1a5f88..c1c2ead 100644
+--- a/include/b64/encode.h
++++ b/include/b64/encode.h
+@@ -12,10 +12,8 @@ For details, see http://sourceforge.net/projects/libb64
+ 
+ namespace base64
+ {
+-	extern "C"
+-	{
++
+ #include "cencode.h"
+-	}
+ 
+ 	struct encoder
+ 	{
+@@ -75,4 +73,3 @@ namespace base64
+ } // namespace base64
+ 
+ #endif // BASE64_ENCODE_H
+-

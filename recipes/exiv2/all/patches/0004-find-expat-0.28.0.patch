@@ -1,0 +1,16 @@
+diff --git a/cmake/findDependencies.cmake b/cmake/findDependencies.cmake
+index 1075c303..d8b580d4 100644
+--- a/cmake/findDependencies.cmake
++++ b/cmake/findDependencies.cmake
+@@ -60,7 +60,7 @@ if (EXIV2_ENABLE_XMP AND EXIV2_ENABLE_EXTERNAL_XMP)
+     message(FATAL_ERROR "EXIV2_ENABLE_XMP AND EXIV2_ENABLE_EXTERNAL_XMP are mutually exclusive.  You can only choose one of them")
+ else()
+     if (EXIV2_ENABLE_XMP)
+-        find_package(EXPAT REQUIRED)
++        find_package(EXPAT REQUIRED MODULE)
+     elseif (EXIV2_ENABLE_EXTERNAL_XMP)
+         find_package(XmpSdk REQUIRED)
+     endif ()
+-- 
+2.33.0.windows.1
+
