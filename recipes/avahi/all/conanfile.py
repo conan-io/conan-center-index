@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rmdir, rm, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
@@ -31,9 +31,6 @@ class AvahiConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
@@ -77,6 +74,7 @@ class AvahiConan(ConanFile):
         tc.configure_args.append("--disable-python")
         tc.configure_args.append("--disable-qt5")
         tc.configure_args.append("--with-systemdsystemunitdir=/lib/systemd/system")
+        tc.configure_args.append("ac_cv_func_strlcpy=no")
         if self.settings.os in ["Linux", "FreeBSD"]:
             tc.configure_args.append("ac_cv_func_setproctitle=no")
         tc.generate()
@@ -88,7 +86,6 @@ class AvahiConan(ConanFile):
         env.vars(self).save_script("conanbuild_pkg_config")
 
     def build(self):
-        apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
