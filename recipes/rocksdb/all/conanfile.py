@@ -13,7 +13,7 @@ from conan.tools.scm import Version
 required_conan_version = ">=1.53.0"
 
 
-class RocksDB(ConanFile):
+class RocksDBConan(ConanFile):
     name = "rocksdb"
     homepage = "https://github.com/facebook/rocksdb"
     license = ("GPL-2.0-only", "Apache-2.0")
