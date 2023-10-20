@@ -92,7 +92,6 @@ class MysqlConnectorCPPRecipe(ConanFile):
         # INFO: mysql-connector-cpp caches all option values. Need to use cache_variables
         tc.cache_variables["BUILD_STATIC"] = not self.options.shared
         tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
-        tc.cache_variables["CMAKE_BUILD_TYPE"] = self.settings.build_type
         # INFO: mysql-connector-cpp doesn't use find package for cmake. Need to pass manually folder paths
         tc.cache_variables["MYSQL_LIB_DIR"] = self._lib_folder_dep("libmysqlclient")
         tc.cache_variables["MYSQL_INCLUDE_DIR"] = self._include_folder_dep("libmysqlclient")
@@ -117,6 +116,9 @@ class MysqlConnectorCPPRecipe(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"), "ext::protobuf-lite", "ext::protobuf")
         # INFO: Disable protobuf-lite to use Conan protobuf targets instead
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "core", "CMakeLists.txt"), "ext::protobuf-lite", "ext::protobuf")
+        if self.settings.os == "Windows":
+            # INFO: On Windows, zlib library name is zlib
+            replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "add_ext(zlib zlib.h z ext_zlib)", "add_ext(zlib zlib.h zlib ext_zlib)")
 
     def build(self):
         self._patch_sources()
