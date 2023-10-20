@@ -4,8 +4,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -26,13 +27,18 @@ class ResiprocateConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_cares": [True, False],
         "with_ssl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_cares": True,
         "with_ssl": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -46,9 +52,14 @@ class ResiprocateConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("c-ares/1.19.1")
+        if self.options.with_cares:
+            self.requires("c-ares/1.20.1")
         if self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]")
+
+    def validate(self):
+        if self.options.shared and is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support shared builds on Windows.")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
@@ -70,7 +81,7 @@ class ResiprocateConan(ConanFile):
         tc.variables["USE_DTLS"] = self.options.with_ssl
         tc.variables["USE_NUGET"] = False
         tc.variables["VERSIONED_SONAME"] = False
-        tc.variables["WITH_C_ARES"] = True
+        tc.variables["WITH_C_ARES"] = self.options.with_cares
         tc.variables["WITH_SSL"] = self.options.with_ssl
         if self.settings.os in ["Linux"]:
             tc.preprocessor_definitions["RESIP_RANDOM_THREAD_LOCAL"] = True
@@ -82,7 +93,11 @@ class ResiprocateConan(ConanFile):
         tc = VirtualBuildEnv(self)
         tc.generate(scope="build")
 
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -100,7 +115,13 @@ class ResiprocateConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = ["resip", "rutil", "dum"]
+        resiprocate_lib = "resiprocate" if self.settings.os == "Windows" else "resip"
+        self.cpp_info.libs = [resiprocate_lib, "rutil", "dum"]
+        if not self.options.with_cares:
+            self.cpp_info.libs.append("resipares")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
+        elif self.settings.os in ["Windows"]:
+            self.cpp_info.system_libs.append("winmm")
+            self.cpp_info.system_libs.append("ws2_32")
