@@ -117,14 +117,15 @@ class MysqlConnectorCPPRecipe(ConanFile):
         # INFO: Manage fPIC from recipe options
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "enable_pic()", "")
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "enable_pic()", "")
+        protobuf = "protobufd" if self.dependencies["protobuf"].settings.build_type == "Debug" else "protobuf"
         # INFO: Disable protobuf-lite to use Conan protobuf targets instead
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindProtobuf.cmake"), "LIBRARY protobuf-lite pb_libprotobuf-lite", "")
+        # INFO: Fix protobuf library name according to the build type
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindProtobuf.cmake"), "LIBRARY protobuf", f"LIBRARY {protobuf}")
         # INFO: Disable protobuf-lite to use Conan protobuf targets instead
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"), "ext::protobuf-lite", "ext::protobuf")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"), "ext::protobuf-lite", f"ext::{protobuf}")
         # INFO: Disable protobuf-lite to use Conan protobuf targets instead
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "core", "CMakeLists.txt"), "ext::protobuf-lite", "ext::protobuf")
-        # INFO: Not able to link in case not finding OpenSSL first, passing folders paths is not enough
-        replace_in_file(self, os.path.join(self.source_folder, "jdbc", "cmake", "DepFindMySQL.cmake"), "target_link_libraries(MySQL::client-static", "find_package(OpenSSL CONFIG REQUIRED)\ntarget_link_libraries(MySQL::client-static")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "core", "CMakeLists.txt"), "ext::protobuf-lite", f"ext::{protobuf}")
         if self.settings.os == "Windows":
             # INFO: On Windows, libraries names change
             zlib = "zdll" if self.dependencies["zlib"].options.shared else "zlib"
@@ -146,6 +147,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
         rm(self, "INFO_BIN", self.package_folder)
 
     def package_info(self):
+        self.cpp_info.libdirs = ["lib/debug"] if self.settings.build_type == "Debug" else ["lib"]
         suffix = "" if self.options.shared else "-static"
         self.cpp_info.libs = [f"mysqlcppconn8{suffix}", f"mysqlcppconn{suffix}"]
         if self.settings.os in ["Linux", "FreeBSD"]:
