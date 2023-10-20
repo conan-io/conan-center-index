@@ -30,12 +30,13 @@ class TestPackageConan(ConanFile):
                 raise ConanException("M4 environment variable not set")
 
         if not tools.cross_building(self, skip_x64_x86=True):
-            self.run("{} --version".format(m4_bin), run_environment=True)
-            self.run("{} -P {}".format(m4_bin, self._m4_input_path))
+            self.run(f"{m4_bin} --version", run_environment=True)
+            self.run(f"{m4_bin} -P {self._m4_input_path}")
 
-            self.run("m4 -R {0}/frozen.m4f {0}/test.m4".format(os.path.join(self.source_folder, os.pardir, "test_package"), run_environment=True))
+            test_package_dir = os.path.join(self.source_folder, os.pardir, "test_package")
+            self.run(f"{m4_bin} -R {test_package_dir}/frozen.m4f {test_package_dir}/test.m4", run_environment=True)
 
             output = StringIO()
-            self.run("{} -P {}".format(m4_bin, self._m4_input_path), output=output)
+            self.run(f"{m4_bin} -P {self._m4_input_path}", output=output)
 
             assert "Harry, Jr. met Sally" in output.getvalue()

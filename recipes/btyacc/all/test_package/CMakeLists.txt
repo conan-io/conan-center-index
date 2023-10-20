@@ -1,13 +1,11 @@
 cmake_minimum_required(VERSION 3.1)
+project(test_package LANGUAGES C)
 
-project(test_package C)
-
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup(TARGETS KEEP_RPATHS)
+enable_testing()
 
 find_package(btyacc REQUIRED CONFIG)
 if(NOT DEFINED BTYACC_EXECUTABLE)
-  message(FATAL_ERROR "BTYACC_EXECUTABLE is not defined")
+    message(FATAL_ERROR "BTYACC_EXECUTABLE is not defined")
 endif()
 
 set(bin "${PROJECT_BINARY_DIR}")
@@ -24,7 +22,6 @@ add_custom_command(
 
 add_executable(test_package "${bin}/main.c")
 
-enable_testing()
 add_test(
     NAME main
     COMMAND "${CMAKE_COMMAND}" -E echo "(())()(())" | test_package

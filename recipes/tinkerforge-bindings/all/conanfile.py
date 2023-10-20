@@ -53,6 +53,7 @@ class TinkerforgeBindingsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["TINKERFORGE_BINDINGS_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.generate()
 
     def build(self):

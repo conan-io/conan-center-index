@@ -25,6 +25,7 @@ class FltkConan(ConanFile):
         "with_threads": [True, False],
         "with_gdiplus": [True, False],
         "abi_version": ["ANY"],
+        "with_xft": [True, False],
     }
     default_options = {
         "shared": False,
@@ -32,6 +33,7 @@ class FltkConan(ConanFile):
         "with_gl": True,
         "with_threads": True,
         "with_gdiplus": True,
+        "with_xft": False,
     }
 
     def export_sources(self):
@@ -68,10 +70,13 @@ class FltkConan(ConanFile):
         self.requires("libjpeg/9e")
         self.requires("libpng/1.6.40")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("opengl/system")
-            self.requires("glu/system")
+            if self.options.with_gl:
+                self.requires("opengl/system")
+                self.requires("glu/system")
             self.requires("fontconfig/2.14.2")
             self.requires("xorg/system")
+            if self.options.with_xft:
+                self.requires("libxft/2.3.6")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -85,6 +90,7 @@ class FltkConan(ConanFile):
         tc.variables["OPTION_USE_THREADS"] = self.options.with_threads
         tc.variables["OPTION_BUILD_HTML_DOCUMENTATION"] = False
         tc.variables["OPTION_BUILD_PDF_DOCUMENTATION"] = False
+        tc.variables["OPTION_USE_XFT"] = self.options.with_xft
         if self.options.abi_version:
             tc.variables["OPTION_ABI_VERSION"] = self.options.abi_version
         tc.generate()
@@ -111,22 +117,26 @@ class FltkConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "fltk::fltk")
         self.cpp_info.libs = collect_libs(self)
 
-        if self.options.shared and self.settings.os == "Windows":
-            self.cpp_info.defines.append("FL_DLL")
         if self.settings.os in ("Linux", "FreeBSD"):
             if self.options.with_threads:
                 self.cpp_info.system_libs.extend(["pthread", "dl"])
             if self.options.with_gl:
                 self.cpp_info.system_libs.extend(["GL", "GLU"])
-        if is_apple_os(self):
+        elif is_apple_os(self):
             self.cpp_info.frameworks = [
                 "AppKit", "ApplicationServices", "Carbon", "Cocoa", "CoreFoundation", "CoreGraphics",
-                "CoreText", "CoreVideo", "Foundation", "IOKit", "OpenGL",
+                "CoreText", "CoreVideo", "Foundation", "IOKit",
             ]
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["gdi32", "imm32", "msimg32", "ole32", "oleaut32", "uuid"]
+            if self.options.with_gl:
+                self.cpp_info.frameworks.append("OpenGL")
+        elif self.settings.os == "Windows":
+            if self.options.shared:
+                self.cpp_info.defines.append("FL_DLL")
+            self.cpp_info.system_libs = ["gdi32", "imm32", "msimg32", "ole32", "oleaut32", "uuid", "comctl32"]
             if self.options.get_safe("with_gdiplus"):
                 self.cpp_info.system_libs.append("gdiplus")
+            if self.options.with_gl:
+                self.cpp_info.system_libs.append("opengl32")
 
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.names["cmake_find_package"] = "fltk"

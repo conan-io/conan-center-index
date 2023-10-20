@@ -23,3 +23,5 @@ versions:
     folder: all
   "5.8.0":
     folder: all
+  "5.8.1":
+    folder: all

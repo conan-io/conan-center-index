@@ -81,13 +81,13 @@ class SDLImageConan(ConanFile):
         # Headers are exposed https://github.com/conan-io/conan-center-index/pull/16167#issuecomment-1508347351
         self.requires("sdl/2.26.5", transitive_headers=True)
         if self.options.with_libtiff:
-            self.requires("libtiff/4.5.1")
+            self.requires("libtiff/4.6.0")
         if self.options.with_libjpeg:
             self.requires("libjpeg/9e")
         if self.options.with_libpng:
             self.requires("libpng/1.6.40")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.3.1")
+            self.requires("libwebp/1.3.2")
 
     def validate(self):
         if self.options.shared and not self.dependencies["sdl"].options.shared:

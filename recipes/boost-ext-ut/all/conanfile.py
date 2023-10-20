@@ -3,8 +3,9 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
@@ -31,9 +32,11 @@ class UTConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "apple-clang": "11" if Version(self.version) < "1.1.8" else "12",
-            "clang": "9",
-            "gcc": "9",
+            "apple-clang": "12" if Version(self.version) < "2.0.0" else "14",
+            "clang": "9" if Version(self.version) < "2.0.0" else "10",
+            "gcc": "9" if Version(self.version) < "2.0.0" else "10",
+            "msvc": "192",
+            "Visual Studio": "14",
         }
 
     def export_sources(self):
@@ -54,9 +57,13 @@ class UTConan(ConanFile):
         if Version(self.version) <= "1.1.8" and is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.ref} may not be built with MSVC. "
                                             "Please use at least version 1.1.9 with MSVC.")
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires at least version {minimum_version} of the {self.settings.compiler} compiler."
+            )
 
         if is_msvc(self):
-            check_min_vs(self, "192")
             if not self.options.get_safe("disable_module", True):
                 self.output.warn("The 'disable_module' option must be enabled when using MSVC.")
         if not is_msvc(self):
@@ -71,6 +78,10 @@ class UTConan(ConanFile):
                         f"{self.ref} requires C++{self._minimum_cpp_standard} support. "
                         f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
+    def build_requirements(self):
+        if Version(self.version) >= "2.0.0":
+            self.tool_requires("cmake/[>=3.21 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -84,7 +95,9 @@ class UTConan(ConanFile):
         if disable_module:
             tc.cache_variables["BOOST_UT_DISABLE_MODULE"] = disable_module
         tc.generate()
-    
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
+
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)

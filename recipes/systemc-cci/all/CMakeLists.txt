@@ -3,13 +3,10 @@ project(cci LANGUAGES CXX)
 
 set(LIBRARY_NAME cciapi)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
-
 find_package(RapidJSON REQUIRED CONFIG)
 find_package(SystemCLanguage REQUIRED CONFIG)
 
-set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src")
+set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/src")
 set(CCI_CFG_DIR "${SOURCE_DIR}/cci_cfg")
 set(CCI_CORE_DIR "${SOURCE_DIR}/cci_core")
 set(CCI_UTILS_DIR "${SOURCE_DIR}/cci_utils")
@@ -31,10 +28,11 @@ set(SOURCES
 
 add_library(${LIBRARY_NAME} ${SOURCES})
 target_include_directories(${LIBRARY_NAME} PRIVATE ${SOURCE_DIR})
-target_link_libraries(${LIBRARY_NAME} PRIVATE RapidJSON::RapidJSON SystemC::SystemC)
+target_link_libraries(${LIBRARY_NAME} PRIVATE rapidjson SystemC::systemc)
 set_target_properties(${LIBRARY_NAME} PROPERTIES
                       WINDOWS_EXPORT_ALL_SYMBOLS TRUE
-                      VERSION ${CONAN_PACKAGE_VERSION})
+                      VERSION ${CONAN_PACKAGE_VERSION}
+                      COMPILE_FEATURES cxx_std_11)
 target_compile_definitions(${LIBRARY_NAME} PRIVATE SC_INCLUDE_FX)
 
 install(TARGETS ${LIBRARY_NAME}

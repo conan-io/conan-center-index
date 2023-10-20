@@ -110,6 +110,7 @@ required_for_references:
 - brotli
 - brynet
 - bshoshany-thread-pool
+- btyacc
 - bullet3
 - butteraugli
 - bvdberg-ctest
@@ -146,6 +147,7 @@ required_for_references:
 - cfitsio
 - cgal
 - cgif
+- cgltf
 - cgns
 - chaiscript
 - charls
@@ -249,6 +251,7 @@ required_for_references:
 - dbcppp
 - dbg-macro
 - dbus
+- dcmtk
 - debug_assert
 - decimal_for_cpp
 - deco
@@ -280,6 +283,7 @@ required_for_references:
 - easy_profiler
 - easyhttpcpp
 - easyloggingpp
+- easylzma
 - ecos
 - editline
 - edlib
@@ -291,6 +295,7 @@ required_for_references:
 - eigen
 - elfio
 - embag
+- embedded_ringbuf_cpp
 - embree3
 - emio
 - emsdk
@@ -322,6 +327,7 @@ required_for_references:
 - fast_double_parser
 - fast_float
 - fastgltf
+- fastnoise2
 - fastpfor
 - fastprng
 - fernandovelcic-hexdump
@@ -347,6 +353,7 @@ required_for_references:
 - foonathan-memory
 - forestdb
 - foxglove-schemas-protobuf
+- foxglove-websocket
 - foxi
 - fp16
 - fpgen
@@ -510,6 +517,7 @@ required_for_references:
 - khrplatform
 - kickcat
 - kissfft
+- kitten
 - kmod
 - ktx
 - kuba-zip
@@ -536,6 +544,7 @@ required_for_references:
 - libavif
 - libb2
 - libbacktrace
+- libbasisu
 - libbigwig
 - libbpf
 - libbsd
@@ -557,12 +566,15 @@ required_for_references:
 - libdivide
 - libdmtx
 - libdrawille
+- libdrm
 - libdwarf
 - libdxfrw
 - libe57format
 - libelf
+- libenvpp
 - libepoxy
 - libev
+- libevdev
 - libevent
 - libexif
 - libfdk_aac
@@ -573,6 +585,7 @@ required_for_references:
 - libgd
 - libgeotiff
 - libgettext
+- libglvnd
 - libgpg-error
 - libgphoto2
 - libgpiod
@@ -588,6 +601,7 @@ required_for_references:
 - libjpeg
 - libjpeg-turbo
 - libkml
+- libliftoff
 - liblsl
 - libltc
 - liblzf
@@ -609,6 +623,7 @@ required_for_references:
 - libmysqlclient
 - libnabo
 - libnet
+- libnetfilter_conntrack
 - libnetfilter_queue
 - libnfnetlink
 - libnfs
@@ -620,6 +635,7 @@ required_for_references:
 - libnova
 - libnpy
 - libnuma
+- liboping
 - libpcap
 - libpciaccess
 - libpfm4
@@ -684,6 +700,8 @@ required_for_references:
 - libxls
 - libxlsxwriter
 - libxml2
+- libxpm
+- libxshmfence
 - libxslt
 - libyaml
 - libyuv
@@ -702,6 +720,7 @@ required_for_references:
 - lodepng
 - log.c
 - log4cplus
+- log4cxx
 - logr
 - loguru
 - ls-qpack
@@ -751,7 +770,9 @@ required_for_references:
 - meson
 - metall
 - metis
+- mfast
 - mgs
+- microprofile
 - microservice-essentials
 - microtar
 - mikelankamp-fpm
@@ -773,6 +794,7 @@ required_for_references:
 - mongo-c-driver
 - mongo-cxx-driver
 - morton-nd
+- mosquitto
 - mozilla-build
 - mozjpeg
 - mp-units
@@ -788,6 +810,7 @@ required_for_references:
 - msgpack-c
 - msgpack-cxx
 - msys2
+- mtdev
 - mujs
 - muparser
 - muparserx
@@ -819,6 +842,7 @@ required_for_references:
 - nodejs
 - nodesoup
 - norm
+- npcap
 - nsync
 - ntv2
 - nudb
@@ -900,6 +924,7 @@ required_for_references:
 - pcl
 - pcre
 - pcre2
+- pdf-writer
 - pdfgen
 - pdqsort
 - perf
@@ -922,6 +947,7 @@ required_for_references:
 - platform.exceptions
 - platform.hashing
 - platform.interfaces
+- playrho
 - plf_colony
 - plf_indiesort
 - plf_list
@@ -940,6 +966,7 @@ required_for_references:
 - poppler-data
 - popt
 - portable-file-dialogs
+- poshlib
 - pprint
 - pranav-csv2
 - pretty-name
@@ -962,6 +989,7 @@ required_for_references:
 - pybind11
 - pybind11_json
 - pystring
+- qarchive
 - qcbor
 - qdbm
 - qhull
@@ -971,10 +999,12 @@ required_for_references:
 - qt
 - quantlib
 - quaternions
+- quazip
 - quickfix
 - quickjs
 - quill
 - quirc
+- qwt
 - r8brain-free-src
 - rabbitmq-c
 - ragel
@@ -1003,6 +1033,7 @@ required_for_references:
 - redis-plus-plus
 - refl-cpp
 - replxx
+- resource_pool
 - restbed
 - restinio
 - rg-etc1
@@ -1021,6 +1052,7 @@ required_for_references:
 - ruy
 - rvo2
 - rxcpp
+- s2geometry
 - s2n
 - safeint
 - sail
@@ -1049,6 +1081,7 @@ required_for_references:
 - seqan3
 - serd
 - serdepp
+- serial
 - sfml
 - shapelib
 - shield
@@ -1064,6 +1097,7 @@ required_for_references:
 - sml
 - snappy
 - snowhouse
+- so5extra
 - sobjectizer
 - soci
 - sofa
@@ -1125,6 +1159,7 @@ required_for_references:
 - tcb-span
 - tcl
 - tclap
+- tcp-wrappers
 - tensorflow-lite
 - tensorpipe
 - termcap
@@ -1156,6 +1191,7 @@ required_for_references:
 - tinyspline
 - tinyxml
 - tinyxml2
+- tixi3
 - tk
 - tl
 - tl-expected
@@ -1167,6 +1203,7 @@ required_for_references:
 - tmxlite
 - tng
 - toml11
+- tomlplusplus
 - tracy
 - transwarp
 - trantor
@@ -1184,6 +1221,8 @@ required_for_references:
 - tsl-sparse-map
 - tuplet
 - turtle
+- tweetnacl
+- twitch-native-ipc
 - type_safe
 - tz
 - ua-nodeset
@@ -1220,6 +1259,7 @@ required_for_references:
 - vincentlaucsb-csv-parser
 - vir-simd
 - visit_struct
+- vk-bootstrap
 - vo-amrwbenc
 - volk
 - vorbis
@@ -1257,6 +1297,7 @@ required_for_references:
 - wyhash
 - xapian-core
 - xbyak
+- xege
 - xerces-c
 - xkbcommon
 - xkeyboard-config
@@ -1288,6 +1329,7 @@ required_for_references:
 - yas
 - yasm
 - yder
+- yoga
 - yyjson
 - z3
 - zbar

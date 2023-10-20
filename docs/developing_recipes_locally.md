@@ -43,7 +43,7 @@ This file is intended to provide all the commands you need to run in order to be
 
 ### Installing the ConanCenter Hooks
 
-> **Warning**: This is not yet supported with Conan 2.0
+> **Warning**: This is not yet supported with Conan 2.0. Please, follow the instructions below only in case you are using Conan 1.0.
 
 The system will use the [conan-center hooks](https://github.com/conan-io/hooks) to perform some quality checks. You can install the hooks by running:
 

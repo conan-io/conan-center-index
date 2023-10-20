@@ -12,7 +12,7 @@ class NewmatConan(ConanFile):
     name = "newmat"
     description = "Manipulate a variety of types of matrices using standard matrix operations."
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://newmat.net"
+    homepage = "http://www.robertnz.net/nm11.htm"
     topics = ("matrix")
     license = "LicenseRef-newmat"
     package_type = "library"
@@ -83,5 +83,5 @@ class NewmatConan(ConanFile):
 
         self.cpp_info.includedirs.append(os.path.join("include", "newmat"))
         if self.options.with_c_subscripts:
-            self.cpp_info.defines = ["SETUP_C_SUBSCRIPTS"]
+            self.cpp_info.defines.append("SETUP_C_SUBSCRIPTS")
 

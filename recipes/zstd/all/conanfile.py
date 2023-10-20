@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir, rm
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
-
 
 class ZstdConan(ConanFile):
     name = "zstd"
@@ -21,11 +21,13 @@ class ZstdConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "threading": [True, False],
+        "build_programs": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "threading": True,
+        "build_programs": True,
     }
 
     def export_sources(self):
@@ -49,10 +51,14 @@ class ZstdConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ZSTD_BUILD_PROGRAMS"] = False
-        tc.variables["ZSTD_BUILD_STATIC"] = not self.options.shared
+        tc.variables["ZSTD_BUILD_PROGRAMS"] = self.options.build_programs
+        tc.variables["ZSTD_BUILD_STATIC"] = not self.options.shared or self.options.build_programs
         tc.variables["ZSTD_BUILD_SHARED"] = self.options.shared
         tc.variables["ZSTD_MULTITHREAD_SUPPORT"] = self.options.threading
+
+        if not is_msvc(self):
+            tc.variables["CMAKE_C_FLAGS"] = "-Wno-maybe-uninitialized"
+
         if Version(self.version) < "1.4.3":
             # Generate a relocatable shared lib on Macos
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
@@ -77,6 +83,12 @@ class ZstdConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
+        if self.options.shared and self.options.build_programs:
+            #If we built programs we always build static libs,
+            #but if we only want shared libs in the package then remove the static libs
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         zstd_cmake = "libzstd_shared" if self.options.shared else "libzstd_static"
@@ -90,3 +102,8 @@ class ZstdConan(ConanFile):
         self.cpp_info.components["zstdlib"].libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["zstdlib"].system_libs.append("pthread")
+
+        if self.options.build_programs:
+            # TODO: Remove after dropping Conan 1.x from ConanCenterIndex
+            bindir = os.path.join(self.package_folder, "bin")
+            self.env_info.PATH.append(bindir)

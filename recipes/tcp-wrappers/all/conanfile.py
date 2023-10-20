@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -31,6 +31,10 @@ class TcpWrappersConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -39,8 +43,6 @@ class TcpWrappersConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if is_msvc(self):
-            raise ConanInvalidConfiguration("Visual Studio is not supported")
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
@@ -50,8 +52,16 @@ class TcpWrappersConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("Visual Studio is not supported")
         if cross_building(self):
             raise ConanInvalidConfiguration("Cross-building is not current supported.")
+
+    def build_requirements(self):
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:subsystem", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -101,10 +111,10 @@ class TcpWrappersConan(ConanFile):
                  src=self.source_folder,
                  dst=os.path.join(self.package_folder, "lib"),
                  keep_path=False)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["wrap"]
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.PATH.append(bin_path)
+        # TODO: to remove once conan v1 not supported anymore
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
