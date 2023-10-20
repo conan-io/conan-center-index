@@ -1,0 +1,4 @@
+sources:
+  "0.0.42":
+    url: "https://github.com/embarktrucks/embag/archive/refs/tags/0.0.42.tar.gz"
+    sha256: "60b22ba9355528040046b7e2c3ee968798ad5773a9eb7a1d13cf33dc47e2adec"
