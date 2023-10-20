@@ -47,7 +47,7 @@ class CapnprotoConan(ConanFile):
         return {
             "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "5",
+            "gcc": "5" if Version(self.version) < "1.0.0" else "7",
             "clang": "5",
             "apple-clang": "5.1",
         }
@@ -79,7 +79,7 @@ class CapnprotoConan(ConanFile):
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -93,6 +93,10 @@ class CapnprotoConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared libraries for Visual Studio")
         if self.settings.os == "Windows" and Version(self.version) < "0.8.0" and self.options.with_openssl:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support OpenSSL on Windows pre 0.8.0")
+        # MSVC Release build is not supported in 1.0.0
+        # https://github.com/capnproto/capnproto/issues/1740
+        if Version(self.version) == "1.0.0" and is_msvc(self) and self.settings.build_type == "Release":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC Release build")
 
     def build_requirements(self):
         if self.settings.os != "Windows":
@@ -218,9 +222,9 @@ class CapnprotoConan(ConanFile):
             self._register_component(component)
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["capnpc"].system_libs = ["pthread"]
-            self.cpp_info.components["kj"].system_libs = ["pthread"]
-            self.cpp_info.components["kj-async"].system_libs = ["pthread"]
+            self.cpp_info.components["capnpc"].system_libs = ["pthread", "m"]
+            self.cpp_info.components["kj"].system_libs = ["pthread", "m"]
+            self.cpp_info.components["kj-async"].system_libs = ["pthread", "m"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["kj-async"].system_libs = ["ws2_32"]
 

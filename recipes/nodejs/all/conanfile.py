@@ -16,6 +16,7 @@ class NodejsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://nodejs.org"
     license = "MIT"
+    package_type = "application"
     settings = "os", "arch", "compiler"
     no_copy_source = True
     short_paths = True
@@ -39,6 +40,9 @@ class NodejsConan(ConanFile):
         buff = StringIO()
         self.run(cmd, buff)
         return str(re.search(r'GLIBC (\d{1,3}.\d{1,3})', buff.getvalue()).group(1))
+
+    def package_id(self):
+        del self.info.settings.compiler
 
     def validate(self):
         if not self.version in self.conan_data["sources"] or \

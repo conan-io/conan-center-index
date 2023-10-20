@@ -69,7 +69,7 @@ class QuillConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/10.0.0", transitive_headers=True)
+        self.requires("fmt/10.1.1", transitive_headers=True)
 
     def validate(self):
         supported_archs = ["x86", "x86_64", "armv6", "armv7", "armv7hf", "armv8"]

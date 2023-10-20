@@ -179,9 +179,9 @@ class AssimpConan(ConanFile):
         if self._depends_on_rapidjson:
             self.requires("rapidjson/cci.20220822")
         if self._depends_on_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self._depends_on_draco:
-            self.requires("draco/1.5.5")
+            self.requires("draco/1.5.6")
         if self._depends_on_clipper:
             self.requires("clipper/4.10.0")  # Only 4.x supported
         if self._depends_on_stb:
