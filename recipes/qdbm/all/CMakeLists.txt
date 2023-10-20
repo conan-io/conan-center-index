@@ -60,8 +60,11 @@ set_target_properties(
 # ---- Install ----
 
 include(GNUInstallDirs)
-
-install(TARGETS qdbm)
+install(TARGETS qdbm
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+)
 
 install(
     FILES

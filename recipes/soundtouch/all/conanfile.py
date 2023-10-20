@@ -48,10 +48,16 @@ class SoundTouchConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["INTEGER_SAMPLES"] = self.options.integer_samples
-        tc.variables["SOUNDTOUCH_DLL"] = self.options.with_dll
-        tc.variables["SOUNDSTRETCH"] = self.options.with_util
-        tc.variables["OPENMP"] = self.options.with_openmp
+        tc.cache_variables["INTEGER_SAMPLES"] = self.options.integer_samples
+        tc.cache_variables["SOUNDTOUCH_DLL"] = self.options.with_dll
+        tc.cache_variables["SOUNDSTRETCH"] = self.options.with_util
+        tc.cache_variables["OPENMP"] = self.options.with_openmp
+        # The finite-math-only optimization has no effect and can cause linking errors
+        # when linked against glibc >= 2.31
+        tc.blocks["cmake_flags_init"].template = tc.blocks["cmake_flags_init"].template + """
+               string(APPEND CMAKE_CXX_FLAGS_INIT " -fno-finite-math-only")
+               string(APPEND CMAKE_C_FLAGS_INIT " -fno-finite-math-only")
+           """
         tc.generate()
 
     def build(self):
