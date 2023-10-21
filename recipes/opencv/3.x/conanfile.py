@@ -80,9 +80,9 @@ class OpenCVConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.5")
+            self.requires("libjpeg-turbo/3.0.0")
         elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.1")
+            self.requires("mozjpeg/4.1.3")
         if self.options.with_png:
             self.requires("libpng/1.6.40")
         if self.options.with_jasper:
@@ -91,17 +91,17 @@ class OpenCVConan(ConanFile):
             # opencv 3.x doesn't support openexr >= 3
             self.requires("openexr/2.5.7")
         if self.options.with_tiff:
-            self.requires("libtiff/4.5.1")
+            self.requires("libtiff/4.6.0")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.parallel == "tbb":
             # opencv 3.x doesn't support onetbb >= 2021
-            self.requires("onetbb/2020.3")
+            self.requires("onetbb/2020.3.3")
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
         if self.options.contrib:
             self.requires("freetype/2.13.0")
-            self.requires("harfbuzz/6.0.0")
+            self.requires("harfbuzz/8.2.2")
             self.requires("gflags/2.2.2")
             self.requires("glog/0.6.0")
         if self.options.get_safe("with_gtk"):
@@ -134,25 +134,11 @@ class OpenCVConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
         # Cleanup RPATH
-        if Version(self.version) < "3.4.8":
-            install_layout_file = os.path.join(self.source_folder, "CMakeLists.txt")
-        else:
-            install_layout_file = os.path.join(self.source_folder, "cmake", "OpenCVInstallLayout.cmake")
+        install_layout_file = os.path.join(self.source_folder, "cmake", "OpenCVInstallLayout.cmake")
         replace_in_file(self, install_layout_file,
                               "ocv_update(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}\")",
                               "")
         replace_in_file(self, install_layout_file, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
-
-        if self.options.contrib and Version(self.version) <= "3.4.12":
-            sfm_cmake = os.path.join(self._contrib_folder, "modules", "sfm", "CMakeLists.txt")
-            search = "  find_package(Glog QUIET)\nendif()"
-            replace_in_file(self, sfm_cmake, search, f"""{search}
-            if(NOT GFLAGS_LIBRARIES AND TARGET gflags::gflags)
-              set(GFLAGS_LIBRARIES gflags::gflags)
-            endif()
-            if(NOT GLOG_LIBRARIES AND TARGET glog::glog)
-              set(GLOG_LIBRARIES glog::glog)
-            endif()""")
 
     def generate(self):
         tc = CMakeToolchain(self)
