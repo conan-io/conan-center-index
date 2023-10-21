@@ -138,14 +138,19 @@ class GoogleCloudCppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def requirements(self):
-        self.requires("protobuf/3.21.9", transitive_headers=True)
-        self.requires("grpc/1.50.1", transitive_headers=True)
-        self.requires("nlohmann_json/3.10.0")
-        self.requires("crc32c/1.1.1")
-        self.requires("abseil/20220623.0", transitive_headers=True)
-        self.requires("libcurl/7.88.1")
+        # Updating Protobuf requires updates to the generated code, even within
+        # a minor version.
+        self.requires("protobuf/3.21.12", transitive_headers=True)
+        # Each release of Abseil is a new major version, not guaranteed to be
+        # compatible with previous verssions.
+        self.requires("abseil/[>=20230125.3.0 <20230126]", transitive_headers=True)
+        # The rest are more semver-like and require less pinning.
+        self.requires("grpc/[>=1.50]", transitive_headers=True)
+        self.requires("nlohmann_json/[>=3.10 <4]")
+        self.requires("crc32c/[>=1.1 <2]")
+        self.requires("libcurl/[>=7.47 <9]")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2 <2]")
 
     def build_requirements(self):
         # For the grpc-cpp-plugin executable
@@ -155,6 +160,7 @@ class GoogleCloudCppConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
+        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_WERROR"] = False
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE"] = ",".join(self._components())
         tc.generate()
         VirtualRunEnv(self).generate(scope="build")
