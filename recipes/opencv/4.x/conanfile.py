@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import can_run, check_min_cppstd, valid_min_cppstd
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
@@ -11,7 +11,7 @@ import os
 import re
 import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
 
 OPENCV_MAIN_MODULES_OPTIONS = (
@@ -212,6 +212,10 @@ class OpenCVConan(ConanFile):
     short_paths = True
 
     @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
+
+    @property
     def _contrib_folder(self):
         return os.path.join(self.source_folder, "contrib")
 
@@ -254,10 +258,6 @@ class OpenCVConan(ConanFile):
     @property
     def _has_barcode_option(self):
         return Version(self.version) >= "4.5.3"
-
-    @property
-    def _protobuf_version(self):
-        return "3.21.12"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -1018,7 +1018,7 @@ class OpenCVConan(ConanFile):
         # dnn module dependencies
         if self.options.dnn:
             # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16678#issuecomment-1507811867
-            self.requires(f"protobuf/{self._protobuf_version}", transitive_libs=True, run=can_run(self))
+            self.requires("protobuf/3.21.12", transitive_libs=True)
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-headers/1.3.250.0")
         # gapi module dependencies
@@ -1128,8 +1128,8 @@ class OpenCVConan(ConanFile):
             )
 
     def build_requirements(self):
-        if self.options.dnn and not can_run(self):
-            self.tool_requires(f"protobuf/{self._protobuf_version}")
+        if self.options.dnn and not self._is_legacy_one_profile:
+            self.tool_requires("protobuf/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
@@ -1183,7 +1183,7 @@ class OpenCVConan(ConanFile):
 
     def generate(self):
         if self.options.dnn:
-            if can_run(self):
+            if self._is_legacy_one_profile:
                 VirtualRunEnv(self).generate(scope="build")
             else:
                 VirtualBuildEnv(self).generate()
