@@ -10,7 +10,7 @@ required_conan_version = ">=1.53.0"
 class Utf8ProcConan(ConanFile):
     name = "utf8proc"
     description = "A clean C library for processing UTF-8 Unicode data"
-    license = "MIT expat"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/JuliaStrings/utf8proc"
     topics = ("utf", "utf8", "unicode", "text")
