@@ -1023,7 +1023,7 @@ class OpenCVConan(ConanFile):
             self.requires("vulkan-headers/1.3.250.0")
         # gapi module dependencies
         if self.options.gapi:
-            self.requires("ade/0.1.2c")
+            self.requires("ade/0.1.2d")
         # highgui module dependencies
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
@@ -1062,7 +1062,7 @@ class OpenCVConan(ConanFile):
         # freetype module dependencies
         if self.options.freetype:
             self.requires("freetype/2.13.0")
-            self.requires("harfbuzz/8.2.1")
+            self.requires("harfbuzz/8.2.2")
         # hdf module dependencies
         if self.options.hdf:
             self.requires("hdf5/1.14.1")
