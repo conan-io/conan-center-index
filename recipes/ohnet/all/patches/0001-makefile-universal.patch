@@ -12,7 +12,7 @@ index a479b12a..82e5db60 100644
  	$(compiler)MdnsProvider.$(objext) -c $(cppflags) $(includes) OpenHome/Net/Device/Bonjour/MdnsProvider.cpp
  $(objdir)Md5.$(objext) : OpenHome/md5.c $(headers)
 diff --git a/Makefile b/Makefile
-index 2f0cb07c..0a808dee 100644
+index 2f0cb07c..7b73494d 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -6,7 +6,7 @@ rsync ?= yes
@@ -122,6 +122,15 @@ index 2f0cb07c..0a808dee 100644
        detected_openhome_architecture = riscv64
      endif
  endif
+@@ -215,7 +215,7 @@ ifeq ($(platform),Mac)
+ 	endif
+ 
+ 	objdir = Build/Obj/$(osbuilddir)/$(build_dir)/
+-	compiler = clang -fPIC -stdlib=libc++ -o $(objdir)
++	compiler = clang -fPIC --start-no-unused-arguments -stdlib=libc++ --end-no-unused-arguments -o $(objdir)
+ 	link = clang++ -pthread -stdlib=libc++ $(platform_linkflags)
+ 	ar = ar rc $(objdir)
+ 	openhome_system = Mac
 @@ -235,8 +235,8 @@ ifeq ($(platform), Core-ppc32)
      osbuilddir = Core-ppc32
      objdir = Build/Obj/$(osbuilddir)/$(build_dir)/

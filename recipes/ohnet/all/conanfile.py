@@ -107,6 +107,7 @@ class OhNetConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["ohNet"].libs = ["ohNet"]
         self.cpp_info.components["ohNet"].set_property("cmake_target_name", "ohNet")
+        self.cpp_info.components["ohNet"].defines.extend(["DEFINE_LITTLE_ENDIAN"])
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ohNet"].system_libs.extend(["pthread", "m"])
         elif self.settings.os == "Windows":
@@ -114,6 +115,7 @@ class OhNetConan(ConanFile):
 
         self.cpp_info.components["ohNetCore"].libs = ["ohNetCore"]
         self.cpp_info.components["ohNetCore"].set_property("cmake_target_name", "ohNetCore")
+        self.cpp_info.components["ohNetCore"].defines.extend(["DEFINE_LITTLE_ENDIAN"])
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ohNetCore"].system_libs.extend(["pthread", "m"])
         elif self.settings.os == "Windows":
