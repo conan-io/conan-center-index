@@ -127,7 +127,7 @@ index 2f0cb07c..7b73494d 100644
  
  	objdir = Build/Obj/$(osbuilddir)/$(build_dir)/
 -	compiler = clang -fPIC -stdlib=libc++ -o $(objdir)
-+	compiler = clang -fPIC --start-no-unused-arguments -stdlib=libc++ --end-no-unused-arguments -o $(objdir)
++	compiler = clang -fPIC -Qunused-arguments -stdlib=libc++ -o $(objdir)
  	link = clang++ -pthread -stdlib=libc++ $(platform_linkflags)
  	ar = ar rc $(objdir)
  	openhome_system = Mac
