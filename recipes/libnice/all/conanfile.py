@@ -68,7 +68,7 @@ class LibniceConan(ConanFile):
             self.requires("gstreamer/1.22.3")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/1.2.3")
         self.tool_requires("pkgconf/2.0.3")
         self.tool_requires("glib/<host_version>")  # for glib-mkenums
         if self.options.with_introspection:
