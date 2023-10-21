@@ -153,8 +153,8 @@ class GoogleCloudCppConan(ConanFile):
         self.requires("zlib/[>=1.2 <2]")
 
     def build_requirements(self):
-        # For the grpc-cpp-plugin executable
-        self.tool_requires("grpc/1.50.1")
+        # For the `grpc-cpp-plugin` executable, and indirectly `protoc`
+        self.tool_requires("grpc/<host_version>")
 
     def generate(self):
         tc = CMakeToolchain(self)
