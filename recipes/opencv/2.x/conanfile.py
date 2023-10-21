@@ -46,7 +46,7 @@ class OpenCVConan(ConanFile):
     description = "OpenCV (Open Source Computer Vision Library)"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("computer-vision", "deep-learning", "image-processing")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
