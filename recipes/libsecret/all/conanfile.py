@@ -64,7 +64,7 @@ class LibsecretConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/1.2.3")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
         self.tool_requires("glib/<host_version>")
