@@ -53,8 +53,8 @@ class CoinUtilsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("bzip2/1.0.8")
-        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("bzip2/1.0.8", transitive_libs=True)
+        self.requires("zlib/[>=1.2.11 <2]", transitive_libs=True)
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
