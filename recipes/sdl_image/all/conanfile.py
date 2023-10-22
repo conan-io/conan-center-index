@@ -195,9 +195,15 @@ class SDLImageConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "SDL2_image.framework"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
-        lib_postfix = "d" if Version(self.version) >= 2.6 and self.settings.build_type == "Debug" else ""
+        lib_postfix = ""
+        if Version(self.version) >= "2.6":
+            if self.settings.os == "Windows" and not self.options.shared:
+                lib_postfix += "-static"
+            if self.settings.build_type == "Debug":
+                lib_postfix += "d"
 
         self.cpp_info.set_property("cmake_file_name", "SDL2_image")
         self.cpp_info.set_property("cmake_target_name", "SDL2_image::SDL2_image")
