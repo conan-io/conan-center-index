@@ -49,9 +49,12 @@ class SimdutfConan(ConanFile):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
         ## simdutf >= 4.0.0 requires _mm_storeu_si64
-        if Version(self.version) >= "4.0.0" and \
-            self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.0":
-            raise ConanInvalidConfiguration(f"{self.ref} doen't support gcc < 9.")
+        if Version(self.version) >= "4.0.0":
+            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.0":
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 9.")
+            if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and \
+                Version(self.settings.compiler.version) < "10.0":
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 10 with debug build")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
