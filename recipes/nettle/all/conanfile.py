@@ -59,7 +59,7 @@ class NettleConan(ConanFile):
 
     def requirements(self):
         if self.options.public_key:
-            self.requires("gmp/6.2.1")
+            self.requires("gmp/6.3.0")
 
     def validate(self):
         if is_msvc(self):
