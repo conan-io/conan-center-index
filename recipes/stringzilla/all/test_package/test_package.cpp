@@ -39,7 +39,7 @@ int main(void) {
   // Perform string-level operations
   sz_size_t character_count = sz_count_char(haystack.start, haystack.length, "a");
   sz_string_start_t substring_position = sz_find_substring(
-    haystack.start, haystack.length, 
+    haystack.start, haystack.length,
     needle.start, needle.length
   );
 
