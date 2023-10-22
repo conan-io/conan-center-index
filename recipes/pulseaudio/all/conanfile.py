@@ -3,8 +3,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
+from conan.tools.meson import MesonToolchain, Meson
 import os
 
 required_conan_version = ">=1.53.0"
@@ -75,6 +76,7 @@ class PulseAudioConan(ConanFile):
             self.requires("dbus/1.15.8")
 
     def validate(self):
+        # TODO: The newer Meson build system should support Windows
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("pulseaudio supports only linux currently")
 
@@ -87,8 +89,7 @@ class PulseAudioConan(ConanFile):
                 )
 
     def build_requirements(self):
-        self.tool_requires("gettext/0.21")
-        self.tool_requires("libtool/2.4.7")
+        self.tool_requires("meson/1.2.3")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
 
@@ -102,35 +103,42 @@ class PulseAudioConan(ConanFile):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
 
-        tc = AutotoolsToolchain(self)
-        yes_no = lambda v: "yes" if v else "no"
-        tc.configure_args.extend([
-            f"--enable-shared={yes_no(self.options.shared)}",
-            f"--enable-static={yes_no(not self.options.shared)}",
-            f"--enable-glib2={yes_no(self.options.with_glib)}",
-            f"--with-fftw={yes_no(self.options.get_safe('with_fftw'))}",
-            "--with-udev-rules-dir=${prefix}/bin/udev/rules.d",
-            f"--with-systemduserunitdir={os.path.join(self.build_folder, 'ignore')}",
-        ])
-        for lib in ["alsa", "x11", "openssl", "dbus"]:
-            tc.configure_args.append(f"--enable-{lib}={yes_no(getattr(self.options, f'with_{lib}'))}")
-        # TODO: to remove when automatically handled by AutotoolsToolchain
-        tc.configure_args.append("--libexecdir=${prefix}/bin")
+        def format_enabled(enabled):
+            return "enabled" if enabled else "disabled"
+
+        tc = MesonToolchain(self)
+        tc.project_options["glib"] = format_enabled(self.options.with_glib)
+        tc.project_options["fftw"] = format_enabled(self.options.get_safe("with_fftw", False))
+        tc.project_options["x11"] = format_enabled(self.options.with_x11)
+        tc.project_options["openssl"] = format_enabled(self.options.with_openssl)
+        tc.project_options["dbus"] = format_enabled(self.options.with_dbus)
+        tc.project_options["alsa"] = format_enabled(self.options.with_alsa)
+        if self.options.with_alsa:
+            tc.project_options["alsadatadir"] = os.path.join(self.dependencies["libalsa"].cpp_info.resdirs[0])
+        tc.project_options["systemduserunitdir"] = os.path.join(self.build_folder, "ignore")
+        tc.project_options["udevrulesdir"] = "${prefix}/bin/udev/rules.d"
+        tc.project_options["libexecdir"] = "${prefix}/bin"
+
+        tc.project_options["tests"] = "false"
+        tc.project_options["doxygen"] = "false"
+        tc.project_options["man"] = "false"
+        # TODO: add support for the daemon component
+        tc.project_options["daemon"] = "false"
+        # tc.project_options["database"] = self.options.database
         tc.generate()
-        deps = AutotoolsDeps(self)
-        deps.generate()
+
         pkg = PkgConfigDeps(self)
         pkg.generate()
 
     def build(self):
-        autotools = Autotools(self)
-        autotools.configure()
-        autotools.make()
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        autotools = Autotools(self)
-        autotools.install()
+        meson = Meson(self)
+        meson.install()
         rmdir(self, os.path.join(self.package_folder, "etc"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
@@ -163,5 +171,3 @@ class PulseAudioConan(ConanFile):
             self.cpp_info.components["pulse-mainloop-glib"].libs = ["pulse-mainloop-glib"]
             self.cpp_info.components["pulse-mainloop-glib"].defines.append("_REENTRANT")
             self.cpp_info.components["pulse-mainloop-glib"].requires = ["pulse", "glib::glib-2.0"]
-
-        # FIXME: add cmake generators when conan can generate PULSEAUDIO_INCLUDE_DIR PULSEAUDIO_LIBRARY vars
