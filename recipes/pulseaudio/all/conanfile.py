@@ -147,6 +147,11 @@ class PulseAudioConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["pulse"].set_property("pkg_config_name", "libpulse")
+        # CMake target names are based on KDE: https://api.kde.org/ecm/find-module/FindPulseAudio.html
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "PulseAudio")
+        self.cpp_info.set_property("cmake_target_name", "PulseAudio::PulseAudio")
+
         self.cpp_info.components["pulse"].libs = ["pulse", f"pulsecommon-{self.version}"]
         self.cpp_info.components["pulse"].libdirs.append(os.path.join("lib", "pulseaudio"))
         self.cpp_info.components["pulse"].requires = ["libiconv::libiconv", "libsndfile::libsndfile", "libcap::libcap", "libtool::libtool"]
