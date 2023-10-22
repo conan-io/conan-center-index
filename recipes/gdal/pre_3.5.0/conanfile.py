@@ -249,28 +249,28 @@ class GdalConan(ConanFile):
         self.requires("json-c/0.17")
         self.requires("libgeotiff/1.7.1")
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
-        self.requires("libtiff/4.5.1")
+        self.requires("libtiff/4.6.0")
         self.requires("proj/9.2.1")
         if Version(self.version) >= "3.1.0":
             self.requires("flatbuffers/2.0.5")
         if self.options.get_safe("with_zlib", True):
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_libdeflate"):
-            self.requires("libdeflate/1.18")
+            self.requires("libdeflate/1.19")
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.5.5")
         if self.options.get_safe("with_blosc"):
-            self.requires("c-blosc/1.21.3")
+            self.requires("c-blosc/1.21.5")
         if self.options.get_safe("with_lz4"):
             self.requires("lz4/1.9.4")
         if self.options.with_pg:
-            self.requires("libpq/14.5")
+            self.requires("libpq/15.4")
         # if self.options.with_libgrass:
         #     self.requires("libgrass/x.x.x")
         if self.options.with_cfitsio:
-            self.requires("cfitsio/4.1.0")
+            self.requires("cfitsio/4.2.0")
         # if self.options.with_pcraster:
         #     self.requires("pcraster-rasterformat/1.3.2")
         if self.options.get_safe("with_png", True):
@@ -286,9 +286,9 @@ class GdalConan(ConanFile):
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.0")
         elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.1")
+            self.requires("mozjpeg/4.1.3")
         if self.options.with_charls:
-            self.requires("charls/2.4.1")
+            self.requires("charls/2.4.2")
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
         # if self.options.with_ogdi:
@@ -300,7 +300,7 @@ class GdalConan(ConanFile):
         if self.options.with_hdf4:
             self.requires("hdf4/4.2.15")
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.0")
+            self.requires("hdf5/1.14.1")
         if self.options.with_kea:
             self.requires("kealib/1.4.14")
         if self.options.with_netcdf:
@@ -312,9 +312,9 @@ class GdalConan(ConanFile):
         # if self.options.with_fgdb:
         #     self.requires("file-geodatabase-api/x.x.x")
         if self.options.with_mysql == "libmysqlclient":
-            self.requires("libmysqlclient/8.0.31")
+            self.requires("libmysqlclient/8.1.0")
         elif self.options.with_mysql == "mariadb-connector-c":
-            self.requires("mariadb-connector-c/3.1.12")
+            self.requires("mariadb-connector-c/3.3.3")
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.4")
         if self.options.with_expat:
@@ -326,13 +326,13 @@ class GdalConan(ConanFile):
         # if self.options.with_dods_root:
         #     self.requires("libdap/3.20.6")
         if self.options.with_curl:
-            self.requires("libcurl/8.2.1")
+            self.requires("libcurl/8.3.0")
         if self.options.with_xml2:
-            self.requires("libxml2/2.10.3")
+            self.requires("libxml2/2.11.5")
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.42.0")
+            self.requires("sqlite3/3.43.2")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
@@ -340,16 +340,16 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_pcre2"):
             self.requires("pcre2/10.42")
         if self.options.with_webp:
-            self.requires("libwebp/1.3.1")
+            self.requires("libwebp/1.3.2")
         if self.options.with_geos:
-            self.requires("geos/3.11.1")
+            self.requires("geos/3.12.0")
         # if self.options.with_sfcgal:
         #     self.requires("sfcgal/1.3.7")
         if self.options.with_qhull:
             self.requires("qhull/8.0.1")
         if self.options.with_opencl:
-            self.requires("opencl-headers/2022.09.30")
-            self.requires("opencl-icd-loader/2022.09.30")
+            self.requires("opencl-headers/2023.04.17")
+            self.requires("opencl-icd-loader/2023.04.17")
         if self.options.with_freexl:
             self.requires("freexl/1.0.6")
         if self.options.with_poppler:
@@ -365,15 +365,15 @@ class GdalConan(ConanFile):
         # if self.options.with_armadillo:
         #     self.requires("armadillo/9.880.1")
         if self.options.with_cryptopp:
-            self.requires("cryptopp/8.7.0")
+            self.requires("cryptopp/8.8.0")
         if self.options.with_crypto:
-            self.requires("openssl/1.1.1u")
+            self.requires("openssl/[>=1.1 <4]")
         # if not self.options.without_lerc:
         #     self.requires("lerc/2.1") # TODO: use conan recipe (not possible yet because lerc API is broken for GDAL)
         if self.options.get_safe("with_exr"):
             self.requires("openexr/3.1.9")
         if self.options.get_safe("with_heif"):
-            self.requires("libheif/1.13.0")
+            self.requires("libheif/1.16.2")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -412,7 +412,7 @@ class GdalConan(ConanFile):
         if not is_msvc(self):
             self.tool_requires("libtool/2.4.7")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/1.9.3")
+                self.tool_requires("pkgconf/2.0.3")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
