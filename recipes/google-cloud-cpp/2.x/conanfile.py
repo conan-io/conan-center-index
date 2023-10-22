@@ -176,9 +176,14 @@ class GoogleCloudCppConan(ConanFile):
         #     https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/RuntimeProtections/RuntimeProtections.html
         settings_build = getattr(self, "settings_build", self.settings)
         if settings_build.os == "Macos":
-            replace_in_file(self, os.path.join(self.source_folder, "cmake/CompileProtos.cmake"),
-                            "$<TARGET_FILE:protobuf::protoc>",
-                            '${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" $<TARGET_FILE:protobuf::protoc>')
+            if Version(self.version) < '2.12.0':
+                replace_in_file(self, os.path.join(self.source_folder, "cmake/CompileProtos.cmake"),
+                                "$<TARGET_FILE:protobuf::protoc>",
+                                '${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" $<TARGET_FILE:protobuf::protoc>')
+            else:
+                replace_in_file(self, os.path.join(self.source_folder, "cmake/CompileProtos.cmake"),
+                                "${Protobuf_PROTOC_EXECUTABLE} ARGS",
+                                '${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" ${Protobuf_PROTOC_EXECUTABLE}')
 
     def build(self):
         self._patch_sources()
