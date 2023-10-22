@@ -272,6 +272,10 @@ class NCursesConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Curses")
         self.cpp_info.set_property("cmake_build_modules", [module_rel_path])
 
+        # for conan v1 generators
+        self.cpp_info.filenames["cmake_find_package"] = "Curses"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Curses"
+
         if self._with_tinfo:
             self.cpp_info.components["tinfo"].libs = ["tinfo" + self._lib_suffix]
             self.cpp_info.components["tinfo"].names["pkg_config"] = "tinfo" + self._lib_suffix
