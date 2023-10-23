@@ -123,7 +123,7 @@ class WtConan(ConanFile):
             )
 
         # FIXME: https://redmine.emweb.be/issues/12073w
-        if conan_version.major == 2 and Version(self.version) >= "4.10.1" and is_msvc(self):
+        if conan_version.major == 2 and Version(self.version) == "4.10.1" and is_msvc(self):
 
             # FIXME: check_max_cppstd is only available for Conan 2.x. Remove it after dropping support for Conan 1.x
             # FIXME: linter complains, but function is there
