@@ -37,6 +37,10 @@ class SubunitConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang"
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -94,10 +98,48 @@ class SubunitConan(ConanFile):
             " ".join(f"-I{unix_path(self, inc)}" for inc in cppunit_info.includedirs))
         )
         tc.configure_args.append("CPPUNIT_LIBS='{}'".format(" ".join(cppunit_info.libs)))
+        # Avoid installing i18n + perl things in arch-dependent folders or in a `local` subfolder
+        tc.make_args += [
+            f"INSTALLARCHLIB={unix_path(self, os.path.join(self.package_folder, 'lib'))}",
+            f"INSTALLSITEARCH={unix_path(self, os.path.join(self.build_folder, 'archlib'))}",
+            f"INSTALLVENDORARCH={unix_path(self, os.path.join(self.build_folder, 'archlib'))}",
+            f"INSTALLSITEBIN={unix_path(self, os.path.join(self.package_folder, 'bin'))}",
+            f"INSTALLSITESCRIPT={unix_path(self, os.path.join(self.package_folder, 'bin'))}",
+            f"INSTALLSITEMAN1DIR={unix_path(self, os.path.join(self.build_folder, 'share', 'man', 'man1'))}",
+            f"INSTALLSITEMAN3DIR={unix_path(self, os.path.join(self.build_folder, 'share', 'man', 'man3'))}",
+        ]
         tc.generate()
 
-        tc = AutotoolsDeps(self)
-        tc.generate()
+        if is_msvc(self) or self._is_clang_cl:
+            # Custom AutotoolsDeps for cl-like compilers
+            # workaround for https://github.com/conan-io/conan/issues/12784
+            includedirs = []
+            defines = []
+            libs = []
+            libdirs = []
+            linkflags = []
+            cxxflags = []
+            cflags = []
+            for dependency in self.dependencies.values():
+                deps_cpp_info = dependency.cpp_info.aggregated_components()
+                includedirs.extend(deps_cpp_info.includedirs)
+                defines.extend(deps_cpp_info.defines)
+                libs.extend(deps_cpp_info.libs)
+                libdirs.extend(deps_cpp_info.libdirs)
+                linkflags.extend(deps_cpp_info.sharedlinkflags + deps_cpp_info.exelinkflags)
+                cxxflags.extend(deps_cpp_info.cxxflags)
+                cflags.extend(deps_cpp_info.cflags)
+
+            env = Environment()
+            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in includedirs] + [f"-D{d}" for d in defines])
+            env.append("LIBS", [f"-l{lib}" for lib in libs])
+            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in libdirs] + linkflags)
+            env.append("CXXFLAGS", cxxflags)
+            env.append("CFLAGS", cflags)
+            env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
+        else:
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
         if is_msvc(self):
             env = Environment()
@@ -107,7 +149,7 @@ class SubunitConan(ConanFile):
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f'{ar_wrapper} "lib -nologo"')
+            env.define("AR", f'{ar_wrapper} lib')
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
@@ -125,19 +167,7 @@ class SubunitConan(ConanFile):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
-            autotools.configure()
-            # Avoid installing i18n + perl things in arch-dependent folders or in a `local` subfolder
-            install_args = [
-                "INSTALLARCHLIB={}".format(unix_path(self, os.path.join(self.package_folder, "lib"))),
-                "INSTALLSITEARCH={}".format(unix_path(self, os.path.join(self.build_folder, "archlib"))),
-                "INSTALLVENDORARCH={}".format(unix_path(self, os.path.join(self.build_folder, "archlib"))),
-                "INSTALLSITEBIN={}".format(unix_path(self, os.path.join(self.package_folder, "bin"))),
-                "INSTALLSITESCRIPT={}".format(unix_path(self, os.path.join(self.package_folder, "bin"))),
-                "INSTALLSITEMAN1DIR={}".format(unix_path(self, os.path.join(self.build_folder, "share", "man", "man1"))),
-                "INSTALLSITEMAN3DIR={}".format(unix_path(self, os.path.join(self.build_folder, "share", "man", "man3"))),
-            ]
-            autotools.install(args=install_args)
-
+            autotools.install()
         rm(self, "*.la", self.package_folder, recursive=True)
         rm(self, "*.pod", self.package_folder, recursive=True)
         for d in glob.glob(os.path.join(self.package_folder, "lib", "python*")):
@@ -157,5 +187,4 @@ class SubunitConan(ConanFile):
         self.cpp_info.components["libcppunit_subunit"].set_property("pkg_config_name", "libcppunit_subunit")
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
