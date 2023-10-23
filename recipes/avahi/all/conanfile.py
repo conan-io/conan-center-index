@@ -74,6 +74,7 @@ class AvahiConan(ConanFile):
         tc.configure_args.append("--disable-python")
         tc.configure_args.append("--disable-qt5")
         tc.configure_args.append("--with-systemdsystemunitdir=/lib/systemd/system")
+        tc.configure_args.append("ac_cv_func_strlcpy=no")
         if self.settings.os in ["Linux", "FreeBSD"]:
             tc.configure_args.append("ac_cv_func_setproctitle=no")
         tc.generate()
@@ -106,7 +107,7 @@ class AvahiConan(ConanFile):
             self.cpp_info.components[lib].names["cmake_find_package"] = lib
             self.cpp_info.components[lib].names["cmake_find_package_multi"] = lib
             self.cpp_info.components[lib].libs = [avahi_lib]
-            self.cpp_info.components[lib].includedirs = [os.path.join("include", avahi_lib)]
+            self.cpp_info.components[lib].includedirs = ["include", os.path.join("include", avahi_lib)]
         self.cpp_info.components["compat-libdns_sd"].libs = ["dns_sd"]
 
         self.cpp_info.components["client"].requires = ["common", "dbus::dbus"]
@@ -131,6 +132,7 @@ class AvahiConan(ConanFile):
         self.cpp_info.components["resolve"].requires = ["client"]
         self.cpp_info.components["set-host-name"].requires = ["client"]
 
+        # TODO: Remove after dropping Conan 1.x support
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)

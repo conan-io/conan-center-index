@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -36,6 +37,9 @@ class MtdevConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        self.tool_requires("libtool/2.4.7")
+
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
@@ -46,9 +50,12 @@ class MtdevConan(ConanFile):
     def generate(self):
         tc = AutotoolsToolchain(self)
         tc.generate()
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
 
     def build(self):
         autotools = Autotools(self)
+        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
