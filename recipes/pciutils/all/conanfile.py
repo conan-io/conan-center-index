@@ -73,8 +73,6 @@ class PciUtilsConan(ConanFile):
             "DNS=no",
             f"CC={cc}",
         ]
-        for var, value in env_vars.items():
-            tc.make_args.append(f"{var}={value}")
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
@@ -99,8 +97,10 @@ class PciUtilsConan(ConanFile):
              keep_path=True)
 
         if self.options.shared:
-            rename(self, src=os.path.join(self.source_folder, "lib", "libpci.so.3.7.0"),
-                   dst=os.path.join(self.package_folder, "lib", "libpci.so"))
+            # libpci.so.3.10.0 -> libpci.so
+            for so_file in self.package_path.glob("lib/libpci.so*.*.*"):
+                so_without_version = os.path.join(self.package_folder, "lib", "libpci.so")
+                self.run(f'ln -s "{so_file}" "{so_without_version}"')
 
         rmdir(self, os.path.join(self.package_folder, "sbin"))
         rmdir(self, os.path.join(self.package_folder, "share"))
