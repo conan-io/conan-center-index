@@ -106,6 +106,7 @@ class OhNetConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["ohNet"].libs = ["ohNet"]
+        self.cpp_info.components["ohNet"].builddirs = [os.path.join("lib", "ServiceGen")]
         self.cpp_info.components["ohNet"].set_property("cmake_target_name", "ohNet")
         self.cpp_info.components["ohNet"].defines.extend(["DEFINE_LITTLE_ENDIAN"])
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -114,6 +115,7 @@ class OhNetConan(ConanFile):
             self.cpp_info.components["ohNet"].system_libs.extend(["iphlpapi", "ws2_32", "dbghelp"])
 
         self.cpp_info.components["ohNetCore"].libs = ["ohNetCore"]
+        self.cpp_info.components["ohNetCore"].builddirs = [os.path.join("lib", "ServiceGen")]
         self.cpp_info.components["ohNetCore"].set_property("cmake_target_name", "ohNetCore")
         self.cpp_info.components["ohNetCore"].defines.extend(["DEFINE_LITTLE_ENDIAN"])
         if self.settings.os in ["Linux", "FreeBSD"]:
