@@ -12,9 +12,6 @@ class TestPackageConan(ConanFile):
     generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     test_type = "explicit"
 
-    def requirements(self):
-        self.requires(self.tested_reference_str)
-
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
 
@@ -30,11 +27,12 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             self.run("pexports -H")
+
             if self.settings.os == "Windows":
-                bin_path = os.path.join("bin", "test_package")
+                bin_path = os.path.join(self.cpp.build.bindir, "test_package")
                 self.run(bin_path, env="conanrun")
                 exports_def_path = os.path.join(self.build_folder, "exports.def")
                 exports_def_contents = load(self, exports_def_path)
                 self.output.info(f"{exports_def_path} contents:\n{exports_def_contents}")
-                if not "test_package_function" in exports_def_contents:
+                if "test_package_function" not in exports_def_contents:
                     raise ConanException("pexport could not detect `test_package_function` in the dll")
