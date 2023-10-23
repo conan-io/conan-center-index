@@ -2,19 +2,19 @@ sources:
   "3.6.0":
     url: "https://github.com/PixarAnimationStudios/OpenSubdiv/archive/refs/tags/v3_6_0.tar.gz"
     sha256: "bebfd61ab6657a4f4ff27845fb66a167d00395783bfbd253254d87447ed1d879"
-  "3.5.1":
-    url: "https://github.com/PixarAnimationStudios/OpenSubdiv/archive/refs/tags/v3_5_1.tar.gz"
-    sha256: "42c7c89ffa552f37e9742d1ecfa4bd1d6a2892e01b68fc156775d104154d3d43"
+  "3.5.0":
+    url: "https://github.com/PixarAnimationStudios/OpenSubdiv/archive/refs/tags/v3_5_0.tar.gz"
+    sha256: "8f5044f453b94162755131f77c08069004f25306fd6dc2192b6d49889efb8095"
   "3.4.4":
     url: "https://github.com/PixarAnimationStudios/OpenSubdiv/archive/refs/tags/v3_4_4.tar.gz"
     sha256: "20d49f80a2b778ad4d01f091ad88d8c2f91cf6c7363940c6213241ce6f1048fb"
 patches:
   "3.6.0":
-    - patch_file: "patches/3.5.1-0002-cmake-no-rpath.patch"
+    - patch_file: "patches/3.6.0-0002-cmake-no-rpath.patch"
       patch_description: "CMake: do not populate rpath with absolute paths"
       patch_type: "conan"
-  "3.5.1":
-    - patch_file: "patches/3.5.1-0002-cmake-no-rpath.patch"
+  "3.5.0":
+    - patch_file: "patches/3.4.4-0002-cmake-no-rpath.patch"
       patch_description: "CMake: do not populate rpath with absolute paths"
       patch_type: "conan"
   "3.4.4":
