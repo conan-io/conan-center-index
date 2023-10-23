@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -23,17 +24,28 @@ class CPPValidatorConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14
+        # cpp-validator rquires C++17 on MSVC
+        # https://github.com/evgeniums/cpp-validator/blob/v2.0.3/CMakeLists.txt#L241
+        return "17" if is_msvc(self) else "14"
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "15",
-            "msvc": "191",
-            "gcc": "7",
-            "clang": "5",
-            "apple-clang": "5.1",
-        }
+            "14": {
+                "gcc": "6",
+                "clang": "5",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+            "17": {
+                "gcc": "8",
+                "clang": "7",
+                "apple-clang": "12",
+                "Visual Studio": "16",
+                "msvc": "192",
+            }
+        }.get(self._min_cppstd, {})
 
     def layout(self):
         basic_layout(self, src_folder="src")
