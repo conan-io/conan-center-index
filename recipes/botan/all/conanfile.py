@@ -1,3 +1,4 @@
+import glob
 import os
 import shutil
 
@@ -259,13 +260,19 @@ class BotanConan(ConanFile):
         with chdir(self, self.source_folder):
             # Note: this will fail to properly consider the package_folder if a "conan build" followed by a "conan export-pkg" is executed
             self.run(self._make_install_cmd)
+        if is_apple_os(self):
+            # fix rpath to make installed library relocatable (CCI KB-H077)
+            with chdir(self, os.path.join(self.package_folder, "lib")):
+                for dylib in glob.glob("*.dylib"):
+                    if not os.path.islink(dylib):
+                        self.run(f"install_name_tool -id @rpath/{os.path.basename(dylib)} {dylib}")
 
     def package_info(self):
         major_version = Version(self.version).major
         self.cpp_info.set_property("pkg_config_name", f"botan-{major_version}")
         self.cpp_info.libs = ["botan" if is_msvc(self) and major_version < 3 else f"botan-{major_version}"]
         if self.settings.os == 'Linux':
-            self.cpp_info.system_libs.extend(['dl', 'rt', 'pthread'])
+            self.cpp_info.system_libs.extend(['dl', 'rt', 'pthread', 'm'])
         if self.settings.os == 'Macos':
             self.cpp_info.frameworks = ['Security', 'CoreFoundation']
         if self.settings.os == 'Windows':
