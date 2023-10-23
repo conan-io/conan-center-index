@@ -107,6 +107,7 @@ class SerfConan(ConanFile):
         if is_msvc(self):
             kwargs["TARGET_ARCH"] = str(self.settings.arch)
             kwargs["MSVC_VERSION"] = "{:.1f}".format(float(msvs_toolset(self).lstrip("v")) / 10)
+            kwargs["ZLIB_LIBNAME"] = f"{self.dependencies['zlib'].cpp_info.libs[0]}"
             env = Environment()
             env.define("OPENSSL_LIBS", os.pathsep.join(f"{lib}.lib" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs))
             env.vars(self).save_script("conanbuild_msvc")
