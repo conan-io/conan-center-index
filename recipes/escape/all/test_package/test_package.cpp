@@ -1,9 +1,14 @@
 #include <iostream>
-#include "esc/terminal.hpp"
+#include "esc/true_color.hpp"
 
 int main(void) {
-    esc::initialize_interactive_terminal();
-    esc::uninitialize_terminal();
+    esc::RGB red_rgb(255, 0, 0);
 
-    std::cout << "terminal size : " << esc::terminal_width() << " x " << esc::terminal_height() << std::endl;
+    auto red_hsl = esc::rgb_to_hsl(red_rgb);
+
+    std::cout
+        << "red => hue : " << static_cast<uint>(red_hsl.hue)
+        << " sat: " << static_cast<uint>(red_hsl.saturation)
+        << " lightness: " << static_cast<uint>(red_hsl.lightness)
+        << std::endl;
 }
