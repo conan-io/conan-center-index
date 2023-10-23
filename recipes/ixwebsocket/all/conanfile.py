@@ -122,7 +122,7 @@ class IXWebSocketConan(ConanFile):
         # INFO: IXWebSocketHttpHeaders.cpp consumes WSAEINVAL but there is no winsock2.h included
         replace_in_file(self, os.path.join(self.source_folder, "ixwebsocket", "IXWebSocketHttpHeaders.cpp"), '#include "IXSocket.h"', '#include "IXNetSystem.h"\n#include "IXSocket.h"')
         # INFO: IXHttpClient.cpp consumes WSAEINVAL but there is no winsock2.h included
-         replace_in_file(self, os.path.join(self.source_folder, "ixwebsocket", "IXHttpClient.h"), '#include "IXSocket.h"', '#include "IXNetSystem.h"\n#include "IXSocket.h"')
+        replace_in_file(self, os.path.join(self.source_folder, "ixwebsocket", "IXHttpClient.h"), '#include "IXSocket.h"', '#include "IXNetSystem.h"\n#include "IXSocket.h"')
 
     def build(self):
         self._patch_sources()
