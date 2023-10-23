@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	dev_list = ibv_get_device_list(&num_devices);
 	if (!dev_list) {
 		perror("Failed to get IB devices list");
-		return 1;
+		return 0;
 	}
 
 	printf("    %-16s\t   node GUID\n", "device");
