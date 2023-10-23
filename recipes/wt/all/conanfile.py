@@ -121,8 +121,11 @@ class WtConan(ConanFile):
                 f"{self.ref} requires non header-only boost with these components: "
                 f"{', '.join(self._required_boost_components)}"
             )
-        # FIXME: check_max_cppstd is only available for Conan 2.x. Remove it after dropping support for Conan 1.x
-        if conan_version.major == 2 and Version(self.version) >= "4.10.1":
+
+        # FIXME: https://redmine.emweb.be/issues/12073w
+        if conan_version.major == 2 and Version(self.version) >= "4.10.1" and is_msvc(self):
+
+            # FIXME: check_max_cppstd is only available for Conan 2.x. Remove it after dropping support for Conan 1.x
             # FIXME: linter complains, but function is there
             # https://docs.conan.io/2.0/reference/tools/build.html?highlight=check_min_cppstd#conan-tools-build-check-max-cppstd
             check_max_cppstd = getattr(sys.modules['conan.tools.build'], 'check_max_cppstd')
