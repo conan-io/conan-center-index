@@ -795,6 +795,7 @@ class FFMpegConan(ConanFile):
                 "user32", "bcrypt"]
             self.cpp_info.components["avformat"].system_libs = ["secur32"]
         elif is_apple_os(self):
+            self.cpp_info.components["avutil"].frameworks = ["CoreServices"]
             if self.options.avdevice:
                 self.cpp_info.components["avdevice"].frameworks = ["CoreFoundation", "Foundation", "CoreGraphics"]
             if self.options.avfilter:
