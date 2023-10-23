@@ -102,7 +102,6 @@ class SerfConan(ConanFile):
             "CPPFLAGS": " ".join([f"-D{d}" for d in autotools.defines] + [f"-I'{unix_path(self, inc)}'" for inc in includedirs]),
             "CC": self._cc,
             "SOURCE_LAYOUT": "False",
-            "LIBS": " ".join(libs),
         }
 
         if is_msvc(self):
@@ -111,6 +110,8 @@ class SerfConan(ConanFile):
             env = Environment()
             env.define("OPENSSL_LIBS", os.pathsep.join(f"{lib}.lib" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs))
             env.vars(self).save_script("conanbuild_msvc")
+        else:
+            kwargs["LIBS"] = " ".join(libs)
 
         escape_str = lambda x: f'"{x}"'
         scons_args = " ".join([escape_str(s) for s in args] + [f"{k}={escape_str(v)}" for k, v in kwargs.items()])
