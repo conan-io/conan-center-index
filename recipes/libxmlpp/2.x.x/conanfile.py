@@ -22,7 +22,8 @@ class LibXMLPlusPlus(ConanFile):
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libxmlplusplus/libxmlplusplus"
-    topics = ["xml", "parser", "wrapper"]
+    topics = ("xml", "parser", "wrapper")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
