@@ -27,7 +27,7 @@ class TestPackageConan(ConanFile):
         tc.generate()
 
     def build(self):
-        if self.settings.os != "Windows":
+        if self.settings.os != "Windows" and can_run(self):
             if conan_version >= "2":
                 # Conan v1 has a bug and fails with 'Variable 'libdir' not defined in gobject-introspection-1.0.pc'
                 pkg_config = PkgConfig(self, "gobject-introspection-1.0", pkg_config_path=self.generators_folder)
@@ -41,11 +41,10 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not can_run(self):
-            return
-        bin_path = os.path.join(self.cpp.build.bindir, "test_basic")
-        self.run(bin_path, env="conanrun")
-
-        bin_path = os.path.join(self.cpp.build.bindir, "test_girepository")
-        if os.path.exists(bin_path):
+        if can_run(self):
+            bin_path = os.path.join(self.cpp.build.bindir, "test_basic")
             self.run(bin_path, env="conanrun")
+
+            bin_path = os.path.join(self.cpp.build.bindir, "test_girepository")
+            if os.path.exists(bin_path):
+                self.run(bin_path, env="conanrun")
