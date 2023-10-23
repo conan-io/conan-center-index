@@ -66,13 +66,15 @@ class Re2CConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # Don't copy benchmark files, which also cause the build to fail on Windows
+        # Don't copy benchmark files, which cause the build to fail on Windows
         replace_in_file(self, os.path.join(self.source_folder, "configure"),
                         '"$ac_config_files Makefile ',
-                        '"$ac_config_files Makefile" #')
+                        '"$ac_config_files Makefile" #',
+                        strict=False)
         replace_in_file(self, os.path.join(self.source_folder, "configure"),
                         '"$ac_config_links ',
-                        '"$ac_config_links" #')
+                        '"$ac_config_links" #',
+                        strict=False)
 
     def build(self):
         self._patch_sources()
