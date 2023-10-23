@@ -43,6 +43,9 @@ class OhNetConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def validate(self):
         if is_msvc(self) and (self.options.shared or msvc_runtime_flag(self).startswith('MD')):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared builds with Visual Studio yet")
