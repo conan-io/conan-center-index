@@ -42,6 +42,9 @@ class PulseAudioConan(ConanFile):
         "with_dbus": False,
     }
 
+    def export_sources(self):
+        copy(self, "cmake/*", src=self.recipe_folder, dst=self.export_sources_folder)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -144,13 +147,19 @@ class PulseAudioConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
+        copy(self, "*.cmake",
+             src=os.path.join(self.export_sources_folder, "cmake"),
+             dst=os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.components["pulse"].set_property("pkg_config_name", "libpulse")
-        # CMake target names are based on KDE: https://api.kde.org/ecm/find-module/FindPulseAudio.html
-        self.cpp_info.set_property("cmake_find_mode", "both")
+
+        # Match the CMake config defined in https://github.com/pulseaudio/pulseaudio/blob/v16.1/PulseAudioConfig.cmake.in
         self.cpp_info.set_property("cmake_file_name", "PulseAudio")
-        self.cpp_info.set_property("cmake_target_name", "PulseAudio::PulseAudio")
+
+        cmake_module = os.path.join("lib", "cmake", "conan-pulseaudio-config.cmake")
+        self.cpp_info.set_property("cmake_build_modules", [cmake_module])
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
 
         self.cpp_info.components["pulse"].libs = ["pulse", f"pulsecommon-{self.version}"]
         self.cpp_info.components["pulse"].libdirs.append(os.path.join("lib", "pulseaudio"))
@@ -176,3 +185,9 @@ class PulseAudioConan(ConanFile):
             self.cpp_info.components["pulse-mainloop-glib"].libs = ["pulse-mainloop-glib"]
             self.cpp_info.components["pulse-mainloop-glib"].defines.append("_REENTRANT")
             self.cpp_info.components["pulse-mainloop-glib"].requires = ["pulse", "glib::glib-2.0"]
+
+        # TODO: Legacy, to be removed on Conan 2.0
+        self.cpp_info.filenames["cmake_find_package"] = "PulseAudio"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "PulseAudio"
+        self.cpp_info.build_modules["cmake_find_package"] = [cmake_module]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [cmake_module]
