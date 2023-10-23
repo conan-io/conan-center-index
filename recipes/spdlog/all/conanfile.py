@@ -57,7 +57,7 @@ class SpdlogConan(ConanFile):
         fmt_version = "7.1.3"
 
         if self_version >= "1.12.0":
-            fmt_version = "10.1.0"
+            fmt_version = "10.1.1"
         elif self_version >= "1.11.0":
             fmt_version = "10.0.0"
         elif self_version >= "1.10.0":

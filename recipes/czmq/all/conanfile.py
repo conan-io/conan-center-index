@@ -66,7 +66,7 @@ class CzmqConan(ConanFile):
         if self.options.get_safe("with_libmicrohttpd"):
             self.requires("libmicrohttpd/0.9.75")
         if self.options.get_safe("with_libcurl"):
-            self.requires("libcurl/7.87.0")
+            self.requires("libcurl/8.2.1")
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.get_safe("with_libuuid"):
