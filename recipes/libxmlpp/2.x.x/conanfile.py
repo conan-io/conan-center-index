@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
@@ -78,8 +79,7 @@ class LibXMLPlusPlus(ConanFile):
             self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -124,6 +124,7 @@ class LibXMLPlusPlus(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", f"libxml++-{self._lib_version}"))
+        fix_apple_shared_install_name(self)
 
         if is_msvc(self):
             rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
