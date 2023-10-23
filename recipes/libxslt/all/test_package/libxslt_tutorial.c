@@ -9,13 +9,7 @@
  */
 
 #include <string.h>
-#include <libxml/xmlmemory.h>
-#include <libxml/debugXML.h>
-#include <libxml/HTMLtree.h>
-#include <libxml/xmlIO.h>
-#include <libxml/DOCBparser.h>
-#include <libxml/xinclude.h>
-#include <libxml/catalog.h>
+#include <libxml/parser.h>
 #include <libxslt/xslt.h>
 #include <libxslt/xsltInternals.h>
 #include <libxslt/transform.h>
@@ -33,52 +27,51 @@ static void usage(const char *name) {
 
 int
 main(int argc, char **argv) {
-	int i;
-	const char *params[16 + 1];
-	int nbparams = 0;
-	xsltStylesheetPtr cur = NULL;
-	xmlDocPtr doc, res;
+    int i;
+    const char *params[16 + 1];
+    int nbparams = 0;
+    xsltStylesheetPtr cur = NULL;
+    xmlDocPtr doc, res;
 
-	if (argc <= 1) {
-		usage(argv[0]);
-		return(1);
-	}
-	
+    if (argc <= 1) {
+        usage(argv[0]);
+        return(1);
+    }
 
- for (i = 1; i < argc; i++) {
+    for (i = 1; i < argc; i++) {
         if (argv[i][0] != '-')
             break;
-	if ((!strcmp(argv[i], "-param")) ||
-                   (!strcmp(argv[i], "--param"))) {
-		i++;
-		params[nbparams++] = argv[i++];
-		params[nbparams++] = argv[i];
-		if (nbparams >= 16) {
-			fprintf(stderr, "too many params\n");
-			return (1);
-		}
-        }  else {
+        if ((!strcmp(argv[i], "-param")) ||
+                       (!strcmp(argv[i], "--param"))) {
+            i++;
+            params[nbparams++] = argv[i++];
+            params[nbparams++] = argv[i];
+            if (nbparams >= 16) {
+                fprintf(stderr, "too many params\n");
+                return (1);
+            }
+        } else {
             fprintf(stderr, "Unknown option %s\n", argv[i]);
             usage(argv[0]);
             return (1);
         }
     }
 
-	params[nbparams] = NULL;
-	xmlSubstituteEntitiesDefault(1);
-	xmlLoadExtDtdDefaultValue = 1;
-	cur = xsltParseStylesheetFile((const xmlChar *)argv[i]);
-	i++;
-	doc = xmlParseFile(argv[i]);
-	res = xsltApplyStylesheet(cur, doc, params);
-	xsltSaveResultToFile(stdout, res, cur);
+    params[nbparams] = NULL;
+    xmlSubstituteEntitiesDefault(1);
+    xmlLoadExtDtdDefaultValue = 1;
+    cur = xsltParseStylesheetFile((const xmlChar *)argv[i]);
+    i++;
+    doc = xmlParseFile(argv[i]);
+    res = xsltApplyStylesheet(cur, doc, params);
+    xsltSaveResultToFile(stdout, res, cur);
 
-	xsltFreeStylesheet(cur);
-	xmlFreeDoc(res);
-	xmlFreeDoc(doc);
+    xsltFreeStylesheet(cur);
+    xmlFreeDoc(res);
+    xmlFreeDoc(doc);
 
-        xsltCleanupGlobals();
-        xmlCleanupParser();
-	return(0);
+    xsltCleanupGlobals();
+    xmlCleanupParser();
+    return(0);
 
 }

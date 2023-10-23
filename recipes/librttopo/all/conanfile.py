@@ -45,7 +45,7 @@ class LibrttopoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("geos/3.11.1", transitive_headers=True, transitive_libs=True)
+        self.requires("geos/3.12.0", transitive_headers=True, transitive_libs=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

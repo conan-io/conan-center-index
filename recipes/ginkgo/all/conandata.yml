@@ -8,10 +8,6 @@ sources:
 patches:
   "1.4.0":
     - patch_file: "patches/windows-symbols.patch"
-      base_path: "source_subfolder"
   "1.3.0":
     - patch_file: "patches/cmake-fixes.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/windows-iterator.patch"
-      base_path: "source_subfolder"
-

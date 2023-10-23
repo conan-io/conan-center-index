@@ -1,3 +1,5 @@
+#include <optional> // missing include in recent versions of MSVC
+
 #include <packio/packio.h>
 
 namespace ip = boost::asio::ip;

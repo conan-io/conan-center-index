@@ -1,37 +1,53 @@
-from conans import ConanFile, tools
-import os.path
-import glob
+import os
+
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get, load, save
+from conan.tools.layout import basic_layout
+
+required_conan_version = ">=1.52.0"
+
 
 class MattiasgustavssonLibsConan(ConanFile):
     name = "mattiasgustavsson-libs"
     description = "Single-file public domain libraries for C/C++"
-    homepage = "https://github.com/mattiasgustavsson/libs"
-    url = "https://github.com/conan-io/conan-center-index"
     license = ("Unlicense", "MIT")
-    topics = ("utilities", "mattiasgustavsson", "libs")
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/mattiasgustavsson/libs"
+    topics = ("utilities", "mattiasgustavsson", "libs", "header-only")
+
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
-    def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
+    def _min_cppstd(self):
+        return 11
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob('libs-*/')[0]
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def _extract_licenses(self):
-        header = tools.load(os.path.join(self._source_subfolder, "thread.h"))
-        mit_content = header[header.find("ALTERNATIVE A - "):header.find("ALTERNATIVE B -")]
-        tools.save("LICENSE_MIT", mit_content)
-        unlicense_content = header[header.find("ALTERNATIVE B - "):header.rfind("*/", 1)]
-        tools.save("LICENSE_UNLICENSE", unlicense_content)
-
-    def package(self):
-        self.copy(pattern="*.h", dst="include", src=self._source_subfolder)
-        self._extract_licenses()
-        self.copy("LICENSE_MIT", dst="licenses")
-        self.copy("LICENSE_UNLICENSE", dst="licenses")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def _extract_licenses(self):
+        header = load(self, os.path.join(self.source_folder, "thread.h"))
+        mit_content = header[header.find("ALTERNATIVE A - ") : header.find("ALTERNATIVE B -")]
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE_MIT"), mit_content)
+        unlicense_content = header[header.find("ALTERNATIVE B - ") : header.rfind("*/", 1)]
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE_UNLICENSE"), unlicense_content)
+
+    def package(self):
+        self._extract_licenses()
+        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder)
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

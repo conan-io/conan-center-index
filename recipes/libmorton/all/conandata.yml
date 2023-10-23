@@ -1,4 +1,10 @@
 sources:
+  "0.2.12":
+    url: "https://github.com/Forceflow/libmorton/archive/v0.2.12.tar.gz"
+    sha256: "48ec3e4ad1d9348052dcb64bff012ff95db226da3fec5522ae6e674fabbd686f"
+  "0.2.11":
+    url: "https://github.com/Forceflow/libmorton/archive/refs/tags/v0.2.11.tar.gz"
+    sha256: "3650ce8eb3deee28bc580e5bb1594fe07f7a33aa2531490bf09b5ab8207d55f6"
   "0.2.10":
     url: "https://github.com/Forceflow/libmorton/archive/refs/tags/v0.2.10.tar.gz"
     sha256: "5f4a8dbf350222b0bec35ad1bee6b76fa22e16ea364e1e80ca47d8f5a7210d6f"

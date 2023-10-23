@@ -56,14 +56,14 @@ class CfitsioConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.threadsafe and self.settings.os == "Windows" and \
            self.settings.compiler.get_safe("threads") != "posix":
             self.requires("pthreads4w/3.0.0")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_curl"):
-            self.requires("libcurl/8.0.0")
+            self.requires("libcurl/8.2.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -108,8 +108,11 @@ class CfitsioConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", f"cfitsio-{self.version}"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "cfitsio")
+        self.cpp_info.set_property("cmake_target_name", "cfitsio::cfitsio")
         self.cpp_info.set_property("pkg_config_name", "cfitsio")
         self.cpp_info.libs = ["cfitsio"]
         if self.settings.os in ["Linux", "FreeBSD"]:

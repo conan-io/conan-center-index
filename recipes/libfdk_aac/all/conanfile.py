@@ -19,7 +19,7 @@ class LibFDKAACConan(ConanFile):
     license = "https://github.com/mstorsjo/fdk-aac/blob/master/NOTICE"
     homepage = "https://sourceforge.net/projects/opencore-amr/"
     topics = ("multimedia", "audio", "fraunhofer", "aac", "decoder", "encoding", "decoding")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],

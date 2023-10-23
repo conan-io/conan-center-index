@@ -1,0 +1,19 @@
+sources:
+  "2.9.3":
+    sha256: "5985db3a30bbe51234c2cd26ebe4ae9b4c3352ab788b1a464c40c0483bf4de59"
+    url: https://download.open-mpi.org/release/hwloc/v2.9/hwloc-2.9.3.tar.gz
+  "2.9.2":
+    sha256: "ffb554d5735e0e0a19d1fd4b2b86e771d3b58b2d97f257eedacae67ade5054b3"
+    url: https://download.open-mpi.org/release/hwloc/v2.9/hwloc-2.9.2.tar.gz
+  "2.9.1":
+    sha256: "a440e2299f7451dc10a57ddbfa3f116c2a6c4be1bb97c663edd3b9c7b3b3b4cf"
+    url: https://download.open-mpi.org/release/hwloc/v2.9/hwloc-2.9.1.tar.gz
+  "2.9.0":
+    sha256: "9d7d3450e0a5fea4cb80ca07dc8db939abb7ab62e2a7bb27f9376447658738ec"
+    url: https://download.open-mpi.org/release/hwloc/v2.9/hwloc-2.9.0.tar.gz
+  "2.8.0":
+    sha256: "20b2bd4df436827d8e50f7afeafb6f967259f2fb374ce7330244f8d0ed2dde6f"
+    url: https://download.open-mpi.org/release/hwloc/v2.8/hwloc-2.8.0.tar.gz
+  "2.7.2":
+    sha256: "407d2712b1c9026787461ddb62044fa9b5c6007755ca37652b360d837a75344f"
+    url: https://download.open-mpi.org/release/hwloc/v2.7/hwloc-2.7.2.tar.gz

@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get
 from conan.tools.layout import basic_layout
 
@@ -107,6 +108,12 @@ class B2Conan(ConanFile):
             os.environ.clear()
             os.environ.update(saved_env)
 
+    def _write_project_config(self, cxx):
+        with open(os.path.join(self.source_folder, "project-config.jam"), "w") as f:
+            f.write(
+                f"using {self.options.toolset} : : {cxx} ;\n"
+            )
+
     def build(self):
         # The order of the with:with: below is important. The first one changes
         # the current dir. While the second does env changes that guarantees
@@ -137,6 +144,19 @@ class B2Conan(ConanFile):
                                         kv.split('=')[1].strip(), 'Auxiliary', 'Build', 'vcvars32.bat')
                                     command += '"'+b2_vcvars+'" && '
         command += "build" if use_windows_commands else "./build.sh"
+
+        if self.options.use_cxx_env:
+            envvars = VirtualBuildEnv(self).vars()
+
+            cxx = envvars.get("CXX")
+            if cxx:
+                command += f" --cxx={cxx}"
+                self._write_project_config(cxx)
+
+            cxxflags = envvars.get("CXXFLAGS")
+            if cxxflags:
+                command += f" --cxxflags={cxxflags}"
+
         if b2_toolset != 'auto':
             command += " "+str(b2_toolset)
         with chdir(self, self._b2_engine_dir):

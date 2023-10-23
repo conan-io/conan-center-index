@@ -1,0 +1,12 @@
+diff --git a/config/config.sub b/config/config.sub
+index 848a7a5..8fecc04 100755
+--- a/config/config.sub
++++ b/config/config.sub
+@@ -322,6 +322,7 @@ case $basic_machine in
+ 	| alpha64-* | alpha64ev[4-8]-* | alpha64ev56-* | alpha64ev6[78]-* \
+ 	| alphapca5[67]-* | alpha64pca5[67]-* | arc-* \
+ 	| arm-*  | armbe-* | armle-* | armeb-* | armv*-* \
++	| aarch64-* | aarch64_be-* \
+ 	| avr-* | avr32-* \
+ 	| bfin-* | bs2000-* \
+ 	| c[123]* | c30-* | [cjt]90-* | c4x-* | c54x-* | c55x-* | c6x-* \

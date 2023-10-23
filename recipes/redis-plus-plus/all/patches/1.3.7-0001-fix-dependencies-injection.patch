@@ -12,7 +12,15 @@ index 69794d9..fbb75b7 100644
      else()
          message(FATAL_ERROR "invalid REDIS_PLUS_PLUS_BUILD_ASYNC")
      endif()
-@@ -191,7 +190,7 @@ if(REDIS_PLUS_PLUS_BUILD_STATIC)
+@@ -131,7 +130,6 @@ if(hiredis_FOUND)
+     list(APPEND REDIS_PLUS_PLUS_HIREDIS_LIBS hiredis::hiredis)
+
+     if(REDIS_PLUS_PLUS_USE_TLS)
+-        find_package(hiredis_ssl REQUIRED)
+         list(APPEND REDIS_PLUS_PLUS_HIREDIS_LIBS hiredis::hiredis_ssl)
+         find_package(OpenSSL REQUIRED)
+         list(APPEND REDIS_PLUS_PLUS_HIREDIS_LIBS ${OPENSSL_LIBRARIES})
+@@ -191,7 +189,7 @@ if(REDIS_PLUS_PLUS_BUILD_STATIC)
  
      if(REDIS_PLUS_PLUS_BUILD_ASYNC)
          target_include_directories(${STATIC_LIB} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${REDIS_PLUS_PLUS_ASYNC_FUTURE_HEADER}>)

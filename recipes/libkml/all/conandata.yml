@@ -4,11 +4,7 @@ sources:
     sha256: "ac2a61b4bca105cbed9ad8d0d6d5536dc7c2a11abcecf86431d023e2f3ae96db"
 patches:
   "1.3.0":
-    - patch_file: "patches/conanize-cmakelists.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/fix-for-mingw-and-empty-literal-for-vc.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/export-extern-symbols-for-msvc.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/minizip-no-crypt-header.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-fix-cmake.patch"
+    - patch_file: "patches/0002-fix-for-mingw-and-empty-literal-for-vc.patch"
+    - patch_file: "patches/0003-export-extern-symbols-for-msvc.patch"
+    - patch_file: "patches/0004-minizip-no-crypt-header.patch"

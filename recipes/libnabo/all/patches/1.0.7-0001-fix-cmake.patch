@@ -1,0 +1,94 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.6)
++cmake_minimum_required(VERSION 3.15)
+ 
+ if (NOT CMAKE_VERSION VERSION_LESS "3.1")
+ 	cmake_policy(SET CMP0054 NEW)
+@@ -7,6 +7,10 @@ endif ()
+ set(LIB_NAME nabo)
+ project("lib${LIB_NAME}")
+ 
++file(READ "nabo/nabo.h" NABO_HEADER_CONTENT)
++string(REGEX MATCH "#define NABO_VERSION \"([0-9]+\.[0-9]+\.[0-9]+)\"" _ ${NABO_HEADER_CONTENT})
++set(PROJECT_VERSION ${CMAKE_MATCH_1})
++if(0)
+ # Extract version from header
+ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+ execute_process(
+@@ -86,6 +90,7 @@ if (CMAKE_VERSION VERSION_LESS "3.1")
+ else ()
+ 	set (CMAKE_CXX_STANDARD 11)
+ endif ()
++endif()
+ 
+ # openmp
+ set(USE_OPEN_MP TRUE CACHE BOOL "Set to FALSE to not use OpenMP")
+@@ -101,15 +106,7 @@ if (USE_OPEN_MP)
+ endif (USE_OPEN_MP)
+ 
+ # eigen 2 or 3
+-find_path(EIGEN_INCLUDE_DIR Eigen/Core
+-	/usr/local/include/eigen3
+-	/usr/local/include/eigen2
+-	/usr/local/include/eigen
+-	/usr/include/eigen3
+-	/usr/include/eigen2
+-	/usr/include/eigen
+-	/opt/local/include/eigen3
+-)
++find_package(Eigen3 REQUIRED CONFIG)
+ 
+ # optionally, opencl
+ # OpenCL disabled as its code is not up-to-date with API
+@@ -141,7 +138,6 @@ else (USE_OPEN_CL)
+ endif (USE_OPEN_CL)
+ 
+ # include all libs so far
+-include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR})
+ 
+ # main nabo lib
+ set(NABO_SRC
+@@ -153,12 +149,14 @@ set(NABO_SRC
+ set(SHARED_LIBS FALSE CACHE BOOL "Set to TRUE to build shared library")
+ if (SHARED_LIBS)
+ 	add_library(${LIB_NAME} SHARED ${NABO_SRC})
+-	install(TARGETS ${LIB_NAME} LIBRARY DESTINATION lib)
++	install(TARGETS ${LIB_NAME} LIBRARY DESTINATION lib ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
++    set_target_properties(${LIB_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ else (SHARED_LIBS)
+ 	add_library(${LIB_NAME} ${NABO_SRC})
+-	add_definitions(-fPIC)
+ 	install(TARGETS ${LIB_NAME} ARCHIVE DESTINATION lib)
+ endif (SHARED_LIBS)
++target_link_libraries(${LIB_NAME} PUBLIC Eigen3::Eigen)
++target_compile_features(${LIB_NAME} PUBLIC cxx_std_11)
+ set_target_properties(${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
+ 
+ # create doc before installing
+@@ -170,11 +168,7 @@ if (DOXYGEN_FOUND)
+ 	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
+ endif (DOXYGEN_FOUND)
+ 
+-enable_testing()
+ 
+-add_subdirectory(examples)
+-add_subdirectory(tests)
+-add_subdirectory(python)
+ 
+ # Install catkin package.xml
+ install(FILES package.xml DESTINATION share/libnabo)
+@@ -195,6 +189,7 @@ install(FILES package.xml DESTINATION share/libnabo)
+ # 1- local build #
+ 
+ # Register the local build in case one doesn't use "make install"
++if(0)
+ export(PACKAGE libnabo)
+ 
+ # Create variable with the library location
+@@ -244,3 +239,4 @@ configure_file(
+ 
+ add_custom_target(uninstall
+ 	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
++endif()

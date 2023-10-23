@@ -5,8 +5,14 @@ sources:
 patches:
   "5.1.1":
     - patch_file: "patches/001-install-win32-headers.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Install win32 headers"
     - patch_file: "patches/002-disable-tests.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Disable tests"
     - patch_file: "patches/003-install-runtime.patch"
-      base_path: "source_subfolder"
+      patch_type: "conan"
+      patch_description: "Install runtime"
+    - patch_file: "patches/004-increase-minimum-cmakelists.patch"
+      patch_type: "conan"
+      patch_description: "Increase minium CMake version required"

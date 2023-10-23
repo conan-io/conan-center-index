@@ -8,7 +8,7 @@ required_conan_version = ">=1.53.0"
 
 class CoinLemonConan(ConanFile):
     name = "coin-lemon"
-    license = "Boost 1.0"
+    license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://lemon.cs.elte.hu"
     description = "LEMON stands for Library for Efficient Modeling and Optimization in Networks."
@@ -86,6 +86,8 @@ class CoinLemonConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "lemon")
         self.cpp_info.libs = ["lemon" if self.settings.os == "Windows" else "emon"]
         self.cpp_info.defines.append("LEMON_ONLY_TEMPLATES")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "LEMON"

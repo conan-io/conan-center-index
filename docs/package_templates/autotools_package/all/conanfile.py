@@ -75,7 +75,7 @@ class PackageConan(ConanFile):
         # validate the minimum cpp standard supported. Only for C++ projects
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if self.settings.os not in ["Linux", "FreeBSD", "MacOS"]:
+        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
     # if another tool than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)

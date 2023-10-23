@@ -1,0 +1,19 @@
+diff --git a/include/svgwrite/writer.hpp b/include/svgwrite/writer.hpp
+index d97bc96..711d453 100644
+--- a/include/svgwrite/writer.hpp
++++ b/include/svgwrite/writer.hpp
+@@ -4,6 +4,7 @@
+ #include <string_view>
+ #include <variant>
+ #include <vector>
++#include <cstdint>
+ 
+ /**
+  * The svgw namespace
+@@ -255,4 +256,4 @@ namespace svgw {
+ 			std::ostream* os;
+ 		};
+ 	}
+-}
+\ No newline at end of file
++}

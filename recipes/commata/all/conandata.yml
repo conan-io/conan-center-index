@@ -1,4 +1,16 @@
 sources:
+  "0.2.6":
+    url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.6.tar.gz"
+    sha256: "bc91f496cb261e5627fb39d8e79d1aaa924975332d9957de4cb4097db6957815"
+  "0.2.5":
+    url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.5.tar.gz"
+    sha256: "d1be1f366267af6c466c29f846f5968f57626a8a6635a2ea9a3de3f6fb88e53b"
+  "0.2.4-bug1":
+    url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.4-bug1.tar.gz"
+    sha256: "fcde251d9b41f1601e1f8b2181613b4bf33c4318678700e2b3b54bf24bc9e1e3"
+  "0.2.4":
+    url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.4.tar.gz"
+    sha256: "2d154c1ed7bbf6551729bcc5baf581613f6605df080ada35a9e107648d255e2e"
   "0.2.3":
     url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.3.tar.gz"
     sha256: "47521aa27b26fe650bd985c4e07df44453f9d09ab0d61ee98dd6877afe4c25a0"

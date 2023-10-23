@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main () {
+int main() {
     printf("hello NVENC API version %u.%u\n", NVENCAPI_MAJOR_VERSION, NVENCAPI_MINOR_VERSION);
     return EXIT_SUCCESS;
 }

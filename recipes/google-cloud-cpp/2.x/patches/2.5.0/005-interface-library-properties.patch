@@ -1,0 +1,51 @@
+diff --git a/google/cloud/speech/CMakeLists.txt b/google/cloud/speech/CMakeLists.txt
+index 59546c7..51bc0b6 100644
+--- a/google/cloud/speech/CMakeLists.txt
++++ b/google/cloud/speech/CMakeLists.txt
+@@ -49,11 +49,8 @@ endif ()
+ add_library(google_cloud_cpp_speech_protos INTERFACE)
+ target_link_libraries(google_cloud_cpp_speech_protos
+                       INTERFACE google-cloud-cpp::cloud_speech_protos)
+-set_target_properties(
+-    google_cloud_cpp_speech_protos
+-    PROPERTIES EXPORT_NAME google-cloud-cpp::speech_protos
+-               VERSION "${PROJECT_VERSION}"
+-               SOVERSION "${PROJECT_VERSION_MAJOR}")
++set_target_properties(google_cloud_cpp_speech_protos
++                      PROPERTIES EXPORT_NAME google-cloud-cpp::speech_protos)
+ target_compile_options(google_cloud_cpp_speech_protos
+                        INTERFACE ${GOOGLE_CLOUD_CPP_EXCEPTIONS_FLAG})
+ add_library(google-cloud-cpp::speech_protos ALIAS
+diff --git a/google/cloud/texttospeech/CMakeLists.txt b/google/cloud/texttospeech/CMakeLists.txt
+index c43aa51..3041dac 100644
+--- a/google/cloud/texttospeech/CMakeLists.txt
++++ b/google/cloud/texttospeech/CMakeLists.txt
+@@ -41,9 +41,7 @@ target_link_libraries(google_cloud_cpp_texttospeech_protos
+                       INTERFACE google-cloud-cpp::cloud_texttospeech_protos)
+ set_target_properties(
+     google_cloud_cpp_texttospeech_protos
+-    PROPERTIES EXPORT_NAME google-cloud-cpp::texttospeech_protos
+-               VERSION "${PROJECT_VERSION}"
+-               SOVERSION "${PROJECT_VERSION_MAJOR}")
++    PROPERTIES EXPORT_NAME google-cloud-cpp::texttospeech_protos)
+ target_compile_options(google_cloud_cpp_texttospeech_protos
+                        INTERFACE ${GOOGLE_CLOUD_CPP_EXCEPTIONS_FLAG})
+ add_library(google-cloud-cpp::texttospeech_protos ALIAS
+diff --git a/google/cloud/trace/CMakeLists.txt b/google/cloud/trace/CMakeLists.txt
+index 0afc230..828603d 100644
+--- a/google/cloud/trace/CMakeLists.txt
++++ b/google/cloud/trace/CMakeLists.txt
+@@ -40,11 +40,8 @@ target_link_libraries(
+     google_cloud_cpp_trace_protos
+     INTERFACE google-cloud-cpp::devtools_cloudtrace_v2_trace_protos
+               google-cloud-cpp::devtools_cloudtrace_v2_tracing_protos)
+-set_target_properties(
+-    google_cloud_cpp_trace_protos
+-    PROPERTIES EXPORT_NAME google-cloud-cpp::trace_protos
+-               VERSION "${PROJECT_VERSION}"
+-               SOVERSION "${PROJECT_VERSION_MAJOR}")
++set_target_properties(google_cloud_cpp_trace_protos
++                      PROPERTIES EXPORT_NAME google-cloud-cpp::trace_protos)
+ target_compile_options(google_cloud_cpp_trace_protos
+                        INTERFACE ${GOOGLE_CLOUD_CPP_EXCEPTIONS_FLAG})
+ add_library(google-cloud-cpp::trace_protos ALIAS google_cloud_cpp_trace_protos)

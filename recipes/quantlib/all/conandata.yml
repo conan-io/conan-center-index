@@ -1,7 +1,13 @@
 sources:
+  "1.30":
+    url: "https://github.com/lballabio/QuantLib/releases/download/QuantLib-v1.30/QuantLib-1.30.tar.gz"
+    sha256: "10159054b68cb9a39480d9000b87851f49e6f42474a4cb9367e934bece2363f3"
   "1.22":
     url: "https://github.com/lballabio/QuantLib/releases/download/QuantLib-v1.22/QuantLib-1.22.tar.gz"
     sha256: "85c81816f689f458596dd7073e4da8fd7f596c1e4c8ada81a6300389a39588af"
 patches:
+  "1.30":
+    - patch_file: "patches/1.30-backport-pr-1644.patch"
+    - patch_file: "patches/1.30-fix-cmake.patch"
   "1.22":
-    - patch_file: "patches/0001-fix-cmake.patch"
+    - patch_file: "patches/1.22-fix-cmake.patch"

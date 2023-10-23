@@ -1,18 +1,30 @@
 sources:
+  "4.2.1":
+    url: "https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.1.tar.gz"
+    sha256: "116715552bd966c85b417c424db1bbdf639f53836eb361549d1f8d6ded5cb4c6"
+  "4.2.0":
+    url: "https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.0.tar.gz"
+    sha256: "f1cc1c6bb14d18f0c61cc416e083f5e697b6e0e3cf9630b9b33e8e483fc960f0"
   "4.1.0":
-    sha256: 3127fe813218f3a1f0adf4e8899de23df33b4cf4b4b3831a5314f78e65ffa2d6
-    url: https://ftp.gnu.org/gnu/mpfr/mpfr-4.1.0.tar.gz
+    url: "https://ftp.gnu.org/gnu/mpfr/mpfr-4.1.0.tar.gz"
+    sha256: "3127fe813218f3a1f0adf4e8899de23df33b4cf4b4b3831a5314f78e65ffa2d6"
   "4.0.2":
-    sha256: ae26cace63a498f07047a784cd3b0e4d010b44d2b193bab82af693de57a19a78
-    url: https://ftp.gnu.org/gnu/mpfr/mpfr-4.0.2.tar.gz
+    url: "https://ftp.gnu.org/gnu/mpfr/mpfr-4.0.2.tar.gz"
+    sha256: "ae26cace63a498f07047a784cd3b0e4d010b44d2b193bab82af693de57a19a78"
 patches:
+  "4.2.1":
+    - patch_file: "patches/4.2.0-0002-windows-header-dll.patch"
+      patch_description: "Windows header DLL"
+      patch_type: "portability"
+  "4.2.0":
+    - patch_file: "patches/4.2.0-0002-windows-header-dll.patch"
+      patch_description: "Windows header DLL"
+      patch_type: "portability"
   "4.1.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/4.1.0-0001-windows-allow-mixed-shared-static.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/4.1.0-0002-windows-header-dll.patch"
+    - patch_file: "patches/4.1.0-0002-windows-header-dll.patch"
+      patch_description: "Windows header DLL"
+      patch_type: "portability"
   "4.0.2":
-    - base_path: "source_subfolder"
-      patch_file: "patches/4.0.2-0001-windows-allow-mixed-shared-static.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/4.0.2-0002-windows-header-dll.patch"
+    - patch_file: "patches/4.0.2-0002-windows-header-dll.patch"
+      patch_description: "Windows header DLL"
+      patch_type: "portability"

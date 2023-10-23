@@ -1,5 +1,14 @@
 import os
-from conans import ConanFile, errors, tools
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.50.0"
+
 
 class OutcomeConan(ConanFile):
     name = "outcome"
@@ -7,42 +16,51 @@ class OutcomeConan(ConanFile):
     description = "Provides very lightweight outcome<T> and result<T>"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("outcome", "result")
-    settings = "compiler"
+    topics = ("result",)
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _min_cppstd(self):
+        return "14"
 
-    def configure(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "14")
-
-        minimum_version = {
+    @property
+    def _compilers_minimum_version(self):
+        return {
             "clang": "3.9",
             "gcc": "6",
-            "Visual Studio": "15.0",
-        }.get(str(self.settings.compiler))
+            "Visual Studio": "15",
+            "msvc": "191",
+        }
 
-        if not minimum_version:
-            self.output.warn(
-                "Unknown compiler {} {}. Assuming compiler supports C++14."
-                .format(self.settings.compiler, self.settings.compiler.version))
-        else:
-            version = tools.Version(self.settings.compiler.version)
-            if version < minimum_version:
-                raise errors.ConanInvalidConfiguration(
-                    "The compiler {} {} does not support C++14."
-                    .format(self.settings.compiler, self.settings.compiler.version))
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def package(self):
-        self.copy("outcome.hpp", dst="include",
-                src=os.path.join(self._source_subfolder, "single-header"))
-        self.copy("Licence.txt", dst="licenses", src=self._source_subfolder)
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        pass
+
+    def package(self):
+        copy(self, "Licence.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "outcome.hpp", src=os.path.join(self.source_folder, "single-header"),
+                                  dst=os.path.join(self.package_folder, "include"))
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

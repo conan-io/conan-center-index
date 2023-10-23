@@ -76,31 +76,31 @@ class OpenCVConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
+            self.requires("libjpeg-turbo/2.1.5")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
         if self.options.with_png:
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
         if self.options.with_jasper:
             self.requires("jasper/4.0.0")
         if self.options.with_openexr:
             # opencv 3.x doesn't support openexr >= 3
             self.requires("openexr/2.5.7")
         if self.options.with_tiff:
-            self.requires("libtiff/4.4.0")
+            self.requires("libtiff/4.5.1")
         if self.options.with_eigen:
-            self.requires("eigen/3.3.9")
+            self.requires("eigen/3.4.0")
         if self.options.parallel == "tbb":
             # opencv 3.x doesn't support onetbb >= 2021
             self.requires("onetbb/2020.3")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.4")
+            self.requires("libwebp/1.3.2")
         if self.options.contrib:
-            self.requires("freetype/2.12.1")
+            self.requires("freetype/2.13.0")
             self.requires("harfbuzz/6.0.0")
             self.requires("gflags/2.2.2")
             self.requires("glog/0.6.0")

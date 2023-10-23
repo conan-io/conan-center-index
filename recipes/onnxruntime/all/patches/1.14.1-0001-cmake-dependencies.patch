@@ -1,0 +1,247 @@
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -753,7 +753,7 @@ endif()
+ 
+ function(onnxruntime_set_compile_flags target_name)
+     if (CPUINFO_SUPPORTED)
+-      onnxruntime_add_include_to_target(${target_name} cpuinfo)
++      onnxruntime_add_include_to_target(${target_name} cpuinfo::cpuinfo)
+     endif()
+     if(onnxruntime_ENABLE_EAGER_MODE)
+       target_compile_definitions(${target_name} PRIVATE ENABLE_EAGER_MODE)
+@@ -837,7 +837,7 @@ function(onnxruntime_set_compile_flags target_name)
+         target_compile_options(${target_name} PRIVATE "-Wno-unused-parameter")
+       endif()
+       target_compile_definitions(${target_name} PUBLIC -DNSYNC_ATOMIC_CPP11)
+-      target_include_directories(${target_name} PRIVATE "${google_nsync_SOURCE_DIR}/public")
++      onnxruntime_add_include_to_target(${target_name} nsync::nsync_cpp)
+     endif()
+     foreach(ORT_FLAG ${ORT_PROVIDER_FLAGS})
+       target_compile_definitions(${target_name} PRIVATE ${ORT_FLAG})
+@@ -1461,7 +1461,7 @@ if (WIN32)
+   list(APPEND onnxruntime_EXTERNAL_LIBRARIES ${SYS_PATH_LIB})
+   list(APPEND onnxruntime_EXTERNAL_LIBRARIES debug Dbghelp)
+ else()
+-  list(APPEND onnxruntime_EXTERNAL_LIBRARIES nsync_cpp)
++  list(APPEND onnxruntime_EXTERNAL_LIBRARIES nsync::nsync_cpp)
+   list(APPEND onnxruntime_EXTERNAL_LIBRARIES ${CMAKE_DL_LIBS} Threads::Threads)
+ endif()
+ 
+--- a/cmake/external/onnxruntime_external_deps.cmake
++++ b/cmake/external/onnxruntime_external_deps.cmake
+@@ -237,7 +237,10 @@ if (NOT WIN32)
+   #nsync tests failed on Mac Build
+   set(NSYNC_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
+   onnxruntime_fetchcontent_makeavailable(google_nsync)
+-  set(nsync_SOURCE_DIR ${google_nsync_SOURCE_DIR})
++  if(google_nsync_SOURCE_DIR)
++    add_library(nsync::nsync_cpp ALIAS nsync_cpp)
++    target_include_directories(nsync_cpp PUBLIC ${google_nsync_SOURCE_DIR}/public)
++  endif()
+ endif()
+ 
+ if(onnxruntime_USE_CUDA)
+@@ -361,6 +364,12 @@ FetchContent_Declare(
+ 
+ if (CPUINFO_SUPPORTED)
+   onnxruntime_fetchcontent_makeavailable(pytorch_cpuinfo)
++  if(pytorch_cpuinfo_SOURCE_DIR)
++    # shouldn't need to define these aliases after we use a version of cpuinfo with this commit:
++    # https://github.com/pytorch/cpuinfo/commit/082deffc80ce517f81dc2f3aebe6ba671fcd09c9
++    add_library(cpuinfo::cpuinfo ALIAS cpuinfo)
++    add_library(cpuinfo::clog ALIAS clog)
++  endif()
+ endif()
+ 
+ 
+--- a/cmake/onnxruntime_common.cmake
++++ b/cmake/onnxruntime_common.cmake
+@@ -194,8 +194,8 @@ if (ARM64 OR ARM OR X86 OR X64 OR X86_64)
+     # Using it mainly in ARM with Android.
+     # Its functionality in detecting x86 cpu features are lacking, so is support for Windows.
+     if (CPUINFO_SUPPORTED)
+-      onnxruntime_add_include_to_target(onnxruntime_common cpuinfo)
+-      list(APPEND onnxruntime_EXTERNAL_LIBRARIES cpuinfo clog)
++      onnxruntime_add_include_to_target(onnxruntime_common cpuinfo::cpuinfo)
++      list(APPEND onnxruntime_EXTERNAL_LIBRARIES cpuinfo::cpuinfo cpuinfo::clog)
+     endif()
+   endif()
+ endif()
+--- a/cmake/onnxruntime_flatbuffers.cmake
++++ b/cmake/onnxruntime_flatbuffers.cmake
+@@ -9,7 +9,7 @@ file(GLOB onnxruntime_flatbuffers_srcs CONFIGURE_DEPENDS
+ source_group(TREE ${REPO_ROOT} FILES ${onnxruntime_flatbuffers_srcs})
+ 
+ onnxruntime_add_static_library(onnxruntime_flatbuffers ${onnxruntime_flatbuffers_srcs})
+-onnxruntime_add_include_to_target(onnxruntime_flatbuffers onnx flatbuffers ${GSL_TARGET})
++onnxruntime_add_include_to_target(onnxruntime_flatbuffers onnx flatbuffers::flatbuffers ${GSL_TARGET})
+ if(onnxruntime_ENABLE_INSTRUMENT)
+   target_compile_definitions(onnxruntime_flatbuffers PUBLIC ONNXRUNTIME_ENABLE_INSTRUMENT)
+ endif()
+--- a/cmake/onnxruntime_providers.cmake
++++ b/cmake/onnxruntime_providers.cmake
+@@ -539,10 +539,10 @@ if (onnxruntime_USE_CUDA)
+ 
+   if(APPLE)
+     set_property(TARGET onnxruntime_providers_cuda APPEND_STRING PROPERTY LINK_FLAGS "-Xlinker -exported_symbols_list ${ONNXRUNTIME_ROOT}/core/providers/cuda/exported_symbols.lst")
+-    target_link_libraries(onnxruntime_providers_cuda PRIVATE nsync_cpp)
++    target_link_libraries(onnxruntime_providers_cuda PRIVATE nsync::nsync_cpp)
+   elseif(UNIX)
+     set_property(TARGET onnxruntime_providers_cuda APPEND_STRING PROPERTY LINK_FLAGS "-Xlinker --version-script=${ONNXRUNTIME_ROOT}/core/providers/cuda/version_script.lds -Xlinker --gc-sections")
+-    target_link_libraries(onnxruntime_providers_cuda PRIVATE nsync_cpp)
++    target_link_libraries(onnxruntime_providers_cuda PRIVATE nsync::nsync_cpp)
+   elseif(WIN32)
+     set_property(TARGET onnxruntime_providers_cuda APPEND_STRING PROPERTY LINK_FLAGS "-DEF:${ONNXRUNTIME_ROOT}/core/providers/cuda/symbols.def")
+   else()
+@@ -595,10 +595,10 @@ if (onnxruntime_USE_DNNL)
+       INSTALL_RPATH "@loader_path"
+       BUILD_WITH_INSTALL_RPATH TRUE
+       INSTALL_RPATH_USE_LINK_PATH FALSE)
+-    target_link_libraries(onnxruntime_providers_dnnl PRIVATE nsync_cpp)
++    target_link_libraries(onnxruntime_providers_dnnl PRIVATE nsync::nsync_cpp)
+   elseif(UNIX)
+     set_property(TARGET onnxruntime_providers_dnnl APPEND_STRING PROPERTY LINK_FLAGS "-Xlinker --version-script=${ONNXRUNTIME_ROOT}/core/providers/dnnl/version_script.lds -Xlinker --gc-sections -Xlinker -rpath=\$ORIGIN")
+-    target_link_libraries(onnxruntime_providers_dnnl PRIVATE nsync_cpp)
++    target_link_libraries(onnxruntime_providers_dnnl PRIVATE nsync::nsync_cpp)
+   elseif(WIN32)
+     set_property(TARGET onnxruntime_providers_dnnl APPEND_STRING PROPERTY LINK_FLAGS "-DEF:${ONNXRUNTIME_ROOT}/core/providers/dnnl/symbols.def")
+   else()
+@@ -728,11 +728,11 @@ if (onnxruntime_USE_TENSORRT)
+ 
+   if(APPLE)
+     set_property(TARGET onnxruntime_providers_tensorrt APPEND_STRING PROPERTY LINK_FLAGS "-Xlinker -exported_symbols_list ${ONNXRUNTIME_ROOT}/core/providers/tensorrt/exported_symbols.lst")
+-    target_link_libraries(onnxruntime_providers_tensorrt PRIVATE nsync_cpp)
++    target_link_libraries(onnxruntime_providers_tensorrt PRIVATE nsync::nsync_cpp)
+   elseif(UNIX)
+     set_property(TARGET onnxruntime_providers_tensorrt APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-deprecated-declarations")
+     set_property(TARGET onnxruntime_providers_tensorrt APPEND_STRING PROPERTY LINK_FLAGS "-Xlinker --version-script=${ONNXRUNTIME_ROOT}/core/providers/tensorrt/version_script.lds -Xlinker --gc-sections")
+-    target_link_libraries(onnxruntime_providers_tensorrt PRIVATE nsync_cpp stdc++fs)
++    target_link_libraries(onnxruntime_providers_tensorrt PRIVATE nsync::nsync_cpp stdc++fs)
+   elseif(WIN32)
+     set_property(TARGET onnxruntime_providers_tensorrt APPEND_STRING PROPERTY LINK_FLAGS "-DEF:${ONNXRUNTIME_ROOT}/core/providers/tensorrt/symbols.def")
+   else()
+@@ -1224,7 +1224,7 @@ if (onnxruntime_USE_MIGRAPHX)
+   target_compile_options(onnxruntime_providers_migraphx PRIVATE -Wno-error=sign-compare)
+   set_property(TARGET onnxruntime_providers_migraphx APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-deprecated-declarations")
+   set_property(TARGET onnxruntime_providers_migraphx APPEND_STRING PROPERTY LINK_FLAGS "-Xlinker --version-script=${ONNXRUNTIME_ROOT}/core/providers/migraphx/version_script.lds -Xlinker --gc-sections")
+-  target_link_libraries(onnxruntime_providers_migraphx PRIVATE nsync_cpp stdc++fs)
++  target_link_libraries(onnxruntime_providers_migraphx PRIVATE nsync::nsync_cpp stdc++fs)
+ 
+   include(CheckLibraryExists)
+   check_library_exists(migraphx::c "migraphx_program_run_async" "/opt/rocm/migraphx/lib" HAS_STREAM_SYNC)
+@@ -1461,7 +1461,7 @@ if (onnxruntime_USE_ROCM)
+ 
+   if(UNIX)
+     set_property(TARGET onnxruntime_providers_rocm APPEND_STRING PROPERTY LINK_FLAGS "-Xlinker --version-script=${ONNXRUNTIME_ROOT}/core/providers/rocm/version_script.lds -Xlinker --gc-sections")
+-    target_link_libraries(onnxruntime_providers_rocm PRIVATE nsync_cpp)
++    target_link_libraries(onnxruntime_providers_rocm PRIVATE nsync::nsync_cpp)
+   else()
+     message(FATAL_ERROR "onnxruntime_providers_rocm unknown platform, need to specify shared library exports for it")
+   endif()
+@@ -1597,7 +1597,7 @@ if (onnxruntime_USE_CANN)
+   onnxruntime_add_include_to_target(onnxruntime_providers_cann onnxruntime_common onnxruntime_framework onnx onnx_proto ${PROTOBUF_LIB} flatbuffers::flatbuffers Boost::mp11 safeint_interface)
+ 
+   add_dependencies(onnxruntime_providers_cann onnxruntime_providers_shared ${onnxruntime_EXTERNAL_DEPENDENCIES})
+-  target_link_libraries(onnxruntime_providers_cann PRIVATE ascendcl acl_op_compiler fmk_onnx_parser nsync_cpp ${ABSEIL_LIBS} ${ONNXRUNTIME_PROVIDERS_SHARED})
++  target_link_libraries(onnxruntime_providers_cann PRIVATE ascendcl acl_op_compiler fmk_onnx_parser nsync::nsync_cpp ${ABSEIL_LIBS} ${ONNXRUNTIME_PROVIDERS_SHARED})
+   target_link_directories(onnxruntime_providers_cann PRIVATE ${onnxruntime_CANN_HOME}/lib64)
+   target_include_directories(onnxruntime_providers_cann PRIVATE ${ONNXRUNTIME_ROOT} ${CMAKE_CURRENT_BINARY_DIR} ${eigen_INCLUDE_DIRS} ${onnxruntime_CANN_HOME} ${onnxruntime_CANN_HOME}/include)
+ 
+@@ -1619,7 +1619,7 @@ if (onnxruntime_USE_AZURE)
+   source_group(TREE ${ONNXRUNTIME_ROOT}/core FILES ${onnxruntime_providers_azure_src})
+   onnxruntime_add_static_library(onnxruntime_providers_azure ${onnxruntime_providers_azure_src})
+   add_dependencies(onnxruntime_providers_azure ${onnxruntime_EXTERNAL_DEPENDENCIES})
+-  onnxruntime_add_include_to_target(onnxruntime_providers_azure onnxruntime_common onnxruntime_framework onnx onnx_proto ${PROTOBUF_LIB} flatbuffers Boost::mp11)
++  onnxruntime_add_include_to_target(onnxruntime_providers_azure onnxruntime_common onnxruntime_framework onnx onnx_proto ${PROTOBUF_LIB} flatbuffers::flatbuffers Boost::mp11)
+   target_link_libraries(onnxruntime_providers_azure PRIVATE onnx onnxruntime_common onnxruntime_framework)
+   set_target_properties(onnxruntime_providers_azure PROPERTIES FOLDER "ONNXRuntime")
+   set_target_properties(onnxruntime_providers_azure PROPERTIES LINKER_LANGUAGE CXX)
+--- a/cmake/onnxruntime_unittests.cmake
++++ b/cmake/onnxruntime_unittests.cmake
+@@ -631,8 +631,8 @@ if(MSVC)
+                 "$<$<NOT:$<COMPILE_LANGUAGE:CUDA>>:/wd6326>")
+ else()
+   target_compile_definitions(onnxruntime_test_utils PUBLIC -DNSYNC_ATOMIC_CPP11)
+-  target_include_directories(onnxruntime_test_utils PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${ONNXRUNTIME_ROOT}
+-          ${nsync_SOURCE_DIR}/public)
++  target_include_directories(onnxruntime_test_utils PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${ONNXRUNTIME_ROOT})
++  onnxruntime_add_include_to_target(onnxruntime_test_utils nsync::nsync_cpp)
+ endif()
+ if (onnxruntime_USE_NCCL)
+   target_include_directories(onnxruntime_test_utils PRIVATE ${NCCL_INCLUDE_DIRS})
+@@ -665,8 +665,8 @@ if(MSVC)
+           "$<$<NOT:$<COMPILE_LANGUAGE:CUDA>>:/utf-8>")
+ else()
+   target_compile_definitions(onnx_test_runner_common PUBLIC -DNSYNC_ATOMIC_CPP11)
+-  target_include_directories(onnx_test_runner_common PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${ONNXRUNTIME_ROOT}
+-          ${nsync_SOURCE_DIR}/public)
++  target_include_directories(onnx_test_runner_common PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${ONNXRUNTIME_ROOT})
++  onnxruntime_add_include_to_target(onnx_test_runner_common nsync::nsync_cpp)
+ endif()
+ if (MSVC AND NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+   #TODO: fix the warnings, they are dangerous
+@@ -995,7 +995,7 @@ if (NOT onnxruntime_ENABLE_TRAINING_TORCH_INTEROP)
+       # "Global initializer calls a non-constexpr function." BENCHMARK_CAPTURE macro needs this.
+       target_compile_options(onnxruntime_mlas_benchmark PRIVATE /wd26426)
+     else()
+-      target_link_libraries(onnxruntime_mlas_benchmark PRIVATE nsync_cpp ${CMAKE_DL_LIBS})
++      target_link_libraries(onnxruntime_mlas_benchmark PRIVATE nsync::nsync_cpp ${CMAKE_DL_LIBS})
+     endif()
+     if (CPUINFO_SUPPORTED AND NOT onnxruntime_BUILD_WEBASSEMBLY)
+       target_link_libraries(onnxruntime_mlas_benchmark PRIVATE cpuinfo)
+@@ -1053,7 +1053,7 @@ if(onnxruntime_ENABLE_EAGER_MODE)
+     list(APPEND onnxruntime_eager_mode_libs onnxruntime_training tensorboard)
+   endif()
+   IF(NOT WIN32)
+-    list(APPEND onnxruntime_eager_mode_libs nsync_cpp)
++    list(APPEND onnxruntime_eager_mode_libs nsync::nsync_cpp)
+   endif()
+   target_link_libraries(onnxruntime_eager_mode_test PRIVATE ${onnxruntime_eager_mode_libs} Threads::Threads ${onnxruntime_EXTERNAL_LIBRARIES})
+   if (onnxruntime_ENABLE_TRAINING_TORCH_INTEROP)
+@@ -1113,7 +1113,7 @@ if (NOT onnxruntime_ENABLE_TRAINING_TORCH_INTEROP)
+             ${onnxruntime_EXTERNAL_LIBRARIES}
+             ${GETOPT_LIB_WIDE} ${SYS_PATH_LIB} ${CMAKE_DL_LIBS})
+     if(NOT WIN32)
+-      list(APPEND onnxruntime_perf_test_libs nsync_cpp)
++      list(APPEND onnxruntime_perf_test_libs nsync::nsync_cpp)
+       if(onnxruntime_USE_SNPE)
+         list(APPEND onnxruntime_perf_test_libs onnxruntime_providers_snpe)
+       endif()
+@@ -1157,7 +1157,7 @@ if (NOT onnxruntime_ENABLE_TRAINING_TORCH_INTEROP)
+     # test inference using shared lib
+     set(onnxruntime_shared_lib_test_LIBS onnxruntime_mocked_allocator onnxruntime_test_utils onnxruntime_common onnx_proto)
+     if(NOT WIN32)
+-      list(APPEND onnxruntime_shared_lib_test_LIBS nsync_cpp)
++      list(APPEND onnxruntime_shared_lib_test_LIBS nsync::nsync_cpp)
+       if(onnxruntime_USE_SNPE)
+         list(APPEND onnxruntime_shared_lib_test_LIBS onnxruntime_providers_snpe)
+       endif()
+@@ -1279,7 +1279,7 @@ if (NOT onnxruntime_ENABLE_TRAINING_TORCH_INTEROP)
+     target_link_libraries(onnxruntime_mlas_test PRIVATE cpuinfo)
+   endif()
+   if(NOT WIN32)
+-    target_link_libraries(onnxruntime_mlas_test PRIVATE nsync_cpp ${CMAKE_DL_LIBS})
++    target_link_libraries(onnxruntime_mlas_test PRIVATE nsync::nsync_cpp ${CMAKE_DL_LIBS})
+   endif()
+   if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+     target_link_libraries(onnxruntime_mlas_test PRIVATE ${android_shared_libs})
+--- a/cmake/onnxruntime_webassembly.cmake
++++ b/cmake/onnxruntime_webassembly.cmake
+@@ -97,7 +97,7 @@ target_compile_options(onnx PRIVATE -Wno-unused-parameter -Wno-unused-variable)
+ 
+ if (onnxruntime_BUILD_WEBASSEMBLY_STATIC_LIB)
+     bundle_static_library(onnxruntime_webassembly
+-      nsync_cpp
++      nsync::nsync_cpp
+       ${PROTOBUF_LIB}
+       onnx
+       onnx_proto
+@@ -172,7 +172,7 @@ else()
+   endif()
+ 
+   target_link_libraries(onnxruntime_webassembly PRIVATE
+-    nsync_cpp
++    nsync::nsync_cpp
+     ${PROTOBUF_LIB}
+     onnx
+     onnx_proto

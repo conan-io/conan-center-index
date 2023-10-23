@@ -25,7 +25,7 @@ class AprConan(ConanFile):
     topics = ("apache", "platform", "library")
     homepage = "https://apr.apache.org/"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -67,9 +67,9 @@ class AprConan(ConanFile):
         else:
             basic_layout(self, src_folder="src")
 
-    def validate(self):
-        if hasattr(self, "settings_build") and cross_building(self):
-            raise ConanInvalidConfiguration("apr recipe doesn't support cross-build yet due to runtime checks")
+    def validate_build(self):
+        if cross_building(self) and not is_msvc(self):
+            raise ConanInvalidConfiguration("apr recipe doesn't support cross-build yet due to runtime checks in autoconf")
 
     def build_requirements(self):
         if not is_msvc(self):

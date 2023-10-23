@@ -2,8 +2,8 @@ from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import can_run, stdcpp_library
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -12,7 +12,7 @@ from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
 
 
 class HarfbuzzConan(ConanFile):
@@ -20,7 +20,7 @@ class HarfbuzzConan(ConanFile):
     description = "HarfBuzz is an OpenType text shaping engine."
     topics = ("opentype", "text", "engine")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://harfbuzz.org"
+    homepage = "https://harfbuzz.github.io/"
     license = "MIT"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -49,6 +49,10 @@ class HarfbuzzConan(ConanFile):
 
     short_paths = True
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -74,18 +78,17 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_freetype:
             self.requires("freetype/2.13.0")
         if self.options.with_icu:
-            self.requires("icu/72.1")
+            self.requires("icu/73.2")
         if self.options.with_glib:
-            self.requires("glib/2.76.0", run=can_run(self))
+            self.requires("glib/2.78.0")
 
     def validate(self):
         if self.options.shared and self.options.with_glib and not self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
-        if Version(self.version) >= "4.4.0":
-            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
-                raise ConanInvalidConfiguration("New versions of harfbuzz require at least gcc 7")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
+            raise ConanInvalidConfiguration("New versions of harfbuzz require at least gcc 7")
 
         if self.options.with_glib and self.dependencies["glib"].options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
@@ -93,11 +96,15 @@ class HarfbuzzConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.2.2")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
-        if self.options.with_glib and not can_run(self):
-            self.tool_requires("glib/2.76.0")
+            self.tool_requires("pkgconf/2.0.3")
+        if self.options.with_glib:
+            self.tool_requires("glib/<host_version>")
+        if self.settings.os == "Macos":
+            # Ensure that the gettext we use at build time is compatible
+            # with the libiconv that is transitively exposed by glib
+            self.tool_requires("gettext/0.21")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -117,8 +124,15 @@ class HarfbuzzConan(ConanFile):
             return "ninja", []
 
         VirtualBuildEnv(self).generate()
-        if self.options.with_glib and can_run(self):
-            VirtualRunEnv(self).generate(scope="build")
+
+        # Avoid conflicts with libiconv
+        # see: https://github.com/conan-io/conan-center-index/pull/17046#issuecomment-1554629094
+        if self._settings_build.os == "Macos":
+            env = Environment()
+            env.define_path("DYLD_FALLBACK_LIBRARY_PATH", "$DYLD_LIBRARY_PATH")
+            env.define_path("DYLD_LIBRARY_PATH", "")
+            env.vars(self, scope="build").save_script("conanbuild_macos_runtimepath")
+
         PkgConfigDeps(self).generate()
 
         backend, cxxflags = meson_backend_and_flags()
@@ -141,6 +155,7 @@ class HarfbuzzConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('util')", "")
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -183,6 +198,7 @@ class HarfbuzzConan(ConanFile):
             libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
+
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""

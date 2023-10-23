@@ -13,15 +13,16 @@ required_conan_version = ">=1.52.0"
 class PfrConan(ConanFile):
     name = "pfr"
     description = "std::tuple like methods for user defined types without any macro or boilerplate code"
-    topics = ("boost", "pfr", "reflection", "magic_get")
+    topics = ("boost", "reflection", "magic_get")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/boostorg/pfr"
     license = "BSL-1.0"
-    settings = "os", "compiler", "build_type", "arch"
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
 
     @property
-    def _minimum_cpp_standard(self):
-        return 14
+    def _min_cppstd(self):
+        return "14"
 
     @property
     def _minimum_compilers_version(self):
@@ -30,35 +31,30 @@ class PfrConan(ConanFile):
             "clang": "3.8",
             "gcc": "5.5",
             "Visual Studio": "14",
+            "msvc": "190",
         }
 
     def export_sources(self):
         export_conandata_patches(self)
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
 
-        compiler = self.settings.compiler
-        try:
-            min_version = self._minimum_compilers_version[str(compiler)]
-            if Version(compiler.version) < min_version:
-                msg = (
-                    "{} requires C++{} features which are not supported by compiler {} {}."
-                ).format(self.name, self._minimum_cpp_standard, compiler, compiler.version)
-                raise ConanInvalidConfiguration(msg)
-        except KeyError:
-            msg = (
-                "{} recipe lacks information about the {} compiler, "
-                "support for the required C++{} features is assumed"
-            ).format(self.name, compiler, self._minimum_cpp_standard)
-            self.output.warn(msg)
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
@@ -69,5 +65,6 @@ class PfrConan(ConanFile):
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "include"),
              src=os.path.join(self.source_folder, "include"))
 
-    def package_id(self):
-        self.info.clear()
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

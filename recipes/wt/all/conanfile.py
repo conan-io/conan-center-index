@@ -1,13 +1,15 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc
 import os
+import sys
 import shutil
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
+
 
 class WtConan(ConanFile):
     name = "wt"
@@ -16,6 +18,7 @@ class WtConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/emweb/wt"
     topics = ("server", "web", "webapp", "websocket", "cgi", "fastcgi", "orm")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -91,26 +94,24 @@ class WtConan(ConanFile):
         return ["program_options", "filesystem", "thread"]
 
     def requirements(self):
-        if Version(self.version) < "4.6.0":
-            self.requires("boost/1.76.0")
-        elif Version(self.version) < "4.9.0":
-            self.requires("boost/1.80.0")
+        if Version(self.version) < "4.9.0":
+            self.requires("boost/1.80.0", transitive_headers = True)
         else:
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.83.0", transitive_headers = True)
         if self.options.connector_http:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.41.1")
+            self.requires("sqlite3/3.43.0")
         if self.options.get_safe("with_mysql"):
-            self.requires("libmysqlclient/8.0.31", transitive_headers=True, transitive_libs=True)
+            self.requires("libmysqlclient/8.1.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_postgres"):
-            self.requires("libpq/14.7", transitive_headers=True, transitive_libs=True)
+            self.requires("libpq/15.4", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
             self.requires("odbc/2.3.11")
         if self.options.get_safe("with_unwind"):
-            self.requires("libunwind/1.6.2")
+            self.requires("libunwind/1.7.2")
 
     def validate(self):
         miss_boost_required_comp = any(self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
@@ -120,6 +121,13 @@ class WtConan(ConanFile):
                 f"{self.ref} requires non header-only boost with these components: "
                 f"{', '.join(self._required_boost_components)}"
             )
+        # FIXME: check_max_cppstd is only available for Conan 2.x. Remove it after dropping support for Conan 1.x
+        if conan_version.major == 2 and Version(self.version) >= "4.10.1":
+            # FIXME: linter complains, but function is there
+            # https://docs.conan.io/2.0/reference/tools/build.html?highlight=check_min_cppstd#conan-tools-build-check-max-cppstd
+            check_max_cppstd = getattr(sys.modules['conan.tools.build'], 'check_max_cppstd')
+            # INFO: error C2661: 'std::to_chars': no overloaded function takes 2 arguments. Removed in C++17.
+            check_max_cppstd(self, 14)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -224,8 +232,6 @@ class WtConan(ConanFile):
         else:
             tc.variables["CONNECTOR_FCGI"] = self.options.connector_fcgi
             tc.variables["CONNECTOR_ISAPI"] = False
-
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -234,11 +240,17 @@ class WtConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        replace_in_file(self, cmakelists, "find_package(OpenSSL)", "#find_package(OpenSSL)")
         replace_in_file(self, cmakelists, "INCLUDE(cmake/WtFindMysql.txt)", "#INCLUDE(cmake/WtFindMysql.txt)")
         replace_in_file(self, cmakelists, "INCLUDE(cmake/WtFindPostgresql.txt)", "#INCLUDE(cmake/WtFindPostgresql.txt)")
         if self.settings.os != "Windows":
             replace_in_file(self, cmakelists, "INCLUDE(cmake/WtFindOdbc.txt)", "#INCLUDE(cmake/WtFindOdbc.txt)")
+
+        if self.options.with_ssl:
+            # Ensure the conan-generated config is used for OpenSSL when required as a dependency
+            replace_in_file(self, cmakelists, "find_package(OpenSSL)", "find_package(OpenSSL CONFIG REQUIRED)")
+        else:
+            # Avoid searching for OpenSSL if it is not required
+            replace_in_file(self, cmakelists, "find_package(OpenSSL)", "")
 
         # Do not pollute rpath of shared libs of the install tree on macOS please
         replace_in_file(self,
