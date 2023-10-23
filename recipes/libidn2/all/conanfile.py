@@ -8,7 +8,6 @@ from conan.tools.files import apply_conandata_patches, chdir, copy, export_conan
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -85,10 +84,9 @@ class LibIdn(ConanFile):
         if not self.options.shared:
             tc.extra_defines.append("IDN2_STATIC")
         if is_msvc(self):
-            if Version(self.settings.compiler.version) >= "12":
-                tc.extra_cxxflags.append("-FS")
+            tc.extra_cxxflags.append("-FS")
         tc.configure_args += [
-            "--with-libiconv-prefix={}".format(unix_path(self, self.dependencies["libiconv"].package_folder)),
+            f"--with-libiconv-prefix={unix_path(self, self.dependencies['libiconv'].package_folder)}",
             "--disable-nls",
             "--disable-rpath",
         ]
@@ -136,5 +134,4 @@ class LibIdn(ConanFile):
                 self.cpp_info.defines = ["IDN2_STATIC"]
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
