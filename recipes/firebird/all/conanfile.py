@@ -47,7 +47,7 @@ class FirebirdConan(ConanFile):
         #   - libtomcrypt
         #   - SfIO
         #   - ttmath
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
@@ -78,11 +78,10 @@ class FirebirdConan(ConanFile):
         # Disable building of examples, plugins and executables.
         # Only executables required for the build are included.
         # https://github.com/FirebirdSQL/firebird/blob/v4.0.2/builds/posix/Makefile.in#L281-L305
+        posix_makefile = os.path.join(self.source_folder, "builds/posix/Makefile.in")
         for target in ["examples", "plugins"]:
-            replace_in_file(self, os.path.join(self.source_folder, "builds/posix/Makefile.in"),
-                            f"$(MAKE) {target}", "")
-        replace_in_file(self, os.path.join(self.source_folder, "builds/posix/Makefile.in"),
-                        "$(MAKE) utilities", "$(MAKE) isql gbak gfix udfsupport")
+            replace_in_file(self, posix_makefile, f"$(MAKE) {target}", "")
+        replace_in_file(self, posix_makefile, "$(MAKE) utilities", "$(MAKE) isql gbak gfix udfsupport")
 
     def build(self):
         self._patch_sources()
