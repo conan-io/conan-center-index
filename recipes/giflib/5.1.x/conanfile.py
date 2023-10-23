@@ -78,6 +78,7 @@ class GiflibConan(ConanFile):
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
             tc.extra_defines.append("USE_GIF_DLL" if self.options.shared else "USE_GIF_LIB")
+            tc.extra_cflags.append("-FS")
         tc.generate()
 
         if is_msvc(self):
