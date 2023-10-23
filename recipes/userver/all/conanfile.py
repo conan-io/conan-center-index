@@ -77,19 +77,19 @@ class UserverConan(ConanFile):
         self.requires('cryptopp/8.7.0')
         self.requires('fmt/8.1.1', transitive_headers=True)
         self.requires('libnghttp2/1.51.0')
-        self.requires('libcurl/7.86.0')
+        self.requires('libcurl/7.88.1')
         self.requires('libev/4.33')
         self.requires('http_parser/2.9.4')
-        self.requires('openssl/1.1.1s')
+        self.requires("openssl/[>=1.1 <4]")
         self.requires('rapidjson/cci.20220822', transitive_headers=True)
         self.requires('yaml-cpp/0.7.0')
-        self.requires('zlib/1.2.13')
+        self.requires("zlib/[>=1.2.11 <2]")
 
         if self.options.with_jemalloc:
             self.requires('jemalloc/5.3.0')
         if self.options.with_grpc:
             self.requires(
-                'grpc/1.48.4', transitive_headers=True, transitive_libs=True,
+                'grpc/1.54.3', transitive_headers=True, transitive_libs=True,
             )
             self.requires(
                 'googleapis/cci.20230501',
@@ -114,7 +114,7 @@ class UserverConan(ConanFile):
         if self.options.with_redis:
             self.requires('hiredis/1.0.2')
         if self.options.with_rabbitmq:
-            self.requires('amqp-cpp/4.3.16')
+            self.requires('amqp-cpp/4.3.26')
         if self.options.with_clickhouse:
             self.requires('clickhouse-cpp/2.4.0')
             self.requires(
