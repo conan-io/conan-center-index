@@ -135,18 +135,6 @@ class LibXMLPlusPlus(ConanFile):
                     os.path.join(self.package_folder, "lib", f"xml++-{self._lib_version}.lib"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_module_file_name", "libxml++")
-        self.cpp_info.set_property("cmake_module_target_name", "libxml++::libxml++")
-        self.cpp_info.set_property("pkg_config_name", "libxml++")
-        self.cpp_info.components[f"libxml++-{self._lib_version}"].set_property("pkg_config_name", f"libxml++-{self._lib_version}")
-        self.cpp_info.components[f"libxml++-{self._lib_version}"].set_property("cmake_target_name", f"libxml++::libxml++-{self._lib_version}")
-        self.cpp_info.components[f"libxml++-{self._lib_version}"].libs = [f"xml++-{self._lib_version}"]
-        self.cpp_info.components[f"libxml++-{self._lib_version}"].includedirs = [
-            os.path.join("include", f"libxml++-{self._lib_version}")
-        ]
-        self.cpp_info.components[f"libxml++-{self._lib_version}"].requires = [
-                "glibmm::glibmm", "libxml2::libxml2"
-        ]
-
-        self.cpp_info.names["cmake_find_package"] = "libxml++"
-        self.cpp_info.names["cmake_find_package_multi"] = "libxml++"
+        self.cpp_info.set_property("pkg_config_name", f"libxml++-{self._lib_version}")
+        self.cpp_info.libs = [f"xml++-{self._lib_version}"]
+        self.cpp_info.includedirs = [os.path.join("include", f"libxml++-{self._lib_version}")]
