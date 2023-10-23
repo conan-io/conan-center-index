@@ -87,8 +87,8 @@ class FirebirdConan(ConanFile):
         self._patch_sources()
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
+            # https://github.com/FirebirdSQL/firebird/blob/v4.0.3/autogen.sh#L45-L59
             autotools.autoreconf()
-            # https://github.com/FirebirdSQL/firebird/blob/eac0f27/autogen.sh#L48-L59
             self.run("libtoolize --install --copy --force")
             autotools.configure()
             autotools.make()
