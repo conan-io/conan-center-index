@@ -189,7 +189,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_libssh2:
             self.requires("libssh2/1.11.0")
         if self.options.with_zlib:
-            self.requires("zlib/[>=1.2.10 <2]")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_brotli:
             self.requires("brotli/1.1.0")
         if self.options.with_zstd:
@@ -337,6 +337,8 @@ class LibcurlConan(ConanFile):
         # brotli
         if Version(self.version) < "8.2.0":
             replace_in_file(self, cmakelists, "find_package(Brotli QUIET)", "find_package(brotli REQUIRED CONFIG)")
+        else:
+            replace_in_file(self, cmakelists, "find_package(Brotli REQUIRED)", "find_package(brotli REQUIRED CONFIG)")
         replace_in_file(self, cmakelists, "if(BROTLI_FOUND)", "if(brotli_FOUND)")
         replace_in_file(self, cmakelists, "${BROTLI_LIBRARIES}", "brotli::brotli")
         replace_in_file(self, cmakelists, "${BROTLI_INCLUDE_DIRS}", "${brotli_INCLUDE_DIRS}")

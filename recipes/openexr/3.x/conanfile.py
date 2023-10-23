@@ -16,7 +16,7 @@ class OpenEXRConan(ConanFile):
     license = "BSD-3-Clause"
     homepage = "https://github.com/AcademySoftwareFoundation/openexr"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -38,17 +38,17 @@ class OpenEXRConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         # Note: OpenEXR and Imath are versioned independently.
         self.requires("imath/3.1.9", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

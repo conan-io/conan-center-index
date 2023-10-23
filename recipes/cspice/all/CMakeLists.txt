@@ -65,7 +65,7 @@ if(CSPICE_BUILD_UTILITIES)
   file(GLOB CSPICE_UTILITIES_SUBDIRS RELATIVE ${SRC_DIR} "${SRC_DIR}/*_c")
   list(REMOVE_ITEM CSPICE_UTILITIES_SUBDIRS "cook_c")
   foreach(CSPICE_SUBDIR ${CSPICE_UTILITIES_SUBDIRS})
-    set(UTILITY_SRC_DIR "${SRC_DIR}/${CSPICE_SUBDIR}")
+    get_filename_component(UTILITY_SRC_DIR "${SRC_DIR}/${CSPICE_SUBDIR}" ABSOLUTE)
 
     # Each .pgm file is the entry point of an executable
     file(GLOB PGM_FILES "${UTILITY_SRC_DIR}/*.pgm")
