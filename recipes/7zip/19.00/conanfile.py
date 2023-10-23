@@ -90,6 +90,12 @@ class SevenZipConan(ConanFile):
             os.chmod(fn, 0o644)
             replace_in_file(self, fn, "-MT", f"-{self.settings.compiler.runtime}")
             replace_in_file(self, fn, "-MD", f"-{self.settings.compiler.runtime}")
+            if self.version < Version("23.01"):
+                replace_in_file(self, fn, "-WX", "")
+
+                pfc = os.path.join(self.source_folder, "CPP", "7zip", "UI", "FileManager", "PanelFolderChange.cpp")
+                os.chmod(pfc, 0o644)
+                replace_in_file(self, pfc, r'L"\\"', r'static_cast<UString>(L"\\")')
 
     def build(self):
         self._patch_sources()

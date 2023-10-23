@@ -9,7 +9,11 @@ sources:
 patches:
   "5.0.1":
     - patch_file: "patches/5.0.1-0001-enable_static_builds_on_msvc.patch"
-      base_path: "source_subfolder"
+      patch_type: "portability"
+      patch_description: "Manage dllexport correctly to be able to build static libraries on MSVC"
+      patch_source: "https://github.com/libxmlplusplus/libxmlplusplus/commit/2a2825c67a30ea34f3514659bfd91111db8e009d.patch"
   "2.42.1":
     - patch_file: "patches/2.42.1-0001-enable_static_builds_on_msvc.patch"
-      base_path: "source_subfolder"
+      patch_type: "portability"
+      patch_description: "Manage dllexport correctly to be able to build static libraries on MSVC"
+      patch_source: "https://github.com/libxmlplusplus/libxmlplusplus/commit/2a2825c67a30ea34f3514659bfd91111db8e009d.patch"

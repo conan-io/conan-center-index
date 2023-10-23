@@ -358,14 +358,14 @@ class OpenCVConan(ConanFile):
             self.requires("eigen/3.4.0")
         if self.options.with_tbb:
             # opencv 2.x doesn't support onetbb >= 2021
-            self.requires("onetbb/2020.3")
+            self.requires("onetbb/2020.3.3")
         # highgui module options
         if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.5")
+            self.requires("libjpeg-turbo/3.0.0")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
-            self.requires("mozjpeg/4.1.1")
+            self.requires("mozjpeg/4.1.3")
         if self.options.get_safe("with_png"):
             self.requires("libpng/1.6.40")
         if self.options.get_safe("with_jasper"):
@@ -374,7 +374,7 @@ class OpenCVConan(ConanFile):
             # opencv 2.x doesn't support openexr >= 3
             self.requires("openexr/2.5.7")
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.5.1")
+            self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
 
