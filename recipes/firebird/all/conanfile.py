@@ -48,6 +48,7 @@ class FirebirdConan(ConanFile):
         #   - SfIO
         #   - ttmath
         self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("icu/73.2")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
