@@ -40,15 +40,7 @@
  endif()
  
  set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 3 VERSION 3.1.0)
-@@ -33,6 +37,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
- 
- # install library
- install(TARGETS ${PROJECT_NAME} EXPORT apriltagTargets
-+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
- )
-@@ -102,16 +107,13 @@ endif (NOT Python3_NOT_FOUND AND NOT Numpy_NOT_FOUND AND PYTHONLIBS_FOUND AND BU
+@@ -102,16 +106,13 @@ endif (NOT Python3_NOT_FOUND AND NOT Numpy_NOT_FOUND AND PYTHONLIBS_FOUND AND BU
  
  # Examples
  # apriltag_demo
