@@ -8,6 +8,7 @@ from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, chdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import unix_path
 
 required_conan_version = ">=1.54.0"
 
@@ -72,6 +73,10 @@ class FirebirdConan(ConanFile):
         tc.configure_args.append("--with-builtin-tomcrypt")
         # Reduce the amount of warnings
         tc.extra_cxxflags.append("-Wno-unused-result")
+        tc.extra_ldflags += [
+            "-L{}".format(unix_path(self, self.dependencies[dep].cpp_info.libdir))
+            for dep in ["zlib", "icu", "termcap"]
+        ]
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
