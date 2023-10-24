@@ -164,6 +164,7 @@ required_for_references:
 - clhep
 - cli11
 - clickhouse-cpp
+- clipboard_lite
 - clipper
 - clipper2
 - clove-unit
@@ -186,6 +187,7 @@ required_for_references:
 - continuable
 - coost
 - corrade
+- cose-c
 - cotila
 - cpp-httplib
 - cpp-ipc
@@ -401,6 +403,7 @@ required_for_references:
 - glfw
 - gli
 - glib
+- glibmm
 - glm
 - glog
 - glpk
@@ -480,6 +483,7 @@ required_for_references:
 - intel-neon2sse
 - intx
 - inversify-cpp
+- iowow
 - iqa
 - irrxml
 - iso8601lib
@@ -559,6 +563,7 @@ required_for_references:
 - libcuckoo
 - libcurl
 - libdaemon
+- libdb
 - libdc1394
 - libde265
 - libdeflate
@@ -652,7 +657,9 @@ required_for_references:
 - librttopo
 - libsafec
 - libsamplerate
+- libsass
 - libschrift
+- libseat
 - libsecret
 - libselinux
 - libserial
@@ -700,6 +707,7 @@ required_for_references:
 - libxls
 - libxlsxwriter
 - libxml2
+- libxmlpp
 - libxpm
 - libxshmfence
 - libxslt
@@ -789,6 +797,7 @@ required_for_references:
 - minizip
 - minizip-ng
 - mio
+- mm_file
 - modern-cpp-kafka
 - moltenvk
 - mongo-c-driver
@@ -876,6 +885,7 @@ required_for_references:
 - openal-soft
 - openapi-generator
 - openblas
+- opencascade
 - opencl-clhpp-headers
 - opencl-headers
 - opencl-icd-loader
@@ -1145,6 +1155,7 @@ required_for_references:
 - svgwrite
 - symengine
 - systemc
+- systemc-cci
 - szip
 - tabulate
 - taglib
@@ -1207,6 +1218,7 @@ required_for_references:
 - tracy
 - transwarp
 - trantor
+- tre
 - tree-sitter
 - tree-sitter-c
 - troldal-zippy
@@ -1227,6 +1239,7 @@ required_for_references:
 - tz
 - ua-nodeset
 - uchardet
+- ulfius
 - uncrustify
 - uni-algo
 - unicorn
