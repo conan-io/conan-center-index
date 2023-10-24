@@ -20,7 +20,7 @@ class PixmanConan(ConanFile):
     description = "Pixman is a low-level software library for pixel manipulation"
     topics = ("graphics", "compositing", "rasterization")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://cairographics.org/"
+    homepage = "https://gitlab.freedesktop.org/pixman/pixman"
     license = ("LGPL-2.1-only", "MPL-1.1")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
