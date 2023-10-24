@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
@@ -94,10 +94,8 @@ class SubunitConan(ConanFile):
         tc.configure_args.append("CHECK_CFLAGS= ")
         tc.configure_args.append("CHECK_LIBS= ")
         cppunit_info = self.dependencies["cppunit"].cpp_info
-        tc.configure_args.append("CPPUNIT_CFLAGS='{}'".format(
-            " ".join(f"-I{unix_path(self, inc)}" for inc in cppunit_info.includedirs))
-        )
         tc.configure_args.append("CPPUNIT_LIBS='{}'".format(" ".join(cppunit_info.libs)))
+        tc.configure_args.append("CPPUNIT_CFLAGS= ")
         # Avoid installing i18n + perl things in arch-dependent folders or in a `local` subfolder
         tc.make_args += [
             f"INSTALLARCHLIB={unix_path(self, os.path.join(self.package_folder, 'lib'))}",
@@ -110,36 +108,11 @@ class SubunitConan(ConanFile):
         ]
         tc.generate()
 
-        if is_msvc(self) or self._is_clang_cl:
-            # Custom AutotoolsDeps for cl-like compilers
-            # workaround for https://github.com/conan-io/conan/issues/12784
-            includedirs = []
-            defines = []
-            libs = []
-            libdirs = []
-            linkflags = []
-            cxxflags = []
-            cflags = []
-            for dependency in self.dependencies.values():
-                deps_cpp_info = dependency.cpp_info.aggregated_components()
-                includedirs.extend(deps_cpp_info.includedirs)
-                defines.extend(deps_cpp_info.defines)
-                libs.extend(deps_cpp_info.libs)
-                libdirs.extend(deps_cpp_info.libdirs)
-                linkflags.extend(deps_cpp_info.sharedlinkflags + deps_cpp_info.exelinkflags)
-                cxxflags.extend(deps_cpp_info.cxxflags)
-                cflags.extend(deps_cpp_info.cflags)
-
-            env = Environment()
-            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in includedirs] + [f"-D{d}" for d in defines])
-            env.append("LIBS", [f"-l{lib}" for lib in libs])
-            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in libdirs] + linkflags)
-            env.append("CXXFLAGS", cxxflags)
-            env.append("CFLAGS", cflags)
-            env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
-        else:
-            deps = AutotoolsDeps(self)
-            deps.generate()
+        # AutotoolsDeps causes ./configure to fail on Windows
+        # Possibly related to https://github.com/conan-io/conan/issues/12784
+        env = Environment()
+        env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in cppunit_info.includedirs] + [f"-D{d}" for d in cppunit_info.defines])
+        env.vars(self).save_script("conanautotoolsdeps_workaround")
 
         if is_msvc(self):
             env = Environment()
