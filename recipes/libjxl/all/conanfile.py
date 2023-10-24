@@ -5,7 +5,7 @@ import shutil
 from conan import ConanFile
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import replace_in_file, copy, get, rm, rmdir, save
 
 required_conan_version = ">=1.53.0"
 
@@ -28,9 +28,6 @@ class LibjxlConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -65,14 +62,26 @@ class LibjxlConan(ConanFile):
         if cross_building(self):
             tc.variables["CMAKE_SYSTEM_PROCESSOR"] = str(self.settings.arch)
         tc.generate()
+
         tc = CMakeDeps(self)
         tc.set_property("brotli::brotlicommon", "cmake_target_name", "brotlicommon-static")
         tc.set_property("brotli::brotlienc", "cmake_target_name", "brotlienc-static")
         tc.set_property("brotli::brotlidec", "cmake_target_name", "brotlidec-static")
+        tc.set_property("highway", "cmake_target_name", "hwy")
+        tc.set_property("lcms", "cmake_target_name", "lcms2")
         tc.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
+        save(self, os.path.join(self.source_folder, "tools", "CMakeLists.txt"), "")
+        save(self, os.path.join(self.source_folder, "lib", "jxl_extras.cmake"), "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "add_subdirectory(third_party)",
+                        ("find_package(lcms REQUIRED CONFIG)\n"
+                         "find_package(brotli REQUIRED CONFIG)\n"
+                         "find_package(highway REQUIRED CONFIG)\n"
+                         "include_directories(${lcms_INCLUDE_DIRS} ${highway_INCLUDE_DIRS} ${brotli_INCLUDE_DIRS})\n"
+                         "link_libraries(brotli::brotli)\n")
+        )
 
     def build(self):
         self._patch_sources()
