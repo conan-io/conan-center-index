@@ -137,7 +137,9 @@ class LibGlvndConan(ConanFile):
         if self.options.egl:
             self.cpp_info.components['egl'].libs = ["EGL"]
             self.cpp_info.components['egl'].system_libs.extend(["pthread", "dl", "m"])
-            self.cpp_info.components['egl'].requires.extend(["xorg::x11", "gldispatch"])
+            self.cpp_info.components['egl'].requires.append("gldispatch")
+            if self.options.x11:
+                self.cpp_info.components['egl'].requires.append("xorg::x11")
             self.cpp_info.components['egl'].set_property("pkg_config_name", "egl")
 
         if self.options.glx:

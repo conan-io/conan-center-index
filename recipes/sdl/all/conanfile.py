@@ -278,12 +278,12 @@ class SDLConan(ConanFile):
         # Add extra information collected from the deps
         all_deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
         if not self._is_cl_frontend:
-            deps_includes = [p for dep in all_deps for p in dep.cpp_info.aggregated_components().includedirs]
+            deps_includes = [p.replace("\\", "/") for dep in all_deps for p in dep.cpp_info.aggregated_components().includedirs]
             tc.variables["CMAKE_REQUIRED_INCLUDES"] = ";".join(deps_includes)
             extra_cflags = [f"-I{p}" for p in deps_includes]
             extra_cflags += [f"-D{define}" for dep in all_deps for define in dep.cpp_info.aggregated_components().defines]
             tc.variables["EXTRA_CFLAGS"] = ";".join(extra_cflags)
-            extra_ldflags = [f"-L{p}" for dep in all_deps for p in dep.cpp_info.aggregated_components().libdirs]
+            extra_ldflags = [f"-L{p.replace('\\', '/')}" for dep in all_deps for p in dep.cpp_info.aggregated_components().libdirs]
             tc.variables["EXTRA_LDFLAGS"] = ";".join(extra_ldflags)
             extra_libs = [lib for dep in all_deps for lib in dep.cpp_info.aggregated_components().libs]
             extra_libs += [lib for dep in all_deps for lib in dep.cpp_info.aggregated_components().system_libs]
