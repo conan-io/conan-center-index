@@ -9,8 +9,7 @@ required_conan_version = ">=1.52.0"
 
 class GnuLibConanFile(ConanFile):
     name = "gnulib"
-    description = ("Gnulib is a central location for common GNU code, "
-                   "intended to be shared among GNU packages.")
+    description = "Gnulib is a central location for common GNU code, intended to be shared among GNU packages."
     license = ("GPL-3.0-or-later", "LGPL-3.0-or-later", "Public-domain")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/gnulib/"
@@ -41,6 +40,6 @@ class GnuLibConanFile(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
+        # TODO: Legacy, to be removed on Conan 2.0
         binpath = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment var: {binpath}")
         self.env_info.PATH.append(binpath)
