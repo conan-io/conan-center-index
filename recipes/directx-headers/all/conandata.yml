@@ -1,0 +1,4 @@
+sources:
+  "1.610.2":
+    url: "https://github.com/microsoft/DirectX-Headers/archive/refs/tags/v1.610.2.tar.gz"
+    sha256: "59492497e99bd3c23f8f8aa8a709f4d7b5bc5bd5057efa8c568bbad40015a8b2"
