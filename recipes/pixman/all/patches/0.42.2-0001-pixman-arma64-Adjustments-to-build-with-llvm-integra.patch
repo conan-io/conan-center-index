@@ -68,7 +68,7 @@ index ee78541..8253906 100644
   */
  
 +
-+#include "pixman-config.h"
++#include "config.h"
 +
 +
  /* Supplementary macro for setting function attributes */
