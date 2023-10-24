@@ -66,6 +66,9 @@ class LibjxlConan(ConanFile):
             tc.variables["CMAKE_SYSTEM_PROCESSOR"] = str(self.settings.arch)
         tc.generate()
         tc = CMakeDeps(self)
+        tc.set_property("brotli::brotlicommon", "cmake_target_name", "brotlicommon-static")
+        tc.set_property("brotli::brotlienc", "cmake_target_name", "brotlienc-static")
+        tc.set_property("brotli::brotlidec", "cmake_target_name", "brotlidec-static")
         tc.generate()
 
     def _patch_sources(self):
@@ -90,14 +93,12 @@ class LibjxlConan(ConanFile):
             rm(self, "*-static.lib", libs_dir, recursive=True)
 
             if self.settings.os == "Windows":
-                copy(self, "jxl_dec.dll", src="bin", dst=os.path.join(self.package_folder, "bin"))
-                copy(self, "jxl_dec.lib", src="lib", dst=os.path.join(self.package_folder, "lib"))
+                copy(self, "jxl_dec.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+                copy(self, "jxl_dec.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
                 for dll_path in glob.glob(os.path.join(libs_dir, "*.dll")):
-                    shutil.move(
-                        dll_path, os.path.join(self.package_folder, "bin", os.path.basename(dll_path))
-                    )
+                    shutil.move(dll_path, os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
             else:
-                copy(self, "libjxl_dec.*", src="lib", dst=os.path.join(self.package_folder, "lib"))
+                copy(self, "libjxl_dec.so*", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
 
     def _lib_name(self, name):
         if not self.options.shared and self.settings.os == "Windows":
