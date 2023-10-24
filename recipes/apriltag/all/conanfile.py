@@ -58,6 +58,7 @@ class ApriltagConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_EXAMPLES"] = False
         if Version(self.version) >= "3.1.4":
             tc.variables["BUILD_PYTHON_WRAPPER"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
