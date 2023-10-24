@@ -28,7 +28,7 @@ class SimdutfConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 11
 
     def export_sources(self):
@@ -46,8 +46,8 @@ class SimdutfConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
         ## simdutf >= 4.0.0 requires _mm_storeu_si64
         if Version(self.version) >= "4.0.0":
             if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.0":
@@ -65,8 +65,7 @@ class SimdutfConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "8":
             tc.variables["CMAKE_CXX_FLAGS"] = " -mavx512f"
-        if Version(self.version) >= "2.0.3":
-            tc.variables["SIMDUTF_TOOLS"] = False
+        tc.variables["SIMDUTF_TOOLS"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -82,6 +81,7 @@ class SimdutfConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = ["simdutf"]
