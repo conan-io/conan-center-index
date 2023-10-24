@@ -14,5 +14,5 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
-            img_path = os.path.join(self.source_folder, "test.jxl")
+            img_path = os.path.join(self.source_folder, os.pardir, "test_package", "test.jxl")
             self.run(bin_path + " " + img_path, run_environment=True)
