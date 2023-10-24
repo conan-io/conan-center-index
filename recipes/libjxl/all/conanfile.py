@@ -83,9 +83,12 @@ class LibjxlConan(ConanFile):
                         ("find_package(lcms REQUIRED CONFIG)\n"
                          "find_package(brotli REQUIRED CONFIG)\n"
                          "find_package(highway REQUIRED CONFIG)\n"
-                         "include_directories(${lcms_INCLUDE_DIRS} ${highway_INCLUDE_DIRS} ${brotli_INCLUDE_DIRS})\n"
-                         "link_libraries(brotli::brotli)\n")
+                         "link_libraries(brotli::brotli hwy lcms2)\n")
         )
+        replace_in_file(self, os.path.join(self.source_folder, "lib", "jxl.cmake"),
+                        '"$<BUILD_INTERFACE:$<TARGET_PROPERTY', "# ", strict=False)
+        replace_in_file(self, os.path.join(self.source_folder, "lib", "jxl.cmake"),
+                        "$<TARGET_PROPERTY", "# ", strict=False)
 
     def build(self):
         self._patch_sources()
