@@ -7,10 +7,10 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import VCVars, is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import VCVars, is_msvc, is_msvc_static_runtime, NMakeToolchain, NMakeDeps
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.58.0"
 
 
 class SqlcipherConan(ConanFile):
@@ -105,36 +105,27 @@ class SqlcipherConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
 
-        tc = AutotoolsToolchain(self)
+        tc = NMakeToolchain(self)
+        env = tc.environment()
         crypto_dep = self.dependencies[str(self.options.crypto_library)].cpp_info
-        crypto_incdir = crypto_dep.includedirs[0]
-        crypto_libdir = crypto_dep.libdirs[0]
-        libs = [lib + ".lib" for lib in crypto_dep.libs]
-        system_libs = [lib + ".lib" for lib in crypto_dep.system_libs]
-
-        nmake_flags = [
-            f'TLIBS="{" ".join(libs + system_libs)}"',
-            f"LTLIBPATHS=/LIBPATH:{crypto_libdir}",
-            f'OPTS="-I{crypto_incdir} -DSQLITE_HAS_CODEC"',
-            "NO_TCL=1",
-            "USE_AMALGAMATION=1",
-            "OPT_FEATURE_FLAGS=-DSQLCIPHER_CRYPTO_OPENSSL",
-            f"SQLITE_TEMP_STORE={self._temp_store_nmake_value}",
-            f"TCLSH_CMD={os.pathsep.join(dep.buildenv_info.TCLSH for dep in self.dependencies.values())}",
-        ]
+        env.define("TLIBS", " ".join(lib + ".lib" for lib in crypto_dep.libs + crypto_dep.system_libs))
+        env.define("LTLIBPATHS", f"/LIBPATH:{crypto_dep.libdir}")
+        env.define("OPTS", f'-I{crypto_dep.includedir} -DSQLITE_HAS_CODEC')
+        env.define("NO_TCL", "1")
+        env.define("USE_AMALGAMATION", "1")
+        env.define("OPT_FEATURE_FLAGS", "-DSQLCIPHER_CRYPTO_OPENSSL")
+        env.define("SQLITE_TEMP_STORE", self._temp_store_nmake_value)
+        env.define("TCLSH_CMD", self.dependencies.build['tcl'].runenv_info.vars(self)['TCLSH'])
 
         if not is_msvc_static_runtime(self):
-            nmake_flags.append("USE_CRT_DLL=1")
+            env.define("USE_CRT_DLL", "1")
         if self.settings.build_type == "Debug":
-            nmake_flags.append("DEBUG=2")
-        nmake_flags.append("FOR_WIN10=1")
-        platforms = {"x86": "x86", "x86_64": "x64"}
-        nmake_flags.append(f"PLATFORM={platforms[str(self.settings.arch)]}")
+            env.define("DEBUG", "2")
+        env.define("FOR_WIN10", "1")
+        env.define("PLATFORM", {"x86": "x86", "x86_64": "x64"}[str(self.settings.arch)])
+        tc.generate(env)
 
-        tc.make_args += nmake_flags
-        tc.generate()
-
-        tc = AutotoolsDeps(self)
+        tc = NMakeDeps(self)
         tc.generate()
 
         vcvars = VCVars(self)
@@ -208,11 +199,6 @@ class SqlcipherConan(ConanFile):
                             "#! /bin/sh\n",
                             f"#! /bin/sh\nexport DYLD_LIBRARY_PATH={libpaths}:$DYLD_LIBRARY_PATH\n")
 
-    def _build_msvc(self):
-        with chdir(self, self.source_folder):
-            main_target = "dll" if self.options.shared else "sqlcipher.lib"
-            self.run(f"nmake /f Makefile.msc {main_target}")
-
     def build(self):
         apply_conandata_patches(self)
         if is_msvc(self):
@@ -234,7 +220,7 @@ class SqlcipherConan(ConanFile):
         if is_msvc(self):
             copy(self, "*.dll", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder, keep_path=False)
             copy(self, "*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
-            copy(self, "sqlite3.h", dst=os.path.join("include", "sqlcipher"), src=self.source_folder)
+            copy(self, "sqlite3.h", dst=os.path.join(self.package_folder, "include", "sqlcipher"), src=self.source_folder)
         else:
             with chdir(self, self.source_folder):
                 autotools = Autotools(self)
