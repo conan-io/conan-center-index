@@ -1,0 +1,57 @@
+diff --git src/bin/dwarfdump/CMakeLists.txt src/bin/dwarfdump/CMakeLists.txt
+index 1b8aa3ae..72819160 100644
+--- src/bin/dwarfdump/CMakeLists.txt
++++ src/bin/dwarfdump/CMakeLists.txt
+@@ -65,7 +65,7 @@ target_compile_options(dwarfdump PRIVATE ${DW_FWALL})
+ 
+ target_link_libraries(dwarfdump PRIVATE ${dwarf-target} ${DW_FZLIB} ${DW_FZSTD} ) 
+ 
+-if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
++if(0)
+ 	set(SUFFIX 64)
+ endif()
+ set(LIBDIR lib${SUFFIX})
+diff --git src/lib/libdwarf/CMakeLists.txt src/lib/libdwarf/CMakeLists.txt
+index 09908bba..a33f92c8 100644
+--- src/lib/libdwarf/CMakeLists.txt
++++ src/lib/libdwarf/CMakeLists.txt
+@@ -109,7 +109,6 @@ foreach(i RANGE ${targetCount})
+ 	
+ 	set_target_properties(${target} PROPERTIES OUTPUT_NAME dwarf)
+ 
+-	set(SUFFIX $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>:64>)
+ 	set(LIBDIR lib${SUFFIX})
+ 	set(BINDIR bin${SUFFIX})
+ 
+@@ -119,7 +118,7 @@ foreach(i RANGE ${targetCount})
+ 		ARCHIVE DESTINATION ${LIBDIR})
+ endforeach()
+ 
+-configure_file(libdwarf.pc.cmake libdwarf.pc @ONLY )
++#configure_file(libdwarf.pc.cmake libdwarf.pc @ONLY )
+ 
+ # The install has to be here, not in
+ # another CMakeLists.txt  to make install work properly
+@@ -144,6 +143,6 @@ install(
+ install(
+     FILES ${CMAKE_CURRENT_SOURCE_DIR}/dwarf.h
+     DESTINATION include/libdwarf)
+-install( FILES ${PROJECT_BINARY_DIR}/src/lib/libdwarf/libdwarf.pc
+-    DESTINATION lib/pkgconfig
+-)
++#install( FILES ${PROJECT_BINARY_DIR}/src/lib/libdwarf/libdwarf.pc
++#    DESTINATION lib/pkgconfig
++#)
+diff --git src/lib/libdwarf/libdwarf.h src/lib/libdwarf/libdwarf.h
+index 9a0783e3..0bce4d09 100644
+--- src/lib/libdwarf/libdwarf.h
++++ src/lib/libdwarf/libdwarf.h
+@@ -51,7 +51,7 @@
+ #endif /* DW_API */
+ 
+ #ifndef LIBDWARF_STATIC
+-# if defined(_WIN32) || defined(__CYGWIN__)
++# if defined(LIBDWARF_SHARED) && (defined(_WIN32) || defined(__CYGWIN__))
+ #  ifdef LIBDWARF_BUILD
+ #   define DW_API __declspec(dllexport)
+ #  else /* !LIBDWARF_BUILD */
