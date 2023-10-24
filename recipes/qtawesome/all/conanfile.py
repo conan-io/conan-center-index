@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd
+from conan.tools.env import VirtualRunEnv
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
@@ -87,6 +88,8 @@ class QtAwesomeConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
+        vre = VirtualRunEnv(self)
+        vre.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)
