@@ -283,7 +283,7 @@ class SDLConan(ConanFile):
             extra_cflags = [f"-I{p}" for p in deps_includes]
             extra_cflags += [f"-D{define}" for dep in all_deps for define in dep.cpp_info.aggregated_components().defines]
             tc.variables["EXTRA_CFLAGS"] = ";".join(extra_cflags)
-            extra_ldflags = [f"-L{p.replace('\\', '/')}" for dep in all_deps for p in dep.cpp_info.aggregated_components().libdirs]
+            extra_ldflags = ["-L{}".format(p.replace("\\", "/")) for dep in all_deps for p in dep.cpp_info.aggregated_components().libdirs]
             tc.variables["EXTRA_LDFLAGS"] = ";".join(extra_ldflags)
             extra_libs = [lib for dep in all_deps for lib in dep.cpp_info.aggregated_components().libs]
             extra_libs += [lib for dep in all_deps for lib in dep.cpp_info.aggregated_components().system_libs]
