@@ -48,6 +48,8 @@ class ZeroMQConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) >= "4.3.5":
             self.license = "MPL-2.0"
+        else:
+            self.license = "DocumentRef-ZeroMQ:LicenseRef-LGPL-3.0-or-later-ZeroMQ-Linking-Exception"
 
     def configure(self):
         if self.options.shared:
