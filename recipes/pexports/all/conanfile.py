@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, chdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, chdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path, is_msvc
@@ -75,8 +75,14 @@ class PExportsConan(ConanFile):
             env.define("LD", "link -nologo")
             env.vars(self).save_script("conanbuild_msvc")
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # Fix for: Invalid configuration `aarch64-apple-darwin': machine `aarch64-apple' not recognized
+        replace_in_file(self, os.path.join(self.source_folder, "build-aux", "config.sub"),
+                        "avr | avr32 ", "avr | avr32 | aarch64")
+
+    def build(self):
+        self._patch_sources()
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
             autotools.configure()
