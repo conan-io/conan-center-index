@@ -39,7 +39,7 @@ class UvmSystemC(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("systemc/2.3.4")
+        self.requires("systemc/2.3.4", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.os == "Windows" or is_apple_os(self):
