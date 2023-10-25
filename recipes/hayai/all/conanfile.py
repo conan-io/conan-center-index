@@ -45,6 +45,9 @@ class HayaiConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_HAYAI_TESTS"] = False
+        tc.cache_variables["BUILD_HAYAI_SAMPLES"] = False
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
     def build(self):
@@ -58,6 +61,7 @@ class HayaiConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "CMake"))
+        rmdir(self, os.path.join(self.package_folder, "CMake"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
