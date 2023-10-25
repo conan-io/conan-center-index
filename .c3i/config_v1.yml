@@ -61,8 +61,8 @@ tasks:
       merge_labels: true  # Merge labels from the multibranch job waited for
   job_relauncher:
     job_names:
-      - continuous-integration/jenkins/pr-merge
-      - c3i/conan-v2/pr-merge
+      - prod-v1/cci
+      - prod-v2/cci
   scheduled_export_check:
     report_issue_url: https://github.com/conan-io/conan-center-index/issues/20516
     report_issue_append: false
