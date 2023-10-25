@@ -14,7 +14,7 @@ class TestPackageConan(ConanFile):
             return
 
         for src in self.exports_sources:
-            shutil.copy(os.path.join(self.source_folder, src), self.build_folder)
+            shutil.copy(os.path.join(self.source_folder, os.pardir, "test_package", src), self.build_folder)
 
         waf_path = tools.which("waf")
         if waf_path:

@@ -45,14 +45,13 @@ class TestPackageConan(ConanFile):
 
         with chdir(self, self.build_folder):
             self.run("waf -h")
-            self.run("waf configure")
+            self.run(f"waf configure -o {self.cpp.build.bindir}")
             self.run("waf")
 
     def test(self):
         if not can_run(self):
             return
-        bin_dir = os.path.join(self.build_folder, "build")
-        bin_path = os.path.join(bin_dir, "app")
+        bin_path = os.path.join(self.cpp.build.bindir, "app")
         self.run(bin_path, env="conanrun")
-        bin_path = os.path.join(bin_dir, "app2")
+        bin_path = os.path.join(self.cpp.build.bindir, "app2")
         self.run(bin_path, env="conanrun")
