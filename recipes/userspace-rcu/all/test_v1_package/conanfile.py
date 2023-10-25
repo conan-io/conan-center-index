@@ -19,4 +19,5 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not cross_building(self):
             for test in ["", "-mb", "-signal"]:
-                self.run("test_package{}".format(test), run_environment=True)
+                bin_path = os.path.join("bin", f"test_package{test}")
+                self.run(bin_path, run_environment=True)
