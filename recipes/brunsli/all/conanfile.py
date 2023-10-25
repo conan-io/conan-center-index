@@ -59,6 +59,7 @@ class PackageConan(ConanFile):
         tc.cache_variables["BUILD_TESTING"] = False
         # TODO: add WASM support
         tc.cache_variables["BRUNSLI_EMSCRIPTEN"] = False
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -74,6 +75,11 @@ class PackageConan(ConanFile):
             save(self, os.path.join(self.source_folder, "brunsli.cmake"),
                  "\ninstall(TARGETS brunslicommon-static brunslidec-static brunslienc-static)",
                  append=True)
+        # Fix DLL installation
+        replace_in_file(self, os.path.join(self.source_folder, "brunsli.cmake"),
+                        'LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"',
+                        'LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" '
+                        'RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"')
 
     def build(self):
         self._patch_sources()
