@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, save
@@ -47,6 +48,8 @@ class PackageConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
+        if self.dependencies["brotli"].options.shared:
+            raise ConanInvalidConfiguration("brotli must be built as a static library")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
