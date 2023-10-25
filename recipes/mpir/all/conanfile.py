@@ -9,7 +9,6 @@ from conan.tools.files import chdir, copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, is_msvc_static_runtime, msvc_runtime_flag
-from conan.tools.microsoft.visual import vs_ide_version
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -123,9 +122,15 @@ class MpirConan(ConanFile):
         return "dll" if self.options.shared else "lib"
 
     @property
+    def _vs_ide_version(self):
+        if str(self.settings.compiler) == "Visual Studio":
+            return self.settings.compiler.version
+        msvc_to_ide = {"170": "11", "180": "12", "190": "14", "191": "15", "192": "16", "193": "17"}
+        return msvc_to_ide.get(str(self.settings.compiler.version), "17")
+
+    @property
     def _vcxproj_paths(self):
-        compiler_version = self.settings.compiler.version if Version(vs_ide_version(self)) <= "17" else "17"
-        build_subdir = f"build.vc{compiler_version}"
+        build_subdir = f"build.vc{self._vs_ide_version}"
         vcxproj_paths = [
             os.path.join(self.source_folder, build_subdir, f"{self._dll_or_lib}_mpir_gc", f"{self._dll_or_lib}_mpir_gc.vcxproj")
         ]
