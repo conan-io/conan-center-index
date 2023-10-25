@@ -48,7 +48,7 @@ class CryptoPPPEMConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"cryptopp/8.8.0", transitive_headers=True, transitive_libs=True)
+        self.requires(f"cryptopp/{self.version}", transitive_headers=True, transitive_libs=True)
 
     def source(self):
         suffix = f"CRYPTOPP_{self.version.replace('.', '_')}"
