@@ -87,7 +87,7 @@ class OpenblasConan(ConanFile):
         # This checks explicit user-specified fortran compiler
         if self.options.build_lapack:
             if not self._fortran_compiler:
-                if Version(self.version) < "0.3.21":
+                if Version(self.version) < "0.3.24":
                     self.output.warning(
                         "Building with LAPACK support requires a Fortran compiler.")
                 else:
