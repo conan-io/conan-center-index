@@ -55,7 +55,7 @@ class TwitchTvLibSoundtrackUtilConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("twitch-native-ipc/3.1.1", transitive_headers=True)
+        self.requires("twitch-native-ipc/3.1.1", transitive_headers=True, transitive_libs=True)
         self.requires("ms-gsl/4.0.0", transitive_headers=True)
 
     def validate(self):
@@ -66,8 +66,6 @@ class TwitchTvLibSoundtrackUtilConan(ConanFile):
         if min_version:
             if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(f"{self.name} requires C++17")
-        else:
-            self.output.warning("unknown compiler, assuming C++17 support")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
