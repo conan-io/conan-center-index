@@ -39,13 +39,15 @@ class TarConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("This recipe does not support Windows builds of tar")  # FIXME: fails on MSVC and mingw-w64
-        # if not self.dependencies["bzip2"].options.build_executable:
-        #     raise ConanInvalidConfiguration("bzip2:build_executable must be enabled")
+        if not self.dependencies.build["bzip2"].options.build_executable:
+            raise ConanInvalidConfiguration("bzip2:build_executable must be enabled")
 
     def build_requirements(self):
-        self.tool_requires("bzip2/1.0.8")
-        self.tool_requires("lzip/1.23")
-        self.tool_requires("xz_utils/5.4.4")
+        self.tool_requires("bzip2/1.0.8", visible=True)
+        self.tool_requires("lzip/1.23", visible=True)
+        self.tool_requires("xz_utils/5.4.4", visible=True)
+        self.tool_requires("zstd/1.5.5", visible=True)
+        # self.tool_requires("lzo/2.10", visible=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -55,23 +57,19 @@ class TarConan(ConanFile):
         env.generate()
         tc = AutotoolsToolchain(self)
         tc.generate()
-        bzip2_exe = "bzip2"  # FIXME: get from bzip2 recipe
-        lzip_exe = "lzip"  # FIXME: get from lzip recipe
-        lzma_exe = "lzma"  # FIXME: get from xz_utils recipe
-        xz_exe = "xz"  # FIXME: get from xz_utils recipe
         tc.configure_args += [
             "--disable-acl",
             "--disable-nls",
             "--disable-rpath",
-            # "--without-gzip",  # FIXME: this will use system gzip
             "--without-posix-acls",
             "--without-selinux",
-            "--with-bzip2={}".format(bzip2_exe),
-            "--with-lzip={}".format(lzip_exe),
-            "--with-lzma={}".format(lzma_exe),
-            # "--without-lzop",  # FIXME: this will use sytem lzop
-            "--with-xz={}".format(xz_exe),
-            # "--without-zstd",  # FIXME: this will use system zstd (current zstd recipe does not build programs)
+            "--with-gzip=gzip",  # FIXME: this will use system gzip
+            "--with-bzip2=bzip2",
+            "--with-lzip=lzip",
+            "--with-lzma=lzma",
+            "--without-lzop", # FIXME: lzo package does not build an executable
+            "--with-xz=xz",
+            "--with-zstd=zstd",
         ]
         tc.generate()
 
@@ -96,6 +94,7 @@ class TarConan(ConanFile):
         autotools = Autotools(self)
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "libexec"))
 
     def package_info(self):
         tar_bin = os.path.join(self.package_folder, "bin", "tar")
@@ -104,6 +103,5 @@ class TarConan(ConanFile):
 
         # TODO: to remove in conan v2
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
         self.user_info.tar = tar_bin
