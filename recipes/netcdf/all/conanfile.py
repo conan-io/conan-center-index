@@ -123,8 +123,6 @@ class NetcdfConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "netcdf")
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["libnetcdf"].libs = ["netcdf"]
-        self.cpp_info.components["libnetcdf"].libdirs       = ["lib"]
-        self.cpp_info.components["libnetcdf"].includedirs   = ["include"]
         if self._with_hdf5:
             self.cpp_info.components["libnetcdf"].requires.append("hdf5::hdf5")
         if self.options.dap or self.options.byterange:
