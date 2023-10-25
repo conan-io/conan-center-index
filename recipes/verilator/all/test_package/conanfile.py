@@ -13,11 +13,12 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        self.requires("systemc/2.3.4")
 
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
         if self._with_systemc_example:
-            self.tool_requires("systemc/2.3.4")
+            self.tool_requires("systemc/<host_version>")
 
     def layout(self):
         cmake_layout(self)

@@ -4,14 +4,14 @@ import shutil
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.env import Environment
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
 
 
 class VerilatorConan(ConanFile):
@@ -37,13 +37,21 @@ class VerilatorConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Windows":
-            self.requires("strawberryperl/5.32.1.1")
+            self.requires("strawberryperl/5.32.1.1", visible=False)
+            if self._needs_old_bison:
+                # don't upgrade to bison 3.7.0 or above, or it fails to build
+                # because of https://github.com/verilator/verilator/pull/2505
+                self.requires("winflexbison/2.5.22", visible=False)
+            else:
+                self.requires("winflexbison/2.5.25", visible=False)
+        else:
+            self.requires("flex/2.6.4", visible=False)
         if is_msvc(self):
             self.requires("dirent/1.24", visible=False)
 
     def package_id(self):
-        # Verilator is an executable-only package, so the compiler version does not matter
-        del self.info.settings.compiler.version
+        # Verilator is an executable-only package, so the compiler does not matter
+        del self.info.settings.compiler
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self):
@@ -69,15 +77,10 @@ class VerilatorConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
             self.tool_requires("automake/1.16.5")
-            if self._needs_old_bison:
-                # don't upgrade to bison 3.7.0 or above, or it fails to build
-                # because of https://github.com/verilator/verilator/pull/2505
-                self.tool_requires("winflexbison/2.5.22")
-            else:
-                self.tool_requires("winflexbison/2.5.25")
-            self.tool_requires("strawberryperl/5.32.1.1")
+            self.tool_requires("winflexbison/<host_version>")
+            self.tool_requires("strawberryperl/<host_version>")
         else:
-            self.tool_requires("flex/2.6.4")
+            self.tool_requires("flex/<host_version>")
             if self._needs_old_bison:
                 # don't upgrade to bison 3.7.0 or above, or it fails to build
                 # because of https://github.com/verilator/verilator/pull/2505
@@ -91,6 +94,8 @@ class VerilatorConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
+
         tc = AutotoolsToolchain(self)
         if self.settings.get_safe("compiler.libcxx") == "libc++":
             tc.extra_cxxflags.append("-lc++")
@@ -99,6 +104,9 @@ class VerilatorConan(ConanFile):
             tc.extra_cxxflags.append("-FS")
             tc.defines.append("YY_NO_UNISTD_H")
         tc.configure_args += ["--datarootdir=${prefix}/bin/share"]
+        flex = "flex" if self.settings.os != "Windows" else "winflexbison"
+        tc.extra_cxxflags += [f"-I{unix_path(self, self.dependencies[flex].cpp_info.includedir)}"]
+        tc.extra_ldflags += [f"-L{unix_path(self, self.dependencies[flex].cpp_info.libdir)}"]
         tc.generate()
 
         tc.make_args += [
