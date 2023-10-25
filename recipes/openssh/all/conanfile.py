@@ -1,5 +1,7 @@
+import os
+
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import patch, copy, get, rmdir, export_conandata_patches
@@ -8,6 +10,7 @@ from conan.tools.layout import basic_layout
 from os.path import join
 
 required_conan_version = ">=1.54.0"
+
 
 class PackageConan(ConanFile):
     name = "openssh"
@@ -29,54 +32,6 @@ class PackageConan(ConanFile):
         "with_sandbox": "auto"
     }
 
-    def _custom_apply_conandata_patches(self):
-
-        if self.conan_data is None:
-            raise ConanException("conandata.yml not defined")
-
-        patches = self.conan_data.get('patches')
-        if patches is None:
-            self.output.info("apply_conandata_patches(): No patches defined in conandata")
-            return
-
-        if isinstance(patches, dict):
-            assert self.version, "Can only be applied if self.version is already defined"
-            entries = patches.get(str(self.version), [])
-        elif isinstance(patches, list):
-            entries = patches
-        else:
-            raise ConanException("conandata.yml 'patches' should be a list or a dict {version: list}")
-        
-        for it in entries:
-            if "patch_os" in it:
-                patch_os = it.get("patch_os")
-                os = self.settings.os
-
-                if patch_os != os:
-                    continue
-
-            if "patch_os_version" in it:
-                patch_os_version = it.get("patch_os_version")
-                os_version = self.settings.get_safe("os.version")
-
-                if patch_os_version != self.settings.get_safe("os.version"):
-                    continue
-
-            if "patch_file" in it:
-                # The patch files are located in the root src
-                entry = it.copy()
-                patch_file = entry.pop("patch_file")
-                patch_file_path = join(self.export_sources_folder, patch_file)
-                if not "patch_description" in entry:
-                    entry["patch_description"] = patch_file
-
-                patch(self, patch_file=patch_file_path, **entry)
-            elif "patch_string" in it:
-                patch(self, **it)
-            else:
-                raise ConanException("The 'conandata.yml' file needs a 'patch_file' or 'patch_string'"
-                                    " entry for every patch to be applied")
-
     def package_id(self):
         del self.info.settings.compiler
         del self.info.settings.build_type
@@ -92,9 +47,9 @@ class PackageConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/[>=1.2.13 <2]")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1w")
         if self.options.with_pam:
             self.requires("openpam/20190224")
 
@@ -115,12 +70,12 @@ class PackageConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             "--without-zlib-version-check",
-            "--with-openssl={}".format("yes" if self.options.with_openssl else "no"), 
+            "--with-openssl={}".format("yes" if self.options.with_openssl else "no"),
             "--with-pam={}".format("yes" if self.options.with_pam else "no"),
         ])
 
-        if self.options.with_openssl:       
-            openssl = self.dependencies["openssl"]     
+        if self.options.with_openssl:
+            openssl = self.dependencies["openssl"]
             tc.configure_args.append("--with-ssl-dir={}".format(openssl.package_folder))
 
         if self.options.with_sandbox != 'auto':
@@ -128,8 +83,25 @@ class PackageConan(ConanFile):
 
         tc.generate()
 
+    def _patch_sources(self):
+        # Usage allowed after consideration with CCI maintainers
+        def _allowed_patch(candidate):
+            """Allow when no patch_os, or when it matches and no patch_os_version, or when it also matches"""
+            return "patch_os" not in candidate or (
+                    self.settings.os == candidate["patch_os"] and (
+                        "patch_os_version" not in candidate or self.settings.get_safe("os.version") == candidate["patch_os_version"]))
+
+        for it in self.conan_data.get("patches", {}).get(self.version, []):
+            if _allowed_patch(it):
+                entry = it.copy()
+                patch_file = entry.pop("patch_file")
+                patch_file_path = os.path.join(self.export_sources_folder, patch_file)
+                if "patch_description" not in entry:
+                    entry["patch_description"] = patch_file
+                patch(self, patch_file=patch_file_path, **entry)
+
     def build(self):
-        self._custom_apply_conandata_patches()
+        self._patch_sources()
 
         autotools = Autotools(self)
         env = VirtualRunEnv(self)
@@ -157,4 +129,4 @@ class PackageConan(ConanFile):
         self.cpp_info.libdirs = []
 
         bindir = join(self.package_folder, "bin")
-        self.runenv_info.prepend_path("PATH", bindir)        
+        self.runenv_info.prepend_path("PATH", bindir)
