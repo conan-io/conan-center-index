@@ -3,7 +3,15 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 2.0.8
+  version: 2.0.12
+  backup_sources:
+    upload_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
+    download_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
+
+  globalconf:
+    - 'core.sources:download_cache={{ CONFIG_HOME }}/backup_sources_cache'
+    - 'core.sources:download_urls=["{{ ARTI_DOWNLOAD_URL }}", "origin"]'
+    - 'core.sources:upload_url={{ ARTI_UPLOAD_URL }}'
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
@@ -27,10 +35,11 @@ tasks:
   build_single_reference:
     package_id_cache_type: "none"
     timeout_minutes: 600
-    large_timeout_minutes: 800
+    large_timeout_minutes: 900
     large_timeout_references:
       - boost
       - qt
+      - llvm
   cci:
     conan_v2_run_export: false
     detailed_status_checks: false
@@ -38,9 +47,9 @@ tasks:
     update_labels: false
     user_feedback:
       title: "Conan v2 pipeline"
-      description: "> **Note**: Conan v2 builds may be required once they are on the [v2 ready](https://github.com/conan-io/conan-center-index/blob/master/.c3i/conan_v2_ready_references.yml) list"
+      description: "> **Note**: Conan v2 builds are now mandatory. Please read our [discussion](https://github.com/conan-io/conan-center-index/discussions/19104) about it."
       regression: "> **Regression**: Conan v2 builds are mandatory and they are required for the PR to be merged, because this recipe worked with Conan v2 previously."
-      text_on_failure: "The v2 pipeline failed. Please, review the errors and note this will be required for pull requests to be merged in the near future."
+      text_on_failure: "The v2 pipeline failed. Please, review the errors and note this is required for pull requests to be merged. In case this recipe is still not ported to Conan 2.x, please, ping `@conan-io/barbarians` on the PR and we will help you."
       collapse_on_success: false
       collapse_on_failure: true
   list_packages:
@@ -95,21 +104,6 @@ configurations:
               compiler.version: ["13" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release"]
-  - id: windows-msvc
-    epochs: [0, 20211221, 20220120, 20220628]
-    hrname: "Windows, MSVC"
-    build_profile:
-      os: "Windows"
-    content:
-      - os: [ "Windows" ]
-        arch: [ "x86_64" ]
-        compiler:
-          - "msvc":
-              compiler.version: [ "192" ]
-              build_type:
-                - "Release":
-                    compiler.runtime: ["dynamic"]
-                    compiler.runtime_type: [ "Release" ]
   - id: windows-msvc
     epochs: [20230606]
     hrname: "Windows, MSVC"

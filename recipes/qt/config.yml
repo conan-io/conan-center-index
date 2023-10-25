@@ -1,14 +1,20 @@
 versions:
+  "6.6.0":
+    folder: 6.x.x
+  "6.5.3":
+    folder: 6.x.x
+  "6.5.2":
+    folder: 6.x.x
   "6.5.1":
     folder: 6.x.x
   "6.5.0":
     folder: 6.x.x
   "6.4.2":
     folder: 6.x.x
-  "6.4.1":
-    folder: 6.x.x
   "6.3.2":
     folder: 6.x.x
+  "5.15.11":
+    folder: 5.x.x
   "5.15.10":
     folder: 5.x.x
   "5.15.9":

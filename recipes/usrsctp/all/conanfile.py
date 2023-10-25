@@ -1,27 +1,33 @@
-from conans import ConanFile, CMake, tools
 import os
+
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+
+required_conan_version = ">=1.53.0"
 
 
 class UsrsctpConan(ConanFile):
     name = "usrsctp"
-    license = "BSD-3-Clause"
-    homepage = "https://github.com/sctplab/usrsctp"
-    url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "network", "sctp")
     description = " A portable SCTP userland stack"
-    settings = "os", "compiler", "arch", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True}
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+    license = "BSD-3-Clause"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/sctplab/usrsctp"
+    topics = ("network", "sctp")
 
-    _cmake = None
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -29,46 +35,51 @@ class UsrsctpConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "usrsctp-{}".format(self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["sctp_debug"] = False
+        tc.variables["sctp_werror"] = False
+        tc.variables["sctp_build_shared_lib"] = self.options.shared
+        tc.variables["sctp_build_programs"] = False
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+        tc.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["sctp_debug"] = False
-        self._cmake.definitions["sctp_werror"] = False
-        self._cmake.definitions["sctp_build_shared_lib"] = self.options.shared
-        self._cmake.definitions["sctp_build_programs"] = False
-        self._cmake.configure()
-        return self._cmake
+        apply_conandata_patches(self)
+        # Fix "The CMake policy CMP0091 must be NEW, but is ''"
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "project(usrsctplib C)\ncmake_minimum_required(VERSION 3.0)",
+                        "cmake_minimum_required(VERSION 3.15)\nproject(usrsctplib C)")
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.md",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "usrsctp"
+        self.cpp_info.set_property("pkg_config_name", "usrsctp")
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(['ws2_32', 'iphlpapi'])
-        elif self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(['pthread'])
+            self.cpp_info.system_libs = ["ws2_32", "iphlpapi"]
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread"]
         suffix = "_import" if self.settings.os == "Windows" and self.options.shared else ""
         self.cpp_info.libs = ["usrsctp" + suffix]

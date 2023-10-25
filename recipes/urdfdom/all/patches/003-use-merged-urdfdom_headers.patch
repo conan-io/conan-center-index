@@ -1,0 +1,21 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	(revision 82fb54588f3ba5091d9a73d072559ac7061eccdf)
++++ b/CMakeLists.txt	(revision 1de2b88f231fa0f7f83a028e971d4ebaed1b164c)
+@@ -46,7 +46,6 @@
+ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+ 
+ find_package(tinyxml REQUIRED CONFIG)
+-find_package(urdfdom_headers 1.0 REQUIRED)
+ find_package(console_bridge REQUIRED CONFIG)
+ 
+ # Control where libraries and executables are placed during the build
+
+diff --git a/urdf_parser/CMakeLists.txt b/urdf_parser/CMakeLists.txt
+--- a/urdf_parser/CMakeLists.txt	(revision 82fb54588f3ba5091d9a73d072559ac7061eccdf)
++++ b/urdf_parser/CMakeLists.txt	(revision 1de2b88f231fa0f7f83a028e971d4ebaed1b164c)
+@@ -135,4 +135,4 @@
+   FILE "urdfdomExport.cmake"
+ )
+ 
+-INSTALL(DIRECTORY include/urdf_parser DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
++INSTALL(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

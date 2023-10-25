@@ -1,0 +1,30 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -5,5 +5,4 @@ cmake_minimum_required(VERSION 3.0)
+ if(NOT DEFINED CMAKE_MACOSX_RPATH)
+-  set(CMAKE_MACOSX_RPATH 0)
+ endif()
+ 
+ # Set the version number for the library
+--- a/cmake/HandleGlobalBuildFlags.cmake
++++ b/cmake/HandleGlobalBuildFlags.cmake
+@@ -20,7 +20,6 @@ endif()
+ 
+ if (APPLE AND BUILD_SHARED_LIBS)
+     # Set the default install directory on macOS
+-    set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+ endif()
+ 
+ ###############################################################################
+--- a/gtsam/3rdparty/metis/libmetis/CMakeLists.txt
++++ b/gtsam/3rdparty/metis/libmetis/CMakeLists.txt
+@@ -17,9 +17,6 @@ if(WIN32)
+ endif()
+ 
+ if (APPLE)
+-		set_target_properties(metis-gtsam PROPERTIES
+-			INSTALL_NAME_DIR
+-			"${CMAKE_INSTALL_PREFIX}/lib")
+  endif()
+ 
+ install(TARGETS metis-gtsam EXPORT GTSAM-exports
