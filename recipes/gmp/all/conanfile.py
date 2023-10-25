@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, export_conandata_patches, get, patch, rm, rmdir
@@ -11,58 +11,6 @@ import stat
 
 required_conan_version = ">=1.57.0"
 
-def apply_conandata_patches(conanfile, filter_func=None):
-    """
-    Applies patches stored in ``conanfile.conan_data`` (read from ``conandata.yml`` file).
-    It will apply all the patches under ``patches`` entry that matches the given
-    ``conanfile.version``. If versions are not defined in ``conandata.yml`` it will apply all the
-    patches directly under ``patches`` keyword.
-
-    The key entries will be passed as kwargs to the ``patch`` function.
-
-    :param filter_func: Optional function to filter patches. It should take a patch as argument and
-                        return True if the patch should be applied or False otherwise.
-    """
-    if conanfile.conan_data is None:
-        raise ConanException("conandata.yml not defined")
-
-    patches = conanfile.conan_data.get('patches')
-    if patches is None:
-        conanfile.output.info("apply_conandata_patches(): No patches defined in conandata")
-        return
-
-    if isinstance(patches, dict):
-        assert conanfile.version, "Can only be applied if conanfile.version is already defined"
-        entries = patches.get(str(conanfile.version), [])
-    elif isinstance(patches, list):
-        entries = patches
-    else:
-        raise ConanException("conandata.yml 'patches' should be a list or a dict {version: list}")
-
-    for it in entries:
-        # Use the filter_func to determine if the patch should be applied
-        if filter_func and not filter_func(it):
-            continue
-
-        if "patch_file" in it:
-            # The patch files are located in the root src
-            entry = it.copy()
-            patch_file = entry.pop("patch_file")
-            patch_file_path = os.path.join(conanfile.export_sources_folder, patch_file)
-            if not "patch_description" in entry:
-                entry["patch_description"] = patch_file
-            patch(conanfile, patch_file=patch_file_path, **entry)
-        elif "patch_string" in it:
-            patch(conanfile, **it)
-        else:
-            raise ConanException("The 'conandata.yml' file needs a 'patch_file' or 'patch_string'"
-                                 " entry for every patch to be applied")
-
-def include_emscripten(patch):
-    return patch.get("patch_os") == "emscripten"
-
-def exclude_emscripten(patch):
-    return not include_emscripten(patch)
 
 class GmpConan(ConanFile):
     name = "gmp"
@@ -71,7 +19,7 @@ class GmpConan(ConanFile):
         "on signed integers, rational numbers, and floating-point numbers."
     )
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("gmp", "math", "arbitrary", "precision", "integer")
+    topics = ("math", "arbitrary", "precision", "integer")
     license = ("LGPL-3.0", "GPL-2.0")
     homepage = "https://gmplib.org"
 
@@ -135,8 +83,8 @@ class GmpConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         if is_msvc(self):
-            self.tool_requires("yasm/1.3.0") # Needed for determining 32-bit word size
-            self.tool_requires("automake/1.16.5") # Needed for lib-wrapper
+            self.tool_requires("yasm/1.3.0")  # Needed for determining 32-bit word size
+            self.tool_requires("automake/1.16.5")  # Needed for lib-wrapper
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -181,13 +129,16 @@ class GmpConan(ConanFile):
             env.define("NM", f"python {dumpbin_nm}")
         tc.generate(env)
 
-    def _patch_for_emscripten(self):
-        apply_conandata_patches(self, filter_func=include_emscripten)
-
     def _patch_sources(self):
-        apply_conandata_patches(self, filter_func=exclude_emscripten)
-        if self.settings.os == "Emscripten":
-            self._patch_for_emscripten()
+        # Usage allowed after consideration with CCI maintainers
+        for it in self.conan_data.get("patches", {}).get(self.version, []):
+            if "patch_os" not in it or self.settings.os == it["patch_os"]:
+                entry = it.copy()
+                patch_file = entry.pop("patch_file")
+                patch_file_path = os.path.join(self.export_sources_folder, patch_file)
+                if "patch_description" not in entry:
+                    entry["patch_description"] = patch_file
+                patch(self, patch_file=patch_file_path, **entry)
 
         # Fix permission issue
         if is_apple_os(self):
