@@ -1,0 +1,10 @@
+sources:
+  "1.0.1":
+    co-simulation:
+      url:
+        - https://fmi-standard.org/assets/releases/FMI_for_CoSimulation_v1.0.1.zip
+      sha256: "81c87527febece29b5bb00bac89f9a58c5aed976aeb0afbfd357cf5aeebabd21"
+    model-exchange:
+      url:
+        - https://fmi-standard.org/assets/releases/FMI_for_ModelExchange_v1.0.1.zip
+      sha256: "966c948707531c5a764b70fa7bbe23030da962d8a939e01dc8bc9af9d8264cd1"

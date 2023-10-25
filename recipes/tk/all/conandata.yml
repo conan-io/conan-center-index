@@ -2,3 +2,15 @@ sources:
   "8.6.10":
     url: "https://prdownloads.sourceforge.net/tcl/tk8.6.10-src.tar.gz"
     sha256: "63df418a859d0a463347f95ded5cd88a3dd3aaa1ceecaeee362194bc30f3e386"
+
+patches:
+  "8.6.10":
+    - patch_file: "patches/0001-Add-unix-conan-compatibility.patch"
+      patch_description: "Add unix conan compatibility"
+      patch_type: "conan"
+    - patch_file: "patches/0002-Add-windows-conan-compatibility.patch"
+      patch_description: "Add windows conan compatibility"
+      patch_type: "conan"
+    - patch_file: "patches/0003-Patch-tkConfig.sh.patch"
+      patch_description: "Remove TK_BUILD_* and TK_SRC_DIR from tkConfig.sh for portability"
+      patch_type: "portability"
