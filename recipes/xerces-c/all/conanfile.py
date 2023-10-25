@@ -1,13 +1,12 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
 
 class XercesCConan(ConanFile):
@@ -42,6 +41,10 @@ class XercesCConan(ConanFile):
         "mutex_manager": "standard",
     }
 
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -67,9 +70,9 @@ class XercesCConan(ConanFile):
 
     def requirements(self):
         if "icu" in (self.options.transcoder, self.options.message_loader):
-            self.requires("icu/72.1", run=can_run(self))
+            self.requires("icu/73.2")
         if self.options.network_accessor == "curl":
-            self.requires("libcurl/7.88.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
 
     def _validate(self, option, value, host_os):
         """
@@ -98,8 +101,8 @@ class XercesCConan(ConanFile):
         self._validate("mutex_manager", "windows", ("Windows", ))
 
     def build_requirements(self):
-        if self.options.message_loader == "icu" and not can_run(self):
-            self.tool_requires("icu/72.1")
+        if self.options.message_loader == "icu" and not self._is_legacy_one_profile:
+            self.tool_requires("icu/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -107,7 +110,7 @@ class XercesCConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if can_run(self):
+        if self.options.message_loader == "icu" and self._is_legacy_one_profile:
             env = VirtualRunEnv(self)
             env.generate(scope="build")
         tc = CMakeToolchain(self)
