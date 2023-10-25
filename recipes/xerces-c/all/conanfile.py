@@ -136,8 +136,8 @@ class XercesCConan(ConanFile):
         cmake.build()
 
     def package(self):
-        for license in ("LICENSE", "NOTICE"):
-            copy(self, license, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        for license_file in ("LICENSE", "NOTICE"):
+            copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
