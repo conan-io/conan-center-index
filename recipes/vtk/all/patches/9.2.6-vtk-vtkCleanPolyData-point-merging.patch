@@ -1,0 +1,520 @@
+A performance improvement for vtkCleanPolyData when merging coincident points
+exactly (i.e. Tolerance == 0.0). This introduces a new class vtkPointDeduplicate,
+which uses an unordered_map to deduplicate the points and is thus much faster than
+the regular cuboid bins of vtkMergePoints (~70x faster for a 1 million point test).
+
+diff -u -r Common/DataModel/CMakeLists.txt Common/DataModel/CMakeLists.txt
+--- Common/DataModel/CMakeLists.txt	2023-02-15 12:03:53.000000000 +0800
++++ Common/DataModel/CMakeLists.txt	2023-10-24 10:24:27.439128100 +0800
+@@ -168,6 +169,7 @@
+   vtkPlanes
+   vtkPlanesIntersection
+   vtkPointData
++  vtkPointDeduplicate
+   vtkPointLocator
+   vtkPointSet
+   vtkPointSetCellIterator
+diff -u -r -N Common/DataModel/vtkPointDeduplicate.cxx Common/DataModel/vtkPointDeduplicate.cxx
+--- Common/DataModel/vtkPointDeduplicate.cxx	1970-01-01 08:00:00.000000000 +0800
++++ Common/DataModel/vtkPointDeduplicate.cxx	2023-10-24 13:11:08.880338900 +0800
+@@ -0,0 +1,101 @@
++/*=========================================================================
++
++  Program:   Visualization Toolkit
++  Module:    vtkPointDeduplicate.cxx
++
++  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
++  All rights reserved.
++  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
++
++     This software is distributed WITHOUT ANY WARRANTY; without even
++     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
++     PURPOSE.  See the above copyright notice for more information.
++
++=========================================================================*/
++#include "vtkPointDeduplicate.h"
++
++#include "vtkObjectFactory.h"
++#include "vtkPoints.h"
++
++vtkStandardNewMacro(vtkPointDeduplicate);
++
++vtkPointDeduplicate::vtkPointDeduplicate()
++{
++  this->InsertionPointId = 0;
++}
++
++//------------------------------------------------------------------------------
++// Determine whether point given by x[3] has been inserted into points list.
++// Return id of previously inserted point if this is true, otherwise return
++// -1.
++vtkIdType vtkPointDeduplicate::IsInsertedPoint(const double x[3])
++{
++  return this->IsInsertedPoint(x[0], x[1], x[2]);
++}
++
++//------------------------------------------------------------------------------
++vtkIdType vtkPointDeduplicate::IsInsertedPoint(double x, double y, double z)
++{
++  std::array<double, 3> xarray = { x, y, z };
++  auto const hashIt = this->HashPoints.find(xarray);
++
++  if (hashIt != this->HashPoints.end())
++  {
++    return hashIt->second;
++  }
++
++  return -1;
++}
++
++//------------------------------------------------------------------------------
++bool vtkPointDeduplicate::InitPointInsertion(vtkPoints* newPts, vtkIdType estNumPts)
++{
++  this->Initialize();
++
++  if (newPts == nullptr)
++  {
++    vtkErrorMacro(<< "Must define points for point insertion");
++    return false;
++  }
++
++  this->Points = newPts;
++
++  if (estNumPts > 0)
++  {
++    this->HashPoints.reserve(estNumPts);
++  }
++
++  return true;
++}
++
++//------------------------------------------------------------------------------
++bool vtkPointDeduplicate::InsertUniquePoint(const double x[3], vtkIdType& id)
++{
++  std::array<double, 3> xarray = { x[0], x[1], x[2] };
++  auto const hashIt = this->HashPoints.find(xarray);
++
++  if (hashIt != this->HashPoints.end())
++  {
++    id = hashIt->second;
++    return false;
++  }
++
++  id = this->InsertionPointId++;
++  this->HashPoints.emplace(xarray, id);
++  this->Points->InsertPoint(id, x);
++
++  return true;
++}
++
++//------------------------------------------------------------------------------
++void vtkPointDeduplicate::Initialize()
++{
++  this->InsertionPointId = 0;
++  this->HashPoints.clear();
++}
++
++//------------------------------------------------------------------------------
++void vtkPointDeduplicate::PrintSelf(ostream& os, vtkIndent indent)
++{
++  this->Superclass::PrintSelf(os, indent);
++}
+diff -u -r -N Common/DataModel/vtkPointDeduplicate.h Common/DataModel/vtkPointDeduplicate.h
+--- Common/DataModel/vtkPointDeduplicate.h	1970-01-01 08:00:00.000000000 +0800
++++ Common/DataModel/vtkPointDeduplicate.h	2023-10-24 09:37:44.225991400 +0800
+@@ -0,0 +1,108 @@
++/*=========================================================================
++
++  Program:   Visualization Toolkit
++  Module:    vtkPointDeduplicate.h
++
++  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
++  All rights reserved.
++  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
++
++     This software is distributed WITHOUT ANY WARRANTY; without even
++     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
++     PURPOSE.  See the above copyright notice for more information.
++
++=========================================================================*/
++/**
++ * @class   vtkPointDeduplicate
++ * @brief   merge exactly coincident points
++ *
++ * vtkPointDeduplicate is merges precisely coincident points. The difference
++ * between vktPointDeduplicate and vtkMergePoints is that vtkPointDeduplicate
++ * does not implement vtkPointLocator, which allows it to use a hashmap for
++ * finding and merging points, and is therefore much faster.
++ */
++
++#ifndef vtkPointDeduplicate_h
++#define vtkPointDeduplicate_h
++
++#include "vtkCommonDataModelModule.h" // For export macro
++#include "vtkObject.h"
++#include "vtkSmartPointer.h"
++
++#include <array>
++#include <unordered_map>
++
++class vtkPoints;
++
++class VTKCOMMONDATAMODEL_EXPORT vtkPointDeduplicate : public vtkObject
++{
++public:
++  static vtkPointDeduplicate* New();
++  vtkTypeMacro(vtkPointDeduplicate, vtkObject);
++  void PrintSelf(ostream& os, vtkIndent indent) override;
++
++  ///@{
++  /**
++   * Determine whether point given by x[3] has been inserted into points list.
++   * Return id of previously inserted point if this is true, otherwise return
++   * -1.
++   */
++  virtual vtkIdType IsInsertedPoint(const double x[3]);
++  virtual vtkIdType IsInsertedPoint(double x, double y, double z);
++  ///@}
++
++  /**
++   * Initialize the point deduplication process. The newPts is an object
++   * representing point coordinates into which incremental insertion methods
++   * place their data.
++   */
++  virtual bool InitPointInsertion(vtkPoints* newPts, vtkIdType estNumPts);
++
++  /**
++   * Determine whether point given by x[3] has been inserted into points list.
++   * Return 0 if point was already in the list, otherwise return 1. If the
++   * point was not in the list, it will be ADDED.  In either case, the id of
++   * the point (newly inserted or not) is returned in the ptId argument.
++   * Note this combines the functionality of IsInsertedPoint() followed
++   * by a call to InsertNextPoint().
++   */
++  virtual bool InsertUniquePoint(const double x[3], vtkIdType& ptId);
++
++  /**
++   * Initialize deduplicator. Frees memory and resets object as appropriate.
++   */
++  virtual void Initialize();
++
++protected:
++  vtkPointDeduplicate();
++  ~vtkPointDeduplicate() override = default;
++
++  struct PointHasher {
++    // after n3876: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3876.pdf
++    void hash_combine(std::size_t& seed, const double val) const
++    {
++      seed ^= std::hash<double>{}(val) + 0x9e3779b9 + (seed<<6) + (seed>>2);
++    }
++
++    std::size_t operator()(const std::array<double,3>& point) const
++    {
++      std::size_t h = 0;
++      hash_combine(h, point[0]);
++      hash_combine(h, point[1]);
++      hash_combine(h, point[2]);
++      return h;
++    }
++  };
++
++  vtkSmartPointer<vtkPoints> Points;
++
++  vtkIdType InsertionPointId;
++
++  std::unordered_map<std::array<double,3>, vtkIdType, PointHasher> HashPoints;
++
++private:
++  vtkPointDeduplicate(const vtkPointDeduplicate&) = delete;
++  void operator=(const vtkPointDeduplicate&) = delete;
++};
++
++#endif
+diff -u -r -N Filters/Core/vtkCleanPolyData.cxx Filters/Core/vtkCleanPolyData.cxx
+--- Filters/Core/vtkCleanPolyData.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Filters/Core/vtkCleanPolyData.cxx	2023-10-24 13:21:31.141648600 +0800
+@@ -20,9 +20,10 @@
+ #include "vtkIncrementalPointLocator.h"
+ #include "vtkInformation.h"
+ #include "vtkInformationVector.h"
+-#include "vtkMergePoints.h"
+ #include "vtkObjectFactory.h"
+ #include "vtkPointData.h"
++#include "vtkPointDeduplicate.h"
++#include "vtkPointLocator.h"
+ #include "vtkPoints.h"
+ #include "vtkPolyData.h"
+ #include "vtkStreamingDemandDrivenPipeline.h"
+@@ -55,6 +56,11 @@
+ vtkCxxSetObjectMacro(vtkCleanPolyData, Locator, vtkIncrementalPointLocator);
+ 
+ //------------------------------------------------------------------------------
++// Specify a point deduplicator for speeding the search process,
++// used when tolerance is zero.
++vtkCxxSetObjectMacro(vtkCleanPolyData, Deduplicator, vtkPointDeduplicate);
++
++//------------------------------------------------------------------------------
+ // Construct object with initial Tolerance of 0.0
+ vtkCleanPolyData::vtkCleanPolyData()
+ {
+@@ -66,6 +72,7 @@
+   this->ConvertLinesToPoints = 1;
+   this->ConvertStripsToPolys = 1;
+   this->Locator = nullptr;
++  this->Deduplicator = nullptr;
+   this->PieceInvariant = 1;
+   this->OutputPointsPrecision = vtkAlgorithm::DEFAULT_PRECISION;
+ }
+@@ -74,6 +81,7 @@
+ vtkCleanPolyData::~vtkCleanPolyData()
+ {
+   this->SetLocator(nullptr);
++  this->SetDeduplicator(nullptr);
+ }
+ 
+ //------------------------------------------------------------------------------
+@@ -131,6 +139,19 @@
+ }
+ 
+ //------------------------------------------------------------------------------
++bool vtkCleanPolyData::InsertUniquePoint(const double x[3], vtkIdType& ptId)
++{
++  if (this->Locator != nullptr)
++  {
++    return this->Locator->InsertUniquePoint(x, ptId) ? true : false;
++  }
++  else
++  {
++    return this->Deduplicator->InsertUniquePoint(x, ptId);
++  }
++}
++
++//------------------------------------------------------------------------------
+ int vtkCleanPolyData::RequestData(vtkInformation* vtkNotUsed(request),
+   vtkInformationVector** inputVector, vtkInformationVector* outputVector)
+ {
+@@ -196,18 +217,26 @@
+   if (this->PointMerging)
+   {
+     this->CreateDefaultLocator(input);
+-    if (this->ToleranceIsAbsolute)
++
++    if (this->Locator != nullptr)
+     {
+-      this->Locator->SetTolerance(this->AbsoluteTolerance);
++      if (this->ToleranceIsAbsolute)
++      {
++        this->Locator->SetTolerance(this->AbsoluteTolerance);
++      }
++      else
++      {
++        this->Locator->SetTolerance(this->Tolerance * input->GetLength());
++      }
++      double originalbounds[6], mappedbounds[6];
++      input->GetBounds(originalbounds);
++      this->OperateOnBounds(originalbounds, mappedbounds);
++      this->Locator->InitPointInsertion(newPts, mappedbounds, numPts);
+     }
+     else
+     {
+-      this->Locator->SetTolerance(this->Tolerance * input->GetLength());
++      this->Deduplicator->InitPointInsertion(newPts, numPts);
+     }
+-    double originalbounds[6], mappedbounds[6];
+-    input->GetBounds(originalbounds);
+-    this->OperateOnBounds(originalbounds, mappedbounds);
+-    this->Locator->InitPointInsertion(newPts, mappedbounds);
+   }
+   else
+   {
+@@ -273,7 +302,7 @@
+         else if ((globalIdsArray &&
+                    InsertPointUsingGlobalId(
+                      globalIdsArray->GetValue(pts[i]), newPts, addedGlobalIdsMap, newx, ptId)) ||
+-          (!globalIdsArray && this->Locator->InsertUniquePoint(newx, ptId)))
++          (!globalIdsArray && this->InsertUniquePoint(newx, ptId)))
+         {
+           outputPD->CopyData(inputPD, pts[i], ptId);
+         }
+@@ -322,7 +351,7 @@
+         else if ((globalIdsArray &&
+                    InsertPointUsingGlobalId(
+                      globalIdsArray->GetValue(pts[i]), newPts, addedGlobalIdsMap, newx, ptId)) ||
+-          (!globalIdsArray && this->Locator->InsertUniquePoint(newx, ptId)))
++          (!globalIdsArray && this->InsertUniquePoint(newx, ptId)))
+         {
+           outputPD->CopyData(inputPD, pts[i], ptId);
+         }
+@@ -395,7 +424,7 @@
+         else if ((globalIdsArray &&
+                    InsertPointUsingGlobalId(
+                      globalIdsArray->GetValue(pts[i]), newPts, addedGlobalIdsMap, newx, ptId)) ||
+-          (!globalIdsArray && this->Locator->InsertUniquePoint(newx, ptId)))
++          (!globalIdsArray && this->InsertUniquePoint(newx, ptId)))
+         {
+           outputPD->CopyData(inputPD, pts[i], ptId);
+         }
+@@ -489,7 +518,7 @@
+         else if ((globalIdsArray &&
+                    InsertPointUsingGlobalId(
+                      globalIdsArray->GetValue(pts[i]), newPts, addedGlobalIdsMap, newx, ptId)) ||
+-          (!globalIdsArray && this->Locator->InsertUniquePoint(newx, ptId)))
++          (!globalIdsArray && this->InsertUniquePoint(newx, ptId)))
+         {
+           outputPD->CopyData(inputPD, pts[i], ptId);
+         }
+@@ -582,7 +611,14 @@
+   delete[] updatedPts;
+   if (this->PointMerging)
+   {
+-    this->Locator->Initialize(); // release memory.
++    if (this->Locator != nullptr)
++    {
++      this->Locator->Initialize(); // release memory.
++    }
++    else
++    {
++      this->Deduplicator->Initialize(); // release memory.
++    }
+   }
+   else
+   {
+@@ -671,27 +707,31 @@
+     }
+   }
+ 
+-  if (this->Locator == nullptr)
++  if (tol == 0.0)
+   {
+-    if (tol == 0.0)
++    // use deduplicator
++    if (this->Locator != nullptr)
+     {
+-      this->Locator = vtkMergePoints::New();
+-      this->Locator->Register(this);
+-      this->Locator->Delete();
++      this->SetLocator(nullptr);
+     }
+-    else
++
++    if (this->Deduplicator == nullptr)
+     {
+-      this->Locator = vtkPointLocator::New();
+-      this->Locator->Register(this);
+-      this->Locator->Delete();
++      this->Deduplicator = vtkPointDeduplicate::New();
++      this->Deduplicator->Register(this);
++      this->Deduplicator->Delete();
+     }
+   }
+   else
+   {
+-    // check that the tolerance wasn't changed from zero to non-zero
+-    if ((tol > 0.0) && (this->GetLocator()->GetTolerance() == 0.0))
++    // use locator
++    if (this->Deduplicator != nullptr)
++    {
++      this->SetDeduplicator(nullptr);
++    }
++
++    if (this->Locator == nullptr)
+     {
+-      this->SetLocator(nullptr);
+       this->Locator = vtkPointLocator::New();
+       this->Locator->Register(this);
+       this->Locator->Delete();
+@@ -719,6 +759,14 @@
+   {
+     os << indent << "Locator: (none)\n";
+   }
++  if (this->Deduplicator)
++  {
++    os << indent << "Deduplicator: " << this->Deduplicator << "\n";
++  }
++  else
++  {
++    os << indent << "Deduplicator: (none)\n";
++  }
+   os << indent << "PieceInvariant: " << (this->PieceInvariant ? "On\n" : "Off\n");
+   os << indent << "Output Points Precision: " << this->OutputPointsPrecision << "\n";
+ }
+@@ -733,5 +781,10 @@
+     time = this->Locator->GetMTime();
+     mTime = (time > mTime ? time : mTime);
+   }
++  if (this->Deduplicator != nullptr)
++  {
++    time = this->Deduplicator->GetMTime();
++    mTime = (time > mTime ? time : mTime);
++  }
+   return mTime;
+ }
+diff -u -r -N Filters/Core/vtkCleanPolyData.h Filters/Core/vtkCleanPolyData.h
+--- Filters/Core/vtkCleanPolyData.h	2023-02-15 12:03:53.000000000 +0800
++++ Filters/Core/vtkCleanPolyData.h	2023-10-24 13:20:52.903514200 +0800
+@@ -85,6 +85,8 @@
+ #include "vtkPolyDataAlgorithm.h"
+ 
+ class vtkIncrementalPointLocator;
++class vtkPointDeduplicate;
++class vtkPoints;
+ 
+ class VTKFILTERSCORE_EXPORT vtkCleanPolyData : public vtkPolyDataAlgorithm
+ {
+@@ -162,13 +164,23 @@
+ 
+   ///@{
+   /**
+-   * Set/Get a spatial locator for speeding the search process. By
+-   * default an instance of vtkMergePoints is used.
++   * Set/Get a spatial locator for speeding the search process, used
++   * when tolerance is nonzero. By default an instance of vtkPointLocator
++   * is used.
+    */
+   virtual void SetLocator(vtkIncrementalPointLocator* locator);
+   vtkGetObjectMacro(Locator, vtkIncrementalPointLocator);
+   ///@}
+ 
++  ///@{
++  /**
++   * Set/Get a point deduplicator for speeding the search process,
++   * used when tolerance is zero.
++   */
++  virtual void SetDeduplicator(vtkPointDeduplicate* deduplicator);
++  vtkGetObjectMacro(Deduplicator, vtkPointDeduplicate);
++  ///@}
++
+   /**
+    * Create default locator. Used to create one when none is specified.
+    */
+@@ -177,7 +189,11 @@
+   /**
+    * Release locator
+    */
+-  void ReleaseLocator() { this->SetLocator(nullptr); }
++  void ReleaseLocator()
++  {
++    this->SetLocator(nullptr);
++    this->SetDeduplicator(nullptr);
++  }
+ 
+   /**
+    * Get the MTime of this object also considering the locator.
+@@ -221,6 +237,8 @@
+   int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+   int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+ 
++  bool InsertUniquePoint(const double x[3], vtkIdType& ptId);
++
+   vtkTypeBool PointMerging;
+   double Tolerance;
+   double AbsoluteTolerance;
+@@ -229,6 +247,7 @@
+   vtkTypeBool ConvertStripsToPolys;
+   vtkTypeBool ToleranceIsAbsolute;
+   vtkIncrementalPointLocator* Locator;
++  vtkPointDeduplicate* Deduplicator;
+ 
+   vtkTypeBool PieceInvariant;
+   int OutputPointsPrecision;

@@ -1,0 +1,1068 @@
+Updated vtkBoxClipDataSet so that point merging only occurs for points on the same
+input edge. This is essential if the input points have data that will be
+interpolated at the output point location, because the different edges may
+have different interpolated data.
+
+The intersection point merging is handled by a new class, vtkIntersectionDeduplicate,
+which uses an unordered_map based from (input id A, input id B, AB factor) to (output id).
+
+diff -u -r Common/DataModel/CMakeLists.txt Common/DataModel/CMakeLists.txt
+--- Common/DataModel/CMakeLists.txt	2023-02-15 12:03:53.000000000 +0800
++++ Common/DataModel/CMakeLists.txt	2023-10-24 10:24:27.439128100 +0800
+@@ -126,6 +126,7 @@
+   vtkIncrementalOctreePointLocator
+   vtkIncrementalPointLocator
+   vtkInformationQuadratureSchemeDefinitionVectorKey
++  vtkIntersectionDeduplicate
+   vtkIterativeClosestPointTransform
+   vtkKdNode
+   vtkKdTree
+diff -u -r -N Common/DataModel/vtkIntersectionDeduplicate.cxx Common/DataModel/vtkIntersectionDeduplicate.cxx
+--- Common/DataModel/vtkIntersectionDeduplicate.cxx	1970-01-01 08:00:00.000000000 +0800
++++ Common/DataModel/vtkIntersectionDeduplicate.cxx	2023-10-24 13:11:22.838649600 +0800
+@@ -0,0 +1,123 @@
++/*=========================================================================
++
++  Program:   Visualization Toolkit
++  Module:    vtkIntersectionDeduplicate.cxx
++
++  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
++  All rights reserved.
++  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
++
++     This software is distributed WITHOUT ANY WARRANTY; without even
++     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
++     PURPOSE.  See the above copyright notice for more information.
++
++=========================================================================*/
++#include "vtkIntersectionDeduplicate.h"
++
++#include "vtkObjectFactory.h"
++#include "vtkPoints.h"
++
++vtkStandardNewMacro(vtkIntersectionDeduplicate);
++
++vtkIntersectionDeduplicate::vtkIntersectionDeduplicate()
++{
++  this->InsertionPointId = 0;
++}
++
++//------------------------------------------------------------------------------
++// Determine whether an input point has been inserted into the points list,
++// equivalent to IsInsertedPoint(id, id, 0.0). Return new id of the previously
++// inserted point if this is true, otherwise return -1.
++vtkIdType vtkIntersectionDeduplicate::IsInsertedPoint(vtkIdType originalId)
++{
++  return this->IsInsertedPoint(originalId, originalId, 0.0);
++}
++
++//------------------------------------------------------------------------------
++// Determine whether an intersection point has been inserted into points list.
++// The intersection point is identified by the input ids of the cut edge, AB,
++// and the fractional distance along AB of the intersection/cut, t.
++// Return id of previously inserted point if this is true, otherwise return
++// -1.
++vtkIdType vtkIntersectionDeduplicate::IsInsertedPoint(vtkIdType originalIdA, vtkIdType originalIdB, double t)
++{
++  IntersectionPoint pt (originalIdA, originalIdB, t);
++  auto const hashIt = this->HashIntersectionPoints.find(pt);
++
++  if (hashIt != this->HashIntersectionPoints.end())
++  {
++    return hashIt->second;
++  }
++
++  return -1;
++}
++
++//------------------------------------------------------------------------------
++bool vtkIntersectionDeduplicate::InitPointInsertion(vtkPoints* newPts, vtkIdType estNumPts)
++{
++  this->Initialize();
++
++  if (newPts == nullptr)
++  {
++    vtkErrorMacro(<< "Must define points for point insertion");
++    return false;
++  }
++
++  this->Points = newPts;
++
++  if (estNumPts > 0)
++  {
++    this->HashIntersectionPoints.reserve(estNumPts);
++  }
++
++  return true;
++}
++
++//------------------------------------------------------------------------------
++// Determine whether an input point has been inserted into the points list,
++// equivalent to InsertUniquePoint(id, id, 0.0, x, ptId). Return false if
++// the point was already in the list, otherwise reutrn true. If the point
++// was not in the list, it will be ADDED. In either case, the id of the
++// point (newly inserted or not) is returned in the ptId argument.
++bool vtkIntersectionDeduplicate::InsertUniquePoint(vtkIdType originalId,
++  const double x[3], vtkIdType& ptId)
++{
++  return this->InsertUniquePoint(originalId, originalId, 0.0, x, ptId);
++}
++
++//------------------------------------------------------------------------------
++// Determine whether an input point has been inserted into the points list.
++// Return false if the point was already in the list, otherwise reutrn true.
++// If the point was not in the list, it will be ADDED. In either case, the id
++// of the point (newly inserted or not) is returned in the ptId argument.
++bool vtkIntersectionDeduplicate::InsertUniquePoint(vtkIdType originalIdA,
++  vtkIdType originalIdB, double t, const double x[3], vtkIdType& ptId)
++{
++  IntersectionPoint pt (originalIdA, originalIdB, t);
++  auto const hashIt = this->HashIntersectionPoints.find(pt);
++
++  if (hashIt != this->HashIntersectionPoints.end())
++  {
++    ptId = hashIt->second;
++    return false;
++  }
++
++  ptId = this->InsertionPointId++;
++  this->HashIntersectionPoints.emplace(pt, ptId);
++  this->Points->InsertPoint(ptId, x);
++
++  return true;
++}
++
++//------------------------------------------------------------------------------
++void vtkIntersectionDeduplicate::Initialize()
++{
++  this->InsertionPointId = 0;
++  this->HashIntersectionPoints.clear();
++}
++
++//------------------------------------------------------------------------------
++void vtkIntersectionDeduplicate::PrintSelf(ostream& os, vtkIndent indent)
++{
++  this->Superclass::PrintSelf(os, indent);
++}
+diff -u -r -N Common/DataModel/vtkIntersectionDeduplicate.h Common/DataModel/vtkIntersectionDeduplicate.h
+--- Common/DataModel/vtkIntersectionDeduplicate.h	1970-01-01 08:00:00.000000000 +0800
++++ Common/DataModel/vtkIntersectionDeduplicate.h	2023-10-24 13:11:25.105928900 +0800
+@@ -0,0 +1,145 @@
++/*=========================================================================
++
++  Program:   Visualization Toolkit
++  Module:    vtkIntersectionDeduplicate.h
++
++  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
++  All rights reserved.
++  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
++
++     This software is distributed WITHOUT ANY WARRANTY; without even
++     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
++     PURPOSE.  See the above copyright notice for more information.
++
++=========================================================================*/
++/**
++ * @class   vtkIntersectionDeduplicate
++ * @brief   merge exactly coincident points
++ *
++ * vtkIntersectionDeduplicate merges precisely coincident points created
++ * from intersections of the line segment between two points. The merging
++ * process depends only on the ids of the two input points, AB, and the
++ * fractional distance between AB of the new point.
++ */
++
++#ifndef vtkIntersectionDeduplicate_h
++#define vtkIntersectionDeduplicate_h
++
++#include "vtkCommonDataModelModule.h" // For export macro
++#include "vtkObject.h"
++#include "vtkSmartPointer.h"
++
++#include <array>
++#include <unordered_map>
++
++class vtkPoints;
++
++class VTKCOMMONDATAMODEL_EXPORT vtkIntersectionDeduplicate : public vtkObject
++{
++public:
++  static vtkIntersectionDeduplicate* New();
++  vtkTypeMacro(vtkIntersectionDeduplicate, vtkObject);
++  void PrintSelf(ostream& os, vtkIndent indent) override;
++
++  /**
++   * Determine whether an input point has been inserted into the points list,
++   * equivalent to IsInsertedPoint(id, id, 0.0). Return new id of the previously
++   * inserted point if this is true, otherwise return -1.
++   */
++  virtual vtkIdType IsInsertedPoint(vtkIdType originalId);
++
++  /**
++   * Determine whether an intersection point has been inserted into points list.
++   * The intersection point is identified by the input ids of the cut edge, AB,
++   * and the fractional distance along AB of the intersection/cut, t.
++   * Return id of previously inserted point if this is true, otherwise return
++   * -1.
++   */
++  virtual vtkIdType IsInsertedPoint(vtkIdType originalIdA, vtkIdType originalIdB, double t);
++
++  /**
++   * Initialize the intersection point deduplication process. The newPts is an object
++   * representing point coordinates into which incremental insertion methods
++   * place their data.
++   */
++  virtual bool InitPointInsertion(vtkPoints* newPts, vtkIdType estNumPts);
++
++  /**
++   * Determine whether an input point has been inserted into the points list,
++   * equivalent to InsertUniquePoint(id, id, 0.0, x, ptId). Return false if
++   * the point was already in the list, otherwise reutrn true. If the point
++   * was not in the list, it will be ADDED. In either case, the id of the
++   * point (newly inserted or not) is returned in the ptId argument.
++   */
++  virtual bool InsertUniquePoint(vtkIdType originalId, const double x[3], vtkIdType& ptId);
++
++  /**
++   * Determine whether an input point has been inserted into the points list.
++   * Return false if the point was already in the list, otherwise reutrn true.
++   * If the point was not in the list, it will be ADDED. In either case, the id
++   * of the point (newly inserted or not) is returned in the ptId argument.
++   */
++  virtual bool InsertUniquePoint(vtkIdType originalIdA, vtkIdType originalIdB, double t, const double x[3], vtkIdType& ptId);
++
++  /**
++   * Initialize deduplicator. Frees memory and resets object as appropriate.
++   */
++  virtual void Initialize();
++
++protected:
++  vtkIntersectionDeduplicate();
++  ~vtkIntersectionDeduplicate() override = default;
++
++  // represents a unique point along an edge.
++  struct IntersectionPoint
++  {
++    IntersectionPoint(vtkIdType a, vtkIdType b, double t)
++      : OriginalIdA(a <= b ? a : b),
++        OriginalIdB(a <= b ? b : a),
++        FactorAB(a <= b ? t : (1.0 - t))
++    {}
++
++    bool operator==(IntersectionPoint const& rhs) const
++    {
++      return OriginalIdA == rhs.OriginalIdA
++        && OriginalIdB == rhs.OriginalIdB
++        && FactorAB == rhs.FactorAB;
++    }
++
++    vtkIdType OriginalIdA;
++    vtkIdType OriginalIdB;
++    double FactorAB;
++  };
++
++  // hash implementation for IntersectionPoint
++  struct IntersectionPointHasher
++  {
++    // after n3876: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3876.pdf
++    template<typename T>
++    void hash_combine(std::size_t& seed, T const val) const
++    {
++      seed ^= std::hash<T>{}(val) + 0x9e3779b9 + (seed<<6) + (seed>>2);
++    }
++
++    std::size_t operator()(const IntersectionPoint& point) const
++    {
++      std::size_t h = 0;
++      hash_combine(h, point.OriginalIdA);
++      hash_combine(h, point.OriginalIdB);
++      hash_combine(h, point.FactorAB);
++      return h;
++    }
++  };
++
++  vtkSmartPointer<vtkPoints> Points;
++
++  vtkIdType InsertionPointId;
++
++  std::unordered_map<IntersectionPoint, vtkIdType, IntersectionPointHasher> HashIntersectionPoints;
++
++private:
++  vtkIntersectionDeduplicate(const vtkIntersectionDeduplicate&) = delete;
++  void operator=(const vtkIntersectionDeduplicate&) = delete;
++};
++
++#endif
+diff -u -r -N Filters/General/vtkBoxClipDataSet.cxx Filters/General/vtkBoxClipDataSet.cxx
+--- Filters/General/vtkBoxClipDataSet.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Filters/General/vtkBoxClipDataSet.cxx	2023-10-24 12:53:00.236916400 +0800
+@@ -25,7 +25,7 @@
+ #include "vtkGenericCell.h"
+ #include "vtkIdList.h"
+ #include "vtkImageData.h"
+-#include "vtkIncrementalPointLocator.h"
++#include "vtkIntersectionDeduplicate.h"
+ #include "vtkInformation.h"
+ #include "vtkInformationVector.h"
+ #include "vtkIntArray.h"
+@@ -39,11 +39,11 @@
+ #include <vector>
+ 
+ vtkStandardNewMacro(vtkBoxClipDataSet);
+-vtkCxxSetObjectMacro(vtkBoxClipDataSet, Locator, vtkIncrementalPointLocator);
++vtkCxxSetObjectMacro(vtkBoxClipDataSet, Deduplicator, vtkIntersectionDeduplicate);
+ //------------------------------------------------------------------------------
+ vtkBoxClipDataSet::vtkBoxClipDataSet()
+ {
+-  this->Locator = nullptr;
++  this->Deduplicator = nullptr;
+   this->GenerateClipScalars = 0;
+ 
+   this->GenerateClippedOutput = 0;
+@@ -117,7 +117,7 @@
+ //------------------------------------------------------------------------------
+ vtkBoxClipDataSet::~vtkBoxClipDataSet()
+ {
+-  this->SetLocator(nullptr);
++  this->SetDeduplicator(nullptr);
+ }
+ 
+ //------------------------------------------------------------------------------
+@@ -139,9 +139,9 @@
+   vtkMTimeType mTime = this->Superclass::GetMTime();
+   vtkMTimeType time;
+ 
+-  if (this->Locator != nullptr)
++  if (this->Deduplicator != nullptr)
+   {
+-    time = this->Locator->GetMTime();
++    time = this->Deduplicator->GetMTime();
+     mTime = (time > mTime ? time : mTime);
+   }
+ 
+@@ -248,11 +248,11 @@
+   newPoints->Allocate(numPts, numPts / 2);
+ 
+   // locator used to merge potentially duplicate points
+-  if (this->Locator == nullptr)
++  if (this->Deduplicator == nullptr)
+   {
+     this->CreateDefaultLocator();
+   }
+-  this->Locator->InitPointInsertion(newPoints, input->GetBounds());
++  this->Deduplicator->InitPointInsertion(newPoints, numPts);
+ 
+   outPD[0] = output->GetPointData();
+   if (this->GenerateClippedOutput)
+@@ -323,12 +323,12 @@
+         if (orientation)
+         {
+           this->ClipHexahedronInOut(
+-            newPoints, cell, this->Locator, conn, inPD, outPD, inCD, cellId, outCD);
++            newPoints, cell, this->Deduplicator, conn, inPD, outPD, inCD, cellId, outCD);
+         }
+         else
+         {
+           this->ClipBoxInOut(
+-            newPoints, cell, this->Locator, conn, inPD, outPD, inCD, cellId, outCD);
++            newPoints, cell, this->Deduplicator, conn, inPD, outPD, inCD, cellId, outCD);
+         }
+ 
+         numNew[0] = conn[0]->GetNumberOfCells() - num[0];
+@@ -341,12 +341,12 @@
+         if (orientation)
+         {
+           this->ClipHexahedronInOut2D(
+-            newPoints, cell, this->Locator, conn, inPD, outPD, inCD, cellId, outCD);
++            newPoints, cell, this->Deduplicator, conn, inPD, outPD, inCD, cellId, outCD);
+         }
+         else
+         {
+           this->ClipBoxInOut2D(
+-            newPoints, cell, this->Locator, conn, inPD, outPD, inCD, cellId, outCD);
++            newPoints, cell, this->Deduplicator, conn, inPD, outPD, inCD, cellId, outCD);
+         }
+         numNew[0] = conn[0]->GetNumberOfCells() - num[0];
+         numNew[1] = conn[1]->GetNumberOfCells() - num[1];
+@@ -358,12 +358,12 @@
+         if (orientation)
+         {
+           this->ClipHexahedronInOut1D(
+-            newPoints, cell, this->Locator, conn, inPD, outPD, inCD, cellId, outCD);
++            newPoints, cell, this->Deduplicator, conn, inPD, outPD, inCD, cellId, outCD);
+         }
+         else
+         {
+           this->ClipBoxInOut1D(
+-            newPoints, cell, this->Locator, conn, inPD, outPD, inCD, cellId, outCD);
++            newPoints, cell, this->Deduplicator, conn, inPD, outPD, inCD, cellId, outCD);
+         }
+         numNew[0] = conn[0]->GetNumberOfCells() - num[0];
+         numNew[1] = conn[1]->GetNumberOfCells() - num[1];
+@@ -374,11 +374,11 @@
+       {
+         if (orientation)
+         {
+-          this->ClipHexahedronInOut0D(cell, this->Locator, conn, inPD, outPD, inCD, cellId, outCD);
++          this->ClipHexahedronInOut0D(cell, this->Deduplicator, conn, inPD, outPD, inCD, cellId, outCD);
+         }
+         else
+         {
+-          this->ClipBoxInOut0D(cell, this->Locator, conn, inPD, outPD, inCD, cellId, outCD);
++          this->ClipBoxInOut0D(cell, this->Deduplicator, conn, inPD, outPD, inCD, cellId, outCD);
+         }
+         numNew[0] = conn[0]->GetNumberOfCells() - num[0];
+         numNew[1] = conn[1]->GetNumberOfCells() - num[1];
+@@ -397,12 +397,12 @@
+         if (orientation)
+         {
+           this->ClipHexahedron(
+-            newPoints, cell, this->Locator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
++            newPoints, cell, this->Deduplicator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
+         }
+         else
+         {
+           this->ClipBox(
+-            newPoints, cell, this->Locator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
++            newPoints, cell, this->Deduplicator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
+         }
+ 
+         numNew[0] = conn[0]->GetNumberOfCells() - num[0];
+@@ -413,12 +413,12 @@
+         if (orientation)
+         {
+           this->ClipHexahedron2D(
+-            newPoints, cell, this->Locator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
++            newPoints, cell, this->Deduplicator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
+         }
+         else
+         {
+           this->ClipBox2D(
+-            newPoints, cell, this->Locator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
++            newPoints, cell, this->Deduplicator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
+         }
+         numNew[0] = conn[0]->GetNumberOfCells() - num[0];
+         num[0] = conn[0]->GetNumberOfCells();
+@@ -428,12 +428,12 @@
+         if (orientation)
+         {
+           this->ClipHexahedron1D(
+-            newPoints, cell, this->Locator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
++            newPoints, cell, this->Deduplicator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
+         }
+         else
+         {
+           this->ClipBox1D(
+-            newPoints, cell, this->Locator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
++            newPoints, cell, this->Deduplicator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
+         }
+         numNew[0] = conn[0]->GetNumberOfCells() - num[0];
+         num[0] = conn[0]->GetNumberOfCells();
+@@ -443,11 +443,11 @@
+         if (orientation)
+         {
+           this->ClipHexahedron0D(
+-            cell, this->Locator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
++            cell, this->Deduplicator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
+         }
+         else
+         {
+-          this->ClipBox0D(cell, this->Locator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
++          this->ClipBox0D(cell, this->Deduplicator, conn[0], inPD, outPD[0], inCD, cellId, outCD[0]);
+         }
+         numNew[0] = conn[0]->GetNumberOfCells() - num[0];
+         num[0] = conn[0]->GetNumberOfCells();
+@@ -506,22 +506,22 @@
+     types[1]->Delete();
+   }
+   newPoints->Delete();
+-  this->Locator->Initialize(); // release any extra memory
++  this->Deduplicator->Initialize(); // release any extra memory
+   output->Squeeze();
+ 
+   return 1;
+ }
+ 
+ //------------------------------------------------------------------------------
+-// Specify a spatial locator for merging points. By default,
+-// an instance of vtkMergePoints is used.
++// Specify an intersection point deduplicator for merging points.
++// By default, an instance of vtkIntersectionDeduplicate is used.
+ void vtkBoxClipDataSet::CreateDefaultLocator()
+ {
+-  if (this->Locator == nullptr)
++  if (this->Deduplicator == nullptr)
+   {
+-    this->Locator = vtkMergePoints::New();
+-    this->Locator->Register(this);
+-    this->Locator->Delete();
++    this->Deduplicator = vtkIntersectionDeduplicate::New();
++    this->Deduplicator->Register(this);
++    this->Deduplicator->Delete();
+   }
+ }
+ 
+@@ -667,13 +667,13 @@
+   // os << indent << "Merge Tolerance: " << this->MergeTolerance << "\n";
+   os << indent << "Orientation: " << this->Orientation << "\n";
+ 
+-  if (this->Locator)
++  if (this->Deduplicator)
+   {
+-    os << indent << "Locator: " << this->Locator << "\n";
++    os << indent << "Deduplicator: " << this->Deduplicator << "\n";
+   }
+   else
+   {
+-    os << indent << "Locator: (none)\n";
++    os << indent << "Deduplicator: (none)\n";
+   }
+ 
+   os << indent << "Generate Clipped Output: " << (this->GenerateClippedOutput ? "Yes\n" : "Off\n");
+@@ -1921,7 +1921,7 @@
+ //------------------------------------------------------------------------------
+ //
+ void vtkBoxClipDataSet::ClipBox(vtkPoints* newPoints, vtkGenericCell* cell,
+-  vtkIncrementalPointLocator* locator, vtkCellArray* tets, vtkPointData* inPD, vtkPointData* outPD,
++  vtkIntersectionDeduplicate* locator, vtkCellArray* tets, vtkPointData* inPD, vtkPointData* outPD,
+   vtkCellData* inCD, vtkIdType cellId, vtkCellData* outCD)
+ {
+   vtkIdType cellType = cell->GetCellType();
+@@ -2032,7 +2032,7 @@
+       cellPts->GetPoint(v_id[i], v);
+       // Currently all points are injected because of the possibility
+       // of intersection point merging.
+-      if (locator->InsertUniquePoint(v, iid[i]))
++      if (locator->InsertUniquePoint(ptId, v, iid[i]))
+       {
+         outPD->CopyData(inPD, ptId, iid[i]);
+       }
+@@ -2161,7 +2161,7 @@
+ 
+             // Incorporate point into output and interpolate edge data as necessary
+             edges_inter = edges_inter * 10 + (edgeNum + 1);
+-            if (locator->InsertUniquePoint(x, p_id[num_inter]))
++            if (locator->InsertUniquePoint(v_id[v1], v_id[v2], t, x, p_id[num_inter]))
+             {
+               this->InterpolateEdge(outPD, p_id[num_inter], v_id[v1], v_id[v2], t);
+             }
+@@ -2413,7 +2413,7 @@
+ // The ClipHexahedron use plane equation to decide who is outside.
+ //
+ void vtkBoxClipDataSet::ClipHexahedron(vtkPoints* newPoints, vtkGenericCell* cell,
+-  vtkIncrementalPointLocator* locator, vtkCellArray* tets, vtkPointData* inPD, vtkPointData* outPD,
++  vtkIntersectionDeduplicate* locator, vtkCellArray* tets, vtkPointData* inPD, vtkPointData* outPD,
+   vtkCellData* inCD, vtkIdType cellId, vtkCellData* outCD)
+ {
+   vtkIdType idcellnew;
+@@ -2524,7 +2524,7 @@
+ 
+       // Currently all points are injected because of the possibility
+       // of intersection point merging.
+-      if (locator->InsertUniquePoint(v, iid[i]))
++      if (locator->InsertUniquePoint(ptId, v, iid[i]))
+       {
+         outPD->CopyData(inPD, ptId, iid[i]);
+       }
+@@ -2661,7 +2661,7 @@
+             // Incorporate point into output and interpolate edge data as necessary
+             edges_inter = edges_inter * 10 + (edgeNum + 1);
+ 
+-            if (locator->InsertUniquePoint(x, p_id[num_inter]))
++            if (locator->InsertUniquePoint(v_id[v1], v_id[v2], t, x, p_id[num_inter]))
+             {
+               this->InterpolateEdge(outPD, p_id[num_inter], v_id[v1], v_id[v2], t);
+             }
+@@ -2904,7 +2904,7 @@
+ // The ClipBoxInOut generate both outputs: inside and outside the clip box.
+ //
+ void vtkBoxClipDataSet::ClipBoxInOut(vtkPoints* newPoints, vtkGenericCell* cell,
+-  vtkIncrementalPointLocator* locator, vtkCellArray** tets, vtkPointData* inPD,
++  vtkIntersectionDeduplicate* locator, vtkCellArray** tets, vtkPointData* inPD,
+   vtkPointData** outPD, vtkCellData* inCD, vtkIdType cellId, vtkCellData** outCD)
+ {
+   vtkIdType cellType = cell->GetCellType();
+@@ -3010,7 +3010,7 @@
+       {
+         for (i = 0; i < 4; i++)
+         {
+-          if (locator->InsertUniquePoint(v_tetra[i], iid[i]))
++          if (locator->InsertUniquePoint(ptIdout[i], v_tetra[i], iid[i]))
+           {
+             outPD[0]->CopyData(inPD, ptIdout[i], iid[i]);
+             outPD[1]->CopyData(inPD, ptIdout[i], iid[i]);
+@@ -3029,7 +3029,7 @@
+ 
+       // Currently all points are injected because of the possibility
+       // of intersection point merging.
+-      if (locator->InsertUniquePoint(v, iid[i]))
++      if (locator->InsertUniquePoint(ptId, v, iid[i]))
+       {
+         outPD[0]->CopyData(inPD, ptId, iid[i]);
+         outPD[1]->CopyData(inPD, ptId, iid[i]);
+@@ -3157,7 +3157,7 @@
+ 
+             // Incorporate point into output and interpolate edge data as necessary
+             edges_inter = edges_inter * 10 + (edgeNum + 1);
+-            if (locator->InsertUniquePoint(x, p_id[num_inter]))
++            if (locator->InsertUniquePoint(v_id[v1], v_id[v2], t, x, p_id[num_inter]))
+             {
+               this->InterpolateEdge(outPD[0], p_id[num_inter], v_id[v1], v_id[v2], t);
+               this->InterpolateEdge(outPD[1], p_id[num_inter], v_id[v1], v_id[v2], t);
+@@ -3472,7 +3472,7 @@
+ // The ClipHexahedronInOut generate both outputs: inside and outside the clip hexahedron.
+ //
+ void vtkBoxClipDataSet::ClipHexahedronInOut(vtkPoints* newPoints, vtkGenericCell* cell,
+-  vtkIncrementalPointLocator* locator, vtkCellArray** tets, vtkPointData* inPD,
++  vtkIntersectionDeduplicate* locator, vtkCellArray** tets, vtkPointData* inPD,
+   vtkPointData** outPD, vtkCellData* inCD, vtkIdType cellId, vtkCellData** outCD)
+ {
+   vtkIdType cellType = cell->GetCellType();
+@@ -3576,7 +3576,7 @@
+     {
+       for (i = 0; i < 4; i++)
+       {
+-        if (locator->InsertUniquePoint(v_tetra[i], iid[i]))
++        if (locator->InsertUniquePoint(ptIdout[i], v_tetra[i], iid[i]))
+         {
+           outPD[0]->CopyData(inPD, ptIdout[i], iid[i]);
+           outPD[1]->CopyData(inPD, ptIdout[i], iid[i]);
+@@ -3595,7 +3595,7 @@
+       // Currently all points are injected because of the possibility
+       // of intersection point merging.
+ 
+-      if (locator->InsertUniquePoint(v, iid[i]))
++      if (locator->InsertUniquePoint(ptId, v, iid[i]))
+       {
+         outPD[0]->CopyData(inPD, ptId, iid[i]);
+         outPD[1]->CopyData(inPD, ptId, iid[i]);
+@@ -3737,7 +3737,7 @@
+             // Incorporate point into output and interpolate edge data as necessary
+             edges_inter = edges_inter * 10 + (edgeNum + 1);
+ 
+-            if (locator->InsertUniquePoint(x, p_id[num_inter]))
++            if (locator->InsertUniquePoint(v_id[v1], v_id[v2], t, x, p_id[num_inter]))
+             {
+               this->InterpolateEdge(outPD[0], p_id[num_inter], v_id[v1], v_id[v2], t);
+               this->InterpolateEdge(outPD[1], p_id[num_inter], v_id[v1], v_id[v2], t);
+@@ -4044,7 +4044,7 @@
+ 
+ //-------------------------------------------------------
+ void vtkBoxClipDataSet::ClipBox2D(vtkPoints* newPoints, vtkGenericCell* cell,
+-  vtkIncrementalPointLocator* locator, vtkCellArray* tets, vtkPointData* inPD, vtkPointData* outPD,
++  vtkIntersectionDeduplicate* locator, vtkCellArray* tets, vtkPointData* inPD, vtkPointData* outPD,
+   vtkCellData* inCD, vtkIdType cellId, vtkCellData* outCD)
+ {
+   vtkIdType cellType = cell->GetCellType();
+@@ -4156,7 +4156,7 @@
+       // of intersection point merging.
+       ptId = cellIds->GetId(v_id[i]);
+       cellPts->GetPoint(v_id[i], v);
+-      if (locator->InsertUniquePoint(v, iid[i]))
++      if (locator->InsertUniquePoint(ptId, v, iid[i]))
+       {
+         outPD->CopyData(inPD, ptId, iid[i]);
+       }
+@@ -4252,7 +4252,7 @@
+ 
+             // Incorporate point into output and interpolate edge data as necessary
+             edges_inter = edges_inter * 10 + (edgeNum + 1);
+-            if (locator->InsertUniquePoint(x, p_id[num_inter]))
++            if (locator->InsertUniquePoint(v_id[v1], v_id[v2], t, x, p_id[num_inter]))
+             {
+               this->InterpolateEdge(outPD, p_id[num_inter], v_id[v1], v_id[v2], t);
+             }
+@@ -4393,7 +4393,7 @@
+ //-------------------------------------------------------
+ 
+ void vtkBoxClipDataSet::ClipBoxInOut2D(vtkPoints* newPoints, vtkGenericCell* cell,
+-  vtkIncrementalPointLocator* locator, vtkCellArray** tets, vtkPointData* inPD,
++  vtkIntersectionDeduplicate* locator, vtkCellArray** tets, vtkPointData* inPD,
+   vtkPointData** outPD, vtkCellData* inCD, vtkIdType cellId, vtkCellData** outCD)
+ {
+   vtkIdType cellType = cell->GetCellType();
+@@ -4500,7 +4500,7 @@
+       {
+         for (i = 0; i < 3; i++)
+         {
+-          if (locator->InsertUniquePoint(v_triangle[i], iid[i]))
++          if (locator->InsertUniquePoint(ptIdout[i], v_triangle[i], iid[i]))
+           {
+             outPD[0]->CopyData(inPD, ptIdout[i], iid[i]);
+             outPD[1]->CopyData(inPD, ptIdout[i], iid[i]);
+@@ -4520,7 +4520,7 @@
+ 
+       // Currently all points are injected because of the possibility
+       // of intersection point merging.
+-      if (locator->InsertUniquePoint(v, iid[i]))
++      if (locator->InsertUniquePoint(ptId, v, iid[i]))
+       {
+         outPD[0]->CopyData(inPD, ptId, iid[i]);
+         outPD[1]->CopyData(inPD, ptId, iid[i]);
+@@ -4616,7 +4616,7 @@
+ 
+             // Incorporate point into output and interpolate edge data as necessary
+             edges_inter = edges_inter * 10 + (edgeNum + 1);
+-            if (locator->InsertUniquePoint(x, p_id[num_inter]))
++            if (locator->InsertUniquePoint(v_id[v1], v_id[v2], t, x, p_id[num_inter]))
+             {
+               this->InterpolateEdge(outPD[0], p_id[num_inter], v_id[v1], v_id[v2], t);
+               this->InterpolateEdge(outPD[1], p_id[num_inter], v_id[v1], v_id[v2], t);
+@@ -4810,7 +4810,7 @@
+ //-------------------------------------------------------
+ 
+ void vtkBoxClipDataSet::ClipHexahedron2D(vtkPoints* newPoints, vtkGenericCell* cell,
+-  vtkIncrementalPointLocator* locator, vtkCellArray* tets, vtkPointData* inPD, vtkPointData* outPD,
++  vtkIntersectionDeduplicate* locator, vtkCellArray* tets, vtkPointData* inPD, vtkPointData* outPD,
+   vtkCellData* inCD, vtkIdType cellId, vtkCellData* outCD)
+ {
+   vtkIdType cellType = cell->GetCellType();
+@@ -4920,7 +4920,7 @@
+       // Currently all points are injected because of the possibility
+       // of intersection point merging.
+ 
+-      if (locator->InsertUniquePoint(v, iid[i]))
++      if (locator->InsertUniquePoint(ptId, v, iid[i]))
+       {
+         outPD->CopyData(inPD, ptId, iid[i]);
+       }
+@@ -5021,7 +5021,7 @@
+             // Incorporate point into output and interpolate edge data as necessary
+             edges_inter = edges_inter * 10 + (edgeNum + 1);
+ 
+-            if (locator->InsertUniquePoint(x, p_id[num_inter]))
++            if (locator->InsertUniquePoint(v_id[v1], v_id[v2], t, x, p_id[num_inter]))
+             {
+               this->InterpolateEdge(outPD, p_id[num_inter], v_id[v1], v_id[v2], t);
+             }
+@@ -5163,7 +5163,7 @@
+ //-------------------------------------------------------
+ 
+ void vtkBoxClipDataSet::ClipHexahedronInOut2D(vtkPoints* newPoints, vtkGenericCell* cell,
+-  vtkIncrementalPointLocator* locator, vtkCellArray** tets, vtkPointData* inPD,
++  vtkIntersectionDeduplicate* locator, vtkCellArray** tets, vtkPointData* inPD,
+   vtkPointData** outPD, vtkCellData* inCD, vtkIdType cellId, vtkCellData** outCD)
+ {
+   vtkIdType cellType = cell->GetCellType();
+@@ -5267,7 +5267,7 @@
+     {
+       for (i = 0; i < 3; i++)
+       {
+-        if (locator->InsertUniquePoint(v_triangle[i], iid[i]))
++        if (locator->InsertUniquePoint(ptIdout[i], v_triangle[i], iid[i]))
+         {
+           outPD[0]->CopyData(inPD, ptIdout[i], iid[i]);
+           outPD[1]->CopyData(inPD, ptIdout[i], iid[i]);
+@@ -5286,7 +5286,7 @@
+ 
+       // Currently all points are injected because of the possibility
+       // of intersection point merging.
+-      if (locator->InsertUniquePoint(v, iid[i]))
++      if (locator->InsertUniquePoint(ptId, v, iid[i]))
+       {
+         outPD[0]->CopyData(inPD, ptId, iid[i]);
+         outPD[1]->CopyData(inPD, ptId, iid[i]);
+@@ -5389,7 +5389,7 @@
+             // Incorporate point into output and interpolate edge data as necessary
+             edges_inter = edges_inter * 10 + (edgeNum + 1);
+ 
+-            if (locator->InsertUniquePoint(x, p_id[num_inter]))
++            if (locator->InsertUniquePoint(v_id[v1], v_id[v2], t, x, p_id[num_inter]))
+             {
+               this->InterpolateEdge(outPD[0], p_id[num_inter], v_id[v1], v_id[v2], t);
+               this->InterpolateEdge(outPD[1], p_id[num_inter], v_id[v1], v_id[v2], t);
+@@ -5580,7 +5580,7 @@
+ //------------------------------------------------------------------------------
+ 
+ void vtkBoxClipDataSet::ClipBox1D(vtkPoints* newPoints, vtkGenericCell* cell,
+-  vtkIncrementalPointLocator* locator, vtkCellArray* lines, vtkPointData* inPD, vtkPointData* outPD,
++  vtkIntersectionDeduplicate* locator, vtkCellArray* lines, vtkPointData* inPD, vtkPointData* outPD,
+   vtkCellData* inCD, vtkIdType cellId, vtkCellData* outCD)
+ {
+   vtkIdType cellType = cell->GetCellType();
+@@ -5678,7 +5678,7 @@
+       // of intersection point merging.
+       ptId = cellIds->GetId(v_id[i]);
+       cellPts->GetPoint(v_id[i], v);
+-      if (locator->InsertUniquePoint(v, iid[i]))
++      if (locator->InsertUniquePoint(ptId, v, iid[i]))
+       {
+         outPD->CopyData(inPD, ptId, iid[i]);
+       }
+@@ -5740,7 +5740,7 @@
+ 
+         // Incorporate point into output and interpolate edge data as
+         // necessary.
+-        if (locator->InsertUniquePoint(x, p_id))
++        if (locator->InsertUniquePoint(v_id[0], v_id[1], t, x, p_id))
+         {
+           this->InterpolateEdge(outPD, p_id, v_id[0], v_id[1], t);
+         }
+@@ -5782,7 +5782,7 @@
+ //------------------------------------------------------------------------------
+ 
+ void vtkBoxClipDataSet::ClipBoxInOut1D(vtkPoints* newPoints, vtkGenericCell* cell,
+-  vtkIncrementalPointLocator* locator, vtkCellArray** lines, vtkPointData* inPD,
++  vtkIntersectionDeduplicate* locator, vtkCellArray** lines, vtkPointData* inPD,
+   vtkPointData** outPD, vtkCellData* inCD, vtkIdType cellId, vtkCellData** outCD)
+ {
+   vtkIdType cellType = cell->GetCellType();
+@@ -5833,7 +5833,7 @@
+         allInside = 0;
+       }
+ 
+-      if (locator->InsertUniquePoint(v, iid[i]))
++      if (locator->InsertUniquePoint(ptId, v, iid[i]))
+       {
+         outPD[0]->CopyData(inPD, ptId, iid[i]);
+         outPD[1]->CopyData(inPD, ptId, iid[i]);
+@@ -5942,7 +5942,7 @@
+ 
+         // Incorporate point into output and interpolate edge data as
+         // necessary.
+-        if (locator->InsertUniquePoint(x, p_id))
++        if (locator->InsertUniquePoint(v_id[0], v_id[1], t, x, p_id))
+         {
+           this->InterpolateEdge(outPD[0], p_id, v_id[0], v_id[1], t);
+           this->InterpolateEdge(outPD[1], p_id, v_id[0], v_id[1], t);
+@@ -6003,7 +6003,7 @@
+ //------------------------------------------------------------------------------
+ 
+ void vtkBoxClipDataSet::ClipHexahedron1D(vtkPoints* newPoints, vtkGenericCell* cell,
+-  vtkIncrementalPointLocator* locator, vtkCellArray* lines, vtkPointData* inPD, vtkPointData* outPD,
++  vtkIntersectionDeduplicate* locator, vtkCellArray* lines, vtkPointData* inPD, vtkPointData* outPD,
+   vtkCellData* inCD, vtkIdType cellId, vtkCellData* outCD)
+ {
+   vtkIdType cellType = cell->GetCellType();
+@@ -6091,7 +6091,7 @@
+       // of intersection point merging.
+       ptId = cellIds->GetId(v_id[i]);
+       cellPts->GetPoint(v_id[i], v);
+-      if (locator->InsertUniquePoint(v, iid[i]))
++      if (locator->InsertUniquePoint(ptId, v, iid[i]))
+       {
+         outPD->CopyData(inPD, ptId, iid[i]);
+       }
+@@ -6154,7 +6154,7 @@
+ 
+         // Incorporate point into output and interpolate edge data as
+         // necessary.
+-        if (locator->InsertUniquePoint(x, p_id))
++        if (locator->InsertUniquePoint(v_id[0], v_id[1], t, x, p_id))
+         {
+           this->InterpolateEdge(outPD, p_id, v_id[0], v_id[1], t);
+         }
+@@ -6195,7 +6195,7 @@
+ //------------------------------------------------------------------------------
+ 
+ void vtkBoxClipDataSet::ClipHexahedronInOut1D(vtkPoints* newPoints, vtkGenericCell* cell,
+-  vtkIncrementalPointLocator* locator, vtkCellArray** lines, vtkPointData* inPD,
++  vtkIntersectionDeduplicate* locator, vtkCellArray** lines, vtkPointData* inPD,
+   vtkPointData** outPD, vtkCellData* inCD, vtkIdType cellId, vtkCellData** outCD)
+ {
+   vtkIdType cellType = cell->GetCellType();
+@@ -6249,7 +6249,7 @@
+         }
+       }
+ 
+-      if (locator->InsertUniquePoint(v, iid[i]))
++      if (locator->InsertUniquePoint(ptId, v, iid[i]))
+       {
+         outPD[0]->CopyData(inPD, ptId, iid[i]);
+         outPD[1]->CopyData(inPD, ptId, iid[i]);
+@@ -6346,7 +6346,7 @@
+ 
+         // Incorporate point into output and interpolate edge data as
+         // necessary.
+-        if (locator->InsertUniquePoint(x, p_id))
++        if (locator->InsertUniquePoint(v_id[0], v_id[1], t, x, p_id))
+         {
+           this->InterpolateEdge(outPD[0], p_id, v_id[0], v_id[1], t);
+           this->InterpolateEdge(outPD[1], p_id, v_id[0], v_id[1], t);
+@@ -6405,7 +6405,7 @@
+ 
+ //------------------------------------------------------------------------------
+ 
+-void vtkBoxClipDataSet::ClipBox0D(vtkGenericCell* cell, vtkIncrementalPointLocator* locator,
++void vtkBoxClipDataSet::ClipBox0D(vtkGenericCell* cell, vtkIntersectionDeduplicate* locator,
+   vtkCellArray* verts, vtkPointData* inPD, vtkPointData* outPD, vtkCellData* inCD, vtkIdType cellId,
+   vtkCellData* outCD)
+ {
+@@ -6445,7 +6445,7 @@
+     {
+       // Vert is inside.
+       ptId = cellIds->GetId(v_id[0]);
+-      if (locator->InsertUniquePoint(v, iid))
++      if (locator->InsertUniquePoint(ptId, v, iid))
+       {
+         outPD->CopyData(inPD, ptId, iid);
+       }
+@@ -6459,7 +6459,7 @@
+ 
+ //------------------------------------------------------------------------------
+ 
+-void vtkBoxClipDataSet::ClipBoxInOut0D(vtkGenericCell* cell, vtkIncrementalPointLocator* locator,
++void vtkBoxClipDataSet::ClipBoxInOut0D(vtkGenericCell* cell, vtkIntersectionDeduplicate* locator,
+   vtkCellArray** verts, vtkPointData* inPD, vtkPointData** outPD, vtkCellData* inCD,
+   vtkIdType cellId, vtkCellData** outCD)
+ {
+@@ -6495,7 +6495,7 @@
+     ptId = cellIds->GetId(v_id[0]);
+     cellPts->GetPoint(v_id[0], v);
+ 
+-    if (locator->InsertUniquePoint(v, iid))
++    if (locator->InsertUniquePoint(ptId, v, iid))
+     {
+       outPD[0]->CopyData(inPD, ptId, iid);
+       outPD[1]->CopyData(inPD, ptId, iid);
+@@ -6522,7 +6522,7 @@
+ 
+ //------------------------------------------------------------------------------
+ 
+-void vtkBoxClipDataSet::ClipHexahedron0D(vtkGenericCell* cell, vtkIncrementalPointLocator* locator,
++void vtkBoxClipDataSet::ClipHexahedron0D(vtkGenericCell* cell, vtkIntersectionDeduplicate* locator,
+   vtkCellArray* verts, vtkPointData* inPD, vtkPointData* outPD, vtkCellData* inCD, vtkIdType cellId,
+   vtkCellData* outCD)
+ {
+@@ -6573,7 +6573,7 @@
+     {
+       // Vert is inside.
+       ptId = cellIds->GetId(v_id[0]);
+-      if (locator->InsertUniquePoint(v, iid))
++      if (locator->InsertUniquePoint(ptId, v, iid))
+       {
+         outPD->CopyData(inPD, ptId, iid);
+       }
+@@ -6588,7 +6588,7 @@
+ //------------------------------------------------------------------------------
+ 
+ void vtkBoxClipDataSet::ClipHexahedronInOut0D(vtkGenericCell* cell,
+-  vtkIncrementalPointLocator* locator, vtkCellArray** verts, vtkPointData* inPD,
++  vtkIntersectionDeduplicate* locator, vtkCellArray** verts, vtkPointData* inPD,
+   vtkPointData** outPD, vtkCellData* inCD, vtkIdType cellId, vtkCellData** outCD)
+ {
+   vtkIdType cellType = cell->GetCellType();
+@@ -6623,7 +6623,7 @@
+     ptId = cellIds->GetId(v_id[0]);
+     cellPts->GetPoint(v_id[0], v);
+ 
+-    if (locator->InsertUniquePoint(v, iid))
++    if (locator->InsertUniquePoint(ptId, v, iid))
+     {
+       outPD[0]->CopyData(inPD, ptId, iid);
+       outPD[1]->CopyData(inPD, ptId, iid);
+diff -u -r -N Filters/General/vtkBoxClipDataSet.h Filters/General/vtkBoxClipDataSet.h
+--- Filters/General/vtkBoxClipDataSet.h	2023-02-15 12:03:53.000000000 +0800
++++ Filters/General/vtkBoxClipDataSet.h	2023-10-24 12:48:20.910887800 +0800
+@@ -59,7 +59,7 @@
+ class vtkIdList;
+ class vtkGenericCell;
+ class vtkPointData;
+-class vtkIncrementalPointLocator;
++class vtkIntersectionDeduplicate;
+ class vtkPoints;
+ 
+ class VTKFILTERSGENERAL_EXPORT vtkBoxClipDataSet : public vtkUnstructuredGridAlgorithm
+@@ -126,16 +126,16 @@
+ 
+   ///@{
+   /**
+-   * Specify a spatial locator for merging points. By default, an
+-   * instance of vtkMergePoints is used.
++   * Specify an intersection point deduplicator for merging points.
++   * By default, an instance of vtkIntersectionDeduplicate is used.
+    */
+-  void SetLocator(vtkIncrementalPointLocator* locator);
+-  vtkGetObjectMacro(Locator, vtkIncrementalPointLocator);
++  void SetDeduplicator(vtkIntersectionDeduplicate* deduplicator);
++  vtkGetObjectMacro(Deduplicator, vtkIntersectionDeduplicate);
+   ///@}
+ 
+   /**
+    * Create default locator. Used to create one when none is specified. The
+-   * locator is used to merge coincident points.
++   * locator is used to merge coincident intersection points.
+    */
+   void CreateDefaultLocator();
+ 
+@@ -163,55 +163,55 @@
+   void CellGrid(
+     vtkIdType typeobj, vtkIdType npts, const vtkIdType* cellIds, vtkCellArray* newCellArray);
+   void CreateTetra(vtkIdType npts, const vtkIdType* cellIds, vtkCellArray* newCellArray);
+-  void ClipBox(vtkPoints* newPoints, vtkGenericCell* cell, vtkIncrementalPointLocator* locator,
++  void ClipBox(vtkPoints* newPoints, vtkGenericCell* cell, vtkIntersectionDeduplicate* locator,
+     vtkCellArray* tets, vtkPointData* inPD, vtkPointData* outPD, vtkCellData* inCD,
+     vtkIdType cellId, vtkCellData* outCD);
+   void ClipHexahedron(vtkPoints* newPoints, vtkGenericCell* cell,
+-    vtkIncrementalPointLocator* locator, vtkCellArray* tets, vtkPointData* inPD,
++    vtkIntersectionDeduplicate* locator, vtkCellArray* tets, vtkPointData* inPD,
+     vtkPointData* outPD, vtkCellData* inCD, vtkIdType cellId, vtkCellData* outCD);
+-  void ClipBoxInOut(vtkPoints* newPoints, vtkGenericCell* cell, vtkIncrementalPointLocator* locator,
++  void ClipBoxInOut(vtkPoints* newPoints, vtkGenericCell* cell, vtkIntersectionDeduplicate* locator,
+     vtkCellArray** tets, vtkPointData* inPD, vtkPointData** outPD, vtkCellData* inCD,
+     vtkIdType cellId, vtkCellData** outCD);
+   void ClipHexahedronInOut(vtkPoints* newPoints, vtkGenericCell* cell,
+-    vtkIncrementalPointLocator* locator, vtkCellArray** tets, vtkPointData* inPD,
++    vtkIntersectionDeduplicate* locator, vtkCellArray** tets, vtkPointData* inPD,
+     vtkPointData** outPD, vtkCellData* inCD, vtkIdType cellId, vtkCellData** outCD);
+ 
+-  void ClipBox2D(vtkPoints* newPoints, vtkGenericCell* cell, vtkIncrementalPointLocator* locator,
++  void ClipBox2D(vtkPoints* newPoints, vtkGenericCell* cell, vtkIntersectionDeduplicate* locator,
+     vtkCellArray* tets, vtkPointData* inPD, vtkPointData* outPD, vtkCellData* inCD,
+     vtkIdType cellId, vtkCellData* outCD);
+   void ClipBoxInOut2D(vtkPoints* newPoints, vtkGenericCell* cell,
+-    vtkIncrementalPointLocator* locator, vtkCellArray** tets, vtkPointData* inPD,
++    vtkIntersectionDeduplicate* locator, vtkCellArray** tets, vtkPointData* inPD,
+     vtkPointData** outPD, vtkCellData* inCD, vtkIdType cellId, vtkCellData** outCD);
+   void ClipHexahedron2D(vtkPoints* newPoints, vtkGenericCell* cell,
+-    vtkIncrementalPointLocator* locator, vtkCellArray* tets, vtkPointData* inPD,
++    vtkIntersectionDeduplicate* locator, vtkCellArray* tets, vtkPointData* inPD,
+     vtkPointData* outPD, vtkCellData* inCD, vtkIdType cellId, vtkCellData* outCD);
+   void ClipHexahedronInOut2D(vtkPoints* newPoints, vtkGenericCell* cell,
+-    vtkIncrementalPointLocator* locator, vtkCellArray** tets, vtkPointData* inPD,
++    vtkIntersectionDeduplicate* locator, vtkCellArray** tets, vtkPointData* inPD,
+     vtkPointData** outPD, vtkCellData* inCD, vtkIdType cellId, vtkCellData** outCD);
+ 
+-  void ClipBox1D(vtkPoints* newPoints, vtkGenericCell* cell, vtkIncrementalPointLocator* locator,
++  void ClipBox1D(vtkPoints* newPoints, vtkGenericCell* cell, vtkIntersectionDeduplicate* locator,
+     vtkCellArray* lines, vtkPointData* inPD, vtkPointData* outPD, vtkCellData* inCD,
+     vtkIdType cellId, vtkCellData* outCD);
+   void ClipBoxInOut1D(vtkPoints* newPoints, vtkGenericCell* cell,
+-    vtkIncrementalPointLocator* locator, vtkCellArray** lines, vtkPointData* inPD,
++    vtkIntersectionDeduplicate* locator, vtkCellArray** lines, vtkPointData* inPD,
+     vtkPointData** outPD, vtkCellData* inCD, vtkIdType cellId, vtkCellData** outCD);
+   void ClipHexahedron1D(vtkPoints* newPoints, vtkGenericCell* cell,
+-    vtkIncrementalPointLocator* locator, vtkCellArray* lines, vtkPointData* inPD,
++    vtkIntersectionDeduplicate* locator, vtkCellArray* lines, vtkPointData* inPD,
+     vtkPointData* outPD, vtkCellData* inCD, vtkIdType cellId, vtkCellData* outCD);
+   void ClipHexahedronInOut1D(vtkPoints* newPoints, vtkGenericCell* cell,
+-    vtkIncrementalPointLocator* locator, vtkCellArray** lines, vtkPointData* inPD,
++    vtkIntersectionDeduplicate* locator, vtkCellArray** lines, vtkPointData* inPD,
+     vtkPointData** outPD, vtkCellData* inCD, vtkIdType cellId, vtkCellData** outCD);
+ 
+-  void ClipBox0D(vtkGenericCell* cell, vtkIncrementalPointLocator* locator, vtkCellArray* verts,
++  void ClipBox0D(vtkGenericCell* cell, vtkIntersectionDeduplicate* locator, vtkCellArray* verts,
+     vtkPointData* inPD, vtkPointData* outPD, vtkCellData* inCD, vtkIdType cellId,
+     vtkCellData* outCD);
+-  void ClipBoxInOut0D(vtkGenericCell* cell, vtkIncrementalPointLocator* locator,
++  void ClipBoxInOut0D(vtkGenericCell* cell, vtkIntersectionDeduplicate* locator,
+     vtkCellArray** verts, vtkPointData* inPD, vtkPointData** outPD, vtkCellData* inCD,
+     vtkIdType cellId, vtkCellData** outCD);
+-  void ClipHexahedron0D(vtkGenericCell* cell, vtkIncrementalPointLocator* locator,
++  void ClipHexahedron0D(vtkGenericCell* cell, vtkIntersectionDeduplicate* locator,
+     vtkCellArray* verts, vtkPointData* inPD, vtkPointData* outPD, vtkCellData* inCD,
+     vtkIdType cellId, vtkCellData* outCD);
+-  void ClipHexahedronInOut0D(vtkGenericCell* cell, vtkIncrementalPointLocator* locator,
++  void ClipHexahedronInOut0D(vtkGenericCell* cell, vtkIntersectionDeduplicate* locator,
+     vtkCellArray** verts, vtkPointData* inPD, vtkPointData** outPD, vtkCellData* inCD,
+     vtkIdType cellId, vtkCellData** outCD);
+ 
+@@ -222,7 +222,7 @@
+   int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+   int FillInputPortInformation(int port, vtkInformation* info) override;
+ 
+-  vtkIncrementalPointLocator* Locator;
++  vtkIntersectionDeduplicate* Deduplicator;
+   vtkTypeBool GenerateClipScalars;
+ 
+   vtkTypeBool GenerateClippedOutput;

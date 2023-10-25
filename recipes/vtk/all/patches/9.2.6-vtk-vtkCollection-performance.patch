@@ -1,0 +1,593 @@
+Greatly improve the performance of some vtkCollection operations.
+
+Namely:
+* determining if an item is in a collection.
+* removing a unique item from a collection.
+
+This is implemented using an unordered_map from items to list nodes,
+and by making the list doubly linked so that a node can be removed
+without needing to iterate from the beginning to find the preceding
+node.
+
+diff -u -r -N Common/Core/vtkCollection.cxx Common/Core/vtkCollection.cxx
+--- Common/Core/vtkCollection.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Common/Core/vtkCollection.cxx	2023-10-24 15:38:00.649897800 +0800
+@@ -54,6 +54,7 @@
+ void vtkCollection::RemoveElement(vtkCollectionElement* elem, vtkCollectionElement* prev)
+ {
+   assert(elem);
++  assert(elem->Previous == prev);
+   if (prev)
+   {
+     prev->Next = elem->Next;
+@@ -67,12 +68,27 @@
+   {
+     this->Bottom = prev;
+   }
++  else
++  {
++    elem->Next->Previous = prev;
++  }
+ 
+   if (this->Current == elem)
+   {
+     this->Current = elem->Next;
+   }
+ 
++  auto const iterRange = this->ItemMap.equal_range(elem->Item);
++
++  for (auto iter = iterRange.first; iter != iterRange.second; ++iter)
++  {
++    if (iter->second == elem)
++    {
++      this->ItemMap.erase(iter);
++      break;
++    }
++  }
++
+   this->NumberOfItems--;
+   this->DeleteElement(elem);
+ }
+@@ -92,12 +108,16 @@
+   {
+     this->Bottom->Next = elem;
+   }
++
++  elem->Previous = this->Bottom;
+   this->Bottom = elem;
+ 
+   a->Register(this);
+   elem->Item = a;
+   elem->Next = nullptr;
+ 
++  this->ItemMap.emplace(a, elem);
++
+   this->NumberOfItems++;
+ 
+   this->Modified();
+@@ -121,6 +141,7 @@
+   {
+     this->Top = elem;
+     elem->Next = curr;
++    curr->Previous = elem;
+   }
+   else
+   {
+@@ -135,6 +156,8 @@
+     }
+ 
+     curr->Next = elem;
++    elem->Previous = curr;
++
+     if (curr == this->Bottom)
+     {
+       this->Bottom = elem;
+@@ -142,12 +165,15 @@
+     else
+     {
+       elem->Next = next;
++      next->Previous = elem;
+     }
+   }
+ 
+   a->Register(this);
+   elem->Item = a;
+ 
++  this->ItemMap.emplace(a, elem);
++
+   this->NumberOfItems++;
+ 
+   this->Modified();
+@@ -163,20 +189,34 @@
+     return;
+   }
+ 
+-  vtkCollectionElement* prev = nullptr;
+-  vtkCollectionElement* elem = this->Top;
+-  for (int i = 0; i < this->NumberOfItems; i++)
++  // If the object is only in the list once, we can remove it without
++  // searching the list to find the first one.
++  auto const iterRange = this->ItemMap.equal_range(a);
++  if (iterRange.first != this->ItemMap.end()
++    && std::next(iterRange.first) == iterRange.second)
++  {
++    vtkCollectionElement* elem = iterRange.first->second;
++    this->RemoveElement(elem, elem->Previous);
++    this->Modified();
++    return;
++  }
++  else
+   {
+-    if (elem->Item == a)
+-    {
+-      this->RemoveElement(elem, prev);
+-      this->Modified();
+-      return;
+-    }
+-    else
+-    {
+-      prev = elem;
+-      elem = elem->Next;
++    vtkCollectionElement* prev = nullptr;
++    vtkCollectionElement* elem = this->Top;
++    for (int i = 0; i < this->NumberOfItems; i++)
++    {
++      if (elem->Item == a)
++      {
++        this->RemoveElement(elem, prev);
++        this->Modified();
++        return;
++      }
++      else
++      {
++        prev = elem;
++        elem = elem->Next;
++      }
+     }
+   }
+ }
+@@ -190,6 +230,8 @@
+     return;
+   }
+ 
++  this->ItemMap.clear();
++
+   while (this->NumberOfItems)
+   {
+     this->RemoveElement(this->Top, nullptr);
+@@ -226,6 +268,11 @@
+   return 0;
+ }
+ 
++std::size_t vtkCollection::CountItemInstances(vtkObject* a)
++{
++  return this->ItemMap.count(a);
++}
++
+ void vtkCollection::PrintSelf(ostream& os, vtkIndent indent)
+ {
+   this->Superclass::PrintSelf(os, indent);
+diff -u -r Common/Core/vtkCollection.h Common/Core/vtkCollection.h
+--- Common/Core/vtkCollection.h	2023-02-15 12:03:53.000000000 +0800
++++ Common/Core/vtkCollection.h	2023-10-19 14:37:54.557983200 +0800
+@@ -34,16 +34,20 @@
+ #include "vtkCommonCoreModule.h" // For export macro
+ #include "vtkObject.h"
+ 
++#include <unordered_map>
++
+ class vtkCollectionElement //;prevents pick-up by man page generator
+ {
+ public:
+   vtkCollectionElement()
+     : Item(nullptr)
+     , Next(nullptr)
++    , Previous(nullptr)
+   {
+   }
+   vtkObject* Item;
+   vtkCollectionElement* Next;
++  vtkCollectionElement* Previous;
+ };
+ typedef void* vtkCollectionSimpleIterator;
+ 
+@@ -105,6 +109,11 @@
+   int IsItemPresent(vtkObject* a);
+ 
+   /**
++   * 
++   */
++  std::size_t CountItemInstances(vtkObject* a);
++
++  /**
+    * Return the number of objects in the list.
+    */
+   int GetNumberOfItems() { return this->NumberOfItems; }
+@@ -165,6 +174,8 @@
+   vtkCollectionElement* Bottom;
+   vtkCollectionElement* Current;
+ 
++  std::unordered_multimap<vtkObject*, vtkCollectionElement*> ItemMap;
++
+   friend class vtkCollectionIterator;
+ 
+   // See vtkGarbageCollector.h:
+diff -u -r Common/DataModel/vtkAnimationScene.cxx Common/DataModel/vtkAnimationScene.cxx
+--- Common/DataModel/vtkAnimationScene.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Common/DataModel/vtkAnimationScene.cxx	2023-10-20 13:34:07.471874600 +0800
+@@ -51,7 +51,7 @@
+ //------------------------------------------------------------------------------
+ void vtkAnimationScene::AddCue(vtkAnimationCue* cue)
+ {
+-  if (this->AnimationCues->IsItemPresent(cue))
++  if (this->AnimationCues->CountItemInstances(cue))
+   {
+     vtkErrorMacro("Animation cue already present in the scene");
+     return;
+diff -u -r Common/DataModel/vtkImplicitBoolean.cxx Common/DataModel/vtkImplicitBoolean.cxx
+--- Common/DataModel/vtkImplicitBoolean.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Common/DataModel/vtkImplicitBoolean.cxx	2023-10-20 13:34:16.719023500 +0800
+@@ -55,7 +55,7 @@
+ // Add another implicit function to the list of functions.
+ void vtkImplicitBoolean::AddFunction(vtkImplicitFunction* f)
+ {
+-  if (!this->FunctionList->IsItemPresent(f))
++  if (!this->FunctionList->CountItemInstances(f))
+   {
+     this->Modified();
+     this->FunctionList->AddItem(f);
+@@ -65,7 +65,7 @@
+ // Remove a function from the list of implicit functions to boolean.
+ void vtkImplicitBoolean::RemoveFunction(vtkImplicitFunction* f)
+ {
+-  if (this->FunctionList->IsItemPresent(f))
++  if (this->FunctionList->CountItemInstances(f))
+   {
+     this->Modified();
+     this->FunctionList->RemoveItem(f);
+diff -u -r -N Common/DataModel/vtkKdTree.cxx Common/DataModel/vtkKdTree.cxx
+--- Common/DataModel/vtkKdTree.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Common/DataModel/vtkKdTree.cxx	2023-10-20 13:34:46.740634500 +0800
+@@ -440,7 +440,7 @@
+     return;
+   }
+ 
+-  if (this->DataSets->IsItemPresent(set))
++  if (this->DataSets->CountItemInstances(set))
+   {
+     return;
+   }
+diff -u -r -N Filters/General/vtkAnnotationLink.cxx Filters/General/vtkAnnotationLink.cxx
+--- Filters/General/vtkAnnotationLink.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Filters/General/vtkAnnotationLink.cxx	2023-10-20 13:34:52.447591800 +0800
+@@ -124,7 +124,7 @@
+ //------------------------------------------------------------------------------
+ void vtkAnnotationLink::AddDomainMap(vtkTable* map)
+ {
+-  if (!this->DomainMaps->IsItemPresent(map))
++  if (!this->DomainMaps->CountItemInstances(map))
+   {
+     this->DomainMaps->AddItem(map);
+   }
+diff -u -r -N Filters/Programmable/vtkProgrammableAttributeDataFilter.cxx Filters/Programmable/vtkProgrammableAttributeDataFilter.cxx
+--- Filters/Programmable/vtkProgrammableAttributeDataFilter.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Filters/Programmable/vtkProgrammableAttributeDataFilter.cxx	2023-10-20 13:34:58.506258100 +0800
+@@ -49,7 +49,7 @@
+ // Add a dataset to the list of data to process.
+ void vtkProgrammableAttributeDataFilter::AddInput(vtkDataSet* ds)
+ {
+-  if (!this->InputList->IsItemPresent(ds))
++  if (!this->InputList->CountItemInstances(ds))
+   {
+     this->Modified();
+     this->InputList->AddItem(ds);
+@@ -59,7 +59,7 @@
+ // Remove a dataset from the list of data to process.
+ void vtkProgrammableAttributeDataFilter::RemoveInput(vtkDataSet* ds)
+ {
+-  if (this->InputList->IsItemPresent(ds))
++  if (this->InputList->CountItemInstances(ds))
+   {
+     this->Modified();
+     this->InputList->RemoveItem(ds);
+diff -u -r -N Infovis/Core/vtkPipelineGraphSource.cxx Infovis/Core/vtkPipelineGraphSource.cxx
+--- Infovis/Core/vtkPipelineGraphSource.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Infovis/Core/vtkPipelineGraphSource.cxx	2023-10-20 13:35:05.828229900 +0800
+@@ -70,7 +70,7 @@
+ 
+ void vtkPipelineGraphSource::AddSink(vtkObject* sink)
+ {
+-  if (sink != nullptr && !this->Sinks->IsItemPresent(sink))
++  if (sink != nullptr && !this->Sinks->CountItemInstances(sink))
+   {
+     this->Sinks->AddItem(sink);
+     this->Modified();
+@@ -79,7 +79,7 @@
+ 
+ void vtkPipelineGraphSource::RemoveSink(vtkObject* sink)
+ {
+-  if (sink != nullptr && this->Sinks->IsItemPresent(sink))
++  if (sink != nullptr && this->Sinks->CountItemInstances(sink))
+   {
+     this->Sinks->RemoveItem(sink);
+     this->Modified();
+diff -u -r -N Interaction/Widgets/vtkMagnifierRepresentation.cxx Interaction/Widgets/vtkMagnifierRepresentation.cxx
+--- Interaction/Widgets/vtkMagnifierRepresentation.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Interaction/Widgets/vtkMagnifierRepresentation.cxx	2023-10-20 13:35:36.383860100 +0800
+@@ -221,7 +221,7 @@
+ //------------------------------------------------------------------------------
+ int vtkMagnifierRepresentation::HasViewProp(vtkProp* prop)
+ {
+-  return (prop && this->Props->IsItemPresent(prop));
++  return (prop && this->Props->CountItemInstances(prop));
+ }
+ 
+ //------------------------------------------------------------------------------
+diff -u -r -N IO/Export/vtkRIBExporter.cxx IO/Export/vtkRIBExporter.cxx
+--- IO/Export/vtkRIBExporter.cxx	2023-02-15 12:03:53.000000000 +0800
++++ IO/Export/vtkRIBExporter.cxx	2023-10-20 13:38:08.528441600 +0800
+@@ -135,7 +135,7 @@
+     if (anActor->GetVisibility())
+     {
+       aTexture = anActor->GetTexture();
+-      if (aTexture && textures->IsItemPresent(aTexture) == 0)
++      if (aTexture && textures->CountItemInstances(aTexture) == 0)
+       {
+         this->WriteTexture(aTexture);
+         textures->AddItem(aTexture);
+diff -u -r -N Rendering/Core/vtkActor2DCollection.cxx Rendering/Core/vtkActor2DCollection.cxx
+--- Rendering/Core/vtkActor2DCollection.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Rendering/Core/vtkActor2DCollection.cxx	2023-10-20 12:48:38.660819700 +0800
+@@ -63,13 +63,14 @@
+   vtkCollectionElement* indexElem;
+   vtkCollectionElement* elem = new vtkCollectionElement;
+ 
++  elem->Item = a;
++
+   // Check if the top item is nullptr
+   if (this->Top == nullptr)
+   {
+     vtkDebugMacro(<< "vtkActor2DCollection::AddItem - Adding item to top of the list");
+ 
+     this->Top = elem;
+-    elem->Item = a;
+     elem->Next = nullptr;
+     this->Bottom = elem;
+     this->NumberOfItems++;
+@@ -79,17 +80,26 @@
+ 
+   for (indexElem = this->Top; indexElem != nullptr; indexElem = indexElem->Next)
+   {
+-
+     vtkActor2D* tempActor = static_cast<vtkActor2D*>(indexElem->Item);
+     if (a->GetLayerNumber() < tempActor->GetLayerNumber())
+     {
+-      // The indexElem item's layer number is larger, so swap
+-      // the new item and the indexElem item.
++      // The indexElem item's layer number is larger, so insert
++      // the new item prior to indexElem.
+       vtkDebugMacro(<< "vtkActor2DCollection::AddItem - Inserting item");
+-      elem->Item = indexElem->Item;
+-      elem->Next = indexElem->Next;
+-      indexElem->Item = a;
+-      indexElem->Next = elem;
++
++      // Back link
++      elem->Previous = indexElem->Previous;
++      elem->Previous->Next = elem;
++
++      // Forward link
++      elem->Next = indexElem;
++      indexElem->Previous = elem;
++
++      // elem->Item = indexElem->Item;
++      // elem->Next = indexElem->Next;
++      // indexElem->Item = a;
++      // indexElem->Next = elem;
++
+       this->NumberOfItems++;
+       a->Register(this);
+       return;
+@@ -98,8 +108,8 @@
+ 
+   // End of list found before a larger layer number
+   vtkDebugMacro(<< "vtkActor2DCollection::AddItem - Adding item to end of the list");
+-  elem->Item = a;
+   elem->Next = nullptr;
++  elem->Previous = this->Bottom;
+   this->Bottom->Next = elem;
+   this->Bottom = elem;
+   this->NumberOfItems++;
+@@ -162,14 +172,20 @@
+   vtkDebugMacro(<< "vtkActor2DCollection::Sort - Rearraging the linked list.");
+   // Now move the items around in the linked list -
+   // keep the links the same, but swap around the items
++  // We also completely regenerate the hashmap lookup,
++  // expensive if there was no change, but simple for now.
++
++  this->ItemMap.clear();
+ 
+   vtkCollectionElement* elem = this->Top;
+   elem->Item = actorPtrArr[0];
++  this->ItemMap.emplace(elem->Item, elem);
+ 
+   for (i = 1; i < numElems; i++)
+   {
+     elem = elem->Next;
+     elem->Item = actorPtrArr[i];
++    this->ItemMap.emplace(elem->Item, elem);
+   }
+ 
+   delete[] actorPtrArr;
+diff -u -r -N Rendering/Core/vtkAreaPicker.cxx Rendering/Core/vtkAreaPicker.cxx
+--- Rendering/Core/vtkAreaPicker.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Rendering/Core/vtkAreaPicker.cxx	2023-10-20 13:38:07.548320700 +0800
+@@ -258,7 +258,7 @@
+           double dist;
+           if (this->ABoxFrustumIsect(bounds, dist))
+           {
+-            if (!this->Prop3Ds->IsItemPresent(prop))
++            if (!this->Prop3Ds->CountItemInstances(prop))
+             {
+               this->Prop3Ds->AddItem(static_cast<vtkProp3D*>(prop));
+               if (dist < mindist) // new nearest, remember it
+diff -u -r -N Rendering/Core/vtkAssembly.cxx Rendering/Core/vtkAssembly.cxx
+--- Rendering/Core/vtkAssembly.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Rendering/Core/vtkAssembly.cxx	2023-10-20 13:38:06.645432500 +0800
+@@ -46,7 +46,7 @@
+ // Add a part to the list of Parts.
+ void vtkAssembly::AddPart(vtkProp3D* prop)
+ {
+-  if (!this->Parts->IsItemPresent(prop))
++  if (!this->Parts->CountItemInstances(prop))
+   {
+     this->Parts->AddItem(prop);
+     prop->AddConsumer(this);
+@@ -57,7 +57,7 @@
+ // Remove a part from the list of parts,
+ void vtkAssembly::RemovePart(vtkProp3D* prop)
+ {
+-  if (this->Parts->IsItemPresent(prop))
++  if (this->Parts->CountItemInstances(prop))
+   {
+     prop->RemoveConsumer(this);
+     this->Parts->RemoveItem(prop);
+diff -u -r -N Rendering/Core/vtkCellPicker.cxx Rendering/Core/vtkCellPicker.cxx
+--- Rendering/Core/vtkCellPicker.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Rendering/Core/vtkCellPicker.cxx	2023-10-20 13:38:05.756710000 +0800
+@@ -184,7 +184,7 @@
+ //------------------------------------------------------------------------------
+ void vtkCellPicker::AddLocator(vtkAbstractCellLocator* locator)
+ {
+-  if (!this->Locators->IsItemPresent(locator))
++  if (!this->Locators->CountItemInstances(locator))
+   {
+     this->Locators->AddItem(locator);
+   }
+diff -u -r -N Rendering/Core/vtkPropAssembly.cxx Rendering/Core/vtkPropAssembly.cxx
+--- Rendering/Core/vtkPropAssembly.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Rendering/Core/vtkPropAssembly.cxx	2023-10-20 13:38:04.899779500 +0800
+@@ -48,7 +48,7 @@
+ // Add a part to the list of Parts.
+ void vtkPropAssembly::AddPart(vtkProp* prop)
+ {
+-  if (!this->Parts->IsItemPresent(prop))
++  if (!this->Parts->CountItemInstances(prop))
+   {
+     this->Parts->AddItem(prop);
+     prop->AddConsumer(this);
+@@ -59,7 +59,7 @@
+ // Remove a part from the list of parts,
+ void vtkPropAssembly::RemovePart(vtkProp* prop)
+ {
+-  if (this->Parts->IsItemPresent(prop))
++  if (this->Parts->CountItemInstances(prop))
+   {
+     prop->RemoveConsumer(this);
+     this->Parts->RemoveItem(prop);
+diff -u -r -N Rendering/Core/vtkRenderedAreaPicker.cxx Rendering/Core/vtkRenderedAreaPicker.cxx
+--- Rendering/Core/vtkRenderedAreaPicker.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Rendering/Core/vtkRenderedAreaPicker.cxx	2023-10-20 13:38:04.014505600 +0800
+@@ -126,7 +126,7 @@
+       {
+         propCandidate = path->GetLastNode()->GetViewProp();
+         pickable = this->TypeDecipher(propCandidate, &mapper);
+-        if (pickable && !this->Prop3Ds->IsItemPresent(prop))
++        if (pickable && !this->Prop3Ds->CountItemInstances(prop))
+         {
+           this->Prop3Ds->AddItem(static_cast<vtkProp3D*>(prop));
+         }
+diff -u -r -N Rendering/Core/vtkRenderer.cxx Rendering/Core/vtkRenderer.cxx
+--- Rendering/Core/vtkRenderer.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Rendering/Core/vtkRenderer.cxx	2023-10-20 13:38:03.159255300 +0800
+@@ -2067,7 +2067,7 @@
+ 
+ int vtkRenderer::CaptureGL2PSSpecialProp(vtkProp* prop)
+ {
+-  if (this->GL2PSSpecialPropCollection && !this->GL2PSSpecialPropCollection->IsItemPresent(prop))
++  if (this->GL2PSSpecialPropCollection && !this->GL2PSSpecialPropCollection->CountItemInstances(prop))
+   {
+     this->GL2PSSpecialPropCollection->AddItem(prop);
+     return 1;
+diff -u -r -N Rendering/Core/vtkRenderWindow.cxx Rendering/Core/vtkRenderWindow.cxx
+--- Rendering/Core/vtkRenderWindow.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Rendering/Core/vtkRenderWindow.cxx	2023-10-20 13:38:02.292802600 +0800
+@@ -422,7 +422,7 @@
+ 
+ int vtkRenderWindow::HasRenderer(vtkRenderer* ren)
+ {
+-  return (ren && this->Renderers->IsItemPresent(ren));
++  return (ren && this->Renderers->CountItemInstances(ren));
+ }
+ 
+ //------------------------------------------------------------------------------
+diff -u -r -N Rendering/Core/vtkViewport.cxx Rendering/Core/vtkViewport.cxx
+--- Rendering/Core/vtkViewport.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Rendering/Core/vtkViewport.cxx	2023-10-19 14:33:25.144299800 +0800
+@@ -143,7 +143,7 @@
+ //------------------------------------------------------------------------------
+ int vtkViewport::HasViewProp(vtkProp* p)
+ {
+-  return (p && this->Props->IsItemPresent(p));
++  return (p && this->Props->CountItemInstances(p));
+ }
+ 
+ //------------------------------------------------------------------------------
+diff -u -r -N Rendering/Image/vtkImageSliceCollection.cxx Rendering/Image/vtkImageSliceCollection.cxx
+--- Rendering/Image/vtkImageSliceCollection.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Rendering/Image/vtkImageSliceCollection.cxx	2023-10-20 12:57:48.792416900 +0800
+@@ -72,6 +72,7 @@
+   else
+   {
+     elem->Next = prevElem->Next;
++    elem->Previous = prevElem;
+     prevElem->Next = elem;
+   }
+ 
+@@ -146,10 +147,16 @@
+ 
+   // Now move the items around in the linked list -
+   // keep the links the same, but swap around the items
++  // We also completely regenerate the hashmap lookup,
++  // expensive if there was no change, but simple for now.
++
++  this->ItemMap.clear();
++
+   vtkCollectionElement* elem = this->Top;
+   for (int jj = 0; jj < numElems; jj++)
+   {
+     elem->Item = layerArray[jj].image;
++    this->ItemMap.emplace(elem->Item, elem);
+     elem = elem->Next;
+   }
+ 
+diff -u -r -N Rendering/Image/vtkImageStack.cxx Rendering/Image/vtkImageStack.cxx
+--- Rendering/Image/vtkImageStack.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Rendering/Image/vtkImageStack.cxx	2023-10-20 13:39:34.607593100 +0800
+@@ -77,7 +77,7 @@
+ //------------------------------------------------------------------------------
+ void vtkImageStack::AddImage(vtkImageSlice* prop)
+ {
+-  if (!this->Images->IsItemPresent(prop) && !vtkImageStack::SafeDownCast(prop))
++  if (!this->Images->CountItemInstances(prop) && !vtkImageStack::SafeDownCast(prop))
+   {
+     this->Images->AddItem(prop);
+     prop->AddConsumer(this);
+@@ -88,7 +88,7 @@
+ //------------------------------------------------------------------------------
+ void vtkImageStack::RemoveImage(vtkImageSlice* prop)
+ {
+-  if (this->Images->IsItemPresent(prop))
++  if (this->Images->CountItemInstances(prop))
+   {
+     prop->RemoveConsumer(this);
+     this->Images->RemoveItem(prop);
+@@ -99,7 +99,7 @@
+ //------------------------------------------------------------------------------
+ int vtkImageStack::HasImage(vtkImageSlice* prop)
+ {
+-  return this->Images->IsItemPresent(prop);
++  return this->Images->CountItemInstances(prop);
+ }
+ 
+ //------------------------------------------------------------------------------
