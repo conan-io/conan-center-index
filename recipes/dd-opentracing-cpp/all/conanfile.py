@@ -102,26 +102,7 @@ class DatadogOpenTracingConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["dd_opentracing"].libs = ["dd_opentracing"]
-        self.cpp_info.components["dd_opentracing"].defines.append(
-            "DD_OPENTRACING_SHARED" if self.options.shared else "DD_OPENTRACING_STATIC"
-        )
+        self.cpp_info.libs = ["dd_opentracing"]
+        self.cpp_info.defines.append("DD_OPENTRACING_SHARED" if self.options.shared else "DD_OPENTRACING_STATIC")
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.components["dd_opentracing"].system_libs.append("pthread")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed.
-        #       Do not support these names in CMakeDeps, it was a mistake, upstream doesn't export targets
-        self.cpp_info.names["cmake_find_package"] = "DataDogOpenTracing"
-        self.cpp_info.names["cmake_find_package_multi"] = "DataDogOpenTracing"
-        target_suffix = "" if self.options.shared else "-static"
-        self.cpp_info.components["dd_opentracing"].set_property("cmake_target_name", "dd_opentracing" + target_suffix)
-        self.cpp_info.components["dd_opentracing"].names["cmake_find_package"] = "dd_opentracing" + target_suffix
-        self.cpp_info.components["dd_opentracing"].names["cmake_find_package_multi"] = "dd_opentracing" + target_suffix
-        self.cpp_info.components["dd_opentracing"].requires = [
-            "opentracing-cpp::opentracing-cpp",
-            "zlib::zlib",
-            "libcurl::libcurl",
-            "msgpack-cxx::msgpack-cxx",
-            "nlohmann_json::nlohmann_json",
-        ]
+            self.cpp_info.system_libs.append("pthread")
