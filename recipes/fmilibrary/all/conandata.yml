@@ -27,3 +27,6 @@ patches:
     - patch_file: "patches/2.4.1-007-enable-testing.patch"
       patch_description: "Ensure that tests can be run with cmake"
       patch_type: "conan"
+    - patch_file: "patches/2.4.1-008-add-missing-stdlib.h-include.patch"
+      patch_description: "exit() is defined in stdlib.h"
+      patch_type: "conan"

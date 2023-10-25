@@ -79,6 +79,10 @@ class PackageConan(ConanFile):
         tc.variables["FMILIB_FMI_STANDARD_HEADERS"] = posixpath.join(self.build_folder, "fmis").replace("\\", "/")
         tc.variables["FMILIB_GENERATE_DOXYGEN_DOC"] = False
 
+        # The variable is an option only if the following condition is true
+        if not self.options.shared and not self.settings.os in ["Windows", "Macos"]:
+            tc.variables["FMILIB_BUILD_FOR_SHARED_LIBS"] = self.options.get_safe("fPIC", False)
+
         if is_msvc(self):
             tc.variables["FMILIB_BUILD_WITH_STATIC_RTLIB"] = is_msvc_static_runtime(self)
 
