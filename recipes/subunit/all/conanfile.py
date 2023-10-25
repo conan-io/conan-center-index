@@ -75,7 +75,6 @@ class SubunitConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
         if is_msvc(self):
             self.tool_requires("automake/1.16.5")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -89,6 +88,7 @@ class SubunitConan(ConanFile):
 
         tc = AutotoolsToolchain(self)
         if is_msvc(self):
+            tc.extra_cflags.append("-FS")
             tc.extra_cxxflags.append("-FS")
             tc.extra_cxxflags.append("-EHsc")
         tc.configure_args.append("CHECK_CFLAGS= ")
