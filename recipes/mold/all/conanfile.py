@@ -10,7 +10,7 @@ class MoldConan(ConanFile):
     name = "mold"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rui314/mold/"
-    license = "AGPL-3.0"
+    license = ("AGPL-3.0", "MIT")
     description = ("mold is a faster drop-in replacement for existing Unix linkers. It is several times faster than the LLVM lld linker")
     topics = ("mold", "ld", "linkage", "compilation")
 
@@ -21,6 +21,12 @@ class MoldConan(ConanFile):
     default_options = {
         "with_mimalloc": False,
     }
+
+    def configure(self):
+        if Version(self.version) < "2.0.0":
+            self.license = "AGPL-3.0"
+        else:
+            self.license = "MIT"
 
     def validate(self):
         #TODO most of these checks should run on validate_build, but the conan-center hooks are broken and fail the PR because they
