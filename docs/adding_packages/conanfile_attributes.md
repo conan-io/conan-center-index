@@ -57,6 +57,18 @@ The license attribute is a mandatory field which provides the legal information 
   * `LicenseRef-` as a prefix, followed by the name of the library. For example:`LicenseRef-libfoo-public-domain`
 * If the library makes no mention of a license and the terms of use - it **shall not be accepted in ConanCenter** , even if the code is publicly available in GitHub or any other platforms.
 
+In case the license changes in a new release, the recipe should update the license attribute accordingly:
+
+```python
+class LibfooConan(ConanFile):
+    license = "MIT" # old license
+
+    def configure (self):
+       # INFO: Version < 2.0 the license was MIT, but changed to BSD-3-Clause now.
+       if Version(self.version) >= "2.0.0""
+          self.license = "BSD-3-Clause"
+```
+
 ## Order of methods and attributes
 
 Prefer the following order of documented methods in python code (`conanfile.py`, `test_package/conanfile.py`):
