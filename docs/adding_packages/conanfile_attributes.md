@@ -64,10 +64,10 @@ class LibfooConan(ConanFile):
     license = ("MIT", "BSD-3-Clause") # keep both old and new licenses, so conan inspect can find it
 
     def configure (self):
+       # change the license according to the version, so conan graph info can show the correct one
+
        # INFO: Version < 2.0 the license was MIT, but changed to BSD-3-Clause now.
-       self.license = "MIT" # change the license according to the version, so conan graph info can show the correct one
-       if Version(self.version) >= "2.0.0""
-          self.license = "BSD-3-Clause"
+       self.license = "BSD-3-Clause" if Version(self.version) >= "2.0.0" else "MIT"
 ```
 
 ## Order of methods and attributes
