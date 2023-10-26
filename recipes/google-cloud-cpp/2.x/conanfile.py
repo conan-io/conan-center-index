@@ -138,19 +138,16 @@ class GoogleCloudCppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def requirements(self):
-        # Updating Protobuf requires updates to the generated code, even within
-        # a minor version.
+        # These must remain pinned in conan index.
         self.requires("protobuf/3.21.12", transitive_headers=True)
-        # Each release of Abseil is a new major version, not guaranteed to be
-        # compatible with previous verssions.
-        self.requires("abseil/[>=20230125.3.0 <20230126]", transitive_headers=True)
-        # The rest are more semver-like and require less pinning.
-        self.requires("grpc/[>=1.50]", transitive_headers=True)
-        self.requires("nlohmann_json/[>=3.10 <4]")
-        self.requires("crc32c/[>=1.1 <2]")
-        self.requires("libcurl/[>=7.47 <9]")
+        self.requires("abseil/20230125.3", transitive_headers=True)
+        self.requires("grpc/1.54.3", transitive_headers=True)
+        self.requires("nlohmann_json/3.11.2")
+        self.requires("crc32c/1.1.2")
+        # The rest require less pinning.
+        self.requires("libcurl/[>=7.78 <9]")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("zlib/[>=1.2 <2]")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
         # For the `grpc-cpp-plugin` executable, and indirectly `protoc`
