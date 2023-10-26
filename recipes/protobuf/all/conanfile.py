@@ -109,6 +109,9 @@ class ProtobufConan(ConanFile):
         if is_apple_os(self) and self.options.shared:
             # Workaround against SIP on macOS for consumers while invoking protoc when protobuf lib is shared
             tc.variables["CMAKE_INSTALL_RPATH"] = "@loader_path/../lib"
+        if is_apple_os(self) and Version(self.version) == "3.5.1":
+            tc.preprocessor_definitions["_POSIX_C_SOURCE"] = "200809L"
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -210,6 +213,9 @@ class ProtobufConan(ConanFile):
 
         lib_prefix = "lib" if (is_msvc(self) or self._is_clang_cl) else ""
         lib_suffix = "d" if self.settings.build_type == "Debug" and self.options.debug_suffix else ""
+
+        if is_apple_os(self) and Version(self.version) == "3.5.1":
+            self.cpp_info.components["libprotobuf"].defines.append("_POSIX_C_SOURCE=200809L")
 
         # libprotobuf
         self.cpp_info.components["libprotobuf"].set_property("cmake_target_name", "protobuf::libprotobuf")
