@@ -3,9 +3,10 @@ from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 import functools
 import os
+import textwrap
 import yaml
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.8"
@@ -273,17 +274,36 @@ class OpenvinoConan(ConanFile):
         for target in ["ov_frontends", "ov_plugins", "openvino_c"]:
             cmake.build(target=target)
 
+    def _create_cmake_module_variables(self, module_file):
+        content = textwrap.dedent(f"""\
+            target_compile_features(openvino::runtime INTERFACE cxx_std_11)
+        """)
+        save(self, module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake", "openvino")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            f"conan-official-{self.name}-properties.cmake")
+
     def package(self):
         cmake = CMake(self)
         cmake.install()
         # remove cmake and .pc files, since they will be generated later by Conan itself in package_info()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        self._create_cmake_module_variables(
+            os.path.join(self.package_folder, self._module_file_rel_path)
+        )
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "config")
         self.cpp_info.set_property("cmake_file_name", "OpenVINO")
         self.cpp_info.set_property("pkg_config_name", "openvino")
+        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
 
         openvino_runtime = self.cpp_info.components["Runtime"]
         openvino_runtime.set_property("cmake_target_name", "openvino::runtime")
