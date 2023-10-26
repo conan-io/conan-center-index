@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
@@ -21,7 +22,8 @@ class LibXMLPlusPlus(ConanFile):
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libxmlplusplus/libxmlplusplus"
-    topics = ["xml", "parser", "wrapper"]
+    topics = ("xml", "parser", "wrapper")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -78,8 +80,7 @@ class LibXMLPlusPlus(ConanFile):
             self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -124,6 +125,7 @@ class LibXMLPlusPlus(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", f"libxml++-{self._lib_version}"))
+        fix_apple_shared_install_name(self)
 
         if is_msvc(self):
             rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
@@ -134,18 +136,6 @@ class LibXMLPlusPlus(ConanFile):
                     os.path.join(self.package_folder, "lib", f"xml++-{self._lib_version}.lib"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_module_file_name", "libxml++")
-        self.cpp_info.set_property("cmake_module_target_name", "libxml++::libxml++")
-        self.cpp_info.set_property("pkg_config_name", "libxml++")
-        self.cpp_info.components[f"libxml++-{self._lib_version}"].set_property("pkg_config_name", f"libxml++-{self._lib_version}")
-        self.cpp_info.components[f"libxml++-{self._lib_version}"].set_property("cmake_target_name", f"libxml++::libxml++-{self._lib_version}")
-        self.cpp_info.components[f"libxml++-{self._lib_version}"].libs = [f"xml++-{self._lib_version}"]
-        self.cpp_info.components[f"libxml++-{self._lib_version}"].includedirs = [
-            os.path.join("include", f"libxml++-{self._lib_version}")
-        ]
-        self.cpp_info.components[f"libxml++-{self._lib_version}"].requires = [
-                "glibmm::glibmm", "libxml2::libxml2"
-        ]
-
-        self.cpp_info.names["cmake_find_package"] = "libxml++"
-        self.cpp_info.names["cmake_find_package_multi"] = "libxml++"
+        self.cpp_info.set_property("pkg_config_name", f"libxml++-{self._lib_version}")
+        self.cpp_info.libs = [f"xml++-{self._lib_version}"]
+        self.cpp_info.includedirs = [os.path.join("include", f"libxml++-{self._lib_version}")]
