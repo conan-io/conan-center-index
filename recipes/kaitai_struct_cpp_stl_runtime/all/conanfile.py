@@ -45,6 +45,7 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
             tc.variables["STRING_ENCODING_TYPE"] = "ICONV"
         else:
             tc.variables["STRING_ENCODING_TYPE"] = "NONE"
+        tc.variables["BUILD_TESTS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
