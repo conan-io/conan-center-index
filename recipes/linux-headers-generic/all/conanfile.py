@@ -31,7 +31,7 @@ class LinuxHeadersGenericConan(ConanFile):
 
     @property
     def _is_legacy_one_profile(self):
-        return hasattr(self, "settings_build")
+        return not hasattr(self, "settings_build")
 
     def validate(self):
         if self.settings.os != "Linux" or (not self._is_legacy_one_profile and self.settings_build.os != "Linux"):
