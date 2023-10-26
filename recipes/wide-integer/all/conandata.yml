@@ -1,0 +1,4 @@
+sources:
+  "cci.20231015":
+    url: "https://github.com/ckormanyos/wide-integer/archive/4c9711b463431c5b64c680444f35183c053be735.tar.gz"
+    sha256: "db5e5491d22fb5f1b9dd3ad6839e479e7d26670764d8e629cbc0b6a5f1b8c47d"

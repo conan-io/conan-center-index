@@ -56,9 +56,9 @@ class IXWebSocketConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_zlib", True):
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.tls == "openssl":
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1w")
         elif self.options.tls == "mbedtls":
             self.requires("mbedtls/2.25.0")
 
@@ -119,6 +119,10 @@ class IXWebSocketConan(ConanFile):
             replace_in_file(self, cmakelists,
                                   "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}",
                                   "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION bin")
+        # INFO: IXWebSocketHttpHeaders.cpp consumes WSAEINVAL but there is no winsock2.h included
+        replace_in_file(self, os.path.join(self.source_folder, "ixwebsocket", "IXWebSocketHttpHeaders.cpp"), '#include "IXSocket.h"', '#include "IXNetSystem.h"\n#include "IXSocket.h"')
+        # INFO: IXHttpClient.cpp consumes WSAEINVAL but there is no winsock2.h included
+        replace_in_file(self, os.path.join(self.source_folder, "ixwebsocket", "IXHttpClient.h"), '#include "IXSocket.h"', '#include "IXNetSystem.h"\n#include "IXSocket.h"')
 
     def build(self):
         self._patch_sources()

@@ -82,12 +82,14 @@ class TesseractConan(ConanFile):
 
     def requirements(self):
         self.requires("leptonica/1.82.0")
+        if self.settings.os == "Windows" and Version(self.version) >= "5.0.0":
+            self.requires("libtiff/4.6.0")
         # libarchive is required for 4.x so default value is true
         if self.options.get_safe("with_libarchive", default=True):
-            self.requires("libarchive/3.6.2")
+            self.requires("libarchive/3.7.1")
         # libcurl is not required for 4.x
         if self.options.get_safe("with_libcurl", default=False):
-            self.requires("libcurl/8.0.1")
+            self.requires("libcurl/8.2.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -185,6 +187,8 @@ class TesseractConan(ConanFile):
         # TODO: back to global scope once cmake_find_package* generators removed
         self.cpp_info.components["libtesseract"].libs = [self._libname]
         self.cpp_info.components["libtesseract"].requires = ["leptonica::leptonica"]
+        if self.settings.os == "Windows" and Version(self.version) >= "5.0.0":
+            self.cpp_info.components["libtesseract"].requires.append("libtiff::libtiff")
         if self.options.get_safe("with_libcurl", default=False):
             self.cpp_info.components["libtesseract"].requires.append("libcurl::libcurl")
         if self.options.get_safe("with_libarchive", default=True):

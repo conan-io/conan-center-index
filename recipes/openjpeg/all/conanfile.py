@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save, replace_in_file
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -71,8 +71,15 @@ class OpenjpegConan(ConanFile):
         tc.variables["OPJ_USE_THREAD"] = True
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # The finite-math-only optimization has no effect and can cause linking errors
+        # when linked against glibc >= 2.31
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "-ffast-math", "-ffast-math;-fno-finite-math-only")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -137,6 +144,7 @@ class OpenjpegConan(ConanFile):
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
         self.cpp_info.set_property("pkg_config_name", "libopenjp2")
         self.cpp_info.includedirs.append(os.path.join("include", self._openjpeg_subdir))
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
         self.cpp_info.libs = ["openjp2"]
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("OPJ_STATIC")
