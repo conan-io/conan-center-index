@@ -1012,7 +1012,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.parallel == "tbb":
-            self.requires("onetbb/2021.9.0")
+            self.requires("onetbb/2021.10.0")
         if self.options.with_ipp == "intel-ipp":
             self.requires("intel-ipp/2020")
         # dnn module dependencies
@@ -1023,19 +1023,19 @@ class OpenCVConan(ConanFile):
             self.requires("vulkan-headers/1.3.250.0")
         # gapi module dependencies
         if self.options.gapi:
-            self.requires("ade/0.1.2a")
+            self.requires("ade/0.1.2c")
         # highgui module dependencies
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         if self.options.get_safe("with_qt"):
-            self.requires("qt/5.15.10")
+            self.requires("qt/5.15.11")
         # imgcodecs module dependencies
         if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.0")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
-            self.requires("mozjpeg/4.1.1")
+            self.requires("mozjpeg/4.1.3")
         if self.options.get_safe("with_jpeg2000") == "jasper":
             self.requires("jasper/4.0.0")
         elif self.options.get_safe("with_jpeg2000") == "openjpeg":
@@ -1045,11 +1045,11 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_openexr"):
             self.requires("openexr/3.1.9")
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.5.1")
+            self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_webp"):
-            self.requires("libwebp/1.3.1")
+            self.requires("libwebp/1.3.2")
         if self.options.get_safe("with_gdal"):
-            self.requires("gdal/3.5.2")
+            self.requires("gdal/3.7.0")
         if self.options.get_safe("with_gdcm"):
             self.requires("gdcm/3.0.21")
         # objdetect module dependencies
@@ -1058,11 +1058,11 @@ class OpenCVConan(ConanFile):
         # videoio module dependencies
         if self.options.get_safe("with_ffmpeg"):
             # opencv doesn't support ffmpeg >= 5.0.0 for the moment (until 4.5.5 at least)
-            self.requires("ffmpeg/4.4.3")
+            self.requires("ffmpeg/4.4.4")
         # freetype module dependencies
         if self.options.freetype:
             self.requires("freetype/2.13.0")
-            self.requires("harfbuzz/8.1.1")
+            self.requires("harfbuzz/8.2.1")
         # hdf module dependencies
         if self.options.hdf:
             self.requires("hdf5/1.14.1")
