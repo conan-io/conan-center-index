@@ -45,6 +45,8 @@ class FtjamConan(ConanFile):
             # Build fails with
             # NMAKE : fatal error U1077: 'jam0 JamFile' : return code '0xc0000005'
             raise ConanInvalidConfiguration("ftjam doesn't build with Visual Studio yet")
+
+    def validate_build(self):    
         if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("ftjam can't be cross-built")
 
