@@ -19,16 +19,39 @@ class WhisperCppConan(ConanFile):
     homepage = "https://github.com/ggerganov/whisper.cpp"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "sanitize_thread": [True, False],
-               "sanitize_address": [True, False], "sanitize_undefined": [True, False],
-               "no_avx": [True, False], "no_avx2": [True, False], "no_fma": [True, False], "no_f16c": [True, False],
-               "no_accelerate": [True, False], "with_coreml": [True, False], "coreml_allow_fallback": [True, False],
-               "with_blas": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "sanitize_thread": False,
-                       "sanitize_address": False, "sanitize_undefined": False,
-                       "no_avx": False, "no_avx2": False, "no_fma": False, "no_f16c": False,
-                       "no_accelerate": False, "with_coreml": False, "coreml_allow_fallback": False,
-                       "with_blas": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "sanitize_thread": [True, False],
+        "sanitize_address": [True, False],
+        "sanitize_undefined": [True, False],
+        "no_avx": [True, False],
+        "no_avx2": [True, False],
+        "no_fma": [True, False],
+        "no_f16c": [True, False],
+        "no_accelerate": [True, False],
+        "with_openvino": [True, False],
+        "with_coreml": [True, False],
+        "coreml_allow_fallback": [True, False],
+        "with_metal": [True, False],
+        "with_blas": [True, False]
+    }
+    default_options = {"shared": False,
+        "fPIC": True,
+        "sanitize_thread": False,
+        "sanitize_address": False,
+        "sanitize_undefined": False,
+        "no_avx": False,
+        "no_avx2": False,
+        "no_fma": False,
+        "no_f16c": False,
+        "no_accelerate": False,
+        "with_openvino": True,
+        "with_coreml": False,
+        "coreml_allow_fallback": False,
+        "with_metal": True,
+        "with_blas": False
+    }
     package_type = "library"
 
     @property
@@ -47,13 +70,24 @@ class WhisperCppConan(ConanFile):
             },
         }.get(self._min_cppstd, {})
 
+    @property
+    def _target_x86_64(self):
+        return self.settings.arch == "x86_64"
+
     def config_options(self):
         if is_apple_os(self):
             del self.options.with_blas
+            if self._target_x86_64:
+                del self.options.with_metal
         else:
             del self.options.no_accelerate
             del self.options.with_coreml
             del self.options.coreml_allow_fallback
+            if Version(self.version) <= "1.4.2":
+                del self.options.with_metal
+
+        if Version(self.version) <= "1.4.2":
+            del self.options.with_openvino
 
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -79,6 +113,8 @@ class WhisperCppConan(ConanFile):
         if not is_apple_os(self):
             if self.options.with_blas:
                 self.requires("openblas/0.3.20")
+        if self.options.get_safe("with_openvino"):
+            self.requires("openvino/2023.1.0")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -114,6 +150,9 @@ class WhisperCppConan(ConanFile):
         if self.options.no_f16c:
             tc.variables["WHISPER_NO_F16C"] = True
 
+        if self.options.get_safe("with_openvino"):
+            tc.variables["WHISPER_OPENVINO"] = True
+
         if is_apple_os(self):
             if self.options.no_accelerate:
                 tc.variables["WHISPER_NO_ACCELERATE"] = True
@@ -121,6 +160,8 @@ class WhisperCppConan(ConanFile):
                 tc.variables["WHISPER_COREML"] = True
                 if self.options.coreml_allow_fallback:
                     tc.variables["WHISPER_COREML_ALLOW_FALLBACK"] = True
+            if Version(self.version) > "1.4.2":
+                tc.variables["WHISPER_METAL"] = self.options.get_safe("with_metal", False)
         else:
             if self.options.with_blas:
                 if Version(self.version) >= "1.4.2":
@@ -147,10 +188,15 @@ class WhisperCppConan(ConanFile):
         self.cpp_info.resdirs = ["res"]
         self.cpp_info.libdirs = ["lib", "lib/static"]
 
+        if self.options.get_safe("with_openvino"):
+            self.cpp_info.requires = ["openvino::Runtime"]
+
         if is_apple_os(self):
             if not self.options.no_accelerate:
                 self.cpp_info.frameworks.append("Accelerate")
             if self.options.with_coreml:
                 self.cpp_info.frameworks.append("CoreML")
+            if self.options.get_safe("with_metal"):
+                self.cpp_info.frameworks.extend(["Foundation", "Metal", "MetalKit"])
         elif self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
