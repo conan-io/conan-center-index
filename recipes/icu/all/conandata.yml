@@ -23,6 +23,7 @@ sources:
 patches:
   "73.2":
     - patch_file: "patches/0001-69.1-fix-mingw.patch"
+    - patch_file: "patches/0001-73.2-fix-clang-default-compiler.patch"
   "73.1":
     - patch_file: "patches/0001-69.1-fix-mingw.patch"
   "72.1":
