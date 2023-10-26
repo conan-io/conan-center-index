@@ -762,7 +762,8 @@ class QtConan(ConanFile):
             save(self, ".qmake.super" , "")
         cmake = CMake(self)
         cmake.install()
-        copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"),
+             excludes="qtbase/examples/*")
         for module in self._get_module_tree:
             if module != "qtbase" and not self.options.get_safe(module):
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
