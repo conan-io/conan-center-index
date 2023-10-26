@@ -146,7 +146,7 @@ class OpenvinoConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
             if self._protobuf_required:
-                # even OpenVINO can work with dynamic protobuf, it's still recommended to use static
+                # even though OpenVINO can work with dynamic protobuf, it's still recommended to use static
                 self.options["protobuf"].shared = False
 
     def build_requirements(self):

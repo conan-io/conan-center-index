@@ -1,0 +1,23 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 94b36d7..f92ec26 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -23,3 +23,18 @@ target_include_directories(QtAwesome
+ target_link_libraries(QtAwesome PUBLIC
+   Qt${QT_VERSION_MAJOR}::Widgets
+ )
++
++install(TARGETS QtAwesome
++  RUNTIME DESTINATION bin
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++)
++
++install(FILES
++  QtAwesome/QtAwesome.h
++  QtAwesome/QtAwesomeAnim.h
++  QtAwesome/QtAwesomeEnumGenerated.h
++  QtAwesome/QtAwesomeStringGenerated.h
++  DESTINATION include
++  )
++

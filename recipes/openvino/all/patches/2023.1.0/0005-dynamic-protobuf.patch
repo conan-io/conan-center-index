@@ -139,6 +139,45 @@ index 93e6a5cc2e..dccf8ddf7a 100644
  /// \brief Internal data structure holding by each frontend. Includes library handle and extensions.
  class FrontEndSharedData {
      friend inline void add_extension_to_shared_data(std::shared_ptr<void>& obj,
+diff --git a/src/frontends/tensorflow/src/proto/meta_graph.proto b/src/frontends/tensorflow/src/proto/meta_graph.proto
+index b6918fa853..c59c0680af 100644
+--- a/src/frontends/tensorflow/src/proto/meta_graph.proto
++++ b/src/frontends/tensorflow/src/proto/meta_graph.proto
+@@ -14,7 +14,7 @@ syntax = "proto3";
+ 
+ package tensorflow;
+ 
+-import "any.proto";
++import "google/protobuf/any.proto";
+ import "graph.proto";
+ import "op_def.proto";
+ import "tensor_shape.proto";
+diff --git a/src/frontends/tensorflow/src/proto/saved_object_graph.proto b/src/frontends/tensorflow/src/proto/saved_object_graph.proto
+index 671441075c..3918a4a8d1 100644
+--- a/src/frontends/tensorflow/src/proto/saved_object_graph.proto
++++ b/src/frontends/tensorflow/src/proto/saved_object_graph.proto
+@@ -14,7 +14,7 @@ syntax = "proto3";
+ 
+ package tensorflow;
+ 
+-import "any.proto";
++import "google/protobuf/any.proto";
+ import "tensor_shape.proto";
+ import "types.proto";
+ import "variable.proto";
+diff --git a/src/frontends/tensorflow/src/proto/trackable_object_graph.proto b/src/frontends/tensorflow/src/proto/trackable_object_graph.proto
+index f4a8e4da34..f0a9617432 100644
+--- a/src/frontends/tensorflow/src/proto/trackable_object_graph.proto
++++ b/src/frontends/tensorflow/src/proto/trackable_object_graph.proto
+@@ -14,7 +14,7 @@ syntax = "proto3";
+ 
+ package tensorflow;
+ 
+-import "wrappers.proto";
++import "google/protobuf/wrappers.proto";
+ 
+ option cc_enable_arenas = true;
+ option go_package = "github.com/tensorflow/tensorflow/tensorflow/go/core/protobuf/for_core_protos_go_proto";
 diff --git a/thirdparty/dependencies.cmake b/thirdparty/dependencies.cmake
 index 43e0ed671a..10042641e4 100644
 --- a/thirdparty/dependencies.cmake
