@@ -13,6 +13,7 @@ patches:
     - patch_file: "patches/0.10.1-0001-remove-template-id.patch"
       patch_description: "rempte template-id from constructor/destructor"
       patch_type: "portability"
+      patch_source: "https://github.com/kaitai-io/kaitai_struct_cpp_stl_runtime/pull/68"
   "0.10":
     - patch_file: "patches/0.10-0001-cmake-minimum-required.patch"
       patch_description: "declare cmake_minimum_required first"
