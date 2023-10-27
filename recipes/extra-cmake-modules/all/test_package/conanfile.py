@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout
 import os
@@ -12,8 +12,14 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
+    def requirements(self):
+        # CMakeToolchain of conan v1 doesn't add cpp_info.builddirs of build requirements to CMAKE_PREFIX_PATH
+        if conan_version < "2":
+            self.requires(self.tested_reference_str)
+
     def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
+        if conan_version > "2":
+            self.tool_requires(self.tested_reference_str)
 
     def build(self):
         cmake = CMake(self)
