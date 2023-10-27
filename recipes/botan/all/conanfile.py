@@ -139,13 +139,13 @@ class BotanConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.get_safe('with_openssl', False):
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <3]")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.38.5")
         if self.options.with_boost:
-            self.requires("boost/1.82.0")
+            self.requires("boost/1.83.0")
 
     @property
     def _required_boost_components(self):
@@ -154,7 +154,7 @@ class BotanConan(ConanFile):
     @property
     def _min_cppstd(self):
         # From the same links as below
-        return 11 if Version(self.version).major < 3 else 20
+        return 11 if Version(self.version) < "3.0.0" else 20
 
     @property
     def _compilers_minimum_version(self):
