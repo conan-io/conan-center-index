@@ -42,7 +42,7 @@ class LsQpackConan(ConanFile):
 
     def requirements(self):
         if self.options.with_xxh:
-            self.requires("xxhash/0.8.1")
+            self.requires("xxhash/0.8.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

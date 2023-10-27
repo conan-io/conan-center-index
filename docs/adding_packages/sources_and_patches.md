@@ -16,8 +16,7 @@ These are a very important aspects and it helps us to establish the quality of t
     * [Format and Conventions](#format-and-conventions)
     * [Exporting Patches](#exporting-patches)
     * [Applying Patches](#applying-patches)
-    * [Rules](#rules)
-    * [Exceptions](#exceptions)<!-- endToc -->
+    * [Policy on patches](#policy-on-patches)<!-- endToc -->
 
 ## Picking the Sources
 
@@ -138,62 +137,13 @@ def _patch_sources(self):
     replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "${CMAKE_SOURCE_DIR}", "${CMAKE_CURRENT_SOURCE_DIR}")
 ```
 
-### Rules
+### Policy on patches
 
-These are the rules that apply to regular versions of Conan packages:
+Conan Center is a package repository, and the aim of the service is to provide the recipes to build libraries from the sources as provided by the library authors, and to provide binaries for Conan Center’s supported platforms and configurations.
 
-**Build system patches.** In order to add libraries into ConanCenter sometimes
-it is NEEDED to apply patches so they can consume existing packages
-for requirements and binaries can be generated. These patches are totally
-needed for the purpose of ConanCenter and Conan keeps adding features trying
-to minimize these changes.
+In general, patches to source code should be avoided and only done as a last resort. In situations where it is strictly necessary, the aim should be that the patches could be eventually merged upstream so that in the future they are no longer necessary. 
 
-**Source patches.** ConanCenter DOES NOT accept patches **backporting bugfixes or
-features** from upcoming releases, they break the principle of minimum surprise,
-they change the behavior of the library and it will no longer match the
-documentation or the changelog originally delivered by the authors.
+Pull Requests that introduce patches will be carefully reviewed by the Conan Team.  We recognize that in some instances, patches are necessary in the build system/build scripts. 
+Patches that affect C and C++ code are strongly discouraged and will only be accepted at the discretion of the Conan Team, after a strict validation process. Patches are more likely to be accepted if they are first reported and acknowledged by the library authors.
 
-However, ConanCenter DOES accept **working software patches**, these patches
-are needed to generate the binaries for architectures not considered by
-library maintainers, or to use some compilers or configurations. These patches
-make it possible to generate binaries that cannot be generated otherwise, or
-they can turn a crashing binary into a working software one (bugs, errors, or
-faults are considered working software as long as they produce deterministic
-results).
-
-Patches to sources to add support to newer versions of dependencies are
-considered feature patches and they are not allowed either. They can
-introduce new behaviors or bugs not considered when delivering the
-library by maintainers. If a requirement is known not to work, the recipe
-should raise a `ConanInvalidConfiguration` from the `validate()` method.
-
-**Vulnerability patches.** Patches published to CVE databases or declared as
-vulnerabilities by the authors in non-mainstream libraries WILL be applied
-to packages generated in Conan Center.
-
-**Official release patches.** If the library documents that a patch should be
-applied to sources when building a tag/release from sources, ConanCenter WILL
-apply that patch too. This is needed to match the documented behavior or the
-binaries of that library offered by other means.
-[Example here](https://www.boost.org/users/history/version_1_73_0.html).
-
-### Exceptions
-
-Exceptionally, we might find libraries that aren't actively developed and consumers
-might benefit from having some bugfixes applied to previous versions while
-waiting for the next release, or because the library is no longer maintained. These
-are the rules for this exceptional scenario:
-
-* **new release**, based on some official release and clearly identifiable will
- be created to apply these patches to: <<PLACEHOLDER_FOR_RELEASE_FORMAT>>.
-* **only patches backporting bugfixes** will be accepted after they have
- been submitted to the upstream and there is a consensus that it's a bug and the patch is the solution.
-
-ConanCenter will build this patched release and serve its binaries like it does with
-any other Conan reference.
-
-Notice that these <<PLACEHOLDER_FOR_RELEASE_FORMAT>> releases are unique to ConanCenter
-and they can get new patches or discard existing ones according to upstream
-considerations. It means that these releases will modify their behavior without previous
-notice, the documentation or changelog for these specific releases won't exist. Use
-them carefully in your projects.
+For scenarios that require patching source code, we greatly encourage raising a new issue explaining the need and motivation, reproducible steps and complete logs, behind the patch. Please note that for issues that strictly affect C and C++ source code, it is very unlikely that a patch will be accepted if an issue is not first raised with the original library authors, or if the patches are not addressing a known security advisory.

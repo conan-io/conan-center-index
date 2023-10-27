@@ -8,3 +8,7 @@ find_package(OpenCLHeadersCpp REQUIRED CONFIG)
 
 add_library(${PROJECT_NAME} OBJECT test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenCL::HeadersCpp)
+
+if(OpenCLHeadersCpp_VERSION VERSION_GREATER 2020.06.16)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_OPENCL_HPP)
+endif()

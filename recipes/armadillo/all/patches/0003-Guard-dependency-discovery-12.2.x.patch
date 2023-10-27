@@ -1,0 +1,121 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7d21cf2..2669b17 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -270,7 +270,11 @@ if(APPLE)
+   set(ARMA_USE_ACCELERATE true)
+   
+   if(ALLOW_OPENBLAS_MACOS)
+-    include(ARMA_FindOpenBLAS)
++    if(USE_OPENBLAS)
++        find_package(OpenBLAS)
++    else()
++        set(OpenBLAS_FOUND NO)
++    endif()
+     message(STATUS "OpenBLAS_FOUND = ${OpenBLAS_FOUND}")
+     message(STATUS "")
+     message(STATUS "*** If use of OpenBLAS is causing problems,")
+@@ -285,8 +289,16 @@ if(APPLE)
+   endif()
+   
+   if(ALLOW_BLAS_LAPACK_MACOS)
+-    include(ARMA_FindBLAS)
+-    include(ARMA_FindLAPACK)
++    if(USE_SYSTEM_BLAS)
++      include(ARMA_FindBLAS)
++    else()
++      set(BLAS_FOUND NO)
++    endif()
++    if(USE_SYSTEM_LAPACK)
++      include(ARMA_FindLAPACK)
++    else()
++      set(LAPACK_FOUND NO)
++    endif()
+     message(STATUS "  BLAS_FOUND = ${BLAS_FOUND}"  )
+     message(STATUS "LAPACK_FOUND = ${LAPACK_FOUND}")
+     message(STATUS "")
+@@ -325,19 +337,45 @@ if(APPLE)
+   
+ else()
+   
+-  if(ALLOW_FLEXIBLAS_LINUX AND (${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
+-    include(ARMA_FindFlexiBLAS)
++  if(USE_MKL)
++    find_package(MKL)
+   else()
+-    set(FlexiBLAS_FOUND false)
++    set(MKL_FOUND NO)
++  endif()
++
++  if(USE_OPENBLAS)
++    find_package(OpenBLAS)
++  else()
++    set(OpenBLAS_FOUND NO)
++  endif()
++
++  if(USE_SYSTEM_ATLAS)
++    include(ARMA_FindATLAS)
++  else()
++    set(ATLAS_FOUND NO)
++  endif()
++
++  if(USE_SYSTEM_BLAS)
++    include(ARMA_FindBLAS)
++  else()
++    set(BLAS_FOUND NO)
++  endif()
++
++  if(USE_SYSTEM_LAPACK)
++    include(ARMA_FindLAPACK)
++  else()
++    set(LAPACK_FOUND NO)
+   endif()
+   
+-  include(ARMA_FindMKL)
+-  include(ARMA_FindOpenBLAS)
+-  include(ARMA_FindATLAS)     # TODO: remove support for ATLAS in next major version
+-  include(ARMA_FindBLAS)
+-  include(ARMA_FindLAPACK)
+-  
+-  message(STATUS "FlexiBLAS_FOUND = ${FlexiBLAS_FOUND}" )
++  if(ALLOW_FLEXIBLAS_LINUX AND (${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
++    if(USE_SYSTEM_FLEXIBLAS)
++      include(ARMA_FindFlexiBLAS)
++    else()
++      set(FlexiBLAS_FOUND NO)
++    endif()
++  endif()
++
++  message(STATUS "FlexiBLAS_FOUND = ${FlexiBLAS_FOUND}" )  
+   message(STATUS "      MKL_FOUND = ${MKL_FOUND}"       )
+   message(STATUS " OpenBLAS_FOUND = ${OpenBLAS_FOUND}"  )
+   message(STATUS "    ATLAS_FOUND = ${ATLAS_FOUND}"     )
+@@ -449,7 +487,11 @@ else()
+ endif()
+ 
+ 
+-include(ARMA_FindARPACK)
++if(USE_SYSTEM_ARPACK)
++  include(ARMA_FindARPACK)
++else()
++  set(ARPACK_FOUND NO)
++endif()
+ message(STATUS "ARPACK_FOUND = ${ARPACK_FOUND}")
+ 
+ if(ARPACK_FOUND)
+@@ -457,7 +499,11 @@ if(ARPACK_FOUND)
+   set(ARMA_LIBS ${ARMA_LIBS} ${ARPACK_LIBRARY})
+ endif()
+ 
+-include(ARMA_FindSuperLU5)
++if(USE_SYSTEM_SUPERLU)
++  include(ARMA_FindSuperLU5)
++else()
++  set(SuperLU_FOUND NO)
++endif()
+ message(STATUS "SuperLU_FOUND = ${SuperLU_FOUND}")
+ 
+ if(SuperLU_FOUND)
+-- 
+2.41.0
+

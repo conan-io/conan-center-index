@@ -11,7 +11,7 @@ int main() {
     values = std::move(values)
         % fn::where([](auto&& _) { return _ % 2 == 0; })
         % fn::transform([] (auto&& _) { return _ * 3; });
-    
+
     auto expected = std::vector<int>{0,6,12,18,24,30};
     bool success = values == expected;
 

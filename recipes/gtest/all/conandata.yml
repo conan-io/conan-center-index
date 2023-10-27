@@ -1,4 +1,7 @@
 sources:
+  "1.14.0":
+    url: "https://github.com/google/googletest/archive/refs/tags/v1.14.0.tar.gz"
+    sha256: "8ad598c73ad796e0d8280b082cebd82a630d73e73cd3c70057938a6501bba5d7"
   "1.13.0":
     url: "https://github.com/google/googletest/archive/refs/tags/v1.13.0.tar.gz"
     sha256: "ad7fdba11ea011c1d925b3289cf4af2c66a352e18d4c7264392fead75e919363"
@@ -8,6 +11,9 @@ sources:
   "1.10.0":
     url: "https://github.com/google/googletest/archive/release-1.10.0.tar.gz"
     sha256: "9dc9157a9a1551ec7a7e43daea9a694a0bb5fb8bec81235d8a1e6ef64c716dcb"
+  "1.8.1":
+    url: "https://github.com/google/googletest/archive/release-1.8.1.tar.gz"
+    sha256: "9bf1fe5182a604b4135edc1a425ae356c9ad15e9b23f9f12a02e80184c3a249c"
 patches:
   "1.10.0":
     - patch_file: "patches/gtest-1.10.0.patch"
@@ -17,3 +23,7 @@ patches:
       patch_description: "prevent compiler from complaining while compiling"
       patch_type: "bugfix"
       patch_source: "https://github.com/google/googletest/pull/2507"
+  "1.8.1":
+    - patch_file: "patches/gtest-1.8.1.patch"
+      patch_description: "add CUSTOM_DEBUG_POSTFIX option"
+      patch_type: "conan"

@@ -73,8 +73,6 @@ class MinizipNgConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-        if self.options.mz_compatibility:
-            self.provides = "minizip"
         if self.options.get_safe("with_libcomp"):
             del self.options.with_zlib
 
@@ -83,7 +81,7 @@ class MinizipNgConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
@@ -98,7 +96,7 @@ class MinizipNgConan(ConanFile):
 
     def build_requirements(self):
         if self._needs_pkg_config:
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/1.9.5")
         if Version(self.version) >= "4.0.0":
             self.tool_requires("cmake/[>=3.19 <4]")
 
@@ -142,7 +140,7 @@ class MinizipNgConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                   "set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE 1)",
                                   "")
-        else:
+        elif Version(self.version) == "4.0.0":
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                   "set_target_properties(${MINIZIP_TARGET} PROPERTIES POSITION_INDEPENDENT_CODE 1)",
                                   "")
@@ -177,7 +175,8 @@ class MinizipNgConan(ConanFile):
             self.cpp_info.components["minizip"].defines.append("HAVE_BZIP2")
 
         if Version(self.version) >= "4.0.0":
-            self.cpp_info.components["minizip"].includedirs.append(os.path.join("include", "minizip-ng"))
+            minizip_dir = "minizip" if self.options.mz_compatibility else "minizip-ng"
+            self.cpp_info.components["minizip"].includedirs.append(os.path.join(self.package_folder, "include", minizip_dir))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "minizip"
@@ -202,6 +201,4 @@ class MinizipNgConan(ConanFile):
             self.cpp_info.components["minizip"].frameworks.extend(["CoreFoundation", "Security"])
         if self.settings.os != "Windows" and self.options.with_iconv:
             self.cpp_info.components["minizip"].requires.append("libiconv::libiconv")
-
-
 

@@ -2,7 +2,6 @@ from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, download, unzip, load, copy, rm
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 import os
 import re
 import shutil
@@ -12,16 +11,18 @@ required_conan_version = ">=1.52.0"
 
 class AndroidNDKConan(ConanFile):
     name = "android-ndk"
-    description = "The Android NDK is a toolset that lets you implement parts of your app in native code, using languages such as C and C++"
+    description = (
+        "The Android NDK is a toolset that lets you implement parts of your app "
+        "in native code, using languages such as C and C++"
+    )
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://developer.android.com/ndk/"
     topics = ("android", "ndk", "toolchain", "compiler")
-    license = "Apache-2.0"
 
-    settings = "os", "arch", "build_type", "compiler"
-
+    package_type = "application"
+    settings = "os", "arch", "compiler", "build_type"
     short_paths = True
-    exports_sources = "cmake-wrapper.cmd", "cmake-wrapper"
 
     def _is_universal2(self, info=False):
         settings = self.info.settings if info else self.settings
@@ -40,6 +41,10 @@ class AndroidNDKConan(ConanFile):
     @property
     def _settings_arch_supported(self):
         return self.conan_data["sources"][self.version].get(str(self.settings.os), {}).get(str(self._arch)) is not None
+
+    def export_sources(self):
+        copy(self, "cmake-wrapper.cmd", src=self.recipe_folder, dst=self.export_sources_folder)
+        copy(self, "cmake-wrapper", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -226,7 +231,7 @@ class AndroidNDKConan(ConanFile):
             cmake_system_processor = "armv5te"
         return cmake_system_processor
 
-    def _define_tool_var(self, name, value, bare = False):
+    def _define_tool_var(self, name, value, bare=False):
         ndk_bin = os.path.join(self._ndk_root, "bin")
         path = os.path.join(ndk_bin, self._tool_name(value, bare))
         if not os.path.isfile(path):
@@ -325,7 +330,7 @@ class AndroidNDKConan(ConanFile):
         self.buildenv_info.define("ANDROID_STL", libcxx_str if libcxx_str.startswith("c++_") else "c++_shared")
 
         # TODO: conan v1 stuff to remove later
-        if Version(conan_version).major < 2:
+        if conan_version.major < 2:
             self.env_info.PATH.extend([os.path.join(self.package_folder, "bin"), os.path.join(self._ndk_root, "bin")])
             self.env_info.ANDROID_NDK_ROOT = os.path.join(self.package_folder, "bin")
             self.env_info.ANDROID_NDK_HOME = os.path.join(self.package_folder, "bin")
