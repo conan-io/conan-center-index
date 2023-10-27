@@ -45,7 +45,6 @@ add_frontend_definition(${target} ENABLE_TF_LITE_FRONTEND tensorflow_lite)
 add_frontend_definition(${target} ENABLE_PYTORCH_FRONTEND pytorch)
 
 target_link_libraries(${target} PRIVATE openvino::runtime)
-target_compile_features(${target} PRIVATE cxx_std_11)
 
 # C test_package
 
