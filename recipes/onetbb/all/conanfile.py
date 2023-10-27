@@ -1,7 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, load, rmdir
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
 import re
@@ -19,6 +21,7 @@ class OneTBBConan(ConanFile):
         " programs that take full advantage of multicore performance, that are portable, composable"
         " and have future-proof scalability.")
     topics = ("tbb", "threading", "parallelism", "tbbmalloc")
+    package_type = "library"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -26,6 +29,7 @@ class OneTBBConan(ConanFile):
         "fPIC": [True, False],
         "tbbmalloc": [True, False],
         "tbbproxy": [True, False],
+        "tbbbind": [True, False],
         "interprocedural_optimization": [True, False],
     }
     default_options = {
@@ -33,8 +37,28 @@ class OneTBBConan(ConanFile):
         "fPIC": True,
         "tbbmalloc": True,
         "tbbproxy": True,
+        "tbbbind": True,
         "interprocedural_optimization": True,
     }
+
+    @property
+    def _tbbbind_hwloc_version(self):
+        # TBB expects different variables depending on the version
+        return "2_5" if Version(self.version) >= "2021.4.0" else "2_4"
+
+    @property
+    def _tbbbind_supported(self):
+        return Version(self.version) >= "2021.1.1" and not self.settings.os == "Macos"
+
+    @property
+    def _tbbbind_build(self):
+        return self.options.get_safe("tbbbind", False) and self._tbbbind_supported
+
+    @property
+    def _tbbbind_explicit_hwloc(self):
+        # during cross-compilation, oneTBB does not search for HWLOC and we need to specify it explicitly
+        # but then oneTBB creates an imported SHARED target from provided paths, so we have to set shared=True
+        return self._tbbbind_build and cross_building(self)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -42,6 +66,8 @@ class OneTBBConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._tbbbind_supported:
+            del self.options.tbbbind
         if Version(self.version) < "2021.6.0" or self.settings.os == "Android":
             del self.options.interprocedural_optimization
         if Version(self.version) < "2021.2.0":
@@ -53,11 +79,22 @@ class OneTBBConan(ConanFile):
             self.options.rm_safe("fPIC")
         else:
             del self.options.tbbproxy
+            self.options.rm_safe("tbbbind")
         if not self.options.tbbmalloc:
             self.options.rm_safe("tbbproxy")
+        if self._tbbbind_explicit_hwloc:
+            self.options["hwloc"].shared = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        if self._tbbbind_build:
+            self.requires("hwloc/2.9.3")
+
+    def build_requirements(self):
+        if not self._tbbbind_explicit_hwloc and not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/1.9.5")
 
     def package_id(self):
         if Version(self.version) < "2021.5.0":
@@ -77,6 +114,10 @@ class OneTBBConan(ConanFile):
                 )
             self.output.warning("oneTBB strongly discourages usage of static linkage")
 
+    def validate(self):
+        if self._tbbbind_explicit_hwloc and not self.dependencies["hwloc"].options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} requires hwloc:shared=True to be built.")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -90,7 +131,22 @@ class OneTBBConan(ConanFile):
             toolchain.variables["TBB_ENABLE_IPO"] = self.options.interprocedural_optimization
         if Version(self.version) >= "2021.6.0" and self.options.get_safe("tbbproxy"):
             toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.tbbproxy
+        toolchain.variables["TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH"] = not self._tbbbind_build
+        if self._tbbbind_explicit_hwloc:
+            hwloc_package_folder = self.dependencies["hwloc"].package_folder
+            hwloc_lib_name = "hwloc.lib" if self.settings.os == "Windows" else "libhwloc.so"
+            toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_LIBRARY_PATH"] = \
+                os.path.join(hwloc_package_folder, "lib", hwloc_lib_name).replace("\\", "/")
+            toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_INCLUDE_PATH"] = \
+                os.path.join(hwloc_package_folder, "include").replace("\\", "/")
+            if self.settings.os == "Windows":
+                toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_DLL_PATH"] = \
+                    os.path.join(hwloc_package_folder, "bin", "hwloc.dll").replace("\\", "/")
         toolchain.generate()
+
+        if self._tbbbind_build:
+            deps = PkgConfigDeps(self)
+            deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
