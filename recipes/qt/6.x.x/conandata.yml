@@ -105,8 +105,6 @@ sources:
       - "https://mirrors.ustc.edu.cn/qtproject/archive/qt/6.3/6.3.2/single/qt-everywhere-src-6.3.2.tar.xz"
     sha256: "b90524f686224a0e5a945c1d65307e16a375348dbe275c9ac11de171fe31374a"
 patches:
-<<<<<<< HEAD
-=======
   "6.6.0":
     - "base_path": "qtwebengine"
       "patch_description": "Workaround for too long .rps file name"
@@ -119,17 +117,13 @@ patches:
     - "base_path": "qtwebengine"
       "patch_description": "Workaround for too long .rps file name"
       "patch_file": "patches/c72097e.diff"
->>>>>>> master
   "6.5.1":
     - base_path: "qtwebengine"
       patch_description: "Workaround for too long .rps file name"
       patch_file: "patches/c72097e.diff"
-<<<<<<< HEAD
-=======
     - base_path: "qtbase/cmake"
       patch_description: "Fix pri helpers, see PR #6668 and QTBUG-95569"
       patch_file: "patches/qt6.5.0-pri-helpers-fix.diff"
->>>>>>> master
   "6.5.0":
     - base_path: "qtwebengine"
       patch_description: "Workaround for too long .rps file name"
