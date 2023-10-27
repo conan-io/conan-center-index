@@ -88,6 +88,9 @@ class SAILConan(ConanFile):
         tc.variables["SAIL_BUILD_TESTS"]    = False
         tc.variables["SAIL_COMBINE_CODECS"] = True
         tc.variables["SAIL_ONLY_CODECS"]    = ";".join(only_codecs)
+        # SVG requires resvg which is not in Conan yet
+        # JPEGXL needs porting to Conan2
+        tc.variables["SAIL_DISABLE_CODECS"] = "svg;jpegxl"
         tc.variables["SAIL_INSTALL_PDB"]    = False
         tc.variables["SAIL_THREAD_SAFE"]    = self.options.thread_safe
         # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
