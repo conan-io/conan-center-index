@@ -320,20 +320,6 @@ set(OHMEDIAPLAYER_HEADERS
     OpenHome/Av/Pins/Pins.h
     OpenHome/Av/Pins/ProviderPins.h
     OpenHome/Av/OhMetadata.h
-    ${CMAKE_BINARY_DIR}/Generated/DvAvOpenhomeOrgProduct3.h
-    ${CMAKE_BINARY_DIR}/Generated/CpAvOpenhomeOrgProduct3.h
-    ${CMAKE_BINARY_DIR}/Generated/DvAvOpenhomeOrgTime1.h
-    ${CMAKE_BINARY_DIR}/Generated/DvAvOpenhomeOrgInfo1.h
-    ${CMAKE_BINARY_DIR}/Generated/DvAvOpenhomeOrgTransport1.h
-    ${CMAKE_BINARY_DIR}/Generated/CpAvOpenhomeOrgTransport1.h
-    ${CMAKE_BINARY_DIR}/Generated/CpAvOpenhomeOrgRadio2.h
-    ${CMAKE_BINARY_DIR}/Generated/DvAvOpenhomeOrgVolume4.h
-    ${CMAKE_BINARY_DIR}/Generated/DvAvOpenhomeOrgConfig2.h
-    ${CMAKE_BINARY_DIR}/Generated/DvAvOpenhomeOrgConfigApp1.h
-    ${CMAKE_BINARY_DIR}/Generated/DvAvOpenhomeOrgCredentials1.h
-    ${CMAKE_BINARY_DIR}/Generated/DvAvOpenhomeOrgDebug2.h
-    ${CMAKE_BINARY_DIR}/Generated/DvAvOpenhomeOrgPins1.h
-    ${CMAKE_BINARY_DIR}/Generated/DvAvOpenhomeOrgOAuth1.h
 )
 add_library(ohMediaPlayer STATIC ${OHMEDIAPLAYER_SOURCES})
 target_link_libraries(ohMediaPlayer PRIVATE libressl::libressl ohNet ohPipeline)
@@ -408,8 +394,6 @@ add_library(SourcePlaylist
 target_link_libraries(SourcePlaylist PRIVATE ohNet ohMediaPlayer Podcast SSL)
 target_include_directories(SourcePlaylist PRIVATE ${PROJECT_SOURCE_DIR})
 set(SOURCE_PLAYLIST_HEADERS
-    ${CMAKE_BINARY_DIR}/Generated/DvAvOpenhomeOrgPlaylist1.h
-    ${CMAKE_BINARY_DIR}/Generated/CpAvOpenhomeOrgPlaylist1.h
     OpenHome/Av/Playlist/ProviderPlaylist.h
     OpenHome/Av/Playlist/TrackDatabase.h
     OpenHome/Av/Playlist/UriProviderPlaylist.h
@@ -419,12 +403,10 @@ set(SOURCE_PLAYLIST_HEADERS
     OpenHome/Av/Qobuz/Qobuz.h
     OpenHome/Av/Qobuz/QobuzMetadata.h
     OpenHome/Av/Qobuz/QobuzPins.h
-    ${CMAKE_BINARY_DIR}/Generated/CpAvOpenhomeOrgTransport1.h
     OpenHome/Av/Playlist/PinInvokerPlaylist.h
     OpenHome/Av/Playlist/DeviceListMediaServer.h
     OpenHome/Av/Playlist/PinInvokerKazooServer.h
     OpenHome/Av/Playlist/PinInvokerUpnpServer.h
-    ${CMAKE_BINARY_DIR}/Generated/CpUpnpOrgContentDirectory1.h
 )
 target_sources(SourcePlaylist PUBLIC FILE_SET HEADERS FILES "${SOURCE_PLAYLIST_HEADERS}")
 install(TARGETS SourcePlaylist
@@ -461,7 +443,6 @@ set(SOURCE_RADIO_HEADERS
     OpenHome/Av/Radio/Presets.h
     OpenHome/Av/Radio/TuneIn.h
     OpenHome/Av/CalmRadio/CalmRadio.h
-    ${CMAKE_BINARY_DIR}/Generated/DvAvOpenhomeOrgRadio2.h
     OpenHome/Av/Radio/ProviderRadio.h
 )
 target_sources(SourceRadio PUBLIC FILE_SET HEADERS FILES "${SOURCE_RADIO_HEADERS}")
@@ -495,7 +476,6 @@ add_library(SourceSongcast
 target_link_libraries(SourceSongcast PRIVATE ohNet ohMediaPlayer)
 target_include_directories(SourceSongcast PRIVATE ${PROJECT_SOURCE_DIR})
 set(SOURCE_SONGCAST_HEADERS
-    ${CMAKE_BINARY_DIR}/Generated/DvAvOpenhomeOrgSender2.h
     OpenHome/Av/Songcast/Ohm.h
     OpenHome/Av/Songcast/OhmMsg.h
     OpenHome/Av/Songcast/OhmSender.h
@@ -503,7 +483,6 @@ set(SOURCE_SONGCAST_HEADERS
     OpenHome/Av/Songcast/ProtocolOhBase.h
     OpenHome/Av/Songcast/ProtocolOhu.h
     OpenHome/Av/Songcast/ProtocolOhm.h
-    ${CMAKE_BINARY_DIR}/Generated/DvAvOpenhomeOrgReceiver1.h
     OpenHome/Av/Songcast/ProviderReceiver.h
     OpenHome/Av/Songcast/ZoneHandler.h
     OpenHome/Av/Songcast/Splitter.h
@@ -584,11 +563,8 @@ add_library(SourceUpnpAv
 target_link_libraries(SourceUpnpAv PRIVATE ohNet ohMediaPlayer)
 target_include_directories(SourceUpnpAv PRIVATE ${PROJECT_SOURCE_DIR})
 set(SOURCE_UPNP_AV_HEADERS
-    ${CMAKE_BINARY_DIR}/Generated/DvUpnpOrgAVTransport1.h
     OpenHome/Av/UpnpAv/ProviderAvTransport.h
-    ${CMAKE_BINARY_DIR}/Generated/DvUpnpOrgConnectionManager1.h
     OpenHome/Av/UpnpAv/ProviderConnectionManager.h
-    ${CMAKE_BINARY_DIR}/Generated/DvUpnpOrgRenderingControl1.h
     OpenHome/Av/UpnpAv/ProviderRenderingControl.h
     OpenHome/Av/UpnpAv/UpnpAv.h
     OpenHome/Av/UpnpAv/FriendlyNameUpnpAv.h
