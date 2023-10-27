@@ -36,9 +36,6 @@ class OhPipelineConan(ConanFile):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
         export_conandata_patches(self)
 
-    def build_requirements(self):
-        self.tool_requires("waf/2.0.25")
-
     def requirements(self):
         self.requires("ohnet/1.36.5182", transitive_headers=True, transitive_libs=True)
         self.requires("libressl/3.5.3", transitive_headers=True, transitive_libs=True)
