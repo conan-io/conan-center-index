@@ -55,7 +55,10 @@ class SAILConan(ConanFile):
         if self.options.with_medium_priority:
             self.requires("libavif/0.11.1")
             self.requires("jasper/4.0.0")
-            #self.requires("libjxl/0.6.1")
+            # TODO Re-enable JPEG XL after merging either of the following:
+            #   - https://github.com/conan-io/conan-center-index/pull/13898
+            #   - https://github.com/conan-io/conan-center-index/pull/18812
+            # self.requires("libjxl/0.6.1")
             self.requires("libwebp/1.3.2")
 
     def layout(self):
@@ -146,7 +149,7 @@ class SAILConan(ConanFile):
         if self.options.with_medium_priority:
             self.cpp_info.components["sail-codecs"].requires.append("libavif::libavif")
             self.cpp_info.components["sail-codecs"].requires.append("jasper::jasper")
-            #self.cpp_info.components["sail-codecs"].requires.append("libjxl::libjxl")
+            # self.cpp_info.components["sail-codecs"].requires.append("libjxl::libjxl")
             self.cpp_info.components["sail-codecs"].requires.append("libwebp::libwebp")
 
         self.cpp_info.components["libsail"].set_property("cmake_target_name", "SAIL::Sail")
