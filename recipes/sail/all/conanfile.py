@@ -83,9 +83,9 @@ class SAILConan(ConanFile):
             only_codecs.append("lowest-priority")
 
         tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"]       = False
         tc.variables["SAIL_BUILD_APPS"]     = False
         tc.variables["SAIL_BUILD_EXAMPLES"] = False
-        tc.variables["SAIL_BUILD_TESTS"]    = False
         tc.variables["SAIL_COMBINE_CODECS"] = True
         tc.variables["SAIL_ONLY_CODECS"]    = ";".join(only_codecs)
         # SVG requires resvg which is not in Conan yet
