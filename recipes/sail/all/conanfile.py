@@ -18,25 +18,21 @@ class SAILConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "thread_safe": [True, False],
-        "with_avif": [True, False],
-        "with_gif": [True, False],
-        "with_jpeg2000": [True, False],
-        "with_jpeg": ["libjpeg", "libjpeg-turbo", False],
-        "with_png": [True, False],
-        "with_tiff": [True, False],
-        "with_webp": [True, False],
+        "with_highest_priority": [True, False],
+        "with_high_priority": [True, False],
+        "with_medium_priority": [True, False],
+        "with_low_priority": [True, False],
+        "with_lowest_priority": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "thread_safe": True,
-        "with_avif": True,
-        "with_gif": True,
-        "with_jpeg2000": True,
-        "with_jpeg": "libjpeg",
-        "with_png": True,
-        "with_tiff": True,
-        "with_webp": True,
+        "with_highest_priority": True,
+        "with_high_priority": True,
+        "with_medium_priority": True,
+        "with_low_priority": True,
+        "with_lowest_priority": True,
     }
 
     def export_sources(self):
@@ -51,21 +47,15 @@ class SAILConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        if self.options.with_avif:
-            self.requires("libavif/0.11.1")
-        if self.options.with_gif:
+        if self.options.with_highest_priority:
             self.requires("giflib/5.2.1")
-        if self.options.with_jpeg2000:
-            self.requires("jasper/4.0.0")
-        if self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
-        elif self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
-        if self.options.with_png:
             self.requires("libpng/1.6.40")
-        if self.options.with_tiff:
             self.requires("libtiff/4.6.0")
-        if self.options.with_webp:
+        if self.options.with_medium_priority:
+            self.requires("libavif/0.11.1")
+            self.requires("jasper/4.0.0")
+            #self.requires("libjxl/0.6.1")
             self.requires("libwebp/1.3.2")
 
     def layout(self):
@@ -76,31 +66,27 @@ class SAILConan(ConanFile):
             strip_root=True, destination=self.source_folder)
 
     def generate(self):
-        enable_codecs = []
+        only_codecs = []
 
-        if self.options.with_avif:
-            enable_codecs.append("avif")
-        if self.options.with_gif:
-            enable_codecs.append("gif")
-        if self.options.with_jpeg2000:
-            enable_codecs.append("jpeg2000")
-        if self.options.with_jpeg:
-            enable_codecs.append("jpeg")
-        if self.options.with_png:
-            enable_codecs.append("png")
-        if self.options.with_tiff:
-            enable_codecs.append("tiff")
-        if self.options.with_webp:
-            enable_codecs.append("webp")
+        if self.options.with_highest_priority:
+            only_codecs.append("highest-priority")
+        if self.options.with_high_priority:
+            only_codecs.append("high-priority")
+        if self.options.with_medium_priority:
+            only_codecs.append("medium-priority")
+        if self.options.with_low_priority:
+            only_codecs.append("low-priority")
+        if self.options.with_lowest_priority:
+            only_codecs.append("lowest-priority")
 
         tc = CMakeToolchain(self)
-        tc.variables["SAIL_BUILD_APPS"] = False
+        tc.variables["SAIL_BUILD_APPS"]     = False
         tc.variables["SAIL_BUILD_EXAMPLES"] = False
-        tc.variables["SAIL_BUILD_TESTS"] = False
+        tc.variables["SAIL_BUILD_TESTS"]    = False
         tc.variables["SAIL_COMBINE_CODECS"] = True
-        tc.variables["SAIL_ENABLE_CODECS"] = ";".join(enable_codecs)
-        tc.variables["SAIL_INSTALL_PDB"] = False
-        tc.variables["SAIL_THREAD_SAFE"] = self.options.thread_safe
+        tc.variables["SAIL_ONLY_CODECS"]    = ";".join(only_codecs)
+        tc.variables["SAIL_INSTALL_PDB"]    = False
+        tc.variables["SAIL_THREAD_SAFE"]    = self.options.thread_safe
         # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
         if is_msvc(self):
             tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
@@ -151,19 +137,16 @@ class SAILConan(ConanFile):
         self.cpp_info.components["sail-codecs"].names["cmake_find_package_multi"] = "SailCodecs"
         self.cpp_info.components["sail-codecs"].libs = ["sail-codecs"]
         self.cpp_info.components["sail-codecs"].requires = ["sail-common"]
-        if self.options.with_avif:
-            self.cpp_info.components["sail-codecs"].requires.append("libavif::libavif")
-        if self.options.with_gif:
+
+        if self.options.with_highest_priority:
             self.cpp_info.components["sail-codecs"].requires.append("giflib::giflib")
-        if self.options.with_jpeg2000:
-            self.cpp_info.components["sail-codecs"].requires.append("jasper::jasper")
-        if self.options.with_jpeg:
-            self.cpp_info.components["sail-codecs"].requires.append("{0}::{0}".format(self.options.with_jpeg))
-        if self.options.with_png:
+            self.cpp_info.components["sail-codecs"].requires.append("libjpeg::libjpeg")
             self.cpp_info.components["sail-codecs"].requires.append("libpng::libpng")
-        if self.options.with_tiff:
             self.cpp_info.components["sail-codecs"].requires.append("libtiff::libtiff")
-        if self.options.with_webp:
+        if self.options.with_medium_priority:
+            self.cpp_info.components["sail-codecs"].requires.append("libavif::libavif")
+            self.cpp_info.components["sail-codecs"].requires.append("jasper::jasper")
+            #self.cpp_info.components["sail-codecs"].requires.append("libjxl::libjxl")
             self.cpp_info.components["sail-codecs"].requires.append("libwebp::libwebp")
 
         self.cpp_info.components["libsail"].set_property("cmake_target_name", "SAIL::Sail")
