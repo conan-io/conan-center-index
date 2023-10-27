@@ -95,7 +95,7 @@ class LibspatialiteConan(ConanFile):
         if self.options.with_freexl:
             self.requires("freexl/2.0.0")
         if self.options.with_geos:
-            self.requires("geos/3.11.2")
+            self.requires("geos/3.12.0")
         if self.options.get_safe("with_rttopo"):
             self.requires("librttopo/1.1.0")
         if self.options.with_libxml2:
