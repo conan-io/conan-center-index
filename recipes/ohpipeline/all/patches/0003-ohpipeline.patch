@@ -1,0 +1,57 @@
+diff --git a/OpenHome/Av/Playlist/PinInvokerUpnpServer.cpp b/OpenHome/Av/Playlist/PinInvokerUpnpServer.cpp
+index a3919ec1..4e7afe42 100644
+--- a/OpenHome/Av/Playlist/PinInvokerUpnpServer.cpp
++++ b/OpenHome/Av/Playlist/PinInvokerUpnpServer.cpp
+@@ -20,6 +20,7 @@
+ 
+ #include <algorithm>
+ #include <atomic>
++#include <random>
+ #include <vector>
+ 
+ using namespace OpenHome;
+@@ -233,7 +234,9 @@ void PinInvokerUpnpServer::BrowseContainerCallback(IAsync& aAsync)
+     catch (XmlError&) {}
+ 
+     if (newContainers && iShuffle) {
+-        std::random_shuffle(iContainers.begin() + iContainersIndex, iContainers.end());
++        std::random_device rd;
++        std::mt19937 g(rd());
++        std::shuffle(iContainers.begin() + iContainersIndex, iContainers.end(), g);
+     }
+ 
+     if (iContainers.size() == iContainersIndex || playlistFull) {
+diff --git a/OpenHome/Av/Playlist/TrackDatabase.cpp b/OpenHome/Av/Playlist/TrackDatabase.cpp
+index 260cf6f0..caf883b0 100644
+--- a/OpenHome/Av/Playlist/TrackDatabase.cpp
++++ b/OpenHome/Av/Playlist/TrackDatabase.cpp
+@@ -8,6 +8,7 @@
+ #include <OpenHome/Av/Debug.h>
+ 
+ #include <algorithm>
++#include <random>
+ #include <vector>
+ 
+ using namespace OpenHome;
+@@ -391,7 +392,9 @@ Track* Shuffler::NextTrackRef(TUint aId)
+                 else if (index == iShuffleList.size()-1) {
+                     // we've run through the entire list
+                     // prefer re-shuffling over repeating the order of tracks if we play again
+-                    std::random_shuffle(iShuffleList.begin(), iShuffleList.end());
++                    std::random_device rd;
++                    std::mt19937 g(rd());
++                    std::shuffle(iShuffleList.begin(), iShuffleList.end(), g);
+                     LogIds("NextTrackRef");
+                 }
+             }
+@@ -539,7 +542,9 @@ void Shuffler::NotifyAllDeleted()
+ void Shuffler::DoReshuffle(const TChar* aLogPrefix)
+ {
+     if (iShuffle) { // prefer re-shuffling over repeating the order of tracks if we play again
+-        std::random_shuffle(iShuffleList.begin(), iShuffleList.end());
++        std::random_device rd;
++        std::mt19937 g(rd());
++        std::shuffle(iShuffleList.begin(), iShuffleList.end(), g);
+         LogIds(aLogPrefix);
+         iPrevTrackId = ITrackDatabase::kTrackIdNone;
+     }
