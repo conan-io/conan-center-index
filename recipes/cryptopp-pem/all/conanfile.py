@@ -4,6 +4,8 @@ import textwrap
 
 from conan import ConanFile
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.microsoft import is_msvc
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, export_conandata_patches, get, replace_in_file, rmdir, save, download, load
 from conan.tools.scm import Version
@@ -49,6 +51,11 @@ class CryptoPPPEMConan(ConanFile):
 
     def requirements(self):
         self.requires(f"cryptopp/{self.version}", transitive_headers=True, transitive_libs=True)
+
+    def validate(self):
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} does not support shared library on Windows.")
+            # look at https://github.com/conan-io/conan-center-index/pull/18863#issuecomment-1779940892
 
     def source(self):
         suffix = f"CRYPTOPP_{self.version.replace('.', '_')}"
