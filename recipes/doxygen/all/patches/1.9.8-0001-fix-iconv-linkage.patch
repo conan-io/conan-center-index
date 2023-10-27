@@ -1,0 +1,59 @@
+diff -u -r doxygen-1.9.8/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2023-08-16 09:54:32
++++ b/CMakeLists.txt	2023-10-27 09:47:43
+@@ -165,5 +165,6 @@
+ endif()
+ 
+ find_package(Iconv REQUIRED)
++get_target_property(ICONV_INCLUDE_DIR Iconv::Iconv INTERFACE_INCLUDE_DIRECTORIES)
+ include_directories(${ICONV_INCLUDE_DIR})
+ 
+
+diff -u -r a/addon/doxyapp/CMakeLists.txt b/addon/doxyapp/CMakeLists.txt
+--- a/addon/doxyapp/CMakeLists.txt	2023-06-04 04:31:31
++++ b/addon/doxyapp/CMakeLists.txt	2023-10-27 09:48:37
+@@ -1,4 +1,5 @@
+ find_package(Iconv)
++get_target_property(ICONV_INCLUDE_DIR Iconv::Iconv INTERFACE_INCLUDE_DIRECTORIES)
+ 
+ include_directories(
+ 	${PROJECT_SOURCE_DIR}/src
+@@ -47,7 +48,7 @@
+ doxycfg
+ vhdlparser
+ spdlog
+-${ICONV_LIBRARIES}
++Iconv::Iconv
+ ${CMAKE_THREAD_LIBS_INIT}
+ ${SQLITE3_LIBRARIES}
+ ${EXTRA_LIBS}
+diff -u -r a/addon/doxyparse/CMakeLists.txt b/addon/doxyparse/CMakeLists.txt
+--- a/addon/doxyparse/CMakeLists.txt	2023-06-04 04:31:31
++++ b/addon/doxyparse/CMakeLists.txt	2023-10-27 09:49:07
+@@ -1,4 +1,5 @@
+ find_package(Iconv)
++get_target_property(ICONV_INCLUDE_DIR Iconv::Iconv INTERFACE_INCLUDE_DIRECTORIES)
+ 
+ include_directories(
+ 	${PROJECT_SOURCE_DIR}/src
+@@ -36,7 +37,7 @@
+ doxycfg
+ vhdlparser
+ spdlog
+-${ICONV_LIBRARIES}
++Iconv::Iconv
+ ${CMAKE_THREAD_LIBS_INIT}
+ ${SQLITE3_LIBRARIES}
+ ${EXTRA_LIBS}
+diff -u -r a/src/CMakeLists.txt b/src/CMakeLists.txt
+--- a/src/CMakeLists.txt	2023-08-18 07:57:36
++++ b/src/CMakeLists.txt	2023-10-27 09:49:22
+@@ -393,7 +393,7 @@
+     doxygen_version
+     vhdlparser
+     spdlog::spdlog
+-    ${ICONV_LIBRARIES}
++    Iconv::Iconv
+     ${CMAKE_THREAD_LIBS_INIT}
+     ${EXTRA_LIBS}
+     ${CLANG_LIBS}
