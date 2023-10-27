@@ -18,7 +18,7 @@ class TestPackageConan(ConanFile):
             self.requires(self.tested_reference_str)
 
     def build_requirements(self):
-        if conan_version > "2":
+        if conan_version >= "2":
             self.tool_requires(self.tested_reference_str)
 
     def build(self):
