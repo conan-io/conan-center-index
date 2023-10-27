@@ -14,7 +14,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-        self.requires("sqlite3/3.42.0")
+        self.requires("sqlite3/3.42.2")
 
     def build(self):
         cmake = CMake(self)
