@@ -25,15 +25,8 @@ class OhPipelineConan(ConanFile):
         "fPIC": True,
     }
 
-    def _get_openhome_architecture(self, args):
-        if is_apple_os(self):
-            if str(self.settings.arch).startswith("armv8"):
-                openhome_architecture = "arm64"
-                args.extend([f"openhome_architecture={openhome_architecture}", f"detected_openhome_architecture={openhome_architecture}"])
-        return args
-
     def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
         export_conandata_patches(self)
 
     def requirements(self):
@@ -48,7 +41,7 @@ class OhPipelineConan(ConanFile):
         self.requires("vorbis/1.3.7", transitive_headers=True, transitive_libs=True)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
