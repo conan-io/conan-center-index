@@ -135,7 +135,7 @@ class CairoConan(ConanFile):
                 )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/1.2.3")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
 
@@ -164,16 +164,17 @@ class CairoConan(ConanFile):
         else:
             options["xcb"] = "disabled"
             options["xlib"] = "disabled"
-        if self.options.get_safe("with_opengl") == "desktop":
-            options["gl-backend"] = "gl"
-        elif self.options.get_safe("with_opengl") == "gles2":
-            options["gl-backend"] = "glesv2"
-        elif self.options.get_safe("with_opengl") == "gles3":
-            options["gl-backend"] = "glesv3"
-        else:
-            options["gl-backend"] = "disabled"
-        options["glesv2"] = is_enabled(self.options.get_safe("with_opengl") == "gles2")
-        options["glesv3"] = is_enabled(self.options.get_safe("with_opengl") == "gles3")
+        if Version(self.version) < "1.18.0":
+            if self.options.get_safe("with_opengl") == "desktop":
+                options["gl-backend"] = "gl"
+            elif self.options.get_safe("with_opengl") == "gles2":
+                options["gl-backend"] = "glesv2"
+            elif self.options.get_safe("with_opengl") == "gles3":
+                options["gl-backend"] = "glesv3"
+            else:
+                options["gl-backend"] = "disabled"
+            options["glesv2"] = is_enabled(self.options.get_safe("with_opengl") == "gles2")
+            options["glesv3"] = is_enabled(self.options.get_safe("with_opengl") == "gles3")
         options["tee"] = is_enabled(self.options.tee)
         options["symbol-lookup"] = is_enabled(self.options.get_safe("with_symbol_lookup"))
 
