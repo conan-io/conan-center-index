@@ -1,20 +1,19 @@
-import os
 import functools
 import glob
+import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import can_run, check_min_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-
 from helpers import parse_proto_libraries
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
 
 class GoogleAPIS(ConanFile):
@@ -29,17 +28,17 @@ class GoogleAPIS(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        }
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
-        }
+    }
     exports = "helpers.py"
     short_paths = True
 
     @property
-    def _protobuf_version(self):
-        return "3.21.9"
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
@@ -59,7 +58,7 @@ class GoogleAPIS(ConanFile):
 
     def requirements(self):
         # https://github.com/conan-io/conan-center-index/pull/15601#issuecomment-1493086506
-        self.requires(f"protobuf/{self._protobuf_version}", transitive_headers=True, transitive_libs=True, run=can_run(self))
+        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -69,12 +68,12 @@ class GoogleAPIS(ConanFile):
 
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration("Source code generated from protos is missing some export macro")
-        if self.options.shared and not self.dependencies["protobuf"].options.shared:
+        if self.options.shared and not self.dependencies.host["protobuf"].options.shared:
             raise ConanInvalidConfiguration("If built as shared, protobuf must be shared as well. Please, use `protobuf:shared=True`")
 
     def build_requirements(self):
-        if not can_run(self):
-            self.tool_requires(f"protobuf/{self._protobuf_version}")
+        if not self._is_legacy_one_profile:
+            self.tool_requires("protobuf/<host_version>")
 
         # CMake >= 3.20 is required. There is a proto with dots in the name 'k8s.min.proto' and CMake fails to generate project files
         self.tool_requires("cmake/[>=3.20 <4]")
@@ -84,7 +83,7 @@ class GoogleAPIS(ConanFile):
 
     def generate(self):
         VirtualBuildEnv(self).generate()
-        if can_run(self):
+        if self._is_legacy_one_profile:
             VirtualRunEnv(self).generate(scope="build")
         tc = CMakeToolchain(self)
         tc.generate()

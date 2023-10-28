@@ -38,3 +38,14 @@ patches:
       patch_description: "Fixed order of initialization of static variables in GPU plugin compiled with clang"
       patch_type: "portability"
       patch_source: "https://github.com/openvinotoolkit/openvino/pull/19768"
+    - patch_file: "patches/2023.1.0/0005-dynamic-protobuf.patch"
+      patch_description: "Added a workaround for OpenVINO to work with dynamic protobuf"
+      patch_type: "portability"
+      # severals PR are merged into a single patch including:
+      # https://github.com/openvinotoolkit/openvino/pull/19599,
+      # https://github.com/openvinotoolkit/openvino/pull/19758 and
+      patch_source: "https://github.com/openvinotoolkit/openvino/pull/20612"
+    - patch_file: "patches/2023.1.0/0006-macos-14.patch"
+      patch_description: "Support macos 14"
+      patch_type: "portability"
+      patch_source: "https://github.com/openvinotoolkit/openvino/pull/19946"

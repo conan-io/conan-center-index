@@ -1,19 +1,12 @@
 sources:
   "1.3.9":
-    url: [
-            "https://www.apache.org/dist/serf/serf-1.3.9.tar.bz2",
-            "https://github.com/apache/serf/archive/1.3.9.tar.gz",
-    ]
+    url: "https://archive.apache.org/dist/serf/serf-1.3.9.tar.bz2"
     sha256: "549c2d21c577a8a9c0450facb5cca809f26591f048e466552240947bdf7a87cc"
 patches:
   "1.3.9":
     - patch_file: "patches/0001-1.3.9-scons-python3.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-1.3.9-scons-respect-flags.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0003-1.3.9-scons-msvc.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0004-1.3.9-scons-python-spaces.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0005-1.3.9-serf-openssl-3.x.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0006-1.3.9-scons-fix-zlib-shared-name.patch"
