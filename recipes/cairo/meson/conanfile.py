@@ -80,7 +80,7 @@ class CairoConan(ConanFile):
             del self.options.with_xlib_xrender
             del self.options.with_xcb
             del self.options.with_symbol_lookup
-        if self.settings.os in ["Macos", "Windows"]:
+        if self.settings.os in ["Macos", "Windows"] or Version(self.version) >= "1.18.0":
             del self.options.with_opengl
 
     def configure(self):
