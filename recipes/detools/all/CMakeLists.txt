@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(detools LANGUAGES C)
 
 find_package(heatshrink REQUIRED CONFIG)
@@ -9,6 +9,8 @@ target_link_libraries(detools PRIVATE
     heatshrink::heatshrink
     LibLZMA::LibLZMA
 )
+
+include(GNUInstallDirs)
 
 install(
     TARGETS detools
