@@ -110,6 +110,7 @@ required_for_references:
 - brotli
 - brynet
 - bshoshany-thread-pool
+- btyacc
 - bullet3
 - butteraugli
 - bvdberg-ctest
@@ -163,6 +164,7 @@ required_for_references:
 - clhep
 - cli11
 - clickhouse-cpp
+- clipboard_lite
 - clipper
 - clipper2
 - clove-unit
@@ -185,6 +187,7 @@ required_for_references:
 - continuable
 - coost
 - corrade
+- cose-c
 - cotila
 - cpp-httplib
 - cpp-ipc
@@ -294,6 +297,7 @@ required_for_references:
 - eigen
 - elfio
 - embag
+- embedded_ringbuf_cpp
 - embree3
 - emio
 - emsdk
@@ -325,6 +329,7 @@ required_for_references:
 - fast_double_parser
 - fast_float
 - fastgltf
+- fastnoise2
 - fastpfor
 - fastprng
 - fernandovelcic-hexdump
@@ -350,6 +355,7 @@ required_for_references:
 - foonathan-memory
 - forestdb
 - foxglove-schemas-protobuf
+- foxglove-websocket
 - foxi
 - fp16
 - fpgen
@@ -397,6 +403,7 @@ required_for_references:
 - glfw
 - gli
 - glib
+- glibmm
 - glm
 - glog
 - glpk
@@ -476,6 +483,7 @@ required_for_references:
 - intel-neon2sse
 - intx
 - inversify-cpp
+- iowow
 - iqa
 - irrxml
 - iso8601lib
@@ -555,6 +563,7 @@ required_for_references:
 - libcuckoo
 - libcurl
 - libdaemon
+- libdb
 - libdc1394
 - libde265
 - libdeflate
@@ -581,6 +590,7 @@ required_for_references:
 - libgd
 - libgeotiff
 - libgettext
+- libglvnd
 - libgpg-error
 - libgphoto2
 - libgpiod
@@ -647,7 +657,9 @@ required_for_references:
 - librttopo
 - libsafec
 - libsamplerate
+- libsass
 - libschrift
+- libseat
 - libsecret
 - libselinux
 - libserial
@@ -695,6 +707,7 @@ required_for_references:
 - libxls
 - libxlsxwriter
 - libxml2
+- libxmlpp
 - libxpm
 - libxshmfence
 - libxslt
@@ -784,11 +797,13 @@ required_for_references:
 - minizip
 - minizip-ng
 - mio
+- mm_file
 - modern-cpp-kafka
 - moltenvk
 - mongo-c-driver
 - mongo-cxx-driver
 - morton-nd
+- mosquitto
 - mozilla-build
 - mozjpeg
 - mp-units
@@ -836,6 +851,7 @@ required_for_references:
 - nodejs
 - nodesoup
 - norm
+- npcap
 - nsync
 - ntv2
 - nudb
@@ -869,6 +885,7 @@ required_for_references:
 - openal-soft
 - openapi-generator
 - openblas
+- opencascade
 - opencl-clhpp-headers
 - opencl-headers
 - opencl-icd-loader
@@ -917,6 +934,7 @@ required_for_references:
 - pcl
 - pcre
 - pcre2
+- pdf-writer
 - pdfgen
 - pdqsort
 - perf
@@ -981,6 +999,7 @@ required_for_references:
 - pybind11
 - pybind11_json
 - pystring
+- qarchive
 - qcbor
 - qdbm
 - qhull
@@ -990,10 +1009,12 @@ required_for_references:
 - qt
 - quantlib
 - quaternions
+- quazip
 - quickfix
 - quickjs
 - quill
 - quirc
+- qwt
 - r8brain-free-src
 - rabbitmq-c
 - ragel
@@ -1134,6 +1155,7 @@ required_for_references:
 - svgwrite
 - symengine
 - systemc
+- systemc-cci
 - szip
 - tabulate
 - taglib
@@ -1180,6 +1202,7 @@ required_for_references:
 - tinyspline
 - tinyxml
 - tinyxml2
+- tixi3
 - tk
 - tl
 - tl-expected
@@ -1191,9 +1214,11 @@ required_for_references:
 - tmxlite
 - tng
 - toml11
+- tomlplusplus
 - tracy
 - transwarp
 - trantor
+- tre
 - tree-sitter
 - tree-sitter-c
 - troldal-zippy
@@ -1214,6 +1239,7 @@ required_for_references:
 - tz
 - ua-nodeset
 - uchardet
+- ulfius
 - uncrustify
 - uni-algo
 - unicorn
@@ -1246,6 +1272,7 @@ required_for_references:
 - vincentlaucsb-csv-parser
 - vir-simd
 - visit_struct
+- vk-bootstrap
 - vo-amrwbenc
 - volk
 - vorbis
