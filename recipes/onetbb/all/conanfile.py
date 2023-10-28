@@ -48,7 +48,9 @@ class OneTBBConan(ConanFile):
 
     @property
     def _tbbbind_supported(self):
-        return Version(self.version) >= "2021.1.1" and Version(self.version) < "2021.11.0" and not self.settings.os == "Macos"
+        if self.settings.os == "Macos":
+            return Version(self.version) >= "2021.11.0"
+        return Version(self.version) >= "2021.1.1"
 
     @property
     def _tbbbind_build(self):
@@ -94,7 +96,7 @@ class OneTBBConan(ConanFile):
 
     def build_requirements(self):
         if not self._tbbbind_explicit_hwloc and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.5")
+            self.tool_requires("pkgconf/2.0.3")
 
     def package_id(self):
         if Version(self.version) < "2021.5.0":
