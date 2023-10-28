@@ -12,7 +12,7 @@ class PackageConan(ConanFile):
     name = "optick"
     description = "Optick is a super-lightweight C++ profiler for Games"
     license = "MIT"
-    url = "https://github.com/bombomby/optick"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/bombomby/optick"
     topics = ("profiler", "games")
     package_type = "shared-library"
