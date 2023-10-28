@@ -68,6 +68,10 @@ class OpenTelemetryCppConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
+        if self.options.with_abseil:
+            return 14
+        if Version(self.version) >= "1.12.0":
+            return 14
         return 11
 
     def export_sources(self):
@@ -196,7 +200,7 @@ class OpenTelemetryCppConan(ConanFile):
 
         tc.variables["WITH_EXAMPLES"] = False
         tc.variables["WITH_NO_DEPRECATED_CODE"] = self.options.with_no_deprecated_code
-        tc.variables["WITH_STL"] = self.options.with_stl
+        tc.variables["WITH_STL"] = "ON" if self.options.with_stl else "OFF"
         tc.variables["WITH_GSL"] = self.options.with_gsl
         tc.variables["WITH_ABSEIL"] = self.options.with_abseil
         tc.variables["WITH_OTLP_GRPC"] = self.options.get_safe("with_otlp_grpc") or False
