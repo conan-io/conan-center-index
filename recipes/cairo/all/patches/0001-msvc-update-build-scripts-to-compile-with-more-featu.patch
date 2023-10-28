@@ -1,0 +1,155 @@
+From 2801a57b7dae8060f4b4c2dede65cf4ce79da62b Mon Sep 17 00:00:00 2001
+From: Ignacio Casal Quinteiro <icq@gnome.org>
+Date: Tue, 28 Feb 2017 11:10:37 +0100
+Subject: [PATCH] msvc: update build scripts to compile with more features
+
+This also adds support to build cairo-gobject
+---
+ build/Makefile.win32.common       | 52 +++++++++++++++++++++++++++++++--------
+ build/Makefile.win32.features     | 13 +++++-----
+ util/cairo-gobject/Makefile.win32 | 24 ++++++++++++++++++
+ 3 files changed, 73 insertions(+), 16 deletions(-)
+ create mode 100644 util/cairo-gobject/Makefile.win32
+
+diff --git a/build/Makefile.win32.common b/build/Makefile.win32.common
+index 7d7e973..38063a7 100644
+--- a/build/Makefile.win32.common
++++ b/build/Makefile.win32.common
+@@ -23,34 +23,66 @@ CFG_CFLAGS := -MD -O2
+ CFG_LDFLAGS :=
+ endif
+ 
++ifeq ($(ARCH),)
++ARCH=Win32
++endif
++
++ifeq ($(INSTALL_DIR),)
++INSTALL_DIR=$(top_srcdir)/../../../../gtk/$(ARCH)/$(CFG)
++endif
++
+ ifeq ($(PIXMAN_PATH),)
+-PIXMAN_PATH := $(top_builddir)/../pixman
++PIXMAN_PATH := $(INSTALL_DIR)
+ endif
+-PIXMAN_CFLAGS := -I$(PIXMAN_PATH)/pixman/
+-PIXMAN_LIBS := $(PIXMAN_PATH)/pixman/$(CFG)/pixman-1.lib
++PIXMAN_CFLAGS := -I$(PIXMAN_PATH)/include/pixman-1
++PIXMAN_LIBS := $(PIXMAN_PATH)/lib/pixman-1.lib
+ 
+ CAIRO_LIBS =  gdi32.lib msimg32.lib user32.lib
+ 
+ ifeq ($(CAIRO_HAS_PNG_FUNCTIONS),1)
+ ifeq ($(LIBPNG_PATH),)
+-LIBPNG_PATH := $(top_builddir)/../libpng
++LIBPNG_PATH := $(INSTALL_DIR)
+ endif
+-LIBPNG_CFLAGS += -I$(LIBPNG_PATH)/
+-CAIRO_LIBS +=  $(LIBPNG_PATH)/libpng.lib
++LIBPNG_CFLAGS += -I$(LIBPNG_PATH)/include
++CAIRO_LIBS +=  $(LIBPNG_PATH)/lib/libpng16.lib
+ endif
+ 
+ ifeq ($(CAIRO_HAS_PS_SURFACE)$(CAIRO_HAS_PDF_SURFACE),00)
+ else
+ ifeq ($(ZLIB_PATH),)
+-ZLIB_PATH := $(top_builddir)/../zlib
++ZLIB_PATH := $(INSTALL_DIR)
++endif
++ZLIB_CFLAGS += -I$(ZLIB_PATH)/include
++CAIRO_LIBS += $(ZLIB_PATH)/lib/zlib1.lib
++endif
++
++ifeq ($(CAIRO_HAS_FT_FONT),1)
++ifeq ($(FREETYPE_PATH),)
++FREETYPE_PATH := $(INSTALL_DIR)
++endif
++FREETYPE_CFLAGS += -I$(FREETYPE_PATH)/include
++CAIRO_LIBS +=  $(FREETYPE_PATH)/lib/freetype.lib
++endif
++
++ifeq ($(CAIRO_HAS_FC_FONT),1)
++ifeq ($(FONTCONFIG_PATH),)
++FONTCONFIG_PATH := $(INSTALL_DIR)
++endif
++FONTCONFIG_CFLAGS += -I$(FONTCONFIG_PATH)/include
++CAIRO_LIBS += $(FONTCONFIG_PATH)/lib/fontconfig.lib
++endif
++
++ifeq ($(CAIRO_HAS_GOBJECT_FUNCTIONS),1)
++ifeq ($(GOBJECT_PATH),)
++GOBJECT_PATH := $(INSTALL_DIR)
+ endif
+-ZLIB_CFLAGS += -I$(ZLIB_PATH)/
+-CAIRO_LIBS += $(ZLIB_PATH)/zdll.lib
++GOBJECT_CFLAGS := -I$(GOBJECT_PATH)/include/glib-2.0 -I$(GOBJECT_PATH)/lib/glib-2.0/include
++GOBJECT_LIBS := $(GOBJECT_PATH)/lib/glib-2.0.lib $(GOBJECT_PATH)/lib/gobject-2.0.lib
+ endif
+ 
+ DEFAULT_CFLAGS = -nologo $(CFG_CFLAGS)
+ DEFAULT_CFLAGS += -I. -I$(top_srcdir) -I$(top_srcdir)/src
+-DEFAULT_CFLAGS += $(PIXMAN_CFLAGS) $(LIBPNG_CFLAGS) $(ZLIB_CFLAGS)
++DEFAULT_CFLAGS += $(PIXMAN_CFLAGS) $(LIBPNG_CFLAGS) $(ZLIB_CFLAGS) $(FREETYPE_CFLAGS) $(FONTCONFIG_CFLAGS)
+ 
+ CAIRO_CFLAGS = $(DEFAULT_CFLAGS) $(CFLAGS)
+ 
+diff --git a/build/Makefile.win32.features b/build/Makefile.win32.features
+index 8cb155d..db3f0ac 100644
+--- a/build/Makefile.win32.features
++++ b/build/Makefile.win32.features
+@@ -26,16 +26,17 @@ CAIRO_HAS_EGL_FUNCTIONS=0
+ CAIRO_HAS_GLX_FUNCTIONS=0
+ CAIRO_HAS_WGL_FUNCTIONS=0
+ CAIRO_HAS_SCRIPT_SURFACE=1
+-CAIRO_HAS_FT_FONT=0
+-CAIRO_HAS_FC_FONT=0
++CAIRO_HAS_FT_FONT=1
++CAIRO_HAS_FC_FONT=1
+ CAIRO_HAS_PS_SURFACE=1
+ CAIRO_HAS_PDF_SURFACE=1
+ CAIRO_HAS_SVG_SURFACE=1
+ CAIRO_HAS_TEST_SURFACES=0
+-CAIRO_HAS_TEE_SURFACE=0
+-CAIRO_HAS_XML_SURFACE=0
++CAIRO_HAS_TEE_SURFACE=1
++CAIRO_HAS_XML_SURFACE=1
+ CAIRO_HAS_PTHREAD=0
+-CAIRO_HAS_GOBJECT_FUNCTIONS=0
+-CAIRO_HAS_TRACE=0
++CAIRO_HAS_GOBJECT_FUNCTIONS=1
++CAIRO_HAS_TRACE=1
+ CAIRO_HAS_INTERPRETER=1
+ CAIRO_HAS_SYMBOL_LOOKUP=0
++CAIRO_HAS_IMAGE_SURFACE=1
+diff --git a/util/cairo-gobject/Makefile.win32 b/util/cairo-gobject/Makefile.win32
+new file mode 100644
+index 0000000..1f63511
+--- /dev/null
++++ b/util/cairo-gobject/Makefile.win32
+@@ -0,0 +1,24 @@
++top_srcdir = ../..
++include $(top_srcdir)/build/Makefile.win32.common
++
++CAIRO_LIB = $(top_srcdir)/src/$(CFG)/cairo.lib
++SOURCES = \
++	cairo-gobject-enums.c \
++	cairo-gobject-structs.c
++
++OBJECTS = $(patsubst %.c, $(CFG)/%.obj, $(SOURCES))
++
++dynamic: inform $(CFG)/cairo-gobject.dll
++
++$(CFG)/%.obj: %.c $(top_srcdir)/src/cairo-features.h
++	@mkdir -p $(CFG)/`dirname $<`
++	@$(CC) $(CAIRO_CFLAGS) $(GOBJECT_CFLAGS) -c -Fo"$@" $<
++
++$(CFG)/cairo-gobject.dll: $(OBJECTS)
++	@$(LD) $(CAIRO_LDFLAGS) $(GOBJECT_LDFLAGS) -DLL -OUT:$@ $(CAIRO_LIB) $(GOBJECT_LIBS) $(OBJECTS)
++
++all: inform $(CFG)/cairo-gobject.dll
++	@echo "Built successfully!"
++	@echo "You should copy the following files to a proper place now:"
++	@echo ""
++	@echo "	util/cairo-gobject/$(CFG)/cairo-gobject.dll"
+-- 
+2.9.3
+
