@@ -74,7 +74,7 @@ class PangoConan(ConanFile):
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.14.2")
         if self.options.with_xft:
-            self.requires("libxft/2.3.6")
+            self.requires("libxft/2.3.8")
         if (
             self.options.with_xft
             and self.options.with_fontconfig
