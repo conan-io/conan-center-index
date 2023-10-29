@@ -47,10 +47,6 @@ class LibrdkafkaConan(ConanFile):
     def _depends_on_cyrus_sasl(self):
         return self.options.sasl and self.settings.os != "Windows"
 
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
-
     def export_sources(self):
         export_conandata_patches(self)
 
