@@ -75,3 +75,8 @@ patches:
       patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
       patch_type: "bugfix"
       patch_source: "https://github.com/protocolbuffers/protobuf/pull/10103"
+  "3.5.1":
+    - patch_file: "patches/protobuf-3.5.1-upstream-macos-rpath.patch"
+      patch_description: "Handle macOS @rpath management"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/protocolbuffers/protobuf/pull/4620"
