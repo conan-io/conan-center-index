@@ -12,16 +12,15 @@ required_conan_version = ">=1.54.0"
 
 class PocoConan(ConanFile):
     name = "poco"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://pocoproject.org"
-    topics = ("building", "networking", "server", "mobile", "embedded")
-    license = "BSL-1.0"
     description = (
         "Modern, powerful open source C++ class libraries for building "
         "network- and internet-based applications that run on desktop, server, "
         "mobile and embedded systems."
     )
-
+    license = "BSL-1.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://pocoproject.org"
+    topics = ("building", "networking", "server", "mobile", "embedded")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -116,9 +115,9 @@ class PocoConan(ConanFile):
         if self.options.enable_xml:
             self.requires("expat/2.5.0")
         if self.options.enable_data_sqlite:
-            self.requires("sqlite3/3.42.0")
+            self.requires("sqlite3/3.43.2")
         if self.options.enable_apacheconnector:
-            self.requires("apr/1.7.0")
+            self.requires("apr/1.7.4")
             self.requires("apr-util/1.6.1")
         if self.options.enable_netssl or self.options.enable_crypto or \
            self.options.get_safe("enable_jwt"):
@@ -126,9 +125,9 @@ class PocoConan(ConanFile):
         if self.options.enable_data_odbc and self.settings.os != "Windows":
             self.requires("odbc/2.3.11")
         if self.options.get_safe("enable_data_postgresql"):
-            self.requires("libpq/14.9")
+            self.requires("libpq/15.4")
         if self.options.get_safe("enable_data_mysql"):
-            self.requires("libmysqlclient/8.0.31")
+            self.requires("libmysqlclient/8.1.0")
 
     def package_id(self):
         del self.info.options.enable_active_record
