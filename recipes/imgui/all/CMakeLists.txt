@@ -7,6 +7,7 @@ set(IMGUI_EXPORT_HEADERS imgui_export_headers.h)
 
 file(GLOB SOURCE_FILES ${IMGUI_SRC_DIR}/*.cpp)
 file(GLOB HEADER_FILES ${IMGUI_SRC_DIR}/*.h)
+
 file(GLOB EXTRA_FONTS_FILES ${EXTRA_FONTS_DIR}/*.ttf)
 if (MSVC)
     file(GLOB EXTRA_NATVIS_FILES ${MISC_DIR}/natvis/*.natvis)

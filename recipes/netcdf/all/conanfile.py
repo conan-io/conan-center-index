@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class NetcdfConan(ConanFile):
@@ -17,7 +17,7 @@ class NetcdfConan(ConanFile):
     license = "BSD-3-Clause"
     homepage = "https://github.com/Unidata/netcdf-c"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -68,13 +68,13 @@ class NetcdfConan(ConanFile):
                 # So we will require the older hdf5 to keep the older behaviour.
                 self.requires("hdf5/1.12.0")
             else:
-                self.requires("hdf5/1.14.0")
+                self.requires("hdf5/1.14.1")
 
         if self.options.dap or self.options.byterange:
-            self.requires("libcurl/7.88.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -89,10 +89,6 @@ class NetcdfConan(ConanFile):
         tc.variables["ENABLE_BYTERANGE"] = self.options.byterange
         tc.variables["USE_HDF5"] = self.options.with_hdf5
         tc.variables["NC_FIND_SHARED_LIBS"] = self.options.with_hdf5 and self.dependencies["hdf5"].options.shared
-
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-
         tc.generate()
 
         tc = CMakeDeps(self)
@@ -127,8 +123,6 @@ class NetcdfConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "netcdf")
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["libnetcdf"].libs = ["netcdf"]
-        self.cpp_info.components["libnetcdf"].libdirs       = ["lib"]
-        self.cpp_info.components["libnetcdf"].includedirs   = ["include"]
         if self._with_hdf5:
             self.cpp_info.components["libnetcdf"].requires.append("hdf5::hdf5")
         if self.options.dap or self.options.byterange:
