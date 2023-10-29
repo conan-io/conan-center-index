@@ -209,38 +209,6 @@ class OpenSSLConan(ConanFile):
         return None
 
     @property
-    def _asm_target(self):
-        # FIXME This function is broken since https://github.com/conan-io/conan-center-index/pull/791
-        # either it returns None (because the_os is not a key of the map below), or it does not return
-        the_os = str(self.settings.os)
-        if the_os in ["Android", "iOS", "watchOS", "tvOS"]:
-            return {
-                "x86": "x86_asm" if the_os == "Android" else None,
-                "x86_64": "x86_64_asm" if the_os == "Android" else None,
-                "armv5el": "armv4_asm",
-                "armv5hf": "armv4_asm",
-                "armv6": "armv4_asm",
-                "armv7": "armv4_asm",
-                "armv7hf": "armv4_asm",
-                "armv7s": "armv4_asm",
-                "armv7k": "armv4_asm",
-                "armv8": "aarch64_asm",
-                "armv8_32": "aarch64_asm",
-                "armv8.3": "aarch64_asm",
-                "mips": "mips32_asm",
-                "mips64": "mips64_asm",
-                "sparc": "sparcv8_asm",
-                "sparcv9": "sparcv9_asm",
-                "ia64": "ia64_asm",
-                "ppc32be": "ppc32_asm",
-                "ppc32": "ppc32_asm",
-                "ppc64le": "ppc64_asm",
-                "ppc64": "ppc64_asm",
-                "s390": "s390x_asm",
-                "s390x": "s390x_asm"
-            }.get(the_os, None)
-
-    @property
     def _targets(self):
         is_cygwin = self.settings.get_safe("os.subsystem") == "cygwin"
         return {
@@ -466,10 +434,7 @@ class OpenSSLConan(ConanFile):
         targets = "my %targets"
         includes = ""
 
-        if self._asm_target:
-            ancestor = '[ "%s", asm("%s") ]' % (self._ancestor_target, self._asm_target)
-        else:
-            ancestor = '[ "%s" ]' % self._ancestor_target
+        ancestor = f'[ "{self._ancestor_target}" ]'
         shared_cflag = ''
         shared_extension = ''
         shared_target = ''
