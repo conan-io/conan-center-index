@@ -6,6 +6,9 @@ sources:
     sha256: "3184f404c61b6b8ba6fe7c64fc40d1c3d6d87df59bcacf1845d846101bc22f9a"
 patches:
   "0.2.1":
-    - patch_file: "patches/0.2.1/0001-fixes.patch"
-      patch_type: "portability"
-      patch_description: "Fixes for ______"
+    - patch_file: "patches/0.2.1/0001-to_uintptr.patch"
+      patch_type: "bugfix"
+      patch_description: "Fix for to_uintptr"
+    - patch_file: "patches/0.2.1/0002-conan-libdwarf.patch"
+      patch_type: "conan"
+      patch_description: "Tweaks to use libdwarf provided by conan"
