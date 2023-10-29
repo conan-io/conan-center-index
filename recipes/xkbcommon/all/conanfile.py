@@ -110,6 +110,9 @@ class XkbcommonConan(ConanFile):
                 replace_in_file(self, meson_build_file,
                                 "wayland_protocols_dep = dependency('wayland-protocols', version: '>=1.12', required: false)",
                                 "wayland_protocols_dep = dependency('wayland-protocols_BUILD', version: '>=1.12', required: false, native: true)")
+                replace_in_file(self, meson_build_file,
+                                "wayland_client_dep = dependency('wayland-client', version: '>=1.2.0', required: false)",
+                                "wayland_client_dep = dependency('wayland-client_BUILD', version: '>=1.2.0', required: false, native: true)")
 
         meson = Meson(self)
         meson.configure()
