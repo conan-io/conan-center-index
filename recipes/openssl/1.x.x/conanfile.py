@@ -88,7 +88,7 @@ class OpenSSLConan(ConanFile):
         "no_tls1": [True, False],
         "capieng_dialog": [True, False],
         "enable_capieng": [True, False],
-        "openssldir": ["ANY", None]
+        "openssldir": [None, "ANY"],
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
@@ -366,35 +366,6 @@ class OpenSSLConan(ConanFile):
             return getattr(XCRun(self), apple_name)
         return None
 
-    def _patch_configure(self):
-        # since _patch_makefile_org will replace binutils variables
-        # use a more restricted regular expresion to prevent that Configure script trying to do it again
-        configure = os.path.join(self.source_folder, "Configure")
-        replace_in_file(self, configure, r"s/^AR=\s*ar/AR= $ar/;", r"s/^AR=\s*ar\b/AR= $ar/;",encoding="latin_1")
-
-    def _adjust_path(self, path):
-        return path.replace("\\", "/") if self._settings_build.os == "Windows" else path
-
-    def _patch_makefile_org(self):
-        # https://wiki.openssl.org/index.php/Compilation_and_Installation#Modifying_Build_Settings
-        # its often easier to modify Configure and Makefile.org rather than trying to add targets to the configure scripts
-        makefile_org = os.path.join(self.source_folder, "Makefile.org")
-        if not "CROSS_COMPILE" in os.environ:
-            cc = os.environ.get("CC", "cc")
-            gen_info = json.loads(load(self, os.path.join(self.generators_folder, "gen_info.conf")))
-            replace_in_file(self, makefile_org, "CC= cc\n", "CC= %s %s\n" % (self._adjust_path(cc), gen_info["CFLAGS"]))
-            if "AR" in os.environ:
-                replace_in_file(self, makefile_org, "AR=ar $(ARFLAGS) r\n", "AR=%s $(ARFLAGS) r\n" % self._adjust_path(os.environ["AR"]))
-            if "RANLIB" in os.environ:
-                replace_in_file(self, makefile_org, "RANLIB= ranlib\n", "RANLIB= %s\n" % self._adjust_path(os.environ["RANLIB"]))
-            rc = os.environ.get("WINDRES", os.environ.get("RC"))
-            if rc:
-                replace_in_file(self, makefile_org, "RC= windres\n", "RC= %s\n" % self._adjust_path(rc))
-            if "NM" in os.environ:
-                replace_in_file(self, makefile_org, "NM= nm\n", "NM= %s\n" % self._adjust_path(os.environ["NM"]))
-            if "AS" in os.environ:
-                replace_in_file(self, makefile_org, "AS=$(CC) -c\n", "AS=%s\n" % self._adjust_path(os.environ["AS"]))
-
     def _get_default_openssl_dir(self):
         if self.settings.os == "Linux":
             return "/etc/ssl"
@@ -539,10 +510,6 @@ class OpenSSLConan(ConanFile):
         if self._use_nmake:
             return self.dependencies.build["strawberryperl"].conf_info.get("user.strawberryperl:perl", check_type=str)
         return "perl"
-
-    @property
-    def _nmake_makefile(self):
-        return r"ms\ntdll.mak" if self.options.shared else r"ms\nt.mak"
 
     @contextmanager
     def _make_context(self):
