@@ -8,6 +8,7 @@ patches:
   "0.2.1":
     - patch_file: "patches/0.2.1/0001-to_uintptr.patch"
       patch_type: "bugfix"
+      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/bda3e2b169796f2e9c7e751b27306aac6b4a7c26"
       patch_description: "Fix for to_uintptr"
     - patch_file: "patches/0.2.1/0002-conan-libdwarf.patch"
       patch_type: "conan"
