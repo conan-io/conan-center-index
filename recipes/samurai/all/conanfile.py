@@ -44,7 +44,7 @@ class PackageConan(ConanFile):
         self.requires("highfive/2.7.1")
         self.requires("pugixml/1.14")
         self.requires("xsimd/11.1.0")
-        self.requires("xtensor/0.24.3")
+        self.requires("xtensor/0.24.6")
 
     def package_id(self):
         self.info.clear()
