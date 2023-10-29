@@ -1,0 +1,459 @@
+diff --git a/.gitignore b/.gitignore
+index af88e2260..b07e9f5d6 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -47,7 +47,6 @@ any_test.pb.*
+ map*unittest.pb.*
+ unittest*.pb.*
+ cpp_test*.pb.*
+-src/google/protobuf/compiler/js/well_known_types_embed.cc
+ src/google/protobuf/util/**/*.pb.cc
+ src/google/protobuf/util/**/*.pb.h
+ 
+diff --git a/BUILD b/BUILD
+index bcaf9cd53..98ed0f378 100644
+--- a/BUILD
++++ b/BUILD
+@@ -253,24 +253,6 @@ internal_copied_filegroup(
+ # Protocol Buffers Compiler
+ ################################################################################
+ 
+-cc_binary(
+-    name = "js_embed",
+-    srcs = ["src/google/protobuf/compiler/js/embed.cc"],
+-    visibility = ["//visibility:public"],
+-)
+-
+-genrule(
+-    name = "generate_js_well_known_types_embed",
+-    srcs = [
+-        "src/google/protobuf/compiler/js/well_known_types/any.js",
+-        "src/google/protobuf/compiler/js/well_known_types/struct.js",
+-        "src/google/protobuf/compiler/js/well_known_types/timestamp.js",
+-    ],
+-    outs = ["src/google/protobuf/compiler/js/well_known_types_embed.cc"],
+-    cmd = "$(location :js_embed) $(SRCS) > $@",
+-    tools = [":js_embed"],
+-)
+-
+ cc_library(
+     name = "protoc_lib",
+     srcs = [
+diff --git a/cmake/libprotoc.cmake b/cmake/libprotoc.cmake
+index 107c1c526..e462bd8e8 100644
+--- a/cmake/libprotoc.cmake
++++ b/cmake/libprotoc.cmake
+@@ -203,18 +203,6 @@ set(libprotoc_headers
+   ${protobuf_source_dir}/src/google/protobuf/compiler/plugin.pb.h
+ )
+ 
+-set(js_well_known_types_sources
+-  ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types/any.js
+-  ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types/struct.js
+-  ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types/timestamp.js
+-)
+-add_executable(js_embed ${protobuf_source_dir}/src/google/protobuf/compiler/js/embed.cc)
+-add_custom_command(
+-  OUTPUT ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types_embed.cc
+-  DEPENDS js_embed ${js_well_known_types_sources}
+-  COMMAND js_embed ${js_well_known_types_sources} > ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types_embed.cc
+-)
+-
+ add_library(libprotoc ${protobuf_SHARED_OR_STATIC}
+   ${libprotoc_files} ${libprotoc_headers})
+ target_link_libraries(libprotoc libprotobuf)
+diff --git a/src/Makefile.am b/src/Makefile.am
+index cdc2298b9..3324d4639 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -56,9 +56,7 @@ clean-local:
+ 
+ CLEANFILES = $(protoc_outputs) unittest_proto_middleman \
+              testzip.jar testzip.list testzip.proto testzip.zip \
+-             no_warning_test.cc \
+-             google/protobuf/compiler/js/well_known_types_embed.cc \
+-             js_embed$(EXEEXT)
++             no_warning_test.cc
+ 
+ MAINTAINERCLEANFILES =   \
+   Makefile.in
+@@ -513,22 +511,6 @@ bin_PROGRAMS = protoc
+ protoc_LDADD = $(PTHREAD_LIBS) libprotobuf.la libprotoc.la
+ protoc_SOURCES = google/protobuf/compiler/main.cc
+ 
+-# The special JS code for the well-known types is linked into the compiler via
+-# well_known_types_embed.cc, which is generated from .js source files. We have
+-# to build the js_embed binary using $(CXX_FOR_BUILD) so that it is executable
+-# on the build machine in a cross-compilation setup.
+-js_embed$(EXEEXT): $(srcdir)/google/protobuf/compiler/js/embed.cc
+-	$(CXX_FOR_BUILD) -o $@ $<
+-js_well_known_types_sources =                                  \
+-	google/protobuf/compiler/js/well_known_types/any.js          \
+-	google/protobuf/compiler/js/well_known_types/struct.js       \
+-	google/protobuf/compiler/js/well_known_types/timestamp.js
+-# We have to cd to $(srcdir) so that out-of-tree builds work properly.
+-google/protobuf/compiler/js/well_known_types_embed.cc: js_embed$(EXEEXT) $(js_well_known_types_sources)
+-	mkdir -p `dirname $@` && \
+-	oldpwd=`pwd` && cd $(srcdir) && \
+-	$$oldpwd/js_embed$(EXEEXT) $(js_well_known_types_sources) > $$oldpwd/$@
+-
+ # Tests ==============================================================
+ 
+ protoc_inputs =                                                   \
+@@ -610,7 +592,6 @@ EXTRA_DIST =                                                   \
+   google/protobuf/package_info.h                               \
+   google/protobuf/io/package_info.h                            \
+   google/protobuf/util/package_info.h                          \
+-  google/protobuf/compiler/js/embed.cc                         \
+   google/protobuf/compiler/ruby/ruby_generated_code.proto      \
+   google/protobuf/compiler/ruby/ruby_generated_code_pb.rb      \
+   google/protobuf/compiler/package_info.h                      \
+diff --git a/src/google/protobuf/compiler/js/embed.cc b/src/google/protobuf/compiler/js/embed.cc
+deleted file mode 100644
+index a725b62eb..000000000
+--- a/src/google/protobuf/compiler/js/embed.cc
++++ /dev/null
+@@ -1,112 +0,0 @@
+-// Protocol Buffers - Google's data interchange format
+-// Copyright 2008 Google Inc.  All rights reserved.
+-// https://developers.google.com/protocol-buffers/
+-//
+-// Redistribution and use in source and binary forms, with or without
+-// modification, are permitted provided that the following conditions are
+-// met:
+-//
+-//     * Redistributions of source code must retain the above copyright
+-// notice, this list of conditions and the following disclaimer.
+-//     * Redistributions in binary form must reproduce the above
+-// copyright notice, this list of conditions and the following disclaimer
+-// in the documentation and/or other materials provided with the
+-// distribution.
+-//     * Neither the name of Google Inc. nor the names of its
+-// contributors may be used to endorse or promote products derived from
+-// this software without specific prior written permission.
+-//
+-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-
+-#include <cassert>
+-#include <cstdlib>
+-#include <fstream>
+-#include <iostream>
+-#include <string>
+-
+-const char output_file[] = "well_known_types_embed.cc";
+-
+-static bool AsciiIsPrint(unsigned char c) {
+-  return c >= 32 && c < 127;
+-}
+-
+-static char ToDecimalDigit(int num) {
+-  assert(num < 10);
+-  return '0' + num;
+-}
+-
+-static std::string CEscape(const std::string& str) {
+-  std::string dest;
+-
+-  for (size_t i = 0; i < str.size(); ++i) {
+-    unsigned char ch = str[i];
+-    switch (ch) {
+-      case '\n': dest += "\\n"; break;
+-      case '\r': dest += "\\r"; break;
+-      case '\t': dest += "\\t"; break;
+-      case '\"': dest += "\\\""; break;
+-      case '\\': dest += "\\\\"; break;
+-      default:
+-        if (AsciiIsPrint(ch)) {
+-          dest += ch;
+-        } else {
+-          dest += "\\";
+-          dest += ToDecimalDigit(ch / 64);
+-          dest += ToDecimalDigit((ch % 64) / 8);
+-          dest += ToDecimalDigit(ch % 8);
+-        }
+-        break;
+-    }
+-  }
+-
+-  return dest;
+-}
+-
+-static void AddFile(const char* name, std::basic_ostream<char>* out) {
+-  std::ifstream in(name);
+-
+-  if (!in.is_open()) {
+-    std::cerr << "Couldn't open input file: " << name << "\n";
+-    std::exit(EXIT_FAILURE);
+-  }
+-
+-  // Make canonical name only include the final element.
+-  for (const char *p = name; *p; p++) {
+-    if (*p == '/') {
+-      name = p + 1;
+-    }
+-  }
+-
+-  *out << "{\"" << CEscape(name) << "\",\n";
+-
+-  for (std::string line; std::getline(in, line); ) {
+-    *out << "  \"" << CEscape(line) << "\\n\"\n";
+-  }
+-
+-  *out << "},\n";
+-}
+-
+-int main(int argc, char *argv[]) {
+-  std::cout << "#include "
+-               "\"google/protobuf/compiler/js/well_known_types_embed.h\"\n";
+-  std::cout << "struct FileToc well_known_types_js[] = {\n";
+-
+-  for (int i = 1; i < argc; i++) {
+-    AddFile(argv[i], &std::cout);
+-  }
+-
+-  std::cout << "  {NULL, NULL}  // Terminate the list.\n";
+-  std::cout << "};\n";
+-
+-  return EXIT_SUCCESS;
+-}
+diff --git a/src/google/protobuf/compiler/js/well_known_types_embed.cc b/src/google/protobuf/compiler/js/well_known_types_embed.cc
+new file mode 100644
+index 000000000..e5ee5510d
+--- /dev/null
++++ b/src/google/protobuf/compiler/js/well_known_types_embed.cc
+@@ -0,0 +1,225 @@
++#include <google/protobuf/compiler/js/well_known_types_embed.h>
++
++struct FileToc well_known_types_js[] = {
++    {"any.js",
++     "/* This code will be inserted into generated code for\n"
++     " * google/protobuf/any.proto. */\n"
++     "\n"
++     "/**\n"
++     " * Returns the type name contained in this instance, if any.\n"
++     " * @return {string|undefined}\n"
++     " */\n"
++     "proto.google.protobuf.Any.prototype.getTypeName = function() {\n"
++     "  return this.getTypeUrl().split('/').pop();\n"
++     "};\n"
++     "\n"
++     "\n"
++     "/**\n"
++     " * Packs the given message instance into this Any.\n"
++     " * @param {!Uint8Array} serialized The serialized data to pack.\n"
++     " * @param {string} name The type name of this message object.\n"
++     " * @param {string=} opt_typeUrlPrefix the type URL prefix.\n"
++     " */\n"
++     "proto.google.protobuf.Any.prototype.pack = function(serialized, name,\n"
++     "                                                    opt_typeUrlPrefix) "
++     "{\n"
++     "  if (!opt_typeUrlPrefix) {\n"
++     "    opt_typeUrlPrefix = 'type.googleapis.com/';\n"
++     "  }\n"
++     "\n"
++     "  if (opt_typeUrlPrefix.substr(-1) != '/') {\n"
++     "    this.setTypeUrl(opt_typeUrlPrefix + '/' + name);\n"
++     "  } else {\n"
++     "    this.setTypeUrl(opt_typeUrlPrefix + name);\n"
++     "  }\n"
++     "\n"
++     "  this.setValue(serialized);\n"
++     "};\n"
++     "\n"
++     "\n"
++     "/**\n"
++     " * @template T\n"
++     " * Unpacks this Any into the given message object.\n"
++     " * @param {function(Uint8Array):T} deserialize Function that will "
++     "deserialize\n"
++     " *     the binary data properly.\n"
++     " * @param {string} name The expected type name of this message object.\n"
++     " * @return {?T} If the name matched the expected name, returns the "
++     "deserialized\n"
++     " *     object, otherwise returns null.\n"
++     " */\n"
++     "proto.google.protobuf.Any.prototype.unpack = function(deserialize, name) "
++     "{\n"
++     "  if (this.getTypeName() == name) {\n"
++     "    return deserialize(this.getValue_asU8());\n"
++     "  } else {\n"
++     "    return null;\n"
++     "  }\n"
++     "};\n"},
++    {"timestamp.js",
++     "/* This code will be inserted into generated code for\n"
++     " * google/protobuf/timestamp.proto. */\n"
++     "\n"
++     "/**\n"
++     " * Returns a JavaScript 'Date' object corresponding to this Timestamp.\n"
++     " * @return {!Date}\n"
++     " */\n"
++     "proto.google.protobuf.Timestamp.prototype.toDate = function() {\n"
++     "  var seconds = this.getSeconds();\n"
++     "  var nanos = this.getNanos();\n"
++     "\n"
++     "  return new Date((seconds * 1000) + (nanos / 1000000));\n"
++     "};\n"
++     "\n"
++     "\n"
++     "/**\n"
++     " * Sets the value of this Timestamp object to be the given Date.\n"
++     " * @param {!Date} value The value to set.\n"
++     " */\n"
++     "proto.google.protobuf.Timestamp.prototype.fromDate = function(value) {\n"
++     "  this.setSeconds(Math.floor(value.getTime() / 1000));\n"
++     "  this.setNanos(value.getMilliseconds() * 1000000);\n"
++     "};\n"},
++    {"struct.js",
++     "/* This code will be inserted into generated code for\n"
++     " * google/protobuf/struct.proto. */\n"
++     "\n"
++     "/**\n"
++     " * Typedef representing plain JavaScript values that can go into a\n"
++     " *     Struct.\n"
++     " * @typedef {null|number|string|boolean|Array|Object}\n"
++     " */\n"
++     "proto.google.protobuf.JavaScriptValue;\n"
++     "\n"
++     "\n"
++     "/**\n"
++     " * Converts this Value object to a plain JavaScript value.\n"
++     " * @return {?proto.google.protobuf.JavaScriptValue} a plain JavaScript\n"
++     " *     value representing this Struct.\n"
++     " */\n"
++     "proto.google.protobuf.Value.prototype.toJavaScript = function() {\n"
++     "  var kindCase = proto.google.protobuf.Value.KindCase;\n"
++     "  switch (this.getKindCase()) {\n"
++     "    case kindCase.NULL_VALUE:\n"
++     "      return null;\n"
++     "    case kindCase.NUMBER_VALUE:\n"
++     "      return this.getNumberValue();\n"
++     "    case kindCase.STRING_VALUE:\n"
++     "      return this.getStringValue();\n"
++     "    case kindCase.BOOL_VALUE:\n"
++     "      return this.getBoolValue();\n"
++     "    case kindCase.STRUCT_VALUE:\n"
++     "      return this.getStructValue().toJavaScript();\n"
++     "    case kindCase.LIST_VALUE:\n"
++     "      return this.getListValue().toJavaScript();\n"
++     "    default:\n"
++     "      throw new Error('Unexpected struct type');\n"
++     "  }\n"
++     "};\n"
++     "\n"
++     "\n"
++     "/**\n"
++     " * Converts this JavaScript value to a new Value proto.\n"
++     " * @param {!proto.google.protobuf.JavaScriptValue} value The value to\n"
++     " *     convert.\n"
++     " * @return {!proto.google.protobuf.Value} The newly constructed value.\n"
++     " */\n"
++     "proto.google.protobuf.Value.fromJavaScript = function(value) {\n"
++     "  var ret = new proto.google.protobuf.Value();\n"
++     "  switch (goog.typeOf(value)) {\n"
++     "    case 'string':\n"
++     "      ret.setStringValue(/** @type {string} */ (value));\n"
++     "      break;\n"
++     "    case 'number':\n"
++     "      ret.setNumberValue(/** @type {number} */ (value));\n"
++     "      break;\n"
++     "    case 'boolean':\n"
++     "      ret.setBoolValue(/** @type {boolean} */ (value));\n"
++     "      break;\n"
++     "    case 'null':\n"
++     "      ret.setNullValue(proto.google.protobuf.NullValue.NULL_VALUE);\n"
++     "      break;\n"
++     "    case 'array':\n"
++     "      ret.setListValue(proto.google.protobuf.ListValue.fromJavaScript(\n"
++     "          /** @type{!Array} */ (value)));\n"
++     "      break;\n"
++     "    case 'object':\n"
++     "      ret.setStructValue(proto.google.protobuf.Struct.fromJavaScript(\n"
++     "          /** @type{!Object} */ (value)));\n"
++     "      break;\n"
++     "    default:\n"
++     "      throw new Error('Unexpected struct type.');\n"
++     "  }\n"
++     "\n"
++     "  return ret;\n"
++     "};\n"
++     "\n"
++     "\n"
++     "/**\n"
++     " * Converts this ListValue object to a plain JavaScript array.\n"
++     " * @return {!Array} a plain JavaScript array representing this List.\n"
++     " */\n"
++     "proto.google.protobuf.ListValue.prototype.toJavaScript = function() {\n"
++     "  var ret = [];\n"
++     "  var values = this.getValuesList();\n"
++     "\n"
++     "  for (var i = 0; i < values.length; i++) {\n"
++     "    ret[i] = values[i].toJavaScript();\n"
++     "  }\n"
++     "\n"
++     "  return ret;\n"
++     "};\n"
++     "\n"
++     "\n"
++     "/**\n"
++     " * Constructs a ListValue protobuf from this plain JavaScript array.\n"
++     " * @param {!Array} array a plain JavaScript array\n"
++     " * @return {proto.google.protobuf.ListValue} a new ListValue object\n"
++     " */\n"
++     "proto.google.protobuf.ListValue.fromJavaScript = function(array) {\n"
++     "  var ret = new proto.google.protobuf.ListValue();\n"
++     "\n"
++     "  for (var i = 0; i < array.length; i++) {\n"
++     "    "
++     "ret.addValues(proto.google.protobuf.Value.fromJavaScript(array[i]));\n"
++     "  }\n"
++     "\n"
++     "  return ret;\n"
++     "};\n"
++     "\n"
++     "\n"
++     "/**\n"
++     " * Converts this Struct object to a plain JavaScript object.\n"
++     " * @return {!Object<string, !proto.google.protobuf.JavaScriptValue>} a "
++     "plain\n"
++     " *     JavaScript object representing this Struct.\n"
++     " */\n"
++     "proto.google.protobuf.Struct.prototype.toJavaScript = function() {\n"
++     "  var ret = {};\n"
++     "\n"
++     "  this.getFieldsMap().forEach(function(value, key) {\n"
++     "    ret[key] = value.toJavaScript();\n"
++     "  });\n"
++     "\n"
++     "  return ret;\n"
++     "};\n"
++     "\n"
++     "\n"
++     "/**\n"
++     " * Constructs a Struct protobuf from this plain JavaScript object.\n"
++     " * @param {!Object} obj a plain JavaScript object\n"
++     " * @return {proto.google.protobuf.Struct} a new Struct object\n"
++     " */\n"
++     "proto.google.protobuf.Struct.fromJavaScript = function(obj) {\n"
++     "  var ret = new proto.google.protobuf.Struct();\n"
++     "  var map = ret.getFieldsMap();\n"
++     "\n"
++     "  for (var property in obj) {\n"
++     "    var val = obj[property];\n"
++     "    map.set(property, proto.google.protobuf.Value.fromJavaScript(val));\n"
++     "  }\n"
++     "\n"
++     "  return ret;\n"
++     "};\n"},
++    {NULL, NULL}  // Terminate the list.
++};

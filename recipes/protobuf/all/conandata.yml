@@ -80,3 +80,7 @@ patches:
       patch_description: "Handle macOS @rpath management"
       patch_type: "bugfix"
       patch_source: "https://github.com/protocolbuffers/protobuf/pull/4620"
+    - patch_file: "patches/protobuf-3.5.1-upstream-pr4709-remove-js_embed.patch"
+      patch_description: "Handle cross-compile issue due to calling build-time generated js_embed application"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/protocolbuffers/protobuf/pull/4709"
