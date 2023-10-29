@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake
-from conan.tools.files import copy
 import os
 
 # It will become the standard on Conan 2.x
@@ -15,11 +14,6 @@ class TestPackageConan(ConanFile):
 
     def layout(self):
         cmake_layout(self)
-
-    def generate(self):
-        if self.settings.os == "Windows":
-            cpptrace = self.dependencies['cpptrace']
-            copy(self, "*.dll", cpptrace.cpp_info.libdirs[0], os.path.join(self.build_folder, self.cpp.build.bindir))
 
     def build(self):
         cmake = CMake(self)

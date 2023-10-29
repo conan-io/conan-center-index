@@ -85,6 +85,9 @@ class CpptraceConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+        if self.settings.os == "Windows" and self.options.shared:
+            copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
