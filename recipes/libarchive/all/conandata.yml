@@ -28,6 +28,7 @@ patches:
     - patch_file: "patches/0007-3.7.1-include-getopt.patch"
       patch_description: "include getopt.h if HAVE_GETOPT_OPTRESET is defined"
       patch_type: "portability"
+      patch_source: "https://github.com/libarchive/libarchive/pull/2007"
     - patch_file: "patches/0001-3.7.1-zlib-winapi.patch"
       patch_description: "Remove broken ZLIB WINAPI check"
       patch_type: "portability"
