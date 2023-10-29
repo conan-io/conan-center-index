@@ -58,8 +58,6 @@ class CpptraceConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # Boolean values are preferred instead of "ON"/"OFF"
-        tc.variables["PACKAGE_CUSTOM_DEFINITION"] = True
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         if not self.options.shared:
@@ -68,8 +66,6 @@ class CpptraceConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)
