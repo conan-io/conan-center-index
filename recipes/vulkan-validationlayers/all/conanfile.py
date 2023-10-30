@@ -180,17 +180,29 @@ class VulkanValidationLayersConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+
+        cmake_lists_path = os.path.join(self.source_folder, "layers", "CMakeLists.txt")
+        # This error is not correct, it only occurs because a generator expression isn't evaluated
+        # in an if statement. It has been disabled to allow the build to complete.
+        if Version(self.version) >= "1.3.239":
+            replace_in_file(
+                self, cmake_lists_path,
+                "message(FATAL_ERROR \"Unable to find spirv/unified1\")",
+                "message(STATUS \"Unable to find spirv/unified1\")",
+            )
         # Vulkan-ValidationLayers relies on Vulkan-Headers version from CMake config file
         # to set api_version in its manifest file, but this value MUST have format x.y.z (no extra number).
         # FIXME: find a way to force correct version in CMakeDeps of vulkan-headers recipe?
-        if Version(self.version) >= "1.3.235":
+        # NOTE: At version 1.3.239, the JSON_API_VERSION was removed from the cmakelists file, 
+        if Version(self.version) >= "1.3.235" and Version(self.version) < "1.3.239":
             vk_version = Version(self.dependencies["vulkan-headers"].ref.version)
             sanitized_vk_version = f"{vk_version.major}.{vk_version.minor}.{vk_version.patch}"
             replace_in_file(
-                self, os.path.join(self.source_folder, "layers", "CMakeLists.txt"),
+                self, cmake_lists_path,
                 "set(JSON_API_VERSION ${VulkanHeaders_VERSION})",
                 f"set(JSON_API_VERSION \"{sanitized_vk_version}\")",
             )
+            
         # FIXME: two CMake module/config files should be generated (SPIRV-ToolsConfig.cmake and SPIRV-Tools-optConfig.cmake),
         # but it can't be modeled right now in spirv-tools recipe
         if not os.path.exists(os.path.join(self.generators_folder, "SPIRV-Tools-optConfig.cmake")):
