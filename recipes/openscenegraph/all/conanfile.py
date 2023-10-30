@@ -132,7 +132,7 @@ class OpenSceneGraphConanFile(ConanFile):
             self.requires("asio/1.22.1")
             self.requires("boost/1.82.0")
         if self.options.with_curl:
-            self.requires("libcurl/8.1.2")
+            self.requires("libcurl/[>=7.78 <9]")
         if self.options.get_safe("with_dcmtk"):
             self.requires("dcmtk/3.6.6")
         if self.options.with_freetype:
@@ -158,7 +158,7 @@ class OpenSceneGraphConanFile(ConanFile):
         if self.options.with_tiff:
             self.requires("libtiff/4.5.0")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
