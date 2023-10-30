@@ -1,4 +1,4 @@
-#include <IconFontCppHeaders/IconsFontAwesome6.h>
+#include <IconsFontAwesome6.h>
 #include <iostream>
 
 int main() {
