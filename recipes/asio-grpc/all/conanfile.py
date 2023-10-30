@@ -60,7 +60,7 @@ class AsioGrpcConan(ConanFile):
         if self._local_allocator_option == "boost_container" or self.options.backend == "boost":
             self.requires("boost/1.83.0")
         if self.options.backend == "asio":
-            self.requires("asio/1.28.1")
+            self.requires("asio/1.28.2")
         if self.options.backend == "unifex":
             self.requires("libunifex/cci.20220430")
 
