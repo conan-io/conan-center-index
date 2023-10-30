@@ -26,4 +26,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             with chdir(self, self.build_folder):
-                self.run(f"ctest", env="conanrun")
+                self.run("ctest", env="conanrun")

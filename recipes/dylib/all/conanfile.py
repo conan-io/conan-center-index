@@ -4,7 +4,7 @@ from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=2.0.0"
+required_conan_version = ">=1.53.0"
 
 class DylibConan(ConanFile):
     name = "dylib"
