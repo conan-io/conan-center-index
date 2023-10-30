@@ -104,7 +104,8 @@ class YamlCppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "yaml-cpp")
-        self.cpp_info.set_property("cmake_target_name", "yaml-cpp")
+        self.cpp_info.set_property("cmake_target_name", "yaml-cpp::yaml-cpp")
+        self.cpp_info.set_property("cmake_target_aliases", ["yaml-cpp"]) # CMake imported target before 0.8.0
         self.cpp_info.set_property("pkg_config_name", "yaml-cpp")
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ("Linux", "FreeBSD"):
