@@ -10,7 +10,6 @@ import os
 
 required_conan_version = ">=1.55.0"
 
-# test
 
 class SevenZipConan(ConanFile):
     name = "7zip"
