@@ -13,3 +13,6 @@ patches:
     - patch_file: "patches/0003-ohpipeline.patch"
       patch_description: "Replace deprecated random_shuffle"
       patch_type: "conan"
+    - patch_file: "patches/0005-ohpipeline.patch"
+      patch_description: "Add limits include"
+      patch_type: "conan"
