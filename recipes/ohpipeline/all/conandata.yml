@@ -4,14 +4,8 @@ sources:
     sha256: "070eac6d974bbe520d0b292df1ca4a72160a2b607a60dabdaa0971c3ef96e5e4"
 patches:
   "1.139.1000":
-    - patch_file: "patches/0001-ohpipeline.patch"
-      patch_description: "Replace FDK AAC include dir"
-      patch_type: "conan"
     - patch_file: "patches/0002-ohpipeline.patch"
       patch_description: "Mark unused variable"
-      patch_type: "conan"
-    - patch_file: "patches/0003-ohpipeline.patch"
-      patch_description: "Replace deprecated random_shuffle"
       patch_type: "conan"
     - patch_file: "patches/0005-ohpipeline.patch"
       patch_description: "Add limits include"

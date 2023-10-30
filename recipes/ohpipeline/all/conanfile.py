@@ -29,6 +29,10 @@ class OhPipelineConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
         export_conandata_patches(self)
@@ -38,20 +42,23 @@ class OhPipelineConan(ConanFile):
 
     def requirements(self):
         self.requires("ohnet/1.36.5182", transitive_headers=True, transitive_libs=True)
-        self.requires("libressl/3.5.3", transitive_headers=True, transitive_libs=True)
-        self.requires("libmad/0.15.1b", transitive_headers=True, transitive_libs=True)
-        self.requires("alac/cci.20121212", transitive_headers=True, transitive_libs=True)
-        self.requires("libfdk_aac/2.0.2", transitive_headers=True, transitive_libs=True)
-        self.requires("faac/1.30", transitive_headers=True, transitive_libs=True)
-        self.requires("flac/1.4.2", transitive_headers=True, transitive_libs=True)
-        self.requires("ogg/1.3.5", transitive_headers=True, transitive_libs=True)
-        self.requires("vorbis/1.3.7", transitive_headers=True, transitive_libs=True)
+        self.requires("libressl/3.5.3")
+        self.requires("libmad/0.15.1b")
+        self.requires("alac/cci.20121212")
+        self.requires("libfdk_aac/2.0.2")
+        self.requires("faac/1.30")
+        self.requires("flac/1.4.2")
+        self.requires("ogg/1.3.5")
+        self.requires("vorbis/1.3.7")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
+        # INFO: AacFdkBase.cpp uses #include <aacdecoder_lib.h>
+        libfdk_include_dir = os.path.join(self.dependencies["libfdk_aac"].cpp_info.includedirs[0], "fdk-aac")
+        tc.variables["CMAKE_CXX_FLAGS"] = tc.variables.get("CMAKE_CXX_FLAGS", "") + " -I{}".format(libfdk_include_dir)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
