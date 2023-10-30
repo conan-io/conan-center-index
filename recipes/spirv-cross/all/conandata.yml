@@ -17,25 +17,7 @@ sources:
   "1.3.239.0":
     url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/sdk-1.3.239.0.tar.gz"
     sha256: "a1695022880e7ef3c2d407647f79876045dc2a3ed012753adc71ead5cc5178ba"
-  "1.3.236.0":
-    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/sdk-1.3.236.0.tar.gz"
-    sha256: "8140a2b53d1e218e9be1f8d5e2749b1ebe854d456e5cb356218fd288747d5438"
-  "1.3.231.1":
-    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/sdk-1.3.231.1.tar.gz"
-    sha256: "3b42f5b6e46b45600e09fd55234f59edb7cfca803e49d7830dc6fb5a086143b1"
-  "1.3.224.1":
-    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/sdk-1.3.224.1.tar.gz"
-    sha256: "b7747a030427eaa11722c9781087c98a2fafbb030daafc7a7598f941082e4bc7"
-  "1.3.224.0":
-    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/sdk-1.3.224.0.tar.gz"
-    sha256: "00256c33e235c5b9f0fc4b531fb9058d3cf1ff53e21e2db62cd8db848525536c"
-  "20210115":
-    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/2021-01-15.tar.gz"
-    sha256: "d700863b548cbc7f27a678cee305f561669a126eb2cc11d36a7023dfc462b9c4"
-patches:
-  "1.3.236.0":
-    - patch_file: "patches/1.3.236.0-0001-fix-gcc5.patch"
-      patch_description: "Fix compilation with gcc-5"
-      patch_type: "portability"
-  "20210115":
-    - patch_file: "patches/0001-fix-bundle-install-20210115.patch"
+  # commit used in Vulkan SDK 1.2.198.0
+  "cci.20211113":
+    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/7c3cb0b12c9965497b08403c82ac1b82846fa7be.tar.gz"
+    sha256: "5bb6837e2b75db1a9e36e7d6eac40d905e3460ff3b5234f391adc6bdf6aadcdf"
