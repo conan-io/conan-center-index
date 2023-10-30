@@ -13,9 +13,6 @@ class TestPackageV1Conan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    # def imports(self):
-    #     self.copy("*.dll", dst="bin", src="lib")
-
     def test(self):
         if not cross_building(self):
             bin_path = os.path.join("bin", "test_package")

@@ -16,10 +16,6 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
-    # def generate(self):
-    #     for dep in self.dependencies.values():
-    #         copy(self, "*.dll", dep.cpp_info.libdirs[0], self.build_folder)
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
