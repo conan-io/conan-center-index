@@ -47,3 +47,6 @@ class DylibConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "dylib")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["dl"])
