@@ -2,6 +2,7 @@ from os import path
 import posixpath
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import (
     apply_conandata_patches, export_conandata_patches, get, copy, rmdir)
@@ -128,6 +129,7 @@ class PackageConan(ConanFile):
 
         cmake = CMake(self)
         cmake.install()
+        fix_apple_shared_install_name(self)
 
         rmdir(self, path.join(self.package_folder, "doc"))
 
@@ -141,6 +143,6 @@ class PackageConan(ConanFile):
             self.cpp_info.system_libs.append("dl")
 
         if self.settings.os in ["Windows"]:
-            self.cpp_info.system_libs.append("Shlwapi")
+            self.cpp_info.system_libs.append("shlwapi")
 
         self.cpp_info.resdirs = ["res"]
