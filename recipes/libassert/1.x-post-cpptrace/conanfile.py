@@ -77,6 +77,8 @@ class LibassertConan(ConanFile):
         toolchain = CMakeToolchain(self)
         if is_msvc(self):
             toolchain.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        if not self.options.shared:
+            tc.variables["ASSERT_STATIC"] = True
         toolchain.variables["ASSERT_USE_EXTERNAL_CPPTRACE"] = True
         toolchain.generate()
         tc = CMakeDeps(self)
