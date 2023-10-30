@@ -1,0 +1,28 @@
+From 9478e541f41e7c9df0fb37a459c093e41848ae2e Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Mon, 30 Oct 2023 10:11:24 +0100
+Subject: [PATCH] Link zlib in a test
+
+---
+ Config.cmake/fmizip.cmake | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/Config.cmake/fmizip.cmake b/Config.cmake/fmizip.cmake
+index 7618d51..213b5f8 100644
+--- a/Config.cmake/fmizip.cmake
++++ b/Config.cmake/fmizip.cmake
+@@ -42,9 +42,10 @@ set(FMIZIPHEADERS
+ #include_directories("${FMILIB_THIRDPARTYLIBS}/zlib/lib/VS2005/win32")
+ 
+ find_package(minizip CONFIG REQUIRED)
++find_package(ZLIB CONFIG REQUIRED)
+ 
+ add_library(fmizip ${FMILIBKIND} ${FMIZIPSOURCE} ${FMIZIPHEADERS})
+ 
+-target_link_libraries(fmizip minizip::minizip jmutils)
++target_link_libraries(fmizip minizip::minizip ZLIB::ZLIB jmutils)
+ 
+ endif(NOT FMIZIPDIR)
+-- 
+2.30.2
+

@@ -30,3 +30,6 @@ patches:
     - patch_file: "patches/2.4.1-008-add-missing-stdlib.h-include.patch"
       patch_description: "exit() is defined in stdlib.h"
       patch_type: "conan"
+    - patch_file: "patches/2.4.1-009-link-zlib-in-fmilib.patch"
+      patch_description: "zlib must be linked explicitly due to minizip.c and miniunz.c inclusion"
+      patch_type: "conan"

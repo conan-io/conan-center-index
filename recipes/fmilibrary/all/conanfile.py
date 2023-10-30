@@ -57,6 +57,7 @@ class PackageConan(ConanFile):
             self.requires("fmi3/3.0.1")
         self.requires("expat/2.4.9")
         self.requires("minizip/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         # c99_snprintf -> should be externalised
 
     def validate(self):
