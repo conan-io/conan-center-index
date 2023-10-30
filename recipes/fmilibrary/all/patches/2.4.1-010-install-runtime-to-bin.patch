@@ -1,0 +1,25 @@
+From 1c1fdb0d864682cb85433fc29cacbe829393eb1d Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Mon, 30 Oct 2023 13:12:34 +0100
+Subject: [PATCH] Install runtime to bin
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cc2a25c..0bb24f6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -304,7 +304,7 @@ file(COPY "${FMILIBRARYHOME}/Config.cmake/fmilib.h" DESTINATION "${FMILibrary_BI
+ install(TARGETS ${FMILIB_TARGETS}
+ 	ARCHIVE DESTINATION lib
+ 	LIBRARY DESTINATION lib
+-	RUNTIME DESTINATION lib
++	RUNTIME DESTINATION bin
+ )
+ install(FILES 
+ 			"${FMILIBRARYHOME}/FMILIB_Readme.txt"
+-- 
+2.30.2
+

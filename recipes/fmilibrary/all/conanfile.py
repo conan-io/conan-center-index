@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import (
     apply_conandata_patches, export_conandata_patches, get, copy, rmdir)
 from conan.tools.scm import Version
-from conan.tools.env import Environment
+from conan.tools.env import Environment, VirtualRunEnv
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 required_conan_version = ">=1.53.0"
@@ -101,6 +101,9 @@ class PackageConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
+
+        vre = VirtualRunEnv(self)
+        vre.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)
