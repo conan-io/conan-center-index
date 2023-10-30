@@ -74,6 +74,16 @@ class OpenTelemetryCppConan(ConanFile):
             return 14
         return 11
 
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "15",
+            "gcc": "5",
+            "clang": "3.4",
+            "apple-clang": "5.1",
+        }
+
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -139,8 +149,18 @@ class OpenTelemetryCppConan(ConanFile):
         return ["locale"] if self.options.with_jaeger and Version(self.version) >= "1.3.0" else []
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+        compiler = self.settings.compiler
+        compiler_name = str(compiler)
+
+        if compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._minimum_compilers_version.get(compiler_name, False)
+        if minimum_version and Version(compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"Requires compiler {compiler_name} minimum version: {minimum_version} with C++17 support."
+            )
+
         check_min_vs(self, "192")
 
         if self.settings.os != "Linux" and self.options.shared:
@@ -223,6 +243,11 @@ class OpenTelemetryCppConan(ConanFile):
 
         if Version(self.version) < "1.11":
             tc.variables["WITH_LOGS_PREVIEW"] = self.options.with_logs_preview
+
+        cppstd = self.settings.compiler.get_safe("cppstd")
+        if not cppstd:
+            cppstd = self._minimum_cpp_standard
+        tc.variables["CMAKE_CXX_STANDARD"] = cppstd
 
         tc.generate()
 
@@ -444,6 +469,7 @@ class OpenTelemetryCppConan(ConanFile):
                 self.cpp_info.components["opentelemetry_exporter_otlp_grpc_client"].requires.extend([
                     "grpc::grpc++",
                     "opentelemetry_proto",
+                    "opentelemetry_proto_grpc",
                 ])
 
                 self.cpp_info.components["opentelemetry_exporter_otlp_grpc"].requires.extend([
