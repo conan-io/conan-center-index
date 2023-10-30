@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
 
 project(ohPipeline CXX)
+set(CMAKE_CXX_STANDARD 11)
 
 find_package(ohnet REQUIRED COMPONENTS ohNetCore ohNetProxies TestFramework)
 find_package(LibreSSL REQUIRED CONFIG)
