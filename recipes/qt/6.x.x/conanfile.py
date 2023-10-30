@@ -874,6 +874,8 @@ class QtConan(ConanFile):
 
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
+            if self.options.gui and self.options.qtshadertools:
+                _create_private_module("Quick", ["CorePrivate", "GuiPrivate", "QmlPrivate", "Quick"])
 
         if self.settings.os in ["Windows", "iOS"]:
             contents = textwrap.dedent("""\
@@ -1111,6 +1113,7 @@ class QtConan(ConanFile):
             self.cpp_info.components["qtQmlImportScanner"].requires = _get_corrected_reqs(["Qml"])
             if qt_quick_enabled:
                 _create_module("Quick", ["Gui", "Qml", "QmlModels"])
+                _add_build_module("qtQuick", self._cmake_qt6_private_file("Quick"))
                 if self.options.widgets:
                     _create_module("QuickWidgets", ["Gui", "Qml", "Quick", "Widgets"])
                 _create_module("QuickShapes", ["Gui", "Qml", "Quick"])
