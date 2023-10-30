@@ -10,7 +10,6 @@ class DylibConan(ConanFile):
     name = "dylib"
     homepage = "https://github.com/martin-olivier/dylib"
     url = "https://github.com/conan-io/conan-center-index"
-    author = "Martin Olivier (martin.olivier@live.fr)"
     description = "C++ cross-platform wrapper around dynamic loading of shared libraries (dll, so, dylib)"
     license = "MIT"
     topics = ("shared-library", "cross-platform", "header-only")
