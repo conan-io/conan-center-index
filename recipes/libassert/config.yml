@@ -1,6 +1,6 @@
 versions:
   # Newer versions at the top
-  "1.2":
+  "1.2.1":
     folder: 1.x-post-cpptrace
   "1.1":
     folder: 1.x-pre-cpptrace
