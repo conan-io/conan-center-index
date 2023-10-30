@@ -182,9 +182,10 @@ class VulkanValidationLayersConan(ConanFile):
         apply_conandata_patches(self)
 
         cmake_lists_path = os.path.join(self.source_folder, "layers", "CMakeLists.txt")
-        # This error is not correct, it only occurs because a generator expression isn't evaluated
-        # in an if statement. It has been disabled to allow the build to complete.
         if Version(self.version) >= "1.3.239":
+            # Without this an incorrect error is issued due to the above CMakeLists.txt
+            #  using generator expressions in an if statement.
+            # It has been disabled to allow the build to complete.
             replace_in_file(
                 self, cmake_lists_path,
                 "message(FATAL_ERROR \"Unable to find spirv/unified1\")",
