@@ -23,3 +23,8 @@ sources:
   "1.0.21":
     url: "https://github.com/eProsima/Fast-CDR/archive/refs/tags/v1.0.21.tar.gz"
     sha256: "C1F32BDD76910ADA00D551EB8828DE7561AD2B2846D063CB4316F9262C03C77D"
+patches:
+  "2.0.0":
+    - patch_file: "patches/2.0.0-0001-Fix-for-non-CWG-1270-revision-compliant-compilers-17.patch"
+      patch_type: "conan"
+      patch_description: "Fix for non CWG 1270 revision compliant compilers"
