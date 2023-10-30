@@ -9,10 +9,10 @@ from conan.tools.env import Environment
 from conan.tools.files import chdir, copy, get, rename, replace_in_file, rmdir, mkdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, unix_path
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, unix_path_package_info_legacy
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.57.0"
 
 
 class NsprConan(ConanFile):
@@ -201,6 +201,7 @@ class NsprConan(ConanFile):
 
         self.cpp_info.resdirs = ["res"]
 
-        aclocal = unix_path(self, os.path.join(self.package_folder, "res", "aclocal"))
+        # TODO: the following can be removed when the recipe supports Conan >= 2.0 only
+        aclocal = unix_path_package_info_legacy(self, os.path.join(self.package_folder, "res", "aclocal"))
         self.output.info(f"Appending AUTOMAKE_CONAN_INCLUDES environment variable: {aclocal}")
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(aclocal)
