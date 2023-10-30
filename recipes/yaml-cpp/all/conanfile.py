@@ -111,6 +111,7 @@ class YamlCppConan(ConanFile):
             self.cpp_info.system_libs.append("m")
         if is_msvc(self):
             self.cpp_info.defines.append("_NOEXCEPT=noexcept")
+        if self.settings.os == "Windows":
             if Version(self.version) < "0.8.0" and self.options.shared:
                 self.cpp_info.defines.append("YAML_CPP_DLL")
             if Version(self.version) >= "0.8.0" and not self.options.shared:
