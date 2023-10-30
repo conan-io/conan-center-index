@@ -1,6 +1,7 @@
 from os import path
 import posixpath
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import (
     apply_conandata_patches, export_conandata_patches, get, copy, rmdir)
@@ -57,6 +58,12 @@ class PackageConan(ConanFile):
         self.requires("expat/2.4.9")
         self.requires("minizip/1.2.13")
         # c99_snprintf -> should be externalised
+
+    def validate(self):
+        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} does not support architecture "
+                f"'{self.settings.arch}' on {self.settings.os}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
