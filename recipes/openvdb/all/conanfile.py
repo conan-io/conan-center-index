@@ -144,7 +144,6 @@ class OpenVDBConan(ConanFile):
     def requirements(self):
         # https://github.com/AcademySoftwareFoundation/openvdb/blob/v10.0.1/doc/dependencies.txt#L36-L84
         self.requires("boost/1.83.0", transitive_headers=True)
-        # Shared builds fail when the transitive_libs=True params below are not explicitly set for some reason
         if Version(self.version) >= "9.0.0":
             self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
         else:
@@ -187,7 +186,7 @@ class OpenVDBConan(ConanFile):
             self.tool_requires("cmake/[>=3.18 <4]")
         if self.options.build_ax:
             if self._settings_build.os == "Windows":
-                self.tool_requires("winflexbison/2.5.24")
+                self.tool_requires("winflexbison/2.5.25")
             else:
                 self.tool_requires("bison/3.8.2")
                 self.tool_requires("flex/2.6.4")
