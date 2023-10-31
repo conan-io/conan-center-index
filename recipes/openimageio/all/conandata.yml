@@ -1,24 +1,12 @@
 sources:
-  "2.2.7.0":
-    url: "https://github.com/OpenImageIO/oiio/archive/Release-2.2.7.0.tar.gz"
-    sha256: "857ac83798d6d2bda5d4d11a90618ff19486da2e5a4c4ff022c5976b5746fe8c"
-  "2.2.18.0":
-    url: "https://github.com/OpenImageIO/oiio/archive/refs/tags/v2.2.18.0.tar.gz"
-    sha256: "72597619f09b60cc2afc18f378b40fbec62701112957f43cff162dd9a52a26ce"
-  "2.3.7.2":
-    url: "https://github.com/OpenImageIO/oiio/archive/refs/tags/v2.3.7.2.tar.gz"
-    sha256: "829c05d17610f1156c2a777310f4709b81f3a302fd11e3999ea4a865a5b4a5d3"
-  "2.4.7.1":
-    url: "https://github.com/OpenImageIO/oiio/archive/refs/tags/v2.4.7.1.tar.gz"
-    sha256: "fd298f71e44c6776863db4b37c4a1388dba0d2eb37378afea95ab07a7cd6ecd4"
+  "2.5.4.0":
+    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.5.4.0.tar.gz"
+    sha256: "2e262ae5e5281f839651cd706e417c83c58294a26527ec184b466a2ba6ca31dc"
+  "2.4.16.0":
+    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.4.16.0.tar.gz"
+    sha256: "a8cea8b6087610e5154fbbe028548ab4fc773eb36531eef44ffb42351bc0b0f0"
 patches:
-  "2.2.7.0":
-    - patch_file: "patches/2.2.7.0-cmake-targets.patch"
-  "2.2.18.0":
-    - patch_file: "patches/2.2.18.0-cmake-targets.patch"
-  "2.3.7.2":
-    - patch_file: "patches/2.3.7.2-cmake-targets.patch"
-  "2.4.7.1":
+  "2.4.16.0":
     - patch_file: "patches/2.4.7.1-cmake-targets.patch"
       patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
       patch_type: "conan"

@@ -1,9 +1,5 @@
 versions:
-  "2.2.7.0":
+  "2.5.4.0":
     folder: all
-  "2.2.18.0":
-    folder: all
-  "2.3.7.2":
-    folder: all
-  "2.4.7.1":
+  "2.4.16.0":
     folder: all

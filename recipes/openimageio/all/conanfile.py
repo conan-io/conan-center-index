@@ -6,7 +6,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -86,7 +85,7 @@ class OpenImageIOConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("boost/1.83.0")
         self.requires("libtiff/4.6.0")
-        self.requires("openexr/2.5.7")
+        self.requires("openexr/3.1.7")
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
@@ -104,10 +103,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_hdf5:
             self.requires("hdf5/1.14.1")
         if self.options.with_opencolorio:
-            if Version(self.version) >= "2.3.7.2":
-                self.requires("opencolorio/2.2.1")
-            else:
-                self.requires("opencolorio/1.1.1")
+            self.requires("opencolorio/2.2.1")
         if self.options.with_opencv:
             self.requires("opencv/4.5.5")
         if self.options.with_tbb:
@@ -116,7 +112,6 @@ class OpenImageIOConan(ConanFile):
             self.requires("dcmtk/3.6.7")
         if self.options.with_ffmpeg:
             self.requires("ffmpeg/6.0")
-        # TODO: Field3D dependency
         if self.options.with_giflib:
             self.requires("giflib/5.2.1")
         if self.options.with_libheif:
@@ -131,15 +126,17 @@ class OpenImageIOConan(ConanFile):
             self.requires("ptex/2.4.0")
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.2")
+        # TODO: Field3D dependency
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
 
+        # TODO: remove
+        self.requires("imath/3.1.9", override=True)
+        self.requires("xz_utils/5.4.4", override=True)
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            if Version(self.version) >= "2.3.0.0" or self.options.with_openvdb:
-                check_min_cppstd(self, 14)
-            else:
-                check_min_cppstd(self, 11)
+            check_min_cppstd(self, 14)
         if is_msvc_static_runtime(self) and self.options.shared:
             raise ConanInvalidConfiguration("Building shared library with static runtime is not supported!")
 
@@ -184,11 +181,8 @@ class OpenImageIOConan(ConanFile):
         tc.variables["USE_FREETYPE"] = self.options.with_freetype
         tc.variables["USE_LIBWEBP"] = self.options.with_libwebp
         tc.variables["USE_OPENJPEG"] = self.options.with_openjpeg
-
-        if self.options.with_openvdb:
-            tc.variables["CMAKE_CXX_STANDARD"] = 14
-
         tc.generate()
+
         tc = CMakeDeps(self)
         tc.generate()
 
@@ -197,9 +191,8 @@ class OpenImageIOConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.source_path.parent)
+        cmake.configure()
         cmake.build()
 
     def package(self):
