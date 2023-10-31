@@ -85,6 +85,9 @@ class AsioGrpcConan(ConanFile):
                 f"{self.name} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports"
                 f" C++{self._min_cppstd}."
             )
+        if Version(self.version) == "2.7.0" and \
+            self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "11":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support gcc 11.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
