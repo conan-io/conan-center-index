@@ -22,7 +22,7 @@ class ZeroMQConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "encryption": [None, "libsodium", "tweetnacl"],
+        "encryption": [False, "libsodium", "tweetnacl"],
         "with_norm": [True, False],
         "poller": [None, "kqueue", "epoll", "devpoll", "pollset", "poll", "select"],
         "with_draft_api": [True, False],

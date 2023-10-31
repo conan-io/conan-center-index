@@ -1,0 +1,5 @@
+sources:
+  "2.0.0":
+    url:
+      - "https://github.com/SeadexGmbH/genesis/archive/refs/tags/2.0.0.tar.gz"
+    sha256: "22bd4e438c1475d7b023d6f8f7d541f49f55784c89e8607acc68a73157bb4ea4"

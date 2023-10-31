@@ -1,4 +1,8 @@
 sources:
+  "1.1.0":
+    url:
+      - "https://github.com/paulelsner/gurkenlaeufer/archive/refs/tags/v1.1.0.zip"
+    sha256: "afa8ff520354ece11c97537ba61998b04fca02d3eda1909d112f008dd4522ba0"
   "1.0.1":
     url:
       - "https://github.com/paulelsner/gurkenlaeufer/archive/refs/tags/v1.0.1.zip"

@@ -1,14 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index aa5447a8..10a0065b 100644
+index 7ce5f63..be39a51 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1,4 +1,4 @@
--cmake_minimum_required(VERSION 3.20)
-+cmake_minimum_required(VERSION 3.18.2)
- 
- # Global properties
- set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-@@ -17,49 +17,36 @@ if(DOXYGEN_FOUND)
+@@ -17,49 +17,37 @@ if(DOXYGEN_FOUND)
    endif()
  endif()
  
@@ -23,6 +17,7 @@ index aa5447a8..10a0065b 100644
 -
  # External packages
  find_package(Threads REQUIRED)
++find_package(fmt REQUIRED)
  if(UNIX AND NOT APPLE AND NOT MSYS)
    find_package(LibBFD)
    find_package(LibDL)
@@ -46,7 +41,7 @@ index aa5447a8..10a0065b 100644
    list(APPEND LINKLIBS ${LIBDL_LIBRARIES})
    list(APPEND LINKLIBS ${LIBRT_LIBRARIES})
 -  list(APPEND LINKLIBS ${LIBUUID_LIBRARIES})
-+  list(APPEND LINKLIBS CONAN_PKG::libuuid)
++  list(APPEND LINKLIBS libuuid::libuuid)
  endif()
  if(WIN32 OR MSYS)
    list(APPEND LINKLIBS ${DBGHELP_LIBRARIES})
@@ -62,7 +57,7 @@ index aa5447a8..10a0065b 100644
  include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/plugins")
  
  # Library
-@@ -68,8 +55,9 @@ file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl" "source/*.inl")
+@@ -68,8 +56,9 @@ file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl" "source/*.inl")
  file(GLOB_RECURSE LIB_SOURCE_FILES "include/*.cpp" "source/*.cpp")
  add_library(cppcommon ${LIB_HEADER_FILES} ${LIB_INLINE_FILES} ${LIB_SOURCE_FILES})
  set_target_properties(cppcommon PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries")
@@ -70,11 +65,11 @@ index aa5447a8..10a0065b 100644
 -target_link_libraries(cppcommon ${LINKLIBS} fmt)
 +target_include_directories(cppcommon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 +target_compile_features(cppcommon PUBLIC cxx_std_17)
-+target_link_libraries(cppcommon PUBLIC ${LINKLIBS} CONAN_PKG::fmt)
++target_link_libraries(cppcommon PUBLIC ${LINKLIBS} fmt::fmt)
  list(APPEND INSTALL_TARGETS cppcommon)
  list(APPEND LINKLIBS cppcommon)
  
-@@ -92,6 +80,7 @@ if(NOT CPPCOMMON_MODULE)
+@@ -92,6 +81,7 @@ if(NOT CPPCOMMON_MODULE)
    endforeach()
  
    # Examples
@@ -82,7 +77,7 @@ index aa5447a8..10a0065b 100644
    file(GLOB EXAMPLE_HEADER_FILES "examples/*.h")
    file(GLOB EXAMPLE_INLINE_FILES "examples/*.inl")
    file(GLOB EXAMPLE_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/examples" "examples/*.cpp")
-@@ -105,8 +94,10 @@ if(NOT CPPCOMMON_MODULE)
+@@ -105,8 +95,10 @@ if(NOT CPPCOMMON_MODULE)
      list(APPEND INSTALL_TARGETS ${EXAMPLE_TARGET})
      list(APPEND INSTALL_TARGETS_PDB ${EXAMPLE_TARGET})
    endforeach()
@@ -93,7 +88,7 @@ index aa5447a8..10a0065b 100644
    file(GLOB BENCHMARK_HEADER_FILES "performance/*.h")
    file(GLOB BENCHMARK_INLINE_FILES "performance/*.inl")
    file(GLOB BENCHMARK_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/performance" "performance/*.cpp")
-@@ -120,8 +111,10 @@ if(NOT CPPCOMMON_MODULE)
+@@ -120,8 +112,10 @@ if(NOT CPPCOMMON_MODULE)
      list(APPEND INSTALL_TARGETS ${BENCHMARK_TARGET})
      list(APPEND INSTALL_TARGETS_PDB ${BENCHMARK_TARGET})
    endforeach()
@@ -104,7 +99,7 @@ index aa5447a8..10a0065b 100644
    file(GLOB TESTS_HEADER_FILES "tests/*.h")
    file(GLOB TESTS_INLINE_FILES "tests/*.inl")
    file(GLOB TESTS_SOURCE_FILES "tests/*.cpp")
-@@ -132,19 +125,22 @@ if(NOT CPPCOMMON_MODULE)
+@@ -132,19 +126,22 @@ if(NOT CPPCOMMON_MODULE)
    target_link_libraries(cppcommon-tests ${LINKLIBS})
    list(APPEND INSTALL_TARGETS cppcommon-tests)
    list(APPEND INSTALL_TARGETS_PDB cppcommon-tests)

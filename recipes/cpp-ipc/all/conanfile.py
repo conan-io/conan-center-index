@@ -1,17 +1,26 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.53.0"
+
 
 class CppIPCConan(ConanFile):
     name = "cpp-ipc"
     description = "C++ IPC Library: A high-performance inter-process communication using shared memory on Linux/Windows."
-    topics = ("ipc", "shared memory", )
+    license = ("MIT",)
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mutouyun/cpp-ipc"
-    license = "MIT",
+    topics = ("ipc", "shared memory")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = ["CMakeLists.txt"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -21,19 +30,18 @@ class CppIPCConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
-
-    _compiler_required_cpp17 = {
-        "Visual Studio": "17",
-        "gcc": "8",
-        "clang": "4",
-    }
-
-    _cmake = None
+    @property
+    def _min_cppstd(self):
+        return 17
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "8",
+            "clang": "4",
+            "msvc": "193",
+            "Visual Studio": "17",
+        }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -41,47 +49,51 @@ class CppIPCConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if tools.is_apple_os(self.settings.os):
-            raise ConanInvalidConfiguration("{} does not support Apple platform".format(self.name))
+        if is_apple_os(self):
+            raise ConanInvalidConfiguration(f"{self.name} does not support Apple platform")
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
+            check_min_cppstd(self, self._min_cppstd)
 
-        minimum_version = self._compiler_required_cpp17.get(str(self.settings.compiler), False)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
-            if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
+            if Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd}, "
+                                                "which your compiler does not support.")
         else:
-            self.output.warn("{0} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
+            self.output.warning(f"{self.name} requires C++{self._min_cppstd}. Your compiler is unknown. "
+                                f"Assuming it supports C++{self._min_cppstd}.")
 
         if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++":
-            raise ConanInvalidConfiguration("{} doesn't support clang with libc++".format(self.name))
+            raise ConanInvalidConfiguration(f"{self.name} doesn't support clang with libc++")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-            destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["LIBIPC_BUILD_SHARED_LIBS"] = self.options.shared
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["LIBIPC_BUILD_SHARED_LIBS"] = self.options.shared
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["ipc"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["rt", "pthread"]
+            self.cpp_info.system_libs = ["rt", "pthread", "m"]

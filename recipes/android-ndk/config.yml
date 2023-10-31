@@ -1,4 +1,8 @@
 versions:
+  "r26b":
+    folder: all
+  "r26":
+    folder: all
   "r25c":
     folder: all
   "r25b":
@@ -20,4 +24,8 @@ versions:
   "r21e":
     folder: all
   "r21d":
+    folder: all
+  "r20b":
+    folder: all
+  "r19c":
     folder: all

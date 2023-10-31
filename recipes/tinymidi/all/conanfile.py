@@ -1,17 +1,20 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class TinyMidiConan(ConanFile):
     name = "tinymidi"
     description = "A small C library for doing MIDI on GNU/Linux"
-    topics = ("conan", "tinymidi", "MIDI")
+    topics = ("audio", "MIDI")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/krgn/tinymidi"
     license = "LGPL-3.0-only"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,64 +25,38 @@ class TinyMidiConan(ConanFile):
         "fPIC": True,
     }
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    exports_sources = "CMakeLists.txt"
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("Only Linux and FreeBSD are supported")
 
-    def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _get_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.libs = []
-        return self._autotools
-
-    def _make_args(self, autotools):
-        args = [
-            "INSTALL_PREFIX={}".format(tools.unix_path(self.package_folder)),
-            "COMPILE_FLAGS={}".format(autotools.vars["CFLAGS"]),
-            "LINKING_FLAGS={} -o".format(autotools.vars["LDFLAGS"]),
-        ]
-        if tools.get_env("CC"):
-            args.append("CC={}".format(tools.get_env("CC")))
-        return args
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["TINYMIDI_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.generate()
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
-            autotools = self._get_autotools()
-            make_args = self._make_args(autotools)
-            autotools.make(args=make_args)
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        cmake.build()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        tools.mkdir(os.path.join(self.package_folder, "include"))
-        tools.mkdir(os.path.join(self.package_folder, "lib"))
-        with tools.chdir(self._source_subfolder):
-            autotools = self._get_autotools()
-            make_args = self._make_args(autotools)
-            autotools.install(args=make_args)
-        if self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
-        else:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so*")
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["tinymidi"]

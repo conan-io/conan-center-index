@@ -12,18 +12,21 @@ required_conan_version = ">=1.54.0"
 class HighwayConan(ConanFile):
     name = "highway"
     description = "Performance-portable, length-agnostic SIMD with runtime dispatch"
-    topics = ("simd",)
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/highway"
+    topics = ("simd", "neon", "avx", "sse",)
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_test": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_test": False,
     }
 
     @property
@@ -49,8 +52,11 @@ class HighwayConan(ConanFile):
     def configure(self):
         if Version(self.version) < "0.16.0":
             del self.options.shared
+            self.package_type = "static-library"
         elif self.options.shared:
             self.options.rm_safe("fPIC")
+        if Version(self.version) < "1.0.6":
+            del self.options.with_test
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -71,6 +77,7 @@ class HighwayConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["HWY_ENABLE_EXAMPLES"] = False
+        tc.variables["HWY_ENABLE_TESTS"] = self.options.get_safe("with_test", False)
         tc.generate()
 
     def _patch_sources(self):
@@ -93,6 +100,7 @@ class HighwayConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.components["hwy"].set_property("pkg_config_name", "libhwy")
@@ -105,7 +113,7 @@ class HighwayConan(ConanFile):
             self.cpp_info.components["hwy_contrib"].set_property("pkg_config_name", "libhwy-contrib")
             self.cpp_info.components["hwy_contrib"].libs = ["hwy_contrib"]
             self.cpp_info.components["hwy_contrib"].requires = ["hwy"]
-        if Version(self.version) >= "0.15.0":
+        if "0.15.0" <= Version(self.version) < "1.0.6" or (Version(self.version) >= "1.0.6" and self.options.with_test):
             self.cpp_info.components["hwy_test"].set_property("pkg_config_name", "libhwy-test")
             self.cpp_info.components["hwy_test"].libs = ["hwy_test"]
             self.cpp_info.components["hwy_test"].requires = ["hwy"]

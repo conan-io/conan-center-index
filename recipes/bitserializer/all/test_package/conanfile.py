@@ -21,8 +21,8 @@ class TestPackageConan(ConanFile):
         tc.variables["WITH_CPPRESTSDK"] = bitserializerOptions.with_cpprestsdk
         tc.variables["WITH_RAPIDJSON"] = bitserializerOptions.with_rapidjson
         tc.variables["WITH_PUGIXML"] = bitserializerOptions.with_pugixml
-        tc.variables["WITH_RAPIDYAML"] = bitserializerOptions.with_rapidyaml
-        tc.variables["WITH_CSV"] = bitserializerOptions.with_csv
+        tc.variables["WITH_RAPIDYAML"] = bitserializerOptions.get_safe("with_rapidyaml", False)
+        tc.variables["WITH_CSV"] = bitserializerOptions.get_safe("with_csv", False)
         tc.generate()
 
     def build(self):

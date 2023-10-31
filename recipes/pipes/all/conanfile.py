@@ -1,20 +1,26 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 import os
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.52.0"
+
 
 class PipesConan(ConanFile):
     name = "pipes"
     description = "Pipelines for expressive code on collections in C++"
     license = "MIT"
-    topics = ("pipes", "functional-programming")
-    homepage = "https://github.com/joboccara/pipes"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "compiler"
-    no_copy_source = True
+    homepage = "https://github.com/joboccara/pipes"
+    topics = ("functional-programming", "header-only")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
     def _minimum_cpp_standard(self):
@@ -31,23 +37,30 @@ class PipesConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
+            self.output.warning(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+            if Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.name} requires C++{self._minimum_cpp_standard} support. The current compiler"
+                    f" {self.settings.compiler} {self.settings.compiler.version} does not support it."
+                )
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
-    
+        self.info.clear()
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("pipes-{}".format(self.version), self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"), keep_path=True)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "*.hpp", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"), keep_path=True)
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

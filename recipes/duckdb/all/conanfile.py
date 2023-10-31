@@ -68,6 +68,8 @@ class DuckdbConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "0.9.0":
+            del self.options.with_parquet
 
     def configure(self):
         if self.options.shared:
@@ -81,7 +83,7 @@ class DuckdbConan(ConanFile):
         if self.options.with_odbc:
             self.requires("odbc/2.3.11")
         if self.options.with_httpfs:
-            self.requires("openssl/3.0.7")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -97,7 +99,8 @@ class DuckdbConan(ConanFile):
         tc.variables["DUCKDB_PATCH_VERSION"] = Version(self.version).patch
         tc.variables["DUCKDB_DEV_ITERATION"] = 0
         tc.variables["BUILD_ICU_EXTENSION"] = self.options.with_icu
-        tc.variables["BUILD_PARQUET_EXTENSION"] = self.options.with_parquet
+        if "with_parquet" in self.options:
+            tc.variables["BUILD_PARQUET_EXTENSION"] = self.options.with_parquet
         tc.variables["BUILD_TPCH_EXTENSION"] = self.options.with_tpch
         tc.variables["BUILD_TPCDS_EXTENSION"] = self.options.with_tpcds
         tc.variables["BUILD_FTS_EXTENSION"] = self.options.with_fts
@@ -170,7 +173,7 @@ class DuckdbConan(ConanFile):
 
             if self.options.with_icu:
                 self.cpp_info.libs.append("icu_extension")
-            if self.options.with_parquet:
+            if self.options.get_safe("with_parquet", True):
                 self.cpp_info.libs.append("parquet_extension")
             if self.options.with_tpch:
                 self.cpp_info.libs.append("tpch_extension")

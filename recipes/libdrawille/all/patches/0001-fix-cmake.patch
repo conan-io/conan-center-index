@@ -1,0 +1,55 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8d225ed..dc1a1b3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,7 +1,7 @@
+ cmake_minimum_required(VERSION 3.4)
+ project(libdrawille VERSION 0.0.1 LANGUAGES C)
+ 
+-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -pedantic")
++set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic")
+ set(CMAKE_C_STANDARD 11)
+ set(CMAKE_C_STANDARD_REQUIRED ON)
+ 
+@@ -12,6 +12,3 @@ elseif(${WIN32})
+ endif()
+ 
+ add_subdirectory(src)
+-add_subdirectory(test)
+-add_subdirectory(examples)
+-add_subdirectory(benchmark)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 3c74714..240ca8b 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,9 +1,26 @@
+-find_library(MATH m)
+-
+ set(SOURCE_FILES Canvas.c stamp.c mat3.c polygon.c point.c utils.c x86/sse.c x86/avx2.c)
+ set_source_files_properties(x86/sse.c PROPERTIES COMPILE_FLAGS "-msse -msse2 -msse4")
+ set_source_files_properties(x86/avx2.c PROPERTIES COMPILE_FLAGS "-msse -msse2 -msse4 -mavx -mavx2")
+ 
+-add_library(libdrawille ${SOURCE_FILES})
+-target_link_libraries(libdrawille ${MATH})
++add_library(drawille ${SOURCE_FILES})
++
++find_library(MATH m)
++if(MATH)
++  target_link_libraries(drawille ${MATH})
++endif()
++
++include(GNUInstallDirs)
++
++install(
++    TARGETS drawille
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
+ 
++install(
++    FILES
++      Canvas.h
++      mat3.h
++    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/drawille
++)

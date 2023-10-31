@@ -1,3 +1,6 @@
+// Workaround for a missing <limits> include in wilzegers-autotest/cci.20200921
+#include <limits>
+
 #include <autotest/autotest.hpp>
 #include <fstream>
 

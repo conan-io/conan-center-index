@@ -1,0 +1,82 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -323,15 +323,13 @@
+ # FreeType
+ if(NOT NO_FONT_INTERFACE_DEFAULT)
+ 	find_package(Freetype REQUIRED)
+-	list(APPEND CORE_LINK_LIBS ${FREETYPE_LIBRARIES})
+-	list(APPEND CORE_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIRS})
++	list(APPEND CORE_LINK_LIBS freetype)
+ endif()
+ 
+ # Lua
+ if(BUILD_LUA_BINDINGS)
+-	find_package(Lua REQUIRED)
+-	list(APPEND LUA_BINDINGS_INCLUDE_DIRS ${LUA_INCLUDE_DIR})
+-	list(APPEND LUA_BINDINGS_LINK_LIBS ${LUA_LIBRARIES})
++	find_package(lua REQUIRED CONFIG)
++	list(APPEND LUA_BINDINGS_LINK_LIBS lua::lua)
+ endif()
+ 
+ # rlottie
+@@ -437,6 +435,10 @@
+ if( MATRIX_ROW_MAJOR )
+ 	list(APPEND CORE_PUBLIC_DEFS -DRMLUI_MATRIX_ROW_MAJOR)
+ endif ()
++if ( NOT NO_THIRDPARTY_CONTAINERS )
++	find_package(robin_hood REQUIRED)
++	target_link_libraries(RmlCore robin_hood::robin_hood)
++endif()
+ if( CUSTOM_CONFIGURATION AND CUSTOM_LINK_LIBRARIES )
+ 	target_link_libraries(RmlCore PUBLIC ${CUSTOM_LINK_LIBRARIES})
+ endif ()
+@@ -890,49 +892,3 @@
+ 		)
+ 	endif()
+ endif()
+-
+-#===================================
+-# Generate Config.cmake files ======
+-#===================================
+-
+-# Try to include helper module
+-include(CMakePackageConfigHelpers OPTIONAL RESULT_VARIABLE PkgHelpers_AVAILABLE)
+-
+-# guard against older versions of cmake which do not provide it
+-if(PkgHelpers_AVAILABLE)
+-	set (INCLUDE_INSTALL_DIR "include")
+-	set (LIB_INSTALL_DIR "lib")
+-	set (INCLUDE_DIR "${PROJECT_SOURCE_DIR}/Include")
+-
+-	# generate configuration for install tree
+-	configure_package_config_file(${PROJECT_SOURCE_DIR}/CMake/RmlUiConfig.cmake.install.in
+-		${CMAKE_CURRENT_BINARY_DIR}/install/RmlUiConfig.cmake
+-		INSTALL_DESTINATION ${LIB_INSTALL_DIR}/RmlUi/cmake
+-		PATH_VARS INCLUDE_INSTALL_DIR LIB_INSTALL_DIR)
+-	write_basic_package_version_file(
+-		${CMAKE_CURRENT_BINARY_DIR}/install/RmlUiConfigVersion.cmake
+-		VERSION ${PROJECT_VERSION}
+-		COMPATIBILITY SameMajorVersion )
+-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/install/RmlUiConfig.cmake
+-		${CMAKE_CURRENT_BINARY_DIR}/install/RmlUiConfigVersion.cmake
+-		DESTINATION ${LIB_INSTALL_DIR}/RmlUi/cmake )
+-	install(EXPORT RmlUiTargets
+-		DESTINATION ${LIB_INSTALL_DIR}/RmlUi/cmake)
+-
+-	# generate configuration for build tree
+-	configure_package_config_file(${PROJECT_SOURCE_DIR}/CMake/RmlUiConfig.cmake.build.in
+-		${CMAKE_CURRENT_BINARY_DIR}/RmlUiConfig.cmake
+-		INSTALL_DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+-		PATH_VARS INCLUDE_DIR CMAKE_CURRENT_BINARY_DIR)
+-	export(TARGETS ${RMLUI_EXPORTED_TARGETS}
+-		FILE "${CMAKE_CURRENT_BINARY_DIR}/RmlUiTargets.cmake")
+-	write_basic_package_version_file(
+-		${CMAKE_CURRENT_BINARY_DIR}/RmlUiConfigVersion.cmake
+-		VERSION ${PROJECT_VERSION}
+-		COMPATIBILITY SameMajorVersion )
+-	set(RmlUi_DIR "${CMAKE_CURRENT_BINARY_DIR}" CACHE PATH "The directory containing a CMake configuration file for RmlUi.")
+-else()
+-	message("If you wish to use find_package(RmlUi) in your own project to find RmlUi library"
+-		" please update cmake to version which provides CMakePackageConfighelpers module"
+-		" or write generators for RmlUiConfig.cmake by yourself.")
+-endif()

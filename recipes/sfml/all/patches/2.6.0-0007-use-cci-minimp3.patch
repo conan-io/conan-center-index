@@ -1,0 +1,14 @@
+diff --git a/src/SFML/Audio/CMakeLists.txt b/src/SFML/Audio/CMakeLists.txt
+index 27c3386..6c455ca 100644
+--- a/src/SFML/Audio/CMakeLists.txt
++++ b/src/SFML/Audio/CMakeLists.txt
+@@ -82,7 +82,8 @@ sfml_add_library(sfml-audio
+ target_link_libraries(sfml-audio PRIVATE OpenAL::OpenAL)
+ 
+ # minimp3 sources
+-target_include_directories(sfml-audio SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/extlibs/headers/minimp3")
++find_package(minimp3 REQUIRED CONFIG)
++target_include_directories(sfml-audio SYSTEM PRIVATE ${minimp3_INCLUDE_DIRS})
+ 
+ if(SFML_OS_ANDROID)
+     target_link_libraries(sfml-audio PRIVATE android OpenSLES)
