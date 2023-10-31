@@ -6,6 +6,7 @@ required_for_references:
 - aaplus
 - abseil
 - absent
+- acado
 - access_private
 - acl
 - ada
@@ -259,6 +260,7 @@ required_for_references:
 - deco
 - di
 - dice-template-library
+- directx-headers
 - dirent
 - discount
 - djinni-generator
@@ -305,6 +307,7 @@ required_for_references:
 - enhex-generic_serialization
 - enhex-strong_type
 - enkits
+- ensmallen
 - entityx
 - entt
 - enum-flags
@@ -312,6 +315,7 @@ required_for_references:
 - erkir
 - etc2comp
 - eternal
+- ethash
 - etl
 - evmc
 - exiv2
@@ -873,6 +877,7 @@ required_for_references:
 - ode
 - ogdf
 - ogg
+- ohnet
 - ois
 - onedpl
 - onetbb
@@ -912,6 +917,7 @@ required_for_references:
 - opentelemetry-cpp
 - opentelemetry-proto
 - opentracing-cpp
+- openvino
 - openxlsx
 - optional-lite
 - opus
@@ -920,6 +926,7 @@ required_for_references:
 - osqp
 - out_ptr
 - outcome
+- ozz-animation
 - p-ranav-glob
 - paho-mqtt-c
 - paho-mqtt-cpp
@@ -1007,6 +1014,7 @@ required_for_references:
 - qpoases
 - qr-code-generator
 - qt
+- qtawesome
 - quantlib
 - quaternions
 - quazip
@@ -1091,11 +1099,13 @@ required_for_references:
 - seqan3
 - serd
 - serdepp
+- serf
 - serial
 - sfml
 - shapelib
 - shield
 - si
+- signals-light
 - sigslot
 - simde
 - simdjson
@@ -1140,6 +1150,7 @@ required_for_references:
 - status-value-lite
 - stb
 - stc
+- stdgpu
 - stduuid
 - stlab
 - strawberryperl
@@ -1297,6 +1308,7 @@ required_for_references:
 - wglext
 - whereami
 - whisper-cpp
+- wide-integer
 - wil
 - wildmidi
 - winflexbison
@@ -1363,4 +1375,5 @@ required_for_references:
 - zug
 - zulu-openjdk
 - zxing-cpp
+- zyre
 - zziplib
