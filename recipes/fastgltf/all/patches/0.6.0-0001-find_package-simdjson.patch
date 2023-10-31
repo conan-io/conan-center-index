@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8091f60..674e474 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -77,6 +77,8 @@ if (FASTGLTF_DOWNLOAD_SIMDJSON)
+         NAMESPACE fastgltf::
+         DESTINATION lib/cmake/fastgltf
+     )
++else()
++    find_package(simdjson CONFIG REQUIRED)
+ endif()
+
+ # Create the library target
