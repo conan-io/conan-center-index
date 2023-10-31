@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import (
     apply_conandata_patches, export_conandata_patches, get, copy, rmdir)
 from conan.tools.scm import Version
-from conan.tools.env import Environment, VirtualRunEnv
+from conan.tools.env import VirtualRunEnv
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 required_conan_version = ">=1.53.0"
@@ -52,13 +52,14 @@ class PackageConan(ConanFile):
         self.requires("fmi2/2.0.4")
         if self.version >= Version("3.0a2"):
             self.requires("fmi3/3.0.1")
-        self.requires("expat/2.4.9")
+        self.requires("expat/2.5.0")
         self.requires("minizip/1.2.13")
         self.requires("zlib/[>=1.2.11 <2]")
         # c99_snprintf -> should be externalised
 
     def validate(self):
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
+        # https://github.com/modelon-community/fmi-library/issues/93
+        if self.settings.arch not in ["x86", "x86_64"] and Version(self.version).major < 3:
             raise ConanInvalidConfiguration(
                 f"{self.ref} does not support architecture "
                 f"'{self.settings.arch}' on {self.settings.os}")
@@ -67,15 +68,6 @@ class PackageConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-
-        copy(self, "fmiModel*.h", self.dependencies["fmi1"].cpp_info.components["modex"].includedirs[0],
-             path.join(self.build_folder, "fmis", "FMI1"))
-        copy(self, "fmiPlatformTypes.h", self.dependencies["fmi1"].cpp_info.components["cosim"].includedirs[0],
-             path.join(self.build_folder, "fmis", "FMI1"))
-        copy(self, "fmiFunctions.h", self.dependencies["fmi1"].cpp_info.components["cosim"].includedirs[0],
-             path.join(self.build_folder, "fmis", "FMI1"))
-        copy(self, "*.h", self.dependencies["fmi2"].cpp_info.includedirs[0],
-             path.join(self.build_folder, "fmis", "FMI2"))
 
         tc = CMakeToolchain(self)
         tc.variables["FMILIB_BUILD_STATIC_LIB"] = not self.options.shared
@@ -104,6 +96,16 @@ class PackageConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+
+        copy(self, "fmiModel*.h", self.dependencies["fmi1"].cpp_info.components["modex"].includedirs[0],
+             path.join(self.build_folder, "fmis", "FMI1"))
+        copy(self, "fmiPlatformTypes.h", self.dependencies["fmi1"].cpp_info.components["cosim"].includedirs[0],
+             path.join(self.build_folder, "fmis", "FMI1"))
+        copy(self, "fmiFunctions.h", self.dependencies["fmi1"].cpp_info.components["cosim"].includedirs[0],
+             path.join(self.build_folder, "fmis", "FMI1"))
+        copy(self, "*.h", self.dependencies["fmi2"].cpp_info.includedirs[0],
+             path.join(self.build_folder, "fmis", "FMI2"))
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
