@@ -79,7 +79,7 @@ class OpenColorIOConan(ConanFile):
 
         if Version(self.version) < "2.0.0" and \
             self.settings.compiler.value == "msvc" and \
-            self.settings.compiler.version >= "17.0":
+            Version(self.settings.compiler.version) >= "17.0":
             raise ConanInvalidConfiguration(f"{self.ref} < 2.0 not building on MSVC 2022")
 
         if Version(self.version) >= "2.3.0" and \
