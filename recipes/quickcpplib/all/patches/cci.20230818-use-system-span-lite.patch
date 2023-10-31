@@ -1,0 +1,12 @@
+diff -ur ./a/include/quickcpplib/span.hpp ./b/include/quickcpplib/span.hpp
+--- ./a/include/quickcpplib/span.hpp	2023-08-18 10:42:53.000000000 +0200
++++ ./b/include/quickcpplib/span.hpp	2023-10-31 15:51:42.507910700 +0100
+@@ -80,7 +80,7 @@
+ 
+ #else
+ 
+-#include "span-lite/include/nonstd/span.hpp"
++#include <nonstd/span.hpp>
+ 
+ QUICKCPPLIB_NAMESPACE_BEGIN
+ 

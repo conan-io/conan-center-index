@@ -1,0 +1,9 @@
+sources:
+  "cci.20230818":
+    url: "https://github.com/ned14/quickcpplib/archive/9aaddae850e2c6dd8a66a9833d1172d1515e9dbf.tar.gz"
+    sha256: "88842a8f589ffbc9abed16bbc2cd360110811974b5879df7c3f5266365337747"
+patches:
+  "cci.20230818":
+    - patch_file: "patches/cci.20230818-use-system-span-lite.patch"
+      patch_description: "Patch incllude path for span-lite"
+      patch_type: "conan"
