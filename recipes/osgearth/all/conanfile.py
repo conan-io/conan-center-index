@@ -109,7 +109,7 @@ class OsgearthConan(ConanFile):
         self.requires("lerc/2.2")
         self.requires("rapidjson/1.1.0")
 
-        self.requires("zlib/1.2.13")  # override
+        self.requires("zlib/[>=1.2.11 <2]")  # override
         self.requires("libtiff/4.5.1")  # override
         self.requires("libpng/1.6.40")  # override
 

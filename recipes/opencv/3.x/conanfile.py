@@ -134,25 +134,11 @@ class OpenCVConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
         # Cleanup RPATH
-        if Version(self.version) < "3.4.8":
-            install_layout_file = os.path.join(self.source_folder, "CMakeLists.txt")
-        else:
-            install_layout_file = os.path.join(self.source_folder, "cmake", "OpenCVInstallLayout.cmake")
+        install_layout_file = os.path.join(self.source_folder, "cmake", "OpenCVInstallLayout.cmake")
         replace_in_file(self, install_layout_file,
                               "ocv_update(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}\")",
                               "")
         replace_in_file(self, install_layout_file, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
-
-        if self.options.contrib and Version(self.version) <= "3.4.12":
-            sfm_cmake = os.path.join(self._contrib_folder, "modules", "sfm", "CMakeLists.txt")
-            search = "  find_package(Glog QUIET)\nendif()"
-            replace_in_file(self, sfm_cmake, search, f"""{search}
-            if(NOT GFLAGS_LIBRARIES AND TARGET gflags::gflags)
-              set(GFLAGS_LIBRARIES gflags::gflags)
-            endif()
-            if(NOT GLOG_LIBRARIES AND TARGET glog::glog)
-              set(GLOG_LIBRARIES glog::glog)
-            endif()""")
 
     def generate(self):
         tc = CMakeToolchain(self)
