@@ -15,7 +15,7 @@ class TestPackageV1Conan(ConanFile):
         if Version(require_version) < Version("1.2.1"):
             variables["CONAN_ASSERT_ASSERT_ASSERT"] = True
         cmake = CMake(self)
-        cmake.configure(variables=variables)
+        cmake.configure(defs=variables)
         cmake.build()
 
     def imports(self):
