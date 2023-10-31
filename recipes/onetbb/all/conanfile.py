@@ -85,16 +85,16 @@ class OneTBBConan(ConanFile):
         if self._tbbbind_explicit_hwloc:
             self.options["hwloc"].shared = True
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         if self._tbbbind_build:
-            self.requires("hwloc/2.9.2")
+            self.requires("hwloc/2.9.3")
 
     def build_requirements(self):
         if not self._tbbbind_explicit_hwloc and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.build_requires("pkgconf/1.9.5")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+            self.tool_requires("pkgconf/1.9.5")
 
     def package_id(self):
         if Version(self.version) < "2021.5.0":
@@ -102,7 +102,7 @@ class OneTBBConan(ConanFile):
         if Version(self.version) < "2021.6.0" and self.info.options.get_safe("tbbproxy"):
             self.info.options.tbbproxy = True
 
-    def validate_build(self):
+    def validate(self):
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "11.0":
             raise ConanInvalidConfiguration(f"{self.ref} couldn't be built by apple-clang < 11.0")
         if not self.options.get_safe("shared", True):
@@ -113,6 +113,7 @@ class OneTBBConan(ConanFile):
                     "Please consider fixing at least the aforementioned issue in upstream."
                 )
             self.output.warning("oneTBB strongly discourages usage of static linkage")
+
         if self._tbbbind_explicit_hwloc and not self.dependencies["hwloc"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires hwloc:shared=True to be built.")
 

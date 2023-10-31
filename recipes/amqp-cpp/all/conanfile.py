@@ -89,7 +89,6 @@ class AmqpcppConan(ConanFile):
         tc.variables["AMQP-CPP_BUILD_SHARED"] = self.options.shared
         tc.variables["AMQP-CPP_BUILD_EXAMPLES"] = False
         tc.variables["AMQP-CPP_LINUX_TCP"] = self.options.get_safe("linux_tcp_module", False)
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

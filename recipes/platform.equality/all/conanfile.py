@@ -26,7 +26,7 @@ class PlatformInterfacesConan(ConanFile):
     no_copy_source = True
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 20
 
     @property
@@ -38,6 +38,7 @@ class PlatformInterfacesConan(ConanFile):
         return {
             "gcc": "10",
             "Visual Studio": "16",
+            "msvc": "192",
             "clang": "11",
             "apple-clang": "11",
         }
@@ -50,15 +51,12 @@ class PlatformInterfacesConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
-        if not minimum_version:
-            self.output.warning(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
-        elif Version(self.settings.compiler.version) < minimum_version:
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._minimum_cpp_standard} with {self.settings.compiler}, "
-                f"which is not supported by {self.settings.compiler} {self.settings.compiler.version}."
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
         if self.settings.compiler in ["clang", "apple-clang"] and not str(self.settings.compiler.libcxx).startswith("libstdc++"):
