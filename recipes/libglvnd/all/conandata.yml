@@ -1,4 +1,7 @@
 sources:
+  "1.7.0":
+    url: "https://gitlab.freedesktop.org/glvnd/libglvnd/-/archive/v1.7.0/libglvnd-v1.7.0.tar.gz"
+    sha256: "2b6e15b06aafb4c0b6e2348124808cbd9b291c647299eaaba2e3202f51ff2f3d"
   "1.5.0":
     url: "https://gitlab.freedesktop.org/glvnd/libglvnd/-/archive/v1.5.0/libglvnd-v1.5.0.tar.gz"
     sha256: "8c246d573bdaabbab32874befa79c8b92b12c05d3eb4bbefbe62afa630842793"

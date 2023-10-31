@@ -31,6 +31,7 @@ class OpenSSLConan(ConanFile):
         "capieng_dialog": [True, False],
         "enable_capieng": [True, False],
         "no_aria": [True, False],
+        "no_autoload_config": [True, False],
         "no_asm": [True, False],
         "no_async": [True, False],
         "no_blake2": [True, False],
