@@ -138,23 +138,26 @@ class GoogleCloudCppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def requirements(self):
-        self.requires("protobuf/3.21.9", transitive_headers=True)
-        self.requires("grpc/1.50.1", transitive_headers=True)
-        self.requires("nlohmann_json/3.10.0")
-        self.requires("crc32c/1.1.1")
-        self.requires("abseil/20220623.0", transitive_headers=True)
-        self.requires("libcurl/7.88.1")
+        # These must remain pinned in conan index.
+        self.requires("protobuf/3.21.12", transitive_headers=True)
+        self.requires("abseil/20230125.3", transitive_headers=True)
+        self.requires("grpc/1.54.3", transitive_headers=True)
+        self.requires("nlohmann_json/3.11.2")
+        self.requires("crc32c/1.1.2")
+        # The rest require less pinning.
+        self.requires("libcurl/[>=7.78 <9]")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
-        # For the grpc-cpp-plugin executable
-        self.tool_requires("grpc/1.50.1")
+        # For the `grpc-cpp-plugin` executable, and indirectly `protoc`
+        self.tool_requires("grpc/<host_version>")
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
+        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_WERROR"] = False
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE"] = ",".join(self._components())
         tc.generate()
         VirtualRunEnv(self).generate(scope="build")
@@ -170,9 +173,14 @@ class GoogleCloudCppConan(ConanFile):
         #     https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/RuntimeProtections/RuntimeProtections.html
         settings_build = getattr(self, "settings_build", self.settings)
         if settings_build.os == "Macos":
-            replace_in_file(self, os.path.join(self.source_folder, "cmake/CompileProtos.cmake"),
-                            "$<TARGET_FILE:protobuf::protoc>",
-                            '${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" $<TARGET_FILE:protobuf::protoc>')
+            if Version(self.version) < '2.12.0':
+                replace_in_file(self, os.path.join(self.source_folder, "cmake/CompileProtos.cmake"),
+                                "$<TARGET_FILE:protobuf::protoc>",
+                                '${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" $<TARGET_FILE:protobuf::protoc>')
+            else:
+                replace_in_file(self, os.path.join(self.source_folder, "cmake/CompileProtos.cmake"),
+                                "${Protobuf_PROTOC_EXECUTABLE} ARGS",
+                                '${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" ${Protobuf_PROTOC_EXECUTABLE}')
 
     def build(self):
         self._patch_sources()
