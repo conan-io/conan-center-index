@@ -51,7 +51,7 @@ Using your own ArtifactoryCE instance is easy. You can [deploy it on-premise](ht
 [use only this remote](https://docs.conan.io/1/reference/commands/misc/remote.html?highlight=add%20new) and new recipe
 revisions are only pushed to your Artifactory after they have been validated in your project.
 
-The minimum solution, if still choosing to rely on ConanCenter directly, involves small changes to your client configuration by pinning the revision of every reference you consume in your project using using:
+The minimum solution, if still choosing to rely on ConanCenter directly, involves small changes to your client configuration by pinning the revision of every reference you consume in your project using the following:
 
 - [recipe revision (RREV)](https://docs.conan.io/1/versioning/revisions.html) can be added to each requirement.
   Instead of `fmt/9.1.0` you can add a pound (or hashtag) to the end followed by the revision `fmt/9.1.0#c93359fba9fd21359d8db6f875d8a233`.
