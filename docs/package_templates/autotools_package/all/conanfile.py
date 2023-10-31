@@ -42,6 +42,10 @@ class PackageConan(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        return 11
+
+    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
@@ -74,7 +78,7 @@ class PackageConan(ConanFile):
     def validate(self):
         # validate the minimum cpp standard supported. Only for C++ projects
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
