@@ -163,14 +163,12 @@ class OpenEXRConan(ConanFile):
             "openexr_ilmimfconfig", "ilmbase_iex", "ilmbase_half",
             "ilmbase_imath", "ilmbase_ilmthread", "zlib::zlib",
         ]
-        self.cpp_info.components["openexr_ilmimf"].system_libs = ["m"]
 
         # IlmImfUtil
         self.cpp_info.components["openexr_ilmimfutil"].set_property("cmake_target_name", "OpenEXR::IlmImfUtil")
         self.cpp_info.components["openexr_ilmimfutil"].includedirs.append(include_dir)
         self.cpp_info.components["openexr_ilmimfutil"].libs = [f"IlmImfUtil{lib_suffix}"]
         self.cpp_info.components["openexr_ilmimfutil"].requires = ["openexr_ilmimfconfig", "openexr_ilmimf"]
-        self.cpp_info.components["openexr_ilmimfutil"].system_libs = ["m"]
 
         # IlmBaseConfig
         self.cpp_info.components["ilmbase_ilmbaseconfig"].set_property("cmake_target_name", "IlmBase::IlmBaseConfig")
@@ -181,28 +179,24 @@ class OpenEXRConan(ConanFile):
         self.cpp_info.components["ilmbase_half"].includedirs.append(include_dir)
         self.cpp_info.components["ilmbase_half"].libs = [f"Half{lib_suffix}"]
         self.cpp_info.components["ilmbase_half"].requires = ["ilmbase_ilmbaseconfig"]
-        self.cpp_info.components["ilmbase_half"].system_libs = ["m"]
 
         # Iex
         self.cpp_info.components["ilmbase_iex"].set_property("cmake_target_name", "IlmBase::Iex")
         self.cpp_info.components["ilmbase_iex"].includedirs.append(include_dir)
         self.cpp_info.components["ilmbase_iex"].libs = [f"Iex{lib_suffix}"]
         self.cpp_info.components["ilmbase_iex"].requires = ["ilmbase_ilmbaseconfig"]
-        self.cpp_info.components["ilmbase_iex"].system_libs = ["m"]
 
         # IexMath
         self.cpp_info.components["ilmbase_iexmath"].set_property("cmake_target_name", "IlmBase::IexMath")
         self.cpp_info.components["ilmbase_iexmath"].includedirs.append(include_dir)
         self.cpp_info.components["ilmbase_iexmath"].libs = [f"IexMath{lib_suffix}"]
         self.cpp_info.components["ilmbase_iexmath"].requires = ["ilmbase_ilmbaseconfig", "ilmbase_iex"]
-        self.cpp_info.components["ilmbase_iexmath"].system_libs = ["m"]
 
         # IMath
         self.cpp_info.components["ilmbase_imath"].set_property("cmake_target_name", "IlmBase::IMath")
         self.cpp_info.components["ilmbase_imath"].includedirs.append(include_dir)
         self.cpp_info.components["ilmbase_imath"].libs = [f"Imath{lib_suffix}"]
         self.cpp_info.components["ilmbase_imath"].requires = ["ilmbase_ilmbaseconfig", "ilmbase_half", "ilmbase_iexmath"]
-        self.cpp_info.components["ilmbase_imath"].system_libs = ["m"]
 
         # IlmThread
         self.cpp_info.components["ilmbase_ilmthread"].set_property("cmake_target_name", "IlmBase::IlmThread")
@@ -211,7 +205,6 @@ class OpenEXRConan(ConanFile):
         self.cpp_info.components["ilmbase_ilmthread"].requires = ["ilmbase_ilmbaseconfig", "ilmbase_iex"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ilmbase_ilmthread"].system_libs.append("pthread")
-        self.cpp_info.components["ilmbase_ilmthread"].system_libs = ["m"]
 
         # Convenient component to model official IlmBase.pc
         self.cpp_info.components["ilmbase_conan_pkgconfig"].set_property("pkg_config_name", "IlmBase")
