@@ -9,3 +9,8 @@ add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE assert::assert)
 # In case the target project need a specific C++ standard
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+
+option(CONAN_ASSERT_ASSERT_ASSERT "Controls old include vs new include" OFF)
+if(CONAN_ASSERT_ASSERT_ASSERT)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE CONAN_ASSERT_ASSERT_ASSERT)
+endif()

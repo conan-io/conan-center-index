@@ -4,15 +4,13 @@ from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches
 import os
 
-
 required_conan_version = ">=1.53.0"
 
-
-class LibAssertConan(ConanFile):
+class LibassertConan(ConanFile):
     name = "libassert"
     description = "The most over-engineered and overpowered C++ assertion library."
     license = "MIT"
@@ -53,6 +51,10 @@ class LibAssertConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        if Version(self.version) >= Version("1.2.1"):
+            self.requires("cpptrace/0.2.1")
+
     def validate(self):
         if self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration("apple-clang not supported")
@@ -73,11 +75,22 @@ class LibAssertConan(ConanFile):
         export_conandata_patches(self)
 
     def generate(self):
-        toolchain = CMakeToolchain(self)
-        if is_msvc(self):
-            toolchain.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-
-        toolchain.generate()
+        if Version(self.version) < Version("1.2.1"):
+            # pre-cpptrace
+            tc = CMakeToolchain(self)
+            if is_msvc(self):
+                tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+            tc.generate()
+        else:
+            tc = CMakeToolchain(self)
+            if is_msvc(self):
+                tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+            if not self.options.shared:
+                tc.variables["ASSERT_STATIC"] = True
+            tc.variables["ASSERT_USE_EXTERNAL_CPPTRACE"] = True
+            tc.generate()
+            tc = CMakeDeps(self)
+            tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -92,6 +105,26 @@ class LibAssertConan(ConanFile):
              src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        
+        if Version(self.version) >= Version("1.2.1"):
+            # For some reason after conan installs the include is #include <assert/assert/assert.hpp> which is not what
+            # should happen
+            copy(
+                self,
+                "assert.hpp",
+                src=os.path.join(self.package_folder, "include/assert/assert/"),
+                dst=os.path.join(self.package_folder, "include/assert/"),
+                keep_path=False
+            )
+            # Take care of copying the dll
+            if self.settings.os == "Windows" and self.options.shared:
+                copy(
+                    self,
+                    "*.dll",
+                    src=self.build_folder,
+                    dst=os.path.join(self.package_folder, "bin"),
+                    keep_path=False
+                )
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
@@ -112,7 +145,9 @@ class LibAssertConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "assert"
         self.cpp_info.names["cmake_find_package_multi"] = "assert"
 
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("dl")
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("dbghelp")
+        if Version(self.version) < Version("1.2.1"):
+            # pre-cpptrace
+            if self.settings.os == "Linux":
+                self.cpp_info.system_libs.append("dl")
+            if self.settings.os == "Windows":
+                self.cpp_info.system_libs.append("dbghelp")
