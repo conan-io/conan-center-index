@@ -37,8 +37,8 @@ class LibdisplayInfoConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -58,8 +58,7 @@ class LibdisplayInfoConan(ConanFile):
             tc.project_options["build.pkg_config_path"] = self.generators_folder
         tc.generate()
         pkg_config_deps = PkgConfigDeps(self)
-        if cross_building(self):
-            pkg_config_deps.build_context_activated = ["hwdata"]
+        pkg_config_deps.build_context_activated = ["hwdata"]
         pkg_config_deps.generate()
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
