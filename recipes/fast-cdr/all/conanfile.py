@@ -109,6 +109,9 @@ class FastCDRConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("FASTCDR_DYN_LINK")
 
+        if self.settings.os in ["Linux"]:
+            self.cpp_info.system_libs.append("m")
+
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "fastcdr"
         self.cpp_info.names["cmake_find_package_multi"] = "fastcdr"
