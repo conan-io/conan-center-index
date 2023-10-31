@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc_static_runtime
 
 required_conan_version = ">=1.53.0"
@@ -54,12 +54,12 @@ class OpenImageIOConan(ConanFile):
         "with_hdf5": True,
         "with_opencolorio": True,
         "with_opencv": False,
-        "with_tbb": False,
+        "with_tbb": True,
         "with_dicom": False,  # Heavy dependency, disabled by default
-        "with_ffmpeg": True,
+        "with_ffmpeg": False,  # FIXME: fix linking
         "with_giflib": True,
         "with_libheif": True,
-        "with_raw": False,  # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
+        "with_raw": True,  # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
         "with_openjpeg": True,
         "with_openvdb": False,  # FIXME: broken on M1
         "with_ptex": True,
@@ -67,6 +67,7 @@ class OpenImageIOConan(ConanFile):
     }
 
     def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
         export_conandata_patches(self)
 
     def config_options(self):
@@ -85,7 +86,8 @@ class OpenImageIOConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("boost/1.83.0")
         self.requires("libtiff/4.6.0")
-        self.requires("openexr/3.1.7")
+        # INFO: https://github.com/AcademySoftwareFoundation/OpenImageIO/blob/v2.5.4.0/src/libOpenImageIO/CMakeLists.txt#L126
+        self.requires("openexr/3.1.7", transitive_headers=True, transitive_libs=True)
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
@@ -93,7 +95,8 @@ class OpenImageIOConan(ConanFile):
         self.requires("pugixml/1.14")
         self.requires("libsquish/1.15")
         self.requires("tsl-robin-map/1.2.1")
-        self.requires("fmt/10.1.1")
+        self.requires("fmt/10.1.1", transitive_headers=True, transitive_libs=True)
+        self.requires("bzip2/1.0.8")
 
         # Optional libraries
         if self.options.with_libpng:
@@ -105,13 +108,14 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_opencolorio:
             self.requires("opencolorio/2.2.1")
         if self.options.with_opencv:
-            self.requires("opencv/4.5.5")
+            # INFO: https://github.com/AcademySoftwareFoundation/OpenImageIO/blob/v2.5.4.0/src/libOpenImageIO/CMakeLists.txt#L131
+            self.requires("opencv/4.5.5", transitive_headers=True)
         if self.options.with_tbb:
             self.requires("onetbb/2021.10.0")
         if self.options.with_dicom:
             self.requires("dcmtk/3.6.7")
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/6.0")
+            self.requires("ffmpeg/4.4")
         if self.options.with_giflib:
             self.requires("giflib/5.2.1")
         if self.options.with_libheif:
@@ -126,7 +130,6 @@ class OpenImageIOConan(ConanFile):
             self.requires("ptex/2.4.0")
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.2")
-        # TODO: Field3D dependency
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
 
@@ -157,6 +160,8 @@ class OpenImageIOConan(ConanFile):
         tc.variables["EMBEDPLUGINS"] = True
         tc.variables["USE_PYTHON"] = False
         tc.variables["USE_EXTERNAL_PUGIXML"] = True
+        tc.variables["BUILD_MISSING_FMT"] = False
+        tc.variables["BUILD_MISSING_ROBINMAP"] = False
 
         # OIIO CMake files are patched to check USE_* flags to require or not use dependencies
         tc.variables["USE_JPEGTURBO"] = self.options.with_libjpeg == "libjpeg-turbo"
@@ -184,15 +189,36 @@ class OpenImageIOConan(ConanFile):
         tc.generate()
 
         tc = CMakeDeps(self)
+        tc.set_property("ptex", "cmake_find_mode", "config")
+        tc.set_property("ptex", "cmake_file_name", "Ptex")
+        tc.set_property("ptex", "cmake_target_name", "Ptex::Ptex_dynamic")
+        tc.set_property("tsl-robin-map", "cmake_file_name", "Robinmap")
+        tc.set_property("libheif", "cmake_file_name", "Libheif")
+        tc.set_property("libraw", "cmake_file_name", "LibRaw")
         tc.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        # Disable custom Find*.cmake modules
+        rmdir(self, os.path.join(self.source_folder, "src", "cmake", "modules"))
+        # Fix root CMakeLists.txt not being the actual root
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "CMAKE_SOURCE_DIR", "CMAKE_CURRENT_SOURCE_DIR")
+        replace_in_file(self, os.path.join(self.source_folder, "src", "cmake", "externalpackages.cmake"),
+                        "CMAKE_SOURCE_DIR", "CMAKE_CURRENT_SOURCE_DIR")
+        # fmt has been unvendored
+        replace_in_file(self, os.path.join(self.source_folder, "src", "include", "CMakeLists.txt"),
+                        "if (INTERNALIZE_FMT", "return()\nif (INTERNALIZE_FMT")
+        replace_in_file(self, os.path.join(self.source_folder, "src", "include", "OpenImageIO", "detail", "fmt.h"),
+                        "OpenImageIO/detail/fmt/", "fmt/")
+        # TODO: remove
+        replace_in_file(self, os.path.join(self.source_folder, "src", "cmake", "externalpackages.cmake"),
+                        " QUIET", " QUIET REQUIRED CONFIG")
 
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
 
     def package(self):
@@ -240,6 +266,7 @@ class OpenImageIOConan(ConanFile):
             "tsl-robin-map::tsl-robin-map",
             "libsquish::libsquish",
             "fmt::fmt",
+            "bzip2::bzip2",
         ]
         if self.options.with_libjpeg == "libjpeg":
             self.cpp_info.components["main"].requires.append("libjpeg::libjpeg")
