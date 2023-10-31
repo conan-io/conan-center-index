@@ -1,0 +1,23 @@
+commit d0398003e820300f902263e67ec06afbdef90c7c
+Author: Martin Delille <martin@delille.org>
+Date:   Fri Mar 31 18:32:51 2023 +0200
+
+    Add headers to CMakeLists.txt
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f92ec26..93f030d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -11,8 +11,12 @@ set(CMAKE_AUTORCC ON)
+ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ 
+ add_library(QtAwesome
++  QtAwesome/QtAwesome.h
+   QtAwesome/QtAwesome.cpp
++  QtAwesome/QtAwesomeAnim.h
+   QtAwesome/QtAwesomeAnim.cpp
++  QtAwesome/QtAwesomeEnumGenerated.h
++  QtAwesome/QtAwesomeStringGenerated.h
+   QtAwesome/QtAwesomeFree.qrc
+ )
+ 
