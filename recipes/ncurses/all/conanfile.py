@@ -104,6 +104,8 @@ class NCursesConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/1.9.3")
+        if is_msvc(self):
+            self.tool_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
