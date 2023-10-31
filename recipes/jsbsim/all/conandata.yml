@@ -12,4 +12,4 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/1.1.13-0003-fix-use-t-before-auto-deduction.patch"
       patch_description: "Fix 'use of t before deduction of auto' in FGTable.cpp"
-      patch_type: "conan"
+      patch_type: "portability"
