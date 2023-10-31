@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
@@ -108,11 +108,15 @@ class SubunitConan(ConanFile):
         ]
         tc.generate()
 
-        # AutotoolsDeps causes ./configure to fail on Windows
-        # Possibly related to https://github.com/conan-io/conan/issues/12784
-        env = Environment()
-        env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in cppunit_info.includedirs] + [f"-D{d}" for d in cppunit_info.defines])
-        env.vars(self).save_script("conanautotoolsdeps_workaround")
+        if is_msvc(self) or self._is_clang_cl:
+            # AutotoolsDeps causes ./configure to fail on Windows
+            # Possibly related to https://github.com/conan-io/conan/issues/12784
+            env = Environment()
+            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in cppunit_info.includedirs] + [f"-D{d}" for d in cppunit_info.defines])
+            env.vars(self).save_script("conanautotoolsdeps_workaround")
+        else:
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
         if is_msvc(self):
             env = Environment()
