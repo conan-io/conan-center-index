@@ -14,11 +14,10 @@ class UserverConan(ConanFile):
     url = 'https://github.com/conan-io/conan-center-index'
     homepage = 'https://userver.tech/'
     license = 'Apache-2.0'
-    package_type = "library"
+    package_type = "static-library"
 
     settings = 'os', 'arch', 'compiler', 'build_type'
     options = {
-        'shared': [True, False],
         'fPIC': [True, False],
         'lto': [True, False],
         'with_jemalloc': [True, False],
@@ -36,7 +35,6 @@ class UserverConan(ConanFile):
     }
 
     default_options = {
-        'shared': False,
         'fPIC': True,
         'lto': True,
         'with_jemalloc': False,
@@ -61,10 +59,6 @@ class UserverConan(ConanFile):
     @property
     def _build_subfolder(self):
         return os.path.join(self.build_folder, 'userver')
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -101,7 +95,6 @@ class UserverConan(ConanFile):
                 transitive_headers=True,
                 transitive_libs=True,
             )
-            self.requires('protobuf/3.21.12') # override
         if self.options.with_postgresql:
             self.requires('libpq/14.5')
         if self.options.with_mongodb:
@@ -142,12 +135,12 @@ class UserverConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("userver can't be built on Windows")
-        if self.options.shared:
-            raise ConanInvalidConfiguration("userver can't be built as shared")
-        if self.dependencies['mongo-c-driver'].options.with_sasl != 'cyrus':
-            raise ConanInvalidConfiguration(
-                f'{self.ref} requires mongo-c-driver with_sasl cyrus',
-            )
+
+        if self.options.with_mongodb:
+            if self.dependencies['mongo-c-driver'].options.with_sasl != 'cyrus':
+                raise ConanInvalidConfiguration(
+                    f'{self.ref} requires mongo-c-driver with_sasl cyrus',
+                )
 
     def generate(self):
         apply_conandata_patches(self)
