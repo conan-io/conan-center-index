@@ -44,10 +44,6 @@ class PackageConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-        self.options["expat"].shared = self.options.shared
-        self.options["minizip"].shared = self.options.shared
-        self.options["zlib"].shared = self.options.shared
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -111,12 +107,6 @@ class PackageConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-
-        if not self.conf.get("tools.build:skip_test", default=True):
-            env = Environment()
-            env.define("CTEST_OUTPUT_ON_FAILURE", "ON")
-            with env.vars(self).apply():
-                cmake.test()
 
     def package(self):
         copy(self, pattern="LICENSE.md", dst=path.join(self.package_folder, "licenses"),
