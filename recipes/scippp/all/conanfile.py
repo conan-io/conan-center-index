@@ -33,12 +33,21 @@ class ScipPlusPlus(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        return {
-            "gcc": "8",
-            "clang": "7",
-            "apple-clang": "11",
-            "msvc": "192"
-        }
+        # see https://github.com/scipopt/SCIPpp/commit/faa80e753f96094004467c1daa98a7ab4d86f279
+        if Version(self.version) >= "1.1.0":
+            return {
+                "gcc": "8",
+                "clang": "7",
+                "apple-clang": "11",
+                "msvc": "192"
+            }
+        else:
+            return {
+                "gcc": "7",
+                "clang": "7",
+                "apple-clang": "10",
+                "msvc": "192"
+            }
 
     def validate(self):
         if self.settings.compiler.cppstd:
