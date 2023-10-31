@@ -37,10 +37,10 @@ class UserverConan(ConanFile):
     default_options = {
         'fPIC': True,
         'lto': True,
-        'with_jemalloc': False,
-        'with_mongodb': True,
+        'with_jemalloc': False, # Disabled dy default due to jemalloc recipe does not support Conan v2
+        'with_mongodb': False, # Disabled by default due to https://github.com/conan-io/conan-center-index/pull/20712#issuecomment-1781385911
         'with_postgresql': True,
-        'with_postgresql_extra': False,
+        'with_postgresql_extra': False, # Disabled dy default due to https://github.com/conan-io/conan-center-index/pull/16074
         'with_redis': True,
         'with_grpc': True,
         'with_clickhouse': True,
