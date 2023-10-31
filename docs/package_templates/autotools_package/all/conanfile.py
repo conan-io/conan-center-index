@@ -44,7 +44,7 @@ class PackageConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return 14
 
     # in case the project requires C++14/17/20/... the minimum compiler version should be listed
     @property
