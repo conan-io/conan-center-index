@@ -85,12 +85,12 @@ class PackageConan(ConanFile):
 
     # Copy all files to the package folder
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(
             self,
-            pattern="*.h",
-            dst=os.path.join(self.package_folder, "include"),
-            src=os.path.join(self.source_folder, "include"),
+            "*.h",
+            os.path.join(self.source_folder, "include"),
+            os.path.join(self.package_folder, "include"),
         )
 
     def package_info(self):
