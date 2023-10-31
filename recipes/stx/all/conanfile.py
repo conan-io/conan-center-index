@@ -104,11 +104,6 @@ class STXConan(ConanFile):
                 "which apple-clang < 12 with libc++ lacks"
             )
 
-        if is_msvc(self) and self.options.shared and Version(self.version) <= '1.0.1':
-            raise ConanInvalidConfiguration(
-                f"shared library build does not work on windows with {self.ref}"
-            )
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
