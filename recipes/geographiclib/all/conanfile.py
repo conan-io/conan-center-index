@@ -110,6 +110,9 @@ class GeographiclibConan(ConanFile):
             replace_in_file(self, cmakelists, "add_subdirectory (tools)", "")
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "CMakeLists.txt"),
                                   "${TOOLS}", "")
+        # Disable -Werror
+        replace_in_file(self, cmakelists, "-Werror", "")
+        replace_in_file(self, cmakelists, "/WX", "")
 
     def build(self):
         self._patch_sources()
