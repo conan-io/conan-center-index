@@ -78,9 +78,9 @@ class PangoConan(ConanFile):
         if self.options.with_xft and self.options.with_fontconfig and self.options.with_freetype:
             self.requires("xorg/system")  # for xorg::xrender
         if self.options.with_cairo:
-            self.requires("cairo/1.18.0", transitive_headers=True)
-        self.requires("harfbuzz/8.2.2", transitive_headers=True)
-        self.requires("glib/2.78.1", transitive_headers=True)
+            self.requires("cairo/1.18.0", transitive_headers=True, transitive_libs=True)
+        self.requires("harfbuzz/8.2.2", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.1", transitive_headers=True, transitive_libs=True)
         self.requires("fribidi/1.0.13")
 
     def validate(self):
