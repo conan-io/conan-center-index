@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 
@@ -23,7 +23,8 @@ class MPCGeneratorConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os == "Windows":
-            self.tool_requires("strawberryperl/5.32.1.1", visible=True)
+            kwargs = dict(visible=True) if conan_version.major >= 2 else {}
+            self.tool_requires("strawberryperl/5.32.1.1", **kwargs)
 
     def package_id(self):
         del self.info.settings.compiler
