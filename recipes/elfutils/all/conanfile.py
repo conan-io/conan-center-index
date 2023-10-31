@@ -6,7 +6,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import unix_path
+from conan.tools.microsoft import unix_path, is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.54.0"
@@ -96,11 +96,11 @@ class ElfutilsConan(ConanFile):
             raise ConanInvalidConfiguration("elfutils does not support macOS.")
 
         if Version(self.version) >= "0.186":
-            if self.settings.compiler in ["apple-clang", "msvc"]:
+            if self.settings.compiler == "apple-clang" or is_msvc(self):
                 raise ConanInvalidConfiguration(f"Your compiler {self.settings.compiler} is not supported. "
                                                 "elfutils only supports GCC and Clang.")
         else:
-            if self.settings.compiler in ["clang", "apple-clang", "msvc"]:
+            if self.settings.compiler in ("clang", "apple-clang") or is_msvc(self):
                 raise ConanInvalidConfiguration(f"Your compiler {self.settings.compiler} is not supported. "
                                                 "elfutils only supports GCC.")
         if self.settings.compiler != "gcc":
