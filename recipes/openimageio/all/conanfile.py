@@ -1,4 +1,5 @@
 import os
+import re
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -54,12 +55,12 @@ class OpenImageIOConan(ConanFile):
         "with_hdf5": True,
         "with_opencolorio": True,
         "with_opencv": False,
-        "with_tbb": True,
+        "with_tbb": False,
         "with_dicom": False,  # Heavy dependency, disabled by default
-        "with_ffmpeg": False,  # FIXME: fix linking
+        "with_ffmpeg": True,
         "with_giflib": True,
         "with_libheif": True,
-        "with_raw": True,  # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
+        "with_raw": False,  # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
         "with_openjpeg": True,
         "with_openvdb": False,  # FIXME: broken on M1
         "with_ptex": True,
@@ -114,7 +115,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_dicom:
             self.requires("dcmtk/3.6.7")
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/4.4")
+            self.requires("ffmpeg/6.0")
         if self.options.with_giflib:
             self.requires("giflib/5.2.1")
         if self.options.with_libheif:
@@ -162,8 +163,9 @@ class OpenImageIOConan(ConanFile):
         tc.variables["BUILD_MISSING_FMT"] = False
         tc.variables["BUILD_MISSING_ROBINMAP"] = False
 
-        # OIIO CMake files are patched to check USE_* flags to require or not use dependencies
-        tc.variables["USE_JPEGTURBO"] = self.options.with_libjpeg == "libjpeg-turbo"
+        # Configure optional dependencies
+        # https://github.com/AcademySoftwareFoundation/OpenImageIO/blob/v2.5.4.0/src/cmake/check_is_enabled.cmake
+        tc.variables["USE_LIBJPEG-TURBO"] = self.options.with_libjpeg == "libjpeg-turbo"
         tc.variables["USE_JPEG"] = True  # Needed for jpeg.imageio plugin, libjpeg/libjpeg-turbo selection still works
         tc.variables["USE_HDF5"] = self.options.with_hdf5
         tc.variables["USE_OPENCOLORIO"] = self.options.with_opencolorio
@@ -171,7 +173,6 @@ class OpenImageIOConan(ConanFile):
         tc.variables["USE_TBB"] = self.options.with_tbb
         tc.variables["USE_DCMTK"] = self.options.with_dicom
         tc.variables["USE_FFMPEG"] = self.options.with_ffmpeg
-        tc.variables["USE_FIELD3D"] = False
         tc.variables["USE_GIF"] = self.options.with_giflib
         tc.variables["USE_LIBHEIF"] = self.options.with_libheif
         tc.variables["USE_LIBRAW"] = self.options.with_raw
@@ -188,12 +189,11 @@ class OpenImageIOConan(ConanFile):
         tc.generate()
 
         tc = CMakeDeps(self)
-        tc.set_property("ptex", "cmake_find_mode", "config")
+        tc.set_property("libheif", "cmake_file_name", "Libheif")
+        tc.set_property("libraw", "cmake_file_name", "LibRaw")
         tc.set_property("ptex", "cmake_file_name", "Ptex")
         tc.set_property("ptex", "cmake_target_name", "Ptex::Ptex_dynamic")
         tc.set_property("tsl-robin-map", "cmake_file_name", "Robinmap")
-        tc.set_property("libheif", "cmake_file_name", "Libheif")
-        tc.set_property("libraw", "cmake_file_name", "LibRaw")
         tc.generate()
 
     def _patch_sources(self):
@@ -209,9 +209,14 @@ class OpenImageIOConan(ConanFile):
                         "if (INTERNALIZE_FMT", "return()\nif (INTERNALIZE_FMT")
         replace_in_file(self, os.path.join(self.source_folder, "src", "include", "OpenImageIO", "detail", "fmt.h"),
                         "OpenImageIO/detail/fmt/", "fmt/")
-        # TODO: remove
-        replace_in_file(self, os.path.join(self.source_folder, "src", "cmake", "externalpackages.cmake"),
-                        " QUIET", " QUIET REQUIRED CONFIG")
+        # Rely on USE_* variables for optional plugins instead of *_FOUND, which gives false positives for transitive dependencies
+        for path in self.source_path.rglob("CMakeLists.txt"):
+            if path.parent.name.endswith(".imageio"):
+                content = path.read_text()
+                content, count = re.subn(r"^if ?\((\S+)_FOUND\)", lambda m: f"if (USE_{m[1].upper()})", content, flags=re.M)
+                if count:
+                    self.output.info(f"Patched {path} to use USE_* instead of *_FOUND")
+                    path.write_text(content)
 
     def build(self):
         self._patch_sources()
