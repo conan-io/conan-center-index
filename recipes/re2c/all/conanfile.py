@@ -56,10 +56,9 @@ class Re2CConan(ConanFile):
         tc.configure_args.append("--disable-benchmarks")
         env = tc.environment()
         if is_msvc(self):
-            tc.extra_cxxflags.append("-FS")
             tc.extra_cxxflags.append("-EHsc")
-            env.define("CC", "cccl")
-            env.define("CXX", "cccl")
+            env.define("CC", "cccl -FS")
+            env.define("CXX", "cccl -FS")
             env.define("LD", "cccl")
             env.define("CXXLD", "cccl")
         tc.generate(env)
