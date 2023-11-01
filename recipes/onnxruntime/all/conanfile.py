@@ -95,7 +95,7 @@ class OnnxRuntimeConan(ConanFile):
         self.requires("nlohmann_json/3.11.3")
         self.requires("eigen/3.4.0")
         self.requires("ms-gsl/4.0.0")
-        self.requires("cpuinfo/cci.20230118")
+        self.requires("cpuinfo/cci.20220618") # Newer versions are not compatible
         if self.settings.os != "Windows":
             self.requires("nsync/1.26.0")
         else:
@@ -116,7 +116,7 @@ class OnnxRuntimeConan(ConanFile):
         if self.version >= Version("1.15.0") and self.options.shared and sys.version_info[:2] < (3, 8):
             # https://github.com/microsoft/onnxruntime/blob/638146b79ea52598ece514704d3f592c10fab2f1/cmake/CMakeLists.txt#LL500C12-L500C12
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires python 3.8+ to be built as shared."
+                f"{self.ref} requires Python 3.8+ to be built as shared."
             )
 
     def build_requirements(self):
@@ -215,7 +215,7 @@ class OnnxRuntimeConan(ConanFile):
 
         deps = CMakeDeps(self)
         deps.set_property("boost::headers", "cmake_target_name", "Boost::mp11")
-        deps.set_property("cpuinfo", "cmake_target_name", "cpuinfo")
+        deps.set_property("cpuinfo::cpuinfo", "cmake_target_name", "cpuinfo")
         deps.set_property("date", "cmake_target_name", "date_interface")
         deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
         deps.set_property("safeint", "cmake_target_name", "safeint_interface")

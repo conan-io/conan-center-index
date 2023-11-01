@@ -2,7 +2,7 @@
 
 if(NOT onnxruntime_DISABLE_ABSEIL)
   find_package(absl REQUIRED CONFIG)
-  list(APPEND onnxruntime_EXTERNAL_LIBRARIES absl::absl)
+  list(APPEND onnxruntime_EXTERNAL_LIBRARIES abseil::abseil)
   include_directories(${absl_INCLUDE_DIRS})
 endif()
 
@@ -27,7 +27,7 @@ list(APPEND onnxruntime_EXTERNAL_LIBRARIES Boost::mp11)
 find_package(nlohmann_json REQUIRED CONFIG)
 list(APPEND onnxruntime_EXTERNAL_LIBRARIES nlohmann_json::nlohmann_json)
 
-find_package(cpuinfo CONFIG)
+find_package(cpuinfo REQUIRED CONFIG)
 set(CPUINFO_SUPPORTED ${cpuinfo_FOUND})
 
 if (NOT WIN32)
@@ -41,7 +41,7 @@ list(APPEND onnxruntime_EXTERNAL_LIBRARIES Microsoft.GSL::GSL)
 include_directories(${Microsoft.GSL_INCLUDE_DIRS})
 
 find_package(safeint REQUIRED CONFIG)
-list(APPEND onnxruntime_EXTERNAL_LIBRARIES safeint::safeint)
+include_directories(${safeint_INCLUDE_DIRS})
 
 find_package(ONNX REQUIRED CONFIG)
 list(APPEND onnxruntime_EXTERNAL_LIBRARIES onnx onnx_proto)
