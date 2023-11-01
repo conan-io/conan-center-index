@@ -1,0 +1,138 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 19e203a..aa6ccdd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -167,26 +167,26 @@ else()
+ endif()
+ 
+ if(PREFER_EXTERNAL_LZ4)
+-    find_package(LZ4)
++    find_package(lz4)
+ else()
+     message(STATUS "Using LZ4 internal sources.")
+ endif()
+ 
+ if(NOT DEACTIVATE_ZLIB)
+     if(PREFER_EXTERNAL_ZLIB)
+-        find_package(ZLIB_NG)
+-        if(ZLIB_NG_FOUND)
++        find_package(zlib-ng)
++        if(zlib-ng_FOUND)
+             set(HAVE_ZLIB_NG TRUE)
+         else()
+             find_package(ZLIB)
+         endif()
+ 
+-        if(NOT (ZLIB_NG_FOUND OR ZLIB_FOUND))
++        if(NOT (zlib-ng_FOUND OR ZLIB_FOUND))
+             message(STATUS "No ZLIB found.  Using ZLIB-NG internal sources.")
+         endif()
+     endif()
+ 
+-    if(NOT (ZLIB_NG_FOUND OR ZLIB_FOUND))
++    if(0)
+         message(STATUS "Using ZLIB-NG internal sources for ZLIB support.")
+         set(HAVE_ZLIB_NG TRUE)
+         add_definitions(-DZLIB_COMPAT)
+@@ -207,8 +207,8 @@ endif()
+ 
+ if(NOT DEACTIVATE_ZSTD)
+     if(PREFER_EXTERNAL_ZSTD)
+-        find_package(ZSTD)
+-        if(NOT ZSTD_FOUND)
++        find_package(zstd)
++        if(NOT zstd_FOUND)
+           message(STATUS "No ZSTD library found.  Using internal sources.")
+         endif()
+     else()
+diff --git a/blosc/CMakeLists.txt b/blosc/CMakeLists.txt
+index 8c7cf90..f7efbf5 100644
+--- a/blosc/CMakeLists.txt
++++ b/blosc/CMakeLists.txt
+@@ -79,15 +79,15 @@ set(INTERNAL_LIBS ${PROJECT_SOURCE_DIR}/internal-complibs)
+ # link dependencies
+ #   "link" dependent targets via target_link_libraries (preferred) and
+ #   manually add includes / libs for others
+-if(LZ4_FOUND)
++if(lz4_FOUND)
+     if(BUILD_SHARED)
+-        target_include_directories(blosc2_shared PUBLIC ${LZ4_INCLUDE_DIR})
++        target_include_directories(blosc2_shared PUBLIC ${lz4_INCLUDE_DIR})
+     endif()
+     if(BUILD_STATIC)
+-        target_include_directories(blosc2_static PUBLIC ${LZ4_INCLUDE_DIR})
++        target_include_directories(blosc2_static PUBLIC ${lz4_INCLUDE_DIR})
+     endif()
+     if(BUILD_TESTS)
+-        target_include_directories(blosc_testing PUBLIC ${LZ4_INCLUDE_DIR})
++        target_include_directories(blosc_testing PUBLIC ${lz4_INCLUDE_DIR})
+     endif()
+ else()
+     set(LZ4_LOCAL_DIR ${INTERNAL_LIBS}/lz4-1.9.4)
+@@ -138,18 +138,18 @@ if(NOT DEACTIVATE_ZLIB)
+ endif()
+ 
+ if(NOT DEACTIVATE_ZSTD)
+-    if(ZSTD_FOUND)
++    if(zstd_FOUND)
+         if(BUILD_SHARED)
+-            target_include_directories(blosc2_shared PUBLIC ${ZSTD_INCLUDE_DIR})
+-            target_link_libraries(blosc2_shared PUBLIC ${ZSTD_LIBRARY})
++            target_include_directories(blosc2_shared PUBLIC ${zstd_INCLUDE_DIR})
++            target_link_libraries(blosc2_shared PUBLIC ${zstd_LIBRARY})
+         endif()
+         if(BUILD_STATIC)
+             target_include_directories(blosc2_static PUBLIC ${ZSTD_INCLUDE_DIR})
+-            target_link_libraries(blosc2_static PUBLIC ${ZSTD_LIBRARY})
++            target_link_libraries(blosc2_static PUBLIC ${zstd_LIBRARY})
+         endif()
+         if(BUILD_TESTS)
+-            target_include_directories(blosc_testing PUBLIC ${ZSTD_INCLUDE_DIR})
+-            target_link_libraries(blosc_testing PUBLIC ${ZSTD_LIBRARY})
++            target_include_directories(blosc_testing PUBLIC ${zstd_INCLUDE_DIR})
++            target_link_libraries(blosc_testing PUBLIC ${zstd_LIBRARY})
+         endif()
+     else()
+         set(ZSTD_LOCAL_DIR ${INTERNAL_LIBS}/zstd-1.5.5)
+@@ -184,8 +184,8 @@ if(NOT WIN32)
+     set(LIBS ${LIBS} ${CMAKE_DL_LIBS})
+ endif()
+ 
+-if(LZ4_FOUND)
+-    set(LIBS ${LIBS} ${LZ4_LIBRARY})
++if(lz4_FOUND)
++    set(LIBS ${LIBS} ${lz4_LIBRARIES})
+ else()
+     file(GLOB LZ4_FILES ${LZ4_LOCAL_DIR}/*.c)
+     list(APPEND SOURCES ${LZ4_FILES})
+@@ -193,8 +193,8 @@ else()
+ endif()
+ 
+ if(NOT DEACTIVATE_ZLIB)
+-    if(ZLIB_NG_FOUND)
+-        set(LIBS ${LIBS} ${ZLIB_NG_LIBRARY})
++    if(zlib-ng_FOUND)
++        set(LIBS ${LIBS} ${zlib-ng_LIBRARIES})
+     elseif(ZLIB_FOUND)
+         set(LIBS ${LIBS} ${ZLIB_LIBRARIES})
+     else()
+@@ -206,8 +206,8 @@ if(NOT DEACTIVATE_ZLIB)
+ endif()
+ 
+ if(NOT DEACTIVATE_ZSTD)
+-    if(ZSTD_FOUND)
+-        set(LIBS ${LIBS} ${ZSTD_LIBRARY})
++    if(zstd_FOUND)
++        set(LIBS ${LIBS} ${zstd_LIBRARIES})
+     else()
+         # Enable assembly code only when not using MSVC *and* x86 is there
+         if((NOT MSVC) AND COMPILER_SUPPORT_SSE2)   # if SSE2 is here, this is an x86 platform
+@@ -262,7 +262,7 @@ list(APPEND SOURCES
+     blosc/directories.c
+     blosc/blosc2-stdio.c
+     blosc/b2nd.c
+-    blosc/b2nd_utils.c    
++    blosc/b2nd_utils.c
+ )
+ if(NOT CMAKE_SYSTEM_PROCESSOR STREQUAL arm64)
+     if(COMPILER_SUPPORT_SSE2)
