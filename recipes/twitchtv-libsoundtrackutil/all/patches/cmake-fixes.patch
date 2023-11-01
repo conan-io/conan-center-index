@@ -26,7 +26,8 @@ diff --git a/libsoundtrackutil/CMakeLists.txt b/libsoundtrackutil/CMakeLists.txt
 --- libsoundtrackutil/CMakeLists.txt
 +++ libsoundtrackutil/CMakeLists.txt
 @@ -1,8 +1,10 @@
- add_library(libsoundtrackutil STATIC)
+-add_library(libsoundtrackutil STATIC)
++add_library(libsoundtrackutil)
  
 +find_package(twitch-native-ipc REQUIRED CONFIG)
 +find_package(Microsoft.GSL REQUIRED CONFIG)
@@ -38,3 +39,14 @@ diff --git a/libsoundtrackutil/CMakeLists.txt b/libsoundtrackutil/CMakeLists.txt
    )
  
  if(MSVC)
+@@ -27,7 +29,9 @@
+ target_compile_features(libsoundtrackutil PRIVATE cxx_std_17)
+ 
+ install(TARGETS libsoundtrackutil
+-  LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++  RUNTIME DESTINATION bin
+ )
+ 
+ install(DIRECTORY include

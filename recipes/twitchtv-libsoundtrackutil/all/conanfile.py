@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -76,6 +76,7 @@ class TwitchTvLibSoundtrackUtilConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         if is_msvc(self):
             tc.variables["MSVC_DYNAMIC_RUNTIME"] = not is_msvc_static_runtime(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
