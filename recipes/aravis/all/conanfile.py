@@ -75,7 +75,6 @@ class AravisConan(ConanFile):
             except ValueError as e:
                 raise ConanInvalidConfiguration("gv_n_buffers_val must be an integer.") from e
 
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
