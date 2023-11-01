@@ -61,6 +61,9 @@ class QuickcpplibCodeConan(ConanFile):
         self.info.clear()
 
     def validate(self):
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("quickcpplib does not support macOS.")
+
         if self.settings.compiler.get_safe("cppstd"):
             # To simplify library integration to CCI
             # we require C++17 to be dependency free.
