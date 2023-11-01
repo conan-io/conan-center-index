@@ -28,13 +28,13 @@ class TestPackageConan(ConanFile):
         buildenv = VirtualBuildEnv(self)
         buildenv.generate()
 
-        env = Environment()
-        for var in ["DYLD_LIBRARY_PATH", "LD_LIBRARY_PATH"]:
-            env.append_path(var, os.path.join(self.build_folder, "build"))
-        env.vars(self, scope="run").save_script("conanrun_macos_runtimepath")
-
         runenv = VirtualRunEnv(self)
         runenv.generate()
+
+        env = Environment()
+        for var in ["DYLD_LIBRARY_PATH", "LD_LIBRARY_PATH"]:
+            env.append_path(var, self.build_folder)
+        env.vars(self, scope="run").save_script("conanrun_macos_dyld_path")
 
     def build(self):
         if not can_run(self):
