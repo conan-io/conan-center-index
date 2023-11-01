@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
@@ -53,7 +52,7 @@ class LibdisplayInfoConan(ConanFile):
             self.requires("hwdata/0.374")
 
     def validate(self):
-        if is_apple_os(self):
+        if not self.settings.os in ["FreeBSD", "Linux"]
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}")
 
     def build_requirements(self):
