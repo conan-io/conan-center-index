@@ -1,12 +1,10 @@
 sources:
+  "5.0.0-beta2":
+    url: "https://github.com/premake/premake-core/releases/download/v5.0.0-beta2/premake-5.0.0-beta2-src.zip"
+    sha256: "4c1100f5170ae1c3bd1b4fd9458b3b02ae841aefbfc41514887b80996436dee2"
   "5.0.0-alpha15":
     url: "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha15/premake-5.0.0-alpha15-src.zip"
     sha256: "880f56e7cb9f4945d1cb879f059189462c1b7bf62ef43ac7d25842dfb177dd53"
-  "5.0.0-alpha14":
-    url: "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-src.zip"
-    sha256: "7c9fa4488156625c819dd03f2b48bfd4712fbfabdc2b5768e8c7f52dd7d16608"
 patches:
   "5.0.0-alpha15":
     - patch_file: "patches/0001-5.0.0-alpha15-mingw.patch"
-  "5.0.0-alpha14":
-    - patch_file: "patches/0001-5.0.0-alpha14-mingw.patch"

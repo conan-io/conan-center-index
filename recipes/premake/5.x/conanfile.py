@@ -88,13 +88,6 @@ class PremakeConan(ConanFile):
         return tuple(res)
 
     @property
-    def _gmake_directory_name_prefix(self):
-        if self._version_info(self.version) <= self._version_info("5.0.0-alpha14"):
-            return "gmake"
-        else:
-            return "gmake2"
-
-    @property
     def _gmake_platform(self):
         return {
             "FreeBSD": "bsd",
@@ -105,8 +98,7 @@ class PremakeConan(ConanFile):
 
     @property
     def _gmake_build_dir(self):
-        return os.path.join(self.source_folder, "build",
-                            f"{self._gmake_directory_name_prefix}.{self._gmake_platform}")
+        return os.path.join(self.source_folder, "build", f"gmake2.{self._gmake_platform}")
 
     @property
     def _gmake_config(self):
@@ -137,10 +129,11 @@ class PremakeConan(ConanFile):
                 replace_in_file(self, fn, "-flto", "", strict=False)
         if check_min_vs(self, 193, raise_invalid=False):
             # Create VS 2022 project directory based on VS 2019 one
-            shutil.move(os.path.join(self.source_folder, "build", "vs2019"),
-                        os.path.join(self.source_folder, "build", "vs2022"))
-            for vcxproj in glob.glob(os.path.join(self.source_folder, "build", "vs2022", "*.vcxproj")):
-                replace_in_file(self, vcxproj, "v142", "v143")
+            if "alpha" in str(self.version):
+                shutil.move(os.path.join(self.source_folder, "build", "vs2019"),
+                            os.path.join(self.source_folder, "build", "vs2022"))
+                for vcxproj in glob.glob(os.path.join(self.source_folder, "build", "vs2022", "*.vcxproj")):
+                    replace_in_file(self, vcxproj, "v142", "v143")
 
     def build(self):
         self._patch_sources()
