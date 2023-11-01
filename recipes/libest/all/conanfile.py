@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps
 from conan.tools.layout import basic_layout
 
@@ -50,6 +50,9 @@ class LibEstConan(ConanFile):
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
 
+    def build_requirements(self):
+        self.tool_requires("libtool/2.4.7")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -61,10 +64,17 @@ class LibEstConan(ConanFile):
         tc = PkgConfigDeps(self)
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # Remove duplicate AM_INIT_AUTOMAKE
+        replace_in_file(self, os.path.join(self.source_folder, "configure.ac"),
+                        "AM_INIT_AUTOMAKE\n", "")
+
+    def build(self):
+        self._patch_sources()
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
+            autotools.autoreconf()
             autotools.configure()
             autotools.make()
 
