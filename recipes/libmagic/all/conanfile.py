@@ -16,7 +16,7 @@ class LibmagicConan(ConanFile):
     license = "DocumentRef-COPYING:LicenseRef-BSD-2-Clause-File"  # Modified BSD 2-Clause that states no restrictions on US export
     homepage = "https://www.darwinsys.com/file/"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = "magic", "file format"
+    topics = "file", "format", "magic"
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
