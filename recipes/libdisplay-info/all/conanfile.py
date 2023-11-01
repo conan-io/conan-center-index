@@ -1,5 +1,6 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
@@ -51,6 +52,10 @@ class LibdisplayInfoConan(ConanFile):
         if not self._has_build_profile:
             self.requires("hwdata/0.374")
 
+    def validate(self):
+        if is_apple_os(self):
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}")
+
     def build_requirements(self):
         if self._has_build_profile:
             self.tool_requires("hwdata/0.374")
@@ -90,8 +95,6 @@ class LibdisplayInfoConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-
-        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["display-info"]
