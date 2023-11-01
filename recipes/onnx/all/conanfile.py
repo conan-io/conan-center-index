@@ -40,9 +40,21 @@ class OnnxConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if Version(self.version) >= "1.15.0":
+            return 17
         if Version(self.version) >= "1.13.0" and is_msvc(self):
             return 17
         return 11
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "15",
+            "msvc": "191",
+            "gcc": "7",
+            "clang": "5",
+            "apple-clang": "10",
+        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -64,6 +76,12 @@ class OnnxConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+        if self._min_cppstd > 11:
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration("onnx shared is broken with Visual Studio")
 
