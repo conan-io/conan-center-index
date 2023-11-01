@@ -1,18 +1,20 @@
-#include <dns_sd.h>
-#include <stdio.h>
+#include <stdlib.h>
 
-int main()
-{
+#include "dns_sd.h"
+#include "avahi-core/log.h"
+
+
+int main(void) {
     DNSServiceRef sdRef;
     DNSServiceErrorType err = DNSServiceBrowse(&sdRef, 0, 0, "_example._tcp", NULL, NULL, NULL);
     if (err == kDNSServiceErr_NoError)
     {
-        printf("DNSServiceBrowse succeeded\n");
+        avahi_log_error("DNSServiceBrowse succeeded\n");
         DNSServiceRefDeallocate(sdRef);
     }
     else
     {
-        printf("DNSServiceBrowse failed: %d\n", err);
+        avahi_log_info("DNSServiceBrowse failed: %d\n", err);
     }
-    return 0;
+    return EXIT_SUCCESS;
 }

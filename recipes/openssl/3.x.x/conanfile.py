@@ -30,6 +30,7 @@ class OpenSSLConan(ConanFile):
         "capieng_dialog": [True, False],
         "enable_capieng": [True, False],
         "no_aria": [True, False],
+        "no_autoload_config": [True, False],
         "no_asm": [True, False],
         "no_async": [True, False],
         "no_blake2": [True, False],
@@ -481,7 +482,8 @@ class OpenSSLConan(ConanFile):
     def _run_make(self, targets=None, parallel=True, install=False):
         command = [self._make_program]
         if install:
-            command.append(f"DESTDIR={self.package_folder}")
+            package_folder = self.package_folder.replace("\\", "/")  # needed for MinGW build
+            command.append(f"DESTDIR={package_folder}")
         if targets:
             command.extend(targets)
         if not self._use_nmake:
@@ -517,7 +519,8 @@ class OpenSSLConan(ConanFile):
 
     def build(self):
         self._make()
-        self.run(f"{self._perl} {self.source_folder}/configdata.pm --dump")
+        source_folder = self.source_folder.replace("\\", "/")  # Necessary for MinGW build
+        self.run(f"{self._perl} {source_folder}/configdata.pm --dump")
 
     @property
     def _make_program(self):
