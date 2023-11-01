@@ -111,7 +111,7 @@ class GfCompleteConan(ConanFile):
         if not is_msvc(self) and "x86" in self.settings.arch:
             tc.extra_cxxflags.append("-mstackrealign")
         yes_no = lambda v: "yes" if v else "no"
-        if "arm" in self.settings.arch:
+        if "arm" in str(self.settings.arch):
             if self.options.neon != "auto":
                 tc.configure_args.append("--enable-neon={}".format(yes_no(self.options.neon)))
         if self.settings.arch in ["x86", "x86_64"]:
@@ -119,9 +119,12 @@ class GfCompleteConan(ConanFile):
                 tc.configure_args.append("--enable-sse={}".format(yes_no(self.options.sse)))
             if self.options.avx != "auto":
                 tc.configure_args.append("--enable-avx={}".format(yes_no(self.options.avx)))
-        if is_msvc(self) and self.options.shared:
-            tc.extra_ldflags.append("-no-undefined")
-            tc.extra_ldflags.append("-Wl,--export-all-symbols")
+        if is_msvc(self):
+            if self.options.shared:
+                tc.extra_ldflags.append("-no-undefined")
+                tc.extra_ldflags.append("-Wl,--export-all-symbols")
+            tc.extra_cflags.append("-FS")
+            tc.extra_cxxflags.append("-FS")
         tc.generate()
 
         if is_msvc(self):
@@ -129,8 +132,8 @@ class GfCompleteConan(ConanFile):
             automake_conf = self.dependencies.build["automake"].conf_info
             compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
             ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
-            env.define("CC", f"{compile_wrapper} cl -nologo /FS")
-            env.define("CXX", f"{compile_wrapper} cl -nologo /FS")
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
             env.define("AR", f'{ar_wrapper} "lib -nologo"')
             env.define("NM", "dumpbin -symbols")
