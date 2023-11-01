@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
@@ -39,8 +39,10 @@ class TarConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("This recipe does not support Windows builds of tar")  # FIXME: fails on MSVC and mingw-w64
-        if not self.dependencies.build["bzip2"].options.build_executable:
-            raise ConanInvalidConfiguration("bzip2:build_executable must be enabled")
+        if conan_version.major >= 2:
+            # Check does not work with Conan v2
+            if not self.dependencies.build["bzip2"].options.build_executable:
+                raise ConanInvalidConfiguration("bzip2:build_executable must be enabled")
 
     def build_requirements(self):
         self.tool_requires("bzip2/1.0.8", visible=True)
