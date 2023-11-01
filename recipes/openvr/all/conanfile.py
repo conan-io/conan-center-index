@@ -48,7 +48,7 @@ class OpenvrConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("jsoncpp/1.9.5", transitive_libs=True)
+        self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -75,15 +75,13 @@ class OpenvrConan(ConanFile):
         apply_conandata_patches(self)
         # Honor fPIC=False
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "-fPIC", "")
-        # Unvendor jsoncpp (we rely on our CMake wrapper for jsoncpp injection)
+        # Unvendor jsoncpp
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "jsoncpp.cpp", "")
         rmdir(self, os.path.join(self.source_folder, "src", "json"))
-        # Add jsoncpp dependency
+        # Add jsoncpp dependency from Conan
         save(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
              "find_package(jsoncpp REQUIRED CONFIG)\n"
-             "link_libraries(jsoncpp::jsoncpp)\n"
-             # FIXME: adding jsoncpp include dir separately should not be necessary
-             "include_directories(${jsoncpp_INCLUDE_DIRS})",
+             "target_link_libraries(${LIBNAME} JsonCpp::JsonCpp)",
              append=True)
 
     def build(self):
