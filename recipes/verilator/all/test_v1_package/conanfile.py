@@ -1,6 +1,8 @@
 from conan.tools.apple import is_apple_os
 from conans import ConanFile, CMake, tools
+from conans.tools import Version
 import os
+
 
 
 class TestVerilatorConan(ConanFile):
@@ -10,7 +12,11 @@ class TestVerilatorConan(ConanFile):
     @property
     def _with_systemc_example(self):
         # systemc is not available on Macos
-        return not is_apple_os(self)
+        if is_apple_os(self):
+            return False
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
+            return False
+        return True
 
     def requirements(self):
         if self._with_systemc_example:

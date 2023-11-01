@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
+from conan.tools.scm import Version
 
 
 class TestPackageConan(ConanFile):
@@ -26,7 +27,11 @@ class TestPackageConan(ConanFile):
     @property
     def _with_systemc_example(self):
         # systemc is not available on Macos
-        return not is_apple_os(self)
+        if is_apple_os(self):
+            return False
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
+            return False
+        return True
 
     def generate(self):
         tc = CMakeToolchain(self)
