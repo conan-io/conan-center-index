@@ -138,21 +138,24 @@ class HexlConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Hexl")
-        self.cpp_info.set_property("cmake_target_name", "Hexl::hexl")
+        self.cpp_info.set_property("cmake_target_name", "Hexl::Hexl")
         self.cpp_info.set_property("pkg_config_name", "hexl")
 
         if not is_msvc(self) and self.settings.build_type == "Debug":
-            self.cpp_info.libs = ["hexl_debug"]
+            self.cpp_info.components["Hexl"].libs = ["hexl_debug"]
         else:
-            self.cpp_info.libs = ["hexl"]
+            self.cpp_info.components["Hexl"].libs = ["hexl"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread", "m"]
+            self.cpp_info.components["Hexl"].system_libs = ["pthread", "m"]
 
-        self.cpp_info.requires.append("cpu_features::libcpu_features")
+        self.cpp_info.components["Hexl"].set_property("cmake_target_name", "Hexl::hexl")
+        self.cpp_info.components["Hexl"].requires.append("cpu_features::libcpu_features")
         if self.settings.build_type == "Debug":
-            self.cpp_info.requires.append("easyloggingpp::easyloggingpp")
+            self.cpp_info.components["Hexl"].requires.append("easyloggingpp::easyloggingpp")
 
         # TODO: Remove in Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "Hexl"
         self.cpp_info.names["cmake_find_package_multi"] = "Hexl"
+        self.cpp_info.components["Hexl"].names["cmake_find_package"] = "hexl"
+        self.cpp_info.components["Hexl"].names["cmake_find_package_multi"] = "hexl"
