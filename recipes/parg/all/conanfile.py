@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -11,7 +12,7 @@ required_conan_version = ">=1.53.0"
 class PargConan(ConanFile):
     name = "parg"
     description = "Parser for argv that works similarly to getopt"
-    license = "CC0-1.0"
+    license = ("CC0-1.0", "MIT-0")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jibsen/parg"
     topics = ("getopt", "c")
@@ -33,6 +34,10 @@ class PargConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.0.3":
+            self.licenses = "CC0-1.0"
+        else:
+            self.licenses = "MIT-0"
 
     def configure(self):
         if self.options.shared:
@@ -50,8 +55,6 @@ class PargConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -59,7 +62,10 @@ class PargConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        if Version(self.version) < "1.0.3":
+            copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        else:
+            copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
         fix_apple_shared_install_name(self)
