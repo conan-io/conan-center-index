@@ -61,7 +61,7 @@ class HexlConan(ConanFile):
         self.requires("cpu_features/0.9.0")
 
         if self.settings.build_type == "Debug":
-            self.requires("easyloggingpp/9.97.0")
+            self.requires("easyloggingpp/9.97.1")
 
     def validate(self):
         if self.settings.compiler.cppstd:
