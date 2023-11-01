@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, replace_in_file, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rm, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -114,9 +114,6 @@ class OpenVDBConan(ConanFile):
             "apple-clang": "10.0",
             "intel-cc": "17",
         }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -245,7 +242,6 @@ class OpenVDBConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Remove FindXXX files from OpenVDB. Let Conan do the job
         rm(self, "Find*.cmake", os.path.join(self.source_folder, "cmake"), recursive=True)
         cmakelists = os.path.join(self.source_folder, "openvdb", "openvdb", "CMakeLists.txt")

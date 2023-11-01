@@ -1,7 +1,7 @@
 sources:
-  "10.0.1":
-    url: "https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v10.0.1.tar.gz"
-    sha256: "887a3391fbd96b20c77914f4fb3ab4b33d26e5fc479aa036d395def5523c622f"
+  "10.1.0":
+    url: "https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v10.1.0.tar.gz"
+    sha256: "2746236e29659a0d35ab90d832f7c7987dd2537587a1a2f9237d9c98afcd5817"
   "9.1.0":
     url: "https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v9.1.0.tar.gz"
     sha256: "914ee417b4607c75c95b53bc73a0599de4157c7d6a32e849e80f24e40fb64181"
@@ -11,9 +11,3 @@ sources:
   "8.0.1":
     url: "https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v8.0.1.tar.gz"
     sha256: "a6845da7c604d2c72e4141c898930ac8a2375521e535f696c2cd92bebbe43c4f"
-patches:
-  "10.0.1":
-    - patch_file: "patches/10.0-001-fix-missing-boost-dep.patch"
-      patch_description: "Fix a missing Boost dependency when use_delayed_loading is False"
-      patch_source: "https://github.com/AcademySoftwareFoundation/openvdb/commit/b1fdff99e80a5a71de0f31f23c27a94b868b0054"
-      patch_type: "backport"
