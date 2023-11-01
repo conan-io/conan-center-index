@@ -7,7 +7,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, rename, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
@@ -42,9 +42,6 @@ class CairommConan(ConanFile):
     @property
     def _min_cppstd(self):
         return 17 if self._abi_version == "1.16" else 11
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -100,10 +97,11 @@ class CairommConan(ConanFile):
             "default_library": "shared" if self.options.shared else "static",
             "libdir": "lib",
         }
+        if not self.options.shared:
+            tc.preprocessor_definitions["CAIROMM_STATIC_LIB"] = "1"
         tc.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         if is_msvc(self):
             # when using cpp_std=c++11 the /permissive- flag is added which
             # attempts enforcing standard conformant c++ code
@@ -143,17 +141,12 @@ class CairommConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "lib", dir_to_remove))
 
     def package_info(self):
-        if self._abi_version == "1.16":
-            self.cpp_info.components["cairomm-1.16"].set_property("pkg_config_name", "cairomm-1.16")
-            self.cpp_info.components["cairomm-1.16"].includedirs = [os.path.join("include", "cairomm-1.16")]
-            self.cpp_info.components["cairomm-1.16"].libs = ["cairomm-1.16"]
-            self.cpp_info.components["cairomm-1.16"].requires = ["libsigcpp::sigc++", "cairo::cairo_", "freetype::freetype"]
-            if is_apple_os(self):
-                self.cpp_info.components["cairomm-1.16"].frameworks = ["CoreFoundation"]
-        else:
-            self.cpp_info.components["cairomm-1.0"].set_property("pkg_config_name", "cairomm-1.0")
-            self.cpp_info.components["cairomm-1.0"].includedirs = [os.path.join("include", "cairomm-1.0")]
-            self.cpp_info.components["cairomm-1.0"].libs = ["cairomm-1.0"]
-            self.cpp_info.components["cairomm-1.0"].requires = ["libsigcpp::sigc++-2.0", "cairo::cairo_", "freetype::freetype"]
-            if is_apple_os(self):
-                self.cpp_info.components["cairomm-1.0"].frameworks = ["CoreFoundation"]
+        name = f"cairomm-{self._abi_version}"
+        self.cpp_info.components[name].set_property("pkg_config_name", name)
+        self.cpp_info.components[name].includedirs = [os.path.join("include", name)]
+        self.cpp_info.components[name].libs = [name]
+        self.cpp_info.components[name].requires = ["libsigcpp::libsigcpp", "cairo::cairo", "freetype::freetype"]
+        if not self.options.shared:
+            self.cpp_info.components[name].defines = ["CAIROMM_STATIC_LIB"]
+        if is_apple_os(self):
+            self.cpp_info.components[name].frameworks = ["CoreFoundation"]
