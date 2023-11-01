@@ -124,8 +124,6 @@ class OpenVDBConan(ConanFile):
         if Version(self.version) < "10.0.0":
             del self.options.use_explicit_instantiation
             del self.options.use_delayed_loading
-        elif Version(self.version) < "8.1.0":
-            del self.options.use_imath_half
 
     def configure(self):
         if self.options.shared:
@@ -145,7 +143,7 @@ class OpenVDBConan(ConanFile):
             self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
         else:
             self.requires("onetbb/2020.3.3", transitive_headers=True, transitive_libs=True)
-        if Version(self.version) < "8.1.0" or self.options.use_imath_half:
+        if self.options.use_imath_half:
             if Version(self.version) >= "9.0.0":
                 self.requires("imath/3.1.9", transitive_headers=True, transitive_libs=True)
             else:
@@ -309,7 +307,7 @@ class OpenVDBConan(ConanFile):
             main_component.requires.append("c-blosc::c-blosc")
         if self.options.with_log4cplus:
             main_component.requires.append("log4cplus::log4cplus")
-        if Version(self.version) < "8.1.0" or self.options.use_imath_half:
+        if self.options.use_imath_half:
             if Version(self.version) >= "9.0.0":
                 main_component.requires.append("imath::imath")
             else:
