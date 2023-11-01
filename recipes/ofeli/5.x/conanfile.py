@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir, replace_in_file, rename
 
 required_conan_version = ">=1.53.0"
@@ -43,10 +44,15 @@ class OfeliConan(ConanFile):
         if self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration("Ofeli only supports libstdc++'s new ABI")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         tc = CMakeToolchain(self)
         tc.generate()
 
