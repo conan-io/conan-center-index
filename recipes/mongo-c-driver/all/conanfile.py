@@ -143,6 +143,8 @@ class MongoCDriverConan(ConanFile):
         tc.cache_variables["ENABLE_CLIENT_SIDE_ENCRYPTION"] = "OFF"  # libmongocrypt recipe not yet in CCI
         tc.cache_variables["ENABLE_MONGODB_AWS_AUTH"] = "AUTO"
         tc.cache_variables["ENABLE_PIC"] = "ON" if self.options.get_safe("fPIC", True) else "OFF"
+        if Version(self.version) >= "1.25.0":
+            tc.cache_variables["BUILD_VERSION"] = str(self.version)
         # Avoid to install vc runtime stuff
         tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = "TRUE"
         if self.options.with_ssl == "openssl":
@@ -172,9 +174,12 @@ class MongoCDriverConan(ConanFile):
              "new": "if(ENABLE_SNAPPY MATCHES \"ON\")\n  find_package(Snappy REQUIRED)"},
             {"old": "SNAPPY_LIBRARIES", "new": "Snappy_LIBRARIES"},
             {"old": "SNAPPY_INCLUDE_DIRS", "new": "Snappy_INCLUDE_DIRS"},
-            # Fix LibreSSL
-            {"old": "set (SSL_LIBRARIES -ltls -lcrypto)", "new": ""},
         ]
+        if Version(self.version) < "1.25.0":
+            to_replace_old_new.append(
+                # Fix LibreSSL
+                {"old": "set (SSL_LIBRARIES -ltls -lcrypto)", "new": ""}
+            )
         for old_new in to_replace_old_new:
             replace_in_file(self, os.path.join(self.source_folder, "src", "libmongoc", "CMakeLists.txt"),
                                   old_new["old"], old_new["new"])

@@ -1,0 +1,16 @@
+diff --git a/build/cmake/MongoC-Warnings.cmake b/build/cmake/MongoC-Warnings.cmake
+index 0f5c339..96f4fac 100644
+--- a/build/cmake/MongoC-Warnings.cmake
++++ b/build/cmake/MongoC-Warnings.cmake
+@@ -67,9 +67,9 @@ mongoc_add_warning_options (
+      # Missing return types/statements
+      gnu-like:-Werror=return-type msvc:/we4716
+      # Incompatible pointer types
+-     gnu-like:lang-c:not-gcc-lt5:-Werror=incompatible-pointer-types msvc:/we4113
++#     gnu-like:lang-c:not-gcc-lt5:-Werror=incompatible-pointer-types msvc:/we4113
+      # Integral/pointer conversions
+-     gnu-like:lang-c:not-gcc-lt5:-Werror=int-conversion msvc:/we4047
++#     gnu-like:lang-c:not-gcc-lt5:-Werror=int-conversion msvc:/we4047
+      # Discarding qualifiers
+      gnu:lang-c:not-gcc-lt5:-Werror=discarded-qualifiers
+      clang:lang-c:-Werror=ignored-qualifiers
