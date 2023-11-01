@@ -16,7 +16,7 @@ requirements:
     PROTOBUF:   []
     SQLITE3:    ["sqlite3/3.41.1"]
     TIFF:       ["libtiff/4.4.0"]
-    XML:        ["libxml2/2.10.3"]
+    XML:        ["libxml2/2.11.4"]
     XSLT:       ["libxslt/1.1.34"]
     UV:         ["libuv/1.44.2"]
     Z:          ["zlib/1.2.13"]
