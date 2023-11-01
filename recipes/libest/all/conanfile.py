@@ -54,9 +54,6 @@ class LibEstConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        # TODO:
-        # - Static only build: https://github.com/cisco/libest/blob/70824ddc09bee661329b9416082d88566efefb32/intro.txt#L140
-        # - Release build: https://github.com/cisco/libest/blob/70824ddc09bee661329b9416082d88566efefb32/intro.txt#L253
         tc = AutotoolsToolchain(self)
         tc.generate()
         tc = AutotoolsDeps(self)
@@ -77,7 +74,11 @@ class LibEstConan(ConanFile):
              dst=os.path.join(self.package_folder, "licenses"))
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
-            autotools.install()
+            if self.settings.build_type in ["Release", "MinSizeRel"]:
+                # https://github.com/cisco/libest/blob/r3.2.0/intro.txt#L244-L254
+                autotools.install(target="install-strip")
+            else:
+                autotools.install()
         os.unlink(os.path.join(self.package_folder, "lib", "libest.la"))
 
     def package_info(self):
