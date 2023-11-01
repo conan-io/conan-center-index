@@ -52,7 +52,7 @@ class LibdisplayInfoConan(ConanFile):
             self.requires("hwdata/0.374")
 
     def validate(self):
-        if not self.settings.os in ["FreeBSD", "Linux"]
+        if not self.settings.os in ["FreeBSD", "Linux"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}")
 
     def build_requirements(self):
