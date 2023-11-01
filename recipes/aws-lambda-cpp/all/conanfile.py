@@ -81,3 +81,5 @@ class AwsLambdaRuntimeConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "aws-lambda-runtime")
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-lambda-runtime")
+
+        self.cpp_info.system_libs.append("m")
