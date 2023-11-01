@@ -9,7 +9,7 @@ from conan.tools.scm import Version
 import os
 import glob
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
 
 
 class NSSConan(ConanFile):
@@ -48,8 +48,8 @@ class NSSConan(ConanFile):
 
     def requirements(self):
         self.requires("nspr/4.35", transitive_headers=True, transitive_libs=True)
-        self.requires("sqlite3/3.42.0", run=not cross_building(self))
-        self.requires("zlib/1.2.13")
+        self.requires("sqlite3/3.43.2", run=not cross_building(self))
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if not self.options.shared:
@@ -74,7 +74,7 @@ class NSSConan(ConanFile):
         if self.settings.os == "Windows":
             self.tool_requires("mozilla-build/3.3")
         if cross_building(self):
-            self.tool_requires("sqlite3/3.42.0")
+            self.tool_requires("sqlite3/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
