@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir, move_folder_contents
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 
@@ -88,9 +88,18 @@ class OpenldapConan(ConanFile):
             autotools.install()
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        for folder in ["var", "share", "etc", "lib/pkgconfig", "res"]:
-            rmdir(self, os.path.join(self.package_folder, folder))
+        if os.path.exists(os.path.join(self.source_folder, "libexec")):
+            move_folder_contents(self, os.path.join(self.source_folder, "libexec"),
+                                 os.path.join(self.package_folder, "bin"))
         rm(self, "*.la", self.package_folder, recursive=True)
+        # Remove symlinks to libexec/slapd
+        for path in self.package_path.joinpath("bin").glob("slap*"):
+            if path.is_symlink():
+                path.unlink()
+        # Remove irrelevant directories
+        for folder in ["var", "share", "etc", os.path.join("lib", "pkgconfig"), "res", "home", "libexec"]:
+            if os.path.exists(os.path.join(self.package_folder, folder)):
+                rmdir(self, os.path.join(self.package_folder, folder))
 
     def package_info(self):
         self.cpp_info.libs = ["ldap", "lber"]
