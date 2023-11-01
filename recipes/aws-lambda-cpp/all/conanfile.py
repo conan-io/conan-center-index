@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.error import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -50,6 +51,9 @@ class AwsLambdaRuntimeConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration(f"{self.ref} supports Linux only.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
