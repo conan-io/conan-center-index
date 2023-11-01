@@ -59,7 +59,7 @@ class PDCursesConan(ConanFile):
 
     def requirements(self):
         if self.options.with_sdl:
-            self.requires("sdl/2.28.2", transitive_libs=True)
+            self.requires("sdl/2.28.3", transitive_libs=True)
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
 
@@ -76,7 +76,7 @@ class PDCursesConan(ConanFile):
     def build_requirements(self):
         if not is_msvc(self):
             if not self.conf.get("tools.gnu:make_program", check_type=str):
-                self.tool_requires("make/4.3")
+                self.tool_requires("make/4.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
