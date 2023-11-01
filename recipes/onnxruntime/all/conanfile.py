@@ -215,11 +215,7 @@ class OnnxRuntimeConan(ConanFile):
 
         deps = CMakeDeps(self)
         deps.set_property("boost::headers", "cmake_target_name", "Boost::mp11")
-        deps.set_property("cpuinfo::cpuinfo", "cmake_target_name", "cpuinfo")
-        deps.set_property("date", "cmake_target_name", "date_interface")
         deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
-        deps.set_property("safeint", "cmake_target_name", "safeint_interface")
-        deps.set_property("xnnpack", "cmake_target_name", "XNNPACK")
         deps.generate()
 
         vbe = VirtualBuildEnv(self)

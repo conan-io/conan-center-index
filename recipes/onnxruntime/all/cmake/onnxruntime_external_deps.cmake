@@ -19,7 +19,9 @@ set(ONNX_CUSTOM_PROTOC_EXECUTABLE protoc)
 set(PROTOC_EXECUTABLE protoc)
 
 find_package(date REQUIRED CONFIG)
-list(APPEND onnxruntime_EXTERNAL_LIBRARIES date_interface)
+list(APPEND onnxruntime_EXTERNAL_LIBRARIES date::date)
+include_directories(${date_INCLUDE_DIRS})
+add_library(date_interface INTERFACE)
 
 find_package(Boost REQUIRED CONFIG)
 list(APPEND onnxruntime_EXTERNAL_LIBRARIES Boost::mp11)
@@ -28,12 +30,17 @@ find_package(nlohmann_json REQUIRED CONFIG)
 list(APPEND onnxruntime_EXTERNAL_LIBRARIES nlohmann_json::nlohmann_json)
 
 find_package(cpuinfo REQUIRED CONFIG)
+list(APPEND onnxruntime_EXTERNAL_LIBRARIES cpuinfo::cpuinfo cpuinfo::clog)
 set(CPUINFO_SUPPORTED ${cpuinfo_FOUND})
+# Add a dummy targets for onnxruntime CMakelists.txt to depend on
+add_library(clog INTERFACE)
+add_library(cpuinfo INTERFACE)
 
 if (NOT WIN32)
   find_package(nsync REQUIRED CONFIG)
   list(APPEND onnxruntime_EXTERNAL_LIBRARIES nsync::nsync_cpp)
   include_directories(${nsync_INCLUDE_DIRS})
+  add_library(nsync_cpp INTERFACE)
 endif()
 
 find_package(Microsoft.GSL 4.0 REQUIRED CONFIG)
@@ -42,6 +49,7 @@ include_directories(${Microsoft.GSL_INCLUDE_DIRS})
 
 find_package(safeint REQUIRED CONFIG)
 include_directories(${safeint_INCLUDE_DIRS})
+add_library(safeint_interface INTERFACE)
 
 find_package(ONNX REQUIRED CONFIG)
 list(APPEND onnxruntime_EXTERNAL_LIBRARIES onnx onnx_proto)
@@ -63,6 +71,7 @@ if (onnxruntime_USE_XNNPACK)
   endif()
   find_package(xnnpack REQUIRED CONFIG)
   list(APPEND onnxruntime_EXTERNAL_LIBRARIES xnnpack::xnnpack)
+  add_library(XNNPACK INTERFACE)
 endif()
 
 if (onnxruntime_USE_MIMALLOC)
