@@ -168,13 +168,13 @@ class GdalConan(ConanFile):
     def requirements(self):
         self.requires("json-c/0.17")
         self.requires("libgeotiff/1.7.1")
-        self.requires("libtiff/4.5.1")
-        self.requires("proj/9.2.1")
+        self.requires("libtiff/4.6.0")
+        self.requires("proj/9.3.0")
         # Used in a public header here:
         # https://github.com/OSGeo/gdal/blob/v3.7.1/port/cpl_minizip_ioapi.h#L26
-        self.requires("zlib/[>=1.2.10 <2]", transitive_headers=True)
+        self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True, transitive_libs=True)
         if self.options.with_armadillo:
-            self.requires("armadillo/12.2.0")
+            self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
             self.requires("arrow/13.0.0")
         if self.options.with_basisu:
@@ -182,9 +182,9 @@ class GdalConan(ConanFile):
         if self.options.with_blosc:
             self.requires("c-blosc/1.21.5")
         if self.options.with_cfitsio:
-            self.requires("cfitsio/4.2.0")
+            self.requires("cfitsio/4.3.0")
         if self.options.with_cryptopp:
-            self.requires("cryptopp/8.7.0")
+            self.requires("cryptopp/8.8.0")
         if self.options.with_curl:
             self.requires("libcurl/[>=7.78 <9]")
         if self.options.with_dds:
@@ -197,7 +197,7 @@ class GdalConan(ConanFile):
         if self.options.with_freexl:
             self.requires("freexl/2.0.0")
         if self.options.with_geos:
-            self.requires("geos/3.11.2")
+            self.requires("geos/3.12.0")
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
         if self.options.with_gta:
@@ -217,17 +217,17 @@ class GdalConan(ConanFile):
         if self.options.with_kea:
             self.requires("kealib/1.4.14")
         if self.options.with_lerc:
-            self.requires("lerc/4.0.0")
+            self.requires("lerc/4.0.1")
         if self.options.with_libarchive:
-            self.requires("libarchive/3.6.2")
+            self.requires("libarchive/3.7.1")
         if self.options.with_libdeflate:
-            self.requires("libdeflate/1.18")
+            self.requires("libdeflate/1.19")
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
         if self.options.with_libkml:
             self.requires("libkml/1.3.0")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.2")
+            self.requires("xz_utils/5.4.4")
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_mongocxx:
@@ -266,13 +266,13 @@ class GdalConan(ConanFile):
         if self.options.with_spatialite:
             self.requires("libspatialite/5.0.1")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.42.0")
+            self.requires("sqlite3/3.43.2")
         if self.options.with_webp:
-            self.requires("libwebp/1.3.1")
+            self.requires("libwebp/1.3.2")
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.4")
         if self.options.with_xml2:
-            self.requires("libxml2/2.11.4")
+            self.requires("libxml2/2.11.5")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         # Use of external shapelib is not recommended and is currently broken.
