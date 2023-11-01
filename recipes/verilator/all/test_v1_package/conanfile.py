@@ -1,3 +1,4 @@
+from conan.tools.apple import is_apple_os
 from conans import ConanFile, CMake, tools
 import os
 
@@ -13,7 +14,7 @@ class TestVerilatorConan(ConanFile):
 
     def requirements(self):
         if self._with_systemc_example:
-            self.requires("systemc/2.3.3")
+            self.requires("systemc/2.3.4")
 
     def build(self):
         if not tools.cross_building(self.settings, skip_x64_x86=True):
