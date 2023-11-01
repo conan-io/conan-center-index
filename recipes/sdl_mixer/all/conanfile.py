@@ -74,7 +74,7 @@ class SDLMixerConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("sdl/2.28.3", transitive_headers=True)
+        self.requires("sdl/2.28.3", transitive_headers=True, transitive_libs=True)
         if self.options.flac:
             self.requires("flac/1.4.2")
         if self.options.mpg123:
