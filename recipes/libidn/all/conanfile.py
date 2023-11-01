@@ -91,6 +91,7 @@ class LibIdnConan(ConanFile):
         tc.configure_args += [
             "--enable-threads={}".format(yes_no(self.options.threads)),
             "--with-libiconv-prefix={}".format(unix_path(self, self.dependencies["libiconv"].package_folder)),
+            "--disable-csharp",
             "--disable-nls",
             "--disable-rpath",
         ]
@@ -141,5 +142,4 @@ class LibIdnConan(ConanFile):
 
         # TODO: to remove in conan v2
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
