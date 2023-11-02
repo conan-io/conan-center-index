@@ -1,4 +1,4 @@
-#include "lzo1f.h"
+#include <lzo/lzo1f.h>
 #include <stdio.h>
 #include <string.h>
 
