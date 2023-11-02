@@ -63,8 +63,6 @@ class CairommConan(ConanFile):
             self.requires("libsigcpp/3.0.7", transitive_headers=True, transitive_libs=True)
         else:
             self.requires("libsigcpp/2.10.8", transitive_headers=True, transitive_libs=True)
-        # FIXME: freetype is a missing cairo transitive dependency
-        self.requires("freetype/2.13.0", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self):
@@ -147,8 +145,7 @@ class CairommConan(ConanFile):
         self.cpp_info.components[name].set_property("pkg_config_name", name)
         self.cpp_info.components[name].includedirs = [os.path.join("include", name)]
         self.cpp_info.components[name].libs = [name]
-        self.cpp_info.components[name].requires = ["libsigcpp::libsigcpp", "cairo::cairo", "fontconfig::fontconfig",
-                                                   "freetype::freetype"]
+        self.cpp_info.components[name].requires = ["libsigcpp::libsigcpp", "cairo::cairo", "fontconfig::fontconfig"]
         if not self.options.shared:
             self.cpp_info.components[name].defines = ["CAIROMM_STATIC_LIB"]
         if is_apple_os(self):
