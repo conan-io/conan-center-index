@@ -1,0 +1,4 @@
+sources:
+  "14.0.0":
+    url: "https://github.com/SGL-UT/gnsstk/archive/refs/tags/v14.0.0.tar.gz"
+    sha256: "ca265361ff803ce6bed357e438dc34caa96911f75b21cb3a0eb41d1131edb809"
