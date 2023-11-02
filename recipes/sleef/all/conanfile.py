@@ -83,6 +83,7 @@ class SleefConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "dummy"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "sleef")
