@@ -1,4 +1,13 @@
 sources:
+  "1.3.268.0":
+    url: "https://github.com/zeux/volk/archive/refs/tags/vulkan-sdk-1.3.268.0.tar.gz"
+    sha256: "f1d30fac1cdc17a8fdc8c69f371663547f92db99cfd612962190bb1e2c8ce74d"
+  "1.3.261.1":
+    url: "https://github.com/zeux/volk/archive/refs/tags/sdk-1.3.261.1.tar.gz"
+    sha256: "052866c6cbff9efdf1e73e71c1d65070c36863730c95a4e93833500b4d894d69"
+  "1.3.250.0":
+    url: "https://github.com/zeux/volk/archive/refs/tags/sdk-1.3.250.0.tar.gz"
+    sha256: "5b6b6e8abcebe5a3e35ee7d1115d12dc976413da4f5dddf8b387e7769f92fc50"
   "1.3.243.0":
     url: "https://github.com/zeux/volk/archive/refs/tags/sdk-1.3.243.0.tar.gz"
     sha256: "5cd92d592227d2d4d9af1b66662d4f92f84bbf431572c43889689e15b6da1dca"
