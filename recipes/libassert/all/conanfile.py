@@ -75,22 +75,20 @@ class LibassertConan(ConanFile):
         export_conandata_patches(self)
 
     def generate(self):
-        if Version(self.version) < Version("1.2.1"):
-            # pre-cpptrace
-            tc = CMakeToolchain(self)
-            if is_msvc(self):
-                tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-            tc.generate()
-        else:
-            tc = CMakeToolchain(self)
-            if is_msvc(self):
-                tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+    def generate(self):
+        tc = CMakeToolchain(self)
+
+        if is_msvc(self):
+            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+
+        if Version(self.version) >= Version("1.2.1"):
             if not self.options.shared:
                 tc.variables["ASSERT_STATIC"] = True
             tc.variables["ASSERT_USE_EXTERNAL_CPPTRACE"] = True
-            tc.generate()
-            tc = CMakeDeps(self)
-            tc.generate()
+            deps = CMakeDeps(self)
+            deps.generate()
+
+        tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
