@@ -44,8 +44,8 @@ class CrossGUIDConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.settings.os == "Linux":
-            self.requires("libuuid/1.0.3", transitive_headers=True, transitive_libs=True)
+        if not (self.settings.os in ["Windows", "Android"] or is_apple_os(self)):
+            self.requires("util-linux-libuuid/2.39.2", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
