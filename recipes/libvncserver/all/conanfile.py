@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
