@@ -129,7 +129,8 @@ class LibassertConan(ConanFile):
         
         # For some reason after conan installs the include is #include <assert/assert/assert.hpp> which is not what
         # should happen
-        self.cpp_info.includedirs = [os.path.join("include", "assert")]
+        if Version(self.version) >= Version("1.2.1"):
+            self.cpp_info.includedirs = [os.path.join("include", "assert")]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "assert"
