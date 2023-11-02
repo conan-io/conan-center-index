@@ -75,6 +75,9 @@ class GNSSTkConan(ConanFile):
         # Disable warnings as errors
         replace_in_file(self, os.path.join(self.source_folder, "BuildSetup.cmake"),
                         "-Werror=return-type -Werror=deprecated", "")
+        # Do not force shared library
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        " SHARED ", " ")
 
     def build(self):
         self._patch_sources()
