@@ -108,11 +108,11 @@ class TileDBConan(ConanFile):
     def requirements(self):
         # TileDB has no transitive header deps
         self.requires("bzip2/1.0.8")
-        self.requires("libxml2/2.11.4")
+        self.requires("libxml2/2.11.5")
         self.requires("lz4/1.9.4")
         self.requires("spdlog/1.12.0")
-        self.requires("xz_utils/5.4.2")
-        self.requires("zlib/1.2.13")
+        self.requires("xz_utils/5.4.4")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zstd/1.5.5")
         if self.settings.os != "Windows":
             self.requires("openssl/[>=1.1 <4]")
@@ -121,7 +121,7 @@ class TileDBConan(ConanFile):
             # TODO: add azure-storage-blobs-cpp to CCI
             self.requires("azure-storage-blobs-cpp/12.6.1")
             if self.settings.os == "Windows":
-                self.requires("wil/1.0.230629.1")
+                self.requires("wil/1.0.230824.2")
         if self.options.gcs:
             self.requires("google-cloud-cpp/2.12.0")
         if self.options.serialization:
@@ -133,7 +133,7 @@ class TileDBConan(ConanFile):
         if self.options.tools:
             self.requires("clipp/1.2.3")
         if self.options.webp:
-            self.requires("libwebp/1.3.1")
+            self.requires("libwebp/1.3.2")
         if self.options.crc32:
             self.requires("crc32c/1.1.2")
 
@@ -149,7 +149,7 @@ class TileDBConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21 <4]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.5")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
