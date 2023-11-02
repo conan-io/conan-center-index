@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 8091f60..674e474 100644
+index 250ee84..1877f54 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -77,6 +77,8 @@ if (FASTGLTF_DOWNLOAD_SIMDJSON)
+@@ -79,6 +79,8 @@ if (FASTGLTF_DOWNLOAD_SIMDJSON)
          NAMESPACE fastgltf::
          DESTINATION lib/cmake/fastgltf
      )
