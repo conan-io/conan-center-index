@@ -100,12 +100,6 @@ class NCursesConan(ConanFile):
                 raise ConanInvalidConfiguration("terminfo cannot be built on Windows because it requires a term driver")
             if self.options.shared and self.options.with_ticlib:
                 raise ConanInvalidConfiguration("ticlib cannot be built separately as a shared library on Windows")
-        if check_min_vs(self, 193, raise_invalid=False):
-            # https://c3i.jfrog.io/c3i/misc-v2/summary.html?json=https://c3i.jfrog.io/c3i/misc-v2/logs/pr/20355/12-windows-msvc/ncurses/6.4/summary.json
-            raise ConanInvalidConfiguration(
-                "Building ncurses with MSVC 193 (Visual Studio 2022) and newer is not supported. "
-                "Consider using PDCurses instead."
-            )
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -181,8 +175,8 @@ class NCursesConan(ConanFile):
 
         if is_msvc(self):
             env = Environment()
-            env.define("CC", "cl")
-            env.define("CXX", "cl")
+            env.define("CC", "cl -nologo")
+            env.define("CXX", "cl -nologo")
             env.define("LD", "link")
             env.define("AR", "lib")
             env.define("NM", "dumpbin -symbols")
