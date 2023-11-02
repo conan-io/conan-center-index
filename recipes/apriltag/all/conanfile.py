@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, save
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -45,7 +45,7 @@ class ApriltagConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if is_msvc(self):
+        if is_msvc(self) and Version(self.version) < "3.3.0":
             self.requires("pthreads4w/3.0.0", transitive_headers=True)
 
     def validate(self):
@@ -76,6 +76,9 @@ class ApriltagConan(ConanFile):
                         "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}",
                         "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}\n"
                         "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}")
+        # Skip the building and installation of examples
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "# Examples", "return()")
 
     def build(self):
         self._patch_sources()

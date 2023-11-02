@@ -12,6 +12,8 @@ sources:
     url: "https://github.com/AprilRobotics/apriltag/archive/refs/tags/v3.1.4.tar.gz"
     sha256: "ad2888d432e9ddcad2f639f243479934a4cd677ed5d2f8dee3b3418617b64f5d"
 patches:
+  "3.2.0":
+    - patch_file: "patches/3.2.0-0001-fix-cmake.patch"
   "3.1.7":
     - patch_file: "patches/3.1.4-0001-fix-cmake.patch"
   "3.1.4":
