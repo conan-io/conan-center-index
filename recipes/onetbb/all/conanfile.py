@@ -77,10 +77,6 @@ class OneTBBConan(ConanFile):
         if self._tbbbind_build:
             self.requires("hwloc/2.9.3")
 
-    def build_requirements(self):
-        if not self._tbbbind_explicit_hwloc and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.5")
-
     def package_id(self):
         if Version(self.version) < "2021.5.0":
             self.info.options.tbbmalloc = True
@@ -93,6 +89,10 @@ class OneTBBConan(ConanFile):
 
         if self._tbbbind_explicit_hwloc and not self.dependencies["hwloc"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires hwloc:shared=True to be built.")
+
+    def build_requirements(self):
+        if not self._tbbbind_explicit_hwloc and not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
