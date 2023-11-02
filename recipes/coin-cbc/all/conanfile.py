@@ -51,6 +51,10 @@ class CoinCbcConan(ConanFile):
         self.requires("coin-cgl/0.60.6")
         if is_msvc(self) and self.options.parallel:
             self.requires("pthreads4w/3.0.0")
+        # FIXME: these should probably be marked as transitive in coin-utils
+        # https://c3i.jfrog.io/c3i/misc/logs/pr/18864/6-linux-gcc/coin-cbc/2.10.5/967138bd48a5d716a011a2a51f6affbb66e8ab9c-test.txt
+        self.requires("bzip2/1.0.8", transitive_headers=True, transitive_libs=True)
+        self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         # FIXME: This issue likely comes from very old autotools versions used to produce configure.
@@ -156,7 +160,9 @@ class CoinCbcConan(ConanFile):
         self.cpp_info.components["libcbc"].libs = ["CbcSolver", "Cbc"]
         self.cpp_info.components["libcbc"].includedirs.append(os.path.join("include", "coin"))
         self.cpp_info.components["libcbc"].requires = [
-            "coin-clp::osi-clp", "coin-utils::coin-utils", "coin-osi::coin-osi", "coin-cgl::coin-cgl"
+            "coin-clp::osi-clp", "coin-utils::coin-utils", "coin-osi::coin-osi", "coin-cgl::coin-cgl",
+            # FIXME: move to coin-utils
+            "zlib::zlib", "bzip2::bzip2"
         ]
         self.cpp_info.components["libcbc"].set_property("pkg_config_name", "cbc")
         if self.settings.os in ["Linux", "FreeBSD"] and self.options.parallel:
