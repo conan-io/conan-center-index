@@ -46,12 +46,12 @@ class OpenblasConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "0.3.21":
+            self.options.build_lapack = True
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if Version(self.version) >= "0.3.21":
-            self.options.build_lapack = True
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
