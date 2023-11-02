@@ -171,7 +171,7 @@ endif()"""
             self.cpp_info.components["openblas_component"].system_libs.append("m")
             if self.options.use_thread:
                 self.cpp_info.components["openblas_component"].system_libs.append("pthread")
-            if self.options.build_lapack:
+            if self.options.build_lapack and self._fortran_compiler:
                 self.cpp_info.components["openblas_component"].system_libs.append("gfortran")
 
         self.output.info(
