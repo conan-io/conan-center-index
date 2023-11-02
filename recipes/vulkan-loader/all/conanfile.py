@@ -201,11 +201,7 @@ class VulkanLoaderConan(ConanFile):
         elif self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreFoundation"]
 
-        vulkan_sdk_path = self.package_folder
-        self.output.info(f"Create VULKAN_SDK environment variable: {vulkan_sdk_path}")
-        self.env_info.VULKAN_SDK = vulkan_sdk_path
-
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Vulkan"
         self.cpp_info.names["cmake_find_package_multi"] = "Vulkan"
-        self.cpp_info.names["pkg_config"] = "vulkan"
+        self.env_info.VULKAN_SDK = self.package_folder
