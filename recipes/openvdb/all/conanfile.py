@@ -1,4 +1,5 @@
 import os
+import re
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -242,11 +243,10 @@ class OpenVDBConan(ConanFile):
     def _patch_sources(self):
         # Remove FindXXX files from OpenVDB. Let Conan do the job
         rm(self, "Find*.cmake", os.path.join(self.source_folder, "cmake"), recursive=True)
-        cmakelists = os.path.join(self.source_folder, "openvdb", "openvdb", "CMakeLists.txt")
-        for dep in ["TBB", "BLOSC", "ZLIB", "LOG4CPLUS", "ILMBASE"]:
-            # Relax version checks in find_package(),
-            # since the config/module files produced by CMakeDeps do not support gt major version checks
-            replace_in_file(self, cmakelists, f"${{MINIMUM_{dep}_VERSION}}", "")
+        # Relax version checks in find_package(),
+        # since the config/module files produced by CMakeDeps do not support gt major version checks
+        cmakelists = self.source_path.joinpath("openvdb", "openvdb", "CMakeLists.txt")
+        cmakelists.write_text(re.sub(r"\$\{MINIMUM_\S+_VERSION}", "", cmakelists.read_text()))
         replace_in_file(self, os.path.join(self.source_folder, "openvdb", "openvdb", "CMakeLists.txt"),
                         "OPENVDB_FUTURE_DEPRECATION", "FALSE")
 
