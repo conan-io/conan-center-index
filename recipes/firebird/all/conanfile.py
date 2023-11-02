@@ -5,10 +5,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, chdir, replace_in_file
+from conan.tools.files import copy, get, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import unix_path
 
 required_conan_version = ">=1.54.0"
 
@@ -24,9 +23,6 @@ class FirebirdConan(ConanFile):
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
 
-    def export_sources(self):
-        copy(self, "LICENSE-*", self.recipe_folder, self.export_sources_folder)
-
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
@@ -35,26 +31,34 @@ class FirebirdConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # https://github.com/FirebirdSQL/firebird/tree/v4.0.2/extern
-        # TODO: should potentially replace these vendored libraries with Conan packages:
-        #   - btyacc
-        #   - editline
-        #   - abseil (for int128)
-        #   - libtommath
-        #   - re2
-        # Not currently available in ConanCenter:
-        #   - cloop
-        #   - decNumber
-        #   - libtomcrypt
-        #   - SfIO
-        #   - ttmath
+        # Based on the following, with CLIENT_ONLY_FLG=Y
+        # https://github.com/FirebirdSQL/firebird/blob/v5.0.0-RC1/configure.ac
+        # https://github.com/FirebirdSQL/firebird/blob/v5.0.0-RC1/builds/posix/Makefile.in#L185-L239
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("icu/73.2")
         self.requires("termcap/1.3.1")
+        # TODO: should potentially unvendor these:
+        # https://github.com/FirebirdSQL/firebird/tree/v5.0.0-RC1/extern
+        # - SfIO
+        # - boost
+        # - btyacc
+        # - cloop
+        # - decNumber
+        # - editline
+        # - icu
+        # - absl (for int128)
+        # - libcds
+        # - libtomcrypt
+        # - libtommath
+        # - re2
+        # - ttmath
+        # - zlib
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
-            raise ConanInvalidConfiguration(f"{self.ref} recipe is not yet supported on {self.settings.os}.")
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} recipe is not yet supported on Windows. Contributions are welcome."
+            )
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
@@ -69,34 +73,21 @@ class FirebirdConan(ConanFile):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
         tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--enable-client-only")
         tc.configure_args.append("--with-builtin-tommath")
         tc.configure_args.append("--with-builtin-tomcrypt")
-        # Reduce the amount of warnings
-        tc.extra_cxxflags.append("-Wno-unused-result")
-        tc.extra_ldflags += [
-            "-L{}".format(unix_path(self, self.dependencies[dep].cpp_info.libdir))
-            for dep in ["zlib", "icu", "termcap"]
-        ]
+        tc.configure_args.append(f"--with-termlib={self.dependencies['termcap'].package_folder}")
+        # Disabled because test_package fails with "double free or corruption (out), Aborted (core dumped)"
+        # if self.settings.build_type == "Debug":
+        #     tc.configure_args.append("--enable-developer")
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        # Disable building of examples, plugins and executables.
-        # Only executables required for the build are included.
-        # https://github.com/FirebirdSQL/firebird/blob/v4.0.2/builds/posix/Makefile.in#L281-L305
-        posix_makefile = os.path.join(self.source_folder, "builds/posix/Makefile.in")
-        for target in ["examples", "plugins"]:
-            replace_in_file(self, posix_makefile, f"$(MAKE) {target}", "")
-        replace_in_file(self, posix_makefile, "$(MAKE) utilities", "$(MAKE) isql gbak gfix udfsupport")
-
     def build(self):
-        self._patch_sources()
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
-            # https://github.com/FirebirdSQL/firebird/blob/v4.0.3/autogen.sh#L45-L59
-            autotools.autoreconf()
-            self.run("libtoolize --install --copy --force")
+            # self.run("NOCONFIGURE=1 ./autogen.sh")
             autotools.configure()
             autotools.make()
 
@@ -105,22 +96,23 @@ class FirebirdConan(ConanFile):
             copy(self, license_file,
                  src=os.path.join(self.source_folder, "builds", "install", "misc"),
                  dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "LICENSE-*",
-             src=self.source_folder,
-             dst=os.path.join(self.package_folder, "licenses"),
-             keep_path=False)
-        copy(self,"*",
-            src=os.path.join(self.source_folder, f"gen/{self.settings.build_type}/firebird/lib"),
-            dst=os.path.join(self.package_folder, "lib"))
-        copy(self, "*",
-             src=os.path.join(self.source_folder, "src/include"),
-             dst=os.path.join(self.package_folder, "include"))
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.make(target="dist")
+        # Debug requires --enable-developer
+        # build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
+        build_type = "Release"
+        dist_root = os.path.join(self.source_folder, "gen", build_type, "firebird")
+        copy(self,"*", os.path.join(dist_root, "include"), os.path.join(self.package_folder, "include"))
+        copy(self,"*", os.path.join(dist_root, "lib"), os.path.join(self.package_folder, "lib"))
+        copy(self,"*", os.path.join(dist_root, "bin"), os.path.join(self.package_folder, "bin"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "firebird")
-
-        self.cpp_info.libs = ["fbclient", "ib_util", "decFloat", "edit", "re2", "tomcrypt", "tommath"]
+        self.cpp_info.libs = ["fbclient"]
+        # TODO: unvendor
+        self.cpp_info.libs += ["tomcrypt", "tommath"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
