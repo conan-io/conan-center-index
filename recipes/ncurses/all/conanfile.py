@@ -136,8 +136,8 @@ class NCursesConan(ConanFile):
             "--without-profile",
             "--with-sp-funcs",
             "--disable-rpath",
-            "--datarootdir=${prefix}/res",
             "--disable-pc-files",
+            "--datarootdir=${prefix}/res",
         ]
         build = None
         host = None
@@ -171,6 +171,8 @@ class NCursesConan(ConanFile):
         if host:
             tc.configure_args.append(f"ac_cv_host={host}")
             tc.configure_args.append(f"ac_cv_target={host}")
+        # Allow ncurses to set the include dir with an appropriate subdir
+        tc.configure_args.remove("--includedir=${prefix}/include")
         tc.generate()
 
         if is_msvc(self):
@@ -237,8 +239,10 @@ class NCursesConan(ConanFile):
     @property
     def _suffix(self):
         res = ""
+        # https://github.com/mirror/ncurses/blob/v6.4/configure.in#L1393
         if self.options.with_reentrant:
             res += "t"
+        # https://github.com/mirror/ncurses/blob/v6.4/configure.in#L959
         if self.options.with_widec:
             res += "w"
         return res
@@ -324,10 +328,5 @@ class NCursesConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "Curses"
         self.cpp_info.components["libcurses"].build_modules["cmake_find_package"] = [module_rel_path]
         self.cpp_info.components["libcurses"].build_modules["cmake_find_package_multi"] = [module_rel_path]
-        if self.options.with_progs:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH environment variable: {bin_path}")
-            self.env_info.PATH.append(bin_path)
-        self.output.info(f"Setting TERMINFO environment variable: {terminfo}")
         self.env_info.TERMINFO = terminfo
         self.user_info.lib_suffix = self._lib_suffix
