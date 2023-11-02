@@ -130,11 +130,13 @@ class LLVMOpenMpConan(ConanFile):
         tc.variables["OPENMP_STANDALONE_BUILD"] = True
         tc.variables["LIBOMP_ENABLE_SHARED"] = self.options.shared
         tc.variables["OPENMP_ENABLE_LIBOMPTARGET"] = self.options.build_libomptarget
+        # Do not buidl OpenMP Tools Interface (OMPT)
+        tc.variables["LIBOMP_OMPT_SUPPORT"] = False
         tc.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        replace_in_file(self,os.path.join(self.source_folder, "runtime", "CMakeLists.txt"),
+        replace_in_file(self, os.path.join(self.source_folder, "runtime", "CMakeLists.txt"),
                         "add_subdirectory(test)", "")
         if self._version_major == 12:
             # v12 can be built without LLVM includes
