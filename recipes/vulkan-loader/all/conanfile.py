@@ -179,18 +179,21 @@ class VulkanLoaderConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "loader"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_file_name", "Vulkan")
-        self.cpp_info.set_property("cmake_target_name", "Vulkan::Vulkan")
+        self.cpp_info.set_property("cmake_module_file_name", "Vulkan")
+        self.cpp_info.set_property("cmake_file_name", "VulkanLoader")
+        self.cpp_info.set_property("cmake_module_target_name", "Vulkan::Vulkan")
+        self.cpp_info.set_property("cmake_target_name", "Vulkan::Loader")
         self.cpp_info.set_property("pkg_config_name", "vulkan")
         suffix = "-1" if self.settings.os == "Windows" else ""
         self.cpp_info.libs = [f"vulkan{suffix}"]
 
-        # allow to properly set Vulkan_INCLUDE_DIRS in CMake like generators
+        # allow to properly set Vulkan_INCLUDE_DIRS in FindVulkan.cmake
         self.cpp_info.includedirs = self.dependencies["vulkan-headers"].cpp_info.aggregated_components().includedirs
 
         if self.settings.os in ["Linux", "FreeBSD"]:
