@@ -75,7 +75,7 @@ class LibVncServerConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_lzo:
-            self.requires("lzo/2.10")
+            self.requires("lzo/2.10", transitive_headers=True, transitive_libs=True)
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
