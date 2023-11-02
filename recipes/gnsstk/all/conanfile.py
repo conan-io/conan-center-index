@@ -1,8 +1,9 @@
 import os
 
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
-from conan.tools.files import get, copy, rmdir, save
+from conan.tools.files import get, copy, rmdir, save, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -50,6 +51,11 @@ class GNSSTkConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            # https://github.com/SGL-UT/gnsstk/blob/v14.0.0/BuildSetup.cmake#L54
+            check_min_cppstd(self, 11)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -66,6 +72,9 @@ class GNSSTkConan(ConanFile):
         save(self, os.path.join(self.source_folder, "examples", "CMakeLists.txt"), "")
         # Disable tests
         save(self, os.path.join(self.source_folder, "core", "tests", "CMakeLists.txt"), "")
+        # Disable warnings as errors
+        replace_in_file(self, os.path.join(self.source_folder, "BuildSetup.cmake"),
+                        "-Werror=return-type -Werror=deprecated", "")
 
     def build(self):
         self._patch_sources()
