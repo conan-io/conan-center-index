@@ -50,6 +50,8 @@ class OpenblasConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if Version(self.version) >= "0.3.21":
+            self.options.build_lapack = True
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
@@ -87,7 +89,7 @@ class OpenblasConan(ConanFile):
         # This checks explicit user-specified fortran compiler
         if self.options.build_lapack:
             if not self._fortran_compiler:
-                if Version(self.version) < "0.3.24":
+                if Version(self.version) < "0.3.21":
                     self.output.warning(
                         "Building with LAPACK support requires a Fortran compiler.")
                 else:
