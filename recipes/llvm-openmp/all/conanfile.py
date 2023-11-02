@@ -7,7 +7,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, save, rename, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, save, move_folder_contents
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -115,8 +115,7 @@ class LLVMOpenMpConan(ConanFile):
         elif self._version_major == 14:
             # v14 source archives also includes a cmake/ directory in the archive root
             get(self, **self.conan_data["sources"][self.version], destination=self.export_sources_folder)
-            rmdir(self, self.source_folder)
-            rename(self, os.path.join(self.export_sources_folder, f"openmp-{self.version}.src"), self.source_folder)
+            move_folder_contents(self, os.path.join(self.export_sources_folder, f"openmp-{self.version}.src"), self.source_folder)
             copy(self, "*.cmake",
                  src=os.path.join(self.export_sources_folder, "cmake", "Modules"),
                  dst=os.path.join(self.source_folder, "cmake"))
