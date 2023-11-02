@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.52.0"
 
@@ -588,8 +589,10 @@ class GdalConan(ConanFile):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("pkg_config_name", "gdal")
 
+        # https://github.com/OSGeo/gdal/blob/v3.7.2/gdal.cmake#L384-L392
+        # FIXME: set the correct postfix for MinGW shared builds
         libname = "gdal"
-        if self.settings.os == "Windows":
+        if is_msvc(self):
             if self.settings.build_type == "Debug":
                 libname += "d"
         self.cpp_info.libs = [libname]
@@ -700,20 +703,24 @@ class GdalConan(ConanFile):
         if self.options.with_zstd:
             self.cpp_info.requires.extend(["zstd::zstdlib"])
 
+        # Based on https://github.com/OSGeo/gdal/blob/v3.7.2/port/CMakeLists.txt
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs += ["pthread"]
+        elif self.settings.os == "Windows":
+            if is_msvc(self):
+                self.cpp_info.system_libs += ["wbemuuid"]
+            if self.options.with_openssl:
+                self.cpp_info.system_libs += ["crypt32"]
+
         gdal_data_path = os.path.join(self.package_folder, "res", "gdal")
-        self.output.info(f"Prepending to GDAL_DATA environment variable: {gdal_data_path}")
         self.runenv_info.prepend_path("GDAL_DATA", gdal_data_path)
 
         if self.options.tools:
             self.buildenv_info.prepend_path("GDAL_DATA", gdal_data_path)
 
+        # TODO: remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "GDAL"
         self.cpp_info.names["cmake_find_package_multi"] = "GDAL"
         self.cpp_info.filenames["cmake_find_package"] = "GDAL"
         self.cpp_info.filenames["cmake_find_package_multi"] = "GDAL"
-        if self.options.tools:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH environment variable: {bin_path}")
-            self.env_info.PATH.append(bin_path)
-        # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
         self.env_info.GDAL_DATA = gdal_data_path
