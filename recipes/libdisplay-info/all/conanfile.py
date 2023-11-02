@@ -18,7 +18,7 @@ class LibdisplayInfoConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.freedesktop.org/emersion/libdisplay-info"
-    topics = ("display", "DisplayID", "EDID", "topic2", "topic3")
+    topics = ("display", "DisplayID", "EDID")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
