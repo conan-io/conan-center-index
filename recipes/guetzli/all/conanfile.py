@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import chdir, copy, get, replace_in_file
+from conan.tools.files import chdir, copy, get, replace_in_file, rm
 from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, MSBuildDeps
@@ -96,6 +96,7 @@ class GoogleGuetzliConan(ConanFile):
         copy(self, "LICENSE",
              dst=os.path.join(self.package_folder, "licenses"),
              src=self.source_folder)
+        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.frameworkdirs = []
