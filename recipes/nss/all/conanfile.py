@@ -64,7 +64,10 @@ class NSSConan(ConanFile):
             raise ConanInvalidConfiguration("Macos ARM64 builds not yet supported. Contributions are welcome.")
         if Version(self.version) < "3.74":
             if self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= 13:
-                raise ConanInvalidConfiguration("nss < 3.74 requires clang < 13 .")
+                raise ConanInvalidConfiguration("nss < 3.74 requires clang < 13.")
+        if is_msvc(self):
+            # https://c3i.jfrog.io/c3i/misc/summary.html?json=https://c3i.jfrog.io/c3i/misc/logs/pr/19262/4-windows-visual_studio/nss/3.89/summary.json
+            raise ConanInvalidConfiguration("MSVC is currently not supported. Contributions are welcome.")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
