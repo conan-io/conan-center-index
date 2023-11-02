@@ -54,3 +54,8 @@ submodules:
       sha256: 032c93e3f7c335bbb2d2d699804a804c9cdce2a2ecc3fe7cde552f2130982c26
       url: https://github.com/OPCFoundation/UA-Nodeset/archive/Glass=1.0.0-2022-01-01.zip
       archive_pattern: "UA-Nodeset-{version}"
+  "1.3.8":
+    deps/ua-nodeset:
+      sha256: 032c93e3f7c335bbb2d2d699804a804c9cdce2a2ecc3fe7cde552f2130982c26
+      url: https://github.com/OPCFoundation/UA-Nodeset/archive/Glass=1.0.0-2022-01-01.zip
+      archive_pattern: "UA-Nodeset-{version}"
