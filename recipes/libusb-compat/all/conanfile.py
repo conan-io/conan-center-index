@@ -43,7 +43,6 @@ class LibUSBCompatConan(ConanFile):
         export_conandata_patches(self)
         copy(self, "CMakeLists.txt.in", src=self.recipe_folder, dst=self.export_sources_folder)
 
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -60,13 +59,13 @@ class LibUSBCompatConan(ConanFile):
     def requirements(self):
         self.requires("libusb/1.0.26")
         if is_msvc(self):
-            self.requires("dirent/1.23.2")
+            self.requires("dirent/1.24")
 
     def build_requirements(self):
         self.tool_requires("gnu-config/cci.20210814")
         self.tool_requires("libtool/2.4.7")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.2")
+            self.tool_requires("pkgconf/2.0.3")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -81,7 +80,7 @@ class LibUSBCompatConan(ConanFile):
         for lib_path in libdirs:
             for prefix in "", "lib":
                 for suffix in "", ".a", ".dll.a", ".lib", ".dll.lib":
-                    fn = os.path.join(lib_path, "{}{}{}".format(prefix, lib, suffix))
+                    fn = os.path.join(lib_path, f"{prefix}{lib}{suffix}")
                     if not fn.endswith(".a") and not fn.endswith(".lib"):
                         continue
                     yield fn
@@ -137,11 +136,12 @@ class LibUSBCompatConan(ConanFile):
     def _extract_makefile_variable(self, makefile, variable):
         makefile_contents = load(self, makefile)
         match = re.search(
-            '{}[ \t]*=[ \t]*((?:(?:[a-zA-Z0-9 \t.=/_-])|(?:\\\\"))*(?:\\\\\n(?:(?:[a-zA-Z0-9 \t.=/_-])|(?:\\"))*)*)\n'.format(variable),
+            fr'^{variable}\s*=\s*((?:[\w \t.=/-]|\")*(?:\\\n(?:[\w \t.=/-]|\")*)*)$',
             makefile_contents,
+            flags=re.MULTILINE,
         )
         if not match:
-            raise ConanException("Cannot extract variable {} from {}".format(variable, makefile_contents))
+            raise ConanException(f"Cannot extract variable {variable} from {makefile_contents}")
         lines = [line.strip(" \t\\") for line in match.group(1).split()]
         return [item for line in lines for item in shlex.split(line) if item]
 
@@ -167,7 +167,7 @@ class LibUSBCompatConan(ConanFile):
                 self,
                 os.path.join(self.source_folder, "configure.ac"),
                 "\nAC_DEFINE([API_EXPORTED]",
-                "\nAC_DEFINE([API_EXPORTED], [{}], [API])\n#".format(api),
+                f"\nAC_DEFINE([API_EXPORTED], [{api}], [API])\n#",
             )
             # libtool disallows building shared libraries that link to static libraries
             # This will override this and add the dependency
@@ -187,15 +187,15 @@ class LibUSBCompatConan(ConanFile):
         if self.settings.os == "Windows":
             cmakelists_in = load(self, os.path.join(self.export_sources_folder, "CMakeLists.txt.in"))
             sources, headers = self._extract_autotools_variables()
-            save(
-                self,
-                os.path.join(self.source_folder, "libusb", "CMakeLists.txt"),
-                cmakelists_in.format(libusb_sources=" ".join(sources), libusb_headers=" ".join(headers)),
-            )
+            save(self, os.path.join(self.source_folder, "libusb", "CMakeLists.txt"), cmakelists_in.format(
+                libusb_sources=" ".join(sources),
+                libusb_headers=" ".join(headers),
+            ))
             replace_in_file(self, os.path.join(self.source_folder, "config.h"),
                             "\n#define API_EXPORTED", "\n#define API_EXPORTED //")
+            copy(self, "config.h", self.source_folder, os.path.join(self.source_folder, "libusb"))
             cmake = CMake(self)
-            cmake.configure()
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, "libusb"))
             cmake.build()
         else:
             with chdir(self, self.source_folder):
