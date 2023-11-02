@@ -83,6 +83,27 @@ class OpenTelemetryCppConan(ConanFile):
             "apple-clang": "5.1",
         }
 
+    @property
+    def _cpp_standard_to_use(self):
+        return self.settings.compiler.get_safe("cppstd") or self._minimum_cpp_standard
+
+    @property
+    def _with_stl_value(self):
+        if Version(self.version) >= "1.12":
+            if self.options.with_stl:
+                cppstd = self._cpp_standard_to_use
+                if "14" in cppstd:
+                    return "CXX14"
+                elif "17" in cppstd:
+                    return "CXX17"
+                elif "20" in cppstd:
+                    return "CXX20"
+                elif "23" in cppstd:
+                    return "CXX23"
+            else:
+                return "OFF"
+        else:
+            return self.options.with_stl
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -220,7 +241,7 @@ class OpenTelemetryCppConan(ConanFile):
 
         tc.variables["WITH_EXAMPLES"] = False
         tc.variables["WITH_NO_DEPRECATED_CODE"] = self.options.with_no_deprecated_code
-        tc.variables["WITH_STL"] = "ON" if self.options.with_stl else "OFF"
+        tc.variables["WITH_STL"] = self._with_stl_value
         tc.variables["WITH_GSL"] = self.options.with_gsl
         tc.variables["WITH_ABSEIL"] = self.options.with_abseil
         tc.variables["WITH_OTLP_GRPC"] = self.options.get_safe("with_otlp_grpc") or False
@@ -244,10 +265,7 @@ class OpenTelemetryCppConan(ConanFile):
         if Version(self.version) < "1.11":
             tc.variables["WITH_LOGS_PREVIEW"] = self.options.with_logs_preview
 
-        cppstd = self.settings.compiler.get_safe("cppstd")
-        if not cppstd:
-            cppstd = self._minimum_cpp_standard
-        tc.variables["CMAKE_CXX_STANDARD"] = cppstd
+        tc.variables["CMAKE_CXX_STANDARD"] = self._cpp_standard_to_use
 
         tc.generate()
 
@@ -432,7 +450,11 @@ class OpenTelemetryCppConan(ConanFile):
             self.cpp_info.components["opentelemetry_common"].system_libs.extend(["pthread"])
 
         if self.options.with_stl:
-            self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_CPP_STDLIB")
+            if Version(self.version) >= "1.12.0":
+                cppstd = self._cpp_standard_to_use[-2:]
+                self.cpp_info.components["opentelemetry_common"].defines.append(f"OPENTELEMETRY_STL_VERSION=20{cppstd}")
+            else:
+                self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_CPP_STDLIB")
 
         if self.options.with_gsl:
             self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_GSL")
