@@ -200,8 +200,3 @@ class VulkanLoaderConan(ConanFile):
             self.cpp_info.system_libs = ["dl", "pthread", "m"]
         elif self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreFoundation"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Vulkan"
-        self.cpp_info.names["cmake_find_package_multi"] = "Vulkan"
-        self.env_info.VULKAN_SDK = self.package_folder
