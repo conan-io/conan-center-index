@@ -222,7 +222,7 @@ class QtConan(ConanFile):
         for module in self._get_module_tree:
             if getattr(self.options, module):
                 _enablemodule(module)
-        
+
         # disable all modules which are:
         # - not explicitely enabled by the consumer and
         # - not required by a module explicitely enabled by the consumer
@@ -806,10 +806,12 @@ class QtConan(ConanFile):
             targets.append("qvkgen")
         if self.options.widgets:
             targets.append("uic")
+        if self._settings_build.os == "Macos" and self.settings.os != "iOS":
+            targets.extend(["macdeployqt"])
+        if self.settings.os == "Windows":
+            targets.extend(["windeployqt"])
         if self.options.qttools:
             targets.extend(["qhelpgenerator", "qtattributionsscanner"])
-            if self.settings.os == "Windows":
-                targets.extend(["windeployqt"])
             targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
         if self.options.qtshadertools:
             targets.append("qsb")
@@ -874,6 +876,9 @@ class QtConan(ConanFile):
 
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
+            save(self, os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake"), textwrap.dedent("""\
+                    set(QT_KNOWN_POLICY_QTP0001 TRUE)
+                    """))
 
         if self.settings.os in ["Windows", "iOS"]:
             contents = textwrap.dedent("""\
@@ -1376,6 +1381,9 @@ class QtConan(ConanFile):
 
         build_modules_list = []
 
+        if self.options.qtdeclarative:
+            build_modules_list.append(os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake"))
+
         def _add_build_modules_for_component(component):
             for req in self.cpp_info.components[component].requires:
                 if "::" in req: # not a qt component
@@ -1385,5 +1393,7 @@ class QtConan(ConanFile):
 
         for c in self.cpp_info.components:
             _add_build_modules_for_component(c)
+
+        build_modules_list.append(os.path.join(self.package_folder, "lib", "cmake", "Qt6Core", "Qt6CoreConfigExtras.cmake"))
 
         self.cpp_info.set_property("cmake_build_modules", build_modules_list)
