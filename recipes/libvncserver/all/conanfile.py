@@ -39,7 +39,7 @@ class LibVncServerConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_zlib": True,
-        "with_lzo": True,
+        "with_lzo": False, # TODO should be true
         "with_libjpeg": "libjpeg",
         "with_libpng": True,
         "with_sdl": True,
@@ -47,7 +47,7 @@ class LibVncServerConan(ConanFile):
         "with_libssh2": True,
         "with_openssl": True,
         "with_systemd": True,
-        "with_libgcrypt": True,
+        "with_libgcrypt": False, # TODO should be true
         "with_ffmpeg": True,
         "with_sasl": True,
         "with_xcb": True,
@@ -93,8 +93,7 @@ class LibVncServerConan(ConanFile):
         if self.options.with_systemd:
             self.requires("libsystemd/253.10")
         if self.options.with_libgcrypt:
-            #self.requires("libgcrypt/1.8.4")
-            print("Not yet implemented")
+            self.requires("libgcrypt/1.8.4")
         if self.options.with_ffmpeg:
             self.requires("ffmpeg/6.0")
         if self.options.with_sasl:
