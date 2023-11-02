@@ -21,20 +21,15 @@ class OneTBBConan(ConanFile):
         " programs that take full advantage of multicore performance, that are portable, composable"
         " and have future-proof scalability.")
     topics = ("tbb", "threading", "parallelism", "tbbmalloc")
-    package_type = "library"
-
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
         "tbbmalloc": [True, False],
         "tbbproxy": [True, False],
         "tbbbind": [True, False],
         "interprocedural_optimization": [True, False],
     }
     default_options = {
-        "shared": True,
-        "fPIC": True,
         "tbbmalloc": True,
         "tbbproxy": True,
         "tbbbind": True,
@@ -64,22 +59,12 @@ class OneTBBConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
         if not self._tbbbind_supported:
             del self.options.tbbbind
         if Version(self.version) < "2021.6.0" or self.settings.os == "Android":
             del self.options.interprocedural_optimization
-        if Version(self.version) < "2021.2.0":
-            del self.options.shared
-            self.options.rm_safe("fPIC")
 
     def configure(self):
-        if self.options.get_safe("shared", True):
-            self.options.rm_safe("fPIC")
-        else:
-            del self.options.tbbproxy
-            self.options.rm_safe("tbbbind")
         if not self.options.tbbmalloc:
             self.options.rm_safe("tbbproxy")
         if self._tbbbind_explicit_hwloc:
@@ -105,14 +90,6 @@ class OneTBBConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "11.0":
             raise ConanInvalidConfiguration(f"{self.ref} couldn't be built by apple-clang < 11.0")
-        if not self.options.get_safe("shared", True):
-            if Version(self.version) >= "2021.6.0":
-                raise ConanInvalidConfiguration(
-                    "Building oneTBB as a static library is highly discouraged and not supported "
-                    "to avoid unforeseen issues like https://github.com/oneapi-src/oneTBB/issues/920. "
-                    "Please consider fixing at least the aforementioned issue in upstream."
-                )
-            self.output.warning("oneTBB strongly discourages usage of static linkage")
 
         if self._tbbbind_explicit_hwloc and not self.dependencies["hwloc"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires hwloc:shared=True to be built.")
