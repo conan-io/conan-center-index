@@ -103,9 +103,7 @@ class NCursesConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
-        if is_msvc(self):
-            self.tool_requires("automake/1.16.5")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -118,7 +116,7 @@ class NCursesConan(ConanFile):
             "--with-cxx-shared={}".format(yes_no(self.options.shared)),
             "--with-normal={}".format(yes_no(not self.options.shared)),
             "--enable-widec={}".format(yes_no(self.options.with_widec)),
-            "--enable-ext-colors={}".format(yes_no(self.options.get_safe("with_extended_colors", False))),
+            "--enable-ext-colors={}".format(yes_no(self.options.get_safe("with_extended_colors"))),
             "--enable-reentrant={}".format(yes_no(self.options.with_reentrant)),
             "--with-pcre2={}".format(yes_no(self.options.with_pcre2)),
             "--with-cxx-binding={}".format(yes_no(self.options.with_cxx)),
@@ -172,13 +170,10 @@ class NCursesConan(ConanFile):
 
         if is_msvc(self):
             env = Environment()
-            automake_conf = self.dependencies.build["automake"].conf_info
-            compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
-            ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
-            env.define("CC", f"{compile_wrapper} cl")
-            env.define("CXX", f"{compile_wrapper} cl")
-            env.define("LD", "link")
-            env.define("AR", f'{ar_wrapper} "lib"')
+            env.define("CC", "cl -nologo")
+            env.define("CXX", "cl -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", "lib -nologo")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
