@@ -1,4 +1,7 @@
 sources:
+  "2.5.9":
+    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v2.5.9.tar.gz"
+    sha256: "05bb9c2da3ff3508eee51c30f59c7f2c59bf068f3b636d12d5991e8bbaf13e01"
   "2.5.7":
     url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v2.5.7.tar.gz"
     sha256: "36ecb2290cba6fc92b2ec9357f8dc0e364b4f9a90d727bf9a57c84760695272d"
