@@ -1,9 +1,0 @@
-sources:
-  "2.4.15.0":
-    url: "https://github.com/OpenImageIO/oiio/archive/refs/tags/v2.4.15.0.tar.gz"
-    sha256: "b2d76e3880d25d3b005f7c694811a991ccebb6e396965959d194f79c369ff390"
-patches:
-  "2.4.15.0":
-    - patch_file: "patches/2.4.15.0-cmake-targets.patch"
-      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
-      patch_type: "conan"
