@@ -36,6 +36,9 @@ class GNSSTkConan(ConanFile):
         "build_ext": "Build the ext library, in addition to the core library.",
     }
 
+    @property
+    def _min_cppstd(self):
+        return 11
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,7 +54,7 @@ class GNSSTkConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             # https://github.com/SGL-UT/gnsstk/blob/v14.0.0/BuildSetup.cmake#L54
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -62,6 +65,9 @@ class GNSSTkConan(ConanFile):
         tc.cache_variables["BUILD_EXT"] = self.options.build_ext
         tc.cache_variables["VERSIONED_HEADER_INSTALL"] = True
         tc.cache_variables["USE_RPATH"] = False
+        if not self.settings.compiler.cppstd:
+            # The C++ standard is not set correctly by the project for apple-clang
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
 
     def _patch_sources(self):
