@@ -26,17 +26,14 @@ class GNSSTkConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "build_ext": [True, False],
-        "versioned_header":  [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "build_ext": True,
-        "versioned_header": False,
     }
     options_description = {
         "build_ext": "Build the ext library, in addition to the core library.",
-        "versioned_header": "Install header files into maj/min versioned directory.",
     }
 
 
@@ -63,7 +60,7 @@ class GNSSTkConan(ConanFile):
         tc = CMakeToolchain(self)
         # https://github.com/SGL-UT/gnsstk/blob/v14.0.0/CMakeLists.txt#L41-L51
         tc.cache_variables["BUILD_EXT"] = self.options.build_ext
-        tc.cache_variables["VERSIONED_HEADER_INSTALL"] = self.options.versioned_header
+        tc.cache_variables["VERSIONED_HEADER_INSTALL"] = True
         tc.cache_variables["USE_RPATH"] = False
         tc.generate()
 
@@ -98,12 +95,11 @@ class GNSSTkConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "gnsstk")
         self.cpp_info.libs = ["gnsstk"]
 
-        if self.options.versioned_header:
-            versioned_dir = f"gnsstk{Version(self.version).major}"
-            self.cpp_info.includedirs.append(os.path.join("include", versioned_dir))
-            self.cpp_info.includedirs.append(os.path.join("include", versioned_dir, "gnsstk"))
-        else:
-            self.cpp_info.includedirs.append(os.path.join("include", "gnsstk"))
+        versioned_dir = f"gnsstk{Version(self.version).major}"
+        # For compatibility with the default VERSIONED_HEADER_INSTALL=FALSE option
+        self.cpp_info.includedirs.append(os.path.join("include", versioned_dir))
+        # The examples use the headers without a directory prefix
+        self.cpp_info.includedirs.append(os.path.join("include", versioned_dir, "gnsstk"))
 
         if self.settings.os != "Windows":
             self.cpp_info.defines.append("GNSSTK_STATIC_DEFINE")
