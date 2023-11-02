@@ -90,41 +90,6 @@ class NSSConan(ConanFile):
 
     @property
     def _make_args(self):
-        args = []
-        if self.settings.arch in ["x86_64"]:
-            args.append("USE_64=1")
-            if self.settings.os == "Macos":
-                args.append("CPU_ARCH=i386")
-            else:
-                args.append("CPU_ARCH=x86_64")
-        if self.settings.arch in ["armv8", "armv8.3"]:
-            args.append("USE_64=1")
-            args.append("CPU_ARCH=aarch64")
-        if self.settings.compiler == "gcc":
-            args.append("XCFLAGS=-Wno-array-parameter")
-
-        nspr_cpp_info = self.dependencies["nspr"].cpp_info.aggregated_components()
-        args.append(f"NSPR_INCLUDE_DIR={nspr_cpp_info.includedirs[1]}") # very fragile !!
-        args.append(f"NSPR_LIB_DIR={nspr_cpp_info.libdirs[0]}")
-
-        os_map = {
-            "Linux": "Linux",
-            "Macos": "Darwin",
-            "Windows": "WINNT",
-            "FreeBSD": "FreeBSD"
-        }
-
-        args.append("OS_TARGET=%s" % os_map.get(str(self.settings.os), "UNSUPPORTED_OS"))
-        args.append("OS_ARCH=%s" % os_map.get(str(self.settings.os), "UNSUPPORTED_OS"))
-        if self.settings.build_type != "Debug":
-            args.append("BUILD_OPT=1")
-        if is_msvc(self):
-            args.append("NSPR31_LIB_PREFIX=$(NULL)")
-
-        args.append("USE_SYSTEM_ZLIB=1")
-        zlib_cpp_info = self.dependencies["zlib"].cpp_info.aggregated_components()
-        args.append(f"ZLIB_INCLUDE_DIR={zlib_cpp_info.includedirs[0]}")
-
         def adjust_path(path):
             """
             adjusts path to be safely passed to the compiler command line
@@ -136,7 +101,7 @@ class NSSConan(ConanFile):
                 path = path.replace('/', '\\')
             else:
                 path = path.replace('\\', '/')
-            return '"%s"' % path if ' ' in path else path
+            return f'"{path}"' if ' ' in path else path
 
         def _format_library_paths(library_paths):
             pattern = "-LIBPATH:%s" if is_msvc(self) else "-L%s"
@@ -154,17 +119,57 @@ class NSSConan(ConanFile):
                     result.append(f"-l{library}")
             return result
 
-        args.append("\"ZLIB_LIBS=%s\"" % " ".join(
-            _format_libraries(zlib_cpp_info.libs) +
-            _format_library_paths(zlib_cpp_info.libdirs)))
-        args.append("NSS_DISABLE_GTESTS=1")
-        args.append("NSS_USE_SYSTEM_SQLITE=1")
-        sqlite3_cpp_info = self.dependencies["sqlite3"].cpp_info.aggregated_components()
-        args.append(f"SQLITE_INCLUDE_DIR={sqlite3_cpp_info.includedirs[0]}")
-        args.append(f"SQLITE_LIB_DIR={sqlite3_cpp_info.libdirs[0]}")
-        args.append("NSDISTMODE=copy")
+        args = []
+        if self.settings.arch in ["x86_64"]:
+            args.append("USE_64=1")
+            if self.settings.os == "Macos":
+                args.append("CPU_ARCH=i386")
+            else:
+                args.append("CPU_ARCH=x86_64")
+        elif self.settings.arch in ["armv8", "armv8.3"]:
+            args.append("USE_64=1")
+            args.append("CPU_ARCH=aarch64")
+
         if cross_building(self):
             args.append("CROSS_COMPILE=1")
+
+        if self.settings.compiler == "gcc":
+            args.append("XCFLAGS=-Wno-array-parameter")
+
+        nspr_root = self.dependencies["nspr"].package_folder
+        args.append(f"NSPR_INCLUDE_DIR={adjust_path(os.path.join(nspr_root, 'include', 'nspr'))}")
+        args.append(f"NSPR_LIB_DIR={adjust_path(os.path.join(nspr_root, 'lib'))}")
+        if is_msvc(self):
+            args.append("NSPR31_LIB_PREFIX=$(NULL)")
+
+        os_id = {
+            "Linux": "Linux",
+            "Macos": "Darwin",
+            "Windows": "WINNT",
+            "FreeBSD": "FreeBSD",
+        }.get(str(self.settings.os), 'UNSUPPORTED_OS')
+        args.append(f"OS_TARGET={os_id}")
+        args.append(f"OS_ARCH={os_id}")
+
+        if self.settings.build_type != "Debug":
+            args.append("BUILD_OPT=1")
+
+        args.append("USE_SYSTEM_ZLIB=1")
+        zlib_cpp_info = self.dependencies["zlib"].cpp_info.aggregated_components()
+        args.append(f"ZLIB_INCLUDE_DIR={zlib_cpp_info.includedir}")
+        args.append('"ZLIB_LIBS=%s"' % " ".join(
+            _format_libraries(zlib_cpp_info.libs) +
+            _format_library_paths(zlib_cpp_info.libdirs)
+        ))
+
+        args.append("NSS_DISABLE_GTESTS=1")
+
+        args.append("NSS_USE_SYSTEM_SQLITE=1")
+        sqlite3_cpp_info = self.dependencies["sqlite3"].cpp_info.aggregated_components()
+        args.append(f"SQLITE_INCLUDE_DIR={sqlite3_cpp_info.includedir}")
+        args.append(f"SQLITE_LIB_DIR={sqlite3_cpp_info.libdir}")
+
+        args.append("NSDISTMODE=copy")
         return " ".join(args)
 
     def build(self):
