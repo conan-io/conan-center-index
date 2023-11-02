@@ -7,7 +7,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, check_min_vs
 
@@ -47,6 +47,10 @@ class PremakeConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
+
+    def requirements(self):
+        if self.settings.os != "Windows":
+            self.requires("util-linux-libuuid/2.39")
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
@@ -121,6 +125,8 @@ class PremakeConan(ConanFile):
             tc = AutotoolsToolchain(self)
             tc.make_args = ["verbose=1", f"config={self._gmake_config}"]
             tc.generate()
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
