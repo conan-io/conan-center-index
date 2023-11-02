@@ -75,7 +75,6 @@ class LibassertConan(ConanFile):
         export_conandata_patches(self)
 
     def generate(self):
-    def generate(self):
         tc = CMakeToolchain(self)
 
         if is_msvc(self):
@@ -105,15 +104,6 @@ class LibassertConan(ConanFile):
         cmake.install()
         
         if Version(self.version) >= Version("1.2.1"):
-            # For some reason after conan installs the include is #include <assert/assert/assert.hpp> which is not what
-            # should happen
-            copy(
-                self,
-                "assert.hpp",
-                src=os.path.join(self.package_folder, "include/assert/assert/"),
-                dst=os.path.join(self.package_folder, "include/assert/"),
-                keep_path=False
-            )
             # Take care of copying the dll
             if self.settings.os == "Windows" and self.options.shared:
                 copy(
@@ -136,6 +126,10 @@ class LibassertConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "assert")
         self.cpp_info.set_property("cmake_target_name", "assert::assert")
+        
+        # For some reason after conan installs the include is #include <assert/assert/assert.hpp> which is not what
+        # should happen
+        self.cpp_info.includedirs = [os.path.join("include", "assert")]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "assert"
