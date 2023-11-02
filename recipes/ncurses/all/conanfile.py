@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import Environment
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
-from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, unix_path, check_min_vs
 from conan.tools.scm import Version
@@ -166,9 +166,6 @@ class NCursesConan(ConanFile):
             if check_min_vs(self, 180, raise_invalid=False):
                 tc.extra_cflags.append("-FS")
                 tc.extra_cxxflags.append("-FS")
-            if self.options.get_safe("with_extended_colors"):
-                tc.extra_cflags.append(" ".join(f"-I{dir}" for dir in self.dependencies["naive-tsearch"].cpp_info.includedirs))
-                tc.extra_ldflags.append(" ".join(f"-l{lib}" for lib in self.dependencies["naive-tsearch"].cpp_info.libs))
         if self._is_mingw:
             # add libssp (gcc support library) for some missing symbols (e.g. __strcpy_chk)
             tc.extra_ldflags.extend(["-lmingwex", "-lssp"])
@@ -177,9 +174,6 @@ class NCursesConan(ConanFile):
         if host:
             tc.configure_args.append(f"ac_cv_host={host}")
             tc.configure_args.append(f"ac_cv_target={host}")
-        tc.generate()
-
-        tc = PkgConfigDeps(self)
         tc.generate()
 
         if is_msvc(self):
@@ -193,6 +187,11 @@ class NCursesConan(ConanFile):
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
             env.vars(self).save_script("conanbuild_msvc")
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
