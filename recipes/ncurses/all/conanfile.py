@@ -51,6 +51,10 @@ class NCursesConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    @property
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "*.cmake", src=self.recipe_folder, dst=self.export_sources_folder)
@@ -81,7 +85,7 @@ class NCursesConan(ConanFile):
         if is_msvc(self):
             self.requires("getopt-for-visual-studio/20200201")
             self.requires("dirent/1.24")
-            if self.options.get_safe("with_extended_colors", False):
+            if self.options.get_safe("with_extended_colors"):
                 self.requires("naive-tsearch/0.1.1")
 
     def validate(self):
@@ -98,7 +102,10 @@ class NCursesConan(ConanFile):
                 raise ConanInvalidConfiguration("ticlib cannot be built separately as a shared library on Windows")
         if check_min_vs(self, 193, raise_invalid=False):
             # https://c3i.jfrog.io/c3i/misc-v2/summary.html?json=https://c3i.jfrog.io/c3i/misc-v2/logs/pr/20355/12-windows-msvc/ncurses/6.4/summary.json
-            raise ConanInvalidConfiguration("Building ncurses with MSVC 193 (Visual Studio 2022) is not supported")
+            raise ConanInvalidConfiguration(
+                "Building ncurses with MSVC 193 (Visual Studio 2022) and newer is not supported. "
+                "Consider using PDCurses instead."
+            )
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -159,7 +166,10 @@ class NCursesConan(ConanFile):
             if check_min_vs(self, 180, raise_invalid=False):
                 tc.extra_cflags.append("-FS")
                 tc.extra_cxxflags.append("-FS")
-        if (self.settings.os, self.settings.compiler) == ("Windows", "gcc"):
+            if self.options.get_safe("with_extended_colors"):
+                tc.extra_cflags.append(" ".join(f"-I{dir}" for dir in self.dependencies["naive-tsearch"].cpp_info.includedirs))
+                tc.extra_ldflags.append(" ".join(f"-l{lib}" for lib in self.dependencies["naive-tsearch"].cpp_info.libs))
+        if self._is_mingw:
             # add libssp (gcc support library) for some missing symbols (e.g. __strcpy_chk)
             tc.extra_ldflags.extend(["-lmingwex", "-lssp"])
         if build:
