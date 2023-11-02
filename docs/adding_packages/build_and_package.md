@@ -67,7 +67,7 @@ Both methods often use build helpers to build binaries and install them into the
 
 * On Apple OS family:
   * shared libs: name field of `LC_ID_DYLIB` load command must be `@rpath/<libfilename>`.
-  * shared libs & executables: name field of each `LC_LOAD_DYLIB` load command should be `@rpath/<libdependencyfilename>` (except those refering to system libs or frameworks).
+  * shared libs & executables: name field of each `LC_LOAD_DYLIB` load command should be `@rpath/<libdependencyfilename>` (except those referring to system libs or frameworks).
 
 * Installed files must not contain absolute paths specific to build machine. Relative paths to other packages is also forbidden since relative paths of dependencies during build may not be the same for consumers. Hardcoded relative paths pointing to a location in the package itself are allowed.
 

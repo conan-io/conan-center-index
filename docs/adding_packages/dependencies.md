@@ -54,7 +54,7 @@ class ExampleConan(ConanFile):
 ```
 
 If a dependency was added (or removed) with a release, then the `if` condition could check [`self.version`](https://docs.conan.io/1/reference/conanfile/attributes.html#version). Another common case is
-`self.settings.os` dependant requirements which need to be added for certain plaforms.
+`self.settings.os` dependant requirements which need to be added for certain platforms.
 
 ### Build Requirements
 
@@ -82,7 +82,7 @@ this is not guaranteed and not a common practice.
 
 Forcing options of dependencies inside a ConanCenter should be avoided, except if it is mandatory for the library to build.
 Our general belief is the users input should be the most important; it's unexpected for command line arguments to be over ruled
-by specifc recipes.
+by specific recipes.
 
 You need to use the [`validate()`](https://docs.conan.io/1/reference/conanfile/methods.html#validate) method in order to ensure they check after the Conan graph is completely built.
 
