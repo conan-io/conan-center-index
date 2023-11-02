@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import check_min_vs
 from conan.tools.scm import Version
@@ -46,9 +46,6 @@ class VulkanLoaderConan(ConanFile):
     def _is_pkgconf_needed(self):
         return self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib") or \
                self.options.get_safe("with_wsi_wayland") or self.options.get_safe("with_wsi_directfb")
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -132,8 +129,6 @@ class VulkanLoaderConan(ConanFile):
             pkg.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         if Version(self.version) < "1.3.234":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "FindVulkanHeaders.cmake"),
                                   "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
