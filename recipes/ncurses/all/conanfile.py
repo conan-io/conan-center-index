@@ -170,10 +170,10 @@ class NCursesConan(ConanFile):
 
         if is_msvc(self):
             env = Environment()
-            env.define("CC", "cl -nologo")
-            env.define("CXX", "cl -nologo")
-            env.define("LD", "link -nologo")
-            env.define("AR", "lib -nologo")
+            env.define("CC", "cl")
+            env.define("CXX", "cl")
+            env.define("LD", "link")
+            env.define("AR", "lib")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
