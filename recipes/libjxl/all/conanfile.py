@@ -17,7 +17,7 @@ class LibjxlConan(ConanFile):
     homepage = "https://github.com/libjxl/libjxl"
     topics = ("image", "jpeg-xl", "jxl", "jpeg")
     package_type = "library"
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -28,7 +28,7 @@ class LibjxlConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 11
 
     def export_sources(self):
@@ -54,8 +54,8 @@ class LibjxlConan(ConanFile):
         self.requires("lcms/2.14")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
