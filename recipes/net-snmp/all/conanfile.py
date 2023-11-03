@@ -4,7 +4,7 @@ import stat
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, chdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, NMakeToolchain
 
@@ -53,11 +53,12 @@ class NetSnmpConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/[>=1.1 <2]")
+        self.requires("openssl/1.1.1w")
+        self.requires("pcre/8.45")
 
     def validate(self):
         if self.settings.os == "Windows" and not is_msvc(self):
-            raise ConanInvalidConfiguration("net-snmp is setup to build only with MSVC on Windows")
+            raise ConanInvalidConfiguration("net-snmp is set up to build only with MSVC on Windows")
 
     def build_requirements(self):
         if is_msvc(self):
@@ -76,7 +77,15 @@ class NetSnmpConan(ConanFile):
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
+            debug_flag = "enable" if self._is_debug else "disable"
+            ipv6_flag = "enable" if self.options.with_ipv6 else "disable"
+            openssl_path = self.dependencies["openssl"].package_folder
+            zlib_path = self.dependencies["zlib"].package_folder
             tc.configure_args += [
+                f"--with-openssl={openssl_path}",
+                f"--with-zlib={zlib_path}",
+                f"--{debug_flag}-debugging",
+                f"--{ipv6_flag}-ipv6",
                 "--with-defaults",
                 "--without-rpm",
                 "--without-pcre",
@@ -86,13 +95,28 @@ class NetSnmpConan(ConanFile):
                 "--disable-scripts",
                 "--disable-mibs",
                 "--disable-embedded-perl",
-                "--disable-{}".format("static" if self.options.shared else "shared"),
-                "--{}-debugging".format("enable" if self._is_debug else "disable"),
-                "--{}-ipv6".format("enable" if self.options.with_ipv6 else "disable"),
-                "--with-openssl={}".format(self.dependencies["openssl"].package_folder),
             ]
+            if self.settings.os == "Neutrino":
+                tc.configure_args.append("--with-endianness=little")
+                if self.settings.os.version == "7.0":
+                    tc.configure_args.append("ac_cv_func_asprintf=no")
+
+            if self.settings.os in ["Linux"]:
+                tc.extra_ldflags.append("-ldl")
+                tc.extra_ldflags.append("-lpthread")
+
+            if self.settings.os in ["Neutrino"]:
+                tc.extra_ldflags.append("-ldl")
+                tc.extra_ldflags.append("-lsocket")
+
+                if self.settings.os.version == "7.1":
+                    tc.extra_ldflags.append("-lregex")
             tc.generate()
+
             deps = AutotoolsDeps(self)
+            deps.generate()
+
+            deps = PkgConfigDeps(self)
             deps.generate()
 
     def _patch_msvc(self):
@@ -173,7 +197,9 @@ class NetSnmpConan(ConanFile):
                      src=os.path.join(self.source_folder, "win32"))
         else:
             autotools = Autotools(self)
-            autotools.install(args=["NOAUTODEPS=1"])
+            #only install with -j1 as parallel install will break dependencies. Probably a bug in the dependencies
+            #install specific targets instead of just everything as it will try to do perl stuff on you host machine
+            autotools.install(args=["-j1"], target="installsubdirs installlibs installprogs installheaders")
             rm(self, "README", self.package_folder, recursive=True)
             rmdir(self, os.path.join(self.package_folder, "bin"))
             rm(self, "*.la", self.package_folder, recursive=True)
@@ -186,3 +212,9 @@ class NetSnmpConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["netsnmp"]
+
+        if self.settings.os == "Neutrino":
+            self.cpp_info.system_libs.append("socket")
+
+        if self.settings.os == "Neutrino" and self.settings.os.version == "7.1":
+            self.cpp_info.system_libs.append("regex")
