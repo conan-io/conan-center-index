@@ -142,13 +142,13 @@ class OpenSceneGraphConanFile(ConanFile):
         if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.5")
+            self.requires("libjpeg-turbo/3.0.0")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
-            self.requires("mozjpeg/4.1.1")
+            self.requires("mozjpeg/4.1.3")
         if self.options.get_safe("with_openexr"):
-            self.requires("openexr/3.2.1")
+            self.requires("openexr/3.1.9")
         if self.options.get_safe("with_png"):
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
         if self.options.with_tiff:
             self.requires("libtiff/4.6.0")
         if self.options.with_zlib:
