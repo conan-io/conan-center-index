@@ -26,7 +26,7 @@ patches:
       patch_description: "Remove dependency on extra-cmake-modules to fix generation of Wayland Protocols"
       patch_type: "portability"
       patch_source: "https://github.com/glfw/glfw/commit/2747e47393cbca2d09db56223e735bd94b21e2eb"
-    - patch_file: "patches/3.3.3-0002-Use-dependencies-from-Conan.patch"
+    - patch_file: "patches/3.3.5-0002-Use-dependencies-from-Conan.patch"
       patch_description: "Use dependencies from Conan"
       patch_type: "conan"
   "3.3.7":
@@ -34,7 +34,7 @@ patches:
       patch_description: "Remove dependency on extra-cmake-modules to fix generation of Wayland Protocols"
       patch_type: "portability"
       patch_source: "https://github.com/glfw/glfw/commit/2747e47393cbca2d09db56223e735bd94b21e2eb"
-    - patch_file: "patches/3.3.3-0002-Use-dependencies-from-Conan.patch"
+    - patch_file: "patches/3.3.5-0002-Use-dependencies-from-Conan.patch"
       patch_description: "Use dependencies from Conan"
       patch_type: "conan"
   "3.3.6":
@@ -42,7 +42,7 @@ patches:
       patch_description: "Remove dependency on extra-cmake-modules to fix generation of Wayland Protocols"
       patch_type: "portability"
       patch_source: "https://github.com/glfw/glfw/commit/2747e47393cbca2d09db56223e735bd94b21e2eb"
-    - patch_file: "patches/3.3.3-0002-Use-dependencies-from-Conan.patch"
+    - patch_file: "patches/3.3.5-0002-Use-dependencies-from-Conan.patch"
       patch_description: "Use dependencies from Conan"
       patch_type: "conan"
   "3.3.5":
@@ -50,7 +50,7 @@ patches:
       patch_description: "Remove dependency on extra-cmake-modules to fix generation of Wayland Protocols"
       patch_type: "portability"
       patch_source: "https://github.com/glfw/glfw/commit/2747e47393cbca2d09db56223e735bd94b21e2eb"
-    - patch_file: "patches/3.3.3-0002-Use-dependencies-from-Conan.patch"
+    - patch_file: "patches/3.3.5-0002-Use-dependencies-from-Conan.patch"
       patch_description: "Use dependencies from Conan"
       patch_type: "conan"
   "3.3.4":
