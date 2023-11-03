@@ -84,7 +84,7 @@ class OneTBBConan(ConanFile):
         if self._tbbbind_explicit_hwloc:
             self.options["hwloc"].shared = True
         if self.options.shared != "deprecated":
-            self.output.warning("shared option is deprecated because is highly discourage: https://github.com/oneapi-src/oneTBB/issues/920")
+            self.output.warning(f"{self.ref}:shared option is deprecated because is highly discouraged: https://github.com/oneapi-src/oneTBB/issues/920")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
