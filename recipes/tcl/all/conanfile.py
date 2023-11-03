@@ -204,14 +204,8 @@ class TclConan(ConanFile):
             fix_apple_shared_install_name(self)
 
         # Relocatable tclConfig.sh
-        # Is it really required to keep this file?
         tclConfigShPath = os.path.join(self.package_folder, "lib", "tclConfig.sh")
-        ## Remove references to build folder
-        build_folder = self.build_folder
-        if self.settings.os == "Windows" and not is_msvc(self):
-            drive, path = os.path.splitdrive(self.build_folder)
-            build_folder = "".join([drive, path.lower().replace("\\", "/")])
-        replace_in_file(self, tclConfigShPath, build_folder, "${TCL_BUILD_ROOT}")
+        ## Comment out references to build folder
         replace_in_file(self, tclConfigShPath, "\nTCL_BUILD_", "\n#TCL_BUILD_")
         replace_in_file(self, tclConfigShPath, "\nTCL_SRC_DIR", "\n#TCL_SRC_DIR")
         ## Replace references to package folder by TCL_ROOT env var supposed to be defined by VirtualRunEnv
@@ -223,7 +217,7 @@ class TclConan(ConanFile):
             for to_replace in ["//", "/"]:
                 replace_in_file(self, tclConfigShPath, f"-L{to_replace}lib", "-L${TCL_ROOT}/lib", strict=False)
                 replace_in_file(self, tclConfigShPath, f"{{{to_replace}lib}}", "{${TCL_ROOT}/lib}", strict=False)
-                replace_in_file(self, tclConfigShPath, f"='{to_replace}lib/", "='${TCL_ROOT}/lib/", strict=False)
+                replace_in_file(self, tclConfigShPath, f"='{to_replace}lib", "='${TCL_ROOT}/lib", strict=False)
                 replace_in_file(self, tclConfigShPath, f"-I{to_replace}include", "-I${TCL_ROOT}/include", strict=False)
 
     def package_info(self):
