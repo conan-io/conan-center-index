@@ -35,6 +35,10 @@ class QuickfastConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
