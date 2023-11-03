@@ -1,12 +1,11 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
+cmake_minimum_required(VERSION 3.15)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+project(test_package CXX)
 
 find_package(ITK REQUIRED CONFIG)
-find_package(HDF5 COMPONENTS CXX)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ITKCommon hdf5::hdf5_cpp)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
+target_link_libraries(${PROJECT_NAME} PRIVATE ITKCommon)
+#itksys is already linked through dependencies of ITKCommon but we also want to check name alias
+target_link_libraries(${PROJECT_NAME} PRIVATE ITK::itksys)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)

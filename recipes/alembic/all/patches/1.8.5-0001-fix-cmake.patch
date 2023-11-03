@@ -1,0 +1,56 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -100,9 +100,6 @@ SET(DARWIN FALSE)
+ IF ("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin")
+     SET(DARWIN TRUE)
+     # suppress rpath warning
+-    IF (POLICY CMP0042)
+-        CMAKE_POLICY(SET CMP0042 OLD)
+-    ENDIF()
+ ENDIF()
+ 
+ SET(LINUX FALSE)
+@@ -212,7 +209,6 @@ INCLUDE("./cmake/AlembicIlmBase.cmake")
+ 
+ # HDF5
+ IF (USE_HDF5)
+-    FIND_PACKAGE(ZLIB REQUIRED)
+     SET(ALEMBIC_WITH_HDF5 "1")
+     INCLUDE("./cmake/AlembicHDF5.cmake")
+     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DH5_USE_18_API")
+--- a/lib/Alembic/CMakeLists.txt
++++ b/lib/Alembic/CMakeLists.txt
+@@ -68,28 +68,26 @@ IF (ALEMBIC_SHARED_LIBS)
+ 
+   if (ALEMBIC_USING_IMATH_3)
+     if (APPLE OR UNIX)
+-      set_target_properties(Alembic PROPERTIES INSTALL_RPATH "$<TARGET_FILE_DIR:${ALEMBIC_ILMBASE_LIBS}>")
+     endif ()
+   endif ()
+ ENDIF()
+ 
+ 
+ TARGET_LINK_LIBRARIES(Alembic
+-    LINK_PUBLIC
++    PUBLIC
+     ${ALEMBIC_ILMBASE_LIBS}
+     ${CMAKE_THREAD_LIBS_INIT}
+     ${EXTERNAL_MATH_LIBS}
+-    LINK_PRIVATE
++    PRIVATE
+     ${HDF5_LIBRARIES}
+-    ${ZLIB_LIBRARY}
+   )
+ 
+ SET( ALEMBIC_LIB_INSTALL_DIR lib CACHE STRING "Where to install the Alembic libs")
+ INSTALL(TARGETS Alembic
+         EXPORT AlembicTargets
+-        LIBRARY DESTINATION ${ALEMBIC_LIB_INSTALL_DIR}
+-        ARCHIVE DESTINATION ${ALEMBIC_LIB_INSTALL_DIR}
+-        RUNTIME DESTINATION ${ALEMBIC_LIB_INSTALL_DIR})
++        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+ #-******************************************************************************
+ # PACKAGE EXPORTS

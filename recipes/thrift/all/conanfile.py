@@ -67,11 +67,11 @@ class ThriftConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0", transitive_headers=True)
+        self.requires("boost/1.82.0", transitive_headers=True)
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
         if self.options.with_qt5:

@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -14,10 +14,19 @@ class ArchicadApidevkitConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://archicadapi.graphisoft.com/"
     license = "LicenseRef-LICENSE"
-    settings = "os", "compiler", "arch", "build_type"
+    topics = ("api", "archicad", "development", "pre-built")
+
+    package_type = "application"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    topics = "api", "archicad", "development"
     short_paths = True
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def validate(self):
         if self.settings.build_type == "Debug":
@@ -31,9 +40,6 @@ class ArchicadApidevkitConan(ConanFile):
         if not str(self.settings.arch) in ("x86_64"):
             raise ConanInvalidConfiguration(
                 f"{self.ref} is not supported yet.")
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "16":
-            raise ConanInvalidConfiguration(
-                "This recipe does not support this compiler version")
 
     def build(self):
         devkit, licenses = self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)]

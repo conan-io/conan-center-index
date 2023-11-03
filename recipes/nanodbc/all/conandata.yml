@@ -1,26 +1,25 @@
 sources:
-  "cci.20200807":
-    url: "https://github.com/nanodbc/nanodbc/archive/ab8d176262f92d5f75aa2d441bfce27041032201.zip"
-    sha256: "9de057ae6e8d0b9192df1d16ccc70ce7525ca9fe52e56fa8d13cfae9206f8286"
-  "2.13.0":
-    url: "https://github.com/nanodbc/nanodbc/archive/v2.13.0.zip"
-    sha256: "1287869b6ca82728cb6cc53c54f836c72cde15370c16f32d81c9ef6c257f7e43"
   "2.14.0":
     url: "https://github.com/nanodbc/nanodbc/archive/v2.14.0.tar.gz"
     sha256: "56228372042b689beccd96b0ac3476643ea85b3f57b3f23fb11ca4314e68b9a5"
-patches:
-  "cci.20200807":
-    - patch_file: "patches/0001-odbc-from-cci.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-allow-windows-shared.patch"
-      base_path: "source_subfolder"
   "2.13.0":
-    - patch_file: "patches/0001-odbc-from-cci.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-allow-windows-shared.patch"
-      base_path: "source_subfolder"
+    url: "https://github.com/nanodbc/nanodbc/archive/v2.13.0.zip"
+    sha256: "1287869b6ca82728cb6cc53c54f836c72cde15370c16f32d81c9ef6c257f7e43"
+patches:
   "2.14.0":
     - patch_file: "patches/0001-odbc-from-cci.patch"
-      base_path: "source_subfolder"
+      patch_description: "Allow compilation on CI with ODBC library"
+      patch_type: "portability"
     - patch_file: "patches/0002-allow-windows-shared.patch"
-      base_path: "source_subfolder"
+      patch_description: "Allow windows to compile shared libraries"
+      patch_type: "portability"
+  "2.13.0":
+    - patch_file: "patches/0001-odbc-from-cci.patch"
+      patch_description: "Allow compilation on CI with ODBC library"
+      patch_type: "portability"
+    - patch_file: "patches/0002-allow-windows-shared.patch"
+      patch_description: "Allow windows to compile shared libraries"
+      patch_type: "portability"
+    - patch_file: "patches/0003-add-missing-include.patch"
+      patch_description: "Add missing include to fix compilation"
+      patch_type: "portability"

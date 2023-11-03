@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
+cmake_minimum_required(VERSION 3.15)
 
-set(CMAKE_CXX_STANDARD 17)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+project(test_package CXX) # if the project uses c++
+find_package(stlab REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+target_compile_definitions( ${PROJECT_NAME} INTERFACE $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX> )
+target_link_libraries(${PROJECT_NAME} PRIVATE stlab::stlab)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+

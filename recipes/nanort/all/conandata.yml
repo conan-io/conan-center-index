@@ -1,0 +1,4 @@
+sources:
+  "cci.20230207":
+    url: "https://github.com/lighttransport/nanort/archive/0bb8ab5284ee8ab7e75705aaedeaea7d7e63e1fe.zip"
+    sha256: "08b22d1a8bd3ec2667a71cb71281c08d37d72a81baa0c3272e01db24ef191db5"

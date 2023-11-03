@@ -1,9 +1,13 @@
 from conan import ConanFile
-from conan.tools import files
 from conan.errors import ConanInvalidConfiguration
-from conans import CMake
+from conan.tools.microsoft import is_msvc
+from conan.tools.files import get, copy, rmdir
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+import os
 
-required_conan_version = ">=1.50.0"
+
+required_conan_version = ">=1.53.0"
+
 
 class SshtConan(ConanFile):
     name = "ssht"
@@ -13,47 +17,51 @@ class SshtConan(ConanFile):
     description = "Fast spin spherical harmonic transforms"
     settings = "os", "arch", "compiler", "build_type"
     topics = ("physics", "astrophysics", "radio interferometry")
+    package_type = "static-library"
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
-    requires = "fftw/3.3.9"
-    generators = "cmake", "cmake_find_package", "cmake_paths"
-    exports_sources = ["CMakeLists.txt"]
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def config_options(self):
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
-    
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("fftw/3.3.10")
+
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             raise ConanInvalidConfiguration("SSHT requires C99 support for complex numbers.")
 
     def source(self):
-        files.get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @property
-    def cmake(self):
-        if not hasattr(self, "_cmake"):
-            self._cmake = CMake(self)
-            self._cmake.definitions["tests"] = False
-            self._cmake.definitions["python"] = False
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["tests"] = False
+        tc.cache_variables["python"] = False
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("fftw", "cmake_target_name", "FFTW3::FFTW3")
+        deps.generate()
+
 
     def build(self):
-        self.cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.cmake.install()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["ssht"]

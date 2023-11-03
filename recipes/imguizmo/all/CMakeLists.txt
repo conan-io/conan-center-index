@@ -1,27 +1,22 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(imguizmo CXX)
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-include(conanbuildinfo.cmake)
-conan_basic_setup()
-
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-set(SOURCE_DIR source_subfolder)
+set(SOURCE_DIR src)
 file(GLOB SOURCE_FILES ${SOURCE_DIR}/*.cpp)
 file(GLOB HEADER_FILES ${SOURCE_DIR}/*.h)
 
+find_package(imgui CONFIG REQUIRED)
+
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME} PUBLIC imgui::imgui)
 
 include(GNUInstallDirs)
-
-install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS ${PROJECT_NAME})
 install(FILES ${HEADER_FILES}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)

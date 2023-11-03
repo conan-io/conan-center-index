@@ -84,7 +84,7 @@ class TestPackageConan(ConanFile):
 
         # Build test project
         autotools = Autotools(self)
-        autotools.autoreconf(args=['--debug'])
+        autotools.autoreconf(args=["--debug"])
         autotools.configure()
         autotools.make()
 

@@ -1,43 +1,58 @@
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.52.0"
 
 class DbgMacroConan(ConanFile):
     name = "dbg-macro"
+    description = "A dbg(...) macro for C++"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/sharkdp/dbg-macro"
-    license = "MIT"
-    description = "A dbg(...) macro for C++"
-    topics = ("conan", "debugging", "macro", "pretty-printing", "header-only")
-    settings = ("compiler", )
+    topics = ("debugging", "macro", "pretty-printing", "header-only")
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 17
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def configure(self):
-        minimal_cpp_standard = "11"
-        if self.settings.get_safe("compiler.cppstd"):
-            tools.check_min_cppstd(self, minimal_cpp_standard)
-
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration(
-                "dbg-mcro can't be used by {0} {1}".format(
-                    self.settings.compiler,
-                    self.settings.compiler.version
-                )
-            )
-
-    def package(self):
-        self.copy("dbg.h", dst="include", src=self._source_subfolder)
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "8",
+        }
+    
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe('cppstd'):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def package(self):
+        copy(self, "dbg.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

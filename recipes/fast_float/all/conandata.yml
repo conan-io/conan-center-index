@@ -1,4 +1,10 @@
 sources:
+  "5.2.0":
+    url: "https://github.com/fastfloat/fast_float/archive/v5.2.0.tar.gz"
+    sha256: "72bbfd1914e414c920e39abdc81378adf910a622b62c45b4c61d344039425d18"
+  "5.1.0":
+    url: "https://github.com/fastfloat/fast_float/archive/v5.1.0.tar.gz"
+    sha256: "37a0de5473ed6b9617ea4c199c2d5bda45ab027dbe72220fe36cf3000f9f23bf"
   "5.0.0":
     url: "https://github.com/fastfloat/fast_float/archive/v5.0.0.tar.gz"
     sha256: "86645ab4af22d21d4ba2d980572dfb74faf90c20c52240d7d8d2201f3eaf4252"
