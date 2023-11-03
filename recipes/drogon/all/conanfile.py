@@ -14,10 +14,11 @@ required_conan_version = ">=1.53.0"
 class DrogonConan(ConanFile):
     name = "drogon"
     description = "A C++14/17/20 based HTTP web application framework running on Linux/macOS/Unix/Windows"
-    topics = ("http-server", "non-blocking-io", "http-framework", "asynchronous-programming")
     license = "MIT"
-    homepage = "https://github.com/drogonframework/drogon"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/drogonframework/drogon"
+    topics = ("http-server", "non-blocking-io", "http-framework", "asynchronous-programming")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [False, True],
@@ -49,7 +50,6 @@ class DrogonConan(ConanFile):
         "with_sqlite": False,
         "with_redis": False,
     }
-    package_type = "library"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -110,24 +110,24 @@ class DrogonConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires boost on C++14")
 
     def requirements(self):
-        self.requires("trantor/1.5.13", transitive_headers=True, transitive_libs=True)
+        self.requires("trantor/1.5.14", transitive_headers=True, transitive_libs=True)
         self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os == "Linux":
-            self.requires("util-linux-libuuid/2.39")
+            self.requires("util-linux-libuuid/2.39.2")
         if self.options.with_profile:
             self.requires("coz/cci.20210322")
         if self.options.with_boost:
             self.requires("boost/1.83.0", transitive_headers=True)
         if self.options.with_brotli:
-            self.requires("brotli/1.0.9")
+            self.requires("brotli/1.1.0")
         if self.options.get_safe("with_postgres"):
             self.requires("libpq/15.4")
         if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.1.0")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.42.0")
+            self.requires("sqlite3/3.43.2")
         if self.options.get_safe("with_redis"):
             self.requires("hiredis/1.2.0")
         if self.options.get_safe("with_yaml_cpp", False):
