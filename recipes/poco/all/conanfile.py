@@ -4,6 +4,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, VCVars
 from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
 from collections import namedtuple
 import os
 
@@ -76,6 +77,26 @@ class PocoConan(ConanFile):
             default_options[comp.option] = comp.default_option
     del comp
 
+    @property
+    def _min_cppstd(self):
+        # Since 1.10.0, poco officially requires C++14
+        # https://github.com/pocoproject/poco/releases/tag/poco-1.10.0-release
+        # But poco uses C++11 features only until 1.12.5
+        # https://github.com/pocoproject/poco/commit/886b76f4faa2007cc0c09dad81f8dcdee6fcb4ac
+        return "11" if Version(self.version) < "1.12.5" else "14"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "14": {
+                "gcc": "6",
+                "clang": "5",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+        }.get(self._min_cppstd, {})
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -133,6 +154,14 @@ class PocoConan(ConanFile):
         del self.info.options.enable_active_record
 
     def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
         if self.options.enable_apacheconnector:
             # FIXME: missing apache2 recipe + few issues
             raise ConanInvalidConfiguration("Apache connector not supported: https://github.com/pocoproject/poco/issues/1764")
