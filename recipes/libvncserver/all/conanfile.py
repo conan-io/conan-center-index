@@ -21,7 +21,7 @@ class LibVncServerConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_zlib": [True, False],
-        "with_lzo": [True, False],
+        #"with_lzo": [True, False],
         "with_libjpeg": ["libjpeg", "libjpeg-turbo", False],
         "with_libpng": [True, False],
         "with_sdl": [True, False],
@@ -29,7 +29,7 @@ class LibVncServerConan(ConanFile):
         "with_libssh2": [True, False],
         "with_openssl": [True, False],
         "with_systemd": [True, False],
-        "with_libgcrypt": [True, False],
+        #"with_libgcrypt": [True, False],
         "with_ffmpeg": [True, False],
         "with_sasl": [True, False],
         "with_xcb": [True, False],
@@ -38,7 +38,7 @@ class LibVncServerConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_zlib": True,
-        "with_lzo": False, # TODO should be true
+        #"with_lzo": False,
         "with_libjpeg": "libjpeg",
         "with_libpng": True,
         "with_sdl": True,
@@ -46,7 +46,7 @@ class LibVncServerConan(ConanFile):
         "with_libssh2": True,
         "with_openssl": True,
         "with_systemd": True,
-        "with_libgcrypt": False, # TODO should be true
+        #"with_libgcrypt": True,
         "with_ffmpeg": True,
         "with_sasl": True,
         "with_xcb": True,
@@ -73,8 +73,8 @@ class LibVncServerConan(ConanFile):
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
-        if self.options.with_lzo:
-            self.requires("lzo/2.10", transitive_headers=True, transitive_libs=True)
+        #if self.options.with_lzo:
+        #    self.requires("lzo/2.10")
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
@@ -91,8 +91,8 @@ class LibVncServerConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_systemd:
             self.requires("libsystemd/253.10")
-        if self.options.with_libgcrypt:
-            self.requires("libgcrypt/1.8.4")
+        #if self.options.with_libgcrypt:
+        #    self.requires("libgcrypt/1.8.4")
         if self.options.with_ffmpeg:
             self.requires("ffmpeg/6.0")
         if self.options.with_sasl:
@@ -114,7 +114,7 @@ class LibVncServerConan(ConanFile):
         tc.variables["WITH_EXAMPLES"] = False
 
         tc.variables["WITH_ZLIB"] = self.options.with_zlib
-        tc.variables["WITH_LZO"] = self.options.with_lzo
+        #tc.variables["WITH_LZO"] = self.options.with_lzo
         tc.variables["WITH_JPEG"] = self.options.with_libjpeg
         tc.variables["WITH_PNG"] = self.options.with_libpng
         tc.variables["WITH_SDL"] = self.options.with_sdl
@@ -122,7 +122,7 @@ class LibVncServerConan(ConanFile):
         tc.variables["WITH_LIBSSH2"] = self.options.with_libssh2
         tc.variables["WITH_OPENSSL"] = self.options.with_openssl
         tc.variables["WITH_SYSTEMD"] = self.options.with_systemd
-        tc.variables["WITH_GCRYPT"] = self.options.with_libgcrypt
+        #tc.variables["WITH_GCRYPT"] = self.options.with_libgcrypt
         tc.variables["WITH_FFMPEG"] = self.options.with_ffmpeg
         tc.variables["WITH_SASL"] = self.options.with_sasl
         tc.variables["WITH_XCB"] = self.options.with_xcb
