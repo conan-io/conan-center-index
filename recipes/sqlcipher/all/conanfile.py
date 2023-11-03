@@ -3,7 +3,8 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -139,6 +140,10 @@ class SqlcipherConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
 
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         tc = AutotoolsToolchain(self)
         tc.configure_args += [
             f"--enable-tempstore={self._temp_store_autotools_value}",
@@ -166,8 +171,8 @@ class SqlcipherConan(ConanFile):
             tc.extra_defines.append("SQLCIPHER_CRYPTO_OPENSSL")
         tc.generate()
 
-        tc = AutotoolsDeps(self)
-        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def generate(self):
         if is_msvc(self):
