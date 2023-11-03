@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import check_min_vs
 from conan.tools.scm import Version
@@ -19,19 +18,15 @@ class VulkanLoaderConan(ConanFile):
     homepage = "https://github.com/KhronosGroup/Vulkan-Loader"
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
-
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
         "with_wsi_xcb": [True, False],
         "with_wsi_xlib": [True, False],
         "with_wsi_wayland": [True, False],
         "with_wsi_directfb": [True, False],
     }
     default_options = {
-        "shared": True,
-        "fPIC": True,
         "with_wsi_xcb": True,
         "with_wsi_xlib": True,
         "with_wsi_wayland": True,
@@ -47,12 +42,7 @@ class VulkanLoaderConan(ConanFile):
         return self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib") or \
                self.options.get_safe("with_wsi_wayland") or self.options.get_safe("with_wsi_directfb")
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
         if self.settings.os != "Linux":
             del self.options.with_wsi_xcb
             del self.options.with_wsi_xlib
@@ -60,13 +50,6 @@ class VulkanLoaderConan(ConanFile):
             del self.options.with_wsi_directfb
 
     def configure(self):
-        if not is_apple_os(self):
-            # static builds are not supported
-            self.options.rm_safe("shared")
-            self.options.rm_safe("fPIC")
-            self.package_type = "shared-library"
-        if self.options.get_safe("shared"):
-            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
@@ -118,8 +101,6 @@ class VulkanLoaderConan(ConanFile):
             tc.variables["BUILD_WSI_DIRECTFB_SUPPORT"] = self.options.with_wsi_directfb
         if self.settings.os == "Windows":
             tc.variables["ENABLE_WIN10_ONECORE"] = False
-        if is_apple_os(self):
-            tc.variables["BUILD_STATIC_LOADER"] = not self.options.shared
         tc.variables["BUILD_LOADER"] = True
         if self.settings.os == "Windows":
             tc.variables["USE_MASM"] = True
@@ -133,8 +114,6 @@ class VulkanLoaderConan(ConanFile):
             pkg.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         if Version(self.version) < "1.3.234":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "FindVulkanHeaders.cmake"),
                                   "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
