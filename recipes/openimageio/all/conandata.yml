@@ -1,16 +1,16 @@
 sources:
   "2.2.7.0":
-    url: "https://github.com/OpenImageIO/oiio/archive/Release-2.2.7.0.tar.gz"
-    sha256: "857ac83798d6d2bda5d4d11a90618ff19486da2e5a4c4ff022c5976b5746fe8c"
+    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.2.7.0.tar.gz"
+    sha256: "6126fb8b1a8be0106c78056652a249791e43b8741d6db3e9921a29ad823c1590"
   "2.2.18.0":
-    url: "https://github.com/OpenImageIO/oiio/archive/refs/tags/v2.2.18.0.tar.gz"
-    sha256: "72597619f09b60cc2afc18f378b40fbec62701112957f43cff162dd9a52a26ce"
+    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.2.18.0.tar.gz"
+    sha256: "b87a3086de76cc295f0d34f5785ddb1561acc61b64c1626b3dba38229fe09ce1"
   "2.3.7.2":
-    url: "https://github.com/OpenImageIO/oiio/archive/refs/tags/v2.3.7.2.tar.gz"
-    sha256: "829c05d17610f1156c2a777310f4709b81f3a302fd11e3999ea4a865a5b4a5d3"
+    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.3.7.2.tar.gz"
+    sha256: "b28be82fc9f6a833da8a21b4e6a658456ec16a653cd2d5794d082c14863979ab"
   "2.4.7.1":
-    url: "https://github.com/OpenImageIO/oiio/archive/refs/tags/v2.4.7.1.tar.gz"
-    sha256: "fd298f71e44c6776863db4b37c4a1388dba0d2eb37378afea95ab07a7cd6ecd4"
+    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.4.7.1.tar.gz"
+    sha256: "a3dc6fdb3693eb5f1e22191e41c05800a4944f3c76daffe90bd203f956180126"
 patches:
   "2.2.7.0":
     - patch_file: "patches/2.2.7.0-cmake-targets.patch"
