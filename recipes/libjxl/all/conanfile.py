@@ -68,27 +68,33 @@ class LibjxlConan(ConanFile):
         tc.generate()
 
         tc = CMakeDeps(self)
-        tc.set_property("brotli::brotlicommon", "cmake_target_name", "brotlicommon-static")
-        tc.set_property("brotli::brotlienc", "cmake_target_name", "brotlienc-static")
-        tc.set_property("brotli::brotlidec", "cmake_target_name", "brotlidec-static")
-        tc.set_property("highway", "cmake_target_name", "hwy")
-        tc.set_property("lcms", "cmake_target_name", "lcms2")
         tc.generate()
 
     def _patch_sources(self):
+        # Disable tools and extras
         save(self, os.path.join(self.source_folder, "tools", "CMakeLists.txt"), "")
         save(self, os.path.join(self.source_folder, "lib", "jxl_extras.cmake"), "")
+        # Inject Conan dependencies
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "add_subdirectory(third_party)",
                         ("find_package(lcms REQUIRED CONFIG)\n"
                          "find_package(brotli REQUIRED CONFIG)\n"
                          "find_package(highway REQUIRED CONFIG)\n"
-                         "link_libraries(brotli::brotli hwy lcms2)\n")
-        )
-        replace_in_file(self, os.path.join(self.source_folder, "lib", "jxl.cmake"),
-                        '"$<BUILD_INTERFACE:$<TARGET_PROPERTY', "# ", strict=False)
-        replace_in_file(self, os.path.join(self.source_folder, "lib", "jxl.cmake"),
-                        "$<TARGET_PROPERTY", "# ", strict=False)
+                         "link_libraries(brotli::brotli highway::highway lcms::lcms)\n")
+                        )
+        # Do not link directly against libraries
+        jxl_cmake = os.path.join(self.source_folder, "lib", "jxl.cmake")
+        for lib, replacement in [
+            ("hwy", "highway::highway"),
+            ("brotlicommon-static", "brotli::brotli"),
+            ("brotlienc-static", "brotli::brotli"),
+            ("brotlidec-static", "brotli::brotli"),
+            ("lcms2", "lcms::lcms"),
+        ]:
+            replace_in_file(self, jxl_cmake, lib, replacement)
+        # Avoid "INTERFACE_LIBRARY targets may only have whitelisted properties" error with Conan v1
+        replace_in_file(self, jxl_cmake, '"$<BUILD_INTERFACE:$<TARGET_PROPERTY', "# ", strict=False)
+        replace_in_file(self, jxl_cmake, "$<TARGET_PROPERTY", "# ", strict=False)
 
     def build(self):
         self._patch_sources()
