@@ -18,9 +18,17 @@ patches:
       base_path: source_subfolder
     - patch_file: patches/0007-fix-msvc-with-std-c++17.patch
       base_path: source_subfolder
+      patch_type: bugfix
+      patch_source: https://github.com/openscenegraph/OpenSceneGraph/pull/1055
     - patch_file: patches/0008-replace-mem-fun-ref.patch
       base_path: source_subfolder
+      patch_type: bugfix
+      patch_source: https://github.com/openscenegraph/OpenSceneGraph/commit/8a0114a46a4bad9041297950fe3bfbb2aea6e1da
     - patch_file: patches/0009-replace-auto-ptr-in-plugins.patch
       base_path: source_subfolder
+      patch_type: portability
+      patch_source: https://github.com/openscenegraph/OpenSceneGraph/pull/1246
     - patch_file: patches/0010-replace-ptr-fun-in-obj-plugin.patch
       base_path: source_subfolder
+      patch_type: portability
+      patch_source: https://github.com/openscenegraph/OpenSceneGraph/pull/1246
