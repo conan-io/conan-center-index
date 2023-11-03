@@ -113,6 +113,9 @@ class EnjinCppSdk(ConanFile):
 
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "RAPIDJSON", "RapidJSON")
+        # Remove version check for RapidJSON
+        save(self, os.path.join(self.source_folder, "cmake", "enjinsdk_find_rapidjson.cmake"),
+             "find_package(RapidJSON REQUIRED CONFIG)")
 
     def build(self):
         self._patch_sources()
