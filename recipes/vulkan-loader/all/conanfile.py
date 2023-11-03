@@ -63,6 +63,7 @@ class VulkanLoaderConan(ConanFile):
         if not is_apple_os(self):
             # static builds are not supported
             self.options.rm_safe("shared")
+            self.options.rm_safe("fPIC")
             self.package_type = "shared-library"
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
