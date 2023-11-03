@@ -47,7 +47,7 @@ class LibCheckConan(ConanFile):
 
     def requirements(self):
         if self.options.with_subunit:
-            self.requires("subunit/1.4.0", transitive_headers=True)
+            self.requires("subunit/1.4.0", transitive_headers=True, transitive_libs=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
