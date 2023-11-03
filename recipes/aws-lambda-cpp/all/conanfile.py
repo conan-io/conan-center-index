@@ -45,7 +45,7 @@ class AwsLambdaRuntimeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcurl/8.2.1")
+        self.requires("libcurl/[>=7.78.0 <9]")
         self.requires("libbacktrace/cci.20210118")
 
     def validate(self):
