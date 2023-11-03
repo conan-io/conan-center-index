@@ -157,9 +157,6 @@ class NCursesConan(ConanFile):
                 "ac_cv_func_setvbuf_reversed=no",
             ])
             tc.extra_cxxflags.append("-EHsc")
-            if check_min_vs(self, 180, raise_invalid=False):
-                tc.extra_cflags.append("-FS")
-                tc.extra_cxxflags.append("-FS")
             if self.options.get_safe("with_extended_colors"):
                 tc.extra_cflags.append(" ".join(f"-I{dir}" for dir in self.dependencies["naive-tsearch"].cpp_info.includedirs))
                 tc.extra_ldflags.append(" ".join(f"-l{lib}" for lib in self.dependencies["naive-tsearch"].cpp_info.libs))
@@ -177,8 +174,8 @@ class NCursesConan(ConanFile):
 
         if is_msvc(self):
             env = Environment()
-            env.define("CC", "cl -nologo")
-            env.define("CXX", "cl -nologo")
+            env.define("CC", "cl -nologo -FS")
+            env.define("CXX", "cl -nologo -FS")
             env.define("LD", "link")
             env.define("AR", "lib")
             env.define("NM", "dumpbin -symbols")
