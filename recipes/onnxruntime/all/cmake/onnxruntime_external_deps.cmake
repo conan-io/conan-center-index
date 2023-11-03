@@ -61,6 +61,7 @@ set(eigen_INCLUDE_DIRS ${Eigen3_INCLUDE_DIRS})
 if(WIN32)
   find_package(wil REQUIRED CONFIG)
   list(APPEND onnxruntime_EXTERNAL_LIBRARIES WIL::WIL)
+  include_directories(${wil_INCLUDE_DIRS})
 endif()
 
 # XNNPACK EP
