@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 
 required_conan_version = ">=1.53.0"
 
@@ -14,7 +14,7 @@ class QuickfastConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://objectcomputing.com/"
-    topics = ("conan", "QuickFAST", "FAST", "FIX", "Fix Adapted for STreaming", "Financial Information Exchange", "libraries", "cpp")
+    topics = ("QuickFAST", "FAST", "FIX", "Fix Adapted for STreaming", "Financial Information Exchange")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -39,7 +39,8 @@ class QuickfastConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.83.0")
+        # Uses Boost.Asio transitively
+        self.requires("boost/1.83.0", transitive_headers=True, transitive_libs=True)
         self.requires("xerces-c/3.2.4")
 
     def validate(self):
@@ -58,8 +59,8 @@ class QuickfastConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.export_sources_folder)
-        cmake.build(target="quickfast")
+        cmake.configure(build_script_folder=self.source_path.parent)
+        cmake.build()
 
     def package(self):
         cmake = CMake(self)
@@ -69,7 +70,7 @@ class QuickfastConan(ConanFile):
              src=self.source_folder)
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["quickfast"]
         self.cpp_info.includedirs.append(os.path.join("include", "quickfast"))
 
         if not self.options.shared:

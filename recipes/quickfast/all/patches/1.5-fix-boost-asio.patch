@@ -1,0 +1,30 @@
+--- src/Communication/AsioService_fwd.h
++++ src/Communication/AsioService_fwd.h
+@@ -11,15 +11,7 @@
+ #error Please include <Application/QuickFAST.h> preferably as a precompiled header file.
+ #endif //QUICKFAST_HEADERS
+ 
+-// forward declare io_service without including
+-// boost header
+-namespace boost
+-{
+-  namespace asio
+-  {
+-    class io_service;
+-  }
+-}
++#include <boost/asio/io_service.hpp>
+ 
+ namespace QuickFAST
+ {
+--- src/Communication/AsioService.h
++++ src/Communication/AsioService.h
+@@ -24,7 +24,7 @@
+     /// Normal case is for all classes derived from AsioService to share
+     /// the same boost::io_service.  The alternate constructor gives the
+     /// application more control if it is needed.
+-    class QuickFAST_Export AsioService
++    class QuickFAST_Export AsioService : public boost::asio::io_service
+     {
+     public:
+       /// @brief Construct using the internal, common io service
