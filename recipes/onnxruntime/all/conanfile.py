@@ -211,6 +211,8 @@ class OnnxRuntimeConan(ConanFile):
         tc.variables["onnxruntime_ENABLE_CUDA_PROFILING"] = False
         tc.variables["onnxruntime_ENABLE_ROCM_PROFILING"] = False
         tc.variables["onnxruntime_USE_CANN"] = False
+        # Disable a warning that gets converted to an error
+        tc.preprocessor_definitions["_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS"] = "1"
         tc.generate()
 
         deps = CMakeDeps(self)
