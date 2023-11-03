@@ -50,6 +50,8 @@ class SimdConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["SIMD_TEST"] = False
+        tc.variables["SIMD_SHARED"] = self.options.shared
         tc.generate()
 
     def build(self):
