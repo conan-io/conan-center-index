@@ -13,6 +13,10 @@ sources:
     sha256: "3e6f6c399493fe90efdc21a3fe70c30434b7480e8195642a959f1dd7a0fa5b0f"
 patches:
   "3.3.3":
+    - patch_file: "patches/3.3.3-0002-fix-zstd-library.patch"
+      patch_description: "Fix zstd library name when linking static"
+      patch_type: "portability"
+      patch_source: "https://github.com/mariadb-corporation/mariadb-connector-c/pull/239"
     - patch_file: "patches/3.3.3-0001-fix-install-and-static-or-shared.patch"
       patch_description: "fix install path, separate static/shared build"
       patch_type: "conan"
