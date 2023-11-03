@@ -96,6 +96,7 @@ class MariadbConnectorcConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("zstd", "cmake_file_name", "ZSTD")
         deps.generate()
 
     def _patch_sources(self):
