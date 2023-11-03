@@ -25,7 +25,7 @@ class OneTBBConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
+        "shared": [True, False, "deprecated"],
         "fPIC": [True, False],
         "tbbmalloc": [True, False],
         "tbbproxy": [True, False],
@@ -33,7 +33,7 @@ class OneTBBConan(ConanFile):
         "interprocedural_optimization": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": "deprecated",
         "fPIC": True,
         "tbbmalloc": True,
         "tbbproxy": True,
@@ -71,7 +71,6 @@ class OneTBBConan(ConanFile):
         if Version(self.version) < "2021.6.0" or self.settings.os == "Android":
             del self.options.interprocedural_optimization
         if Version(self.version) < "2021.2.0":
-            del self.options.shared
             self.options.rm_safe("fPIC")
 
     def configure(self):
@@ -84,6 +83,8 @@ class OneTBBConan(ConanFile):
             self.options.rm_safe("tbbproxy")
         if self._tbbbind_explicit_hwloc:
             self.options["hwloc"].shared = True
+        if self.options.shared != "deprecated":
+            self.output.warning("shared option is deprecated because is highly discourage: https://github.com/oneapi-src/oneTBB/issues/920")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -101,19 +102,11 @@ class OneTBBConan(ConanFile):
             self.info.options.tbbmalloc = True
         if Version(self.version) < "2021.6.0" and self.info.options.get_safe("tbbproxy"):
             self.info.options.tbbproxy = True
+        del self.info.options.shared
 
     def validate(self):
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "11.0":
             raise ConanInvalidConfiguration(f"{self.ref} couldn't be built by apple-clang < 11.0")
-        if not self.options.get_safe("shared", True):
-            if Version(self.version) >= "2021.6.0":
-                raise ConanInvalidConfiguration(
-                    "Building oneTBB as a static library is highly discouraged and not supported "
-                    "to avoid unforeseen issues like https://github.com/oneapi-src/oneTBB/issues/920. "
-                    "Please consider fixing at least the aforementioned issue in upstream."
-                )
-            self.output.warning("oneTBB strongly discourages usage of static linkage")
-
         if self._tbbbind_explicit_hwloc and not self.dependencies["hwloc"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires hwloc:shared=True to be built.")
 
@@ -124,6 +117,7 @@ class OneTBBConan(ConanFile):
         toolchain = CMakeToolchain(self)
         toolchain.variables["TBB_TEST"] = False
         toolchain.variables["TBB_STRICT"] = False
+        toolchain.cache_variables["BUILD_SHARED_LIBS"] = False
         if Version(self.version) >= "2021.5.0":
             toolchain.variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
         if self.options.get_safe("interprocedural_optimization"):
