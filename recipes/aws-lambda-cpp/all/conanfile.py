@@ -30,8 +30,6 @@ class AwsLambdaRuntimeConan(ConanFile):
     def _min_cppstd(self):
         return 11
 
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
