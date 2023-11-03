@@ -1,13 +1,14 @@
 import os
+import shutil
 import sys
 import textwrap
 import time
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.build import check_min_cppstd
-from conan.tools.env import VirtualBuildEnv, Environment
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get, load, save, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars
@@ -88,6 +89,22 @@ class GnConan(ConanFile):
             configure_args.append("-d")
         save(self, os.path.join(self.source_folder, "configure_args"), " ".join(configure_args))
 
+    @property
+    def _cxx(self):
+        compilers_by_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+        cxx = compilers_by_conf.get("cpp") or VirtualBuildEnv(self).vars().get("CXX")
+        if cxx:
+            return cxx
+        if self.settings.compiler == "apple-clang":
+            return XCRun(self).cxx
+        compiler_version = self.settings.compiler.version
+        major = Version(compiler_version).major
+        if self.settings.compiler == "gcc":
+            return shutil.which(f"g++-{compiler_version}") or shutil.which(f"g++-{major}") or shutil.which("g++") or ""
+        if self.settings.compiler == "clang":
+            return shutil.which(f"clang++-{compiler_version}") or shutil.which(f"clang++-{major}") or shutil.which("clang++") or ""
+        return ""
+
     def build(self):
         with chdir(self, self.source_folder):
             # Generate dummy header to be able to run `build/gen.py` with `--no-last-commit-position`.
@@ -107,16 +124,22 @@ class GnConan(ConanFile):
 
             # Make sure CXX env var is set, otherwise gn defaults it to clang++
             # https://gn.googlesource.com/gn/+/refs/heads/main/build/gen.py#386
-            compilers_by_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
-            os.environ["CXX"] = compilers_by_conf.get("cpp") or VirtualBuildEnv(self).vars().get("CXX")
+            os.environ["CXX"] = self._cxx
+            self.output.info(f"Set CXX to '{os.environ['CXX']}'")
 
-            self.run(f"{sys.executable} build/gen.py " + load(self, "configure_args"))
-
-            # Try sleeping one second to avoid time skew of the generated ninja.build file (and having to re-run build/gen.py)
-            time.sleep(1)
-
-            build_args = ["-C", "out", f"-j{os.cpu_count()}"]
-            self.run("ninja " + " ".join(build_args))
+            # Try sleeping to avoid time skew of the generated ninja.build file (and having to re-run build/gen.py)
+            err = None
+            for sleep in [0, 1, 2, 4, 8]:
+                self.run(f"{sys.executable} build/gen.py " + load(self, "configure_args"))
+                time.sleep(sleep)
+                try:
+                    build_args = ["-C", "out", f"-j{os.cpu_count()}", "-v"]
+                    self.run("ninja " + " ".join(build_args))
+                    break
+                except Exception as e:
+                    err = e
+            if err:
+                raise err
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
