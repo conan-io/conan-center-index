@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-
 project(ohPipeline CXX)
-set(CMAKE_CXX_STANDARD 11)
 
 find_package(ohnet REQUIRED COMPONENTS ohNetCore ohNetProxies TestFramework)
 find_package(LibreSSL REQUIRED CONFIG)
@@ -86,7 +84,6 @@ add_custom_target(
 )
 
 add_library(ohPipeline
-    STATIC
     OpenHome/Media/Pipeline/VolumeRamper.cpp
     OpenHome/Media/Pipeline/AudioDumper.cpp
     OpenHome/Media/Pipeline/AudioReservoir.cpp
@@ -225,6 +222,7 @@ set(ohPipeline_HEADERS
     OpenHome/SocketSsl.h
 )
 target_sources(ohPipeline PUBLIC FILE_SET HEADERS FILES "${ohPipeline_HEADERS}")
+target_compile_features(ohPipeline PUBLIC cxx_std_11)
 install(TARGETS ohPipeline
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -322,7 +320,7 @@ set(OHMEDIAPLAYER_HEADERS
     OpenHome/Av/Pins/ProviderPins.h
     OpenHome/Av/OhMetadata.h
 )
-add_library(ohMediaPlayer STATIC ${OHMEDIAPLAYER_SOURCES})
+add_library(ohMediaPlayer ${OHMEDIAPLAYER_SOURCES})
 target_link_libraries(ohMediaPlayer PRIVATE libressl::libressl ohNet ohPipeline)
 target_include_directories(ohMediaPlayer PRIVATE ${PROJECT_SOURCE_DIR})
 target_include_directories(ohMediaPlayer PUBLIC
@@ -331,6 +329,7 @@ target_include_directories(ohMediaPlayer PUBLIC
 )
 add_dependencies(ohMediaPlayer oh_codegen)
 target_sources(ohMediaPlayer PUBLIC FILE_SET HEADERS FILES "${OHMEDIAPLAYER_HEADERS}")
+target_compile_features(ohMediaPlayer PUBLIC cxx_std_11)
 install(TARGETS ohMediaPlayer
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -392,7 +391,7 @@ add_library(SourcePlaylist
     OpenHome/Av/Playlist/PinInvokerUpnpServer.cpp
     Generated/CpUpnpOrgContentDirectory1.cpp
 )
-target_link_libraries(SourcePlaylist PRIVATE ohNet ohMediaPlayer Podcast SSL)
+target_link_libraries(SourcePlaylist PRIVATE ohNet ohMediaPlayer Podcast libressl::libressl)
 target_include_directories(SourcePlaylist PRIVATE ${PROJECT_SOURCE_DIR})
 set(SOURCE_PLAYLIST_HEADERS
     OpenHome/Av/Playlist/ProviderPlaylist.h
@@ -410,6 +409,7 @@ set(SOURCE_PLAYLIST_HEADERS
     OpenHome/Av/Playlist/PinInvokerUpnpServer.h
 )
 target_sources(SourcePlaylist PUBLIC FILE_SET HEADERS FILES "${SOURCE_PLAYLIST_HEADERS}")
+target_compile_features(SourcePlaylist PUBLIC cxx_std_11)
 install(TARGETS SourcePlaylist
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -447,6 +447,7 @@ set(SOURCE_RADIO_HEADERS
     OpenHome/Av/Radio/ProviderRadio.h
 )
 target_sources(SourceRadio PUBLIC FILE_SET HEADERS FILES "${SOURCE_RADIO_HEADERS}")
+target_compile_features(SourceRadio PUBLIC cxx_std_11)
 install(TARGETS SourceRadio
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -492,6 +493,7 @@ set(SOURCE_SONGCAST_HEADERS
     OpenHome/Av/Utils/DriverSongcastSender.h
 )
 target_sources(SourceSongcast PUBLIC FILE_SET HEADERS FILES "${SOURCE_SONGCAST_HEADERS}")
+target_compile_features(SourceSongcast PUBLIC cxx_std_11)
 install(TARGETS SourceSongcast
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -516,6 +518,7 @@ set(SOURCE_SCD_HEADERS
     OpenHome/Av/Scd/Receiver/UriProviderScd.h
 )
 target_sources(SourceScd PUBLIC FILE_SET HEADERS FILES "${SOURCE_SCD_HEADERS}")
+target_compile_features(SourceScd PUBLIC cxx_std_11)
 install(TARGETS SourceScd
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -542,6 +545,7 @@ set(SOURCE_RAOP_HEADERS
     OpenHome/Av/Raop/CodecRaopApple.h
 )
 target_sources(SourceRaop PUBLIC FILE_SET HEADERS FILES "${SOURCE_RAOP_HEADERS}")
+target_compile_features(SourceRaop PUBLIC cxx_std_11)
 install(TARGETS SourceRaop
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -571,6 +575,7 @@ set(SOURCE_UPNP_AV_HEADERS
     OpenHome/Av/UpnpAv/FriendlyNameUpnpAv.h
 )
 target_sources(SourceUpnpAv PUBLIC FILE_SET HEADERS FILES "${SOURCE_UPNP_AV_HEADERS}")
+target_compile_features(SourceUpnpAv PUBLIC cxx_std_11)
 install(TARGETS SourceUpnpAv
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -593,6 +598,7 @@ set(PODCAST_HEADERS
     OpenHome/Av/Pins/PodcastPinsTuneIn.h
 )
 target_sources(Podcast PUBLIC FILE_SET HEADERS FILES "${PODCAST_HEADERS}")
+target_compile_features(Podcast PUBLIC cxx_std_11)
 install(TARGETS Podcast
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -612,13 +618,14 @@ set(SCD_SENDER_HEADERS
   OpenHome/Av/Scd/Sender/ScdSupply.h
   OpenHome/Av/Scd/Sender/ScdServer.h
 )
-add_library(ScdSender STATIC ${SCDSENDER_SOURCES})
+add_library(ScdSender ${SCDSENDER_SOURCES})
 target_include_directories(ScdSender PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(ScdSender PUBLIC
   ${CMAKE_BINARY_DIR}
 )
 target_link_libraries(ScdSender PUBLIC ohNet)
 target_sources(ScdSender PUBLIC FILE_SET HEADERS FILES "${SCD_SENDER_HEADERS}")
+target_compile_features(ScdSender PUBLIC cxx_std_11)
 install(TARGETS ScdSender
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -631,12 +638,13 @@ install(TARGETS ScdSender
 set(CODECWAV_SOURCES
   OpenHome/Media/Codec/Wav.cpp
 )
-add_library(CodecWav STATIC ${CODECWAV_SOURCES})
+add_library(CodecWav ${CODECWAV_SOURCES})
 target_include_directories(CodecWav PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecWav PUBLIC
   ${CMAKE_BINARY_DIR}
 )
 target_link_libraries(CodecWav PUBLIC ohNet)
+target_compile_features(CodecWav PUBLIC cxx_std_11)
 install(TARGETS CodecWav
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -646,7 +654,8 @@ install(TARGETS CodecWav
 set(CODECPCM_SOURCES
   OpenHome/Media/Codec/Pcm.cpp
 )
-add_library(CodecPcm STATIC ${CODECPCM_SOURCES})
+add_library(CodecPcm ${CODECPCM_SOURCES})
+target_compile_features(CodecPcm PUBLIC cxx_std_11)
 target_include_directories(CodecPcm PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecPcm PUBLIC
   ${CMAKE_BINARY_DIR}
@@ -661,12 +670,13 @@ install(TARGETS CodecPcm
 set(CODECDSDDSF_SOURCES
   OpenHome/Media/Codec/DsdDsf.cpp
 )
-add_library(CodecDsdDsf STATIC ${CODECDSDDSF_SOURCES})
+add_library(CodecDsdDsf ${CODECDSDDSF_SOURCES})
 target_include_directories(CodecDsdDsf PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecDsdDsf PUBLIC
   ${CMAKE_BINARY_DIR}
 )
 target_link_libraries(CodecDsdDsf PUBLIC ohNet)
+target_compile_features(CodecDsdDsf PUBLIC cxx_std_11)
 install(TARGETS CodecDsdDsf
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -676,12 +686,13 @@ install(TARGETS CodecDsdDsf
 set(CODECDSDDFF_SOURCES
   OpenHome/Media/Codec/DsdDff.cpp
 )
-add_library(CodecDsdDff STATIC ${CODECDSDDFF_SOURCES})
+add_library(CodecDsdDff ${CODECDSDDFF_SOURCES})
 target_include_directories(CodecDsdDff PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecDsdDff PUBLIC
   ${CMAKE_BINARY_DIR}
 )
 target_link_libraries(CodecDsdDff PUBLIC ohNet)
+target_compile_features(CodecDsdDff PUBLIC cxx_std_11)
 install(TARGETS CodecDsdDff
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -691,12 +702,13 @@ install(TARGETS CodecDsdDff
 set(CODECDSDRAW_SOURCES
   OpenHome/Media/Codec/DsdRaw.cpp
 )
-add_library(CodecDsdRaw STATIC ${CODECDSDRAW_SOURCES})
+add_library(CodecDsdRaw ${CODECDSDRAW_SOURCES})
 target_include_directories(CodecDsdRaw PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecDsdRaw PUBLIC
   ${CMAKE_BINARY_DIR}
 )
 target_link_libraries(CodecDsdRaw PUBLIC ohNet)
+target_compile_features(CodecDsdRaw PUBLIC cxx_std_11)
 install(TARGETS CodecDsdRaw
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -709,13 +721,14 @@ set(CODECAIFFBASE_SOURCES
 set(CODECAIFFBASE_HEADERS
   OpenHome/Media/Codec/AiffBase.h
 )
-add_library(CodecAiffBase STATIC ${CODECAIFFBASE_SOURCES})
+add_library(CodecAiffBase ${CODECAIFFBASE_SOURCES})
 target_include_directories(CodecAiffBase PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecAiffBase PUBLIC
   ${CMAKE_BINARY_DIR}
 )
 target_link_libraries(CodecAiffBase PUBLIC ohNet)
 target_sources(CodecAiffBase PUBLIC FILE_SET HEADERS FILES "${CODECAIFFBASE_HEADERS}")
+target_compile_features(CodecAiffBase PUBLIC cxx_std_11)
 install(TARGETS CodecAiffBase
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -728,12 +741,13 @@ install(TARGETS CodecAiffBase
 set(CODECAIFC_SOURCES
   OpenHome/Media/Codec/Aifc.cpp
 )
-add_library(CodecAifc STATIC ${CODECAIFC_SOURCES})
+add_library(CodecAifc ${CODECAIFC_SOURCES})
 target_include_directories(CodecAifc PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecAifc PUBLIC
   ${CMAKE_BINARY_DIR}
 )
 target_link_libraries(CodecAifc PUBLIC CodecAiffBase ohNet)
+target_compile_features(CodecAifc PUBLIC cxx_std_11)
 install(TARGETS CodecAifc
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -743,12 +757,13 @@ install(TARGETS CodecAifc
 set(CODECAIFF_SOURCES
   OpenHome/Media/Codec/Aiff.cpp
 )
-add_library(CodecAiff STATIC ${CODECAIFF_SOURCES})
+add_library(CodecAiff ${CODECAIFF_SOURCES})
 target_include_directories(CodecAiff PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecAiff PUBLIC
   ${CMAKE_BINARY_DIR}
 )
 target_link_libraries(CodecAiff PUBLIC CodecAiffBase ohNet)
+target_compile_features(CodecAiff PUBLIC cxx_std_11)
 install(TARGETS CodecAiff
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -758,11 +773,12 @@ install(TARGETS CodecAiff
 set(CODECFLAC_SOURCES
   OpenHome/Media/Codec/Flac.cpp
 )
-add_library(CodecFlac STATIC ${CODECFLAC_SOURCES})
+add_library(CodecFlac ${CODECFLAC_SOURCES})
 target_include_directories(CodecFlac PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecFlac PUBLIC
   ${CMAKE_BINARY_DIR}
 )
+target_compile_features(CodecFlac PUBLIC cxx_std_11)
 target_link_libraries(CodecFlac PUBLIC
   ohNet
   flac::flac
@@ -780,13 +796,14 @@ set(CODECALACAPPLEBASE_SOURCES
 set(CODECALACAPPLEBASE_HEADERS
   OpenHome/Media/Codec/AlacAppleBase.h
 )
-add_library(CodecAlacAppleBase STATIC ${CODECALACAPPLEBASE_SOURCES})
+add_library(CodecAlacAppleBase ${CODECALACAPPLEBASE_SOURCES})
 target_include_directories(CodecAlacAppleBase PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecAlacAppleBase PUBLIC
   ${CMAKE_BINARY_DIR}
 )
 target_link_libraries(CodecAlacAppleBase PUBLIC alac::alac ohNet ohMediaPlayer)
 target_sources(CodecAlacAppleBase PUBLIC FILE_SET HEADERS FILES "${CODECALACAPPLEBASE_HEADERS}")
+target_compile_features(CodecAlacAppleBase PUBLIC cxx_std_11)
 install(TARGETS CodecAlacAppleBase
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -799,12 +816,13 @@ install(TARGETS CodecAlacAppleBase
 set(CODECALACAPPLE_SOURCES
   OpenHome/Media/Codec/AlacApple.cpp
 )
-add_library(CodecAlacApple STATIC ${CODECALACAPPLE_SOURCES})
+add_library(CodecAlacApple ${CODECALACAPPLE_SOURCES})
 target_include_directories(CodecAlacApple PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecAlacApple PUBLIC
   ${CMAKE_BINARY_DIR}
 )
 target_link_libraries(CodecAlacApple PUBLIC CodecAlacAppleBase ohNet)
+target_compile_features(CodecAlacApple PUBLIC cxx_std_11)
 install(TARGETS CodecAlacApple
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -817,7 +835,7 @@ set(CODECAACFDKBASE_SOURCES
 set(CODECAACFDKBASE_HEADERS
   OpenHome/Media/Codec/AacFdkBase.h
 )
-add_library(CodecAacFdkBase STATIC ${CODECAACFDKBASE_SOURCES})
+add_library(CodecAacFdkBase ${CODECAACFDKBASE_SOURCES})
 target_include_directories(CodecAacFdkBase PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecAacFdkBase PUBLIC
   ${CMAKE_BINARY_DIR}
@@ -827,6 +845,8 @@ target_link_libraries(CodecAacFdkBase PUBLIC
   FDK-AAC::fdk-aac
 )
 target_sources(CodecAacFdkBase PUBLIC FILE_SET HEADERS FILES "${CODECAACFDKBASE_HEADERS}")
+target_compile_features(CodecAacFdkBase PUBLIC cxx_std_11)
+target_include_directories(CodecAacFdkBase PUBLIC "${fdk-aac_INCLUDE_DIR}/fdk-aac")
 install(TARGETS CodecAacFdkBase
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -839,12 +859,13 @@ install(TARGETS CodecAacFdkBase
 set(CODECAACFDKMP4_SOURCES
   OpenHome/Media/Codec/AacFdkMp4.cpp
 )
-add_library(CodecAacFdkMp4 STATIC ${CODECAACFDKMP4_SOURCES})
+add_library(CodecAacFdkMp4 ${CODECAACFDKMP4_SOURCES})
 target_include_directories(CodecAacFdkMp4 PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecAacFdkMp4 PUBLIC
   ${CMAKE_BINARY_DIR}
 )
 target_link_libraries(CodecAacFdkMp4 PUBLIC ohNetCore CodecAacFdkBase ohNet)
+target_compile_features(CodecAacFdkMp4 PUBLIC cxx_std_11)
 install(TARGETS CodecAacFdkMp4
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -854,12 +875,13 @@ install(TARGETS CodecAacFdkMp4
 set(CODECAACFDKADTS_SOURCES
   OpenHome/Media/Codec/AacFdkAdts.cpp
 )
-add_library(CodecAacFdkAdts STATIC ${CODECAACFDKADTS_SOURCES})
+add_library(CodecAacFdkAdts ${CODECAACFDKADTS_SOURCES})
 target_include_directories(CodecAacFdkAdts PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecAacFdkAdts PUBLIC
   ${CMAKE_BINARY_DIR}
 )
 target_link_libraries(CodecAacFdkAdts PUBLIC CodecAacFdkBase ohNet)
+target_compile_features(CodecAacFdkAdts PUBLIC cxx_std_11)
 install(TARGETS CodecAacFdkAdts
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -869,7 +891,7 @@ install(TARGETS CodecAacFdkAdts
 set(CODECMP3_SOURCES
   OpenHome/Media/Codec/Mp3.cpp
 )
-add_library(CodecMp3 STATIC ${CODECMP3_SOURCES})
+add_library(CodecMp3 ${CODECMP3_SOURCES})
 target_include_directories(CodecMp3 PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecMp3 PUBLIC
   ${CMAKE_BINARY_DIR}
@@ -878,6 +900,7 @@ target_link_libraries(CodecMp3 PUBLIC
   ohNet
   libmad::libmad
 )
+target_compile_features(CodecMp3 PUBLIC cxx_std_11)
 install(TARGETS CodecMp3
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -887,12 +910,13 @@ install(TARGETS CodecMp3
 set(CODECVORBIS_SOURCES
   OpenHome/Media/Codec/Vorbis.cpp
 )
-add_library(CodecVorbis STATIC ${CODECVORBIS_SOURCES})
+add_library(CodecVorbis ${CODECVORBIS_SOURCES})
 target_include_directories(CodecVorbis PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(CodecVorbis PUBLIC
     thirdparty/Tremor
   ${CMAKE_BINARY_DIR}
 )
+target_compile_features(CodecVorbis PUBLIC cxx_std_11)
 target_link_libraries(CodecVorbis PUBLIC
   ohnet::ohnet
   Ogg::ogg
@@ -912,13 +936,14 @@ set(WEBAPPFRAMEWORK_HEADERS
   OpenHome/Web/ResourceHandler.h
   OpenHome/Web/WebAppFramework.h
 )
-add_library(WebAppFramework STATIC ${WEBAPPFRAMEWORK_SOURCES})
+add_library(WebAppFramework ${WEBAPPFRAMEWORK_SOURCES})
 target_include_directories(WebAppFramework PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(WebAppFramework PUBLIC
   ${CMAKE_BINARY_DIR}
 )
 target_link_libraries(WebAppFramework PUBLIC ohNet)
 target_sources(WebAppFramework PUBLIC FILE_SET HEADERS FILES "${WEBAPPFRAMEWORK_HEADERS}")
+target_compile_features(WebAppFramework PUBLIC cxx_std_11)
 install(TARGETS WebAppFramework
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -938,12 +963,13 @@ install(TARGETS WebAppFramework
 set(WEBAPPFRAMEWORKTESTUTILS_SOURCES
   OpenHome/Web/Tests/TestWebAppFramework.cpp
 )
-add_library(WebAppFrameworkTestUtils STATIC ${WEBAPPFRAMEWORKTESTUTILS_SOURCES})
+add_library(WebAppFrameworkTestUtils ${WEBAPPFRAMEWORKTESTUTILS_SOURCES})
 target_include_directories(WebAppFrameworkTestUtils PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(WebAppFrameworkTestUtils PUBLIC
   ${CMAKE_BINARY_DIR}
 )
 target_link_libraries(WebAppFrameworkTestUtils PUBLIC WebAppFramework ohNet)
+target_compile_features(WebAppFrameworkTestUtils PUBLIC cxx_std_11)
 install(TARGETS WebAppFrameworkTestUtils
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -960,13 +986,14 @@ set(CONFIGUI_HEADERS
   OpenHome/Web/ConfigUi/FileResourceHandler.h
   OpenHome/Web/ConfigUi/ConfigUiMediaPlayer.h
 )
-add_library(ConfigUi STATIC ${CONFIGUI_SOURCES})
+add_library(ConfigUi ${CONFIGUI_SOURCES})
 target_include_directories(ConfigUi PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(ConfigUi PUBLIC
   ${CMAKE_BINARY_DIR}
 )
 target_link_libraries(ConfigUi PUBLIC WebAppFramework ohNet)
 target_sources(ConfigUi PUBLIC FILE_SET HEADERS FILES "${CONFIGUI_HEADERS}")
+target_compile_features(ConfigUi PUBLIC cxx_std_11)
 install(TARGETS ConfigUi
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -982,7 +1009,7 @@ set(CONFIGUITESTUTILS_SOURCES
 set(CONFIGUITESTUTILS_HEADERS
   OpenHome/Web/ConfigUi/Tests/TestConfigUi.h
 )
-add_library(ConfigUiTestUtils STATIC ${CONFIGUITESTUTILS_SOURCES})
+add_library(ConfigUiTestUtils ${CONFIGUITESTUTILS_SOURCES})
 target_include_directories(ConfigUiTestUtils PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(ConfigUiTestUtils PUBLIC
   ${CMAKE_BINARY_DIR}
@@ -994,6 +1021,7 @@ target_link_libraries(ConfigUiTestUtils PUBLIC
   libressl::libressl
 )
 target_sources(ConfigUiTestUtils PUBLIC FILE_SET HEADERS FILES "${CONFIGUITESTUTILS_HEADERS}")
+target_compile_features(ConfigUiTestUtils PUBLIC cxx_std_11)
 install(TARGETS ConfigUiTestUtils
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

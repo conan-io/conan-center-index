@@ -56,9 +56,6 @@ class OhPipelineConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # INFO: AacFdkBase.cpp uses #include <aacdecoder_lib.h>
-        libfdk_include_dir = os.path.join(self.dependencies["libfdk_aac"].cpp_info.includedirs[0], "fdk-aac")
-        tc.variables["CMAKE_CXX_FLAGS"] = tc.variables.get("CMAKE_CXX_FLAGS", "") + " -I{}".format(libfdk_include_dir)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
