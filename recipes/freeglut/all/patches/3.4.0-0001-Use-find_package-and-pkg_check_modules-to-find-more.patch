@@ -32,7 +32,7 @@ index 832d8672..83cf2927 100644
 -    LIST(APPEND LIBS GLESv2 GLESv1_CM EGL)
 +    # todo Use the OpenGL GLES2 component from CMake 3.27 when available.
 +    FIND_PACKAGE(OpenGL REQUIRED COMPONENTS EGL)
-+    LIST(APPEND LIBS GLESv2 GLESv1_CM OpenGL::EGL)
++    LIST(APPEND LIBS ${OPENGL_LIBRARIES} OpenGL::EGL)
  ELSE()
      # On OS X, we need to link against the X11 OpenGL libraries, NOT the Cocoa OpenGL libraries.
      # To do that, you need to manually find two of the libraries before calling FindOpenGL
