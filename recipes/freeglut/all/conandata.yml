@@ -15,7 +15,7 @@ patches:
       patch_source: "https://github.com/FreeGLUTProject/freeglut/pull/147"
       patch_type: "conan"
   "3.2.2":
-    - patch_file: "patches/3.2.1-0001-Use-find_package-and-pkg_check_modules-to-find-more.patch"
+    - patch_file: "patches/3.2.2-0001-Use-find_package-and-pkg_check_modules-to-find-more.patch"
       patch_description: "Use find_package and pkg_check_modules to find dependencies"
       patch_source: "https://github.com/FreeGLUTProject/freeglut/pull/147"
       patch_type: "conan"
