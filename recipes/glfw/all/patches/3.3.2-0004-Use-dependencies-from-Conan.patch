@@ -1,0 +1,38 @@
+From 7e7042f9a63f3285c97831558881f153a861c04c Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Fri, 3 Nov 2023 13:46:24 -0500
+Subject: [PATCH] Use dependencies from Conan
+
+---
+ CMakeLists.txt | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 33d1a0c1..21a7508a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -239,7 +239,7 @@ endif()
+ if (_GLFW_WAYLAND)
+ 
+     include(FindPkgConfig)
+-    pkg_check_modules(Wayland REQUIRED
++    pkg_check_modules(Wayland REQUIRED IMPORTED_TARGET
+         wayland-client>=0.2.7
+         wayland-cursor>=0.2.7
+         wayland-egl>=0.2.7
+@@ -247,11 +247,7 @@ if (_GLFW_WAYLAND)
+ 
+     list(APPEND glfw_PKG_DEPS "wayland-egl")
+ 
+-    list(APPEND glfw_INCLUDE_DIRS "${Wayland_INCLUDE_DIRS}")
+-    list(APPEND glfw_LIBRARIES "${Wayland_LIBRARIES}" "${CMAKE_THREAD_LIBS_INIT}")
+-
+-    find_package(XKBCommon REQUIRED)
+-    list(APPEND glfw_INCLUDE_DIRS "${XKBCOMMON_INCLUDE_DIRS}")
++    list(APPEND glfw_LIBRARIES PkgConfig::Wayland "${CMAKE_THREAD_LIBS_INIT}")
+ 
+     include(CheckIncludeFiles)
+     include(CheckFunctionExists)
+-- 
+2.41.0
+
