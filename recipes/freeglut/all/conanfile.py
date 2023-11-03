@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
@@ -142,6 +143,8 @@ class freeglutConan(ConanFile):
         cmake_deps.generate()
         pkg_config_deps = PkgConfigDeps(self)
         pkg_config_deps.generate()
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
 
     def build(self):
         apply_conandata_patches(self)
