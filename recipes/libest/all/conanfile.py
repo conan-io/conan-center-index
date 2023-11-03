@@ -3,10 +3,11 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import unix_path
 
 required_conan_version = ">=1.53.0"
 
@@ -49,7 +50,7 @@ class LibEstConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
+        self.requires("openssl/1.1.1w", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
@@ -58,9 +59,13 @@ class LibEstConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
         tc = AutotoolsToolchain(self)
-        tc.configure_args.append(f"--with-ssl-dir={self.dependencies['openssl'].package_folder}")
         tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
