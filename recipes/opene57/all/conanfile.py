@@ -96,6 +96,11 @@ class Opene57Conan(ConanFile):
     def _patch_sources(self):
         # Do not raise an error for shared builds
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "message(FATAL_ERROR", "# ")
+        compiler_opts = os.path.join(self.source_folder, "src", "cmake", "compiler_options.cmake")
+        # Disable ASan and UBSan as these require linking against asan and ubsan runtime libraries
+        # FIXME: Figure out how to link against these using Conan
+        replace_in_file(self, compiler_opts, "$<$<CONFIG:DEBUG>:-fsanitize=address>", "")
+        replace_in_file(self, compiler_opts, "$<$<CONFIG:DEBUG>:-fsanitize=undefined>", "")
 
     def build(self):
         self._patch_sources()
@@ -120,5 +125,4 @@ class Opene57Conan(ConanFile):
         # TODO: to remove in conan v2
         if self.options.with_tools:
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH env: {bin_path}")
             self.env_info.PATH.append(bin_path)
