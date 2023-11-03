@@ -73,5 +73,8 @@ class QuickfastConan(ConanFile):
         self.cpp_info.libs = ["quickfast"]
         self.cpp_info.includedirs.append(os.path.join("include", "quickfast"))
 
+        # Needed to keep support for deprecated placeholders in boost::bind
+        self.cpp_info.defines.append("BOOST_BIND_GLOBAL_PLACEHOLDERS")
+
         if not self.options.shared:
             self.cpp_info.defines.append("QUICKFAST_HAS_DLL=0")
