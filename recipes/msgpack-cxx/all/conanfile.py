@@ -56,20 +56,26 @@ class MsgpackCXXConan(ConanFile):
             dst=os.path.join(self.package_folder, "include"),
             src=os.path.join(self.source_folder, "include"),
         )
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {"msgpackc-cxx": "msgpackc-cxx::msgpackc-cxx"}
-        )
+        if Version(self.version) >= "6.0.0":
+            self._create_cmake_module_alias_targets(
+                os.path.join(self.package_folder, self._module_file_rel_path),
+                {"msgpack-cxx": "msgpack-cxx::msgpack-cxx"}
+            )
+        else:
+            self._create_cmake_module_alias_targets(
+                os.path.join(self.package_folder, self._module_file_rel_path),
+                {"msgpackc-cxx": "msgpackc-cxx::msgpackc-cxx"}
+            )
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
+            """)
         save(self, module_file, content)
 
     @property
