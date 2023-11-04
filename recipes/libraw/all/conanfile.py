@@ -94,11 +94,9 @@ class LibRawConan(ConanFile):
         self.cpp_info.libs = ["raw"]
 
         if self.settings.os == "Windows":
-            self.cpp_info.defines.append("WIN32")
             self.cpp_info.system_libs.append("ws2_32")
-
-        if not self.options.shared:
-            self.cpp_info.defines.append("LIBRAW_NODLL")
+            if not self.options.shared:
+                self.cpp_info.defines.append("LIBRAW_NODLL")
 
         if self.options.with_jpeg == "libjpeg":
             self.cpp_info.requires.append("libjpeg::libjpeg")
