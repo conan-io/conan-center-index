@@ -34,11 +34,11 @@ class FakeItConan(ConanFile):
 
     def requirements(self):
         if self.options.integration == "boost":
-            self.requires("boost/1.82.0")
+            self.requires("boost/1.83.0")
         elif self.options.integration == "catch":
             self.requires("catch2/3.4.0")
         elif self.options.integration == "gtest":
-            self.requires("gtest/1.13.0")
+            self.requires("gtest/1.14.0")
         elif self.options.integration == "qtest":
             self.requires("qt/6.3.0")
         elif self.options.integration == "standalone":

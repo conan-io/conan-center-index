@@ -58,9 +58,9 @@ class AsioGrpcConan(ConanFile):
     def requirements(self):
         self.requires("grpc/1.50.1")
         if self._local_allocator_option == "boost_container" or self.options.backend == "boost":
-            self.requires("boost/1.82.0")
+            self.requires("boost/1.83.0")
         if self.options.backend == "asio":
-            self.requires("asio/1.28.1")
+            self.requires("asio/1.28.2")
         if self.options.backend == "unifex":
             self.requires("libunifex/cci.20220430")
 
@@ -85,6 +85,9 @@ class AsioGrpcConan(ConanFile):
                 f"{self.name} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports"
                 f" C++{self._min_cppstd}."
             )
+        if Version(self.version) == "2.7.0" and \
+            self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "11":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support gcc 11.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

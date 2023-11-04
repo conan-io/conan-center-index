@@ -39,7 +39,7 @@ class GDCMConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return 14
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -56,18 +56,19 @@ class GDCMConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("charls/2.4.2")
         self.requires("expat/2.5.0")
         self.requires("openjpeg/2.5.0")
         if self.options.with_zlibng:
-            self.requires("zlib-ng/2.0.7")
+            self.requires("zlib-ng/2.1.3")
         else:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os != "Windows":
             self.requires("util-linux-libuuid/2.39")
             if Version(self.version) >= Version("3.0.20"):
                 self.requires("libiconv/1.17")
         if self.options.with_json:
-            self.requires("json-c/0.16")
+            self.requires("json-c/0.17")
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
 
@@ -89,6 +90,7 @@ class GDCMConan(ConanFile):
         tc.variables["GDCM_BUILD_DOCBOOK_MANPAGES"] = False
         tc.variables["GDCM_BUILD_SHARED_LIBS"] = bool(self.options.shared)
         # FIXME: unvendor deps https://github.com/conan-io/conan-center-index/pull/5705#discussion_r647224146
+        tc.variables["GDCM_USE_SYSTEM_CHARLS"] = True
         tc.variables["GDCM_USE_SYSTEM_EXPAT"] = True
         tc.variables["GDCM_USE_SYSTEM_JSON"] = self.options.with_json
         tc.variables["GDCM_USE_SYSTEM_OPENJPEG"] = True
@@ -98,6 +100,13 @@ class GDCMConan(ConanFile):
 
         if not valid_min_cppstd(self, self._min_cppstd):
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+
+        # https://sourceforge.net/p/gdcm/bugs/548/
+        tc.preprocessor_definitions["CHARLS_NO_DEPRECATED_WARNING"] = "1"
+
+        #gdcm currently uses functionality that is deprecated since OpenSSL 1.1.0
+        tc.preprocessor_definitions["OPENSSL_API_COMPAT"] = "0x10000000L"
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -194,8 +203,7 @@ class GDCMConan(ConanFile):
 
     @property
     def _gdcm_libraries(self):
-        gdcm_libs = ["gdcmcharls",
-                     "gdcmCommon",
+        gdcm_libs = ["gdcmCommon",
                      "gdcmDICT",
                      "gdcmDSED",
                      "gdcmIOD",
@@ -237,7 +245,7 @@ class GDCMConan(ConanFile):
 
         self.cpp_info.components["gdcmDSED"].requires.extend(["gdcmCommon", zlib()])
         self.cpp_info.components["gdcmIOD"].requires.extend(["gdcmDSED", "gdcmCommon", "expat::expat"])
-        self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmIOD", "gdcmDSED", "gdcmDICT", "openjpeg::openjpeg"])
+        self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmIOD", "gdcmDSED", "gdcmDICT", "charls::charls", "openjpeg::openjpeg"])
         if self.options.with_json:
             self.cpp_info.components["gdcmMSFF"].requires.append("json-c::json-c")
         if self.settings.os != "Windows":
@@ -247,7 +255,7 @@ class GDCMConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["gdcmDICT"].requires.extend(["gdcmDSED", "gdcmIOD"])
             self.cpp_info.components["gdcmMEXD"].requires.extend(["gdcmMSFF", "gdcmDICT", "gdcmDSED", "gdcmIOD", "socketxx"])
-            self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmjpeg8", "gdcmjpeg12", "gdcmjpeg16", "gdcmcharls"])
+            self.cpp_info.components["gdcmMSFF"].requires.extend(["gdcmjpeg8", "gdcmjpeg12", "gdcmjpeg16"])
 
             if self.settings.os == "Windows":
                 self.cpp_info.components["gdcmCommon"].system_libs = ["ws2_32", "crypt32"]
