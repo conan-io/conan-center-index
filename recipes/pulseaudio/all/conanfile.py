@@ -2,10 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -24,6 +25,7 @@ class PulseAudioConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "database": ["simple", "gdbm", "tdb"],
         "with_alsa": [True, False],
         "with_glib": [True, False],
         "with_fftw": [True, False],
@@ -34,6 +36,7 @@ class PulseAudioConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "database": "simple",
         "with_alsa": True,
         "with_glib": False,
         "with_fftw": False,
@@ -56,6 +59,8 @@ class PulseAudioConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         if not self.options.with_dbus:
             del self.options.with_fftw
+        if self.options.get_safe("with_fftw"):
+            self.options["fftw"].precision = "single"
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -68,7 +73,7 @@ class PulseAudioConan(ConanFile):
         if self.options.with_alsa:
             self.requires("libalsa/1.2.10")
         if self.options.with_glib:
-            self.requires("glib/2.78.0")
+            self.requires("glib/2.78.1", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_fftw"):
             self.requires("fftw/3.3.10")
         if self.options.with_x11:
@@ -77,6 +82,11 @@ class PulseAudioConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_dbus:
             self.requires("dbus/1.15.8")
+        if self.options.database == "gdbm":
+            self.requires("gdbm/1.23")
+        elif self.options.database == "tdb":
+            # FIXME: tdb is not yet available on CCI
+            self.requires("tdb/1.4.9")
 
     def validate(self):
         # TODO: The newer Meson build system should support Windows
@@ -110,30 +120,48 @@ class PulseAudioConan(ConanFile):
             return "enabled" if enabled else "disabled"
 
         tc = MesonToolchain(self)
+        tc.project_options["database"] = str(self.options.database)
         tc.project_options["glib"] = format_enabled(self.options.with_glib)
         tc.project_options["fftw"] = format_enabled(self.options.get_safe("with_fftw", False))
         tc.project_options["x11"] = format_enabled(self.options.with_x11)
         tc.project_options["openssl"] = format_enabled(self.options.with_openssl)
         tc.project_options["dbus"] = format_enabled(self.options.with_dbus)
         tc.project_options["alsa"] = format_enabled(self.options.with_alsa)
-        if self.options.with_alsa:
+        tc.project_options["glib"] = format_enabled(self.options.with_glib)
+        tc.project_options["gsettings"] = format_enabled(self.options.with_glib)
+        if self.options.with_alsa and Version(self.version) >= "14":
             tc.project_options["alsadatadir"] = os.path.join(self.dependencies["libalsa"].cpp_info.resdirs[0])
         tc.project_options["systemduserunitdir"] = os.path.join(self.build_folder, "ignore")
         tc.project_options["udevrulesdir"] = "${prefix}/bin/udev/rules.d"
         tc.project_options["libexecdir"] = "${prefix}/bin"
-
+        tc.project_options["bluez5"] = "disabled" if Version(self.version) >= "15" else "false"
         tc.project_options["tests"] = "false"
-        tc.project_options["doxygen"] = "false"
         tc.project_options["man"] = "false"
-        # TODO: add support for the daemon component
-        tc.project_options["daemon"] = "false"
-        # tc.project_options["database"] = self.options.database
+
+        if Version(self.version) >= "15":
+            # TODO: add support for the daemon component
+            tc.project_options["daemon"] = "false"
+
+        if self.options.database == "gdbm":
+            gdbm = self.dependencies["gdbm"].cpp_info.aggregated_components()
+            tc.c_args += ["-I{}".format(inc) for inc in gdbm.includedirs]
+            tc.c_link_args += ["-L{}".format(lib) for lib in gdbm.libdirs]
+
         tc.generate()
 
         pkg = PkgConfigDeps(self)
         pkg.generate()
 
+    def _patch_sources(self):
+        meson_build = os.path.join(self.source_folder, "meson.build")
+        if "15" <= Version(self.version) <= "16.1":
+            # gio-2.0 should be marked as optional
+            replace_in_file(self, meson_build, "dependency('gio-2.0', ", "dependency('gio-2.0', required: false, ")
+        if Version(self.version) >= "14":
+            replace_in_file(self, meson_build, "subdir('doxygen')", "")
+
     def build(self):
+        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -174,6 +202,10 @@ class PulseAudioConan(ConanFile):
             self.cpp_info.components["pulse"].requires.append("openssl::openssl")
         if self.options.with_dbus:
             self.cpp_info.components["pulse"].requires.append("dbus::dbus")
+        if self.options.database == "gdbm":
+            self.cpp_info.components["pulse"].requires.append("gdbm::gdbm")
+        elif self.options.database == "tdb":
+            self.cpp_info.components["pulse"].requires.append("tdb::tdb")
 
         self.cpp_info.components["pulse-simple"].set_property("pkg_config_name", "libpulse-simple")
         self.cpp_info.components["pulse-simple"].libs = ["pulse-simple"]
