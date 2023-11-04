@@ -61,10 +61,8 @@ class Opene57Conan(ConanFile):
     def requirements(self):
         if self.options.with_tools:
             self.requires("boost/1.83.0")
-
-        if self.settings.os in ["Linux", "FreeBSD"] or is_apple_os(self):
+        if self.settings.os != "Windows":
             self.requires("icu/73.2")
-
         self.requires("xerces-c/3.2.4")
 
     def validate(self):
