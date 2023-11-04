@@ -1,8 +1,9 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conans.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 import os
 
 
@@ -45,7 +46,7 @@ class SimdConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        if self.settings.compiler == "gcc" and self.settings.compiler.version.major < 10:
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "10.0":
             raise ConanInvalidConfiguration(f"{self.ref} isn't compiled correctly with gcc < 10 ")
 
     def source(self):
