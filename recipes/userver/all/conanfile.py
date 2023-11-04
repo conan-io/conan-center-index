@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -51,6 +52,14 @@ class UserverConan(ConanFile):
         'namespace_end': '}',
         'mongo-c-driver/*:with_sasl': 'cyrus',
     }
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "8",
+            "clang": "9",
+            "apple-clang": "9",
+        }
 
     @property
     def _source_subfolder(self):
@@ -135,6 +144,12 @@ class UserverConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("userver can't be built on Windows")
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version:
+            if Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"Compiler ({self.settings.compiler} {self.settings.compiler.version}) does not supported")
 
         if self.options.with_mongodb:
             if self.dependencies['mongo-c-driver'].options.with_sasl != 'cyrus':
