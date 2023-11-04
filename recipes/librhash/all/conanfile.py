@@ -2,7 +2,8 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
@@ -73,6 +74,10 @@ class LibRHashConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
 
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         tc = AutotoolsToolchain(self)
         if self.settings.compiler in ("apple-clang",):
             if self.settings.arch == "armv7":
@@ -83,15 +88,17 @@ class LibRHashConan(ConanFile):
             # librhash's configure script does not understand `--enable-opt1=yes`
             "--{}-openssl".format("enable" if self.options.with_openssl else "disable"),
             "--disable-gettext",
-            # librhash's configure script is custom and does not understand "--bindir=${prefix}/bin" arguments
-            f"--prefix={unix_path(self, self.package_folder)}",
-            f"--bindir=/bin",
-            f"--libdir=/lib",
         ]
         if self.options.shared:
             tc.configure_args += ["--enable-lib-shared", "--disable-lib-static"]
         else:
             tc.configure_args += ["--disable-lib-shared", "--enable-lib-static"]
+        tc.make_args += [
+            f"INCDIR={unix_path(self, os.path.join(self.package_folder, 'include'))}",
+            f"BINDIR={unix_path(self, os.path.join(self.package_folder, 'bin'))}",
+            f"LIBDIR={unix_path(self, os.path.join(self.package_folder, 'lib'))}",
+            f"SO_DIR={unix_path(self, os.path.join(self.package_folder, 'lib'))}",
+        ]
         tc.generate()
 
         deps = AutotoolsDeps(self)
