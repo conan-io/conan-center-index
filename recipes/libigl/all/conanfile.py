@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
@@ -65,7 +66,7 @@ class LibiglConan(ConanFile):
     def requirements(self):
         # Eigen v3.4+ is not compatible
         self.requires("eigen/3.3.9", transitive_headers=True)
-    
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
 
@@ -91,6 +92,9 @@ class LibiglConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = CMakeToolchain(self)
         tc.cache_variables["LIBIGL_INSTALL"] = True
         tc.cache_variables["LIBIGL_EXPORT_TARGETS"] = True
@@ -143,6 +147,7 @@ class LibiglConan(ConanFile):
         copy(self, "LICENSE.MPL2", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if not self.options.header_only:
             rm(self, "*.c", self.package_folder, recursive=True)
             rm(self, "*.cpp", self.package_folder, recursive=True)
