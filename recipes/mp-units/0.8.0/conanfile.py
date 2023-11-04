@@ -12,8 +12,8 @@ required_conan_version = ">=1.59.0"
 
 class MPUnitsConan(ConanFile):
     name = "mp-units"
-    homepage = "https://github.com/mpusz/units"
-    description = "Physical Quantities and Units library for C++"
+    homepage = "https://github.com/mpusz/mp-units"
+    description = "A Physical Quantities and Units library for C++"
     topics = (
         "units",
         "dimensions",
@@ -59,9 +59,9 @@ class MPUnitsConan(ConanFile):
     def requirements(self):
         self.requires("gsl-lite/0.40.0")
         if self._use_libfmt:
-            self.requires("fmt/8.1.1")
+            self.requires("fmt/10.1.0")
         if self._use_range_v3:
-            self.requires("range-v3/0.11.0")
+            self.requires("range-v3/0.12.0")
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):

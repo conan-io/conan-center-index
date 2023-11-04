@@ -4,7 +4,7 @@ from conan.tools.layout import basic_layout
 
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.50.0"
 
 class WyhashConan(ConanFile):
     name = "wyhash"
@@ -13,6 +13,7 @@ class WyhashConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/wangyi-fudan/wyhash"
     topics = ("bloom-filter", "hash", "random-number-generators", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -23,7 +24,7 @@ class WyhashConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)

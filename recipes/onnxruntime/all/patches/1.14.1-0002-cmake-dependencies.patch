@@ -149,19 +149,6 @@ index 1fc2c6ccdc..a2c28957f9 100644
  
  set(onnxruntime_EXTERNAL_LIBRARIES_XNNPACK XNNPACK pthreadpool)
  
-diff --git a/cmake/onnxruntime_common.cmake b/cmake/onnxruntime_common.cmake
-index 0410d3361c..685df7a487 100644
---- a/cmake/onnxruntime_common.cmake
-+++ b/cmake/onnxruntime_common.cmake
-@@ -195,7 +195,7 @@ if (ARM64 OR ARM OR X86 OR X64 OR X86_64)
-     # Its functionality in detecting x86 cpu features are lacking, so is support for Windows.
-     if (CPUINFO_SUPPORTED)
-       onnxruntime_add_include_to_target(onnxruntime_common cpuinfo::cpuinfo)
--      list(APPEND onnxruntime_EXTERNAL_LIBRARIES cpuinfo::cpuinfo cpuinfo::clog)
-+      list(APPEND onnxruntime_EXTERNAL_LIBRARIES cpuinfo::cpuinfo)
-     endif()
-   endif()
- endif()
 diff --git a/cmake/onnxruntime_providers.cmake b/cmake/onnxruntime_providers.cmake
 index 7a99bac233..bbf1955494 100644
 --- a/cmake/onnxruntime_providers.cmake

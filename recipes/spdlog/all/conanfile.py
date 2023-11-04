@@ -56,7 +56,9 @@ class SpdlogConan(ConanFile):
         self_version = Version(self.version)
         fmt_version = "7.1.3"
 
-        if self_version >= "1.11.0":
+        if self_version >= "1.12.0":
+            fmt_version = "10.1.1"
+        elif self_version >= "1.11.0":
             fmt_version = "10.0.0"
         elif self_version >= "1.10.0":
             fmt_version = "8.1.1"
@@ -142,7 +144,9 @@ class SpdlogConan(ConanFile):
         self.cpp_info.components["libspdlog"].defines.append("SPDLOG_FMT_EXTERNAL")
         self.cpp_info.components["libspdlog"].requires = ["fmt::fmt"]
 
-        if not self.options.header_only:
+        if self.options.header_only:
+            self.cpp_info.components["libspdlog"].libdirs = []
+        else:
             suffix = "d" if self.settings.build_type == "Debug" else ""
             self.cpp_info.components["libspdlog"].libs = [f"spdlog{suffix}"]
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_COMPILED_LIB")

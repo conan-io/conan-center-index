@@ -51,17 +51,17 @@ class LibgdConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_png:
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
             if is_msvc(self):
                 self.requires("getopt-for-visual-studio/20200201")
         if self.options.with_jpeg:
             self.requires("libjpeg/9e")
         if self.options.with_tiff:
-            self.requires("libtiff/4.4.0")
+            self.requires("libtiff/4.6.0")
         if self.options.with_freetype:
-            self.requires("freetype/2.12.1")
+            self.requires("freetype/2.13.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
