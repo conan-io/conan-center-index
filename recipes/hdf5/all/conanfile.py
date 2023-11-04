@@ -1,4 +1,3 @@
-import glob
 import os
 import textwrap
 
@@ -236,9 +235,7 @@ class Hdf5Conan(ConanFile):
 
         # remove extra libs... building 1.8.21 as shared also outputs static libs on Linux.
         if self.options.shared:
-            for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
-                if not lib.endswith(".dll.a"):
-                    os.remove(lib)
+            rm(self, "*[!.dll].a", os.path.join(self.package_folder, "lib"))
 
         # Mimic the official CMake FindHDF5 targets. HDF5::HDF5 refers to the global target as per conan,
         # but component targets have a lower case namespace prefix. hdf5::hdf5 refers to the C library only
