@@ -1,7 +1,7 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, collect_libs
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
 import os
 
 required_conan_version = ">=1.53.0"
