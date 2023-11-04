@@ -174,8 +174,8 @@ class NCursesConan(ConanFile):
 
         if is_msvc(self):
             env = Environment()
-            env.define("CC", "cl -nologo -FS")
-            env.define("CXX", "cl -nologo -FS")
+            env.define("CC", "cl -nologo -FS -DEBUG:NONE")
+            env.define("CXX", "cl -nologo -FS -DEBUG:NONE")
             env.define("LD", "link")
             env.define("AR", "lib")
             env.define("NM", "dumpbin -symbols")
