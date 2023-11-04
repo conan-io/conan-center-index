@@ -114,11 +114,12 @@ class SoPlexConan(ConanFile):
         copy(self, pattern="*.h", src=join(self.build_folder, "soplex"), dst=join(self.package_folder, "include", "soplex"))
         copy(self, pattern="*.lib", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"), keep_path=False)
         if self.options.shared:
-            copy(self, pattern="*.so*", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"))
-            copy(self, pattern="*.dll", src=join(self.build_folder, "bin"), dst=join(self.package_folder, "bin"))
-            copy(self, pattern="*.dylib*", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"))
+            copy(self, pattern="*.so*", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"), keep_path=False)
+            copy(self, pattern="*.dylib*", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"), keep_path=False)
+            copy(self, pattern="*.dll", src=join(self.build_folder, "bin"), dst=join(self.package_folder, "bin"), keep_path=False)
+            copy(self, pattern="*.dll.a", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"), keep_path=False)
         else:
-            copy(self, pattern="*.a", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"))
+            copy(self, pattern="*.a", src=join(self.build_folder, "lib"), dst=join(self.package_folder, "lib"), keep_path=False)
         fix_apple_shared_install_name(self)
 
     def package_info(self):
