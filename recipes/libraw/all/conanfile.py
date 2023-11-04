@@ -12,21 +12,22 @@ class LibRawConan(ConanFile):
     license = "CDDL-1.0", "LGPL-2.1-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libraw.org/"
-    topics = ["image", "photography", "raw"]
+    topics = ("image", "photography", "raw")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
+        "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_lcms": [True, False],
-        "with_jasper": [True, False]
+        "with_jasper": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_jpeg": "libjpeg",
         "with_lcms": True,
-        "with_jasper": True
+        "with_jasper": True,
     }
     exports_sources = ["CMakeLists.txt"]
 
@@ -51,7 +52,9 @@ class LibRawConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.5")
+            self.requires("libjpeg-turbo/3.0.0")
+        elif self.options.with_jpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.3")
         if self.options.with_lcms:
             self.requires("lcms/2.14")
         if self.options.with_jasper:
@@ -68,6 +71,9 @@ class LibRawConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["RAW_LIB_VERSION_STRING"] = self.version
         tc.variables["LIBRAW_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["LIBRAW_WITH_JPEG"] = bool(self.options.with_jpeg)
+        tc.variables["LIBRAW_WITH_LCMS"] = self.options.with_lcms
+        tc.variables["LIBRAW_WITH_JASPER"] = self.options.with_jasper
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -85,7 +91,7 @@ class LibRawConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["raw"]
 
         if self.settings.os == "Windows":
             self.cpp_info.defines.append("WIN32")
@@ -93,3 +99,14 @@ class LibRawConan(ConanFile):
 
         if not self.options.shared:
             self.cpp_info.defines.append("LIBRAW_NODLL")
+
+        if self.options.with_jpeg == "libjpeg":
+            self.cpp_info.requires.append("libjpeg::libjpeg")
+        elif self.options.with_jpeg == "libjpeg-turbo":
+            self.cpp_info.requires.append("libjpeg-turbo::jpeg")
+        elif self.options.with_jpeg == "mozjpeg":
+            self.cpp_info.requires.append("mozjpeg::libjpeg")
+        if self.options.with_lcms:
+            self.cpp_info.requires.append("lcms::lcms")
+        if self.options.with_jasper:
+            self.cpp_info.requires.append("jasper::jasper")
