@@ -6,7 +6,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime
+from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -64,6 +64,8 @@ class AzureStorageCppConan(ConanFile):
         self.requires("libxml2/2.11.5", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
         if self.settings.os != "Windows":
+            # Boost.Asio is used in a public header here:
+            # https://github.com/Azure/azure-storage-cpp/blob/v7.5.0/Microsoft.WindowsAzure.Storage/includes/wascore/timer_handler.h#L27
             self.requires("boost/1.83.0", transitive_headers=True, transitive_libs=True)
             self.requires("util-linux-libuuid/2.39.2", transitive_headers=True, transitive_libs=True)
         if is_apple_os(self):
@@ -129,8 +131,16 @@ class AzureStorageCppConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["wastorage"]
         if self.settings.os == "Windows":
+            # https://github.com/Azure/azure-storage-cpp/blob/v7.5.0/Microsoft.WindowsAzure.Storage/src/CMakeLists.txt#L100
+            self.cpp_info.libs = ["wastorage"]
+            # https://github.com/Azure/azure-storage-cpp/blob/v7.5.0/Microsoft.WindowsAzure.Storage/src/CMakeLists.txt#L90
             self.cpp_info.system_libs = ["ws2_32", "rpcrt4", "xmllite", "bcrypt"]
-            if not self.options.shared:
-                self.cpp_info.defines = ["_NO_WASTORAGE_API"]
+            if is_msvc(self):
+                # https://github.com/Azure/azure-storage-cpp/blob/v7.5.0/Microsoft.WindowsAzure.Storage/CMakeLists.txt#L116-L120
+                if self.options.shared:
+                    self.cpp_info.defines = ["WASTORAGE_DLL", "_USRDLL"]
+                else:
+                    self.cpp_info.defines = ["_NO_WASTORAGE_API"]
+        else:
+            self.cpp_info.libs = ["azurestorage"]
