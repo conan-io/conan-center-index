@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
+from conan.tools.files import save, load
 from conan.tools.scm import Version
 
 
@@ -37,6 +38,8 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_SYSTEMC"] = self._with_systemc_example
         tc.generate()
+        save(self, os.path.join(self.build_folder, "verilator_path"),
+             os.path.join(self.dependencies["verilator"].package_folder, "bin", "verilator"))
 
     def build(self):
         if can_run(self):
@@ -46,7 +49,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            verilator_path = os.path.join(self.dependencies["verilator"].package_folder, "bin", "verilator")
+            verilator_path = load(self, os.path.join(self.build_folder, "verilator_path"))
             self.run(f"perl {verilator_path} --version")
             bin_path = os.path.join(self.cpp.build.bindir, "blinky")
             self.run(bin_path, env="conanrun")
