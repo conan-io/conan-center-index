@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, chdir
+from conan.tools.files import copy, get, chdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 
@@ -84,7 +84,12 @@ class FirebirdConan(ConanFile):
         deps = AutotoolsDeps(self)
         deps.generate()
 
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "extern", "cloop", "Makefile"),
+                        "$(LIBS)", "$(LDFLAGS) $(LIBS)")
+
     def build(self):
+        self._patch_sources()
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
             # self.run("NOCONFIGURE=1 ./autogen.sh")
