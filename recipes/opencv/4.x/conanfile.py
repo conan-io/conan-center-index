@@ -1230,8 +1230,8 @@ class OpenCVConan(ConanFile):
 
         ## Remove 3rd party libs
         for directory in [
-            "libjasper", "libjpeg", "libjpeg-turbo", "libpng", "libspng", "libtiff",
-            "libwebp", "openexr", "openjpeg", "protobuf", "quirc", "tbb", "zlib",
+            "libjasper", "libjpeg-turbo", "libjpeg", "libpng", "libtiff",
+            "libwebp", "openexr", "protobuf", "zlib", "quirc",
         ]:
             rmdir(self, os.path.join(self.source_folder, "3rdparty", directory))
 
@@ -1521,7 +1521,6 @@ class OpenCVConan(ConanFile):
         if self.settings.os == "Android":
             tc.variables["BUILD_ANDROID_EXAMPLES"] = False
 
-        tc.cache_variables["CMAKE_VERBOSE_MAKEFILE"] = True
         tc.generate()
 
         CMakeDeps(self).generate()
