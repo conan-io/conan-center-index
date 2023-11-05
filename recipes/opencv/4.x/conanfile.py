@@ -5,6 +5,7 @@ from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -182,9 +183,9 @@ class OpenCVConan(ConanFile):
         "with_vulkan": False,
         "dnn_cuda": False,
         # highgui module options
-        "with_gtk": True,
+        "with_gtk": False,
         "with_qt": False,
-        "with_wayland": False,
+        "with_wayland": True,
         # imgcodecs module options
         "with_avif": False,
         "with_jpeg": "libjpeg",
@@ -343,6 +344,12 @@ class OpenCVConan(ConanFile):
             # by default for MinGW (actually it would fail otherwise)
             self.options.with_msmf = False
             self.options.with_msmf_dxva = False
+        if self.settings.os == "Linux":
+            # Use Wayland by default, but fallback to GTK for old OpenCV versions.
+            # gtk/system is problematic for this recpe, there might be side effects
+            # in a big dependency graph
+            if not self._has_with_wayland_option:
+                self.options.with_gtk = True
 
     @property
     def _opencv_modules(self):
@@ -411,6 +418,9 @@ class OpenCVConan(ConanFile):
 
         def wayland():
             return ["wayland::wayland"] if self.options.get_safe("with_wayland") else []
+
+        def xkbcommon():
+            return ["xkbcommon::xkbcommon"] if self.options.get_safe("with_wayland") else []
 
         def opencv_calib3d():
             return ["opencv_calib3d"] if self.options.calib3d else []
@@ -509,7 +519,7 @@ class OpenCVConan(ConanFile):
                 "is_built": self.options.highgui,
                 "mandatory_options": ["imgproc"],
                 "requires": ["opencv_core", "opencv_imgproc"] + opencv_imgcodecs() +
-                            opencv_videoio() + gtk() + qt() + wayland() + ipp(),
+                            opencv_videoio() + gtk() + qt() + xkbcommon() + wayland() + ipp(),
                 "system_libs": [
                     (self.settings.os == "Windows", ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]),
                 ],
@@ -1093,6 +1103,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_qt"):
             self.requires("qt/5.15.11")
         if self.options.get_safe("with_wayland"):
+            self.requires("xkbcommon/1.6.0")
             self.requires("wayland/1.22.0")
         # imgcodecs module dependencies
         if self.options.get_safe("with_avif"):
@@ -1195,8 +1206,15 @@ class OpenCVConan(ConanFile):
             )
 
     def build_requirements(self):
-        if self.options.get_safe("with_protobuf") and not self._is_legacy_one_profile:
-            self.tool_requires("protobuf/<host_version>")
+        if self.options.get_safe("with_protobuf"):
+            if not self._is_legacy_one_profile:
+                self.tool_requires("protobuf/<host_version>")
+        if self.options.get_safe("with_wayland"):
+            self.tool_requires("wayland-protocols/1.32")
+            if not self._is_legacy_one_profile:
+                self.tool_requires("wayland/<host_version>")
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
@@ -1229,6 +1247,24 @@ class OpenCVConan(ConanFile):
         ## Fix detection of ffmpeg
         replace_in_file(self, os.path.join(self.source_folder, "modules", "videoio", "cmake", "detect_ffmpeg.cmake"),
                         "FFMPEG_FOUND", "ffmpeg_FOUND")
+
+        ## OpenCV uses pkgconfig to find wayland-protocols files, but we can't generate
+        ## pkgconfig files of a build requirement with 1 profile, so here is a workaround
+        if self.options.get_safe("with_wayland") and self._is_legacy_one_profile:
+            detect_wayland = os.path.join(self.source_folder, "modules", "highgui", "cmake", "detect_wayland.cmake")
+            replace_in_file(
+                self,
+                detect_wayland,
+                "ocv_check_modules(WAYLAND_PROTOCOLS wayland-protocols>=1.13)",
+                "set(HAVE_WAYLAND_PROTOCOLS TRUE)",
+            )
+            pkgdatadir = os.path.join(self.dependencies["wayland-protocols"].package_folder, "res", "wayland-protocols")
+            replace_in_file(
+                self,
+                detect_wayland,
+                "pkg_get_variable(WAYLAND_PROTOCOLS_BASE wayland-protocols pkgdatadir)",
+                f"set(WAYLAND_PROTOCOLS_BASE {pkgdatadir})",
+            )
 
         ## Cleanup RPATH
         if Version(self.version) < "4.1.2":
@@ -1275,11 +1311,10 @@ class OpenCVConan(ConanFile):
             replace_in_file(self, freetype_cmake, "HARFBUZZ_", "harfbuzz_")
 
     def generate(self):
-        if self.options.get_safe("with_protobuf"):
-            if self._is_legacy_one_profile:
+        VirtualBuildEnv(self).generate()
+        if self._is_legacy_one_profile:
+            if self.options.get_safe("with_protobuf") or self.options.get_safe("with_wayland"):
                 VirtualRunEnv(self).generate(scope="build")
-            else:
-                VirtualBuildEnv(self).generate()
 
         tc = CMakeToolchain(self)
         tc.variables["OPENCV_CONFIG_INSTALL_PATH"] = "cmake"
@@ -1490,6 +1525,12 @@ class OpenCVConan(ConanFile):
         tc.generate()
 
         CMakeDeps(self).generate()
+
+        if self.options.get_safe("with_wayland"):
+            deps = PkgConfigDeps(self)
+            if not self._is_legacy_one_profile:
+                deps.build_context_activated = ["wayland-protocols"]
+            deps.generate()
 
     def build(self):
         self._patch_sources()
