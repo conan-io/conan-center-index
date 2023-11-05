@@ -152,10 +152,15 @@ class NCursesConan(ConanFile):
             ]
         if is_msvc(self):
             build = host = f"{self.settings.arch}-w64-mingw32-msvc"
-            tc.configure_args.extend([
+            tc.configure_args += [
                 "ac_cv_func_getopt=yes",
                 "ac_cv_func_setvbuf_reversed=no",
-            ])
+            ]
+            # The env vars below are used by ./configure, but not during make
+            tc.make_args += [
+                "CC=cl -nologo -FS -DEBUG:NONE",
+                "CPP=cl -nologo -FS -DEBUG:NONE -E",
+            ]
             tc.extra_cxxflags.append("-EHsc")
             if self.options.get_safe("with_extended_colors"):
                 tc.extra_cflags.append(" ".join(f"-I{dir}" for dir in self.dependencies["naive-tsearch"].cpp_info.includedirs))
