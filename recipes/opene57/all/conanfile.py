@@ -99,6 +99,8 @@ class Opene57Conan(ConanFile):
         # FIXME: Figure out how to link against these using Conan
         replace_in_file(self, compiler_opts, "$<$<CONFIG:DEBUG>:-fsanitize=address>", "")
         replace_in_file(self, compiler_opts, "$<$<CONFIG:DEBUG>:-fsanitize=undefined>", "")
+        if self.settings.compiler == "apple-clang":
+            replace_in_file(self, compiler_opts, "$<$<CONFIG:DEBUG>:-fsanitize=leak>", "")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8":
             replace_in_file(self, compiler_opts, "-fstack-clash-protection", "")
 
