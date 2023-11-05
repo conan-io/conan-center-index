@@ -1,7 +1,13 @@
 #include <cstdint>
 #include <cstdio>
+
+#ifdef UNPREFIXED_HEADERS
 #include <webm/mkvmuxerutil.h>
 #include <webm/mkvparser.h>
+#else
+#include <webm/mkvmuxer/mkvmuxerutil.h>
+#include <webm/mkvparser/mkvparser.h>
+#endif // UNPREFIXED_HEADERS
 
 int main(void) {
   int32_t major, minor, build, revision;
