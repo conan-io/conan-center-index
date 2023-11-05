@@ -22,10 +22,12 @@ class SimdConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_avx512": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_avx512": False,
     }
 
     @property
@@ -54,6 +56,9 @@ class SimdConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["SIMD_AVX512"] = self.options.with_avx512
+        tc.variables["SIMD_AVX512VNNI"] = self.options.with_avx512
+        tc.variables["SIMD_AVX512BF16"] = self.options.with_avx512
         tc.variables["SIMD_TEST"] = False
         tc.variables["SIMD_SHARED"] = self.options.shared
         tc.generate()
