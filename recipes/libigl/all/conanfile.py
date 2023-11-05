@@ -65,8 +65,11 @@ class LibiglConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # Eigen v3.4+ is not compatible
-        self.requires("eigen/3.3.9", transitive_headers=True)
+        if Version(self.version) >= "2.5.0":
+            self.requires("eigen/3.4.0", transitive_headers=True)
+        else:
+            # 3.4.0 is not compatible with older versions
+            self.requires("eigen/3.3.9", transitive_headers=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
