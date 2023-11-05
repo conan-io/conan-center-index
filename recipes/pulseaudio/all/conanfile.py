@@ -142,10 +142,14 @@ class PulseAudioConan(ConanFile):
             # TODO: add support for the daemon component
             tc.project_options["daemon"] = "false"
 
-        if self.options.database == "gdbm":
-            gdbm = self.dependencies["gdbm"].cpp_info.aggregated_components()
+        def _add_lib_flags(pkg):
+            gdbm = self.dependencies[pkg].cpp_info.aggregated_components()
             tc.c_args += ["-I{}".format(inc) for inc in gdbm.includedirs]
             tc.c_link_args += ["-L{}".format(lib) for lib in gdbm.libdirs]
+
+        _add_lib_flags("libtool")
+        if self.options.database == "gdbm":
+            _add_lib_flags("gdbm")
 
         tc.generate()
 
