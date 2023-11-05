@@ -122,6 +122,8 @@ class OpenEXRConan(ConanFile):
         Iex = self._add_component("Iex")
         Iex.libs = [f"Iex{lib_suffix}"]
         Iex.requires = [self._conan_comp("IexConfig")]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            Iex.system_libs = ["m"]
 
         # OpenEXR::IlmThread
         IlmThread = self._add_component("IlmThread")
@@ -131,11 +133,14 @@ class OpenEXRConan(ConanFile):
         ]
         if self.settings.os in ["Linux", "FreeBSD"]:
             IlmThread.system_libs = ["pthread"]
+            IlmThread.system_libs = ["m"]
 
         # OpenEXR::OpenEXRCore
         OpenEXRCore = self._add_component("OpenEXRCore")
         OpenEXRCore.libs = [f"OpenEXRCore{lib_suffix}"]
         OpenEXRCore.requires = [self._conan_comp("OpenEXRConfig"), "zlib::zlib"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            OpenEXRCore.system_libs = ["m"]
 
         # OpenEXR::OpenEXR
         OpenEXR = self._add_component("OpenEXR")
@@ -144,11 +149,15 @@ class OpenEXRConan(ConanFile):
             self._conan_comp("OpenEXRCore"), self._conan_comp("IlmThread"),
             self._conan_comp("Iex"), "imath::imath",
         ]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            OpenEXR.system_libs = ["m"]
 
         # OpenEXR::OpenEXRUtil
         OpenEXRUtil = self._add_component("OpenEXRUtil")
         OpenEXRUtil.libs = [f"OpenEXRUtil{lib_suffix}"]
         OpenEXRUtil.requires = [self._conan_comp("OpenEXR")]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            OpenEXRUtil.system_libs = ["m"]
 
         # Add tools directory to PATH
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
