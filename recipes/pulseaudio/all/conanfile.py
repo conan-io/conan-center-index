@@ -197,7 +197,7 @@ class PulseAudioConan(ConanFile):
         # Match the CMake config defined in https://github.com/pulseaudio/pulseaudio/blob/v16.1/PulseAudioConfig.cmake.in
         self.cpp_info.set_property("cmake_file_name", "PulseAudio")
 
-        cmake_module = os.path.join("lib", "cmake", "conan-pulseaudio-config.cmake")
+        cmake_module = os.path.join("lib", "cmake", "conan-pulseaudio-vars.cmake")
         self.cpp_info.set_property("cmake_build_modules", [cmake_module])
         self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
 
