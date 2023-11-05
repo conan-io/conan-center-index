@@ -1,4 +1,9 @@
 sources:
+#  "4.8.1":
+#    - url: "https://github.com/opencv/opencv/archive/refs/tags/4.8.1.tar.gz"
+#      sha256: "62f650467a60a38794d681ae7e66e3e8cfba38f445e0bf87867e2f2cdc8be9d5"
+#    - url: "https://github.com/opencv/opencv_contrib/archive/refs/tags/4.8.1.tar.gz"
+#      sha256: "0c082a0b29b3118f2a0a1856b403bb098643af7b994a0080f402a12159a99c6e"
   "4.5.5":
     - url: "https://github.com/opencv/opencv/archive/refs/tags/4.5.5.tar.gz"
       sha256: "a1cfdcf6619387ca9e232687504da996aaa9f7b5689986b8331ec02cb61d28ad"
@@ -15,6 +20,32 @@ sources:
     - url: "https://github.com/opencv/opencv_contrib/archive/refs/tags/4.1.2.tar.gz"
       sha256: "0f6c3d30baa39e3e7611afb481ee86dea45dafb182cac87d570c95dccd83eb8b"
 patches:
+#  "4.8.1":
+#    - patch_file: "patches/4.5.5-0001-find-openexr.patch"
+#      patch_description: "Robust discovery & injection of OpenEXR"
+#      patch_type: "conan"
+#    - patch_file: "patches/4.5.5-0003-find-quirc.patch"
+#      patch_description: "Robust discovery & injection of quirc"
+#      patch_type: "conan"
+#    - patch_file: "patches/4.8.1-0001-find-ade.patch"
+#      patch_description: "Robust discovery & injection of ade"
+#      patch_type: "conan"
+#    - patch_file: "patches/4.5.1-0001-tracking-no-plot-deps.patch"
+#      patch_description: "Fix requirements of tracking module"
+#      patch_type: "conan"
+#    - patch_file: "patches/4.1.2-0006-hdf.patch"
+#      patch_description: "Robust discovery of hdf"
+#      patch_type: "conan"
+#    - patch_file: "patches/4.5.2-0001-fix-zlib-static-android.patch"
+#      patch_description: "Fix discovery of zlib static if Android"
+#      patch_type: "conan"
+#    - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
+#      patch_description: "Honor install layout from conan if Android"
+#      patch_type: "conan"
+#    - patch_file: "patches/4.8.1-0002-mingw-disable-obsensor.patch"
+#      patch_description: "MinGW: disable obsensor to avoid build issue"
+#      patch_type: "portability"
+#      patch_source: "https://github.com/opencv/opencv/pull/24478"
   "4.5.5":
     - patch_file: "patches/4.5.5-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
