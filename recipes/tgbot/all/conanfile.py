@@ -97,10 +97,3 @@ class TgbotConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["TgBot"]
-        self.cpp_info.requires = [
-            "boost::headers",
-            "boost::stacktrace",
-            "boost::system",
-            "libcurl::libcurl",
-            "openssl::openssl",
-        ]
