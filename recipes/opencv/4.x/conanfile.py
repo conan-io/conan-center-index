@@ -220,6 +220,10 @@ class OpenCVConan(ConanFile):
     short_paths = True
 
     @property
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+
+    @property
     def _is_legacy_one_profile(self):
         return not hasattr(self, "settings_build")
 
@@ -332,6 +336,13 @@ class OpenCVConan(ConanFile):
             del self.options.with_avif
         if not self._has_with_flatbuffers_option:
             del self.options.with_flatbuffers
+
+        # Conditional default options
+        if self._is_mingw:
+            # These options are visible for Windows, but upstream disables them
+            # by default for MinGW (actually it would fail otherwise)
+            self.options.with_msmf = False
+            self.options.with_msmf_dxva = False
 
     @property
     def _opencv_modules(self):
