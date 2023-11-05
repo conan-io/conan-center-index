@@ -12,10 +12,10 @@ class OpenEXRConan(ConanFile):
     name = "openexr"
     description = "OpenEXR is a high dynamic-range (HDR) image file format developed by Industrial Light & " \
                   "Magic for use in computer imaging applications."
-    topics = ("openexr", "hdr", "image", "picture")
     license = "BSD-3-Clause"
-    homepage = "https://github.com/AcademySoftwareFoundation/openexr"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/AcademySoftwareFoundation/openexr"
+    topics = ("openexr", "hdr", "image", "picture")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -26,6 +26,10 @@ class OpenEXRConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 11
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -47,8 +51,8 @@ class OpenEXRConan(ConanFile):
         self.requires("imath/3.1.9", transitive_headers=True)
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
