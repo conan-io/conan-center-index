@@ -14,12 +14,10 @@ required_conan_version = ">=1.53.0"
 class MinizipNgConan(ConanFile):
     name = "minizip-ng"
     description = "Fork of the popular zip manipulation library found in the zlib distribution."
-    topics = ("compression", "zip")
-    package_type = "library"
+    license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zlib-ng/minizip-ng"
-    license = "Zlib"
-
+    topics = ("compression", "zip")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -85,7 +83,7 @@ class MinizipNgConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.2")
+            self.requires("xz_utils/5.4.4")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_openssl:
@@ -96,7 +94,7 @@ class MinizipNgConan(ConanFile):
 
     def build_requirements(self):
         if self._needs_pkg_config:
-            self.tool_requires("pkgconf/1.9.5")
+            self.tool_requires("pkgconf/2.0.3")
         if Version(self.version) >= "4.0.0":
             self.tool_requires("cmake/[>=3.19 <4]")
 

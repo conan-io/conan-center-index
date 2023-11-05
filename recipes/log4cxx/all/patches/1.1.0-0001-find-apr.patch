@@ -1,0 +1,44 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 61c0479..6ac3e77 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -51,16 +51,18 @@ endif()
+ 
+ # Find Apache Runtime
+ option(APR_STATIC "Link to the APR static library" OFF)
+-find_package(APR REQUIRED)
++find_package(apr REQUIRED)
++set(APR_LIBRARIES apr::apr)
+ 
+ # Find Apache Runtime Utilities
+ option(APU_STATIC "Link to the APR-Util static library" OFF)
+-find_package(APR-Util REQUIRED)
++find_package(apr-util REQUIRED)
++set(APR_UTIL_LIBRARIES apr-util::apr-util)
+ 
+ find_package( Threads REQUIRED )
+ 
+ # Find expat for XML parsing
+-find_package(EXPAT REQUIRED)
++find_package(EXPAT REQUIRED MODULE)
+ if(TARGET EXPAT::EXPAT)
+   set(EXPAT_LIBRARIES EXPAT::EXPAT)
+ elseif(TARGET expat::expat)
+@@ -134,7 +136,7 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/main/include/log4cxx
+ )
+ 
+ install(TARGETS log4cxx EXPORT log4cxxTargets
+-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} 
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+@@ -171,7 +173,7 @@ if(UNIX)
+     "${CMAKE_CURRENT_BINARY_DIR}/liblog4cxx.pc"
+   )
+ 
+-  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/liblog4cxx.pc" 
++  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/liblog4cxx.pc"
+     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+ 
+   if(LOG4CXX_QT_SUPPORT)
