@@ -44,7 +44,7 @@ class LibProtobufMutatorConan(ConanFile):
         self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if self.settings.compiler.libcxx != "libstdc++11":
+        if self.settings.compiler in ["gcc", "clang", "intel-cc"] and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration("Requires compiler.libcxx=libstdc++11")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
