@@ -3,19 +3,20 @@ import os
 from conan import ConanFile, conan_version
 from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run
-from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import save, load
 from conan.tools.scm import Version
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualRunEnv"
+    generators = "VirtualRunEnv"
     test_type = "explicit"
 
     def requirements(self):
-        self.requires(self.tested_reference_str)
-        self.requires("systemc/2.3.4")
+        if self._with_systemc_example:
+            self.requires("systemc/2.3.4")
 
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
@@ -38,16 +39,17 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_SYSTEMC"] = self._with_systemc_example
         tc.generate()
-        save(self, os.path.join(self.build_folder, "verilator_path"),
-             os.path.join(self.dependencies["verilator"].package_folder, "bin", "verilator"))
-
-    @property
-    def _can_build(self):
-        # In Conan v1 the generated verilator-config.cmake tries to incorrectly load flex and fails
-        return conan_version > 2
+        if hasattr(self, "settings_build"):
+            VirtualBuildEnv(self).generate()
+            deps = CMakeDeps(self)
+            deps.build_context_activated = ["verilator"]
+            deps.build_context_build_modules = ["verilator"]
+            deps.generate()
+        save(self, os.path.join(self.generators_folder, "verilator_path"),
+             os.path.join(self.dependencies.build["verilator"].package_folder, "bin", "verilator"))
 
     def build(self):
-        if can_run(self) and self._can_build:
+        if can_run(self):
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
@@ -55,11 +57,10 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not can_run(self):
             return
-        verilator_path = load(self, os.path.join(self.build_folder, "verilator_path"))
+        verilator_path = load(self, os.path.join(self.generators_folder, "verilator_path"))
         self.run(f"perl {verilator_path} --version")
-        if self._can_build:
-            bin_path = os.path.join(self.cpp.build.bindir, "blinky")
+        bin_path = os.path.join(self.cpp.build.bindir, "blinky")
+        self.run(bin_path, env="conanrun")
+        if self._with_systemc_example:
+            bin_path = os.path.join(self.cpp.build.bindir, "blinky_sc")
             self.run(bin_path, env="conanrun")
-            if self._with_systemc_example:
-                bin_path = os.path.join(self.cpp.build.bindir, "blinky_sc")
-                self.run(bin_path, env="conanrun")
