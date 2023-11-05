@@ -1,3 +1,5 @@
+import re
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
@@ -163,6 +165,12 @@ class PulseAudioConan(ConanFile):
             replace_in_file(self, meson_build, "dependency('gio-2.0', ", "dependency('gio-2.0', required: false, ")
         if Version(self.version) >= "14":
             replace_in_file(self, meson_build, "subdir('doxygen')", "")
+        # Allow static library output
+        for meson_build in self.source_path.rglob("meson.build"):
+            content, n = re.subn(r"shared_library\(", "library(", meson_build.read_text())
+            if n > 0:
+                self.output.info(f"Replaced shared_library() with library() in {meson_build}")
+                meson_build.write_text(content)
 
     def build(self):
         self._patch_sources()
