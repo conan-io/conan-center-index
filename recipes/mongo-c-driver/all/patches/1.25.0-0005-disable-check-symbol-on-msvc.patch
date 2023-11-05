@@ -1,0 +1,13 @@
+diff --git a/src/libmongoc/CMakeLists.txt b/src/libmongoc/CMakeLists.txt
+index 61cae9c..b5ab570 100644
+--- a/src/libmongoc/CMakeLists.txt
++++ b/src/libmongoc/CMakeLists.txt
+@@ -263,7 +263,7 @@ add_feature_info("Cryptography" "${MONGOC_ENABLE_CRYPTO}" "cryptographic primiti
+ 
+ include(CMakePushCheckState)
+ include(CheckSymbolExists)
+-if(TLS_BACKEND STREQUAL "OpenSSL")
++if(TLS_BACKEND STREQUAL "OpenSSL" AND NOT MSVC)
+    # Check for newer OpenSSL string functions
+    cmake_push_check_state()
+    list(APPEND CMAKE_REQUIRED_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)

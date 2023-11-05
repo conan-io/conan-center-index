@@ -40,6 +40,9 @@ patches:
     - patch_file: "patches/1.25.0-0004-disable-calc-version.patch"
       patch_description: "disable calculate version number"
       patch_type: "conan"
+    - patch_file: "patches/1.25.0-0005-disable-check-symbol-on-msvc.patch"
+      patch_description: "disable check symbol on msvc"
+      patch_type: "conan"
   "1.24.3":
     - patch_file: "patches/1.24.1-0001-disable-shared-when-static.patch"
       patch_description: "separate static and shared builds"
