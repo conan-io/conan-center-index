@@ -1230,8 +1230,8 @@ class OpenCVConan(ConanFile):
 
         ## Remove 3rd party libs
         for directory in [
-            "libjasper", "libjpeg-turbo", "libjpeg", "libpng", "libtiff",
-            "libwebp", "openexr", "protobuf", "zlib", "quirc",
+            "libjasper", "libjpeg", "libjpeg-turbo", "libpng", "libspng", "libtiff",
+            "libwebp", "openexr", "openjpeg", "protobuf", "quirc", "tbb", "zlib",
         ]:
             rmdir(self, os.path.join(self.source_folder, "3rdparty", directory))
 
