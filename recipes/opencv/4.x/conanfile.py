@@ -417,10 +417,10 @@ class OpenCVConan(ConanFile):
             return ["vulkan-headers::vulkan-headers"] if self.options.get_safe("with_vulkan") else []
 
         def wayland():
-            return ["wayland::wayland"] if self.options.get_safe("with_wayland") else []
+            return ["wayland::wayland-client", "wayland::wayland-cursor"] if self.options.get_safe("with_wayland") else []
 
         def xkbcommon():
-            return ["xkbcommon::xkbcommon"] if self.options.get_safe("with_wayland") else []
+            return ["xkbcommon::libxkbcommon"] if self.options.get_safe("with_wayland") else []
 
         def opencv_calib3d():
             return ["opencv_calib3d"] if self.options.calib3d else []
@@ -1250,13 +1250,15 @@ class OpenCVConan(ConanFile):
 
         ## Robust handling of wayland
         if self.options.get_safe("with_wayland"):
+            detect_wayland = os.path.join(self.source_folder, "modules", "highgui", "cmake", "detect_wayland.cmake")
+
             # We have to override *_LINK_LIBRARIES variables linked to highui because they are just link fkags, not cflags
             # so include dirs are missing (OpenCV seems to assume system libs for wayland)
             replace_in_file(
                 self,
                 detect_wayland,
                 "ocv_check_modules(WAYLAND_CLIENT wayland-client)",
-                "ocv_check_modules(WAYLAND_CLIENT wayland-client)\nset(WAYLAND_CLIENT_LINK_LIBRARIES wayland::wayland-client)",
+                "ocv_check_modules(WAYLAND_CLIENT wayland-client)\nfind_package(wayland REQUIRED CONFIG)\nset(WAYLAND_CLIENT_LINK_LIBRARIES wayland::wayland-client)",
             )
             replace_in_file(
                 self,
@@ -1268,12 +1270,11 @@ class OpenCVConan(ConanFile):
                 self,
                 detect_wayland,
                 "ocv_check_modules(XKBCOMMON xkbcommon)",
-                "ocv_check_modules(XKBCOMMON xkbcommon)\nset(XKBCOMMON_LINK_LIBRARIES xkbcommon::libxkbcommon)",
+                "ocv_check_modules(XKBCOMMON xkbcommon)\nfind_package(xkbcommon REQUIRED CONFIG)\nset(XKBCOMMON_LINK_LIBRARIES xkbcommon::libxkbcommon)",
             )
             # OpenCV uses pkgconfig to find wayland-protocols files, but we can't generate
             # pkgconfig files of a build requirement with 1 profile, so here is a workaround
             if self._is_legacy_one_profile:
-                detect_wayland = os.path.join(self.source_folder, "modules", "highgui", "cmake", "detect_wayland.cmake")
                 replace_in_file(
                     self,
                     detect_wayland,
