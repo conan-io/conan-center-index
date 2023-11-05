@@ -1,4 +1,5 @@
 import os
+import shutil
 import stat
 
 from conan import ConanFile
@@ -65,6 +66,9 @@ class NetSnmpConan(ConanFile):
     def build_requirements(self):
         if is_msvc(self):
             self.tool_requires("strawberryperl/5.32.1.1")
+        else:
+            self.tool_requires("gnu-config/cci.20210814")
+            self.tool_requires("autoconf/2.71")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -149,6 +153,12 @@ class NetSnmpConan(ConanFile):
         replace_in_file(self, config, "/* Conan: system_libs */", link_lines)
 
     def _patch_unix(self):
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
         configure_path = os.path.join(self.source_folder, "configure")
         replace_in_file(self, configure_path,
                         "-install_name \\$rpath/",
