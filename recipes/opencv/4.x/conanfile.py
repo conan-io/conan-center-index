@@ -1248,23 +1248,45 @@ class OpenCVConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "modules", "videoio", "cmake", "detect_ffmpeg.cmake"),
                         "FFMPEG_FOUND", "ffmpeg_FOUND")
 
-        ## OpenCV uses pkgconfig to find wayland-protocols files, but we can't generate
-        ## pkgconfig files of a build requirement with 1 profile, so here is a workaround
-        if self.options.get_safe("with_wayland") and self._is_legacy_one_profile:
-            detect_wayland = os.path.join(self.source_folder, "modules", "highgui", "cmake", "detect_wayland.cmake")
+        ## Robust handling of wayland
+        if self.options.get_safe("with_wayland"):
+            # We have to override *_LINK_LIBRARIES variables linked to highui because they are just link fkags, not cflags
+            # so include dirs are missing (OpenCV seems to assume system libs for wayland)
             replace_in_file(
                 self,
                 detect_wayland,
-                "ocv_check_modules(WAYLAND_PROTOCOLS wayland-protocols>=1.13)",
-                "set(HAVE_WAYLAND_PROTOCOLS TRUE)",
+                "ocv_check_modules(WAYLAND_CLIENT wayland-client)",
+                "ocv_check_modules(WAYLAND_CLIENT wayland-client)\nset(WAYLAND_CLIENT_LINK_LIBRARIES wayland::wayland-client)",
             )
-            pkgdatadir = os.path.join(self.dependencies["wayland-protocols"].package_folder, "res", "wayland-protocols")
             replace_in_file(
                 self,
                 detect_wayland,
-                "pkg_get_variable(WAYLAND_PROTOCOLS_BASE wayland-protocols pkgdatadir)",
-                f"set(WAYLAND_PROTOCOLS_BASE {pkgdatadir})",
+                "ocv_check_modules(WAYLAND_CURSOR wayland-cursor)",
+                "ocv_check_modules(WAYLAND_CURSOR wayland-cursor)\nset(WAYLAND_CURSOR_LINK_LIBRARIES wayland::wayland-cursor)",
             )
+            replace_in_file(
+                self,
+                detect_wayland,
+                "ocv_check_modules(XKBCOMMON xkbcommon)",
+                "ocv_check_modules(XKBCOMMON xkbcommon)\nset(XKBCOMMON_LINK_LIBRARIES xkbcommon::libxkbcommon)",
+            )
+            # OpenCV uses pkgconfig to find wayland-protocols files, but we can't generate
+            # pkgconfig files of a build requirement with 1 profile, so here is a workaround
+            if self._is_legacy_one_profile:
+                detect_wayland = os.path.join(self.source_folder, "modules", "highgui", "cmake", "detect_wayland.cmake")
+                replace_in_file(
+                    self,
+                    detect_wayland,
+                    "ocv_check_modules(WAYLAND_PROTOCOLS wayland-protocols>=1.13)",
+                    "set(HAVE_WAYLAND_PROTOCOLS TRUE)",
+                )
+                pkgdatadir = os.path.join(self.dependencies["wayland-protocols"].package_folder, "res", "wayland-protocols")
+                replace_in_file(
+                    self,
+                    detect_wayland,
+                    "pkg_get_variable(WAYLAND_PROTOCOLS_BASE wayland-protocols pkgdatadir)",
+                    f"set(WAYLAND_PROTOCOLS_BASE {pkgdatadir})",
+                )
 
         ## Cleanup RPATH
         if Version(self.version) < "4.1.2":
