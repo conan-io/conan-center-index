@@ -48,8 +48,6 @@ class SimdConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "10.0":
-            raise ConanInvalidConfiguration(f"{self.ref} isn't compiled correctly with gcc < 10 ")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
