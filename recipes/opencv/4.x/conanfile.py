@@ -1093,7 +1093,7 @@ class OpenCVConan(ConanFile):
             # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16678#issuecomment-1507811867
             self.requires("protobuf/3.21.12", transitive_libs=True)
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-headers/1.3.250.0")
+            self.requires("vulkan-headers/1.3.268.0")
         # gapi module dependencies
         if self.options.gapi:
             self.requires("ade/0.1.2d")
@@ -1107,7 +1107,7 @@ class OpenCVConan(ConanFile):
             self.requires("wayland/1.22.0")
         # imgcodecs module dependencies
         if self.options.get_safe("with_avif"):
-            self.requires("libavif/0.11.1")
+            self.requires("libavif/1.0.1")
         if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
@@ -1143,7 +1143,7 @@ class OpenCVConan(ConanFile):
             self.requires("harfbuzz/8.2.2")
         # hdf module dependencies
         if self.options.hdf:
-            self.requires("hdf5/1.14.1")
+            self.requires("hdf5/1.14.2")
         # ovis module dependencies
         if self.options.ovis:
             self.requires("ogre/1.10.2")
