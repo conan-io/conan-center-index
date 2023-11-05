@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rm, rmdir
@@ -23,7 +24,7 @@ class CBlosc2Conan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "simd_intrinsics": [None, "sse2", "avx2"],
+        "simd_intrinsics": [None, "sse2", "avx2", "avx512"],
         "with_lz4": [True, False],
         "with_zlib": [None, "zlib", "zlib-ng", "zlib-ng-compat"],
         "with_zstd": [True, False],
@@ -73,6 +74,12 @@ class CBlosc2Conan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
 
+    def validate(self):
+        if Version(self.version) < "2.11.0" \
+           and self.info.settings.arch in ["x86", "x86_64"] \
+           and self.options.simd_intrinsics == "avx512":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support 'avx512' SIMD intrinsics")
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16.3 <4]")
 
@@ -93,7 +100,8 @@ class CBlosc2Conan(ConanFile):
         tc.cache_variables["BUILD_BENCHMARKS"] = False
         tc.cache_variables["BUILD_EXAMPLES"] = False
         simd_intrinsics = self.options.get_safe("simd_intrinsics", False)
-        tc.cache_variables["DEACTIVATE_AVX2"] = simd_intrinsics != "avx2"
+        tc.cache_variables["DEACTIVATE_AVX2"] = simd_intrinsics not in ["avx2", "avx512"]
+        tc.cache_variables["DEACTIVATE_AVX512"] = simd_intrinsics != "avx512"
         tc.cache_variables["DEACTIVATE_LZ4"] = not bool(self.options.with_lz4)
         tc.cache_variables["PREFER_EXTERNAL_LZ4"] = True
         tc.cache_variables["DEACTIVATE_ZLIB"] = self.options.with_zlib is None
