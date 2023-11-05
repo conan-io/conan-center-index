@@ -42,6 +42,10 @@ patches:
     - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
       patch_description: "Honor install layout from conan if Android"
       patch_type: "conan"
+    - patch_file: "patches/4.8.0-0002-mingw-disable-obsensor.patch"
+      patch_description: "MinGW: disable obsensor to avoid build issue"
+      patch_type: "portability"
+      patch_source: "https://github.com/opencv/opencv/pull/24478"
   "4.5.5":
     - patch_file: "patches/4.5.5-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
