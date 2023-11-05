@@ -1345,10 +1345,7 @@ class OpenCVConan(ConanFile):
                     ffmpeg_libraries.append(f"ffmpeg::{component}")
                     ffmpeg_component_version = self.dependencies["ffmpeg"].cpp_info.components[component].get_property("component_version")
                     tc.variables[f"FFMPEG_lib{component}_VERSION"] = ffmpeg_component_version
-            # FIXME: link to individual components, but for the moment link all ffmepg components
-            # as a workararound for https://github.com/conan-io/conan-center-index/pull/19194#issuecomment-1793702314
-            # tc.variables["FFMPEG_LIBRARIES"] = "";".join(ffmpeg_libraries)"
-            tc.variables["FFMPEG_LIBRARIES"] = "ffmpeg::ffmpeg"
+            tc.variables["FFMPEG_LIBRARIES"] = ";".join(ffmpeg_libraries)
 
         tc.variables["WITH_GSTREAMER"] = False
         tc.variables["WITH_HALIDE"] = False
