@@ -33,7 +33,7 @@ class Nmslib(ConanFile):
         "build_extras": True,
     }
     options_description = {
-        "build_extras": "Add support for Signature Quadratic Form Distance (SQFD)",
+        "build_extras": "Add support for Signature Quadratic Form Distance (SQFD). Not supported on MSVC.",
     }
 
     def export_sources(self):
@@ -46,6 +46,10 @@ class Nmslib(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if is_msvc(self):
+            # Not available on MSVC
+            # https://github.com/nmslib/nmslib/blob/v2.1.1/similarity_search/include/space/space_sqfd.h#L19
+            self.options.build_extras = False
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -68,8 +72,6 @@ class Nmslib(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["WITH_EXTRAS"] = self.options.build_extras
-        if self.options.build_extras:
-            tc.preprocessor_definitions["WITH_EXTRAS"] = "1"
         tc.variables["WITHOUT_TESTS"] = True
         # Relocatable shared libs on macOS
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
