@@ -133,7 +133,7 @@ class VerilatorConan(ConanFile):
 
         tc.make_args += [
             "CFG_WITH_DEFENV=false",
-            "SRC_TARGET={}".format("dbg" if self.settings.build_type == "Debug" else "opt")
+            "SRC_TARGET={}".format("debug" if self.settings.build_type == "Debug" else "optimize")
         ]
         if self.settings.build_type == "Debug":
             tc.make_args.append("DEBUG=1")
