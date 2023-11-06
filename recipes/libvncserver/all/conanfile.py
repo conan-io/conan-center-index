@@ -145,13 +145,20 @@ class LibVncServerConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "LibVNCServer")
         self.cpp_info.set_property("cmake_target_name", "libvncserver::libvncserver")
+        self.cpp_info.filenames["cmake_find_package"] = "LibVNCServer"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "LibVNCServer"
         self.cpp_info.components["server"].set_property("cmake_target_name", "LibVNCServer::vncserver")
+        self.cpp_info.components["server"].names["cmake_find_package"] = "vncserver"
+        self.cpp_info.components["server"].names["cmake_find_package_multi"] = "vncserver"
         self.cpp_info.components["server"].libs = ['vncserver']
         self.cpp_info.components["server"].system_libs = ['pthread']
 
         self.cpp_info.components["client"].set_property("cmake_target_name", "LibVNCServer::vncclient")
+        self.cpp_info.components["client"].names["cmake_find_package"] = "vncclient"
+        self.cpp_info.components["client"].names["cmake_find_package_multi"] = "vncclient"
         self.cpp_info.components["client"].libs = ['vncclient']
         self.cpp_info.components["client"].system_libs = ['pthread']
+
         self.cpp_info.components["server"].set_property("pkg_config_name", "libvncserver")
         self.cpp_info.components["client"].set_property("pkg_config_name", "libvncclient")
 
