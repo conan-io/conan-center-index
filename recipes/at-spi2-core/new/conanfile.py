@@ -55,7 +55,7 @@ class AtSpi2CoreConan(ConanFile):
         self.tool_requires("glib/<host_version>")
 
     def requirements(self):
-        self.requires("glib/2.78.0")
+        self.requires("glib/2.78.1")
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.settings.os == "Linux":
