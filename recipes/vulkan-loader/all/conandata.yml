@@ -17,3 +17,9 @@ sources:
   "1.2.198.0":
     url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.2.198.0.tar.gz"
     sha256: "7d5d56296dcd88af84ed0fde969038370cac8600c4ef7e328788b7422d9025bb"
+patches:
+  "1.3.268.0":
+    - patch_file: "patches/1.3.268.0-0001-fix-apple-arm.patch"
+      patch_description: "Apple: fix M1 build, as well as iOS & tvOS"
+      patch_type: "portability"
+      patch_source: "https://github.com/KhronosGroup/Vulkan-Loader/pull/1349"
