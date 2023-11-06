@@ -9,11 +9,6 @@ sources:
     url: "https://github.com/libigl/libigl/archive/refs/tags/v2.3.0.zip"
     sha256: "5124443c2657023394039fe56fb240d4f7a867723ee4ebba053eaeb881ed7455"
 patches:
-  "2.4.0":
-    - patch_file: "patches/001-replace-random_shuffle.patch"
-      patch_type: "portability"
-      patch_description: "Replace std::random_shuffle that was removed in C++17"
-      patch_source: "https://github.com/libigl/libigl/commit/3f3d186db7c2f5ce79194c3439134ca5faf2818a"
   "2.3.0":
     - patch_file: "patches/001-replace-random_shuffle.patch"
       patch_type: "portability"
