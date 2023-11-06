@@ -63,7 +63,7 @@ class GdkPixbufConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.78.0", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.1", transitive_headers=True, transitive_libs=True)
         if self.options.with_libpng:
             self.requires("libpng/1.6.40")
         if self.options.with_libtiff:
