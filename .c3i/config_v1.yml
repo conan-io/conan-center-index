@@ -167,6 +167,7 @@ pod_size:
   large:
     - "duckdb"
     - "ceres-solver"
+    - "libigl"
   xlarge:
     - "llvm"
     - "opengv"
