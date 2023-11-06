@@ -60,4 +60,5 @@ class PackageConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
+        self.cpp_info.system_libs = ["ws2_32", "dbghelp"]
         self.cpp_info.libs = ["OptickCore" + ("d" if self.settings.build_type == "Debug" else "")]
