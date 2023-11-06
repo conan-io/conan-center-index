@@ -1,14 +1,15 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import Environment
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
-from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, unix_path, check_min_vs
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, unix_path
 from conan.tools.scm import Version
-import os
 
 required_conan_version = ">=1.53.0"
 
@@ -270,8 +271,10 @@ class NCursesConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "Curses")
+
         # CMake's standard FindCurses module does not define a target.
         # Adding one nevertheless for consistency with other packages.
+        # https://gitlab.kitware.com/cmake/cmake/-/issues/23051
         self.cpp_info.set_property("cmake_target_name", "Curses::Curses")
 
         def _add_component(name, lib_name=None, requires=None):
@@ -328,8 +331,8 @@ class NCursesConan(ConanFile):
         self.conf_info.define("user.ncurses:lib_suffix", self._lib_suffix)
 
         # TODO: Legacy, to be removed on Conan 2.0
-        self.cpp_info.filenames["cmake_find_package"] = "Curses"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Curses"
+        self.cpp_info.names["cmake_find_package"] = "Curses"
+        self.cpp_info.names["cmake_find_package_multi"] = "Curses"
         self.cpp_info.components["libcurses"].build_modules["cmake_find_package"] = [module_rel_path]
         self.cpp_info.components["libcurses"].build_modules["cmake_find_package_multi"] = [module_rel_path]
         self.env_info.TERMINFO = terminfo
