@@ -61,7 +61,7 @@ class LibniceConan(ConanFile):
                 "-o glib/*:shared=True with static runtime is not supported")
 
     def requirements(self):
-        self.requires("glib/2.78.0", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.1", transitive_headers=True, transitive_libs=True)
         if self.options.crypto_library == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_gstreamer:
