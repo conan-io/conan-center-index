@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, save
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -64,6 +64,10 @@ class Gm2calcConan(ConanFile):
         apply_conandata_patches(self)
         if Version(self.version) < "2.2.0":
             replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "EIGEN3", "Eigen3")
+        # Fix src/slhaea.h:25:10: fatal error: boost/algorithm/string/classification.hpp: No such file or directory
+        save(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+             "\ninclude_directories(${Boost_INCLUDE_DIRS})", append=True)
+        # Disable examples, test and doc
         for subdir in ["examples", "test", "doc"]:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), f"add_subdirectory({subdir})", "")
 
