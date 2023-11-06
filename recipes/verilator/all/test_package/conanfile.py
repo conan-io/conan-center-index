@@ -1,27 +1,22 @@
 import os
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import save, load
 from conan.tools.scm import Version
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "VirtualRunEnv"
     test_type = "explicit"
 
     def requirements(self):
+        self.requires(self.tested_reference_str, run=True)
         if self._with_systemc_example:
-            self.requires("systemc/2.3.4")
-
-    def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
-        if self._with_systemc_example:
-            self.tool_requires("systemc/<host_version>")
+            self.requires("systemc/2.3.4", run=True)
 
     def layout(self):
         cmake_layout(self)
@@ -36,17 +31,17 @@ class TestPackageConan(ConanFile):
         return True
 
     def generate(self):
+        VirtualRunEnv(self).generate(scope="build")
+        VirtualRunEnv(self).generate(scope="run")
         tc = CMakeToolchain(self)
         tc.variables["BUILD_SYSTEMC"] = self._with_systemc_example
         tc.generate()
         if hasattr(self, "settings_build"):
             VirtualBuildEnv(self).generate()
             deps = CMakeDeps(self)
-            deps.build_context_activated = ["verilator"]
-            deps.build_context_build_modules = ["verilator"]
             deps.generate()
         save(self, os.path.join(self.generators_folder, "verilator_path"),
-             os.path.join(self.dependencies.build["verilator"].package_folder, "bin", "verilator"))
+             os.path.join(self.dependencies["verilator"].package_folder, "bin", "verilator"))
 
     def build(self):
         if can_run(self):
