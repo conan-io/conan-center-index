@@ -1,6 +1,6 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -437,7 +437,12 @@ IF(HUNTER_ENABLED)
+@@ -437,10 +437,14 @@ IF(HUNTER_ENABLED)
    set(ASSIMP_BUILD_MINIZIP TRUE)
  ELSE(HUNTER_ENABLED)
    IF ( NOT ASSIMP_BUILD_ZLIB )
@@ -10,11 +10,25 @@
 +       ASSIMP_BUILD_X_IMPORTER OR ASSIMP_BUILD_XGL_IMPORTER)
 +        find_package(ZLIB REQUIRED)
 +    endif()
-+    set(ZLIB_FOUND TRUE)
    ENDIF( NOT ASSIMP_BUILD_ZLIB )
  
-   IF( NOT ZLIB_FOUND )
-@@ -470,14 +475,14 @@ ENDIF(HUNTER_ENABLED)
+-  IF( NOT ZLIB_FOUND )
++  IF(0)
+     MESSAGE(STATUS "compiling zlib from sources")
+     INCLUDE(CheckIncludeFile)
+     INCLUDE(CheckTypeSize)
+@@ -461,23 +465,23 @@ ELSE(HUNTER_ENABLED)
+     SET(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/contrib/zlib ${CMAKE_CURRENT_BINARY_DIR}/contrib/zlib)
+     # need to ensure we don't link with system zlib or minizip as well.
+     SET(ASSIMP_BUILD_MINIZIP 1)
+-  ELSE(NOT ZLIB_FOUND)
++  ELSE()
+     ADD_DEFINITIONS(-DASSIMP_BUILD_NO_OWN_ZLIB)
+     SET(ZLIB_LIBRARIES_LINKED -lz)
+-  ENDIF(NOT ZLIB_FOUND)
++  ENDIF()
+   INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+ ENDIF(HUNTER_ENABLED)
  
  IF( NOT IOS )
    IF( NOT ASSIMP_BUILD_MINIZIP )
