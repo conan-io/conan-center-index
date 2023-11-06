@@ -175,7 +175,6 @@ class NcbiCxxToolkit(ConanFile):
             pkgs = self._translate_req(req)
             if pkgs is not None:
                 for pkg in pkgs:
-                    print("Package requires ", pkg)
                     self.requires(pkg)
 
     def validate(self):
