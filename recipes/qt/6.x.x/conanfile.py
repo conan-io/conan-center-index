@@ -26,6 +26,7 @@ class QtConan(ConanFile):
                    "qtserialport", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview",
                    "qtremoteobjects", "qtpositioning", "qtlanguageserver",
                    "qtspeech", "qthttpserver", "qtquick3dphysics", "qtgrpc", "qtquickeffectmaker"]
+    _submodules += ["qtgraphs"] # new modules for qt 6.6.0
 
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
@@ -116,7 +117,6 @@ class QtConan(ConanFile):
         "multiconfiguration": False,
         "disabled_features": "",
     }
-    default_options.update({module: False for module in _submodules})
 
     short_paths = True
 
@@ -139,15 +139,16 @@ class QtConan(ConanFile):
             assert section.startswith("submodule ")
             assert section.count('"') == 2
             modulename = section[section.find('"') + 1: section.rfind('"')]
+            if modulename in ["qtbase", "qtqa", "qtrepotools"]:
+                continue
             status = str(config.get(section, "status"))
             if status not in ["obsolete", "ignore", "additionalLibrary"]:
+                assert modulename in self._submodules, f"module {modulename} not in self._submodules"
                 self._submodules_tree[modulename] = {"status": status,
                                 "path": str(config.get(section, "path")), "depends": []}
                 if config.has_option(section, "depends"):
                     self._submodules_tree[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
 
-        for m in self._submodules_tree:
-            assert m in ["qtbase", "qtqa", "qtrepotools"] or m in self._submodules, f"module {m} not in self._submodules"
 
         return self._submodules_tree
 
@@ -213,12 +214,21 @@ class QtConan(ConanFile):
         def _enablemodule(mod):
             if mod != "qtbase":
                 setattr(self.options, mod, True)
-            for req in self._get_module_tree[mod]["depends"]:
-                _enablemodule(req)
+                for req in self._get_module_tree[mod]["depends"]:
+                    _enablemodule(req)
 
+        # enable all modules which are
+        # - required by a module explicitely enabled by the consumer
         for module in self._get_module_tree:
-            if self.options.get_safe(module):
+            if getattr(self.options, module):
                 _enablemodule(module)
+
+        # disable all modules which are:
+        # - not explicitely enabled by the consumer and
+        # - not required by a module explicitely enabled by the consumer
+        for module in self._get_module_tree:
+            if getattr(self.options, module).value is None:
+                setattr(self.options, module, False)
 
     def validate(self):
         if os.getenv('NOT_ON_C3I', '0') == '0':
@@ -460,8 +470,9 @@ class QtConan(ConanFile):
         tc.variables["FEATURE_optimize_size"] = ("ON" if self.settings.build_type == "MinSizeRel" else "OFF")
 
         for module in self._get_module_tree:
-            if module != 'qtbase':
-                tc.variables[f"BUILD_{module}"] = ("ON" if self.options.get_safe(module) else "OFF")
+            tc.variables[f"BUILD_{module}"] = ("ON" if getattr(self.options, module) else "OFF")
+        tc.variables["BUILD_qtqa"] = "OFF"
+        tc.variables["BUILD_qtrepotools"] = "OFF"
 
         tc.variables["FEATURE_system_zlib"] = "ON"
 
@@ -761,9 +772,10 @@ class QtConan(ConanFile):
             save(self, ".qmake.super" , "")
         cmake = CMake(self)
         cmake.install()
-        copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"),
+             excludes="qtbase/examples/*")
         for module in self._get_module_tree:
-            if module != "qtbase" and not self.options.get_safe(module):
+            if not getattr(self.options, module):
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
@@ -794,10 +806,12 @@ class QtConan(ConanFile):
             targets.append("qvkgen")
         if self.options.widgets:
             targets.append("uic")
+        if self._settings_build.os == "Macos" and self.settings.os != "iOS":
+            targets.extend(["macdeployqt"])
+        if self.settings.os == "Windows":
+            targets.extend(["windeployqt"])
         if self.options.qttools:
             targets.extend(["qhelpgenerator", "qtattributionsscanner"])
-            if self.settings.os == "Windows":
-                targets.extend(["windeployqt"])
             targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
         if self.options.qtshadertools:
             targets.append("qsb")
@@ -862,6 +876,9 @@ class QtConan(ConanFile):
 
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
+            save(self, os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake"), textwrap.dedent("""\
+                    set(QT_KNOWN_POLICY_QTP0001 TRUE)
+                    """))
 
         if self.settings.os in ["Windows", "iOS"]:
             contents = textwrap.dedent("""\
@@ -1324,6 +1341,7 @@ class QtConan(ConanFile):
                 self.cpp_info.components["qtCore"].frameworks.append("IOKit")     # qtcore requires "_IORegistryEntryCreateCFProperty", "_IOServiceGetMatchingService" and much more which are in "IOKit" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
+                self.cpp_info.components["qtNetwork"].system_libs.append("resolv")
                 self.cpp_info.components["qtNetwork"].frameworks.append("SystemConfiguration")
                 if self.options.with_gssapi:
                     self.cpp_info.components["qtNetwork"].frameworks.append("GSS")
@@ -1363,6 +1381,9 @@ class QtConan(ConanFile):
 
         build_modules_list = []
 
+        if self.options.qtdeclarative:
+            build_modules_list.append(os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake"))
+
         def _add_build_modules_for_component(component):
             for req in self.cpp_info.components[component].requires:
                 if "::" in req: # not a qt component
@@ -1372,5 +1393,7 @@ class QtConan(ConanFile):
 
         for c in self.cpp_info.components:
             _add_build_modules_for_component(c)
+
+        build_modules_list.append(os.path.join(self.package_folder, "lib", "cmake", "Qt6Core", "Qt6CoreConfigExtras.cmake"))
 
         self.cpp_info.set_property("cmake_build_modules", build_modules_list)

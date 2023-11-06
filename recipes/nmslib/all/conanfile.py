@@ -83,6 +83,10 @@ class Nmslib(ConanFile):
         apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "similarity_search", "CMakeLists.txt"),
                         "EIGEN3", "Eigen3")
+        # The finite-math-only optimization has no effect and can cause linking errors
+        # when linked against glibc >= 2.31
+        replace_in_file(self, os.path.join(self.source_folder, "similarity_search", "CMakeLists.txt"),
+                        "-Ofast", "-Ofast -fno-finite-math-only")
 
     def build(self):
         self._patch_sources()
