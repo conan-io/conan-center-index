@@ -45,11 +45,12 @@ class TarConan(ConanFile):
                 raise ConanInvalidConfiguration("bzip2:build_executable must be enabled")
 
     def build_requirements(self):
-        self.tool_requires("bzip2/1.0.8", visible=True)
-        self.tool_requires("lzip/1.23", visible=True)
-        self.tool_requires("xz_utils/5.4.4", visible=True)
-        self.tool_requires("zstd/1.5.5", visible=True)
-        # self.tool_requires("lzo/2.10", visible=True)
+        visible = dict(visible=True) if conan_version >= 2 else dict()
+        self.tool_requires("bzip2/1.0.8", **visible)
+        self.tool_requires("lzip/1.23", **visible)
+        self.tool_requires("xz_utils/5.4.4", **visible)
+        self.tool_requires("zstd/1.5.5", **visible)
+        # self.tool_requires("lzo/2.10", **visible)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
