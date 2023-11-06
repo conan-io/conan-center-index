@@ -132,8 +132,7 @@ class OpenEXRConan(ConanFile):
             self._conan_comp("IlmThreadConfig"), self._conan_comp("Iex"),
         ]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            IlmThread.system_libs = ["pthread"]
-            IlmThread.system_libs = ["m"]
+            IlmThread.system_libs = ["pthread", "m"]
 
         # OpenEXR::OpenEXRCore
         OpenEXRCore = self._add_component("OpenEXRCore")
