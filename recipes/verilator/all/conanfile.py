@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv
@@ -35,19 +35,36 @@ class VerilatorConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    @property
+    def _needs_old_bison(self):
+        # don't upgrade to bison 3.7.0 or above, or it fails to build
+        # because of https://github.com/verilator/verilator/pull/2505
+        return Version(self.version) < "4.100"
+
+    @property
+    def _flex_version(self):
+        return "2.6.4"
+
+    @property
+    def _winflexbison_version(self):
+        return "2.5.22" if self._needs_old_bison else "2.5.25"
+
+    @property
+    def _bison_version(self):
+        return "3.5.3" if self._needs_old_bison else "3.8.2"
+
     def requirements(self):
         if self.settings.os == "Windows":
             self.requires("strawberryperl/5.32.1.1", visible=False)
-            if self._needs_old_bison:
-                # don't upgrade to bison 3.7.0 or above, or it fails to build
-                # because of https://github.com/verilator/verilator/pull/2505
-                self.requires("winflexbison/2.5.22", visible=False)
+            if is_msvc(self):
+                self.requires("dirent/1.24", visible=False)
+        # Conan v1 does not handle flex being both a build and a host requirement correctly.
+        # It gets incorrectly marked as a dependency in CMake but a CMake module/config is not generated.
+        if conan_version >= 2:
+            if self.settings.os == "Windows":
+                self.requires(f"winflexbison/{self._winflexbison_version}", visible=False)
             else:
-                self.requires("winflexbison/2.5.25", visible=False)
-        else:
-            self.requires("flex/2.6.4", visible=False)
-        if is_msvc(self):
-            self.requires("dirent/1.24", visible=False)
+                self.requires(f"flex/{self._flex_version}", visible=False)
 
     def package_id(self):
         # Verilator is an executable-only package, so the compiler does not matter
@@ -67,26 +84,26 @@ class VerilatorConan(ConanFile):
         if self.settings.os == "Windows" and Version(self.version) >= "4.200":
             raise ConanInvalidConfiguration("Windows build is not yet supported. Contributions are welcome")
 
-    @property
-    def _needs_old_bison(self):
-        return Version(self.version) < "4.100"
-
     def build_requirements(self):
+        if conan_version >= 2:
+            if self._settings_build.os == "Windows":
+                self.tool_requires("winflexbison/<host_version>")
+            else:
+                self.tool_requires("flex/<host_version>")
+        else:
+            if self._settings_build.os == "Windows":
+                self.build_requires(f"winflexbison/{self._winflexbison_version}")
+            else:
+                self.build_requires(f"flex/{self._flex_version}")
+
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
             self.tool_requires("automake/1.16.5")
-            self.tool_requires("winflexbison/<host_version>")
             self.tool_requires("strawberryperl/<host_version>")
         else:
-            self.tool_requires("flex/<host_version>")
-            if self._needs_old_bison:
-                # don't upgrade to bison 3.7.0 or above, or it fails to build
-                # because of https://github.com/verilator/verilator/pull/2505
-                self.tool_requires("bison/3.5.3")
-            else:
-                self.tool_requires("bison/3.8.2")
+            self.tool_requires(f"bison/{self._bison_version}")
         if Version(self.version) >= "4.224":
             self.tool_requires("autoconf/2.71")
 
@@ -104,9 +121,14 @@ class VerilatorConan(ConanFile):
             tc.extra_cxxflags.append("-FS")
             tc.defines.append("YY_NO_UNISTD_H")
         tc.configure_args += ["--datarootdir=${prefix}/bin/share"]
+
         flex = "flex" if self.settings.os != "Windows" else "winflexbison"
-        tc.extra_cxxflags += [f"-I{unix_path(self, self.dependencies[flex].cpp_info.includedir)}"]
-        tc.extra_ldflags += [f"-L{unix_path(self, self.dependencies[flex].cpp_info.libdir)}"]
+        if conan_version >= 2:
+            flex_info = self.dependencies[flex].cpp_info
+        else:
+            flex_info = self.dependencies.build[flex].cpp_info
+        tc.extra_cxxflags += [f"-I{unix_path(self, flex_info.includedir)}"]
+        tc.extra_ldflags += [f"-L{unix_path(self, flex_info.libdir)}"]
         tc.generate()
 
         tc.make_args += [

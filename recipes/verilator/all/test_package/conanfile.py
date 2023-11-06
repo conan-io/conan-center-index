@@ -14,9 +14,12 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def requirements(self):
-        self.requires(self.tested_reference_str, run=True)
+        self.requires(self.tested_reference_str)
         if self._with_systemc_example:
             self.requires("systemc/2.3.4", run=True)
+
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def layout(self):
         cmake_layout(self)
@@ -31,15 +34,13 @@ class TestPackageConan(ConanFile):
         return True
 
     def generate(self):
-        VirtualRunEnv(self).generate(scope="build")
-        VirtualRunEnv(self).generate(scope="run")
+        VirtualBuildEnv(self).generate()
+        VirtualRunEnv(self).generate()
         tc = CMakeToolchain(self)
         tc.variables["BUILD_SYSTEMC"] = self._with_systemc_example
         tc.generate()
-        if hasattr(self, "settings_build"):
-            VirtualBuildEnv(self).generate()
-            deps = CMakeDeps(self)
-            deps.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
         save(self, os.path.join(self.generators_folder, "verilator_path"),
              os.path.join(self.dependencies["verilator"].package_folder, "bin", "verilator"))
 
