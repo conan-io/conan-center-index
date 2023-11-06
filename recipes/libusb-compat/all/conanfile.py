@@ -59,7 +59,7 @@ class LibUSBCompatConan(ConanFile):
     def requirements(self):
         self.requires("libusb/1.0.26")
         if is_msvc(self):
-            self.requires("dirent/1.24")
+            self.requires("dirent/1.24", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         self.tool_requires("gnu-config/cci.20210814")
