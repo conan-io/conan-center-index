@@ -28,6 +28,13 @@ add_executable(${PROJECT_NAME}
     ${UA_TYPES_FOO_FLT_SOURCES}
     test_package.c
 )
+
+target_link_options(
+    ${PROJECT_NAME}
+    PRIVATE 
+    $<$<AND:$<CONFIG:Debug>,$<C_COMPILER_ID:Clang>>:-fsanitize=address>    
+)
+
 # Make sure the nodeset compiler is executed before compiling the main file
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}-ns-foo_flt)
 target_link_libraries(${PROJECT_NAME} PRIVATE open62541::open62541)
