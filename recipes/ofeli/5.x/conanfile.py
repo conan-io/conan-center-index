@@ -6,6 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir, replace_in_file, rename
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -37,10 +38,12 @@ class OfeliConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
-        if self.settings.compiler in ["clang", "apple-clang"]:
+        if self.settings.compiler in ["clang", "apple-clang"] or is_msvc(self):
             # Clang fails with
             # include/linear_algebra/LocalVect_impl.h:251:42: error: cannot initialize return object of type 'OFELI::Element *' with an lvalue of type 'const OFELI::Element *'
-            raise ConanInvalidConfiguration(f"{self.settings.compiler} is not supported due to compilation errors in a public header")
+            # MSVC fails with a lot of errors
+            # https://c3i.jfrog.io/c3i/misc/summary.html?json=https://c3i.jfrog.io/c3i/misc/logs/pr/18952/12-windows-visual_studio/ofeli/5.1.0/summary.json
+            raise ConanInvalidConfiguration(f"{self.settings.compiler} is not supported due to compilation errors")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
