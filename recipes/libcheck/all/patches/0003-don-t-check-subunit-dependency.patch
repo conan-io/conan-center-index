@@ -8,7 +8,7 @@
  if (HAVE_SUBUNIT)
 +  find_package(subunit REQUIRED CONFIG)
 +  link_libraries(subunit::subunit)
-+  include_directories(${subunit_INCLUDE_DIRS})
++  link_directories(${subunit_INCLUDE_DIR}/../lib) # Conan v1 does not set the lib dirs correctly for some reason
    set(SUBUNIT "subunit")
    set(ENABLE_SUBUNIT 1)
 
