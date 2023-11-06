@@ -35,14 +35,12 @@ class OfeliConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("Ofeli only supports Linux")
-        if self.settings.compiler != "gcc":
-            raise ConanInvalidConfiguration("Ofeli only supports GCC")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
-        if self.settings.compiler.libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration("Ofeli only supports libstdc++'s new ABI")
+        if self.settings.compiler in ["clang", "apple-clang"]:
+            # Clang fails with
+            # include/linear_algebra/LocalVect_impl.h:251:42: error: cannot initialize return object of type 'OFELI::Element *' with an lvalue of type 'const OFELI::Element *'
+            raise ConanInvalidConfiguration(f"{self.settings.compiler} is not supported due to compilation errors in a public header")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
