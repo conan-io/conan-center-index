@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 
@@ -20,20 +21,23 @@ class AwsLambdaRuntimeConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_backtrace": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_backtrace": False,
     }
 
     @property
     def _min_cppstd(self):
         return 11
 
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "0.2.9":
+            del self.options.with_backtrace
 
     def configure(self):
         if self.options.shared:
@@ -44,7 +48,8 @@ class AwsLambdaRuntimeConan(ConanFile):
 
     def requirements(self):
         self.requires("libcurl/[>=7.78.0 <9]")
-        self.requires("libbacktrace/cci.20210118")
+        if self.options.get_safe("with_backtrace", True):
+            self.requires("libbacktrace/cci.20210118")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
