@@ -142,7 +142,11 @@ class LibiglConan(ConanFile):
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=self.source_path.parent)
-        cmake.build()
+        try:
+            cmake.build()
+        except Exception:
+            # Workaround for C3I running out of memory during build
+            cmake.build(cli_args=["-j1"])
 
     def package(self):
         cmake = CMake(self)
