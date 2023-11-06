@@ -133,10 +133,6 @@ class OpenImageIOConan(ConanFile):
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
 
-        # TODO: remove
-        self.requires("imath/3.1.9", override=True)
-        self.requires("xz_utils/5.4.4", override=True)
-
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 14)
