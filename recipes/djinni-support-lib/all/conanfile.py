@@ -77,7 +77,7 @@ class DjinniSupportLib(ConanFile):
         tc.variables["DJINNI_WITH_JNI"] = self._jni_support
         if self._jni_support:
             tc.variables["JAVA_AWT_LIBRARY"] = "NotNeeded"
-            tc.variables["JAVA_AWT_INCLUDE_PATH"] = unix_path(self, self.source_folder)
+            tc.variables["JAVA_AWT_INCLUDE_PATH"] = self.source_folder.replace("\\", "/")
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
