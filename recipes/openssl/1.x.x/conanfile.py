@@ -539,10 +539,6 @@ class OpenSSLConan(ConanFile):
             with chdir(self, self.source_folder):
                 self.run(f"nmake -f Makefile install_sw DESTDIR={self.package_folder}")
             rm(self, "*.pdb", self.package_folder, recursive=True)
-            if self.settings.build_type == "Debug":
-                with chdir(self, os.path.join(self.package_folder, "lib")):
-                    rename(self, "libssl.lib", "libssld.lib")
-                    rename(self, "libcrypto.lib", "libcryptod.lib")
         else:
             autotools = Autotools(self)
             with chdir(self, self.source_folder):
@@ -619,9 +615,8 @@ class OpenSSLConan(ConanFile):
         self.cpp_info.components["ssl"].set_property("cmake_target_name", "OpenSSL::SSL")
         self.cpp_info.components["ssl"].set_property("pkg_config_name", "libssl")
         if self._use_nmake:
-            libsuffix = "d" if self.settings.build_type == "Debug" else ""
-            self.cpp_info.components["ssl"].libs = ["libssl" + libsuffix]
-            self.cpp_info.components["crypto"].libs = ["libcrypto" + libsuffix]
+            self.cpp_info.components["ssl"].libs = ["libssl"]
+            self.cpp_info.components["crypto"].libs = ["libcrypto"]
         else:
             self.cpp_info.components["ssl"].libs = ["ssl"]
             self.cpp_info.components["crypto"].libs = ["crypto"]
