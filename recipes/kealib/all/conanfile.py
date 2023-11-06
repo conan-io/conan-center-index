@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 
@@ -47,6 +48,8 @@ class KealibConan(ConanFile):
         self.requires("hdf5/1.14.2", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
         hdf5_opts = self.dependencies["hdf5"].options
         if not (hdf5_opts.enable_cxx and hdf5_opts.hl):
             raise ConanInvalidConfiguration("kealib requires hdf5 with cxx and hl enabled.")
