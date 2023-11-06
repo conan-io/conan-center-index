@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.52.0"
@@ -62,8 +62,17 @@ class LibCheckConan(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # Do not build the unnecessary target
+        disabled_target = "check" if self.options.shared else "checkShared"
+        save(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+             f"set_target_properties({disabled_target} PROPERTIES EXCLUDE_FROM_ALL TRUE)\n",
+             append=True)
+
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -86,7 +95,7 @@ class LibCheckConan(ConanFile):
         libsuffix = "Dynamic" if is_msvc(self) and self.options.shared else ""
         self.cpp_info.components["liblibcheck"].libs = [f"check{libsuffix}"]
         if self.options.with_subunit:
-            self.cpp_info.components["liblibcheck"].requires.append("subunit::libsubunit")
+            self.cpp_info.components["liblibcheck"].requires.append("subunit::subunit")
         if not self.options.shared:
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["liblibcheck"].system_libs = ["m", "pthread", "rt"]
