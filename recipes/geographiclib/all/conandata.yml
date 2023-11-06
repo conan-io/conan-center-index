@@ -1,16 +1,19 @@
 sources:
+  "2.3":
+    url: "https://github.com/geographiclib/geographiclib/archive/refs/tags/v2.3.tar.gz"
+    sha256: "18131077061ef8be14064f073f6dba2897a138519733803af807f861a01976c1"
   "1.52":
-    url: "https://sourceforge.net/projects/geographiclib/files/distrib/GeographicLib-1.52.tar.gz"
-    sha256: "5d4145cd16ebf51a2ff97c9244330a340787d131165cfd150e4b2840c0e8ac2b"
+    url: "https://github.com/geographiclib/geographiclib/archive/refs/tags/v1.52.tar.gz"
+    sha256: "f327ec3d16cc64d954c388b342893377dc56909fab267dbae8ea8bc170b32b2d"
   "1.51":
-    url: "https://sourceforge.net/projects/geographiclib/files/distrib/GeographicLib-1.51.tar.gz"
-    sha256: "34370949617df5105bd6961e0b91581aef758dc455fe8629eb5858516022d310"
-  "1.50.1":
-    url: "https://sourceforge.net/projects/geographiclib/files/distrib/GeographicLib-1.50.1.tar.gz"
-    sha256: "d1765009e068b8cc5e76957e5d6be45ce6cff08c4aad8e5995e84a28354385f1"
+    url: "https://github.com/geographiclib/geographiclib/archive/refs/tags/v1.51.tar.gz"
+    sha256: "9a2fe4fb69887ab7c625a40e5f1c20261bc80871670d729bea3119a2492e112c"
+  "1.50.2":
+    url: "https://github.com/geographiclib/geographiclib/archive/refs/tags/v1.50.2.tar.gz"
+    sha256: "6bdb960292b3197dc18bc3005ee76e4cdefbf025154d71fb42c986cb5ed1e4e7"
 patches:
   "1.52":
-    - patch_file: "patches/0002-cmake-minimum-required-1.52.patch"
+    - patch_file: "patches/0002-cmake-minimum-required-1.51.patch"
       patch_description: "Add cmake_minimum_required() to top CMakeLists"
       patch_type: "conan"
       patch_source: "https://github.com/geographiclib/geographiclib/commit/d9ca6c6ec0b721326b9a690eee259eac643b927f"
@@ -19,8 +22,11 @@ patches:
       patch_description: "Add cmake_minimum_required() to top CMakeLists"
       patch_type: "conan"
       patch_source: "https://github.com/geographiclib/geographiclib/commit/d9ca6c6ec0b721326b9a690eee259eac643b927f"
-  "1.50.1":
-    - patch_file: "patches/0001-streamoff.patch"
+    - patch_file: "patches/0003-fix-rhumb.patch"
+      patch_description: "Fix Rhumb.hpp Clang compatibility"
+      patch_type: "portability"
+      patch_source: "https://github.com/geographiclib/geographiclib/commit/6c5767ba13a12710eab8b5ab7a3db331a1ed7161"
+  "1.50.2":
     - patch_file: "patches/0002-cmake-minimum-required-1.50.1.patch"
       patch_description: "Add cmake_minimum_required() to top CMakeLists"
       patch_type: "conan"

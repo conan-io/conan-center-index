@@ -1,6 +1,13 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -488,7 +488,12 @@ ELSE()
+@@ -482,16 +482,20 @@ IF(ASSIMP_HUNTER_ENABLED)
+   set(ASSIMP_BUILD_MINIZIP TRUE)
+ ELSE()
+   # If the zlib is already found outside, add an export in case assimpTargets can't find it.
+-  IF( ZLIB_FOUND )
++  IF(0)
+     INSTALL( TARGETS zlib zlibstatic
+         EXPORT "${TARGETS_EXPORT_NAME}")
    ENDIF()
  
    IF ( NOT ASSIMP_BUILD_ZLIB )
@@ -10,11 +17,14 @@
 +       ASSIMP_BUILD_X_IMPORTER OR ASSIMP_BUILD_XGL_IMPORTER)
 +        find_package(ZLIB REQUIRED)
 +    endif()
-+    set(ZLIB_FOUND TRUE)
    ENDIF()
  
-   IF( NOT ZLIB_FOUND )
-@@ -521,12 +526,14 @@ ENDIF()
+-  IF( NOT ZLIB_FOUND )
++  IF(0)
+     MESSAGE(STATUS "compiling zlib from sources")
+     INCLUDE(CheckIncludeFile)
+     INCLUDE(CheckTypeSize)
+@@ -521,12 +525,14 @@ ENDIF()
  
  IF( NOT IOS )
    IF( NOT ASSIMP_BUILD_MINIZIP )

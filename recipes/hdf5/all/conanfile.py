@@ -107,7 +107,7 @@ class Hdf5Conan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _inject_stdlib_flag(self, tc):
-        if self.settings.os == "Linux" and self.settings.compiler == "clang":
+        if self.settings.os in ["Linux", "FreeBSD"] and self.settings.compiler == "clang":
             cpp_stdlib = f" -stdlib={self.settings.compiler.libcxx}".rstrip("1")  # strip 11 from stdlibc++11
             tc.variables["CMAKE_CXX_FLAGS"] = tc.variables.get("CMAKE_CXX_FLAGS", "") + cpp_stdlib
         return tc
@@ -281,10 +281,12 @@ class Hdf5Conan(ConanFile):
         components = self._components()
         add_component("hdf5_c", **components["hdf5_c"])
         self.cpp_info.components["hdf5_c"].includedirs.append(os.path.join("include", "hdf5"))
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["hdf5_c"].system_libs.extend(["dl", "m"])
             if self.options.get_safe("threadsafe"):
                 self.cpp_info.components["hdf5_c"].system_libs.append("pthread")
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["hdf5_c"].system_libs.append("Shlwapi")
 
         if self.options.shared:
             self.cpp_info.components["hdf5_c"].defines.append("H5_BUILT_AS_DYNAMIC_LIB")

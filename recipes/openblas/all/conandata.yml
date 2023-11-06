@@ -1,4 +1,7 @@
 sources:
+  "0.3.24":
+    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.24.tar.gz"
+    sha256: "ceadc5065da97bd92404cac7254da66cc6eb192679cf1002098688978d4d5132"
   "0.3.20":
     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.20.tar.gz"
     sha256: "8495c9affc536253648e942908e88e097f2ec7753ede55aca52e5dead3029e3c"
