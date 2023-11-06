@@ -209,16 +209,25 @@ class UserverConan(ConanFile):
         cmake.build()
 
     @property
+    def _userver_root(self):
+        return os.path.join(self.package_folder, 'lib')
+    
+    @property
     def _cmake_subfolder(self):
-        return os.path.join(self.package_folder, 'cmake')
+        return os.path.join(self.package_folder, 'lib', 'cmake')
 
     def package(self):
-        copy(self, pattern='LICENSE', src=self.source_folder, dst='licenses')
+        copy(
+            self, 
+            "LICENSE",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder,"licenses")
+        )
 
         copy(
             self,
             pattern='*',
-            dst=os.path.join(self.package_folder, 'scripts'),
+            dst=os.path.join(self._userver_root, 'scripts'),
             src=os.path.join(self.source_folder, 'scripts'),
             keep_path=True,
         )
@@ -264,6 +273,17 @@ class UserverConan(ConanFile):
         copy_component('core')
         copy_component('universal')
 
+        os.makedirs(self._cmake_subfolder)
+        with open(
+                os.path.join(
+                    self._cmake_subfolder, 'conan_helper.cmake',
+                ),
+                    'a+',
+        ) as cmake_file:
+            cmake_file.write('\nset(USERVER_CONAN TRUE)')
+            cmake_file.write('\nset(PYTHON "python3")')
+            cmake_file.write(f'\nset(USERVER_ROOT_DIR {self._userver_root})')
+
         if self.options.with_grpc:
             copy_component('grpc')
             copy(
@@ -278,19 +298,11 @@ class UserverConan(ConanFile):
             copy(
                 self,
                 pattern='GrpcTargets.cmake',
-                dst=os.path.join(self.package_folder, 'cmake'),
+                dst=self._cmake_subfolder,
                 src=os.path.join(self.source_folder, 'cmake'),
                 keep_path=True,
             )
 
-            with open(
-                    os.path.join(
-                        self.package_folder, 'cmake', 'GrpcConan.cmake',
-                    ),
-                    'a+',
-            ) as grpc_file:
-                grpc_file.write('\nset(USERVER_CONAN TRUE)')
-                grpc_file.write('\nset(PYTHON "python3")')
         if self.options.with_utest:
             copy(
                 self,
@@ -304,14 +316,14 @@ class UserverConan(ConanFile):
             copy(
                 self,
                 pattern='*',
-                dst=os.path.join(self.package_folder, 'testsuite'),
+                dst=os.path.join(self._userver_root, 'testsuite'),
                 src=os.path.join(self.source_folder, 'testsuite'),
                 keep_path=True,
             )
             copy(
                 self,
                 pattern='AddGoogleTests.cmake',
-                dst=os.path.join(self.package_folder, 'cmake'),
+                dst=self._cmake_subfolder,
                 src=os.path.join(self.source_folder, 'cmake'),
                 keep_path=True,
             )
@@ -319,7 +331,7 @@ class UserverConan(ConanFile):
             copy(
                 self,
                 pattern='UserverTestsuite.cmake',
-                dst=os.path.join(self.package_folder, 'cmake'),
+                dst=self._cmake_subfolder,
                 src=os.path.join(self.source_folder, 'cmake'),
                 keep_path=True,
             )
@@ -340,9 +352,6 @@ class UserverConan(ConanFile):
 
     @property
     def _userver_components(self):
-        def abseil():
-            return ['abseil::abseil']
-
         def ares():
             return ['c-ares::c-ares']
 
@@ -430,6 +439,14 @@ class UserverConan(ConanFile):
                 if self.options.with_clickhouse
                 else []
             )
+        
+        def abseil():
+            return (
+                ['abseil::abseil']
+                if self.options.with_clickhouse
+                else []
+            )
+
 
         userver_components = [
             {
@@ -646,16 +663,15 @@ class UserverConan(ConanFile):
         add_components(self._userver_components)
 
         build_modules = [
+            os.path.join(self._cmake_subfolder, 'conan_helper.cmake'),
             os.path.join(self._cmake_subfolder, 'UserverTestsuite.cmake'),
         ]
+
         if self.options.with_utest:
             build_modules.append(
                 os.path.join(self._cmake_subfolder, 'AddGoogleTests.cmake'),
             )
         if self.options.with_grpc:
-            build_modules.append(
-                os.path.join(self._cmake_subfolder, 'GrpcConan.cmake'),
-            )
             build_modules.append(
                 os.path.join(self._cmake_subfolder, 'GrpcTargets.cmake'),
             )
