@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.apple import XCRun, to_apple_arch
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
@@ -69,6 +69,11 @@ class PbcConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("LEX=flex")
         # No idea why this is necessary, but if you don't set CC this way, then
