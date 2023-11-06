@@ -87,14 +87,14 @@ class GrpcConan(ConanFile):
         # abseil is public. See https://github.com/conan-io/conan-center-index/pull/17284#issuecomment-1526082638
         if Version(self.version) < "1.47":
             if is_msvc(self):
-                self.requires("abseil/20230125.3", transitive_headers=True, transitive_libs=True)
+                self.requires("abseil/20230802.1", transitive_headers=True, transitive_libs=True)
             else:
-                self.requires("abseil/20230125.3", transitive_headers=True, transitive_libs=True)
+                self.requires("abseil/20230802.1", transitive_headers=True, transitive_libs=True)
         else:
-            self.requires("abseil/20230125.3", transitive_headers=True, transitive_libs=True)
-        self.requires("c-ares/1.20.1")
+            self.requires("abseil/20230802.1", transitive_headers=True, transitive_libs=True)
+        self.requires("c-ares/1.21.0")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("re2/20230901")
+        self.requires("re2/20231101")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True, run=can_run(self))
 
