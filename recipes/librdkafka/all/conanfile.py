@@ -70,7 +70,7 @@ class LibrdkafkaConan(ConanFile):
         if self.options.ssl:
             self.requires("openssl/[>=1.1 <4]")
         if self._depends_on_cyrus_sasl:
-            self.requires("cyrus-sasl/2.1.27")
+            self.requires("cyrus-sasl/2.1.28")
         if self.options.curl:
             self.requires("libcurl/[>=7.78.0 <9]")
 
