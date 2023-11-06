@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import Environment
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
@@ -237,6 +238,7 @@ class NCursesConan(ConanFile):
         copy(self, "*.cmake",
              src=os.path.join(self.export_sources_folder, "cmake"),
              dst=os.path.join(self.package_folder, self._module_subfolder))
+        fix_apple_shared_install_name(self)
 
     @property
     def _suffix(self):
