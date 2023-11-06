@@ -275,3 +275,6 @@ class SpirvtoolsConan(ConanFile):
             self.cpp_info.components["spirv-tools-diff"].names["cmake_find_package_multi"] = "SPIRV-Tools-diff"
             self.cpp_info.components["spirv-tools-diff"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
             self.cpp_info.components["spirv-tools-diff"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+
+        if Version(self.version) < "1.3" and not self.options.shared:
+            del self.cpp_info.components["spirv-tools-diff"]
