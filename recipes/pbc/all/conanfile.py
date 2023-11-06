@@ -58,7 +58,7 @@ class PbcConan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
-            self.tool_requires("winflexbison/2.5.24")
+            self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("flex/2.6.4")
             self.tool_requires("bison/3.8.2")
