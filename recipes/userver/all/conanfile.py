@@ -629,7 +629,7 @@ class UserverConan(ConanFile):
                     self.cpp_info.components[conan_component].libs.append(
                         get_lib_name('core-internal'),
                     )
-                if cmake_component != 'ubench':
+                if cmake_component not in ['ubench', 'grpc-handlers', 'grpc-handlers-proto', 'api-common-protos']:
                     self.cpp_info.components[
                         conan_component
                     ].includedirs.append(
