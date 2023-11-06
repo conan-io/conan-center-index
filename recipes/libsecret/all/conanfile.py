@@ -53,7 +53,7 @@ class LibsecretConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.78.0", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.1", transitive_headers=True, transitive_libs=True)
         if self._use_gcrypt:
             self.requires("libgcrypt/1.8.4")
 
