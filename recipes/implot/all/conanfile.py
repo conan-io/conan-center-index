@@ -72,6 +72,7 @@ class ImplotConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="implot*.cpp", dst=os.path.join(self.package_folder, "res", "src"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 
