@@ -55,7 +55,7 @@ class MpirConan(ConanFile):
             self.settings.rm_safe("compiler.libcxx")
             self.settings.rm_safe("compiler.cppstd")
         if self.options.enable_gmpcompat:
-            self.provides.append("gmp")
+            self.provides = ["gmp"]
 
     def layout(self):
         basic_layout(self, src_folder="src")
