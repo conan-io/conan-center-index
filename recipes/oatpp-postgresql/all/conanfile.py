@@ -46,7 +46,7 @@ class OatppPostgresqlConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"oatpp/{self.version}")
+        self.requires(f"oatpp/{self.version}", transitive_headers=True)
         self.requires("libpq/15.4")
 
     def validate(self):
