@@ -37,7 +37,6 @@ class MpirConan(ConanFile):
         "enable_cxx": True,
         "enable_gmpcompat": True,
     }
-    provides = []
 
     @property
     def _settings_build(self):
