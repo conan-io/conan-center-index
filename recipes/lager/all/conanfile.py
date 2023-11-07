@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -67,7 +67,14 @@ class LagerConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
+    def _patch_sources(self):
+        # Do not inject the package folder path into the library.
+        # This is only used for examples.
+        replace_in_file(self, os.path.join(self.source_folder, "lager", "resources_path.hpp.in"),
+                        '"@LAGER_PREFIX_PATH@"', "")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
