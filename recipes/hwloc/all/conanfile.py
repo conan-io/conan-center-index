@@ -64,6 +64,7 @@ class HwlocConan(ConanFile):
             if not self.options.with_libxml2:
                 tc.configure_args.extend(["--disable-libxml2"])
             tc.configure_args.extend(["--disable-io", "--disable-cairo"])
+            tc.configure_args.extend(["--enable-shared", "--disable-static"])
             tc.generate()
 
     def build(self):
