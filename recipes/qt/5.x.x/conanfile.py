@@ -151,7 +151,7 @@ class QtConan(ConanFile):
             # In any case, check its actual version for compatibility
             from six import StringIO  # Python 2 and 3 compatible
             mybuf = StringIO()
-            cmd_v = f"\"{python_exe}\" --version"
+            cmd_v = f"\"{python_exe}\" --version 2>&1"
             self.run(cmd_v, mybuf)
             verstr = mybuf.getvalue().strip().split("Python ")[1]
             if verstr.endswith("+"):
