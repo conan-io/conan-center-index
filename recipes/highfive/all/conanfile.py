@@ -22,12 +22,14 @@ class HighFiveConan(ConanFile):
         "with_eigen": [True, False],
         "with_xtensor": [True, False],
         "with_opencv": [True, False],
+        "with_static_hdf5": [True, False],
     }
     default_options = {
         "with_boost": True,
         "with_eigen": True,
         "with_xtensor": True,
         "with_opencv": False,
+        "with_static_hdf5": False,
     }
 
     def layout(self):
@@ -65,6 +67,7 @@ class HighFiveConan(ConanFile):
         tc.variables["HIGHFIVE_EXAMPLES"] = False
         tc.variables["HIGHFIVE_BUILD_DOCS"] = False
         tc.variables["HIGHFIVE_USE_INSTALL_DEPS"] = False
+        tc.variables["HIGHFIVE_STATIC_HDF5"] = self.options.with_static_hdf5
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
