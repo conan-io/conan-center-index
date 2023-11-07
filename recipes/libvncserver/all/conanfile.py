@@ -53,12 +53,16 @@ class LibVncServerConan(ConanFile):
     }
     
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
+        if self.settings.os not in ["Linux", "FreeBSD", "Windows"]:
             raise ConanInvalidConfiguration(f"conan is not yet supporting {self.ref} on {self.settings.os}.")
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.with_gtk
+            del self.options.with_xcb
+            del self.options.with_sasl
+            del self.options.with_systemd
 
     def configure(self):
         if self.options.shared:
@@ -67,7 +71,7 @@ class LibVncServerConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def build_requirements(self):
-        if self.options.with_systemd:
+        if self.options.get_safe("with_systemd"):
             self.tool_requires("pkgconf/2.0.3")
 
     def requirements(self):
@@ -83,21 +87,21 @@ class LibVncServerConan(ConanFile):
             self.requires("libpng/1.6.40")
         if self.options.with_sdl:
             self.requires("sdl/2.28.2")
-        if self.options.with_gtk:
+        if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         if self.options.with_libssh2:
             self.requires("libssh2/1.11.0")
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
-        if self.options.with_systemd:
+        if self.options.get_safe("with_systemd"):
             self.requires("libsystemd/253.10")
         #if self.options.with_libgcrypt:
         #    self.requires("libgcrypt/1.8.4")
         if self.options.with_ffmpeg:
             self.requires("ffmpeg/6.0")
-        if self.options.with_sasl:
+        if self.options.get_safe("with_sasl"):
             self.requires("cyrus-sasl/2.1.27")
-        if self.options.with_xcb:
+        if self.options.get_safe("with_xcb"):
             self.requires("xorg/system")
 
     def layout(self):
@@ -118,14 +122,14 @@ class LibVncServerConan(ConanFile):
         tc.variables["WITH_JPEG"] = self.options.with_libjpeg
         tc.variables["WITH_PNG"] = self.options.with_libpng
         tc.variables["WITH_SDL"] = self.options.with_sdl
-        tc.variables["WITH_GTK"] = self.options.with_gtk
+        tc.variables["WITH_GTK"] = self.options.get_safe("with_gtk")
         tc.variables["WITH_LIBSSH2"] = self.options.with_libssh2
         tc.variables["WITH_OPENSSL"] = self.options.with_openssl
-        tc.variables["WITH_SYSTEMD"] = self.options.with_systemd
+        tc.variables["WITH_SYSTEMD"] = self.options.get_safe("with_systemd")
         #tc.variables["WITH_GCRYPT"] = self.options.with_libgcrypt
         tc.variables["WITH_FFMPEG"] = self.options.with_ffmpeg
-        tc.variables["WITH_SASL"] = self.options.with_sasl
-        tc.variables["WITH_XCB"] = self.options.with_xcb
+        tc.variables["WITH_SASL"] = self.options.get_safe("with_sasl")
+        tc.variables["WITH_XCB"] = self.options.get_safe("with_xcb")
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
