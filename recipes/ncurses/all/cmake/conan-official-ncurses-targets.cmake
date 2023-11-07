@@ -1,5 +1,4 @@
 # Reproduces the variables set by https://cmake.org/cmake/help/latest/module/FindCurses.html
-
 string(TOUPPER "${CMAKE_BUILD_TYPE}" _CONFIG)
 
 set(CURSES_FOUND ON)
@@ -12,9 +11,15 @@ if(CURSES_NEED_NCURSES)
     set(CURSES_HAVE_NCURSES_NCURSES_H ON)
 endif()
 
-# Backward Compatibility
-set(CURSES_INCLUDE_DIR ${CURSES_INCLUDE_DIRS})
-set(CURSES_LIBRARY ${CURSES_LIBRARIES})
+# For backward compatibility with Conan v1
+set(CURSES_INCLUDE_DIRS ${CURSES_INCLUDE_DIRS}
+    ${ncurses_INCLUDE_DIRS_${_CONFIG}}
+    ${Curses_INCLUDE_DIRS_${_CONFIG}}
+)
+set(CURSES_CFLAGS ${CURSES_CFLAGS}
+    ${ncurses_DEFINITIONS_${_CONFIG}} ${ncurses_COMPILE_OPTIONS_C_${_CONFIG}}
+    ${Curses_DEFINITIONS_${_CONFIG}} ${Curses_COMPILE_OPTIONS_C_${_CONFIG}}
+)
 
 # CURSES_LIBRARIES output from CMake uses absolute paths for the libraries
 list (GET CURSES_INCLUDE_DIRS 0 _first_include_dir)
@@ -28,12 +33,5 @@ foreach(_LIB ${Curses_LIBRARIES} ${ncurses_LIBRARIES_${_CONFIG}} ${Curses_LIBRAR
     endif()
 endforeach()
 
-# For backward compatibility with Conan v1
-set(CURSES_INCLUDE_DIRS ${CURSES_INCLUDE_DIRS}
-    ${ncurses_INCLUDE_DIRS_${_CONFIG}}
-    ${Curses_INCLUDE_DIRS_${_CONFIG}}
-)
-set(CURSES_CFLAGS ${CURSES_CFLAGS}
-    ${ncurses_DEFINITIONS_${_CONFIG}} ${ncurses_COMPILE_OPTIONS_C_${_CONFIG}}
-    ${Curses_DEFINITIONS_${_CONFIG}} ${Curses_COMPILE_OPTIONS_C_${_CONFIG}}
-)
+set(CURSES_INCLUDE_DIR ${CURSES_INCLUDE_DIRS})
+set(CURSES_LIBRARY ${CURSES_LIBRARIES})
