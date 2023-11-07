@@ -64,6 +64,8 @@ class freeglutConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
+        if self.settings.os not in ["FreeBSD", "Linux"]:
+            self.options.rm_safe("gles")
         if self.settings.os != "Linux":
             self.options.rm_safe("with_wayland")
 
@@ -129,7 +131,7 @@ class freeglutConan(ConanFile):
         tc.variables["FREEGLUT_BUILD_DEMOS"] = False
         tc.variables["FREEGLUT_BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["FREEGLUT_BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["FREEGLUT_GLES"] = self.options.gles
+        tc.variables["FREEGLUT_GLES"] = self.options.get_safe("gles")
         tc.variables["FREEGLUT_PRINT_ERRORS"] = self.options.print_errors_at_runtime
         tc.variables["FREEGLUT_PRINT_WARNINGS"] = self.options.print_warnings_at_runtime
         tc.variables["FREEGLUT_WAYLAND"] = self.options.get_safe("with_wayland")
