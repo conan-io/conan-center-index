@@ -1,0 +1,25 @@
+From 4f38cbdd2892fa30ebc48092b029f8ab751bcec5 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Tue, 7 Nov 2023 09:05:17 -0600
+Subject: [PATCH] Only add the GL dependency as a requires when it is a
+ pkgconfig dep
+
+On macOS, this solves a problem when using the system's GL library.
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 7949e30..74cfc70 100644
+--- a/meson.build
++++ b/meson.build
+@@ -34,5 +34,5 @@ pkgconf.generate(
+   libglu,
+   name : 'glu',
+   description : 'Mesa OpenGL Utility Library',
+-  requires: dep_gl
++  requires: dep_gl.type_name() == 'pkgconfig' ? dep_gl : []
+ )
+-- 
+2.41.0
+

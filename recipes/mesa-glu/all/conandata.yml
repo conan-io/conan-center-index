@@ -2,3 +2,9 @@ sources:
   "9.0.3":
     url: "https://gitlab.freedesktop.org/mesa/glu/-/archive/glu-9.0.3/glu-glu-9.0.3.tar.bz2"
     sha256: "38044ee4f255578165a54eaeb089b67fb64f7f7c0ce5fa690cd47c9df10b263c"
+patches:
+  "9.0.3":
+    - patch_file: "patches/9.0.3-0001-Only-add-the-GL-dependency-as-a-requires-when-it-is.patch"
+      patch_description: "Only add the GL dependency as a requires when it is a pkgconfig dep"
+      patch_type: "portability"
+      patch_source: "https://gitlab.freedesktop.org/mesa/glu/-/merge_requests/12"
