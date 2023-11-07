@@ -24,24 +24,30 @@ patches:
   "2.5.7":
     - patch_file: "patches/2.5.7-0001-cstdint-include.patch"
       patch_description: "Add #include <cstdint> as required by newer gcc versions"
-      patch_type: "conan"
+      patch_type: "portability"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openexr/commit/310ae8600"
   "2.5.5":
     - patch_file: "patches/2.5.7-0001-cstdint-include.patch"
       patch_description: "Add #include <cstdint> as required by newer gcc versions"
-      patch_type: "conan"
+      patch_type: "portability"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openexr/commit/310ae8600"
   "2.5.4":
     - patch_file: "patches/2.5.4-0001-cstdint-include.patch"
       patch_description: "Add #include <cstdint> as required by newer gcc versions"
-      patch_type: "conan"
+      patch_type: "portability"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openexr/commit/310ae8600"
   "2.5.3":
     - patch_file: "patches/2.5.4-0001-cstdint-include.patch"
       patch_description: "Add #include <cstdint> as required by newer gcc versions"
-      patch_type: "conan"
+      patch_type: "portability"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openexr/commit/310ae8600"
   "2.5.2":
     - patch_file: "patches/2.5.4-0001-cstdint-include.patch"
       patch_description: "Add #include <cstdint> as required by newer gcc versions"
-      patch_type: "conan"
+      patch_type: "portability"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openexr/commit/310ae8600"
   "2.4.0":
     - patch_file: "patches/2.4.0-0001-cstdint-include.patch"
       patch_description: "Add #include <cstdint> as required by newer gcc versions"
-      patch_type: "conan"
+      patch_type: "portability"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openexr/commit/310ae8600"
