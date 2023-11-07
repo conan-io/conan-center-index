@@ -22,6 +22,7 @@ This file is intended to provide all the commands you need to run in order to be
     * [Yamlschema](#yamlschema)
   * [Testing the different `test__package`](#testing-the-different-test__package)
   * [Testing more environments](#testing-more-environments)
+      * [Docker build images used by ConanCenterIndex](#docker-build-images-used-by-conancenterindex)
   * [Using Conan 2.0](#using-conan-20)
     * [Installing Conan 2.0 beta](#installing-conan-20-beta)
     * [Trying it out](#trying-it-out)<!-- endToc -->
@@ -42,7 +43,7 @@ This file is intended to provide all the commands you need to run in order to be
 
 ### Installing the ConanCenter Hooks
 
-> **Warning**: This is not yet supported with Conan 2.0
+> **Warning**: This is not yet supported with Conan 2.0. Please, follow the instructions below only in case you are using Conan 1.0.
 
 The system will use the [conan-center hooks](https://github.com/conan-io/hooks) to perform some quality checks. You can install the hooks by running:
 
@@ -220,6 +221,29 @@ If you are working with packages that have system dependencies that are managed 
 ```sh
 docker run -e CONAN_SYSREQUIRES_MODE=enabled conanio/gcc11-ubuntu16.04 conan install fmt/9.0.0@ -if build --build missing -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=yes
 ```
+
+#### Docker build images used by ConanCenterIndex
+
+The Conan Center Index uses [Conan Docker Tools](https://github.com/conan-io/conan-docker-tools/) to build packages in a variety of environments. All images are hosted in [Docker Hub](https://hub.docker.com/u/conanio). The relation of the images with the build configurations is available according to the Conan configuration, as `node_labels.Linux`, for instance:
+
+
+```yaml
+node_labels:
+  Linux:
+    x86_64:
+      "gcc":
+        default: "linux_gcc_${compiler.version}"
+        "11": "linux_gcc_${compiler.version}_ubuntu16.04"
+      "clang":
+        default: "linux_clang_${compiler.version}_ubuntu16.04"
+        "11": "linux_clang_${compiler.version}"
+```
+
+The configuration files are located in the folder [../.c3i](../.c3i). Currently are the files [config_v1.yml](../.c3i/config_v1.yml) and [config_v2.yml](../.c3i/config_v2.yml). The configuration file `config_v1.yml` is used by the Conan 1.0 client, while `config_v2.yml` is used by the Conan 2.0 client.
+
+The label `linux` refers to any Docker image, while `gcc_${compiler.version}` refers to GCC + a compiler version. For example, `linux_gcc_10` refers to the image `conanio/gcc10`.
+The suffix `_ubuntu16.04` refers to the base image used by the Docker image, in this case, `ubuntu16.04`. So, `"11": "linux_gcc_${compiler.version}_ubuntu16.04"` means that the image `conanio/gcc11-ubuntu16.04`. Thus, all GCC versions use `conanio/gcc<version>`, except for the GCC 11, which uses `conanio/gcc11-ubuntu16.04`. The same applies to Clang.
+
 
 ## Using Conan 2.0
 

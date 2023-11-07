@@ -1,12 +1,8 @@
 #include <qdbm/cabin.h>
 #include <stddef.h>
 
-int main(int argc, char const* argv[])
+int main()
 {
-  (void)argc;
-  (void)argv;
-
-  cbfree(NULL);
-
-  return 0;
+    cbfree(NULL);
+    return 0;
 }

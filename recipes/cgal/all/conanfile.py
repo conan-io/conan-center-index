@@ -163,6 +163,10 @@ function(CGAL_setup_CGAL_flags target)
 endfunction()
 
 CGAL_setup_CGAL_flags(CGAL::CGAL)
+
+# CGAL use may rely on the presence of those two variables
+set(CGAL_USE_GMP  TRUE CACHE INTERNAL "CGAL library is configured to use GMP")
+set(CGAL_USE_MPFR TRUE CACHE INTERNAL "CGAL library is configured to use MPFR")
 ''')
         save(self, module_file, content)
 

@@ -1,0 +1,684 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 461f1a209c..0b552b3da3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -47,6 +47,7 @@ message (STATUS "CMAKE_GENERATOR ....................... " ${CMAKE_GENERATOR})
+ message (STATUS "CPACK_GENERATOR ....................... " ${CPACK_GENERATOR})
+ message (STATUS "CMAKE_C_COMPILER_ID ................... " ${CMAKE_C_COMPILER_ID})
+ message (STATUS "CMAKE_CXX_COMPILER_ID ................. " ${CMAKE_CXX_COMPILER_ID})
++message (STATUS "CMAKE_CXX_STANDARD .................... " ${CMAKE_CXX_STANDARD})
+ if(OV_GENERATOR_MULTI_CONFIG)
+     string(REPLACE ";" " " config_types "${CMAKE_CONFIGURATION_TYPES}")
+     message (STATUS "CMAKE_CONFIGURATION_TYPES ............. " ${config_types})
+diff --git a/cmake/developer_package/plugins/plugins.cmake b/cmake/developer_package/plugins/plugins.cmake
+index 436685355a..ea187411d1 100644
+--- a/cmake/developer_package/plugins/plugins.cmake
++++ b/cmake/developer_package/plugins/plugins.cmake
+@@ -117,6 +117,10 @@ function(ov_add_plugin)
+         # install rules
+         if(NOT OV_PLUGIN_SKIP_INSTALL OR NOT BUILD_SHARED_LIBS)
+             string(TOLOWER "${OV_PLUGIN_DEVICE_NAME}" install_component)
++            if(NOT BUILD_SHARED_LIBS)
++                # in case of static libs everything is installed to 'core'
++                set(install_component ${OV_CPACK_COMP_CORE})
++            endif()
+ 
+             if(OV_PLUGIN_PSEUDO_DEVICE)
+                 set(plugin_hidden HIDDEN)
+diff --git a/cmake/features.cmake b/cmake/features.cmake
+index e4b60c89e0..7327b262a2 100644
+--- a/cmake/features.cmake
++++ b/cmake/features.cmake
+@@ -23,7 +23,7 @@ endif()
+ 
+ ie_dependent_option (ENABLE_INTEL_GPU "GPU OpenCL-based plugin for OpenVINO Runtime" ${ENABLE_INTEL_GPU_DEFAULT} "X86_64 OR AARCH64;NOT APPLE;NOT WINDOWS_STORE;NOT WINDOWS_PHONE" OFF)
+ 
+-if (ANDROID OR (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0) OR NOT BUILD_SHARED_LIBS)
++if (ANDROID OR MINGW OR (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0) OR (NOT BUILD_SHARED_LIBS AND ENABLE_INTEL_CPU))
+     # oneDNN doesn't support old compilers and android builds for now, so we'll build GPU plugin without oneDNN
+     # also, in case of static build CPU's and GPU's oneDNNs will conflict, so we are disabling GPU's one in this case
+     set(ENABLE_ONEDNN_FOR_GPU_DEFAULT OFF)
+diff --git a/cmake/templates/OpenVINOConfig.cmake.in b/cmake/templates/OpenVINOConfig.cmake.in
+index 9eb1cfdd35..7dda80d8a3 100644
+--- a/cmake/templates/OpenVINOConfig.cmake.in
++++ b/cmake/templates/OpenVINOConfig.cmake.in
+@@ -223,6 +223,10 @@ macro(_ov_find_tbb)
+                                 PATHS ${_tbb_bind_dir}
+                                 NO_CMAKE_FIND_ROOT_PATH
+                                 NO_DEFAULT_PATH)
++            if(TARGET TBBbind::tbbbind_2_5)
++                # To solve https://cmake.org/cmake/help/latest/policy/CMP0111.html warnings
++                set_property(TARGET TBBbind::tbbbind_2_5 PROPERTY IMPORTED_CONFIGURATIONS RELEASE DEBUG)
++            endif()
+             unset(_tbb_bind_dir)
+         endif()
+         unset(install_tbbbind)
+@@ -343,11 +347,15 @@ endmacro()
+ macro(_ov_find_intel_cpu_dependencies)
+     set(_OV_ENABLE_CPU_ACL "@DNNL_USE_ACL@")
+     if(_OV_ENABLE_CPU_ACL)
+-        set(_ov_in_install_tree "@PACKAGE_ARM_COMPUTE_LIB_DIR@")
++        set(_ov_in_install_tree "@PACKAGE_OPENVINO_LIB_DIR@")
+         if(_ov_in_install_tree)
+-            set_and_check(ARM_COMPUTE_LIB_DIR "@PACKAGE_ARM_COMPUTE_LIB_DIR@")
++            set_and_check(ARM_COMPUTE_LIB_DIR "@PACKAGE_OPENVINO_LIB_DIR@")
+             set(ACL_DIR "${CMAKE_CURRENT_LIST_DIR}")
+         else()
++            if(NOT TARGET arm_compute::arm_compute)
++                # for case when build tree is used separately, e.g. OpenVINODeveloperPackageConfig.cmake
++                set_and_check(ARM_COMPUTE_LIB_DIR "@PACKAGE_CMAKE_ARCHIVE_OUTPUT_DIRECTORY@")
++            endif()
+             set_and_check(ACL_DIR "@PACKAGE_FIND_ACL_PATH@")
+         endif()
+ 
+@@ -363,16 +371,50 @@ macro(_ov_find_intel_gpu_dependencies)
+     set(_OV_ENABLE_INTEL_GPU "@ENABLE_INTEL_GPU@")
+     set(_OV_ENABLE_SYSTEM_OPENCL "@ENABLE_SYSTEM_OPENCL@")
+     if(_OV_ENABLE_INTEL_GPU AND _OV_ENABLE_SYSTEM_OPENCL)
+-        set(_OV_OpenCLICDLoader_FOUND "@OpenCLICDLoader_FOUND@")
+-        if(_OV_OpenCLICDLoader_FOUND)
+-            _ov_find_dependency(OpenCLICDLoader)
+-        else()
+-            _ov_find_dependency(OpenCL)
+-        endif()
+-        unset(_OV_OpenCLICDLoader_FOUND)
++        _ov_find_dependency(OpenCL)
+     endif()
+     unset(_OV_ENABLE_INTEL_GPU)
+     unset(_OV_ENABLE_SYSTEM_OPENCL)
++
++    set(_OV_ENABLE_ONEDNN_FOR_GPU "@ENABLE_ONEDNN_FOR_GPU@")
++    if(_OV_ENABLE_ONEDNN_FOR_GPU AND NOT TARGET onednn_gpu_tgt)
++        set(_OV_DNNL_GPU_LIBRARY_NAME "@DNNL_GPU_LIBRARY_NAME@")
++
++        set(_ov_in_install_tree "@PACKAGE_OPENVINO_LIB_DIR@")
++        if(_ov_in_install_tree)
++            set(onednn_gpu_lib "${CMAKE_STATIC_LIBRARY_PREFIX}${_OV_DNNL_GPU_LIBRARY_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
++            set_and_check(onednn_gpu_lib_root "@PACKAGE_OPENVINO_LIB_DIR@")
++            if(WIN32)
++                if(OV_GENERATOR_MULTI_CONFIG)
++                    set(extra_args PATH_SUFFIXES ${CMAKE_CONFIGURATION_TYPES})
++                else()
++                    set(extra_args PATH_SUFFIXES ${CMAKE_BUILD_TYPE})
++                endif()
++            endif()
++
++            find_library(onednn_gpu_lib_path
++                         NAMES ${_OV_DNNL_GPU_LIBRARY_NAME}
++                         PATHS ${onednn_gpu_lib_root}
++                         ${extra_args})
++
++            if(NOT onednn_gpu_lib_path)
++                message(FATAL_ERROR "Internal error: failed to find '${_OV_DNNL_GPU_LIBRARY_NAME}' in '${onednn_gpu_lib_root}'")
++            endif()
++
++            unset(extra_args)
++            unset(onednn_gpu_lib)
++        else()
++            set_and_check(onednn_gpu_lib_path "@PACKAGE_ONEDNN_GPU_LIB_PATH@")
++        endif()
++
++        set_target_properties(openvino::onednn_gpu_tgt PROPERTIES
++            INTERFACE_LINK_LIBRARIES "${onednn_gpu_lib_path}")
++
++        unset(onednn_gpu_lib_path)
++        unset(_ov_in_install_tree)
++        unset(_OV_DNNL_GPU_LIBRARY_NAME)
++    endif()
++    unset(_OV_ENABLE_ONEDNN_FOR_GPU)
+ endmacro()
+ 
+ macro(_ov_find_intel_gna_dependencies)
+@@ -455,6 +497,7 @@ set(_OV_ENABLE_OPENVINO_BUILD_SHARED "@BUILD_SHARED_LIBS@")
+ 
+ if(NOT TARGET openvino)
+     set(_ov_as_external_package ON)
++    include("${CMAKE_CURRENT_LIST_DIR}/OpenVINOTargets.cmake")
+ endif()
+ 
+ if(NOT _OV_ENABLE_OPENVINO_BUILD_SHARED)
+@@ -487,8 +530,6 @@ set(_ov_imported_libs openvino::runtime openvino::runtime::c
+    openvino::frontend::pytorch openvino::frontend::tensorflow_lite)
+ 
+ if(_ov_as_external_package)
+-    include("${CMAKE_CURRENT_LIST_DIR}/OpenVINOTargets.cmake")
+-
+     foreach(target IN LISTS _ov_imported_libs)
+         if(TARGET ${target})
+             get_target_property(imported_configs ${target} IMPORTED_CONFIGURATIONS)
+diff --git a/src/cmake/openvino.cmake b/src/cmake/openvino.cmake
+index eb9a54354e..1d2996482b 100644
+--- a/src/cmake/openvino.cmake
++++ b/src/cmake/openvino.cmake
+@@ -157,9 +157,12 @@ if(ENABLE_INTEL_GNA)
+     list(APPEND PATH_VARS "GNA_PATH")
+ endif()
+ if(DNNL_USE_ACL)
+-    list(APPEND BUILD_PATH_VARS "FIND_ACL_PATH")
++    list(APPEND BUILD_PATH_VARS "FIND_ACL_PATH;CMAKE_ARCHIVE_OUTPUT_DIRECTORY")
+     set(FIND_ACL_PATH "${intel_cpu_thirdparty_SOURCE_DIR}")
+ endif()
++if(ENABLE_ONEDNN_FOR_GPU)
++    list(APPEND BUILD_PATH_VARS "ONEDNN_GPU_LIB_PATH")
++endif()
+ 
+ set(PUBLIC_HEADERS_DIR "${OpenVINO_SOURCE_DIR}/src/inference/include")
+ set(IE_INCLUDE_DIR "${PUBLIC_HEADERS_DIR}/ie")
+@@ -177,12 +180,10 @@ configure_package_config_file("${OpenVINO_SOURCE_DIR}/cmake/templates/OpenVINOCo
+ 
+ # install tree
+ 
+-if(DNNL_USE_ACL)
+-    list(APPEND INSTALL_PATH_VARS "ARM_COMPUTE_LIB_DIR")
+-    # remove generator expression at the end, because searching in Release / Debug will be
+-    # done by ACLConfig.cmake itself
+-    string(REPLACE "$<CONFIG>" "" ARM_COMPUTE_LIB_DIR "${OV_CPACK_LIBRARYDIR}")
+-endif()
++list(APPEND INSTALL_PATH_VARS "OPENVINO_LIB_DIR")
++# remove generator expression at the end, because searching in Release / Debug
++# will be done by inside OpenVINOConfig.cmak / ACLConfig.cmake
++string(REPLACE "$<CONFIG>" "" OPENVINO_LIB_DIR "${OV_CPACK_LIBRARYDIR}")
+ 
+ set(IE_INCLUDE_DIR "${OV_CPACK_INCLUDEDIR}/ie")
+ set(IE_TBB_DIR "${IE_TBB_DIR_INSTALL}")
+diff --git a/src/plugins/intel_cpu/thirdparty/CMakeLists.txt b/src/plugins/intel_cpu/thirdparty/CMakeLists.txt
+index 98935a0792..7e8325acef 100644
+--- a/src/plugins/intel_cpu/thirdparty/CMakeLists.txt
++++ b/src/plugins/intel_cpu/thirdparty/CMakeLists.txt
+@@ -117,7 +117,7 @@ function(ov_add_onednn)
+     add_subdirectory(onednn EXCLUDE_FROM_ALL)
+ 
+     # install static libraries
+-    ov_install_static_lib(dnnl cpu)
++    ov_install_static_lib(dnnl ${OV_CPACK_COMP_CORE})
+ 
+     if(DNNL_USE_ACL AND NOT BUILD_SHARED_LIBS)
+         # use ACLConfig.cmake in OpenVINOConfig.cmake in case of static build
+@@ -125,16 +125,16 @@ function(ov_add_onednn)
+         # but for this we need to install library files
+         install(FILES $<TARGET_PROPERTY:arm_compute::arm_compute,IMPORTED_LOCATION>
+                 DESTINATION ${OV_CPACK_ARCHIVEDIR}
+-                COMPONENT cpu)
++                COMPONENT ${OV_CPACK_COMP_CORE})
+         install(FILES "${intel_cpu_thirdparty_SOURCE_DIR}/ACLConfig.cmake"
+                 DESTINATION ${OV_CPACK_OPENVINO_CMAKEDIR}
+-                COMPONENT core_dev)
++                COMPONENT ${OV_CPACK_COMP_CORE_DEV})
+     endif()
+ endfunction()
+ 
+ if(ENABLE_MLAS_FOR_CPU)
+     add_subdirectory(mlas)
+-    ov_install_static_lib(mlas cpu)
++    ov_install_static_lib(mlas ${OV_CPACK_COMP_CORE})
+ endif()
+ 
+ ov_add_onednn()
+diff --git a/src/plugins/intel_gpu/CMakeLists.txt b/src/plugins/intel_gpu/CMakeLists.txt
+index 1770b34b65..4e8a9d0e68 100644
+--- a/src/plugins/intel_gpu/CMakeLists.txt
++++ b/src/plugins/intel_gpu/CMakeLists.txt
+@@ -35,6 +35,7 @@ set(MAIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
+ 
+ add_subdirectory(thirdparty)
++include(thirdparty/cmake/rapidjson.cmake)
+ 
+ if(CMAKE_COMPILER_IS_GNUCXX)
+     ie_add_compiler_flags(-Werror)
+diff --git a/src/plugins/intel_gpu/src/graph/CMakeLists.txt b/src/plugins/intel_gpu/src/graph/CMakeLists.txt
+index 0b2093d2a0..fac58ec0fa 100644
+--- a/src/plugins/intel_gpu/src/graph/CMakeLists.txt
++++ b/src/plugins/intel_gpu/src/graph/CMakeLists.txt
+@@ -58,7 +58,7 @@ elseif((NOT ANDROID) AND (UNIX))
+   target_link_libraries(${TARGET_NAME} PRIVATE pthread)
+ endif()
+ 
+-ov_install_static_lib(${TARGET_NAME} gpu)
++ov_install_static_lib(${TARGET_NAME} ${OV_CPACK_COMP_CORE})
+ 
+ if(ENABLE_SSE42)
+   ie_sse42_optimization_flags(sse4_2_flags)
+diff --git a/src/plugins/intel_gpu/src/kernel_selector/CMakeLists.txt b/src/plugins/intel_gpu/src/kernel_selector/CMakeLists.txt
+index b76d8ee732..99ebf5331a 100644
+--- a/src/plugins/intel_gpu/src/kernel_selector/CMakeLists.txt
++++ b/src/plugins/intel_gpu/src/kernel_selector/CMakeLists.txt
+@@ -61,7 +61,8 @@ endif()
+ target_include_directories(${TARGET_NAME} PUBLIC $<BUILD_INTERFACE:${INCLUDE_DIR}>
+                                                  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+                                                  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/kernels/>
+-                                                 $<BUILD_INTERFACE:${CODEGEN_INCDIR}>)
++                                                 $<BUILD_INTERFACE:${CODEGEN_INCDIR}>
++                                          PRIVATE $<TARGET_PROPERTY:rapidjson,INTERFACE_INCLUDE_DIRECTORIES>)
+ 
+ target_compile_options(${TARGET_NAME} PRIVATE
+   $<$<CONFIG:Release>:$<IF:$<CXX_COMPILER_ID:MSVC>,/Os,-Os>>)
+@@ -70,7 +71,7 @@ if(COMMAND add_cpplint_target)
+   add_cpplint_target(${TARGET_NAME}_cpplint FOR_TARGETS ${TARGET_NAME})
+ endif()
+ 
+-target_link_libraries(${TARGET_NAME} PUBLIC OpenCL::OpenCL rapidjson inference_engine_plugin_api)
++target_link_libraries(${TARGET_NAME} PUBLIC OpenCL::OpenCL inference_engine_plugin_api)
+ 
+ set_target_properties(${TARGET_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ${ENABLE_LTO})
+ 
+@@ -90,8 +91,16 @@ add_custom_command(
+     TARGET ${TARGET_NAME} POST_BUILD
+     COMMAND "${CMAKE_COMMAND}" -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/cache/cache.json ${TUNING_CACHE_PATH}/cache.json)
+ 
++if(BUILD_SHARED_LIBS)
++  set(CACHE_JSON_INSTALL_DIR ${OV_CPACK_PLUGINSDIR})
++  set(CACHE_JSON_COMPONENT gpu)
++else()
++  set(CACHE_JSON_INSTALL_DIR ${OV_CPACK_ARCHIVEDIR})
++  set(CACHE_JSON_COMPONENT ${OV_CPACK_COMP_CORE})
++endif()
++
+ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cache/cache.json
+-        DESTINATION ${OV_CPACK_PLUGINSDIR}
+-        COMPONENT gpu)
++        DESTINATION ${CACHE_JSON_INSTALL_DIR}
++        COMPONENT ${CACHE_JSON_COMPONENT})
+ 
+-ov_install_static_lib(${TARGET_NAME} gpu)
++ov_install_static_lib(${TARGET_NAME} ${OV_CPACK_COMP_CORE})
+diff --git a/src/plugins/intel_gpu/src/kernel_selector/auto_tuner.cpp b/src/plugins/intel_gpu/src/kernel_selector/auto_tuner.cpp
+index cfac486cdf..a5d0711f61 100644
+--- a/src/plugins/intel_gpu/src/kernel_selector/auto_tuner.cpp
++++ b/src/plugins/intel_gpu/src/kernel_selector/auto_tuner.cpp
+@@ -3,18 +3,21 @@
+ //
+ 
+ #include "auto_tuner.h"
++
+ #include <iostream>
+ #include <sstream>
+ #include <fstream>
+ #include <iomanip>
+ #include <string>
+-#include "istreamwrapper.h"
+-#include "stringbuffer.h"
+-#include "prettywriter.h"
+ #include <memory>
+ #include <utility>
+ #include <tuple>
+ 
++#include "rapidjson/istreamwrapper.h"
++#include "rapidjson/stringbuffer.h"
++#include "rapidjson/prettywriter.h"
++#include "rapidjson/document.h"
++
+ #ifdef _WIN32
+ #ifndef WIN32_LEAN_AND_MEAN
+ #define WIN32_LEAN_AND_MEAN
+@@ -35,32 +38,37 @@
+ 
+ namespace kernel_selector {
+ 
++class TuningCache::Impl {
++public:
++    rapidjson::Document cache;
++};
++
+ TuningCache::TuningCache(const std::string& cacheFilePath)
+-    : cache() {
++    : impl(new Impl()) {
+     // Read cache file
+     std::ifstream tuningFile(cacheFilePath);
+ 
+     if (tuningFile && tuningFile.good()) {
+         std::stringstream buffer;
+         buffer << tuningFile.rdbuf();
+-        cache.Parse(buffer.str().c_str());
++        impl->cache.Parse(buffer.str().c_str());
+     } else {
+         throw std::runtime_error("Tuning file: " + cacheFilePath + " could not be read! Must provide a valid cache file in USE_CACHE mode.");
+     }
+ 
+-    if (cache.IsNull()) {
+-        cache.SetObject();
+-    } else if (!cache.IsObject()) {
++    if (impl->cache.IsNull()) {
++        impl->cache.SetObject();
++    } else if (!impl->cache.IsObject()) {
+         throw std::runtime_error("Tuning file: " + cacheFilePath + " has incorrect format.");
+     }
+ 
+-    auto cacheObj = cache.GetObject();
++    auto cacheObj = impl->cache.GetObject();
+ 
+     // Update to new format with version markers
+     if (!cacheObj.HasMember(version2Marker)) {
+-        auto newName = rapidjson::Value(version2Marker, cache.GetAllocator());
++        auto newName = rapidjson::Value(version2Marker, impl->cache.GetAllocator());
+         auto newObj = rapidjson::Value(rapidjson::Type::kObjectType);
+-        cacheObj.AddMember(newName, newObj, cache.GetAllocator());
++        cacheObj.AddMember(newName, newObj, impl->cache.GetAllocator());
+     }
+ 
+     bool needsV1 = false;
+@@ -73,9 +81,9 @@ TuningCache::TuningCache(const std::string& cacheFilePath)
+ 
+     if (needsV1) {
+         if (!cacheObj.HasMember(version1Marker)) {
+-            auto newName = rapidjson::Value(version1Marker, cache.GetAllocator());
++            auto newName = rapidjson::Value(version1Marker, impl->cache.GetAllocator());
+             auto newObj = rapidjson::Value(rapidjson::Type::kObjectType);
+-            cacheObj.AddMember(newName, newObj, cache.GetAllocator());
++            cacheObj.AddMember(newName, newObj, impl->cache.GetAllocator());
+         }
+ 
+         for (auto it = cacheObj.begin(); it != cacheObj.end();) {
+@@ -86,7 +94,7 @@ TuningCache::TuningCache(const std::string& cacheFilePath)
+                 auto newValue = rapidjson::Value(rapidjson::Type::kObjectType);
+                 newName.Swap(member.name);
+                 newValue.Swap(member.value);
+-                cache[version1Marker].AddMember(newName, newValue, cache.GetAllocator());
++                impl->cache[version1Marker].AddMember(newName, newValue, impl->cache.GetAllocator());
+                 it = cacheObj.EraseMember(it);
+             } else {
+                 it++;
+@@ -96,11 +104,11 @@ TuningCache::TuningCache(const std::string& cacheFilePath)
+ }
+ 
+ TuningCache::TuningCache()
+-    : cache() {
+-    cache.SetObject();
+-    auto v2Name = rapidjson::Value(version2Marker, cache.GetAllocator());
++    : impl(new Impl()) {
++    impl->cache.SetObject();
++    auto v2Name = rapidjson::Value(version2Marker, impl->cache.GetAllocator());
+     auto v2Obj = rapidjson::Value(rapidjson::Type::kObjectType);
+-    cache.AddMember(v2Name, v2Obj, cache.GetAllocator());
++    impl->cache.AddMember(v2Name, v2Obj, impl->cache.GetAllocator());
+ }
+ 
+ TuningCache::Entry TuningCache::LoadKernel(const Params& params) {
+@@ -129,8 +137,8 @@ TuningCache::Entry TuningCache::LoadKernel_v1(const Params& params, uint32_t com
+     auto hashStr = std::to_string(create_hash(params.to_string()));
+     auto computeUnitsStr = std::to_string(computeUnitsCount);
+ 
+-    auto v1It = cache.FindMember(version1Marker);
+-    if (v1It == cache.MemberEnd())
++    auto v1It = impl->cache.FindMember(version1Marker);
++    if (v1It == impl->cache.MemberEnd())
+         return result;
+ 
+     auto computeUnitsIt = v1It->value.FindMember(computeUnitsStr.c_str());
+@@ -152,8 +160,8 @@ TuningCache::Entry TuningCache::LoadKernel_v2(const Params& params, uint32_t com
+     auto paramStr = params.to_cache_string_v2();
+     auto computeUnitsStr = std::to_string(computeUnitsCount);
+ 
+-    auto v2It = cache.FindMember(version2Marker);
+-    if (v2It == cache.MemberEnd())
++    auto v2It = impl->cache.FindMember(version2Marker);
++    if (v2It == impl->cache.MemberEnd())
+         return result;
+ 
+     auto computeUnitsIt = v2It->value.FindMember(computeUnitsStr.c_str());
+diff --git a/src/plugins/intel_gpu/src/kernel_selector/auto_tuner.h b/src/plugins/intel_gpu/src/kernel_selector/auto_tuner.h
+index 1a875b7d4d..8a9da81354 100644
+--- a/src/plugins/intel_gpu/src/kernel_selector/auto_tuner.h
++++ b/src/plugins/intel_gpu/src/kernel_selector/auto_tuner.h
+@@ -8,12 +8,12 @@
+ #include <mutex>
+ #include <map>
+ #include <string>
+-#include "kernel_selector_common.h"
+-#include "kernel_selector_params.h"
+-#include "document.h"
+ #include <memory>
+ #include <tuple>
+ 
++#include "kernel_selector_common.h"
++#include "kernel_selector_params.h"
++
+ namespace kernel_selector {
+ 
+ class TuningCache {
+@@ -42,7 +42,8 @@ private:
+     Entry LoadKernel_v1(const Params& params, uint32_t computeUnitsCount);
+     Entry LoadKernel_v2(const Params& params, uint32_t computeUnitsCount);
+ 
+-    rapidjson::Document cache;
++    class Impl;
++    std::shared_ptr<Impl> impl;
+ 
+     static constexpr const char* version1Marker = "version_1";
+     static constexpr const char* version2Marker = "version_2";
+diff --git a/src/plugins/intel_gpu/src/kernel_selector/jitter.cpp b/src/plugins/intel_gpu/src/kernel_selector/jitter.cpp
+index fe6ffe8008..106560f5f1 100644
+--- a/src/plugins/intel_gpu/src/kernel_selector/jitter.cpp
++++ b/src/plugins/intel_gpu/src/kernel_selector/jitter.cpp
+@@ -1540,11 +1540,11 @@ JitConstants MakeActivationJitConstants(std::vector<kernel_selector::base_activa
+         std::string nl_n = toCodeString(params[i].n);
+         if (params[i].function == ActivationFunction::CLAMP) {
+             if (out_dt == Datatype::INT8) {
+-                nl_m = toCodeString(std::max(params[i].m, static_cast<float>(SCHAR_MIN)));
+-                nl_n = toCodeString(std::min(params[i].n, static_cast<float>(SCHAR_MAX)));
++                nl_m = toCodeString(std::max<float>(params[i].m, std::numeric_limits<signed char>::min()));
++                nl_n = toCodeString(std::min<float>(params[i].n, std::numeric_limits<signed char>::max()));
+             } else if (out_dt == Datatype::UINT8) {
+                 nl_m = toCodeString(std::max(params[i].m, 0.0f));
+-                nl_n = toCodeString(std::min(params[i].n, static_cast<float>(UCHAR_MAX)));
++                nl_n = toCodeString(std::min<float>(params[i].n, std::numeric_limits<unsigned char>::max()));
+             }
+         }
+         auto jitConstants = JitConstants{MakeJitConstant("NL_M" + activation_suffix, nl_m),
+@@ -1949,11 +1949,11 @@ JitConstants FusedOpsCodeGenerator::MakeOpJitConstants(const FusedOpsConfigurati
+ 
+                 if (activation_p.function == ActivationFunction::CLAMP) {
+                     if (out_type == Datatype::INT8) {
+-                        nl_m = toCodeString(std::max(activation_p.m, static_cast<float>(SCHAR_MIN)));
+-                        nl_n = toCodeString(std::min(activation_p.n, static_cast<float>(SCHAR_MAX)));
++                        nl_m = toCodeString(std::max<float>(activation_p.m, std::numeric_limits<signed char>::min()));
++                        nl_n = toCodeString(std::min<float>(activation_p.n, std::numeric_limits<signed char>::max()));
+                     } else if (out_type == Datatype::UINT8) {
+                         nl_m = toCodeString(std::max(activation_p.m, 0.0f));
+-                        nl_n = toCodeString(std::min(activation_p.n, static_cast<float>(UCHAR_MAX)));
++                        nl_n = toCodeString(std::min<float>(activation_p.n, std::numeric_limits<unsigned char>::max()));
+                     }
+                 }
+ 
+diff --git a/src/plugins/intel_gpu/src/kernel_selector/kernel_selector_params.h b/src/plugins/intel_gpu/src/kernel_selector/kernel_selector_params.h
+index 5c71c907b7..76e84e558b 100644
+--- a/src/plugins/intel_gpu/src/kernel_selector/kernel_selector_params.h
++++ b/src/plugins/intel_gpu/src/kernel_selector/kernel_selector_params.h
+@@ -10,7 +10,6 @@
+ #include <limits>
+ #include "common_types.h"
+ #include "tensor_type.h"
+-#include "document.h"
+ #include <vector>
+ #include <utility>
+ #include <bitset>
+diff --git a/src/plugins/intel_gpu/src/runtime/CMakeLists.txt b/src/plugins/intel_gpu/src/runtime/CMakeLists.txt
+index c442f65575..321fc2f1b2 100644
+--- a/src/plugins/intel_gpu/src/runtime/CMakeLists.txt
++++ b/src/plugins/intel_gpu/src/runtime/CMakeLists.txt
+@@ -64,4 +64,4 @@ elseif((NOT ANDROID) AND (UNIX))
+   target_link_libraries(${TARGET_NAME} PRIVATE pthread)
+ endif()
+ 
+-ov_install_static_lib(${TARGET_NAME} gpu)
++ov_install_static_lib(${TARGET_NAME} ${OV_CPACK_COMP_CORE})
+diff --git a/src/plugins/intel_gpu/thirdparty/CMakeLists.txt b/src/plugins/intel_gpu/thirdparty/CMakeLists.txt
+index c7c616d0df..b7cc810a75 100644
+--- a/src/plugins/intel_gpu/thirdparty/CMakeLists.txt
++++ b/src/plugins/intel_gpu/thirdparty/CMakeLists.txt
+@@ -2,14 +2,6 @@
+ # SPDX-License-Identifier: Apache-2.0
+ #
+ 
+-add_library(rapidjson INTERFACE)
+-
+-set_target_properties(rapidjson PROPERTIES
+-    INTERFACE_INCLUDE_DIRECTORIES $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/rapidjson>
+-)
+-
+-ov_install_static_lib(rapidjson gpu)
+-
+ #
+ # oneDNN for GPU plugin
+ #
+@@ -17,11 +9,12 @@ ov_install_static_lib(rapidjson gpu)
+ if(ENABLE_ONEDNN_FOR_GPU)
+     function(build_onednn_gpu)
+         include(ExternalProject)
+-        set(ONEDNN_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/onednn_gpu_build/")
+-        set(ONEDNN_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/onednn_gpu_install/")
++        set(ONEDNN_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/onednn_gpu_build")
++        set(ONEDNN_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/onednn_gpu_install" CACHE PATH "Installation path for oneDNN GPU library")
+         set(ONEDNN_PREFIX_DIR "${CMAKE_CURRENT_BINARY_DIR}/onednn_gpu_root")
+         set(ONEDNN_ENABLED_PRIMITIVES "CONCAT;CONVOLUTION;DECONVOLUTION;INNER_PRODUCT;MATMUL;REORDER;POOLING;REDUCTION")
+         set(ONEDNN_ENABLED_ISA "XEHP;XEHPG;XEHPC")
++        set(DNNL_GPU_LIBRARY_NAME "openvino_onednn_gpu" CACHE STRING "Name of oneDNN library for Intel GPU Plugin")
+ 
+         if(X86_64)
+             set(ONEDNN_TARGET_ARCH "X64" CACHE STRING "" FORCE)
+@@ -87,18 +80,16 @@ if(ENABLE_ONEDNN_FOR_GPU)
+             list(APPEND cmake_extra_args "-DOpenCL_INCLUDE_DIR=${OpenCL_INCLUDE_DIR}")
+         endif()
+ 
++        set(onednn_gpu_lib "${CMAKE_STATIC_LIBRARY_PREFIX}${DNNL_GPU_LIBRARY_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
++        set(ONEDNN_GPU_LIB_PATH ${ONEDNN_INSTALL_DIR}/lib/${onednn_gpu_lib} CACHE FILEPATH "Path to oneDNN GPU library")
++
+         ExternalProject_Add(onednn_gpu_build
++            # Directory Options:
++            PREFIX "${ONEDNN_PREFIX_DIR}"
+             SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/onednn_gpu"
+             BINARY_DIR "${ONEDNN_BUILD_DIR}"
+             INSTALL_DIR "${ONEDNN_INSTALL_DIR}"
+-            PREFIX "${ONEDNN_PREFIX_DIR}"
+-            EXCLUDE_FROM_ALL ON
+-            CMAKE_CACHE_ARGS
+-                # The arguments below requires list to be passed as argument
+-                # which doesn't work properly when passed to CMAKE_ARGS.
+-                # Thus we pass it via CMAKE_CACHE_ARGS
+-                "-DDNNL_ENABLE_PRIMITIVE:STRING=${ONEDNN_ENABLED_PRIMITIVES}"
+-                "-DDNNL_ENABLE_PRIMITIVE_GPU_ISA:STRING=${ONEDNN_ENABLED_ISA}"
++            # Configure Step Options:
+             CMAKE_ARGS
+                 ${cmake_extra_args}
+                 "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+@@ -112,9 +103,8 @@ if(ENABLE_ONEDNN_FOR_GPU)
+                 "-DDNNL_TARGET_ARCH=${ONEDNN_TARGET_ARCH}"
+                 "-DDNNL_CPU_RUNTIME=NONE"
+                 "-DDNNL_GPU_RUNTIME=OCL"
+-                "-DDNNL_LIBRARY_NAME=openvino_onednn_gpu"
++                "-DDNNL_LIBRARY_NAME=${DNNL_GPU_LIBRARY_NAME}"
+                 "-DCMAKE_INSTALL_PREFIX=${ONEDNN_INSTALL_DIR}"
+-                "-DCMAKE_INSTALL_LIBDIR=lib/$<CONFIG>"
+                 "-DDNNL_ENABLE_CONCURRENT_EXEC=ON"
+                 "-DDNNL_ENABLE_PRIMITIVE_CACHE=OFF"
+                 "-DDNNL_ENABLE_WORKLOAD=INFERENCE"
+@@ -129,16 +119,38 @@ if(ENABLE_ONEDNN_FOR_GPU)
+                 # specifically for Conan, because it overrides CMAKE_PREFIX_PATH and oneDNN's FindOpenCL.cmake is ignored
+                 # Conan's FindOpenCL.cmake module does not set OpenCL_INCLUDE_DIRS, so we need to set it manually
+                 "-DOpenCL_INCLUDE_DIRS=$<TARGET_PROPERTY:OpenCL::OpenCL,INTERFACE_INCLUDE_DIRECTORIES>"
++                # Conan calls cmake with default value for CMP0091, so we have to bypass it to oneDNN build
++                # because we bypass conan_toolchain.cmake via CMAKE_TOOLCHAIN_FILE
++                "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW"
++            CMAKE_CACHE_ARGS
++                # The arguments below requires list to be passed as argument
++                # which doesn't work properly when passed to CMAKE_ARGS.
++                # Thus we pass it via CMAKE_CACHE_ARGS
++                "-DDNNL_ENABLE_PRIMITIVE:STRING=${ONEDNN_ENABLED_PRIMITIVES}"
++                "-DDNNL_ENABLE_PRIMITIVE_GPU_ISA:STRING=${ONEDNN_ENABLED_ISA}"
++            # Build Step Options:
++            BUILD_BYPRODUCTS ${ONEDNN_GPU_LIB_PATH}
++            # Target Options:
++            EXCLUDE_FROM_ALL ON
+         )
++
+         add_library(onednn_gpu_tgt INTERFACE)
+         set_target_properties(onednn_gpu_tgt PROPERTIES
+-            INTERFACE_LINK_DIRECTORIES "${ONEDNN_INSTALL_DIR}/lib/$<CONFIG>"
+-            INTERFACE_LINK_LIBRARIES "openvino_onednn_gpu"
+-            INTERFACE_INCLUDE_DIRECTORIES "${ONEDNN_INSTALL_DIR}/include"
++            INTERFACE_LINK_LIBRARIES $<BUILD_INTERFACE:${ONEDNN_GPU_LIB_PATH}>
++            INTERFACE_INCLUDE_DIRECTORIES $<BUILD_INTERFACE:${ONEDNN_INSTALL_DIR}/include>
+             INTERFACE_COMPILE_DEFINITIONS ENABLE_ONEDNN_FOR_GPU
+         )
+         add_dependencies(onednn_gpu_tgt onednn_gpu_build)
+-        # TODO: install onednn_gpu in static builds
++
++        if(NOT BUILD_SHARED_LIBS)
++            ov_install_static_lib(onednn_gpu_tgt ${OV_CPACK_COMP_CORE})
++
++            # we need to install library explicitly and set_target_properties in OpenVINOConfig.cmake for 'onednn_gpu_tgt'
++            # to point to installation location of this file
++            install(FILES "${ONEDNN_GPU_LIB_PATH}"
++                    DESTINATION ${OV_CPACK_ARCHIVEDIR}
++                    COMPONENT ${OV_CPACK_COMP_CORE})
++        endif()
+     endfunction()
+     build_onednn_gpu()
+ endif()
+diff --git a/src/plugins/intel_gpu/thirdparty/cmake/rapidjson.cmake b/src/plugins/intel_gpu/thirdparty/cmake/rapidjson.cmake
+new file mode 100644
+index 0000000000..655224dbc1
+--- /dev/null
++++ b/src/plugins/intel_gpu/thirdparty/cmake/rapidjson.cmake
+@@ -0,0 +1,22 @@
++# Copyright (C) 2018-2023 Intel Corporation
++# SPDX-License-Identifier: Apache-2.0
++#
++
++find_package(RapidJSON QUIET)
++
++if(NOT TARGET rapidjson)
++    # sometimes RapidJSONConfig.cmake defines only RAPIDJSON_INCLUDE_DIRS
++    add_library(rapidjson INTERFACE)
++
++    if(RapidJSON_FOUND)
++        if(TARGET RapidJSON)
++            target_link_libraries(rapidjson INTERFACE RapidJSON)
++        elseif(DEFINED RAPIDJSON_INCLUDE_DIRS)
++            target_include_directories(rapidjson INTERFACE $<BUILD_INTERFACE:${RAPIDJSON_INCLUDE_DIRS}>)
++        else()
++            message(FATAL_ERROR "RapidJSON does not define RAPIDJSON_INCLUDE_DIRS nor RapidJSON / rapidjson targets")
++        endif()
++    else()
++        target_include_directories(rapidjson INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty>)
++    endif()
++endif()
+diff --git a/src/plugins/template/backend/CMakeLists.txt b/src/plugins/template/backend/CMakeLists.txt
+index 7530dd1688..a451fea900 100644
+--- a/src/plugins/template/backend/CMakeLists.txt
++++ b/src/plugins/template/backend/CMakeLists.txt
+@@ -52,4 +52,4 @@ openvino_developer_export_targets(COMPONENT core TARGETS interpreter_backend)
+ 
+ # install
+ 
+-ov_install_static_lib(interpreter_backend template)
++ov_install_static_lib(interpreter_backend ${OV_CPACK_COMP_CORE})
+diff --git a/src/plugins/template/src/CMakeLists.txt b/src/plugins/template/src/CMakeLists.txt
+index 2409bb10e0..f382f90d11 100644
+--- a/src/plugins/template/src/CMakeLists.txt
++++ b/src/plugins/template/src/CMakeLists.txt
+@@ -28,7 +28,7 @@ target_include_directories(${TARGET_NAME} PRIVATE
+     "${CMAKE_CURRENT_SOURCE_DIR}"
+     "${TEMPLATE_PLUGIN_SOURCE_DIR}/include")
+ 
+-# link common Inference Engine libraries
++# link common OpenVINO Runtime libraries
+ target_link_libraries(${TARGET_NAME} PRIVATE
+     openvino::interpreter_backend
+     openvino::reference)
+@@ -42,4 +42,4 @@ endif()
+ # [cmake:plugin]
+ 
+ install(TARGETS ${TARGET_NAME}
+-    LIBRARY DESTINATION tests COMPONENT tests EXCLUDE_FROM_ALL)
++        LIBRARY DESTINATION tests COMPONENT tests EXCLUDE_FROM_ALL)
+diff --git a/thirdparty/ocl/CMakeLists.txt b/thirdparty/ocl/CMakeLists.txt
+index f31519467f..0ebe3fd6d1 100644
+--- a/thirdparty/ocl/CMakeLists.txt
++++ b/thirdparty/ocl/CMakeLists.txt
+@@ -58,4 +58,4 @@ set(opencl_root_hints "${OpenCL_INCLUDE_DIR}" PARENT_SCOPE)
+ 
+ # installation
+ 
+-ov_install_static_lib(OpenCL gpu)
++ov_install_static_lib(OpenCL ${OV_CPACK_COMP_CORE})
