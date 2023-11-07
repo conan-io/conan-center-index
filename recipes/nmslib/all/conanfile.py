@@ -42,20 +42,20 @@ class Nmslib(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if is_msvc(self):
+            # Not available on MSVC
+            # https://github.com/nmslib/nmslib/blob/v2.1.1/similarity_search/include/space/space_sqfd.h#L19
+            del self.options.build_extras
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if is_msvc(self):
-            # Not available on MSVC
-            # https://github.com/nmslib/nmslib/blob/v2.1.1/similarity_search/include/space/space_sqfd.h#L19
-            self.options.build_extras = False
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.build_extras:
+        if self.options.get_safe("build_extras"):
             # Eigen is only used internally, no need for transitive_*
             self.requires("eigen/3.4.0")
 
@@ -71,7 +71,7 @@ class Nmslib(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["WITH_EXTRAS"] = self.options.build_extras
+        tc.variables["WITH_EXTRAS"] = self.options.get_safe("build_extras", False)
         tc.variables["WITHOUT_TESTS"] = True
         # Relocatable shared libs on macOS
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
@@ -107,5 +107,5 @@ class Nmslib(ConanFile):
             self.cpp_info.system_libs = ["pthread", "m"]
             if self.settings.arch in ["x86", "x86_64"]:
                 self.cpp_info.system_libs.append("mvec")
-        if self.options.build_extras:
+        if self.options.get_safe("build_extras"):
             self.cpp_info.defines.append("WITH_EXTRAS")
