@@ -9,7 +9,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, msvs_toolset
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class ImageMagicConan(ConanFile):
@@ -268,31 +268,22 @@ class ImageMagicConan(ConanFile):
     def _patch_sources_msvc(self):
         apply_conandata_patches(self)
         # FIXME: package LiquidRescale  aka liblqr
-        replace_in_file(self, os.path.join("VisualMagick", "lqr", "Config.txt"), "#define MAGICKCORE_LQR_DELEGATE", "")
+        replace_in_file(self, os.path.join("VisualMagick", "lqr", "Config.txt"),
+                        "#define MAGICKCORE_LQR_DELEGATE", "")
         # FIXME: package LibRaw
-        replace_in_file(
-            self,
-            os.path.join("VisualMagick", "libraw", "Config.txt"),
-            "#define MAGICKCORE_RAW_R_DELEGATE",
-            "",
-        )
+        replace_in_file(self, os.path.join("VisualMagick", "libraw", "Config.txt"),
+                        "#define MAGICKCORE_RAW_R_DELEGATE", "")
         # FIXME: package FLIF (FLIF: Free Lossless Image Format)
-        replace_in_file(
-            self, os.path.join("VisualMagick", "flif", "Config.txt"), "#define MAGICKCORE_FLIF_DELEGATE", ""
-        )
+        replace_in_file(self, os.path.join("VisualMagick", "flif", "Config.txt"),
+                        "#define MAGICKCORE_FLIF_DELEGATE", "")
         # FIXME: package librsvg
-        replace_in_file(
-            self, os.path.join("VisualMagick", "librsvg", "Config.txt"), "#define MAGICKCORE_RSVG_DELEGATE", ""
-        )
+        replace_in_file(self, os.path.join("VisualMagick", "librsvg", "Config.txt"),
+                        "#define MAGICKCORE_RSVG_DELEGATE", "")
         if not self.options.shared:
             for module in self._modules:
                 replace_in_file(self, os.path.join("VisualMagick", module, "Config.txt"), "[DLL]", "[STATIC]")
-            replace_in_file(
-                self,
-                os.path.join("VisualMagick", "coders", "Config.txt"),
-                "[DLLMODULE]",
-                "[STATIC]\n[DEFINES]\n_MAGICKLIB_",
-            )
+            replace_in_file(self, os.path.join("VisualMagick", "coders", "Config.txt"),
+                            "[DLLMODULE]", "[STATIC]\n[DEFINES]\n_MAGICKLIB_")
 
         if self.settings.arch == "x86_64":
             project = os.path.join("VisualMagick", "configure", "configure.vcxproj")
@@ -301,33 +292,21 @@ class ImageMagicConan(ConanFile):
 
         with chdir(self, os.path.join("VisualMagick", "configure")):
             toolset = msvs_toolset(self)
-            replace_in_file(
-                self,
-                "configure.vcxproj",
-                "<PlatformToolset>v120</PlatformToolset>",
-                f"<PlatformToolset>{toolset}</PlatformToolset>",
-            )
+            replace_in_file(self, "configure.vcxproj",
+                            "<PlatformToolset>v120</PlatformToolset>",
+                            f"<PlatformToolset>{toolset}</PlatformToolset>")
 
         # GdiPlus requires C++, but ImageMagick has *.c files
         suffix = self._msvc_runtime_suffix
         project = f"IM_MOD_emf_{suffix}.vcxproj" if self.options.shared else f"CORE_coders_{suffix}.vcxproj"
-        replace_in_file(
-            self,
-            os.path.join("VisualMagick", "coders", project),
-            '<ClCompile Include="..\\..\\ImageMagick\\coders\\emf.c">',
-            '<ClCompile Include="..\\..\\ImageMagick\\coders\\emf.c">\n<CompileAs>CompileAsCpp</CompileAs>',
-        )
+        replace_in_file(self, os.path.join("VisualMagick", "coders", project),
+                        '<ClCompile Include="..\\..\\ImageMagick\\coders\\emf.c">',
+                        '<ClCompile Include="..\\..\\ImageMagick\\coders\\emf.c">\n<CompileAs>CompileAsCpp</CompileAs>')
 
         # disable incorrectly detected OpenCL
         baseconfig = os.path.join(self.source_folder, "MagickCore", "magick-baseconfig.h")
         replace_in_file(self, baseconfig, "#define MAGICKCORE__OPENCL", "#undef MAGICKCORE__OPENCL", strict=False)
-        replace_in_file(
-            self,
-            baseconfig,
-            "#define MAGICKCORE_HAVE_CL_CL_H",
-            "#undef MAGICKCORE_HAVE_CL_CL_H",
-            strict=False,
-        )
+        replace_in_file(self, baseconfig, "#define MAGICKCORE_HAVE_CL_CL_H", "#undef MAGICKCORE_HAVE_CL_CL_H", strict=False)
 
     def _build_msvc(self):
         self._patch_sources_msvc()
@@ -367,20 +346,14 @@ class ImageMagicConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if is_msvc(self):
             for pattern in ["*CORE_*.lib", "*CORE_*.dll", "*IM_MOD_*.dll"]:
-                copy(
-                    self,
-                    pattern=pattern,
-                    dst=os.path.join(self.package_folder, "lib"),
-                    src=os.path.join("VisualMagick", "lib"),
-                    keep_path=False,
-                )
+                copy(self, pattern,
+                     dst=os.path.join(self.package_folder, "lib"),
+                     src=os.path.join("VisualMagick", "lib"),
+                     keep_path=False)
             for module in self._modules:
-                copy(
-                    self,
-                    pattern="*.h",
-                    dst=os.path.join("include", f"ImageMagick-{Version(self.version).major}", module),
-                    src=os.path.join(self.source_folder, module),
-                )
+                copy(self, "*.h",
+                     dst=os.path.join("include", f"ImageMagick-{Version(self.version).major}", module),
+                     src=os.path.join(self.source_folder, module))
         else:
             with chdir(self, self.source_folder):
                 autotools = Autotools(self)
@@ -435,17 +408,14 @@ class ImageMagicConan(ConanFile):
         if self.options.with_freetype:
             core_requires.append("freetype::freetype")
 
-        if is_msvc(self):
-            if not self.options.shared:
-                self.cpp_info.components["MagickCore"].libs.append(self._libname("coders"))
+        if is_msvc(self) and not self.options.shared:
+            self.cpp_info.components["MagickCore"].libs.append(self._libname("coders"))
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["MagickCore"].system_libs.append("pthread")
 
         self.cpp_info.components["MagickCore"].defines.append(f"MAGICKCORE_QUANTUM_DEPTH={self.options.quantum_depth}")
         self.cpp_info.components["MagickCore"].defines.append(f"MAGICKCORE_HDRI_ENABLE={int(bool(self.options.hdri))}")
-        self.cpp_info.components["MagickCore"].defines.append(
-            "_MAGICKDLL_=1" if self.options.shared else "_MAGICKLIB_=1"
-        )
+        self.cpp_info.components["MagickCore"].defines.append("_MAGICKDLL_=1" if self.options.shared else "_MAGICKLIB_=1")
 
         include_dir_root = os.path.join("include", f"ImageMagick-{Version(self.version).major}")
         self.cpp_info.components["MagickCore"].includedirs = [include_dir_root]
@@ -454,9 +424,7 @@ class ImageMagicConan(ConanFile):
         self.cpp_info.components["MagickCore"].set_property("pkg_config_name", "MagicCore")
 
         self.cpp_info.components[self._libname("MagickCore")].requires = ["MagickCore"]
-        self.cpp_info.components[self._libname("MagickCore")].set_property(
-            "pkg_config_name", self._libname("MagickCore")
-        )
+        self.cpp_info.components[self._libname("MagickCore")].set_property("pkg_config_name", self._libname("MagickCore"))
 
         self.cpp_info.components["MagickWand"].includedirs = [os.path.join(include_dir_root, "MagickWand")]
         self.cpp_info.components["MagickWand"].libs = [self._libname("MagickWand")]
@@ -476,5 +444,4 @@ class ImageMagicConan(ConanFile):
 
         # TODO: Legacy, to be removed on Conan 2.0
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
