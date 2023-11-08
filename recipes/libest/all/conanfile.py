@@ -50,7 +50,7 @@ class LibEstConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/1.1.1w", transitive_headers=True, transitive_libs=True)
+        self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
