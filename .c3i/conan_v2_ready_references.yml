@@ -6,6 +6,8 @@ required_for_references:
 - aaplus
 - abseil
 - absent
+- acado
+- accellera-uvm-systemc
 - access_private
 - acl
 - ada
@@ -69,6 +71,7 @@ required_for_references:
 - aws-checksums
 - aws-crt-cpp
 - aws-kvs-pic
+- aws-lambda-cpp
 - aws-libfabric
 - aws-sdk-cpp
 - b2
@@ -108,6 +111,7 @@ required_for_references:
 - breakpad
 - brigand
 - brotli
+- brunsli
 - brynet
 - bshoshany-thread-pool
 - btyacc
@@ -147,6 +151,7 @@ required_for_references:
 - cfitsio
 - cgal
 - cgif
+- cglm
 - cgltf
 - cgns
 - chaiscript
@@ -207,6 +212,7 @@ required_for_references:
 - cppitertools
 - cpprestsdk
 - cpptoml
+- cpptrace
 - cppunit
 - cpputest
 - cppzmq
@@ -219,9 +225,11 @@ required_for_references:
 - crc_cpp
 - create-dmg
 - croncpp
+- crossguid
 - crowcpp-crow
 - crunch
 - cryptopp
+- cryptopp-pem
 - cs_libguarded
 - csm
 - cspice
@@ -257,8 +265,10 @@ required_for_references:
 - debug_assert
 - decimal_for_cpp
 - deco
+- detools
 - di
 - dice-template-library
+- directx-headers
 - dirent
 - discount
 - djinni-generator
@@ -279,6 +289,7 @@ required_for_references:
 - dtl
 - duckdb
 - duktape
+- dylib
 - eabase
 - earcut
 - eastl
@@ -296,6 +307,7 @@ required_for_references:
 - egl-headers
 - eigen
 - elfio
+- elfutils
 - embag
 - embedded_ringbuf_cpp
 - embree3
@@ -305,6 +317,7 @@ required_for_references:
 - enhex-generic_serialization
 - enhex-strong_type
 - enkits
+- ensmallen
 - entityx
 - entt
 - enum-flags
@@ -312,6 +325,7 @@ required_for_references:
 - erkir
 - etc2comp
 - eternal
+- ethash
 - etl
 - evmc
 - exiv2
@@ -440,6 +454,7 @@ required_for_references:
 - happly
 - harfbuzz
 - hash-library
+- hayai
 - hazelcast-cpp-client
 - hdf4
 - hdf5
@@ -459,9 +474,11 @@ required_for_references:
 - homog2d
 - http_parser
 - hunspell
+- hwdata
 - hwloc
 - hyperscan
 - icecream-cpp
+- iconfontcppheaders
 - icu
 - id3v2lib
 - iir1
@@ -501,6 +518,7 @@ required_for_references:
 - jom
 - jpcre2
 - jpeg-compressor
+- jsbsim
 - jsmn
 - json-c
 - json-schema-validator
@@ -852,6 +870,8 @@ required_for_references:
 - nodesoup
 - norm
 - npcap
+- nsimd
+- nspr
 - nsync
 - ntv2
 - nudb
@@ -873,6 +893,7 @@ required_for_references:
 - ode
 - ogdf
 - ogg
+- ohnet
 - ois
 - onedpl
 - onetbb
@@ -912,6 +933,7 @@ required_for_references:
 - opentelemetry-cpp
 - opentelemetry-proto
 - opentracing-cpp
+- openvino
 - openxlsx
 - optional-lite
 - opus
@@ -920,6 +942,7 @@ required_for_references:
 - osqp
 - out_ptr
 - outcome
+- ozz-animation
 - p-ranav-glob
 - paho-mqtt-c
 - paho-mqtt-cpp
@@ -1007,6 +1030,7 @@ required_for_references:
 - qpoases
 - qr-code-generator
 - qt
+- qtawesome
 - quantlib
 - quaternions
 - quazip
@@ -1091,11 +1115,13 @@ required_for_references:
 - seqan3
 - serd
 - serdepp
+- serf
 - serial
 - sfml
 - shapelib
 - shield
 - si
+- signals-light
 - sigslot
 - simde
 - simdjson
@@ -1140,6 +1166,7 @@ required_for_references:
 - status-value-lite
 - stb
 - stc
+- stdgpu
 - stduuid
 - stlab
 - strawberryperl
@@ -1149,6 +1176,8 @@ required_for_references:
 - stringzilla
 - strong_type
 - structopt
+- stx
+- subunit
 - sundials
 - svector
 - svgpp
@@ -1171,6 +1200,7 @@ required_for_references:
 - tcl
 - tclap
 - tcp-wrappers
+- tcsbank-uri-template
 - tensorflow-lite
 - tensorpipe
 - termcap
@@ -1297,6 +1327,7 @@ required_for_references:
 - wglext
 - whereami
 - whisper-cpp
+- wide-integer
 - wil
 - wildmidi
 - winflexbison
@@ -1363,4 +1394,5 @@ required_for_references:
 - zug
 - zulu-openjdk
 - zxing-cpp
+- zyre
 - zziplib
