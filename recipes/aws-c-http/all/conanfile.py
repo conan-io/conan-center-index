@@ -44,7 +44,7 @@ class AwsCHttp(ConanFile):
             self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-compression/0.2.15")
         else:
-            self.requires("aws-c-common/0.9.0", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-common/0.9.6", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-compression/0.2.17")
         if Version(self.version) <= "0.6.13":
             self.requires("aws-c-io/0.10.20", transitive_headers=True)
