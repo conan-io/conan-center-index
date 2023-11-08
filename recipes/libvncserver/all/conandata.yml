@@ -7,4 +7,3 @@ patches:
     - patch_file: "patches/0.9.14/0001-fix-windows-check_c_source_runs-script.patch"
       patch_description: "separate static/shared builds, disable debug suffix, disable building examples"
       patch_type: "conan"
-
