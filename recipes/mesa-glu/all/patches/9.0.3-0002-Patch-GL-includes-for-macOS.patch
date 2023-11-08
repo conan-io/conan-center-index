@@ -1,36 +1,37 @@
-From 5554ad982a39477c7ca6b9dbeeee6692a744b95a Mon Sep 17 00:00:00 2001
+From f77b5919df5924f93ac87f10c6cff0b2fe7623b5 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Wed, 8 Nov 2023 09:12:24 -0600
 Subject: [PATCH] Patch GL includes for macOS
 
 ---
- include/GL/glu.h                          | 4 ++++
- src/libnurbs/interface/bezierPatchMesh.cc | 4 ++++
- src/libnurbs/interface/bezierPatchMesh.h  | 4 ++++
- src/libnurbs/interface/glcurveval.h       | 4 ++++
- src/libnurbs/interface/glinterface.cc     | 4 ++++
- src/libnurbs/interface/glrenderer.h       | 4 ++++
- src/libnurbs/interface/glsurfeval.h       | 4 ++++
- src/libnurbs/interface/insurfeval.cc      | 4 ++++
- src/libnurbs/internals/slicer.cc          | 6 +++++-
- src/libnurbs/nurbtess/gridWrap.cc         | 4 ++++
- src/libnurbs/nurbtess/monoChain.cc        | 4 ++++
- src/libnurbs/nurbtess/primitiveStream.cc  | 4 ++++
- src/libnurbs/nurbtess/rectBlock.cc        | 4 ++++
- src/libnurbs/nurbtess/sampleMonoPoly.cc   | 4 ++++
- src/libutil/project.c                     | 4 ++++
- src/libutil/quad.c                        | 4 ++++
- 16 files changed, 65 insertions(+), 1 deletion(-)
+ include/GL/glu.h                          | 5 +++++
+ src/libnurbs/interface/bezierPatchMesh.cc | 5 +++++
+ src/libnurbs/interface/bezierPatchMesh.h  | 5 +++++
+ src/libnurbs/interface/glcurveval.h       | 5 +++++
+ src/libnurbs/interface/glinterface.cc     | 5 +++++
+ src/libnurbs/interface/glrenderer.h       | 5 +++++
+ src/libnurbs/interface/glsurfeval.h       | 5 +++++
+ src/libnurbs/interface/insurfeval.cc      | 5 +++++
+ src/libnurbs/internals/slicer.cc          | 7 ++++++-
+ src/libnurbs/nurbtess/gridWrap.cc         | 5 +++++
+ src/libnurbs/nurbtess/monoChain.cc        | 5 +++++
+ src/libnurbs/nurbtess/primitiveStream.cc  | 5 +++++
+ src/libnurbs/nurbtess/rectBlock.cc        | 5 +++++
+ src/libnurbs/nurbtess/sampleMonoPoly.cc   | 5 +++++
+ src/libutil/project.c                     | 5 +++++
+ src/libutil/quad.c                        | 5 +++++
+ 16 files changed, 81 insertions(+), 1 deletion(-)
 
 diff --git a/include/GL/glu.h b/include/GL/glu.h
-index 421f25d..b4bd134 100644
+index 421f25d..0b6d307 100644
 --- a/include/GL/glu.h
 +++ b/include/GL/glu.h
-@@ -31,7 +31,11 @@
+@@ -31,7 +31,12 @@
  #ifndef __glu_h__
  #define __glu_h__
  
 +#if defined(__APPLE__)
++#include <OpenGL/gl.h>
 +#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
@@ -39,14 +40,15 @@ index 421f25d..b4bd134 100644
  #ifndef GLAPIENTRY
  #if defined(_MSC_VER) || defined(__MINGW32__)
 diff --git a/src/libnurbs/interface/bezierPatchMesh.cc b/src/libnurbs/interface/bezierPatchMesh.cc
-index ac7ff84..3763b9a 100644
+index ac7ff84..2a0992b 100644
 --- a/src/libnurbs/interface/bezierPatchMesh.cc
 +++ b/src/libnurbs/interface/bezierPatchMesh.cc
-@@ -39,7 +39,11 @@
+@@ -39,7 +39,12 @@
  #include <stdlib.h>
  #include <stdio.h>
  #include <assert.h>
 +#if defined(__APPLE__)
++#include <OpenGL/gl.h>
 +#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
@@ -55,14 +57,15 @@ index ac7ff84..3763b9a 100644
  #include "bezierPatchMesh.h"
  
 diff --git a/src/libnurbs/interface/bezierPatchMesh.h b/src/libnurbs/interface/bezierPatchMesh.h
-index ba6868a..60e6e99 100644
+index ba6868a..3d80420 100644
 --- a/src/libnurbs/interface/bezierPatchMesh.h
 +++ b/src/libnurbs/interface/bezierPatchMesh.h
-@@ -33,7 +33,11 @@
+@@ -33,7 +33,12 @@
  #ifndef _BEZIERPATCHMESH_H
  #define _BEZIERPATCHMESH_H
  
 +#if defined(__APPLE__)
++#include <OpenGL/gl.h>
 +#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
@@ -71,14 +74,15 @@ index ba6868a..60e6e99 100644
  
  typedef struct bezierPatchMesh{
 diff --git a/src/libnurbs/interface/glcurveval.h b/src/libnurbs/interface/glcurveval.h
-index 8fa4930..9b81f8c 100644
+index 8fa4930..0f0405c 100644
 --- a/src/libnurbs/interface/glcurveval.h
 +++ b/src/libnurbs/interface/glcurveval.h
-@@ -37,7 +37,11 @@
+@@ -37,7 +37,12 @@
  #define __gluglcurveval_h_
  
  #include "gluos.h"
 +#if defined(__APPLE__)
++#include <OpenGL/gl.h>
 +#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
@@ -87,14 +91,15 @@ index 8fa4930..9b81f8c 100644
  #include "basiccrveval.h"
  
 diff --git a/src/libnurbs/interface/glinterface.cc b/src/libnurbs/interface/glinterface.cc
-index ba64bcd..e358100 100644
+index ba64bcd..a27cc9e 100644
 --- a/src/libnurbs/interface/glinterface.cc
 +++ b/src/libnurbs/interface/glinterface.cc
-@@ -36,7 +36,11 @@
+@@ -36,7 +36,12 @@
  */
  
  #include "gluos.h"
 +#if defined(__APPLE__)
++#include <OpenGL/gl.h>
 +#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
@@ -103,14 +108,15 @@ index ba64bcd..e358100 100644
  #include <stdio.h>
  #include "glimports.h"
 diff --git a/src/libnurbs/interface/glrenderer.h b/src/libnurbs/interface/glrenderer.h
-index 3b72d44..a8bb8f2 100644
+index 3b72d44..05e5038 100644
 --- a/src/libnurbs/interface/glrenderer.h
 +++ b/src/libnurbs/interface/glrenderer.h
-@@ -36,7 +36,11 @@
+@@ -36,7 +36,12 @@
  #ifndef __gluglrenderer_h_
  #define __gluglrenderer_h_
  
 +#if defined(__APPLE__)
++#include <OpenGL/gl.h>
 +#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
@@ -119,14 +125,15 @@ index 3b72d44..a8bb8f2 100644
  #include "nurbstess.h"
  #include "glsurfeval.h"
 diff --git a/src/libnurbs/interface/glsurfeval.h b/src/libnurbs/interface/glsurfeval.h
-index 621e593..c4aa3e1 100644
+index 621e593..3dbade6 100644
 --- a/src/libnurbs/interface/glsurfeval.h
 +++ b/src/libnurbs/interface/glsurfeval.h
-@@ -38,7 +38,11 @@
+@@ -38,7 +38,12 @@
  
  #include "basicsurfeval.h"
  #include "bezierPatchMesh.h" //in case output triangles
 +#if defined(__APPLE__)
++#include <OpenGL/gl.h>
 +#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
@@ -135,14 +142,15 @@ index 621e593..c4aa3e1 100644
  
  class SurfaceMap;
 diff --git a/src/libnurbs/interface/insurfeval.cc b/src/libnurbs/interface/insurfeval.cc
-index 9d0c82a..8e1359f 100644
+index 9d0c82a..017eb94 100644
 --- a/src/libnurbs/interface/insurfeval.cc
 +++ b/src/libnurbs/interface/insurfeval.cc
-@@ -38,7 +38,11 @@
+@@ -38,7 +38,12 @@
  #include "gluos.h"
  #include <stdlib.h>
  #include <stdio.h>
 +#if defined(__APPLE__)
++#include <OpenGL/gl.h>
 +#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
@@ -151,15 +159,16 @@ index 9d0c82a..8e1359f 100644
  #include <assert.h>
  
 diff --git a/src/libnurbs/internals/slicer.cc b/src/libnurbs/internals/slicer.cc
-index 1b18d73..819edfd 100644
+index 1b18d73..fbd81a9 100644
 --- a/src/libnurbs/internals/slicer.cc
 +++ b/src/libnurbs/internals/slicer.cc
-@@ -59,7 +59,11 @@
+@@ -59,7 +59,12 @@
  /*USE_OPTTT is initiated in trimvertex.h*/
  
  #ifdef USE_OPTTT
 -	#include <GL/gl.h>
 +  #if defined(__APPLE__)
++    #include <OpenGL/gl.h>
 +    #include <OpenGL/gl3.h>
 +  #else 
 +    #include <GL/gl.h>
@@ -168,14 +177,15 @@ index 1b18d73..819edfd 100644
  
  //#define USE_READ_FLAG //whether to use new or old tesselator
 diff --git a/src/libnurbs/nurbtess/gridWrap.cc b/src/libnurbs/nurbtess/gridWrap.cc
-index 3c92039..5536209 100644
+index 3c92039..150e1fa 100644
 --- a/src/libnurbs/nurbtess/gridWrap.cc
 +++ b/src/libnurbs/nurbtess/gridWrap.cc
-@@ -38,7 +38,11 @@
+@@ -38,7 +38,12 @@
  #include "gluos.h"
  #include <stdlib.h>
  #include <stdio.h>
 +#if defined(__APPLE__)
++#include <OpenGL/gl.h>
 +#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
@@ -184,14 +194,15 @@ index 3c92039..5536209 100644
  #include "gridWrap.h"
  
 diff --git a/src/libnurbs/nurbtess/monoChain.cc b/src/libnurbs/nurbtess/monoChain.cc
-index cb28129..97261ab 100644
+index cb28129..bbed703 100644
 --- a/src/libnurbs/nurbtess/monoChain.cc
 +++ b/src/libnurbs/nurbtess/monoChain.cc
-@@ -38,7 +38,11 @@
+@@ -38,7 +38,12 @@
  #include "gluos.h"
  #include <stdlib.h>
  #include <stdio.h>
 +#if defined(__APPLE__)
++#include <OpenGL/gl.h>
 +#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
@@ -200,14 +211,15 @@ index cb28129..97261ab 100644
  #include "glimports.h"
  #include "zlassert.h"
 diff --git a/src/libnurbs/nurbtess/primitiveStream.cc b/src/libnurbs/nurbtess/primitiveStream.cc
-index dfdbd4e..87b061f 100644
+index dfdbd4e..92bc73e 100644
 --- a/src/libnurbs/nurbtess/primitiveStream.cc
 +++ b/src/libnurbs/nurbtess/primitiveStream.cc
-@@ -39,7 +39,11 @@
+@@ -39,7 +39,12 @@
  #include <stdlib.h>
  #include <stdio.h>
  #include <assert.h>
 +#if defined(__APPLE__)
++#include <OpenGL/gl.h>
 +#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h> 
@@ -216,14 +228,15 @@ index dfdbd4e..87b061f 100644
  #include "primitiveStream.h"
  
 diff --git a/src/libnurbs/nurbtess/rectBlock.cc b/src/libnurbs/nurbtess/rectBlock.cc
-index f457b15..905480e 100644
+index f457b15..ff3eda9 100644
 --- a/src/libnurbs/nurbtess/rectBlock.cc
 +++ b/src/libnurbs/nurbtess/rectBlock.cc
-@@ -40,7 +40,11 @@
+@@ -40,7 +40,12 @@
  #include <stdio.h>
  #include "glimports.h"
  #include "zlassert.h"
 +#if defined(__APPLE__)
++#include <OpenGL/gl.h>
 +#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
@@ -232,14 +245,15 @@ index f457b15..905480e 100644
  #include "rectBlock.h"
  
 diff --git a/src/libnurbs/nurbtess/sampleMonoPoly.cc b/src/libnurbs/nurbtess/sampleMonoPoly.cc
-index 051f241..742886a 100644
+index 051f241..da353be 100644
 --- a/src/libnurbs/nurbtess/sampleMonoPoly.cc
 +++ b/src/libnurbs/nurbtess/sampleMonoPoly.cc
-@@ -47,7 +47,11 @@
+@@ -47,7 +47,12 @@
  #define min(a,b) ((a>b)? b:a)
  #endif
  
 +#if defined(__APPLE__)
++#include <OpenGL/gl.h>
 +#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
@@ -248,14 +262,15 @@ index 051f241..742886a 100644
  #include "glimports.h"
  #include "zlassert.h"
 diff --git a/src/libutil/project.c b/src/libutil/project.c
-index f4bf883..213fcab 100644
+index f4bf883..e1cbc1f 100644
 --- a/src/libutil/project.c
 +++ b/src/libutil/project.c
-@@ -30,7 +30,11 @@
+@@ -30,7 +30,12 @@
  
  #include "gluos.h"
  #include <math.h>
 +#if defined(__APPLE__)
++#include <OpenGL/gl.h>
 +#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
@@ -264,14 +279,15 @@ index f4bf883..213fcab 100644
  #include "gluint.h"
  
 diff --git a/src/libutil/quad.c b/src/libutil/quad.c
-index d88b20f..dfe0771 100644
+index d88b20f..3199fa4 100644
 --- a/src/libutil/quad.c
 +++ b/src/libutil/quad.c
-@@ -33,7 +33,11 @@
+@@ -33,7 +33,12 @@
  #include <stdio.h>
  #include <stdlib.h>
  #include <math.h>
 +#if defined(__APPLE__)
++#include <OpenGL/gl.h>
 +#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
