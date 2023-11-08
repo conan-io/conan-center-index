@@ -131,10 +131,10 @@ class freeglutConan(ConanFile):
         tc.variables["FREEGLUT_BUILD_DEMOS"] = False
         tc.variables["FREEGLUT_BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["FREEGLUT_BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["FREEGLUT_GLES"] = self.options.get_safe("gles")
+        tc.variables["FREEGLUT_GLES"] = self.options.get_safe("gles", False)
         tc.variables["FREEGLUT_PRINT_ERRORS"] = self.options.print_errors_at_runtime
         tc.variables["FREEGLUT_PRINT_WARNINGS"] = self.options.print_warnings_at_runtime
-        tc.variables["FREEGLUT_WAYLAND"] = self.options.get_safe("with_wayland")
+        tc.variables["FREEGLUT_WAYLAND"] = self.options.get_safe("with_wayland", False)
         tc.variables["FREEGLUT_INSTALL_PDB"] = False
         tc.variables["INSTALL_PDB"] = False
         tc.variables["FREEGLUT_REPLACE_GLUT"] = self.options.replace_glut
