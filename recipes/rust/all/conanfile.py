@@ -1,95 +1,74 @@
-import os.path
-import sys
-import textwrap
+import os
 
 from conan import ConanFile
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get
-from conan.tools.gnu import PkgConfigDeps
-from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, download, unzip, rm, rmdir
 
 
 class RustConan(ConanFile):
     name = "rust"
     description = "The Rust Programming Language"
-    license = "Apache-2.0"
+    license = "MIT", "Apache-2.0"
     homepage = "https://www.rust-lang.org"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("rust", "language", "rust-language")
+    topics = ("rust", "language", "rust-language", "pre-built")
 
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
-    short_paths = True
 
     def layout(self):
-        basic_layout(self, src_folder="src")
-
-    def requirements(self):
-        self.requires("openssl/[>=1.1 <4]", visible=False)
+        pass
 
     def package_id(self):
         del self.info.settings.compiler
         del self.info.settings.build_type
 
-    def build_requirements(self):
-        self.tool_requires("ninja/1.11.1")
-        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+    @property
+    def _os_name(self):
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            return "Linux"
+        return str(self.settings.os)
 
     @property
-    def _config_toml_path(self):
-        return os.path.join(self.generators_folder, "config.toml")
+    def _rust_download_info(self):
+        arch_name = str(self.settings.arch)
+        return self.conan_data["sources"][self.version].get(self._os_name, {}).get(arch_name)
 
-    def _write_config_toml(self):
-        install_folder = unix_path(self, os.path.join(self.package_folder, "bin"))
-        with open(self._config_toml_path, "w", encoding="utf8") as f:
-            f.write(textwrap.dedent(f"""\
-                [build]
-                docs = false
-                [install]
-                prefix = "{install_folder}"
-                [rust]
-                rpath = false
-            """))
-
-    def generate(self):
-        venv = VirtualBuildEnv(self)
-        venv.generate()
-        deps = PkgConfigDeps(self)
-        deps.generate()
-        self._write_config_toml()
-
-    @property
-    def _python_interpreter(self):
-        if getattr(sys, "frozen", False):
-            return "python"
-        return sys.executable
-
-    @property
-    def _windows_build_triple(self):
-        suffix = "msvc" if is_msvc(self) else "gnu"
-        return f"{str(self.settings.arch)}-pc-windows-{suffix}"
-
-    def _xpy(self, mode):
-        # x.py is the build tool for the rust repository
-        cmd = f"{self._python_interpreter} x.py {mode} --config {self._config_toml_path}"
-        if self.settings.os == "Windows":
-            cmd += f" --build={self._windows_build_triple}"
-        return self.run(cmd, cwd=self.source_folder)
+    def validate(self):
+        if not self._rust_download_info:
+            raise ConanInvalidConfiguration(f"Unsupported OS/arch combination: {self.settings.os}/{self.settings.arch}")
 
     def build(self):
-        self._xpy("build")
+        dl_info = self._rust_download_info
+        file_name = dl_info["url"].rsplit("/", 1)[-1]
+        extension = file_name.split(".", 1)[-1]
+        download(self, **dl_info, filename=file_name)
+
+        if extension == "msi":
+            self.run(f"msiexec /a {file_name} /qn TARGETDIR={self.build_folder}/rust")
+        elif extension == "pkg":
+            self.run(f"xar -xf {file_name}")
+        else:
+            unzip(self, file_name, self.build_folder, strip_root=True)
+
+        os.remove(file_name)
+
 
     def package(self):
-        copy(self, "LICENSE-APACHE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(self, "LICENSE-MIT", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        self._xpy("install")
+        copy(self, "LICENSE-APACHE", self.build_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE-MIT", self.build_folder, os.path.join(self.package_folder, "licenses"))
+        # Merge all Rust components into the package folder
+        for dir in self.build_path.iterdir():
+            if dir.is_dir() and "docs" not in dir.name:
+                self.output.info(f"Copying {dir.name} contents to {self.package_folder}")
+                copy(self, "*", dir, self.package_folder)
+        rm(self, "manifest.in", self.package_folder)
+        rmdir(self, os.path.join(self.package_folder, "libexec"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "etc"))
 
     def package_info(self):
-        self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["dl", "m", "pthread", "rt"]
