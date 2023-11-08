@@ -37,8 +37,6 @@ class LibCoapConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Windows" or is_apple_os(self):
-            raise ConanInvalidConfiguration("Platform is currently not supported")
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
@@ -54,6 +52,9 @@ class LibCoapConan(ConanFile):
             self.requires("mbedtls/3.2.1")
 
     def validate(self):
+        if self.settings.os == "Windows" or is_apple_os(self):
+            raise ConanInvalidConfiguration("Platform is currently not supported")
+
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
         if self.options.dtls_backend in ["gnutls", "tinydtls"]:
