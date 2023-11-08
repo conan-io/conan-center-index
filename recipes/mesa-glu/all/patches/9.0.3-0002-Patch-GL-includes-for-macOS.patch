@@ -31,7 +31,7 @@ index 421f25d..b4bd134 100644
  #define __glu_h__
  
 +#if defined(__APPLE__)
-+#include <OpenGL/gl.h>
++#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
 +#endif
@@ -47,7 +47,7 @@ index ac7ff84..3763b9a 100644
  #include <stdio.h>
  #include <assert.h>
 +#if defined(__APPLE__)
-+#include <OpenGL/gl.h>
++#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
 +#endif
@@ -63,7 +63,7 @@ index ba6868a..60e6e99 100644
  #define _BEZIERPATCHMESH_H
  
 +#if defined(__APPLE__)
-+#include <OpenGL/gl.h>
++#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
 +#endif
@@ -79,7 +79,7 @@ index 8fa4930..9b81f8c 100644
  
  #include "gluos.h"
 +#if defined(__APPLE__)
-+#include <OpenGL/gl.h>
++#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
 +#endif
@@ -95,7 +95,7 @@ index ba64bcd..e358100 100644
  
  #include "gluos.h"
 +#if defined(__APPLE__)
-+#include <OpenGL/gl.h>
++#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
 +#endif
@@ -111,7 +111,7 @@ index 3b72d44..a8bb8f2 100644
  #define __gluglrenderer_h_
  
 +#if defined(__APPLE__)
-+#include <OpenGL/gl.h>
++#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
 +#endif
@@ -127,7 +127,7 @@ index 621e593..c4aa3e1 100644
  #include "basicsurfeval.h"
  #include "bezierPatchMesh.h" //in case output triangles
 +#if defined(__APPLE__)
-+#include <OpenGL/gl.h>
++#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
 +#endif
@@ -143,7 +143,7 @@ index 9d0c82a..8e1359f 100644
  #include <stdlib.h>
  #include <stdio.h>
 +#if defined(__APPLE__)
-+#include <OpenGL/gl.h>
++#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
 +#endif
@@ -160,7 +160,7 @@ index 1b18d73..819edfd 100644
  #ifdef USE_OPTTT
 -	#include <GL/gl.h>
 +  #if defined(__APPLE__)
-+    #include <OpenGL/gl.h>
++    #include <OpenGL/gl3.h>
 +  #else 
 +    #include <GL/gl.h>
 +  #endif
@@ -176,7 +176,7 @@ index 3c92039..5536209 100644
  #include <stdlib.h>
  #include <stdio.h>
 +#if defined(__APPLE__)
-+#include <OpenGL/gl.h>
++#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
 +#endif
@@ -192,7 +192,7 @@ index cb28129..97261ab 100644
  #include <stdlib.h>
  #include <stdio.h>
 +#if defined(__APPLE__)
-+#include <OpenGL/gl.h>
++#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
 +#endif
@@ -208,7 +208,7 @@ index dfdbd4e..87b061f 100644
  #include <stdio.h>
  #include <assert.h>
 +#if defined(__APPLE__)
-+#include <OpenGL/gl.h>
++#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h> 
 +#endif
@@ -224,7 +224,7 @@ index f457b15..905480e 100644
  #include "glimports.h"
  #include "zlassert.h"
 +#if defined(__APPLE__)
-+#include <OpenGL/gl.h>
++#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
 +#endif
@@ -240,7 +240,7 @@ index 051f241..742886a 100644
  #endif
  
 +#if defined(__APPLE__)
-+#include <OpenGL/gl.h>
++#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
 +#endif
@@ -256,7 +256,7 @@ index f4bf883..213fcab 100644
  #include "gluos.h"
  #include <math.h>
 +#if defined(__APPLE__)
-+#include <OpenGL/gl.h>
++#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
 +#endif
@@ -272,7 +272,7 @@ index d88b20f..dfe0771 100644
  #include <stdlib.h>
  #include <math.h>
 +#if defined(__APPLE__)
-+#include <OpenGL/gl.h>
++#include <OpenGL/gl3.h>
 +#else 
  #include <GL/gl.h>
 +#endif
