@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, download, unzip, rm, rmdir
+from conan.tools.files import copy, rm, rmdir, get
 
 
 class RustConan(ConanFile):
@@ -24,35 +24,17 @@ class RustConan(ConanFile):
         del self.info.settings.build_type
 
     @property
-    def _os_name(self):
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            return "Linux"
-        return str(self.settings.os)
-
-    @property
     def _rust_download_info(self):
+        os_name = "Linux" if self.settings.os in ["Linux", "FreeBSD"] else str(self.settings.os)
         arch_name = str(self.settings.arch)
-        return self.conan_data["sources"][self.version].get(self._os_name, {}).get(arch_name)
+        return self.conan_data["sources"][self.version].get(os_name, {}).get(arch_name)
 
     def validate(self):
         if not self._rust_download_info:
             raise ConanInvalidConfiguration(f"Unsupported OS/arch combination: {self.settings.os}/{self.settings.arch}")
 
     def build(self):
-        dl_info = self._rust_download_info
-        file_name = dl_info["url"].rsplit("/", 1)[-1]
-        extension = file_name.split(".", 1)[-1]
-        download(self, **dl_info, filename=file_name)
-
-        if extension == "msi":
-            self.run(f"msiexec /a {file_name} /qn TARGETDIR={self.build_folder}/rust")
-        elif extension == "pkg":
-            self.run(f"xar -xf {file_name}")
-        else:
-            unzip(self, file_name, self.build_folder, strip_root=True)
-
-        os.remove(file_name)
-
+        get(self, **self._rust_download_info, strip_root=True)
 
     def package(self):
         copy(self, "LICENSE-APACHE", self.build_folder, os.path.join(self.package_folder, "licenses"))
@@ -69,6 +51,3 @@ class RustConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.includedirs = []
-
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["dl", "m", "pthread", "rt"]
