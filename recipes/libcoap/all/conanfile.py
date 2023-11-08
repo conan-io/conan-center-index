@@ -90,22 +90,31 @@ class LibCoapConan(ConanFile):
     def package_info(self):
         if self.version == "cci.20200424":
             library_name = "coap"
+            cmake_target_name = "coap"
             pkgconfig_filename = "libcoap-2"
         else:
             library_name = "coap-3"
+            cmake_target_name = "coap-3"
             pkgconfig_filename = "libcoap-3"
 
         if self.options.dtls_backend:
             pkgconfig_filename += f"-{self.options.dtls_backend}"
 
-        self.cpp_info.components["coap"].names["cmake_find_package"] = "coap"
-        self.cpp_info.components["coap"].names["cmake_find_package_multi"] = "coap"
-        self.cpp_info.components["coap"].set_property("pkg_config_name", pkgconfig_filename)
-        self.cpp_info.components["coap"].libs = [library_name]
+        self.cpp_info.set_property("cmake_file_name", "libcoap")
+        self.cpp_info.set_property("cmake_target_name", f"libcoap::{cmake_target_name}")
+        self.cpp_info.set_property("pkg_config_name", pkgconfig_filename)
 
+        # TODO: back to global scope once legacy generators support removed
+        self.cpp_info.components["coap"].libs = [library_name]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["coap"].system_libs = ["pthread"]
             if self.options.dtls_backend == "openssl":
                 self.cpp_info.components["coap"].requires = ["openssl::openssl"]
             elif self.options.dtls_backend == "mbedtls":
                 self.cpp_info.components["coap"].requires = ["mbedtls::mbedtls"]
+
+        # TODO: to remove once legacy generators support removed
+        self.cpp_info.components["coap"].names["cmake_find_package"] = cmake_target_name
+        self.cpp_info.components["coap"].names["cmake_find_package_multi"] = cmake_target_name
+        self.cpp_info.components["coap"].set_property("cmake_target_name", f"libcoap::{cmake_target_name}")
+        self.cpp_info.components["coap"].set_property("pkg_config_name", pkgconfig_filename)
