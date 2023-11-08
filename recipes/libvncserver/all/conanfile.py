@@ -120,6 +120,9 @@ class LibVncServerConan(ConanFile):
         tc.variables["WITH_TESTS"] = False
         tc.variables["WITH_EXAMPLES"] = False
 
+        if self.settings.os == "Windows":
+            tc.variables["PREFER_WIN32THREADS"] = True
+
         tc.variables["WITH_ZLIB"] = self.options.with_zlib
         #tc.variables["WITH_LZO"] = self.options.with_lzo
         tc.variables["WITH_JPEG"] = self.options.with_libjpeg
