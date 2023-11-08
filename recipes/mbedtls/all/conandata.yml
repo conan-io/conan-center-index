@@ -1,4 +1,7 @@
 sources:
+  "3.5.1":
+    url: "https://github.com/Mbed-TLS/mbedtls/archive/mbedtls-3.5.1.tar.gz"
+    sha256: "0da345cda55ec6f6d71afa84cfae55632a16ba0b8b4644f4d0e8a32c9d1117b0"
   "3.5.0":
     url: "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.5.0.tar.gz"
     sha256: "bdee0e3e45bbf360541306cac0cc27e00402c7a46b9bdf2d24787d5107f008f2"
