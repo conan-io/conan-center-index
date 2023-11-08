@@ -3,7 +3,7 @@ import os
 
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import can_run, check_min_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import get, collect_libs, copy
@@ -11,7 +11,7 @@ from conan.tools.scm import Version
 
 from helpers import parse_proto_libraries
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
 
 class GRPCProto(ConanFile):
@@ -32,6 +32,10 @@ class GRPCProto(ConanFile):
         "fPIC": True,
     }
     exports = "helpers.py"
+
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
@@ -56,7 +60,7 @@ class GRPCProto(ConanFile):
     def requirements(self):
        # protobuf symbols are exposed from generated structures
        # https://github.com/conan-io/conan-center-index/pull/16185#issuecomment-1501174215
-        self.requires("protobuf/3.21.9", transitive_headers=True, transitive_libs=True, run=can_run(self))
+        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
         self.requires("googleapis/cci.20230501")
 
     def validate(self):
@@ -71,8 +75,8 @@ class GRPCProto(ConanFile):
             )
 
     def build_requirements(self):
-        if not can_run(self):
-            self.tool_requires("protobuf/3.21.9")
+        if not self._is_legacy_one_profile:
+            self.tool_requires("protobuf/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -80,7 +84,7 @@ class GRPCProto(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if can_run(self):
+        if self._is_legacy_one_profile:
             env = VirtualRunEnv(self)
             env.generate(scope="build")
         tc = CMakeToolchain(self)

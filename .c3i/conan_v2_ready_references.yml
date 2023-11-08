@@ -7,6 +7,7 @@ required_for_references:
 - abseil
 - absent
 - acado
+- accellera-uvm-systemc
 - access_private
 - acl
 - ada
@@ -70,6 +71,7 @@ required_for_references:
 - aws-checksums
 - aws-crt-cpp
 - aws-kvs-pic
+- aws-lambda-cpp
 - aws-libfabric
 - aws-sdk-cpp
 - b2
@@ -109,6 +111,7 @@ required_for_references:
 - breakpad
 - brigand
 - brotli
+- brunsli
 - brynet
 - bshoshany-thread-pool
 - btyacc
@@ -148,6 +151,7 @@ required_for_references:
 - cfitsio
 - cgal
 - cgif
+- cglm
 - cgltf
 - cgns
 - chaiscript
@@ -208,6 +212,7 @@ required_for_references:
 - cppitertools
 - cpprestsdk
 - cpptoml
+- cpptrace
 - cppunit
 - cpputest
 - cppzmq
@@ -220,9 +225,11 @@ required_for_references:
 - crc_cpp
 - create-dmg
 - croncpp
+- crossguid
 - crowcpp-crow
 - crunch
 - cryptopp
+- cryptopp-pem
 - cs_libguarded
 - csm
 - cspice
@@ -258,6 +265,7 @@ required_for_references:
 - debug_assert
 - decimal_for_cpp
 - deco
+- detools
 - di
 - dice-template-library
 - directx-headers
@@ -281,6 +289,7 @@ required_for_references:
 - dtl
 - duckdb
 - duktape
+- dylib
 - eabase
 - earcut
 - eastl
@@ -298,6 +307,7 @@ required_for_references:
 - egl-headers
 - eigen
 - elfio
+- elfutils
 - embag
 - embedded_ringbuf_cpp
 - embree3
@@ -444,6 +454,7 @@ required_for_references:
 - happly
 - harfbuzz
 - hash-library
+- hayai
 - hazelcast-cpp-client
 - hdf4
 - hdf5
@@ -463,9 +474,11 @@ required_for_references:
 - homog2d
 - http_parser
 - hunspell
+- hwdata
 - hwloc
 - hyperscan
 - icecream-cpp
+- iconfontcppheaders
 - icu
 - id3v2lib
 - iir1
@@ -505,6 +518,7 @@ required_for_references:
 - jom
 - jpcre2
 - jpeg-compressor
+- jsbsim
 - jsmn
 - json-c
 - json-schema-validator
@@ -856,6 +870,8 @@ required_for_references:
 - nodesoup
 - norm
 - npcap
+- nsimd
+- nspr
 - nsync
 - ntv2
 - nudb
@@ -1160,6 +1176,8 @@ required_for_references:
 - stringzilla
 - strong_type
 - structopt
+- stx
+- subunit
 - sundials
 - svector
 - svgpp
@@ -1182,6 +1200,7 @@ required_for_references:
 - tcl
 - tclap
 - tcp-wrappers
+- tcsbank-uri-template
 - tensorflow-lite
 - tensorpipe
 - termcap
