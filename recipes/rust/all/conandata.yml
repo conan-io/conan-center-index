@@ -1,4 +1,4 @@
 "sources":
-  "1.64.0":
-    "url": "https://static.rust-lang.org/dist/rustc-1.64.0-src.tar.gz"
-    "sha256": b3cd9f481e1a2901bf6f3808d30c69cc4ea80d93c4cc4e2ed52258b180381205
+  "1.73.0":
+    "url": "https://static.rust-lang.org/dist/rustc-1.73.0-src.tar.gz"
+    "sha256": "96d62e6d1f2d21df7ac8acb3b9882411f9e7c7036173f7f2ede9e1f1f6b1bb3a"
