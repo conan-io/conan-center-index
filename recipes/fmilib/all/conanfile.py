@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import (
-    apply_conandata_patches, export_conandata_patches, get, copy, rmdir)
+    apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir)
 from conan.tools.scm import Version
 from conan.tools.env import VirtualRunEnv
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -14,7 +14,7 @@ required_conan_version = ">=1.53.0"
 
 
 class PackageConan(ConanFile):
-    name = "fmilibrary"
+    name = "fmilib"
     description = "C library for importing FMUs"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
@@ -88,8 +88,9 @@ class PackageConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0046"] = "OLD"
 
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+
+        cd = CMakeDeps(self)
+        cd.generate()
 
         vre = VirtualRunEnv(self)
         vre.generate(scope="build")
@@ -121,6 +122,11 @@ class PackageConan(ConanFile):
 
         cmake = CMake(self)
         cmake.install()
+
+        copy(self, pattern="*.dll", dst=path.join(self.package_folder, "bin"),
+             src=path.join(self.package_folder, "lib"), keep_path=False)
+        rm(self, "*.dll", path.join(self.package_folder, "lib"))
+
         fix_apple_shared_install_name(self)
 
         rmdir(self, path.join(self.package_folder, "doc"))
@@ -138,3 +144,4 @@ class PackageConan(ConanFile):
             self.cpp_info.system_libs.append("shlwapi")
 
         self.cpp_info.resdirs = ["res"]
+        self.cpp_info.set_property("cmake_target_aliases", ["fmilibrary::fmilibrary"])
