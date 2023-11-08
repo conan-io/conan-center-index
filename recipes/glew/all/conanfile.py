@@ -13,7 +13,7 @@ class GlewConan(ConanFile):
     homepage = "http://github.com/nigels-com/glew"
     topics = ("glew", "opengl", "wrangler", "loader", "binding")
     license = "MIT"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
