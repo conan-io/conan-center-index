@@ -109,12 +109,12 @@ class FFTWConan(ConanFile):
         apply_conandata_patches(self)
         for self._current_precision in self._all_precisions:
             cmake = CMake(self)
-            cli_args = [
-                f"-DENABLE_FLOAT={on_off(self._current_precision == SINGLE)}",
-                f"-DENABLE_LONG_DOUBLE={on_off(self._current_precision == LONGDOUBLE)}",
-                f"-DENABLE_QUAD_PRECISION={on_off(self._current_precision == QUAD)}"
-            ]
-            cmake.configure(cli_args=cli_args)
+            variables = {
+                "ENABLE_FLOAT": on_off(self._current_precision == SINGLE),
+                "ENABLE_LONG_DOUBLE": on_off(self._current_precision == LONGDOUBLE),
+                "EENABLE_QUAD_PRECISION": on_off(self._current_precision == QUAD)
+            }
+            cmake.configure(variables=variables)
             cmake.build()
 
     def package(self):
