@@ -1,4 +1,33 @@
-"sources":
+# Hashes can be updated with https://gist.github.com/valgur/f94bc2cf455daf081095f6088551c24e
+sources:
   "1.73.0":
-    "url": "https://static.rust-lang.org/dist/rustc-1.73.0-src.tar.gz"
-    "sha256": "96d62e6d1f2d21df7ac8acb3b9882411f9e7c7036173f7f2ede9e1f1f6b1bb3a"
+    Macos:
+      armv8:
+        url: "https://static.rust-lang.org/dist/rust-1.73.0-aarch64-apple-darwin.pkg"
+        sha256: "6d1432d352f52db0adb20c95c640e020d7aca21d85ba45db8693a614a98df20c"
+      x86_64:
+        url: "https://static.rust-lang.org/dist/rust-1.73.0-x86_64-apple-darwin.pkg"
+        sha256: "bdc59de4e3559979258c5e81efda6f2f865af59a1edd0a2fbe12066d5080cd39"
+    Windows:
+      armv8:
+        url: "https://static.rust-lang.org/dist/rust-1.73.0-aarch64-pc-windows-msvc.msi"
+        sha256: "3833b86594603e505723e22aacf958841fac175e1de498e2a73275040803a4bc"
+      x86:
+        url: "https://static.rust-lang.org/dist/rust-1.73.0-i686-pc-windows-msvc.msi"
+        sha256: "97f44bd341b2fadd252881cb5594d3ebe333ea7e04ff609bb168f809d987eb9c"
+      x86_64:
+        url: "https://static.rust-lang.org/dist/rust-1.73.0-x86_64-pc-windows-msvc.msi"
+        sha256: "f09ad46b79fb92e778755d2c6a5e9d2cb69f61b4bc13f8f8e75ac96279e4dfbe"
+    Linux:
+      armv8:
+        url: "https://static.rust-lang.org/dist/rust-1.73.0-aarch64-unknown-linux-gnu.tar.gz"
+        sha256: "e54d7d886ba413ae573151f668e76ea537f9a44406d3d29598269a4a536d12f6"
+      armv7:
+        url: "https://static.rust-lang.org/dist/rust-1.73.0-armv7-unknown-linux-gnueabihf.tar.gz"
+        sha256: "092b32b82c602c18279d76d9a96763e85030aa62cda64c1bc73fc1f6355bb99c"
+      x86:
+        url: "https://static.rust-lang.org/dist/rust-1.73.0-i686-unknown-linux-gnu.tar.gz"
+        sha256: "6a088acbbda734d27e8b431499f1d746de7781673b88fead3aeae072be1d1a5a"
+      x86_64:
+        url: "https://static.rust-lang.org/dist/rust-1.73.0-x86_64-unknown-linux-gnu.tar.gz"
+        sha256: "aa4cf0b7e66a9f5b7c623d4b340bb1ac2864a5f2c2b981f39f796245dc84f2cb"
