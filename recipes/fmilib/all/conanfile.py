@@ -5,7 +5,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import (
-    apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir)
+    apply_conandata_patches, export_conandata_patches,
+    get, copy, rename, rm, rmdir
+    )
 from conan.tools.scm import Version
 from conan.tools.env import VirtualRunEnv
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -43,6 +45,9 @@ class PackageConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -97,6 +102,11 @@ class PackageConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+
+        # Rename c++ suffix to c to avoid CMake's confusion
+        fmi2_folder = path.join(self.source_folder, "Test", "FMI2")
+        rename(self, path.join(fmi2_folder, "fmi2_import_xml_test.cc"),
+               path.join(fmi2_folder, "fmi2_import_xml_test.c"))
 
         copy(self, "fmiModel*.h", self.dependencies["fmi1"].cpp_info.components["modex"].includedirs[0],
              path.join(self.build_folder, "fmis", "FMI1"))

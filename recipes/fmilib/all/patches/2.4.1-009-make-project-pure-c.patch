@@ -1,0 +1,39 @@
+From dcf9863528e64edcad83ff0f9242b94b14df1705 Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Wed, 8 Nov 2023 12:59:01 +0100
+Subject: [PATCH] Make project pure C
+
+---
+ CMakeLists.txt               | 2 +-
+ Config.cmake/test_fmi2.cmake | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 56ca3ee..01cf54d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -20,7 +20,7 @@ cmake_minimum_required (VERSION 2.8.6 FATAL_ERROR)
+ IF("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+   message(FATAL_ERROR "In-source build is not supported. Please, use an empty directory for building the project.")
+ ENDIF()
+-project (FMILibrary)
++project (FMILibrary LANGUAGES C)
+ set_property(GLOBAL PROPERTY PROPERTYPREDEFINED_TARGETS_FOLDER Global)
+ set(FMILIBRARYHOME ${FMILibrary_SOURCE_DIR})
+ set(FMILIBRARYBUILD ${FMILibrary_BINARY_DIR})
+diff --git a/Config.cmake/test_fmi2.cmake b/Config.cmake/test_fmi2.cmake
+index 2885d4e..e9b49e6 100644
+--- a/Config.cmake/test_fmi2.cmake
++++ b/Config.cmake/test_fmi2.cmake
+@@ -81,7 +81,7 @@ if(FMILIB_TEST_LOCALE)
+     target_compile_definitions(fmi2_xml_parsing_test PRIVATE -DFMILIB_TEST_LOCALE)
+ endif()
+ 
+-add_executable (fmi2_import_xml_test ${RTTESTDIR}/FMI2/fmi2_import_xml_test.cc)
++add_executable (fmi2_import_xml_test ${RTTESTDIR}/FMI2/fmi2_import_xml_test.c)
+ target_link_libraries (fmi2_import_xml_test  ${FMILIBFORTEST})
+ add_executable (fmi2_import_me_test ${RTTESTDIR}/FMI2/fmi2_import_me_test.c)
+ target_link_libraries (fmi2_import_me_test  ${FMILIBFORTEST})
+-- 
+2.30.2
+
