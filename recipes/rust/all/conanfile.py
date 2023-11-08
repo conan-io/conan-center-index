@@ -45,6 +45,7 @@ class RustConan(ConanFile):
                 self.output.info(f"Copying {dir.name} contents to {self.package_folder}")
                 copy(self, "*", dir, self.package_folder)
         rm(self, "manifest.in", self.package_folder)
+        rm(self, "*.pdb", self.package_folder, recursive=True)
         rmdir(self, os.path.join(self.package_folder, "libexec"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "etc"))
