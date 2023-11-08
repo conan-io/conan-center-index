@@ -20,7 +20,7 @@ index 7949e30..24fa8fb 100644
  endif
 -dep_gl = dependency(gl_provider)
 +
-+if host_machine.system() == 'darwin'
++if host_machine.system() == 'darwin' and gl_provider == 'gl'
 +  dep_gl = dependency('appleframeworks', modules : ['OpenGL'])
 +else
 +  dep_gl = dependency(gl_provider)
