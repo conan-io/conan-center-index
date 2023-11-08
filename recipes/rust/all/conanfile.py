@@ -1,59 +1,68 @@
-from pathlib import PureWindowsPath
 import os.path
 import sys
+import textwrap
 
 from conan import ConanFile
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.files import copy, get, rename, replace_in_file
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, unix_path
 
 
 class RustConan(ConanFile):
     name = "rust"
     description = "The Rust Programming Language"
     license = "Apache-2.0"
-    topics = ("rust", "language", "rust-language")
     homepage = "https://www.rust-lang.org"
     url = "https://github.com/conan-io/conan-center-index"
+    topics = ("rust", "language", "rust-language")
+
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "PkgConfigDeps", "VirtualBuildEnv"
+    no_copy_source = True
     short_paths = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+    def requirements(self):
+        self.requires("openssl/[>=1.1 <4]", visible=False)
+
+    def package_id(self):
+        del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def build_requirements(self):
-        self.tool_requires("ninja/1.11.0")
-        self.tool_requires("openssl/3.0.5")
-        self.tool_requires("pkgconf/1.9.3")
+        self.tool_requires("ninja/1.11.1")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/2.0.3")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
-    def _windows_build_triple(self):
-        suffix = "msvc" if is_msvc(self) else "gnu"
-        return f"{str(self.settings.arch)}-pc-windows-{suffix}"
+    def _config_toml_path(self):
+        return os.path.join(self.generators_folder, "config.toml")
 
-    def _configure_sources(self):
-        config_file = os.path.join(self.source_folder, "config.toml.example")
+    def _write_config_toml(self):
+        install_folder = unix_path(self, os.path.join(self.package_folder, "bin"))
+        with open(self._config_toml_path, "w", encoding="utf8") as f:
+            f.write(textwrap.dedent(f"""\
+                [build]
+                docs = false
+                [install]
+                prefix = "{install_folder}"
+                [rust]
+                rpath = false
+            """))
 
-        def unix_path(path):
-            if self.settings.os == "Windows":
-                return PureWindowsPath(path).as_posix()
-            return path
-
-        def config(value, replacement):
-            replace_in_file(
-                self,
-                config_file,
-                value,
-                replacement
-            )
-        install_folder = unix_path(os.path.join(self.package_folder, "bin"))
-        config('#prefix = "/usr/local"', f'prefix = "{install_folder}"')
-        config('#docs = true', 'docs = false')
-        rename(self, config_file, os.path.join(self.source_folder, "config.toml"))
+    def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+        deps = PkgConfigDeps(self)
+        deps.generate()
+        self._write_config_toml()
 
     @property
     def _python_interpreter(self):
@@ -61,29 +70,26 @@ class RustConan(ConanFile):
             return "python"
         return sys.executable
 
-    def _xpy_command(self, mode):
-        cmd = f"{self._python_interpreter} x.py {mode}"
+    @property
+    def _windows_build_triple(self):
+        suffix = "msvc" if is_msvc(self) else "gnu"
+        return f"{str(self.settings.arch)}-pc-windows-{suffix}"
+
+    def _xpy(self, mode):
+        # x.py is the build tool for the rust repository
+        cmd = f"{self._python_interpreter} x.py {mode} --config {self._config_toml_path}"
         if self.settings.os == "Windows":
             cmd += f" --build={self._windows_build_triple}"
-        return cmd
+        return self.run(cmd, cwd=self.source_folder)
 
     def build(self):
-        self._configure_sources()
-        self.run(self._xpy_command("build"), cwd=self.source_folder)
+        self._xpy("build")
 
     def package(self):
-        self.run(self._xpy_command("install"), cwd=self.source_folder)
-        licenses_folder = os.path.join(self.package_folder, "licenses")
-        copy(self, "LICENSE-APACHE", self.source_folder, licenses_folder)
-        copy(self, "LICENSE-MIT", self.source_folder, licenses_folder)
+        copy(self, "LICENSE-APACHE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE-MIT", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        self._xpy("install")
 
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
-        bin_path = os.path.join(self.package_folder, "bin", "bin")
-        self.output.info("Appending PATH environment variable:: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
-
-    def package_id(self):
-        del self.info.settings.compiler
-        del self.info.settings.build_type
