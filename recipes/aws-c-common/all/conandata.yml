@@ -1,4 +1,7 @@
 sources:
+  "0.9.6":
+    url: "https://github.com/awslabs/aws-c-common/archive/v0.9.6.tar.gz"
+    sha256: "5c30cc066a7f05fb8e4728f93aeed0e0e2698197a6df76237ac4e1200977d090"
   "0.9.3":
     url: "https://github.com/awslabs/aws-c-common/archive/v0.9.3.tar.gz"
     sha256: "389eaac7f64d7d5a91ca3decad6810429eb5a65bbba54798b9beffcb4d1d1ed6"
