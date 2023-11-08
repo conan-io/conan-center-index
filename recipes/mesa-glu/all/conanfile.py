@@ -1,5 +1,6 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, load, rm, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
@@ -53,7 +54,11 @@ class MesaGluConan(ConanFile):
         if self._with_libglvnd:
             self.requires("libglvnd/1.7.0", transitive_headers=True)
         else:
-            self.requires("opengl/system", transitive_headers=True, transitive_libs=is_apple_os(self))
+            self.requires("opengl/system", transitive_headers=True)
+
+    def validate(self):
+        if is_apple_os(self):
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}")
 
     def build_requirements(self):
         self.tool_requires("meson/1.2.3")
@@ -94,7 +99,6 @@ class MesaGluConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["GLU"]
