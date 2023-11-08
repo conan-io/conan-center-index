@@ -78,33 +78,45 @@ class Krb5Conan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-        tc = AutotoolsToolchain(self)
-        yes_no = lambda v: "yes" if v else "no"
-        tls_impl = {
-            "openssl": "openssl",
-        }.get(str(self.options.get_safe('with_tls')))
-        tc.configure_args.extend([
-            f"--enable-thread-support={yes_no(self.options.get_safe('thread'))}",
-            f"--enable-dns-for-realm={yes_no(self.options.use_dns_realms)}",
-            f"--enable-pkinit={yes_no(self.options.get_safe('with_tls'))}",
-            f"--with-crypto-impl={(tls_impl or 'builtin')}",
-            f"--with-spake-openssl={yes_no(self.options.get_safe('with_tls') == 'openssl')}",
-            "--disable-nls",
-            "--disable-rpath",
-            "--without-libedit",
-            "--without-readline",
-            "--with-system-verto",
-            # "--with-system-et}",
-            # "--with-system-ss}",
-            f"--with-tcl={(self.deps_cpp_info['tcl'].rootpath if self.options.get_safe('with_tcl') else 'no')}",
-            ])
-        tc.generate()
-        deps = AutotoolsDeps(self)
-        deps.generate()
-        pkg = PkgConfigDeps(self)
-        pkg.generate()
+        if is_msvc(self):
+            vcvars = VCVars(self)
+            vcvars.generate()
+
+            deps = NMakeDeps(self)
+            deps.generate()
+
+            tc = NMakeToolchain(self)
+            env = tc.environment()
+            env.define("KRB_INSTALL_DIR", self.package_folder)
+            tc.generate(env)
+        else:   
+            env = VirtualBuildEnv(self)
+            env.generate()
+            tc = AutotoolsToolchain(self)
+            yes_no = lambda v: "yes" if v else "no"
+            tls_impl = {
+                "openssl": "openssl",
+            }.get(str(self.options.get_safe('with_tls')))
+            tc.configure_args.extend([
+                f"--enable-thread-support={yes_no(self.options.get_safe('thread'))}",
+                f"--enable-dns-for-realm={yes_no(self.options.use_dns_realms)}",
+                f"--enable-pkinit={yes_no(self.options.get_safe('with_tls'))}",
+                f"--with-crypto-impl={(tls_impl or 'builtin')}",
+                f"--with-spake-openssl={yes_no(self.options.get_safe('with_tls') == 'openssl')}",
+                "--disable-nls",
+                "--disable-rpath",
+                "--without-libedit",
+                "--without-readline",
+                "--with-system-verto",
+                # "--with-system-et}",
+                # "--with-system-ss}",
+                f"--with-tcl={(self.deps_cpp_info['tcl'].rootpath if self.options.get_safe('with_tcl') else 'no')}",
+                ])
+            tc.generate()
+            deps = AutotoolsDeps(self)
+            deps.generate()
+            pkg = PkgConfigDeps(self)
+            pkg.generate()
 
     def requirements(self):
         # if self.settings.os != "Windows":
@@ -137,19 +149,6 @@ class Krb5Conan(ConanFile):
         autotools.configure(os.path.join(self.source_folder,"src"))
         autotools.make()
 
-    @contextmanager
-    def _msvc_context(self):
-        vsvars = VCVars(self)
-        vsvars.generate()
-
-        deps = NMakeDeps(self)
-        deps.generate()
-
-        tc = NMakeToolchain(self)
-        env = tc.environment()
-        env.define("KRB_INSTALL_DIR", self.package_folder)
-        tc.generate(env)
-
     @property
     def _nmake_args(self):
         nmake_args = []
@@ -163,9 +162,8 @@ class Krb5Conan(ConanFile):
 
     def _build_msvc(self):
         with chdir(self, os.path.join(self.source_folder, "src")):
-            with self._msvc_context():
-                self.run("nmake -f Makefile.in prep-windows")
-                self.run("nmake {}".format(" ".join(self._nmake_args)))
+            self.run("nmake -f Makefile.in prep-windows")
+            self.run("nmake {}".format(" ".join(self._nmake_args)))
 
     def build(self):
         if not self.options.shared:
@@ -200,8 +198,7 @@ class Krb5Conan(ConanFile):
         copy(self, "NOTICE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "src")):
-                with self._msvc_context():
-                    self.run("nmake install {}".format(" ".join(self._nmake_args)))
+                self.run("nmake install {}".format(" ".join(self._nmake_args)))
 
             for pdb in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
                 os.unlink(pdb)
