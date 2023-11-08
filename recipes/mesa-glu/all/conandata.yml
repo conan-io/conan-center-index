@@ -8,3 +8,6 @@ patches:
       patch_description: "Only add the GL dependency as a requires when it is a pkgconfig dep"
       patch_type: "portability"
       patch_source: "https://gitlab.freedesktop.org/mesa/glu/-/merge_requests/12"
+    - patch_file: "patches/9.0.3-0002-Patch-GL-includes-for-macOS.patch"
+      patch_description: "Patch the GL includes to work on macOS"
+      patch_type: "portability"
