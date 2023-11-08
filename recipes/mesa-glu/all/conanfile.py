@@ -11,7 +11,7 @@ import os
 required_conan_version = ">=1.53.0"
 
 
-class GluConan(ConanFile):
+class MesaGluConan(ConanFile):
     name = "mesa-glu"
     description = "Mesa's implementation of the OpenGL utility library"
     license = ("SGI-B-1.1", "SGI-B-2.0", "MIT")
