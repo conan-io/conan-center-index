@@ -102,6 +102,9 @@ class LibCoapConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "libcoap")
         self.cpp_info.set_property("cmake_target_name", f"libcoap::{cmake_target_name}")
+        if cmake_target_name != "coap":
+            # Old target, still provided to not break users
+            self.cpp_info.set_property("cmake_target_aliases", ["libcoap::coap"])
         self.cpp_info.set_property("pkg_config_name", pkgconfig_filename)
 
         # TODO: back to global scope once legacy generators support removed
