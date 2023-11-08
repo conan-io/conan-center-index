@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, apply_conandata_patches, export_conandata_patches
 import os
 
 required_conan_version = ">=1.53.0"
@@ -52,6 +52,9 @@ class LibVncServerConan(ConanFile):
         "with_xcb": True,
     }
     
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Windows"]:
             raise ConanInvalidConfiguration(f"conan is not yet supporting {self.ref} on {self.settings.os}.")
@@ -135,6 +138,7 @@ class LibVncServerConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
