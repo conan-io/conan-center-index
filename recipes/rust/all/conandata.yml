@@ -3,21 +3,21 @@ sources:
   "1.73.0":
     Macos:
       armv8:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-aarch64-apple-darwin.pkg"
-        sha256: "6d1432d352f52db0adb20c95c640e020d7aca21d85ba45db8693a614a98df20c"
+        url: "https://static.rust-lang.org/dist/rust-1.73.0-aarch64-apple-darwin.tar.gz"
+        sha256: "9c96e4c57328fb438ee2d87aa75970ce89b4426b49780ccb3c16af0d7c617cc6"
       x86_64:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-x86_64-apple-darwin.pkg"
-        sha256: "bdc59de4e3559979258c5e81efda6f2f865af59a1edd0a2fbe12066d5080cd39"
+        url: "https://static.rust-lang.org/dist/rust-1.73.0-x86_64-apple-darwin.tar.gz"
+        sha256: "ece9646bb153d4bc0f7f1443989de0cbcd8989a7d0bf3b7fb9956e1223954f0c"
     Windows:
       armv8:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-aarch64-pc-windows-msvc.msi"
-        sha256: "3833b86594603e505723e22aacf958841fac175e1de498e2a73275040803a4bc"
+        url: "https://static.rust-lang.org/dist/rust-1.73.0-aarch64-pc-windows-msvc.tar.gz"
+        sha256: "ea36179b1da415d8c4756885b698b5ba14e77c092bf7bfff5e7fdfbc899ffd78"
       x86:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-i686-pc-windows-msvc.msi"
-        sha256: "97f44bd341b2fadd252881cb5594d3ebe333ea7e04ff609bb168f809d987eb9c"
+        url: "https://static.rust-lang.org/dist/rust-1.73.0-i686-pc-windows-msvc.tar.gz"
+        sha256: "985dcae82e154e662d78a03df637339b679120bb92acd34401e9d33c5b1156dc"
       x86_64:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-x86_64-pc-windows-msvc.msi"
-        sha256: "f09ad46b79fb92e778755d2c6a5e9d2cb69f61b4bc13f8f8e75ac96279e4dfbe"
+        url: "https://static.rust-lang.org/dist/rust-1.73.0-x86_64-pc-windows-msvc.tar.gz"
+        sha256: "d6b0db0acc5ffef638ffb7bfc0497381ffa41d5935a1115230c34db6c6f1ab20"
     Linux:
       armv8:
         url: "https://static.rust-lang.org/dist/rust-1.73.0-aarch64-unknown-linux-gnu.tar.gz"
