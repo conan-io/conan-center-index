@@ -64,6 +64,8 @@ class YamlCppConan(ConanFile):
         if is_msvc(self):
             tc.variables["YAML_MSVC_SHARED_RT"] = not is_msvc_static_runtime(self)
             tc.preprocessor_definitions["_NOEXCEPT"] = "noexcept"
+        if self.conf.get("user.library.no_debug_suffix", default=False, check_type=bool):
+            tc.variables['CMAKE_DEBUG_POSTFIX'] = ''
         tc.generate()
 
     def build(self):
