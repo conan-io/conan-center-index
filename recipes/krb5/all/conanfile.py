@@ -1,11 +1,10 @@
 from conan import ConanFile
-from conans import tools
 from conan.tools.env import VirtualBuildEnv
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, rmdir, chdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain,AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, VCVars, NMakeDeps, NMakeToolchain
 from contextlib import contextmanager
 import glob
 import os
@@ -129,7 +128,7 @@ class Krb5Conan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def _build_autotools(self):
-        tools.save("skiptests", "")
+        #tools.save("skiptests", "")
 
         # with chdir(self, os.path.join(self.source_folder,"src")):
         #     replace_in_file(self,"aclocal.m4", "AC_CONFIG_AUX_DIR(", "echo \"Hello world\"\n\nAC_CONFIG_AUX_DIR(")
@@ -140,12 +139,16 @@ class Krb5Conan(ConanFile):
 
     @contextmanager
     def _msvc_context(self):
-        env = {
-            "KRB_INSTALL_DIR": self.package_folder,
-        }
-        with tools.environment_append(env):
-            with tools.vcvars(self.settings):
-                yield
+        vsvars = VCVars(self)
+        vsvars.generate()
+
+        deps = NMakeDeps(self)
+        deps.generate()
+
+        tc = NMakeToolchain(self)
+        env = tc.environment()
+        env.define("KRB_INSTALL_DIR", self.package_folder)
+        tc.generate(env)
 
     @property
     def _nmake_args(self):
@@ -161,8 +164,8 @@ class Krb5Conan(ConanFile):
     def _build_msvc(self):
         with chdir(self, os.path.join(self.source_folder, "src")):
             with self._msvc_context():
-                self.run("nmake -f Makefile.in prep-windows", run_environment=True, win_bash=tools.os_info.is_windows)
-                self.run("nmake {}".format(" ".join(self._nmake_args)), run_environment=True, win_bash=tools.os_info.is_windows)
+                self.run("nmake -f Makefile.in prep-windows")
+                self.run("nmake {}".format(" ".join(self._nmake_args)))
 
     def build(self):
         if not self.options.shared:
@@ -198,7 +201,7 @@ class Krb5Conan(ConanFile):
         if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "src")):
                 with self._msvc_context():
-                    self.run("nmake install {}".format(" ".join(self._nmake_args)), run_environment=True, win_bash=tools.os_info.is_windows)
+                    self.run("nmake install {}".format(" ".join(self._nmake_args)))
 
             for pdb in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
                 os.unlink(pdb)
