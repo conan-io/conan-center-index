@@ -100,8 +100,6 @@ class LibrsvgConan(ConanFile):
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
-        deps = AutotoolsDeps(self)
-        deps.generate()
 
         if is_msvc(self):
             env = Environment()
