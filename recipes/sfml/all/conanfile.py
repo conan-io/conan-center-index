@@ -147,6 +147,9 @@ class SfmlConan(ConanFile):
         def ws2_32():
             return ["ws2_32"] if self.settings.os == "Windows" else []
 
+        def dl():
+            return ["dl"] if self.settings.os == "Linux" else []
+
         def libudev():
             return ["libudev::libudev"] if self.settings.os == "Linux" else []
 
@@ -235,7 +238,7 @@ class SfmlConan(ConanFile):
                     "target": "sfml-window",
                     "libs": [f"sfml-window{suffix}"],
                     "requires": ["system"] + opengl() + xorg() + libudev(),
-                    "system_libs": gdi32() + winmm() + usbhid() + android() + opengles_android(),
+                    "system_libs": dl() + gdi32() + winmm() + usbhid() + android() + opengles_android(),
                     "frameworks": foundation() + appkit() + iokit() + carbon() +
                                   uikit() + coregraphics() + quartzcore() +
                                   coreservices() + coremotion() + opengles_ios(),
