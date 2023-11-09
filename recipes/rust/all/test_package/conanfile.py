@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout
+from conan.tools.microsoft import VCVars, is_msvc
 
 
 class TestPackageConan(ConanFile):
@@ -15,6 +16,10 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
+
+    def generate(self):
+        if is_msvc(self):
+            VCVars(self).generate()
 
     def build(self):
         if can_run(self):
