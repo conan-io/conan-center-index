@@ -25,9 +25,14 @@ class RustConan(ConanFile):
 
     @property
     def _rust_download_info(self):
-        os_name = "Linux" if self.settings.os in ["Linux", "FreeBSD"] else str(self.settings.os)
+        os_name = str(self.settings.os)
         arch_name = str(self.settings.arch)
-        return self.conan_data["sources"][self.version].get(os_name, {}).get(arch_name)
+        version_info = self.conan_data["sources"][self.version]
+        if os_name == "Windows":
+            compiler_name = "gcc" if self.settings.compiler == "gcc" else "msvc"
+            return version_info[os_name][compiler_name].get(arch_name)
+        else:
+            return version_info.get(os_name, {}).get(arch_name)
 
     def validate(self):
         if not self._rust_download_info:
