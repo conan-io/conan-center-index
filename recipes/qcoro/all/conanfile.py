@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
@@ -126,6 +127,8 @@ class QCoroConan(ConanFile):
         self.cpp_info.components["qcoro-network"].set_property("cmake_target_name", "QCoro::Network")
         self.cpp_info.components["qcoro-network"].libs = ["QCoro6Network"]
         self.cpp_info.components["qcoro-network"].requires = ["qt::qtNetwork"]
+        if is_apple_os(self):
+            self.cpp_info.components["qcoro-network"].frameworks = ["CFNetwork"]
 
         if self.dependencies["qt"].options.with_dbus:
             self.cpp_info.components["qcoro-dbus"].set_property("cmake_target_name", "QCoro::DBus")
