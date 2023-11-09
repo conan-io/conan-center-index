@@ -1,5 +1,6 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, load, rm, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
@@ -52,8 +53,10 @@ class MesaGluConan(ConanFile):
         # The glu headers include OpenGL headers.
         if self._with_libglvnd:
             self.requires("libglvnd/1.7.0", transitive_headers=True)
-        elif not is_apple_os(self):
-            self.requires("opengl/system", transitive_headers=True)
+
+    def validate(self):
+        if is_apple_os(self) or self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}")
 
     def build_requirements(self):
         self.tool_requires("meson/1.2.3")
@@ -94,11 +97,7 @@ class MesaGluConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["GLU"]
         self.cpp_info.set_property("pkg_config_name", "glu")
-        if is_apple_os(self):
-            self.cpp_info.defines.append("GL_SILENCE_DEPRECATION=1")
-            self.cpp_info.frameworks.append("OpenGL")
