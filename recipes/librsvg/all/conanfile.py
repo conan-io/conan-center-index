@@ -5,10 +5,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import cmake_layout
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -68,6 +68,10 @@ class LibrsvgConan(ConanFile):
         self.requires("gdk-pixbuf/2.42.10", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
+        if is_msvc(self):
+            # Not impossible, but building with MSVC is very fragile
+            # https://gitlab.gnome.org/GNOME/librsvg/-/blob/main/win32/MSVC-Builds.md
+            raise ConanInvalidConfiguration("Building librsvg with MSVC is currently not supported")
         if not self.dependencies["pango"].options.with_cairo:
             raise ConanInvalidConfiguration("librsvg requires -o pango/*:with_cairo=True")
         if not self.dependencies["pango"].options.with_freetype:
@@ -81,8 +85,6 @@ class LibrsvgConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        if is_msvc(self):
-            self.tool_requires("automake/1.16.5")
         self.tool_requires("rust/1.73.0")
         self.tool_requires("gdk-pixbuf/<host_version>")
 
@@ -106,21 +108,6 @@ class LibrsvgConan(ConanFile):
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
-
-        if is_msvc(self):
-            env = Environment()
-            automake_conf = self.dependencies.build["automake"].conf_info
-            compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
-            ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
-            env.define("CC", f"{compile_wrapper} cl -nologo")
-            env.define("CXX", f"{compile_wrapper} cl -nologo")
-            env.define("LD", "link -nologo")
-            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
-            env.define("NM", "dumpbin -symbols")
-            env.define("OBJDUMP", ":")
-            env.define("RANLIB", ":")
-            env.define("STRIP", ":")
-            env.vars(self).save_script("conanbuild_msvc")
 
     def _patch_sources(self):
         # Fix freetype version check, which uses a different versioning format
