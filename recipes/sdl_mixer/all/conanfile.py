@@ -63,7 +63,7 @@ class SDLMixerConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("sdl/2.0.20")
+        self.requires("sdl/2.28.5")
         if self.options.flac:
             self.requires("flac/1.3.3")
         if self.options.mpg123:

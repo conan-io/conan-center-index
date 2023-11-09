@@ -117,7 +117,7 @@ class ogrecmakeconan(ConanFile):
         self.requires("openssl/1.1.1o", override=True)
         self.requires("xorg/system")
         self.requires("glu/system")
-        self.requires("sdl/2.0.20")
+        self.requires("sdl/2.28.5")
         if self.options.glsupport_use_egl and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("egl/system")
         else:

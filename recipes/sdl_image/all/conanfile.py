@@ -96,7 +96,7 @@ class SDLImageConan(ConanFile):
 
     def requirements(self):
         # Headers are exposed https://github.com/conan-io/conan-center-index/pull/16167#issuecomment-1508347351
-        self.requires("sdl/2.28.3", transitive_headers=True)
+        self.requires("sdl/2.28.5", transitive_headers=True)
         if self.options.with_libtiff:
             self.requires("libtiff/4.6.0")
         if self.options.with_libjpeg:
