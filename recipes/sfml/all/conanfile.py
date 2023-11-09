@@ -148,7 +148,7 @@ class SfmlConan(ConanFile):
             return ["ws2_32"] if self.settings.os == "Windows" else []
 
         def dl():
-            return ["dl"] if self.settings.os == "Linux" else []
+            return ["dl"] if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "2.6.0" else []
 
         def libudev():
             return ["libudev::libudev"] if self.settings.os == "Linux" else []
