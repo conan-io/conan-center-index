@@ -55,6 +55,10 @@ class fastgltf(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        if Version(self.version) <= "0.6.0":
+            del self.options.disable_custom_memory_pool
+            del self.options.use_64bit_float
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -82,9 +86,9 @@ class fastgltf(ConanFile):
         tc.variables["FASTGLTF_DOWNLOAD_SIMDJSON"] = False
         if self.options.enable_small_vector:
             tc.variables["FASTGLTF_USE_SMALL_VECTOR"] = True
-        if self.options.disable_custom_memory_pool:
+        if self.options.get_safe("disable_custom_memory_pool"):
             tc.variables["FASTGLTF_DISABLE_CUSTOM_MEMORY_POOL"] = True
-        if self.options.use_64bit_float:
+        if self.options.get_safe("use_64bit_float"):
             tc.variables["FASTGLTF_USE_64BIT_FLOAT"] = True
         tc.generate()
         deps = CMakeDeps(self)
