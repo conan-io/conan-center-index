@@ -301,6 +301,7 @@ class DCMTKConan(ConanFile):
             "dcmjpls" : ["ofstd", "oflog", "dcmdata", "dcmimgle", "dcmimage", "dcmtkcharls"],
             "dcmtkcharls": ["ofstd", "oflog"],
             "dcmtls"  : ["ofstd", "dcmdata", "dcmnet"] + openssl(),
+            "dcmect"  : ["ofstd", "dcmdata", "dcmfg", "dcmiod", "oflog"],
             "dcmnet"  : ["ofstd", "oflog", "dcmdata"] + tcpwrappers(),
             "dcmsr"   : ["ofstd", "oflog", "dcmdata", "dcmimgle", "dcmimage"] + xml2(),
             "cmr"     : ["dcmsr"],
