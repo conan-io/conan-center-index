@@ -11,13 +11,7 @@ from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 import os
 
-
 required_conan_version = ">=1.53.0"
-
-#
-# INFO: Please, remove all comments before pushing your PR!
-#
-
 
 class VerySimpleSmtpsConan(ConanFile):
     name = "very-simple-smtps"
