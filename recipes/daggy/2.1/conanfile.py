@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.files import copy, get
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -16,7 +16,7 @@ class DaggyConan(ConanFile):
     description = "Data Aggregation Utility and C/C++ developer library for data streams catching"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://daggy.dev"
+    homepage = "https://github.com/synacker/daggy"
     topics = ("streaming", "qt", "monitoring", "process", "stream-processing", "extensible", "serverless-framework", "aggregation", "ssh2", "crossplatform", "ssh-client")
 
     package_type = "library"
@@ -37,11 +37,11 @@ class DaggyConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 17
 
     @property
-    def _minimum_compilers_version(self):
+    def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16",
             "msvc": "192",
@@ -50,9 +50,6 @@ class DaggyConan(ConanFile):
             "apple-clang": "10",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -60,7 +57,6 @@ class DaggyConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-
         self.options["qt"].shared = True
 
     def layout(self):
@@ -69,30 +65,19 @@ class DaggyConan(ConanFile):
     def requirements(self):
         self.requires("qt/6.6.0")
         self.requires("kainjow-mustache/4.1")
-
         if self.options.with_yaml:
             self.requires("yaml-cpp/0.8.0")
-
         if self.options.with_ssh2:
             self.requires("libssh2/1.11.0")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warning(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
-        else:
-            if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration(
-                    "{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                        self.name,
-                        self._minimum_cpp_standard,
-                        self.settings.compiler,
-                        self.settings.compiler.version,
-                    )
-                )
-
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
         if not self.dependencies["qt"].options.shared:
             raise ConanInvalidConfiguration("Shared Qt lib is required.")
 
@@ -124,18 +109,14 @@ class DaggyConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        copy(self, "LICENSE",
-             src=self.source_folder,
-             dst=os.path.join(self.package_folder, "licenses"),
-             keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["DaggyCore"]
