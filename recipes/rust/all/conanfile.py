@@ -40,10 +40,10 @@ class RustConan(ConanFile):
         copy(self, "LICENSE-APACHE", self.build_folder, os.path.join(self.package_folder, "licenses"))
         copy(self, "LICENSE-MIT", self.build_folder, os.path.join(self.package_folder, "licenses"))
         # Merge all Rust components into the package folder
-        for dir in self.build_path.iterdir():
-            if dir.is_dir() and "docs" not in dir.name:
-                self.output.info(f"Copying {dir.name} contents to {self.package_folder}")
-                copy(self, "*", dir, self.package_folder)
+        for path in self.build_path.iterdir():
+            if path.is_dir() and "docs" not in path.name:
+                self.output.info(f"Copying {path.name} contents to {self.package_folder}")
+                copy(self, "*", path, self.package_folder)
         rm(self, "manifest.in", self.package_folder)
         rm(self, "*.pdb", self.package_folder, recursive=True)
         rmdir(self, os.path.join(self.package_folder, "libexec"))
