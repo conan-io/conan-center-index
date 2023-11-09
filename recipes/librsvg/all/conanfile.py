@@ -1,12 +1,13 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import cmake_layout
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, replace_in_file, rmdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.microsoft import is_msvc, unix_path
 
 required_conan_version = ">=1.53.0"
@@ -37,6 +38,8 @@ class LibrsvgConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        self.options["pango"].with_cairo = True
+        self.options["pango"].with_freetype = True
 
     def configure(self):
         if self.options.shared:
@@ -65,7 +68,10 @@ class LibrsvgConan(ConanFile):
         self.requires("gdk-pixbuf/2.42.10", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        pass
+        if not self.dependencies["pango"].options.with_cairo:
+            raise ConanInvalidConfiguration("librsvg requires -o pango/*:with_cairo=True")
+        if not self.dependencies["pango"].options.with_freetype:
+            raise ConanInvalidConfiguration("librsvg requires -o pango/*:with_freetype=True")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
