@@ -23,7 +23,7 @@ index 7949e30..650f481 100644
 +if gl_provider == 'gl' and host_machine.system() == 'darwin'
 +  dep_gl = dependency('appleframeworks', modules : ['OpenGL'])
 +elif gl_provider == 'gl' and host_machine.system() == 'windows'
-+  dep_gl = cc.find_library('opengl32', required : false)
++  dep_gl = meson.get_compiler('c').find_library('opengl32', required : false)
 +else
 +  dep_gl = dependency(gl_provider)
 +endif
