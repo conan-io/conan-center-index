@@ -52,3 +52,9 @@ class RustConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.includedirs = []
+
+        # https://doc.rust-lang.org/cargo/reference/environment-variables.html
+        self.buildenv_info.define_path("CARGO", os.path.join(self.package_folder, "bin", "cargo"))
+        self.buildenv_info.define_path("RUSTC", os.path.join(self.package_folder, "bin", "rustc"))
+        self.buildenv_info.define_path("RUSTDOC", os.path.join(self.package_folder, "bin", "rustdoc"))
+        self.buildenv_info.define_path("RUSTFMT", os.path.join(self.package_folder, "bin", "rustfmt"))
