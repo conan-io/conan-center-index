@@ -1,6 +1,7 @@
-#include <iostream>
-#include <cstdlib>
 #include <libnfnetlink/libnfnetlink.h>
+
+#include <cstdlib>
+#include <iostream>
 
 int main() {
     struct nfnl_handle *nl = nfnl_open();

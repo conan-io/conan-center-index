@@ -1,4 +1,18 @@
 versions:
+  "20.38.6":
+    folder: all
+  "20.38.4":
+    folder: all
+  "20.38.3":
+    folder: all
+  "20.38.0":
+    folder: all
+  "20.37.3":
+    folder: all
+  "20.37.2":
+    folder: all
+  "20.37.1":
+    folder: all
   "20.37.0":
     folder: all
   "20.36.0":
@@ -12,8 +26,4 @@ versions:
   "20.35.7":
     folder: all
   "20.34.0":
-    folder: all
-  "20.33.0":
-    folder: all
-  "20.32.1":
     folder: all

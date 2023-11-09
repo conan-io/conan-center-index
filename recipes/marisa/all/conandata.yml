@@ -5,4 +5,3 @@ sources:
 patches:
   "0.2.6":
     - patch_file: "patches/0001-add-cmake.patch"
-      base_path: "source_subfolder"

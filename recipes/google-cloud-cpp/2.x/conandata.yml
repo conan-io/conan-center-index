@@ -22,6 +22,10 @@ patches:
       patch_source: https://github.com/googleapis/google-cloud-cpp/pull/10636
       patch_description: "Fix problems with INTERFACE proto libraries"
       patch_type: backport
+    - patch_file: "patches/2.5.0/006-cannot-use-or-with-windows.patch"
+      patch_source: https://github.com/googleapis/google-cloud-cpp/pull/10612
+      patch_description: "MSVC does not like `or` spelling for `||`"
+      patch_type: backport
   "2.12.0":
     - patch_file: "patches/2.12.0/001-use-conan-msvc-runtime.patch"
       patch_description: "Let Conan select the MSVC runtime"

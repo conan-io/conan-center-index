@@ -44,8 +44,8 @@ class LibgeotiffConan(ConanFile):
 
     def requirements(self):
         # libgeotiff/include/xtiffio.h includes libtiff/include/tiffio.h
-        self.requires("libtiff/4.5.1", transitive_headers=True, transitive_libs=True)
-        self.requires("proj/9.1.1")
+        self.requires("libtiff/4.6.0", transitive_headers=True, transitive_libs=True)
+        self.requires("proj/9.3.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

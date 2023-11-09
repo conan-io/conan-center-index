@@ -34,6 +34,14 @@ class OpenblasConan(ConanFile):
         "dynamic_arch": False,
     }
     short_paths = True
+    package_type = "library"
+
+    @property
+    def _fortran_compiler(self):
+        comp_exe = self.conf.get("tools.build:compiler_executables")
+        if comp_exe and 'fortran' in comp_exe:
+            return comp_exe["fortran"]
+        return None
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,7 +55,7 @@ class OpenblasConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
-    def source(self): 
+    def source(self):
         get(self,
             **self.conan_data["sources"][self.version],
             strip_root=True,
@@ -75,9 +83,19 @@ class OpenblasConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
-        if self.options.build_lapack:
-            self.output.warn("Building with lapack support requires a Fortran compiler.")
         tc.cache_variables["NOFORTRAN"] = not self.options.build_lapack
+        # This checks explicit user-specified fortran compiler
+        if self.options.build_lapack:
+            if not self._fortran_compiler:
+                if Version(self.version) < "0.3.24":
+                    self.output.warning(
+                        "Building with LAPACK support requires a Fortran compiler.")
+                else:
+                    tc.cache_variables["C_LAPACK"] = True
+                    tc.cache_variables["NOFORTRAN"] = True
+                    self.output.info(
+                        "Building LAPACK without Fortran compiler")
+
         tc.cache_variables["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
         tc.cache_variables["DYNAMIC_ARCH"] = self.options.dynamic_arch
         tc.cache_variables["USE_THREAD"] = self.options.use_thread
@@ -85,9 +103,8 @@ class OpenblasConan(ConanFile):
         # Required for safe concurrent calls to OpenBLAS routines
         tc.cache_variables["USE_LOCKING"] = not self.options.use_thread
 
-        tc.cache_variables[
-            "MSVC_STATIC_CRT"
-        ] = False  # don't, may lie to consumer, /MD or /MT is managed by conan
+        # don't, may lie to consumer, /MD or /MT is managed by conan
+        tc.cache_variables["MSVC_STATIC_CRT"] = False
 
         # This is a workaround to add the libm dependency on linux,
         # which is required to successfully compile on older gcc versions.
@@ -96,14 +113,15 @@ class OpenblasConan(ConanFile):
         tc.generate()
 
     def build(self):
-        if Version(self.version) >= "0.3.12":
-            search = """message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")"""
-            replace = (
-                """message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")"""
-            )
-        else:
-            search = "enable_language(Fortran)"
-            replace = """include(CheckLanguage)
+        if Version(self.version) < "0.3.21":
+            if Version(self.version) >= "0.3.12":
+                search = """message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")"""
+                replace = (
+                    """message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")"""
+                )
+            else:
+                search = "enable_language(Fortran)"
+                replace = """include(CheckLanguage)
 check_language(Fortran)
 if(CMAKE_Fortran_COMPILER)
   enable_language(Fortran)
@@ -113,11 +131,12 @@ else()
   set (NO_LAPACK 1)
 endif()"""
 
-        replace_in_file(self,
-            os.path.join(self.source_folder, self.source_folder, "cmake", "f_check.cmake"),
-            search,
-            replace,
-        )
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, self.source_folder, "cmake", "f_check.cmake"),
+                search,
+                replace,
+            )
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -125,6 +144,7 @@ endif()"""
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = self._configure_cmake()
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
@@ -137,7 +157,9 @@ endif()"""
         self.cpp_info.set_property("cmake_file_name", "OpenBLAS")
         self.cpp_info.set_property("cmake_target_name", "OpenBLAS::OpenBLAS")
         self.cpp_info.set_property("pkg_config_name", "openblas")
-        cmake_component_name = "pthread" if self.options.use_thread else "serial" # TODO: ow to model this in CMakeDeps?
+        cmake_component_name = "pthread" if self.options.use_thread else "serial"  # TODO: how to model this in CMakeDeps?
+        self.cpp_info.components["openblas_component"].set_property(
+            "cmake_target_name", "OpenBLAS::" + cmake_component_name)  # 'pthread' causes issues without namespace
         self.cpp_info.components["openblas_component"].set_property("pkg_config_name", "openblas")
         self.cpp_info.components["openblas_component"].includedirs.append(
             os.path.join("include", "openblas")
