@@ -4,11 +4,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
 
 class DaggyConan(ConanFile):
@@ -17,7 +17,7 @@ class DaggyConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/synacker/daggy"
-    topics = ("streaming", "qt", "monitoring", "process", "stream-processing", "extensible", "serverless-framework", "aggregation", "ssh2", "crossplatform", "ssh-client")
+    topics = ("streaming", "qt", "monitoring", "process", "stream-processing", "extensible", "serverless-framework", "aggregation", "ssh2", "cross-platform", "ssh-client")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -63,7 +63,8 @@ class DaggyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/6.6.0")
+        # Qt is used in the public headers
+        self.requires("qt/6.6.0", transitive_headers=True, transitive_libs=True)
         self.requires("kainjow-mustache/4.1")
         if self.options.with_yaml:
             self.requires("yaml-cpp/0.8.0")
@@ -83,6 +84,7 @@ class DaggyConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21 <4]")
+        self.tool_requires("qt/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -90,6 +92,11 @@ class DaggyConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
+        # Required for Qt's moc
+        env = VirtualRunEnv(self)
+        env.generate(scope="build")
+
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_CXX_STANDARD"] = 17
         tc.variables["CMAKE_CXX_STANDARD_REQUIRED"] = True
@@ -110,7 +117,7 @@ class DaggyConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "src"))
         cmake.build()
 
     def package(self):
