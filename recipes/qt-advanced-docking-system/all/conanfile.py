@@ -37,8 +37,12 @@ class QtADS(ConanFile):
     }
 
     @property
+    def _qt_major(self):
+        return Version(self.dependencies["qt"].ref.version).major
+
+    @property
     def _min_cppstd(self):
-        if Version(self.dependencies["qt"].ref.version) >= 6:
+        if self._qt_major >= 6:
             return 17
         else:
             return 14
@@ -118,12 +122,17 @@ class QtADS(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        if Version(self.version) >= 4:
+            lib_name = f"qt{self._qt_major}advanceddocking"
+            self.cpp_info.includedirs.append(os.path.join("include", lib_name))
+        else:
+            lib_name = "qtadvanceddocking"
         if self.options.shared:
-            self.cpp_info.libs = ["qtadvanceddocking"]
+            self.cpp_info.libs = [lib_name]
         else:
             self.cpp_info.defines.append("ADS_STATIC")
-            self.cpp_info.libs = ["qtadvanceddocking_static"]
+            self.cpp_info.libs = [f"{lib_name}_static"]
 
-        if is_msvc(self) and Version(self.dependencies["qt"].ref.version) >= 6:
+        if is_msvc(self) and self._qt_major >= 6:
             # Qt 6 requires C++17 and a valid __cplusplus value
             self.cpp_info.cxxflags.append("/Zc:__cplusplus")
