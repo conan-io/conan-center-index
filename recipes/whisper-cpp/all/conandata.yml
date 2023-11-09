@@ -5,6 +5,9 @@ sources:
   "1.4.2":
     url: "https://github.com/ggerganov/whisper.cpp/archive/a5defbc1b98bea0f070331ce1e8b62d947b0443d.tar.gz"
     sha256: "6dd0690b084269b22b1b749103b047e6d45d7b910d7bc9587085ce057dca5431"
+  "1.4.3":
+    url: "https://github.com/ggerganov/whisper.cpp/archive/6a5d195109994b865e1c92a88258ac182399eb64.tar.gz"
+    sha256: "5b6693c314ae6fb362c13d02357a18099ab0ba03abc07c21f2e8c32b42b7b07e"
 patches:
   "1.4.2":
     - patch_file: "patches/1.4.2-0001-find_package_openblas.patch"
