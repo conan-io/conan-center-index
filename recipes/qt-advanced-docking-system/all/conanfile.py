@@ -4,8 +4,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.56.0 <2 || >=2.0.6"
@@ -37,7 +38,10 @@ class QtADS(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14
+        if Version(self.dependencies["qt"].ref.version) >= 6:
+            return 17
+        else:
+            return 14
 
     @property
     def _compilers_minimum_version(self):
@@ -46,7 +50,7 @@ class QtADS(ConanFile):
             "msvc": "191",
             "gcc": "5",
             "clang": "5",
-            "apple-clang": "5.1",
+            "apple-clang": "5",
         }
 
     def export_sources(self):
@@ -64,7 +68,7 @@ class QtADS(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/5.15.11", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/6.6.0", transitive_headers=True, transitive_libs=True)
         self.requires("libpng/1.6.40")
 
     def validate(self):
@@ -86,6 +90,8 @@ class QtADS(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+        env = VirtualRunEnv(self)
+        env.generate(scope="build")
         tc = CMakeToolchain(self)
         tc.cache_variables["ADS_VERSION"] = self.version
         tc.variables["BUILD_EXAMPLES"] = "OFF"
@@ -121,3 +127,7 @@ class QtADS(ConanFile):
         else:
             self.cpp_info.defines.append("ADS_STATIC")
             self.cpp_info.libs = ["qtadvanceddocking_static"]
+
+        if is_msvc(self) and Version(self.dependencies["qt"].ref.version) >= 6:
+            # Qt 6 requires C++17 and a valid __cplusplus value
+            self.cpp_info.cxxflags.append("/Zc:__cplusplus")
