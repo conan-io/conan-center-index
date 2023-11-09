@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -53,9 +53,6 @@ class QtADS(ConanFile):
             "apple-clang": "5",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -101,11 +98,10 @@ class QtADS(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         qt_version = self.dependencies["qt"].ref.version
         replace_in_file(self, os.path.join(self.source_folder, "src", "ads_globals.cpp"),
-            "#include <qpa/qplatformnativeinterface.h>",
-            f"#include <{qt_version}/QtGui/qpa/qplatformnativeinterface.h>",
+                        "#include <qpa/qplatformnativeinterface.h>",
+                        f"#include <{qt_version}/QtGui/qpa/qplatformnativeinterface.h>",
         )
 
     def build(self):
