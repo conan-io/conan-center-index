@@ -43,8 +43,8 @@ class SpirvtoolsConan(ConanFile):
         return {
             "17": {
                 "apple-clang": "10",
-                "clang": "7",
-                "gcc": "8",
+                "clang": "7" if Version(self.version) >= "1.3.250" else "5",
+                "gcc": "8" if Version(self.version) >= "1.3.250" else "7",
                 "msvc": "191",
                 "Visual Studio": "15",
             }
