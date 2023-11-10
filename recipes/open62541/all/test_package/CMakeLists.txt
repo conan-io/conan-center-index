@@ -29,6 +29,12 @@ add_executable(${PROJECT_NAME}
     test_package.c
 )
 
+target_compile_options(
+    ${PROJECT_NAME}
+    PRIVATE 
+    $<$<AND:$<CONFIG:Debug>,$<C_COMPILER_ID:Clang>>:-fsanitize=address>    
+)
+
 target_link_options(
     ${PROJECT_NAME}
     PRIVATE 
