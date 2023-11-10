@@ -1,4 +1,7 @@
 sources:
+  "0.10.1":
+    url: "https://github.com/kaitai-io/kaitai_struct_cpp_stl_runtime/archive/refs/tags/0.10.1.tar.gz"
+    sha256: "19a7fb2d386d1bb14c04ffa514d26673444c71fef73246984e2a587dc5ae1ab2"
   "0.10":
     url: "https://github.com/kaitai-io/kaitai_struct_cpp_stl_runtime/archive/refs/tags/0.10.tar.gz"
     sha256: "9a7d382b2acbbe6498ecca23fc7b6b98cbcc418af83fb569f94395f29712171c"
@@ -6,11 +9,16 @@ sources:
     url: "https://github.com/kaitai-io/kaitai_struct_cpp_stl_runtime/archive/cb09b3a84c7e905c6a3fecfe9617cf864d9af781.zip"
     sha256: "058c01828692bf193cb862372651c572fcc43babbf2d664674409511b9f54e5b"
 patches:
+  "0.10.1":
+    - patch_file: "patches/0.10.1-0001-remove-template-id.patch"
+      patch_description: "rempte template-id from constructor/destructor"
+      patch_type: "portability"
+      patch_source: "https://github.com/kaitai-io/kaitai_struct_cpp_stl_runtime/pull/68"
   "0.10":
-    - patch_file: "patches/0001-cmake-minimum-required.patch"
+    - patch_file: "patches/0.10-0001-cmake-minimum-required.patch"
       patch_description: "declare cmake_minimum_required first"
       patch_type: "portability"
   "cci.20210701":
-    - patch_file: "patches/0001-cmake-minimum-required.patch"
+    - patch_file: "patches/0.10-0001-cmake-minimum-required.patch"
       patch_description: "declare cmake_minimum_required first"
       patch_type: "portability"
