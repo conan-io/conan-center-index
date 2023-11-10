@@ -596,7 +596,7 @@ class QtConan(ConanFile):
             cpp_std_map[23] = "FEATURE_cxx2b"
         
         for std,feature in cpp_std_map.items():
-            tr.variables[feature] = "ON" if int(current_cpp_std) >= std else "OFF"
+            tc.variables[feature] = "ON" if int(current_cpp_std) >= std else "OFF"
 
         tc.variables["QT_USE_VCPKG"] = False
         tc.cache_variables["QT_USE_VCPKG"] = False
