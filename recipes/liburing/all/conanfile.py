@@ -1,6 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, rmdir, copy, apply_conandata_patches, chdir, export_conandata_patches
-from conan.tools.files.symlinks import remove_broken_symlinks
+from conan.tools.files import get, rmdir, copy, apply_conandata_patches, chdir, export_conandata_patches, symlinks
 from conan.tools.scm import Version
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -103,7 +102,7 @@ class Liburing(ConanFile):
             os.remove(os.path.join(self.package_folder, "lib", "liburing.a"))
         
             # FIXME: The liburing.so symlink ends up broken. Remove and replace.
-            remove_broken_symlinks(self, self.package_folder)
+            symlinks.remove_broken_symlinks(self, self.package_folder)
             source_file_suffix = "1" if self.version < Version("2.0") else "2"
             os.symlink(src=os.path.join(self.package_folder, "lib", f"liburing.so.{source_file_suffix}"),
                        dst=os.path.join(self.package_folder, "lib", "liburing.so"))
