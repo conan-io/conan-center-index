@@ -67,7 +67,7 @@ class Liburing(ConanFile):
         def whether(condition):
             return "" if condition else None
         tc.update_configure_args({
-            "--nolibc": whether(not self.options.get_safe("with_libc")),
+            "--nolibc": whether(not self.options.get_safe("with_libc", default=True)),
             "--enable-shared": None,
             "--disable-shared": None,
             "--enable-static": None,
