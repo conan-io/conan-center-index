@@ -1,4 +1,13 @@
 sources:
+  "1.7.0":
+    url: "https://github.com/ginkgo-project/ginkgo/archive/v1.7.0.tar.gz"
+    sha256: "f4b362bcb046bc53fbe2e578662b939222d0c44b96449101829e73ecce02bcb3"
+  "1.6.0":
+    url: "https://github.com/ginkgo-project/ginkgo/archive/v1.6.0.tar.gz"
+    sha256: "c59f574090eac212d272c57f0858db0c13ef41ce5547e38331a74c85ef7fba99"
+  "1.5.0":
+    url: "https://github.com/ginkgo-project/ginkgo/archive/v1.5.0.tar.gz"
+    sha256: "9b24ce0a17ebdf08aa65e87af2d81d6d1e2c94ce317bb26cd32ce47dea8b4bad"
   "1.4.0":
     url: "https://github.com/ginkgo-project/ginkgo/archive/v1.4.0.tar.gz"
     sha256: "6dcadbd3e93f6ec58ef6cda5b980fbf51ea3c7c13e27952ef38804058ac93f08"
