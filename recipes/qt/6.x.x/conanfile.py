@@ -298,9 +298,6 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtwayland", False) and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
             raise ConanInvalidConfiguration("The 'with_wayland' option for the 'xkbcommon' package must be enabled when the 'qtwayland' option is enabled")
 
-        if cross_building(self):
-            raise ConanInvalidConfiguration("cross compiling qt 6 is not yet supported. Contributions are welcome")
-
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
 
@@ -574,6 +571,8 @@ class QtConan(ConanFile):
                 self.output.warning(f"host not supported: {self.settings.os} {self.settings.compiler} {self.settings.compiler.version} {self.settings.arch}")
         if self.options.cross_compile:
             tc.variables["QT_QMAKE_DEVICE_OPTIONS"] = f"CROSS_COMPILE={self.options.cross_compile}"
+        if cross_building(self):
+            tc.variables["QT_HOST_PATH"] = self.dependencies.direct_build["qt"].package_folder
 
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
