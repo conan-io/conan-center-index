@@ -29,17 +29,19 @@ add_executable(${PROJECT_NAME}
     test_package.c
 )
 
-target_compile_options(
-    ${PROJECT_NAME}
-    PRIVATE 
-    $<$<AND:$<CONFIG:Debug>,$<C_COMPILER_ID:Clang>>:-fsanitize=address>    
-)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" and CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(
+        ${PROJECT_NAME}
+        PRIVATE 
+        -fsanitize=address
+        )
 
-target_link_options(
-    ${PROJECT_NAME}
-    PRIVATE 
-    $<$<AND:$<CONFIG:Debug>,$<C_COMPILER_ID:Clang>>:-fsanitize=address>    
-)
+    target_link_options(
+        ${PROJECT_NAME}
+        PRIVATE 
+        -fsanitize=address
+        )
+endif()
 
 # Make sure the nodeset compiler is executed before compiling the main file
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}-ns-foo_flt)
