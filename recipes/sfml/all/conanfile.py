@@ -15,9 +15,9 @@ class SfmlConan(ConanFile):
     name = "sfml"
     description = "Simple and Fast Multimedia Library."
     license = "Zlib"
-    topics = ("multimedia", "games", "graphics", "audio")
-    homepage = "https://www.sfml-dev.org"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.sfml-dev.org"
+    topics = ("multimedia", "games", "graphics", "audio")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -61,7 +61,7 @@ class SfmlConan(ConanFile):
                 self.requires("xorg/system")
         if self.options.graphics:
             self.requires("freetype/2.13.0")
-            self.requires("stb/cci.20220909")
+            self.requires("stb/cci.20230920")
         if self.options.audio:
             self.requires("flac/1.4.2")
             self.requires("openal-soft/1.22.2")
