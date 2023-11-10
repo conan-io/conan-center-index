@@ -4,6 +4,9 @@ sources:
     sha256: "60d1ea8779471bb851b89b49ce44eecb78e46265be1a6e9320a28b100c8df44f"
 patches:
   "1.1.0":
-    - patch_file: "patches/freealut-1.1.0-conan-build.patch"
-      patch_description: "Change CMakeLists to get OpenAL from conan and allow multiplatform build as static lib"
+    - patch_file: "patches/get-openal-from-conan-and-cmake-adaptations.patch"
+      patch_description: "Get OpenAL from conan and use GNUInstallDirs in cmake"
+      patch_type: "conan"
+    - patch_file: "patches/harmonize-static-lib-build.patch"
+      patch_description: "Remove dllexport/dllimport when build as static library"
       patch_type: "portability"

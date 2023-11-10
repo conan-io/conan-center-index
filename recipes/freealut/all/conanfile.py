@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir, rm
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -73,8 +73,6 @@ class FreeAlutConan(ConanFile):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rm(self, "freealut-config", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = ['alut']

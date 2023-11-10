@@ -1,0 +1,98 @@
+From 28dfaafad99c7c330e9bee5e313f8323ab1b60e0 Mon Sep 17 00:00:00 2001
+From: Lucas K Dal Castel <lucas.castel@ael.com.br>
+Date: Fri, 10 Nov 2023 10:31:29 -0300
+Subject: [PATCH] Get OpenAl from conan & minor cmake changes
+
+---
+ CMakeLists.txt | 39 ++++++++++++++-------------------------
+ 1 file changed, 14 insertions(+), 25 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 640f35b..7aa9687 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,14 +1,16 @@
+ # cmake project file by Prakash Punnoor
+-CMAKE_MINIMUM_REQUIRED(VERSION 2.0)
++CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
+ 
+ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/admin/CMakeModules")
+ PROJECT(Alut C)
++include(GNUInstallDirs)
++
+ SET(PACKAGE "freealut")
+ SET(PACKAGE_TARNAME "freealut")
+ SET(PACKAGE_NAME "freealut library")
+ SET(PACKAGE_MAJOR_VERSION "1")
+-SET(PACKAGE_MINOR_VERSION "0")
+-SET(PACKAGE_BUILD_VERSION "1")
++SET(PACKAGE_MINOR_VERSION "1")
++SET(PACKAGE_BUILD_VERSION "0")
+ SET(PACKAGE_VERSION "${PACKAGE_MAJOR_VERSION}.${PACKAGE_MINOR_VERSION}.${PACKAGE_BUILD_VERSION}")
+ SET(MAJOR_VERSION "0")
+ SET(MINOR_VERSION "0")
+@@ -36,7 +38,7 @@ SET(ALUT_SOURCES src/alutBufferData.c
+                  src/alutVersion.c
+                  src/alutWaveform.c)
+ 
+-INCLUDE_DIRECTORIES(${Alut_SOURCE_DIR}/include)
++INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+ 
+ SET(ADD_WFLAGS "")
+ SET(ADD_CFLAGS "")
+@@ -72,24 +74,9 @@ ADD_DEFINE("__NO_CTYPE 1")
+ ADD_DEFINITIONS(-DHAVE_CONFIG_H)
+ ADD_DEFINITIONS(-DNDEBUG)
+ 
+-FIND_LIBRARY(OPENAL_LIB NAMES openal openal32 PATHS /usr/lib /usr/local/lib ${OPENAL_LIB_DIR})
+-IF(OPENAL_LIB MATCHES "NOTFOUND")
+-  MESSAGE(FATAL_ERROR "OpenAL not installed, cannot build alut - aborting.")
+-ENDIF(OPENAL_LIB MATCHES "NOTFOUND")
+-
+-IF(UNIX)
+- SET(ADD_LIBS ${ADD_LIBS} m)
+-ENDIF(UNIX)
+-
+-SET(CMAKE_REQUIRED_INCLUDES ${OPENAL_INCLUDE_DIR})
+-CHECK_INCLUDE_FILES("AL/alc.h;AL/al.h" AL_HEADERS)
+-IF(NOT AL_HEADERS)
+-  MESSAGE(FATAL_ERROR "OpenAL header files not found - aborting.")
+-ENDIF(NOT AL_HEADERS)
+ 
+-IF(DEFINED OPENAL_INCLUDE_DIR)
+-  INCLUDE_DIRECTORIES(${OPENAL_INCLUDE_DIR})
+-ENDIF(DEFINED OPENAL_INCLUDE_DIR)
++FIND_PACKAGE(OpenAL REQUIRED)
++set(OPENAL_LIB "OpenAL::OpenAL")
+ 
+ FIND_PACKAGE(SleepFunction)
+ 
+@@ -151,10 +138,14 @@ ENDIF(BUILD_STATIC)
+ 
+ ADD_LIBRARY(alut SHARED ${ALUT_SOURCES})
+ SET_TARGET_PROPERTIES(alut PROPERTIES VERSION ${VERSION} SOVERSION ${MAJOR_VERSION})
++set_target_properties(alut PROPERTIES PUBLIC_HEADER "include/AL/alut.h")
+ TARGET_LINK_LIBRARIES(alut ${OPENAL_LIB} ${ADD_LIBS})
+ 
+-INSTALL_TARGETS(/lib alut)
+-INSTALL_FILES(/include/AL FILES include/AL/alut.h)
++install(TARGETS alut
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/AL)
+ 
+ # needed for openal.pc.in and openal-config.in
+ SET(prefix ${CMAKE_INSTALL_PREFIX})
+@@ -170,8 +161,6 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/admin/pkgconfig/freealut.pc.in
+                ${CMAKE_BINARY_DIR}/admin/pkgconfig/freealut.pc @ONLY)
+ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/admin/pkgconfig/freealut-config.in
+                ${CMAKE_BINARY_DIR}/admin/pkgconfig/freealut-config @ONLY)
+-INSTALL_PROGRAMS(/bin FILES admin/pkgconfig/freealut-config)
+-INSTALL_FILES(/lib/pkgconfig FILES admin/pkgconfig/freealut.pc)
+ 
+ 
+ # test-suite
+-- 
+2.36.1.windows.1
+
