@@ -11,11 +11,3 @@ index 6df5429b..e7dedbc4 100644
      find_package(cpptoml REQUIRED)
  endif()
  
-@@ -325,7 +323,6 @@ if(TOML_CONFIG)
-         iceoryx_posh::iceoryx_posh
-         iceoryx_utils::iceoryx_utils
-         iceoryx_posh::iceoryx_posh_roudi
--        cpptoml
-         ${ICEORYX_SANITIZER_FLAGS}
-     )
- 
