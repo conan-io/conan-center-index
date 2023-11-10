@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, rmdir, copy, apply_conandata_patches, chdir
+from conan.tools.files import get, rmdir, copy, apply_conandata_patches, chdir, export_conandata_patches
 from conan.tools.scm import Version
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -30,9 +30,8 @@ class Liburing(ConanFile):
         "with_libc": True,
     }
 
-    exports_sources = ["patches/*"]
-
-    _autotools = None
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def requirements(self):
         if Version(self.version) < "2.3":
@@ -103,5 +102,5 @@ class Liburing(ConanFile):
             os.remove(os.path.join(self.package_folder, "lib", "liburing.a"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "liburing"
+        self.cpp_info.set_property("pkg_config_name", "liburing")
         self.cpp_info.libs = ["uring"]

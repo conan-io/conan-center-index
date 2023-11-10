@@ -17,5 +17,4 @@ sources:
 
 patches:
   "2.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-liburing-2.1-memfd-create.patch"
+    - patch_file: "patches/0001-liburing-2.1-memfd-create.patch"
