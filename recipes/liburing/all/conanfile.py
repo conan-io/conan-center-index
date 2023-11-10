@@ -84,7 +84,7 @@ class Liburing(ConanFile):
         with chdir(self, self.source_folder):
             at = Autotools(self)
             at.configure()
-            at.make()
+            at.make(target="src")
 
     def package(self):
         copy(self, "COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
