@@ -6,6 +6,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc, unix_path_package_info_legacy
+from conan.tools.scm import Version
 
 
 required_conan_version = ">=1.57.0"
@@ -76,7 +77,10 @@ class PkgConfConan(ConanFile):
         env.generate()
 
         tc = MesonToolchain(self)
-        tc.project_options["tests"] = "disabled"
+        if Version(self.version) >= "1.9.4":
+            tc.project_options["tests"] = "disabled"
+        else:
+            tc.project_options["tests"] = False
 
         if not self.options.enable_lib:
             tc.project_options["default_library"] = "static"
