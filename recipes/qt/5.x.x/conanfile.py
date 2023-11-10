@@ -1253,6 +1253,8 @@ Examples = bin/datadir/examples""")
 
         if self.options.qtsvg and self.options.gui:
             _create_module("Svg", ["Gui"])
+            _create_plugin("QSvgIconPlugin", "qsvgicon", "iconengines", [])
+            _create_plugin("QSvgPlugin", "qsvg", "imageformats", [])
 
         if self.options.qtwayland and self.options.gui:
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])

@@ -26,8 +26,8 @@ class GlazeConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "17" if Version(self.version) >= "1.3.3" else "16",
-            "msvc": "193" if Version(self.version) >= "1.3.3" else "192",
+            "Visual Studio": "17",
+            "msvc": "193",
             "gcc": "12",
             "clang": "12",
             "apple-clang": "13.1",
