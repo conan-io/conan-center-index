@@ -1,0 +1,72 @@
+Linked static libraries do not export symbols on Windows,
+so build the shared libraries from scratch instead.
+--- brunsli.cmake
++++ brunsli.cmake
+@@ -77,13 +77,21 @@
+ 
+ if(NOT BRUNSLI_EMSCRIPTEN)
+ add_library(brunslidec-c SHARED
++  ${BRUNSLI_COMMON_SOURCES}
++  ${BRUNSLI_COMMON_HEADERS}
++  ${BRUNSLI_DEC_SOURCES}
++  ${BRUNSLI_DEC_HEADERS}
+   c/dec/decode.cc
+ )
+-target_link_libraries(brunslidec-c PRIVATE brunslidec-static)
++target_link_libraries(brunslidec-c PRIVATE brotlidec-static)
+ add_library(brunslienc-c SHARED
++  ${BRUNSLI_COMMON_SOURCES}
++  ${BRUNSLI_COMMON_HEADERS}
++  ${BRUNSLI_ENC_SOURCES}
++  ${BRUNSLI_ENC_HEADERS}
+   c/enc/encode.cc
+ )
+-target_link_libraries(brunslienc-c PRIVATE brunslienc-static)
++target_link_libraries(brunslienc-c PRIVATE brotlienc-static)
+ list(APPEND BRUNSLI_LIBRARIES brunslidec-c brunslienc-c)
+ endif()  # BRUNSLI_EMSCRIPTEN
+ 
+@@ -95,14 +103,6 @@
+   set_property(TARGET ${lib} PROPERTY POSITION_INDEPENDENT_CODE ON)
+ endforeach()
+ 
+-add_executable(cbrunsli c/tools/cbrunsli.cc)
+-target_link_libraries(cbrunsli PRIVATE
+-  brunslienc-static
+-)
+-add_executable(dbrunsli c/tools/dbrunsli.cc)
+-target_link_libraries(dbrunsli PRIVATE
+-  brunslidec-static
+-)
+ if(BRUNSLI_EMSCRIPTEN)
+ set(WASM_MODULES brunslicodec-wasm brunslidec-wasm brunslienc-wasm)
+ foreach(module IN LISTS WASM_MODULES)
+@@ -121,14 +121,6 @@
+   ${WASM_BASE_FLAGS} \
+   -s MODULARIZE=1 \
+   -s FILESYSTEM=0 \
+-")
+-set_target_properties(cbrunsli PROPERTIES LINK_FLAGS "\
+-  ${WASM_BASE_FLAGS} \
+-  -s NODERAWFS=1 \
+-")
+-set_target_properties(dbrunsli PROPERTIES LINK_FLAGS "\
+-  ${WASM_BASE_FLAGS} \
+-  -s NODERAWFS=1 \
+ ")
+ set(WASM_COMMON_EXPORT "\"_malloc\",\"_free\"")
+ set(WASM_DEC_EXPORT "\"_BrunsliToJpeg\",\"_GetJpegData\",\"_GetJpegLength\",\"_FreeJpeg\",\"_BrunsliDecoderInit\",\"_BrunsliDecoderProcess\",\"_BrunsliDecoderCleanup\"")
+@@ -163,13 +155,6 @@
+     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+   )
+ endif() # BRUNSLI_EMSCRIPTEN
+-
+-# Gather artifacts in a single directory for easier uploading.
+-set_target_properties(cbrunsli dbrunsli ${BRUNSLI_LIBRARIES} PROPERTIES
+-  ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/artifacts"
+-  LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/artifacts"
+-  RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/artifacts"
+-)
+ 
+ if (${BUILD_TESTING})
+ 
