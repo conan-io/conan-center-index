@@ -1,6 +1,4 @@
 # Reproduces the variables set by https://cmake.org/cmake/help/latest/module/FindCurses.html
-string(TOUPPER "${CMAKE_BUILD_TYPE}" _CONFIG)
-
 set(CURSES_FOUND ON)
 set(CURSES_INCLUDE_DIRS ${Curses_INCLUDE_DIRS})
 set(CURSES_CFLAGS ${Curses_DEFINITIONS} ${Curses_COMPILE_OPTIONS_C})
@@ -12,6 +10,7 @@ if(CURSES_NEED_NCURSES)
 endif()
 
 # For backward compatibility with Conan v1
+string(TOUPPER "${CMAKE_BUILD_TYPE}" _CONFIG)
 set(CURSES_INCLUDE_DIRS ${CURSES_INCLUDE_DIRS}
     ${ncurses_INCLUDE_DIRS_${_CONFIG}}
     ${Curses_INCLUDE_DIRS_${_CONFIG}}
