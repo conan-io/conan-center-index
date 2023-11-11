@@ -91,15 +91,6 @@ class RocksDBConan(ConanFile):
 
         check_min_vs(self, "191")
 
-        if self.version == "6.0.2" and is_msvc(self) and check_min_vs(self, "192", raise_invalid=False):
-            raise ConanInvalidConfiguration("Rocksdb 6.0.2 is not compilable with Visual Studio >15.") # See https://github.com/facebook/rocksdb/issues/6048
-
-        if self.version == "6.0.2" and \
-           self.settings.os == "Linux" and \
-           self.settings.compiler == "clang" and \
-           Version(self.settings.compiler.version) > "9":
-            raise ConanInvalidConfiguration("Rocksdb 6.0.2 is not compilable with clang >9.") # See https://github.com/facebook/rocksdb/pull/7265
-
         if self.version == "6.20.3" and \
            self.settings.os == "Linux" and \
            self.settings.compiler == "gcc" and \

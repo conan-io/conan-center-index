@@ -8,9 +8,3 @@ sources:
   "6.20.3":
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v6.20.3.tar.gz"
     sha256: "c6502c7aae641b7e20fafa6c2b92273d935d2b7b2707135ebd9a67b092169dca"
-  "6.10.2":
-    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v6.10.2.tar.gz"
-    sha256: "514b315c64159dd767bbbf6430d33313903c0c9240d4249bddead5c4297d128f"
-  "6.8.1":
-    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v6.8.1.tar.gz"
-    sha256: "ca192a06ed3bcb9f09060add7e9d0daee1ae7a8705a3d5ecbe41867c5e2796a2"
