@@ -412,8 +412,8 @@ class OpenCascadeConan(ConanFile):
 
         # Honor fPIC option, compiler.cppstd and compiler.libcxx
         replace_in_file(self, occt_defs_flags_cmake, "-fPIC", "")
-        replace_in_file(self, occt_defs_flags_cmake, "-std=c++0x", "")
-        replace_in_file(self, occt_defs_flags_cmake, "-std=gnu++0x", "")
+        replace_in_file(self, occt_defs_flags_cmake, "-std=c++0x", "", strict=False)
+        replace_in_file(self, occt_defs_flags_cmake, "-std=gnu++0x", "", strict=False)
         replace_in_file(self, occt_defs_flags_cmake, "-stdlib=libc++", "")
         replace_in_file(self, occt_csf_cmake,
                               "set (CSF_ThreadLibs  \"pthread rt stdc++\")",
