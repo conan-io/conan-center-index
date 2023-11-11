@@ -8,4 +8,3 @@ sources:
 patches:
   "2.0.0":
     - patch_file: "patches/tinyalsa-2.0.0-strncpy-warning.patch"
-      base_path: "source_subfolder"
