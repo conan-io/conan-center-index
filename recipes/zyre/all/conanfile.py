@@ -91,9 +91,11 @@ class ZyreConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "zyre")
+        self.cpp_info.set_property("cmake_target_name", "zyre" if self.options.shared else "zyre-static")
         self.cpp_info.set_property("pkg_config_name", "libzyre")
 
         libname = "zyre"
