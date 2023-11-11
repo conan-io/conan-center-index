@@ -123,7 +123,7 @@ class RocksDBConan(ConanFile):
         tc.variables["ROCKSDB_LIBRARY_EXPORTS"] = self.settings.os == "Windows" and self.options.shared
         tc.variables["ROCKSDB_DLL" ] = self.settings.os == "Windows" and self.options.shared
         tc.variables["USE_RTTI"] = self.options.use_rtti
-        if self.options.enable_sse == "False":
+        if not bool(self.options.enable_sse):
             tc.variables["PORTABLE"] = True
             tc.variables["FORCE_SSE42"] = False
         elif self.options.enable_sse == "sse42":
@@ -134,8 +134,6 @@ class RocksDBConan(ConanFile):
             tc.variables["FORCE_SSE42"] = False
         # not available yet in CCI
         tc.variables["WITH_NUMA"] = False
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            tc.cache_variables["CMAKE_CXX_FLAGS"] = "-march=armv8-a"
         tc.generate()
 
         deps = CMakeDeps(self)
