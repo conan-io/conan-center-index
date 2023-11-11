@@ -46,9 +46,9 @@ class ZyreConan(ConanFile):
 
     def requirements(self):
         self.requires("czmq/4.2.1", transitive_headers=True)
-        self.requires("zeromq/4.3.4")
+        self.requires("zeromq/4.3.5")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("libsystemd/253.6")
+            self.requires("libsystemd/253.10")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
