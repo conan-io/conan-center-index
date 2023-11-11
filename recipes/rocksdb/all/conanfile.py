@@ -148,8 +148,10 @@ class RocksDBConan(ConanFile):
         cmake.build()
 
     def _remove_static_libraries(self):
-        for static_lib_name in ["lib*.a", "rocksdb.lib"]:
-            rm(self, static_lib_name, os.path.join(self.package_folder, "lib"))
+        rm(self, "rocksdb.lib", os.path.join(self.package_folder, "lib"))
+        for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
+            if not lib.endswith(".dll.a"):
+                os.remove(lib)
 
     def _remove_cpp_headers(self):
         for path in glob.glob(os.path.join(self.package_folder, "include", "rocksdb", "*")):
