@@ -77,6 +77,8 @@ class MsdfgenConan(ConanFile):
         if Version(self.version) >= "1.10":
             tc.cache_variables["MSDFGEN_DYNAMIC_RUNTIME"] = not is_msvc_static_runtime(self)
             tc.cache_variables["MSDFGEN_USE_VCPKG"] = False
+        # Because in CMakeLists, project() is called after some logic based on BUILD_SHARED_LIBS
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
