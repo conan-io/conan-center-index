@@ -50,6 +50,9 @@ class MoldConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.18.0 <4]")
+
     def requirements(self):
         self.requires("zlib/1.2.13")
         self.requires("openssl/1.1.1q")
