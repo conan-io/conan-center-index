@@ -9,10 +9,6 @@ sources:
     url: "https://github.com/Chlumsky/msdfgen/archive/refs/tags/v1.9.tar.gz"
     sha256: "909eb88c71268dc00cdda244a1fa40a0feefae45f68a779fbfddd5463559fa40"
 patches:
-  "1.10":
-    - patch_file: "patches/1.10-0001-fix-cmake.patch"
-      patch_description: "move project position to top"
-      patch_type: "conan"
   "1.9.1":
     - patch_file: "patches/1.9-0001-unvendor-external-libs.patch"
       patch_description: "Use external libs from conan instead of vendored ones"

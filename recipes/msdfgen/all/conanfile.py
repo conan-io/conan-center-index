@@ -69,14 +69,14 @@ class MsdfgenConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["MSDFGEN_BUILD_MSDFGEN_STANDALONE"] = self.options.utility
-        tc.variables["MSDFGEN_USE_OPENMP"] = self.options.with_openmp
-        tc.variables["MSDFGEN_USE_CPP11"] = True
-        tc.variables["MSDFGEN_USE_SKIA"] = self.options.with_skia
-        tc.variables["MSDFGEN_INSTALL"] = True
+        tc.cache_variables["MSDFGEN_BUILD_MSDFGEN_STANDALONE"] = self.options.utility
+        tc.cache_variables["MSDFGEN_USE_OPENMP"] = self.options.with_openmp
+        tc.cache_variables["MSDFGEN_USE_CPP11"] = True
+        tc.cache_variables["MSDFGEN_USE_SKIA"] = self.options.with_skia
+        tc.cache_variables["MSDFGEN_INSTALL"] = True
         if Version(self.version) >= "1.10":
-            tc.variables["MSDFGEN_DYNAMIC_RUNTIME"] = not is_msvc_static_runtime(self)
-            tc.variables["MSDFGEN_USE_VCPKG"] = False
+            tc.cache_variables["MSDFGEN_DYNAMIC_RUNTIME"] = not is_msvc_static_runtime(self)
+            tc.cache_variables["MSDFGEN_USE_VCPKG"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
