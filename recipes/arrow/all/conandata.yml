@@ -1,4 +1,7 @@
 sources:
+  "14.0.1":
+    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-14.0.1/apache-arrow-14.0.1.tar.gz?action=download"
+    sha256: "5c70eafb1011f9d124bafb328afe54f62cc5b9280b7080e1e3d668f78c0e407e"
   "14.0.0":
     url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-14.0.0/apache-arrow-14.0.0.tar.gz?action=download"
     sha256: "4eb0da50ec071baf15fc163cb48058931e006f1c862c8def0e180fd07d531021"
