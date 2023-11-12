@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.scm import Version
 import os
 
 
@@ -48,6 +47,8 @@ class SimdConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+        if self.settings.compiler == "clang":
+            raise ConanInvalidConfiguration(f"{self.ref} don't support clang. (yet)")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
