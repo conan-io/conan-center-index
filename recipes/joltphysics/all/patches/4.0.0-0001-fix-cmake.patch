@@ -1,0 +1,64 @@
+diff --git a/Build/CMakeLists.txt b/Build/CMakeLists.txt
+index e503744..6525df9 100644
+--- a/Build/CMakeLists.txt
++++ b/Build/CMakeLists.txt
+@@ -57,11 +57,11 @@ include(CMakeDependentOption)
+ cmake_dependent_option(USE_STATIC_MSVC_RUNTIME_LIBRARY "Use the static MSVC runtime library" ON "MSVC;NOT WINDOWS_STORE" OFF)
+ 
+ # Determine which configurations exist
+-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+-	set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
+-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+-	set(CMAKE_CONFIGURATION_TYPES "Debug;Release;ReleaseASAN;ReleaseUBSAN;ReleaseCoverage;Distribution")
+-endif()
++#if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
++#	set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
++#elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
++#	set(CMAKE_CONFIGURATION_TYPES "Debug;Release;ReleaseASAN;ReleaseUBSAN;ReleaseCoverage;Distribution")
++#endif()
+ 
+ if (("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows" OR "${CMAKE_SYSTEM_NAME}" STREQUAL "WindowsStore") AND NOT MINGW)
+ 	# Fill in the path to the asan libraries
+diff --git a/Jolt/Jolt.cmake b/Jolt/Jolt.cmake
+index c0f7099..c1210c3 100644
+--- a/Jolt/Jolt.cmake
++++ b/Jolt/Jolt.cmake
+@@ -446,6 +446,21 @@ source_group(TREE ${JOLT_PHYSICS_ROOT} FILES ${JOLT_PHYSICS_SRC_FILES})
+ 
+ # Create Jolt lib
+ add_library(Jolt ${JOLT_PHYSICS_SRC_FILES})
++target_compile_features(Jolt PUBLIC cxx_std_17)
++include(GNUInstallDirs)
++install(
++	TARGETS Jolt
++	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++)
++install(DIRECTORY ${JOLT_PHYSICS_ROOT} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} FILES_MATCHING REGEX "(.*).(h|inl)$")
++if(JPH_DEBUG_RENDERER)
++    target_compile_definitions(Jolt PUBLIC JPH_DEBUG_RENDERER)
++endif()
++if(JPH_PROFILE_ENABLED)
++    target_compile_definitions(Jolt PUBLIC JPH_PROFILE_ENABLED)
++endif()
+ 
+ if (BUILD_SHARED_LIBS)
+ 	# Set default visibility to hidden
+@@ -475,12 +490,11 @@ if (BUILD_SHARED_LIBS)
+ endif()
+ 
+ target_include_directories(Jolt PUBLIC ${PHYSICS_REPO_ROOT})
+-target_precompile_headers(Jolt PRIVATE ${JOLT_PHYSICS_ROOT}/Jolt.h)
+-target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Debug>:_DEBUG;JPH_PROFILE_ENABLED;JPH_DEBUG_RENDERER>")
+-target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Release>:NDEBUG;JPH_PROFILE_ENABLED;JPH_DEBUG_RENDERER>")
++target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Debug>:_DEBUG>")
++target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Release>:NDEBUG>")
+ target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Distribution>:NDEBUG>")
+-target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:ReleaseASAN>:NDEBUG;JPH_PROFILE_ENABLED;JPH_DISABLE_TEMP_ALLOCATOR;JPH_DISABLE_CUSTOM_ALLOCATOR;JPH_DEBUG_RENDERER>")
+-target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:ReleaseUBSAN>:NDEBUG;JPH_PROFILE_ENABLED;JPH_DEBUG_RENDERER>")
++target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:ReleaseASAN>:NDEBUG;JPH_DISABLE_TEMP_ALLOCATOR;JPH_DISABLE_CUSTOM_ALLOCATOR>")
++target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:ReleaseUBSAN>:NDEBUG>")
+ target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:ReleaseCoverage>:NDEBUG>")
+ 
+ # Setting floating point exceptions
