@@ -104,7 +104,7 @@ class Liburing(ConanFile):
             # FIXME: The liburing.so symlink ends up broken. Remove and replace.
             symlinks.remove_broken_symlinks(self, self.package_folder)
             source_file_suffix = "1" if self.version < Version("2.0") else "2"
-            os.symlink(src=os.path.join(self.package_folder, "lib", f"liburing.so.{source_file_suffix}"),
+            os.symlink(src=f"liburing.so.{source_file_suffix}",
                        dst=os.path.join(self.package_folder, "lib", "liburing.so"))
 
     def package_info(self):
