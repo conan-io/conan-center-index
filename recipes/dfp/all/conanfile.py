@@ -2,21 +2,6 @@ from conan import ConanFile
 from conan.tools.files import copy
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 import os
-import re
-
-from conan.tools.scm import git
-
-
-# https://docs.conan.io/2/reference/conanfile/attributes.html
-
-
-def load_version(properties_filename):
-    with (open(properties_filename, 'r') as file):
-        for line in file:
-            if re.match("^\s*version\s*=", line):
-                return line[line.index("=") + 1:].strip().removesuffix("-SNAPSHOT")
-
-    raise Exception("Can't determine version")
 
 
 class DfpConan(ConanFile):
@@ -38,10 +23,6 @@ class DfpConan(ConanFile):
 
     # Sources are located in the same place as this recipe, copy them to the recipe
     exports_sources = "LICENSE", "intel-eula.txt", "native/CMakeLists.txt", "native/src/*", "native/include/*"
-
-    def set_version(self):
-        # Command line ``--version=xxxx`` will be assigned first to self.version and have priority
-        self.version = self.version or load_version(os.path.join(self.recipe_folder, "gradle.properties"))
 
     def configure(self):
         # it's a C library
