@@ -1,15 +1,10 @@
+from conans import ConanFile, CMake, tools
 import os
-
-from conans import ConanFile, tools
-from conans import CMake
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "pkg_config"
-
-    def build_requirements(self):
-        self.build_requires("pkgconf/2.0.3")
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
@@ -20,3 +15,5 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
+
+            self.run("cpuid_tool --report", run_environment=True)
