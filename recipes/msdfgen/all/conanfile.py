@@ -75,49 +75,30 @@ class MsdfgenConan(ConanFile):
         tc.cache_variables["MSDFGEN_USE_SKIA"] = self.options.with_skia
         tc.cache_variables["MSDFGEN_INSTALL"] = True
         if Version(self.version) >= "1.10":
-            tc.cache_variables["MSDFGEN_DYNAMIC_RUNTIME"] = not is_msvc_static_runtime(self)
             tc.cache_variables["MSDFGEN_USE_VCPKG"] = False
-        # Because in CMakeLists, project() is called after some logic based on BUILD_SHARED_LIBS
-        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+            # Because in upstream CMakeLists, project() is called after some logic based on BUILD_SHARED_LIBS
+            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        if Version(self.version) >= "1.11":
+            tc.cache_variables["MSDFGEN_DYNAMIC_RUNTIME"] = not is_msvc_static_runtime(self)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        # workaround against CMAKE_FIND_PACKAGE_PREFER_CONFIG ON in conan toolchain
-        replace_in_file(self, cmakelists, "find_package(Freetype REQUIRED)", "find_package(Freetype REQUIRED MODULE)")
-        # remove bundled lodepng & tinyxml2
-        rmdir(self, os.path.join(self.source_folder, "lib"))
-        rmdir(self, os.path.join(self.source_folder, "include"))
-        # very weird but required for Visual Studio when libs are unvendored (at least for Ninja generator)
-        if is_msvc(self):
-            if Version(self.version) < "1.10":
+
+        if Version(self.version) < "1.10":
+            # remove bundled lodepng & tinyxml2
+            rmdir(self, os.path.join(self.source_folder, "lib"))
+            rmdir(self, os.path.join(self.source_folder, "include"))
+
+            # very weird but required for Visual Studio when libs are unvendored (at least for Ninja generator)
+            if is_msvc(self):
                 replace_in_file(
                     self,
-                    cmakelists,
+                    os.path.join(self.source_folder, "CMakeLists.txt"),
                     "set_target_properties(msdfgen-standalone PROPERTIES ARCHIVE_OUTPUT_DIRECTORY archive OUTPUT_NAME msdfgen)",
                     "set_target_properties(msdfgen-standalone PROPERTIES OUTPUT_NAME msdfgen IMPORT_PREFIX foo)",
-                )
-            else:
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    'set_property(TARGET msdfgen-core PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
-                    ''
-                )
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    'set_property(TARGET msdfgen-ext PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
-                    ''
-                )
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    'set_property(TARGET msdfgen PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
-                    ''
                 )
 
     def build(self):
