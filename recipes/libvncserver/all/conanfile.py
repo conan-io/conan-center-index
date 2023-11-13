@@ -56,7 +56,7 @@ class LibVncServerConan(ConanFile):
         export_conandata_patches(self)
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD", "Windows"]:
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(f"conan is not yet supporting {self.ref} on {self.settings.os}.")
 
     def config_options(self):
