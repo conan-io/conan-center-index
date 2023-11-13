@@ -250,9 +250,10 @@ class CPythonConan(ConanFile):
             tcltk_libs = []
             # FIXME: collect using some conan util (https://github.com/conan-io/conan/issues/7656)
             for dep in ("tcl", "tk", "zlib"):
-                tcltk_includes += [f"-I{d}" for d in self.dependencies[dep].cpp_info.includedirs]
-                tcltk_libs += [f"-L{lib}" for lib in self.dependencies[dep].cpp_info.libdirs]
-                tcltk_libs += [f"-l{lib}" for lib in self.dependencies[dep].cpp_info.libs]
+                cpp_info = self.dependencies[dep].cpp_info.aggregated_components()
+                tcltk_includes += [f"-I{d}" for d in cpp_info.includedirs]
+                tcltk_libs += [f"-L{lib}" for lib in cpp_info.libdirs]
+                tcltk_libs += [f"-l{lib}" for lib in cpp_info.libs]
             if self.settings.os in ["Linux", "FreeBSD"] and not self.dependencies["tk"].options.shared:
                 # FIXME: use info from xorg.components (x11, xscrnsaver)
                 tcltk_libs.extend([f"-l{lib}" for lib in ("X11", "Xss")])
@@ -312,7 +313,7 @@ class CPythonConan(ConanFile):
 
         if self.options.get_safe("with_curses", False):
             # FIXME: this will link to ALL libraries of ncurses. Only need to link to ncurses(w) (+ eventually tinfo)
-            ncurses_info = self.dependencies["ncurses"].cpp_info
+            ncurses_info = self.dependencies["ncurses"].cpp_info.aggregated_components()
             replace_in_file(self, os.path.join(self.source_folder, "setup.py"),
                 "curses_libs = ",
                 "curses_libs = {} #".format(repr(ncurses_info.libs + ncurses_info.system_libs)))
