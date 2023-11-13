@@ -149,6 +149,6 @@ class CycloneDDSCXXConan(ConanFile):
         self.cpp_info.includedirs = ["include/ddscxx"]
         self.cpp_info.components["ddscxx"].libs = ["ddscxx"]
         self.cpp_info.components["ddscxx"].includedirs = ["include/ddscxx"]
-        # self.cpp_info.components["ddscxx"].requires = ["CycloneDDS::ddsc"]
+        self.cpp_info.components["ddscxx"].requires = ["CycloneDDS::CycloneDDS"]
         self.cpp_info.components["ddscxx"].set_property("cmake_target_name", "CycloneDDS-CXX::ddscxx")
         self.cpp_info.components["ddscxx"].set_property("pkg_config_name", "CycloneDDS-CXX")
