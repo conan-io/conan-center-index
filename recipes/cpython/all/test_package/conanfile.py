@@ -182,7 +182,8 @@ class TestPackageConan(ConanFile):
             if self._supports_modules:
                 self._test_module("gdbm", self._cpython_option("with_gdbm"))
                 self._test_module("bz2", self._cpython_option("with_bz2"))
-                self._test_module("bsddb", self._cpython_option("with_bsddb"))
+                if self._py_version.major < 3:
+                    self._test_module("bsddb", self._cpython_option("with_bsddb"))
                 self._test_module("lzma", self._cpython_option("with_lzma"))
                 self._test_module("tkinter", self._cpython_option("with_tkinter"))
                 os.environ["TERM"] = "ansi"

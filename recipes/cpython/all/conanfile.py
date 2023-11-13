@@ -575,12 +575,9 @@ class CPythonConan(ConanFile):
             unzip(self, filename=os.path.join(whldir, fname),
                   destination=os.path.join(self.package_folder, "bin", "Lib", "site-packages"))
 
-        self.run(
-            "{} -c \"import compileall; compileall.compile_dir('{}')\"".format(
-                os.path.join(build_path, self._cpython_interpreter_name),
-                os.path.join(self.package_folder, self._msvc_install_subprefix, "Lib").replace("\\", "/"),
-            )
-        )
+        interpreter_path = os.path.join(build_path, self._cpython_interpreter_name)
+        lib_dir_path = os.path.join(self.package_folder, self._msvc_install_subprefix, "Lib").replace("\\", "/")
+        self.run(f"{interpreter_path} -c \"import compileall; compileall.compile_dir('{lib_dir_path}')\"")
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
