@@ -202,6 +202,14 @@ def test_tkinter():
     print(f"tk version: {_tkinter.TK_VERSION}")
 
 
+@add_test
+def test_ssl():
+    import ssl
+
+    default_context = ssl.create_default_context()
+    print(f"default_context.options={default_context.options}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", dest="build_folder", help="build_folder", required=True)

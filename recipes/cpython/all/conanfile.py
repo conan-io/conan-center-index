@@ -318,6 +318,19 @@ class CPythonConan(ConanFile):
                 "curses_libs = ",
                 "curses_libs = {} #".format(repr(ncurses_info.libs + ncurses_info.system_libs)))
 
+        if self._supports_modules:
+            openssl = self.dependencies["openssl"].cpp_info.aggregated_components()
+            zlib = self.dependencies["zlib"].cpp_info.aggregated_components()
+            replace_in_file(self, os.path.join(self.source_folder, "setup.py"),
+                            "openssl_includes = ",
+                            f"openssl_includes = {openssl.includedirs + zlib.includedirs} #")
+            replace_in_file(self, os.path.join(self.source_folder, "setup.py"),
+                            "openssl_libdirs = ",
+                            f"openssl_libdirs = {openssl.libdirs + zlib.libdirs} #")
+            replace_in_file(self, os.path.join(self.source_folder, "setup.py"),
+                            "openssl_libs = ",
+                            f"openssl_libs = {openssl.libs + zlib.libs} #")
+
         # Enable static MSVC cpython
         if not self.options.shared:
             replace_in_file(self, os.path.join(self.source_folder, "PCbuild", "pythoncore.vcxproj"),
