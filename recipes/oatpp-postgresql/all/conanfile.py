@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class OatppPostgresqlConan(ConanFile):
@@ -18,6 +18,7 @@ class OatppPostgresqlConan(ConanFile):
     description = "oat++ PostgreSQL library"
     topics = ("oat", "postgresql", "orm", "database")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -43,6 +44,7 @@ class OatppPostgresqlConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # Most headers include oatpp's
         self.requires(f"oatpp/{self.version}", transitive_headers=True)
         self.requires("libpq/15.4")
 
