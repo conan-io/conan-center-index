@@ -50,17 +50,20 @@ class OpenColorIOConan(ConanFile):
         if Version(self.version) < "2.2.0":
             self.requires("openexr/2.5.7")
         else:
-            self.requires("openexr/3.1.7")
-            self.requires("imath/3.1.6")
+            self.requires("openexr/3.1.9")
+            self.requires("imath/3.1.9")
 
-        self.requires("yaml-cpp/0.7.0")
         if Version(self.version) < "2.0.0":
             self.requires("tinyxml/2.6.2")
+            self.requires("yaml-cpp/0.7.0")
         else:
             self.requires("pystring/1.1.4")
+            self.requires("yaml-cpp/0.8.0")
 
-        if Version(self.version) >= "2.2.0":
-            self.requires("minizip-ng/3.0.7")
+        if Version(self.version) >= "2.3.0":
+            self.requires("minizip-ng/4.0.1")
+        elif Version(self.version) >= "2.2.0":
+            self.requires("minizip-ng/3.0.9")
 
         # for tools only
         self.requires("lcms/2.14")
@@ -69,6 +72,20 @@ class OpenColorIOConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
+        if Version(self.version) >= "2.3.0" and \
+            self.settings.compiler == "gcc" and \
+            Version(self.settings.compiler.version) < "6.0":
+            raise ConanInvalidConfiguration(f"{self.ref} requires gcc >= 6.0")
+
+        if Version(self.version) < "2.0.0" and \
+            self.settings.compiler.value == "msvc" and \
+            Version(self.settings.compiler.version) >= "17.0":
+            raise ConanInvalidConfiguration(f"{self.ref} < 2.0 not building on MSVC 2022")
+
+        if Version(self.version) >= "2.3.0" and \
+            self.settings.compiler == "clang" and \
+            self.settings.compiler.libcxx == "libc++":
+            raise ConanInvalidConfiguration(f"{self.ref} deosn't support clang with libc++")
 
         # opencolorio>=2.2.0 requires minizip-ng with with_zlib
         if Version(self.version) >= "2.2.0" and \
@@ -77,7 +94,7 @@ class OpenColorIOConan(ConanFile):
 
         if Version(self.version) == "1.1.1" and self.options.shared and self.dependencies["yaml-cpp"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires static build yaml-cpp")
-        if Version(self.version) == "2.2.1" and self.options.shared and self.dependencies["minizip-ng"].options.shared:
+        if Version(self.version) >= "2.2.1" and self.options.shared and self.dependencies["minizip-ng"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires static build minizip-ng")
 
     def build_requirements(self):
