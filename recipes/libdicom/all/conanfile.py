@@ -81,3 +81,5 @@ class LibdicomConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["dicom"]
         self.cpp_info.set_property("pkg_config_name", "libdicom")
+        if not self.options.shared:
+            self.cpp_info.defines = ["DCM_STATIC"]
