@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -46,6 +47,11 @@ class ImakeConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+    
+    def validate(self):
+        if self.settings.compiler == "clang":
+            # See https://github.com/conan-io/conan-center-index/pull/16267#issuecomment-1469824504
+            raise ConanInvalidConfiguration("Recipe cannot be built with clang")
 
     def requirements(self):
         self.requires("xorg-proto/2022.2")
