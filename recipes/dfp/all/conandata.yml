@@ -1,0 +1,4 @@
+sources:
+  "1.0.2":
+    url: "https://github.com/epam/DFP/archive/refs/tags/1.0.2.tar.gz"
+    sha256: "5dbde2e4e409f0001105205eebc9e368b0c55866888a3775e965a2407730fcf9"
