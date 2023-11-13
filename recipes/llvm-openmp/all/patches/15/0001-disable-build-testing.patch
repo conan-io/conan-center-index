@@ -1,21 +1,6 @@
-diff --git a/CMakeLists_orig.txt b/CMakeLists.txt
-index b8a2822..7950dde 100644
---- a/CMakeLists_orig.txt
+--- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -21,12 +21,6 @@ if (OPENMP_STANDALONE_BUILD OR "${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_S
-   # Do not use OPENMP_LIBDIR_SUFFIX directly, use OPENMP_INSTALL_LIBDIR.
-   set(OPENMP_INSTALL_LIBDIR "lib${OPENMP_LIBDIR_SUFFIX}")
- 
--  # Group test settings.
--  set(OPENMP_TEST_C_COMPILER ${CMAKE_C_COMPILER} CACHE STRING
--    "C compiler to use for testing OpenMP runtime libraries.")
--  set(OPENMP_TEST_CXX_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING
--    "C++ compiler to use for testing OpenMP runtime libraries.")
--  set(OPENMP_LLVM_TOOLS_DIR "" CACHE PATH "Path to LLVM tools for testing.")
- else()
-   set(OPENMP_ENABLE_WERROR ${LLVM_ENABLE_WERROR})
-   # If building in tree, we honor the same install suffix LLVM uses.
-@@ -47,14 +41,6 @@ endif()
+@@ -55,25 +51,12 @@
  include(config-ix)
  include(HandleOpenMPOptions)
  
@@ -30,7 +15,28 @@ index b8a2822..7950dde 100644
  set(ENABLE_LIBOMPTARGET ON)
  # Currently libomptarget cannot be compiled on Windows or MacOS X.
  # Since the device plugins are only supported on Linux anyway,
-@@ -97,22 +83,3 @@ if (OPENMP_ENABLE_LIBOMPTARGET)
+ # there is no point in trying to compile libomptarget on other OSes.
+ if (APPLE OR WIN32 OR NOT OPENMP_HAVE_STD_CPP14_FLAG)
+   set(ENABLE_LIBOMPTARGET OFF)
+-endif()
+-
+-set(ENABLE_LIBOMPTARGET_PROFILING OFF)
+-if (ENABLE_LIBOMPTARGET AND NOT LLVM_RUNTIMES_BUILD)
+-  set(ENABLE_LIBOMPTARGET_PROFILING ON)
+ endif()
+ 
+ option(OPENMP_ENABLE_LIBOMPTARGET "Enable building libomptarget for offloading."
+@@ -86,9 +69,6 @@
+ # to enable time profiling support in the OpenMP runtime.
+ add_subdirectory(runtime)
+ 
+-# Build libompd.so
+-add_subdirectory(libompd)
+-
+ if (OPENMP_ENABLE_LIBOMPTARGET)
+   # Check that the library can actually be built.
+   if (APPLE OR WIN32)
+@@ -99,23 +79,3 @@
  
    add_subdirectory(libomptarget)
  endif()
@@ -47,6 +53,7 @@ index b8a2822..7950dde 100644
 -  add_subdirectory(tools)
 -endif()
 -
+-option(OPENMP_MSVC_NAME_SCHEME "Build dll with MSVC naming scheme." OFF)
 -
 -# Build documentation
 -add_subdirectory(docs)
