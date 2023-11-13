@@ -31,7 +31,7 @@ class freeglutConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "gles": True,
+        "gles": False,
         "print_errors_at_runtime": True,
         "print_warnings_at_runtime": True,
         "replace_glut": True,
@@ -64,8 +64,10 @@ class freeglutConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
-        if self.settings.os not in ["FreeBSD", "Linux"]:
+        if self.settings.os not in ["Android", "FreeBSD", "Linux"]:
             self.options.rm_safe("gles")
+        else:
+            self.options.gles = self.settings.os == "Android"
         if self.settings.os != "Linux":
             self.options.rm_safe("with_wayland")
 
