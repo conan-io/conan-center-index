@@ -1,8 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import copy
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.layout import basic_layout
-
 import os
 
 required_conan_version = ">=2.0.6"
@@ -34,7 +32,7 @@ class DfpConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
-        basic_layout(self, src_folder="native")
+        self.folders.source = "native"
 
     def generate(self):
         deps = CMakeDeps(self)
