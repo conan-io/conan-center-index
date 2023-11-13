@@ -29,10 +29,11 @@ add_executable(${PROJECT_NAME}
     test_package.c
 )
 
-if (${CMAKE_C_COMPILER_ID} STREQUAL "Clang" AND ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+if (${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
     target_compile_options(
         ${PROJECT_NAME}
         PRIVATE 
+        
         -fsanitize=address
         )
 
