@@ -52,3 +52,4 @@ class ExpectedLiteConan(ConanFile):
         self.cpp_info.components["expectedlite"].names["cmake_find_package"] = "expected-lite"
         self.cpp_info.components["expectedlite"].names["cmake_find_package_multi"] = "expected-lite"
         self.cpp_info.components["expectedlite"].set_property("cmake_target_name", "nonstd::expected-lite")
+        self.cpp_info.components["expectedlite"].libdirs = []

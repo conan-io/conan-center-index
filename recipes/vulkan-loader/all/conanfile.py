@@ -60,7 +60,11 @@ class VulkanLoaderConan(ConanFile):
             del self.options.with_wsi_directfb
 
     def configure(self):
-        if self.options.shared:
+        if not is_apple_os(self):
+            # static builds are not supported
+            self.options.rm_safe("shared")
+            self.package_type = "shared-library"
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
@@ -73,14 +77,12 @@ class VulkanLoaderConan(ConanFile):
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if Version(self.version) < "1.3.231" and self.options.get_safe("with_wsi_wayland"):
-            self.requires("wayland/1.21.0")
+            self.requires("wayland/1.22.0")
 
     def validate(self):
         if self.options.get_safe("with_wsi_directfb"):
             # TODO: directfb package
             raise ConanInvalidConfiguration("Conan recipe for DirectFB is not available yet.")
-        if not is_apple_os(self) and not self.options.shared:
-            raise ConanInvalidConfiguration(f"Static builds are not supported on {self.settings.os}")
         # FIXME: It should build but Visual Studio 2015 container in CI of CCI seems to lack some Win SDK headers
         check_min_vs(self, "191")
         # TODO: to replace by some version range check
@@ -90,9 +92,11 @@ class VulkanLoaderConan(ConanFile):
     def build_requirements(self):
         if self._is_pkgconf_needed:
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/1.9.3")
+                self.tool_requires("pkgconf/2.0.3")
         if self._is_mingw:
             self.tool_requires("jwasm/2.13")
+        if Version(self.version) >= "1.3.234":
+            self.tool_requires("cmake/[>=3.17.2 <4.0]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -145,12 +149,14 @@ class VulkanLoaderConan(ConanFile):
             replace_in_file(self, cmakelists, "/WX", "")
         # This fix is needed due to CMAKE_FIND_PACKAGE_PREFER_CONFIG ON in CMakeToolchain (see https://github.com/conan-io/conan/issues/10387).
         # Indeed we want to use upstream Find modules of xcb, x11, wayland and directfb. There are properly using pkgconfig under the hood.
-        replace_in_file(self, cmakelists, "find_package(XCB REQUIRED)", "find_package(XCB REQUIRED MODULE)")
-        replace_in_file(self, cmakelists, "find_package(X11 REQUIRED)", "find_package(X11 REQUIRED MODULE)")
+        if Version(self.version) < "1.3.234":
+            replace_in_file(self, cmakelists, "find_package(XCB REQUIRED)", "find_package(XCB REQUIRED MODULE)")
+            replace_in_file(self, cmakelists, "find_package(X11 REQUIRED)", "find_package(X11 REQUIRED MODULE)")
         # find_package(Wayland REQUIRED) was removed, as it was unused
         if Version(self.version) < "1.3.231":
             replace_in_file(self, cmakelists, "find_package(Wayland REQUIRED)", "find_package(Wayland REQUIRED MODULE)")
-        replace_in_file(self, cmakelists, "find_package(DirectFB REQUIRED)", "find_package(DirectFB REQUIRED MODULE)")
+        if Version(self.version) < "1.3.234":
+            replace_in_file(self, cmakelists, "find_package(DirectFB REQUIRED)", "find_package(DirectFB REQUIRED MODULE)")
 
     def build(self):
         self._patch_sources()

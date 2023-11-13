@@ -5,8 +5,5 @@ find_package(CppUTest REQUIRED CONFIG)
 
 add_executable(test_package test_package.cpp)
 target_link_libraries(test_package PRIVATE CppUTest)
+target_compile_definitions(test_package PRIVATE $<$<BOOL:${WITH_EXTENSIONS}>:WITH_EXTENSIONS>)
 
-if(WITH_EXTENSIONS)
-    add_executable(test_package_with_extensions test_package_with_extensions.cpp)
-    target_link_libraries(test_package_with_extensions PRIVATE CppUTestExt)
-endif()

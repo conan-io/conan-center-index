@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -36,6 +37,8 @@ class CppcheckConan(ConanFile):
         tc.variables["HAVE_RULES"] = self.options.get_safe("have_rules", False)
         tc.variables["USE_MATCHCOMPILER"] = "Auto"
         tc.variables["ENABLE_OSS_FUZZ"] = False
+        if Version(self.version) >= "2.11.0":
+            tc.variables["DISABLE_DMAKE"] = True
         tc.variables["FILESDIR"] = "bin"
         tc.generate()
 

@@ -1,0 +1,4 @@
+sources:
+  "0.7.6":
+    url: "https://github.com/mbits-os/lngs/archive/v0.7.6.tar.gz"
+    sha256: "85c9fd3afd5b6d5446a294f4de11221ae7fa160a62d1115a7ea0c1af17633a0b"

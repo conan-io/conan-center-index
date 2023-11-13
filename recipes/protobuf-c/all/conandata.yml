@@ -1,0 +1,10 @@
+sources:
+  "1.4.1":
+    url: https://github.com/protobuf-c/protobuf-c/archive/v1.4.1.tar.gz
+    sha256: 99be336cdb15dfc5827efe34e5ac9aaa962e2485db547dd254d2a122a7d23102
+patches:
+  "1.4.1":
+    # TODO: This won't be needed once upstream PR (https://github.com/protobuf-c/protobuf-c/pull/555) gets merged
+    - patch_file: "patches/1.4.1-cmake-protobuf-target.patch"
+      patch_description: "Fit Protobuf directory variables to official targets"
+      patch_type: conan

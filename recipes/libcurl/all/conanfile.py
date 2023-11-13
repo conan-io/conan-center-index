@@ -183,19 +183,19 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/5.5.1")
+            self.requires("wolfssl/5.6.3")
         if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.51.0")
+            self.requires("libnghttp2/1.56.0")
         if self.options.with_libssh2:
-            self.requires("libssh2/1.10.0")
+            self.requires("libssh2/1.11.0")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_brotli:
-            self.requires("brotli/1.0.9")
+            self.requires("brotli/1.1.0")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.19.0")
+            self.requires("c-ares/1.19.1")
         if self.options.get_safe("with_libpsl"):
             self.requires("libpsl/0.21.1")
 
@@ -216,7 +216,7 @@ class LibcurlConan(ConanFile):
         else:
             self.tool_requires("libtool/2.4.7")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/1.9.3")
+                self.tool_requires("pkgconf/2.0.2")
             if self.settings.os in [ "tvOS", "watchOS" ]:
                 self.tool_requires("gnu-config/cci.20210814")
             if self._settings_build.os == "Windows":
@@ -226,7 +226,9 @@ class LibcurlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        download(self, "https://curl.se/ca/cacert-2023-01-10.pem", "cacert.pem", verify=True, sha256="fb1ecd641d0a02c01bc9036d513cb658bbda62a75e246bedbc01764560a639f0")
+        cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or "https://curl.se/ca/cacert-2023-01-10.pem"
+        cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or "fb1ecd641d0a02c01bc9036d513cb658bbda62a75e246bedbc01764560a639f0"
+        download(self, cert_url, "cacert.pem", verify=True, sha256=cert_sha256)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -301,7 +303,7 @@ class LibcurlConan(ConanFile):
                                   "AC_CHECK_LIB(z,",
                                   f"AC_CHECK_LIB({zlib_name},")
             replace_in_file(self, configure_ac,
-                                  "-lz ",
+                                  "-lz",
                                   f"-l{zlib_name} ")
 
         if self._is_mingw and self.options.shared:
@@ -328,11 +330,15 @@ class LibcurlConan(ConanFile):
             return
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # TODO: check this patch, it's suspicious
-        replace_in_file(self, cmakelists,
-                              "include(CurlSymbolHiding)", "")
+        if Version(self.version) < "8.4.0":
+            replace_in_file(self, cmakelists,
+                                "include(CurlSymbolHiding)", "")
 
         # brotli
-        replace_in_file(self, cmakelists, "find_package(Brotli QUIET)", "find_package(brotli REQUIRED CONFIG)")
+        if Version(self.version) < "8.2.0":
+            replace_in_file(self, cmakelists, "find_package(Brotli QUIET)", "find_package(brotli REQUIRED CONFIG)")
+        else:
+            replace_in_file(self, cmakelists, "find_package(Brotli REQUIRED)", "find_package(brotli REQUIRED CONFIG)")
         replace_in_file(self, cmakelists, "if(BROTLI_FOUND)", "if(brotli_FOUND)")
         replace_in_file(self, cmakelists, "${BROTLI_LIBRARIES}", "brotli::brotli")
         replace_in_file(self, cmakelists, "${BROTLI_INCLUDE_DIRS}", "${brotli_INCLUDE_DIRS}")
@@ -618,6 +624,13 @@ class LibcurlConan(ConanFile):
             tc.cache_variables["CURL_CA_PATH"] = "none"
 
         tc.cache_variables["CURL_CA_FALLBACK"] = self.options.with_ca_fallback
+
+        # TODO: remove this when https://github.com/conan-io/conan/issues/12180 will be fixed.
+        if  Version(self.version) >= "8.3.0":
+            tc.variables["HAVE_SSL_SET0_WBIO"] = False
+        if  Version(self.version) >= "8.4.0":
+            tc.variables["HAVE_OPENSSL_SRP"] = True
+            tc.variables["HAVE_SSL_CTX_SET_QUIC_METHOD"] = True
 
         tc.generate()
 

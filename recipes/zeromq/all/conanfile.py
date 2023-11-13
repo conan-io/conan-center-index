@@ -12,17 +12,17 @@ required_conan_version = ">=1.53.0"
 
 class ZeroMQConan(ConanFile):
     name = "zeromq"
-    homepage = "https://github.com/zeromq/libzmq"
     description = "ZeroMQ is a community of projects focused on decentralized messaging and computing"
-    topics = ("zmq", "libzmq", "message-queue", "asynchronous")
+    license = ("DocumentRef-ZeroMQ:LicenseRef-LGPL-3.0-or-later-ZeroMQ-Linking-Exception", "MPL-2.0")
     url = "https://github.com/conan-io/conan-center-index"
-    license = "LGPL-3.0"
-
+    homepage = "https://github.com/zeromq/libzmq"
+    topics = ("zmq", "libzmq", "message-queue", "asynchronous")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "encryption": [None, "libsodium", "tweetnacl"],
+        "encryption": [False, "libsodium", "tweetnacl"],
         "with_norm": [True, False],
         "poller": [None, "kqueue", "epoll", "devpoll", "pollset", "poll", "select"],
         "with_draft_api": [True, False],
@@ -46,6 +46,10 @@ class ZeroMQConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "4.3.5":
+            self.license = "MPL-2.0"
+        else:
+            self.license = "DocumentRef-ZeroMQ:LicenseRef-LGPL-3.0-or-later-ZeroMQ-Linking-Exception"
 
     def configure(self):
         if self.options.shared:
@@ -56,7 +60,7 @@ class ZeroMQConan(ConanFile):
 
     def requirements(self):
         if self.options.encryption == "libsodium":
-            self.requires("libsodium/1.0.18")
+            self.requires("libsodium/1.0.19")
         if self.options.with_norm:
             self.requires("norm/1.5.9")
 
@@ -100,7 +104,12 @@ class ZeroMQConan(ConanFile):
             cpp_info_sodium = self.dependencies["libsodium"].cpp_info
             sodium_config = cpp_info_sodium.get_property("cmake_file_name") or "libsodium"
             sodium_target = cpp_info_sodium.get_property("cmake_target_name") or "libsodium::libsodium"
-            find_sodium = "find_package(Sodium)" if Version(self.version) < "4.3.3" else "find_package(\"Sodium\")"
+            if Version(self.version) < "4.3.3":
+                find_sodium = "find_package(Sodium)"
+            elif Version(self.version) < "4.3.5":
+                find_sodium = "find_package(\"Sodium\")"
+            else:
+                find_sodium = "find_package(\"sodium\")"
             replace_in_file(self, cmakelists, find_sodium, f"find_package({sodium_config} REQUIRED CONFIG)")
             replace_in_file(self, cmakelists, "SODIUM_FOUND", f"{sodium_config}_FOUND")
             replace_in_file(self, cmakelists, "SODIUM_INCLUDE_DIRS", f"{sodium_config}_INCLUDE_DIRS")
@@ -113,7 +122,10 @@ class ZeroMQConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if Version(self.version) >= "4.3.5":
+            copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        else:
+            copy(self, "COPYING*", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))

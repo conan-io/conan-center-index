@@ -1,0 +1,9 @@
+sources:
+  "1.3.1":
+    url: "https://github.com/ethz-asl/libpointmatcher/archive/refs/tags/1.3.1.tar.gz"
+    sha256: "82f93d2e7689efeef8837b8e969919b51c51ad4a1d1fa921c4dd8df4811378ab"
+patches:
+  "1.3.1":
+    - patch_file: "patches/1.3.1-0001-fix-cmake.patch"
+      patch_description: "Fix upstream CMakeLists"
+      patch_type: "conan"

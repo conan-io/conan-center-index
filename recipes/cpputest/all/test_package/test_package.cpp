@@ -1,6 +1,9 @@
 #include <CppUTest/TestHarness.h>
 #include <CppUTest/TestRegistry.h>
 #include <CppUTest/CommandLineTestRunner.h>
+#if defined(WITH_EXTENSIONS)
+#include <CppUTestExt/GTestSupport.h> // Only found if extensions enabled
+#endif
 
 TEST_GROUP(FirstTestGroup)
 {

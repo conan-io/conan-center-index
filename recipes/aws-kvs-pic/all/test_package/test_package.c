@@ -1,5 +1,6 @@
-#include <stdio.h>
 #include "com/amazonaws/kinesis/video/client/Include.h"
+
+#include <stdio.h>
 
 int main(int argc, char *argv[])
 {

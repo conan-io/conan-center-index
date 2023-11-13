@@ -1,12 +1,13 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.microsoft import is_msvc
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class LibrdkafkaConan(ConanFile):
@@ -19,6 +20,7 @@ class LibrdkafkaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/edenhill/librdkafka"
     topics = ("kafka", "consumer", "producer")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -51,8 +53,6 @@ class LibrdkafkaConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "1.9.0":
-            del self.options.curl
 
     def configure(self):
         if self.options.shared:
@@ -64,25 +64,27 @@ class LibrdkafkaConan(ConanFile):
     def requirements(self):
         self.requires("lz4/1.9.4")
         if self.options.zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.5")
         if self.options.ssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
         if self._depends_on_cyrus_sasl:
             self.requires("cyrus-sasl/2.1.27")
-        if self.options.get_safe("curl", False):
-            self.requires("libcurl/7.87.0")
+        if self.options.curl:
+            self.requires("libcurl/[>=7.78.0 <9]")
 
     def build_requirements(self):
         if self._depends_on_cyrus_sasl:
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = CMakeToolchain(self)
         tc.variables["WITHOUT_OPTIMIZATION"] = self.settings.build_type == "Debug"
         tc.variables["ENABLE_DEVEL"] = self.settings.build_type == "Debug"
@@ -107,17 +109,15 @@ class LibrdkafkaConan(ConanFile):
         if self._depends_on_cyrus_sasl:
             pc = PkgConfigDeps(self)
             pc.generate()
-            # inject pkgconf env vars in build context
-            ms = VirtualBuildEnv(self)
-            ms.generate(scope="build")
-            # also need to inject generators folder into PKG_CONFIG_PATH
-            env = Environment()
-            env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
-            envvars = env.vars(self, scope="build")
-            envvars.save_script("conanbuildenv_pkg_config_path")
 
     def build(self):
         apply_conandata_patches(self)
+        # There are references to libcrypto.lib and libssl.lib in rdkafka_ssl.c for versions >= 1.8.0
+        if Version(self.version) >= "1.8.0" and is_msvc(self) and \
+                self.settings.build_type == "Debug" and self.options.get_safe("ssl", False):
+            rdkafka_ssl_path = os.path.join(self.source_folder, "src", "rdkafka_ssl.c")
+            replace_in_file(self, rdkafka_ssl_path, "libcrypto.lib", "libcryptod.lib")
+            replace_in_file(self, rdkafka_ssl_path, "libssl.lib", "libssld.lib")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -166,15 +166,6 @@ class LibrdkafkaConan(ConanFile):
         self.cpp_info.components["rdkafka++"].set_property("pkg_config_name", "rdkafka++")
         self.cpp_info.components["rdkafka++"].libs = ["rdkafka++"]
         self.cpp_info.components["rdkafka++"].requires = ["rdkafka"]
-
-        # FIXME: remove when Conan 1.50 is used in c3i and update the Conan required version
-        # from that version components don't have empty libdirs by default
-        self.cpp_info.components["rdkafka"].includedirs = ["include"]
-        self.cpp_info.components["rdkafka"].libdirs= ["lib"]
-        self.cpp_info.components["rdkafka"].bindirs = ["bin"]
-        self.cpp_info.components["rdkafka++"].includedirs = ["include"]
-        self.cpp_info.components["rdkafka++"].libdirs = ["lib"]
-        self.cpp_info.components["rdkafka++"].bindirs = ["bin"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "RdKafka"

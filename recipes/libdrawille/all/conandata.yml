@@ -1,0 +1,12 @@
+sources:
+  "cci.20160428":
+    url: "https://github.com/Huulivoide/libdrawille/archive/e7e366e739c80120690dd0ee9f41648d2556f800.tar.gz"
+    sha256: "c4f4e4b74d419bb06e8fdf4886421216d65eb095e69fb8bcdeb33960bbd7ae16"
+patches:
+  "cci.20160428":
+    - patch_file: "patches/0001-fix-cmake.patch"
+      patch_description: "disable test, examples add installer, link mathlib only on Linux"
+      patch_type: "conan"
+    - patch_file: "patches/0002-support-msvc.patch"
+      patch_description: "rename restrict keyword for msvc"
+      patch_type: "portability"

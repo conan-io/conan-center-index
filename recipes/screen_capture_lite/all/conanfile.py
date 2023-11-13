@@ -1,14 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.microsoft import is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.apple import is_apple_os
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
+
 
 class ScreenCaptureLiteConan(ConanFile):
     name = "screen_capture_lite"
@@ -30,7 +30,7 @@ class ScreenCaptureLiteConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 20
+        return "20" if Version(self.version) < "17.1.596" else "17"
 
     @property
     def _compilers_minimum_version(self):
@@ -61,36 +61,25 @@ class ScreenCaptureLiteConan(ConanFile):
             self.requires("xorg/system")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.info.settings.compiler == "clang" and self.info.settings.compiler.get_safe("libcxx") == "libstdc++":
+        if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} does not support clang with libstdc++")
 
         # Since 17.1.451, screen_capture_lite uses CGPreflightScreenCaptureAccess which is provided by macOS SDK 11 later.
         if Version(self.version) >= "17.1.451" and \
-            is_apple_os(self) and Version(self.info.settings.compiler.version) <= "11":
+            self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) <= "11":
             raise ConanInvalidConfiguration(f"{self.ref} requires CGPreflightScreenCaptureAccess which support macOS SDK 11 later.")
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output=output)
-            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
-        if Version(self.version) >= "17.1.596" and not self._cmake_new_enough("3.16"):
-            self.tool_requires("cmake/3.25.3")
+        if Version(self.version) >= "17.1.596":
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -103,7 +92,6 @@ class ScreenCaptureLiteConan(ConanFile):
             tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
         if Version(self.version) >= "17.1.613":
             tc.variables["BUILD_CSHARP"] = False
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)

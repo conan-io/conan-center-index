@@ -43,8 +43,8 @@ class SpirvtoolsConan(ConanFile):
         return {
             "17": {
                 "apple-clang": "10",
-                "clang": "5",
-                "gcc": "7",
+                "clang": "7" if Version(self.version) >= "1.3.250" else "5",
+                "gcc": "8" if Version(self.version) >= "1.3.250" else "7",
                 "msvc": "191",
                 "Visual Studio": "15",
             }
@@ -74,21 +74,9 @@ class SpirvtoolsConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output)
-            m = re.search(r"cmake version (\d+\.\d+\.\d+)", output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
         if Version(self.version) >= "1.3.239":
-            if not self._cmake_new_enough("3.17.2"):
-                self.tool_requires("cmake/3.25.3")
+            self.tool_requires("cmake/[>=3.17.2 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -287,3 +275,6 @@ class SpirvtoolsConan(ConanFile):
             self.cpp_info.components["spirv-tools-diff"].names["cmake_find_package_multi"] = "SPIRV-Tools-diff"
             self.cpp_info.components["spirv-tools-diff"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
             self.cpp_info.components["spirv-tools-diff"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+
+        if Version(self.version) < "1.3" and not self.options.shared:
+            del self.cpp_info.components["spirv-tools-diff"]

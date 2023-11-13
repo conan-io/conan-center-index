@@ -1,4 +1,14 @@
 versions:
+  "20231101":
+    folder: all
+  "20230901":
+    folder: all
+  "20230801":
+    folder: all
+  "20230701":
+    folder: all
+  "20230602":
+    folder: all
   "20230301":
     folder: all
   "20230201":
@@ -12,12 +22,4 @@ versions:
   "20211101":
     folder: all
   "20210901":
-    folder: all
-  "20210601":
-    folder: all
-  "20210401":
-    folder: all
-  "20210202":
-    folder: all
-  "20201101":
     folder: all

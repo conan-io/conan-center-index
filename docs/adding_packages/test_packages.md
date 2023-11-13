@@ -20,7 +20,7 @@ themselves. It's possible to have ConanCenter run `conan test` on more then one 
 See the [recipe files and structures](README.md#recipe-files-structure) for a visual.
 
 All ConanCenterIndex recipe should have a two [test_folders](https://docs.conan.io/1/reference/commands/creator/create.html?highlight=test_folder)
-One for the current CMake generator in `test_package/` and on for the deprecated generators in `test_v1_package/`.
+One for the current CMake generator in `test_package/`.
 
 Please refer to the [Package Templates](../package_templates/) for the current practices about which files and what their content should be.
 
@@ -39,11 +39,7 @@ target_link_libraries(test_ranges PRIVATE fmt::fmt)
 
 Refer to the [package template](https://github.com/conan-io/conan-center-index/blob/master/docs/package_templates/cmake_package/all/test_package/CMakeLists.txt) for more examples.
 
-> **Notes** It's still important to test targets provided by `cmake_find_package[_multi]` generators.
-> It should help in the migration (and compatibility) with Conan v2. See [v1 test package template](https://github.com/conan-io/conan-center-index/blob/master/docs/package_templates/cmake_package/all/test_v1_package/CMakeLists.txt) for details.
-> You can see read [this conversation](https://github.com/conan-io/conan-center-index/issues/12888#issuecomment-1290817799) for more context.
-
-In ConanCenter we try to accurately represent the names of the targets and the information provided by CMake's modules and config files that some libraries
+In ConanCenterIndex, we try to accurately represent the names of the targets and the information provided by CMake's modules and config files that some libraries
 provide. If CMake or the library itself don't enforce any target name, the default ones provided by Conan should be recommended. The minimal project
 in the `test_package` folder should serve as an example of the best way to consume the package, and targets are preferred over raw variables.
 
@@ -60,7 +56,7 @@ of them together in the testing logs.
 Sometimes it is useful to test the package using different build systems (CMake, Autotools,...). Instead of adding complex logic to one
 `test_package/conanfile.py` file, it is better to add another `test_<something>/conanfile.py` file with a minimal example for that build system. That
 way the examples will be short and easy to understand and maintain. In some other situations it could be useful to test different Conan generators
-(`cmake_find_package`, `CMakeDeps`,...) using different folders and `conanfile.py` files.
+(e.g. `CMakeDeps`) using different folders and `conanfile.py` files.
 
 When using more than one `test_<something>` folder, create a different project for each of them to keep the content of the `conanfile.py` and the
 project files as simple as possible, without the need of extra logic to handle different scenarios.

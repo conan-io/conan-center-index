@@ -1,43 +1,54 @@
-from conans import ConanFile, CMake, tools
 import os
+
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+
+required_conan_version = ">=1.52.0"
+
 
 class FireHppConan(ConanFile):
     name = "fire-hpp"
-    homepage = "https://github.com/kongaskristjan/fire-hpp"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "Fire for C++: Create fully functional CLIs using function signatures"
-    topics = ("command-line", "argument", "parser")
     license = "BSL-1.0"
-    no_copy_source = True
-    settings = "os", "arch", "compiler", "build_type"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/kongaskristjan/fire-hpp"
+    topics = ("command-line", "argument", "parser", "header-only")
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
-    _cmake = None
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{}-{}".format(self.name, self.version)
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["FIRE_EXAMPLES"] = False
-        self._cmake.definitions["FIRE_UNIT_TESTS"] = False
-        self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
-        return self._cmake
-
-    def package(self):
-        cmake = self._configure_cmake()
-        cmake.install()
-        self.copy("LICENCE", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["FIRE_EXAMPLES"] = False
+        tc.variables["FIRE_UNIT_TESTS"] = False
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        cmake = CMake(self)
+        cmake.install()
+        copy(self, "LICENCE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        rmdir(self, os.path.join(self.package_folder, "lib"))
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

@@ -1,3 +1,6 @@
+// workaround for a missing include in rtm
+#include <limits>
+
 #include <rtm/constants.h>
 #include <rtm/scalarf.h>
 #include <rtm/scalard.h>
