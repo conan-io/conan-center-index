@@ -1,7 +1,7 @@
 sources:
   "1.0.2":
-    url: "https://github.com/epam/DFP/archive/refs/tags/1.0.2.tar.gz"
-    sha256: "5dbde2e4e409f0001105205eebc9e368b0c55866888a3775e965a2407730fcf9"
+    url: "https://github.com/epam/DFP/archive/refs/tags/1.0.2-cxx.tar.gz"
+    sha256: "ff8e4d616878e03c57ca9933d22ce2079c3f62cfbc98a7503005ed770e22da87"
 patches:
   "1.0.2":
     - patch_file: "patches/1.0.2-0001-Add-Cxx-Headers.patch"
