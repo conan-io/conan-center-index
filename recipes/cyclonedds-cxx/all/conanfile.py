@@ -60,11 +60,11 @@ class CycloneDDSCXXConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self,src_folder="src")
+        cmake_layout(self)
 
     def requirements(self):
         # Use the corresponding version of cyclonedds
-        self.requires("cyclonedds/{}".format(self.version))
+        self.requires("cyclonedds/{}".format(self.version), transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -149,6 +149,5 @@ class CycloneDDSCXXConan(ConanFile):
         self.cpp_info.includedirs = ["include/ddscxx"]
         self.cpp_info.components["ddscxx"].libs = ["ddscxx"]
         self.cpp_info.components["ddscxx"].includedirs = ["include/ddscxx"]
-        self.cpp_info.components["ddscxx"].requires = ["CycloneDDS::CycloneDDS"]
         self.cpp_info.components["ddscxx"].set_property("cmake_target_name", "CycloneDDS-CXX::ddscxx")
         self.cpp_info.components["ddscxx"].set_property("pkg_config_name", "CycloneDDS-CXX")
