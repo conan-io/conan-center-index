@@ -24,15 +24,12 @@ class DfpConan(ConanFile):
     default_options = {"shared": False}
 
     # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "LICENSE", "intel-eula.txt", "native/CMakeLists.txt", "native/src/*", "native/include/*"
+    exports_sources = "LICENSE", "intel-eula.txt", "CMakeLists.txt", "src/*", "include/*"
 
     def configure(self):
         # it's a C library
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-
-    def layout(self):
-        self.folders.source = "native"
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -46,8 +43,8 @@ class DfpConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, ".."))
-        copy(self, "intel-eula.txt", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, ".."))
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "intel-eula.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 
