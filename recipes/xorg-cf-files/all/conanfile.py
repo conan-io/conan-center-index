@@ -48,6 +48,9 @@ class XorgCfFilesConan(ConanFile):
     def validate(self):
         if is_apple_os(self):
             raise ConanInvalidConfiguration(f"{self.ref} does not support Apple operating systems.")
+        if self.settings.compiler == "clang":
+            # See https://github.com/conan-io/conan-center-index/pull/16267#issuecomment-1469824504
+            raise ConanInvalidConfiguration("Recipe cannot be built with clang")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
