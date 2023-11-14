@@ -3,7 +3,7 @@ from conan.tools.files import copy
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 import os
 
-required_conan_version = ">=2.0.6"
+required_conan_version = ">=1.54.0"
 
 
 class DfpConan(ConanFile):

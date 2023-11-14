@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
-project(demo)
+project(test_package LANGUAGES CXX)
 
 find_package(dfp CONFIG REQUIRED)
 
 
-add_executable(demo src/demo.cpp)
-target_link_libraries(demo dfp::dfp)
+add_executable(${PROJECT_NAME} src/demo.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE dfp::dfp)
