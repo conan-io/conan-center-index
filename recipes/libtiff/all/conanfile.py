@@ -1,10 +1,12 @@
+import os
+from pathlib import Path
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-import os
 
 required_conan_version = ">=1.53.0"
 
@@ -25,6 +27,7 @@ class LibtiffConan(ConanFile):
         "lzma": [True, False],
         "jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "zlib": [True, False],
+        "lerc": [True, False],
         "libdeflate": [True, False],
         "zstd": [True, False],
         "jbig": [True, False],
@@ -37,6 +40,7 @@ class LibtiffConan(ConanFile):
         "lzma": True,
         "jpeg": "libjpeg",
         "zlib": True,
+        "lerc": False,
         "libdeflate": True,
         "zstd": True,
         "jbig": True,
@@ -80,6 +84,8 @@ class LibtiffConan(ConanFile):
             self.requires("zstd/1.5.5")
         if self.options.webp:
             self.requires("libwebp/1.3.2")
+        if self.options.lerc:
+            self.requires("lerc/4.0.4")
 
     def validate(self):
         if self.options.libdeflate and not self.options.zlib:
@@ -103,7 +109,7 @@ class LibtiffConan(ConanFile):
         tc.variables["libdeflate"] = self.options.libdeflate
         tc.variables["zstd"] = self.options.zstd
         tc.variables["webp"] = self.options.webp
-        tc.variables["lerc"] = False # TODO: add lerc support for libtiff versions >= 4.3.0
+        tc.variables["lerc"] = self.options.lerc
         if Version(self.version) >= "4.5.0":
             # Disable tools, test, contrib, man & html generation
             tc.variables["tiff-tools"] = False
@@ -124,14 +130,16 @@ class LibtiffConan(ConanFile):
             deps.set_property("libdeflate", "cmake_file_name", "Deflate")
             deps.set_property("libdeflate", "cmake_target_name", "Deflate::Deflate")
             deps.set_property("zstd", "cmake_file_name", "ZSTD")
+        deps.set_property("lerc", "cmake_target_name", "LERC::LERC")
         deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        # remove FindXXXX for conan dependencies
-        for module in ["Deflate", "JBIG", "JPEG", "LERC", "WebP", "ZSTD", "liblzma", "LibLZMA"]:
-            rm(self, f"Find{module}.cmake", os.path.join(self.source_folder, "cmake"))
+        # remove all FindXXXX for conan dependencies
+        for module in Path(self.source_folder, "cmake").glob("Find*.cmake"):
+            if module.name != "FindCMath.cmake":
+                module.unlink()
 
         # Export symbols of tiffxx for msvc shared
         replace_in_file(self, os.path.join(self.source_folder, "libtiff", "CMakeLists.txt"),
@@ -189,3 +197,5 @@ class LibtiffConan(ConanFile):
             self.cpp_info.requires.append("zstd::zstd")
         if self.options.webp:
             self.cpp_info.requires.append("libwebp::webp")
+        if self.options.lerc:
+            self.cpp_info.requires.append("lerc::lerc")
