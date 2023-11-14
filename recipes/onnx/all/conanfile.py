@@ -8,6 +8,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
+import sys
 import textwrap
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
@@ -99,6 +100,9 @@ class OnnxConan(ConanFile):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
         tc = CMakeToolchain(self)
+        # https://cmake.org/cmake/help/v3.28/module/FindPythonInterp.html
+        # https://github.com/onnx/onnx/blob/1014f41f17ecc778d63e760a994579d96ba471ff/CMakeLists.txt#L119C1-L119C50
+        tc.variables["PYTHON_EXECUTABLE"] = sys.executable.replace("\\", "/")
         tc.variables["ONNX_BUILD_BENCHMARKS"] = False
         tc.variables["ONNX_USE_PROTOBUF_SHARED_LIBS"] = self.dependencies.host["protobuf"].options.shared
         tc.variables["BUILD_ONNX_PYTHON"] = False

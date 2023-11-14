@@ -1,8 +1,7 @@
 sources:
   "cci.latest":
-    url: [
-            "https://github.com/msys2/msys2-installer/releases/download/2022-01-18/msys2-base-x86_64-20220118.tar.xz",
-            "http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20220118.tar.xz",
-            "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20220118.tar.xz",
-    ]
-    sha256: "2ec6fe9c3e01ecba10b9ffa708ea13bf1f8c9739e5ce9da853b77f1f3e270034"
+    url:
+      - "https://github.com/msys2/msys2-installer/releases/download/2023-10-26/msys2-base-x86_64-20231026.tar.xz"
+      - "http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20231026.tar.xz"
+      - "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20231026.tar.xz"
+    sha256: "fa75120560563a311241c05882016978bd35612692c7f0d39815a27837bff27d"
