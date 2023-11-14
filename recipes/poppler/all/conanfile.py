@@ -161,10 +161,6 @@ class PopplerConan(ConanFile):
         elif Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++14 support required, which your compiler does not support.")
 
-        if self.options.with_nss:
-            # FIXME: missing nss recipe
-            raise ConanInvalidConfiguration("nss is not (yet) available on cci")
-
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.0.3")
