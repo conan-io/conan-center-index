@@ -105,8 +105,9 @@ class PopplerConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("poppler-data/0.4.11")
-        self.requires("freetype/2.13.0")
+        self.requires("poppler-data/0.4.11", transitive_headers=True, transitive_libs=True)
+        # https://gitlab.freedesktop.org/poppler/poppler/-/blob/poppler-22.04.0/splash/SplashFTFont.h#L30
+        self.requires("freetype/2.13.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_libiconv"):
             self.requires("libiconv/1.17")
         if self.options.fontconfiguration == "fontconfig":
@@ -231,16 +232,20 @@ class PopplerConan(ConanFile):
 
         tc.generate()
 
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        # Rename to output variables in upper-case
+        deps.set_property("freetype", "cmake_file_name", "FREETYPE")
+        deps.set_property("cairo", "cmake_file_name", "CAIRO")
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "Freetype", "FREETYPE")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "Cairo", "CAIRO")
         if Version(self.version) < "21.07.0" and not self.options.shared:
             poppler_global = os.path.join(self.source_folder, "cpp", "poppler-global.h")
             replace_in_file(self, poppler_global, "__declspec(dllimport)", "")
             replace_in_file(self, poppler_global, "__declspec(dllexport)", "")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "FREETYPE_INCLUDE_DIRS", "Freetype_INCLUDE_DIRS")
 
     def build(self):
         self._patch_sources()

@@ -42,29 +42,3 @@ index 16e3070..fba2259 100644
  endif()
  
  # Check for Cairo rendering backend
-diff --git a/qt5/src/CMakeLists.txt b/qt5/src/CMakeLists.txt
-index 01d3e3e..dc1c662 100644
---- a/qt5/src/CMakeLists.txt
-+++ b/qt5/src/CMakeLists.txt
-@@ -43,7 +43,7 @@ if(MINGW AND BUILD_SHARED_LIBS)
-     get_target_property(POPPLER_QT5_SOVERSION poppler-qt5 SOVERSION)
-     set_target_properties(poppler-qt5 PROPERTIES SUFFIX "-${POPPLER_QT5_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
- endif()
--target_link_libraries(poppler-qt5 poppler Qt5::Core Qt5::Gui Qt5::Xml CONAN_PKG::freetype)
-+target_link_libraries(poppler-qt5 poppler CONAN_PKG::qt CONAN_PKG::freetype)
- if(MSVC)
- target_link_libraries(poppler-qt5 poppler ${poppler_LIBS})
- endif()
-diff --git a/qt6/src/CMakeLists.txt b/qt6/src/CMakeLists.txt
-index 6337173..f275c92 100644
---- a/qt6/src/CMakeLists.txt
-+++ b/qt6/src/CMakeLists.txt
-@@ -43,7 +43,7 @@ if(MINGW AND BUILD_SHARED_LIBS)
-     get_target_property(POPPLER_QT6_SOVERSION poppler-qt6 SOVERSION)
-     set_target_properties(poppler-qt6 PROPERTIES SUFFIX "-${POPPLER_QT6_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
- endif()
--target_link_libraries(poppler-qt6 poppler Qt6::Core Qt6::Gui CONAN_PKG::freetype})
-+target_link_libraries(poppler-qt6 poppler CONAN_PKG::qt CONAN_PKG::freetype})
- if(MSVC)
- target_link_libraries(poppler-qt6 poppler ${poppler_LIBS})
- endif()

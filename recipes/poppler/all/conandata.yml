@@ -4,8 +4,6 @@ sources:
     sha256: "e26ab29f68065de4d6562f0a3e2b5435a83ca92be573b99a1c81998fa286a4d4"
 patches:
   "21.07.0":
-    - patch_file: "patches/21/0001-cmake-use-PROJECT_SOURCE_DIR-fix-CMAKE_MODULE_PATH.patch"
-    - patch_file: "patches/21/0002-cmake-use_CONAN_PKG-targets.patch"
     - patch_file: "patches/21/0004-add-POPPLER_DATADIR-environment-variable.patch"
     - patch_file: "patches/21/0005-fix-visual-studio-basetsd.h-libjpeg-INT32.patch"
     - patch_file: "patches/21/0007-cmake-use_conan_qt.patch"
