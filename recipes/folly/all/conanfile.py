@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
@@ -96,13 +97,13 @@ class FollyConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.settings.os == "Macos" and self.settings.arch != "x86_64":
+        if is_apple_os(self) and self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Conan currently requires a 64bit target architecture for Folly on Macos")
 
         if self.settings.os == "Windows" and self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Folly requires a 64bit target architecture on Windows")
 
-        if self.settings.os in ["Macos", "Windows"] and self.options.shared:
+        if (is_apple_os(self) or self.settings.os == "Windows") and self.options.shared:
             raise ConanInvalidConfiguration(f"Folly could not be built on {self.settings.os} as shared library")
 
         if self.settings.os == "Windows":
@@ -260,11 +261,11 @@ class FollyConan(ConanFile):
 
         if (self.settings.os in ["Linux", "FreeBSD"] and self.settings.compiler == "clang" and
             self.settings.compiler.libcxx == "libstdc++") or \
-           (self.settings.os == "Macos" and self.settings.compiler == "apple-clang" and
+           (self.settings.compiler == "apple-clang" and
             Version(self.settings.compiler.version.value) == "9.0" and self.settings.compiler.libcxx == "libc++"):
             self.cpp_info.components["libfolly"].system_libs.append("atomic")
 
-        if self.settings.os == "Macos" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "11.0":
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "11.0":
             self.cpp_info.components["libfolly"].system_libs.append("c++abi")
 
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9":
