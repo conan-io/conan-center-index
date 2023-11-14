@@ -54,6 +54,9 @@ class LibtiffConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) <= "4.5.0":
+            # test_package.cpp segfaults with older libtiff versions
+            self.options.cxx = False
 
     def configure(self):
         if self.options.shared:
@@ -169,33 +172,41 @@ class LibtiffConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "TIFF")
-        self.cpp_info.set_property("cmake_target_name", "TIFF::TIFF")
-        self.cpp_info.set_property("pkg_config_name", f"libtiff-{Version(self.version).major}")
+
+        self.cpp_info.components["tiff"].set_property("cmake_target_name", "TIFF::TIFF")
+        self.cpp_info.components["tiff"].set_property("pkg_config_name", f"libtiff-{Version(self.version).major}")
         suffix = "d" if is_msvc(self) and self.settings.build_type == "Debug" else ""
-        if self.options.cxx:
-            self.cpp_info.libs.append(f"tiffxx{suffix}")
-        self.cpp_info.libs.append(f"tiff{suffix}")
+        self.cpp_info.components["tiff"].libs.append(f"tiff{suffix}")
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["tiff"].system_libs.append("m")
 
         self.cpp_info.requires = []
         if self.options.zlib:
-            self.cpp_info.requires.append("zlib::zlib")
+            self.cpp_info.components["tiff"].requires.append("zlib::zlib")
         if self.options.libdeflate:
-            self.cpp_info.requires.append("libdeflate::libdeflate")
+            self.cpp_info.components["tiff"].requires.append("libdeflate::libdeflate")
         if self.options.lzma:
-            self.cpp_info.requires.append("xz_utils::xz_utils")
+            self.cpp_info.components["tiff"].requires.append("xz_utils::xz_utils")
         if self.options.jpeg == "libjpeg":
-            self.cpp_info.requires.append("libjpeg::libjpeg")
+            self.cpp_info.components["tiff"].requires.append("libjpeg::libjpeg")
         elif self.options.jpeg == "libjpeg-turbo":
-            self.cpp_info.requires.append("libjpeg-turbo::jpeg")
+            self.cpp_info.components["tiff"].requires.append("libjpeg-turbo::jpeg")
         elif self.options.jpeg == "mozjpeg":
-            self.cpp_info.requires.append("mozjpeg::libjpeg")
+            self.cpp_info.components["tiff"].requires.append("mozjpeg::libjpeg")
         if self.options.jbig:
-            self.cpp_info.requires.append("jbig::jbig")
+            self.cpp_info.components["tiff"].requires.append("jbig::jbig")
         if self.options.zstd:
-            self.cpp_info.requires.append("zstd::zstd")
+            self.cpp_info.components["tiff"].requires.append("zstd::zstd")
         if self.options.webp:
-            self.cpp_info.requires.append("libwebp::webp")
+            self.cpp_info.components["tiff"].requires.append("libwebp::webp")
         if self.options.lerc:
-            self.cpp_info.requires.append("lerc::lerc")
+            self.cpp_info.components["tiff"].requires.append("lerc::lerc")
+
+        if self.options.cxx:
+            self.cpp_info.components["tiffxx"].libs.append(f"tiffxx{suffix}")
+            # https://cmake.org/cmake/help/latest/module/FindTIFF.html#imported-targets
+            # https://github.com/libsdl-org/libtiff/blob/v4.6.0/libtiff/CMakeLists.txt#L229
+            self.cpp_info.components["tiffxx"].set_property("cmake_target_name", "TIFF::CXX")
+            # Note: the project does not export tiffxx as a pkg-config component, this is unofficial
+            self.cpp_info.components["tiffxx"].set_property("pkg_config_name", f"libtiffxx-{Version(self.version).major}")
+            self.cpp_info.components["tiffxx"].requires = ["tiff"]
