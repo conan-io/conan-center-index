@@ -65,10 +65,7 @@ class GeographiclibConan(ConanFile):
                 check_min_cppstd(self, 11)
 
             def loose_lt_semver(v1, v2):
-                lv1 = [int(v) for v in v1.split(".")]
-                lv2 = [int(v) for v in v2.split(".")]
-                min_length = min(len(lv1), len(lv2))
-                return lv1[:min_length] < lv2[:min_length]
+                return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))
 
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
@@ -103,8 +100,9 @@ class GeographiclibConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        # it does not work on Windows but is not needed
-        replace_in_file(self, cmakelists, "add_subdirectory (js)", "")
+        if Version(self.version) < "2":
+            # it does not work on Windows but is not needed
+            replace_in_file(self, cmakelists, "add_subdirectory (js)", "")
         # Don't install system libs
         replace_in_file(self, cmakelists, "include (InstallRequiredSystemLibraries)", "")
         # Don't build tools if asked
@@ -112,6 +110,9 @@ class GeographiclibConan(ConanFile):
             replace_in_file(self, cmakelists, "add_subdirectory (tools)", "")
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "CMakeLists.txt"),
                                   "${TOOLS}", "")
+        # Disable -Werror
+        replace_in_file(self, cmakelists, "-Werror", "")
+        replace_in_file(self, cmakelists, "/WX", "")
 
     def build(self):
         self._patch_sources()
