@@ -1,4 +1,6 @@
 versions:
+  "0.2.6-bug1":
+    folder: all
   "0.2.6":
     folder: all
   "0.2.5":

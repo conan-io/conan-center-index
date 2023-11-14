@@ -53,16 +53,13 @@ class TCSBankUconfigConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        compiler = str(self.settings.compiler)
-        compiler_version = Version(self.settings.compiler.version)
-
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
 
-        if compiler_version < self._compilers_minimum_version[compiler]:
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                f"{self.name} requires a compiler that supports at least C++{self._min_cppstd}. "
-                f"{compiler} {compiler_version} is not supported."
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
     def source(self):
