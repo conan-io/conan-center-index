@@ -162,11 +162,6 @@ class FFTWConan(ConanFile):
             component.set_property("pkg_config_name", pkgconfig_name)
 
     def package_id(self):
-        if self.info.options.precision != 'deprecated':
-            self.info.options.precision_single = self.info.options.precision == SINGLE
-            self.info.options.precision_double = self.info.options.precision == DOUBLE
-            self.info.options.precision_longdouble = self.info.options.precision == LONGDOUBLE
-            self.info.options.precision_quad = self.info.options.precision == QUAD
         del self.info.options.precision
 
     @property
