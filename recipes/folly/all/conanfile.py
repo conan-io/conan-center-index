@@ -61,26 +61,26 @@ class FollyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.78.0", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/1.83.0", transitive_headers=True, transitive_libs=True)
         self.requires("bzip2/1.0.8")
-        self.requires("double-conversion/3.2.1", transitive_headers=True, transitive_libs=True)
+        self.requires("double-conversion/3.3.0", transitive_headers=True, transitive_libs=True)
         self.requires("gflags/2.2.2")
-        self.requires("glog/0.4.0", transitive_headers=True, transitive_libs=True)
+        self.requires("glog/0.6.0", transitive_headers=True, transitive_libs=True)
         self.requires("libevent/2.1.12", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("lz4/1.9.3", transitive_libs=True)
-        self.requires("snappy/1.1.9")
-        self.requires("zlib/1.2.13")
-        self.requires("zstd/1.5.2", transitive_libs=True)
+        self.requires("lz4/1.9.4", transitive_libs=True)
+        self.requires("snappy/1.1.10")
+        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("zstd/1.5.5", transitive_libs=True)
         if not is_msvc(self):
             self.requires("libdwarf/20191104")
-        self.requires("libsodium/1.0.18")
-        self.requires("xz_utils/5.4.0")
+        self.requires("libsodium/1.0.19")
+        self.requires("xz_utils/5.4.4")
         # FIXME: Causing compilation issues on clang: self.requires("jemalloc/5.2.1")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/1.6.2")
-            self.requires("fmt/8.0.1", transitive_headers=True, transitive_libs=True)  # Folly bump fmt to 8.0.1 in v2022.01.31.00
+            self.requires("fmt/10.1.1", transitive_headers=True, transitive_libs=True)
 
     @property
     def _required_boost_components(self):
