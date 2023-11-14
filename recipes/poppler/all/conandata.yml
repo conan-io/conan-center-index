@@ -1,8 +1,14 @@
 sources:
+  "23.11.0":
+    url: "https://poppler.freedesktop.org/poppler-23.11.0.tar.xz"
+    sha256: "f99cca6799cb9cb6c92fc1e0eb78547b611cb733750ab7cb047cb0e6c246539c"
   "21.07.0":
     url: "https://poppler.freedesktop.org/poppler-21.07.0.tar.xz"
     sha256: "e26ab29f68065de4d6562f0a3e2b5435a83ca92be573b99a1c81998fa286a4d4"
 patches:
+  "23.11.0":
+    - patch_file: "patches/23/0004-add-POPPLER_DATADIR-environment-variable.patch"
+    - patch_file: "patches/23/0007-cmake-use_conan_qt.patch"
   "21.07.0":
     - patch_file: "patches/21/0004-add-POPPLER_DATADIR-environment-variable.patch"
     - patch_file: "patches/21/0005-fix-visual-studio-basetsd.h-libjpeg-INT32.patch"

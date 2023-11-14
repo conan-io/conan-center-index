@@ -67,20 +67,27 @@ class PopplerConan(ConanFile):
 
     @property
     def _cppstd_required(self):
-        if self.options.with_qt and Version(self.dependencies["qt"].ref.version).major == "6":
+        if Version(self.version) > "21.11" or (self.options.with_qt and Version(self.dependencies["qt"].ref.version).major == "6"):
             return 17
         else:
             return 14
 
     @property
     def _minimum_compilers_version(self):
-        # Poppler requires C++14
+        if self._cppstd_required == 14:
+            return {
+                "Visual Studio": "15",
+                "msvc": "191",
+                "gcc": "5",
+                "clang": "5",
+                "apple-clang": "5.1",
+            }
         return {
-            "Visual Studio": "15",
-            "msvc": "191",
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "5.1",
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "8",
+            "clang": "9",
+            "apple-clang": "11",
         }
 
     def export_sources(self):
@@ -135,7 +142,8 @@ class PopplerConan(ConanFile):
         if self.options.splash:
             self.requires("boost/1.83.0")
         if self.options.with_libcurl:
-            self.requires("libcurl/[>=7.78 <9]")
+            # https://gitlab.freedesktop.org/poppler/poppler/-/blob/poppler-23.11.0/poppler/CurlCachedFile.h#L18
+            self.requires("libcurl/[>=7.78 <9]", transitive_headers=True, transitive_libs=True)
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
 
@@ -174,50 +182,53 @@ class PopplerConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_CXX_STANDARD"] = self._cppstd_required
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
 
-        tc.variables["ENABLE_UNSTABLE_API_ABI_HEADERS"] = True
-        tc.variables["BUILD_GTK_TESTS"] = False
-        tc.variables["BUILD_QT5_TESTS"] = False
-        tc.variables["BUILD_QT6_TESTS"] = False
-        tc.variables["BUILD_CPP_TESTS"] = False
-        tc.variables["BUILD_MANUAL_TESTS"] = False
+        tc.cache_variables["BUILD_CPP_TESTS"] = False
+        tc.cache_variables["BUILD_CPP_TESTS"] = False
+        tc.cache_variables["BUILD_GTK_TESTS"] = False
+        tc.cache_variables["BUILD_MANUAL_TESTS"] = False
+        tc.cache_variables["BUILD_QT5_TESTS"] = False
+        tc.cache_variables["BUILD_QT6_TESTS"] = False
+        tc.cache_variables["ENABLE_CMS"] = "lcms2" if self.options.with_lcms else "none"
+        tc.cache_variables["ENABLE_CPP"] = self.options.cpp
+        tc.cache_variables["ENABLE_DCTDECODER"] = self._dct_decoder
+        tc.cache_variables["ENABLE_GLIB"] = self.options.get_safe("with_glib", False)
+        tc.cache_variables["ENABLE_GOBJECT_INTROSPECTION"] = self.options.get_safe("with_gobject_introspection", False)
+        tc.cache_variables["ENABLE_GPGME"] = False
+        tc.cache_variables["ENABLE_GTK_DOC"] = False
+        tc.cache_variables["ENABLE_JPEG"] = self.options.with_libjpeg
+        tc.cache_variables["ENABLE_LCMS"] = self.options.with_lcms
+        tc.cache_variables["ENABLE_LIBCURL"] = self.options.with_libcurl
+        tc.cache_variables["ENABLE_LIBOPENJPEG"] = "openjpeg2" if self.options.with_openjpeg else "none"
+        tc.cache_variables["ENABLE_LIBTIFF"] = self.options.with_tiff
+        tc.cache_variables["ENABLE_NSS3"] = self.options.with_nss
+        tc.cache_variables["ENABLE_QT5"] = self.options.with_qt and Version(self.dependencies["qt"].ref.version).major == "5"
+        tc.cache_variables["ENABLE_QT6"] = self.options.with_qt and Version(self.dependencies["qt"].ref.version).major == "6"
+        tc.cache_variables["ENABLE_SPLASH"] = self.options.splash
+        tc.cache_variables["ENABLE_UNSTABLE_API_ABI_HEADERS"] = True
+        tc.cache_variables["ENABLE_UTILS"] = False
+        tc.cache_variables["ENABLE_ZLIB"] = self.options.with_zlib
+        tc.cache_variables["ENABLE_ZLIB_UNCOMPRESS"] = self.options.with_zlib
+        tc.cache_variables["EXTRA_WARN"] = False
+        tc.cache_variables["FONT_CONFIGURATION"] = self.options.fontconfiguration
+        tc.cache_variables["FONT_CONFIGURATION"] = self.options.fontconfiguration
+        tc.cache_variables["POPPLER_DATADIR"] = self.dependencies["poppler-data"].conf_info.get("user.poppler-data:datadir").replace("\\", "/")
+        tc.cache_variables["RUN_GPERF_IF_PRESENT"] = False
+        tc.cache_variables["USE_FLOAT"] = self.options.float
+        tc.cache_variables["WITH_CAIRO"] = self.options.with_cairo
+        tc.cache_variables["WITH_GTK"] = self.options.get_safe("with_gtk", False)
+        tc.cache_variables["WITH_Iconv"] = self.options.get_safe("with_libiconv")
+        tc.cache_variables["WITH_NSS3"] = self.options.with_nss
+        tc.cache_variables["WITH_PNG"] = self.options.with_png
+        tc.cache_variables["WITH_TIFF"] = self.options.with_tiff
 
-        tc.variables["ENABLE_UTILS"] = False
-        tc.variables["ENABLE_CPP"] = self.options.cpp
+        if self.settings.os == "Windows":
+            tc.variables["ENABLE_RELOCATABLE"] = self.options.shared
 
-        tc.variables["ENABLE_SPLASH"] = self.options.splash
-        tc.variables["FONT_CONFIGURATION"] = self.options.fontconfiguration
-        tc.variables["ENABLE_JPEG"] = self.options.with_libjpeg
-        tc.variables["WITH_PNG"] = self.options.with_png
-        tc.variables["WITH_TIFF"] = self.options.with_tiff
-        tc.variables["WITH_NSS3"] = self.options.with_nss
-        tc.variables["WITH_Cairo"] = self.options.with_cairo
-        tc.variables["ENABLE_GLIB"] = self.options.get_safe("with_glib", False)
-        tc.variables["ENABLE_GOBJECT_INTROSPECTION"] = self.options.get_safe("with_gobject_introspection", False)
-        tc.variables["WITH_GTK"] = self.options.get_safe("with_gtk", False)
-        tc.variables["WITH_Iconv"] = self.options.get_safe("with_libiconv")
-        tc.variables["ENABLE_ZLIB"] = self.options.with_zlib
-        tc.variables["ENABLE_LIBOPENJPEG"] = "openjpeg2" if self.options.with_openjpeg else "none"
         if self.options.with_openjpeg:
             # FIXME: openjpeg's cmake_find_package should provide these variables
             tc.variables["OPENJPEG_MAJOR_VERSION"] = Version(self.dependencies["openjpeg"].ref.version).major
-        tc.variables["ENABLE_CMS"] = "lcms2" if self.options.with_lcms else "none"
-        tc.variables["ENABLE_LIBCURL"] = self.options.with_libcurl
-
-        tc.variables["POPPLER_DATADIR"] = self.dependencies["poppler-data"].conf_info.get("user.poppler-data:datadir").replace("\\", "/")
-        tc.variables["FONT_CONFIGURATION"] = self.options.fontconfiguration
-        tc.variables["BUILD_CPP_TESTS"] = False
-        tc.variables["ENABLE_GTK_DOC"] = False
-        tc.variables["ENABLE_QT5"] = self.options.with_qt and Version(self.dependencies["qt"].ref.version).major == "5"
-        tc.variables["ENABLE_QT6"] = self.options.with_qt and Version(self.dependencies["qt"].ref.version).major == "6"
-
-        tc.variables["ENABLE_CMS"] = "lcms2" if self.options.with_lcms else "none"
-        tc.variables["ENABLE_DCTDECODER"] = self._dct_decoder
-        tc.variables["USE_FLOAT"] = self.options.float
-        tc.variables["RUN_GPERF_IF_PRESENT"] = False
-        if self.settings.os == "Windows":
-            tc.variables["ENABLE_RELOCATABLE"] = self.options.shared
-        tc.variables["EXTRA_WARN"] = False
 
         # Workaround for cross-build to at least iOS/tvOS/watchOS,
         # when dependencies are found with find_path() and find_library()
@@ -233,8 +244,8 @@ class PopplerConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        # Rename to output variables in upper-case
         deps.set_property("freetype", "cmake_file_name", "FREETYPE")
+        deps.set_property("freetype", "cmake_target_name", "FREETYPE::FREETYPE")
         deps.set_property("cairo", "cmake_file_name", "CAIRO")
         deps.generate()
 
