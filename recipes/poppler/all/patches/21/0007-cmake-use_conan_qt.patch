@@ -28,7 +28,7 @@ index 16e3070..fba2259 100644
 -    message("-- Package Qt5Core or Qt5Gui or Qt5Xml or Qt5Widgets or Qt5Test not found")
 -    set(ENABLE_QT5 OFF)
 -  endif()
-+  find_package(qt 5.5 COMPONENTS Core Gui Xml Widgets Test REQUIRED)  # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when increasing this
++  find_package(Qt5 5.5 COMPONENTS Core Gui Xml Widgets Test REQUIRED CONFIG)  # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when increasing this
  endif()
  
  if (ENABLE_QT6)
@@ -38,7 +38,7 @@ index 16e3070..fba2259 100644
 -    message("-- Package Qt6Core or Qt6Gui or Qt6Widgets or Qt6Test not found")
 -    set(ENABLE_QT6 OFF)
 -  endif()
-+  find_package(Qt6 COMPONENTS Core Gui Widgets Test REQUIRED)
++  find_package(Qt6 COMPONENTS Core Gui Widgets Test REQUIRED CONFIG)
  endif()
  
  # Check for Cairo rendering backend
