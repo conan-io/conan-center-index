@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
@@ -169,6 +170,8 @@ class PopplerConan(ConanFile):
             self.tool_requires("pkgconf/2.0.3")
         if self.options.get_safe("with_glib"):
             self.tool_requires("glib/<host_version>")
+        if Version(self.version) > "22.12.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -181,6 +184,8 @@ class PopplerConan(ConanFile):
             return str(self.options.with_libjpeg)
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
+
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_CXX_STANDARD"] = self._cppstd_required
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
