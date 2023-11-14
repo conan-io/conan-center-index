@@ -15,9 +15,9 @@ class SfmlConan(ConanFile):
     name = "sfml"
     description = "Simple and Fast Multimedia Library."
     license = "Zlib"
-    topics = ("multimedia", "games", "graphics", "audio")
-    homepage = "https://www.sfml-dev.org"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.sfml-dev.org"
+    topics = ("multimedia", "games", "graphics", "audio")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -61,7 +61,7 @@ class SfmlConan(ConanFile):
                 self.requires("xorg/system")
         if self.options.graphics:
             self.requires("freetype/2.13.0")
-            self.requires("stb/cci.20220909")
+            self.requires("stb/cci.20230920")
         if self.options.audio:
             self.requires("flac/1.4.2")
             self.requires("openal-soft/1.22.2")
@@ -146,6 +146,9 @@ class SfmlConan(ConanFile):
 
         def ws2_32():
             return ["ws2_32"] if self.settings.os == "Windows" else []
+
+        def dl():
+            return ["dl"] if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "2.6.0" else []
 
         def libudev():
             return ["libudev::libudev"] if self.settings.os == "Linux" else []
@@ -235,7 +238,7 @@ class SfmlConan(ConanFile):
                     "target": "sfml-window",
                     "libs": [f"sfml-window{suffix}"],
                     "requires": ["system"] + opengl() + xorg() + libudev(),
-                    "system_libs": gdi32() + winmm() + usbhid() + android() + opengles_android(),
+                    "system_libs": dl() + gdi32() + winmm() + usbhid() + android() + opengles_android(),
                     "frameworks": foundation() + appkit() + iokit() + carbon() +
                                   uikit() + coregraphics() + quartzcore() +
                                   coreservices() + coremotion() + opengles_ios(),

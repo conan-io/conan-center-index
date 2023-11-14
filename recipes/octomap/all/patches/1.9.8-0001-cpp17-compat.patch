@@ -1,0 +1,442 @@
+--- a/octomap/include/octomap/AbstractOcTree.h
++++ b/octomap/include/octomap/AbstractOcTree.h
+@@ -51,7 +51,7 @@
+     friend class StaticMapInit;
+   public:
+     AbstractOcTree();
+-    virtual ~AbstractOcTree() {};
++    virtual ~AbstractOcTree() {}
+ 
+     /// virtual constructor: creates a new object of same type
+     virtual AbstractOcTree* create() const = 0;
+--- a/octomap/include/octomap/AbstractOccupancyOcTree.h
++++ b/octomap/include/octomap/AbstractOccupancyOcTree.h
+@@ -52,7 +52,7 @@
+   class AbstractOccupancyOcTree : public AbstractOcTree {
+   public:
+     AbstractOccupancyOcTree();
+-    virtual ~AbstractOccupancyOcTree() {};
++    virtual ~AbstractOccupancyOcTree() {}
+ 
+     //-- IO
+ 
+--- a/octomap/include/octomap/ColorOcTree.h
++++ b/octomap/include/octomap/ColorOcTree.h
+@@ -192,7 +192,7 @@
+          * StaticMemberInitializer, causing this tree failing to register.
+          * Needs to be called from the constructor of this octree.
+          */
+-         void ensureLinking() {};
++         void ensureLinking() {}
+     };
+     /// static member to ensure static initialization (only once)
+     static StaticMemberInitializer colorOcTreeMemberInit;
+--- a/octomap/include/octomap/CountingOcTree.h
++++ b/octomap/include/octomap/CountingOcTree.h
+@@ -110,7 +110,7 @@
+          * StaticMemberInitializer, causing this tree failing to register.
+          * Needs to be called from the constructor of this octree.
+          */
+-         void ensureLinking() {};
++         void ensureLinking() {}
+     };
+     /// static member to ensure static initialization (only once)
+     static StaticMemberInitializer countingOcTreeMemberInit;
+--- a/octomap/include/octomap/OcTree.h
++++ b/octomap/include/octomap/OcTree.h
+@@ -59,7 +59,7 @@
+      */
+     OcTree(std::string _filename);
+ 
+-    virtual ~OcTree(){};
++    virtual ~OcTree(){}
+ 
+     /// virtual constructor: creates a new object of same type
+     /// (Covariant return type requires an up-to-date compiler)
+@@ -89,7 +89,7 @@
+ 	     * StaticMemberInitializer, causing this tree failing to register.
+ 	     * Needs to be called from the constructor of this octree.
+ 	     */
+-	    void ensureLinking() {};
++	    void ensureLinking() {}
+     };
+ 
+     /// to ensure static initialization (only once)
+--- a/octomap/include/octomap/OcTreeBase.h
++++ b/octomap/include/octomap/OcTreeBase.h
+@@ -43,7 +43,7 @@
+   template <class NODE>
+   class OcTreeBase : public OcTreeBaseImpl<NODE,AbstractOcTree> {
+   public:
+-    OcTreeBase<NODE>(double res) : OcTreeBaseImpl<NODE,AbstractOcTree>(res) {};
++    OcTreeBase(double res) : OcTreeBaseImpl<NODE,AbstractOcTree>(res) {}
+ 
+     /// virtual constructor: creates a new object of same type
+     /// (Covariant return type requires an up-to-date compiler)
+--- a/octomap/include/octomap/OcTreeBaseImpl.h
++++ b/octomap/include/octomap/OcTreeBaseImpl.h
+@@ -244,7 +244,7 @@
+     virtual size_t memoryUsage() const;
+ 
+     /// \return Memory usage of a single octree node
+-    virtual inline size_t memoryUsageNode() const {return sizeof(NODE); };
++    virtual inline size_t memoryUsageNode() const {return sizeof(NODE); }
+ 
+     /// \return Memory usage of a full grid of the same size as the OcTree in bytes (for comparison)
+     /// \note this can be larger than the adressable memory - size_t may not be enough to hold it!
+@@ -324,12 +324,12 @@
+     typedef leaf_iterator iterator;
+ 
+     /// @return beginning of the tree as leaf iterator
+-    iterator begin(unsigned char maxDepth=0) const {return iterator(this, maxDepth);};
++    iterator begin(unsigned char maxDepth=0) const {return iterator(this, maxDepth);}
+     /// @return end of the tree as leaf iterator
+-    const iterator end() const {return leaf_iterator_end;}; // TODO: RVE?
++    const iterator end() const {return leaf_iterator_end;} // TODO: RVE?
+ 
+     /// @return beginning of the tree as leaf iterator
+-    leaf_iterator begin_leafs(unsigned char maxDepth=0) const {return leaf_iterator(this, maxDepth);};
++    leaf_iterator begin_leafs(unsigned char maxDepth=0) const {return leaf_iterator(this, maxDepth);}
+     /// @return end of the tree as leaf iterator
+     const leaf_iterator end_leafs() const {return leaf_iterator_end;}
+ 
+--- a/octomap/include/octomap/OcTreeDataNode.h
++++ b/octomap/include/octomap/OcTreeDataNode.h
+@@ -100,9 +100,9 @@
+     OCTOMAP_DEPRECATED(bool hasChildren() const);
+ 
+     /// @return value stored in the node
+-    T getValue() const{return value;};
++    T getValue() const{return value;}
+     /// sets value to be stored in the node
+-    void setValue(T v) {value = v;};
++    void setValue(T v) {value = v;}
+ 
+     // file IO:
+ 
+--- a/octomap/include/octomap/OcTreeIterator.hxx
++++ b/octomap/include/octomap/OcTreeIterator.hxx
+@@ -95,7 +95,7 @@
+         maxDepth = other.maxDepth;
+         stack = other.stack;
+         return *this;
+-      };
++      }
+ 
+       /// Ptr operator will return the current node in the octree which the
+       /// iterator is referring to
+@@ -213,7 +213,7 @@
+        * @param ptree OcTreeBaseImpl on which the iterator is used on
+        * @param depth Maximum depth to traverse the tree. 0 (default): unlimited
+        */
+-      tree_iterator(OcTreeBaseImpl<NodeType,INTERFACE> const* ptree, uint8_t depth=0) : iterator_base(ptree, depth) {};
++      tree_iterator(OcTreeBaseImpl<NodeType,INTERFACE> const* ptree, uint8_t depth=0) : iterator_base(ptree, depth) {}
+ 
+       /// postfix increment operator of iterator (it++)
+       tree_iterator operator++(int){
+@@ -280,7 +280,7 @@
+             }
+           }
+ 
+-          leaf_iterator(const leaf_iterator& other) : iterator_base(other) {};
++          leaf_iterator(const leaf_iterator& other) : iterator_base(other) {}
+ 
+           /// postfix increment operator of iterator (it++)
+           leaf_iterator operator++(int){
+@@ -334,7 +334,7 @@
+      */
+     class leaf_bbx_iterator : public iterator_base {
+     public:
+-      leaf_bbx_iterator() : iterator_base() {};
++      leaf_bbx_iterator() : iterator_base() {}
+       /**
+       * Constructor of the iterator. The bounding box corners min and max are
+       * converted into an OcTreeKey first.
+@@ -425,7 +425,7 @@
+ 
+ 
+         return *this;
+-      };
++      }
+ 
+     protected:
+ 
+--- a/octomap/include/octomap/OcTreeStamped.h
++++ b/octomap/include/octomap/OcTreeStamped.h
+@@ -116,7 +116,7 @@
+       * StaticMemberInitializer, causing this tree failing to register.
+       * Needs to be called from the constructor of this octree.
+       */
+-      void ensureLinking() {};
++      void ensureLinking() {}
+     };
+     /// to ensure static initialization (only once)
+     static StaticMemberInitializer ocTreeStampedMemberInit;
+--- a/octomap/include/octomap/ScanGraph.h
++++ b/octomap/include/octomap/ScanGraph.h
+@@ -115,7 +115,7 @@
+ 
+    public:
+ 
+-    ScanGraph() {};
++    ScanGraph() {}
+     ~ScanGraph();
+ 
+     /// Clears all nodes and edges, and will delete the corresponding objects
+--- a/octomap/src/Pointcloud.cpp
++++ b/octomap/src/Pointcloud.cpp
+@@ -38,7 +38,7 @@
+ 
+ #if defined(_MSC_VER) || defined(_LIBCPP_VERSION)
+   #include <algorithm>
+-  #if __cplusplus > 199711L
++  #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201103L) || __cplusplus >= 201103L)
+     #include <random>
+   #endif
+ #else
+@@ -213,7 +213,7 @@
+   #if defined(_MSC_VER) || defined(_LIBCPP_VERSION)
+     samples.reserve(this->size());
+     samples.insert(samples.end(), this->begin(), this->end());
+-    #if __cplusplus > 199711L
++    #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201103L) || __cplusplus >= 201103L)
+       std::random_device r;
+       std::mt19937 urbg(r());
+       std::shuffle(samples.begin(), samples.end(), urbg);
+--- a/octomap/src/compare_octrees.cpp
++++ b/octomap/src/compare_octrees.cpp
+@@ -132,7 +132,7 @@
+       else
+         kld +=log(p1/p2)*p1 + log((1-p1)/(1-p2))*(1-p1);
+ 
+-#if __cplusplus >= 201103L
++#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201103L) || __cplusplus >= 201103L)
+       if (std::isnan(kld)){
+ #else
+       if (isnan(kld)){
+--- a/octovis/include/octovis/OcTreeDrawer.h
++++ b/octovis/include/octovis/OcTreeDrawer.h
+@@ -62,14 +62,14 @@
+     void setAlternativeDrawing(bool flag){m_alternativeDrawing = flag;}
+ 
+     void enableOcTree(bool enabled = true);
+-    void enableOcTreeCells(bool enabled = true) { m_update = true; m_drawOccupied = enabled; };
+-    void enableFreespace(bool enabled = true) { m_update = true; m_drawFree = enabled; };
+-    void enableSelection(bool enabled = true) { m_update = true; m_drawSelection = enabled; };
+-    void setMax_tree_depth(unsigned int max_tree_depth) { m_update = true; m_max_tree_depth = max_tree_depth;};
++    void enableOcTreeCells(bool enabled = true) { m_update = true; m_drawOccupied = enabled; }
++    void enableFreespace(bool enabled = true) { m_update = true; m_drawFree = enabled; }
++    void enableSelection(bool enabled = true) { m_update = true; m_drawSelection = enabled; }
++    void setMax_tree_depth(unsigned int max_tree_depth) { m_update = true; m_max_tree_depth = max_tree_depth;}
+ 
+     // set new origin (move object)
+     void setOrigin(octomap::pose6d t);
+-    void enableAxes(bool enabled = true) { m_update = true; m_displayAxes = enabled; };
++    void enableAxes(bool enabled = true) { m_update = true; m_displayAxes = enabled; }
+ 
+   protected:
+     //void clearOcTree();
+--- a/octovis/include/octovis/SceneObject.h
++++ b/octovis/include/octovis/SceneObject.h
+@@ -57,7 +57,7 @@
+ 
+   public:
+     SceneObject();
+-    virtual ~SceneObject(){};
++    virtual ~SceneObject(){}
+ 
+     /**
+     * Actual draw function which will be called to visualize the object
+@@ -67,7 +67,7 @@
+     /**
+     * Clears the object's representation (will be called when it gets invalid)
+     */
+-    virtual void clear(){};
++    virtual void clear(){}
+ 
+   public:
+     //! the color mode has to be set before calling OcTreDrawer::setMap()
+@@ -95,8 +95,8 @@
+   */
+   class ScanGraphDrawer : public SceneObject {
+   public:
+-    ScanGraphDrawer(): SceneObject(){};
+-    virtual ~ScanGraphDrawer(){};
++    ScanGraphDrawer(): SceneObject(){}
++    virtual ~ScanGraphDrawer(){}
+ 
+     /**
+     * Notifies drawer of a new or changed ScanGraph, so that the internal
+--- a/octovis/include/octovis/ViewerSettings.h
++++ b/octovis/include/octovis/ViewerSettings.h
+@@ -40,12 +40,12 @@
+ public:
+     ViewerSettings(QWidget *parent = 0);
+     ~ViewerSettings();
+-    double getResolution(){return ui.resolution->value(); };
+-    void setResolution(double resolution){ui.resolution->setValue(resolution);};
+-    unsigned int getLaserType(){return ui.laserType->currentIndex(); };
+-    void setLaserType(int type){ui.laserType->setCurrentIndex(type); };
+-    double getMaxRange(){return ui.maxRange->value(); };
+-    void setMaxRange(double range){ui.maxRange->setValue(range); };
++    double getResolution(){return ui.resolution->value(); }
++    void setResolution(double resolution){ui.resolution->setValue(resolution);}
++    unsigned int getLaserType(){return ui.laserType->currentIndex(); }
++    void setLaserType(int type){ui.laserType->setCurrentIndex(type); }
++    double getMaxRange(){return ui.maxRange->value(); }
++    void setMaxRange(double range){ui.maxRange->setValue(range); }
+ 
+ private:
+     Ui::ViewerSettingsClass ui;
+--- a/octovis/src/extern/QGLViewer/VRender/Exporter.h
++++ b/octovis/src/extern/QGLViewer/VRender/Exporter.h
+@@ -60,7 +60,7 @@
+ 	{
+ 		public:
+ 			Exporter() ;
+-			virtual ~Exporter() {};
++			virtual ~Exporter() {}
+ 
+ 			virtual void exportToFile(const QString& filename,const std::vector<PtrPrimitive>&,VRenderParams&) ;
+ 
+@@ -92,7 +92,7 @@
+ 	{
+ 		public:
+ 			EPSExporter() ;
+-			virtual ~EPSExporter() {};
++			virtual ~EPSExporter() {}
+ 
+ 		protected:
+ 			virtual void spewPoint(const Point *, QTextStream& out) ;
+@@ -120,7 +120,7 @@
+ 	class PSExporter: public EPSExporter
+ 	{
+ 		public:
+-			virtual ~PSExporter() {};
++			virtual ~PSExporter() {}
+ 		protected:
+ 			virtual void writeFooter(QTextStream& out) const ;
+ 	};
+@@ -129,7 +129,7 @@
+ 	{
+ 		public:
+ 			FIGExporter() ;
+-			virtual ~FIGExporter() {};
++			virtual ~FIGExporter() {}
+ 
+ 		protected:
+ 			virtual void spewPoint(const Point *, QTextStream& out) ;
+--- a/octovis/src/extern/QGLViewer/camera.cpp
++++ b/octovis/src/extern/QGLViewer/camera.cpp
+@@ -199,8 +199,8 @@
+  \code
+  class myCamera :: public qglviewer::Camera
+  {
+-   virtual qreal Camera::zNear() const { return 0.001; };
+-   virtual qreal Camera::zFar() const { return 100.0; };
++   virtual qreal Camera::zNear() const { return 0.001; }
++   virtual qreal Camera::zFar() const { return 100.0; }
+  }
+  \endcode
+ 
+--- a/octovis/src/extern/QGLViewer/constraint.h
++++ b/octovis/src/extern/QGLViewer/constraint.h
+@@ -197,7 +197,7 @@
+ 		  case MyAxisPlaneConstraint::FREE: ... break;
+ 		  case MyAxisPlaneConstraint::CUSTOM: ... break;
+ 		}
+-	  };
++	  }
+ 
+ 	  MyAxisPlaneConstraint* c = new MyAxisPlaneConstraint();
+ 	  // Note the Type conversion
+@@ -209,11 +209,11 @@
+ 	/*! @name Translation constraint */
+ 	//@{
+ 	/*! Overloading of Constraint::constrainTranslation(). Empty */
+-	virtual void constrainTranslation(Vec& translation, Frame* const frame) { Q_UNUSED(translation); Q_UNUSED(frame); };
++	virtual void constrainTranslation(Vec& translation, Frame* const frame) { Q_UNUSED(translation); Q_UNUSED(frame); }
+ 
+ 	void setTranslationConstraint(Type type, const Vec& direction);
+ 	/*! Sets the Type() of the translationConstraintType(). Default is AxisPlaneConstraint::FREE. */
+-	void setTranslationConstraintType(Type type) { translationConstraintType_ = type; };
++	void setTranslationConstraintType(Type type) { translationConstraintType_ = type; }
+ 	void setTranslationConstraintDirection(const Vec& direction);
+ 
+ 	/*! Returns the translation constraint Type().
+@@ -225,7 +225,7 @@
+ 
+ 	Use Frame::setPosition() to define the position of the constrained Frame before it gets
+ 	constrained. */
+-	Type translationConstraintType() const { return translationConstraintType_; };
++	Type translationConstraintType() const { return translationConstraintType_; }
+ 	/*! Returns the direction used by the translation constraint.
+ 
+ 	It represents the axis direction (AxisPlaneConstraint::AXIS) or the plane normal
+@@ -235,20 +235,20 @@
+ 	The AxisPlaneConstraint derived classes express this direction in different coordinate system
+ 	(camera for CameraConstraint, local for LocalConstraint, and world for WorldConstraint). This
+ 	value can be modified with setTranslationConstraintDirection(). */
+-	Vec translationConstraintDirection() const { return translationConstraintDir_; };
++	Vec translationConstraintDirection() const { return translationConstraintDir_; }
+ 	//@}
+ 
+ 	/*! @name Rotation constraint */
+ 	//@{
+ 	/*! Overloading of Constraint::constrainRotation(). Empty. */
+-	virtual void constrainRotation(Quaternion& rotation, Frame* const frame) { Q_UNUSED(rotation); Q_UNUSED(frame); };
++	virtual void constrainRotation(Quaternion& rotation, Frame* const frame) { Q_UNUSED(rotation); Q_UNUSED(frame); }
+ 
+ 	void setRotationConstraint(Type type, const Vec& direction);
+ 	void setRotationConstraintType(Type type);
+ 	void setRotationConstraintDirection(const Vec& direction);
+ 
+ 	/*! Returns the rotation constraint Type(). */
+-	Type rotationConstraintType() const { return rotationConstraintType_; };
++	Type rotationConstraintType() const { return rotationConstraintType_; }
+ 	/*! Returns the axis direction used by the rotation constraint.
+ 
+ 	This direction is defined only when rotationConstraintType() is AxisPlaneConstraint::AXIS.
+@@ -256,7 +256,7 @@
+ 	The AxisPlaneConstraint derived classes express this direction in different coordinate system
+ 	(camera for CameraConstraint, local for LocalConstraint, and world for WorldConstraint). This
+ 	value can be modified with setRotationConstraintDirection(). */
+-	Vec rotationConstraintDirection() const { return rotationConstraintDir_; };
++	Vec rotationConstraintDirection() const { return rotationConstraintDir_; }
+ 	//@}
+ 
+ private:
+@@ -280,7 +280,7 @@
+ {
+ public:
+ 	/*! Virtual destructor. Empty. */
+-	virtual ~LocalConstraint() {};
++	virtual ~LocalConstraint() {}
+ 
+ 	virtual void constrainTranslation(Vec&     translation, Frame* const frame);
+ 	virtual void constrainRotation   (Quaternion& rotation, Frame* const frame);
+@@ -300,7 +300,7 @@
+ {
+ public:
+ 	/*! Virtual destructor. Empty. */
+-	virtual ~WorldConstraint() {};
++	virtual ~WorldConstraint() {}
+ 
+ 	virtual void constrainTranslation(Vec&     translation, Frame* const frame);
+ 	virtual void constrainRotation   (Quaternion& rotation, Frame* const frame);
+@@ -321,13 +321,13 @@
+ public:
+ 	explicit CameraConstraint(const Camera* const camera);
+ 	/*! Virtual destructor. Empty. */
+-	virtual ~CameraConstraint() {};
++	virtual ~CameraConstraint() {}
+ 
+ 	virtual void constrainTranslation(Vec&     translation, Frame* const frame);
+ 	virtual void constrainRotation   (Quaternion& rotation, Frame* const frame);
+ 
+ 	/*! Returns the associated Camera. Set using the CameraConstraint constructor. */
+-	const Camera* camera() const { return camera_; };
++	const Camera* camera() const { return camera_; }
+ 
+ private:
+ 	const Camera* const camera_;
