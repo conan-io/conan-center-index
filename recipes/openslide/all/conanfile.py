@@ -11,7 +11,7 @@ from conan.tools.meson import Meson, MesonToolchain
 required_conan_version = ">=1.53.0"
 
 
-class OpenslideConan(ConanFile):
+class OpenSlideConan(ConanFile):
     name = "openslide"
     description = "OpenSlide is a C library for reading whole slide image files (also known as virtual slides)"
     license = "LGPL-2.1"
@@ -81,7 +81,7 @@ class OpenslideConan(ConanFile):
         meson.build()
 
     def package(self):
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING.LESSER", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
