@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, rmdir, copy, apply_conandata_patches, chdir, export_conandata_patches, symlinks
+from conan.tools.files import get, rmdir, copy, apply_conandata_patches, chdir, export_conandata_patches, rm
 from conan.tools.scm import Version
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -64,10 +64,8 @@ class Liburing(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        def whether(condition):
-            return "" if condition else None
         tc.update_configure_args({
-            "--nolibc": whether(not self.options.get_safe("with_libc", default=True)),
+            "--nolibc": None if self.options.get_safe("with_libc", default=True) else "",
             "--enable-shared": None,
             "--disable-shared": None,
             "--enable-static": None,
@@ -75,6 +73,7 @@ class Liburing(ConanFile):
             "--bindir": None,
             "--sbindir": None,
             "--oldincludedir": None,
+            "--libdevdir": "${prefix}/lib",  # pointing to libdir
         })
         tc.generate()
 
@@ -99,13 +98,7 @@ class Liburing(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "man"))
 
         if self.options.shared:
-            os.remove(os.path.join(self.package_folder, "lib", "liburing.a"))
-        
-            # FIXME: The liburing.so symlink ends up broken. Remove and replace.
-            symlinks.remove_broken_symlinks(self, self.package_folder)
-            source_file_suffix = "1" if self.version < Version("2.0") else "2"
-            os.symlink(src=f"liburing.so.{source_file_suffix}",
-                       dst=os.path.join(self.package_folder, "lib", "liburing.so"))
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "liburing")
