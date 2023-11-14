@@ -115,10 +115,9 @@ class PciUtilsConan(ConanFile):
              keep_path=True)
 
         if self.options.shared:
-            # libpci.so.3.10.0 -> libpci.so
-            for so_file in self.package_path.glob("lib/libpci.so*.*.*"):
-                so_without_version = os.path.join(self.package_folder, "lib", "libpci.so")
-                self.run(f'ln -s "{so_file}" "{so_without_version}"')
+            # libpci.so.3 -> libpci.so
+            with chdir(self, os.path.join(self.package_folder, "lib")):
+                os.symlink("libpci.so.3", "libpci.so")
 
         rmdir(self, os.path.join(self.package_folder, "sbin"))
         rmdir(self, os.path.join(self.package_folder, "share"))
