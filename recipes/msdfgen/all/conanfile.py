@@ -87,10 +87,6 @@ class MsdfgenConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        # workaround against CMAKE_FIND_PACKAGE_PREFER_CONFIG ON in conan toolchain
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        replace_in_file(self, cmakelists, "find_package(Freetype REQUIRED)", "find_package(Freetype REQUIRED MODULE)")
-
         if Version(self.version) < "1.10":
             # remove bundled lodepng & tinyxml2
             rmdir(self, os.path.join(self.source_folder, "lib"))
@@ -100,7 +96,7 @@ class MsdfgenConan(ConanFile):
             if is_msvc(self):
                 replace_in_file(
                     self,
-                    cmakelists,
+                    os.path.join(self.source_folder, "CMakeLists.txt"),
                     "set_target_properties(msdfgen-standalone PROPERTIES ARCHIVE_OUTPUT_DIRECTORY archive OUTPUT_NAME msdfgen)",
                     "set_target_properties(msdfgen-standalone PROPERTIES OUTPUT_NAME msdfgen IMPORT_PREFIX foo)",
                 )
