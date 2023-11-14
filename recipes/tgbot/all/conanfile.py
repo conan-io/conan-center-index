@@ -41,7 +41,9 @@ class TgbotConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # tgbot/Api.h:#include <boost/property_tree/ptree.hpp>
         self.requires("boost/1.83.0", transitive_headers=True, transitive_libs=True)
+        # tgbot/net/CurlHttpClient.h:#include <curl/curl.h>
         self.requires("libcurl/[>=7.78 <9]", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
 
@@ -97,3 +99,4 @@ class TgbotConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["TgBot"]
+        self.cpp_info.defines = ["HAVE_CURL=1"]
