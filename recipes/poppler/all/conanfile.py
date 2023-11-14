@@ -5,9 +5,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
 
 class PopplerConan(ConanFile):
@@ -135,10 +136,12 @@ class PopplerConan(ConanFile):
             self.requires("lcms/2.16")
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
+        if self.options.with_nss:
+            self.requires("nss/3.93")
         if self.options.with_png:
             self.requires("libpng/1.6.40")
         if self.options.with_tiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/4.6.0", force=True)
         if self.options.splash:
             self.requires("boost/1.83.0")
         if self.options.with_libcurl:
@@ -164,6 +167,8 @@ class PopplerConan(ConanFile):
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.0.3")
+        if self.options.get_safe("with_glib"):
+            self.tool_requires("glib/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -241,18 +246,20 @@ class PopplerConan(ConanFile):
 
         deps = CMakeDeps(self)
         deps.set_property("freetype", "cmake_file_name", "FREETYPE")
-        deps.set_property("freetype", "cmake_target_name", "FREETYPE::FREETYPE")
         deps.set_property("cairo", "cmake_file_name", "CAIRO")
+        deps.set_property("glib", "cmake_file_name", "GLIB")
+        deps.set_property("glib", "cmake_target_name", "PkgConfig::GLIB2")
+        deps.generate()
+
+        deps = PkgConfigDeps(self)
         deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "Freetype", "FREETYPE")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "Cairo", "CAIRO")
-        if Version(self.version) < "21.07.0" and not self.options.shared:
-            poppler_global = os.path.join(self.source_folder, "cpp", "poppler-global.h")
-            replace_in_file(self, poppler_global, "__declspec(dllimport)", "")
-            replace_in_file(self, poppler_global, "__declspec(dllexport)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "find_package(Freetype", "find_package(FREETYPE")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "find_package(Cairo", "find_package(CAIRO")
 
     def build(self):
         self._patch_sources()
@@ -327,8 +334,8 @@ class PopplerConan(ConanFile):
 
         if self.options.with_qt:
             qt_major = Version(self.dependencies["qt"].ref.version).major
-            self.cpp_info.components["libpoppler-qt"].libs = ["poppler-qt{}".format(qt_major)]
-            self.cpp_info.components["libpoppler-qt"].set_property("pkg_config_name", "poppler-qt{}".format(qt_major))
+            self.cpp_info.components["libpoppler-qt"].libs = [f"poppler-qt{qt_major}"]
+            self.cpp_info.components["libpoppler-qt"].set_property("pkg_config_name", f"poppler-qt{qt_major}")
             self.cpp_info.components["libpoppler-qt"].requires = ["libpoppler", "qt::qtCore", "qt::qtGui", "qt::qtWidgets"]
 
         datadir = self.dependencies["poppler-data"].conf_info.get("user.poppler-data:datadir")
