@@ -40,6 +40,7 @@ class FollyConan(ConanFile):
         return {
             "gcc": "7",
             "Visual Studio": "16",
+            "msvc": "192",
             "clang": "6",
             "apple-clang": "10",
         }
@@ -87,7 +88,7 @@ class FollyConan(ConanFile):
         return ["context", "filesystem", "program_options", "regex", "system", "thread"]
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
+        if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
