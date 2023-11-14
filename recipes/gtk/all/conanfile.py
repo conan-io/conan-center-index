@@ -60,7 +60,7 @@ class GtkConan(ConanFile):
             self.options["gdk-pixbuf"].shared = True
             # Fix segmentation fault
             self.options["cairo"].shared = True
-        if Version(self.version) >= "4.1.0":
+        if self._gtk4:
             # The upstream meson file does not create a static library
             # See https://github.com/GNOME/gtk/commit/14f0a0addb9a195bad2f8651f93b95450b186bd6
             self.options.shared = True
@@ -93,9 +93,11 @@ class GtkConan(ConanFile):
             # INFO: https://gitlab.gnome.org/GNOME/gtk/-/blob/4.10.0/gsk/gsktypes.h#L25
             self.requires("graphene/1.10.8", transitive_headers=True, transitive_libs=True)
             self.requires("fribidi/1.0.13")
-            self.requires("libpng/1.6.40")
-            self.requires("libtiff/4.4.0")
+            self.requires("libpng/[>=1.6 <2]")
+            self.requires("libtiff/4.6.0")
             self.requires("libjpeg/9e")
+            if Version(self.version) >= "4.13.2":
+                self.requires("libdrm/2.4.114")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self._gtk4 or self.options.with_wayland:
                 self.requires("xkbcommon/1.6.0")
@@ -126,15 +128,14 @@ class GtkConan(ConanFile):
                 raise ConanInvalidConfiguration("MSVC build requires shared gdk-pixbuf")
             if not self.dependencies["cairo"].options.shared:
                 raise ConanInvalidConfiguration("MSVC build requires shared cairo")
-        if Version(self.version) >= "4.1.0":
-            if not self.options.shared:
-                raise ConanInvalidConfiguration("gtk supports only shared since 4.1.0")
+        if self._gtk4 and not self.options.shared:
+            raise ConanInvalidConfiguration("gtk supports only shared since 4.1.0")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.3")
+        self.tool_requires("meson/1.4.0")
         self.tool_requires("glib/<host_version>")
         if self._gtk4:
-            self.tool_requires("libxml2/2.11.5")  # for xmllint
+            self.tool_requires("libxml2/2.12.6")  # for xmllint
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.0.3")
         if self._gtk4:
@@ -166,17 +167,13 @@ class GtkConan(ConanFile):
             tc.project_options["media-ffmpeg"] = enabled_disabled(self.options.with_ffmpeg)
             tc.project_options["media-gstreamer"] = enabled_disabled(self.options.with_gstreamer)
             tc.project_options["print-cups"] = enabled_disabled(self.options.with_cups)
-            if Version(self.version) < "4.3.2":
-                tc.project_options["print-cloudprint"] = enabled_disabled(self.options.with_cloudprint)
         tc.generate()
 
         tc = PkgConfigDeps(self)
         tc.generate()
 
     def _patch_sources(self):
-        if "4.2.0" <= Version(self.version) < "4.6.1":
-            replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "gtk_update_icon_cache: true", "gtk_update_icon_cache: false")
-        if "4.6.2" <= Version(self.version):
+        if "4.6.2" <= Version(self.version) < "4.9.2":
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "dependency(is_msvc_like ? ", "dependency(false ? ")
 
     def build(self):
