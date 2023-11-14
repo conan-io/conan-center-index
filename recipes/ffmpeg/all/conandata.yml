@@ -1,4 +1,7 @@
 sources:
+  "6.0.1":
+    url: "http://ffmpeg.org/releases/ffmpeg-6.0.1.tar.bz2"
+    sha256: "2c6e294569d1ba8e99cbf1acbe49e060a23454228a540a0f45d679d72ec69a06"
   "6.0":
     url: "https://ffmpeg.org/releases/ffmpeg-6.0.tar.bz2"
     sha256: "47d062731c9f66a78380e35a19aac77cebceccd1c7cc309b9c82343ffc430c3d"
