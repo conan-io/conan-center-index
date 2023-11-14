@@ -100,7 +100,7 @@ class FFTWConan(ConanFile):
 
     @property
     def _all_precisions(self):
-        return [p for p in ALL if self.options.precision == p or self.options.get_safe(f"precision_{p}")]
+        return [p for p in ALL if self.options.get_safe(f"precision_{p}")]
 
     def build(self):
         def on_off(value):
