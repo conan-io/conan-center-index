@@ -33,16 +33,11 @@ class FollyConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17" if Version(self.version) >= "2022.01.31.00" else "14"
+        return 17
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "15",
-            "gcc": "5",
-            "clang": "6",
-            "apple-clang": "8",
-        } if self._min_cppstd == "14" else {
             "gcc": "7",
             "Visual Studio": "16",
             "clang": "6",
@@ -55,7 +50,7 @@ class FollyConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if str(self.settings.arch) not in ['x86', 'x86_64']:
+        if str(self.settings.arch) not in ["x86", "x86_64"]:
             del self.options.use_sse4_2
 
     def configure(self):
@@ -82,12 +77,9 @@ class FollyConan(ConanFile):
         self.requires("libsodium/1.0.18")
         self.requires("xz_utils/5.4.0")
         # FIXME: Causing compilation issues on clang: self.requires("jemalloc/5.2.1")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/1.6.2")
-        if "2020.08.10.00" <= Version(self.version) < "2022.01.31.00":
-            self.requires("fmt/7.1.3", transitive_headers=True, transitive_libs=True)
-        if Version(self.version) >= "2022.01.31.00":
             self.requires("fmt/8.0.1", transitive_headers=True, transitive_libs=True)  # Folly bump fmt to 8.0.1 in v2022.01.31.00
 
     @property
@@ -103,9 +95,6 @@ class FollyConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if Version(self.version) < "2022.01.31.00" and self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Conan support for non-Linux platforms starts with Folly version 2022.01.31.00")
-
         if self.settings.os == "Macos" and self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Conan currently requires a 64bit target architecture for Folly on Macos")
 
@@ -117,7 +106,7 @@ class FollyConan(ConanFile):
 
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} could not be built on {self.settings.os}. PR's are welcome.")
-        
+
         if Version(self.version) >= "2020.08.10.00" and self.settings.compiler == "clang" and self.options.shared:
             raise ConanInvalidConfiguration(f"Folly {self.version} could not be built by clang as a shared library")
 
@@ -136,11 +125,8 @@ class FollyConan(ConanFile):
     def build_requirements(self):
         pass
 
-    def _preserve_tarball_root(self):
-        return Version(self.version) >= "2022.01.31.00"
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=not self._preserve_tarball_root())
+        get(self, **self.conan_data["sources"][self.version], strip_root=False)
 
     def _cppstd_flag_value(self, cppstd):
         cppstd_prefix_gnu, cppstd_value = (cppstd[:3], cppstd[3:]) if "gnu" in cppstd else ("", cppstd)
@@ -225,7 +211,7 @@ class FollyConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "Folly::folly")
         self.cpp_info.set_property("pkg_config_name", "libfolly")
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libfolly"].libs = [
                 "folly_exception_counter",
                 "folly_exception_tracer",
@@ -258,19 +244,18 @@ class FollyConan(ConanFile):
         ]
         if not is_msvc(self):
             self.cpp_info.components["libfolly"].requires.append("libdwarf::libdwarf")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libfolly"].requires.extend(["libiberty::libiberty", "libunwind::libunwind"])
             self.cpp_info.components["libfolly"].system_libs.extend(["pthread", "dl", "rt"])
 
-        if Version(self.version) >= "2020.08.10.00":
-            self.cpp_info.components["libfolly"].requires.append("fmt::fmt")
-            if self.settings.os == "Linux":
-                self.cpp_info.components["libfolly"].defines.extend(["FOLLY_HAVE_ELF", "FOLLY_HAVE_DWARF"])
+        self.cpp_info.components["libfolly"].requires.append("fmt::fmt")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["libfolly"].defines.extend(["FOLLY_HAVE_ELF", "FOLLY_HAVE_DWARF"])
 
         elif self.settings.os == "Windows":
             self.cpp_info.components["libfolly"].system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
 
-        if (self.settings.os == "Linux" and self.settings.compiler == "clang" and
+        if (self.settings.os in ["Linux", "FreeBSD"] and self.settings.compiler == "clang" and
             self.settings.compiler.libcxx == "libstdc++") or \
            (self.settings.os == "Macos" and self.settings.compiler == "apple-clang" and
             Version(self.settings.compiler.version.value) == "9.0" and self.settings.compiler.libcxx == "libc++"):
@@ -313,7 +298,7 @@ class FollyConan(ConanFile):
         self.cpp_info.components["folly_test_util"].libs = ["folly_test_util"]
         self.cpp_info.components["folly_test_util"].requires = ["libfolly"]
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
             self.cpp_info.components["folly_exception_tracer_base"].names["cmake_find_package"] = "folly_exception_tracer_base"
             self.cpp_info.components["folly_exception_tracer_base"].names["cmake_find_package_multi"] = "folly_exception_tracer_base"
