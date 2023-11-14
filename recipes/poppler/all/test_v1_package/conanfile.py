@@ -14,6 +14,6 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
-            pdf_path = os.path.join(self.source_folder, "sample.pdf")
-            self.run("{} {}".format(bin_path, pdf_path), run_environment=True)
+            pdf_path = os.path.join(self.source_folder, os.pardir, "test_package", "sample.pdf")
+            self.run(f"{bin_path} {pdf_path}", run_environment=True)
 
