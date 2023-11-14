@@ -1,6 +1,8 @@
 from conan import ConanFile
-from conan.tools.files import get, export_conandata_patches, apply_conandata_patches, copy
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import get, export_conandata_patches, apply_conandata_patches, chdir, copy, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -19,11 +21,11 @@ class TinyAlsaConan(ConanFile):
     default_options = {'shared': False}
 
     def layout(self):
-        cmake_layout(self)
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(f"{self.ref} only works for Linux.")
+            raise ConanInvalidConfiguration("{} only works for Linux.".format(self.name))
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
@@ -36,24 +38,34 @@ class TinyAlsaConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = CMakeToolchain(self)
+        tc = AutotoolsToolchain(self)
         tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        with chdir(self, self.source_folder):
+            at = Autotools(self)
+            at.make()
 
     def package(self):
         copy(self, "NOTICE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
-        cmake = CMake(self)
-        cmake.install()
+        with chdir(self, self.source_folder):
+            at = Autotools(self)
+            at.install(args=[f"DESTDIR={self.package_folder}", "PREFIX="])
+
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
+        with chdir(self, os.path.join(self.package_folder, "lib")):
+            files = os.listdir()
+            for f in files:
+                if (self.options.shared and f.endswith(".a")) or (not self.options.shared and not f.endswith(".a")):
+                    os.unlink(f)
 
     def package_info(self):
         self.cpp_info.libs = ["tinyalsa"]
-        self.cpp_info.system_libs.append("dl")
+        if Version(self.version) >= "2.0.0":
+            self.cpp_info.system_libs.append("dl")
         
         # Needed for compatibility with v1.x - Remove when 2.0 becomes the default
         bin_path = os.path.join(self.package_folder, "bin")
