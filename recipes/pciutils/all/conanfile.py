@@ -40,11 +40,6 @@ class PciUtilsConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration(
-                f"Platform {self.settings.os} is currently not supported by this recipe"
-            )
-
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
@@ -58,6 +53,12 @@ class PciUtilsConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_udev:
             self.requires("libudev/system")
+
+    def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration(
+                f"Platform {self.settings.os} is currently not supported by this recipe"
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -81,7 +82,6 @@ class PciUtilsConan(ConanFile):
     def generate(self):
         yes_no = lambda v: "yes" if v else "no"
         tc = AutotoolsToolchain(self)
-        env_vars = tc.environment().vars(self)
         tc.make_args = [
             f"SHARED={yes_no(self.options.shared)}",
             f"ZLIB={yes_no(self.options.with_zlib)}",
