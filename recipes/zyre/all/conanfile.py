@@ -46,9 +46,9 @@ class ZyreConan(ConanFile):
 
     def requirements(self):
         self.requires("czmq/4.2.1", transitive_headers=True)
-        self.requires("zeromq/4.3.4")
+        self.requires("zeromq/4.3.5")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("libsystemd/253.6")
+            self.requires("libsystemd/253.10")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -62,6 +62,8 @@ class ZyreConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
         if not self.options.shared:
             tc.preprocessor_definitions["ZYRE_STATIC"] = ""
+        # Relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("zeromq", "cmake_file_name", "LIBZMQ")
@@ -89,9 +91,11 @@ class ZyreConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "zyre")
+        self.cpp_info.set_property("cmake_target_name", "zyre" if self.options.shared else "zyre-static")
         self.cpp_info.set_property("pkg_config_name", "libzyre")
 
         libname = "zyre"
