@@ -19,7 +19,7 @@ class TinyAlsaConan(ConanFile):
     default_options = {'shared': False}
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        cmake_layout(self)
 
     def validate(self):
         if self.settings.os != "Linux":
