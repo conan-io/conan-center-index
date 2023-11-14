@@ -30,16 +30,20 @@ patches:
   "2.18.2":
     - patch_file: "patches/fix-amalgamation-build.patch"
       patch_description: "Backport a fix for amalgamation build"
-      patch_type: "portability"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/randombit/botan/pull/2835"
   "3.0.0":
     - patch_file: "patches/backport-getrandom-via-syscall-to-3.0.0.patch"
       patch_description: "Backport a fix to support getrandom() with glibc < 2.25"
       patch_type: "portability"
+      patch_source: "https://github.com/randombit/botan/pull/3688"
   "3.1.0":
     - patch_file: "patches/backport-getrandom-via-syscall-to-3.1.0.patch"
       patch_description: "Backport a fix to support getrandom() with glibc < 2.25"
       patch_type: "portability"
+      patch_source: "https://github.com/randombit/botan/pull/3688"
   "3.1.1":
     - patch_file: "patches/backport-getrandom-via-syscall-to-3.1.0.patch"
       patch_description: "Backport a fix to support getrandom() with glibc < 2.25"
       patch_type: "portability"
+      patch_source: "https://github.com/randombit/botan/pull/3688"
