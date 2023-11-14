@@ -65,11 +65,11 @@ class ElfutilsConan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.13")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.42.0")
+            self.requires("sqlite3/3.44.0")
         if self.options.with_bzlib:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.2")
+            self.requires("xz_utils/5.4.4")
         if self.options.get_safe("libdebuginfod"):
             self.requires("libcurl/8.1.2")
         if self.options.debuginfod:
@@ -82,7 +82,7 @@ class ElfutilsConan(ConanFile):
         self.build_requires("flex/2.6.4")
         self.tool_requires("bison/3.8.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
