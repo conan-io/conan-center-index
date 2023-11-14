@@ -1,8 +1,11 @@
 import os
+import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import chdir, copy, get, rename, rmdir
+from conan.tools.apple import XCRun
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import chdir, copy, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 
@@ -59,11 +62,26 @@ class PciUtilsConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    @property
+    def _cc(self):
+        compilers_by_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+        cxx = compilers_by_conf.get("c") or VirtualBuildEnv(self).vars().get("CC")
+        if cxx:
+            return cxx
+        if self.settings.compiler == "apple-clang":
+            return XCRun(self).cxx
+        compiler_version = str(self.settings.compiler.version)
+        major = compiler_version.split(".", 1)[0]
+        if self.settings.compiler == "gcc":
+            return shutil.which(f"gcc-{compiler_version}") or shutil.which(f"gcc-{major}") or shutil.which("gcc") or ""
+        if self.settings.compiler == "clang":
+            return shutil.which(f"clang-{compiler_version}") or shutil.which(f"clang-{major}") or shutil.which("clang") or ""
+        return ""
+
     def generate(self):
         yes_no = lambda v: "yes" if v else "no"
         tc = AutotoolsToolchain(self)
         env_vars = tc.environment().vars(self)
-        cc = env_vars.get("CC", self.settings.compiler)
         tc.make_args = [
             f"SHARED={yes_no(self.options.shared)}",
             f"ZLIB={yes_no(self.options.with_zlib)}",
@@ -71,7 +89,7 @@ class PciUtilsConan(ConanFile):
             f"DESTDIR={self.package_folder}",
             "PREFIX=/",
             "DNS=no",
-            f"CC={cc}",
+            f"CC={self._cc}",
         ]
         tc.generate()
         deps = AutotoolsDeps(self)
