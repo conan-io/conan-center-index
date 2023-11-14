@@ -29,21 +29,6 @@ add_executable(${PROJECT_NAME}
     test_package.c
 )
 
-if (${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
-    target_compile_options(
-        ${PROJECT_NAME}
-        PRIVATE 
-        
-        -fsanitize=address
-        )
-
-    target_link_options(
-        ${PROJECT_NAME}
-        PRIVATE 
-        -fsanitize=address
-        )
-endif()
-
 # Make sure the nodeset compiler is executed before compiling the main file
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}-ns-foo_flt)
 target_link_libraries(${PROJECT_NAME} PRIVATE open62541::open62541)

@@ -108,7 +108,10 @@ class Open62541Conan(ConanFile):
         # UA_COMPILE_AS_CXX=cpp_compatible
         "cpp_compatible": [True, False],
         # UA_ENABLE_STATUSCODE_DESCRIPTIONS=readable_statuscodes
-        "readable_statuscodes": [True, False]
+        "readable_statuscodes": [True, False],
+        # True: UA_ENABLE_DEBUG_SANITIZER=On - Use sanitizer in debug mode (only for Clang)
+        # False: UA_ENABLE_DEBUG_SANITIZER=Off
+        "debug_sanitizer": [True, False],
     }
     default_options = {
         "fPIC": True,
@@ -136,7 +139,8 @@ class Open62541Conan(ConanFile):
         "typenames": True,
         "hardening": True,
         "cpp_compatible": False,
-        "readable_statuscodes": True
+        "readable_statuscodes": True,
+        "debug_sanitizer": False,
     }
 
     exports = "submoduledata.yml"
