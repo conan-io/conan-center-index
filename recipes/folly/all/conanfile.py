@@ -151,15 +151,17 @@ class FollyConan(ConanFile):
             tc.variables["HAVE_VSNPRINTF_ERRORS_EXITCODE"] = "0"
             tc.variables["HAVE_VSNPRINTF_ERRORS_EXITCODE__TRYRUN_OUTPUT"] = ""
 
-        if self.options.get_safe("use_sse4_2") and str(self.settings.arch) in ['x86', 'x86_64']:
+        if self.options.get_safe("use_sse4_2") and str(self.settings.arch) in ["x86", "x86_64"]:
             tc.preprocessor_definitions["FOLLY_SSE"] = "4"
             tc.preprocessor_definitions["FOLLY_SSE_MINOR"] = "2"
             if not is_msvc(self):
-                tc.variables["CMAKE_C_FLAGS"] = "-mfma"
-                tc.variables["CMAKE_CXX_FLAGS"] = "-mfma"
+                cflags = "-mfma"
             else:
-                tc.variables["CMAKE_C_FLAGS"] = "/arch:FMA"
-                tc.variables["CMAKE_CXX_FLAGS"] = "/arch:FMA"
+                cflags = "/arch:FMA"
+            tc.blocks["cmake_flags_init"].template += (
+                f'string(APPEND CMAKE_CXX_FLAGS_INIT " {cflags}")\n'
+                f'string(APPEND CMAKE_C_FLAGS_INIT " {cflags}")\n'
+            )
 
         # Folly is not respecting this from the helper https://github.com/conan-io/conan-center-index/pull/15726/files#r1097068754
         tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
