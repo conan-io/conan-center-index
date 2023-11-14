@@ -13,10 +13,9 @@ class DfpConan(ConanFile):
     # Optional metadata
     description = "Decimal Floating Point Arithmetic Library"
     homepage = "https://github.com/epam/DFP/"
-    url = "https://github.com/epam/DFP.git"
+    url = "https://github.com/conan-io/conan-center-index"
     license = ("Apache-2.0", "Intel")
     topics = ("decimal", "dfp", "ieee-754", "deltix")
-    author = "Andrei Davydov (agdavydov81@gmail.com)"
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
@@ -24,7 +23,7 @@ class DfpConan(ConanFile):
     default_options = {"shared": False}
 
     # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "LICENSE", "intel-eula.txt", "CMakeLists.txt", "src/*", "include/*"
+    exports_sources = "CMakeLists.txt", "src/*", "include/*"
 
     def configure(self):
         # it's a C library
