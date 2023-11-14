@@ -121,16 +121,16 @@ class OpenSceneGraphConanFile(ConanFile):
         if self.options.use_fontconfig:
             self.requires("fontconfig/2.14.2")
 
-        if self.options.get_safe("with_asio", False):
+        if self.options.get_safe("with_asio"):
             # Should these be private requires?
             self.requires("asio/1.28.2")
             self.requires("boost/1.83.0")
         if self.options.with_curl:
-            self.requires("libcurl/8.4.0")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.get_safe("with_dcmtk"):
             self.requires("dcmtk/3.6.7")
         if self.options.with_freetype:
-            self.requires("freetype/2.13.0")
+            self.requires("freetype/2.13.2")
         if self.options.with_gdal:
             self.requires("gdal/3.7.0")
         if self.options.get_safe("with_gif"):
@@ -151,7 +151,7 @@ class OpenSceneGraphConanFile(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if self.options.get_safe("with_asio", False):
+        if self.options.get_safe("with_asio"):
             raise ConanInvalidConfiguration(
                 "ASIO support in OSG is broken, "
                 "see https://github.com/openscenegraph/OpenSceneGraph/issues/921"
@@ -235,10 +235,10 @@ class OpenSceneGraphConanFile(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        for package in ("Fontconfig", "Freetype", "GDAL", "GIFLIB", "GTA", "Jasper", "OpenEXR"):
+        for package in ["Fontconfig", "Freetype", "GDAL", "GIFLIB", "GTA", "Jasper", "OpenEXR"]:
             # Prefer conan's find package scripts over osg's
             os.unlink(os.path.join(self.source_folder, "CMakeModules", f"Find{package}.cmake"))
-        for path in (self.source_path / "src" / "osgPlugins").rglob("CMakeLists.txt"):
+        for path in self.source_path.joinpath("src", "osgPlugins").rglob("CMakeLists.txt"):
             content = path.read_text()
             # Correct usage of *_LIBRARY variables to *_LIBRARIES
             content = content.replace("_LIBRARY", "_LIBRARIES")
@@ -247,13 +247,17 @@ class OpenSceneGraphConanFile(ConanFile):
             content = re.sub(r"\b([A-Z]+)_FOUND\b", r"OSG_WITH_\1", content)
             path.write_text(content)
         # Fix file(to_cmake_path ...) usage
-        path = self.source_path / "CMakeModules" / "OsgMacroUtils.cmake"
+        path = self.source_path.joinpath("CMakeModules", "OsgMacroUtils.cmake")
         content = path.read_text()
         content = re.sub(r'FILE\(TO_CMAKE_PATH TMPVAR "CMAKE_(\w+)_OUTPUT_DIRECTORY/\$\{RELATIVE_OUTDIR}"\)',
                          r'FILE(TO_CMAKE_PATH "\${CMAKE_\1_OUTPUT_DIRECTORY}/\${RELATIVE_OUTDIR}" TMPVAR)',
                          content)
         path.write_text(content)
         apply_conandata_patches(self)
+
+        # Not sure why, but CMake fails to find the EXPAT::EXPAT target created by Conan when Fontconfig is found as a module.
+        replace_in_file(self, os.path.join(self.source_folder, "src", "osgText", "CMakeLists.txt"),
+                        "find_package(Fontconfig MODULE)", "find_package(Fontconfig CONFIG REQUIRED)")
 
     def build(self):
         self._patch_sources()
@@ -399,7 +403,7 @@ class OpenSceneGraphConanFile(ConanFile):
         setup_plugin("osg")
 
         plugin = setup_plugin("ive")
-        plugin.requires.extend(("osgSim", "osgFX", "osgText", "osgTerrain", "osgVolume"))
+        plugin.requires.extend(["osgSim", "osgFX", "osgText", "osgTerrain", "osgVolume"])
         if self.options.with_zlib:
             plugin.requires.append("zlib::zlib")
 
@@ -433,13 +437,13 @@ class OpenSceneGraphConanFile(ConanFile):
             setup_plugin("gif").requires.append("giflib::giflib")
 
         if self.options.get_safe("with_png"):
-            setup_plugin("png").requires.extend(("libpng::libpng", "zlib::zlib"))
+            setup_plugin("png").requires.extend(["libpng::libpng", "zlib::zlib"])
 
         if self.options.with_tiff:
             setup_plugin("tiff").requires.append("libtiff::libtiff")
 
         if self.options.with_gdal:
-            setup_plugin("gdal").requires.extend(("osgTerrain", "gdal::gdal"))
+            setup_plugin("gdal").requires.extend(["osgTerrain", "gdal::gdal"])
             setup_plugin("ogr").requires.append("gdal::gdal")
 
         if self.options.with_gta:
@@ -448,13 +452,13 @@ class OpenSceneGraphConanFile(ConanFile):
         # 3D Image plugins
         if self.options.get_safe("with_dcmtk"):
             plugin = setup_plugin("dicom")
-            plugin.requires.extend(("osgVolume", "dcmtk::dcmtk"))
+            plugin.requires.extend(["osgVolume", "dcmtk::dcmtk"])
             if self.settings.os == "Windows":
                 plugin.system_libs = ["wsock32", "ws2_32"]
 
         # 3rd party 3d plugins
         setup_plugin("3dc")
-        setup_plugin("p3d").requires.extend(("osgGA", "osgText", "osgVolume", "osgFX", "osgViewer", "osgPresentation"))
+        setup_plugin("p3d").requires.extend(["osgGA", "osgText", "osgVolume", "osgFX", "osgViewer", "osgPresentation"])
 
         if self.options.with_curl:
             plugin = setup_plugin("curl")
@@ -492,15 +496,15 @@ class OpenSceneGraphConanFile(ConanFile):
         setup_plugin("md2")
         setup_plugin("osgtgz")
         setup_plugin("tgz")
-        setup_plugin("shp").requires.extend(("osgSim", "osgTerrain"))
+        setup_plugin("shp").requires.extend(["osgSim", "osgTerrain"])
         setup_plugin("txf").requires.append("osgText")
         setup_plugin("bsp")
         setup_plugin("mdl")
-        setup_plugin("gles").requires.extend(("osgUtil", "osgAnimation"))
-        setup_plugin("osgjs").requires.extend(("osgAnimation", "osgSim"))
+        setup_plugin("gles").requires.extend(["osgUtil", "osgAnimation"])
+        setup_plugin("osgjs").requires.extend(["osgAnimation", "osgSim"])
         setup_plugin("lwo").requires.append("osgFX")
         setup_plugin("ply")
-        setup_plugin("txp").requires.extend(("osgSim", "osgText"))
+        setup_plugin("txp").requires.extend(["osgSim", "osgText"])
 
         # with_ffmpeg
         # setup_plugin("ffmpeg")
@@ -515,10 +519,9 @@ class OpenSceneGraphConanFile(ConanFile):
             setup_plugin("imageio").frameworks = ["Accelerate"]
 
         if (
-            is_apple_os(self)
-            and self.settings.os.version
-            and Version(self.settings.os.version) >= "10.8"
-        ) or (self.settings.os == "iOS" and Version(self.settings.os.version) >= "6.0"):
+            (self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version) >= "10.8") or
+            (self.settings.os == "iOS" and self.settings.os.version and Version(self.settings.os.version) >= "6.0")
+        ):
             plugin = setup_plugin("avfoundation")
             plugin.requires.append("osgViewer")
             plugin.frameworks = ["AVFoundation", "Cocoa", "CoreVideo", "CoreMedia", "QuartzCore"]
@@ -540,7 +543,7 @@ class OpenSceneGraphConanFile(ConanFile):
         # setup_plugin("nvtt")
 
         if self.options.with_freetype:
-            setup_plugin("freetype").requires.extend(("osgText", "freetype::freetype"))
+            setup_plugin("freetype").requires.extend(["osgText", "freetype::freetype"])
 
         if self.options.with_zlib:
             setup_plugin("zip")
@@ -573,7 +576,7 @@ class OpenSceneGraphConanFile(ConanFile):
         # setup_plugin("sdl")
 
         if self.options.get_safe("with_asio", False):
-            setup_plugin("resthttp").requires.extend(("osgPresentation", "asio::asio", "boost::boost"))
+            setup_plugin("resthttp").requires.extend(["osgPresentation", "asio::asio", "boost::boost"])
 
         # with_zeroconf
         # setup_plugin("zeroconf")
