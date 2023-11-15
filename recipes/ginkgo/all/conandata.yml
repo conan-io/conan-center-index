@@ -23,7 +23,7 @@ patches:
     - patch_file: "patches/cmake-fixes.patch"
       patch_type: "official"
       patch_description: "Fixes for CMake issues"
-      patch_source: ["https://github.com/ginkgo-project/ginkgo/pull/713", "https://github.com/ginkgo-project/ginkgo/pull/720"]
+      patch_source: "https://github.com/ginkgo-project/ginkgo/pull/713, https://github.com/ginkgo-project/ginkgo/pull/720"
     - patch_file: "patches/windows-iterator.patch"
       patch_type: "official"
       patch_description: "Fixes for MSVC compatibility"
