@@ -109,9 +109,6 @@ class Open62541Conan(ConanFile):
         "cpp_compatible": [True, False],
         # UA_ENABLE_STATUSCODE_DESCRIPTIONS=readable_statuscodes
         "readable_statuscodes": [True, False],
-        # True: UA_ENABLE_DEBUG_SANITIZER=On - Use sanitizer in debug mode (only for Clang)
-        # False: UA_ENABLE_DEBUG_SANITIZER=Off
-        "debug_sanitizer": [True, False],
     }
     default_options = {
         "fPIC": True,
@@ -140,7 +137,6 @@ class Open62541Conan(ConanFile):
         "hardening": True,
         "cpp_compatible": False,
         "readable_statuscodes": True,
-        "debug_sanitizer": False,
     }
 
     exports = "submoduledata.yml"
@@ -357,11 +353,9 @@ class Open62541Conan(ConanFile):
             tc.variables["UA_MSVC_FORCE_STATIC_CRT"] = True
 
         tc.variables["UA_COMPILE_AS_CXX"] = self.options.cpp_compatible
-        
+
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-
-        tc.variables["UA_ENABLE_DEBUG_SANITIZER"] = self.options.debug_sanitizer        
 
         tc.generate()
         tc = CMakeDeps(self)
