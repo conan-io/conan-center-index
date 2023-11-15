@@ -1,0 +1,4 @@
+sources:
+  "2.3.0":
+    url: "https://github.com/troydhanson/uthash/archive/e493aa90a2833b4655927598f169c31cfcdf7861.tar.gz"
+    sha256: "2ddb6665e82ffd7e87a27b97081bddf8f09520b7a2cfd6ab011541e7cde991fa"
