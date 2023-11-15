@@ -17,7 +17,7 @@ class Log4cxxConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://logging.apache.org/log4cxx"
-    topics = ("logging")
+    topics = ("logging", "log")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -50,7 +50,7 @@ class Log4cxxConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17
+        return 11
 
     @property
     def _compilers_minimum_version(self):
@@ -83,7 +83,6 @@ class Log4cxxConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-
     def requirements(self):
         self.requires("apr/1.7.4")
         self.requires("apr-util/1.6.1")
@@ -111,8 +110,6 @@ class Log4cxxConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.settings.compiler} {compiler_version} does not support C++17: {minimum_version} required.")
             if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, "17")
-        elif self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "11")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
