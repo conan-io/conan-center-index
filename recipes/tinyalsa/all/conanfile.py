@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, export_conandata_patches, apply_conandata_patches, chdir, copy, rmdir
+from conan.tools.files import get, export_conandata_patches, apply_conandata_patches, chdir, copy, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
@@ -56,11 +56,8 @@ class TinyAlsaConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-        with chdir(self, os.path.join(self.package_folder, "lib")):
-            files = os.listdir()
-            for f in files:
-                if (self.options.shared and f.endswith(".a")) or (not self.options.shared and not f.endswith(".a")):
-                    os.unlink(f)
+        pattern_to_remove = "*.a" if self.options.shared else "*.so"
+        rm(self, pattern_to_remove, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["tinyalsa"]
