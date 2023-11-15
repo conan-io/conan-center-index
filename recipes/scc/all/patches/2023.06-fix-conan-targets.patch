@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -24,5 +24,11 @@
+@@ -24,5 +24,12 @@
  include(Common)
  
 -if(CMAKE_PROJECT_NAME STREQUAL "scc")
@@ -9,6 +9,7 @@
 +find_package(Boost REQUIRED CONFIG)
 +find_package(SystemC REQUIRED CONFIG)
 +find_package(yaml-cpp REQUIRED CONFIG)
++find_package(lz4 REQUIRED CONFIG)
 +if(TRUE)
 +elseif(CMAKE_PROJECT_NAME STREQUAL "scc")
      message(STATUS "Building SCC in standalone mode")

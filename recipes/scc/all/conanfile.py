@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -49,12 +49,14 @@ class SystemcComponentsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/9.1.0", force=True)  # must be < 10, version conflict with spdlog
-        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("boost/1.83.0")
-        self.requires("gsl-lite/0.41.0")
+        self.requires("fmt/9.1.0", force=True)  # must be < 10, version conflict with spdlog
+        self.requires("lz4/1.9.4")
+        self.requires("rapidjson/cci.20220822")
         self.requires("spdlog/1.12.0")
+        self.requires("systemc-cci/1.0.0")
         self.requires("systemc/2.3.4")
+        self.requires("zlib/[>=1.2.11 <2]")
         if Version(self.version) >= "2023.06":
             self.requires("yaml-cpp/0.8.0")
 
@@ -87,8 +89,13 @@ class SystemcComponentsConan(ConanFile):
         deps.set_property("yaml-cpp", "cmake_target_name", "yaml-cpp::yaml-cpp")
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "third_party", "axi_chi", "CMakeLists.txt"),
+                        " STATIC", "")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -101,8 +108,43 @@ class SystemcComponentsConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.components["busses"].libs = ["busses"]
         self.cpp_info.components["scc-sysc"].libs = ["scc-sysc"]
+        self.cpp_info.components["scc-sysc"].requires = [
+            "fstapi",
+            "lwtr",
+            "scc-util",
+            "scv-tr",
+            "boost::date_time",
+            "fmt::fmt",
+            "rapidjson::rapidjson",
+            "spdlog::spdlog",
+            "systemc-cci::systemc-cci",
+            "systemc::systemc",
+            "zlib::zlib",
+            'lz4::lz4',
+        ]
+        if Version(self.version) >= "2023.06":
+            self.cpp_info.components["scc-sysc"].requires.append("yaml-cpp::yaml-cpp")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["scc-sysc"].system_libs = ["pthread", "dl"]
+
+        self.cpp_info.components["busses"].libs = ["busses"]
+        self.cpp_info.components["busses"].requires = ["tlm-interfaces", "scc-sysc"]
+
+        self.cpp_info.components["cciapi"].libs = ["cciapi"]
+        self.cpp_info.components["cciapi"].requires = ["rapidjson::rapidjson"]
+
+        self.cpp_info.components["fstapi"].libs = ["fstapi"]
+        self.cpp_info.components["fstapi"].requires = ["zlib::zlib", "lz4::lz4"]
+
+        self.cpp_info.components["lwtr"].libs = ["lwtr"]
+        self.cpp_info.components["lwtr"].requires = ["zlib::zlib", "lz4::lz4", "systemc::systemc", "fmt::fmt"]
+
         self.cpp_info.components["scc-util"].libs = ["scc-util"]
+        self.cpp_info.components["scc-util"].requires = ["lz4::lz4"]
+
         self.cpp_info.components["scv-tr"].libs = ["scv-tr"]
+        self.cpp_info.components["scv-tr"].requires = ["fmt::fmt", "systemc::systemc"]
+
         self.cpp_info.components["tlm-interfaces"].libs = ["tlm-interfaces"]
+        self.cpp_info.components["tlm-interfaces"].requires = ["scc-sysc", "systemc::systemc"]
