@@ -33,6 +33,12 @@ class DfpConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def layout(self):
+        cmake_layout(self)
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.22.0 <4]")
+
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
