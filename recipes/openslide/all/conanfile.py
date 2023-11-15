@@ -69,7 +69,7 @@ class OpenSlideConan(ConanFile):
 
     def validate(self):
         if is_msvc(self):
-            raise ConanInvalidConfiguration(f"OpenSlide requires GNU C++ extensions support and is not compatible with MSVC")
+            raise ConanInvalidConfiguration("OpenSlide requires GNU C extensions support and is not compatible with MSVC")
 
     def build_requirements(self):
         self.tool_requires("meson/1.2.3")
