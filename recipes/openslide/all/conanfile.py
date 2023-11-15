@@ -28,10 +28,12 @@ class OpenSlideConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "jpeg": "libjpeg",
     }
 
     def config_options(self):
@@ -52,13 +54,18 @@ class OpenSlideConan(ConanFile):
         self.requires("gdk-pixbuf/2.42.10")
         self.requires("glib/2.78.1", force=True)  # FIXME
         self.requires("libdicom/1.0.5")
-        self.requires("libjpeg/9e")
         self.requires("libpng/1.6.40")
         self.requires("libtiff/4.6.0", force=True)  # FIXME
         self.requires("libxml2/2.11.5")
         self.requires("openjpeg/2.5.0")
         self.requires("sqlite3/3.44.0")
         self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.jpeg == "libjpeg":
+            self.requires("libjpeg/9e")
+        elif self.options.jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/3.0.1")
+        elif self.options.jpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.3")
 
     def validate(self):
         if is_msvc(self):
@@ -101,3 +108,24 @@ class OpenSlideConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["openslide"]
         self.cpp_info.includedirs.append(os.path.join("include", "openslide"))
+
+        self.cpp_info.requires = [
+            "cairo::cairo_",
+            "gdk-pixbuf::gdk-pixbuf",
+            "glib::gio-2.0",
+            "glib::glib-2.0",
+            "glib::gobject-2.0",
+            "libdicom::libdicom",
+            "libpng::libpng",
+            "libtiff::libtiff",
+            "libxml2::libxml2",
+            "openjpeg::openjpeg",
+            "sqlite3::sqlite3",
+            "zlib::zlib",
+        ]
+        if self.options.jpeg == "libjpeg":
+            self.cpp_info.requires.append("libjpeg::libjpeg")
+        elif self.options.jpeg == "libjpeg-turbo":
+            self.cpp_info.requires.append("libjpeg-turbo::jpeg")
+        elif self.options.jpeg == "mozjpeg":
+            self.cpp_info.requires.append("mozjpeg::libjpeg")
