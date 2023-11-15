@@ -78,17 +78,20 @@ class Krb5Conan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         if is_msvc(self):
-            vcvars = VCVars(self)
-            vcvars.generate()
-
-            deps = NMakeDeps(self)
-            deps.generate()
-
             tc = NMakeToolchain(self)
             env = tc.environment()
             env.define("KRB_INSTALL_DIR", self.package_folder)
             tc.generate(env)
+
+            tc = NMakeDeps(self)
+            tc.generate()
+
+            vcvars = VCVars(self)
+            vcvars.generate()
         else:   
             env = VirtualBuildEnv(self)
             env.generate()
@@ -134,6 +137,8 @@ class Krb5Conan(ConanFile):
         if not is_msvc(self):
             self.build_requires("automake/1.16.5")
             self.build_requires("bison/3.8.2")
+        if is_msvc(self):
+            self.tool_requires("strawberryperl/5.32.1.1")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
