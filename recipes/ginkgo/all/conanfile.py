@@ -93,7 +93,17 @@ class GinkgoConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
+        is_windows_shared = self.options.shared and is_msvc(self)
+
+        if (
+            is_windows_shared
+            and self.settings.build_type == "Debug"
+            and Version(self.version) >= "1.7.0"
+        ):
+            raise ConanInvalidConfiguration(
+                "Ginkgo >= 1.7.0 cannot be built in shared debug mode on Windows"
+            )
+        if is_windows_shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
                 "Ginkgo does not support mixing static CRT and shared library"
             )
