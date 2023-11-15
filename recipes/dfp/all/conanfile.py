@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import copy
+from conan.tools.files import copy, get
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 import os
 
@@ -24,6 +24,9 @@ class DfpConan(ConanFile):
 
     # Sources are located in the same place as this recipe, copy them to the recipe
     exports_sources = "CMakeLists.txt", "src/*", "include/*"
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def configure(self):
         # it's a C library
