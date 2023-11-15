@@ -21,7 +21,7 @@ class MesaGluConan(ConanFile):
     topics = ("gl", "glu", "mesa", "opengl")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    provides = "libglu"
+    provides = "glu"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
