@@ -11,8 +11,20 @@ sources:
 patches:
   "1.7.0":
     - patch_file: "patches/libc++-chrono.patch"
+      patch_type: "official"
+      patch_description: "Fix for std::chrono incompatibility with libc++"
+      patch_source: "https://github.com/ginkgo-project/ginkgo/pull/1463"
   "1.4.0":
     - patch_file: "patches/windows-symbols.patch"
+      patch_type: "official"
+      patch_description: "Fix for excessive link symbol count with MSVC"
+      patch_source: "https://github.com/ginkgo-project/ginkgo/pull/868"
   "1.3.0":
     - patch_file: "patches/cmake-fixes.patch"
+      patch_type: "official"
+      patch_description: "Fixes for CMake issues"
+      patch_source: ["https://github.com/ginkgo-project/ginkgo/pull/713", "https://github.com/ginkgo-project/ginkgo/pull/720"]
     - patch_file: "patches/windows-iterator.patch"
+      patch_type: "official"
+      patch_description: "Fixes for MSVC compatibility"
+      patch_source: "https://github.com/ginkgo-project/ginkgo/pull/665"
