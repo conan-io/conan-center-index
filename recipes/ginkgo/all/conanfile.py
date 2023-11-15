@@ -111,7 +111,10 @@ class GinkgoConan(ConanFile):
         tc.variables["GINKGO_BUILD_OMP"] = self.options.openmp
         tc.variables["GINKGO_BUILD_CUDA"] = self.options.cuda
         tc.variables["GINKGO_BUILD_HIP"] = False
-        tc.variables["GINKGO_BUILD_DPCPP"] = False
+        if Version(self.version) >= "1.7.0":
+            tc.variables["GINKGO_BUILD_SYCL"] = False
+        else:
+            tc.variables["GINKGO_BUILD_DPCPP"] = False
         tc.variables["GINKGO_BUILD_HWLOC"] = False
         tc.variables["GINKGO_BUILD_MPI"] = False
         tc.generate()
