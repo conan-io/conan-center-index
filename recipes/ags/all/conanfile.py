@@ -21,10 +21,16 @@ class AGSConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK"
-    topics = ("amd", "gpu", "header-only")
+    topics = ("amd", "gpu")
 
-    package_type = "static-library"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+    }
+    default_options = {
+        "shared": False,
+    }
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -41,7 +47,7 @@ class AGSConan(ConanFile):
                 f"ags doesn't support compiler: {self.settings.compiler} on OS: {self.settings.os}."
             )
         check_min_vs(self, 190)
-        if Version(self.version) < "6.1.0" and check_min_vs(self, 193, raise_invalid=True):
+        if Version(self.version) < "6.1.0" and check_min_vs(self, 193, raise_invalid=False):
             raise ConanInvalidConfiguration(f"Visual Studio 2019 or older is required for v{self.version}")
         if self.settings.arch not in self._supported_archs:
             raise ConanInvalidConfiguration(f"ags doesn't support arch: {self.settings.arch}")
