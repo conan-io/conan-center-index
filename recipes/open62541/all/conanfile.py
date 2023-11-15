@@ -361,6 +361,8 @@ class Open62541Conan(ConanFile):
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
+        tc.variables["UA_ENABLE_DEBUG_SANITIZER"] = self.options.debug_sanitizer        
+
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -455,3 +457,4 @@ class Open62541Conan(ConanFile):
             self._module_file_rel_path]
         self.cpp_info.set_property("cmake_build_modules", [
                                    self._module_file_rel_path])
+        
