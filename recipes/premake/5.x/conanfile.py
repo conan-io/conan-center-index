@@ -170,5 +170,4 @@ class PremakeConan(ConanFile):
 
         # TODO: Legacy, to be removed on Conan 2.0
         bindir = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bindir}")
         self.env_info.PATH.append(bindir)
