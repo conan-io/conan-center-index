@@ -1,18 +1,19 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+enable_testing()
 
 find_package(RocksDB REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME}_stable_abi test_package_stable_abi.cpp)
+add_test(NAME ${PROJECT_NAME}_stable_abi COMMAND ${PROJECT_NAME}_stable_abi)
 if(ROCKSDB_SHARED)
-  target_link_libraries(${PROJECT_NAME}_stable_abi RocksDB::rocksdb-shared)
+    target_link_libraries(${PROJECT_NAME}_stable_abi PRIVATE RocksDB::rocksdb-shared)
 else()
-  target_link_libraries(${PROJECT_NAME}_stable_abi RocksDB::rocksdb)
+    target_link_libraries(${PROJECT_NAME}_stable_abi PRIVATE RocksDB::rocksdb)
 
-  add_executable(${PROJECT_NAME}_cpp test_package.cpp)
-  target_link_libraries(${PROJECT_NAME}_cpp RocksDB::rocksdb)
-  set_property(TARGET ${PROJECT_NAME}_cpp PROPERTY CXX_STANDARD 11)
+    add_executable(${PROJECT_NAME}_cpp test_package.cpp)
+    target_link_libraries(${PROJECT_NAME}_cpp PRIVATE RocksDB::rocksdb)
+    target_compile_features(${PROJECT_NAME}_cpp PRIVATE cxx_std_11)
+    add_test(NAME ${PROJECT_NAME}_cpp COMMAND ${PROJECT_NAME}_cpp)
 endif()
