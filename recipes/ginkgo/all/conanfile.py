@@ -63,6 +63,9 @@ class GinkgoConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def build_requirements(self):
+        self.tool_requires(self, "cmake/[3.16 <4]")
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
