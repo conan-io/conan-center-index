@@ -120,10 +120,7 @@ class Log4cxxConan(ConanFile):
                 self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
-        # OSError: [WinError 123] The filename, directory name, or volume label syntax is incorrect:
-        # 'src\\test\\resources\\output\\xyz\\:'
-        pattern = "*[!:]"
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, pattern=pattern)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
