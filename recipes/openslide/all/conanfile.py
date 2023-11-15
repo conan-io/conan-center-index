@@ -17,7 +17,9 @@ class OpenSlideConan(ConanFile):
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://openslide.org/"
-    topics = ("pathology", "whole-slide-imaging", "slide-image")
+    topics = ("image", "pathology", "whole-slide-imaging", "slide-image",
+              # supported formats
+              "bif", "dicom", "dcm", "mrxs", "ndpi", "scn", "svs", "svslide", "tiff", "vms", "vmu")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
