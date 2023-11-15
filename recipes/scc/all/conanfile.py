@@ -49,8 +49,8 @@ class SystemcComponentsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/8.1.1")
-        self.requires("zlib/1.2.13")
+        self.requires("fmt/9.1.0", force=True)  # must be < 10, version conflict with spdlog
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("boost/1.83.0")
         self.requires("gsl-lite/0.41.0")
         self.requires("spdlog/1.12.0")
@@ -67,7 +67,7 @@ class SystemcComponentsConan(ConanFile):
             raise ConanInvalidConfiguration("GCC < version 7 is not supported")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.24]")
+        self.tool_requires("cmake/[>=3.24 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
