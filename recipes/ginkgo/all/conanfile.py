@@ -64,7 +64,7 @@ class GinkgoConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.tool_requires("cmake/[3.16 <4]")
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def configure(self):
         if self.options.shared:
