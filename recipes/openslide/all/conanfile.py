@@ -1,12 +1,14 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -57,6 +59,10 @@ class OpenSlideConan(ConanFile):
         self.requires("openjpeg/2.5.0")
         self.requires("sqlite3/3.44.0")
         self.requires("zlib/[>=1.2.11 <2]")
+
+    def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"OpenSlide requires GNU C++ extensions support and is not compatible with MSVC")
 
     def build_requirements(self):
         self.tool_requires("meson/1.2.3")
