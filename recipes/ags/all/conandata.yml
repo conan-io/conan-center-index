@@ -8,3 +8,6 @@ sources:
   "6.1.0":
     url: https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK/archive/v6.1.0.tar.gz
     sha256: 718c2ca4a6b5b7b0d35d6cdba2ae38bea4be7c01039a9093a5b13dd87c3fb8fd
+  "6.2.0":
+    url: https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK/archive/refs/tags/v6.2.0.tar.gz
+    sha256: 7fe211ff3856bb806da24d7988ddbf9dcb5d3395a1795ca68d510f7c29fe43cb
