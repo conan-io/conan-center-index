@@ -1,6 +1,7 @@
 #include <openslide.h>
+#include <stdio.h>
 
 int main() {
-    openslide_detect_vendor("");
+    printf("OpenSlide version: %s\n", openslide_get_version());
     return 0;
 }
