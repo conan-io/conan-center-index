@@ -57,8 +57,7 @@ class SystemcComponentsConan(ConanFile):
         self.requires("systemc-cci/1.0.0")
         self.requires("systemc/2.3.4")
         self.requires("zlib/[>=1.2.11 <2]")
-        if Version(self.version) >= "2023.06":
-            self.requires("yaml-cpp/0.8.0")
+        self.requires("yaml-cpp/0.8.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -116,15 +115,14 @@ class SystemcComponentsConan(ConanFile):
             "scv-tr",
             "boost::date_time",
             "fmt::fmt",
+            "lz4::lz4",
             "rapidjson::rapidjson",
             "spdlog::spdlog",
             "systemc-cci::systemc-cci",
             "systemc::systemc",
+            "yaml-cpp::yaml-cpp",
             "zlib::zlib",
-            'lz4::lz4',
         ]
-        if Version(self.version) >= "2023.06":
-            self.cpp_info.components["scc-sysc"].requires.append("yaml-cpp::yaml-cpp")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["scc-sysc"].system_libs = ["pthread", "dl"]
 
