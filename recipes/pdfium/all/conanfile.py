@@ -49,10 +49,11 @@ class PdfiumConan(ConanFile):
         self.requires("icu/74.1")
         self.requires("lcms/2.14")
         self.requires("openjpeg/2.5.0")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/3.0.1")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -86,6 +87,8 @@ class PdfiumConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["PDFIUM_ROOT"] = self.source_folder.replace("\\", "/")
         tc.variables["PDF_LIBJPEG_TURBO"] = self.options.with_libjpeg == "libjpeg-turbo"
+        tc.variables["PDF_ENABLE_XFA"] = False  # TODO: pdfium-cmake needs updating
+        tc.variables["PDF_ENABLE_V8"] = False  # TODO: requires v8
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
