@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -61,6 +62,9 @@ class MariadbConnectorcConan(ConanFile):
             self.requires("libcurl/8.2.1")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
+        if Version(self.version) >= "3.3":
+            # INFO: https://mariadb.com/kb/en/mariadb-connector-c-330-release-notes
+            self.requires("zstd/1.5.5")
 
     def validate(self):
         if self.settings.os != "Windows" and self.options.with_ssl == "schannel":
@@ -92,6 +96,8 @@ class MariadbConnectorcConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
+        if Version(self.version) >= "3.3":
+            deps.set_property("zstd", "cmake_file_name", "ZSTD")
         deps.generate()
 
     def _patch_sources(self):
