@@ -141,9 +141,7 @@ dependencies:
   - date_time
   - exception
   - system
-  timer:
-  - chrono
-  - system
+  timer: []
   type_erasure:
   - thread
   unit_test_framework:
