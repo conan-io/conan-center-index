@@ -1,4 +1,7 @@
 sources:
+  "41":
+    url: "https://github.com/SimonKagstrom/kcov/archive/refs/tags/v41.tar.gz"
+    sha256: "13cddde0c6c97dc78ece23f7adcad7a8f2b5ae3c84193020e7edd9bf44e5997c"
   "40":
     url: "https://github.com/SimonKagstrom/kcov/archive/refs/tags/v40.tar.gz"
     sha256: "6b1c11b066d57426d61375a31c3816f1fcd2610b447050c86d9920e22d5200b3"
@@ -6,7 +9,6 @@ sources:
     url: "https://github.com/SimonKagstrom/kcov/archive/38.tar.gz"
     sha256: "b37af60d81a9b1e3b140f9473bdcb7975af12040feb24cc666f9bb2bb0be68b4"
 patches:
-  "40": []
   "38":
     - patch_file: "patches/0001-fix-SOLIB-path.patch"
     - patch_file: "patches/0002-fix-missing-libssl-dependency.patch"
