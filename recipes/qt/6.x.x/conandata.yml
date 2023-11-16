@@ -117,6 +117,10 @@ patches:
     - "base_path": "qtwebengine"
       "patch_description": "Workaround for too long .rps file name"
       "patch_file": "patches/c72097e.diff"
+    - base_path: "qtbase"
+      patch_description: "Fix compilation with point releases of GCC 9 prior to 9.3"
+      patch_file: "patches/148895_0001-Fix-FTBFS-qt-6.5.0-on-gcc-9.patch"
+      patch_source: "https://bugreports.qt.io/browse/QTBUG-112920"
   "6.5.1":
     - base_path: "qtwebengine"
       patch_description: "Workaround for too long .rps file name"
@@ -124,6 +128,10 @@ patches:
     - base_path: "qtbase/cmake"
       patch_description: "Fix pri helpers, see PR #6668 and QTBUG-95569"
       patch_file: "patches/qt6.5.0-pri-helpers-fix.diff"
+    - base_path: "qtbase"
+      patch_description: "Fix compilation with point releases of GCC 9 prior to 9.3"
+      patch_file: "patches/148895_0001-Fix-FTBFS-qt-6.5.0-on-gcc-9.patch"
+      patch_source: "https://bugreports.qt.io/browse/QTBUG-112920"
   "6.5.0":
     - base_path: "qtwebengine"
       patch_description: "Workaround for too long .rps file name"
@@ -131,6 +139,10 @@ patches:
     - base_path: "qtbase/cmake"
       patch_description: "Fix pri helpers, see PR #6668 and QTBUG-95569"
       patch_file: "patches/qt6.5.0-pri-helpers-fix.diff"
+    - base_path: "qtbase"
+      patch_description: "Fix compilation with point releases of GCC 9 prior to 9.3"
+      patch_file: "patches/148895_0001-Fix-FTBFS-qt-6.5.0-on-gcc-9.patch"
+      patch_source: "https://bugreports.qt.io/browse/QTBUG-112920"
   "6.4.2":
     - base_path: "qtbase/cmake"
       patch_description: "Fix pri helpers"
