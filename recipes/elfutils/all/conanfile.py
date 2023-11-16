@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rm, rmdir
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path, is_msvc
@@ -19,6 +19,7 @@ class ElfutilsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("libelf", "libdw", "libasm")
     license = ["GPL-1.0-or-later", "LGPL-3.0-or-later", "GPL-2.0-or-later"]
+
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -28,6 +29,7 @@ class ElfutilsConan(ConanFile):
         "libdebuginfod": [True, False],
         "with_bzlib": [True, False],
         "with_lzma": [True, False],
+        "with_zstd": [True, False],
         "with_sqlite3": [True, False],
     }
     default_options = {
@@ -37,6 +39,7 @@ class ElfutilsConan(ConanFile):
         "libdebuginfod": False,
         "with_bzlib": True,
         "with_lzma": True,
+        "with_zstd": True,
         "with_sqlite3": False,
     }
 
@@ -52,6 +55,7 @@ class ElfutilsConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) < "0.186":
             del self.options.libdebuginfod
+            del self.options.with_zstd
 
     def configure(self):
         if self.options.shared:
@@ -70,8 +74,10 @@ class ElfutilsConan(ConanFile):
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
             self.requires("xz_utils/5.4.4")
+        if self.options.get_safe("with_zstd"):
+            self.requires("zstd/1.5.5")
         if self.options.get_safe("libdebuginfod"):
-            self.requires("libcurl/8.1.2")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.debuginfod:
             self.requires("libmicrohttpd/0.9.75")
 
@@ -121,19 +127,28 @@ class ElfutilsConan(ConanFile):
             "--with-zlib",
             "--with-bzlib" if self.options.with_bzlib else "--without-bzlib",
             "--with-lzma" if self.options.with_lzma else "--without-lzma",
+            "--with-zstd" if self.options.get_safe("with_zstd") else "--without-zstd",
             "--enable-debuginfod" if self.options.debuginfod else "--disable-debuginfod",
         ])
         if Version(self.version) >= "0.186":
             tc.configure_args.append("--enable-libdebuginfod" if self.options.libdebuginfod else "--disable-libdebuginfod")
         tc.configure_args.append(f"BUILD_STATIC={'0' if self.options.shared else '1'}")
+        if self.options.with_zstd:
+            # ./configure ignores system_libs
+            tc.extra_ldflags.append("-pthread")
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "config", "eu.am"),
+                        "-Werror", "", strict=False)
+
+    def build(self):
+        self._patch_sources()
         autotools = Autotools(self)
         autotools.autoreconf(args=["-fiv"])
         autotools.configure()
@@ -156,14 +171,18 @@ class ElfutilsConan(ConanFile):
         # library components
         self.cpp_info.components["libelf"].libs = ["elf"]
         self.cpp_info.components["libelf"].requires = ["zlib::zlib"]
+        if self.options.with_bzlib:
+            self.cpp_info.components["libelf"].requires.append("bzip2::bzip2")
+        if self.options.with_lzma:
+            self.cpp_info.components["libelf"].requires.append("xz_utils::xz_utils")
+        if self.options.with_zstd:
+            self.cpp_info.components["libelf"].requires.append("zstd::zstd")
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["libelf"].system_libs.append("pthread")
 
         self.cpp_info.components["libdw"].libs = ["dw"]
-        self.cpp_info.components["libdw"].requires = ["libelf", "zlib::zlib"]
-        if self.options.with_bzlib:
-            self.cpp_info.components["libdw"].requires.append("bzip2::bzip2")
-        if self.options.with_lzma:
-            self.cpp_info.components["libdw"].requires.append("xz_utils::xz_utils")
-        if self.settings.os == "Linux":
+        self.cpp_info.components["libdw"].requires = ["libelf"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libdw"].system_libs.extend(["dl"])
 
         self.cpp_info.components["libasm"].includedirs = ["include/elfutils"]
