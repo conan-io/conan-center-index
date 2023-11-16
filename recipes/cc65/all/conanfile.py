@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import can_run
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -27,11 +28,6 @@ class Cc65Conan(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        if is_msvc(self):
-            if self.settings.arch not in ("x86", "x86_64"):
-                raise ConanInvalidConfiguration("Invalid arch")
-            if self.settings.arch == "x86_64":
-                self.output.info("This recipe will build x86 instead of x86_64 (the binaries are compatible)")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -42,9 +38,21 @@ class Cc65Conan(ConanFile):
                 self.info.settings.arch = "x86"
         del self.info.settings.compiler
 
+    def validate(self):
+        if not can_run(self):
+            raise ConanInvalidConfiguration(
+                f"Compiling for {self.settings.arch} is not supported. "
+                "cc65 needs to be able to run the built executables during the build process"
+            )
+        if is_msvc(self):
+            if self.settings.arch not in ("x86", "x86_64"):
+                raise ConanInvalidConfiguration(f"{self.settings.arch} is not supported on MSVC")
+            if self.settings.arch == "x86_64":
+                self.output.info("This recipe will build x86 instead of x86_64 (the binaries are compatible)")
+
     def build_requirements(self):
         if is_msvc(self):
-            self.tool_requires("make/4.3")
+            self.tool_requires("make/4.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
