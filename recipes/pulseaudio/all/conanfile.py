@@ -81,7 +81,7 @@ class PulseAudioConan(ConanFile):
         if self.options.get_safe("with_fftw"):
             if not self.dependencies["fftw"].options.precision_single:
                 raise ConanInvalidConfiguration(
-                    f"Pulse audio cannot use fftw single precision. "
+                    f"Pulse audio uses fftw single precision. "
                      "Either set option -o fftw/*:precision_single=True or -o pulseaudio/*:with_fftw=False"
                 )
 
