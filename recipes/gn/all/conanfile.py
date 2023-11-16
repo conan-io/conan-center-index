@@ -8,7 +8,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.build import check_min_cppstd
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import chdir, copy, get, load, save, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars
@@ -73,22 +73,6 @@ class GnConan(ConanFile):
         # Assume gn knows about the os
         return str(self.settings.os).lower()
 
-    def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
-        if is_msvc(self):
-            vcvars = VCVars(self)
-            vcvars.generate()
-
-        configure_args = [
-            "--no-last-commit-position",
-            f"--host={self._gn_platform}",
-        ]
-        if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
-            configure_args.append("-d")
-        save(self, os.path.join(self.source_folder, "configure_args"), " ".join(configure_args))
-
     @property
     def _cxx(self):
         compilers_by_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
@@ -104,6 +88,28 @@ class GnConan(ConanFile):
         if self.settings.compiler == "clang":
             return shutil.which(f"clang++-{compiler_version}") or shutil.which(f"clang++-{major}") or shutil.which("clang++") or ""
         return ""
+
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
+        # Make sure CXX env var is set, otherwise gn defaults it to clang++
+        # https://gn.googlesource.com/gn/+/refs/heads/main/build/gen.py#386
+        env = Environment()
+        env.define("CXX", self._cxx)
+        env.vars(self).save_script("conanbuild_gn")
+
+        if is_msvc(self):
+            vcvars = VCVars(self)
+            vcvars.generate()
+
+        configure_args = [
+            "--no-last-commit-position",
+            f"--host={self._gn_platform}",
+        ]
+        if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
+            configure_args.append("-d")
+        save(self, os.path.join(self.source_folder, "configure_args"), " ".join(configure_args))
 
     def build(self):
         with chdir(self, self.source_folder):
@@ -121,11 +127,6 @@ class GnConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "build/gen.py"),
                             "def GenerateLastCommitPosition(host, header):",
                             "def GenerateLastCommitPosition(host, header):\n  return")
-
-            # Make sure CXX env var is set, otherwise gn defaults it to clang++
-            # https://gn.googlesource.com/gn/+/refs/heads/main/build/gen.py#386
-            os.environ["CXX"] = self._cxx
-            self.output.info(f"Set CXX to '{os.environ['CXX']}'")
 
             # Try sleeping to avoid time skew of the generated ninja.build file (and having to re-run build/gen.py)
             err = None
