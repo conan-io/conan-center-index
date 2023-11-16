@@ -3,8 +3,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save, replace_in_file
@@ -59,13 +58,10 @@ class IgnitionMathConan(ConanFile):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warning(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
-        else:
-            if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.name} requires c++17 support. "
-                    f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
+        if min_version and Version(self.settings.compiler.version) < min_version:
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires c++17 support. "
+                f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -75,8 +71,8 @@ class IgnitionMathConan(ConanFile):
         self.requires("swig/4.1.1")
 
     def validate(self):
-        if is_apple_os(self) and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("sorry, M1 builds are not currently supported, giving up!")
+        if cross_building(self) and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("sorry, M1 cross builds are not currently supported, giving up!")
 
     def build_requirements(self):
         if Version(self.version) <= "6.8":
