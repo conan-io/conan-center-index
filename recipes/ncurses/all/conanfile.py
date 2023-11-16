@@ -31,9 +31,9 @@ class NCursesConan(ConanFile):
         "with_extended_colors": [True, False],
         "with_cxx": [True, False],
         "with_progs": [True, False],
-        "with_ticlib": ["auto", True, False],
+        "with_ticlib": [True, False],
         "with_reentrant": [True, False],
-        "with_tinfo": ["auto", True, False],
+        "with_tinfo": [True, False],
         "with_pcre2": [True, False],
     }
     default_options = {
@@ -43,9 +43,9 @@ class NCursesConan(ConanFile):
         "with_extended_colors": True,
         "with_cxx": True,
         "with_progs": True,
-        "with_ticlib": "auto",
+        "with_ticlib": True,
         "with_reentrant": False,
-        "with_tinfo": "auto",
+        "with_tinfo": True,
         "with_pcre2": False,
     }
 
@@ -64,10 +64,9 @@ class NCursesConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.options.with_ticlib == "auto":
-            self.options.with_ticlib = self.settings.os != "Windows"
-        if self.options.with_tinfo == "auto":
-            self.options.with_tinfo = self.settings.os != "Windows"
+        # Set the default value based on OS
+        self.options.with_ticlib = self.settings.os != "Windows"
+        self.options.with_tinfo = self.settings.os != "Windows"
 
     def configure(self):
         if self.options.shared:
