@@ -40,22 +40,3 @@
  endif()
  
  set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 3 VERSION 3.1.0)
-@@ -102,16 +106,13 @@ endif (NOT Python3_NOT_FOUND AND NOT Numpy_NOT_FOUND AND PYTHONLIBS_FOUND AND BU
- 
- # Examples
- # apriltag_demo
--add_executable(apriltag_demo example/apriltag_demo.c)
--target_link_libraries(apriltag_demo apriltag)
- 
- # opencv_demo
--if(OpenCV_FOUND)
-+if(0)
-     add_executable(opencv_demo example/opencv_demo.cc)
-     target_link_libraries(opencv_demo apriltag ${OpenCV_LIBRARIES})
-     set_target_properties(opencv_demo PROPERTIES CXX_STANDARD 11)
-     install(TARGETS opencv_demo RUNTIME DESTINATION bin)
--endif(OpenCV_FOUND)
-+endif()
- 
- # install example programs
--install(TARGETS apriltag_demo RUNTIME DESTINATION bin)

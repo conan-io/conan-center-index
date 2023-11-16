@@ -6,15 +6,28 @@ sources:
     url: "https://github.com/AprilRobotics/apriltag/archive/refs/tags/v3.2.0.tar.gz"
     sha256: "111a93a5315f8b8c2a36fa911403236032a819e8f50e8845548fe2d7dd1e5db5"
   "3.1.7":
-    url: "https://github.com/AprilRobotics/apriltag/archive/refs/tags/v3.1.4.tar.gz"
-    sha256: "ad2888d432e9ddcad2f639f243479934a4cd677ed5d2f8dee3b3418617b64f5d"
+    url: "https://github.com/AprilRobotics/apriltag/archive/refs/tags/v3.1.7.tar.gz"
+    sha256: "f16f53fc31a9792255f7e37f339452f3c51f1b580cb8c1f3000cb845846d51d3"
   "3.1.4":
     url: "https://github.com/AprilRobotics/apriltag/archive/refs/tags/v3.1.4.tar.gz"
     sha256: "ad2888d432e9ddcad2f639f243479934a4cd677ed5d2f8dee3b3418617b64f5d"
 patches:
+  "3.3.0":
+    - patch_file: "patches/3.3.0-0001-disable-examples.patch"
+      patch_type: "conan"
+      patch_description: "Disable building of examples"
   "3.2.0":
-    - patch_file: "patches/3.2.0-0001-fix-cmake.patch"
+    - patch_file: "patches/3.2.0-0001-disable-examples.patch"
+      patch_type: "conan"
+      patch_description: "Disable building of examples"
+    - patch_file: "patches/3.2.0-0002-fix-cmake.patch"
   "3.1.7":
-    - patch_file: "patches/3.1.4-0001-fix-cmake.patch"
+    - patch_file: "patches/3.1.7-0001-disable-examples.patch"
+      patch_type: "conan"
+      patch_description: "Disable building of examples"
+    - patch_file: "patches/3.1.7-0002-fix-cmake.patch"
   "3.1.4":
-    - patch_file: "patches/3.1.4-0001-fix-cmake.patch"
+    - patch_file: "patches/3.1.4-0001-disable-examples.patch"
+      patch_type: "conan"
+      patch_description: "Disable building of examples"
+    - patch_file: "patches/3.1.4-0002-fix-cmake.patch"
