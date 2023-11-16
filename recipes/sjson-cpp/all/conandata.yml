@@ -1,4 +1,7 @@
 sources:
+  "0.9.0":
+    url: "https://github.com/nfrechette/sjson-cpp/archive/v0.9.0.tar.gz"
+    sha256: "61b8ea49acce6fa6c48db2c70a6fd7514e219c17b276bff2da3bfc510840320f"
   "0.8.3":
     url: "https://github.com/nfrechette/sjson-cpp/archive/v0.8.3.tar.gz"
     sha256: "3a6188bea5f00161a9e4508078f95637e303b3fce108c8dc9dc2a5b871d9e43d"
