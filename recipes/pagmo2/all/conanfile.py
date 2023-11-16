@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -42,7 +43,7 @@ class Pagmo2Conan(ConanFile):
             "msvc": "191",
             "gcc": "7",
             "clang": "5.0",
-            "apple-clang": "9.1",
+            "apple-clang": "9",
         }
 
     def config_options(self):
@@ -93,6 +94,12 @@ class Pagmo2Conan(ConanFile):
                 )
             )
 
+        if Version(self.version) < "2.19" and is_msvc(self) and self.options.shared:
+            # test_package.obj : error LNK2019: unresolved external symbol "public: __cdecl boost::archive::codecvt_null<wchar_t>::codecvt_null<wchar_t>(unsigned __int64)"
+            # https://github.com/boostorg/serialization/issues/232
+            # https://github.com/conda-forge/scipoptsuite-feedstock/pull/44
+            raise ConanInvalidConfiguration("Shared builds are currently broken on MSVC")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -112,8 +119,9 @@ class Pagmo2Conan(ConanFile):
 
     def _patch_sources(self):
         # do not force MT runtime for static lib
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "if(YACMA_COMPILER_IS_MSVC AND PAGMO_BUILD_STATIC_LIBRARY)", "if(0)")
+        if Version(self.version) < "2.18":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "if(YACMA_COMPILER_IS_MSVC AND PAGMO_BUILD_STATIC_LIBRARY)", "if(0)")
         # No warnings as errors
         yacma_cmake = os.path.join(self.source_folder, "cmake_modules", "yacma", "YACMACompilerLinkerSettings.cmake")
         replace_in_file(self, yacma_cmake, 'list(APPEND _YACMA_CXX_FLAGS_DEBUG "-Werror")', "")
