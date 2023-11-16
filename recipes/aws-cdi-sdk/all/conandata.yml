@@ -1,8 +1,7 @@
 sources:
+  "2.4.1":
+    url: "https://github.com/aws/aws-cdi-sdk/archive/refs/tags/v2.4.1.tar.gz"
+    sha256: "360a8eeaf741a1e6b7c9d3971d0d0b4098e4c76092330684816b62d5e8400045"
   "2.2.0":
-    url: https://github.com/aws/aws-cdi-sdk/archive/refs/tags/v2.2.0.tar.gz
-    sha256: 4ee109b7fa2f683b4b0cd03028d0946857f09f34da4e89fe69a5c297cdaeb689
-patches:
-  "2.2.0":
-    - base_path: source_subfolder
-      patch_file: patches/001-Makefile.patch
+    url: "https://github.com/aws/aws-cdi-sdk/archive/refs/tags/v2.2.0.tar.gz"
+    sha256: "4ee109b7fa2f683b4b0cd03028d0946857f09f34da4e89fe69a5c297cdaeb689"
