@@ -73,11 +73,7 @@ class Pagmo2Conan(ConanFile):
             check_min_cppstd(self, 17)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warning(
-                f"{self.name} {self.version} requires C++17. Your compiler is unknown. Assuming it supports C++17."
-            )
-        elif Version(self.settings.compiler.version) < minimum_version:
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.name} {self.version} requires C++17, which your compiler does not support."
             )
