@@ -64,7 +64,7 @@ class PulseAudioConan(ConanFile):
         if self.options.with_alsa:
             self.requires("libalsa/1.2.10")
         if self.options.with_glib:
-            self.requires("glib/2.78.0")
+            self.requires("glib/2.78.1")
         if self.options.get_safe("with_fftw"):
             self.requires("fftw/3.3.10")
         if self.options.with_x11:
@@ -79,11 +79,10 @@ class PulseAudioConan(ConanFile):
             raise ConanInvalidConfiguration("pulseaudio supports only linux currently")
 
         if self.options.get_safe("with_fftw"):
-            fftw_precision = self.dependencies["fftw"].options.precision
-            if fftw_precision != "single":
+            if not self.dependencies["fftw"].options.precision_single:
                 raise ConanInvalidConfiguration(
-                    f"Pulse audio cannot use fftw {fftw_precision} precision. "
-                    "Either set option fftw:precision=single or pulseaudio:with_fftw=False"
+                    f"Pulse audio cannot use fftw single precision. "
+                     "Either set option -o fftw/*:precision_single=True or -o pulseaudio/*:with_fftw=False"
                 )
 
     def build_requirements(self):
