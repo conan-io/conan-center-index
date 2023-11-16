@@ -96,7 +96,7 @@ class OpenVDBConan(ConanFile):
                 "apple-clang": "12.0",
                 "intel-cc": "19",
             }
-        if Version(self.version) >= "9.0.0":
+        else:
             # https://github.com/AcademySoftwareFoundation/openvdb/blob/v9.1.0/doc/dependencies.txt#L56-L84
             return {
                 "msvc": "191.0",
@@ -106,15 +106,6 @@ class OpenVDBConan(ConanFile):
                 "apple-clang": "10.0",
                 "intel-cc": "17",
             }
-        # https://github.com/AcademySoftwareFoundation/openvdb/blob/v8.2.0/doc/dependencies.txt#L55-L81
-        return {
-            "msvc": "191.0",
-            "Visual Studio": "15",
-            "gcc": "6.3.1",
-            "clang": "3.8",
-            "apple-clang": "10.0",
-            "intel-cc": "17",
-        }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -140,15 +131,9 @@ class OpenVDBConan(ConanFile):
     def requirements(self):
         # https://github.com/AcademySoftwareFoundation/openvdb/blob/v10.0.1/doc/dependencies.txt#L36-L84
         self.requires("boost/1.83.0", transitive_headers=True)
-        if Version(self.version) >= "9.0.0":
-            self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
-        else:
-            self.requires("onetbb/2020.3.3", transitive_headers=True, transitive_libs=True)
+        self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
         if self.options.use_imath_half:
-            if Version(self.version) >= "9.0.0":
-                self.requires("imath/3.1.9", transitive_headers=True, transitive_libs=True)
-            else:
-                self.requires("openexr/2.5.7", transitive_headers=True, transitive_libs=True)
+            self.requires("imath/3.1.9", transitive_headers=True, transitive_libs=True)
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_blosc:
@@ -308,10 +293,7 @@ class OpenVDBConan(ConanFile):
         if self.options.with_log4cplus:
             main_component.requires.append("log4cplus::log4cplus")
         if self.options.use_imath_half:
-            if Version(self.version) >= "9.0.0":
-                main_component.requires.append("imath::imath")
-            else:
-                main_component.requires.append("openexr::ilmbase_half")
+            main_component.requires.append("imath::imath")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "OpenVDB"
