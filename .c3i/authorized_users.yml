@@ -734,6 +734,7 @@ authorized_users:
 - DS-Serafin
 - DS-Alex-AG
 - cbeattie-tl
+- '0x28'
 - nmgwddj
 - brandonmkunkel
 - MykolaPu
@@ -1227,6 +1228,7 @@ authorized_users:
 - martin-olivier
 - lucaskdc
 - fnadeau
+- '0x5ea1ed'
 - Kischy
 - MangaD
 - fabiorossetto
