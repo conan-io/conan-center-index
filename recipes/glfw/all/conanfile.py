@@ -35,7 +35,7 @@ class GlfwConan(ConanFile):
         "fPIC": True,
         "vulkan_static": False,
         "with_x11": True,
-        "with_wayland": True,
+        "with_wayland": False,
     }
 
     @property
