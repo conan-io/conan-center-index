@@ -100,6 +100,7 @@ class GlfwConan(ConanFile):
             tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.generate()
         cmake_deps = CMakeDeps(self)
+        cmake_deps.set_property("xkbcommon", "cmake_file_name", "XKBCommon")
         cmake_deps.generate()
         pkg_config_deps = PkgConfigDeps(self)
         pkg_config_deps.generate()
