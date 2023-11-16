@@ -68,10 +68,11 @@ class PDCursesConan(ConanFile):
             raise ConanInvalidConfiguration("with_sdl option is not yet supported on Windows")
         if self.settings.os != "Windows" and not self.options.get_safe("with_x11") and not self.options.with_sdl:
             raise ConanInvalidConfiguration("At least one of with_x11 or with_sdl options must be enabled")
-        if cross_building(self):
-            raise ConanInvalidConfiguration("Cross-building is not supported")
-        if self.options.with_sdl and self.options.shared:
-            raise ConanInvalidConfiguration("Shared library output is not available for with_sdl option")
+        if self.options.with_sdl:
+            if self.options.shared:
+                raise ConanInvalidConfiguration("Shared library output is not available for with_sdl option")
+            if cross_building(self):
+                raise ConanInvalidConfiguration("Cross-building is not supported for with_sdl option")
 
     def build_requirements(self):
         if not is_msvc(self):
