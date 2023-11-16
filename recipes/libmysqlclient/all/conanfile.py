@@ -55,12 +55,7 @@ class LibMysqlClientCConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        # Sice 8.0.17 this doesn't support shared library on MacOS.
-        # https://github.com/mysql/mysql-server/blob/mysql-8.0.17/cmake/libutils.cmake#L333-L335
-        if is_apple_os(self):
-            self.options.rm_safe("shared")
-            self.package_type = "static-library"
-        if self.options.get_safe("shared"):
+        if self.options.shared:
             self.options.rm_safe("fPIC")
 
     def layout(self):
@@ -206,7 +201,7 @@ class LibMysqlClientCConan(ConanFile):
 
         tc = CMakeToolchain(self)
         # Not used anywhere in the CMakeLists
-        tc.cache_variables["DISABLE_SHARED"] = not self.options.get_safe("shared", False)
+        tc.cache_variables["DISABLE_SHARED"] = not self.options.shared
         tc.cache_variables["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
         tc.cache_variables["WITHOUT_SERVER"] = True
         tc.cache_variables["WITH_UNIT_TESTS"] = False
@@ -258,7 +253,7 @@ class LibMysqlClientCConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "docs"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.os == "Windows":
-            if self.options.get_safe("shared"):
+            if self.options.shared:
                 rename(self, os.path.join(self.package_folder, "lib", "libmysql.dll"),
                              os.path.join(self.package_folder, "bin", "libmysql.dll"))
                 rm(self, "*mysqlclient.*", os.path.join(self.package_folder, "lib"))
@@ -266,7 +261,7 @@ class LibMysqlClientCConan(ConanFile):
                 rm(self, "*.dll", os.path.join(self.package_folder, "lib"))
                 rm(self, "*libmysql.*", os.path.join(self.package_folder, "lib"))
         else:
-            if self.options.get_safe("shared"):
+            if self.options.shared:
                 rm(self, "*.a", os.path.join(self.package_folder, "lib"))
             else:
                 rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
@@ -274,8 +269,8 @@ class LibMysqlClientCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "mysqlclient")
-        self.cpp_info.libs = ["libmysql" if self.settings.os == "Windows" and self.options.get_safe("shared") else "mysqlclient"]
-        if not self.options.get_safe("shared", False):
+        self.cpp_info.libs = ["libmysql" if self.settings.os == "Windows" and self.options.shared else "mysqlclient"]
+        if not self.options.shared:
             stdcpplib = stdcpp_library(self)
             if stdcpplib:
                 self.cpp_info.system_libs.append(stdcpplib)
