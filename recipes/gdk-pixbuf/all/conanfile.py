@@ -1,3 +1,5 @@
+import os
+
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
@@ -10,15 +12,13 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 
-import os
-
-required_conan_version = ">=1.56.0 <2 || >=2.0.6"
+required_conan_version = ">=1.56.0 <2 || >=2.0.8"
 
 
 class GdkPixbufConan(ConanFile):
     name = "gdk-pixbuf"
     description = "toolkit for image loading and pixel buffer manipulation"
-    topics = ("image")
+    topics = "image"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://developer.gnome.org/gdk-pixbuf/"
     license = "LGPL-2.1-or-later"
@@ -80,10 +80,6 @@ class GdkPixbufConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
-        if self.settings.os == "Macos":
-            # when running gdk-pixbuf-query-loaders
-            # dyld: malformed mach-o: load commands size (97560) > 32768
-            raise ConanInvalidConfiguration("This package does not support Macos currently")
         if self.dependencies["glib"].options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
                 "Linking shared glib with the MSVC static runtime is not supported"
@@ -165,10 +161,10 @@ class GdkPixbufConan(ConanFile):
             replace_in_file(self, meson_build, "is_msvc_like = ", "is_msvc_like = false #")
 
         # Fix libtiff, libpng not being linked against when building statically
-        # https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/blob/2.42.10/gdk-pixbuf/meson.build#L341
+        # Reported upstream: https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/merge_requests/159
         replace_in_file(self, os.path.join(self.source_folder, "gdk-pixbuf", "meson.build"),
-                        "dependencies: gdk_pixbuf_deps ",
-                        "dependencies: gdk_pixbuf_deps + loaders_deps ")
+                        "dependencies: gdk_pixbuf_deps + [ gdkpixbuf_dep ],",
+                        "dependencies: loaders_deps + gdk_pixbuf_deps + [ gdkpixbuf_dep ],")
 
     def build(self):
         self._patch_sources()
@@ -199,10 +195,13 @@ class GdkPixbufConan(ConanFile):
             self.cpp_info.exelinkflags = ldflags
             self.cpp_info.sharedlinkflags = ldflags
 
+        # Breaking change since Conan >= 2.0.8
+        # Related to https://github.com/conan-io/conan/pull/14233
+        libdir_variable = "libdir1" if Version(conan_version) < "2.0" else "libdir1"
         pkgconfig_variables = {
             "bindir": "${prefix}/bin",
             "gdk_pixbuf_binary_version": "2.10.0",
-            "gdk_pixbuf_binarydir": "${libdir1}/gdk-pixbuf-2.0/2.10",
+            "gdk_pixbuf_binarydir": "${%s}/gdk-pixbuf-2.0/2.10" % libdir_variable,
             "gdk_pixbuf_moduledir": "${gdk_pixbuf_binarydir}/loaders",
             "gdk_pixbuf_cache_file": "${gdk_pixbuf_binarydir}/loaders.cache",
             "gdk_pixbuf_csource": "${bindir}/gdk-pixbuf-csource",
