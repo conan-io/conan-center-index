@@ -10,3 +10,7 @@ patches:
     - patch_file: patches/1.1.1-tvos-watchos.patch
       patch_description: "TVOS and WatchOS don't like fork()"
       patch_type: "portability"
+    - patch_file: patches/1.1.1w-Make-Windows-build-more-robust.patch
+      patch_description: "Make Windows build more robust"
+      patch_type: "backport"
+      patch_source: "https://github.com/openssl/openssl/pull/22754"
