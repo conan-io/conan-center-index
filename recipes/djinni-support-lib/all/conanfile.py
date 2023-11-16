@@ -5,7 +5,6 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get
-from conan.tools.microsoft import unix_path
 
 required_conan_version = ">=1.53.0"
 
@@ -35,17 +34,11 @@ class DjinniSupportLib(ConanFile):
 
     @property
     def _objc_support(self):
-        if self.options.target == "auto":
-            return is_apple_os(self)
-        else:
-            return self.options.target == "objc"
+        return self.options.target == "objc"
 
     @property
     def _jni_support(self):
-        if self.options.target == "auto":
-            return self.settings.os not in ["iOS", "watchOS", "tvOS"]
-        else:
-            return self.options.target == "jni"
+        return self.options.target == "jni"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -53,6 +46,8 @@ class DjinniSupportLib(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        # Set default target based on OS
+        self.options.target = "objc" if is_apple_os(self) else "jni"
 
     def configure(self):
         if self.options.shared:
@@ -63,7 +58,7 @@ class DjinniSupportLib(ConanFile):
 
     def build_requirements(self):
         if not self.options.system_java and self._jni_support:
-            self.tool_requires("zulu-openjdk/11.0.19")
+            self.tool_requires("zulu-openjdk/21.0.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -104,3 +99,6 @@ class DjinniSupportLib(ConanFile):
             self.cpp_info.includedirs.append(os.path.join("include", "djinni", "objc"))
         if self._jni_support:
             self.cpp_info.includedirs.append(os.path.join("include", "djinni", "jni"))
+
+        if self._objc_support:
+            self.cpp_info.frameworks = ["Foundation", "CoreFoundation"]
