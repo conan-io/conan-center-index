@@ -218,7 +218,7 @@ class Open62541Conan(ConanFile):
         unsupported_clang_version = "8" if Version(self.version) < "1.1.0" else "9"
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) == unsupported_clang_version:
             raise ConanInvalidConfiguration(
-                "Open62541 version {} does not support Clang version {}".format(Version(self.version),Version(self.settings.compiler.version)))
+                f"{self.ref} does not support Clang version {self.settings.compiler.version}")
 
         if self.settings.compiler == "clang":
             if Version(self.settings.compiler.version) < "5":
