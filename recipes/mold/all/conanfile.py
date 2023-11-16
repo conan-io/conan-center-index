@@ -109,7 +109,7 @@ class MoldConan(ConanFile):
 
         bindir = os.path.join(self.package_folder, "bin")
         mold_executable = os.path.join(bindir, "mold")
-        self.conf_info.define("user.mold:mold", mold_executable)
+        self.conf_info.define("user.mold:path", mold_executable)
         self.buildenv_info.define_path("MOLD_ROOT", bindir)
         self.buildenv_info.define("LD", mold_executable)
 
