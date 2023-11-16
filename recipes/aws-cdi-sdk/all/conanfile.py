@@ -31,7 +31,13 @@ class AwsCdiSdkConan(ConanFile):
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
         self.options["aws-libfabric"].shared = True
         self.options["aws-sdk-cpp"].shared = True
 
