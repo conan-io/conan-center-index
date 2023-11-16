@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
-from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm, export_conandata_patches, copy, mkdir
+from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm, export_conandata_patches, mkdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
@@ -257,14 +257,20 @@ class LibMysqlClientCConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "docs"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        if self.settings.os == "Windows" and self.options.get_safe("shared"):
-            copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
-        if self.options.get_safe("shared"):
-            rm(self, "*.a", self.package_folder, recursive=True)
+        if self.settings.os == "Windows":
+            if self.options.get_safe("shared"):
+                rename(self, os.path.join(self.package_folder, "lib", "libmysql.dll"),
+                             os.path.join(self.package_folder, "bin", "libmysql.dll"))
+                rm(self, "*mysqlclient.*", os.path.join(self.package_folder, "lib"))
+            else:
+                rm(self, "*.dll", os.path.join(self.package_folder, "lib"))
+                rm(self, "*libmysql.*", os.path.join(self.package_folder, "lib"))
         else:
-            rm(self, "*.dll", self.package_folder, recursive=True)
-            rm(self, "*.dylib", self.package_folder, recursive=True)
-            rm(self, "*.so*", self.package_folder, recursive=True)
+            if self.options.get_safe("shared"):
+                rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+            else:
+                rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
+                rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "mysqlclient")
