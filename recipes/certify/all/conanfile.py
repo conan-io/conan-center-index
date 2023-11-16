@@ -38,7 +38,7 @@ class CertifyConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/[>=1.82 <2]")
+        self.requires("boost/1.83.0")
         self.requires("openssl/[>=1.1 <4]")
 
     def package_id(self):
