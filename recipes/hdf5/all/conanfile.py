@@ -46,12 +46,6 @@ class Hdf5Conan(ConanFile):
         "enable_unsupported": False
     }
 
-    def get_crossbuild_emulator(self):
-        for (k, v) in self.conf.items():
-            if k == "tools.qemu:path":
-                return v
-        return None
-
     @property
     def _min_cppstd(self):
         if Version(self.version) < "1.14.0":
@@ -94,7 +88,7 @@ class Hdf5Conan(ConanFile):
         if not can_run(self):
             if Version(self.version) < "1.14.3":
                 raise ConanInvalidConfiguration(f"Current recipe doesn't support cross-building (yet) for Version {self.version}")
-            elif self.get_crossbuild_emulator() is None:
+            elif self.conf.get("user.qemu:path") is None:
                 raise ConanInvalidConfiguration(f"Current recipe doesn't support cross-building without a cross compile emulator")
         if self.options.parallel and not self.options.enable_unsupported:
             if self.options.enable_cxx:
@@ -127,7 +121,7 @@ class Hdf5Conan(ConanFile):
 
         tc = CMakeToolchain(self)
         if not can_run(self):
-            c = self.get_crossbuild_emulator()
+            c = self.conf.get("user.qemu:path")
             if c is not None:
                 tc.variables["CMAKE_CROSSCOMPILING_EMULATOR"] = c
         if not valid_min_cppstd(self, self._min_cppstd):
