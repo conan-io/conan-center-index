@@ -69,21 +69,10 @@ class PopplerConan(ConanFile):
 
     @property
     def _cppstd_required(self):
-        if Version(self.version) > "21.11" or (self.options.with_qt and Version(self.dependencies["qt"].ref.version).major == "6"):
-            return 17
-        else:
-            return 14
+        return 17
 
     @property
     def _minimum_compilers_version(self):
-        if self._cppstd_required == 14:
-            return {
-                "Visual Studio": "15",
-                "msvc": "191",
-                "gcc": "5",
-                "clang": "5",
-                "apple-clang": "5.1",
-            }
         return {
             "Visual Studio": "16",
             "msvc": "192",
@@ -160,9 +149,7 @@ class PopplerConan(ConanFile):
             check_min_cppstd(self, 14)
 
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warning("C++14 support required. Your compiler is unknown. Assuming it supports C++14.")
-        elif Version(self.settings.compiler.version) < minimum_version:
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("C++14 support required, which your compiler does not support.")
 
     def build_requirements(self):
@@ -170,8 +157,7 @@ class PopplerConan(ConanFile):
             self.tool_requires("pkgconf/2.0.3")
         if self.options.get_safe("with_glib"):
             self.tool_requires("glib/<host_version>")
-        if Version(self.version) > "22.12.0":
-            self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
