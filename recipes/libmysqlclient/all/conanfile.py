@@ -250,6 +250,7 @@ class LibMysqlClientCConan(ConanFile):
         rm(self, "README", self.package_folder)
         rm(self, "*.pdb", self.package_folder, recursive=True)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "plugin"))
         rmdir(self, os.path.join(self.package_folder, "docs"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.os == "Windows":
