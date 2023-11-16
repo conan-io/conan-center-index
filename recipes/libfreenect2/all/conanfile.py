@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 
 required_conan_version = ">=1.53.0"
@@ -98,14 +98,21 @@ class Libfreenect2Conan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("libusb", "cmake_file_name", "LibUSB")
         deps.set_property("glfw3", "cmake_file_name", "GLFW3")
-        deps.set_property("libjpeg-turbo", "cmake_file_name", "JPEG")
+        deps.set_property("libjpeg-turbo", "cmake_file_name", "TurboJPEG")
         deps.generate()
 
         deps = PkgConfigDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "FIND_PACKAGE(JPEG)", "FIND_PACKAGE(TurboJPEG REQUIRED CONFIG)")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        " JPEG_FOUND", " TRUE")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
