@@ -13,7 +13,7 @@ class QuickfastConan(ConanFile):
     description = "QuickFAST is an Open Source native C++ implementation of the FAST Protocol"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://objectcomputing.com/"
+    homepage = "https://github.com/objectcomputing/quickfast"
     topics = ("QuickFAST", "FAST", "FIX", "Fix Adapted for STreaming", "Financial Information Exchange")
 
     package_type = "library"
@@ -28,7 +28,7 @@ class QuickfastConan(ConanFile):
     }
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
         export_conandata_patches(self)
 
     def config_options(self):
@@ -63,15 +63,13 @@ class QuickfastConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.source_path.parent)
+        cmake.configure()
         cmake.build()
 
     def package(self):
+        copy(self, "license.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        copy(self, "license.txt",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=self.source_folder)
 
     def package_info(self):
         self.cpp_info.libs = ["quickfast"]
@@ -82,3 +80,10 @@ class QuickfastConan(ConanFile):
 
         if not self.options.shared:
             self.cpp_info.defines.append("QUICKFAST_HAS_DLL=0")
+
+        self.cpp_info.requires = [
+            "boost::headers",
+            "boost::thread",
+            "boost::date_time",
+            "xerces-c::xerces-c"
+        ]
