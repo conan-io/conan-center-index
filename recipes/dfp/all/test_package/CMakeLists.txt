@@ -7,3 +7,4 @@ find_package(dfp CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} src/demo.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE dfp::dfp)
+set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
