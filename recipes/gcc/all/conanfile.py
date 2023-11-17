@@ -42,7 +42,7 @@ class GccConan(ConanFile):
         self.requires("mpfr/4.2.0")
         self.requires("gmp/6.3.0")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("isl/0.24")
+        self.requires("isl/0.25")
 
     def package_id(self):
         del self.info.settings.compiler
