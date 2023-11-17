@@ -94,7 +94,7 @@ class GlfwConan(ConanFile):
         tc.cache_variables["GLFW_BUILD_TESTS"] = False
         tc.cache_variables["GLFW_BUILD_X11"] = self.options.get_safe("with_x11")
         tc.cache_variables["GLFW_INSTALL"] = True
-        tc.variables["GLFW_USE_WAYLAND" if self.version <= "3.3.8" else "GLFW_BUILD_WAYLAND"] = self.options.get_safe("with_wayland")
+        tc.variables["GLFW_USE_WAYLAND" if self.version <= Version("3.3.8") else "GLFW_BUILD_WAYLAND"] = self.options.get_safe("with_wayland")
         tc.variables["GLFW_VULKAN_STATIC"] = self.options.vulkan_static
         if is_msvc(self):
             tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
