@@ -109,10 +109,18 @@ patches:
     - "base_path": "qtwebengine"
       "patch_description": "Workaround for too long .rps file name"
       "patch_file": "patches/c72097e_6.6.0.diff"
+    - base_path: "qtbase"
+      patch_description: "Fix compilation with point releases of GCC 9 prior to 9.3"
+      patch_file: "patches/148895_0001-Fix-FTBFS-qt-6.6.0-on-gcc-9.patch"
+      patch_source: "https://bugreports.qt.io/browse/QTBUG-112920"
   "6.5.3":
     - "base_path": "qtwebengine"
       "patch_description": "Workaround for too long .rps file name"
       "patch_file": "patches/c72097e.diff"
+    - base_path: "qtbase"
+      patch_description: "Fix compilation with point releases of GCC 9 prior to 9.3"
+      patch_file: "patches/148895_0001-Fix-FTBFS-qt-6.5.0-on-gcc-9.patch"
+      patch_source: "https://bugreports.qt.io/browse/QTBUG-112920"
   "6.5.2":
     - "base_path": "qtwebengine"
       "patch_description": "Workaround for too long .rps file name"

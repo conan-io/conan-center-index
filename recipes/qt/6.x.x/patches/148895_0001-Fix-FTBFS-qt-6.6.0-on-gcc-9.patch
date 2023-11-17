@@ -1,0 +1,24 @@
+From fba07d6e02084c5aeaed46aa659b52ddef2e6357 Mon Sep 17 00:00:00 2001
+From: shjiu <shanheng.jiu@qt.io>
+Date: Thu, 16 Nov 2023 20:29:24 +0900
+Subject: [PATCH] Fix FTBFS qt 6.5.0 on gcc 9
+
+---
+ src/corelib/text/qstring.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/corelib/text/qstring.cpp b/src/corelib/text/qstring.cpp
+index 7024ccb219..319515ed77 100644
+--- a/src/corelib/text/qstring.cpp
++++ b/src/corelib/text/qstring.cpp
+@@ -471,7 +471,7 @@ static bool simdTestMask(const char *&ptr, const char *end, quint32 maskval)
+     if constexpr (UseSse4_1) {
+ #  ifndef Q_OS_QNX              // compiler fails in the code below
+         __m128i mask;
+-        auto updatePtrSimd = [&](__m128i data) {
++        auto updatePtrSimd = [&](__m128i data) -> bool {
+             __m128i masked = _mm_and_si128(mask, data);
+             __m128i comparison = _mm_cmpeq_epi16(masked, _mm_setzero_si128());
+             uint result = _mm_movemask_epi8(comparison);
+-- 
+2.41.0
