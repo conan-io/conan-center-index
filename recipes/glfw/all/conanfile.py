@@ -107,6 +107,7 @@ class GlfwConan(ConanFile):
         cmake_deps.set_property("xkbcommon", "cmake_file_name", "XKBCommon")
         cmake_deps.generate()
         pkg_config_deps = PkgConfigDeps(self)
+        pkg_config_deps.build_context_activated = ["wayland-protocols"]
         pkg_config_deps.generate()
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
