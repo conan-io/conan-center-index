@@ -67,7 +67,7 @@ class OpenTDFConan(ConanFile):
             self.requires("openssl/3.1.4")
         # Uses magic_enum for 1.4.0 and newer
         if Version(self.version) >= "1.4.0":
-            self.requires("magic_enum/0.9.4")
+            self.requires("magic_enum/0.9.5")
         self.requires("ms-gsl/4.0.0")
         self.requires("nlohmann_json/3.11.2")
         self.requires("jwt-cpp/0.6.0")
