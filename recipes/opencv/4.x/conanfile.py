@@ -1101,7 +1101,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         if self.options.get_safe("with_qt"):
-            self.requires("qt/5.15.11")
+            self.requires("qt/6.6.0")
         if self.options.get_safe("with_wayland"):
             self.requires("xkbcommon/1.6.0")
             self.requires("wayland/1.22.0")
@@ -1111,7 +1111,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/3.0.1")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
             self.requires("mozjpeg/4.1.3")
         if self.options.get_safe("with_jpeg2000") == "jasper":
@@ -1127,7 +1127,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_webp"):
             self.requires("libwebp/1.3.2")
         if self.options.get_safe("with_gdal"):
-            self.requires("gdal/3.7.0")
+            self.requires("gdal/3.4.3")
         if self.options.get_safe("with_gdcm"):
             self.requires("gdcm/3.0.21")
         # objdetect module dependencies
@@ -1136,11 +1136,11 @@ class OpenCVConan(ConanFile):
         # videoio module dependencies
         if self.options.get_safe("with_ffmpeg"):
             # opencv doesn't support ffmpeg >= 5.0.0 for the moment (until 4.5.5 at least)
-            self.requires("ffmpeg/4.4.4")
+            self.requires("ffmpeg/6.1")
         # freetype module dependencies
         if self.options.freetype:
             self.requires("freetype/2.13.0")
-            self.requires("harfbuzz/8.2.2")
+            self.requires("harfbuzz/8.3.0")
         # hdf module dependencies
         if self.options.hdf:
             self.requires("hdf5/1.14.2")
@@ -1210,7 +1210,7 @@ class OpenCVConan(ConanFile):
             if not self._is_legacy_one_profile:
                 self.tool_requires("protobuf/<host_version>")
         if self.options.get_safe("with_wayland"):
-            self.tool_requires("wayland-protocols/1.31")
+            self.tool_requires("wayland-protocols/1.32")
             if not self._is_legacy_one_profile:
                 self.tool_requires("wayland/<host_version>")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
