@@ -44,7 +44,7 @@ class GlfwConan(ConanFile):
 
     @property
     def _requires_x11(self):
-        return self.settings.os in ["Linux", "FreeBSD"] and self.version <= Version("3.3.8")
+        return self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) <= Version("3.3.8")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -54,7 +54,7 @@ class GlfwConan(ConanFile):
             self.options.rm_safe("fPIC")
         if self.settings.os != "Linux":
             self.options.rm_safe("with_wayland")
-        if not self.settings.os in ["Linux", "FreeBSD"] or self.version <= Version("3.3.8"):
+        if not self.settings.os in ["Linux", "FreeBSD"] or Version(self.version) <= Version("3.3.8"):
             self.options.rm_safe("with_x11")
 
     def configure(self):
@@ -98,7 +98,7 @@ class GlfwConan(ConanFile):
         tc.cache_variables["GLFW_BUILD_TESTS"] = False
         tc.cache_variables["GLFW_BUILD_X11"] = self.options.get_safe("with_x11")
         tc.cache_variables["GLFW_INSTALL"] = True
-        tc.variables["GLFW_USE_WAYLAND" if self.version <= Version("3.3.8") else "GLFW_BUILD_WAYLAND"] = self.options.get_safe("with_wayland")
+        tc.variables["GLFW_USE_WAYLAND" if Version(self.version) <= Version("3.3.8") else "GLFW_BUILD_WAYLAND"] = self.options.get_safe("with_wayland")
         tc.variables["GLFW_VULKAN_STATIC"] = self.options.vulkan_static
         if is_msvc(self):
             tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
