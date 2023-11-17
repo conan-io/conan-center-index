@@ -7,7 +7,8 @@ from conan.tools.build import can_run
 
 class TestExampleConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps", "CMakeToolchain"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    test_type = "explicit"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -23,4 +24,4 @@ class TestExampleConan(ConanFile):
     def test(self):
         if can_run(self):
             cmd = os.path.join(self.cpp.build.bindir, "test_package")
-            self.run(f'{cmd} 2 + 5', env="conanrun")
+            self.run(cmd, env="conanrun")
