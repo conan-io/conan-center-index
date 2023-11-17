@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 
@@ -63,6 +64,11 @@ class GameNetworkingSocketsConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+        venv = VirtualRunEnv(self)
+        venv.generate(scope="build")
+
         tc = CMakeToolchain(self)
         tc.variables["BUILD_STATIC_LIB"] = not self.options.shared
         tc.variables["BUILD_SHARED_LIB"] = self.options.shared
@@ -89,7 +95,6 @@ class GameNetworkingSocketsConan(ConanFile):
 
         tc = CMakeDeps(self)
         tc.generate()
-
         tc = PkgConfigDeps(self)
         tc.generate()
 
