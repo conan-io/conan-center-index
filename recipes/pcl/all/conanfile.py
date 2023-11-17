@@ -382,7 +382,7 @@ class PclConan(ConanFile):
             self.requires("glew/2.2.0", transitive_headers=True)
             self.requires("glu/system", transitive_headers=True)
         if self._is_enabled("opencv"):
-            self.requires("opencv/4.5.5", transitive_headers=True)
+            self.requires("opencv/4.8.1", transitive_headers=True)
         if self._is_enabled("zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
         # TODO:
