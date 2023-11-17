@@ -152,27 +152,14 @@ class Cc65Conan(ConanFile):
 
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
         bindir = os.path.join(self.package_folder, "bin")
-        datadir = os.path.join(self.package_folder, "bin", "share", "cc65")
-
-        self.output.info(f"Setting CC65_HOME environment variable: {datadir}")
-        self.buildenv_info.define_path("CC65_HOME", datadir)
-
-        cc65_cc = os.path.join(bindir, "cc65" + bin_ext)
-        self.output.info(f"Setting CC65 environment variable: {cc65_cc}")
-        self.buildenv_info.define_path("CC65", cc65_cc)
-
-        cc65_as = os.path.join(bindir, "ca65" + bin_ext)
-        self.output.info(f"Setting AS65 environment variable: {cc65_as}")
-        self.buildenv_info.define_path("AS65", cc65_as)
-
-        cc65_ld = os.path.join(bindir, "cl65" + bin_ext)
-        self.output.info(f"Setting LD65 environment variable: {cc65_ld}")
-        self.buildenv_info.define_path("LD65", cc65_ld)
+        self.buildenv_info.define_path("CC65_HOME", os.path.join(self.package_folder, "bin", "share", "cc65"))
+        self.buildenv_info.define_path("CC65", os.path.join(bindir, "cc65" + bin_ext))
+        self.buildenv_info.define_path("AS65", os.path.join(bindir, "ca65" + bin_ext))
+        self.buildenv_info.define_path("LD65", os.path.join(bindir, "cl65" + bin_ext))
 
         # TODO: Legacy, to be removed on Conan 2.0
-        self.output.info(f"Appending PATH environment variable: {bindir}")
         self.env_info.PATH.append(bindir)
-        self.env_info.CC65_HOME = datadir
-        self.env_info.CC65 = cc65_cc
-        self.env_info.AS65 = cc65_as
-        self.env_info.LD65 = cc65_ld
+        self.env_info.CC65_HOME = os.path.join(self.package_folder, "bin", "share", "cc65")
+        self.env_info.CC65 = os.path.join(bindir, "cc65" + bin_ext)
+        self.env_info.AS65 = os.path.join(bindir, "ca65" + bin_ext)
+        self.env_info.LD65 = os.path.join(bindir, "cl65" + bin_ext)
