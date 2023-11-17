@@ -34,14 +34,14 @@ class GccConan(ConanFile):
         if self.settings.os == "Linux":
             # binutils recipe is broken for Macos, and Windows uses tools
             # distributed with msys/mingw
-            self.tool_requires("binutils/2.38")
+            self.tool_requires("binutils/2.41")
         self.tool_requires("flex/2.6.4")
 
     def requirements(self):
-        self.requires("mpc/1.2.0")
-        self.requires("mpfr/4.1.0")
-        self.requires("gmp/6.2.1")
-        self.requires("zlib/1.2.13")
+        self.requires("mpc/1.3.1")
+        self.requires("mpfr/4.2.0")
+        self.requires("gmp/6.3.0")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("isl/0.24")
 
     def package_id(self):
