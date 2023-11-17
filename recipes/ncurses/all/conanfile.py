@@ -31,9 +31,9 @@ class NCursesConan(ConanFile):
         "with_extended_colors": [True, False],
         "with_cxx": [True, False],
         "with_progs": [True, False],
-        "with_ticlib": [True, False],
+        "with_ticlib": ["auto", True, False],
         "with_reentrant": [True, False],
-        "with_tinfo": [True, False],
+        "with_tinfo": ["auto", True, False],
         "with_pcre2": [True, False],
     }
     default_options = {
@@ -43,9 +43,9 @@ class NCursesConan(ConanFile):
         "with_extended_colors": True,
         "with_cxx": True,
         "with_progs": True,
-        "with_ticlib": True,
+        "with_ticlib": "auto",
         "with_reentrant": False,
-        "with_tinfo": True,
+        "with_tinfo": "auto",
         "with_pcre2": False,
     }
 
