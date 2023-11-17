@@ -49,3 +49,7 @@ patches:
       patch_description: "Support macos 14"
       patch_type: "portability"
       patch_source: "https://github.com/openvinotoolkit/openvino/pull/19946"
+    - patch_file: "patches/2023.1.0/0007-compilation-c++23.patch"
+      patch_description: "Compilation with C++23"
+      patch_type: "portability"
+      patch_source: "https://github.com/openvinotoolkit/openvino/pull/20724"
