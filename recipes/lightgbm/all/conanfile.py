@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, save
+from conan.tools.files import copy, get, replace_in_file, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -35,6 +35,9 @@ class LightGBMConan(ConanFile):
         "fPIC": True,
         "with_openmp": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -74,9 +77,8 @@ class LightGBMConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         cmakelists_path = os.path.join(self.source_folder, "CMakeLists.txt")
-        # Fix OpenMP detection for Clang
-        replace_in_file(self, cmakelists_path, "AppleClang", "Clang|AppleClang")
         # Fix vendored dependency includes
         common_h = os.path.join(self.source_folder, "include", "LightGBM", "utils", "common.h")
         for lib in ["fmt", "fast_double_parser"]:
