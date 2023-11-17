@@ -73,7 +73,6 @@ class GlfwConan(ConanFile):
             self.requires("xorg/system")
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0")
-            self.requires("wayland-protocols/1.32")
             self.requires("xkbcommon/1.6.0")
 
     def validate(self):
@@ -83,6 +82,7 @@ class GlfwConan(ConanFile):
     def build_requirements(self):
         if self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/<host_version>")
+            self.tool_requires("wayland-protocols/1.32")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
