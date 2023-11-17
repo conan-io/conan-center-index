@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 class WasmedgeConan(ConanFile):
     name = "wasmedge"
@@ -16,18 +16,19 @@ class WasmedgeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/WasmEdge/WasmEdge/"
     topics = ("webassembly", "wasm", "wasi", "emscripten")
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
 
     @property
     def _compiler_alias(self):
         return {
-            "Visual Studio": "Visual Studio",
-            "msvc": "Visual Studio",
-        }.get(str(self.settings.compiler), "gcc")
+            "Visual Studio": "msvc",
+            "msvc": "msvc",
+        }.get(str(self.info.settings.compiler), "gcc")
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.compiler.rm_safe("libcxx")
+        self.settings.compiler.rm_safe("cppstd")
 
     def validate(self):
         try:
@@ -39,7 +40,7 @@ class WasmedgeConan(ConanFile):
         del self.info.settings.compiler.version
         self.info.settings.compiler = self._compiler_alias
 
-    def source(self):
+    def build(self):
         # This is packaging binaries so the download needs to be in build
         get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias][0],
             destination=self.source_folder, strip_root=True)
