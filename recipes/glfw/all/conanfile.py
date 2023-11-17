@@ -42,6 +42,10 @@ class GlfwConan(ConanFile):
     def _has_build_profile(self):
         return hasattr(self, "settings_build")
 
+    @property
+    def _requires_x11(self):
+        return self.settings.os in ["Linux", "FreeBSD"] and self.version <= Version("3.3.8")
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -69,7 +73,7 @@ class GlfwConan(ConanFile):
         self.requires("opengl/system")
         if self.options.vulkan_static:
             self.requires("vulkan-loader/1.3.243.0")
-        if self.options.get_safe("with_x11") or self.version <= Version("3.3.8"):
+        if self.options.get_safe("with_x11") or self._requires_x11:
             self.requires("xorg/system")
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0")
