@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 1.60.2
+  version: 1.61.0
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
@@ -44,10 +44,11 @@ tasks:
   build_single_reference:
     package_id_cache_type: "none"
     timeout_minutes: 600
-    large_timeout_minutes: 800
+    large_timeout_minutes: 900
     large_timeout_references:
       - boost
       - qt
+      - llvm
   cci:
     conan_v2_run_export: false
     write_comments: true
@@ -57,8 +58,13 @@ tasks:
       job_name: "prod-v2/cci"  # e.g. "cci-v2/cci" -> this means waiting for cci-v2/cci/PR-<number>
       timeout_seconds: 600  # Maximum time to wait for the multibranch job
       merge_messages: true  # Merge messages from the multibranch job waited for
+      merge_labels: true  # Merge labels from the multibranch job waited for
+  job_relauncher:
+    job_names:
+      - prod-v1/cci
+      - prod-v2/cci
   scheduled_export_check:
-    report_issue_url: https://github.com/conan-io/conan-center-index/issues/2232
+    report_issue_url: https://github.com/conan-io/conan-center-index/issues/20516
     report_issue_append: false
   validate_infrastructure:
     macos_executors: 2
@@ -67,17 +73,6 @@ tasks:
 
 # Profile configurations to build packages
 configurations:
-  - id: linux-gcc
-    epochs: [0]
-    hrname: "Linux, GCC"
-    content:
-      - os: [ "Linux" ]
-        arch: [ "x86_64" ]
-        compiler:
-          - "gcc":
-              compiler.libcxx: [ "libstdc++11" ]
-              compiler.version: [ "5", "7", "9", "10" ]
-              build_type: [ "Release", "Debug" ]
   - id: linux-gcc
     epochs: [20211221, 20220120, 20230606]
     hrname: "Linux, GCC"
@@ -101,17 +96,6 @@ configurations:
               compiler.version: ["12", "13"]
               build_type: ["Release", "Debug"]
   - id: macos-clang
-    epochs: [0, 20211221]
-    hrname: "macOS, Clang"
-    content:
-      - os: [ "Macos" ]
-        arch: [ "x86_64" ]
-        compiler:
-          - "apple-clang":
-              compiler.version: [ "11.0", "12.0" ]
-              compiler.libcxx: [ "libc++" ]
-              build_type: [ "Release", "Debug" ]
-  - id: macos-clang
     epochs: [20220120, 20230606]
     hrname: "macOS, Clang"
     content:
@@ -120,20 +104,6 @@ configurations:
         compiler:
           - "apple-clang":
               compiler.version: [ "13.0" ]
-              compiler.libcxx: [ "libc++" ]
-              build_type: [ "Release", "Debug" ]
-  - id: macos-m1-clang
-    epochs: [0, 20211221]
-    hrname: "macOS, Clang (M1/arm64)"
-    build_profile:
-      os: "Macos"
-      arch: "x86_64"
-    content:
-      - os: [ "Macos" ]
-        arch: [ "armv8" ]
-        compiler:
-          - "apple-clang":
-              compiler.version: [ "12.0" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release", "Debug" ]
   - id: macos-m1-clang

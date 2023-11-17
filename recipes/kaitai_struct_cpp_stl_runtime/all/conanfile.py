@@ -12,6 +12,7 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://kaitai.io/"
     topics = ("parsers", "streams", "dsl", "kaitai struct")
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_zlib": [True, False],
@@ -31,7 +32,7 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_iconv:
             self.requires("libiconv/1.17")
 
@@ -44,6 +45,7 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
             tc.variables["STRING_ENCODING_TYPE"] = "ICONV"
         else:
             tc.variables["STRING_ENCODING_TYPE"] = "NONE"
+        tc.variables["BUILD_TESTS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -62,3 +64,5 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["kaitai_struct_cpp_stl_runtime"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")

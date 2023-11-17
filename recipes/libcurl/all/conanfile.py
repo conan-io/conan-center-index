@@ -189,7 +189,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_libssh2:
             self.requires("libssh2/1.11.0")
         if self.options.with_zlib:
-            self.requires("zlib/[>=1.2.10 <2]")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_brotli:
             self.requires("brotli/1.1.0")
         if self.options.with_zstd:
@@ -303,7 +303,7 @@ class LibcurlConan(ConanFile):
                                   "AC_CHECK_LIB(z,",
                                   f"AC_CHECK_LIB({zlib_name},")
             replace_in_file(self, configure_ac,
-                                  "-lz ",
+                                  "-lz",
                                   f"-l{zlib_name} ")
 
         if self._is_mingw and self.options.shared:
@@ -330,12 +330,15 @@ class LibcurlConan(ConanFile):
             return
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # TODO: check this patch, it's suspicious
-        replace_in_file(self, cmakelists,
-                              "include(CurlSymbolHiding)", "")
+        if Version(self.version) < "8.4.0":
+            replace_in_file(self, cmakelists,
+                                "include(CurlSymbolHiding)", "")
 
         # brotli
         if Version(self.version) < "8.2.0":
             replace_in_file(self, cmakelists, "find_package(Brotli QUIET)", "find_package(brotli REQUIRED CONFIG)")
+        else:
+            replace_in_file(self, cmakelists, "find_package(Brotli REQUIRED)", "find_package(brotli REQUIRED CONFIG)")
         replace_in_file(self, cmakelists, "if(BROTLI_FOUND)", "if(brotli_FOUND)")
         replace_in_file(self, cmakelists, "${BROTLI_LIBRARIES}", "brotli::brotli")
         replace_in_file(self, cmakelists, "${BROTLI_INCLUDE_DIRS}", "${brotli_INCLUDE_DIRS}")
@@ -621,6 +624,13 @@ class LibcurlConan(ConanFile):
             tc.cache_variables["CURL_CA_PATH"] = "none"
 
         tc.cache_variables["CURL_CA_FALLBACK"] = self.options.with_ca_fallback
+
+        # TODO: remove this when https://github.com/conan-io/conan/issues/12180 will be fixed.
+        if  Version(self.version) >= "8.3.0":
+            tc.variables["HAVE_SSL_SET0_WBIO"] = False
+        if  Version(self.version) >= "8.4.0":
+            tc.variables["HAVE_OPENSSL_SRP"] = True
+            tc.variables["HAVE_SSL_CTX_SET_QUIC_METHOD"] = True
 
         tc.generate()
 

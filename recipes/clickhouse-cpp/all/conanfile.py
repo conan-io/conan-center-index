@@ -85,6 +85,9 @@ class ClickHouseCppConan(ConanFile):
         tc.cache_variables["WITH_SYSTEM_ABSEIL"] = True
         tc.cache_variables["WITH_SYSTEM_LZ4"] = True
         tc.cache_variables["WITH_SYSTEM_CITYHASH"] = True
+        # TODO: enable DEBUG_DEPENDENCIES on >= 2.5.0
+        if Version(self.version) >= "2.5.0":
+            tc.cache_variables["DEBUG_DEPENDENCIES"] = False
         tc.generate()
 
         cd = CMakeDeps(self)
