@@ -9,7 +9,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
 
 
 class GlfwConan(ConanFile):
@@ -50,7 +50,7 @@ class GlfwConan(ConanFile):
             self.options.rm_safe("fPIC")
         if self.settings.os != "Linux":
             self.options.rm_safe("with_wayland")
-        if not self.settings.os in ["Linux", "FreeBSD"] or self.version <= Version("3.3.8"):
+        if not self.settings.os in ["Linux", "FreeBSD"] or Version(self.version) <= Version("3.3.8"):
             self.options.rm_safe("with_x11")
 
     def configure(self):
