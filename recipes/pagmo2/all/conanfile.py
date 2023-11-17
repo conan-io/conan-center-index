@@ -94,7 +94,7 @@ class Pagmo2Conan(ConanFile):
                 )
             )
 
-        if Version(self.version) < "2.19" and is_msvc(self) and self.options.shared:
+        if is_msvc(self) and self.options.shared:
             # test_package.obj : error LNK2019: unresolved external symbol "public: __cdecl boost::archive::codecvt_null<wchar_t>::codecvt_null<wchar_t>(unsigned __int64)"
             # https://github.com/boostorg/serialization/issues/232
             # https://github.com/conda-forge/scipoptsuite-feedstock/pull/44
