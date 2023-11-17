@@ -53,7 +53,7 @@ class CoinCbcConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("coin-utils/2.11.9")
+        self.requires("coin-utils/2.11.10")
         self.requires("coin-osi/0.108.7")
         self.requires("coin-clp/1.17.7")
         self.requires("coin-cgl/0.60.7")
