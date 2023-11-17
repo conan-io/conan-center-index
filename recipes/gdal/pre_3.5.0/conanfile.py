@@ -293,7 +293,7 @@ class GdalConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/3.0.1")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.3")
         if self.options.with_charls:
@@ -305,7 +305,7 @@ class GdalConan(ConanFile):
         # if self.options.with_sosi:
         #     self.requires("fyba/4.1.1")
         if self.options.with_mongocxx:
-            self.requires("mongo-cxx-driver/3.8.0")
+            self.requires("mongo-cxx-driver/3.8.1")
         if self.options.with_hdf4:
             self.requires("hdf4/4.2.15")
         if self.options.with_hdf5:
@@ -382,7 +382,7 @@ class GdalConan(ConanFile):
         # if not self.options.without_lerc:
         #     self.requires("lerc/4.0.1") # TODO: use conan recipe (not possible yet because lerc API is broken for GDAL)
         if self.options.get_safe("with_exr"):
-            self.requires("openexr/3.1.9")
+            self.requires("openexr/3.2.1")
         if self.options.get_safe("with_heif"):
             self.requires("libheif/1.16.2")
 
