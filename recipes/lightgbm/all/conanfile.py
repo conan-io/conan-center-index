@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, save, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -37,6 +37,7 @@ class LightGBMConan(ConanFile):
     }
 
     def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
 
     def config_options(self):
@@ -72,40 +73,25 @@ class LightGBMConan(ConanFile):
         tc.cache_variables["BUILD_CLI"] = False
         if is_apple_os(self):
             tc.cache_variables["APPLE_OUTPUT_DYLIB"] = True
+        tc.variables["_MAJOR_VERSION"] = Version(self.version).major
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        cmakelists_path = os.path.join(self.source_folder, "CMakeLists.txt")
         # Fix vendored dependency includes
         common_h = os.path.join(self.source_folder, "include", "LightGBM", "utils", "common.h")
         for lib in ["fmt", "fast_double_parser"]:
             replace_in_file(self, common_h, f"../../../external_libs/{lib}/include/", "")
-        # Add dependencies
-        replace_in_file(self, cmakelists_path, "include_directories(${EIGEN_DIR})", "")
-        extra_cmake_content = (
-            "find_package(fmt REQUIRED CONFIG)\n"
-            "find_package(Eigen3 REQUIRED CONFIG)\n"
-            "find_package(fast_double_parser REQUIRED CONFIG)\n"
-        )
-        if Version(self.version).major >= 4:
-            targets = ["lightgbm_objs", "lightgbm_capi_objs"]
-        else:
-            targets = ["lightgbm", "_lightgbm"]
-        for target in targets:
-            extra_cmake_content += (
-                f"target_link_libraries({target} PRIVATE "
-                "fmt::fmt Eigen3::Eigen fast_double_parser::fast_double_parser)\n"
-            )
-        save(self, cmakelists_path, extra_cmake_content, append=True)
-
+        # Unvendor Eigen3
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "include_directories(${EIGEN_DIR})", "")
 
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
 
     def package(self):
@@ -139,5 +125,4 @@ class LightGBMConan(ConanFile):
                 openmp_flags = ["-fopenmp"]
             elif self.settings.compiler in ["clang", "apple-clang"]:
                 openmp_flags = ["-Xpreprocessor", "-fopenmp"]
-            self.cpp_info.cflags.extend(openmp_flags)
             self.cpp_info.cxxflags.extend(openmp_flags)
