@@ -19,10 +19,12 @@ class GccConan(ConanFile):
         "C++, Objective-C, Fortran, Ada, Go, and D, as well as "
         "libraries for these languages (libstdc++,...). "
     )
-    topics = ("gcc", "gnu", "compiler", "c", "c++")
-    homepage = "https://gcc.gnu.org"
+    license = "GPL-3.0-only WITH GCC-exception-3.1"
     url = "https://github.com/conan-io/conan-center-index"
-    license = "GPL-3.0-only"
+    homepage = "https://gcc.gnu.org"
+    topics = ("gcc", "gnu", "compiler", "c", "c++")
+
+    package_type = "application"
     settings = "os", "compiler", "arch", "build_type"
 
     def configure(self):
