@@ -50,7 +50,7 @@ class GlfwConan(ConanFile):
             self.options.rm_safe("fPIC")
         if self.settings.os != "Linux":
             self.options.rm_safe("with_wayland")
-        if not self.settings.os in ["Linux", "FreeBSD"] or self.version <= Version("3.3.8"):
+        if self.settings.os not in ["Linux", "FreeBSD"] or Version(self.version) <= "3.3.8":
             self.options.rm_safe("with_x11")
 
     def configure(self):
@@ -69,8 +69,9 @@ class GlfwConan(ConanFile):
         self.requires("opengl/system")
         if self.options.vulkan_static:
             self.requires("vulkan-loader/1.3.243.0")
-        if self.options.get_safe("with_x11") or self.version <= Version("3.3.8"):
-            self.requires("xorg/system")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            if self.options.get_safe("with_x11", True):
+                self.requires("xorg/system")
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0")
             self.requires("wayland-protocols/1.32")
