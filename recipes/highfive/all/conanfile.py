@@ -36,13 +36,13 @@ class HighFiveConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("hdf5/1.14.1")
+        self.requires("hdf5/1.14.2")
         if self.options.with_boost:
             self.requires("boost/1.83.0")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.with_xtensor:
-            self.requires("xtensor/0.24.6")
+            self.requires("xtensor/0.24.7")
         if self.options.with_opencv:
             self.requires("opencv/4.5.5")
 
