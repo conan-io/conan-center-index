@@ -11,7 +11,7 @@ required_conan_version = ">=1.53.0"
 class FltkConan(ConanFile):
     name = "fltk"
     description = "Fast Light Toolkit is a cross-platform C++ GUI toolkit"
-    license = "LGPL-2.1+ WITH FLTK-exception"
+    license = "LGPL-2.1-or-later WITH FLTK-exception"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.fltk.org"
     topics = ("gui",)
