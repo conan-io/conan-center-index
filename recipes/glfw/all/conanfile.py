@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -83,12 +83,19 @@ class GlfwConan(ConanFile):
 
     def build_requirements(self):
         if self.options.get_safe("with_wayland"):
-            self.tool_requires("wayland/<host_version>")
+            if self._has_build_profile:
+                self.tool_requires("wayland/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if self.options.get_safe("with_wayland") and not self._has_build_profile:
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         tc = CMakeToolchain(self)
         tc.cache_variables["GLFW_BUILD_DOCS"] = False
         tc.cache_variables["GLFW_BUILD_EXAMPLES"] = False
@@ -108,8 +115,6 @@ class GlfwConan(ConanFile):
         cmake_deps.generate()
         pkg_config_deps = PkgConfigDeps(self)
         pkg_config_deps.generate()
-        virtual_build_env = VirtualBuildEnv(self)
-        virtual_build_env.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
