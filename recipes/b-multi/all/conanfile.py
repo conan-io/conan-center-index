@@ -4,7 +4,6 @@ from conan.tools.files import copy
 
 class MultiConan(ConanFile):
     name = "b-multi"
-    version = "0.80.1"
     homepage = "https://gitlab.com/correaa/boost-multi"
     description = "Multidimensional array access to contiguous or regularly contiguous memory. (Not an official Boost library)"
     topics = (
