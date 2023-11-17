@@ -92,7 +92,7 @@ class VulkanUtilityLibrariesConan(ConanFile):
         copy(self, "LICENSE.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.source_folder, "lib", "cmake", "VulkanUtilityLibraries"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         fix_apple_shared_install_name(self)
 
