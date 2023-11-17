@@ -74,7 +74,6 @@ class GlfwConan(ConanFile):
                 self.requires("xorg/system")
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0")
-            self.requires("wayland-protocols/1.32")
             self.requires("xkbcommon/1.6.0")
 
     def validate(self):
@@ -83,8 +82,11 @@ class GlfwConan(ConanFile):
 
     def build_requirements(self):
         if self.options.get_safe("with_wayland"):
+            self.tool_requires("wayland-protocols/1.32")
             if self._has_build_profile:
                 self.tool_requires("wayland/<host_version>")
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -111,19 +113,39 @@ class GlfwConan(ConanFile):
             tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.generate()
         cmake_deps = CMakeDeps(self)
-        cmake_deps.set_property("xkbcommon", "cmake_file_name", "XKBCommon")
+        if self.options.get_safe("with_wayland"):
+            cmake_deps.set_property("xkbcommon", "cmake_file_name", "XKBCommon")
         cmake_deps.generate()
-        pkg_config_deps = PkgConfigDeps(self)
-        pkg_config_deps.generate()
+        if self.options.get_safe("with_wayland"):
+            pkg_config_deps = PkgConfigDeps(self)
+            if self._has_build_profile:
+                pkg_config_deps.build_context_activated = ["wayland-protocols"]
+            pkg_config_deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+
+        cmakelists_src = os.path.join(self.source_folder, "src", "CMakeLists.txt")
         # don't force PIC
-        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
-                              "POSITION_INDEPENDENT_CODE ON", "")
+        replace_in_file(self, cmakelists_src, "POSITION_INDEPENDENT_CODE ON", "")
         # don't force static link to libgcc if MinGW
-        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
-                              "target_link_libraries(glfw PRIVATE \"-static-libgcc\")", "")
+        replace_in_file(self, cmakelists_src, "target_link_libraries(glfw PRIVATE \"-static-libgcc\")", "")
+
+        # Workaround for wayland-protocols in case of 1 profile (build_context_activated cannot work)
+        if self.options.get_safe("with_wayland") and not self._has_build_profile:
+            replace_in_file(
+                self,
+                cmakelists_src,
+                "pkg_check_modules(WAYLAND_PROTOCOLS REQUIRED wayland-protocols>=1.15)",
+                "",
+            )
+            pkgdatadir = os.path.join(self.dependencies["wayland-protocols"].package_folder, "res", "wayland-protocols")
+            replace_in_file(
+                self,
+                cmakelists_src,
+                "pkg_get_variable(WAYLAND_PROTOCOLS_BASE wayland-protocols pkgdatadir)",
+                f"set(WAYLAND_PROTOCOLS_BASE {pkgdatadir})",
+            )
 
         # Allow to link vulkan-loader into shared glfw
         if self.options.vulkan_static:
