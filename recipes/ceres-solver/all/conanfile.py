@@ -3,10 +3,11 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
+import textwrap
 
 required_conan_version = ">=1.54.0"
 
@@ -153,10 +154,31 @@ class CeressolverConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "CMake"))
+        self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_variables_file_rel_path))
+
+    def _create_cmake_module_variables(self, module_file):
+        # Define several variables of upstream CMake config file which are not
+        # defined out of the box by CMakeDeps.
+        # See https://github.com/ceres-solver/ceres-solver/blob/master/cmake/CeresConfig.cmake.in
+        content = textwrap.dedent(f"""\
+            set(CERES_FOUND TRUE)
+            set(CERES_VERSION {self.version})
+            if(NOT DEFINED CERES_LIBRARIES)
+                set(CERES_LIBRARIES Ceres::ceres)
+            endif()
+        """)
+        save(self, module_file, content)
+
+    @property
+    def _module_variables_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Ceres")
         self.cpp_info.set_property("cmake_target_name", "Ceres::ceres")
+        # see https://github.com/ceres-solver/ceres-solver/blob/2.2.0/cmake/CeresConfig.cmake.in#L334-L340
+        self.cpp_info.set_property("cmake_target_aliases", ["ceres"])
+        self.cpp_info.set_property("cmake_build_modules", [self._module_variables_file_rel_path])
 
         libsuffix = ""
         if self.settings.build_type == "Debug":
@@ -186,4 +208,6 @@ class CeressolverConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Ceres"
         self.cpp_info.names["cmake_find_package_multi"] = "Ceres"
+        self.cpp_info.components["ceres"].build_modules["cmake_find_package"] = [self._module_variables_file_rel_path]
+        self.cpp_info.components["ceres"].build_modules["cmake_find_package_multi"] = [self._module_variables_file_rel_path]
         self.cpp_info.components["ceres"].set_property("cmake_target_name", "Ceres::ceres")
