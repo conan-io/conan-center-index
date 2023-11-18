@@ -19,11 +19,13 @@ class LibbpfConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
+        "with_uapi_headers": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
+        "with_uapi_headers": False
     }
 
     def config_options(self):
@@ -75,6 +77,8 @@ class LibbpfConan(ConanFile):
         with chdir(self, os.path.join(self.source_folder, "src")):
             autotools = Autotools(self)
             autotools.make()
+            if self.options.with_uapi_headers:
+                autotools.make('install_uapi_headers')
 
     def package(self):
         copy(self, pattern="LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
