@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
 
@@ -421,6 +422,26 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_ZLIB"] = True
         tc.cache_variables["GDAL_USE_ZLIB_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_ZSTD"] = self.options.with_zstd
+        # https://github.com/OSGeo/gdal/blob/v3.8.0/cmake/helpers/CheckDependentLibraries.cmake#L419-L450
+        tc.cache_variables["HAVE_JPEGTURBO_DUAL_MODE_8_12"] = (
+                self.options.with_jpeg == "libjpeg-turbo" and
+                bool(self.dependencies["libjpeg-turbo"].options.get_safe("enable12bit"))
+        )
+        # https://github.com/OSGeo/gdal/blob/v3.8.0/port/CMakeLists.txt
+        tc.cache_variables["BLOSC_HAS_BLOSC_CBUFFER_VALIDATE"] = (
+                self.options.with_blosc and
+                Version(self.dependencies["c-blosc"].ref.version) >= "1.21.5"
+        )
+        # https://github.com/OSGeo/gdal/blob/v3.8.0/frmts/hdf5/CMakeLists.txt#L61-L64
+        tc.cache_variables["GDAL_ENABLE_HDF5_GLOBAL_LOCK"] = (
+                self.dependencies.get("hdf5", False) and
+                bool(self.dependencies["hdf5"].options.get_safe("threadsafe"))
+        )
+        # https://github.com/OSGeo/gdal/blob/v3.8.0/frmts/hdf4/CMakeLists.txt#L28-L46
+        tc.cache_variables["HDF4_HAS_MAXOPENFILES"] = (
+                self.dependencies.get("hdf4", False) and
+                Version(self.dependencies["hdf4"].ref.version) >= "4.2.5"
+        )
         tc.generate()
 
         jsonc = self.dependencies["json-c"]
