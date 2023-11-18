@@ -1,15 +1,13 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanException
 from conan.tools.build import can_run
-from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
-from conan.tools.microsoft import unix_path
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
+from conan.tools.env import VirtualRunEnv
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def requirements(self):
@@ -36,14 +34,18 @@ class TestPackageConan(ConanFile):
         return available
 
     def generate(self):
+        VirtualRunEnv(self).generate(scope="build")
+        VirtualRunEnv(self).generate(scope="run")
         tc = CMakeToolchain(self)
         for exec in self._executables:
             tc.variables["EXEC_{}".format(exec.replace("-", "_")).upper()] = True
         plugins_root = self.dependencies["magnum"].conf_info.get("user.magnum:plugins_basepath", check_type=str)
-        tc.variables["IMPORTER_PLUGINS_FOLDER"] = unix_path(self, os.path.join(plugins_root, "importers"))
-        tc.variables["OBJ_FILE"] = unix_path(self, os.path.join(self.source_folder, "triangleMesh.obj"))
+        tc.variables["IMPORTER_PLUGINS_FOLDER"] = os.path.join(plugins_root, "importers").replace("\\", "/")
+        tc.variables["OBJ_FILE"] = os.path.join(self.source_folder, "triangleMesh.obj").replace("\\", "/")
         tc.variables["SHARED_PLUGINS"] = self.dependencies["magnum"].options.shared_plugins
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)

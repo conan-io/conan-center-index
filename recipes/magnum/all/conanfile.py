@@ -204,12 +204,17 @@ class MagnumConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"corrade/{self.version}")
+        # https://github.com/mosra/magnum/blob/v2020.06/src/Magnum/Math/Vector.h#L33
+        self.requires(f"corrade/{self.version}", transitive_headers=True, transitive_libs=True)
         if self.options.audio:
-            self.requires("openal-soft/1.23.1")
+            # https://github.com/mosra/magnum/blob/v2020.06/src/Magnum/Audio/Buffer.h#L35-L36
+            self.requires("openal-soft/1.23.1", transitive_headers=True, transitive_libs=True)
         if self.options.gl:
-            self.requires("opengl/system")
+            # https://github.com/mosra/magnum/blob/v2020.06/src/Magnum/Platform/WindowlessGlxApplication.h#L44-L46
+            transitive = bool(self.options.get_safe("windowless_glx_application"))
+            self.requires("opengl/system", transitive_headers=transitive, transitive_libs=transitive)
         if self.options.vk:
+            # not used in public headers
             self.requires("vulkan-loader/1.3.268.0")
 
         if (
@@ -220,13 +225,17 @@ class MagnumConan(ConanFile):
             or self.options.get_safe("windowless_windows_egl_application", False)
             or self.options.get_safe("target_headless", False)
         ):
-            self.requires("egl/system")
+            # https://github.com/mosra/magnum/blob/v2020.06/src/Magnum/Platform/WindowlessEglApplication.h#L36-L37
+            transitive = bool(self.options.get_safe("windowless_windows_egl_application"))
+            self.requires("egl/system", transitive_headers=transitive, transitive_libs=transitive)
 
         if self.options.glfw_application:
-            self.requires("glfw/3.3.8")
+            # https://github.com/mosra/magnum/blob/v2020.06/src/Magnum/Platform/GlfwApplication.h#L51
+            self.requires("glfw/3.3.8", transitive_headers=True, transitive_libs=True)
 
         if self.options.sdl2_application:
-            self.requires("sdl/2.28.5")
+            # https://github.com/mosra/magnum/blob/v2020.06/src/Magnum/Platform/Sdl2Application.h#L60-L64
+            self.requires("sdl/2.28.5", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -271,75 +280,75 @@ class MagnumConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_DEPRECATED"] = False
-        tc.variables["BUILD_STATIC"] = not self.options.shared
-        tc.variables["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", False)
-        # tc.variables["BUILD_STATIC_UNIQUE_GLOBALS"]
-        tc.variables["BUILD_PLUGINS_STATIC"] = not self.options.shared_plugins
-        tc.variables["LIB_SUFFIX"] = ""
-        tc.variables["BUILD_TESTS"] = False
-        tc.variables["BUILD_GL_TESTS"] = False
-        tc.variables["BUILD_AL_TESTS"] = False
-        tc.variables["WITH_OPENGLTESTER"] = False
-        tc.variables["WITH_VULKANTESTER"] = False
+        tc.cache_variables["BUILD_DEPRECATED"] = False
+        tc.cache_variables["BUILD_STATIC"] = not self.options.shared
+        tc.cache_variables["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", False)
+        # tc.cache_variables["BUILD_STATIC_UNIQUE_GLOBALS"]
+        tc.cache_variables["BUILD_PLUGINS_STATIC"] = not self.options.shared_plugins
+        tc.cache_variables["LIB_SUFFIX"] = ""
+        tc.cache_variables["BUILD_TESTS"] = False
+        tc.cache_variables["BUILD_GL_TESTS"] = False
+        tc.cache_variables["BUILD_AL_TESTS"] = False
+        tc.cache_variables["WITH_OPENGLTESTER"] = False
+        tc.cache_variables["WITH_VULKANTESTER"] = False
 
-        tc.variables["TARGET_GL"] = bool(self.options.target_gl)
-        tc.variables["TARGET_GLES"] = self.options.target_gl == "gles3"
-        tc.variables["TARGET_GLES2"] = self.options.target_gl == "gles2"
-        tc.variables["TARGET_DESKTOP_GLES"] = self.options.target_gl == "desktop_gl"
-        tc.variables["TARGET_HEADLESS"] = self.options.get_safe("target_headless", False)
-        tc.variables["TARGET_VK"] = self.options.target_vk
+        tc.cache_variables["TARGET_GL"] = bool(self.options.target_gl)
+        tc.cache_variables["TARGET_GLES"] = self.options.target_gl == "gles3"
+        tc.cache_variables["TARGET_GLES2"] = self.options.target_gl == "gles2"
+        tc.cache_variables["TARGET_DESKTOP_GLES"] = self.options.target_gl == "desktop_gl"
+        tc.cache_variables["TARGET_HEADLESS"] = self.options.get_safe("target_headless", False)
+        tc.cache_variables["TARGET_VK"] = self.options.target_vk
 
-        tc.variables["WITH_AUDIO"] = self.options.audio
-        tc.variables["WITH_DEBUGTOOLS"] = self.options.debug_tools
-        tc.variables["WITH_GL"] = self.options.gl
-        tc.variables["WITH_MESHTOOLS"] = self.options.mesh_tools
-        tc.variables["WITH_PRIMITIVES"] = self.options.primitives
-        tc.variables["WITH_SCENEGRAPH"] = self.options.scene_graph
-        tc.variables["WITH_SHADERS"] = self.options.shaders
-        tc.variables["WITH_TEXT"] = self.options.text
-        tc.variables["WITH_TEXTURETOOLS"] = self.options.texture_tools
-        tc.variables["WITH_TRADE"] = self.options.trade
-        tc.variables["WITH_VK"] = self.options.vk
+        tc.cache_variables["WITH_AUDIO"] = self.options.audio
+        tc.cache_variables["WITH_DEBUGTOOLS"] = self.options.debug_tools
+        tc.cache_variables["WITH_GL"] = self.options.gl
+        tc.cache_variables["WITH_MESHTOOLS"] = self.options.mesh_tools
+        tc.cache_variables["WITH_PRIMITIVES"] = self.options.primitives
+        tc.cache_variables["WITH_SCENEGRAPH"] = self.options.scene_graph
+        tc.cache_variables["WITH_SHADERS"] = self.options.shaders
+        tc.cache_variables["WITH_TEXT"] = self.options.text
+        tc.cache_variables["WITH_TEXTURETOOLS"] = self.options.texture_tools
+        tc.cache_variables["WITH_TRADE"] = self.options.trade
+        tc.cache_variables["WITH_VK"] = self.options.vk
 
-        tc.variables["WITH_ANDROIDAPPLICATION"] = self.options.get_safe("android_application", False)
-        tc.variables["WITH_EMSCRIPTENAPPLICATION"] = self.options.get_safe("emscripten_application", False)
-        tc.variables["WITH_GLFWAPPLICATION"] = self.options.glfw_application
-        tc.variables["WITH_GLXAPPLICATION"] = self.options.get_safe("glx_application", False)
-        tc.variables["WITH_SDL2APPLICATION"] = self.options.sdl2_application
-        tc.variables["WITH_XEGLAPPLICATION"] = self.options.get_safe("xegl_application", False)
-        tc.variables["WITH_WINDOWLESSCGLAPPLICATION"] = self.options.get_safe("windowless_cgl_application", False)
-        tc.variables["WITH_WINDOWLESSEGLAPPLICATION"] = self.options.get_safe("windowless_egl_application", False)
-        tc.variables["WITH_WINDOWLESSGLXAPPLICATION"] = self.options.get_safe("windowless_glx_application", False)
-        tc.variables["WITH_WINDOWLESSIOSAPPLICATION"] = self.options.get_safe("windowless_ios_application", False)
-        tc.variables["WITH_WINDOWLESSWGLAPPLICATION"] = self.options.get_safe("windowless_wgl_application", False)
-        tc.variables["WITH_WINDOWLESSWINDOWSEGLAPPLICATION"] = self.options.get_safe("windowless_windows_egl_application", False)
+        tc.cache_variables["WITH_ANDROIDAPPLICATION"] = self.options.get_safe("android_application", False)
+        tc.cache_variables["WITH_EMSCRIPTENAPPLICATION"] = self.options.get_safe("emscripten_application", False)
+        tc.cache_variables["WITH_GLFWAPPLICATION"] = self.options.glfw_application
+        tc.cache_variables["WITH_GLXAPPLICATION"] = self.options.get_safe("glx_application", False)
+        tc.cache_variables["WITH_SDL2APPLICATION"] = self.options.sdl2_application
+        tc.cache_variables["WITH_XEGLAPPLICATION"] = self.options.get_safe("xegl_application", False)
+        tc.cache_variables["WITH_WINDOWLESSCGLAPPLICATION"] = self.options.get_safe("windowless_cgl_application", False)
+        tc.cache_variables["WITH_WINDOWLESSEGLAPPLICATION"] = self.options.get_safe("windowless_egl_application", False)
+        tc.cache_variables["WITH_WINDOWLESSGLXAPPLICATION"] = self.options.get_safe("windowless_glx_application", False)
+        tc.cache_variables["WITH_WINDOWLESSIOSAPPLICATION"] = self.options.get_safe("windowless_ios_application", False)
+        tc.cache_variables["WITH_WINDOWLESSWGLAPPLICATION"] = self.options.get_safe("windowless_wgl_application", False)
+        tc.cache_variables["WITH_WINDOWLESSWINDOWSEGLAPPLICATION"] = self.options.get_safe("windowless_windows_egl_application", False)
 
-        tc.variables["WITH_CGLCONTEXT"] = self.options.get_safe("cgl_context", False)
-        tc.variables["WITH_EGLCONTEXT"] = self.options.get_safe("egl_context", False)
-        tc.variables["WITH_GLXCONTEXT"] = self.options.glx_context
-        tc.variables["WITH_WGLCONTEXT"] = self.options.get_safe("wgl_context", False)
+        tc.cache_variables["WITH_CGLCONTEXT"] = self.options.get_safe("cgl_context", False)
+        tc.cache_variables["WITH_EGLCONTEXT"] = self.options.get_safe("egl_context", False)
+        tc.cache_variables["WITH_GLXCONTEXT"] = self.options.glx_context
+        tc.cache_variables["WITH_WGLCONTEXT"] = self.options.get_safe("wgl_context", False)
 
         ##### Plugins related #####
-        tc.variables["WITH_ANYAUDIOIMPORTER"] = self.options.any_audio_importer
-        tc.variables["WITH_ANYIMAGECONVERTER"] = self.options.any_image_converter
-        tc.variables["WITH_ANYIMAGEIMPORTER"] = self.options.any_image_importer
-        tc.variables["WITH_ANYSCENECONVERTER"] = self.options.any_scene_converter
-        tc.variables["WITH_ANYSCENEIMPORTER"] = self.options.any_scene_importer
-        tc.variables["WITH_MAGNUMFONT"] = self.options.magnum_font
-        tc.variables["WITH_MAGNUMFONTCONVERTER"] = self.options.magnum_font_converter
-        tc.variables["WITH_OBJIMPORTER"] = self.options.obj_importer
-        tc.variables["WITH_TGAIMPORTER"] = self.options.tga_importer
-        tc.variables["WITH_TGAIMAGECONVERTER"] = self.options.tga_image_converter
-        tc.variables["WITH_WAVAUDIOIMPORTER"] = self.options.wav_audio_importer
+        tc.cache_variables["WITH_ANYAUDIOIMPORTER"] = self.options.any_audio_importer
+        tc.cache_variables["WITH_ANYIMAGECONVERTER"] = self.options.any_image_converter
+        tc.cache_variables["WITH_ANYIMAGEIMPORTER"] = self.options.any_image_importer
+        tc.cache_variables["WITH_ANYSCENECONVERTER"] = self.options.any_scene_converter
+        tc.cache_variables["WITH_ANYSCENEIMPORTER"] = self.options.any_scene_importer
+        tc.cache_variables["WITH_MAGNUMFONT"] = self.options.magnum_font
+        tc.cache_variables["WITH_MAGNUMFONTCONVERTER"] = self.options.magnum_font_converter
+        tc.cache_variables["WITH_OBJIMPORTER"] = self.options.obj_importer
+        tc.cache_variables["WITH_TGAIMPORTER"] = self.options.tga_importer
+        tc.cache_variables["WITH_TGAIMAGECONVERTER"] = self.options.tga_image_converter
+        tc.cache_variables["WITH_WAVAUDIOIMPORTER"] = self.options.wav_audio_importer
 
         #### Command line utilities ####
-        tc.variables["WITH_GL_INFO"] = self.options.gl_info
-        tc.variables["WITH_AL_INFO"] = self.options.al_info
-        tc.variables["WITH_DISTANCEFIELDCONVERTER"] = self.options.get_safe("distance_field_converter", False)
-        tc.variables["WITH_FONTCONVERTER"] = self.options.font_converter
-        tc.variables["WITH_IMAGECONVERTER"] = self.options.image_converter
-        tc.variables["WITH_SCENECONVERTER"] = self.options.scene_converter
+        tc.cache_variables["WITH_GL_INFO"] = self.options.gl_info
+        tc.cache_variables["WITH_AL_INFO"] = self.options.al_info
+        tc.cache_variables["WITH_DISTANCEFIELDCONVERTER"] = self.options.get_safe("distance_field_converter", False)
+        tc.cache_variables["WITH_FONTCONVERTER"] = self.options.font_converter
+        tc.cache_variables["WITH_IMAGECONVERTER"] = self.options.image_converter
+        tc.cache_variables["WITH_SCENECONVERTER"] = self.options.scene_converter
 
         tc.generate()
 
@@ -524,7 +533,9 @@ class MagnumConan(ConanFile):
             self.cpp_info.components[component].set_property("cmake_target_name", f"Magnum::{lib_name}")
             self.cpp_info.components[component].names["cmake_find_package"] = lib_name
             self.cpp_info.components[component].names["cmake_find_package_multi"] = lib_name
-            self.cpp_info.components[component].libs = [f"{lib_name}{plugin_lib_suffix}"]
+            # add only static plugins: shared plugins are meant to be loaded dynamically and not to be used during linking
+            if not self.options.shared_plugins:
+                self.cpp_info.components[component].libs = [f"{lib_name}{plugin_lib_suffix}"]
             self.cpp_info.components[component].libdirs = [os.path.join(self.package_folder, "lib", magnum_plugin_libdir, folder)]
             self.cpp_info.components[component].requires = deps
             if not self.options.shared_plugins:
