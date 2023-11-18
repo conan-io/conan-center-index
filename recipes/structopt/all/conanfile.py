@@ -45,7 +45,7 @@ class StructoptConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("magic_enum/0.9.2")
+        self.requires("magic_enum/0.9.5")
         self.requires("visit_struct/1.1.0")
 
     def package_id(self):

@@ -21,7 +21,7 @@ index 5ef391c..a8f51e6 100644
  #include <structopt/sub_command.hpp>
 -#include <structopt/third_party/magic_enum/magic_enum.hpp>
 -#include <structopt/third_party/visit_struct/visit_struct.hpp>
-+#include <magic_enum.hpp>
++#include <magic_enum/magic_enum.hpp>
 +#include <visit_struct/visit_struct.hpp>
  #include <tuple>
  #include <type_traits>
