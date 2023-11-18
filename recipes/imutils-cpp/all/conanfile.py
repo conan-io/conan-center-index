@@ -56,7 +56,7 @@ class ImutilsCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("opencv/4.5.5", transitive_headers=True, transitive_libs=True)
+        self.requires("opencv/4.8.1", transitive_headers=True, transitive_libs=True)
         self.requires("libcurl/8.2.1")
 
     def validate(self):
