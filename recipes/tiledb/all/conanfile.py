@@ -213,7 +213,7 @@ class TileDBConan(ConanFile):
             "libwebp::webp":             "WebP::webp",
             "libwebp::webpdecoder":      "WebP::webpdecoder",
             "libwebp::webpdemux":        "WebP::webpdemux",
-            "libwebp::webpmux":          "WebP::webpmux",
+            "libwebp::webpmux":          "WebP::libwebpmux",
             "lz4":                       "LZ4::LZ4",
             "zlib":                      "ZLIB::ZLIB",
             "zstd":                      "Zstd::Zstd",
