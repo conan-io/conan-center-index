@@ -64,7 +64,7 @@ class GdalConan(ConanFile):
         "with_openssl": [True, False],
         "with_pcre": [True, False],
         "with_pcre2": [True, False],
-        "with_pdfium": [True, False],
+        # "with_pdfium": [True, False],
         "with_pg": [True, False],
         "with_png": [True, False],
         "with_podofo": [True, False],
@@ -125,7 +125,7 @@ class GdalConan(ConanFile):
         "with_openssl": False,
         "with_pcre": False,
         "with_pcre2": False,
-        "with_pdfium": False,
+        # "with_pdfium": False,
         "with_pg": False,
         "with_png": True,
         "with_podofo": False,
@@ -249,8 +249,9 @@ class GdalConan(ConanFile):
             self.requires("pcre/8.45")
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
-        if self.options.with_pdfium:
-            self.requires("pdfium/95.0.4629")
+        # TODO: pdfium recipe needs to be compatible with https://github.com/rouault/pdfium_build_gdal_3_8
+        # if self.options.with_pdfium:
+        #     self.requires("pdfium/95.0.4629")
         if self.options.with_pg:
             # libpq 15+ is not supported
             self.requires("libpq/14.9")
@@ -397,7 +398,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_PARQUET"] = False
         tc.cache_variables["GDAL_USE_PCRE"] = self.options.with_pcre
         tc.cache_variables["GDAL_USE_PCRE2"] = self.options.with_pcre2
-        tc.cache_variables["GDAL_USE_PDFIUM"] = self.options.with_pdfium
+        tc.cache_variables["GDAL_USE_PDFIUM"] = False  # self.options.with_pdfium
         tc.cache_variables["GDAL_USE_PNG"] = self.options.with_png
         tc.cache_variables["GDAL_USE_PNG_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_PODOFO"] = self.options.with_podofo
@@ -676,8 +677,8 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["pcre::pcre"])
         if self.options.with_pcre2:
             self.cpp_info.requires.extend(["pcre2::pcre2-8"])
-        if self.options.with_pdfium:
-            self.cpp_info.requires.extend(["pdfium::pdfium"])
+        # if self.options.with_pdfium:
+        #     self.cpp_info.requires.extend(["pdfium::pdfium"])
         if self.options.with_pg:
             self.cpp_info.requires.extend(["libpq::pq"])
         if self.options.with_png:
