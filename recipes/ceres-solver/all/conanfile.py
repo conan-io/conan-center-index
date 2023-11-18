@@ -52,7 +52,11 @@ class CeressolverConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "98" if Version(self.version) < "2.0.0" else "14"
+        if Version(self.version) >= "2.2.0":
+            return "17"
+        if Version(self.version) >= "2.0.0":
+            return "14"
+        return "98"
 
     @property
     def _compilers_minimum_version(self):
@@ -63,6 +67,13 @@ class CeressolverConan(ConanFile):
                 "gcc": "5",
                 "msvc": "190",
                 "Visual Studio": "14",
+            },
+            "17": {
+                "apple-clang": "10",
+                "clang": "7",
+                "gcc": "8",
+                "msvc": "191",
+                "Visual Studio": "15",
             },
         }.get(self._min_cppstd, {})
 
@@ -106,6 +117,10 @@ class CeressolverConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
 
+    def build_requirements(self):
+        if Version(self.version) >= "2.2.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -114,7 +129,6 @@ class CeressolverConan(ConanFile):
         tc.variables["MINIGLOG"] = not self.options.use_glog
         tc.variables["GFLAGS"] = False # useless for the lib itself, gflags is not a direct dependency
         tc.variables["SUITESPARSE"] = False
-        tc.variables["CXSPARSE"] = False
         tc.variables["LAPACK"] = False
         tc.variables["SCHUR_SPECIALIZATIONS"] = self.options.use_schur_specializations
         tc.variables["CUSTOM_BLAS"] = self.options.use_custom_blas
@@ -123,17 +137,25 @@ class CeressolverConan(ConanFile):
         tc.variables["BUILD_DOCUMENTATION"] = False
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_BENCHMARKS"] = False
-        if is_msvc(self):
-            tc.variables["MSVC_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
-        if Version(self.version) >= "2.1.0":
+
+        ceres_version = Version(self.version)
+        if ceres_version >= "2.2.0":
+            tc.variables["USE_CUDA"] = False
+        elif ceres_version >= "2.1.0":
             tc.variables["CUDA"] = False
-        if Version(self.version) >= "2.0.0":
+        if ceres_version >= "2.2.0":
+            tc.variables["EIGENMETIS"] = False
+        if ceres_version >= "2.0.0":
             tc.variables["PROVIDE_UNINSTALL_TARGET"] = False
             if is_apple_os(self):
                 tc.variables["ACCELERATESPARSE"] = True
-        if Version(self.version) < "2.1.0":
+        if ceres_version < "2.2.0":
+            tc.variables["CXSPARSE"] = False
+            if is_msvc(self):
+                tc.variables["MSVC_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
+        if ceres_version < "2.1.0":
             tc.variables["LIB_SUFFIX"] = ""
-        if Version(self.version) < "2.0":
+        if ceres_version < "2.0.0":
             tc.variables["CXX11"] = self.options.use_CXX11
             tc.variables["OPENMP"] = False
             tc.variables["TBB"] = self.options.use_TBB

@@ -1,4 +1,7 @@
 sources:
+  "2.2.0":
+    url: "http://ceres-solver.org/ceres-solver-2.2.0.tar.gz"
+    sha256: "48b2302a7986ece172898477c3bcd6deb8fb5cf19b3327bc49969aad4cede82d"
   "2.1.0":
     url: "http://ceres-solver.org/ceres-solver-2.1.0.tar.gz"
     sha256: "f7d74eecde0aed75bfc51ec48c91d01fe16a6bf16bce1987a7073286701e2fc6"
@@ -9,6 +12,13 @@ sources:
     url: "http://ceres-solver.org/ceres-solver-1.14.0.tar.gz"
     sha256: "4744005fc3b902fed886ea418df70690caa8e2ff6b5a90f3dd88a3d291ef8e8e"
 patches:
+  "2.2.0":
+    - patch_file: "patches/2.2.0-0001-find-libraries-conan.patch"
+      patch_description: "Robust dependencies handling"
+      patch_type: "conan"
+    - patch_file: "patches/2.2.0-0002-fix-mingw-build.patch"
+      patch_description: "Fix MinGW build"
+      patch_type: "portability"
   "2.1.0":
     - patch_file: "patches/2.1.0-0001-find-libraries-conan.patch"
       patch_description: "Robust dependencies handling"
