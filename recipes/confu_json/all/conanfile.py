@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -12,11 +12,11 @@ required_conan_version = ">=1.51.1"
 
 class ConfuJson(ConanFile):
     name = "confu_json"
-    homepage = "https://github.com/werto87/confu_json"
-    description = "uses boost::fusion to help with serialization; json <-> user defined type"
-    topics = ("json parse", "serialization", "user defined type")
+    description = "Helps you with parsing json to user defined type and vice versa."
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/werto87/confu_json"
+    topics = ("json parse", "serialization", "user defined type", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
@@ -42,12 +42,18 @@ class ConfuJson(ConanFile):
             },
         }.get(self._min_cppstd, {})
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0")
-        self.requires("magic_enum/0.8.2")
+        self.requires("boost/1.83.0")
+        if Version(self.version) >= "1.0.0":
+            self.requires("magic_enum/0.9.5")
+        else:
+            self.requires("magic_enum/0.9.4")
 
     def package_id(self):
         self.info.clear()
@@ -75,7 +81,7 @@ class ConfuJson(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
-        pass
+        apply_conandata_patches(self)
 
     def package(self):
         copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))

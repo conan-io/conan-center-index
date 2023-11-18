@@ -1,0 +1,26 @@
+diff --git a/confu_json/to_json.hxx b/confu_json/to_json.hxx
+index 696ffd2..916966c 100644
+--- a/confu_json/to_json.hxx
++++ b/confu_json/to_json.hxx
+@@ -22,7 +22,7 @@
+ #include <boost/fusion/include/vector.hpp>
+ #include <boost/mpl/range_c.hpp>
+ #include <boost/mpl/size.hpp>
+-#include <magic_enum.hpp>
++#include <magic_enum/magic_enum.hpp>
+ 
+ namespace confu_json
+ {
+diff --git a/confu_json/to_object.hxx b/confu_json/to_object.hxx
+index db6dc57..579793e 100644
+--- a/confu_json/to_object.hxx
++++ b/confu_json/to_object.hxx
+@@ -20,7 +20,7 @@
+ #include <boost/fusion/include/vector.hpp>
+ #include <boost/mpl/range_c.hpp>
+ #include <boost/mpl/size.hpp>
+-#include <magic_enum.hpp>
++#include <magic_enum/magic_enum.hpp>
+ namespace confu_json
+ {
+ 
