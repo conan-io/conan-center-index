@@ -121,11 +121,11 @@ class TileDBConan(ConanFile):
             # TODO: add azure-storage-blobs-cpp to CCI
             self.requires("azure-storage-blobs-cpp/12.6.1")
             if self.settings.os == "Windows":
-                self.requires("wil/1.0.230824.2")
+                self.requires("wil/1.0.231028.1")
         if self.options.gcs:
             self.requires("google-cloud-cpp/2.12.0")
         if self.options.serialization:
-            self.requires("libcurl/8.2.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
             # Exactly v0.8.0 is required
             self.requires("capnproto/0.8.0")
         if self.options.s3:
