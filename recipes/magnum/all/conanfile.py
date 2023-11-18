@@ -1,59 +1,14 @@
-# TODO: verify the Conan v2 migration
-
-import os
-
-from conan import ConanFile, conan_version
-from conan.errors import ConanInvalidConfiguration, ConanException
-from conan.tools.android import android_abi
-from conan.tools.apple import XCRun, fix_apple_shared_install_name, is_apple_os, to_apple_arch
-from conan.tools.build import build_jobs, can_run, check_min_cppstd, cross_building, default_cppstd, stdcpp_library, valid_min_cppstd
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import (
-    apply_conandata_patches,
-    chdir,
-    collect_libs,
-    copy,
-    download,
-    export_conandata_patches,
-    get,
-    load,
-    mkdir,
-    patch,
-    patches,
-    rename,
-    replace_in_file,
-    rm,
-    rmdir,
-    save,
-    symlinks,
-    unzip,
-)
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfig, PkgConfigDeps
-from conan.tools.layout import basic_layout
-from conan.tools.meson import MesonToolchain, Meson
-from conan.tools.microsoft import (
-    MSBuild,
-    MSBuildDeps,
-    MSBuildToolchain,
-    NMakeDeps,
-    NMakeToolchain,
-    VCVars,
-    check_min_vs,
-    is_msvc,
-    is_msvc_static_runtime,
-    msvc_runtime_flag,
-    unix_path,
-    unix_path_package_info_legacy,
-    vs_layout,
-)
-from conan.tools.scm import Version
-from conan.tools.system import package_manager
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-import functools
 import os
 import re
 import textwrap
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir, save
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -251,11 +206,11 @@ class MagnumConan(ConanFile):
     def requirements(self):
         self.requires(f"corrade/{self.version}")
         if self.options.audio:
-            self.requires("openal/1.22.2")
+            self.requires("openal-soft/1.23.1")
         if self.options.gl:
             self.requires("opengl/system")
         if self.options.vk:
-            self.requires("vulkan-loader/1.3.243.0")
+            self.requires("vulkan-loader/1.3.268.0")
 
         if (
             self.options.get_safe("egl_context", False)
@@ -271,7 +226,7 @@ class MagnumConan(ConanFile):
             self.requires("glfw/3.3.8")
 
         if self.options.sdl2_application:
-            self.requires("sdl/2.28.2")
+            self.requires("sdl/2.28.5")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -403,12 +358,10 @@ class MagnumConan(ConanFile):
                         'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})', "")
         # Get rid of cmake_dependent_option, it can activate features when we try to disable them,
         #   let the Conan user decide what to use and what not.
-        with open(os.path.join(self.source_folder, "CMakeLists.txt"), "r+", encoding="utf-8") as f:
-            text = f.read()
-            text = re.sub(r"cmake_dependent_option(([0-9A-Z_]+) .*)", r'option(\1 "Option \1 disabled by Conan" OFF)', text)
-            f.seek(0)
-            f.write(text)
-            f.truncate()
+        cmakelists = self.source_path.joinpath("CMakeLists.txt")
+        text = cmakelists.read_text(encoding="utf8")
+        text = re.sub(r"cmake_dependent_option\(([0-9A-Z_]+) .+\)", r'option(\1 "Option \1 disabled by Conan" OFF)', text)
+        cmakelists.write_text(text, encoding="utf8")
 
     def build(self):
         self._patch_sources()
@@ -494,7 +447,7 @@ class MagnumConan(ConanFile):
 
         if self.options.audio:
             _add_component("audio", "Audio",
-                           ["magnum_main", "corrade::plugin_manager", "openal::openal"])
+                           ["magnum_main", "corrade::plugin_manager", "openal-soft::openal-soft"])
             if self.options.scene_graph:
                 self.cpp_info.components["audio"].requires += ["scene_graph"]
         if self.options.debug_tools:
