@@ -126,3 +126,5 @@ class LightGBMConan(ConanFile):
             elif self.settings.compiler in ["clang", "apple-clang"]:
                 openmp_flags = ["-Xpreprocessor", "-fopenmp"]
             self.cpp_info.cxxflags.extend(openmp_flags)
+            self.cpp_info.exelinkflags.extend(openmp_flags)
+            self.cpp_info.sharedlinkflags.extend(openmp_flags)
