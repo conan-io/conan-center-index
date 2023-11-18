@@ -434,12 +434,12 @@ class GdalConan(ConanFile):
         )
         # https://github.com/OSGeo/gdal/blob/v3.8.0/frmts/hdf5/CMakeLists.txt#L61-L64
         tc.cache_variables["GDAL_ENABLE_HDF5_GLOBAL_LOCK"] = (
-                self.dependencies.get("hdf5", False) and
+                self.options.with_hdf5 and
                 bool(self.dependencies["hdf5"].options.get_safe("threadsafe"))
         )
         # https://github.com/OSGeo/gdal/blob/v3.8.0/frmts/hdf4/CMakeLists.txt#L28-L46
         tc.cache_variables["HDF4_HAS_MAXOPENFILES"] = (
-                self.dependencies.get("hdf4", False) and
+                self.options.with_hdf4 and
                 Version(self.dependencies["hdf4"].ref.version) >= "4.2.5"
         )
         tc.generate()
