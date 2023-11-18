@@ -177,7 +177,7 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
-            self.requires("arrow/13.0.0")
+            self.requires("arrow/14.0.1")
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
@@ -193,7 +193,7 @@ class GdalConan(ConanFile):
         if self.options.with_expat:
             self.requires("expat/2.5.0")
         if self.options.with_exr:
-            self.requires("openexr/3.1.9")
+            self.requires("openexr/3.2.1")
             self.requires("imath/3.1.9")
         if self.options.with_freexl:
             self.requires("freexl/2.0.0")
@@ -206,13 +206,13 @@ class GdalConan(ConanFile):
         if self.options.with_hdf4:
             self.requires("hdf4/4.2.15")
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.1")
+            self.requires("hdf5/1.14.2")
         if self.options.with_heif:
             self.requires("libheif/1.16.2")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/3.0.1")
         if self.options.with_jxl:
             self.requires("libjxl/0.6.1")
         if self.options.with_kea:
@@ -220,7 +220,7 @@ class GdalConan(ConanFile):
         if self.options.with_lerc:
             self.requires("lerc/4.0.1")
         if self.options.with_libarchive:
-            self.requires("libarchive/3.7.1")
+            self.requires("libarchive/3.7.2")
         if self.options.with_libdeflate:
             self.requires("libdeflate/1.19")
         if self.options.with_libiconv:
@@ -232,7 +232,7 @@ class GdalConan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_mongocxx:
-            self.requires("mongo-cxx-driver/3.8.0")
+            self.requires("mongo-cxx-driver/3.8.1")
         if self.options.with_mysql == "libmysqlclient":
             self.requires("libmysqlclient/8.1.0")
         elif self.options.with_mysql == "mariadb-connector-c":
@@ -250,7 +250,7 @@ class GdalConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
         if self.options.with_pdfium:
-            self.requires("pdfium/cci.20210730")
+            self.requires("pdfium/95.0.4629")
         if self.options.with_pg:
             # libpq 15+ is not supported
             self.requires("libpq/14.9")
@@ -267,7 +267,7 @@ class GdalConan(ConanFile):
         if self.options.with_spatialite:
             self.requires("libspatialite/5.0.1")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.43.2")
+            self.requires("sqlite3/3.44.0")
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
         if self.options.with_xerces:
