@@ -26,6 +26,7 @@ patches:
     - patch_file: "patches/0001-extended-support-1.9.0.patch"
       patch_type: "portability"
       patch_description: "Add support for more compilers"
+      patch_source: "https://github.com/webmproject/libvpx/commit/cafe7cc1f10cfea74edb2ded7c3df2d69fcf1eee"
     - patch_file: "patches/0002-msvc_conan_build.patch"
       patch_type: "portability"
       patch_description: "Add support for more compilers"
