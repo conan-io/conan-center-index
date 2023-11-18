@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -43,6 +43,9 @@ class LightGBMConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if conan_version.major == 1 and self.settings.compiler == "apple-clang":
+            # https://github.com/conan-io/conan-center-index/pull/18759#issuecomment-1817470331
+            del self.options.with_openmp
 
     def configure(self):
         if self.options.shared:
@@ -55,7 +58,7 @@ class LightGBMConan(ConanFile):
         self.requires("eigen/3.4.0")
         self.requires("fast_double_parser/0.7.0", transitive_headers=True, transitive_libs=True)
         self.requires("fmt/10.1.1", transitive_headers=True, transitive_libs=True)
-        if self.options.with_openmp and self.settings.compiler in ["clang", "apple-clang"]:
+        if self.options.get_safe("with_openmp") and self.settings.compiler in ["clang", "apple-clang"]:
             self.requires("llvm-openmp/17.0.4", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
@@ -69,7 +72,7 @@ class LightGBMConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_STATIC_LIB"] = not self.options.shared
         tc.cache_variables["USE_DEBUG"] = self.settings.build_type in ["Debug", "RelWithDebInfo"]
-        tc.cache_variables["USE_OPENMP"] = self.options.with_openmp
+        tc.cache_variables["USE_OPENMP"] = self.options.get_safe("with_openmp", False)
         tc.cache_variables["BUILD_CLI"] = False
         if is_apple_os(self):
             tc.cache_variables["APPLE_OUTPUT_DYLIB"] = True
@@ -117,7 +120,7 @@ class LightGBMConan(ConanFile):
 
         # OpenMP preprocessor directives are used in a number of public headers, such as:
         # https://github.com/microsoft/LightGBM/blob/master/include/LightGBM/tree.h#L188
-        if self.options.with_openmp:
+        if self.options.get_safe("with_openmp"):
             openmp_flags = []
             if is_msvc(self):
                 openmp_flags = ["-openmp"]
