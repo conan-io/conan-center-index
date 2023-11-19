@@ -1,0 +1,11 @@
+--- Source/C/tinyxml/tinyxml.cpp	2010-10-29 16:12:42.000000000 +0100
++++ Source/C/tinyxml/tinyxml.cpp	2010-10-29 16:13:54.000000000 +0100
+@@ -1020,6 +1020,8 @@
+ 
+ 		if ( fread( buf, length, 1, file ) != 1 ) {
+ 		//if ( fread( buf, 1, length, file ) != (size_t)length ) {
++			delete [] buf;
++			buf = 0;
+ 			SetError( TIXML_ERROR_OPENING_FILE, 0, 0, TIXML_ENCODING_UNKNOWN );
+ 			fclose( file );
+ 			return false;

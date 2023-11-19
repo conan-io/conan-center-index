@@ -1,0 +1,16 @@
+--- Source/C/NCSUtil/malloc.c.ori	2010-02-02 00:09:24.000000000 +0100
++++ Source/C/NCSUtil/malloc.c	2010-02-02 00:17:13.000000000 +0100
+@@ -390,7 +390,12 @@
+ #else	/* SOLARIS */
+ 
+ #ifdef LINUX
+-	return(sysconf(_SC_PHYS_PAGES) * sysconf(_SC_PAGESIZE));
++        long nPages = sysconf(_SC_PHYS_PAGES);
++        long nPageSize = sysconf(_SC_PAGESIZE);
++        if (nPages > INT_MAX / nPageSize)
++            return INT_MAX;
++        else
++	    return (INT32)(nPages * nPageSize);
+ #elif defined MACOSX
+ 	return(128*1024*1024);
+ 

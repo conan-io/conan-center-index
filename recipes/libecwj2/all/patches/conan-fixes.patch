@@ -1,0 +1,282 @@
+--- Source/C/NCSEcw/NCSEcw/NCSOutputFile.cpp
++++ Source/C/NCSEcw/NCSEcw/NCSOutputFile.cpp
+@@ -24,28 +24,15 @@
+ *******************************************************/
+ 
+ 
+-#ifdef WIN32
+-	#define _WIN32_WINNT 0x0400	// For MB_SERVICE_NOTIFICATION
+-	#define XMD_H
+-	#include <stdio.h> /**[04]**/
+-	#include "../../libjpeg/jpeglib.h"
+-#elif defined( macintosh )
+-	#include <stdio.h>
+-	extern "C" {
+-		#include "jpeglib.h"
+-	}
+-	#include <string.h>
+-#elif defined(_WIN32_WCE)
+-	#define _WIN32_WINNT 0x0400	// For MB_SERVICE_NOTIFICATION
+-	#define XMD_H
+-	#include <stdio.h> /**[04]**/
+-	#include "../../libjpeg/jpeglib.h"
+-#endif
+ 
+ #include <setjmp.h>
+ 
+ #include "NCSUtil.h"
+ #include "NCSRenderer.h"
++
++#define XMD_H
++#include <jpeglib.h>
++#undef XMD_H
+ 
+ //#ifdef WIN32
+ //#include "WINWRAP.H"
+--- Source/C/NCSEcw/NCSJP2/NCSJP2GMLGeoLocationBox.cpp
++++ Source/C/NCSEcw/NCSJP2/NCSJP2GMLGeoLocationBox.cpp
+@@ -23,15 +23,7 @@
+ #include "NCSJP2File.h"
+ #include "../../NCSGDT2/NCSGDTEpsg.h"
+ 
+-#ifdef NCSJPC_USE_TINYXML
+-#include "../../tinyxml/tinyxml.h"
+-#include "../../tinyxml/tinyxml.cpp"
+-#include "../../tinyxml/tinyxmlparser.cpp"
+-#include "../../tinyxml/tinyxmlerror.cpp"
+-#ifndef TIXML_USE_STL
+-#	include "../../tinyxml/tinystr.cpp"
+-#endif
+-#endif
++#include <tinyxml.h>
+ 
+ #ifndef M_PI
+ #define M_PI    3.14159265358979323846
+--- Source/C/NCSUtil/NCSPrefsXML.h
++++ Source/C/NCSUtil/NCSPrefsXML.h
+@@ -1,4 +1,4 @@
+-#include "../tinyxml/tinyxml.h"
++#include <tinyxml.h>
+ 
+ using namespace std;
+ 
+--- Source/include/NCSTypes.h
++++ Source/include/NCSTypes.h
+@@ -24,38 +24,29 @@
+ #ifndef NCSTYPES_H
+ #define NCSTYPES_H
+ 
+-/*	Platform determination stuff.
+-	Should be moved to a better "central" location.
+-*/
+-#ifdef macintosh
+-//#define MACINTOSH
+-//#include "SimpleWinTypes.h"  // include mac types
+-#ifndef MACINTOSH
+-#	undef WIN32
+-#	define MACINTOSH
+-#	define _MAC
+-#	undef _DEBUG_NEVER
+-#	define uint2	unsigned short
+-#	define uint	unsigned long		
+-#endif
+-
+-#elif defined __PALMOS_TRAP__
+-
+-#define PALM
+-
+-#elif defined sun
+-
+-#ifndef SOLARIS
+-#define SOLARIS
+-#endif // SOLARIS
+-
+-#endif
+ 
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+ 
+ #ifndef ERSTYPES_H
++
++#include <stdint.h>
++
++typedef uint8_t BOOLEAN;
++typedef int8_t INT8;
++typedef uint8_t UINT8;
++typedef int16_t INT16;
++typedef uint16_t UINT16;
++typedef int32_t INT32;
++typedef uint32_t UINT32;
++typedef int64_t INT64;
++typedef uint64_t UINT64;
++
++#define DWORD UINT32
++#define BYTE UINT8
++
++typedef unsigned int uint;
+ 
+ /*
+ ** Includes
+@@ -95,84 +86,11 @@
+ #include <stdarg.h>
+ #endif /* WIN32 */
+ 
+-#ifdef HPUX
+-//#include <sys/types.h>
+-#endif
+-
+-/*
+- * #defines
+- */
+-#ifdef WIN32
+-#elif defined MACINTOSH
+-
+-#ifndef FALSE
+-#define FALSE	0
+-#endif
+-#ifndef TRUE
+-#define TRUE	1
+-#endif
+-
+-#elif defined PALM
+-#endif
+ /*
+ ** Typedefs
+ */
+ 
+-/*
+-** General data sizes
+-*/
+-#if (defined(WIN32) || defined(_WIN32_WCE))	//pocket pc 2002
+-typedef signed char		INT8;		/*  8 bit signed integer		*/
+-typedef unsigned char	UINT8;		/*  8 bit unsigned integer		*/
+-typedef signed short	INT16;		/* 16 bit signed integer		*/
+-typedef unsigned short	UINT16;		/* 16 bit unsigned integer		*/
+-#ifndef _BASETSD_H_
+-typedef signed int		INT32;		/* 32 bit signed integer		*/
+-typedef unsigned int	UINT32;		/* 32 bit unsigned integer		*/
+-typedef LONGLONG 		INT64;		/* 64 bit signed integer		*/
+-typedef DWORDLONG 		UINT64;		/* 64 bit unsigned integer		*/
+-typedef UINT8			BOOLEAN;	/* for use as a True/False or On/Off type */
+-#endif
+-
+-#else	/* WIN32 */
+-
+-#ifdef MACINTOSH
+-
+-#if TARGET_API_MAC_CARBON
+-#define MAC_PREEMPTIVE
+-#endif // TARGET_API_MAC_CARBON
+-
+-//	Define Data Types for the Macintosh
+-typedef signed char			INT8;		/*  8 bit signed integer		*/
+-typedef unsigned char		UINT8;		/*  8 bit unsigned integer		*/
+-typedef signed short		INT16;		/* 16 bit signed integer		*/
+-typedef unsigned short		UINT16;		/* 16 bit unsigned integer		*/
+-typedef signed long			INT32;		/* 32 bit signed integer		*/
+-typedef unsigned long		UINT32;		/* 32 bit unsigned integer		*/
+-typedef long long			INT64;		/* 64 bit signed integer		*/
+-typedef unsigned long long	UINT64;		/* 64 bit unsigned integer		*/
+-typedef int  				BOOLEAN;	/* boolean						*/
+-
+-typedef void *HANDLE;
+-#define DWORD UINT32
+-#define BYTE	UINT8
+-
+-#else	/* MACINTOSH */
+-
+ #ifdef POSIX
+-
+-typedef signed char	INT8;		/*  8 bit signed integer		*/
+-typedef unsigned char	UINT8;		/*  8 bit unsigned integer		*/
+-typedef signed short	INT16;		/* 16 bit signed integer		*/
+-typedef unsigned short	UINT16;		/* 16 bit unsigned integer		*/
+-#ifndef _BASETSD_H_
+-typedef signed int	INT32;		/* 32 bit signed integer		*/
+-typedef unsigned int	UINT32;		/* 32 bit unsigned integer		*/
+-#endif
+-#define BYTE	UINT8
+-
+-#if defined(SOLARIS)
+-
+ #define DWORD UINT32
+ typedef struct tagRECT {
+ 	long left;
+@@ -180,76 +98,8 @@
+ 	long right;
+ 	long bottom;
+ } RECT, *PRECT;
+-
+-typedef longlong_t 	INT64;		/* 64 bit signed integer		*/
+-typedef u_longlong_t 	UINT64;		/* 64 bit unsigned integer		*/
+-
+-#elif defined(LINUX)
+-
+-#define DWORD UINT32
+-typedef struct tagRECT {
+-	long left;
+-	long top;
+-	long right;
+-	long bottom;
+-} RECT, *PRECT;
+-
+-typedef int64_t		INT64;
+-typedef u_int64_t	UINT64;
+-
+-#elif defined(MACOSX)
+-
+-typedef unsigned long long UINT64;
+-typedef signed long long INT64;
+-typedef char BOOLEAN;
+-//typedef int boolean;
+-#define DWORD UINT32
+-#define BYTE	UINT8
+-#ifndef NULL
+-#	define NULL 0
+ #endif
+ 
+-#elif defined(HPUX)
+-
+-#if !defined(_BASETSD_H_) 
+-//&& !defined(_DLFCN_H)
+-typedef int64_t		INT64;
+-//typedef uint64_t	UINT64;
+-#include <dlfcn.h>	// include this globally to get the correct definition of UINT64
+-#endif
+-
+-#endif
+-
+-#if !(defined(_BASETSD_H_)||defined(_UTILITY_H)) && !(defined(MACOSX))
+-typedef int BOOLEAN;		/* for use as a True/False or On/Off type */
+-#endif
+-
+-#else	/* SOLARIS */
+-#ifdef IRIX
+-
+-typedef signed char		INT8;		/*  8 bit signed integer		*/
+-typedef unsigned char	UINT8;		/*  8 bit unsigned integer		*/
+-typedef signed short	INT16;		/* 16 bit signed integer		*/
+-typedef unsigned short	UINT16;		/* 16 bit unsigned integer		*/
+-#ifndef _BASETSD_H_
+-typedef signed int		INT32;		/* 32 bit signed integer		*/
+-typedef unsigned int	UINT32;		/* 32 bit unsigned integer		*/
+-#endif
+-typedef __int64_t 		INT64;		/* 64 bit signed integer		*/
+-typedef __uint64_t 		UINT64;		/* 64 bit unsigned integer		*/
+-#ifndef _BASETSD_H_
+-typedef UINT8 BOOLEAN;				/* for use as a True/False or On/Off type */
+-#endif
+-
+-
+-#else	/* IRIX */
+-
+-#error unknown machine type will require custom 64 bit variables
+-
+-#endif	/* IRIX */
+-#endif	/* SOLARIS */
+-#endif	/* MACINTOSH */
+-#endif	/* WIN32 */
+ 
+ typedef float			IEEE4;		/* 4 byte IEEE floating point	*/
+ typedef double			IEEE8;		/* 8 byte IEEE floating point	*/

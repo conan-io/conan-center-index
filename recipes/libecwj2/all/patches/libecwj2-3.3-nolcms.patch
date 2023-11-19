@@ -1,0 +1,85 @@
+diff -Naur ../libecwj2-3.3/Makefile.am ./Makefile.am
+--- ../libecwj2-3.3/Makefile.am	2006-07-02 20:14:18.000000000 -0500
++++ ./Makefile.am	2009-03-16 14:04:13.000000000 -0500
+@@ -1,3 +1,5 @@
++AUTOMAKE_OPTIONS = foreign
++
+ SUBDIRS = \
+ 	Source
+ 
+@@ -127,7 +129,5 @@
+ 	Source/include/gdt_pub.h \
+ 	Source/include/gdt_stat.h \
+ 	Source/include/pcs_erm.h \
+-	Source/C/NCSEcw/lcms/include/lcms.h \
+-	Source/C/NCSEcw/lcms/include/icc34.h \
+ 	Source/NCSBuildGnu/NCSGnuConfig.h 
+ 
+diff -Naur ../libecwj2-3.3/Source/NCSBuildGnu/Makefile.am ./Source/NCSBuildGnu/Makefile.am
+--- ../libecwj2-3.3/Source/NCSBuildGnu/Makefile.am	2006-07-02 20:14:18.000000000 -0500
++++ ./Source/NCSBuildGnu/Makefile.am	2009-03-16 14:00:50.000000000 -0500
+@@ -113,22 +113,6 @@
+ 	../C/NCSEcw/shared_src/qmf_util.c \
+ 	../C/NCSEcw/shared_src/quantize.c \
+ 	../C/NCSEcw/shared_src/unpack.c \
+-	../C/NCSEcw/lcms/src/cmscnvrt.c \
+-	../C/NCSEcw/lcms/src/cmserr.c \
+-	../C/NCSEcw/lcms/src/cmsgamma.c \
+-	../C/NCSEcw/lcms/src/cmsgmt.c \
+-	../C/NCSEcw/lcms/src/cmsintrp.c \
+-	../C/NCSEcw/lcms/src/cmsio1.c \
+-	../C/NCSEcw/lcms/src/cmslut.c \
+-	../C/NCSEcw/lcms/src/cmsmatsh.c \
+-	../C/NCSEcw/lcms/src/cmsmtrx.c \
+-	../C/NCSEcw/lcms/src/cmsnamed.c \
+-	../C/NCSEcw/lcms/src/cmspack.c \
+-	../C/NCSEcw/lcms/src/cmspcs.c \
+-	../C/NCSEcw/lcms/src/cmssamp.c \
+-	../C/NCSEcw/lcms/src/cmsvirt.c \
+-	../C/NCSEcw/lcms/src/cmswtpnt.c \
+-	../C/NCSEcw/lcms/src/cmsxform.c \
+ 	../C/NCSGDT2/NCSGDTEpsg.cpp \
+ 	../C/NCSGDT2/NCSGDTEPSGKey.cpp \
+ 	../C/NCSGDT2/NCSGDTLocation.cpp
+diff -Naur ../libecwj2-3.3/Source/include/NCSJPCDefs.h ./Source/include/NCSJPCDefs.h
+--- ../libecwj2-3.3/Source/include/NCSJPCDefs.h	2006-07-02 20:15:24.000000000 -0500
++++ ./Source/include/NCSJPCDefs.h	2009-03-16 14:00:27.000000000 -0500
+@@ -59,7 +59,7 @@
+ // Use LCMS for ICC->RGB conversions, supports both
+ // restricted and full ICC profiles.
+ //
+-#define NCSJPC_USE_LCMS
++//#define NCSJPC_USE_LCMS
+ 
+ //
+ // Use TinyXML for XML DOM Parsing
+diff -Naur ../libecwj2-3.3/configure.in ./configure.in
+--- ../libecwj2-3.3/configure.in	2006-07-02 20:13:30.000000000 -0500
++++ ./configure.in	2009-03-16 14:00:14.000000000 -0500
+@@ -32,17 +32,6 @@
+ # Build some standard absolute include paths for the build
+ 
+ MAIN_INCLUDE_DIR="$PWD/Source/include"
+-LCMS_INCLUDE_DIR="$PWD/Source/C/NCSEcw/lcms/include"
+-
+-# Run configure in the LCMS directory (using LCMS's own configure script) 
+-# to initialise any platform dependent settings that it uses 
+-# (e.g. typedefs for int types)
+-
+-THISDIR=$PWD
+-cd Source/C/NCSEcw/lcms
+-chmod +x configure
+-./configure
+-cd $THISDIR
+ 
+ # Build LIBECWJ2_DEFS with all defines, and NCSGnuSystemDefs.h with defines
+ # needed by apps building against libecwj2.
+@@ -89,7 +78,7 @@
+ LIBECWJ2_CFLAGS="$PLATFORM_CFLAGS"
+ LIBECWJ2_STATIC_LDFLAGS="$PLATFORM_STATIC_LDFLAGS"
+ LIBECWJ2_SHARED_LDFLAGS="$PLATFORM_SHARED_LDFLAGS"
+-LIBECWJ2_INCLUDES="-I$MAIN_INCLUDE_DIR -I$LCMS_INCLUDE_DIR"
++LIBECWJ2_INCLUDES="-I$MAIN_INCLUDE_DIR"
+ 
+ rm -f Source/NCSBuildGnu/NCSGnuSystemDefs.h
+ echo "#ifndef LIBECWJ2" > Source/NCSBuildGnu/NCSGnuSystemDefs.h
