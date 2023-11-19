@@ -33,7 +33,7 @@ class LibdisplayInfoConan(ConanFile):
 
     @property
     def _has_build_profile(self):
-        return getattr(self, "settings_build", None)
+        return hasattr(self, "settings_build")
 
     def config_options(self):
         if self.settings.os == "Windows":
