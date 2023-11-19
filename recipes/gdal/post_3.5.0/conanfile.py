@@ -36,6 +36,7 @@ class GdalConan(ConanFile):
         "with_cryptopp": [True, False],
         "with_curl": [True, False],
         "with_dds": [True, False],
+        "with_ecw": [True, False],
         "with_expat": [True, False],
         "with_exr": [True, False],
         "with_freexl": [True, False],
@@ -100,6 +101,7 @@ class GdalConan(ConanFile):
         "with_cryptopp": False,
         "with_curl": True,
         "with_dds": False,
+        "with_ecw": False,
         "with_expat": True,
         "with_exr": False,
         "with_freexl": False,
@@ -199,6 +201,8 @@ class GdalConan(ConanFile):
             self.requires("libcurl/[>=7.78 <9]")
         if self.options.with_dds:
             self.requires("crunch/cci.20190615")
+        if self.options.with_ecw:
+            self.requires("libecwj2/3.3")
         if self.options.with_expat:
             self.requires("expat/2.5.0")
         if self.options.with_exr:
@@ -356,7 +360,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_CRYPTOPP"] = self.options.with_cryptopp
         tc.cache_variables["GDAL_USE_CURL"] = self.options.with_curl
         tc.cache_variables["GDAL_USE_DEFLATE"] = self.options.with_libdeflate
-        tc.cache_variables["GDAL_USE_ECW"] = False
+        tc.cache_variables["GDAL_USE_ECW"] = self.options.with_ecw
         tc.cache_variables["GDAL_USE_EXPAT"] = self.options.with_expat
         tc.cache_variables["GDAL_USE_FILEGDB"] = False
         tc.cache_variables["GDAL_USE_FREEXL"] = self.options.with_freexl
@@ -487,6 +491,7 @@ class GdalConan(ConanFile):
             # "libcsf": "LIBCSF",
             "libcurl": "CURL",
             "libdeflate": "Deflate",
+            "libecwj2": "ECW",
             "libgeotiff": "GeoTIFF",
             "libgta": "GTA",
             "libheif": "HEIF",
@@ -536,7 +541,6 @@ class GdalConan(ConanFile):
             "zlib": "ZLIB",
             "zstd": "ZSTD",
             # Closed-source/proprietary libraries
-            # "ecw": "ECW",
             # "idb": "IDB",
             # "kdu": "KDU",
             # "luratech": "LURATECH",
@@ -565,6 +569,7 @@ class GdalConan(ConanFile):
             "libarchive":                 "ARCHIVE::ARCHIVE",
             "libbasisu":                  "basisu::basisu_lib",
             "libdeflate":                 "Deflate::Deflate",
+            "libecwj2":                   "ECW::ECW_ALL",
             "libgeotiff":                 "GEOTIFF::GEOTIFF",
             "libheif":                    "HEIF::HEIF",
             "libjxl::jxl":                "JXL::JXL",
@@ -659,6 +664,8 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["libcurl::curl"])
         if self.options.with_dds:
             self.cpp_info.requires.extend(["crunch::crunch"])
+        if self.options.with_ecw:
+            self.cpp_info.requires.extend(["libecwj2::libecwj2"])
         if self.options.with_expat:
             self.cpp_info.requires.extend(["expat::expat"])
         if self.options.with_exr:
