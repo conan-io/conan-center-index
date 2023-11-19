@@ -29,6 +29,7 @@ class GdalConan(ConanFile):
         "with_arrow": [True, False],
         "with_basisu": [True, False],
         "with_blosc": [True, False],
+        "with_brunsli": [True, False],
         "with_cfitsio": [True, False],
         # with_cypto option has been renamed with_openssl in version 3.5.1
         "with_crypto": ["deprecated", True, False],
@@ -91,6 +92,7 @@ class GdalConan(ConanFile):
         "with_arrow": False,
         "with_basisu": False,
         "with_blosc": False,
+        "with_brunsli": False,
         "with_cfitsio": False,
         "with_crypto": "deprecated",
         "with_cryptopp": False,
@@ -183,6 +185,8 @@ class GdalConan(ConanFile):
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
             self.requires("c-blosc/1.21.5")
+        if self.options.with_brunsli:
+            self.requires("brunsli/cci.20231024")
         if self.options.with_cfitsio:
             self.requires("cfitsio/4.3.0")
         if self.options.with_cryptopp:
@@ -452,7 +456,7 @@ class GdalConan(ConanFile):
         conan_to_cmake_pkg_name = {
             "armadillo": "Armadillo",
             "arrow": "Arrow",
-            # "brunsli": "BRUNSLI",
+            "brunsli": "BRUNSLI",
             "c-blosc": "Blosc",
             "cfitsio": "CFITSIO",
             "crunch": "Crnlib",
@@ -537,6 +541,8 @@ class GdalConan(ConanFile):
 
         renamed_targets = {
             "arrow":                      "Arrow::arrow_shared",
+            "brunsli::brunslidec-c":      "BRUNSLI::DECODE",
+            "brunsli::brunslienc-c":      "BRUNSLI::ENCODE",
             "c-blosc":                    "Blosc::Blosc",
             "cfitsio":                    "CFITSIO::CFITSIO",
             "crunch":                     "CRNLIB::Crnlib",
@@ -630,6 +636,8 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["arrow::libarrow"])
         if self.options.with_basisu:
             self.cpp_info.requires.extend(["libbasisu::libbasisu"])
+        if self.options.with_brunsli:
+            self.cpp_info.requires.extend(["brunsli::brunsli"])
         if self.options.with_blosc:
             self.cpp_info.requires.extend(["c-blosc::c-blosc"])
         if self.options.with_cfitsio:
