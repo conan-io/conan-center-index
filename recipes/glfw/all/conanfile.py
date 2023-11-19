@@ -139,7 +139,9 @@ class GlfwConan(ConanFile):
                 "pkg_check_modules(WAYLAND_PROTOCOLS REQUIRED wayland-protocols>=1.15)",
                 "",
             )
-            pkgdatadir = os.path.join(self.dependencies["wayland-protocols"].package_folder, "res", "wayland-protocols")
+            # We must use legacy conan v1 deps_cpp_info because self.dependencies doesn't
+            # contain build requirements when using 1 profile.
+            pkgdatadir = os.path.join(self.deps_cpp_info["wayland-protocols"].rootpath, "res", "wayland-protocols")
             replace_in_file(
                 self,
                 cmakelists_src,
