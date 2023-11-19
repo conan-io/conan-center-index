@@ -62,6 +62,7 @@ class GdalConan(ConanFile):
         "with_netcdf": [True, False],
         "with_odbc": [True, False],
         "with_opencad": [True, False],
+        "with_opencl": [True, False],
         "with_openjpeg": [True, False],
         "with_openssl": [True, False],
         "with_pcre": [True, False],
@@ -124,6 +125,7 @@ class GdalConan(ConanFile):
         "with_netcdf": False,
         "with_odbc": False,
         "with_opencad": False,
+        "with_opencl": True,
         "with_openjpeg": False,
         "with_openssl": False,
         "with_pcre": False,
@@ -246,6 +248,8 @@ class GdalConan(ConanFile):
             self.requires("netcdf/4.8.1")
         if self.options.with_odbc:
             self.requires("odbc/2.3.11")
+        if self.options.with_opencl:
+            self.requires("opencl-icd-loader/2023.04.17")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.0")
         if self.options.with_openssl:
@@ -397,6 +401,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_OPENCAD_INTERNAL"] = self.options.with_opencad
         tc.cache_variables["GDAL_USE_OPENCL"] = False
         tc.cache_variables["GDAL_USE_OPENEXR"] = self.options.with_exr
+        tc.cache_variables["GDAL_USE_OPENCL"] = self.options.with_opencl
         tc.cache_variables["GDAL_USE_OPENJPEG"] = self.options.with_openjpeg
         tc.cache_variables["GDAL_USE_OPENSSL"] = self.options.with_openssl
         tc.cache_variables["GDAL_USE_ORACLE"] = False
@@ -505,7 +510,7 @@ class GdalConan(ConanFile):
             # "odbccpp": "ODBCCPP",
             # "ogdi": "OGDI",
             # "opencad": "OpenCAD",
-            # "opencl": "OpenCL",
+            "opencl-icd-loader": "OpenCL",
             "openexr": "OpenEXR",
             "openjpeg": "OpenJPEG",
             "openssl": "OpenSSL",
@@ -569,6 +574,7 @@ class GdalConan(ConanFile):
             "mongo-cxx-driver::bsoncxx":  "MONGOCXX::BSONCXX",
             "mongo-cxx-driver::mongocxx": "MONGOCXX::MONGOCXX",
             "netcds":                     "netCDF::netcdf",
+            "opencl-icd-loader":          "OpenCL::OpenCL",
             "openjpeg":                   "OPENJPEG::OpenJPEG",
             "pcre":                       "PCRE::PCRE",
             "pcre2::pcre2-8":             "PCRE2::PCRE2-8",
@@ -698,6 +704,8 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["netcdf::netcdf"])
         if self.options.with_odbc:
             self.cpp_info.requires.extend(["odbc::odbc"])
+        if self.options.with_opencl:
+            self.cpp_info.requires.extend(["opencl-icd-loader::opencl-icd-loader"])
         if self.options.with_openjpeg:
             self.cpp_info.requires.extend(["openjpeg::openjpeg"])
         if self.options.with_openssl:
