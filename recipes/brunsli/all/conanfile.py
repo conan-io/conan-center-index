@@ -90,7 +90,9 @@ class PackageConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["brunslidec-c"].libs = ["brunslidec-c"]
+        self.cpp_info.components["brunslidec-c"].requires = ["brotli::brotlidec"]
         self.cpp_info.components["brunslienc-c"].libs = ["brunslienc-c"]
+        self.cpp_info.components["brunslienc-c"].requires = ["brotli::brotlienc"]
         if not self.options.shared:
             self.cpp_info.components["brunslidec-c"].libs += ["brunslicommon-static", "brunslidec-static"]
             self.cpp_info.components["brunslienc-c"].libs += ["brunslicommon-static", "brunslienc-static"]
