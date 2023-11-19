@@ -79,6 +79,7 @@ class GdalConan(ConanFile):
         "with_shapelib": [True, False],
         "with_spatialite": [True, False],
         "with_sqlite3": [True, False],
+        "with_tiledb": [True, False],
         "with_webp": [True, False],
         "with_xerces": [True, False],
         "with_xml2": [True, False],
@@ -142,6 +143,7 @@ class GdalConan(ConanFile):
         "with_shapelib": True,
         "with_spatialite": False,
         "with_sqlite3": True,
+        "with_tiledb": False,
         "with_webp": False,
         "with_xerces": False,
         "with_xml2": False,
@@ -278,6 +280,8 @@ class GdalConan(ConanFile):
             self.requires("libspatialite/5.0.1")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.43.2")
+        if self.options.with_tiledb:
+            self.requires("tiledb/2.17.4")
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
         if self.options.with_xerces:
@@ -425,7 +429,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_SQLITE3"] = self.options.with_sqlite3
         tc.cache_variables["GDAL_USE_TEIGHA"] = False
         tc.cache_variables["GDAL_USE_TIFF_INTERNAL"] = False
-        tc.cache_variables["GDAL_USE_TILEDB"] = False
+        tc.cache_variables["GDAL_USE_TILEDB"] = self.options.with_tiledb
         tc.cache_variables["GDAL_USE_WEBP"] = self.options.with_webp
         tc.cache_variables["GDAL_USE_XERCESC"] = self.options.with_xerces
         tc.cache_variables["GDAL_USE_ZLIB"] = True
@@ -526,7 +530,7 @@ class GdalConan(ConanFile):
             # "sfcgal": "SFCGAL",
             "shapelib": "Shapelib",
             "sqlite3": "SQLite3",
-            # "tiledb": "TileDB",
+            "tiledb": "TileDB",
             "xerces-c": "XercesC",
             "xz_utils": "LibLZMA",
             "zlib": "ZLIB",
@@ -582,6 +586,7 @@ class GdalConan(ConanFile):
             "podofo":                     "PODOFO::Podofo",
             "poppler":                    "Poppler::Poppler",
             "shapelib":                   "SHAPELIB::shp",
+            "tiledb":                     "TileDB::tiledb_shared",
             "xz_utils":                   "LibLZMA::LibLZMA",
             "zstd":                       "ZSTD::zstd",
         }
@@ -732,6 +737,8 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["libspatialite::libspatialite"])
         if self.options.with_sqlite3:
             self.cpp_info.requires.extend(["sqlite3::sqlite"])
+        if self.options.with_tiledb:
+            self.cpp_info.requires.extend(["tiledb::tiledb"])
         if self.options.with_webp:
             self.cpp_info.requires.extend(["libwebp::libwebp"])
         if self.options.with_xerces:
