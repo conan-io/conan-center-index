@@ -108,6 +108,19 @@ class XkbcommonConan(ConanFile):
             if self._has_build_profile:
                 pkg_config_deps.build_context_activated = ["wayland", "wayland-protocols"]
                 pkg_config_deps.build_context_suffix = {"wayland": "_BUILD"}
+        pkg_config_deps.generate()
+
+    def _patch_sources(self):
+        if self.options.get_safe("with_wayland"):
+            if self._has_build_profile:
+                # Patch the build system to use the pkg-config files generated for the build context.
+                meson_build_file = os.path.join(self.source_folder, "meson.build")
+                replace_in_file(
+                    self,
+                    meson_build_file,
+                    "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
+                    "wayland_scanner_dep = dependency('wayland-scanner_BUILD', required: false, native: true)",
+                )
             else:
                 # Manually generate pkgconfig file of wayland-protocols since
                 # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
@@ -122,19 +135,6 @@ class XkbcommonConan(ConanFile):
                     Version: {wp_version}
                 """)
                 save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
-        pkg_config_deps.generate()
-
-    def _patch_sources(self):
-        if self.options.get_safe("with_wayland"):
-            if self._has_build_profile:
-                # Patch the build system to use the pkg-config files generated for the build context.
-                meson_build_file = os.path.join(self.source_folder, "meson.build")
-                replace_in_file(
-                    self,
-                    meson_build_file,
-                    "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
-                    "wayland_scanner_dep = dependency('wayland-scanner_BUILD', required: false, native: true)",
-                )
 
     def build(self):
         self._patch_sources()
