@@ -43,7 +43,17 @@ class LibHALConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.83.0", transitive_headers=True)
+        # NOTE: from the author, kammce, to the conan team. although boost-leaf
+        # is marked as deprecated, it is required for libhal to work with bare
+        # metal cross compilers such as the Arm GNU Toolchain. The main issue
+        # with boost is its dependency on things such as bzip that cannot
+        # compile on freestanding environments. boost-leaf has no dependencies
+        # and can work in freestanding environments.
+        version = Version(self.version)
+        if "2.0.0" <= version and version < "3.0.0":
+            self.requires("boost/1.83.0",
+                          transitive_headers=True,
+                          options={ "header_only": True })
 
     def package_id(self):
         self.info.clear()
@@ -74,15 +84,15 @@ class LibHALConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(
-            self, 
-            "*.h", 
-            dst=os.path.join(self.package_folder, "include"), 
+            self,
+            "*.h",
+            dst=os.path.join(self.package_folder, "include"),
             src=os.path.join(self.source_folder, "include")
         )
         copy(
-            self, 
-            "*.hpp", 
-            dst=os.path.join(self.package_folder, "include"), 
+            self,
+            "*.hpp",
+            dst=os.path.join(self.package_folder, "include"),
             src=os.path.join(self.source_folder, "include")
         )
 
