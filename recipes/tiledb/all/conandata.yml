@@ -2,3 +2,9 @@ sources:
   "2.17.4":
     url: "https://github.com/TileDB-Inc/TileDB/archive/refs/tags/2.17.4.tar.gz"
     sha256: "7ef1c88415045eda28666f7eceb75146c49443b1eee162aa28c3b7e27496b769"
+patches:
+  "2.17.4":
+    - patch_file: "patches/2.17.4-fix-webp-linking-tests.patch"
+      patch_description: "Fix WebP linking tests"
+      patch_type: "portability"
+      patch_source: "https://github.com/TileDB-Inc/TileDB/pull/4525"

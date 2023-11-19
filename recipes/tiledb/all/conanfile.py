@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir, replace_in_file, rm
+from conan.tools.files import get, copy, rmdir, replace_in_file, rm, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 
@@ -87,6 +87,9 @@ class TileDBConan(ConanFile):
             "msvc": "191",
             "Visual Studio": "15",
         }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -227,6 +230,7 @@ class TileDBConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         # Disable examples
         # Re-add external includes, which otherwise used to get added via cmake/Modules/Find*_EP.cmake modules
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),

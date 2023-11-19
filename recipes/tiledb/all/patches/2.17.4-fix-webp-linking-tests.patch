@@ -1,0 +1,47 @@
+From 72ad8b3e1a2b13a73da983311091f0d1fe565346 Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Sun, 19 Nov 2023 12:14:28 +0200
+Subject: [PATCH] Remove tests against hidden libwebp symbols in
+ link_webp_test1.cc
+
+---
+ tiledb/sm/compressors/test/link_webp_test1.cc | 8 --------
+ 1 file changed, 8 deletions(-)
+
+diff --git a/tiledb/sm/compressors/test/link_webp_test1.cc b/tiledb/sm/compressors/test/link_webp_test1.cc
+index c59b166311b..b64ad5243f0 100644
+--- a/tiledb/sm/compressors/test/link_webp_test1.cc
++++ b/tiledb/sm/compressors/test/link_webp_test1.cc
+@@ -98,15 +98,7 @@
+ 
+ extern "C" int WebPGetDemuxVersion(void);
+ extern "C" int WebPGetMuxVersion(void);
+-extern "C" VP8StatusCode WebPAllocateDecBuffer(
+-    int width,
+-    int height,
+-    const WebPDecoderOptions* const options,
+-    WebPDecBuffer* const buffer);
+ extern "C" void WebPFreeDecBuffer(WebPDecBuffer* const buffer);
+-typedef void VP8LDecoder;
+-extern "C" VP8LDecoder* VP8LNew(void);
+-extern "C" void VP8LClear(VP8LDecoder*);
+ 
+ int main(int argc, const char* argv[]) {
+   (void)argv;
+@@ -140,16 +132,9 @@
+     // *** turns out, there is -NO- symbol in webpdecoder that is not also in
+     // webp! left here anyway, in case libraries are ever de-dupped.
+     const int dec_version = WebPGetDecoderVersion();
+-    auto vp8l_dec = VP8LNew();
+-    VP8LClear(vp8l_dec);
+ 
+     VP8StatusCode status;
+     WebPDecoderOptions webpdecoptions;
+-    WebPDecBuffer webpdec_buffer;
+-    status = WebPAllocateDecBuffer(512, 512, &webpdecoptions, &webpdec_buffer);
+-    if (status == VP8_STATUS_OK) {
+-      WebPFreeDecBuffer(&webpdec_buffer);
+-    }
+ 
+     // webpdemux
+     const int demux_version = WebPGetDemuxVersion();
