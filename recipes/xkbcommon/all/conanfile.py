@@ -124,8 +124,10 @@ class XkbcommonConan(ConanFile):
             else:
                 # Manually generate pkgconfig file of wayland-protocols since
                 # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
-                wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
-                wp_version = self.dependencies.build["wayland-protocols"].ref.version
+                # We must use legacy conan v1 deps_cpp_info because self.dependencies doesn't
+                # contain build requirements when using 1 profile.
+                wp_prefix = self.deps_cpp_info["wayland-protocols"].rootpath
+                wp_version = self.deps_cpp_info["wayland-protocols"].version
                 wp_pkg_content = textwrap.dedent(f"""\
                     prefix={wp_prefix}
                     datarootdir=${{prefix}}/res
