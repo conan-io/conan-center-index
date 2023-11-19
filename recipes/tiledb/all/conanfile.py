@@ -76,16 +76,16 @@ class TileDBConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17
+        return 20
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "7",
-            "clang": "5.0",
-            "apple-clang": "9.1",
-            "msvc": "191",
-            "Visual Studio": "15",
+            "gcc": "8",
+            "clang": "10",
+            "apple-clang": "10",
+            "msvc": "192",
+            "Visual Studio": "16",
         }
 
     def export_sources(self):
