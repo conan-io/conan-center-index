@@ -120,6 +120,22 @@ class GlfwConan(ConanFile):
             pkg_config_deps = PkgConfigDeps(self)
             if self._has_build_profile:
                 pkg_config_deps.build_context_activated = ["wayland-protocols"]
+            else:
+                # Manually generate pkgconfig file of wayland-protocols since
+                # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
+                # We must use legacy conan v1 deps_cpp_info because self.dependencies doesn't
+                # contain build requirements when using 1 profile.
+                wp_prefix = self.deps_cpp_info["wayland-protocols"].rootpath
+                wp_version = self.deps_cpp_info["wayland-protocols"].version
+                wp_pkg_content = textwrap.dedent(f"""\
+                    prefix={wp_prefix}
+                    datarootdir=${{prefix}}/res
+                    pkgdatadir=${{datarootdir}}/wayland-protocols
+                    Name: Wayland Protocols
+                    Description: Wayland protocol files
+                    Version: {wp_version}
+                """)
+                save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
             pkg_config_deps.generate()
 
     def _patch_sources(self):
@@ -130,24 +146,6 @@ class GlfwConan(ConanFile):
         replace_in_file(self, cmakelists_src, "POSITION_INDEPENDENT_CODE ON", "")
         # don't force static link to libgcc if MinGW
         replace_in_file(self, cmakelists_src, "target_link_libraries(glfw PRIVATE \"-static-libgcc\")", "")
-
-        # Workaround for wayland-protocols in case of 1 profile (build_context_activated cannot work)
-        if self.options.get_safe("with_wayland") and not self._has_build_profile:
-            replace_in_file(
-                self,
-                cmakelists_src,
-                "pkg_check_modules(WAYLAND_PROTOCOLS REQUIRED wayland-protocols>=1.15)",
-                "",
-            )
-            # We must use legacy conan v1 deps_cpp_info because self.dependencies doesn't
-            # contain build requirements when using 1 profile.
-            pkgdatadir = os.path.join(self.deps_cpp_info["wayland-protocols"].rootpath, "res", "wayland-protocols")
-            replace_in_file(
-                self,
-                cmakelists_src,
-                "pkg_get_variable(WAYLAND_PROTOCOLS_BASE wayland-protocols pkgdatadir)",
-                f"set(WAYLAND_PROTOCOLS_BASE {pkgdatadir})",
-            )
 
         # Allow to link vulkan-loader into shared glfw
         if self.options.vulkan_static:
