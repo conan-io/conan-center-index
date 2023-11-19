@@ -1272,24 +1272,6 @@ class OpenCVConan(ConanFile):
                 "ocv_check_modules(XKBCOMMON xkbcommon)",
                 "ocv_check_modules(XKBCOMMON xkbcommon)\nfind_package(xkbcommon REQUIRED CONFIG)\nset(XKBCOMMON_LINK_LIBRARIES xkbcommon::libxkbcommon)",
             )
-            # OpenCV uses pkgconfig to find wayland-protocols files, but we can't generate
-            # pkgconfig files of a build requirement with 1 profile, so here is a workaround
-            if self._is_legacy_one_profile:
-                replace_in_file(
-                    self,
-                    detect_wayland,
-                    "ocv_check_modules(WAYLAND_PROTOCOLS wayland-protocols>=1.13)",
-                    "set(HAVE_WAYLAND_PROTOCOLS TRUE)",
-                )
-                # We must use legacy conan v1 deps_cpp_info because self.dependencies doesn't
-                # contain build requirements when using 1 profile.
-                pkgdatadir = os.path.join(self.deps_cpp_info["wayland-protocols"].rootpath, "res", "wayland-protocols")
-                replace_in_file(
-                    self,
-                    detect_wayland,
-                    "pkg_get_variable(WAYLAND_PROTOCOLS_BASE wayland-protocols pkgdatadir)",
-                    f"set(WAYLAND_PROTOCOLS_BASE {pkgdatadir})",
-                )
 
         ## Cleanup RPATH
         if Version(self.version) < "4.1.2":
@@ -1552,7 +1534,23 @@ class OpenCVConan(ConanFile):
 
         if self.options.get_safe("with_wayland"):
             deps = PkgConfigDeps(self)
-            if not self._is_legacy_one_profile:
+            if self._is_legacy_one_profile:
+                # Manually generate pkgconfig file of wayland-protocols since
+                # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
+                # We must use legacy conan v1 deps_cpp_info because self.dependencies doesn't
+                # contain build requirements when using 1 profile.
+                wp_prefix = self.deps_cpp_info["wayland-protocols"].rootpath
+                wp_version = self.deps_cpp_info["wayland-protocols"].version
+                wp_pkg_content = textwrap.dedent(f"""\
+                    prefix={wp_prefix}
+                    datarootdir=${{prefix}}/res
+                    pkgdatadir=${{datarootdir}}/wayland-protocols
+                    Name: Wayland Protocols
+                    Description: Wayland protocol files
+                    Version: {wp_version}
+                """)
+                save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
+            else:
                 deps.build_context_activated = ["wayland-protocols"]
             deps.generate()
 
