@@ -45,6 +45,7 @@ class MicrosoftGslConan(ConanFile):
             "gcc": "5",
             "clang": "3.4",
             "apple-clang": "3.4",
+            "intel-cc":"2021.1",
         }
 
     def config_options(self):
