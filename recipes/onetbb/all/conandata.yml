@@ -1,6 +1,6 @@
 sources:
-  "2021.11.0-rc1":
-    url: "https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2021.11.0-rc1.tar.gz"
+  "2021.11.0":
+    url: "https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2021.11.0.tar.gz"
     sha256: "ff0fbbf6ffcb0e81beacfddf5ef5b1eab0bb16f4e4c4bae517ed1f4e3b269b47"
   "2021.10.0":
     url: "https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2021.10.0.tar.gz"
