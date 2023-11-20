@@ -1,7 +1,9 @@
 sources:
-  "2.3.0":
-    url: "https://github.com/PDAL/PDAL/releases/download/2.3.0/PDAL-2.3.0-src.tar.bz2"
-    sha256: "63d8d4fee491675f0fa3dca58c26d57fb2afcaa37c24b10f595b3fbff174996e"
+  "2.6.0":
+    url: "https://github.com/PDAL/PDAL/releases/download/2.6.0/PDAL-2.6.0-src.tar.bz2"
+    sha256: "ec50e60544673a72f4300d90df1e70f1cd28055780b789319185590b63e3f688"
 patches:
-  "2.3.0":
-    - patch_file: "patches/0005-vendor-nanoflann.patch"
+  "2.6.0":
+    - patch_file: "patches/2.6.0-001-nanoflann-1.5.patch"
+      patch_type: "portability"
+      patch_description: "Add support for nanoflann v1.5.0"

@@ -3,10 +3,9 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save, load
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -28,8 +27,6 @@ class PdalConan(ConanFile):
         "fPIC": [True, False],
         "with_unwind": [True, False],
         "with_xml": [True, False],
-        "with_lazperf": [True, False],
-        "with_laszip": [True, False],
         "with_zlib": [True, False],
         "with_lzma": [True, False],
         "with_zstd": [True, False],
@@ -39,12 +36,24 @@ class PdalConan(ConanFile):
         "fPIC": True,
         "with_unwind": False,
         "with_xml": True,
-        "with_lazperf": False,  # TODO: should be True
-        "with_laszip": True,
         "with_zlib": True,
         "with_lzma": False,
         "with_zstd": True,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "12.0",
+        }
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
@@ -64,30 +73,28 @@ class PdalConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("arbiter/cci.20231005", transitive_headers=True, transitive_libs=True)
         self.requires("boost/1.83.0")
         self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
         self.requires("gdal/3.8.0", transitive_headers=True, transitive_libs=True)
-        self.requires("libcurl/[>=7.78.0 <9]")  # mandatory dependency of arbiter (to remove if arbiter is unvendored)
-        self.requires("openssl/[>=1.1 <4]")
         self.requires("libgeotiff/1.7.1")
-        self.requires("nanoflann/1.5.0")
+        self.requires("nanoflann/1.5.0", transitive_headers=True, transitive_libs=True)
+        self.requires("nlohmann_json/3.11.2", transitive_headers=True, transitive_libs=True)
         if self.options.with_xml:
             self.requires("libxml2/2.11.5", transitive_headers=True, transitive_libs=True)
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
-        if self.options.with_laszip:
-            self.requires("laszip/3.4.3", transitive_headers=True, transitive_libs=True)
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True, transitive_libs=True)
         if self.options.with_lzma:
             self.requires("xz_utils/5.4.4")
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.7.2")
-        # TODO package improvements:
-        # - switch from vendored arbiter (not in CCI)
-        # - unvendor nlohmann_json
-        # - add draco
-        # - add openscenegraph
+        # TODO: unvendor json-schema-validator
+        # TODO: unvendor utfcpp
+        # TODO: add proj
+        # TODO: add draco
+        # TODO: add openscenegraph
 
     @property
     def _required_boost_components(self):
@@ -95,11 +102,17 @@ class PdalConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 5:
-            raise ConanInvalidConfiguration("This compiler version is unsupported")
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
         if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("pdal shared doesn't support MT runtime with Visual Studio")
+
         miss_boost_required_comp = any(
             self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
             for boost_comp in self._required_boost_components
@@ -109,10 +122,6 @@ class PdalConan(ConanFile):
                 f"{self.name} requires non header-only boost with these components: "
                 + ", ".join(self._required_boost_components)
             )
-        if hasattr(self, "settings_build") and cross_building(self):
-            raise ConanInvalidConfiguration("pdal doesn't support cross-build yet")
-        if self.options.with_lazperf:
-            raise ConanInvalidConfiguration("lazperf recipe not yet available in CCI")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -121,19 +130,20 @@ class PdalConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["PDAL_BUILD_STATIC"] = not self.options.shared
         tc.variables["WITH_TESTS"] = False
-        tc.variables["WITH_LAZPERF"] = self.options.with_lazperf
-        tc.variables["WITH_LASZIP"] = self.options.with_laszip
-        # doesn't really matter but avoids to inject useless definition
-        tc.variables["WITH_STATIC_LASZIP"] = True
-        tc.variables["WITH_ZSTD"] = self.options.with_zstd
-        tc.variables["WITH_ZLIB"] = self.options.with_zlib
-        tc.variables["WITH_LZMA"] = self.options.with_lzma
+        tc.variables["PDAL_HAVE_ZSTD"] = self.options.with_zstd
+        tc.variables["PDAL_HAVE_ZLIB"] = self.options.with_zlib
+        tc.variables["PDAL_HAVE_LZMA"] = self.options.with_lzma
         # disable plugin that requires postgresql
         tc.variables["BUILD_PLUGIN_PGPOINTCLOUD"] = False
         # Workarounds for different library names
         tc.variables["geotiff_FOUND"] = True
         tc.variables["gdal_FOUND"] = True
         tc.generate()
+
+        # For the namespace injection in _patch_sources() below
+        self.dependencies["nlohmann_json"].cpp_info.includedirs.append(
+            os.path.join(self.dependencies["nlohmann_json"].package_folder, "include", "nlohmann")
+        )
         tc = CMakeDeps(self)
         tc.generate()
 
@@ -143,45 +153,50 @@ class PdalConan(ConanFile):
         util_cmakelists = os.path.join(self.source_folder, "pdal", "util", "CMakeLists.txt")
         # Provide these dependencies via the CMakeLists.txt in the recipe instead
         for cmake_module in [
+            "arbiter",
             "gdal",
             "geotiff",
-            # "lazperf",
-            "laszip",
-            "zlib",
-            "lzma",
-            "zstd",
             "libxml2",
-            # "dimension",
-            # "arbiter",
-            # "nlohmann",
+            "lzma",
+            "nlohmann",
             "openssl",
+            "zlib",
+            "zstd",
         ]:
-            replace_in_file(self, top_cmakelists, f"include(${{PDAL_CMAKE_DIR}}/{cmake_module}.cmake)", "")
-
-        # disabling libxml2 support is only done via patching
+            save(self, os.path.join(self.source_folder, "cmake", f"{cmake_module}.cmake"), "")
+        # Unvendor arbiter
+        rmdir(self, os.path.join(self.source_folder, "vendor", "arbiter"))
+        save(self, os.path.join(self.source_folder, "vendor", "arbiter", "CMakeLists.txt"), "")
+        # Unvendor nlohmann
+        rmdir(self, os.path.join(self.source_folder, "vendor", "nlohmann"))
+        save(self, os.path.join(self.source_folder, "vendor", "nlohmann", "nlohmann", "json.hpp"),
+             "#include <json.hpp>\nnamespace NL = nlohmann;")
+        # Overwrite JsonFwd.hpp since it's only compatible with nlohmann_json/3.10.15
+        save(self, os.path.join(self.source_folder, "pdal", "JsonFwd.hpp"),
+             "#include <nlohmann/json.hpp>\nnamespace NL = nlohmann;")
+        # Unvendor eigen
+        rmdir(self, os.path.join(self.source_folder, "vendor", "eigen"))
+        # Unvendor nanoflann
+        rmdir(self, os.path.join(self.source_folder, "vendor", "nanoflann"))
+        replace_in_file(self, os.path.join(self.source_folder, "pdal", "private", "KDImpl.hpp"),
+                        "#include <nanoflann/nanoflann.hpp>", "#include <nanoflann.hpp>")
+        # Disabling libxml2 support is only possible via patching
         if not self.options.with_xml:
             replace_in_file(self, top_cmakelists, "include(${PDAL_CMAKE_DIR}/libxml2.cmake)", "")
-        # disabling libunwind support is only done via patching
+        # Disabling libunwind support is only possible via patching
         if not self.options.get_safe("with_unwind", False):
             replace_in_file(self, util_cmakelists, "include(${PDAL_CMAKE_DIR}/unwind.cmake)", "")
-        for vendored_lib in ["eigen", "nanoflann", "pdalboost"]:
-            rmdir(self, os.path.join(self.source_folder, "vendor", vendored_lib))
-        replace_in_file(self, top_cmakelists, "add_subdirectory(vendor/pdalboost)", "")
-        replace_in_file(self, util_cmakelists, "${PDAL_BOOST_LIB_NAME}", "Boost::filesystem")
-        replace_in_file(self, os.path.join(self.source_folder, "pdal", "util", "FileUtils.cpp"),
-                        "pdalboost::", "boost::")
-        # No rpath manipulation
+        # Disable rpath manipulation
         replace_in_file(self, top_cmakelists, "include(${PDAL_CMAKE_DIR}/rpath.cmake)", "")
-        # No reexport
-        replace_in_file(self, top_cmakelists,
-                        'set(PDAL_REEXPORT "-Wl,-reexport_library,$<TARGET_FILE:${PDAL_UTIL_LIB_NAME}>")', "")
-        # fix static build
+        # Disable copying of symbols from libpdal_util.dylib to libpdalcpp.dylib
+        replace_in_file(self, top_cmakelists, "${PDAL_REEXPORT}", "")
+        # Fix static build
         if not self.options.shared:
             replace_in_file(self, top_cmakelists, 'add_definitions("-DPDAL_DLL_EXPORT=1")', "")
             replace_in_file(self, top_cmakelists,
                             "${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME}",
                             ("${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME} "
-                             "${PDAL_ARBITER_LIB_NAME} ${PDAL_KAZHDAN_LIB_NAME}"))
+                             "${PDAL_KAZHDAN_LIB_NAME}"))
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "macros.cmake"),
                             "install(TARGETS ${_name}",
                             ("endif()\n"
@@ -190,6 +205,13 @@ class PdalConan(ConanFile):
             replace_in_file(self, util_cmakelists,
                             "PDAL_ADD_FREE_LIBRARY(${PDAL_UTIL_LIB_NAME} SHARED ${PDAL_UTIL_SOURCES})",
                             "PDAL_ADD_FREE_LIBRARY(${PDAL_UTIL_LIB_NAME} ${PDAL_LIB_TYPE} ${PDAL_UTIL_SOURCES})")
+
+        # TODO: should be turned into a patch and submitted upstream
+        for header in [os.path.join(self.source_folder, "io", "private", "connector", "Connector.hpp"),
+                       os.path.join(self.source_folder, "io", "private", "stac", "Utils.hpp")]:
+            replace_in_file(self, header,
+                            "#include <arbiter/arbiter.hpp>",
+                            "#include <arbiter/arbiter.hpp>\n#include <nlohmann/json.hpp>")
 
     def build(self):
         self._patch_sources()
@@ -213,13 +235,13 @@ class PdalConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_target_file),
-            {f"{self._pdal_base_name}": f"PDAL::{self._pdal_base_name}", "pdal_util": "PDAL::pdal_util"},
+            {"pdalcpp": "PDAL::pdalcpp", "pdal_util": "PDAL::pdal_util"},
         )
 
     def _create_cmake_module_variables(self, module_file):
         pdal_version = Version(self.version)
         content = textwrap.dedent(f"""\
-            set(PDAL_LIBRARIES {self._pdal_base_name} pdal_util)
+            set(PDAL_LIBRARIES pdalcpp pdal_util)
             set(PDAL_VERSION_MAJOR {pdal_version.major})
             set(PDAL_VERSION_MINOR {pdal_version.minor})
             set(PDAL_VERSION_PATCH {pdal_version.patch})
@@ -245,10 +267,6 @@ class PdalConan(ConanFile):
     def _module_target_file(self):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
-    @property
-    def _pdal_base_name(self):
-        return "pdalcpp" if self.settings.os == "Windows" or is_apple_os(self) else "pdal_base"
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "PDAL")
         self.cpp_info.set_property("cmake_target_name", "PDAL::PDAL")
@@ -256,28 +274,25 @@ class PdalConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "pdal")
 
         # pdal_base
-        self.cpp_info.components["pdal_base"].set_property("cmake_target_name", self._pdal_base_name)
-        self.cpp_info.components["pdal_base"].libs = [self._pdal_base_name]
+        self.cpp_info.components["pdal_base"].set_property("cmake_target_name", "pdalcpp")
+        self.cpp_info.components["pdal_base"].libs = ["pdalcpp"]
         if not self.options.shared:
-            self.cpp_info.components["pdal_base"].libs.extend(["pdal_arbiter", "pdal_kazhdan"])
-            if self.settings.os == "Windows":
-                # dependency of pdal_arbiter
-                self.cpp_info.components["pdal_base"].system_libs.append("shlwapi")
+            self.cpp_info.components["pdal_base"].libs.extend(["pdal_kazhdan", "pdal_lepcc"])
+        self.cpp_info.components["pdal_base"].builddirs.append(os.path.join("lib", "cmake"))
         self.cpp_info.components["pdal_base"].requires = [
             "pdal_util",
+            "arbiter::arbiter",
             "eigen::eigen",
             "gdal::gdal",
-            "libcurl::libcurl",
             "libgeotiff::libgeotiff",
             "nanoflann::nanoflann",
-            "openssl::openssl",
+            "nlohmann_json::nlohmann_json",
+            # "utfcpp::utfcpp",
         ]
         if self.options.with_xml:
             self.cpp_info.components["pdal_base"].requires.append("libxml2::libxml2")
         if self.options.with_zstd:
             self.cpp_info.components["pdal_base"].requires.append("zstd::zstd")
-        if self.options.with_laszip:
-            self.cpp_info.components["pdal_base"].requires.append("laszip::laszip")
         if self.options.with_zlib:
             self.cpp_info.components["pdal_base"].requires.append("zlib::zlib")
         if self.options.with_lzma:
@@ -285,19 +300,24 @@ class PdalConan(ConanFile):
 
         # pdal_util
         self.cpp_info.components["pdal_util"].set_property("cmake_target_name", "pdal_util")
-        self.cpp_info.components["pdal_util"].libs = ["pdal_util"]
         if not self.options.shared:
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["pdal_util"].system_libs.extend(["dl", "m"])
-        self.cpp_info.components["pdal_util"].requires = ["boost::filesystem"]
+            self.cpp_info.components["pdal_util"].libs = ["pdal_util"]
+        self.cpp_info.components["pdal_util"].builddirs.append(os.path.join("lib", "cmake"))
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["pdal_util"].system_libs.extend(["dl", "m", "pthread"])
+        self.cpp_info.components["pdal_util"].requires = [
+            "boost::filesystem",
+            "nlohmann_json::nlohmann_json",
+            # "utfcpp::utfcpp",
+        ]
         if self.options.get_safe("with_unwind"):
             self.cpp_info.components["pdal_util"].requires.append("libunwind::libunwind")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "PDAL"
         self.cpp_info.names["cmake_find_package_multi"] = "PDAL"
-        self.cpp_info.components["pdal_base"].names["cmake_find_package"] = self._pdal_base_name
-        self.cpp_info.components["pdal_base"].names["cmake_find_package_multi"] = self._pdal_base_name
+        self.cpp_info.components["pdal_base"].names["cmake_find_package"] = "pdalcpp"
+        self.cpp_info.components["pdal_base"].names["cmake_find_package_multi"] = "pdalcpp"
         self.cpp_info.components["pdal_base"].build_modules["cmake_find_package"] = [
             self._module_target_file, self._module_vars_file,
         ]
