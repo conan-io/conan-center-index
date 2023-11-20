@@ -22,7 +22,7 @@ class HictkConan(ConanFile):
     default_options = {"with_eigen": True}
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 17
 
     @property
@@ -58,7 +58,7 @@ class HictkConan(ConanFile):
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
 
         def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -66,28 +66,17 @@ class HictkConan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        compiler = str(self.settings.compiler)
-        version = str(self.settings.compiler.version)
-        try:
-            minimum_version = self._compilers_minimum_version[str(compiler)]
-            if minimum_version and loose_lt_semver(version, minimum_version):
-                msg = (
-                    f"{self.ref} requires C++{self._minimum_cpp_standard} features "
-                    f"which are not supported by compiler {compiler} {version}."
-                )
-                raise ConanInvalidConfiguration(msg)
-        except KeyError:
-            msg = (
-                f"{self.ref} recipe lacks information about the {compiler} compiler, "
-                f"support for the required C++{self._minimum_cpp_standard} features is assumed"
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
+        if minimum_version and loose_lt_semver(self.settings.compiler.version, minimum_version):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-            self.output.warn(msg)
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25 <4]")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
