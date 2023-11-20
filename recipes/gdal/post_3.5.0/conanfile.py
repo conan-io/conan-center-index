@@ -283,7 +283,7 @@ class GdalConan(ConanFile):
         if self.options.with_spatialite:
             self.requires("libspatialite/5.0.1")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.43.2")
+            self.requires("sqlite3/3.44.0")
         if self.options.with_tiledb:
             self.requires("tiledb/2.17.4")
         if self.options.with_webp:
