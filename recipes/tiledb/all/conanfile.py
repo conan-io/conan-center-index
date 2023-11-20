@@ -180,6 +180,7 @@ class TileDBConan(ConanFile):
         tc.cache_variables["TILEDB_TESTS"] = False
         tc.cache_variables["SANITIZER"] = False
         tc.cache_variables["TILEDB_SUPERBUILD"] = False
+        tc.variables["BUILD_TESTING"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
