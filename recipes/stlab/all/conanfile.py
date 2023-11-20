@@ -75,7 +75,11 @@ class Stlab(ConanFile):
         # Just remove build_type, requires and conf from package id for the moment
         del self.info.settings.build_type
         self.info.requires.clear()
-        self.info.conf.clear()
+        try:
+            # Only conan v2
+            self.info.conf.clear()
+        except AttributeError:
+            pass
         # Hack to force KB-H014 to consider stlab as header-only
         # self.info.header_only()
 
