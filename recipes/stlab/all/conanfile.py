@@ -122,13 +122,6 @@ class Stlab(ConanFile):
         self._validate_thread_system()
         self._validate_boost_components()
 
-    def configure(self):
-        self.output.info("STLab With Boost: {}.".format(self.options.with_boost))
-        self.output.info("STLab Future Coroutines: {}.".format(self.options.future_coroutines))
-        self.output.info("STLab No Standard Coroutines: {}.".format(self.options.no_std_coroutines))
-        self.output.info("STLab Task System: {}.".format(self.options.task_system))
-        self.output.info("STLab Thread System: {}.".format(self.options.thread_system))
-
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables['BUILD_TESTING'] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
