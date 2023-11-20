@@ -5,7 +5,7 @@
      {
          Query q = m_config->sasToken();
 -        q.insert(std::cbegin(query),std::cend(query));
-+        q.insert(query.cbegin(), query.cend());
++        q.insert(std::begin(query), std::end(query));
          res.reset(new Response(http.internalHead(resource.url(), headers, q)));
      }
      else
