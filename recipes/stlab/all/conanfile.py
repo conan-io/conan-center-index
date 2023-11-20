@@ -5,7 +5,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir
-from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
@@ -50,9 +49,13 @@ class Stlab(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        return {"gcc": "9",
-                "clang": "8",
-                "apple-clang": "13"}
+        return {
+            "gcc": "9",
+            "clang": "8",
+            "apple-clang": "13",
+            "msvc": "192",
+            "Visual Studio": "16",
+        }
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -99,20 +102,16 @@ class Stlab(ConanFile):
                 f"so we will use boost::optional and boost::variant instead. Try -o {self.ref}:with_boost=True.")
 
     def _validate_min_compiler_version(self):
-        if is_msvc(self):
-            check_min_vs(self, "192")
-        else:
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if not minimum_version:
-                self.output.warn(f"{self.ref} requires C++{self._minimum_cpp_standard}. "
-                                 f"Your compiler is unknown. Assuming it supports C++{self._minimum_cpp_standard}.")
-            elif Version(str(self.settings.compiler.version)) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, "
-                                                f"which your compiler does not support.")
-            if self.settings.compiler == "clang" and str(self.settings.compiler.version) in ("13", "14"):
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} currently does not work with Clang {self.settings.compiler.version} on CCI, it enters "
-                    f"in an infinite build loop (smells like a compiler bug). Contributions are welcomed!")
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+            )
+
+        if self.settings.compiler == "clang" and str(self.settings.compiler.version) in ("13", "14"):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} currently does not work with Clang {self.settings.compiler.version} on CCI, it enters "
+                f"in an infinite build loop (smells like a compiler bug). Contributions are welcomed!")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
