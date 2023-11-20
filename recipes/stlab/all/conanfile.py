@@ -69,6 +69,12 @@ class Stlab(ConanFile):
         if self.options.task_system == "libdispatch" and self.settings.os != "Macos":
             self.requires("libdispatch/5.3.2")
 
+    def package_id(self):
+        # TODO: stlab is header only but needs a header modified by cmake based on OS and options
+        # (and also threading model which might depend on compiler).
+        # Just remove build_type from package id for the moment
+        del self.info.settings.build_type
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
@@ -150,12 +156,6 @@ class Stlab(ConanFile):
         rm(self, "msvcp*.dll", os.path.join(self.package_folder, "bin"))
         rm(self, "concrt*.dll", os.path.join(self.package_folder, "bin"))
         rm(self, "vcruntime*.dll", os.path.join(self.package_folder, "bin"))
-
-    def package_id(self):
-        # TODO: is header only but needs a header modified by cmake
-        # self.info.settings.clear()
-        # self.info.header_only()
-        pass
 
     def package_info(self):
         future_coroutines_value = 1 if self.options.future_coroutines else 0
