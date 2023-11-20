@@ -72,8 +72,9 @@ class Stlab(ConanFile):
     def package_id(self):
         # TODO: stlab is header only but needs a header modified by cmake based on OS and options
         # (and also threading model which might depend on compiler).
-        # Just remove build_type from package id for the moment
+        # Just remove build_type and requires from package id for the moment
         del self.info.settings.build_type
+        self.requires.clear()
         # Hack to force KB-H014 to consider stlab as header-only
         # self.info.header_only()
 
