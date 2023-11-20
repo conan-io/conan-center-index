@@ -74,6 +74,8 @@ class Stlab(ConanFile):
         # (and also threading model which might depend on compiler).
         # Just remove build_type from package id for the moment
         del self.info.settings.build_type
+        # Hack to force KB-H014 to consider stlab as header-only
+        # self.info.header_only()
 
     def _validate_task_system(self):
         if self.options.task_system == "libdispatch":
