@@ -158,8 +158,10 @@ class Stlab(ConanFile):
         rm(self, "vcruntime*.dll", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        future_coroutines_value = 1 if self.options.future_coroutines else 0
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
 
+        future_coroutines_value = 1 if self.options.future_coroutines else 0
         self.cpp_info.defines = [
             'STLAB_FUTURE_COROUTINES={}'.format(future_coroutines_value)
         ]
