@@ -1,7 +1,11 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -23,19 +27,31 @@ class GlfwConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "vulkan_static": [True, False],
+        "with_x11": [True, False],
+        "with_wayland": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "vulkan_static": False,
+        "with_x11": True,
+        "with_wayland": False,
     }
+
+    @property
+    def _has_build_profile(self):
+        return hasattr(self, "settings_build")
 
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+        if self.settings.os != "Linux":
+            self.options.rm_safe("with_wayland")
+        if not self.settings.os in ["Linux", "FreeBSD"] or self.version <= Version("3.3.8"):
+            self.options.rm_safe("with_x11")
 
     def configure(self):
         if self.options.shared:
@@ -43,29 +59,53 @@ class GlfwConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
+        if self.options.get_safe("with_wayland"):
+            self.options["xkbcommon"].with_wayland = True
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("opengl/system")
         if self.options.vulkan_static:
-            self.requires("vulkan-loader/1.3.239.0")
-        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.requires("vulkan-loader/1.3.243.0")
+        if self.options.get_safe("with_x11") or self.version <= Version("3.3.8"):
             self.requires("xorg/system")
+        if self.options.get_safe("with_wayland"):
+            self.requires("wayland/1.22.0")
+            self.requires("wayland-protocols/1.32")
+            self.requires("xkbcommon/1.6.0")
+
+    def validate(self):
+        if self.options.get_safe("with_wayland") and not self.dependencies["xkbcommon"].options.with_wayland:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the with_wayland option in xkbcommon to be enabled when the with_wayland option is enabled")
+
+    def build_requirements(self):
+        if self.options.get_safe("with_wayland"):
+            self.tool_requires("wayland/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["GLFW_BUILD_EXAMPLES"] = False
-        tc.variables["GLFW_BUILD_TESTS"] = False
-        tc.variables["GLFW_BUILD_DOCS"] = False
-        tc.variables["GLFW_INSTALL"] = True
+        tc.cache_variables["GLFW_BUILD_DOCS"] = False
+        tc.cache_variables["GLFW_BUILD_EXAMPLES"] = False
+        tc.cache_variables["GLFW_BUILD_TESTS"] = False
+        tc.cache_variables["GLFW_BUILD_X11"] = self.options.get_safe("with_x11")
+        tc.cache_variables["GLFW_INSTALL"] = True
+        tc.variables["GLFW_USE_WAYLAND" if self.version <= "3.3.8" else "GLFW_BUILD_WAYLAND"] = self.options.get_safe("with_wayland")
         tc.variables["GLFW_VULKAN_STATIC"] = self.options.vulkan_static
         if is_msvc(self):
-            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+            tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.generate()
+        cmake_deps = CMakeDeps(self)
+        cmake_deps.set_property("xkbcommon", "cmake_file_name", "XKBCommon")
+        cmake_deps.generate()
+        pkg_config_deps = PkgConfigDeps(self)
+        pkg_config_deps.generate()
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -100,7 +140,7 @@ class GlfwConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))

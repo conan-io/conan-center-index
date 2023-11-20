@@ -42,10 +42,10 @@ class AvahiConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.77.1")
+        self.requires("glib/2.78.1")
         self.requires("expat/2.5.0")
         self.requires("libdaemon/0.14")
-        self.requires("dbus/1.15.6")
+        self.requires("dbus/1.15.8")
         self.requires("gdbm/1.23")
         self.requires("libevent/2.1.12")
 
@@ -56,7 +56,7 @@ class AvahiConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.5")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -107,6 +107,7 @@ class AvahiConan(ConanFile):
             self.cpp_info.components[lib].names["cmake_find_package"] = lib
             self.cpp_info.components[lib].names["cmake_find_package_multi"] = lib
             self.cpp_info.components[lib].libs = [avahi_lib]
+            self.cpp_info.components[lib].includedirs = ["include", os.path.join("include", avahi_lib)]
         self.cpp_info.components["compat-libdns_sd"].libs = ["dns_sd"]
 
         self.cpp_info.components["client"].requires = ["common", "dbus::dbus"]
@@ -131,6 +132,7 @@ class AvahiConan(ConanFile):
         self.cpp_info.components["resolve"].requires = ["client"]
         self.cpp_info.components["set-host-name"].requires = ["client"]
 
+        # TODO: Remove after dropping Conan 1.x support
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)
