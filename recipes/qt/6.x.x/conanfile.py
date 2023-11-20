@@ -575,6 +575,8 @@ class QtConan(ConanFile):
                 self.output.warning(f"host not supported: {self.settings.os} {self.settings.compiler} {self.settings.compiler.version} {self.settings.arch}")
         if self.options.cross_compile:
             tc.variables["QT_QMAKE_DEVICE_OPTIONS"] = f"CROSS_COMPILE={self.options.cross_compile}"
+        if cross_building(self):
+            tc.variables["QT_HOST_PATH"] = self.dependencies.direct_build["qt"].package_folder
 
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
@@ -589,12 +591,17 @@ class QtConan(ConanFile):
         current_cpp_std = self.settings.get_safe("compiler.cppstd", default_cppstd(self))
         current_cpp_std = str(current_cpp_std).replace("gnu", "")
         cpp_std_map = {
-            "20": "FEATURE_cxx20"
+            11: "FEATURE_cxx11",
+            14: "FEATURE_cxx14",
+            17: "FEATURE_cxx17",
+            20: "FEATURE_cxx20"
             }
         if Version(self.version) >= "6.5.0":
-            cpp_std_map["23"] = "FEATURE_cxx2b"
+            cpp_std_map[23] = "FEATURE_cxx2b"
+        
+        for std,feature in cpp_std_map.items():
+            tc.variables[feature] = "ON" if int(current_cpp_std) >= std else "OFF"
 
-        tc.variables[cpp_std_map.get(current_cpp_std, "FEATURE_cxx17")] = "ON"
         tc.variables["QT_USE_VCPKG"] = False
         tc.cache_variables["QT_USE_VCPKG"] = False
 
