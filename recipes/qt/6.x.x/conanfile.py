@@ -1359,10 +1359,15 @@ class QtConan(ConanFile):
             _add_build_module("qtCore", self._cmake_entry_point_file)
 
         for m in os.listdir(os.path.join("lib", "cmake")):
-            module = os.path.join("lib", "cmake", m, f"{m}Macros.cmake")
             component_name = m.replace("Qt6", "qt")
             if component_name == "qt":
                 component_name = "qtCore"
+
+            module = os.path.join("lib", "cmake", m, f"{m}Macros.cmake")
+            if os.path.isfile(module):
+                _add_build_module(component_name, module)
+
+            module = os.path.join("lib", "cmake", m, f"{m}ConfigExtras.cmake")
             if os.path.isfile(module):
                 _add_build_module(component_name, module)
 
@@ -1397,7 +1402,5 @@ class QtConan(ConanFile):
 
         for c in self.cpp_info.components:
             _add_build_modules_for_component(c)
-
-        build_modules_list.append(os.path.join(self.package_folder, "lib", "cmake", "Qt6Core", "Qt6CoreConfigExtras.cmake"))
 
         self.cpp_info.set_property("cmake_build_modules", build_modules_list)
