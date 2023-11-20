@@ -182,7 +182,8 @@ class SentryNativeConan(ConanFile):
         rm(self, "*pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.components["sentry"].set_property("cmake_file_name", "sentry")
+        self.cpp_info.set_property("cmake_file_name", "sentry")
+
         self.cpp_info.components["sentry"].set_property("cmake_target_name", "sentry::sentry")
         self.cpp_info.components["sentry"].libs = ["sentry"]
         if self.settings.os in ("Android", "FreeBSD", "Linux"):
@@ -206,7 +207,6 @@ class SentryNativeConan(ConanFile):
 
             # mini_chromium
             self.cpp_info.components["crashpad_mini_chromium"].set_property("cmake_target_name", "crashpad::mini_chromium")
-            self.cpp_info.components["crashpad_mini_chromium"].includedirs.append(os.path.join("include", "crashpad", "mini_chromium"))
             self.cpp_info.components["crashpad_mini_chromium"].libs = ["mini_chromium"]
             if self.settings.os in ("Linux", "FreeBSD"):
                 self.cpp_info.components["crashpad_mini_chromium"].system_libs.append("pthread")
@@ -219,7 +219,6 @@ class SentryNativeConan(ConanFile):
 
             # compat
             self.cpp_info.components["crashpad_compat"].set_property("cmake_target_name", "crashpad::compat")
-            self.cpp_info.components["crashpad_compat"].includedirs.append(os.path.join("include", "crashpad"))
             # On Apple crashpad_compat is an interface library
             if not is_apple_os(self):
                 self.cpp_info.components["crashpad_compat"].libs = ["crashpad_compat"]
