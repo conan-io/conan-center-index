@@ -50,8 +50,8 @@ class PackageConan(ConanFile):
         self.requires("libcurl/[>=7.78.0 <9]")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("nlohmann_json/3.11.2")
-        self.requires("rapidxml/1.13")
+        self.requires("nlohmann_json/3.11.2", transitive_headers=True)
+        self.requires("rapidxml/1.13", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
