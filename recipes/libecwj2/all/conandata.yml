@@ -33,3 +33,6 @@ patches:
     - patch_file: "patches/use-stdint.h-types.patch"
       patch_description: "Use modern stdint.h types"
       patch_type: "portability"
+    - patch_file: "patches/macos-compatibility.patch"
+      patch_description: "Remove outdated compatibility function on macOS"
+      patch_type: "portability"
