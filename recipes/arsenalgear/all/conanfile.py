@@ -104,6 +104,8 @@ class ArsenalgearConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "arsenalgear")
+        self.cpp_info.set_property("cmake_target_name", "arsenalgear::arsenalgear")
         self.cpp_info.libs = ["arsenalgear"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
