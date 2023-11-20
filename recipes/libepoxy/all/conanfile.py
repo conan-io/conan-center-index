@@ -70,7 +70,7 @@ class EpoxyConan(ConanFile):
             raise ConanInvalidConfiguration("Static builds on Windows are not supported")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.3")
+        self.tool_requires("meson/1.3.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
