@@ -28,7 +28,7 @@ class Stlab(ConanFile):
     default_options = {
         "with_boost": False,
         "no_std_coroutines": True,
-        "future_coroutines": False
+        "future_coroutines": False,
         # Handle default value for `thread_system` in `config_options` method
         # Handle default value for `task_system` in `config_options` method
     }
@@ -74,9 +74,6 @@ class Stlab(ConanFile):
         # (and also threading model which might depend on compiler).
         # Just remove build_type from package id for the moment
         del self.info.settings.build_type
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def _validate_task_system(self):
         if self.options.task_system == "libdispatch":
@@ -127,6 +124,9 @@ class Stlab(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.23.3 <4]")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
