@@ -154,7 +154,6 @@ class MsdfgenConan(ConanFile):
         if self.options.with_skia:
             self.cpp_info.components["msdfgen-ext"].defines.append("MSDFGEN_USE_SKIA")
 
+        # TODO: to remove once conan v1 support dropped
         if self.options.utility:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
