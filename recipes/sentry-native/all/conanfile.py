@@ -203,8 +203,6 @@ class SentryNativeConan(ConanFile):
             self.cpp_info.components["sentry"].requires.extend(["libcurl::libcurl"])
 
         if self.options.backend == "crashpad" and self.options.with_crashpad == "sentry":
-            self.cpp_info.components["crashpad"].set_property("cmake_file_name", "crashpad")
-
             # mini_chromium
             self.cpp_info.components["crashpad_mini_chromium"].set_property("cmake_target_name", "crashpad::mini_chromium")
             self.cpp_info.components["crashpad_mini_chromium"].libs = ["mini_chromium"]
