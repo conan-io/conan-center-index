@@ -12,7 +12,7 @@ required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
 class QwtConan(ConanFile):
     name = "qwt"
-    license = "LGPL-2.1+ WITH Qwt-exception-1.0"
+    license = "LGPL-2.1-or-later WITH Qwt-exception-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://qwt.sourceforge.io/"
     topics = ("chart", "data-visualization", "graph", "plot", "qt")
