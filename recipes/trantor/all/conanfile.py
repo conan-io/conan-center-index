@@ -68,11 +68,10 @@ class TrantorConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version:
-            if Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
-        else:
-            self.output.warn(f"{self.ref} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
+        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
         # TODO: Compilation succeeds, but execution of test_package fails on Visual Studio with MDd
         if is_msvc(self) and self.options.shared and "MDd" in msvc_runtime_flag(self):
