@@ -54,22 +54,11 @@ class CppSortConan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        compiler = str(self.settings.compiler)
-        version = str(self.settings.compiler.version)
-        try:
-            minimum_version = self._compilers_minimum_version[str(compiler)]
-            if minimum_version and loose_lt_semver(version, minimum_version):
-                msg = (
-                    f"{self.ref} requires C++{self._min_cppstd} features "
-                    f"which are not supported by compiler {compiler} {version}."
-                )
-                raise ConanInvalidConfiguration(msg)
-        except KeyError:
-            msg = (
-                f"{self.ref} recipe lacks information about the {compiler} compiler, "
-                f"support for the required C++{self._min_cppstd} features is assumed"
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
+        if minimum_version and loose_lt_semver(self.settings.compiler.version, minimum_version):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-            self.output.warn(msg)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
