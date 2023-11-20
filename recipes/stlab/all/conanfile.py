@@ -60,9 +60,6 @@ class Stlab(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.23.3]")
-
     def requirements(self):
         if self.options.with_boost:
             self.requires("boost/1.82.0")
@@ -121,6 +118,9 @@ class Stlab(ConanFile):
         self._validate_task_system()
         self._validate_thread_system()
         self._validate_boost_components()
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.23.3 <4]")
 
     def generate(self):
         tc = CMakeToolchain(self)
