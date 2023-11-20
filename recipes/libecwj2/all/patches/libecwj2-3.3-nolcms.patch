@@ -1,6 +1,5 @@
-diff -Naur ../libecwj2-3.3/Makefile.am ./Makefile.am
---- ../libecwj2-3.3/Makefile.am	2006-07-02 20:14:18.000000000 -0500
-+++ ./Makefile.am	2009-03-16 14:04:13.000000000 -0500
+--- Makefile.am
++++ Makefile.am
 @@ -1,3 +1,5 @@
 +AUTOMAKE_OPTIONS = foreign
 +
@@ -15,9 +14,8 @@ diff -Naur ../libecwj2-3.3/Makefile.am ./Makefile.am
 -	Source/C/NCSEcw/lcms/include/icc34.h \
  	Source/NCSBuildGnu/NCSGnuConfig.h 
  
-diff -Naur ../libecwj2-3.3/Source/NCSBuildGnu/Makefile.am ./Source/NCSBuildGnu/Makefile.am
---- ../libecwj2-3.3/Source/NCSBuildGnu/Makefile.am	2006-07-02 20:14:18.000000000 -0500
-+++ ./Source/NCSBuildGnu/Makefile.am	2009-03-16 14:00:50.000000000 -0500
+--- Source/NCSBuildGnu/Makefile.am
++++ Source/NCSBuildGnu/Makefile.am
 @@ -113,22 +113,6 @@
  	../C/NCSEcw/shared_src/qmf_util.c \
  	../C/NCSEcw/shared_src/quantize.c \
@@ -41,9 +39,8 @@ diff -Naur ../libecwj2-3.3/Source/NCSBuildGnu/Makefile.am ./Source/NCSBuildGnu/M
  	../C/NCSGDT2/NCSGDTEpsg.cpp \
  	../C/NCSGDT2/NCSGDTEPSGKey.cpp \
  	../C/NCSGDT2/NCSGDTLocation.cpp
-diff -Naur ../libecwj2-3.3/Source/include/NCSJPCDefs.h ./Source/include/NCSJPCDefs.h
---- ../libecwj2-3.3/Source/include/NCSJPCDefs.h	2006-07-02 20:15:24.000000000 -0500
-+++ ./Source/include/NCSJPCDefs.h	2009-03-16 14:00:27.000000000 -0500
+--- Source/include/NCSJPCDefs.h
++++ Source/include/NCSJPCDefs.h
 @@ -59,7 +59,7 @@
  // Use LCMS for ICC->RGB conversions, supports both
  // restricted and full ICC profiles.
@@ -53,9 +50,8 @@ diff -Naur ../libecwj2-3.3/Source/include/NCSJPCDefs.h ./Source/include/NCSJPCDe
  
  //
  // Use TinyXML for XML DOM Parsing
-diff -Naur ../libecwj2-3.3/configure.in ./configure.in
---- ../libecwj2-3.3/configure.in	2006-07-02 20:13:30.000000000 -0500
-+++ ./configure.in	2009-03-16 14:00:14.000000000 -0500
+--- configure.in
++++ configure.in
 @@ -32,17 +32,6 @@
  # Build some standard absolute include paths for the build
  
