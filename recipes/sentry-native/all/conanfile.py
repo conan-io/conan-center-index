@@ -202,6 +202,15 @@ class SentryNativeConan(ConanFile):
         if self.options.transport == "curl":
             self.cpp_info.components["sentry"].requires.extend(["libcurl::libcurl"])
 
+        if self.options.backend == "breakpad" and self.options.with_breakpad == "sentry":
+            self.cpp_info.components["breakpad"].set_property("pkg_config_name", "breakpad-client")
+            self.cpp_info.components["breakpad"].libs = ["breakpad_client"]
+            self.cpp_info.components["breakpad"].includedirs.append(os.path.join("include", "breakpad"))
+            if is_apple_os(self):
+                self.cpp_info.components["breakpad"].frameworks.append("CoreFoundation")
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["breakpad"].system_libs.append("pthread")
+
         if self.options.backend == "crashpad" and self.options.with_crashpad == "sentry":
             # mini_chromium
             self.cpp_info.components["crashpad_mini_chromium"].set_property("cmake_target_name", "crashpad::mini_chromium")
