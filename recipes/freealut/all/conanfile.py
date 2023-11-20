@@ -41,6 +41,11 @@ class FreeAlutConan(ConanFile):
                 "If built as shared openal-soft must be shared as well. "
                 "Please, use `openal-soft/*:shared=True`.",
             )
+        if self.settings.os == "Windows" and \
+            not self.options.shared:
+            raise ConanInvalidConfiguration(
+                "Static build is currently not supported for Windows."
+            )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -62,6 +67,10 @@ class FreeAlutConan(ConanFile):
         # INFO: CMakeDeps generates CamelCase variables
         tc.variables["OPENAL_LIB_DIR"] = os.path.join(self.dependencies["openal-soft"].package_folder, "lib")
         tc.variables["OPENAL_INCLUDE_DIR"] = os.path.join(self.dependencies["openal-soft"].package_folder, "include")
+        if self.settings.os == "Windows":            
+            tc.variables["OPENAL_INCLUDE_DIR"] += ";" + os.path.join(self.dependencies["openal-soft"].package_folder, "include", "AL")
+            tc.variables["OPENAL_LIB_DIR"] = tc.variables["OPENAL_LIB_DIR"].replace("\\","/")
+            tc.variables["OPENAL_INCLUDE_DIR"] = tc.variables["OPENAL_INCLUDE_DIR"].replace("\\","/")
         tc.generate()
 
     def build(self):
