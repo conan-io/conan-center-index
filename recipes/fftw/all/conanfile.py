@@ -112,7 +112,7 @@ class FFTWConan(ConanFile):
             variables = {
                 "ENABLE_FLOAT": on_off(self._current_precision == SINGLE),
                 "ENABLE_LONG_DOUBLE": on_off(self._current_precision == LONGDOUBLE),
-                "EENABLE_QUAD_PRECISION": on_off(self._current_precision == QUAD)
+                "ENABLE_QUAD_PRECISION": on_off(self._current_precision == QUAD)
             }
             cmake.configure(variables=variables)
             cmake.build()
