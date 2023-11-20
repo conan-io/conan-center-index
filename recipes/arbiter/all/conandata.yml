@@ -1,0 +1,10 @@
+sources:
+  "cci.20231005":
+    url: "https://github.com/connormanning/arbiter/archive/70b57eeddfaed426d8edc8a5f02c87defd3a0f22.tar.gz"
+    sha256: "5adab0b51bef87bc3fa1d100ad1c49a2a334f4f8c15ed8e62c68fb84181a4159"
+patches:
+  "cci.20231005":
+    - patch_file: "patches/001-fix-cbegin-cend.patch"
+      patch_type: "portability"
+      patch_description: "Replace std::cbegin and std::cend for C++11 compatibility"
+      patch_source: "https://github.com/connormanning/arbiter/pull/49"
