@@ -354,7 +354,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_ARROWDATASET"] = self.options.with_arrow
         tc.cache_variables["GDAL_USE_BASISU"] = self.options.with_basisu
         tc.cache_variables["GDAL_USE_BLOSC"] = self.options.with_blosc
-        tc.cache_variables["GDAL_USE_BRUNSLI"] = False
+        tc.cache_variables["GDAL_USE_BRUNSLI"] = self.options.with_brunsli
         tc.cache_variables["GDAL_USE_CFITSIO"] = self.options.with_cfitsio
         tc.cache_variables["GDAL_USE_CRNLIB"] = self.options.with_dds
         tc.cache_variables["GDAL_USE_CRYPTOPP"] = self.options.with_cryptopp
@@ -475,7 +475,6 @@ class GdalConan(ConanFile):
             "crunch": "Crnlib",
             "cryptopp": "CryptoPP",
             "expat": "EXPAT",
-            # "filegdb": "FileGDB",
             "freexl": "FreeXL",
             # "fyba": "FYBA",
             "geos": "GEOS",
@@ -541,6 +540,7 @@ class GdalConan(ConanFile):
             "zlib": "ZLIB",
             "zstd": "ZSTD",
             # Closed-source/proprietary libraries
+            # "filegdb": "FileGDB",
             # "idb": "IDB",
             # "kdu": "KDU",
             # "luratech": "LURATECH",
