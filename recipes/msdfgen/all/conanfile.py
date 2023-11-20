@@ -49,7 +49,7 @@ class MsdfgenConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("freetype/2.13.0")
+        self.requires("freetype/2.13.2")
         if  Version(self.version) < "1.10":
             self.requires("lodepng/cci.20200615")
         else:
