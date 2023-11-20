@@ -45,7 +45,7 @@ class PdfiumConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("freetype/2.13.0")
+        self.requires("freetype/2.13.2")
         self.requires("icu/74.1")
         self.requires("lcms/2.14")
         self.requires("openjpeg/2.5.0")
