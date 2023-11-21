@@ -7,9 +7,9 @@ add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE sentry::sentry)
 
 if(UNIX AND NOT APPLE)
-  target_link_libraries(${PROJECT_NAME} PRIVATE breakpad_client)
+  target_link_libraries(${PROJECT_NAME} PRIVATE sentry::breakpad_client)
 else()
-  target_link_libraries(${PROJECT_NAME} PRIVATE crashpad::client)
+  target_link_libraries(${PROJECT_NAME} PRIVATE sentry::crashpad_client)
 endif()
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
