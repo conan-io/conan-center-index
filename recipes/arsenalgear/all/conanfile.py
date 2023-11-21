@@ -17,12 +17,14 @@ class ArsenalgearConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/JustWhit3/arsenalgear-cpp"
     topics = ("constants", "math", "operators", "stream")
-    package_type = "static-library"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
     }
 
@@ -37,7 +39,7 @@ class ArsenalgearConan(ConanFile):
             "msvc": "192",
             "gcc": "8",
             "clang": "7",
-            "apple-clang": "12.0",
+            "apple-clang": "12",
         }
 
     def export_sources(self):
@@ -48,6 +50,10 @@ class ArsenalgearConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
