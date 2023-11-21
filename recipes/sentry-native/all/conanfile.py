@@ -58,10 +58,13 @@ class SentryNativeConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
+        minimum_gcc_version = "5"
+        if self.options.get_safe("backend") == "breakpad":
+            minimum_gcc_version = "7"
         return {
             "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "5",
+            "gcc": minimum_gcc_version,
             "clang": "3.4",
             "apple-clang": "5.1",
         }
