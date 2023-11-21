@@ -39,7 +39,14 @@ class StbConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.clear()
+        # Can't call self.info.clear() because options contribute to package id
+        self.info.settings.clear()
+        self.info.requires.clear()
+        try:
+            # conan v2 specific
+            self.info.conf.clear()
+        except AttributeError:
+            pass
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
