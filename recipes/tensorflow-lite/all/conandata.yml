@@ -12,7 +12,7 @@ patches:
     - patch_file: "patches/disable_fetch_content.patch"
       patch_description: "Fail if the CMake build script tries to fetch external dependencies"
       patch_type: "conan"
-    - patch_file: "patches/dependencies_2_10.patch"
+    - patch_file: "patches/dependencies_2_12.patch"
       patch_description: "Dependency compatibility: Patch CMakeLists.txt, updating package names, target names, etc"
       patch_type: "conan"
   "2.10.0":
