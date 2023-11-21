@@ -41,10 +41,10 @@ class FreeAlutConan(ConanFile):
                 "If built as shared openal-soft must be shared as well. "
                 "Please, use `openal-soft/*:shared=True`.",
             )
-        if self.settings.os == "Windows" and \
+        if self.settings.os in ["Windows", "Macos"] and \
             not self.options.shared:
             raise ConanInvalidConfiguration(
-                "Static build is currently not supported for Windows."
+                "Static build is currently not supported for Windows or macOS."
             )
 
     def layout(self):
