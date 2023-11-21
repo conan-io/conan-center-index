@@ -51,7 +51,7 @@ class MsdfgenConan(ConanFile):
     def requirements(self):
         self.requires("freetype/2.13.2")
         if  Version(self.version) < "1.10":
-            self.requires("lodepng/cci.20200615")
+            self.requires("lodepng/cci.20230410")
         else:
             self.requires("libpng/1.6.40")
         self.requires("tinyxml2/9.0.0")
