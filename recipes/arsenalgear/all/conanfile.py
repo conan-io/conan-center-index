@@ -64,9 +64,8 @@ class ArsenalgearConan(ConanFile):
                 self.requires("exprtk/0.0.2", transitive_headers=True)
 
     def validate(self):
-        # arsenalgear doesn't support Visual Studio(yet).
-        if is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio(yet)")
+        if Version(self.version) < "2.0.0" and is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio.")
 
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
