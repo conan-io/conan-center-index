@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc
-from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 import os
 
@@ -41,6 +41,7 @@ class ArsenalgearConan(ConanFile):
         }
 
     def export_sources(self):
+        export_conandata_patches(self)
         if Version(self.version) < "2.1.0":
             copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
@@ -84,6 +85,7 @@ class ArsenalgearConan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         if Version(self.version) < "2.1.0":
             cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
