@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir, save
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -22,25 +23,30 @@ class HighFiveConan(ConanFile):
         "with_eigen": [True, False],
         "with_xtensor": [True, False],
         "with_opencv": [True, False],
+        "with_static_hdf5": [True, False],
     }
     default_options = {
         "with_boost": True,
         "with_eigen": True,
         "with_xtensor": True,
         "with_opencv": False,
+        "with_static_hdf5": False,
     }
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("hdf5/1.14.1")
+        if Version(self.version) < "2.5.1":
+            self.requires("hdf5/1.14.1")
+        else:
+            self.requires("hdf5/1.14.2")
         if self.options.with_boost:
             self.requires("boost/1.83.0")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.with_xtensor:
-            self.requires("xtensor/0.24.6")
+            self.requires("xtensor/0.24.7")
         if self.options.with_opencv:
             self.requires("opencv/4.5.5")
 
@@ -65,6 +71,7 @@ class HighFiveConan(ConanFile):
         tc.variables["HIGHFIVE_EXAMPLES"] = False
         tc.variables["HIGHFIVE_BUILD_DOCS"] = False
         tc.variables["HIGHFIVE_USE_INSTALL_DEPS"] = False
+        tc.variables["HIGHFIVE_STATIC_HDF5"] = self.options.with_static_hdf5
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

@@ -1,4 +1,7 @@
 sources:
+  "3.44.0":
+    url: "https://sqlite.org/2023/sqlite-amalgamation-3440000.zip"
+    sha256: "93299c8d2c8397622fe00bd807204b1f58815f45bda8097bf93b3bf759a3ebad"
   "3.43.2":
     url: "https://sqlite.org/2023/sqlite-amalgamation-3430200.zip"
     sha256: "a17ac8792f57266847d57651c5259001d1e4e4b46be96ec0d985c953925b2a1c"
