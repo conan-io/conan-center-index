@@ -146,6 +146,11 @@ class CycloneDDSCXXConan(ConanFile):
             os.path.join(self._module_path, "CycloneDDS-CXX", "idlcxx", "Generate.cmake"),
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
+        build_dirs = [
+            os.path.join(self.package_folder, self._module_path, "CycloneDDS-CXX"),
+            os.path.join(self.package_folder, self._module_path, "CycloneDDS-CXX", "idlcxx"),
+        ]
+        self.cpp_info.builddirs = build_dirs
         self.cpp_info.includedirs = ["include/ddscxx"]
         self.cpp_info.components["ddscxx"].libs = ["ddscxx"]
         self.cpp_info.components["ddscxx"].includedirs = ["include/ddscxx"]
