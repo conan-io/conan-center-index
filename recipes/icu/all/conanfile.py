@@ -33,6 +33,7 @@ class ICUConan(ConanFile):
         "data_packaging": ["files", "archive", "library", "static"],
         "with_dyload": [True, False],
         "dat_package_file": [None, "ANY"],
+        "custom_data_hash": [None, "ANY"],
         "with_icuio": [True, False],
         "with_extras": [True, False],
     }
@@ -42,6 +43,7 @@ class ICUConan(ConanFile):
         "data_packaging": "archive",
         "with_dyload": True,
         "dat_package_file": None,
+        "custom_data_hash": None,
         "with_icuio": True,
         "with_extras": False,
     }
@@ -88,7 +90,8 @@ class ICUConan(ConanFile):
 
     def package_id(self):
         if self.info.options.dat_package_file:
-            self.info.options.dat_package_file = self._sha256sum(str(self.info.options.dat_package_file))
+            self.info.options.custom_data_hash = self._sha256sum(str(self.info.options.dat_package_file))
+            del self.info.options.dat_package_file
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
