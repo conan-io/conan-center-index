@@ -8,10 +8,12 @@ find_package(Eigen3 REQUIRED CONFIG)
 link_libraries(Eigen3::Eigen)
 
 find_package(GDAL REQUIRED CONFIG)
-link_libraries(geotiff_library)
+link_libraries(GDAL::GDAL)
+set(gdal_FOUND TRUE)
 
 find_package(GeoTIFF REQUIRED CONFIG)
-link_libraries(GDAL::GDAL)
+link_libraries(geotiff_library)
+set(geotiff_FOUND TRUE)
 
 find_package(LibXml2 REQUIRED CONFIG)
 link_libraries(LibXml2::LibXml2)

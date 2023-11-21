@@ -150,9 +150,6 @@ class PdalConan(ConanFile):
         tc.variables["PDAL_HAVE_LZMA"] = self.options.with_lzma
         # disable plugin that requires postgresql
         tc.variables["BUILD_PLUGIN_PGPOINTCLOUD"] = False
-        # Workarounds for different library names
-        tc.variables["geotiff_FOUND"] = True
-        tc.variables["gdal_FOUND"] = True
         tc.generate()
 
         # For the namespace injection in _patch_sources() below
