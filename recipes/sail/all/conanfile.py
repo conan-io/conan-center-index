@@ -18,21 +18,21 @@ class SAILConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "thread_safe": [True, False],
-        "with_highest_priority": [True, False],
-        "with_high_priority": [True, False],
-        "with_medium_priority": [True, False],
-        "with_low_priority": [True, False],
-        "with_lowest_priority": [True, False],
+        "with_highest_priority_codecs": [True, False],
+        "with_high_priority_codecs": [True, False],
+        "with_medium_priority_codecs": [True, False],
+        "with_low_priority_codecs": [True, False],
+        "with_lowest_priority_codecs": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "thread_safe": True,
-        "with_highest_priority": True,
-        "with_high_priority": True,
-        "with_medium_priority": True,
-        "with_low_priority": True,
-        "with_lowest_priority": True,
+        "with_highest_priority_codecs": True,
+        "with_high_priority_codecs": True,
+        "with_medium_priority_codecs": True,
+        "with_low_priority_codecs": True,
+        "with_lowest_priority_codecs": True,
     }
 
     def export_sources(self):
@@ -47,12 +47,12 @@ class SAILConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        if self.options.with_highest_priority:
+        if self.options.with_highest_priority_codecs:
             self.requires("giflib/5.2.1")
             self.requires("libjpeg/9e")
             self.requires("libpng/1.6.40")
             self.requires("libtiff/4.6.0")
-        if self.options.with_medium_priority:
+        if self.options.with_medium_priority_codecs:
             self.requires("libavif/0.11.1")
             self.requires("jasper/4.0.0")
             # TODO Re-enable JPEG XL after merging either of the following:
@@ -71,15 +71,15 @@ class SAILConan(ConanFile):
     def generate(self):
         only_codecs = []
 
-        if self.options.with_highest_priority:
+        if self.options.with_highest_priority_codecs:
             only_codecs.append("highest-priority")
-        if self.options.with_high_priority:
+        if self.options.with_high_priority_codecs:
             only_codecs.append("high-priority")
-        if self.options.with_medium_priority:
+        if self.options.with_medium_priority_codecs:
             only_codecs.append("medium-priority")
-        if self.options.with_low_priority:
+        if self.options.with_low_priority_codecs:
             only_codecs.append("low-priority")
-        if self.options.with_lowest_priority:
+        if self.options.with_lowest_priority_codecs:
             only_codecs.append("lowest-priority")
 
         tc = CMakeToolchain(self)
@@ -144,12 +144,12 @@ class SAILConan(ConanFile):
         self.cpp_info.components["sail-codecs"].libs = ["sail-codecs"]
         self.cpp_info.components["sail-codecs"].requires = ["sail-common"]
 
-        if self.options.with_highest_priority:
+        if self.options.with_highest_priority_codecs:
             self.cpp_info.components["sail-codecs"].requires.append("giflib::giflib")
             self.cpp_info.components["sail-codecs"].requires.append("libjpeg::libjpeg")
             self.cpp_info.components["sail-codecs"].requires.append("libpng::libpng")
             self.cpp_info.components["sail-codecs"].requires.append("libtiff::libtiff")
-        if self.options.with_medium_priority:
+        if self.options.with_medium_priority_codecs:
             self.cpp_info.components["sail-codecs"].requires.append("libavif::libavif")
             self.cpp_info.components["sail-codecs"].requires.append("jasper::jasper")
             # self.cpp_info.components["sail-codecs"].requires.append("libjxl::libjxl")
