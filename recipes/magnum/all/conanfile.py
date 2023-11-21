@@ -208,7 +208,7 @@ class MagnumConan(ConanFile):
         self.requires(f"corrade/{self.version}", transitive_headers=True, transitive_libs=True)
         if self.options.audio:
             # https://github.com/mosra/magnum/blob/v2020.06/src/Magnum/Audio/Buffer.h#L35-L36
-            self.requires("openal-soft/1.23.1", transitive_headers=True, transitive_libs=True)
+            self.requires("openal-soft/1.22.2", transitive_headers=True, transitive_libs=True)
         if self.options.gl:
             # https://github.com/mosra/magnum/blob/v2020.06/src/Magnum/Platform/WindowlessGlxApplication.h#L44-L46
             transitive = bool(self.options.get_safe("windowless_glx_application"))
