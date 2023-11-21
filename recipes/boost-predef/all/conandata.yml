@@ -3,4 +3,3 @@ sources:
     url:
       - "https://github.com/boostorg/predef/archive/refs/tags/boost-1.83.0.tar.gz"
     sha256: "c0d8a35f9258846f9daa511c0de052fcce0c88dbe1e697f3047118c31fa13854"
-
