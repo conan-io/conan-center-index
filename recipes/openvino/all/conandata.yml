@@ -1,4 +1,20 @@
 sources:
+  "2023.2.0":
+    "openvino":
+      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2023.2.0.tar.gz"
+      sha256: "419b3137a1a549fc5054edbba5b71da76cbde730e8a271769126e021477ad47b"
+    "arm_compute":
+      url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v23.08.tar.gz"
+      sha256: "62f514a555409d4401e5250b290cdf8cf1676e4eb775e5bd61ea6a740a8ce24f"
+    "onednn_cpu":
+      url: "https://github.com/openvinotoolkit/oneDNN/archive/2ead5d4fe5993a797d9a7a4b8b5557b96f6ec90e.tar.gz"
+      sha256: "3c51d577f9e7e4cbd94ad08d267502953ec64513241dda6595b2608fafc8314c"
+    "mlas":
+      url: "https://github.com/openvinotoolkit/mlas/archive/f6425b1394334822390fcd9da12788c9cd0d11da.tar.gz"
+      sha256: "707a6634d62ea5563042a67161472b4be3ffe73c9783719519abdd583b0295f4"
+    "onednn_gpu":
+      url: "https://github.com/oneapi-src/oneDNN/archive/284ad4574939fa784e4ddaa1f4aa577b8eb7a017.tar.gz"
+      sha256: "16f36078339cd08b949efea1d863344cb0b742d9f5898937d07a591b0c4da517"
   "2023.1.0":
     "openvino":
       url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2023.1.0.tar.gz"
@@ -16,6 +32,11 @@ sources:
       url: "https://github.com/oneapi-src/oneDNN/archive/4b82a66ed38ecaa993352e5cc6ed7753656b8a26.tar.gz"
       sha256: "cb17c003fe51bc9b4e20189573956b4446468162adf0fc4cea2ee0820cff0cd0"
 patches:
+  "2023.2.0":
+    - patch_file: "patches/2023.2.0/0001-git-version.patch"
+      patch_description: "Fixed issue with version on Windows"
+      patch_type: "portability"
+      patch_source: "https://github.com/openvinotoolkit/openvino/pull/19628"
   "2023.1.0":
     - patch_file: "patches/2023.1.0/0001-cpu-plugin-compilation-c++17.patch"
       patch_description: "Fixed CPU plugin compilation with C++17"
@@ -49,3 +70,7 @@ patches:
       patch_description: "Support macos 14"
       patch_type: "portability"
       patch_source: "https://github.com/openvinotoolkit/openvino/pull/19946"
+    - patch_file: "patches/2023.1.0/0007-compilation-c++23.patch"
+      patch_description: "Compilation with C++23"
+      patch_type: "portability"
+      patch_source: "https://github.com/openvinotoolkit/openvino/pull/20724"

@@ -1,10 +1,7 @@
-cmake_minimum_required(VERSION 3.1.2)
+cmake_minimum_required(VERSION 3.15)
 project(test_package CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
-
-find_package(libdispatch REQUIRED)
+find_package(libdispatch REQUIRED CONFIG)
 
 # TEST_PACKAGE #################################################################
 add_executable(${CMAKE_PROJECT_NAME} test_package.cpp)

@@ -49,14 +49,14 @@ class FontconfigConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("freetype/2.13.0")
+        self.requires("freetype/2.13.2")
         self.requires("expat/2.5.0")
         if self.settings.os == "Linux":
-            self.requires("util-linux-libuuid/2.39")
+            self.requires("util-linux-libuuid/2.39.2")
 
     def build_requirements(self):
         self.tool_requires("gperf/3.1")
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/1.2.3")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.0.3")
 

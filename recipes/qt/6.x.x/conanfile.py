@@ -181,6 +181,7 @@ class QtConan(ConanFile):
         # Qt6 requires C++17
         return {
             "Visual Studio": "16",
+            "msvc": "192",
             "gcc": "8",
             "clang": "9",
             "apple-clang": "12" if Version(self.version) >= "6.5.0" else "11"
@@ -1035,7 +1036,7 @@ class QtConan(ConanFile):
 
             if self.settings.os == "Windows":
                 self.cpp_info.components["qtGui"].system_libs = ["advapi32", "gdi32", "ole32", "shell32", "user32", "d3d11",
-                    "dxgi", "dxguid", "d2d1", "dwrite"]
+                    "dxgi", "dxguid", "d2d1", "dwrite", "d3d9", "setupapi", "SHCore"]
                 if self.settings.compiler == "gcc":
                     self.cpp_info.components["qtGui"].system_libs.append("uuid")
                 _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
@@ -1120,6 +1121,7 @@ class QtConan(ConanFile):
                     _create_module("QuickWidgets", ["Gui", "Qml", "Quick", "Widgets"])
                 _create_module("QuickShapes", ["Gui", "Qml", "Quick"])
             _create_module("QmlWorkerScript", ["Qml"])
+            _create_module("QuickTest", ["Test"])
 
         if self.options.qttools and self.options.gui and self.options.widgets:
             self.cpp_info.components["qtLinguistTools"].set_property("cmake_target_name", "Qt6::LinguistTools")
@@ -1147,6 +1149,8 @@ class QtConan(ConanFile):
 
         if self.options.qtsvg and self.options.gui:
             _create_module("Svg", ["Gui"])
+            _create_plugin("QSvgIconPlugin", "qsvgicon", "iconengines", [])
+            _create_plugin("QSvgPlugin", "qsvg", "imageformats", [])
             if self.options.widgets:
                 _create_module("SvgWidgets", ["Gui", "Svg", "Widgets"])
 
