@@ -1,7 +1,7 @@
 sources:
   "4.4.0":
     url: "https://github.com/JustWhit3/osmanip/archive/v4.4.0.tar.gz"
-    sha256: "e0d982d19792c3e438e3be99f789434b66788f9a7114f217b3c5f28d0121af7f"
+    sha256: "61c08255afe4fa8694771ed139d9d8a4d5edfba56ffbd25997019a41f6923314"
   "4.3.0":
     url: "https://github.com/JustWhit3/osmanip/archive/v4.3.0.tar.gz"
     sha256: "e0d982d19792c3e438e3be99f789434b66788f9a7114f217b3c5f28d0121af7f"
