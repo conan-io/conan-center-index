@@ -77,9 +77,12 @@ class PdalConan(ConanFile):
         self.requires("boost/1.83.0")
         self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
         self.requires("gdal/3.8.0", transitive_headers=True, transitive_libs=True)
+        self.requires("json-schema-validator/2.2.0")
         self.requires("libgeotiff/1.7.1")
         self.requires("nanoflann/1.5.0", transitive_headers=True, transitive_libs=True)
         self.requires("nlohmann_json/3.11.2", transitive_headers=True, transitive_libs=True)
+        self.requires("proj/9.3.0", transitive_headers=True, transitive_libs=True)
+        self.requires("utfcpp/4.0.1")
         if self.options.with_xml:
             self.requires("libxml2/2.11.5", transitive_headers=True, transitive_libs=True)
         if self.options.with_zstd:
@@ -90,9 +93,9 @@ class PdalConan(ConanFile):
             self.requires("xz_utils/5.4.4")
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.7.2")
-        # TODO: unvendor json-schema-validator
-        # TODO: unvendor utfcpp
-        # TODO: add proj
+        # TODO: unvendor kazhdan
+        # TODO: unvendor lazperf
+        # TODO: unvendor lepcc
         # TODO: add draco
         # TODO: add openscenegraph
 
@@ -151,6 +154,7 @@ class PdalConan(ConanFile):
         apply_conandata_patches(self)
         top_cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         util_cmakelists = os.path.join(self.source_folder, "pdal", "util", "CMakeLists.txt")
+
         # Provide these dependencies via the CMakeLists.txt in the recipe instead
         for cmake_module in [
             "arbiter",
@@ -160,6 +164,9 @@ class PdalConan(ConanFile):
             "lzma",
             "nlohmann",
             "openssl",
+            "proj,"
+            "schema-validator",
+            "utfcpp",
             "zlib",
             "zstd",
         ]:
@@ -180,6 +187,16 @@ class PdalConan(ConanFile):
         rmdir(self, os.path.join(self.source_folder, "vendor", "nanoflann"))
         replace_in_file(self, os.path.join(self.source_folder, "pdal", "private", "KDImpl.hpp"),
                         "#include <nanoflann/nanoflann.hpp>", "#include <nanoflann.hpp>")
+        # Unvendor utfcpp
+        rmdir(self, os.path.join(self.source_folder, "vendor", "utfcpp"))
+        save(self, os.path.join(self.source_folder, "vendor", "utfcpp", "CMakeLists.txt"), "")
+        #unvendor schema-validator
+        rmdir(self, os.path.join(self.source_folder, "vendor", "schema-validator"))
+        save(self, os.path.join(self.source_folder, "vendor", "schema-validator", "CMakeLists.txt"), "")
+        save(self, os.path.join(self.source_folder, "vendor", "schema-validator", "json-schema.hpp"),
+             "#include <nlohmann/json-schema.hpp>\n")
+        replace_in_file(self, top_cmakelists, "${JSON_SCHEMA_LIB_NAME}", "")
+
         # Disabling libxml2 support is only possible via patching
         if not self.options.with_xml:
             replace_in_file(self, top_cmakelists, "include(${PDAL_CMAKE_DIR}/libxml2.cmake)", "")
@@ -190,21 +207,6 @@ class PdalConan(ConanFile):
         replace_in_file(self, top_cmakelists, "include(${PDAL_CMAKE_DIR}/rpath.cmake)", "")
         # Disable copying of symbols from libpdal_util.dylib to libpdalcpp.dylib
         replace_in_file(self, top_cmakelists, "${PDAL_REEXPORT}", "")
-        # Fix static build
-        if not self.options.shared:
-            replace_in_file(self, top_cmakelists, 'add_definitions("-DPDAL_DLL_EXPORT=1")', "")
-            replace_in_file(self, top_cmakelists,
-                            "${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME}",
-                            ("${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME} "
-                             "${PDAL_KAZHDAN_LIB_NAME}"))
-            replace_in_file(self, os.path.join(self.source_folder, "cmake", "macros.cmake"),
-                            "install(TARGETS ${_name}",
-                            ("endif()\n"
-                             'if (PDAL_LIB_TYPE STREQUAL "STATIC" OR NOT ${_library_type} STREQUAL "STATIC")\n'
-                             "    install(TARGETS ${_name}"))
-            replace_in_file(self, util_cmakelists,
-                            "PDAL_ADD_FREE_LIBRARY(${PDAL_UTIL_LIB_NAME} SHARED ${PDAL_UTIL_SOURCES})",
-                            "PDAL_ADD_FREE_LIBRARY(${PDAL_UTIL_LIB_NAME} ${PDAL_LIB_TYPE} ${PDAL_UTIL_SOURCES})")
 
         # TODO: should be turned into a patch and submitted upstream
         for header in [os.path.join(self.source_folder, "io", "private", "connector", "Connector.hpp"),
@@ -284,10 +286,12 @@ class PdalConan(ConanFile):
             "arbiter::arbiter",
             "eigen::eigen",
             "gdal::gdal",
+            "json-schema-validator::json-schema-validator",
             "libgeotiff::libgeotiff",
             "nanoflann::nanoflann",
             "nlohmann_json::nlohmann_json",
-            # "utfcpp::utfcpp",
+            "proj::proj",
+            "utfcpp::utfcpp",
         ]
         if self.options.with_xml:
             self.cpp_info.components["pdal_base"].requires.append("libxml2::libxml2")
@@ -308,7 +312,7 @@ class PdalConan(ConanFile):
         self.cpp_info.components["pdal_util"].requires = [
             "boost::filesystem",
             "nlohmann_json::nlohmann_json",
-            # "utfcpp::utfcpp",
+            "utfcpp::utfcpp",
         ]
         if self.options.get_safe("with_unwind"):
             self.cpp_info.components["pdal_util"].requires.append("libunwind::libunwind")

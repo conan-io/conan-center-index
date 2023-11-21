@@ -26,11 +26,19 @@ find_package(nlohmann_json REQUIRED CONFIG)
 link_libraries(nlohmann_json::nlohmann_json)
 include_directories(BEFORE src/vendor/nlohmann)
 
+find_package(nlohmann_json_schema_validator REQUIRED CONFIG)
+link_libraries(nlohmann_json_schema_validator)
+
+find_package(utf8cpp REQUIRED CONFIG)
+link_libraries(utf8::cpp)
+
+find_package(proj REQUIRED CONFIG)
+link_libraries(PROJ::proj)
+
 find_package(LibLZMA)
 if(LibLZMA_FOUND)
     link_libraries(LibLZMA::LibLZMA)
 endif()
-
 
 find_package(LibXml2 QUIET CONFIG)
 if(LibXml2_FOUND)
