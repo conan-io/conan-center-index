@@ -93,11 +93,23 @@ class PdalConan(ConanFile):
             self.requires("xz_utils/5.4.4")
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.7.2")
-        # TODO: unvendor kazhdan
-        # TODO: unvendor lazperf
-        # TODO: unvendor lepcc
-        # TODO: add draco
-        # TODO: add openscenegraph
+        # TODO: unvendor kazhdan (not on CCI, https://github.com/mkazhdan/PoissonRecon)
+        # TODO: unvendor lazperf (not on CCI, https://github.com/hobuinc/laz-perf)
+        # TODO: unvendor lepcc (not on CCI, https://github.com/Esri/lepcc)
+        # TODO: add arrow support (requires parquet)
+        # TODO: add cpd support (not on CCI, https://github.com/gadomski/cpd)
+        # TODO: add ceres support
+        # TODO: add draco support
+        # TODO: add hdf5 support
+        # TODO: add iconv support
+        # TODO: add libe57format support (and unvendor)
+        # TODO: add libexecinfo support
+        # TODO: add libpq support
+        # TODO: add mbsystem support (not on CCI, https://github.com/dwcaress/MB-System)
+        # TODO: add nitro support (not on CCI, https://github.com/hobu/nitro)
+        # TODO: add openscenegraph support
+        # TODO: add teaserpp support (not on CCI, https://github.com/MIT-SPARK/TEASER-plusplus)
+        # TODO: add tiledb support
 
     @property
     def _required_boost_components(self):
