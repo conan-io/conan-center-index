@@ -36,6 +36,10 @@ class LibHALConan(ConanFile):
             "apple-clang": "14"
         }
 
+    @property
+    def _bare_metal(self):
+        return self.settings.os == "baremetal"
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -43,14 +47,12 @@ class LibHALConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # NOTE: from the author, kammce, to the conan team. although boost-leaf
-        # is marked as deprecated, it is required for libhal to work with bare
-        # metal cross compilers such as the Arm GNU Toolchain. The main issue
-        # with boost is its dependency on things such as bzip that cannot
-        # compile on freestanding environments. boost-leaf has no dependencies
-        # and can work in freestanding environments.
+        # NOTE: from the author, kammce, to the conan team. boost-leaf is tied
+        # to the 2.0.1 and must be kept for it to work correctly.
         version = Version(self.version)
-        if "2.0.0" <= version and version < "3.0.0":
+        if version == "2.0.1":
+            self.requires("boost-leaf/1.81.0",)
+        elif version == "2.0.2":
             self.requires("boost/1.83.0",
                           transitive_headers=True,
                           options={ "header_only": True })
@@ -98,4 +100,13 @@ class LibHALConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
+
+        version = Version(self.version)
+        if self._bare_metal and version < "3.0.0":
+            self.cpp_info.defines = [
+                "BOOST_LEAF_EMBEDDED",
+                "BOOST_LEAF_NO_THREADS"
+            ]
