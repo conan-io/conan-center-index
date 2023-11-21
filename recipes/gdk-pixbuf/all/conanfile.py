@@ -178,6 +178,10 @@ class GdkPixbufConan(ConanFile):
             # custom_target admits also an "env" parameter, but it's not working as expected
             replace_in_file(self, os.path.join(self.source_folder, "gdk-pixbuf", "meson.build"),
                             "build_by_default: true", "build_by_default: false")
+            # Using Conan libgettext instead
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                            "intl_dep = cc.find_library('intl', required: false)", "intl_dep = dependency('libgettext', required: false)")
+
 
     def build(self):
         self._patch_sources()
