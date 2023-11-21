@@ -1,0 +1,19 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 46f5cc9cc..e9f77a283 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -234,9 +234,11 @@ if(NOT BUILD_SHARED_LIBS)
+     set(FASTDDS_STATIC ON)
+ endif()
+ 
+-eprosima_find_package(fastcdr REQUIRED)
+-eprosima_find_thirdparty(Asio asio VERSION 1.10.8)
+-eprosima_find_thirdparty(TinyXML2 tinyxml2)
++eprosima_find_thirdparty(fastcdr REQUIRED)
++eprosima_find_thirdparty(asio REQUIRED)
++eprosima_find_thirdparty(tinyxml2 REQUIRED)
++set(TINYXML2_LIBRARY tinyxml2::tinyxml2)
++set(Asio_INCLUDE_DIR ${asio_INCLUDE_DIR})
+ 
+ find_package(foonathan_memory REQUIRED)
+ message(STATUS "Found foonathan_memory: ${foonathan_memory_DIR}")
