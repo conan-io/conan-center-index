@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.15)
 project(cdisdk LANGUAGES C CXX)
 
 find_package(AWSSDK REQUIRED CONFIG)
-add_library(aws-cpp-sdk-core ALIAS AWS::aws-sdk-cpp-core)
 add_subdirectory(aws-cpp-sdk-cdi)
 
 find_package(aws-libfabric REQUIRED CONFIG)
@@ -35,7 +34,7 @@ if (NOT MSVC)
         "$<$<CONFIG:RELEASE>:-O3;-DNDEBUG>"
     )
     # https://github.com/aws/aws-cdi-sdk/blob/v2.4.1/Makefile#L376-L379
-    target_link_options(cdisdk PRIVATE -z defs --version-script ${CMAKE_SOURCE_DIR}/libcdisdk.vers)
+    target_link_options(cdisdk PRIVATE -z defs -Wl,--version-script ${CMAKE_SOURCE_DIR}/libcdisdk.vers)
 endif()
 if (UNIX)
     target_link_libraries(cdisdk PRIVATE dl rt m)

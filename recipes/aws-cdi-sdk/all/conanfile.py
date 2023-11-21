@@ -68,6 +68,7 @@ class AwsCdiSdkConan(ConanFile):
         tc.variables["MAJOR_MINOR_VERSION"] = f"{major}.{minor}"
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("aws-sdk-cpp", "cmake_target_name", "aws-cpp-sdk-core")
         deps.generate()
 
     def build(self):
