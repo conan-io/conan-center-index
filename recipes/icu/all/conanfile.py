@@ -33,6 +33,7 @@ class ICUConan(ConanFile):
         "data_packaging": ["files", "archive", "library", "static"],
         "with_dyload": [True, False],
         "dat_package_file": [None, "ANY"],
+        "custom_data_hash": [None, "ANY"],
         "with_icuio": [True, False],
         "with_extras": [True, False],
     }
@@ -42,6 +43,7 @@ class ICUConan(ConanFile):
         "data_packaging": "archive",
         "with_dyload": True,
         "dat_package_file": None,
+        "custom_data_hash": None,
         "with_icuio": True,
         "with_extras": False,
     }
@@ -71,7 +73,7 @@ class ICUConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def validate(self):
-        if self.options.dat_package_file:
+        if self.options.dat_package_file and not self.info.options.custom_data_hash:
             if not os.path.exists(str(self.options.dat_package_file)):
                 raise ConanInvalidConfiguration("Non-existent dat_package_file specified")
 
@@ -87,8 +89,9 @@ class ICUConan(ConanFile):
         return m.hexdigest()
 
     def package_id(self):
-        if self.info.options.dat_package_file:
-            self.info.options.dat_package_file = self._sha256sum(str(self.info.options.dat_package_file))
+        if self.info.options.dat_package_file and not self.info.options.custom_data_hash:
+            self.info.options.custom_data_hash = self._sha256sum(str(self.info.options.dat_package_file))
+        self.info.options.dat_package_file = "custom ICU data file"
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
