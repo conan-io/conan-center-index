@@ -63,7 +63,7 @@ class ElfutilsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.44.0")
         if self.options.with_bzlib:
