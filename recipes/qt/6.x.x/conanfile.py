@@ -181,6 +181,7 @@ class QtConan(ConanFile):
         # Qt6 requires C++17
         return {
             "Visual Studio": "16",
+            "msvc": "192",
             "gcc": "8",
             "clang": "9",
             "apple-clang": "12" if Version(self.version) >= "6.5.0" else "11"
@@ -325,7 +326,7 @@ class QtConan(ConanFile):
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.3.0")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
-            self.requires("freetype/2.13.0")
+            self.requires("freetype/2.13.2")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.14.2")
         if self.options.get_safe("with_icu", False):
@@ -574,6 +575,8 @@ class QtConan(ConanFile):
                 self.output.warning(f"host not supported: {self.settings.os} {self.settings.compiler} {self.settings.compiler.version} {self.settings.arch}")
         if self.options.cross_compile:
             tc.variables["QT_QMAKE_DEVICE_OPTIONS"] = f"CROSS_COMPILE={self.options.cross_compile}"
+        if cross_building(self):
+            tc.variables["QT_HOST_PATH"] = self.dependencies.direct_build["qt"].package_folder
 
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
@@ -588,12 +591,17 @@ class QtConan(ConanFile):
         current_cpp_std = self.settings.get_safe("compiler.cppstd", default_cppstd(self))
         current_cpp_std = str(current_cpp_std).replace("gnu", "")
         cpp_std_map = {
-            "20": "FEATURE_cxx20"
+            11: "FEATURE_cxx11",
+            14: "FEATURE_cxx14",
+            17: "FEATURE_cxx17",
+            20: "FEATURE_cxx20"
             }
         if Version(self.version) >= "6.5.0":
-            cpp_std_map["23"] = "FEATURE_cxx2b"
+            cpp_std_map[23] = "FEATURE_cxx2b"
+        
+        for std,feature in cpp_std_map.items():
+            tc.variables[feature] = "ON" if int(current_cpp_std) >= std else "OFF"
 
-        tc.variables[cpp_std_map.get(current_cpp_std, "FEATURE_cxx17")] = "ON"
         tc.variables["QT_USE_VCPKG"] = False
         tc.cache_variables["QT_USE_VCPKG"] = False
 
@@ -1035,7 +1043,7 @@ class QtConan(ConanFile):
 
             if self.settings.os == "Windows":
                 self.cpp_info.components["qtGui"].system_libs = ["advapi32", "gdi32", "ole32", "shell32", "user32", "d3d11",
-                    "dxgi", "dxguid", "d2d1", "dwrite"]
+                    "dxgi", "dxguid", "d2d1", "dwrite", "d3d9", "setupapi", "SHCore"]
                 if self.settings.compiler == "gcc":
                     self.cpp_info.components["qtGui"].system_libs.append("uuid")
                 _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
@@ -1119,6 +1127,7 @@ class QtConan(ConanFile):
                 if self.options.widgets:
                     _create_module("QuickWidgets", ["Gui", "Qml", "Quick", "Widgets"])
                 _create_module("QuickShapes", ["Gui", "Qml", "Quick"])
+                _create_module("QuickTest", ["Test", "Quick"])
             _create_module("QmlWorkerScript", ["Qml"])
 
         if self.options.qttools and self.options.gui and self.options.widgets:
@@ -1147,6 +1156,8 @@ class QtConan(ConanFile):
 
         if self.options.qtsvg and self.options.gui:
             _create_module("Svg", ["Gui"])
+            _create_plugin("QSvgIconPlugin", "qsvgicon", "iconengines", [])
+            _create_plugin("QSvgPlugin", "qsvg", "imageformats", [])
             if self.options.widgets:
                 _create_module("SvgWidgets", ["Gui", "Svg", "Widgets"])
 
@@ -1355,10 +1366,15 @@ class QtConan(ConanFile):
             _add_build_module("qtCore", self._cmake_entry_point_file)
 
         for m in os.listdir(os.path.join("lib", "cmake")):
-            module = os.path.join("lib", "cmake", m, f"{m}Macros.cmake")
             component_name = m.replace("Qt6", "qt")
             if component_name == "qt":
                 component_name = "qtCore"
+
+            module = os.path.join("lib", "cmake", m, f"{m}Macros.cmake")
+            if os.path.isfile(module):
+                _add_build_module(component_name, module)
+
+            module = os.path.join("lib", "cmake", m, f"{m}ConfigExtras.cmake")
             if os.path.isfile(module):
                 _add_build_module(component_name, module)
 
@@ -1393,7 +1409,5 @@ class QtConan(ConanFile):
 
         for c in self.cpp_info.components:
             _add_build_modules_for_component(c)
-
-        build_modules_list.append(os.path.join(self.package_folder, "lib", "cmake", "Qt6Core", "Qt6CoreConfigExtras.cmake"))
 
         self.cpp_info.set_property("cmake_build_modules", build_modules_list)
