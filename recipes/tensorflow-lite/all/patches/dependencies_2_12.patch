@@ -1,6 +1,6 @@
 --- a/tensorflow/lite/CMakeLists.txt	2023-04-12 18:04:31
 +++ b/tensorflow/lite/CMakeLists.txt	2023-04-13 08:40:25
-@@ -140,12 +140,11 @@
+@@ -140,11 +140,10 @@
  endmacro()
  # Find TensorFlow Lite dependencies.
  find_package(absl REQUIRED)
@@ -11,7 +11,6 @@
  find_package(Flatbuffers REQUIRED)
  find_package(gemmlowp REQUIRED)
 -find_package(NEON_2_SSE REQUIRED)
- find_package(clog REQUIRED)
  find_package(cpuinfo REQUIRED)  #CPUINFO is used by XNNPACK and RUY library
  find_package(ruy REQUIRED)
 @@ -151,6 +150,11 @@
