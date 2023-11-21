@@ -1,5 +1,6 @@
 import glob
 import os
+import re
 import shutil
 import stat
 
@@ -68,6 +69,7 @@ class CernRootConan(ConanFile):
     def requirements(self):
         self.requires("cfitsio/4.3.0")
         self.requires("fftw/3.3.10")
+        self.requires("freetype/2.13.2")
         self.requires("giflib/5.2.1")
         self.requires("glew/2.2.0")
         self.requires("glu/system")
@@ -76,11 +78,11 @@ class CernRootConan(ConanFile):
         self.requires("libpng/1.6.40")
         self.requires("libxml2/2.11.5")
         self.requires("lz4/1.9.4")
+        self.requires("onetbb/2021.10.0")
         self.requires("opengl/system")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("pcre/8.45")
         self.requires("sqlite3/3.44.0")
-        self.requires("onetbb/2021.10.0")
         self.requires("xorg/system")
         self.requires("xxhash/0.8.2")
         self.requires("xz_utils/5.4.4")
@@ -91,19 +93,14 @@ class CernRootConan(ConanFile):
         self._enforce_libcxx_requirements()
 
     def _enforce_minimum_compiler_version(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warning(
-                f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support."
+        if min_version and Version(self.settings.compiler.version) < min_version:
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires C++{self._minimum_cpp_standard} support. "
+                f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it."
             )
-        else:
-            if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.name} requires C++{self._minimum_cpp_standard} support. "
-                    f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it."
-                )
 
     def _enforce_libcxx_requirements(self):
         libcxx = self.settings.get_safe("compiler.libcxx")
@@ -174,6 +171,10 @@ class CernRootConan(ConanFile):
         tc.generate()
 
         tc = CMakeDeps(self)
+        tc.set_property("openssl", "cmake_file_name", "OPENSSL")
+        tc.set_property("xz_utils", "cmake_file_name", "LIBLZMA")
+        tc.set_property("xxhash", "cmake_file_name", "XXHASH")
+        tc.set_property("pcre", "cmake_target_name", "PCRE::PCRE")
         tc.set_property("pcre", "cmake_target_name", "PCRE::PCRE")
         tc.set_property("xxhash", "cmake_target_name", "xxHash::xxHash")
         tc.set_property("lz4", "cmake_target_name", "LZ4::LZ4")
@@ -184,6 +185,14 @@ class CernRootConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
             "set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)",
             "list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)")
+
+        # Convert all find_package names to upper case to ensure the CMake vars created by Conan
+        # are upper case as well, matching the project's conventions.
+        # Add CONFIG to avoid using system libraries, if possible.
+        path = self.source_path.joinpath("cmake", "modules", "SearchInstalledSoftware.cmake")
+        content = re.sub(r"find_package\((\S+) ", lambda m: f"find_package({m[1].upper()} CONFIG ", path.read_text())
+        content = content.replace("X11 CONFIG", "X11")
+        path.write_text(content)
 
     def _fix_source_permissions(self):
         # Fix execute permissions on scripts
@@ -207,7 +216,7 @@ class CernRootConan(ConanFile):
 
     @property
     def _cmake_cxx_standard(self):
-        return str(self.settings.get_safe("compiler.cppstd", "11"))
+        return str(self.settings.get_safe("compiler.cppstd", self._minimum_cpp_standard))
 
     @property
     def _cmake_pyrootopt(self):
