@@ -4,7 +4,7 @@ import textwrap
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import export_conandata_patches, get, copy, replace_in_file, save
+from conan.tools.files import get, copy, replace_in_file, save
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
@@ -37,16 +37,13 @@ class RmmConan(ConanFile):
             "apple-clang": "14.0",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("thrust/1.17.2")
-        self.requires("spdlog/1.11.0")
-        self.requires("fmt/9.1.0")
+        self.requires("spdlog/1.12.0")
+        self.requires("fmt/10.1.1")
 
     def package_id(self):
         self.info.clear()
@@ -54,8 +51,13 @@ class RmmConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+
+        def lazy_lt_semver(v1, v2):
+            # Needed to allow version "9" >= "9.3" for gcc
+            return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))
+
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+        if minimum_version and lazy_lt_semver(self.settings.compiler.version, minimum_version):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
@@ -83,12 +85,8 @@ class RmmConan(ConanFile):
         if Version(self.version) < "23.08":
             # https://github.com/rapidsai/rmm/pull/1295
             # Add missing include in logger.hpp
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "include", "rmm", "logger.hpp"),
-                "#include <string>",
-                "#include <string>\n#include <array>",
-            )
+            replace_in_file(self, os.path.join(self.source_folder, "include", "rmm", "logger.hpp"),
+                            "#include <string>", "#include <string>\n#include <array>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -96,23 +94,18 @@ class RmmConan(ConanFile):
         self._patch_sources()
 
     def package(self):
-        copy(
-            self,
-            pattern="LICENSE",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
-        )
+        copy(self, "LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
         for pattern in ["*.hpp", "*.h"]:
-            copy(
-                self,
-                pattern=pattern,
-                dst=os.path.join(self.package_folder, "include"),
-                src=os.path.join(self.source_folder, "include"),
-            )
+            copy(self, pattern,
+                 dst=os.path.join(self.package_folder, "include"),
+                 src=os.path.join(self.source_folder, "include"))
 
     def package_info(self):
-        self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("dl")
