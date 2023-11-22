@@ -149,8 +149,8 @@ class GdkPixbufConan(ConanFile):
         replace_in_file(self, meson_build, "subdir('tests')", "#subdir('tests')")
         replace_in_file(self, meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
         replace_in_file(self, meson_build,
-                              "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')" if Version(self.version) >= "2.42.6"
-                              else "gmodule_dep.get_pkgconfig_variable('gmodule_supported')", "'true'")
+                        "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')" if Version(self.version) >= "2.42.6"
+                        else "gmodule_dep.get_pkgconfig_variable('gmodule_supported')", "'true'")
         # workaround https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/issues/203
         if Version(self.version) >= "2.42.6":
             replace_in_file(self, os.path.join(self.source_folder, "build-aux", "post-install.py"),
@@ -163,25 +163,31 @@ class GdkPixbufConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "gdk-pixbuf", "meson.build"),
                         "dependencies: gdk_pixbuf_deps + [ gdkpixbuf_dep ],",
                         "dependencies: loaders_deps + gdk_pixbuf_deps + [ gdkpixbuf_dep ],")
-        if self.settings.os == "Macos":
-            # Using Conan libgettext instead
+        # Forcing Conan libgettext instead of system one (if exists)
+        try:
+            # glib in Linux does not depend on gettext, but let's do this check safer just in case
+            gettext_version = self.dependencies["libgettext"].ref.version
+        except KeyError:
+            pass
+        else:
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
-                            "intl_dep = cc.find_library('intl', required: false)", "intl_dep = dependency('libgettext', required: false)")
-            if self.options.shared:
-                # Workaround to avoid generating gdk-pixbuf/loaders.cache
-                #
-                #   [167/167] Generating gdk-pixbuf/loaders.cache with a custom command (wrapped by meson to capture output)
-                #   FAILED: gdk-pixbuf/loaders.cache
-                #   meson.py --internal exe --capture gdk-pixbuf/loaders.cache -- xxxx/gdk-pixbuf/gdk-pixbuf-query-loaders
-                #   --- stderr ---
-                #   dyld[25158]: Library not loaded: /lib/libgnuintl.8.dylib
-                #   Reason: tried: '/lib/libgnuintl.8.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/lib/libgnuintl.8.dylib' (no such file)
-                #
-                # Obviously, the libgnuintl.8.dylib is in the VirtualRunEnv, but the current env is not passed to
-                # the meson custom_target function as it's wrappering the execution
-                # custom_target admits also an "env" parameter, but it's not working as expected
-                replace_in_file(self, os.path.join(self.source_folder, "gdk-pixbuf", "meson.build"),
-                                "build_by_default: true", "build_by_default: false")
+                            "intl_dep = cc.find_library('intl', required: false)",
+                            f"intl_dep = dependency('libgettext', version: '{gettext_version}', required: false, method : 'pkg-config')")
+        if self.settings.os == "Macos" and self.options.shared:
+            # Workaround to avoid generating gdk-pixbuf/loaders.cache
+            #
+            #   [167/167] Generating gdk-pixbuf/loaders.cache with a custom command (wrapped by meson to capture output)
+            #   FAILED: gdk-pixbuf/loaders.cache
+            #   meson.py --internal exe --capture gdk-pixbuf/loaders.cache -- xxxx/gdk-pixbuf/gdk-pixbuf-query-loaders
+            #   --- stderr ---
+            #   dyld[25158]: Library not loaded: /lib/libgnuintl.8.dylib
+            #   Reason: tried: '/lib/libgnuintl.8.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/lib/libgnuintl.8.dylib' (no such file)
+            #
+            # Obviously, the libgnuintl.8.dylib is in the VirtualRunEnv, but the current env is not passed to
+            # the meson custom_target function as it's wrappering the execution
+            # custom_target admits also an "env" parameter, but it's not working as expected
+            replace_in_file(self, os.path.join(self.source_folder, "gdk-pixbuf", "meson.build"),
+                            "build_by_default: true", "build_by_default: false")
 
     def build(self):
         self._patch_sources()
