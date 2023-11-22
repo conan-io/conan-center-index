@@ -620,12 +620,15 @@ class GdalConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.TXT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE.TXT", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        os.rename(os.path.join(self.package_folder, "share"),
+                  os.path.join(self.package_folder, "res"))
+        rmdir(self, os.path.join(self.package_folder, "res", "bash-completion"))
+        rmdir(self, os.path.join(self.package_folder, "res", "man"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "GDAL")
@@ -640,6 +643,7 @@ class GdalConan(ConanFile):
             if self.settings.build_type == "Debug":
                 libname += "d"
         self.cpp_info.libs = [libname]
+        self.cpp_info.resdirs = ["res"]
 
         self.cpp_info.requires.extend(["json-c::json-c"])
         self.cpp_info.requires.extend(["libgeotiff::libgeotiff"])
@@ -765,10 +769,10 @@ class GdalConan(ConanFile):
                 self.cpp_info.system_libs += ["crypt32"]
 
         gdal_data_path = os.path.join(self.package_folder, "res", "gdal")
-        self.runenv_info.prepend_path("GDAL_DATA", gdal_data_path)
+        self.runenv_info.define_path("GDAL_DATA", gdal_data_path)
 
         if self.options.tools:
-            self.buildenv_info.prepend_path("GDAL_DATA", gdal_data_path)
+            self.buildenv_info.define_path("GDAL_DATA", gdal_data_path)
 
         # TODO: remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "GDAL"
