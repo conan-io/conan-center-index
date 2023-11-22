@@ -418,9 +418,8 @@ class MagnumConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Magnum")
-        self.cpp_info.set_property("cmake_target_name", "Magnum::Magnum")
-        self.cpp_info.names["cmake_find_package"] = "Magnum"
-        self.cpp_info.names["cmake_find_package_multi"] = "Magnum"
+        self.cpp_info.filenames["cmake_find_package"] = "Magnum"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Magnum"
 
         magnum_plugin_libdir = "magnum-d" if self.settings.build_type == "Debug" and self.options.shared_plugins else "magnum"
         plugin_lib_suffix = "-d" if self.settings.build_type == "Debug" and not self.options.shared_plugins else ""
@@ -432,7 +431,7 @@ class MagnumConan(ConanFile):
             component.names["cmake_find_package"] = lib_name
             component.names["cmake_find_package_multi"] = lib_name
             component.libs = [f"Magnum{lib_name}{lib_suffix}"]
-            component.requires = requires
+            component.requires = requires + ["_magnum"]
 
         build_modules = []
 
