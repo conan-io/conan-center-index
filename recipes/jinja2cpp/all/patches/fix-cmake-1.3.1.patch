@@ -52,3 +52,14 @@ index fc8f51d..49540d3 100644
  else ()
      set (JINJA2CPP_PRIVATE_LIBS ${JINJA2_PRIVATE_LIBS_INT})
  endif ()
+diff --git a/thirdparty/thirdparty-conan-build.cmake b/thirdparty/thirdparty-conan-build.cmake
+index 773cb87..40e0b59 100644
+--- a/thirdparty/thirdparty-conan-build.cmake
++++ b/thirdparty/thirdparty-conan-build.cmake
+@@ -11,5 +11,5 @@ find_package(fmt REQUIRED)
+ find_package(RapidJSON REQUIRED)
+ 
+ set(JINJA2_PRIVATE_LIBS_INT Boost::headers Boost::filesystem)
+-set(JINJA2_PUBLIC_LIBS_INT Boost::json fmt::fmt rapidjson Boost::regex
++set(JINJA2_PUBLIC_LIBS_INT fmt::fmt rapidjson
+     nlohmann_json::nlohmann_json nonstd::expected-lite nonstd::variant-lite nonstd::optional-lite nonstd::string-view-lite)
