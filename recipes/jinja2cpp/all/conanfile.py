@@ -77,6 +77,10 @@ class Jinja2cppConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+    def build_requirements(self):
+        if Version(self.version) >= "1.3.1":
+            self.tool_requires("cmake/[>=3.23 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
