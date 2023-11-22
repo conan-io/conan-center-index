@@ -112,14 +112,14 @@ class SentryNativeConan(ConanFile):
 
     def requirements(self):
         if self.options.transport == "curl":
-            self.requires("libcurl/8.2.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.backend == "crashpad":
             if self.options.with_crashpad == "google":
                 self.requires("crashpad/cci.20220219")
             else:
                 self.requires("zlib/[>=1.2.11 <2]")
                 if self.settings.os in ("Linux", "FreeBSD"):
-                    self.requires("libcurl/8.2.1")
+                    self.requires("libcurl/[>=7.78.0 <9]")
                 if self.options.get_safe("crashpad_with_tls"):
                     self.requires("openssl/[>=1.1 <4]")
         elif self.options.backend == "breakpad":
