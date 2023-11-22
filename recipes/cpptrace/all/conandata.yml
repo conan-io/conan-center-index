@@ -3,7 +3,7 @@ sources:
   "0.3.0":
     url:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.3.0-rc1.tar.gz"
-    sha256: "31fe45c5557d020d2ae1f955eefe24ffa60481604c907e0ebf23e09f88058f11"
+    sha256: "d217e1341039b1aed4537b5a496aae2041b1e7bf7a327bf8c496c0e92b517625"
   "0.2.1":
     url:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.2.1.tar.gz"
