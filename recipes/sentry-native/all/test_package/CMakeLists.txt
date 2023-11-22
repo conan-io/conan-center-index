@@ -6,7 +6,9 @@ find_package(sentry REQUIRED CONFIG)
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE sentry::sentry)
 
-if(APPLE OR WIN32)
+if(UNIX AND NOT APPLE)
+  target_link_libraries(${PROJECT_NAME} PRIVATE breakpad_client)
+else()
   target_link_libraries(${PROJECT_NAME} PRIVATE crashpad::client)
 endif()
 
