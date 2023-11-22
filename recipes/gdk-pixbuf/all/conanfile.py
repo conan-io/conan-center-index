@@ -163,24 +163,26 @@ class GdkPixbufConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "gdk-pixbuf", "meson.build"),
                         "dependencies: gdk_pixbuf_deps + [ gdkpixbuf_dep ],",
                         "dependencies: loaders_deps + gdk_pixbuf_deps + [ gdkpixbuf_dep ],")
-        if self.settings.os == "Macos" and self.options.shared:
-            # Workaround to avoid generating gdk-pixbuf/loaders.cache
-            #
-            #   [167/167] Generating gdk-pixbuf/loaders.cache with a custom command (wrapped by meson to capture output)
-            #   FAILED: gdk-pixbuf/loaders.cache
-            #   meson.py --internal exe --capture gdk-pixbuf/loaders.cache -- xxxx/gdk-pixbuf/gdk-pixbuf-query-loaders
-            #   --- stderr ---
-            #   dyld[25158]: Library not loaded: /lib/libgnuintl.8.dylib
-            #   Reason: tried: '/lib/libgnuintl.8.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/lib/libgnuintl.8.dylib' (no such file)
-            #
-            # Obviously, the libgnuintl.8.dylib is in the VirtualRunEnv, but the current env is not passed to
-            # the meson custom_target function as it's wrappering the execution
-            # custom_target admits also an "env" parameter, but it's not working as expected
-            replace_in_file(self, os.path.join(self.source_folder, "gdk-pixbuf", "meson.build"),
-                            "build_by_default: true", "build_by_default: false")
+        if self.settings.os == "Macos":
             # Using Conan libgettext instead
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                             "intl_dep = cc.find_library('intl', required: false)", "intl_dep = dependency('libgettext', required: false)")
+
+            if self.options.shared:
+                # Workaround to avoid generating gdk-pixbuf/loaders.cache
+                #
+                #   [167/167] Generating gdk-pixbuf/loaders.cache with a custom command (wrapped by meson to capture output)
+                #   FAILED: gdk-pixbuf/loaders.cache
+                #   meson.py --internal exe --capture gdk-pixbuf/loaders.cache -- xxxx/gdk-pixbuf/gdk-pixbuf-query-loaders
+                #   --- stderr ---
+                #   dyld[25158]: Library not loaded: /lib/libgnuintl.8.dylib
+                #   Reason: tried: '/lib/libgnuintl.8.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/lib/libgnuintl.8.dylib' (no such file)
+                #
+                # Obviously, the libgnuintl.8.dylib is in the VirtualRunEnv, but the current env is not passed to
+                # the meson custom_target function as it's wrappering the execution
+                # custom_target admits also an "env" parameter, but it's not working as expected
+                replace_in_file(self, os.path.join(self.source_folder, "gdk-pixbuf", "meson.build"),
+                                "build_by_default: true", "build_by_default: false")
 
 
     def build(self):
