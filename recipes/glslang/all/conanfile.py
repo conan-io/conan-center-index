@@ -42,10 +42,6 @@ class GlslangConan(ConanFile):
 
     short_paths = True
 
-    @property
-    def _is_v1(self):
-        return Version(self.version).major == 1
-
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
@@ -105,9 +101,8 @@ class GlslangConan(ConanFile):
             tc.variables["OVERRIDE_MSVCCRT"] = False
         if is_apple_os(self):
             tc.variables["CMAKE_MACOSX_BUNDLE"] = False
-        if not self._is_v1:
-            # Generate a relocatable shared lib on Macos
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        # Generate a relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -145,8 +140,8 @@ class GlslangConan(ConanFile):
 
         has_machineindependent = not self.options.shared
         has_genericcodegen = not self.options.shared
-        has_osdependent = not self._is_v1 or not self.options.shared
-        has_oglcompiler = not self._is_v1 or not self.options.shared
+        has_osdependent = not self.options.shared
+        has_oglcompiler = not self.options.shared
 
         # glslang
         self.cpp_info.components["glslang-core"].set_property("cmake_target_name", "glslang::glslang")
