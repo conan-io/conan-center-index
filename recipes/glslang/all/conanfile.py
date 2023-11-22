@@ -3,11 +3,9 @@ import re
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
-from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.54.0"
 
@@ -97,10 +95,8 @@ class GlslangConan(ConanFile):
         tc.variables["ENABLE_PCH"] = False
         tc.variables["ENABLE_CTEST"] = False
         tc.variables["USE_CCACHE"] = False
-        if self.settings.os == "Windows":
-            tc.variables["OVERRIDE_MSVCCRT"] = False
-        if is_apple_os(self):
-            tc.variables["CMAKE_MACOSX_BUNDLE"] = False
+        tc.variables["OVERRIDE_MSVCCRT"] = False
+        tc.variables["CMAKE_MACOSX_BUNDLE"] = False
         # Generate a relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
@@ -109,15 +105,17 @@ class GlslangConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        for cmake_file in sorted(self.source_path.rglob("CMakeLists.txt")):
-            content = cmake_file.read_text(encoding="utf8")
-            if "POSITION_INDEPENDENT_CODE ON" in content:
-                content = re.sub(r"set_property\(TARGET \S+ PROPERTY POSITION_INDEPENDENT_CODE ON\)\n", "", content)
-                content = content.replace("POSITION_INDEPENDENT_CODE ON", "")
-                cmake_file.write_text(content, encoding="utf8")
-                self.output.info(f"Patched fPIC handling in {cmake_file.relative_to(self.source_path)}")
-            if "POSITION_INDEPENDENT_CODE" in content:
-                raise ConanException(f"POSITION_INDEPENDENT_CODE found in {cmake_file}, please update the recipe")
+        if not self.options.get_safe("fPIC"):
+            # Only removing when fPIC is False, since Conan's automatic fPIC handling does not appear to be sufficient for some reason
+            for cmake_file in sorted(self.source_path.rglob("CMakeLists.txt")):
+                content = cmake_file.read_text(encoding="utf8")
+                if "POSITION_INDEPENDENT_CODE ON" in content:
+                    content = re.sub(r"set_property\(TARGET \S+ PROPERTY POSITION_INDEPENDENT_CODE ON\)\n", "", content)
+                    content = content.replace("POSITION_INDEPENDENT_CODE ON", "")
+                    cmake_file.write_text(content, encoding="utf8")
+                    self.output.info(f"Patched fPIC handling in {cmake_file.relative_to(self.source_path)}")
+                if "POSITION_INDEPENDENT_CODE" in content:
+                    raise ConanException(f"POSITION_INDEPENDENT_CODE found in {cmake_file}, please update the recipe")
 
     def build(self):
         self._patch_sources()
@@ -126,7 +124,7 @@ class GlslangConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
@@ -134,7 +132,7 @@ class GlslangConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "glslang")
-        self.cpp_info.set_property("cmake_target_name", "glslang::glslang-do-not-use") # because glslang-core target is glslang::glslang
+        self.cpp_info.set_property("cmake_target_name", "glslang::_glslang-do-not-use") # because glslang-core target is glslang::glslang
 
         lib_suffix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
 
