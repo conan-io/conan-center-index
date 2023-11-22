@@ -159,9 +159,11 @@ class NCursesConan(ConanFile):
             ]
             # The env vars below are used by ./configure, but not during make
             tc.make_args += [
-                "CC=cl -nologo -FS -DEBUG:NONE",
-                "CPP=cl -nologo -FS -DEBUG:NONE -E",
+                "CC=cl -nologo",
+                "CPP=cl -nologo -E",
             ]
+            tc.extra_cflags.append("-FS")
+            tc.extra_cxxflags.append("-FS")
             tc.extra_cxxflags.append("-EHsc")
             if self.options.get_safe("with_extended_colors"):
                 tc.extra_cflags.append(" ".join(f"-I{dir}" for dir in self.dependencies["naive-tsearch"].cpp_info.includedirs))
@@ -180,8 +182,8 @@ class NCursesConan(ConanFile):
 
         if is_msvc(self):
             env = Environment()
-            env.define("CC", "cl -nologo -FS -DEBUG:NONE")
-            env.define("CXX", "cl -nologo -FS -DEBUG:NONE")
+            env.define("CC", "cl -nologo -FS")
+            env.define("CXX", "cl -nologo -FS")
             env.define("LD", "link")
             env.define("AR", "lib")
             env.define("NM", "dumpbin -symbols")
