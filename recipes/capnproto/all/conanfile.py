@@ -205,11 +205,13 @@ class CapnprotoConan(ConanFile):
             {"name": "capnpc", "requires": ["capnp", "kj"]},
             {"name": "kj", "requires": []},
             {"name": "kj-async", "requires": ["kj"]},
-            {"name": "kj-http", "requires": ["kj", "kj-async"]},
             {"name": "kj-test", "requires": ["kj"]},
-        ]
+        ]        
         if self.options.get_safe("with_zlib"):
             components.append({"name": "kj-gzip", "requires": ["kj", "kj-async", "zlib::zlib"]})
+            components.append({"name": "kj-http", "requires": ["kj", "kj-async", "zlib::zlib"]})
+        else:
+            components.append({"name": "kj-http", "requires": ["kj", "kj-async"]})
         if self.options.with_openssl:
             components.append({"name": "kj-tls", "requires": ["kj", "kj-async", "openssl::openssl"]})
         if Version(self.version) >= "0.9.0":
