@@ -167,7 +167,6 @@ class GdkPixbufConan(ConanFile):
             # Using Conan libgettext instead
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                             "intl_dep = cc.find_library('intl', required: false)", "intl_dep = dependency('libgettext', required: false)")
-
             if self.options.shared:
                 # Workaround to avoid generating gdk-pixbuf/loaders.cache
                 #
@@ -183,7 +182,6 @@ class GdkPixbufConan(ConanFile):
                 # custom_target admits also an "env" parameter, but it's not working as expected
                 replace_in_file(self, os.path.join(self.source_folder, "gdk-pixbuf", "meson.build"),
                                 "build_by_default: true", "build_by_default: false")
-
 
     def build(self):
         self._patch_sources()
@@ -234,6 +232,7 @@ class GdkPixbufConan(ConanFile):
         gdk_pixbuf_pixdata = os.path.join(self.package_folder, "bin", "gdk-pixbuf-pixdata")
         self.runenv_info.define_path("GDK_PIXBUF_PIXDATA", gdk_pixbuf_pixdata)
         self.env_info.GDK_PIXBUF_PIXDATA = gdk_pixbuf_pixdata # remove in conan v2?
+
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
