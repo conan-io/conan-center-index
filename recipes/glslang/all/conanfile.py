@@ -16,7 +16,7 @@ class GlslangConan(ConanFile):
     name = "glslang"
     description = "Khronos-reference front end for GLSL/ESSL, partial front " \
                   "end for HLSL, and a SPIR-V generator."
-    license = ["BSD-3-Clause", "NVIDIA"]
+    license = "DocumentRef-LICENSE.txt:LicenseRef-glslang"
     topics = ("glsl", "hlsl", "spirv", "spir-v", "validation", "translation")
     homepage = "https://github.com/KhronosGroup/glslang"
     url = "https://github.com/conan-io/conan-center-index"
