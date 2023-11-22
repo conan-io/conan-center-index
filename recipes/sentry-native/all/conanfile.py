@@ -208,6 +208,7 @@ class SentryNativeConan(ConanFile):
             self.cpp_info.components["sentry"].requires.extend(["libcurl::libcurl"])
 
         if self.options.backend == "breakpad" and self.options.with_breakpad == "sentry":
+            self.cpp_info.components["breakpad"].set_property("cmake_target_name", "breakpad_client")
             self.cpp_info.components["breakpad"].set_property("pkg_config_name", "breakpad-client")
             self.cpp_info.components["breakpad"].libs = ["breakpad_client"]
             if is_apple_os(self):
