@@ -214,7 +214,7 @@ class GdkPixbufConan(ConanFile):
 
         # Breaking change since Conan >= 2.0.8
         # Related to https://github.com/conan-io/conan/pull/14233
-        libdir_variable = "libdir1" if Version(conan_version) < "2.0" else "libdir1"
+        libdir_variable = "libdir1" if Version(conan_version) < "2.0" else "libdir"
         pkgconfig_variables = {
             "bindir": "${prefix}/bin",
             "gdk_pixbuf_binary_version": "2.10.0",
