@@ -80,7 +80,7 @@ class PbcConan(ConanFile):
         # configure complains that it can't find gmp.
         if cross_building(self) and self.settings.compiler == "apple-clang":
             xcr = XCRun(self)
-            target = to_apple_arch(self.settings.arch) + "-apple-darwin"
+            target = to_apple_arch(self) + "-apple-darwin"
             min_ios = ""
             if self.settings.os == "iOS":
                 min_ios = f"-miphoneos-version-min={self.settings.os.version}"
