@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def requirements(self):
-        self.requires(self.tested_reference_str)
+        self.requires(self.tested_reference_str, run=True)
 
     def layout(self):
         cmake_layout(self)
@@ -35,8 +35,7 @@ class TestPackageConan(ConanFile):
         return available
 
     def generate(self):
-        VirtualRunEnv(self).generate(scope="build")
-        VirtualRunEnv(self).generate(scope="run")
+        VirtualRunEnv(self).generate()
         tc = CMakeToolchain(self)
         for exec in self._executables:
             tc.variables["EXEC_{}".format(exec.replace("-", "_")).upper()] = True
@@ -59,7 +58,7 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             executables = load(self, os.path.join(self.build_folder, "executables")).splitlines()
             for exec in executables:
-                self.run(f"magnum-{exec} --help")
+                self.run(f"magnum-{exec} --help", env="conanrun")
 
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
