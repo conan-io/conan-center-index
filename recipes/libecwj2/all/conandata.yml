@@ -36,3 +36,6 @@ patches:
     - patch_file: "patches/macos-compatibility.patch"
       patch_description: "Remove outdated compatibility function on macOS"
       patch_type: "portability"
+    - patch_file: "patches/modernize-configure.in.patch"
+      patch_description: "Modernize configure.in a bit"
+      patch_type: "portability"

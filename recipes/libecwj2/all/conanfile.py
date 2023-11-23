@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, stdcpp_library
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, chdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conans.errors import ConanInvalidConfiguration
@@ -13,28 +13,34 @@ required_conan_version = ">=1.54.0"
 
 class PackageConan(ConanFile):
     name = "libecwj2"
-    description = "Legacy version of the ERDAS ECW/JP2 SDK. Provides support for the ECW (Enhanced Compressed Wavelet) and the JPEG 2000 image formats."
+    description = ("Legacy version of the ERDAS ECW/JP2 SDK, which provides support for "
+                   "the ECW (Enhanced Compressed Wavelet) and the JPEG 2000 image formats.")
     license = "DocumentRef-License.txt:LicenseRef-libecwj2"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://trac.osgeo.org/gdal/wiki/ECW"
-    topics = ("image", "ecw", "jp2", "jpeg2000")
+    topics = ("image", "ecw", "jp2", "jpeg2000", "gis", "geospatial", "remote-sensing")
 
-    package_type = "static-library"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
     }
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src", "Source"))
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -60,6 +66,9 @@ class PackageConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
+        # Disable warnings
+        tc.extra_cflags.append("-w")
+        tc.extra_cxxflags.append("-w")
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
@@ -68,7 +77,6 @@ class PackageConan(ConanFile):
         apply_conandata_patches(self)
         rmdir(self, os.path.join(self.source_folder, "Source", "C", "libjpeg"))
         rmdir(self, os.path.join(self.source_folder, "Source", "C", "tinyxml"))
-        replace_in_file(self, os.path.join(self.source_folder, "configure.in"), " -fpic", "")
 
     def build(self):
         self._patch_sources()
@@ -80,14 +88,13 @@ class PackageConan(ConanFile):
 
     def package(self):
         copy(self, "License.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(self, "*", os.path.join(self.source_folder, "lib"), os.path.join(self.package_folder, "lib"))
+        copy(self, "*.a", os.path.join(self.source_folder, "bin", ".libs"), os.path.join(self.package_folder, "lib"))
+        copy(self, "*.so*", os.path.join(self.source_folder, "bin", ".libs"), os.path.join(self.package_folder, "lib"))
         copy(self, "*", os.path.join(self.source_folder, "Source", "include"), os.path.join(self.package_folder, "include"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = ["ecwj2"]
+        self.cpp_info.libs = ["NCSEcw", "NCSCnet", "NCSUtil", "NCSEcwC"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "rt", "m", "pthread"])
         if stdcpp_library(self):
