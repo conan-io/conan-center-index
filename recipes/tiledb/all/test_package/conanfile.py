@@ -1,7 +1,9 @@
+import os
+
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
-import os
+from conan.tools.files import save, load
 
 
 class TestPackageConan(ConanFile):
@@ -19,6 +21,7 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["TILEDB_CPP_API"] = self.dependencies["tiledb"].options.cpp_api
         tc.generate()
+        save(self, os.path.join(self.build_folder, "have_tools"), str(self.dependencies["tiledb"].options.tools))
 
     def build(self):
         cmake = CMake(self)
@@ -34,5 +37,6 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join(self.cpp.build.bindir, "test_package_c")
             self.run(bin_path, env="conanrun")
 
-            if self.dependencies["tiledb"].options.tools:
+            have_tools = load(self, os.path.join(self.build_folder, "have_tools")) == "True"
+            if have_tools:
                 self.run("tiledb help info", env="conanrun")
