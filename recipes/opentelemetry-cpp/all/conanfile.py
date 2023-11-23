@@ -4,7 +4,6 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.microsoft import check_min_vs
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 
 import os
@@ -67,8 +66,26 @@ class OpenTelemetryCppConan(ConanFile):
     short_paths = True
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
+        if self.options.with_abseil and Version(self.dependencies["abseil"].ref.version) >= "20230125":
+            return 14
         return 11
+
+    @property
+    def _compilers_minimum_version(self):
+        if self._min_cppstd == 14:
+            return {
+                "gcc": "6",
+                "clang": "5",
+                "apple-clang": "10",
+                "Visual Studio": "16",
+                "msvc": "192",
+            }
+        else:
+            return {
+                "Visual Studio": "16",
+                "msvc": "192",
+            }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -97,8 +114,6 @@ class OpenTelemetryCppConan(ConanFile):
 
         if self.options.with_otlp:
             self.requires("protobuf/3.21.12")
-            self.requires("opentelemetry-proto/0.20.0")
-
             if self.options.get_safe("with_otlp_grpc"):
                 self.requires("grpc/1.54.3")
 
@@ -128,9 +143,13 @@ class OpenTelemetryCppConan(ConanFile):
         return ["locale"] if self.options.with_jaeger else []
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        check_min_vs(self, "192")
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
         if self.settings.os != "Linux" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} supports building shared libraries only on Linux")
@@ -150,6 +169,7 @@ class OpenTelemetryCppConan(ConanFile):
 
     def build_requirements(self):
         if self.options.with_otlp:
+            self.tool_requires("opentelemetry-proto/1.0.0")
             self.tool_requires("protobuf/<host_version>")
             if self.options.get_safe("with_otlp_grpc"):
                 self.tool_requires("grpc/<host_version>")
@@ -193,6 +213,8 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_LOGS_PREVIEW"] = self.options.with_logs_preview
         tc.cache_variables["WITH_ASYNC_EXPORT_PREVIEW"] = self.options.with_async_export_preview
         tc.cache_variables["WITH_METRICS_EXEMPLAR_PREVIEW"] = self.options.with_metrics_exemplar_preview
+        if not self.settings.compiler.cppstd:
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
 
         tc = CMakeDeps(self)
@@ -200,25 +222,21 @@ class OpenTelemetryCppConan(ConanFile):
 
     def _patch_sources(self):
         if self.options.with_otlp:
-            protos_path = self.dependencies["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root").replace("\\", "/")
+            protos_path = self.dependencies.build["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root").replace("\\", "/")
             protos_cmake_path = os.path.join(self.source_folder, "cmake", "opentelemetry-proto.cmake")
-            replace_in_file(self,
-                protos_cmake_path,
-                "if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto/.git)",
-                "if(1)")
+            replace_in_file(self, protos_cmake_path,
+                            "if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto/.git)",
+                            "if(1)")
             if Version(self.version) < "1.9.0":
-                replace_in_file(self,
-                    protos_cmake_path,
-                    "set(PROTO_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
-                    f"set(PROTO_PATH \"{protos_path}\")")
+                replace_in_file(self, protos_cmake_path,
+                                'set(PROTO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto")',
+                                f'set(PROTO_PATH "{protos_path}")')
             else:
-                replace_in_file(self,
-                    protos_cmake_path,
-                    "\"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
-                    f"\"{protos_path}\")")
+                replace_in_file(self, protos_cmake_path,
+                                '"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto")',
+                                f'"{protos_path}")')
 
         rmdir(self, os.path.join(self.source_folder, "api", "include", "opentelemetry", "nostd", "absl"))
-
         apply_conandata_patches(self)
 
     def build(self):
@@ -264,59 +282,41 @@ class OpenTelemetryCppConan(ConanFile):
             "opentelemetry_trace",
             "opentelemetry_version",
         ]
-
         if self.options.with_otlp:
             libraries.extend([
                 "opentelemetry_proto",
                 "opentelemetry_otlp_recordable",
                 ])
-
             if self.options.get_safe("with_otlp_grpc"):
                 libraries.append("opentelemetry_exporter_otlp_grpc")
-
                 libraries.append("opentelemetry_exporter_otlp_grpc_metrics")
-
                 if Version(self.version) >= "1.7.0":
                     libraries.append("opentelemetry_exporter_otlp_grpc_client")
-
                 if self.options.with_logs_preview:
                     libraries.append("opentelemetry_exporter_otlp_grpc_log")
-
             if self.options.get_safe("with_otlp_http"):
                 libraries.append("opentelemetry_exporter_otlp_http")
-
                 libraries.append("opentelemetry_exporter_otlp_http_client")
-
                 libraries.append("opentelemetry_exporter_otlp_http_metric")
-
                 if self.options.with_logs_preview:
                     libraries.append("opentelemetry_exporter_otlp_http_log")
-
         if self.options.with_prometheus:
             libraries.append("opentelemetry_exporter_prometheus")
-
         if self.options.with_elasticsearch and self.options.with_logs_preview:
             libraries.append("opentelemetry_exporter_elasticsearch_logs")
-
         if self.options.with_zipkin:
             libraries.append("opentelemetry_exporter_zipkin_trace")
-
         if self.options.with_jaeger:
             libraries.append("opentelemetry_exporter_jaeger_trace")
-
         libraries.append("opentelemetry_metrics")
-
         libraries.append("opentelemetry_exporter_ostream_metrics")
-
         if self.options.with_logs_preview:
             libraries.extend([
                 "opentelemetry_logs",
                 "opentelemetry_exporter_ostream_logs",
             ])
-
         if self.settings.os == "Windows" and self.options.with_etw:
             libraries.append("opentelemetry_exporter_etw")
-
         return libraries
 
     def package_info(self):
@@ -366,10 +366,7 @@ class OpenTelemetryCppConan(ConanFile):
             self.cpp_info.components["opentelemetry_common"].requires.append("abseil::abseil")
 
         if self.options.with_otlp:
-            self.cpp_info.components["opentelemetry_proto"].requires.extend([
-                "opentelemetry-proto::opentelemetry-proto",
-                "protobuf::protobuf",
-            ])
+            self.cpp_info.components["opentelemetry_proto"].requires.append("protobuf::protobuf")
 
             self.cpp_info.components["opentelemetry_otlp_recordable"].requires.extend([
                 "opentelemetry_proto",
