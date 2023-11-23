@@ -137,6 +137,7 @@ class PopplerConan(ConanFile):
         if self.options.with_libcurl:
             # https://gitlab.freedesktop.org/poppler/poppler/-/blob/poppler-23.11.0/poppler/CurlCachedFile.h#L18
             self.requires("libcurl/[>=7.78 <9]", transitive_headers=True, transitive_libs=True)
+            self.requires("openssl/[>=1.1 <4]", transitive_libs=True)
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
 
@@ -292,7 +293,7 @@ class PopplerConan(ConanFile):
         if self.options.with_tiff:
             self.cpp_info.components["libpoppler"].requires.append("libtiff::libtiff")
         if self.options.with_libcurl:
-            self.cpp_info.components["libpoppler"].requires.append("libcurl::libcurl")
+            self.cpp_info.components["libpoppler"].requires.extend(["libcurl::libcurl", "openssl::openssl"])
         if self.options.with_zlib:
             self.cpp_info.components["libpoppler"].requires.append("zlib::zlib")
 
