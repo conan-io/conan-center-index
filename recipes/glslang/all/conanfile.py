@@ -5,7 +5,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.54.0"
 
@@ -73,10 +75,17 @@ class GlslangConan(ConanFile):
                 "because SPIRV-Tools-opt is not built if shared"
             )
 
+    def build_requirements(self):
+        if Version(self.version) >= "1.3.261":
+            self.tool_requires("cmake/[>=3.17.2 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+
         tc = CMakeToolchain(self)
         tc.variables["BUILD_EXTERNAL"] = False
         tc.variables["SKIP_GLSLANG_INSTALL"] = False
