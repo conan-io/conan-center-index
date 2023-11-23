@@ -3,20 +3,19 @@ import os
 from conan import ConanFile
 from conan.tools.apple import XCRun, to_apple_arch
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, unix_path
 
 required_conan_version = ">=1.53.0"
 
 
 class PbcConan(ConanFile):
     name = "pbc"
-    description = (
-        "The PBC (Pairing-Based Crypto) library is a C library providing "
-        "low-level routines for pairing-based cryptosystems."
-    )
+    description = ("The PBC (Pairing-Based Crypto) library is a C library providing "
+                   "low-level routines for pairing-based cryptosystems.")
     license = "LGPL-3.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://crypto.stanford.edu/pbc/"
@@ -58,6 +57,11 @@ class PbcConan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+            if is_msvc(self):
+                self.tool_requires("automake/1.16.5")
             self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("flex/2.6.4")
@@ -88,6 +92,17 @@ class PbcConan(ConanFile):
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
+
+        if is_msvc(self):
+            env = Environment()
+            automake_conf = self.dependencies.build["automake"].conf_info
+            compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
+            ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
+            env.define("CC", f"{compile_wrapper} cl -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            env.define("NM", "dumpbin -symbols")
+            env.vars(self).save_script("conanbuild_msvc")
 
     def build(self):
         apply_conandata_patches(self)
