@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -49,6 +50,8 @@ class SimdConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
         if self.settings.compiler == "clang":
             raise ConanInvalidConfiguration(f"{self.ref} don't support clang. (yet)")
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} don't support msvc. (yet)")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
