@@ -145,7 +145,6 @@ class GdkPixbufConan(ConanFile):
             tc.c_link_args.append("-rtlib=compiler-rt")
         tc.generate()
 
-
     def _patch_sources(self):
         def _force_conan_libgettext():
             try:
