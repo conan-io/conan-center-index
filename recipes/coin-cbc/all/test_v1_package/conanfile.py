@@ -4,7 +4,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "pkg_config"
+    generators = "cmake", "cmake_find_package_multi", "pkg_config"
 
     def build_requirements(self):
         self.build_requires("pkgconf/2.0.3")
@@ -16,5 +16,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            bin_path = os.path.join("bin", "test_package")
+            # bin_path = os.path.join("bin", "test_package_pkgconfig")
+            # self.run(bin_path, run_environment=True)
+            bin_path = os.path.join("bin", "test_package_cmake")
             self.run(bin_path, run_environment=True)
