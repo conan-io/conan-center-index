@@ -221,6 +221,17 @@ class CPythonConan(ConanFile):
 
     def _generate_autotools(self):
         tc = AutotoolsToolchain(self)
+        # TODO it's possible not all of these are needed
+        tc.update_configure_args({
+            "--prefix": f"{self.package_folder}",
+            "--bindir": "${prefix}/bin",
+            "--sbindir": "${prefix}/bin",
+            "--libexecdir": "${prefix}/bin",
+            "--libdir": "${prefix}/lib",
+            "--includedir": "${prefix}/include",
+            "--oldincludedir": "${prefix}/include",
+            "--datarootdir": "${prefix}/share",
+        })
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args += [
             "--with-doc-strings={}".format(yes_no(self.options.docstrings)),
@@ -230,6 +241,7 @@ class CPythonConan(ConanFile):
             "--enable-optimizations={}".format(yes_no(self.options.optimizations)),
             "--with-lto={}".format(yes_no(self.options.lto)),
             "--with-pydebug={}".format(yes_no(self.settings.build_type == "Debug")),
+            "--disable-test-modules",
         ]
         if self._is_py2:
             tc.configure_args += ["--enable-unicode={}".format(yes_no(self.options.unicode))]
