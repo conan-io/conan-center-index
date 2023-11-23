@@ -48,7 +48,7 @@ class CoinCbcConan(ConanFile):
         self.requires("coin-utils/2.11.9")
         self.requires("coin-osi/0.108.7")
         self.requires("coin-clp/1.17.7")
-        self.requires("coin-cgl/0.60.6")
+        self.requires("coin-cgl/0.60.7")
         if is_msvc(self) and self.options.parallel:
             self.requires("pthreads4w/3.0.0")
         # FIXME: these should probably be marked as transitive in coin-utils
