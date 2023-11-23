@@ -5,7 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import check_min_vs
-from conan.tools.env import Environment
+from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 
 import os
 import textwrap
@@ -135,12 +135,6 @@ class OpenTelemetryCppConan(ConanFile):
         if self.settings.os != "Linux" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} supports building shared libraries only on Linux")
 
-        if self.options.get_safe("with_otlp_grpc") and not self.options.with_otlp:
-            raise ConanInvalidConfiguration("Option 'with_otlp_grpc' requires 'with_otlp'")
-
-        if self.options.get_safe("with_otlp_http") and not self.options.with_otlp:
-            raise ConanInvalidConfiguration("Option 'with_otlp_http' requires 'with_otlp'")
-
         if self.options.get_safe("with_otlp_grpc"):
             if not self.dependencies["grpc"].options.cpp_plugin:
                 raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
@@ -175,62 +169,53 @@ class OpenTelemetryCppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        VirtualBuildEnv(self).generate(scope="build")
+        VirtualRunEnv(self).generate(scope="build")
+
         tc = CMakeToolchain(self)
-
-        tc.variables["BUILD_TESTING"] = False
-        tc.variables["BUILD_BENCHMARK"] = False
-
-        tc.variables["WITH_EXAMPLES"] = False
-        tc.variables["WITH_NO_DEPRECATED_CODE"] = self.options.with_no_deprecated_code
-        tc.variables["WITH_STL"] = self.options.with_stl
-        tc.variables["WITH_GSL"] = self.options.with_gsl
-        tc.variables["WITH_ABSEIL"] = self.options.with_abseil
-        tc.variables["WITH_OTLP"] = self.options.with_otlp
-        tc.variables["WITH_OTLP_GRPC"] = self.options.get_safe("with_otlp_grpc")
-        tc.variables["WITH_OTLP_HTTP"] = self.options.get_safe("with_otlp_http")
-        tc.variables["WITH_ZIPKIN"] = self.options.with_zipkin
-        tc.variables["WITH_PROMETHEUS"] = self.options.with_prometheus
-        tc.variables["WITH_ELASTICSEARCH"] = self.options.with_elasticsearch
-        tc.variables["WITH_ZPAGES"] = self.options.with_zpages
-        tc.variables["WITH_JAEGER"] = self.options.with_jaeger
-        tc.variables["WITH_NO_GETENV"] = self.options.with_no_getenv
-        tc.variables["WITH_ETW"] = self.options.with_etw
-        tc.variables["WITH_LOGS_PREVIEW"] = self.options.with_logs_preview
-        tc.variables["WITH_ASYNC_EXPORT_PREVIEW"] = self.options.with_async_export_preview
-        tc.variables["WITH_METRICS_EXEMPLAR_PREVIEW"] = self.options.with_metrics_exemplar_preview
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_BENCHMARK"] = False
+        tc.cache_variables["WITH_EXAMPLES"] = False
+        tc.cache_variables["WITH_NO_DEPRECATED_CODE"] = self.options.with_no_deprecated_code
+        tc.cache_variables["WITH_STL"] = self.options.with_stl
+        tc.cache_variables["WITH_GSL"] = self.options.with_gsl
+        tc.cache_variables["WITH_ABSEIL"] = self.options.with_abseil
+        tc.cache_variables["WITH_OTLP"] = self.options.with_otlp
+        tc.cache_variables["WITH_OTLP_GRPC"] = self.options.get_safe("with_otlp_grpc", False)
+        tc.cache_variables["WITH_OTLP_HTTP"] = self.options.get_safe("with_otlp_http", False)
+        tc.cache_variables["WITH_ZIPKIN"] = self.options.with_zipkin
+        tc.cache_variables["WITH_PROMETHEUS"] = self.options.with_prometheus
+        tc.cache_variables["WITH_ELASTICSEARCH"] = self.options.with_elasticsearch
+        tc.cache_variables["WITH_ZPAGES"] = self.options.with_zpages
+        tc.cache_variables["WITH_JAEGER"] = self.options.with_jaeger
+        tc.cache_variables["WITH_NO_GETENV"] = self.options.with_no_getenv
+        tc.cache_variables["WITH_ETW"] = self.options.with_etw
+        tc.cache_variables["WITH_LOGS_PREVIEW"] = self.options.with_logs_preview
+        tc.cache_variables["WITH_ASYNC_EXPORT_PREVIEW"] = self.options.with_async_export_preview
+        tc.cache_variables["WITH_METRICS_EXEMPLAR_PREVIEW"] = self.options.with_metrics_exemplar_preview
         tc.generate()
 
         tc = CMakeDeps(self)
         tc.generate()
 
-        if self.settings.os == "Linux":
-            env = Environment()
-            if self.dependencies["grpc"].options.shared:
-                env.append_path("LD_LIBRARY_PATH", os.path.join(self.dependencies["grpc"].package_folder, "lib"))
-            if self.dependencies["protobuf"].options.shared:
-                env.append_path("LD_LIBRARY_PATH", os.path.join(self.dependencies["protobuf"].package_folder, "lib"))
-            env.vars(self).save_script("conanbuild_loadpath")
-
     def _patch_sources(self):
-        protos_path = self.dependencies["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root").replace("\\", "/")
-        protos_cmake_path = os.path.join(
-            self.source_folder,
-            "cmake",
-            "opentelemetry-proto.cmake")
-        replace_in_file(self,
-            protos_cmake_path,
-            "if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto/.git)",
-            "if(1)")
-        if Version(self.version) < "1.9.0":
+        if self.options.with_otlp:
+            protos_path = self.dependencies["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root").replace("\\", "/")
+            protos_cmake_path = os.path.join(self.source_folder, "cmake", "opentelemetry-proto.cmake")
             replace_in_file(self,
                 protos_cmake_path,
-                "set(PROTO_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
-                f"set(PROTO_PATH \"{protos_path}\")")
-        else:
-            replace_in_file(self,
-                protos_cmake_path,
-                "\"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
-                f"\"{protos_path}\")")
+                "if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto/.git)",
+                "if(1)")
+            if Version(self.version) < "1.9.0":
+                replace_in_file(self,
+                    protos_cmake_path,
+                    "set(PROTO_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
+                    f"set(PROTO_PATH \"{protos_path}\")")
+            else:
+                replace_in_file(self,
+                    protos_cmake_path,
+                    "\"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto\")",
+                    f"\"{protos_path}\")")
 
         rmdir(self, os.path.join(self.source_folder, "api", "include", "opentelemetry", "nostd", "absl"))
 
