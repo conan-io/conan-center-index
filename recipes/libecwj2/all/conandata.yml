@@ -1,8 +1,8 @@
 sources:
   "3.3":
     url:
-    - "https://github.com/bogind/libecwj2-3.3/raw/master/libecwj2-3.3-2006-09-06.zip"
-    - "https://sourceforge.net/projects/libecw-legacy/files/libecwj2-3.3-2006-09-06.zip"
+      - "https://github.com/bogind/libecwj2-3.3/raw/master/libecwj2-3.3-2006-09-06.zip"
+      - "https://sourceforge.net/projects/libecw-legacy/files/libecwj2-3.3-2006-09-06.zip"
     sha256: "60ae34e2ba34ca77525950822f53243f374940f1cd13d2460eabbbd759e11074"
 patches:
   "3.3":
