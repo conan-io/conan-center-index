@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, save
+from conan.tools.files import get, copy, rmdir, replace_in_file, save
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -86,9 +86,6 @@ class OpenTelemetryCppConan(ConanFile):
                 "Visual Studio": "16",
                 "msvc": "192",
             }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -217,8 +214,9 @@ class OpenTelemetryCppConan(ConanFile):
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
 
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+
+        deps.generate()
 
     def _patch_sources(self):
         if self.options.with_otlp:
@@ -231,13 +229,14 @@ class OpenTelemetryCppConan(ConanFile):
                 replace_in_file(self, protos_cmake_path,
                                 'set(PROTO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto")',
                                 f'set(PROTO_PATH "{protos_path}")')
+                if self.options.get_safe("with_otlp_grpc"):
+                    save(self, protos_cmake_path, "\ntarget_link_libraries(opentelemetry_proto PUBLIC gRPC::grpc++)", append=True)
             else:
                 replace_in_file(self, protos_cmake_path,
                                 '"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto")',
                                 f'"{protos_path}")')
 
         rmdir(self, os.path.join(self.source_folder, "api", "include", "opentelemetry", "nostd", "absl"))
-        apply_conandata_patches(self)
 
     def build(self):
         self._patch_sources()
