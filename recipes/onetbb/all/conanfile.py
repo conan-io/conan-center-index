@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, load, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, load, rmdir, rm
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
@@ -51,7 +51,9 @@ class OneTBBConan(ConanFile):
 
     @property
     def _tbbbind_supported(self):
-        return Version(self.version) >= "2021.1.1" and not self.settings.os == "Macos"
+        if self.settings.os == "Macos":
+            return Version(self.version) >= "2021.11.0"
+        return Version(self.version) >= "2021.1.1"
 
     @property
     def _tbbbind_build(self):
@@ -143,6 +145,7 @@ class OneTBBConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "TBB")
