@@ -59,11 +59,13 @@ class OrcConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("lz4/1.9.4")
-        self.requires("protobuf/3.21.12")
-        self.requires("snappy/1.1.10")
-        self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("zstd/1.5.5")
+        # FIXME? not sure why transitive_libs=True is necessary here.
+        # None of these are not used in the public headers.
+        self.requires("protobuf/3.21.12", transitive_libs=True)
+        self.requires("lz4/1.9.4", transitive_libs=True)
+        self.requires("snappy/1.1.10", transitive_libs=True)
+        self.requires("zlib/[>=1.2.11 <2]", transitive_libs=True)
+        self.requires("zstd/1.5.5", transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
