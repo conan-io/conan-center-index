@@ -1,0 +1,114 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f452186..1125bf4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,15 +9,19 @@ endif()
+ option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
+ option(BUILD_SAMPLE "Build provided sample" OFF)
+ 
+-set(HEADERS src/duckx.hpp src/zip.h src/miniz.h
++find_package(pugixml REQUIRED CONFIG)
++find_package(zip REQUIRED CONFIG)
++
++set(HEADERS src/duckx.hpp
+ 	src/pugixml.hpp src/pugiconfig.hpp)
+-set(SOURCES src/duckx.cpp src/zip.c src/pugixml.cpp)
++set(SOURCES src/duckx.cpp)
+ 
+ if(BUILD_SHARED_LIBS)
+     add_library(duckx SHARED ${HEADERS} ${SOURCES})
+ else()
+     add_library(duckx STATIC ${HEADERS} ${SOURCES})
+ endif()
++target_link_libraries(duckx PRIVATE pugixml::pugixml zip::zip)
+ 
+ add_library(duckx::duckx ALIAS duckx)
+ 
+diff --git a/src/duckx.cpp b/src/duckx.cpp
+index 7379d02..4d66e62 100644
+--- a/src/duckx.cpp
++++ b/src/duckx.cpp
+@@ -172,7 +172,7 @@ duckx::Paragraph::Paragraph(pugi::xml_node parent, pugi::xml_node current) {
+ void duckx::Paragraph::set_parent(pugi::xml_node node) {
+     this->parent = node;
+     this->current = this->parent.child("w:p");
+-    
++
+     this->run.set_parent(
+         this->current
+     );
+@@ -216,7 +216,7 @@ duckx::Run &duckx::Paragraph::add_run(const char *text) {
+ 
+ duckx::Paragraph &duckx::Paragraph::insert_paragraph_after(const std::string& text) {
+     pugi::xml_node new_para = this->parent.insert_child_after("w:p", this->current);
+-    
++
+     Paragraph *p = new Paragraph();
+     p->set_current(new_para);
+     p->add_run(text);
+@@ -245,10 +245,10 @@ void duckx::Document::open() {
+ 
+     // Open file and load "xml" content to the document variable
+     zip_t *zip = zip_open(this->directory.c_str(), ZIP_DEFAULT_COMPRESSION_LEVEL, 'r');
+-    
++
+     zip_entry_open(zip, "word/document.xml");
+     zip_entry_read(zip, &buf, &bufsize);
+-    
++
+     zip_entry_close(zip);
+     zip_close(zip);
+ 
+@@ -279,7 +279,7 @@ void duckx::Document::save() const {
+ 
+ 	// Create the new file
+     zip_t *new_zip = zip_open(temp_file.c_str(), ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
+-    
++
+ 	// Write out document.xml
+     zip_entry_open(new_zip, "word/document.xml");
+ 	xml_string_writer writer;
+@@ -292,7 +292,7 @@ void duckx::Document::save() const {
+ 	// Open the original zip and copy all files which are not replaced by duckX
+ 	zip_t* orig_zip = zip_open(original_file.c_str(), ZIP_DEFAULT_COMPRESSION_LEVEL, 'r');
+ 	// Loop & copy each relevant entry in the original zip
+-	int orig_zip_entry_ct = zip_total_entries(orig_zip);
++	int orig_zip_entry_ct = zip_entries_total(orig_zip);
+ 	for (int i = 0; i < orig_zip_entry_ct; i++)
+ 	{
+ 		zip_entry_openbyindex(orig_zip, i);
+@@ -304,18 +304,18 @@ void duckx::Document::save() const {
+ 			void* entry_buf;
+ 			size_t entry_buf_size;
+ 			zip_entry_read(orig_zip, &entry_buf, &entry_buf_size);
+-			
++
+ 			// Write into new zip
+ 			zip_entry_open(new_zip, name);
+ 			zip_entry_write(new_zip, entry_buf, entry_buf_size);
+ 			zip_entry_close(new_zip);
+-			
++
+ 			free(entry_buf);
+ 		}
+ 
+ 		zip_entry_close(orig_zip);
+ 	}
+-	
++
+ 	// Close both zips
+ 	zip_close(orig_zip);
+     zip_close(new_zip);
+diff --git a/src/duckx.hpp b/src/duckx.hpp
+index fd54d10..c3350d3 100644
+--- a/src/duckx.hpp
++++ b/src/duckx.hpp
+@@ -12,7 +12,7 @@
+ #include <string>
+ 
+ #include "pugixml.hpp"
+-#include "zip.h"
++#include "zip/zip.h"
+ 
+ 
+ // TODO: Use container-iterator design pattern!
