@@ -140,7 +140,7 @@ class VulkanUtilityLibrariesConan(ConanFile):
             defines.append("VK_USE_PLATFORM_ANDROID_KHR")
         elif is_apple_os(self):
             defines.append("VK_USE_PLATFORM_METAL_EXT")
-            if self.settings.os.subsystem == "iOS":
+            if self.settings.os == "iOS":
                 defines.append("VK_USE_PLATFORM_IOS_MVK")
             else:
                 defines.append("VK_USE_PLATFORM_MACOS_MVK")
