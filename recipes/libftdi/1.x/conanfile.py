@@ -55,9 +55,11 @@ class LibFtdiConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libusb/1.0.26", transitive_headers=True)
+        # libusb.h is used in public ftdi.h
+        self.requires("libusb/1.0.26", transitive_headers=True, transitive_libs=True)
         if self.options.enable_cpp_wrapper:
-            self.requires("boost/1.83.0")
+            # boost/shared_ptr.hpp is used in public ftdi.hpp
+            self.requires("boost/1.83.0", transitive_headers=True)
 
     def validate(self):
         if is_msvc(self) and self.options.use_streaming:

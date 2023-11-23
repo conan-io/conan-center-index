@@ -47,9 +47,9 @@ class LibFtdi(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libusb-compat/0.1.7", transitive_headers=True)
+        self.requires("libusb-compat/0.1.7", transitive_headers=True, transitive_libs=True)
         if self.options.enable_cpp_wrapper:
-            self.requires("boost/1.83.0")
+            self.requires("boost/1.83.0", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -68,12 +68,8 @@ class LibFtdi(ConanFile):
         apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "CMAKE_BINARY_DIR", "PROJECT_BINARY_DIR")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "CMAKE_SOURCE_DIR", "PROJECT_SOURCE_DIR")
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "ftdipp", "CMakeLists.txt"),
-            "CMAKE_SOURCE_DIR",
-            "PROJECT_SOURCE_DIR",
-        )
+        replace_in_file(self, os.path.join(self.source_folder, "ftdipp", "CMakeLists.txt"),
+                        "CMAKE_SOURCE_DIR", "PROJECT_SOURCE_DIR")
 
     def build(self):
         self._patch_sources()
@@ -82,13 +78,14 @@ class LibFtdi(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING*", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.libs = ["ftdi"]
+        self.cpp_info.requires = ["libusb-compat::libusb-compat"]
         if self.options.enable_cpp_wrapper:
             self.cpp_info.libs.append("ftdipp")
-        self.cpp_info.libs.append("ftdi")
+            self.cpp_info.requires.append("boost::headers")
