@@ -108,9 +108,9 @@ class OpenTelemetryCppConan(ConanFile):
             self.requires("abseil/20230125.3", transitive_headers=True)
 
         if self.options.with_otlp or self.options.with_otlp_grpc:
-            self.requires("protobuf/3.21.12")
+            self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
             if self.options.with_otlp_grpc:
-                self.requires("grpc/1.54.3")
+                self.requires("grpc/1.54.3", transitive_headers=True, transitive_libs=True)
 
         if (self.options.with_zipkin or
            self.options.with_elasticsearch or
