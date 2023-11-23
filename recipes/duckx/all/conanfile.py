@@ -41,7 +41,7 @@ class DuckxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("pugixml/1.14")
+        self.requires("pugixml/1.14", transitive_headers=True)
         self.requires("kuba-zip/0.2.6", transitive_headers=True)
 
     def source(self):
