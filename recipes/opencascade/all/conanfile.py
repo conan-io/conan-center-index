@@ -116,7 +116,7 @@ class OpenCascadeConan(ConanFile):
         if self.options.with_openvr:
             self.requires("openvr/1.16.8")
         if self.options.with_rapidjson:
-            self.requires("rapidjson/cci.20220822")
+            self.requires("rapidjson/cci.20230929")
         if self.options.get_safe("with_draco"):
             self.requires("draco/1.5.6")
         if self.options.with_tbb:
