@@ -11,6 +11,11 @@ if(WIN32)
     set_target_properties(tpl PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
     target_sources(tpl PRIVATE src/win/mmap.c)
     install(FILES src/win/mman.h DESTINATION include/win)
+    if(BUILD_SHARED_LIBS)
+        target_compile_definitions(tpl PRIVATE TPL_EXPORTS)
+    else()
+        target_compile_definitions(tpl PUBLIC TPL_NOLIB)
+    endif()
 endif()
 
 install(TARGETS tpl

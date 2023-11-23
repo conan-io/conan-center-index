@@ -66,3 +66,5 @@ class PackageConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tpl"]
+        if self.settings.os == "Windows" and not self.options.shared:
+            self.cpp_info.defines.append("TPL_NOLIB")
