@@ -3,7 +3,6 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -176,8 +175,7 @@ class ThriftConan(ConanFile):
         self.cpp_info.components["libthrift"].libs = [f"thrift{libsuffix}"]
         if self.settings.os == "Windows":
             self.cpp_info.components["libthrift"].defines.append("NOMINMAX")
-            if Version(self.version) >= "0.15.0":
-                self.cpp_info.components["libthrift"].system_libs.append("shlwapi")
+            self.cpp_info.components["libthrift"].system_libs.append("shlwapi")
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libthrift"].system_libs.extend(["m", "pthread"])
         self.cpp_info.components["libthrift"].requires.append("boost::headers")
