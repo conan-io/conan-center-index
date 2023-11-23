@@ -87,6 +87,9 @@ class GdkPixbufConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/1.2.3")
+        # FIXME: unify libgettext and gettext??
+        # INFO: gettext provides msgfmt, which is required to build the .mo files
+        self.tool_requires("gettext/0.21")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
         self.tool_requires("glib/<host_version>")
@@ -142,7 +145,35 @@ class GdkPixbufConan(ConanFile):
             tc.c_link_args.append("-rtlib=compiler-rt")
         tc.generate()
 
+
     def _patch_sources(self):
+        def _force_conan_libgettext():
+            try:
+                # glib in Linux does not depend on gettext, but let's do this check safer just in case
+                gettext_version = self.dependencies["libgettext"].ref.version
+            except KeyError:
+                pass
+            else:
+                replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                                "intl_dep = cc.find_library('intl', required: false)",
+                                f"intl_dep = dependency('libgettext', version: '{gettext_version}', required: false, method : 'pkg-config')")
+
+        def _deactivate_gdk_pixbuf_query_loaders_installation():
+            if self.settings.os == "Macos" and self.options.shared:
+                # Error output:
+                #   [167/167] Generating gdk-pixbuf/loaders.cache with a custom command (wrapped by meson to capture output)
+                #   FAILED: gdk-pixbuf/loaders.cache
+                #   meson.py --internal exe --capture gdk-pixbuf/loaders.cache -- xxxx/gdk-pixbuf/gdk-pixbuf-query-loaders
+                #   --- stderr ---
+                #   dyld[25158]: Library not loaded: /lib/libgnuintl.8.dylib
+                #   Reason: tried: '/lib/libgnuintl.8.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/lib/libgnuintl.8.dylib' (no such file)
+                #
+                # Obviously, the libgnuintl.8.dylib is in the VirtualRunEnv, but the current env is not passed to
+                # the meson custom_target function as it's wrappering the execution
+                # custom_target admits also an "env" parameter, but it's not working as expected
+                replace_in_file(self, os.path.join(self.source_folder, "gdk-pixbuf", "meson.build"),
+                                "build_by_default: true", "build_by_default: false")
+
         apply_conandata_patches(self)
 
         meson_build = os.path.join(self.source_folder, "meson.build")
@@ -158,36 +189,15 @@ class GdkPixbufConan(ConanFile):
         if Version(self.version) >= "2.42.9":
             replace_in_file(self, meson_build, "is_msvc_like = ", "is_msvc_like = false #")
 
-        # Fix libtiff, libpng not being linked against when building statically
+        # Fix libtiff and libpng not being linked against when building statically
         # Reported upstream: https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/merge_requests/159
         replace_in_file(self, os.path.join(self.source_folder, "gdk-pixbuf", "meson.build"),
                         "dependencies: gdk_pixbuf_deps + [ gdkpixbuf_dep ],",
                         "dependencies: loaders_deps + gdk_pixbuf_deps + [ gdkpixbuf_dep ],")
         # Forcing Conan libgettext instead of system one (if exists)
-        try:
-            # glib in Linux does not depend on gettext, but let's do this check safer just in case
-            gettext_version = self.dependencies["libgettext"].ref.version
-        except KeyError:
-            pass
-        else:
-            replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
-                            "intl_dep = cc.find_library('intl', required: false)",
-                            f"intl_dep = dependency('libgettext', version: '{gettext_version}', required: false, method : 'pkg-config')")
-        if self.settings.os == "Macos" and self.options.shared:
-            # Workaround to avoid generating gdk-pixbuf/loaders.cache
-            #
-            #   [167/167] Generating gdk-pixbuf/loaders.cache with a custom command (wrapped by meson to capture output)
-            #   FAILED: gdk-pixbuf/loaders.cache
-            #   meson.py --internal exe --capture gdk-pixbuf/loaders.cache -- xxxx/gdk-pixbuf/gdk-pixbuf-query-loaders
-            #   --- stderr ---
-            #   dyld[25158]: Library not loaded: /lib/libgnuintl.8.dylib
-            #   Reason: tried: '/lib/libgnuintl.8.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/lib/libgnuintl.8.dylib' (no such file)
-            #
-            # Obviously, the libgnuintl.8.dylib is in the VirtualRunEnv, but the current env is not passed to
-            # the meson custom_target function as it's wrappering the execution
-            # custom_target admits also an "env" parameter, but it's not working as expected
-            replace_in_file(self, os.path.join(self.source_folder, "gdk-pixbuf", "meson.build"),
-                            "build_by_default: true", "build_by_default: false")
+        _force_conan_libgettext()
+        # Workaround to avoid generating gdk-pixbuf/loaders.cache fails (if macOS and shared=True)
+        _deactivate_gdk_pixbuf_query_loaders_installation()
 
     def build(self):
         self._patch_sources()
