@@ -90,8 +90,20 @@ class PbcConan(ConanFile):
                 min_ios = f"-miphoneos-version-min={self.settings.os.version}"
             tc.configure_args.append(f"CC={xcr.cc} -isysroot {xcr.sdk_path} -target {target} {min_ios}")
         tc.generate()
-        deps = AutotoolsDeps(self)
-        deps.generate()
+
+        if not is_msvc(self):
+            deps = AutotoolsDeps(self)
+            deps.generate()
+        else:
+            # Custom AutotoolsDeps for cl like compilers
+            # workaround for https://github.com/conan-io/conan/issues/12784
+            gmp_info = self.dependencies["gmp"].cpp_info
+            env = Environment()
+            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in gmp_info.includedirs] + [f"-D{d}" for d in gmp_info.defines])
+            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in (gmp_info.libs + gmp_info.system_libs)])
+            env.append("LDFLAGS", [f"-LIBPATH:{unix_path(self, p)}" for p in gmp_info.libdirs] + gmp_info.sharedlinkflags + gmp_info.exelinkflags)
+            env.append("CFLAGS", gmp_info.cflags)
+            env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
 
         if is_msvc(self):
             env = Environment()
