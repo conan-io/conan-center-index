@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm, export_conandata_patches, apply_conandata_patches, rmdir, save
+from conan.tools.files import copy, get, rm, rmdir, save
 
 required_conan_version = ">=1.53.0"
 
@@ -33,7 +33,6 @@ class PackageConan(ConanFile):
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -67,7 +66,6 @@ class PackageConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Unvendor nlohmann_json
         rmdir(self, os.path.join(self.source_folder, "arbiter", "third", "json"))
         save(self, os.path.join(self.source_folder, "arbiter", "third", "json", "json.hpp"),
@@ -100,6 +98,6 @@ class PackageConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("Shlwapi")
+            self.cpp_info.system_libs.append("shlwapi")
         if self.options.shared:
             self.cpp_info.defines.append("ARBITER_DLL_IMPORT")
