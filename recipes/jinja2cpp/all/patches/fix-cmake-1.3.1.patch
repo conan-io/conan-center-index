@@ -46,18 +46,7 @@ index fc8f51d..dbcc8c9 100644
  if (NOT DEFINED JINJA2_PRIVATE_LIBS_INT)
      set(JINJA2CPP_PRIVATE_LIBS ${JINJA2CPP_PRIVATE_LIBS}
 -        Boost::variant Boost::filesystem Boost::algorithm Boost::lexical_cast Boost::json
-+        Boost::headers Boost::filesystem
++        Boost::headers Boost::filesystem Boost::json
          Boost::regex fmt RapidJson)
  else ()
      set (JINJA2CPP_PRIVATE_LIBS ${JINJA2_PRIVATE_LIBS_INT})
-diff --git a/thirdparty/thirdparty-conan-build.cmake b/thirdparty/thirdparty-conan-build.cmake
-index 773cb87..05c3cf0 100644
---- a/thirdparty/thirdparty-conan-build.cmake
-+++ b/thirdparty/thirdparty-conan-build.cmake
-@@ -11,5 +11,5 @@ find_package(fmt REQUIRED)
- find_package(RapidJSON REQUIRED)
- 
- set(JINJA2_PRIVATE_LIBS_INT Boost::headers Boost::filesystem)
--set(JINJA2_PUBLIC_LIBS_INT Boost::json fmt::fmt rapidjson Boost::regex
-+set(JINJA2_PUBLIC_LIBS_INT fmt::fmt rapidjson Boost::regex
-     nlohmann_json::nlohmann_json nonstd::expected-lite nonstd::variant-lite nonstd::optional-lite nonstd::string-view-lite)
