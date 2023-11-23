@@ -76,6 +76,8 @@ class Jinja2cppConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        if Version(self.version) >= "1.3.1" and self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support apple-clang (yet) because Boost::json is not available.")
 
     def build_requirements(self):
         if Version(self.version) >= "1.3.1":
