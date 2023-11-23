@@ -62,7 +62,7 @@ class OrcConan(ConanFile):
         self.requires("lz4/1.9.4")
         self.requires("protobuf/3.21.12")
         self.requires("snappy/1.1.10")
-        self.requires("zlib/1.3")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zstd/1.5.5")
 
     def validate(self):
@@ -100,7 +100,7 @@ class OrcConan(ConanFile):
         tc.cache_variables["STOP_BUILD_ON_WARNING"] = False
         # AVX512 support is determined by ORC_USER_SIMD_LEVEL env var at runtime, defaults to off
         tc.cache_variables["BUILD_ENABLE_AVX512"] = self.options.build_avx512
-        protoc_path = os.path.join(self.dependencies.build["protobuf"].cpp_info.bindir, "protoc")
+        protoc_path = os.path.join(self.dependencies["protobuf"].package_folder, "bin", "protoc")
         tc.cache_variables["PROTOBUF_EXECUTABLE"] = protoc_path.replace("\\", "/")
         tc.generate()
 
@@ -129,4 +129,3 @@ class OrcConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["orc"]
-
