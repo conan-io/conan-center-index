@@ -35,16 +35,11 @@ class FreeAlutConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def validate(self):
-        if self.options.shared and \
-           not self.dependencies["openal-soft"].options.shared:
-            raise ConanInvalidConfiguration(
-                "If built as shared openal-soft must be shared as well. "
-                "Please, use `openal-soft/*:shared=True`.",
-            )
+        # FIXME: freeglut supports Windows and Macos, but the recipe needs some help to work.
         if self.settings.os in ["Windows", "Macos"] and \
             not self.options.shared:
             raise ConanInvalidConfiguration(
-                "Static build is currently not supported for Windows or macOS."
+                f"{self.ref} recipe is currently not prepared for Windows or Macos. Contributions are welcome."
             )
 
     def layout(self):
