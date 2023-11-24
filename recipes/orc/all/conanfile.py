@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rmdir, save
+from conan.tools.files import copy, get, rmdir, save, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
@@ -104,6 +104,7 @@ class OrcConan(ConanFile):
         tc.cache_variables["BUILD_ENABLE_AVX512"] = self.options.build_avx512
         protoc_path = os.path.join(self.dependencies["protobuf"].package_folder, "bin", "protoc")
         tc.cache_variables["PROTOBUF_EXECUTABLE"] = protoc_path.replace("\\", "/")
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -112,10 +113,14 @@ class OrcConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        # Unvendor packages
         for pkg in self._unvendored_packages:
             os.unlink(os.path.join(self.source_folder, "cmake_modules", f"Find{pkg}.cmake"))
         save(self, os.path.join(self.source_folder, "cmake_modules", "ThirdpartyToolchain.cmake"),
              "\n".join(f"find_package({pkg} REQUIRED CONFIG)" for pkg in self._unvendored_packages))
+        # Allow shared builds
+        replace_in_file(self, os.path.join(self.source_folder, "c++", "src", "CMakeLists.txt"),
+                        "add_library (orc STATIC ${SOURCE_FILES})", "add_library (orc ${SOURCE_FILES})")
 
     def build(self):
         self._patch_sources()
