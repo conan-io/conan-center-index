@@ -170,8 +170,8 @@ class OsgearthConan(ConanFile):
         tc.variables["OSGEARTH_WITH_WEBP"] = self.options.with_webp
         tc.generate()
 
-        dpes = CMakeDeps(self)
-        dpes.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
