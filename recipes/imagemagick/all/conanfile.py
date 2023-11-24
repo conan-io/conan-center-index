@@ -4,9 +4,9 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, msvs_toolset
+from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, msvs_toolset, msvc_runtime_flag
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -23,7 +23,7 @@ class ImageMagicConan(ConanFile):
     homepage = "https://imagemagick.org"
     topics = ("images", "manipulating")
 
-    package_type = "application"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -57,12 +57,12 @@ class ImageMagicConan(ConanFile):
         "with_bzlib": True,
         "with_lzma": True,
         "with_lcms": True,
-        "with_openexr": False, # FIXME
-        "with_heic": False, # FIXME
+        "with_openexr": True,
+        "with_heic": True,
         "with_jbig": True,
         "with_jpeg": "libjpeg",
-        "with_openjp2": False,  # FIXME
-        "with_pango": False,  # FIXME
+        "with_openjp2": True,
+        "with_pango": False,  # FIXME: re-enable once migrated
         "with_png": True,
         "with_tiff": True,
         "with_webp": False,
@@ -87,6 +87,7 @@ class ImageMagicConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
+        # None of the dependencies need transitive_headers=True
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_bzlib:
@@ -136,6 +137,10 @@ class ImageMagicConan(ConanFile):
                 "Windows builds of ImageMagick require MFC which cannot currently be sourced from CCI."
             )
 
+    def build_requirements(self):
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/2.0.3")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
 
@@ -151,19 +156,30 @@ class ImageMagicConan(ConanFile):
             "MTd": "StaticMTD",
             "MD": "DynamicMT",
             "MDd": "DynamicMT",
-        }.get(str(self.settings.compiler.runtime))
+        }.get(msvc_runtime_flag(self))
 
     @property
     def _visual_studio_version(self):
+        if str(self.settings.compiler) == "Visual Studio":
+            return {
+                9: "/VS2002",
+                10: "/VS2010",
+                11: "/VS2012",
+                12: "/VS2013",
+                14: "/VS2015",
+                15: "/VS2017",
+                16: "/VS2019",
+                17: "/VS2022",
+            }.get(int(str(self.settings.compiler.version)))
         return {
-            9: "/VS2002",
-            10: "/VS2010",
-            11: "/VS2012",
-            12: "/VS2013",
-            14: "/VS2015",
-            15: "/VS2017",
-            16: "/VS2019",
-            17: "/VS2022",
+            130: "/VS2002",
+            160: "/VS2010",
+            170: "/VS2012",
+            180: "/VS2013",
+            190: "/VS2015",
+            191: "/VS2017",
+            192: "/VS2019",
+            193: "/VS2022",
         }.get(int(str(self.settings.compiler.version)))
 
     @property
@@ -173,7 +189,7 @@ class ImageMagicConan(ConanFile):
             "MTd": "/smtd",
             "MD": "/dmt",
             "MDd": "/mdt",
-        }.get(str(self.settings.compiler.runtime))
+        }.get(msvc_runtime_flag(self))
 
     def _generate_msvc(self):
         with chdir(self, os.path.join("VisualMagick", "configure")):
@@ -253,11 +269,14 @@ class ImageMagicConan(ConanFile):
         ]
         tc.generate()
 
-        tc = AutotoolsDeps(self)
+        deps = AutotoolsDeps(self)
         # FIXME: workaround for xorg/system adding system includes https://github.com/conan-io/conan-center-index/issues/6880
         # if "/usr/include/uuid" in tc.include_paths:
         #     tc.include_paths.remove("/usr/include/uuid")
-        tc.generate()
+        deps.generate()
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def generate(self):
         if is_msvc(self):
