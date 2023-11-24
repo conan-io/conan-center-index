@@ -104,7 +104,7 @@ class ImageMagicConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/3.0.1")
         if self.options.with_openjp2:
             self.requires("openjpeg/2.5.0")
         if self.options.with_pango:
@@ -118,7 +118,7 @@ class ImageMagicConan(ConanFile):
         if self.options.with_xml2:
             self.requires("libxml2/2.11.5")
         if self.options.with_freetype:
-            self.requires("freetype/2.13.0")
+            self.requires("freetype/2.13.2")
         if self.options.with_djvu:
             # FIXME: missing djvu recipe
             self.output.warning(
