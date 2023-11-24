@@ -6,16 +6,14 @@ class canteraRecipe(ConanFile):
     tool_requires="scons/4.3.0"
     
     # Metadata
-    author = ("David G. Goodwin", "Harry K. Moffat", "Ingmar Schoegl", "Raymond L. Speth", "Bryan W. Weber")
-    url = "https://github.com/Cantera/cantera"
     description = "Cantera is an open-source collection of object-oriented software tools for problems involving chemical kinetics, thermodynamics, and transport processes."
     license = "LicenseRef-Cantera"
+    homepage = "https://www.cantera.org/"
+    topics = ("chemical kinetics", "combustion", "thermodynamics", "reacting flows", "catalysis", "electrochemistry")
+    url = "https://github.com/conan-io/conan-center-index"
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
-
-    # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "cantera/SConstruct", "cantera/src/*", "cantera/include/*", "cantera/site_scons/*", "cantera/interfaces/*", "cantera/platform/*", "cantera/ext/*", "cantera/data/*", "cantera/License.txt", "FindCantera.cmake", "Kerosine5Step.yaml"
 
     # Define config variables
     scons_extra_inc_dirs = []
