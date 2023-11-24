@@ -58,6 +58,10 @@ class WhisperCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        if Version(self.version) < "1.4.3":
+            del self.options.metal
+            del self.options.metal_ndebug
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -117,9 +121,9 @@ class WhisperCppConan(ConanFile):
         if is_apple_os(self):
             if self.options.no_accelerate:
                 tc.variables["WHISPER_NO_ACCELERATE"] = True
-            if not self.options.metal:
+            if not self.options.get_safe("metal"):
                 tc.variables["WHISPER_METAL"] = False
-            if self.options.metal_ndebug:
+            if self.options.get_safe("metal_ndebug"):
                 tc.variables["WHISPER_METAL_NDEBUG"] = True
             if self.options.with_coreml:
                 tc.variables["WHISPER_COREML"] = True
