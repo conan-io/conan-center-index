@@ -57,14 +57,8 @@ class PackageConan(ConanFile):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("Only Linux and FreeBSD are currently supported. Contributions are welcome.")
 
-    @staticmethod
-    def _chmod_plus_x(filename):
-        if os.name == "posix":
-            os.chmod(filename, os.stat(filename).st_mode | 0o111)
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._chmod_plus_x(os.path.join(self.source_folder, "configure"))
 
     def generate(self):
         if not cross_building(self):
