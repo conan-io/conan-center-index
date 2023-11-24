@@ -1,4 +1,6 @@
 sources:
   "3.0.0":
-    url: "https://github.com/Cantera/cantera/archive/refs/tags/v3.0.0.tar.gz"
-    sha256: "6d17cdef21dae9deaf91351260b68ccf7e264c37c6030c9d4bf26a2cefb2b905"
+    url:
+      - "https://github.com/Cantera/cantera/archive/refs/tags/v3.0.0.zip"
+      - "https://zenodo.org/records/8137090/files/cantera-3.0.0.zip"
+    sha256: "8d430aa16bdea27d834138d83db4ca5f2af008818a725027816a6c10cc46be8d"

@@ -94,3 +94,11 @@ class canteraRecipe(ConanFile):
             cd_modifier = ""
         
         self.run("cd {} {} && scons install".format(cd_modifier, self.source_folder))
+
+    
+    def package_info(self):
+        self.cpp_info.libs = ["cantera"]
+        self.cpp_info.includedirs = ["include"]
+        self.cpp_info.libdirs = ["lib"]
+        self.cpp_info.bindirs = ["bin"]
+        self.cpp_info.resdirs = ["data"]
