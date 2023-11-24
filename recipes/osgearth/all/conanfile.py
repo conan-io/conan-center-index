@@ -120,7 +120,7 @@ class OsgearthConan(ConanFile):
         if self.options.with_geos:
             self.requires("geos/3.12.0")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.44.1")
+            self.requires("sqlite3/3.44.0")
         if self.options.with_draco:
             self.requires("draco/1.5.6")
         # if self.options.with_basisu:
@@ -170,8 +170,8 @@ class OsgearthConan(ConanFile):
         tc.variables["OSGEARTH_WITH_WEBP"] = self.options.with_webp
         tc.generate()
 
-        dpes = CMakeDeps(self)
-        dpes.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
