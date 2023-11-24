@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir, save
+from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.scm import Version
 
 import os
@@ -30,6 +30,9 @@ class AwsCAuth(ConanFile):
         "fPIC": True,
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -44,7 +47,7 @@ class AwsCAuth(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) < "0.6.17":
+        if Version(self.version) <= "0.6.17":
             self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-cal/0.5.13")
             self.requires("aws-c-io/0.10.20", transitive_headers=True)
@@ -70,6 +73,7 @@ class AwsCAuth(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
