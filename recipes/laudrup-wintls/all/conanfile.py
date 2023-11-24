@@ -104,8 +104,7 @@ class LaudrupWinTLS(ConanFile):
         self.cpp_info.libdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.set_property("cmake_target_name", "boost-wintls")
-        self.cpp_info.filenames["cmake_find_package"] = "boost-wintls"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "boost-wintls"
-        self.cpp_info.names["cmake_find_package"] = "boost-wintls"
-        self.cpp_info.names["cmake_find_package_multi"] = "boost-wintls"
+        self.cpp_info.filenames["cmake_find_package"] = "laudrup-wintls"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "laudrup-wintls"
+        self.cpp_info.names["cmake_find_package"] = "laudrup-wintls"
+        self.cpp_info.names["cmake_find_package_multi"] = "laudrup-wintls"
