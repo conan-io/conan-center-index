@@ -318,7 +318,7 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.239.0")
+            self.requires("vulkan-loader/1.3.268.0")
             if is_apple_os(self):
                 self.requires("moltenvk/1.2.2")
         if self.options.with_glib:
@@ -341,7 +341,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.40")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.44.0")
+            self.requires("sqlite3/3.44.1")
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.1.0")
         if self.options.with_pq:
@@ -354,7 +354,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_x11") or self.options.qtwayland:
-            self.requires("xkbcommon/1.5.0")
+            self.requires("xkbcommon/1.6.0")
         if self.options.get_safe("with_x11", False):
             self.requires("xorg/system")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
@@ -377,7 +377,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
-            self.requires("dbus/1.15.6")
+            self.requires("dbus/1.15.8")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_md4c", False):
