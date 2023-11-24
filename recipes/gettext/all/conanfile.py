@@ -1,7 +1,6 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, chdir, rm, rename
 from conan.tools.gnu import AutotoolsToolchain, Autotools
@@ -29,12 +28,16 @@ class GetTextConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        # INFO: Handle default value for `threads` in `config_options` method
+        "threads": "posix",
     }
 
     @property
-    def _gettext_folder(self):
+    def _gettext_tools_folder(self):
         return "gettext-tools"
+
+    @property
+    def _gettext_runtime_folder(self):
+        return "gettext-runtime"
 
     @property
     def _settings_build(self):
@@ -46,7 +49,8 @@ class GetTextConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
-        self.options.threads = {"Solaris": "solaris", "Windows": "windows"}.get(str(self.settings.os), "posix")
+        if str(self.settings.os) in ["Windows", "Solaris"]:
+            self.options.threads = str(self.settings.os).lower()
 
     def configure(self):
         if self.options.shared:
@@ -144,14 +148,12 @@ class GetTextConan(ConanFile):
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
-        #with chdir(self, os.path.join(self.build_folder, self._gettext_folder)):
-        #    autotools.make(args=["-C", "intl"])
 
     def package(self):
+        copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
 
-        copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "share", "doc"))
         rmdir(self, os.path.join(self.package_folder, "share", "info"))
         rmdir(self, os.path.join(self.package_folder, "share", "man"))
@@ -174,6 +176,9 @@ class GetTextConan(ConanFile):
         self.buildenv_info.define_path("AUTOPOINT", autopoint)
 
         # TODO: Generate FindGettext.cmake: https://cmake.org/cmake/help/latest/module/FindGettext.html
+        # TODO: Generate components for libgettext, libstyletext and gnuintl
+        # TODO: Export cppinfo libgettext
+        # TODO: Export cppinfo libstyletext
 
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "Intl")
