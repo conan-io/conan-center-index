@@ -77,6 +77,10 @@ class LibHALConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler ({compiler}-{version}) does not support")
 
+        if not self.dependencies["boost"].options.header_only:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires boost/*:header_only=True due boost::leaf")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
