@@ -8,13 +8,13 @@ import os
 required_conan_version = ">=1.52.0"
 
 
-class UlidConan(ConanFile):
-    name = "ulid"
+class SuyashUlidConan(ConanFile):
+    name = "suyash-ulid"
     description = "ulids in C++, Header Only"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://suy.io/ulid/"
-    topics = ("header-only")
+    topics = ("ulid", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
