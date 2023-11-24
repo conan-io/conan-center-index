@@ -3,7 +3,8 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, \
+    replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, msvs_toolset, msvc_runtime_flag
@@ -14,10 +15,8 @@ required_conan_version = ">=1.53.0"
 
 class ImageMagicConan(ConanFile):
     name = "imagemagick"
-    description = (
-        "ImageMagick is a free and open-source software suite for displaying, "
-        "converting, and editing raster image and vector image files"
-    )
+    description = ("ImageMagick is a free and open-source software suite for displaying, "
+                   "converting, and editing raster image and vector image files")
     license = "ImageMagick"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://imagemagick.org"
