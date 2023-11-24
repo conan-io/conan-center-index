@@ -58,7 +58,8 @@ class Bzip2Conan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
+        if Version(self.version) <= "1.0.6":
+            apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
