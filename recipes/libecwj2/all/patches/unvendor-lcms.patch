@@ -39,17 +39,6 @@
  	../C/NCSGDT2/NCSGDTEpsg.cpp \
  	../C/NCSGDT2/NCSGDTEPSGKey.cpp \
  	../C/NCSGDT2/NCSGDTLocation.cpp
---- Source/include/NCSJPCDefs.h
-+++ Source/include/NCSJPCDefs.h
-@@ -59,7 +59,7 @@
- // Use LCMS for ICC->RGB conversions, supports both
- // restricted and full ICC profiles.
- //
--#define NCSJPC_USE_LCMS
-+//#define NCSJPC_USE_LCMS
- 
- //
- // Use TinyXML for XML DOM Parsing
 --- configure.in
 +++ configure.in
 @@ -32,17 +32,6 @@
@@ -79,3 +68,25 @@
  
  rm -f Source/NCSBuildGnu/NCSGnuSystemDefs.h
  echo "#ifndef LIBECWJ2" > Source/NCSBuildGnu/NCSGnuSystemDefs.h
+--- Source/include/NCSJPCICCNode.h
++++ Source/include/NCSJPCICCNode.h
+@@ -26,7 +26,7 @@
+ #endif // NCSJPCNODE_H
+ 
+ #ifdef NCSJPC_USE_LCMS
+-#include "lcms.h"
++#include <lcms2.h>
+ #endif // NCSJPC_USE_LCMS
+ 	/**
+ 	 * CNCSJPCICC2RGBNode class - ICC profile to RGB colorspace conversion node using 
+--- Source/C/NCSEcw/NCSJP2/NCSJP2File.cpp
++++ Source/C/NCSEcw/NCSJP2/NCSJP2File.cpp
+@@ -33,7 +33,7 @@
+ #include "../../NCSGDT2/NCSGDTEpsg.h"
+ 
+ #ifdef NCSJPC_USE_LCMS
+-#include "lcms.h"
++#include <lcms2.h>
+ #endif //NCSJPC_USE_LCMS
+ 
+ #define JP2_GEODATA_WLD_MASK	4

@@ -6,6 +6,8 @@ sources:
     sha256: "60ae34e2ba34ca77525950822f53243f374940f1cd13d2460eabbbd759e11074"
 patches:
   "3.3":
+    # The following patches are applied by GDAL in an aggregated patch here:
+    # https://github.com/rouault/libecwj2-3.3-builds/blob/main/libecwj2-3.3.patch
     - patch_file: "patches/libecwj2-3.3-3245a.patch"
       patch_description: "Memory leak patches from http://trac.osgeo.org/mapserver/ticket/3245"
       patch_type: "bugfix"
@@ -22,12 +24,15 @@ patches:
       patch_description: "Fix crash creating 16bit JP images on x86_64 from http://trac.osgeo.org/gdal/ticket/2593"
       patch_type: "bugfix"
       patch_source: "https://sourceforge.net/projects/libecw-legacy/files/patches/libecwj2-3.3-2593.patch"
-    - patch_file: "patches/libecwj2-3.3-nolcms.patch"
-      patch_source: "https://sourceforge.net/projects/libecw-legacy/files/patches/libecwj2-3.3-nolcms.patch"
     - patch_file: "patches/libecwj2-3.3-wcharfix.patch"
       patch_type: "portability"
       patch_source: "https://sourceforge.net/projects/libecw-legacy/files/patches/libecwj2-3.3-wcharfix.patch"
-    - patch_file: "patches/unvendor-dependencies.patch"
+    # Additional patches for Conan
+    - patch_file: "patches/unvendor-lcms.patch"
+      patch_description: "Use lcms2 from Conan"
+      patch_type: "conan"
+      patch_source: "https://sourceforge.net/projects/libecw-legacy/files/patches/libecwj2-3.3-nolcms.patch"
+    - patch_file: "patches/unvendor-libjpeg-tinyxml.patch"
       patch_description: "Use libjpeg and tinyxml from Conan"
       patch_type: "conan"
     - patch_file: "patches/use-stdint.h-types.patch"

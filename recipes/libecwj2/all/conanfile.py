@@ -46,6 +46,7 @@ class PackageConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("lcms/2.14", transitive_headers=True, transitive_libs=True)
         self.requires("libjpeg/9e")
         self.requires("tinyxml/2.6.2", transitive_headers=True, transitive_libs=True)
 
