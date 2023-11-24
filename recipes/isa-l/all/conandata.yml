@@ -1,7 +1,4 @@
 sources:
-  "cci.20230818":
-    url: "https://github.com/intel/isa-l/archive/4815174a68bd197b48c19db45c77cf9f49008760.tar.gz"
-    sha256: "615d2fe8399c3fe6c91ed9ca1377710cf373a093a6b3f984754da706f012f6d6"
   "2.30.0":
     url: "https://github.com/intel/isa-l/archive/refs/tags/v2.30.0.tar.gz"
     sha256: "bcf592c04fdfa19e723d2adf53d3e0f4efd5b956bb618fed54a1108d76a6eb56"
