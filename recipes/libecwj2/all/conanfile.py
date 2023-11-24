@@ -1,12 +1,12 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
-from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.54.0"
 
