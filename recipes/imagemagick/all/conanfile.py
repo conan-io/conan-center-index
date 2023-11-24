@@ -97,7 +97,7 @@ class ImageMagicConan(ConanFile):
         if self.options.with_lcms:
             self.requires("lcms/2.14")
         if self.options.with_openexr:
-            self.requires("openexr/2.5.7")
+            self.requires("openexr/3.2.1")
         if self.options.with_heic:
             self.requires("libheif/1.16.2")
         if self.options.with_jbig:
