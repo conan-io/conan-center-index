@@ -126,9 +126,6 @@ class wxWidgetsConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == 'Linux':
-            # To solve versions conflicts:
-            self.requires("glib/2.70.4", override=True)
-
             self.requires('xorg/system')
             self.requires("gtk/3.24.24")
             if self.options.opengl:
