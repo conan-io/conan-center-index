@@ -1,0 +1,95 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e9f9e29..2d74724 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -17,6 +17,7 @@ include(GNUInstallDirs)
+ option(BUILD_TESTING "Top-level switch for testing. Turn off to disable unit and contract tests." ON)
+ 
+ option(LD_BUILD_SHARED_LIBS "Build the SDKs as shared libraries" OFF)
++option(LD_USE_FETCH_CONTENT "Use FetchContent to satisfy dependencies" ON)
+ 
+ cmake_dependent_option(LD_BUILD_UNIT_TESTS
+         "Build the C++ unit tests."
+@@ -36,9 +37,9 @@ cmake_dependent_option(LD_TESTING_SANITIZERS
+ 
+ cmake_dependent_option(LD_BUILD_CONTRACT_TESTS
+         "Build contract test service."
+-        OFF                                         # default to disabling contract tests, since they require running a service
++        OFF               # default to disabling contract tests, since they require running a service
+         "BUILD_TESTING;NOT LD_BUILD_SHARED_LIBS"    # only expose if top-level switch is on and using static libs, since C++ symbols needed would be hidden.
+-        OFF                                         # otherwise, off
++        OFF               # otherwise, off
+ )
+ 
+ # The general strategy is to produce a fat artifact containing all of our dependencies so users
+@@ -105,10 +106,6 @@ endif ()
+ find_package(OpenSSL REQUIRED)
+ message(STATUS "LaunchDarkly: using OpenSSL v${OPENSSL_VERSION}")
+ 
+-# Even though the main SDK might be a static or shared lib, boost should always statically
+-# linked into the binary.
+-set(Boost_USE_STATIC_LIBS ON)
+-
+ if (LD_BUILD_SHARED_LIBS)
+     # When building a shared library we hide all symbols
+     # aside from this we have specifically exported for the C-API.
+@@ -116,12 +113,15 @@ if (LD_BUILD_SHARED_LIBS)
+     set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+ endif ()
+ 
+-set(Boost_USE_MULTITHREADED ON)
+-set(Boost_USE_STATIC_RUNTIME OFF)
+ find_package(Boost 1.81 REQUIRED COMPONENTS json url coroutine)
+ message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
+ 
+-include(${CMAKE_FILES}/certify.cmake)
++if (LD_USE_FETCH_CONTENT)
++    include(${CMAKE_FILES}/certify.cmake)
++else()
++    find_package(certify REQUIRED)
++endif()
++
+ add_subdirectory(vendor/foxy)
+ 
+ # Common, internal, and server-sent-events are built as "object" libraries.
+diff --git a/libs/common/CMakeLists.txt b/libs/common/CMakeLists.txt
+index 0423c4b..87d0f7c 100644
+--- a/libs/common/CMakeLists.txt
++++ b/libs/common/CMakeLists.txt
+@@ -22,10 +22,12 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+ endif ()
+ 
+ # Needed to fetch external dependencies.
+-include(FetchContent)
+-
+-include(${CMAKE_FILES}/expected.cmake)
+-#include(${CMAKE_FILES}/foxy.cmake)
++if(LD_USE_FETCH_CONTENT)
++    include(FetchContent)
++    include(${CMAKE_FILES}/expected.cmake)
++else()
++    find_package(tl-expected REQUIRED)
++endif()
+ 
+ # Add main SDK sources.
+ add_subdirectory(src)
+diff --git a/libs/internal/CMakeLists.txt b/libs/internal/CMakeLists.txt
+index 2be93f6..0f59554 100644
+--- a/libs/internal/CMakeLists.txt
++++ b/libs/internal/CMakeLists.txt
+@@ -22,8 +22,13 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+ endif ()
+ 
+ 
+-# Needed to fetch external dependencies. 
+-include(FetchContent)
++# Needed to fetch external dependencies.
++if(LD_USE_FETCH_CONTENT)
++    include(FetchContent)
++    include(${CMAKE_FILES}/expected.cmake)
++else()
++    find_package(tl-expected REQUIRED)
++endif()
+ 
+ # Add main SDK sources.
+ add_subdirectory(src)

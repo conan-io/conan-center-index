@@ -1,0 +1,22 @@
+sources:
+  "3.2.1":
+    url: "https://github.com/launchdarkly/cpp-sdks/archive/refs/tags/launchdarkly-cpp-client-v3.2.1.tar.gz"
+    sha256: "64b6c46e07bf8810585ea574aa21fad3c55ed1968f2c1ba826e269acf3364af7"
+  "3.0.8":
+    url: "https://github.com/launchdarkly/cpp-sdks/archive/refs/tags/launchdarkly-cpp-client-v3.0.8.tar.gz"
+    sha256: "ecbec85c885a9b6e3dd13e77431e5096fafb3755921b6cdc9317ca2d2df8c130"
+patches:
+  "3.0.8":
+    - patch_file: "patches/no-fetch-content-3.0.8.patch"
+      patch_type: portability
+      patch_description: "allows disabling internal usage of fetch content"
+      patch_source: "https://gitlab.dev.entos.sky/immerse-ui/libs/launchdarkly/-/commit/f14e48a74c08b42344764d4180222a47459f244f"
+  "3.2.1":
+    - patch_file: "patches/no-fetch-content.patch"
+      patch_type: portability
+      patch_description: "allows disabling internal usage of fetch content"
+      patch_source: "https://gitlab.dev.entos.sky/immerse-ui/libs/launchdarkly/-/commit/f14e48a74c08b42344764d4180222a47459f244f"
+    - patch_file: "patches/optional-server-sdk.patch"
+      patch_type: portability
+      patch_description: "disable the server sdk which does not build with latest boost"
+      patch_source: "https://gitlab.dev.entos.sky/immerse-ui/libs/launchdarkly/-/commit/"
