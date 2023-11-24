@@ -1,4 +1,4 @@
 sources:
   "1.0.2":
-    url: "https://github.com/epam/DFP/releases/download/1.0.2-cxx/native-sources.tar.gz"
-    sha256: "1f5eabc5ec0447841475bc3e364a316aa4cefc4162aa6e35b9c8887f9c52df11"
+    url: "https://github.com/epam/DFP/releases/download/1.0.2-cxx/native-sources.zip"
+    sha256: "49b71861661d18b31b752e3e9314ac28473e355650bd7d117ce39c10ce9ed9d2"
