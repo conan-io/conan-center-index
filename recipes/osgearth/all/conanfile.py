@@ -98,14 +98,11 @@ class OsgearthConan(ConanFile):
     def requirements(self):
         self.requires("opengl/system")
         self.requires("gdal/3.8.0")
-        self.requires("openscenegraph/3.6.5")
+        self.requires("openscenegraph/3.6.5", transitive_headers=True, transitive_libs=True)
         self.requires("libcurl/[>=7.78.0 <9]")
-        self.requires("lerc/4.0.1")
+        self.requires("lerc/2.2", force=True)  # FIXME: lerc v4 is not compatible with v3.3
         self.requires("rapidjson/cci.20230929")
-
-        self.requires("zlib/[>=1.2.11 <2]")  # override
-        self.requires("libtiff/4.6.0")  # override
-        self.requires("libpng/1.6.40")  # override
+        self.requires("libzip/1.10.1")
 
         # if self.options.build_triton_nodekit:
         #     self.requires("triton_nodekit")
@@ -115,8 +112,6 @@ class OsgearthConan(ConanFile):
             self.requires("leveldb/1.23")
         if self.options.build_rocksdb_cache:
             self.requires("rocksdb/6.29.5")
-        if self.options.build_zip_plugin:
-            self.requires("zstd/1.5.5")  # override
         if self.options.with_geos:
             self.requires("geos/3.12.0")
         if self.options.with_sqlite3:
@@ -128,7 +123,7 @@ class OsgearthConan(ConanFile):
         # if self.options.with_glew:
         #     self.requires("glew/2.2.0")
         if self.options.with_protobuf:
-            self.requires("protobuf/3.21.12")
+            self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
 
@@ -223,14 +218,13 @@ class OsgearthConan(ConanFile):
             "libcurl": ["libcurl"],
             "gdal": ["gdal"],
             "opengl": ["opengl"],
+            "libzip": ["libzip"],
         }
 
         osgearth = setup_lib("osgEarth", required_libs)
 
         if not self.options.shared and is_msvc(self):
             osgearth.defines += ["OSGEARTH_LIBRARY_STATIC"]
-        if self.options.build_zip_plugin:
-            osgearth.requires += ["zstd::zstd"]
         if self.options.with_geos:
             osgearth.requires += ["geos::geos"]
         if self.options.with_sqlite3:
