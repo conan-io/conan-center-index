@@ -1,4 +1,7 @@
 sources:
+  "0.22.4":
+    url: "https://ftp.gnu.org/pub/gnu/gettext/gettext-0.22.4.tar.gz"
+    sha256: "c1e0bb2a4427a9024390c662cd532d664c4b36b8ff444ed5e54b115fdb7a1aea"
   "0.21":
     url: "https://ftp.gnu.org/pub/gnu/gettext/gettext-0.21.tar.gz"
     sha256: "c77d0da3102aec9c07f43671e60611ebff89a996ef159497ce8e59d075786b12"
@@ -7,6 +10,12 @@ sources:
     sha256: "66415634c6e8c3fa8b71362879ec7575e27da43da562c798a8a2f223e6e47f5c"
 patches:
   "0.21":
+    - patch_file: "patches/0006-gettext-relocatable.patch"
+      patch_description: "Relocate gettext install path"
+      patch_type: "conan"
+    - patch_file: "patches/0005-fix-mac-shared-libs.patch"
+      patch_description: "Link shared libs on mac"
+      patch_type: "conan"
     - patch_file: "patches/0002-memmove-is-intrinsic-function-on-MSVC.patch"
     - patch_file: "patches/0004-autopoint-relocatable.patch"
       patch_description: "relocatable autopoint with resources relative to script"
