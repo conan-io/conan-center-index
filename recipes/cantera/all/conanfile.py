@@ -1,9 +1,18 @@
+import os
+
 from conan import ConanFile
 from conan.tools.files import get
 
 class canteraRecipe(ConanFile):
     name = "cantera"
     tool_requires="scons/4.3.0"
+    options = {
+        "shared": [True, False]
+    }
+    default_options = {
+        "shared": False
+    }
+
     
     # Metadata
     description = "Cantera is an open-source collection of object-oriented software tools for problems involving chemical kinetics, thermodynamics, and transport processes."
@@ -59,31 +68,32 @@ class canteraRecipe(ConanFile):
 
     def build(self):
 
-        opt = "build -j4 " \
+        if self.settings.os == "Windows":
+            opt = "toolchain=msvc "
+            cd_modifier = "/d"
+        else:
+            opt = ""
+            cd_modifier = ""
+
+        opt = opt +\
               "prefix={} ".format(self.package_folder) +\
               "libdirname=lib " \
               "python_package=none " \
               "f90_interface=n " \
               "googletest=none " \
               "versioned_shared_library=yes " \
-              "extra_inc_dirs={} ".format(';'.join(self.scons_extra_inc_dirs)) +\
-              "extra_lib_dirs={} ".format(';'.join(self.scons_extra_lib_dirs)) +\
+              "extra_inc_dirs={} ".format(os.pathsep.join(self.scons_extra_inc_dirs)) +\
+              "extra_lib_dirs={} ".format(os.pathsep.join(self.scons_extra_lib_dirs)) +\
               "boost_inc_dir={} ".format(self.scons_boost_inc_dir) +\
               "sundials_include={} ".format(self.scons_sundials_include) +\
               "sundials_libdir={} ".format(self.scons_sundials_libdir)
-
-        if self.settings.os == "Windows":
-            opt = opt + "toolchain=msvc "
-            cd_modifier = "/d"
-        else:
-            cd_modifier = ""
 
         if self.settings.build_type == "Debug":
             opt = opt + "optimize=no "
         else:
             opt = opt + "debug=no "
 
-        self.run("cd {} {} && scons {}".format(cd_modifier, self.source_folder, opt))
+        self.run("cd {} {} && scons build -j4 {}".format(cd_modifier, self.source_folder, opt))
 
     def package(self):
         if self.settings.os == "Windows":
@@ -95,8 +105,8 @@ class canteraRecipe(ConanFile):
 
     
     def package_info(self):
-        self.cpp_info.libs = ["cantera"]
+        self.cpp_info.libs = ["cantera_shared"] if self.options.shared else ["cantera"]
         self.cpp_info.includedirs = ["include"]
-        self.cpp_info.libdirs = ["lib"]
+        self.cpp_info.libdirs = ["bin"] if self.options.shared else ["lib"]
         self.cpp_info.bindirs = ["bin"]
         self.cpp_info.resdirs = ["data"]
