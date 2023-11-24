@@ -34,7 +34,7 @@ class FreeAlutConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def validate(self):
-        # FIXME: freeglut supports Windows and Macos, but the recipe needs some help to work.
+        # FIXME: freealut supports Windows and Macos, but the recipe needs some help to work.
         if self.settings.os in ["Windows", "Macos"] and \
             not self.options.shared:
             raise ConanInvalidConfiguration(
