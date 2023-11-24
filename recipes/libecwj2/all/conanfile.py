@@ -3,7 +3,8 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import check_min_cppstd, stdcpp_library
+from conan.tools.build import check_min_cppstd, stdcpp_library, cross_building
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
@@ -66,6 +67,9 @@ class PackageConan(ConanFile):
         self._chmod_plus_x(os.path.join(self.source_folder, "configure"))
 
     def generate(self):
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
         tc = AutotoolsToolchain(self)
         # Disable warnings
         tc.extra_cflags.append("-w")
@@ -78,6 +82,9 @@ class PackageConan(ConanFile):
         apply_conandata_patches(self)
         rmdir(self, os.path.join(self.source_folder, "Source", "C", "libjpeg"))
         rmdir(self, os.path.join(self.source_folder, "Source", "C", "tinyxml"))
+        # Fix autotools warnings about incorrect name
+        os.rename(os.path.join(self.source_folder, "configure.in"),
+                  os.path.join(self.source_folder, "configure.ac"))
 
     def build(self):
         self._patch_sources()
