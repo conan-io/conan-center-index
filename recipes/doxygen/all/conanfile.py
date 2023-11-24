@@ -111,3 +111,7 @@ class DoxygenConan(ConanFile):
 
         # TODO: to remove in conan v2
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+
+    def package_id(self):
+        del self.info.settings.compiler
+        del self.info.settings.build_type
