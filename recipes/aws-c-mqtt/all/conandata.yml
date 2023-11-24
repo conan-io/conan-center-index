@@ -1,4 +1,7 @@
 sources:
+  "0.8.12":
+    url: "https://github.com/awslabs/aws-c-mqtt/archive/v0.8.12.tar.gz"
+    sha256: "df02de478ab1806bb57bcb78e5faa21b567716dcb64f8a52ae90a2b84f43cba1"
   "0.7.12":
     url: "https://github.com/awslabs/aws-c-mqtt/archive/v0.7.12.tar.gz"
     sha256: "cf80f1b4f37aa8a6b8698315fae32cbf2bd944b67784f07b5762f392f18e64df"
