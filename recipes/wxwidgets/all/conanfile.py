@@ -300,7 +300,7 @@ class wxWidgetsConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "wxwidgets")
 
         _version = Version(self.version)
-        version_suffix_major_minor = '-%s.%s' % (_version.major, _version.minor)
+        version_suffix_major_minor = f'-{_version.major}.{_version.minor}'
         unicode = 'u' if self.options.unicode else ''
 
         # wx no longer uses a debug suffix for non-windows platforms from 3.1.3 onwards
@@ -328,7 +328,7 @@ class wxWidgetsConan(ConanFile):
                 suffix = version_suffix_major_minor
             else:
                 prefix = 'wx'
-                version = '%s%s' % (version_major, version_minor)
+                version = f'{_version.major}{_version.minor}'
                 suffix = ''
 
         def base_library_pattern(library):
@@ -419,7 +419,7 @@ class wxWidgetsConan(ConanFile):
 
             arch_suffix = '_x64' if self.settings.arch == 'x86_64' else ''
             lib_suffix = '_dll' if self.options.shared else '_lib'
-            libdir = '%s%s%s' % (compiler_prefix, arch_suffix, lib_suffix)
+            libdir = f'{compiler_prefix}{arch_suffix}{lib_suffix}'
             libdir = os.path.join('lib', libdir)
             self.cpp_info.bindirs.append(libdir)
             self.cpp_info.libdirs.append(libdir)
@@ -469,5 +469,5 @@ class wxWidgetsConan(ConanFile):
         if self.settings.os == 'Windows':
             self.cpp_info.includedirs.append(os.path.join('include', 'msvc'))
         else:
-            include_path = os.path.join("include", "wx{}".format(version_suffix_major_minor))
+            include_path = os.path.join("include", f"wx{version_suffix_major_minor}")
             self.cpp_info.includedirs = [include_path] + self.cpp_info.includedirs
