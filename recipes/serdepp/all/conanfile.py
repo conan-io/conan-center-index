@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
@@ -49,12 +49,15 @@ class SerdeppConan(ConanFile):
             "apple-clang": "10",
         }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("nameof/0.10.3")
-        self.requires("magic_enum/0.9.3")
+        self.requires("magic_enum/0.9.5")
         if self.options.with_toml11:
             self.requires("toml11/3.7.1")
         if self.options.with_yamlcpp:
@@ -76,12 +79,15 @@ class SerdeppConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
 
         if not minimum_version:
-            self.output.warning(f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+            self.output.warning(f"{self.name} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
         elif Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.name} requires a compiler that supports at least C++17")
+            raise ConanInvalidConfiguration(f"{self.name} requires a compiler that supports at least C++{self._min_cppstd}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        apply_conandata_patches(self)
 
     def package(self):
         s = lambda x: os.path.join(self.source_folder, x)
