@@ -440,6 +440,10 @@ class PclConan(ConanFile):
         tc.cache_variables["WITH_PCAP"] = self._is_enabled("pcap")
         tc.cache_variables["WITH_PNG"] = self._is_enabled("png")
         tc.cache_variables["WITH_QHULL"] = self._is_enabled("qhull")
+        if self._is_enabled("qhull"):
+            # Upstream FindQhull.cmake defines HAVE_QHULL which changes content of pcl_config.h
+            # Since we use CMakeDeps instead of this file, we have to manually inject HAVE_QHULL
+            tc.cache_variables["HAVE_QHULL"] = True
         tc.cache_variables["WITH_QT"] = self._is_enabled("qt")
         tc.cache_variables["WITH_VTK"] = self._is_enabled("vtk")
         tc.cache_variables["WITH_CUDA"] = self._is_enabled("cuda")
@@ -573,13 +577,6 @@ class PclConan(ConanFile):
                         common.system_libs.append("gomp")
         if self.settings.os == "Windows":
             common.system_libs.append("ws2_32")
-
-        if self.options.with_qhull:
-            self.cpp_info.defines.append('HAVE_QHULL=1')
-        if self.options.with_png:
-            self.cpp_info.defines.append('HAVE_PNG=1')
-        if self.options.with_cuda:
-            self.cpp_info.defines.append('HAVE_CUDA=1')
 
         # TODO: Legacy, to be removed on Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "PCL"
