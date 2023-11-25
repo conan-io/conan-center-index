@@ -29,6 +29,7 @@ class wxWidgetsConan(ConanFile):
                "expat": ["off", "expat"],
                "regex": ["off", "regex"],
                "svg": ["off", "nanosvg"], # TODO: cmake currently can't find "nanosvg"
+               "gtk": [2, 3, "require"],
                "secretstore": [True, False],
                "aui": [True, False],
                "opengl": [True, False],
@@ -63,6 +64,7 @@ class wxWidgetsConan(ConanFile):
                "expat": "expat",
                "regex": "regex",
                "svg": "off",
+               "gtk": 3,
                "secretstore": True,
                "aui": True,
                "opengl": True,
@@ -96,40 +98,65 @@ class wxWidgetsConan(ConanFile):
         if self.settings.os != "Linux":
             self.options.rm_safe("secretstore")
             self.options.rm_safe("cairo")
+            self.options.rm_safe("gtk")
+        else:
+            if self.options.get_safe("gtk") == 3:
+                self.options["gtk/system"].version = 3
         if self.options.compatibility > Version(self.version):
             self.options.compatibility = "3.0"
 
     def system_requirements(self):
         apt = package_manager.Apt(self)
         packages = []
+        if self.options.secretstore and self.options.gtk != 'require':
+            packages.append('libsecret-1-dev')
         if self.options.webview:
-            # TODO: Why is libsoup required?
-            # Can't find a reference in the docs
-            packages.extend(['libsoup2.4-dev',
-                             'libwebkit2gtk-4.0-dev'])
+            # webkit2gtk requires libsoup
+            if self.options.gtk == 2:
+                packages.extend(['libsoup2.4-dev',
+                                 'libwebkitgtk-dev'])
+            else:
+                packages.extend(['libsoup2.4-dev',
+                                 'libwebkitgtk-3.0-dev'])
+                # TODO: Recent distro only
+                # packages.extend(['libsoup3.0-dev',
+                #                  'libwebkit2gtk-4.1-dev'])
         if self.options.get_safe("cairo"):
             packages.append("libcairo2-dev")
-        for package in packages:
-            apt.install(package)
+        apt.install(packages)
 
         yum = package_manager.Yum(self)
         packages = []
         if self.options.webview:
-            packages.append("webkit2gtk3-devel")
+            packages.append("libsoup3-devel")
+            packages.append("webkit2gtk4.1-devel")
         if self.options.get_safe("cairo"):
             packages.append("cairo-devel")
-        for package in packages:
-            yum.install(package)
+        yum.install(packages)
 
     def build_requirements(self):
         self.tool_requires("ninja/1.11.1")
+        self.tool_requires("cmake/[>=3.17]")
 
     def requirements(self):
         if self.settings.os == 'Linux':
             self.requires('xorg/system')
-            self.requires("gtk/3.24.24")
+            if self.options.gtk == 'require':
+                self.requires("gtk/3.24.24")
+            else:
+                self.requires("gtk/system")
             if self.options.opengl:
                 self.requires('opengl/system')
+            self.requires("xkbcommon/1.5.0")
+            # TODO: Does not work right now
+            # if self.options.get_safe("cairo"):
+            #    self.requires("cairo/1.18.0")
+            if self.options.mediactrl:
+                self.requires("gstreamer/1.22.3")
+                self.requires("gst-plugins-base/1.19.2")
+            # TODO: CMake doesn't find libsecret right now
+            if self.options.get_safe("secretstore") and self.options.gtk == "require":
+                self.requires("libsecret/0.20.5")
         if self.options.png == 'libpng':
             self.requires('libpng/1.6.40')
         if self.options.jpeg == 'libjpeg':
@@ -144,18 +171,15 @@ class wxWidgetsConan(ConanFile):
             self.requires('zlib/[>=1.2.11 <2]')
         if self.options.expat == 'expat':
             self.requires('expat/2.5.0')
-        # TODO: Does not work right now
-        # if self.options.get_safe("cairo"):
-        #    self.requires("cairo/1.18.0")
-        if self.options.mediactrl:
-            self.requires("gstreamer/1.22.3")
-            self.requires("gst-plugins-base/1.19.2")
-        if self.options.get_safe("secretstore"):
-            self.requires("libsecret/0.20.5")
         if self.options.regex == 'regex' and self.version >= '3.1.6':
             self.requires('pcre2/10.42')
         if self.options.svg == 'nanosvg' and self.version >= '3.1.7':
             self.requires('nanosvg/cci.20210904')
+
+    def validate(self):
+        if self.settings.os == 'Linux':
+            if not self.dependencies.direct_host["xkbcommon"].options.with_x11:
+                raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -201,7 +225,7 @@ class wxWidgetsConan(ConanFile):
             tc.variables['wxBUILD_USE_STATIC_RUNTIME'] = 'MT' in str(self.settings.compiler.runtime)
             tc.variables['wxBUILD_MSVC_MULTIPROC'] = True
         if self.settings.os == 'Linux':
-            tc.variables['wxBUILD_TOOLKIT'] = 'gtk3'
+            tc.variables['wxBUILD_TOOLKIT'] = 'gtk2' if self.options.gtk == 2 else 'gtk3'
             tc.variables['wxUSE_CAIRO'] = self.options.cairo
         # Disable some optional libraries that will otherwise lead to non-deterministic builds
         if self.settings.os != "Windows":
@@ -309,7 +333,7 @@ class wxWidgetsConan(ConanFile):
 
         if self.settings.os == 'Linux':
             prefix = 'wx_'
-            toolkit = 'gtk3'
+            toolkit = 'gtk2' if self.options.gtk == 2 else 'gtk3'
             version = ''
             suffix = version_suffix_major_minor
         elif self.settings.os == 'Macos':
