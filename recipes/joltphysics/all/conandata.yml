@@ -10,7 +10,7 @@ sources:
     sha256: "96ae2e8691c4802e56bf2587da30f2cc86b8abe82a78bc2398065bd87dd718af"
 patches:
   "4.0.1":
-    - patch_file: "patches/4.0.0-0001-fix-cmake.patch"
+    - patch_file: "patches/4.0.1-0001-fix-cmake.patch"
       patch_description: "Fix CMakeLists: no warnings as errors, add install target, and add profile & debug_renderer options"
       patch_type: "conan"
   "3.0.1":
