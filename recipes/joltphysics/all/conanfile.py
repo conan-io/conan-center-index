@@ -133,7 +133,6 @@ class JoltPhysicsConan(ConanFile):
         tc.variables["JPH_PROFILE_ENABLED"] = self.options.profile
         if Version(self.version) >= "3.0.0":
             tc.variables["ENABLE_ALL_WARNINGS"] = False
-        if Version(self.version) >= "3.0.0":
             tc.variables["INTERPROCEDURAL_OPTIMIZATION"] = False
         tc.generate()
 
