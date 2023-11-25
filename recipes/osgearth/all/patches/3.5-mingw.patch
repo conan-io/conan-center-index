@@ -1,0 +1,15 @@
+--- src/osgEarthDrivers/fastdxt/dxt.cpp
++++ src/osgEarthDrivers/fastdxt/dxt.cpp
+@@ -119,7 +119,12 @@
+ 			     int &outputBytes )
+ {
+   byte *tmpBuf;
++
++#ifdef __MINGW32__
++  tmpBuf = (byte*)__mingw_aligned_malloc(width*height*4,16);
++#else
+   tmpBuf = (byte*)memalign(16, width*height*4);
++#endif
+   memset(tmpBuf, 0, width*height*4);
+   RGBAtoYCoCg(inBuf, tmpBuf, width, height);
+   CompressImageDXT5(tmpBuf, outBuf, width, height, outputBytes);
