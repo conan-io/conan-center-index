@@ -30,7 +30,7 @@ class wxWidgetsConan(ConanFile):
                "expat": ["off", "expat"],
                "regex": ["off", "regex"],
                "svg": ["off", "nanosvg"], # TODO: cmake currently can't find "nanosvg"
-               "gtk": [2, 3, "require"],
+               "gtk": [2, 3, "gtk"], # TODO: compile without system gtk
                "secretstore": [True, False],
                "aui": [True, False],
                "opengl": [True, False],
@@ -66,6 +66,7 @@ class wxWidgetsConan(ConanFile):
                "regex": "regex",
                "svg": "off",
                "gtk": 3,
+               "gtk/*:version": 3,
                "secretstore": True,
                "aui": True,
                "opengl": True,
@@ -101,18 +102,17 @@ class wxWidgetsConan(ConanFile):
             self.options.rm_safe("cairo")
             self.options.rm_safe("gtk")
         else:
-            if self.options.get_safe("gtk") == 3:
-                self.options["gtk/system"].version = 3
-        if self.options.compatibility > Version(self.version):
-            self.options.compatibility = "3.0"
+            if self.version < "3.2.1":
+                # CMake find_package error in older versions
+                self.options.rm_safe("opengl")
 
     def system_requirements(self):
         apt = package_manager.Apt(self)
         packages = []
-        if self.options.secretstore and self.options.gtk != 'require':
+        if self.options.secretstore and self.options.get_safe("gtk") != "gtk":
             packages.append('libsecret-1-dev')
         if self.options.webview:
-            if self.options.gtk == 2:
+            if self.options.get_safe("gtk") == 2:
                 packages.append('libwebkitgtk-dev')
             else:
                 packages.append('libwebkit2gtk-4.0-dev')
@@ -135,11 +135,11 @@ class wxWidgetsConan(ConanFile):
     def requirements(self):
         if self.settings.os == 'Linux':
             self.requires('xorg/system')
-            if self.options.gtk == 'require':
+            if self.options.get_safe("gtk") == "gtk":
                 self.requires("gtk/3.24.24")
             else:
                 self.requires("gtk/system")
-            if self.options.opengl:
+            if self.options.get_safe("opengl", default=False):
                 self.requires('opengl/system')
             self.requires("xkbcommon/1.6.0")
             # TODO: Does not work right now
@@ -149,8 +149,10 @@ class wxWidgetsConan(ConanFile):
                 self.requires("gstreamer/1.22.3")
                 self.requires("gst-plugins-base/1.19.2")
             # TODO: CMake doesn't find libsecret right now
-            if self.options.get_safe("secretstore") and self.options.gtk == "require":
+            if self.options.get_safe("secretstore") and self.options.get_safe("gtk") == "gtk":
                 self.requires("libsecret/0.20.5")
+            if self.options.webview:
+                self.requires("libcurl/8.4.0")
         if self.options.png == 'libpng':
             self.requires('libpng/1.6.40')
         if self.options.jpeg == 'libjpeg':
@@ -174,6 +176,9 @@ class wxWidgetsConan(ConanFile):
         if self.settings.os == 'Linux':
             if not self.dependencies.direct_host["xkbcommon"].options.with_x11:
                 raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled")
+            if self.dependencies.direct_host["gtk"].options.version != self.options.gtk:
+                print(self.dependencies.direct_host["gtk"].options.version, self.options.gtk)
+                raise ConanInvalidConfiguration("The 'version' option for the 'gtk' package must match the 'gtk' option")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -201,6 +206,12 @@ class wxWidgetsConan(ConanFile):
                         '${EXPAT_LIBRARIES}',
                         'expat::expat')
 
+    @property
+    def _gtk_version(self):
+        if self.options.get_safe("gtk") == 2:
+            return "gtk2"
+        return "gtk3"
+
     def generate(self):
         tc = CMakeToolchain(self)
 
@@ -219,7 +230,7 @@ class wxWidgetsConan(ConanFile):
             tc.variables['wxBUILD_USE_STATIC_RUNTIME'] = 'MT' in str(self.settings.compiler.runtime)
             tc.variables['wxBUILD_MSVC_MULTIPROC'] = True
         if self.settings.os == 'Linux':
-            tc.variables['wxBUILD_TOOLKIT'] = 'gtk2' if self.options.gtk == 2 else 'gtk3'
+            tc.variables['wxBUILD_TOOLKIT'] = self._gtk_version
             tc.variables['wxUSE_CAIRO'] = self.options.cairo
         # Disable some optional libraries that will otherwise lead to non-deterministic builds
         if self.settings.os != "Windows":
@@ -243,7 +254,7 @@ class wxWidgetsConan(ConanFile):
 
         # wxWidgets libraries
         tc.variables['wxUSE_AUI'] = self.options.aui
-        tc.variables['wxUSE_OPENGL'] = self.options.opengl
+        tc.variables['wxUSE_OPENGL'] = self.options.get_safe("opengl", default=False)
         tc.variables['wxUSE_HTML'] = self.options.html
         tc.variables['wxUSE_MEDIACTRL'] = self.options.mediactrl
         tc.variables['wxUSE_PROPGRID'] = self.options.propgrid
@@ -327,7 +338,7 @@ class wxWidgetsConan(ConanFile):
 
         if self.settings.os == 'Linux':
             prefix = 'wx_'
-            toolkit = 'gtk2' if self.options.gtk == 2 else 'gtk3'
+            toolkit = self._gtk_version
             version = ''
             suffix = version_suffix_major_minor
         elif self.settings.os == 'Macos':
@@ -365,7 +376,7 @@ class wxWidgetsConan(ConanFile):
             libs.append(base_library_pattern('xml'))
         if self.options.aui:
             libs.append(library_pattern('aui'))
-        if self.options.opengl:
+        if self.options.get_safe("opengl", default=False):
             libs.append(library_pattern('gl'))
         if self.options.html:
             libs.append(library_pattern('html'))
