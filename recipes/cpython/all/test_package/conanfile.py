@@ -1,9 +1,8 @@
 import os
-import re
 import shutil
 from io import StringIO
 
-from conan import ConanFile
+from conan import ConanFile, __version__ as conan_version
 from conan.errors import ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
@@ -12,6 +11,7 @@ from conan.tools.files import mkdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
+conan2 = conan_version >= Version("2.0.0")
 
 class CmakePython3Abi(object):
     def __init__(self, debug, pymalloc, unicode):
@@ -52,9 +52,10 @@ class TestPackageConan(ConanFile):
 
     @property
     def _python(self):
-        #return self.deps_user_info["cpython"].python
-        # FIXME
-        return self.dependencies["cpython"].conf_info.get("user.cpython:python", check_type=str)
+        if conan2:
+            return self.dependencies["cpython"].conf_info.get("user.cpython:python", check_type=str)
+        else:
+            return self.deps_user_info["cpython"].python
 
     @property
     def _clean_py_version(self):
@@ -62,15 +63,17 @@ class TestPackageConan(ConanFile):
 
     @property
     def _py_version(self):
-        #return Version(self.deps_cpp_info["cpython"].version)
-        # FIXME
-        return Version(self.dependencies["cpython"].ref.version)
+        if conan2:
+            return Version(self.dependencies["cpython"].ref.version)
+        else:
+            return Version(self.deps_cpp_info["cpython"].version)
 
     @property
     def _pymalloc(self):
-        #return bool("pymalloc" in self.options["cpython"] and self.options["cpython"].pymalloc)
-        # FIXME
-        return bool(self.dependencies["cpython"].options.get_safe("pymalloc", False))
+        if conan2:
+            return bool(self.dependencies["cpython"].options.get_safe("pymalloc", False))
+        else:
+            return bool("pymalloc" in self.options["cpython"] and self.options["cpython"].pymalloc)
 
     @property
     def _cmake_abi(self):
@@ -158,21 +161,17 @@ class TestPackageConan(ConanFile):
         self.output.info("Module worked as expected")
 
     def _cpython_option(self, name):
-        #try:
-        #    return getattr(self.options["cpython"], name, False)
-        #except ConanException:
-        #    return False
-        # FIXME
-        return self.dependencies["cpython"].options.get_safe(name, False)
+        if conan2:
+            return self.dependencies["cpython"].options.get_safe(name, False)
+        else:
+            try:
+                return getattr(self.options["cpython"], name, False)
+            except ConanException:
+                return False
 
     def test(self):
         if not cross_building(self, skip_x64_x86=True):
-            # FIXME
-            #command = f"{self._python} --version"
-            #buffer = StringIO()
-            #self.run(command, stdout=buffer, ignore_errors=True)
-            #self.output.info(f"output: {buffer.getvalue()}")
-            #self.run(command)
+            self.run(f"{self._python} --version")
 
             self.run(f"{self._python} -c \"print('hello world')\"")
 
@@ -219,9 +218,11 @@ class TestPackageConan(ConanFile):
 
             # MSVC builds need PYTHONHOME set.
             # FIXME
-            if self.dependencies["cpython"].conf_info.get("user.cpython:module_requires_pythonhome", check_type=bool):
-                os.environ["PYTHONHOME"] = self.dependencies["cpython"].conf_info.get("user.cpython:pythonhome", check_type=str)
-            #if self.deps_user_info["cpython"].module_requires_pythonhome == "True":
-            #    os.environ["PYTHONHOME"] = self.deps_user_info["cpython"].pythonhome
+            if conan2:
+                if self.dependencies["cpython"].conf_info.get("user.cpython:module_requires_pythonhome", check_type=bool):
+                    os.environ["PYTHONHOME"] = self.dependencies["cpython"].conf_info.get("user.cpython:pythonhome", check_type=str)
+            else:
+                if self.deps_user_info["cpython"].module_requires_pythonhome == "True":
+                    os.environ["PYTHONHOME"] = self.deps_user_info["cpython"].pythonhome
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path)
