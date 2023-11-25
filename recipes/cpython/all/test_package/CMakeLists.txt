@@ -96,4 +96,4 @@ if(BUILD_MODULE)
 endif()
 
 add_executable(${PROJECT_NAME} "py${PY_VERSION_MAJOR}/test_package.c")
-target_link_libraries(${PROJECT_NAME} PRIVATE cpython::cpython)
+target_link_libraries(${PROJECT_NAME} PRIVATE cpython::embed)

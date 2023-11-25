@@ -8,7 +8,6 @@ from conan.errors import ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualRunEnv
 from conan.tools.files import mkdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -42,7 +41,7 @@ class CmakePython3Abi(object):
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps"
+    generators = "CMakeDeps", "VirtualRunEnv", "VCVars" # TODO test MSVC, is VCVars necessary? 
     test_type = "explicit"
 
     def requirements(self):
@@ -76,9 +75,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _cmake_try_FindPythonX(self):
-        # FIXME: re-enable
-        # return not is_msvc(self) or self.settings.build_type != "Debug"
-        return False
+        return not is_msvc(self) or self.settings.build_type != "Debug"
 
     @property
     def _supports_modules(self):
@@ -103,7 +100,7 @@ class TestPackageConan(ConanFile):
         tc.cache_variables[f"Python{py_major}_FIND_REGISTRY"] = "NEVER"
         tc.cache_variables[f"Python{py_major}_FIND_IMPLEMENTATIONS"] = "CPython"
         tc.cache_variables[f"Python{py_major}_FIND_STRATEGY"] = "LOCATION"
-        if not is_msvc(self) and self._clean_py_version < "3.8":
+        if not is_msvc(self) and self._py_version < "3.8":
             tc.cache_variables[f"Python{py_major}_FIND_ABI"] = self._cmake_abi.cmake_arg
         tc.generate()
 
@@ -190,7 +187,7 @@ class TestPackageConan(ConanFile):
                 self._test_module("curses", self._cpython_option("with_curses"))
 
                 self._test_module("expat", True)
-                self._test_module("sqlite3", True)
+                self._test_module("sqlite3", self._cpython_option("with_sqlite3"))
                 self._test_module("decimal", True)
                 self._test_module("ctypes", True)
                 self._test_module("ssl", True)
@@ -203,7 +200,7 @@ class TestPackageConan(ConanFile):
                 # FIXME: find out why cpython on apple does not allow to use modules linked against a static python
             else:
                 if self._supports_modules:
-                    os.environ["PYTHONPATH"] = os.path.join(self.build_folder, "lib")
+                    os.environ["PYTHONPATH"] = self.build_folder
                     self.output.info("Testing module (spam) using cmake built module")
                     self._test_module("spam", True)
 
@@ -214,4 +211,5 @@ class TestPackageConan(ConanFile):
             # MSVC builds need PYTHONHOME set.
             if self.dependencies["cpython"].conf_info.get("user.cpython:module_requires_pythonhome", check_type=bool):
                 os.environ["PYTHONHOME"] = self.dependencies["cpython"].conf_info.get("user.cpython:pythonhome", check_type=str)
-            self.run(os.path.join(self.cpp.build.bindir, "test_package"), env="conanrun")
+            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            self.run(bin_path, run_environment=True)
