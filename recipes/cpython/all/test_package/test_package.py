@@ -164,6 +164,8 @@ def test_sqlite3():
         raise Exception("Need 4 stocks")
     print(data)
     conn.close()
+    # Remove the file so subsequent tests don't fail
+    os.remove("sqlite3.db")
 
 
 @add_test
