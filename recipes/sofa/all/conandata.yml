@@ -1,4 +1,7 @@
 sources:
+  "20231011":
+    url: "http://www.iausofa.org/2023_1011_C/sofa_c-20231011.tar.gz"
+    sha256: "d9c10833cae8b4d9361a0ffda31ec361fd1262362025bec4d4e51a880150ace2"
   "20210512":
     url: "http://www.iausofa.org/2021_0512_C/sofa_c-20210512.tar.gz"
     sha256: "3362baba47ce965af1fc6a3141052a0e1f643d186e8deca83df1ea97455bb2fd"
