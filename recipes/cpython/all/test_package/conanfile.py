@@ -106,13 +106,6 @@ class TestPackageConan(ConanFile):
 
 
     def build(self):
-        if not cross_building(self, skip_x64_x86=True):
-            command = f"{self._python} --version"
-            buffer = StringIO()
-            self.run(command, stdout=buffer, ignore_errors=True)
-            self.output.info(f"output: {buffer.getvalue()}")
-            self.run(command)
-
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
