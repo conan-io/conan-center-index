@@ -6,6 +6,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
 from conan.tools.scm import Version
 from conan.tools.system import package_manager
+from conan.errors import ConanInvalidConfiguration
 
 
 class wxWidgetsConan(ConanFile):
@@ -111,16 +112,10 @@ class wxWidgetsConan(ConanFile):
         if self.options.secretstore and self.options.gtk != 'require':
             packages.append('libsecret-1-dev')
         if self.options.webview:
-            # webkit2gtk requires libsoup
             if self.options.gtk == 2:
-                packages.extend(['libsoup2.4-dev',
-                                 'libwebkitgtk-dev'])
+                packages.append('libwebkitgtk-dev')
             else:
-                packages.extend(['libsoup2.4-dev',
-                                 'libwebkitgtk-3.0-dev'])
-                # TODO: Recent distro only
-                # packages.extend(['libsoup3.0-dev',
-                #                  'libwebkit2gtk-4.1-dev'])
+                packages.append('libwebkit2gtk-4.0-dev')
         if self.options.get_safe("cairo"):
             packages.append("libcairo2-dev")
         apt.install(packages)
@@ -128,7 +123,6 @@ class wxWidgetsConan(ConanFile):
         yum = package_manager.Yum(self)
         packages = []
         if self.options.webview:
-            packages.append("libsoup3-devel")
             packages.append("webkit2gtk4.1-devel")
         if self.options.get_safe("cairo"):
             packages.append("cairo-devel")
@@ -147,7 +141,7 @@ class wxWidgetsConan(ConanFile):
                 self.requires("gtk/system")
             if self.options.opengl:
                 self.requires('opengl/system')
-            self.requires("xkbcommon/1.5.0")
+            self.requires("xkbcommon/1.6.0")
             # TODO: Does not work right now
             # if self.options.get_safe("cairo"):
             #    self.requires("cairo/1.18.0")
