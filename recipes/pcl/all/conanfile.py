@@ -543,7 +543,6 @@ class PclConan(ConanFile):
                     component.requires.append(opt_dep)
             for dep in self._external_deps.get(name, []) + self._external_optional_deps.get(name, []):
                 component.requires += self._ext_dep_to_conan_target(dep)
-            self.output.info(f"Component {name} requires: {component.requires}")
 
         if self.options.apps:
             component = self.cpp_info.components["apps"]
