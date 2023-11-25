@@ -5,6 +5,12 @@ sources:
   "3.1.5":
     url: "https://github.com/wxWidgets/wxWidgets/archive/v3.1.5.tar.gz"
     sha256: "e8fd5f9fbff864562aa4d9c094f898c97f5e1274c90f25beb0bfd5cb61319dea"
+  "3.1.6":
+    url: "https://github.com/wxWidgets/wxWidgets/archive/v3.1.6.tar.gz"
+    sha256: "ad6537778b3a9e267c4d7d87ad05714ea2e2f5221da0cfb8b3028fec4f606b6c"
+  "3.1.7":
+    url: "https://github.com/wxWidgets/wxWidgets/archive/v3.1.7.tar.gz"
+    sha256: "0e20be27a3f51f2c54b0dbf49d534868281db07f10a85d50944aaaf1b5415441"
   "3.2.0":
     url: "https://github.com/wxWidgets/wxWidgets/archive/v3.2.0.tar.gz"
     sha256: "43480e3887f32924246eb439520a3a2bc04d7947712de1ea0590c5b58dedadd9"
@@ -17,6 +23,9 @@ sources:
   "3.2.3":
     url: "https://github.com/wxWidgets/wxWidgets/archive/v3.2.3.tar.gz"
     sha256: "0eb9499c06778c6746dbd4aee2a124f1995a5db331e282d15237b0046c1788af"
+  "3.2.4":
+    url: "https://github.com/wxWidgets/wxWidgets/archive/v3.2.4.tar.gz"
+    sha256: "b358b7f59f5b7cb934265120d114e5fd510a8b40802d00a111a85911eb5100d1"
 patches:
   "3.1.4":
     - patch_file: "patches/d9deaa8b76128613a84f3d085eb1e4b05631083a.patch"
