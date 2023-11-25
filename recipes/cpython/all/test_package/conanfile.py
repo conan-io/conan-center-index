@@ -41,7 +41,7 @@ class CmakePython3Abi(object):
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualRunEnv", "VCVars" # TODO test MSVC, is VCVars necessary? 
+    generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def requirements(self):
@@ -56,7 +56,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _clean_py_version(self):
-        return re.match(r"^[0-9.]+", str(self.dependencies["cpython"].ref.version)).group(0)
+        return str(self._py_version)
 
     @property
     def _py_version(self):
@@ -104,8 +104,6 @@ class TestPackageConan(ConanFile):
             tc.cache_variables[f"Python{py_major}_FIND_ABI"] = self._cmake_abi.cmake_arg
         tc.generate()
 
-        VirtualRunEnv(self).generate(scope="run")
-        VirtualRunEnv(self).generate(scope="build")
 
     def build(self):
         if not cross_building(self, skip_x64_x86=True):
@@ -212,4 +210,4 @@ class TestPackageConan(ConanFile):
             if self.dependencies["cpython"].conf_info.get("user.cpython:module_requires_pythonhome", check_type=bool):
                 os.environ["PYTHONHOME"] = self.dependencies["cpython"].conf_info.get("user.cpython:pythonhome", check_type=str)
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(bin_path, run_environment=True)
+            self.run(bin_path)
