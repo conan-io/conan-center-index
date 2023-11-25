@@ -65,8 +65,7 @@ class wxWidgetsConan(ConanFile):
                "expat": "expat",
                "regex": "regex",
                "svg": "off",
-               "gtk": 3,
-               "gtk/*:version": 3,
+               "gtk": 2,
                "secretstore": True,
                "aui": True,
                "opengl": True,
@@ -78,7 +77,9 @@ class wxWidgetsConan(ConanFile):
                "richtext": True,
                "sockets": True,
                "stc": True,
-               "webview": True,
+               # WebKitGTK for GTK2 is not available as a system dependency on modern distros.
+               # When gtk/system defaults to GTK3, turn this back on.
+               "webview": False,
                "xml": True,
                "xrc": True,
                "cairo": True,
