@@ -8,7 +8,6 @@ required_conan_version = ">=2.0"
 
 class sqlite3mc(ConanFile):
     name = "sqlite3mc"
-    version = "1.8.0"
     package_type = "library"
 
     license = "MIT"
@@ -119,12 +118,14 @@ class sqlite3mc(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.require_zlib:
