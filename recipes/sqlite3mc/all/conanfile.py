@@ -3,7 +3,7 @@ from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMakeDeps, CMakeToolchain, CMake
 from conan.tools.files import get, copy
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
 
 class sqlite3mc(ConanFile):
