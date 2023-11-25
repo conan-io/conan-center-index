@@ -1,8 +1,8 @@
 diff --git a/Build/CMakeLists.txt b/Build/CMakeLists.txt
-index e503744..6525df9 100644
+index a49e61c..51e2777 100644
 --- a/Build/CMakeLists.txt
 +++ b/Build/CMakeLists.txt
-@@ -57,11 +57,11 @@ include(CMakeDependentOption)
+@@ -60,11 +60,11 @@ include(CMakeDependentOption)
  cmake_dependent_option(USE_STATIC_MSVC_RUNTIME_LIBRARY "Use the static MSVC runtime library" ON "MSVC;NOT WINDOWS_STORE" OFF)
  
  # Determine which configurations exist
