@@ -1,0 +1,20 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ee82585..bea77c7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -113,10 +113,14 @@ target_include_directories(stx PRIVATE src)
+ # === Install
+ #
+ # ===============================================
++include(GNUInstallDirs)
+ install(
+   TARGETS stx
+   EXPORT stx
+-  LIBRARY DESTINATION lib)
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
+ install(DIRECTORY include/stx DESTINATION include)
+ 
+ # ===============================================
