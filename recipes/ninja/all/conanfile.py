@@ -22,6 +22,7 @@ class NinjaConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
