@@ -58,7 +58,7 @@ class OsgearthConan(ConanFile):
         "enable_profiling": False,
         "enable_wininet_for_http": False,
         "install_shaders": True,
-        "with_basisu": True,
+        "with_basisu": False,
         "with_blend2d": False,
         "with_blosc": True,
         "with_draco": True,
@@ -119,7 +119,7 @@ class OsgearthConan(ConanFile):
         if self.options.enable_profiling:
             self.requires("tracy/0.10")
         if self.options.with_basisu:
-            self.requires("libbasisu/1.15.0")
+            self.requires("libbasisu/1.14.0")  # libbasisu 1.15+ is not compatible
         if self.options.with_blend2d:
             self.requires("blend2d/0.10.6")
         if self.options.with_blosc:
