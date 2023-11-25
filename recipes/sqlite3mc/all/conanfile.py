@@ -111,6 +111,9 @@ class sqlite3mc(ConanFile):
         "omit_aes_hardware_support": False
     }
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.24 <4]")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
