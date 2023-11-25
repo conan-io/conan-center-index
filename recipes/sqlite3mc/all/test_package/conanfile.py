@@ -8,6 +8,9 @@ class sqlite3mcTest(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "CMakeToolchain"
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.24 <4]")
+
     def requirements(self):
         self.requires(self.tested_reference_str)
 
