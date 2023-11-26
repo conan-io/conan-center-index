@@ -109,6 +109,8 @@ class Base64Conan(ConanFile):
             copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "base64")
+        self.cpp_info.set_property("cmake_target_name", "aklomp::base64")
         self.cpp_info.libs = ["base64"]
 
         if Version(self.version) >= "0.5.0" and not self.options.shared:
