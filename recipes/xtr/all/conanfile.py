@@ -3,8 +3,8 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import chdir, copy, get, rmdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
+from conan.tools.files import copy, get, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
@@ -41,11 +41,9 @@ class XtrConan(ConanFile):
     }
 
     def config_options(self):
-        if Version(self.version) < "1.0.1":
-            self.options.rm_safe("sink_capacity_kb")
         if Version(self.version) < "2.0.0":
-            self.options.rm_safe("enable_io_uring")
-            self.options.rm_safe("enable_io_uring_sqpoll")
+            del self.options.enable_io_uring
+            del self.options.enable_io_uring_sqpoll
 
     def configure(self):
         if self.options.shared:
@@ -67,12 +65,6 @@ class XtrConan(ConanFile):
             self.requires("liburing/2.4")
 
     def validate(self):
-        if self.settings.os not in ("FreeBSD", "Linux"):
-            raise ConanInvalidConfiguration(f"Unsupported os={self.settings.os}")
-        if self.settings.compiler not in ("gcc", "clang"):
-            raise ConanInvalidConfiguration(f"Unsupported compiler={self.settings.compiler}")
-        if self.settings.arch not in ("x86_64",):
-            raise ConanInvalidConfiguration(f"Unsupported arch={self.settings.arch}")
         if (
             Version(self.version) < "2.0.0"
             and self.settings.compiler == "clang"
@@ -123,41 +115,39 @@ class XtrConan(ConanFile):
         return defines
 
     def generate(self):
-        deps = AutotoolsDeps(self)
+        tc = CMakeToolchain(self)
+        tc.cache_variables["ENABLE_EXCEPTIONS"] = self.options.enable_exceptions
+        tc.cache_variables["ENABLE_LTO"] = self.options.enable_lto
+        tc.cache_variables["BUILD_SINGLE_HEADER"] = False
+        tc.cache_variables["BUILD_BENCHMARK"] = False
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["INSTALL_DOCS"] = False
+        tc.generate()
+        deps = CMakeDeps(self)
         deps.generate()
 
-        tc = AutotoolsToolchain(self)
-        tc.make_args += [
-            f"EXCEPTIONS={int(bool(self.options.enable_exceptions))}",
-            f"LTO={int(bool(self.options.enable_lto))}",
-            f"LDLIBS={deps.vars()['LIBS']}",
-        ]
-        tc.extra_defines = self._get_defines()
-        tc.generate()
+    def _patch_sources(self):
+        if Version(self.version) >= "2.0.0":
+            # Ensure that liburing from Conan is used
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "find_package(liburing)",
+                            "find_package(liburing REQUIRED NO_DEFAULT_PATH PATHS ${CMAKE_PREFIX_PATH})")
+        # Non-single header installation is broken as of 2.1.0
+        # https://github.com/choll/xtr/pull/4
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "        PUBLIC_HEADER DESTINATION include)",
+                        ")\ninstall(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION include)")
 
     def build(self):
-        with chdir(self, self.source_folder):
-            autotools = Autotools(self)
-            autotools.make()
-            # FIXME: xtrctl fails to compile with
-            # undefined reference to 'xtr::detail::file_descriptor::~file_descriptor()'
-            # autotools.make(target="xtrctl")
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.hpp",
-             src=os.path.join(self.source_folder, "include"),
-             dst=os.path.join(self.package_folder, "include"))
-        copy(self, "*/libxtr.a",
-             src=os.path.join(self.source_folder, "build"),
-             dst=os.path.join(self.package_folder, "lib"),
-             keep_path=False)
-        # copy(self, "*/xtrctl",
-        #      src=os.path.join(self.source_folder, "build"),
-        #      dst=os.path.join(self.package_folder, "bin"),
-        #      keep_path=False)
-
-        rmdir(self, os.path.join(self.package_folder, "man"))
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["xtr"]
