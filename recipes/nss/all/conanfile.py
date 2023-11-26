@@ -48,7 +48,7 @@ class NSSConan(ConanFile):
 
     def requirements(self):
         self.requires("nspr/4.35", transitive_headers=True, transitive_libs=True)
-        self.requires("sqlite3/3.43.2", run=not cross_building(self))
+        self.requires("sqlite3/3.44.2", run=not cross_building(self))
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
