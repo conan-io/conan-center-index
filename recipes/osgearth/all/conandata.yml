@@ -5,3 +5,6 @@ sources:
 patches:
   "3.5":
     - patch_file: "patches/3.5-mingw.patch"
+    - patch_file: "patches/3.5-lerc-api-upgrades.patch"
+      patch_description: "Upgrade lerc library calls for v4 compatibility"
+      patch_type: "portability"
