@@ -87,12 +87,14 @@ class XtrConan(ConanFile):
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
 
+        if self.settings.arch not in ["x86_64"]:
+            raise ConanInvalidConfiguration(f"Unsupported arch={self.settings.arch}")
         if Version(self.version) < "2.0.0" and str(self.settings.compiler.libcxx) == "libc++":
-            raise ConanInvalidConfiguration(f"Use at least version 2.0.0 for libc++ compatibility")
+            raise ConanInvalidConfiguration("Use at least version 2.0.0 for libc++ compatibility")
         if self.options.get_safe("enable_io_uring_sqpoll") and not self.options.get_safe("enable_io_uring"):
-            raise ConanInvalidConfiguration(f"io_uring must be enabled if io_uring_sqpoll is enabled")
+            raise ConanInvalidConfiguration("io_uring must be enabled if io_uring_sqpoll is enabled")
         if self.options.get_safe("sink_capacity_kb") and not str(self.options.get_safe("sink_capacity_kb")).isdigit():
-            raise ConanInvalidConfiguration(f"The option 'sink_capacity_kb' must be an integer")
+            raise ConanInvalidConfiguration("The option 'sink_capacity_kb' must be an integer")
 
         if Version(self.dependencies["fmt"].ref.version) < 6:
             raise ConanInvalidConfiguration("The version of fmt must be >= 6.0.0")
