@@ -68,7 +68,7 @@ class OsgearthConan(ConanFile):
         "with_protobuf": True,
         "with_spdlog": True,
         "with_sqlite3": True,
-        "with_tinyxml": True,
+        "with_tinyxml": False,  # fails with osgEarth::TiXmlDocument etc linker errors
         "with_webp": True,
     }
     short_paths = True
@@ -129,10 +129,12 @@ class OsgearthConan(ConanFile):
         if self.options.with_duktape:
             self.requires("duktape/2.7.0")
         if self.options.with_geos:
+            # https://github.com/gwaldron/osgearth/blob/osgearth-3.5/src/osgEarth/GEOS#L32
             self.requires("geos/3.12.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_glew:
             self.requires("glew/2.2.0")
         if self.options.with_protobuf:
+            # Used transitively by the generated headers
             self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
         if self.options.with_spdlog:
             self.requires("spdlog/1.12.0")
