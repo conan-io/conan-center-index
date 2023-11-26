@@ -1,0 +1,56 @@
+--- src/osgEarthDrivers/lerc/ReaderWriterLERC.cpp
++++ src/osgEarthDrivers/lerc/ReaderWriterLERC.cpp
+@@ -66,7 +66,7 @@
+         char* data = new char[length];
+         fin.read(data, length);
+ 
+-        uint32 infoArr[8];
++        uint32 infoArr[11];
+ 
+         lerc_status hr(0);
+ 
+@@ -84,6 +84,9 @@
+         unsigned int numBands = infoArr[5];
+         unsigned int nValidPixels = infoArr[6];
+         unsigned int blobSize = infoArr[7];
++        unsigned int nMasks = infoArr[8];
++        unsigned int nDepth = infoArr[9];
++        unsigned int nUsesNoDataValue = infoArr[10];
+ 
+         GLenum glDataType;
+         int    sampleSize;
+@@ -175,7 +178,7 @@
+ 
+         // Decode the image
+         unsigned int bandOffset = 0;
+-        hr = lerc_decode((const unsigned char*)(data), length, 0, numDims, width, height, numBands, dataType, (void*)output);
++        hr = lerc_decode((const unsigned char*)(data), length, nMasks, 0, numDims, width, height, numBands, dataType, (void*)output);
+         if (hr)
+         {
+             delete[]output;
+@@ -267,6 +270,7 @@
+ 
+         unsigned int numDims = 1;
+         unsigned int numBands = 1;
++        unsigned int numMasks = 0;
+         uint32 dataType;
+         unsigned int sampleSize;
+ 
+@@ -348,7 +352,7 @@
+ 
+ 
+         hr = lerc_computeCompressedSize((void*)imageData,    // raw image data, row by row, band by band
+-            dataType, numDims, width, height, numBands,
++            dataType, numDims, width, height, numBands, numMasks,
+             0,
+             maxZError,           // max coding error per pixel, or precision
+             &numBytesNeeded);    // size of outgoing Lerc blob
+@@ -362,7 +366,7 @@
+         Byte* pLercBlob = new Byte[numBytesBlob];
+ 
+         hr = lerc_encode((void*)imageData,    // raw image data, row by row, band by band
+-            dataType, numDims, width, height, numBands,
++            dataType, numDims, width, height, numBands, numMasks,
+             0,         // can give nullptr if all pixels are valid
+             maxZError,           // max coding error per pixel, or precision
+             pLercBlob,           // buffer to write to, function will fail if buffer too small
