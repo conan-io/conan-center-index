@@ -29,7 +29,7 @@ class wxWidgetsConan(ConanFile):
                "tiff": ["off", "libtiff"],
                "expat": ["off", "expat"],
                "regex": ["off", "regex"],
-               "svg": ["off", "nanosvg"], # TODO: cmake currently can't find "nanosvg"
+               "svg": ["off", "nanosvg"],
                "gtk": [2, 3, "gtk"], # TODO: compile without system gtk
                "secretstore": [True, False],
                "aui": [True, False],
@@ -64,7 +64,7 @@ class wxWidgetsConan(ConanFile):
                "tiff": "libtiff",
                "expat": "expat",
                "regex": "regex",
-               "svg": "off",
+               "svg": "nanosvg",
                "gtk": 2,
                "secretstore": True,
                "aui": True,
@@ -114,8 +114,6 @@ class wxWidgetsConan(ConanFile):
     def system_requirements(self):
         apt = package_manager.Apt(self)
         packages = []
-        if self.options.secretstore and self.options.get_safe("gtk") != "gtk":
-            packages.append('libsecret-1-dev')
         if self.options.webview:
             if self.options.get_safe("gtk") == 2:
                 packages.append('libwebkitgtk-dev')
@@ -153,8 +151,7 @@ class wxWidgetsConan(ConanFile):
             if self.options.mediactrl:
                 self.requires("gstreamer/1.22.3")
                 self.requires("gst-plugins-base/1.19.2")
-            # TODO: CMake doesn't find libsecret right now
-            if self.options.get_safe("secretstore") and self.options.get_safe("gtk") == "gtk":
+            if self.options.get_safe("secretstore"):
                 self.requires("libsecret/0.20.5")
             self.requires("libcurl/8.4.0")
         if self.options.png == 'libpng':
@@ -210,6 +207,10 @@ class wxWidgetsConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "build", "cmake", "lib", "xml", "CMakeLists.txt"),
                         '${EXPAT_LIBRARIES}',
                         'expat::expat')
+        if self.version >= '3.1.7':
+            replace_in_file(self, os.path.join(self.source_folder, "build", "cmake", "lib", "nanosvg.cmake"),
+                            'NanoSVG',
+                            'nanosvg')
 
     @property
     def _gtk_version(self):
