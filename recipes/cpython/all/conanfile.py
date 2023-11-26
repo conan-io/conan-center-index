@@ -7,7 +7,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, unzip
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir, unzip
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuildDeps, MSBuildToolchain, MSBuild, is_msvc, is_msvc_static_runtime, msvc_runtime_flag
@@ -113,7 +113,7 @@ class CPythonConan(ConanFile):
             del self.options.unicode
 
         self.settings.compiler.rm_safe("libcxx")
-        del self.settings.compiler.cppstd
+        self.settings.compiler.rm_safe("cppstd")
 
     def configure(self):
         if self.options.shared:
@@ -146,11 +146,11 @@ class CPythonConan(ConanFile):
             elif Version(self.version) < "3.10":
                 self.requires("mpdecimal/2.5.0")
             else:
-                self.requires("mpdecimal/2.5.0")  # FIXME: no 2.5.1 to troubleshoot apple
+                self.requires("mpdecimal/2.5.1")
         if self.settings.os != "Windows":
             if not is_apple_os(self):
-                self.requires("util-linux-libuuid/2.39")
-            self.requires("libxcrypt/4.4.35")
+                self.requires("util-linux-libuuid/2.39.2")
+            self.requires("libxcrypt/4.4.36")
         if self.options.get_safe("with_bz2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_gdbm", False):
@@ -159,7 +159,7 @@ class CPythonConan(ConanFile):
             # TODO: Add nis when available.
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.43.1")
+            self.requires("sqlite3/3.44.2")
         if self.options.get_safe("with_tkinter"):
             self.requires("tk/8.6.10")
         if self.options.get_safe("with_curses", False):
@@ -169,7 +169,7 @@ class CPythonConan(ConanFile):
         if self.options.get_safe("with_bsddb", False):
             self.requires("libdb/5.3.28")
         if self.options.get_safe("with_lzma", False):
-            self.requires("xz_utils/5.4.4")
+            self.requires("xz_utils/5.4.5")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -386,7 +386,7 @@ class CPythonConan(ConanFile):
         # Fix props path for dependencies we are pulling
         PCBuild = os.path.join(self.source_folder, "PCbuild")
         for filename in os.listdir(PCBuild):
-            if filename.endswith(".vcxproj"): 
+            if filename.endswith(".vcxproj"):
                 replace_in_file(self, os.path.join(PCBuild, filename), "CONAN_REPLACE_HERE", self.generators_folder, strict=False)
 
         conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)

@@ -2,7 +2,7 @@ import os
 import shutil
 from io import StringIO
 
-from conan import ConanFile, __version__ as conan_version
+from conan import ConanFile, conan_version
 from conan.errors import ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
