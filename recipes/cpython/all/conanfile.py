@@ -607,7 +607,7 @@ class CPythonConan(ConanFile):
             rm(self, "vcruntime*", os.path.join(self.package_folder, "bin"), recursive=True)
         else:
             autotools = Autotools(self)
-            autotools.install()
+            autotools.install(target="altinstall")
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
 
