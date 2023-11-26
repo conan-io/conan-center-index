@@ -3,7 +3,7 @@ from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMakeDeps, CMakeToolchain, CMake
 from conan.tools.files import get, copy
 
-required_conan_version = ">=1.56.0 <2 || >=2.0.6"
+required_conan_version = ">=1.53.0"
 
 
 class sqlite3mc(ConanFile):
@@ -125,16 +125,16 @@ class sqlite3mc(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.require_zlib:
-            self.requires("zlib/[>=1.2.9]")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_icu:
-            self.requires("icu/[>=67.1]")
+            self.requires("icu/[74.1]")
 
     def generate(self):
         deps = CMakeDeps(self)

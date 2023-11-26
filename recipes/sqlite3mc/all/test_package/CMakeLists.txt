@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24.0)
+cmake_minimum_required(VERSION 3.15)
 project(test_sqlite3mc C)
 
 find_package(sqlite3mc REQUIRED)
