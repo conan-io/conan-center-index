@@ -18,7 +18,7 @@ class Base64Conan(ConanFile):
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/aklomp/base64"
-    topics = ("base64", "codec", "encoder", "decoder")
+    topics = ("codec", "encoder", "decoder")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -34,7 +34,7 @@ class Base64Conan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -62,6 +62,10 @@ class Base64Conan(ConanFile):
     def generate(self):
         if self._use_cmake:
             tc = CMakeToolchain(self)
+            tc.variables["BASE64_BUILD_CLI"] = False
+            tc.variables["BASE64_WERROR"] = False
+            tc.variables["BASE64_BUILD_TESTS"] = False
+            tc.variables["BASE64_WITH_OpenMP"] = False
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
@@ -72,10 +76,7 @@ class Base64Conan(ConanFile):
         if self._use_cmake:
             cmake = CMake(self)
             cmake.configure()
-            if Version(self.version) >= "0.5.0":
-                cmake.build()
-            else:
-                cmake.build(target="base64")
+            cmake.build()
         else:
             env = Environment()
             if self.settings.arch == "x86" or self.settings.arch == "x86_64":
@@ -101,8 +102,6 @@ class Base64Conan(ConanFile):
                 rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
             else:
                 rmdir(self, os.path.join(self.package_folder, "cmake"))
-                rmdir(self, os.path.join(self.package_folder, "lib"))
-                copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
         else:
             copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
             copy(self, pattern="*.a", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
