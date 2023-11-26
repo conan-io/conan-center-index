@@ -39,7 +39,7 @@ class GetDnsConan(ConanFile):
         "with_libev": "auto",
         "with_libevent": True,
         "with_libuv": True,
-        "with_libidn2": True,
+        "with_libidn2": False,  # FIXME: re-enable once libidn2 has been migrated
     }
 
     def export_sources(self):
