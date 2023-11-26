@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -53,6 +54,8 @@ class CoostConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+        if Version(self.version) >= "3.0.2" and is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} shared not supported with Visual Studio")
         if self.info.options.with_libcurl:
             if not self.info.options.with_openssl:
                 raise ConanInvalidConfiguration(f"{self.ref} requires with_openssl=True when using with_libcurl=True")
