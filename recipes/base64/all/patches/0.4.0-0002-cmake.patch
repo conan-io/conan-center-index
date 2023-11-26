@@ -180,9 +180,9 @@
 +# install target
 +if (BASE64_INSTALL_TARGET)
 +    install(TARGETS base64 EXPORT base64-targets
-+        RUNTIME DESTINATION bin/$<CONFIG>
-+        LIBRARY DESTINATION lib/$<CONFIG>
-+        ARCHIVE DESTINATION lib/$<CONFIG>
++        RUNTIME DESTINATION bin
++        LIBRARY DESTINATION lib
++        ARCHIVE DESTINATION lib
 +        INCLUDES DESTINATION include
 +    )
 +    install(FILES include/libbase64.h DESTINATION include)
