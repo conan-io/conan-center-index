@@ -88,7 +88,10 @@ class TestPackageConan(ConanFile):
 
     @property
     def _supports_modules(self):
-        return not is_msvc(self) or self.dependencies["cpython"].options.shared
+        if conan2:
+            return not is_msvc(self) or self.dependencies["cpython"].options.shared
+        else:
+            return not is_msvc(self) or self.options["cpython"].shared
 
     def generate(self):
         tc = CMakeToolchain(self)

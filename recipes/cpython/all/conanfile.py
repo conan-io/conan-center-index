@@ -298,6 +298,7 @@ class CPythonConan(ConanFile):
             deps.generate()
             # The toolchain.props is not injected yet, but it also generates VCVars
             toolchain = MSBuildToolchain(self)
+            toolchain.properties["IncludeExternals"] = "true"
             toolchain.generate()
         else:
             self._generate_autotools()
@@ -369,22 +370,31 @@ class CPythonConan(ConanFile):
                 "<ItemDefinitionGroup>",
                 "<ItemDefinitionGroup><ClCompile><PreprocessorDefinitions>Py_NO_ENABLE_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile>")
 
-    def _upgrade_single_project_file(self, project_file):
-        """
-        `devenv /upgrade <project.vcxproj>` will upgrade *ALL* projects referenced by the project.
-        By temporarily moving the solution project, only one project is upgraded
-        This is needed for static cpython or for disabled optional dependencies (e.g. tkinter=False)
-        Restore it afterwards because it is needed to build some targets.
-        """
-        rename(self,os.path.join(self.source_folder, "PCbuild", "pcbuild.sln"),
-               os.path.join(self.source_folder, "PCbuild", "pcbuild.sln.bak"))
-        rename(self, os.path.join(self.source_folder, "PCbuild", "pcbuild.proj"),
-               os.path.join(self.source_folder, "PCbuild", "pcbuild.proj.bak"))
-        self.run(f'devenv "{project_file}" /upgrade')
-        rename(self, os.path.join(self.source_folder, "PCbuild", "pcbuild.sln.bak"),
-               os.path.join(self.source_folder, "PCbuild", "pcbuild.sln"))
-        rename(self, os.path.join(self.source_folder, "PCbuild", "pcbuild.proj.bak"),
-               os.path.join(self.source_folder, "PCbuild", "pcbuild.proj"))
+        # Don't import projects that we aren't pulling
+        deps = [
+            # Option suffix, base file name, conan props suffix
+            ("sqlite3", "_sqlite3", "sqlite3"),
+            ("tkinter", "_tkinter", "tk"),
+            ("bz2", "_bz2", "bzip2"),
+            ("lzma", "_lzma", "xz_utils"),
+        ]
+        for opt, fname, propname in deps:
+            full_file = os.path.join(self.source_folder, "PCbuild", f"{fname}.vcxproj")
+            if not self.options.get_safe(f"with_{opt}", default=True):
+                replace_in_file(self, full_file, f'<Import Project="CONAN_REPLACE_HERE/conan_{propname}.props" />', "")
+
+        # Fix props path for dependencies we are pulling
+        PCBuild = os.path.join(self.source_folder, "PCbuild")
+        for filename in os.listdir(PCBuild):
+            if filename.endswith(".vcxproj"): 
+                replace_in_file(self, os.path.join(PCBuild, filename), "CONAN_REPLACE_HERE", self.generators_folder, strict=False)
+
+        conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
+        replace_in_file(
+            self, os.path.join(self.source_folder, "PCbuild", "pythoncore.vcxproj"),
+            '<Import Project="python.props" />',
+            f'<Import Project="{conantoolchain_props}" /><Import Project="python.props" />',
+        )
 
     @property
     def _solution_projects(self):
@@ -399,17 +409,7 @@ class CPythonConan(ConanFile):
                     return False
                 return True
 
-            def sort_importance(key):
-                importance = (
-                    "pythoncore",   # The python library MUST be built first. All modules and executables depend on it
-                    "python",       # Build the python executable next (for convenience, when debugging)
-                )
-                try:
-                    return importance.index(key)
-                except ValueError:
-                    return len(importance)
-
-            projects = sorted((p for p in projects if project_build(p)), key=sort_importance)
+            projects = list(filter(project_build, projects))
             return projects
         else:
             return "pythoncore", "python", "pythonw"
@@ -468,19 +468,12 @@ class CPythonConan(ConanFile):
     def _msvc_build(self):
         msbuild = MSBuild(self)
         msbuild.platform = self._msvc_archs[str(self.settings.arch)]
-        # TODO
-        msbuild_properties = {
-            "IncludeExternals": "true",
-        }
 
         projects = self._solution_projects
         self.output.info(f"Building {len(projects)} Visual Studio projects: {projects}")
 
-        for project_i, project in enumerate(projects, 1):
-            self.output.info(f"[{project_i}/{len(projects)}] Building project '{project}'...")
-            project_file = os.path.join(self.source_folder, "PCbuild", project + ".vcxproj")
-            self._upgrade_single_project_file(project_file)
-            msbuild.build(project_file)
+        msbuild.build(os.path.join(self.source_folder, "PCbuild", "pcbuild.sln"),
+                      targets=projects)
 
     def build(self):
         self._patch_sources()
@@ -749,6 +742,7 @@ class CPythonConan(ConanFile):
         # embed component: "Embed Python into an application"
         self.cpp_info.components["embed"].libs = [self._lib_name]
         self.cpp_info.components["embed"].libdirs = [libdir]
+        self.cpp_info.components["embed"].includedirs = []
         self.cpp_info.components["embed"].set_property(
             "pkg_config_name", f"python-{py_version.major}.{py_version.minor}-embed"
         )
