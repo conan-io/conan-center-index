@@ -107,6 +107,10 @@ class wxWidgetsConan(ConanFile):
                 # CMake find_package error in older versions
                 self.options.rm_safe("opengl")
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
     def system_requirements(self):
         apt = package_manager.Apt(self)
         packages = []
@@ -152,8 +156,7 @@ class wxWidgetsConan(ConanFile):
             # TODO: CMake doesn't find libsecret right now
             if self.options.get_safe("secretstore") and self.options.get_safe("gtk") == "gtk":
                 self.requires("libsecret/0.20.5")
-            if self.options.webview:
-                self.requires("libcurl/8.4.0")
+            self.requires("libcurl/8.4.0")
         if self.options.png == 'libpng':
             self.requires('libpng/1.6.40')
         if self.options.jpeg == 'libjpeg':
@@ -189,10 +192,11 @@ class wxWidgetsConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # Don't change library names when cross-compiling
-        replace_in_file(self, os.path.join(self.source_folder, "build", "cmake", "functions.cmake"),
-                        'set(cross_target "-${CMAKE_SYSTEM_NAME}")',
-                        'set(cross_target)')
+        if self.version >= '3.1.5':
+            # Don't change library names when cross-compiling
+            replace_in_file(self, os.path.join(self.source_folder, "build", "cmake", "functions.cmake"),
+                            'set(cross_target "-${CMAKE_SYSTEM_NAME}")',
+                            'set(cross_target)')
         # Don't override Conan's toolchain
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         'CMAKE_OSX_DEPLOYMENT_TARGET',
