@@ -50,6 +50,9 @@ class OrcConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.compiler == "apple-clang":
+            # AVX support is not enabled by default, might need to add -mavx512f to CXXFLAGS
+            del self.options.build_avx512
 
     def configure(self):
         if self.options.shared:
@@ -101,7 +104,7 @@ class OrcConan(ConanFile):
         tc.cache_variables["INSTALL_VENDORED_LIBS"] = False
         tc.cache_variables["STOP_BUILD_ON_WARNING"] = False
         # AVX512 support is determined by ORC_USER_SIMD_LEVEL env var at runtime, defaults to off
-        tc.cache_variables["BUILD_ENABLE_AVX512"] = self.options.build_avx512
+        tc.cache_variables["BUILD_ENABLE_AVX512"] = self.options.get_safe("build_avx512", False)
         protoc_path = os.path.join(self.dependencies["protobuf"].package_folder, "bin", "protoc")
         tc.cache_variables["PROTOBUF_EXECUTABLE"] = protoc_path.replace("\\", "/")
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
