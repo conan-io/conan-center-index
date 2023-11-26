@@ -112,7 +112,7 @@ class CPythonConan(ConanFile):
             del self.options.with_bsddb
             del self.options.unicode
 
-        del self.settings.compiler.libcxx
+        self.settings.compiler.rm_safe("libcxx")
         del self.settings.compiler.cppstd
 
     def configure(self):
@@ -213,7 +213,7 @@ class CPythonConan(ConanFile):
                     raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
 
         if self._with_libffi:
-            if self.dependencies["libffi"].ref.version >= "3.3" and is_msvc(self) and "d" in str(self.settings.compiler.runtime):
+            if self.dependencies["libffi"].ref.version >= "3.3" and is_msvc(self) and "d" in str(self.settings.compiler.runtime) and self.settings.compiler.runtime != "dynamic":
                 raise ConanInvalidConfiguration("libffi versions >= 3.3 cause 'read access violations' when using a debug runtime (MTd/MDd)")
 
     def source(self):
