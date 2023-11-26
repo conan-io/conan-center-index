@@ -221,7 +221,7 @@ class LibwebsocketsConan(ConanFile):
             self.requires("libmount/2.39")
 
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.44.0")
+            self.requires("sqlite3/3.44.2")
 
         if self.options.with_ssl == "openssl":
             # Cannot add the [>=1.1 <4] range, as it seems openssl3 makes it fail
