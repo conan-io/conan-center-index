@@ -5,7 +5,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm, replace_in_file
-from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
@@ -81,8 +80,7 @@ class GetDnsConan(ConanFile):
             raise ConanInvalidConfiguration("libunbound is not (yet) available on cci")
 
     def build_requirements(self):
-        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+        self.tool_requires("cmake/[>=3.20 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -118,9 +116,6 @@ class GetDnsConan(ConanFile):
         deps.set_property("libuv", "cmake_target_name", "Libuv::Libuv")
         deps.set_property("nettle", "cmake_file_name", "Nettle")
         deps.set_property("nettle", "cmake_target_name", "Nettle::Nettle")
-        deps.generate()
-
-        deps = PkgConfigDeps(self)
         deps.generate()
 
     def _patch_sources(self):
