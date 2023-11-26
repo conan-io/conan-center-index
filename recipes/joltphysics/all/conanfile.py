@@ -110,6 +110,11 @@ class JoltPhysicsConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported with Visual Studio")
 
+        if Version(self.version) >= "4.0.1" and \
+            self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "13" and \
+            self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} shared not supported with {self.settings.compiler}{self.settings.compiler.version}")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
