@@ -24,7 +24,7 @@ class LibSELinuxConan(ConanFile):
     license = (
         # https://github.com/SELinuxProject/selinux/blob/main/libselinux/LICENSE
         # For the libselinux component: public domain with a limited liability clause
-        "LicenseRef-LICENSE-libselinux",
+        "libselinux-1.0",
         # https://github.com/SELinuxProject/selinux/blob/main/libsepol/LICENSE
         # For the libsepol component: LGPL-2.1
         "LGPL-2.1-or-later",
