@@ -59,7 +59,7 @@ class XtrConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if Version(self.version) >= "2.0.0" and self.settings.os in ["Linux", "FreeBSD"]:
+        if Version(self.version) >= "2.0.0" and self.settings.os == "Linux":
             # Require liburing on any Linux system by default as a run-time check will be
             # done to detect if the host kernel supports io_uring.
             self.options.enable_io_uring = True
