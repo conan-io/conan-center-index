@@ -40,8 +40,26 @@ class XtrConan(ConanFile):
         "sink_capacity_kb": None,
     }
 
+    @property
+    def _min_cppstd(self):
+        return 20
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "10",
+            "clang": "12",
+            "apple-clang": "11",
+            "msvc": "192",
+            "Visual Studio": "16",
+        }
+
     def config_options(self):
-        if Version(self.version) < "2.0.0":
+        if Version(self.version) >= "2.0.0" and self.settings.os in ["Linux", "FreeBSD"]:
+            # Require liburing on any Linux system by default as a run-time check will be
+            # done to detect if the host kernel supports io_uring.
+            self.options.enable_io_uring = True
+        else:
             del self.options.enable_io_uring
             del self.options.enable_io_uring_sqpoll
 
@@ -55,49 +73,27 @@ class XtrConan(ConanFile):
     def requirements(self):
         # INFO: https://github.com/choll/xtr/blob/2.1.0/include/xtr/detail/buffer.hpp#L27
         self.requires("fmt/10.1.1", transitive_headers=True, transitive_libs=True)
-        # Require liburing on any Linux system as a run-time check will be
-        # done to detect if the host kernel supports io_uring.
-        if (
-            Version(self.version) >= "2.0.0"
-            and self.settings.os in ["Linux", "FreeBSD"]
-            and self.options.get_safe("enable_io_uring")
-        ):
+        if self.options.get_safe("enable_io_uring"):
             self.requires("liburing/2.4")
 
     def validate(self):
-        if (
-            Version(self.version) < "2.0.0"
-            and self.settings.compiler == "clang"
-            and self.settings.compiler.libcxx == "libc++"
-        ):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
+
+        if Version(self.version) < "2.0.0" and str(self.settings.compiler.libcxx) == "libc++":
             raise ConanInvalidConfiguration(f"Use at least version 2.0.0 for libc++ compatibility")
         if self.options.get_safe("enable_io_uring_sqpoll") and not self.options.get_safe("enable_io_uring"):
             raise ConanInvalidConfiguration(f"io_uring must be enabled if io_uring_sqpoll is enabled")
-        if (
-            self.options.get_safe("sink_capacity_kb")
-            and not str(self.options.get_safe("sink_capacity_kb")).isdigit()
-        ):
+        if self.options.get_safe("sink_capacity_kb") and not str(self.options.get_safe("sink_capacity_kb")).isdigit():
             raise ConanInvalidConfiguration(f"The option 'sink_capacity_kb' must be an integer")
-
-        minimal_cpp_standard = 20
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, minimal_cpp_standard)
-
-        minimum_version = {"gcc": 10, "clang": 12}
-        compiler = str(self.settings.compiler)
-        version = Version(self.settings.compiler.version)
-
-        if version < minimum_version[compiler]:
-            raise ConanInvalidConfiguration(
-                f"{self.name} requires {self.settings.compiler} version {minimum_version[compiler]} or later"
-            )
 
         if Version(self.dependencies["fmt"].ref.version) < 6:
             raise ConanInvalidConfiguration("The version of fmt must be >= 6.0.0")
         if Version(self.dependencies["fmt"].ref.version) == "8.0.0" and self.settings.compiler == "clang":
-            raise ConanInvalidConfiguration(
-                "fmt/8.0.0 is known to not work with clang (https://github.com/fmtlib/fmt/issues/2377)"
-            )
+            raise ConanInvalidConfiguration("fmt/8.0.0 is known to not work with clang (https://github.com/fmtlib/fmt/issues/2377)")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -122,6 +118,7 @@ class XtrConan(ConanFile):
         tc.cache_variables["BUILD_BENCHMARK"] = False
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["INSTALL_DOCS"] = False
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -131,7 +128,9 @@ class XtrConan(ConanFile):
             # Ensure that liburing from Conan is used
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "find_package(liburing)",
-                            "find_package(liburing REQUIRED NO_DEFAULT_PATH PATHS ${CMAKE_PREFIX_PATH})")
+                            "find_package(liburing REQUIRED NO_DEFAULT_PATH PATHS ${CMAKE_PREFIX_PATH})"
+                            if self.options.get_safe("enable_io_uring") else
+                            "")
         # Non-single header installation is broken as of 2.1.0
         # https://github.com/choll/xtr/pull/4
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
