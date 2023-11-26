@@ -54,7 +54,11 @@ class XtrConan(ConanFile):
             "Visual Studio": "16",
         }
 
+
     def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
         if Version(self.version) >= "2.0.0" and self.settings.os in ["Linux", "FreeBSD"]:
             # Require liburing on any Linux system by default as a run-time check will be
             # done to detect if the host kernel supports io_uring.
