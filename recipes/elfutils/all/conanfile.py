@@ -133,7 +133,7 @@ class ElfutilsConan(ConanFile):
         if Version(self.version) >= "0.186":
             tc.configure_args.append("--enable-libdebuginfod" if self.options.libdebuginfod else "--disable-libdebuginfod")
         tc.configure_args.append(f"BUILD_STATIC={'0' if self.options.shared else '1'}")
-        if self.options.with_zstd:
+        if self.options.get_safe("with_zstd"):
             # ./configure ignores system_libs
             tc.extra_ldflags.append("-pthread")
         tc.generate()
@@ -175,7 +175,7 @@ class ElfutilsConan(ConanFile):
             self.cpp_info.components["libelf"].requires.append("bzip2::bzip2")
         if self.options.with_lzma:
             self.cpp_info.components["libelf"].requires.append("xz_utils::xz_utils")
-        if self.options.with_zstd:
+        if self.options.get_safe("with_zstd"):
             self.cpp_info.components["libelf"].requires.append("zstd::zstd")
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libelf"].system_libs.append("pthread")
