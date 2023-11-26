@@ -11,7 +11,6 @@ class sqlite3mc(ConanFile):
     package_type = "library"
 
     license = "MIT"
-    author = "utelle(GitHub)"
     homepage = "https://github.com/utelle/SQLite3MultipleCiphers"
     url = "https://github.com/conan-io/conan-center-index"
     description = "The project SQLite3 Multiple Ciphers implements an encryption extension for SQLite with support for multiple ciphers."
