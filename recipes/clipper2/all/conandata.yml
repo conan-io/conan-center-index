@@ -1,4 +1,7 @@
 sources:
+  "1.2.4":
+    url: "https://github.com/AngusJohnson/Clipper2/archive/refs/tags/Clipper2_1.2.4.tar.gz"
+    sha256: "a013d391c25c5f665cdb5cbd75cdd842dcc28f6e1bd098454beb359f6f212f33"
   "1.2.3":
     url: "https://github.com/AngusJohnson/Clipper2/archive/refs/tags/Clipper2_1.2.3.tar.gz"
     sha256: "d65bd45f50331e9dd2de3c68137c6be069fe25732095bef0128d547c997b1fda"
