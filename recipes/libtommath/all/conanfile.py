@@ -1,12 +1,13 @@
-from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, rename, chdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.layout import basic_layout
-from conan.tools.build import cross_building
-from conan.tools.microsoft import is_msvc, NMakeToolchain
 import os
 
+from conan import ConanFile
+from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, rename, chdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, NMakeToolchain
 
 required_conan_version = ">=1.53.0"
 
@@ -14,10 +15,12 @@ required_conan_version = ">=1.53.0"
 class LibTomMathConan(ConanFile):
     name = "libtommath"
     description = "LibTomMath is a free open source portable number theoretic multiple-precision integer library written entirely in C."
-    topics = "libtommath", "math", "multiple", "precision"
     license = "Unlicense"
     homepage = "https://www.libtom.net/"
     url = "https://github.com/conan-io/conan-center-index"
+    topics = ("libtommath", "math", "multiple", "precision")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -28,12 +31,12 @@ class LibTomMathConan(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,19 +50,18 @@ class LibTomMathConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/1.9.3")
+                self.tool_requires("pkgconf/2.0.3")
         if not is_msvc(self) and self.settings.os != "Windows" and self.options.shared:
             self.tool_requires("libtool/2.4.7")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -70,7 +72,7 @@ class LibTomMathConan(ConanFile):
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
-            if self.settings.os == "Macos" and self.settings.arch == "armv8":
+            if is_apple_os(self) and self.settings.arch == "armv8":
                 tc.extra_ldflags.append("-arch arm64")
                 if cross_building(self):
                     tc.make_args.append("CROSS_COMPILE=arm64-apple-m1-")
@@ -131,11 +133,11 @@ class LibTomMathConan(ConanFile):
                    os.path.join(self.package_folder, "lib", "tommath.lib"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "libtommath")
+        self.cpp_info.set_property("cmake_target_name", "libtommath")
+        self.cpp_info.set_property("pkg_config_name", "libtommath")
+
         self.cpp_info.libs = ["tommath"]
         if not self.options.shared:
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["advapi32", "crypt32"]
-
-        self.cpp_info.set_property("cmake_file_name", "libtommath")
-        self.cpp_info.set_property("cmake_target_name", "libtommath")
-        self.cpp_info.set_property("pkg_config_name", "libtommath")
