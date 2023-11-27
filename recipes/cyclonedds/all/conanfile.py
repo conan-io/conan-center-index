@@ -134,6 +134,11 @@ class CycloneDDSConan(ConanFile):
         copy(self, "CycloneDDS_idlc.cmake",
                    src=os.path.join(self.source_folder, os.pardir, "cmake"),
                    dst=os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS"))
+        with open(os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS", "CycloneDDS_ddsc.cmake"), "w") as f:
+            f.write("set_target_properties(CycloneDDS::ddsc" + \
+                    "\n  PROPERTIES SHM_SUPPORT_IS_AVAILABLE {}".format(self.options.with_shm) + \
+                    "\n             TYPE_DISCOVERY_IS_AVAILABLE {}".format(self.options.enable_discovery) + \
+                    "\n             TOPIC_DISCOVERY_IS_AVAILABLE {})".format(self.options.enable_discovery))
         if self.settings.os == "Windows":
             for p in ("*.pdb", "concrt*.dll", "msvcp*.dll", "vcruntime*.dll"):
                 rm(self, p, os.path.join(self.package_folder, "bin"))
@@ -161,6 +166,7 @@ class CycloneDDSConan(ConanFile):
             ]
 
         build_modules = [
+            os.path.join("lib", "cmake", "CycloneDDS", "CycloneDDS_ddsc.cmake"),
             os.path.join("lib", "cmake", "CycloneDDS", "CycloneDDS_idlc.cmake"),
             os.path.join("lib", "cmake", "CycloneDDS", "idlc", "Generate.cmake"),
         ]
