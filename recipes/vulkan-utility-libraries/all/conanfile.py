@@ -6,7 +6,7 @@ from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -18,7 +18,7 @@ class VulkanUtilityLibrariesConan(ConanFile):
     description = "Utility libraries for Vulkan developers"
     license = "Apache-2.0"
     topics = ("vulkan",)
-    homepage = "https://github.com/KhronosGroup/Vulkan-ValidationLayers"
+    homepage = "https://github.com/KhronosGroup/Vulkan-Utility-Libraries"
     url = "https://github.com/conan-io/conan-center-index"
 
     package_type = "static-library"
@@ -29,7 +29,6 @@ class VulkanUtilityLibrariesConan(ConanFile):
     default_options = {
         "fPIC": True,
     }
-    short_paths = True
 
     @property
     def _min_cppstd(self):
@@ -83,7 +82,12 @@ class VulkanUtilityLibrariesConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
