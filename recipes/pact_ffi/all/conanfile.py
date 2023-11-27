@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, rm
 
 import os
 
@@ -59,7 +59,9 @@ class PactFFIConan(ConanFile):
              os.path.join(self.build_folder, "lib", subfolder[str(self.settings.os)]),
              os.path.join(self.package_folder, "lib")
         )
-        copy(self, "*.h", os.path.join(self.build_folder, "include"), os.path.join(self.package_folder, "include"))
+        copy(self, "pact*.h", os.path.join(self.build_folder, "include"), os.path.join(self.package_folder, "include"))
+        # we don't want the C++ binaries as part of this package
+        rm(self, "libpact-cpp-consumer.*", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.libs = ["pact_ffi"]
