@@ -7,6 +7,9 @@ typedef float real_t;
 #elif defined(ENABLE_LONG_DOUBLE_PRECISION)
 typedef long double real_t;
 #define FFTW_MANGLE(name) FFTW_MANGLE_LONG_DOUBLE(name)
+#elif defined(ENABLE_QUAD_PRECISION)
+typedef __float128 real_t;
+#define FFTW_MANGLE(name) FFTW_MANGLE_QUAD(name)
 #else
 typedef double real_t;
 #define FFTW_MANGLE(name) FFTW_MANGLE_DOUBLE(name)

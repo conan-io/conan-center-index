@@ -11,10 +11,10 @@ class CerealConan(ConanFile):
     name = "cereal"
     description = "Serialization header-only library for C++11."
     license = "BSD-3-Clause"
-    topics = ("cereal", "header-only", "serialization", "cpp11")
+    topics = ("header-only", "serialization", "cpp11")
     homepage = "https://github.com/USCiLab/cereal"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "thread_safe": [True, False],
@@ -23,15 +23,14 @@ class CerealConan(ConanFile):
         "thread_safe": False,
     }
 
-    def package_id(self):
-        self.info.clear()
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def package_id(self):
+        self.info.clear()
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -81,9 +80,7 @@ class CerealConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "cereal::cereal")
         self.cpp_info.set_property("cmake_target_aliases", ["cereal"]) # target before 1.3.1
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
         if self.options.thread_safe:
             self.cpp_info.defines = ["CEREAL_THREAD_SAFE=1"]
             if self.settings.os in ["Linux", "FreeBSD"]:

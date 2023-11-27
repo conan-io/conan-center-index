@@ -14,6 +14,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        self.requires("sdl/2.28.2")
 
     def build(self):
         cmake = CMake(self)

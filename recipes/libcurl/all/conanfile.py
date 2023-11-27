@@ -49,7 +49,6 @@ class LibcurlConan(ConanFile):
         "with_libidn": [True, False],
         "with_librtmp": [True, False],
         "with_libgsasl": [True, False],
-        "with_libmetalink": [True, False],
         "with_libpsl": [True, False],
         "with_largemaxwritesize": [True, False],
         "with_nghttp2": [True, False],
@@ -95,7 +94,6 @@ class LibcurlConan(ConanFile):
         "with_libidn": False,
         "with_librtmp": False,
         "with_libgsasl": False,
-        "with_libmetalink": False,
         "with_libpsl": False,
         "with_largemaxwritesize": False,
         "with_nghttp2": False,
@@ -137,11 +135,6 @@ class LibcurlConan(ConanFile):
         return is_msvc(self) or self._is_win_x_android
 
     @property
-    def _has_metalink_option(self):
-        # Support for metalink was removed in version 7.78.0 https://github.com/curl/curl/pull/7176
-        return Version(self.version) < "7.78.0" and not self._is_using_cmake_build
-
-    @property
     def _has_with_libpsl_option(self):
         return not (self._is_using_cmake_build and Version(self.version) < "7.84.0")
 
@@ -152,8 +145,6 @@ class LibcurlConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._has_metalink_option:
-            del self.options.with_libmetalink
         if not self._has_with_libpsl_option:
             del self.options.with_libpsl
         if self._is_using_cmake_build:
@@ -185,7 +176,7 @@ class LibcurlConan(ConanFile):
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/5.6.3")
         if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.56.0")
+            self.requires("libnghttp2/1.58.0")
         if self.options.with_libssh2:
             self.requires("libssh2/1.11.0")
         if self.options.with_zlib:
@@ -195,7 +186,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.19.1")
+            self.requires("c-ares/1.22.0")
         if self.options.get_safe("with_libpsl"):
             self.requires("libpsl/0.21.1")
 
@@ -216,7 +207,7 @@ class LibcurlConan(ConanFile):
         else:
             self.tool_requires("libtool/2.4.7")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.0.2")
+                self.tool_requires("pkgconf/2.0.3")
             if self.settings.os in [ "tvOS", "watchOS" ]:
                 self.tool_requires("gnu-config/cci.20210814")
             if self._settings_build.os == "Windows":
@@ -303,7 +294,7 @@ class LibcurlConan(ConanFile):
                                   "AC_CHECK_LIB(z,",
                                   f"AC_CHECK_LIB({zlib_name},")
             replace_in_file(self, configure_ac,
-                                  "-lz ",
+                                  "-lz",
                                   f"-l{zlib_name} ")
 
         if self._is_mingw and self.options.shared:
@@ -330,8 +321,9 @@ class LibcurlConan(ConanFile):
             return
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # TODO: check this patch, it's suspicious
-        replace_in_file(self, cmakelists,
-                              "include(CurlSymbolHiding)", "")
+        if Version(self.version) < "8.4.0":
+            replace_in_file(self, cmakelists,
+                                "include(CurlSymbolHiding)", "")
 
         # brotli
         if Version(self.version) < "8.2.0":
@@ -435,15 +427,14 @@ class LibcurlConan(ConanFile):
         ])
 
         # Since 7.77.0, disabling TLS must be explicitly requested otherwise it fails
-        if Version(self.version) >= "7.77.0" and not self.options.with_ssl:
+        if not self.options.with_ssl:
             tc.configure_args.append("--without-ssl")
 
-        openssl_option = "ssl" if Version(self.version) < "7.77.0" else "openssl"
         if self.options.with_ssl == "openssl":
             path = unix_path(self, self.dependencies["openssl"].package_folder)
-            tc.configure_args.append(f"--with-{openssl_option}={path}")
+            tc.configure_args.append(f"--with-openssl={path}")
         else:
-            tc.configure_args.append(f"--without-{openssl_option}")
+            tc.configure_args.append("--without-openssl")
 
         if self.options.with_ssl == "wolfssl":
             path = unix_path(self, self.dependencies["wolfssl"].package_folder)
@@ -469,9 +460,6 @@ class LibcurlConan(ConanFile):
         else:
             tc.configure_args.append("--without-zlib")
 
-        if self._has_metalink_option:
-            tc.configure_args.append(f"--with-libmetalink={self._yes_no(self.options.with_libmetalink)}")
-
         if not self.options.with_proxy:
             tc.configure_args.append("--disable-proxy")
 
@@ -483,10 +471,7 @@ class LibcurlConan(ConanFile):
 
         # ntlm will default to enabled if any SSL options are enabled
         if not self.options.with_ntlm:
-            if Version(self.version) <= "7.77.0":
-                tc.configure_args.append("--disable-crypto-auth")
-            else:
-                tc.configure_args.append("--disable-ntlm")
+            tc.configure_args.append("--disable-ntlm")
 
         if not self.options.with_ntlm_wb:
             tc.configure_args.append("--disable-ntlm-wb")
@@ -606,10 +591,7 @@ class LibcurlConan(ConanFile):
 
         # Also disables NTLM_WB if set to false
         if not self.options.with_ntlm:
-            if Version(self.version) <= "7.77.0":
-                tc.variables["CURL_DISABLE_CRYPTO_AUTH"] = True
-            else:
-                tc.variables["CURL_DISABLE_NTLM"] = True
+            tc.variables["CURL_DISABLE_NTLM"] = True
         tc.variables["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
 
         if self.options.with_ca_bundle:
@@ -623,6 +605,13 @@ class LibcurlConan(ConanFile):
             tc.cache_variables["CURL_CA_PATH"] = "none"
 
         tc.cache_variables["CURL_CA_FALLBACK"] = self.options.with_ca_fallback
+
+        # TODO: remove this when https://github.com/conan-io/conan/issues/12180 will be fixed.
+        if  Version(self.version) >= "8.3.0":
+            tc.variables["HAVE_SSL_SET0_WBIO"] = False
+        if  Version(self.version) >= "8.4.0":
+            tc.variables["HAVE_OPENSSL_SRP"] = True
+            tc.variables["HAVE_SSL_CTX_SET_QUIC_METHOD"] = True
 
         tc.generate()
 
@@ -676,10 +665,8 @@ class LibcurlConan(ConanFile):
             if self.options.with_ssl == "schannel":
                 self.cpp_info.components["curl"].system_libs.append("crypt32")
         elif is_apple_os(self):
-            if Version(self.version) >= "7.78.0" or self.options.with_ssl == "darwinssl":
-                self.cpp_info.components["curl"].frameworks.append("CoreFoundation")
-            if Version(self.version) >= "7.77.0":
-                self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
+            self.cpp_info.components["curl"].frameworks.append("CoreFoundation")
+            self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("ldap")
             if self.options.with_ssl == "darwinssl":

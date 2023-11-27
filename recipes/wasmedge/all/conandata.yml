@@ -1,4 +1,45 @@
 sources:
+  "0.13.5":
+    Windows:
+      "x86_64":
+        Visual Studio:
+          - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.13.5/WasmEdge-0.13.5-windows.zip"
+            sha256: "db533289ba26ec557b5193593c9ed03db75be3bc7aa737e2caa5b56b8eef888a"
+          - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.13.5/LICENSE"
+            sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    Linux:
+      "x86_64":
+        "gcc":
+          - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.13.5/WasmEdge-0.13.5-manylinux2014_x86_64.tar.gz"
+            sha256: "3686e0226871bf17b62ec57e1c15778c2947834b90af0dfad14f2e0202bf9284"
+          - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.13.5/LICENSE"
+            sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      "armv8":
+        "gcc":
+          - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.13.5/WasmEdge-0.13.5-manylinux2014_aarch64.tar.gz"
+            sha256: "472de88e0257c539c120b33fdd1805e1e95063121acc2df1d5626e4676b93529"
+          - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.11.1/LICENSE"
+            sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    Macos:
+      "x86_64":
+        "gcc":
+          - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.13.5/WasmEdge-0.13.5-darwin_x86_64.tar.gz"
+            sha256: "b7fdfaf59805951241f47690917b501ddfa06d9b6f7e0262e44e784efe4a7b33"
+          - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.13.5/LICENSE"
+            sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      "armv8":
+        "gcc":
+          - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.13.5/WasmEdge-0.13.5-darwin_arm64.tar.gz"
+            sha256: "acc93721210294ced0887352f360e42e46dcc05332e6dd78c1452fb3a35d5255"
+          - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.13.5/LICENSE"
+            sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    Android:
+      "armv8":
+        "gcc":
+          - url: "https://github.com/WasmEdge/WasmEdge/releases/download/0.13.5/WasmEdge-0.13.5-android_aarch64.tar.gz"
+            sha256: "59a0d68a0c7368b51cc65cb5a44a68037d79fd449883ef42792178d57c8784a8"
+          - url: "https://raw.githubusercontent.com/WasmEdge/WasmEdge/0.13.5/LICENSE"
+            sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
   "0.11.2":
     Windows:
       "x86_64":

@@ -15,6 +15,7 @@ class EnttConan(ConanFile):
     homepage = "https://github.com/skypjack/entt"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     @property
@@ -41,7 +42,6 @@ class EnttConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        # TODO: use self.info.settings in validate() instead of self.settings
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
@@ -58,8 +58,7 @@ class EnttConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)

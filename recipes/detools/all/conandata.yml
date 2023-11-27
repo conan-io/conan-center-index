@@ -1,4 +1,7 @@
 sources:
+  "0.53.0":
+    url: "https://github.com/eerimoq/detools/archive/refs/tags/0.53.0.tar.gz"
+    sha256: "9ea3b547627f5d37756023d91c701ef18fb2748b801b985e55c74c7fe8247ac2"
   "0.51.0":
-    url: "https://github.com/eerimoq/detools/archive/refs/tags/0.51.0.zip"
-    sha256: 604175d493a9df5d19e78a55cd183e9c44789ee552f24d1a2b7466d58628c1ac
+    url: "https://github.com/eerimoq/detools/archive/refs/tags/0.51.0.tar.gz"
+    sha256: "18e5f08fbc3c09ec9d805fd859838940f57a3f064724bad4897461f9a3c8f87c"

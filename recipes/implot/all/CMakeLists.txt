@@ -6,6 +6,7 @@ file(GLOB HEADER_FILES ${IMPLOT_SRC_DIR}/*.h)
 add_library(${PROJECT_NAME}
     ${IMPLOT_SRC_DIR}/implot.cpp
     ${IMPLOT_SRC_DIR}/implot_items.cpp
+    ${IMPLOT_SRC_DIR}/implot_demo.cpp
 )
 target_include_directories(${PROJECT_NAME} PRIVATE ${IMPLOT_SRC_DIR})
 

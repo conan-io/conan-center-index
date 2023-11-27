@@ -13,4 +13,3 @@ class MoldTestConan(ConanFile):
     def test(self):
         if can_run(self):
             self.run("mold -v")
-

@@ -123,7 +123,7 @@ class CprConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcurl/8.2.1", transitive_headers=True, transitive_libs=True)
+        self.requires("libcurl/8.4.0", transitive_headers=True, transitive_libs=True)
         # FIXME: This is a very dirty hack.
         # with_ssl == _AUTO_SSL, cpr needs the openssl header to compile. But Conan recipe does not know which SSL library to use.
         # because cpr's CMakeLists.txt automatically detects SSL libraries with CPR_ENABLE_SSL == ON.

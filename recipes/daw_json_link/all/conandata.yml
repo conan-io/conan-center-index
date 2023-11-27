@@ -1,4 +1,7 @@
 sources:
+  "3.23.0":
+    url: "https://github.com/beached/daw_json_link/archive/refs/tags/v3.23.0.tar.gz"
+    sha256: "a01e9a3a48784a47dbb60bd21ecbe7e05a7d30cec75ea6d55b1789f6aefe5f05"
   "3.20.1":
     url: "https://github.com/beached/daw_json_link/archive/refs/tags/v3.20.1.tar.gz"
     sha256: "046638bc4437d138cc8bdc882027d318ca3e267f33d1b419c5bdecb45b595a47"

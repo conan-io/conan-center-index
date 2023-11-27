@@ -21,10 +21,12 @@ class Blend2dConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_jit": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_jit": True,
     }
 
     def export_sources(self):
@@ -42,7 +44,8 @@ class Blend2dConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("asmjit/cci.20230325")
+        if self.options.with_jit:
+            self.requires("asmjit/cci.20230325")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -68,6 +71,7 @@ class Blend2dConan(ConanFile):
             tc.variables["CMAKE_CXX_STANDARD"] = 11
         if not self.options.shared:
             tc.preprocessor_definitions["BL_STATIC"] = "1"
+        tc.variables["BLEND2D_NO_JIT"] = not self.options.with_jit
         tc.generate()
 
         deps = CMakeDeps(self)

@@ -8,6 +8,7 @@ import os
 
 required_conan_version = ">=1.53.0"
 
+# INFO: In order to prevent OneTBB missing package error, we build only shared library for hwloc.
 
 class HwlocConan(ConanFile):
     name = "hwloc"
@@ -16,26 +17,16 @@ class HwlocConan(ConanFile):
     license = "BSD-3-Clause"
     homepage = "https://www.open-mpi.org/projects/hwloc/"
     url = "https://github.com/conan-io/conan-center-index"
-    package_type = "library"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
         "with_libxml2": [True, False]
     }
     default_options = {
-        "shared": False,
-        "fPIC": True,
         "with_libxml2": False
     }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
@@ -63,7 +54,7 @@ class HwlocConan(ConanFile):
             tc.cache_variables["HWLOC_SKIP_INCLUDES"] = 'OFF'
             tc.cache_variables["HWLOC_WITH_OPENCL"] = 'OFF'
             tc.cache_variables["HWLOC_WITH_CUDA"] = 'OFF'
-            tc.cache_variables["HWLOC_BUILD_SHARED_LIBS"] = self.options.shared
+            tc.cache_variables["HWLOC_BUILD_SHARED_LIBS"] = True
             tc.cache_variables["HWLOC_WITH_LIBXML2"] = self.options.with_libxml2
             tc.generate()
         else:
@@ -73,6 +64,7 @@ class HwlocConan(ConanFile):
             if not self.options.with_libxml2:
                 tc.configure_args.extend(["--disable-libxml2"])
             tc.configure_args.extend(["--disable-io", "--disable-cairo"])
+            tc.configure_args.extend(["--enable-shared", "--disable-static"])
             tc.generate()
 
     def build(self):
@@ -106,9 +98,5 @@ class HwlocConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "hwloc")
         self.cpp_info.libs = ["hwloc"]
-
-        if not self.options.shared:
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs = ["m"]
         if is_apple_os(self):
             self.cpp_info.frameworks = ['IOKit', 'Foundation', 'CoreFoundation']

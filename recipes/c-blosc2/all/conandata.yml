@@ -1,4 +1,10 @@
 sources:
+  "2.11.2":
+    url: "https://github.com/Blosc/c-blosc2/archive/v2.11.2.tar.gz"
+    sha256: "4a508362653468d8948762886c6b24e6bafb70e02709aa31284c0ff9db62b83d"
+  "2.11.1":
+    url: "https://github.com/Blosc/c-blosc2/archive/v2.11.1.tar.gz"
+    sha256: "1e9923e0f026eb6e6caee608b4b9a523837806076fc79409055a6386cf5de1ea"
   "2.10.5":
     url: "https://github.com/Blosc/c-blosc2/archive/v2.10.5.tar.gz"
     sha256: "a88f94bf839c1371aab8207a6a43698ceb92c72f65d0d7fe5b6e59f24c138b4d"
@@ -20,16 +26,15 @@ sources:
   "2.4.3":
     url: "https://github.com/Blosc/c-blosc2/archive/v2.4.3.tar.gz"
     sha256: "d4aa5e0794598794f20ab950e973d44f0d0d9c133ea1a5a07cb200fa54d2e036"
-  "2.4.2":
-    url: "https://github.com/Blosc/c-blosc2/archive/v2.4.2.tar.gz"
-    sha256: "763ded7a6286abd248a79b1560ce8bfda11018b699a450b3e43c529f284a5232"
-  "2.4.1":
-    url: "https://github.com/Blosc/c-blosc2/archive/refs/tags/v2.4.1.tar.gz"
-    sha256: "f09a43bfac563ceda611a213c799ca5359c3b629281e0a4f3a543e692a64a931"
-  "2.2.0":
-    url: "https://github.com/Blosc/c-blosc2/archive/refs/tags/v2.2.0.tar.gz"
-    sha256: "66f9977de26d6bc9ea1c0e623d873c3225e4fff709aa09b3335fd09d41d57c0e"
 patches:
+  "2.11.2":
+    - patch_file: "patches/2.11.1-0001-fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "2.11.1":
+    - patch_file: "patches/2.11.1-0001-fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
   "2.10.5":
     - patch_file: "patches/2.10.5-0001-fix-cmake.patch"
       patch_description: "use cci package"
@@ -56,17 +61,5 @@ patches:
       patch_type: "conan"
   "2.4.3":
     - patch_file: "patches/2.4.1-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "2.4.2":
-    - patch_file: "patches/2.4.1-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "2.4.1":
-    - patch_file: "patches/2.4.1-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "2.2.0":
-    - patch_file: "patches/2.2.0-0001-fix-cmake.patch"
       patch_description: "use cci package"
       patch_type: "conan"

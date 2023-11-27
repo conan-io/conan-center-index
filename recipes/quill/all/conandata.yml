@@ -1,4 +1,10 @@
 sources:
+  "3.4.1":
+    url: "https://github.com/odygrd/quill/archive/v3.4.1.tar.gz"
+    sha256: "99f6497b8ba37c30c871fab89f14cd7bc989f3eaa921ccd940a521ee60a6a1c5"
+  "3.4.0":
+    url: "https://github.com/odygrd/quill/archive/v3.4.0.tar.gz"
+    sha256: "16a6cfadc288953f07d128bb51e8ebd4ca6bb8ce4175b5a8af53ce7dde324d8d"
   "3.3.1":
     url: "https://github.com/odygrd/quill/archive/v3.3.1.tar.gz"
     sha256: "f929d54a115b45c32dd2acd1a9810336d35c31fde9f5581c51ad2b80f980d0d1"

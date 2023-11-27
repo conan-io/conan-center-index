@@ -17,7 +17,7 @@ class AeronConan(ConanFile):
     description = "Efficient reliable UDP unicast, UDP multicast, and IPC message transport"
     topics = ("udp", "messaging", "low-latency")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/real-logic/aeron/wiki"
+    homepage = "https://github.com/real-logic/aeron"
     license = "Apache-2.0"
 
     package_type = "library"
@@ -72,7 +72,7 @@ class AeronConan(ConanFile):
             raise ConanInvalidConfiguration("This platform (os=Macos arch=armv8) is not yet supported by this recipe")
 
     def build_requirements(self):
-        self.tool_requires("zulu-openjdk/11.0.15")
+        self.tool_requires("zulu-openjdk/11.0.19")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -90,6 +90,12 @@ class AeronConan(ConanFile):
         tc.cache_variables["AERON_BUILD_DOCUMENTATION"] = False
         tc.cache_variables["AERON_INSTALL_TARGETS"] = True
         tc.cache_variables["AERON_ENABLE_NONSTANDARD_OPTIMIZATIONS"] = True
+        # The finite-math-only optimization has no effect and can cause linking errors
+        # when linked against glibc >= 2.31
+        tc.blocks["cmake_flags_init"].template += (
+            'string(APPEND CMAKE_CXX_FLAGS_INIT " -fno-finite-math-only")\n'
+            'string(APPEND CMAKE_C_FLAGS_INIT " -fno-finite-math-only")\n'
+        )
         tc.generate()
 
     def _patch_sources(self):
