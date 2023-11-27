@@ -25,10 +25,12 @@ class IgnitionMathConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "enable_swig": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "enable_swig": False,
     }
 
     @property
@@ -67,20 +69,23 @@ class IgnitionMathConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        if Version(self.version) <= "6.8":
+            self.requires("ignition-cmake/2.5.0", private=True)
+        else:
+            self.requires("ignition-cmake/2.10.0", private=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
-        self.requires("swig/4.1.1")
+        if self.options.enable_swig:
+            self.requires("swig/4.1.0")
 
     def validate(self):
         if cross_building(self) and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("sorry, M1 cross builds are not currently supported, giving up!")
 
     def build_requirements(self):
-        if Version(self.version) <= "6.8":
-            self.tool_requires("ignition-cmake/2.5.0")
-        else:
-            self.tool_requires("ignition-cmake/2.10.0")
+        self.tool_requires("ignition-cmake/<host_version>")
         self.tool_requires("doxygen/1.9.4")
-        self.tool_requires("swig/<host_version>")
+        if self.options.enable_swig:
+            self.tool_requires("swig/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -90,10 +95,9 @@ class IgnitionMathConan(ConanFile):
         env.generate()
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables["SKIP_SWIG"] = not self.options.enable_swig
         tc.generate()
         deps = CMakeDeps(self)
-        deps.build_context_activated = ["ignition-cmake"]
-        deps.build_context_build_modules = ["ignition-cmake"]
         deps.generate()
 
     def _patch_sources(self):
@@ -148,7 +152,9 @@ class IgnitionMathConan(ConanFile):
         main_component = self.cpp_info.components[lib_name]
         main_component.libs = [lib_name]
         main_component.includedirs.append(os.path.join("include", "ignition", "math" + version_major))
-        main_component.requires = ["swig::swig", "eigen::eigen"]
+        main_component.requires = ["eigen::eigen"]
+        if self.options.enable_swig:
+            main_component.requires.append("swig::swig")
 
         eigen3_component = self.cpp_info.components["eigen3"]
         eigen3_component.includedirs.append(os.path.join("include", "ignition", "math" + version_major))
