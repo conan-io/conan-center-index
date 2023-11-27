@@ -1,4 +1,4 @@
 sources:
-  "cci.20231020":
-    url: "https://github.com/resiprocate/resiprocate/archive/2945eed45bd08fa0f5e67a30f1c3794b3b60ad86.tar.gz"
-    sha256: "0f463c642034d18f98d4ff595f44a1fc3db1e29fc9e12ed2e8fbdc51b4284f98"
+  "cci.20231120":
+    url: "https://github.com/resiprocate/resiprocate/archive/6b21271c121981e4bae8bb0b5d445081f776c78d.tar.gz"
+    sha256: "764381136ef35e7f28cc5d77b8b39a80c49bad99b45b756d2f1af75fab9a2ad8"
