@@ -26,7 +26,6 @@ class CycloneDDSCXXConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    short_paths = True
 
     @property
     def _min_cppstd(self):
@@ -99,7 +98,6 @@ class CycloneDDSCXXConan(ConanFile):
         cd.generate()
 
     def _patch_sources(self):
-        #apply_conandata_patches(self)
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         replace_in_file(self, cmakelists,
                         "get_target_property(cyclonedds_has_shm CycloneDDS::ddsc SHM_SUPPORT_IS_AVAILABLE)",
