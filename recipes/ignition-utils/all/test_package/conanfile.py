@@ -12,10 +12,11 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def requirements(self):
+        self.requires("ignition-cmake/2.10.0", private=True)
         self.requires(self.tested_reference_str)
 
     def build_requirements(self):
-        self.tool_requires("ignition-cmake/2.10.0")
+        self.tool_requires("ignition-cmake/<host_version>")
         self.tool_requires("doxygen/1.9.4")
 
     def layout(self):
@@ -26,8 +27,6 @@ class TestPackageConan(ConanFile):
         tc.variables["IGN_UTILS_MAJOR_VER"] = Version(self.dependencies["ignition-utils"].ref.version).major
         tc.generate()
         deps = CMakeDeps(self)
-        deps.build_context_activated = ["ignition-cmake"]
-        deps.build_context_build_modules = ["ignition-cmake"]
         deps.generate()
 
     def build(self):
