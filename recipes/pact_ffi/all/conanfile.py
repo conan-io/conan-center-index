@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.files import get, copy
+
 import os
 
 required_conan_version = ">=2.0.0"
@@ -35,7 +36,18 @@ class PactFFIConan(ConanFile):
 
     def build(self):
         data = self.conan_data["sources"][self.version]
-        get(self, data["url"], sha256=data["sha256"], strip_root=True)
+        token = os.getenv("GITLAB_API_TOKEN") or os.getenv("CI_JOB_TOKEN")
+        if token is None:
+            raise ConanException("GITLAB_API_TOKEN or CI_JOB_TOKEN must be defined "
+                                 "with a token with the permissions to read the Pact repository")
+        get(
+            self,
+            data["url"],
+            sha256=data["sha256"],
+            strip_root=True,
+            headers={"PRIVATE-TOKEN": token},
+            filename=f"pact_ffi-{self.version}.tar.gz"
+        )
 
     def package(self):
         subfolder = {
