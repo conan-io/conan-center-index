@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get
+from conan.tools.layout import basic_layout
 
 class canteraRecipe(ConanFile):
     name = "cantera"
@@ -67,9 +68,7 @@ class canteraRecipe(ConanFile):
         self.scons_boost_inc_dir = self.dependencies["boost"].cpp_info.includedirs[0]
 
     def layout(self):
-        self.folders.source = "."
-        self.folders.build = "build"
-        self.cpp.source.includedirs = ["include"]
+        basic_layout(self, src_folder="src")
 
     def build(self):
 
@@ -112,6 +111,10 @@ class canteraRecipe(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["cantera_shared"] if self.options.shared else ["cantera"]
         self.cpp_info.includedirs = ["include"]
-        self.cpp_info.libdirs = ["bin"] if self.options.shared else ["lib"]
         self.cpp_info.bindirs = ["bin"]
         self.cpp_info.resdirs = ["data"]
+
+        if self.options.shared:
+            self.cpp_info.libdirs = ["bin"] if self.settings.os == "Windows" else ["share"]
+        else:
+            self.cpp_info.libdirs = ["lib"]
