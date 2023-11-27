@@ -9,6 +9,10 @@ sources:
     url: "https://github.com/AngusJohnson/Clipper2/files/11071418/Clipper2_1.2.2.zip"
     sha256: "ec28bc4e05a86cb0be81a872e8d90a4d575b63882ef3ac78f06662358e410f89"
 patches:
+  "1.2.4":
+    - patch_file: "patches/1.2.4-0001-remove-macos-suffix.patch"
+      patch_description: "fix install for windows shared build"
+      patch_type: "portability"
   "1.2.2":
     - patch_file: "patches/1.2.2-0001-fix-install.patch"
       patch_description: "fix install for windows shared build"
