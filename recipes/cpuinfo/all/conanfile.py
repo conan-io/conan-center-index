@@ -94,6 +94,7 @@ class CpuinfoConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "cpuinfo")
         self.cpp_info.set_property("pkg_config_name", "libcpuinfo")
 
         if self.version < "cci.20230118":
