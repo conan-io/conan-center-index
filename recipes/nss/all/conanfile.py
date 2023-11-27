@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rename, rm
@@ -19,14 +19,13 @@ class NSSConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Network Security Services"
     topics = ("network", "security", "crypto", "ssl")
-    package_type = "library"
+
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": True,
         "fPIC": True,
     }
 
@@ -39,12 +38,8 @@ class NSSConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-        self.options["nspr"].shared = True
-        self.options["sqlite3"].shared = True
 
     def requirements(self):
         self.requires("nspr/4.35", transitive_headers=True, transitive_libs=True)
@@ -52,15 +47,13 @@ class NSSConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if not self.options.shared:
-            raise ConanInvalidConfiguration("NSS recipe cannot yet build static library. Contributions are welcome.")
-        if not self.dependencies["nspr"].options.shared:
-            raise ConanInvalidConfiguration("NSS cannot link to static NSPR. Please use option nspr:shared=True")
         if msvc_runtime_flag(self) == "MTd":
             raise ConanInvalidConfiguration("NSS recipes does not support MTd runtime. Contributions are welcome.")
+        if not self.dependencies["nspr"].options.shared:
+            raise ConanInvalidConfiguration("NSS cannot link to static NSPR. Please use option nspr:shared=True")
         if not self.dependencies["sqlite3"].options.shared:
             raise ConanInvalidConfiguration("NSS cannot link to static sqlite. Please use option sqlite3:shared=True")
-        if self.settings.arch in ["armv8", "armv8.3"] and self.settings.os in ["Macos"]:
+        if self.settings.arch in ["armv8", "armv8.3"] and is_apple_os(self):
             raise ConanInvalidConfiguration("Macos ARM64 builds not yet supported. Contributions are welcome.")
         if Version(self.version) < "3.74":
             if self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= 13:
@@ -197,16 +190,14 @@ class NSSConan(ConanFile):
         for dll_file in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
             rename(self, dll_file, os.path.join(self.package_folder, "bin", os.path.basename(dll_file)))
 
-        if self.options.shared:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
-        else:
-            rm(self, "*.so", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
+        rm(self, "*.so", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
         def _library_name(lib,vers):
-            return f"{lib}{vers}" if self.options.shared else lib
+            # return f"{lib}{vers}" if self.options.shared else lib
+            return lib
         self.cpp_info.components["libnss"].libs.append(_library_name("nss", 3))
         self.cpp_info.components["libnss"].requires = ["nssutil", "nspr::nspr"]
 
