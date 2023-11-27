@@ -574,6 +574,13 @@ class PclConan(ConanFile):
         if self.settings.os == "Windows":
             common.system_libs.append("ws2_32")
 
+        if self.options.with_qhull:
+            self.cpp_info.defines.append('HAVE_QHULL=1')
+        if self.options.with_png:
+            self.cpp_info.defines.append('HAVE_PNG=1')
+        if self.options.with_cuda:
+            self.cpp_info.defines.append('HAVE_CUDA=1')
+
         # TODO: Legacy, to be removed on Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "PCL"
         self.cpp_info.names["cmake_find_package_multi"] = "PCL"
