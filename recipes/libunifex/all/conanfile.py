@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.52.0"
@@ -39,8 +39,8 @@ class LibunifexConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("liburing/2.2", transitive_headers=True)
+        if self.settings.os == "Linux":
+            self.requires("liburing/2.4", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -65,13 +65,24 @@ class LibunifexConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("liburing", "cmake_file_name", "LIBURING")
+        deps.generate()
 
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
+
+    def _patch_sources(self):
+        # Ensure liburing from the system is not used and that uuper-case variables are generated
+        required = "REQUIRED" if self.settings.os == "Linux" else ""
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "unifex_flags.cmake"),
+                        "find_package(LibUring COMPONENTS)",
+                        f"find_package(LIBURING {required} CONFIG NO_DEFAULT_PATH PATHS ${{CMAKE_PREFIX_PATH}})")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "unifex_env.cmake"), "-Werror", "")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "unifex_env.cmake"), "/WX", "")
 
     def package(self):
         copy(self, "LICENSE.txt",
