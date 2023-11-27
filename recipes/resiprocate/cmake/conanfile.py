@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -144,6 +145,10 @@ class ResiprocateConan(ConanFile):
         self.cpp_info.libs = [resiprocate_lib, "rutil", "dum"]
         if not self.options.with_cares:
             self.cpp_info.libs.append("resipares")
+        if is_apple_os(self):
+            self.cpp_info.frameworks.append("CoreFoundation")
+            self.cpp_info.frameworks.append("CoreServices")
+            self.cpp_info.frameworks.append("Security")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
