@@ -37,6 +37,20 @@ class ResiprocateConan(ConanFile):
         "with_ssl": True,
     }
 
+    @property
+    def _minimum_cpp_standard(self):
+        return 11
+
+    @property
+    def _minimum_compiler_version(self):
+        return {
+            "gcc": "7",
+            "clang": "6",
+            "apple-clang": "10",
+            "msvc": "191",
+            "Visual Studio": "15",
+        }
+
     def export_sources(self):
         export_conandata_patches(self)
 
