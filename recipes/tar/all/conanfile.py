@@ -36,6 +36,13 @@ class TarConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
+    def requirements(self):
+        self.requires("bzip2/1.0.8", run=True, headers=False, libs=False)
+        self.requires("lzip/1.23", run=True, headers=False, libs=False)
+        self.requires("xz_utils/5.4.4", run=True, headers=False, libs=False)
+        self.requires("zstd/1.5.5", run=True, headers=False, libs=False)
+        # self.requires("lzo/2.10", run=True, headers=False, libs=False)
+
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("This recipe does not support Windows builds of tar")  # FIXME: fails on MSVC and mingw-w64
@@ -43,14 +50,6 @@ class TarConan(ConanFile):
             # Check does not work with Conan v2
             if not self.dependencies.build["bzip2"].options.build_executable:
                 raise ConanInvalidConfiguration("bzip2:build_executable must be enabled")
-
-    def build_requirements(self):
-        visible = dict(visible=True) if conan_version >= 2 else dict()
-        self.tool_requires("bzip2/1.0.8", **visible)
-        self.tool_requires("lzip/1.23", **visible)
-        self.tool_requires("xz_utils/5.4.4", **visible)
-        self.tool_requires("zstd/1.5.5", **visible)
-        # self.tool_requires("lzo/2.10", **visible)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
