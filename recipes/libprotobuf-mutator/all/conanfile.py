@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
@@ -46,6 +47,8 @@ class LibProtobufMutatorConan(ConanFile):
     def validate(self):
         if self.settings.compiler in ["gcc", "clang", "intel-cc"] and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration("Requires compiler.libcxx=libstdc++11")
+        if is_apple_os(self):
+            raise ConanInvalidConfiguration(f"libprotobuf-mutator does not support {self.settings.os}")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
 
