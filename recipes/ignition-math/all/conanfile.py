@@ -69,10 +69,7 @@ class IgnitionMathConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) <= "6.8":
-            self.requires("ignition-cmake/2.5.0", private=True)
-        else:
-            self.requires("ignition-cmake/2.10.0", private=True)
+        self.requires("ignition-cmake/2.10.0", private=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.enable_swig:
             self.requires("swig/4.1.0")
