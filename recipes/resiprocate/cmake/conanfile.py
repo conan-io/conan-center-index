@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
@@ -108,6 +108,8 @@ class ResiprocateConan(ConanFile):
         tc.variables["WITH_SSL"] = self.options.with_ssl
         if self.settings.os in ["Linux"]:
             tc.preprocessor_definitions["RESIP_RANDOM_THREAD_LOCAL"] = True
+        if cross_building(self):
+            tc.cache_variables("HAVE_CLOCK_GETTIME_MONOTONIC") = not self.settings.os in ["Windows"]
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
