@@ -7,6 +7,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path, is_msvc
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.52.0"
 
@@ -38,6 +39,10 @@ class PExportsConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
+
+    def validate(self):
+        if self.settings.arch in ["armv8", "armv8.3"] and cross_building(self):
+            raise ConanInvalidConfiguration("pexports does not support cross-compilation to armv8")
 
     def build_requirements(self):
         self.tool_requires("automake/1.16.5")
