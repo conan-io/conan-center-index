@@ -47,5 +47,8 @@ class MultiConan(ConanFile):
         copy(self, "*.hpp", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "multi")
+        self.cpp_info.set_property("cmake_target_name", "multi::multi")
+
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
