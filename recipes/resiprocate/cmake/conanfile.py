@@ -74,6 +74,13 @@ class ResiprocateConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
+        if self.info.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        minimum_version = self._minimum_compiler_version.get(str(self.info.settings.compiler), False)
+        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+            )
         if self.options.shared and is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared builds on Windows.")
 
