@@ -11,7 +11,7 @@ class MultiConan(ConanFile):
         "multidimensional",
         "library",
     )
-    license = "Boost"
+    license = "BSL-1.0"
     url = "https://gitlab.com/correaa/boost-multi"
     # No settings/options are necessary, this is header only
     exports_sources = "include/*"
