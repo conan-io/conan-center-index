@@ -1,13 +1,9 @@
 import os
 
 from conan import ConanFile
-from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, rename, chdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, NMakeToolchain
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rm, rmdir, download, replace_in_file, save
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -31,13 +27,6 @@ class LibTomMathConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -49,88 +38,41 @@ class LibTomMathConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
-        basic_layout(self, src_folder="src")
-    def build_requirements(self):
-        if self._settings_build.os == "Windows":
-            self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-                self.tool_requires("msys2/cci.latest")
-        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.0.3")
-        if not is_msvc(self) and self.settings.os != "Windows" and self.options.shared:
-            self.tool_requires("libtool/2.4.7")
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
+        download(self, **self.conan_data["sources"][self.version]["cmakelists"], filename="CMakeLists.txt")
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-        if is_msvc(self):
-            tc = NMakeToolchain(self)
-            tc.extra_ldflags = ["-lcrypt32"]
-            tc.generate()
-        else:
-            tc = AutotoolsToolchain(self)
-            if is_apple_os(self) and self.settings.arch == "armv8":
-                tc.extra_ldflags.append("-arch arm64")
-                if cross_building(self):
-                    tc.make_args.append("CROSS_COMPILE=arm64-apple-m1-")
-            tc.make_args.extend([f"PREFIX={self.package_folder}", "LIBTOOL=libtool"])
-            tc.generate()
+        tc = CMakeToolchain(self)
+        tc.generate()
 
-    @property
-    def _makefile_filename(self):
-        if is_msvc(self):
-            return "makefile.msvc"
-        elif self.settings.os == "Windows" and not is_msvc(self):
-            return "makefile.mingw"
-        elif self.options.shared:
-            return "makefile.shared"
-        else:
-            return "makefile.unix"
-
-    @property
-    def _makefile_target(self):
-        if is_msvc(self):
-            return "tommath.dll" if self.options.shared else "tommath.lib"
-        elif self.settings.os == "Windows" and not is_msvc(self):
-            return "libtommath.dll" if self.options.shared else "libtommath.a"
-        return None
+    def _patch_sources(self):
+        if Version(self.version) <= "1.2.1":
+            save(self, os.path.join(self.source_folder, "sources.cmake"),
+                 "file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.c)\n"
+                 "file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)\n")
+        # Disable installation of docs (which are not found on < 1.2.1)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "# Windows uses a different help sytem.\nif(", "if(0 AND")
 
     def build(self):
-        apply_conandata_patches(self)
-        with chdir(self, self.source_folder):
-            if is_msvc(self):
-                self.run(f"nmake -f {self._makefile_filename} {self._makefile_target}")
-            else:
-                autotools = Autotools(self)
-                autotools.make(target=self._makefile_target, args=["-f", self._makefile_filename])
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        if self.settings.os == "Windows":
-            # INFO: The mingw makefile uses `cmd`, which is only available on Windows
-            copy(self, "*.a", src=self.source_folder, dst=os.path.join(self.package_folder, "lib"))
-            copy(self, "*.lib", src=self.source_folder, dst=os.path.join(self.package_folder, "lib"))
-            copy(self, "*.dll", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"))
-            copy(self, "tommath.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
-        else:
-            with chdir(self, self.source_folder):
-                if is_msvc(self):
-                    self.run(f"nmake -f {self._makefile_filename} install")
-                else:
-                    autotools = Autotools(self)
-                    autotools.install(args=["DESTDIR=", "-f", self._makefile_filename])
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
 
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        if self.options.shared:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-
-        if is_msvc(self) and self.options.shared:
-            rename(self, os.path.join(self.package_folder, "lib", "tommath.dll.lib"),
-                   os.path.join(self.package_folder, "lib", "tommath.lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libtommath")
@@ -138,6 +80,7 @@ class LibTomMathConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libtommath")
 
         self.cpp_info.libs = ["tommath"]
+        self.cpp_info.includedirs.append(os.path.join("include", "libtommath"))
         if not self.options.shared:
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["advapi32", "crypt32"]
