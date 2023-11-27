@@ -28,7 +28,19 @@ class JsonconsConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return "11" if Version(self.version) < "0.172.0" else "14"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "14": {
+                "gcc": "6",
+                "clang": "5",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+        }.get(self._min_cppstd, {})
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -39,9 +51,11 @@ class JsonconsConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-        if Version(self.version) >= "0.172.0" and \
-            self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support GCC < 6.")
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
