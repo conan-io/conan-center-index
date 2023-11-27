@@ -52,7 +52,9 @@ class LibassertConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= Version("1.2.1"):
+        if Version(self.version) >= Version("1.2.2"):
+            self.requires("cpptrace/0.3.0")
+        elif Version(self.version) >= Version("1.2.1"):
             self.requires("cpptrace/0.2.1")
 
     def validate(self):
@@ -102,7 +104,7 @@ class LibassertConan(ConanFile):
              src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        
+
         if self.settings.os == "Windows" and self.options.shared:
             copy(
                 self,
@@ -124,7 +126,7 @@ class LibassertConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "assert")
         self.cpp_info.set_property("cmake_target_name", "assert::assert")
-        
+
         # the first version of this library used assert/assert as include folder
         # appending this one but not removing the default to not break consumers
         self.cpp_info.includedirs.append(os.path.join("include", "assert"))
