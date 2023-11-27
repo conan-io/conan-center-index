@@ -71,7 +71,7 @@ class ElfutilsConan(ConanFile):
         if self.options.with_lzma:
             self.requires("xz_utils/5.4.5")
         if self.options.get_safe("libdebuginfod"):
-            self.requires("libcurl/8.3.0")
+            self.requires("libcurl/8.4.0")
         if self.options.debuginfod:
             self.requires("libmicrohttpd/0.9.75")
 
