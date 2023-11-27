@@ -9,7 +9,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir, save, replace_in_file
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
 
 class IgnitionUitlsConan(ConanFile):
@@ -59,6 +59,7 @@ class IgnitionUitlsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("ignition-cmake/2.10.0", private=True)
         if self.options.ign_utils_vendor_cli11:
             self.requires("cli11/2.3.2")
 
@@ -83,7 +84,7 @@ class IgnitionUitlsConan(ConanFile):
             self.requires("cli11/2.1.2")
 
     def build_requirements(self):
-        self.tool_requires("ignition-cmake/2.10.0")
+        self.tool_requires("ignition-cmake/<host_version>")
         self.tool_requires("doxygen/1.9.4")
 
     def source(self):
@@ -96,8 +97,6 @@ class IgnitionUitlsConan(ConanFile):
         tc.variables["CMAKE_FIND_DEBUG_MODE"] = True
         tc.generate()
         deps = CMakeDeps(self)
-        deps.build_context_activated = ["ignition-cmake"]
-        deps.build_context_build_modules = ["ignition-cmake"]
         deps.generate()
 
     def _patch_sources(self):
