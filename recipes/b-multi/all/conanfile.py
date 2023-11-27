@@ -13,8 +13,7 @@ class MultiConan(ConanFile):
     )
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
-    # No settings/options are necessary, this is header only
-    exports_sources = "include/*"
+    package_type = "header-library"
     no_copy_source = True
 
     def package(self):
