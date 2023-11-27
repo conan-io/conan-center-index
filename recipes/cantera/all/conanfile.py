@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import get
 
 class canteraRecipe(ConanFile):
@@ -34,6 +35,10 @@ class canteraRecipe(ConanFile):
     @property
     def _min_cppstd(self):
         return 17
+    
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
     def requirements(self):
         self.requires("boost/1.83.0", headers=True, libs=False, build=False, visible=False)
