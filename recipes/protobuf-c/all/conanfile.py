@@ -91,9 +91,11 @@ class ProtobufCConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+
         # TODO: This won't be needed once upstream PR (https://github.com/protobuf-c/protobuf-c/pull/555) gets merged
         copy(self, "protobuf-c.cmake", dst=os.path.join(self.package_folder, self._cmake_install_base_path), src=self.export_sources_folder)
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         # upstream CMake config file name and target name matches the package name
