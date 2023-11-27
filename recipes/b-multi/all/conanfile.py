@@ -21,7 +21,7 @@ class MultiConan(ConanFile):
     package_type = "header-library"
     no_copy_source = True
 
-	@property
+    @property
     def _min_cppstd(self):
         return 17
 
