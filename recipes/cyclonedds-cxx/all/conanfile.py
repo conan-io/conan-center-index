@@ -62,7 +62,12 @@ class CycloneDDSCXXConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # Use the corresponding version of cyclonedds
+        # Use the corresponding version of cyclonedds with transitive headers
+        #INFO: <dds/dds.h> is used in several public headers including:
+        #      <dds/sub/detail/DataWriter.hpp>:29
+        #      <dds/sub/detail/DataReader.hpp>:31
+        #      <dds/topic/detail/TTopicImpl.hpp>:26
+        #      <dds/topic/detail/Topic.hpp>:34
         self.requires("cyclonedds/{}".format(self.version), transitive_headers=True)
 
     def validate(self):
