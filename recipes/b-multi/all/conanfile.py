@@ -44,8 +44,7 @@ class MultiConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        # This will also copy the "include" folder
-        copy(self, "*.hpp", self.source_folder, self.package_folder)
+        copy(self, "*.hpp", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         # For header-only packages, libdirs and bindirs are not used
