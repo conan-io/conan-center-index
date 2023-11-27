@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(cmake_wrapper)
 
+# Wrapper for find_package() that sets variables in the format expected by the project
 macro(custom_find_package name)
     find_package(${name} REQUIRED CONFIG
         # Allow only Conan packages
@@ -38,3 +39,8 @@ if(WIN32)
 endif()
 
 add_subdirectory(src)
+
+if(NOT HAVE_DSA_SIG_SET0)
+    # This should have been found for OpenSSL from CCI
+    message(FATAL_ERROR "OpenSSL feature detection failed, probably due to a bug in getdns recipe.")
+endif()
