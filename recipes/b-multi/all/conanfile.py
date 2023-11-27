@@ -12,7 +12,7 @@ class MultiConan(ConanFile):
         "library",
     )
     license = "BSL-1.0"
-    url = "https://gitlab.com/correaa/boost-multi"
+    url = "https://github.com/conan-io/conan-center-index"
     # No settings/options are necessary, this is header only
     exports_sources = "include/*"
     no_copy_source = True
