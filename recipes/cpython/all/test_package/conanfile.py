@@ -1,9 +1,16 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools, RunEnvironment
-from conans.errors import ConanException
-from io import StringIO
 import os
 import re
 import shutil
+from io import StringIO
+
+from conans import AutoToolsBuildEnvironment, CMake, tools, RunEnvironment
+
+from conan import ConanFile
+from conan.errors import ConanException
+from conan.tools.apple import is_apple_os
+from conan.tools.build import can_run
+from conan.tools.files import mkdir
+from conan.tools.scm import Version
 
 
 class CmakePython3Abi(object):
@@ -43,7 +50,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _cmake_abi(self):
-        if self._py_version < tools.Version("3.8"):
+        if self._py_version < Version("3.8"):
             return CmakePython3Abi(
                 debug=self.settings.build_type == "Debug",
                 pymalloc=self._pymalloc,
@@ -67,7 +74,7 @@ class TestPackageConan(ConanFile):
         return self.settings.compiler != "Visual Studio" or self.options["cpython"].shared
 
     def build(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if can_run(self):
             command = "{} --version".format(self.deps_user_info["cpython"].python)
             buffer = StringIO()
             self.run(command, output=buffer, ignore_errors=True, run_environment=True)
@@ -93,18 +100,18 @@ class TestPackageConan(ConanFile):
         cmake.definitions["Python{}_FIND_STRATEGY".format(py_major)] = "LOCATION"
 
         if self.settings.compiler != "Visual Studio":
-            if tools.Version(self._py_version) < tools.Version("3.8"):
+            if Version(self._py_version) < Version("3.8"):
                 cmake.definitions["Python{}_FIND_ABI".format(py_major)] = self._cmake_abi.cmake_arg
 
         with tools.environment_append(RunEnvironment(self).vars):
             cmake.configure()
         cmake.build()
 
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if can_run(self):
             if self._supports_modules:
                 with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                    modsrcfolder = "py2" if tools.Version(self.deps_cpp_info["cpython"].version).major < "3" else "py3"
-                    tools.mkdir(os.path.join(self.build_folder, modsrcfolder))
+                    modsrcfolder = "py2" if Version(self.deps_cpp_info["cpython"].version).major < "3" else "py3"
+                    mkdir(self, os.path.join(self.build_folder, modsrcfolder))
                     for fn in os.listdir(os.path.join(self.source_folder, modsrcfolder)):
                         shutil.copy(os.path.join(self.source_folder, modsrcfolder, fn), os.path.join(self.build_folder, modsrcfolder, fn))
                     shutil.copy(os.path.join(self.source_folder, "setup.py"), os.path.join(self.build_folder, "setup.py"))
@@ -150,7 +157,7 @@ class TestPackageConan(ConanFile):
             return False
 
     def test(self):
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if can_run(self):
             self.run("{} -c \"print('hello world')\"".format(self.deps_user_info["cpython"].python), run_environment=True)
 
             buffer = StringIO()
@@ -174,7 +181,7 @@ class TestPackageConan(ConanFile):
                 self._test_module("decimal", True)
                 self._test_module("ctypes", True)
 
-            if tools.is_apple_os(self.settings.os) and not self.options["cpython"].shared:
+            if is_apple_os(self) and not self.options["cpython"].shared:
                 self.output.info("Not testing the module, because these seem not to work on apple when cpython is built as a static library")
                 # FIXME: find out why cpython on apple does not allow to use modules linked against a static python
             else:
