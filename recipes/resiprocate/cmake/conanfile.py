@@ -40,15 +40,15 @@ class ResiprocateConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 11
 
     @property
-    def _minimum_compiler_version(self):
+    def _compilers_minimum_version(self):
         return {
-            "gcc": "7",
-            "clang": "6",
             "apple-clang": "10",
+            "clang": "6",
+            "gcc": "7",
             "msvc": "191",
             "Visual Studio": "15",
         }
@@ -74,15 +74,15 @@ class ResiprocateConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._minimum_compiler_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        if self.options.shared and is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.ref} does not support shared builds on Windows.")
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
