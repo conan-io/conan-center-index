@@ -73,7 +73,7 @@ class GdkPixbufConan(ConanFile):
         elif self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.3")
+            self.requires("mozjpeg/4.1.5")
 
     def validate(self):
         if self.options.shared and not self.dependencies["glib"].options.shared:
