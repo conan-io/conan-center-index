@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -40,22 +40,14 @@ class LibHALConan(ConanFile):
     def _bare_metal(self):
         return self.settings.os == "baremetal"
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # NOTE: from the author, kammce, to the conan team. boost-leaf is tied
-        # to the 2.0.1 and must be kept for it to work correctly.
-        version = Version(self.version)
-        if version == "2.0.1":
-            self.requires("boost-leaf/1.81.0",)
-        elif version == "2.0.2":
-            self.requires("boost/1.83.0",
-                          transitive_headers=True,
-                          options={ "header_only": True })
+        # NOTE from the author, kammce, and CCI maintainers:
+        # although boost-leaf is deprecated, we've kept it for 2.x versions,
+        # don't update it as upstream code won't work with boost itself
+        self.requires("boost-leaf/1.81.0")
 
     def package_id(self):
         self.info.clear()
@@ -75,19 +67,14 @@ class LibHALConan(ConanFile):
         minimum_version = self._compilers_minimum_version.get(compiler, False)
         if minimum_version and lazy_lt_semver(version, minimum_version):
             raise ConanInvalidConfiguration(
-                f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler ({compiler}-{version}) does not support")
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler ({compiler}-{version}) does not support")
 
-        if (Version(self.version) == "2.0.2" and
-            not self.dependencies["boost"].options.header_only and
-            self._bare_metal):
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires boost/*:header_only=True due boost::leaf")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
-        apply_conandata_patches(self)
+        pass
 
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
@@ -116,3 +103,8 @@ class LibHALConan(ConanFile):
                 "BOOST_LEAF_EMBEDDED",
                 "BOOST_LEAF_NO_THREADS"
             ]
+
+        # Note from CCI maintainers: Ensure users are aware of the deprecated dependency
+        if Version(self.version) < "3.0":
+            self.output.warning(f"{self.name} < 3.0.0 uses boost-leaf which is a deprecated recipe. "
+                                f"Once 3.0 is released, 2.x will also be deprecated.")
