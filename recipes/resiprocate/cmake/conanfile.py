@@ -69,7 +69,7 @@ class ResiprocateConan(ConanFile):
 
     def requirements(self):
         if self.options.with_cares:
-            self.requires("c-ares/1.20.1")
+            self.requires("c-ares/1.22.1")
         if self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]")
 
