@@ -212,9 +212,12 @@ class wxWidgetsConan(ConanFile):
                         "CMAKE_OSX_DEPLOYMENT_TARGET_IGNORED")
         # Fix for strcpy_s (fix upstream?)
         if is_apple_os(self):
+            cmake_version = "3.0"
+            if self.version < "3.1.7":
+                cmake_version = "2.8.12"
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            'cmake_minimum_required(VERSION 3.0)',
-                            'cmake_minimum_required(VERSION 3.0)\nadd_definitions(-D__STDC_WANT_LIB_EXT1__)')
+                            f'cmake_minimum_required(VERSION {cmake_version})',
+                            f'cmake_minimum_required(VERSION {cmake_version})\nadd_definitions(-D__STDC_WANT_LIB_EXT1__)')
 
     @property
     def _gtk_version(self):
