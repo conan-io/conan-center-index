@@ -109,7 +109,7 @@ class ResiprocateConan(ConanFile):
         if self.settings.os in ["Linux"]:
             tc.preprocessor_definitions["RESIP_RANDOM_THREAD_LOCAL"] = True
         if cross_building(self):
-            tc.cache_variables("HAVE_CLOCK_GETTIME_MONOTONIC") = not self.settings.os in ["Windows"]
+            tc.cache_variables["HAVE_CLOCK_GETTIME_MONOTONIC"] = not self.settings.os in ["Windows"]
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
