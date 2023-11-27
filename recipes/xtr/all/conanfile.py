@@ -49,16 +49,10 @@ class XtrConan(ConanFile):
         return {
             "gcc": "10",
             "clang": "12",
-            "apple-clang": "11",
-            "msvc": "192",
-            "Visual Studio": "16",
         }
 
 
     def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
         if Version(self.version) >= "2.0.0" and self.settings.os == "Linux":
             # Require liburing on any Linux system by default as a run-time check will be
             # done to detect if the host kernel supports io_uring.
@@ -81,16 +75,19 @@ class XtrConan(ConanFile):
             self.requires("liburing/2.4")
 
     def validate(self):
+        if self.settings.os not in ["FreeBSD", "Linux"]:
+            raise ConanInvalidConfiguration(f"Unsupported os={self.settings.os}")
+        if self.settings.arch not in ["x86_64"]:
+            raise ConanInvalidConfiguration(f"Unsupported arch={self.settings.arch}")
+
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
-
-        if self.settings.arch not in ["x86_64"]:
-            raise ConanInvalidConfiguration(f"Unsupported arch={self.settings.arch}")
         if Version(self.version) < "2.0.0" and str(self.settings.compiler.libcxx) == "libc++":
             raise ConanInvalidConfiguration("Use at least version 2.0.0 for libc++ compatibility")
+
         if self.options.get_safe("enable_io_uring_sqpoll") and not self.options.get_safe("enable_io_uring"):
             raise ConanInvalidConfiguration("io_uring must be enabled if io_uring_sqpoll is enabled")
         if self.options.get_safe("sink_capacity_kb") and not str(self.options.get_safe("sink_capacity_kb")).isdigit():
@@ -124,7 +121,6 @@ class XtrConan(ConanFile):
         tc.cache_variables["BUILD_BENCHMARK"] = False
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["INSTALL_DOCS"] = False
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
