@@ -51,12 +51,11 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if not can_run(self):
-            return
-        verilator_path = load(self, os.path.join(self.generators_folder, "verilator_path"))
-        self.run(f"perl {verilator_path} --version")
-        bin_path = os.path.join(self.cpp.build.bindir, "blinky")
-        self.run(bin_path, env="conanrun")
-        if self._with_systemc_example:
-            bin_path = os.path.join(self.cpp.build.bindir, "blinky_sc")
+        if can_run(self):
+            verilator_path = load(self, os.path.join(self.generators_folder, "verilator_path"))
+            self.run(f"perl {verilator_path} --version")
+            bin_path = os.path.join(self.cpp.build.bindir, "blinky")
             self.run(bin_path, env="conanrun")
+            if self._with_systemc_example:
+                bin_path = os.path.join(self.cpp.build.bindir, "blinky_sc")
+                self.run(bin_path, env="conanrun")

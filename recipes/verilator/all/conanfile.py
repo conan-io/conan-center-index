@@ -5,7 +5,7 @@ from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
+from conan.tools.files import chdir, copy, get, rename, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -29,29 +29,8 @@ class VerilatorConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
-
-    @property
-    def _needs_old_bison(self):
-        # don't upgrade to bison 3.7.0 or above, or it fails to build
-        # because of https://github.com/verilator/verilator/pull/2505
-        return Version(self.version) < "4.100"
-
-    @property
-    def _flex_version(self):
-        return "2.6.4"
-
-    @property
-    def _winflexbison_version(self):
-        return "2.5.22" if self._needs_old_bison else "2.5.25"
-
-    @property
-    def _bison_version(self):
-        return "3.5.3" if self._needs_old_bison else "3.8.2"
 
     def requirements(self):
         if self.settings.os == "Windows":
@@ -62,9 +41,9 @@ class VerilatorConan(ConanFile):
         # It gets incorrectly marked as a dependency in CMake but a CMake module/config is not generated.
         if conan_version >= 2:
             if self.settings.os == "Windows":
-                self.requires(f"winflexbison/{self._winflexbison_version}", visible=False)
+                self.requires("winflexbison/2.5.25", visible=False)
             else:
-                self.requires(f"flex/{self._flex_version}", visible=False)
+                self.requires("flex/2.6.4", visible=False)
 
     def package_id(self):
         # Verilator is an executable-only package, so the compiler does not matter
@@ -74,14 +53,10 @@ class VerilatorConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
 
-        if (
-            Version(self.version) >= "4.200"
-            and self.settings.compiler == "gcc"
-            and Version(self.settings.compiler.version) < "7"
-        ):
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("GCC < version 7 is not supported")
 
-        if self.settings.os == "Windows" and Version(self.version) >= "4.200":
+        if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows build is not yet supported. Contributions are welcome")
 
     def build_requirements(self):
@@ -92,9 +67,9 @@ class VerilatorConan(ConanFile):
                 self.tool_requires("flex/<host_version>")
         else:
             if self._settings_build.os == "Windows":
-                self.build_requires(f"winflexbison/{self._winflexbison_version}")
+                self.build_requires("winflexbison/2.5.25")
             else:
-                self.build_requires(f"flex/{self._flex_version}")
+                self.build_requires("flex/2.6.4")
 
         if self._settings_build.os == "Windows":
             self.win_bash = True
@@ -103,7 +78,7 @@ class VerilatorConan(ConanFile):
             self.tool_requires("automake/1.16.5")
             self.tool_requires("strawberryperl/<host_version>")
         else:
-            self.tool_requires(f"bison/{self._bison_version}")
+            self.tool_requires("bison/3.8.2")
         if Version(self.version) >= "4.224":
             self.tool_requires("autoconf/2.71")
 
@@ -157,8 +132,6 @@ class VerilatorConan(ConanFile):
             env.vars(self).save_script("conanbuild_msvc")
 
     def _patch_sources(self):
-        if Version(self.version) < "4.200":
-            apply_conandata_patches(self)
         rm(self, "config_build.h", os.path.join(self.source_folder, "src", "config_build.h"))
         if is_msvc(self):
             replace_in_file(self, os.path.join(self.source_folder, "src", "Makefile_obj.in"),
@@ -208,16 +181,15 @@ class VerilatorConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         verilator_bin = "verilator_bin_dbg" if self.settings.build_type == "Debug" else "verilator_bin"
         self.conf_info.define("user.verilator:verilator", verilator_bin)
+        self.buildenv_info.define("VERILATOR_BIN", verilator_bin)
+        self.buildenv_info.define_path("VERILATOR_ROOT", self.package_folder)
 
         module_path = os.path.join("bin", "share", "verilator", "verilator-tools.cmake")
         self.cpp_info.set_property("cmake_build_modules", [module_path])
 
         # TODO: Legacy, to be removed on Conan 2.0
-        self.output.info(f"Appending PATH environment variable: {bindir}")
         self.env_info.PATH.append(bindir)
-        self.output.info(f"Setting VERILATOR_BIN environment variable to {verilator_bin}")
         self.env_info.VERILATOR_BIN = verilator_bin
-        self.output.info(f"Setting VERILATOR_ROOT environment variable to {self.package_folder}")
         self.env_info.VERILATOR_ROOT = self.package_folder
         self.cpp_info.builddirs.append(os.path.join("bin", "share", "verilator"))
         self.cpp_info.build_modules["cmake_find_package"].append(module_path)
