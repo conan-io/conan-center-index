@@ -1,8 +1,10 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir, download, replace_in_file, save
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -36,6 +38,13 @@ class LibTomMathConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+
+    def validate(self):
+        if is_msvc(self) and self.settings.build_type == "Debug":
+            # Build fails due to undefined symbols
+            # https://c3i.jfrog.io/c3i/misc/logs/pr/18852/7-windows-visual_studio/libtommath/1.2.1//d057732059ea44a47760900cb5e4855d2bea8714-test.txt
+            # https://github.com/libtom/libtommath/blob/v1.2.1/bn_s_mp_rand_platform.c#L10-L17
+            raise ConanInvalidConfiguration("libtommath does not support Debug builds on MSVC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
