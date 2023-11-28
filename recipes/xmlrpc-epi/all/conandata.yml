@@ -1,0 +1,13 @@
+sources:
+  "0.54.2":
+    url: "https://downloads.sourceforge.net/project/xmlrpc-epi/xmlrpc-epi-base/0.54.2/xmlrpc-epi-0.54.2.tar.bz2"
+    sha256: "c74ef8fb680b140890138a82f37619714b67f69025a775b9ba2009d62cded0b8"
+patches:
+  "0.54.2":
+    - patch_file: "patches/0001-debian.patch"
+      patch_type: "vulnerability"
+      patch_description: "CVE-2016-6296: Heap buffer overflow vulnerability in simplestring_addn"
+      patch_source: https://sources.debian.org/src/xmlrpc-epi/0.54.2-2/debian/patches/debian.patch/
+    - patch_file: "patches/0002-msvc.patch"
+      patch_type: "portability"
+      patch_description: "Fix strncasecmp and strcasecmp for MSVC"
