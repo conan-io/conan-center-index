@@ -41,7 +41,12 @@ class AndreasbuhrCppCoroConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17
+        # Clang with libstdc++ always requires C++20
+        # Clang 17+ always requires C++20
+        # Otherwise, require C++17
+        compiler = self.settings.compiler
+        requires_cpp20 = compiler = "clang" and ("libstdc++" in compiler.libcxx or compiler.version >= Version("17"))
+        return 20 if requires_cpp20 else 17
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -66,8 +71,11 @@ class AndreasbuhrCppCoroConan(ConanFile):
 
         # Older versions of clang expects coroutine to be put under std::experimental::, while libstdc++ puts them under std::,
         # See https://bugs.llvm.org/show_bug.cgi?id=48172 for more context.
-        if self.settings.compiler == "clang" and self.settings.compiler.version < Version("14") and self.settings.compiler.get_safe("libcxx") == "libstdc++":
-            raise ConanInvalidConfiguration("{self.name} does not support clang<14 with libstdc++. Use libc++ or upgrade to clang 14+ instead.")
+        if self.settings.compiler == "clang" and "libstdc++" in self.settings.compiler.get_safe("libcxx"):
+            if self.settings.compiler.version < Version("14"):
+                raise ConanInvalidConfiguration("{self.name} does not support clang<14 with libstdc++. Use libc++ or upgrade to clang 14+ instead.")
+            if self.settings.compiler.version == Version("14"):
+                self.output.warning("This build may fail if using libstdc++13 or greater")
 
     def configure(self):
         if self.options.shared:
@@ -78,8 +86,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.settings.os == "Windows" and self.options.shared:
-            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = "ON"
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = "ON"
         tc.generate()
 
     def build(self):
@@ -92,6 +99,19 @@ class AndreasbuhrCppCoroConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+
+    @property
+    def _needs_fcoroutines_ts_flag(self):
+        version = Version(self.settings.compiler.version)
+        if self.settings.compiler == "clang":
+            # clang 5: Coroutines support added
+            # somewhere between clang 5 and 11: the requirement to add -fcoroutines-ts was dropped, at least in the context of this recipe.
+            return version < 11
+        elif self.settings.compiler == "apple-clang":
+            # At some point before apple-clang 13, in the context of this recipe, the requirement for this flag was dropped.
+            return version < 13
+        else:
+            return False
 
     def package_info(self):
         self.cpp_info.libs = ["cppcoro"]
@@ -106,8 +126,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
         elif self.settings.compiler == "gcc":
             self.cpp_info.cxxflags.append("-fcoroutines")
             self.cpp_info.defines.append("CPPCORO_COMPILER_SUPPORTS_SYMMETRIC_TRANSFER=1")
-        elif (self.settings.compiler == "clang" and self.settings.compiler.version < Version("16")) or \
-             (self.settings.compiler == "apple-clang"):
+        elif self._needs_fcoroutines_ts_flag:
             self.cpp_info.cxxflags.append("-fcoroutines-ts")
 
         self.cpp_info.set_property("cmake_file_name", "cppcoro")
