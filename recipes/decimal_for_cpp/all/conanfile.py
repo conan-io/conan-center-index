@@ -10,21 +10,21 @@ class DecimalforcppConan(ConanFile):
     name = "decimal_for_cpp"
     description = "Decimal data type support, for COBOL-like fixed-point operations on currency values."
     license = "BSD-3-Clause"
-    topics = ("decimal_for_cpp", "currency", "money-library", "decimal-numbers")
+    topics = ("currency", "money-library", "decimal-numbers")
     homepage = "https://github.com/vpiotr/decimal_for_cpp"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-
-    def package_id(self):
-        self.info.clear()
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def package_id(self):
+        self.info.clear()
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -35,6 +35,4 @@ class DecimalforcppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
