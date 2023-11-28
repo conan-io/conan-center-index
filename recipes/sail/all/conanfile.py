@@ -102,7 +102,7 @@ class SAILConan(ConanFile):
 
     def validate(self):
         for option_name in ["with_avif", "with_gif", "with_jpeg2000", "with_jpeg", "with_png", "with_tiff", "with_webp"]:
-            if getattr(self.options, option_name) != "deprecated":
+            if self.options.get_safe(option_name, "deprecated") != "deprecated":
                 self.output.warning(f"{self.ref}:{option_name} option is deprecated, please, use 'with_xxx_priority_codecs' instead.")
 
     def layout(self):
