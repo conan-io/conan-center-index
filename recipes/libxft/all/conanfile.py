@@ -45,12 +45,12 @@ class libxftConan(ConanFile):
 
     def requirements(self):
         self.requires("xorg/system")
-        self.requires("freetype/2.13.0", transitive_headers=True)
+        self.requires("freetype/2.13.2", transitive_headers=True)
         self.requires("fontconfig/2.14.2", transitive_headers=True)
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.5")
+            self.tool_requires("pkgconf/2.0.3")
         self.tool_requires("xorg-macros/1.19.3")
         self.tool_requires("libtool/2.4.7")
 

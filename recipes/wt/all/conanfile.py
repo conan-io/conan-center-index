@@ -1,10 +1,11 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc
 import os
+import sys
 import shutil
 
 required_conan_version = ">=1.54.0"
@@ -102,7 +103,7 @@ class WtConan(ConanFile):
         if self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.43.0")
+            self.requires("sqlite3/3.44.2")
         if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.1.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_postgres"):
@@ -120,6 +121,16 @@ class WtConan(ConanFile):
                 f"{self.ref} requires non header-only boost with these components: "
                 f"{', '.join(self._required_boost_components)}"
             )
+
+        # FIXME: https://redmine.emweb.be/issues/12073w
+        if conan_version.major == 2 and Version(self.version) == "4.10.1" and is_msvc(self):
+
+            # FIXME: check_max_cppstd is only available for Conan 2.x. Remove it after dropping support for Conan 1.x
+            # FIXME: linter complains, but function is there
+            # https://docs.conan.io/2.0/reference/tools/build.html?highlight=check_min_cppstd#conan-tools-build-check-max-cppstd
+            check_max_cppstd = getattr(sys.modules['conan.tools.build'], 'check_max_cppstd')
+            # INFO: error C2661: 'std::to_chars': no overloaded function takes 2 arguments. Removed in C++17.
+            check_max_cppstd(self, 14)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -146,7 +157,7 @@ class WtConan(ConanFile):
         return "" if self.settings.os == "Windows" else "lib"
 
     def _cmakify_path_list(self, paths):
-        return ";".join(paths).replace("\\", "/")
+        return ";".join([p.replace("\\", "/") for p in paths])
 
     def _find_library(self, libname, dep):
         for path in self.dependencies[dep].cpp_info.aggregated_components().libdirs:
@@ -190,16 +201,16 @@ class WtConan(ConanFile):
 
         # FIXME: all this logic coming from upstream custom find module files seems fragile, to improve later !
         #        we can't even inject cmake_find_package generator, it breaks the all upstream logic
-        tc.variables["BOOST_PREFIX"] = self._cmakify_path_list(self.dependencies["boost"].package_folder)
+        tc.variables["BOOST_PREFIX"] = self._cmakify_path_list([self.dependencies["boost"].package_folder])
         if self.options.connector_http:
-            tc.variables["ZLIB_PREFIX"] = self._cmakify_path_list(self.dependencies["zlib"].package_folder)
+            tc.variables["ZLIB_PREFIX"] = self._cmakify_path_list([self.dependencies["zlib"].package_folder])
         if self.options.with_ssl:
-            tc.variables["SSL_PREFIX"] = self._cmakify_path_list(self.dependencies["openssl"].package_folder)
+            tc.variables["SSL_PREFIX"] = self._cmakify_path_list([self.dependencies["openssl"].package_folder])
             tc.variables["OPENSSL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("openssl"))
             tc.variables["OPENSSL_INCLUDE_DIR"] = self._cmakify_path_list(self.dependencies["openssl"].cpp_info.aggregated_components().includedirs)
             tc.variables["OPENSSL_FOUND"] = True
         if self.options.get_safe("with_sqlite"):
-            tc.variables["SQLITE3_PREFIX"] = self._cmakify_path_list(self.dependencies["sqlite3"].package_folder)
+            tc.variables["SQLITE3_PREFIX"] = self._cmakify_path_list([self.dependencies["sqlite3"].package_folder])
         if self.options.get_safe("with_mysql"):
             tc.variables["MYSQL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libmysqlclient"))
             libmysqlclient_cppinfo = self.dependencies["libmysqlclient"].cpp_info.aggregated_components()
@@ -207,17 +218,17 @@ class WtConan(ConanFile):
             tc.variables["MYSQL_DEFINITIONS"] = ";".join(f"-D{d}" for d in libmysqlclient_cppinfo.defines)
             tc.variables["MYSQL_FOUND"] = True
         if self.options.get_safe("with_postgres"):
-            tc.variables["POSTGRES_PREFIX"] = self._cmakify_path_list(self.dependencies["libpq"].package_folder)
+            tc.variables["POSTGRES_PREFIX"] = self._cmakify_path_list([self.dependencies["libpq"].package_folder])
             tc.variables["POSTGRES_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libpq"))
             tc.variables["POSTGRES_INCLUDE"] = self._cmakify_path_list(self.dependencies["libpq"].cpp_info.aggregated_components().includedirs)
             tc.variables["POSTGRES_FOUND"] = True
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
-            tc.variables["ODBC_PREFIX"] = self._cmakify_path_list(self.dependencies["odbc"].package_folder)
+            tc.variables["ODBC_PREFIX"] = self._cmakify_path_list([self.dependencies["odbc"].package_folder])
             tc.variables["ODBC_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("odbc"))
             tc.variables["ODBC_INCLUDE"] = self._cmakify_path_list(self.dependencies["odbc"].cpp_info.aggregated_components().includedirs)
             tc.variables["ODBC_FOUND"] = True
         if self.options.get_safe("with_unwind"):
-            tc.variables["UNWIND_PREFIX"] = self._cmakify_path_list(self.dependencies["libunwind"].package_folder)
+            tc.variables["UNWIND_PREFIX"] = self._cmakify_path_list([self.dependencies["libunwind"].package_folder])
         if self.settings.os == "Windows":
             tc.variables["CONNECTOR_FCGI"] = False
             tc.variables["CONNECTOR_ISAPI"] = self.options.connector_isapi

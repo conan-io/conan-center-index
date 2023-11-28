@@ -48,6 +48,24 @@ class DlibConan(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        if Version(self.version) < "19.24.2":
+            return 11
+        return 14
+
+    @property
+    def _compilers_minimum_version(self):
+        if Version(self.version) < "19.24.2":
+            return {}
+        return {
+            "Visual Studio": "15",
+            "msvc": "191",
+            "gcc": "6",
+            "clang": "5",
+            "apple-clang": "10",
+        }
+
+    @property
     def _has_with_webp_option(self):
         return Version(self.version) >= "19.24"
 
@@ -78,13 +96,18 @@ class DlibConan(ConanFile):
         if self.options.get_safe("with_webp"):
             self.requires("libwebp/1.3.2")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.43.1")
+            self.requires("sqlite3/3.44.2")
         if self.options.with_openblas:
             self.requires("openblas/0.3.20")
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, "11")
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared on Windows. See https://github.com/davisking/dlib/issues/1483.")
 

@@ -1,4 +1,13 @@
 sources:
+  "2.7.4":
+    url: "https://github.com/ada-url/ada/archive/v2.7.4.tar.gz"
+    sha256: "897942ba8c99153f916c25698a49604022f3e54441cfa9b76f657ad15b6ca041"
+  "2.7.3":
+    url: "https://github.com/ada-url/ada/archive/v2.7.3.tar.gz"
+    sha256: "8e222d536d237269488f7d454544eedf12847f47b3d42651e8c9963c3fb0cf5e"
+  "2.7.2":
+    url: "https://github.com/ada-url/ada/archive/v2.7.2.tar.gz"
+    sha256: "4dea9dd6a46695547da2dac3dc7254d32187cd35d3170179c0cdc0900090c025"
   "2.7.0":
     url: "https://github.com/ada-url/ada/archive/v2.7.0.tar.gz"
     sha256: "08646b8a41cd6367b282aab2c87c82e5ce4876078a0cbe0799af7e51e4358591"

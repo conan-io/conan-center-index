@@ -143,7 +143,7 @@ class FFMpegConan(ConanFile):
         "with_pulse": True,
         "with_vaapi": True,
         "with_vdpau": True,
-        "with_vulkan": True,
+        "with_vulkan": False,
         "with_xcb": True,
         "with_appkit": True,
         "with_avfoundation": True,
@@ -296,9 +296,9 @@ class FFMpegConan(ConanFile):
         if self.options.with_opus:
             self.requires("opus/1.4")
         if self.options.with_zeromq:
-            self.requires("zeromq/4.3.4")
+            self.requires("zeromq/4.3.5")
         if self.options.with_sdl:
-            self.requires("sdl/2.28.2")
+            self.requires("sdl/2.28.5")
         if self.options.with_libx264:
             self.requires("libx264/cci.20220602")
         if self.options.with_libx265:
@@ -324,7 +324,7 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vdpau"):
             self.requires("vdpau/system")
         if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.239.0")
+            self.requires("vulkan-loader/1.3.243.0")
         if self.options.get_safe("with_libsvtav1"):
             self.requires("libsvtav1/1.6.0")
         if self.options.with_libaom:
