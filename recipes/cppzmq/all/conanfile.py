@@ -22,7 +22,7 @@ class CppZmqConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zeromq/4.3.4")
+        self.requires("zeromq/4.3.5")
 
     def package_id(self):
         self.info.clear()
