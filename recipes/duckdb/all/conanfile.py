@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -89,6 +90,10 @@ class DuckdbConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
+        # FIXME: drop support MSVC debug shared build
+        if Version(self.version) >= "0.9.2" and \
+            is_msvc(self) and self.options.shared and self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC debug shared build")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
