@@ -17,6 +17,7 @@ class CppcodecConan(ConanFile):
         "base32hex and hex (a.k.a. base16) as specified in RFC 4648, plus Crockford's base32"
     )
     topics = ("base64", "cpp11", "codec", "base32")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -31,8 +32,7 @@ class CppcodecConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -45,4 +45,3 @@ class CppcodecConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "cppcodec-1")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
