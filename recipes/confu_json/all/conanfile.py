@@ -53,7 +53,7 @@ class ConfuJson(ConanFile):
         if Version(self.version) >= "1.0.0":
             self.requires("magic_enum/0.9.5")
         else:
-            self.requires("magic_enum/0.9.4")
+            self.requires("magic_enum/0.9.3")
 
     def package_id(self):
         self.info.clear()

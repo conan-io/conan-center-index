@@ -15,4 +15,19 @@ patches:
   "1.0.0":
     - patch_file: "patches/1.0.0-0001-support-maginc_enum-0_9_5.patch"
       patch_description: "fix include path for magic_enum >= 0.9.5"
-      patch_type: "backport"
+      patch_type: "portability"
+  "0.0.10":
+    - patch_file: "patches/0.0.5-0001-include-sstream.patch"
+      patch_description: "include sstream"
+      patch_type: "portaiblity"
+      patch_source: "https://github.com/werto87/confu_json/commit/7e117f37a1e80f0e862410a3be95bf32c95a3a9d"
+  "0.0.9":
+    - patch_file: "patches/0.0.5-0001-include-sstream.patch"
+      patch_description: "include sstream"
+      patch_type: "portaiblity"
+      patch_source: "https://github.com/werto87/confu_json/commit/7e117f37a1e80f0e862410a3be95bf32c95a3a9d"
+  "0.0.5":
+    - patch_file: "patches/0.0.5-0001-include-sstream.patch"
+      patch_description: "include sstream"
+      patch_type: "portaiblity"
+      patch_source: "https://github.com/werto87/confu_json/commit/7e117f37a1e80f0e862410a3be95bf32c95a3a9d"

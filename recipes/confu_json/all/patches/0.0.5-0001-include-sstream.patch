@@ -1,0 +1,13 @@
+diff --git a/confu_json/util.hxx b/confu_json/util.hxx
+index c9f9351..7232cc3 100644
+--- a/confu_json/util.hxx
++++ b/confu_json/util.hxx
+@@ -12,7 +12,7 @@
+ #include <boost/json.hpp>
+ #include <iostream>
+ #include <string_view>
+-
++#include <sstream>
+ namespace confu_json
+ {
+ 
