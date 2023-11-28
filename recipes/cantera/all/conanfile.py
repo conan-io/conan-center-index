@@ -43,11 +43,11 @@ class canteraRecipe(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
     def requirements(self):
-        self.requires("boost/1.83.0", headers=True, libs=False, build=False, visible=False)
-        self.requires("fmt/10.1.1", headers=True)
-        self.requires("yaml-cpp/0.7.0")
-        self.requires("eigen/3.4.0")
-        self.requires("sundials/5.4.0")
+        self.requires("boost/1.83.0", headers=True, libs=False)
+        self.requires("fmt/10.1.1", transitive_headers=True)
+        self.requires("yaml-cpp/0.7.0", transitive_headers=True)
+        self.requires("eigen/3.4.0", transitive_headers=True)
+        self.requires("sundials/5.4.0", transitive_headers=True)
 
     def layout(self):
         basic_layout(self, src_folder="src")
