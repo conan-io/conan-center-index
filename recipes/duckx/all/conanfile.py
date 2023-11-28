@@ -1,6 +1,8 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.build import check_min_cppstd
 import os
 
 required_conan_version = ">=1.53.0"
@@ -20,6 +22,7 @@ class DuckxConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": False,
+        "pugixml/*:header_only": True,
     }
 
     @property
@@ -36,7 +39,6 @@ class DuckxConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.options["pugixml"].header_only = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -44,6 +46,12 @@ class DuckxConan(ConanFile):
     def requirements(self):
         self.requires("pugixml/1.14", transitive_headers=True)
         self.requires("kuba-zip/0.2.6", transitive_headers=True)
+
+    def validate(self):
+        if self.info.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        if not self.dependencies["pugixml"].options.header_only:
+            raise ConanInvalidConfiguration(f"{self.ref} requires header_only spdlog.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
