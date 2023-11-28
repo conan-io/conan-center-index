@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -64,9 +64,9 @@ class RedisPlusPlusConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("hiredis/1.1.0", transitive_headers=True, transitive_libs=True)
+        self.requires("hiredis/1.2.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("build_async"):
-            self.requires("libuv/1.46.0")
+            self.requires("libuv/1.47.0")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
@@ -97,18 +97,13 @@ class RedisPlusPlusConan(ConanFile):
         tc.variables["REDIS_PLUS_PLUS_BUILD_TEST"] = False
         tc.variables["REDIS_PLUS_PLUS_BUILD_STATIC"] = not self.options.shared
         tc.variables["REDIS_PLUS_PLUS_BUILD_SHARED"] = self.options.shared
-        if Version(self.version) >= "1.2.3":
-            tc.variables["REDIS_PLUS_PLUS_BUILD_STATIC_WITH_PIC"] = self.options.shared
+        tc.variables["REDIS_PLUS_PLUS_BUILD_STATIC_WITH_PIC"] = self.options.shared
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if Version(self.version) < "1.2.3":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                  "set_target_properties(${STATIC_LIB} PROPERTIES POSITION_INDEPENDENT_CODE ON)",
-                                  "")
 
     def build(self):
         self._patch_sources()
