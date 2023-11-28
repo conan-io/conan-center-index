@@ -15,7 +15,7 @@ class CxxOptsConan(ConanFile):
     description = "Lightweight C++ option parser library, supporting the standard GNU style syntax for options."
     license = "MIT"
     topics = ("option-parser", "positional-arguments ", "header-only")
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "unicode": [True, False],
