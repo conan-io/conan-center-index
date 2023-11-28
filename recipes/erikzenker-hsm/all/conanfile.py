@@ -21,9 +21,12 @@ class HsmConan(ConanFile):
         "complex meta programming code to a minimum."
     )
     topics = ("state-machine", "template-meta-programming")
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeDeps"
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("boost/1.81.0")
@@ -41,12 +44,8 @@ class HsmConan(ConanFile):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8":
             raise ConanInvalidConfiguration("GCC 8+ is required")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -69,3 +68,5 @@ class HsmConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "hsm")
         self.cpp_info.set_property("cmake_target_name", "hsm::hsm")
         self.cpp_info.requires = ["boost::headers"]
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
