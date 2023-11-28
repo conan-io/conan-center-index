@@ -29,7 +29,7 @@ class HsmConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0")
+        self.requires("boost/1.83.0")
 
     def package_id(self):
         self.info.clear()
