@@ -54,7 +54,7 @@ class TrantorConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) < "1.5.15":
             del self.options.with_spdlog
-            self.default_options.rm_safe("spdlog/*:header_only")
+            del self.default_options["spdlog/*:header_only"]
 
     def configure(self):
         if self.options.shared:
