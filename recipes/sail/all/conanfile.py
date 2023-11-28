@@ -49,6 +49,21 @@ class SAILConan(ConanFile):
         "with_tiff": "deprecated",
         "with_webp": "deprecated",
     }
+    options_description = {
+        "with_avif": "Deprecated",
+        "with_gif": "Deprecated",
+        "with_jpeg2000": "Deprecated",
+        "with_jpeg": "Deprecated",
+        "with_png": "Deprecated",
+        "with_tiff": "Deprecated",
+        "with_webp": "Deprecated",
+        "with_highest_priority_codecs": "Enable highest priority codecs",
+        "with_high_priority_codecs": "Enable high priority codecs",
+        "with_medium_priority_codecs": "Enable medium priority codecs",
+        "with_low_priority_codecs": "Enable low priority codecs",
+        "with_lowest_priority_codecs": "Enable lowest priority codecs",
+    }
+
 
     def export_sources(self):
         export_conandata_patches(self)
