@@ -12,10 +12,14 @@ class BlazeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://bitbucket.org/blaze-lib/blaze"
     description = "open-source, high-performance C++ math library for dense and sparse arithmetic"
-    topics = ("blaze", "math", "algebra", "linear algebra", "high-performance")
+    topics = ("math", "algebra", "linear algebra", "high-performance")
     license = "BSD-3-Clause"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -23,9 +27,6 @@ class BlazeConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 14)
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
 
     def source(self):
         base_source_dir = os.path.join(self.source_folder, os.pardir)
@@ -46,6 +47,4 @@ class BlazeConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "blaze")
         self.cpp_info.set_property("cmake_target_name", "blaze::blaze")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
