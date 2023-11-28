@@ -15,8 +15,8 @@ import os
 required_conan_version = ">=1.53.0"
 
 
-class LaudrupWinTLS(ConanFile):
-    name = "laudrup-wintls"
+class BoostWinTLS(ConanFile):
+    name = "boost-wintls"
     description = "Native Windows TLS stream wrapper for use with boost::asio"
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
