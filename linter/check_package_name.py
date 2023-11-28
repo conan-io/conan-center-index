@@ -32,7 +32,7 @@ class PackageName(BaseChecker):
 
     def visit_classdef(self, node: nodes) -> None:
         filename = Path(node.root().file)
-        is_test = filename.match('test_package/*.py') or filename.match('test_v1_package/*.py')
+        is_test = filename.match('test_*/*.py')
 
         if node.basenames == ['ConanFile']:
             for attr in node.body:
