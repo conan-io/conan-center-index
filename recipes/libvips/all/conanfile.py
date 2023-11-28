@@ -281,6 +281,12 @@ class LibvipsConan(ConanFile):
         replace_in_file(self, meson_build, "subdir('test')", "")
         replace_in_file(self, meson_build, "subdir('fuzz')", "")
 
+        # workaround https://github.com/conan-io/conan/issues/14213
+        replace_in_file(self, meson_build,
+                        "cfg_var.set_quoted('VIPS_PREFIX', prefix_dir)",
+                        "cfg_var.set_quoted('VIPS_PREFIX', prefix_dir.replace('\\\\', '/'))"
+                        )
+
     def build(self):
         self._patch_sources()
         meson = Meson(self)
