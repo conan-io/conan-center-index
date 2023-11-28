@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.files import load, save
 import os
 
 
@@ -13,6 +14,10 @@ class TestPackageConan(ConanFile):
 
     def layout(self):
         cmake_layout(self)
+    
+    def generate(self):
+        save(self, os.path.join(self.build_folder, "with_utils"),
+             str(self.dependencies["tinyalsa"].options.with_utils))
 
     def build(self):
         cmake = CMake(self)
@@ -23,4 +28,5 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "example")
             self.run(bin_path, env="conanrun")
-            self.run("tinymix --help", env="conanrun")
+            if load(self, os.path.join(self.build_folder, "with_utils")) == "True":
+                self.run("tinymix --help", env="conanrun")
