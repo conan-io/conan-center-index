@@ -23,6 +23,14 @@ class SAILConan(ConanFile):
         "with_medium_priority_codecs": [True, False],
         "with_low_priority_codecs": [True, False],
         "with_lowest_priority_codecs": [True, False],
+        "with_avif": [True, False, "deprecated"],
+        "with_gif": [True, False, "deprecated"],
+        "with_jpeg2000": [True, False, "deprecated"],
+        "with_jpeg": ["libjpeg", "libjpeg-turbo", False, "deprecated"],
+        "with_png": [True, False, "deprecated"],
+        "with_tiff": [True, False, "deprecated"],
+        "with_webp": [True, False, "deprecated"],
+
     }
     default_options = {
         "shared": False,
@@ -33,6 +41,13 @@ class SAILConan(ConanFile):
         "with_medium_priority_codecs": True,
         "with_low_priority_codecs": True,
         "with_lowest_priority_codecs": True,
+        "with_avif": "deprecated",
+        "with_gif": "deprecated",
+        "with_jpeg2000": "deprecated",
+        "with_jpeg": "deprecated",
+        "with_png": "deprecated",
+        "with_tiff": "deprecated",
+        "with_webp": "deprecated",
     }
 
     def export_sources(self):
@@ -60,6 +75,20 @@ class SAILConan(ConanFile):
             #   - https://github.com/conan-io/conan-center-index/pull/18812
             # self.requires("libjxl/0.6.1")
             self.requires("libwebp/1.3.2")
+
+    def package_id(self):
+        del self.info.options.with_avif
+        del self.info.options.with_gif
+        del self.info.options.with_jpeg2000
+        del self.info.options.with_jpeg
+        del self.info.options.with_png
+        del self.info.options.with_tiff
+        del self.info.options.with_webp
+
+    def validate(self):
+        for option_name in ["with_avif", "with_gif", "with_jpeg2000", "with_jpeg", "with_png", "with_tiff", "with_webp"]:
+            if getattr(self.options, option_name) != "deprecated":
+                self.output.warning(f"{self.ref}:{option_name} option is deprecated, please, use 'with_xxx_priority_codecs' instead.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
