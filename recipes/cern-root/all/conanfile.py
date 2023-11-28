@@ -89,12 +89,15 @@ class CernRootConan(ConanFile):
         self.requires("openssl/[>=1.1 <4]")
         self.requires("pcre/8.45")
         self.requires("sqlite3/3.44.2")
-        self.requires("xorg/system")
         self.requires("xxhash/0.8.2")
         self.requires("xz_utils/5.4.5")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zstd/1.5.5")
-        if self.settings in ["Linux", "FreeBSD"]:
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.requires("xorg/system")
+            self.requires("libxft/2.3.8")
+            self.requires("libxpm/3.5.13")
             self.requires("util-linux-libuuid/2.39.2")
 
         if self.options.asimage:
@@ -142,7 +145,7 @@ class CernRootConan(ConanFile):
         tc.variables["asimage"] = self.options.asimage
         tc.variables["fail-on-missing"] = True
         tc.variables["soversion"] = True
-        tc.variables["soversion"] = True
+        tc.variables["x11"] = self.settings.os in ["Linux", "FreeBSD"]
         # Disable builtins and use Conan deps where available
         tc.variables["builtin_cfitsio"] = False
         tc.variables["builtin_davix"] = False
@@ -159,7 +162,7 @@ class CernRootConan(ConanFile):
         tc.variables["builtin_zlib"] = False
         tc.variables["builtin_zstd"] = False
         # Enable builtins where there is no Conan package
-        tc.variables["builtin_afterimage"] = False  # FIXME : replace with afterimage CCI package when available
+        tc.variables["builtin_afterimage"] = self.options.asimage  # FIXME : replace with afterimage CCI package when available
         tc.variables["builtin_gl2ps"] = True  # FIXME : replace with gl2ps CCI package when available
         tc.variables["builtin_ftgl"] = True  # FIXME : replace with ftgl CCI package when available
         tc.variables["builtin_vdt"] = True  # FIXME : replace with vdt CCI package when available
@@ -208,6 +211,8 @@ class CernRootConan(ConanFile):
             "libpng": "PNG",
             "libpq": "PostgreSQL",
             "libxml2": "LibXml2",
+            "libxft": "X11_Xft",
+            "libxpm": "X11_Xpm",
             "lz4": "LZ4",
             "odbc": "ODBC",
             "onetbb": "TBB",
