@@ -1,7 +1,5 @@
 import glob
 import os
-import re
-import shutil
 import stat
 
 from conan import ConanFile
@@ -34,12 +32,18 @@ class CernRootConan(ConanFile):
         # in future we may allow the user to specify a version when
         # libPython is available in Conan Center Index.
         # FIXME: add option to use CCI Python package when it is available
+        "asimage": [True, False],
         "python": ["off", "system"],
     }
     default_options = {
         "fPIC": True,
+        "asimage": False,  # FIXME: requires builtin_afterimage, but its build is broken
         # default python=off as there is currently no libpython in Conan center
         "python": "off",
+    }
+    options_description = {
+        "asimage": "Enable support for image processing via libAfterImage",
+        "python": "Enable support for automatic Python bindings (PyROOT)",
     }
 
     @property
@@ -57,6 +61,7 @@ class CernRootConan(ConanFile):
         }
 
     def export_sources(self):
+        copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
         export_conandata_patches(self)
 
     def config_options(self):
@@ -67,26 +72,36 @@ class CernRootConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("arrow/14.0.1")
         self.requires("cfitsio/4.3.0")
         self.requires("fftw/3.3.10")
         self.requires("freetype/2.13.2")
-        self.requires("giflib/5.2.1")
         self.requires("glew/2.2.0")
-        self.requires("glu/system")
+        self.requires("gsl/2.7")
         self.requires("libcurl/[>=7.78 <9]")
-        self.requires("libjpeg/9e")
-        self.requires("libpng/1.6.40")
+        self.requires("libmysqlclient/8.1.0")
+        self.requires("libpq/15.4")
         self.requires("libxml2/2.11.5")
         self.requires("lz4/1.9.4")
-        self.requires("onetbb/2021.10.0")
+        self.requires("odbc/2.3.11")
+        self.requires("onetbb/2020.3.3")
         self.requires("opengl/system")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("pcre/8.45")
-        self.requires("sqlite3/3.44.0")
+        self.requires("sqlite3/3.44.2")
         self.requires("xorg/system")
         self.requires("xxhash/0.8.2")
-        self.requires("xz_utils/5.4.4")
+        self.requires("xz_utils/5.4.5")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zstd/1.5.5")
+        if self.settings in ["Linux", "FreeBSD"]:
+            self.requires("util-linux-libuuid/2.39.2")
+
+        if self.options.asimage:
+            self.requires("giflib/5.2.1")
+            self.requires("libjpeg/9e")
+            self.requires("libpng/1.6.40")
+            self.requires("libtiff/4.6.0")
 
     def validate(self):
         self._enforce_minimum_compiler_version()
@@ -119,10 +134,14 @@ class CernRootConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_SHARED_LIBS"] = True
-        tc.variables["fail-on-missing"] = True
+        # Configure build options found at
+        # https://github.com/root-project/root/blob/v6-22-06/cmake/modules/RootBuildOptions.cmake#L80-L193
         tc.variables["CMAKE_CXX_STANDARD"] = self._cmake_cxx_standard
-        tc.variables["gnuinstall"] = True
+        tc.variables["BUILD_SHARED_LIBS"] = True
+        tc.variables["shared"] = True
+        tc.variables["asimage"] = self.options.asimage
+        tc.variables["fail-on-missing"] = True
+        tc.variables["soversion"] = True
         tc.variables["soversion"] = True
         # Disable builtins and use Conan deps where available
         tc.variables["builtin_cfitsio"] = False
@@ -130,6 +149,7 @@ class CernRootConan(ConanFile):
         tc.variables["builtin_fftw3"] = False
         tc.variables["builtin_freetype"] = False
         tc.variables["builtin_glew"] = False
+        tc.variables["builtin_gsl"] = False
         tc.variables["builtin_lz4"] = False
         tc.variables["builtin_lzma"] = False
         tc.variables["builtin_openssl"] = False
@@ -139,18 +159,22 @@ class CernRootConan(ConanFile):
         tc.variables["builtin_zlib"] = False
         tc.variables["builtin_zstd"] = False
         # Enable builtins where there is no Conan package
-        tc.variables["builtin_afterimage"] = True  # FIXME : replace with afterimage CCI package when available
-        tc.variables["builtin_gsl"] = True  # FIXME : replace with gsl CCI package when available
+        tc.variables["builtin_afterimage"] = False  # FIXME : replace with afterimage CCI package when available
         tc.variables["builtin_gl2ps"] = True  # FIXME : replace with gl2ps CCI package when available
         tc.variables["builtin_ftgl"] = True  # FIXME : replace with ftgl CCI package when available
         tc.variables["builtin_vdt"] = True  # FIXME : replace with vdt CCI package when available
+        tc.variables["builtin_clang"] = True
+        tc.variables["builtin_llvm"] = True
+        # Enable optional dependencies
+        tc.variables["arrow"] = True
+        tc.variables["mysql"] = True
+        tc.variables["odbc"] = True
+        tc.variables["pgsql"] = True
         # No Conan packages available for these dependencies yet
         tc.variables["davix"] = False  # FIXME : switch on if davix CCI package available
         tc.variables["pythia6"] = False  # FIXME : switch on if pythia6 CCI package available
         tc.variables["pythia8"] = False  # FIXME : switch on if pythia8 CCI package available
-        tc.variables["mysql"] = False  # FIXME : switch on if mysql CCI package available
         tc.variables["oracle"] = False
-        tc.variables["pgsql"] = False  # FIXME: switch on if PostgreSQL CCI package available
         tc.variables["gfal"] = False  # FIXME: switch on if gfal CCI package available
         tc.variables["tmva-pymva"] = False  # FIXME: switch on if Python CCI package available
         tc.variables["xrootd"] = False  # FIXME: switch on if xrootd CCI package available
@@ -170,29 +194,72 @@ class CernRootConan(ConanFile):
         tc.variables["CMAKE_INSTALL_SYSCONFDIR"] = "res/etc"
         tc.generate()
 
+        cmake_pkgs = {
+            "arrow": "Arrow",
+            "cfitsio": "CFITSIO",
+            "fftw": "FFTW",
+            "freetype": "Freetype",
+            "giflib": "GIF",
+            "glew": "GLEW",
+            "gsl": "GSL",
+            "libcurl": "CURL",
+            "libjpeg": "JPEG",
+            "libmysqlclient": "MySQL",
+            "libpng": "PNG",
+            "libpq": "PostgreSQL",
+            "libxml2": "LibXml2",
+            "lz4": "LZ4",
+            "odbc": "ODBC",
+            "onetbb": "TBB",
+            "openssl": "OpenSSL",
+            "pcre": "PCRE",
+            "sqlite3": "Sqlite",
+            "tiff": "TIFF",
+            "xxhash": "xxHash",
+            "xz_utils": "LibLZMA",
+            "zlib": "ZLIB",
+            "zstd": "ZSTD",
+            # "afterimage": "AfterImage",
+            # "alien": "Alien",
+            # "blas": "BLAS",
+            # "cuda": "CUDA",
+            # "cudnn": "CuDNN",
+            # "davix": "Davix",
+            # "dcap": "DCAP",
+            # "fastcgi": "FastCGI",
+            # "ftgl": "FTGL",
+            # "gfal": "GFAL",
+            # "gl2ps": "gl2ps",
+            # "graphviz": "Graphviz",
+            # "jemalloc": "jemalloc",
+            # "monalisa": "Monalisa",
+            # "mpi": "MPI",
+            # "oracle": "Oracle",
+            # "pythia6": "Pythia6",
+            # "pythia8": "Pythia8",
+            # "r": "R",
+            # "tcmalloc": "tcmalloc",
+            # "unuran": "Unuran",
+            # "vc": "Vc",
+            # "vdt": "Vdt",
+            # "veccore": "VecCore",
+            # "vecgeom": "VecGeom",
+            # "xrootd": "XROOTD",
+        }
+
         tc = CMakeDeps(self)
-        tc.set_property("openssl", "cmake_file_name", "OPENSSL")
-        tc.set_property("xz_utils", "cmake_file_name", "LIBLZMA")
-        tc.set_property("xxhash", "cmake_file_name", "XXHASH")
-        tc.set_property("pcre", "cmake_target_name", "PCRE::PCRE")
+        for package, cmake_name in cmake_pkgs.items():
+            tc.set_property(package, "cmake_file_name", cmake_name)
+        tc.set_property("freetype", "cmake_target_name", "FreeType::FreeType")
         tc.set_property("pcre", "cmake_target_name", "PCRE::PCRE")
         tc.set_property("xxhash", "cmake_target_name", "xxHash::xxHash")
         tc.set_property("lz4", "cmake_target_name", "LZ4::LZ4")
         tc.generate()
 
     def _patch_source_cmake(self):
-        rm(self, "FindTBB.cmake", os.path.join(self.source_folder, "cmake", "modules"))
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
             "set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)",
             "list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)")
-
-        # Convert all find_package names to upper case to ensure the CMake vars created by Conan
-        # are upper case as well, matching the project's conventions.
-        # Add CONFIG to avoid using system libraries, if possible.
-        path = self.source_path.joinpath("cmake", "modules", "SearchInstalledSoftware.cmake")
-        content = re.sub(r"find_package\((\S+) ", lambda m: f"find_package({m[1].upper()} CONFIG ", path.read_text())
-        content = content.replace("X11 CONFIG", "X11")
-        path.write_text(content)
 
     def _fix_source_permissions(self):
         # Fix execute permissions on scripts
@@ -209,10 +276,8 @@ class CernRootConan(ConanFile):
         apply_conandata_patches(self)
         self._patch_source_cmake()
         self._fix_source_permissions()
-
-    def _move_findcmake_conan_to_root_dir(self):
-        for f in ["opengl_system", "GLEW", "glu", "TBB", "LibXml2", "ZLIB", "SQLite3"]:
-            shutil.copy(f"Find{f}.cmake", os.path.join(self.source_folder, "cmake", "modules"))
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "project(ROOT)", "project(ROOT)\n\ninclude(conan_deps.cmake)")
 
     @property
     def _cmake_cxx_standard(self):
@@ -229,7 +294,7 @@ class CernRootConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         # Fix for CMAKE-MODULES-CONFIG-FILES (KB-H016)
