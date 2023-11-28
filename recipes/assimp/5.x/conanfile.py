@@ -32,6 +32,7 @@ class AssimpConan(ConanFile):
         "fPIC": True,
         "double_precision": False,
     }
+    short_paths = True
 
     _format_option_map = {
         "with_3d": ("ASSIMP_BUILD_3D_IMPORTER", "5.0.0"),
@@ -199,6 +200,8 @@ class AssimpConan(ConanFile):
             expected = 4
         if self._depends_on_clipper and Version(self.dependencies["clipper"].ref.version).major != expected:
             raise ConanInvalidConfiguration(f"Only 'clipper/{expected}.x' is supported")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "5":
+            raise ConanInvalidConfiguration("Gcc 5 not supported")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
