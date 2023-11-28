@@ -17,8 +17,8 @@ class TinyAlsaConan(ConanFile):
     topics = ("tiny", "alsa", "sound", "audio", "tinyalsa")
     package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = {'shared': False}
+    options = {"shared": [True, False], "with_utils": [True, False, "deprecated"]}
+    default_options = {"shared": False, "with_utils": "deprecated"}
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -30,6 +30,9 @@ class TinyAlsaConan(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+
+        if self.options.with_utils != "deprecated":
+            self.output.warning("with_utils option is deprecated, do not use anymore.")
     
     def export_sources(self):
         export_conandata_patches(self)
@@ -58,6 +61,9 @@ class TinyAlsaConan(ConanFile):
 
         pattern_to_remove = "*.a" if self.options.shared else "*.so"
         rm(self, pattern_to_remove, os.path.join(self.package_folder, "lib"))
+
+    def package_id(self):
+        del self.info.options.with_utils
 
     def package_info(self):
         self.cpp_info.libs = ["tinyalsa"]
