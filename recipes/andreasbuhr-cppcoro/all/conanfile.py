@@ -45,7 +45,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
         # Clang 17+ always requires C++20
         # Otherwise, require C++17
         compiler = self.settings.compiler
-        requires_cpp20 = compiler = "clang" and ("libstdc++" in compiler.libcxx or compiler.version >= Version("17"))
+        requires_cpp20 = compiler = "clang" and ("libstdc++" in compiler.get_safe("libcxx", "") or compiler.version >= Version("17"))
         return 20 if requires_cpp20 else 17
 
     def layout(self):
@@ -71,7 +71,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
 
         # Older versions of clang expects coroutine to be put under std::experimental::, while libstdc++ puts them under std::,
         # See https://bugs.llvm.org/show_bug.cgi?id=48172 for more context.
-        if self.settings.compiler == "clang" and "libstdc++" in self.settings.compiler.get_safe("libcxx"):
+        if self.settings.compiler == "clang" and "libstdc++" in self.settings.compiler.get_safe("libcxx", ""):
             if self.settings.compiler.version < Version("14"):
                 raise ConanInvalidConfiguration("{self.name} does not support clang<14 with libstdc++. Use libc++ or upgrade to clang 14+ instead.")
             if self.settings.compiler.version == Version("14"):
