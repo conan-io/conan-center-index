@@ -1,12 +1,12 @@
 versions:
-  "3.10.13":
-    folder: "all"
+#  "3.10.13":
+#    folder: "all"
   "3.10.0":
     folder: "all"
-  "3.9.18":
-    folder: "all"
-  "3.8.18":
-    folder: "all"
+#  "3.9.18":
+#    folder: "all"
+#  "3.8.18":
+#    folder: "all"
   "3.7.17":
     folder: "all"
   "2.7.18":
