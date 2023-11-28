@@ -12,7 +12,7 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def requirements(self):
-        self.requires("ignition-cmake/2.10.0", private=True)
+        self.requires("ignition-cmake/2.10.0", visible=False)
         self.requires(self.tested_reference_str)
 
     def build_requirements(self):

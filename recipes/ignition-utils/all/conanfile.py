@@ -59,7 +59,7 @@ class IgnitionUitlsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("ignition-cmake/2.10.0", private=True)
+        self.requires("ignition-cmake/2.10.0", visible=False)
         if self.options.ign_utils_vendor_cli11:
             self.requires("cli11/2.3.2")
 
