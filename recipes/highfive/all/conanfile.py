@@ -16,7 +16,7 @@ class HighFiveConan(ConanFile):
     topics = ("hdf5", "hdf", "data")
     homepage = "https://github.com/BlueBrain/HighFive"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_boost": [True, False],
@@ -58,8 +58,7 @@ class HighFiveConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -128,7 +127,6 @@ class HighFiveConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "HighFive")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
         self.cpp_info.requires = ["hdf5::hdf5"]
         if self.options.with_boost:
             self.cpp_info.requires.append("boost::headers")
