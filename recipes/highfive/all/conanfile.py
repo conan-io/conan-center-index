@@ -48,7 +48,7 @@ class HighFiveConan(ConanFile):
         if self.options.with_xtensor:
             self.requires("xtensor/0.24.7")
         if self.options.with_opencv:
-            self.requires("opencv/4.5.5")
+            self.requires("opencv/4.8.1")
 
     def package_id(self):
         self.info.clear()
