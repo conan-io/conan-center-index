@@ -25,9 +25,7 @@ class HlslppConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        return {
-            "gcc": "6",
-        }
+        return {"gcc": "6"} if Version(self.version) >= "3.3" else {}
 
     def layout(self):
         basic_layout(self, src_folder="src")
