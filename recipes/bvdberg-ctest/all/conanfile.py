@@ -14,8 +14,12 @@ class BvdbergCtestConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "ctest is a unit test framework for software written in C."
     topics = ("testing", "testing-framework", "unit-testing")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -24,12 +28,8 @@ class BvdbergCtestConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows not supported")
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -40,6 +40,4 @@ class BvdbergCtestConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
