@@ -1,15 +1,15 @@
-diff -ur a/src/xmlrpc.h b/src/xmlrpc.h
---- a/src/xmlrpc.h	2023-11-26 09:30:53.358486300 -0800
-+++ b/src/xmlrpc.h	2023-11-26 09:31:34.147842700 -0800
-@@ -55,6 +55,11 @@
- /* where to find more info. shouldn't need to change much */
- #define XMLRPC_HOME_PAGE_STR "http://xmlprc-epi.sourceforge.net/"
+diff -ruN a/src/xmlrpc_private.h b/src/xmlrpc_private.h
+--- a/src/xmlrpc_private.h	2023-11-28 23:38:00.109172126 -0800
++++ b/src/xmlrpc_private.h	2023-11-28 23:46:00.040837064 -0800
+@@ -42,6 +42,11 @@
+  */
+ #define XMLRPC_PRIVATE_ALREADY_INCLUDED
  
 +#ifdef _MSC_VER 
 +#define strncasecmp _strnicmp
 +#define strcasecmp _stricmp
 +#endif
 +
- 
- /****d* VALUE/XMLRPC_VALUE_TYPE
-  * NAME
+ #ifdef __cplusplus
+ extern "C" {
+ #endif

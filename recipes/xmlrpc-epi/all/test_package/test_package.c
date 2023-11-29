@@ -1,4 +1,4 @@
-#include "xmlrpc.h"
+#include <xmlrpc-epi/xmlrpc.h>
 
 int main(int argc, char **argv)
 {
