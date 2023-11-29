@@ -48,6 +48,8 @@ class IndicatorsConan(ConanFile):
         copy(self, pattern="*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "indicators")
+        self.cpp_info.set_property("cmake_target_name", "indicators::indicators")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
