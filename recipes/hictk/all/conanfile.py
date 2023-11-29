@@ -16,13 +16,13 @@ class HictkConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/paulsengroup/hictk"
     topics = "hictk", "bioinformatics", "hic"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
     options = {"with_eigen": [True, False]}
     default_options = {"with_eigen": True}
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 17
 
     @property
@@ -40,14 +40,14 @@ class HictkConan(ConanFile):
 
     def requirements(self):
         self.requires("bshoshany-thread-pool/3.5.0", transitive_headers=True)
-        self.requires("fast_float/5.2.0", transitive_headers=True)
+        self.requires("fast_float/5.3.0", transitive_headers=True)
         if self.options.with_eigen:
             self.requires("eigen/3.4.0", transitive_headers=True)
         self.requires("fmt/10.1.1", transitive_headers=True)
         self.requires("hdf5/1.14.1", transitive_headers=True)
         self.requires("highfive/2.7.1", transitive_headers=True)
-        self.requires("libdeflate/1.18", transitive_headers=True)
-        self.requires("parallel-hashmap/1.3.11", transitive_headers=True)
+        self.requires("libdeflate/1.19", transitive_headers=True)
+        self.requires("parallel-hashmap/1.37", transitive_headers=True)
         self.requires("span-lite/0.10.3", transitive_headers=True)
         self.requires("spdlog/1.12.0", transitive_headers=True)
         self.requires("xxhash/0.8.2", transitive_headers=True)
@@ -58,7 +58,7 @@ class HictkConan(ConanFile):
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
 
         def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -66,28 +66,17 @@ class HictkConan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        compiler = str(self.settings.compiler)
-        version = str(self.settings.compiler.version)
-        try:
-            minimum_version = self._compilers_minimum_version[str(compiler)]
-            if minimum_version and loose_lt_semver(version, minimum_version):
-                msg = (
-                    f"{self.ref} requires C++{self._minimum_cpp_standard} features "
-                    f"which are not supported by compiler {compiler} {version}."
-                )
-                raise ConanInvalidConfiguration(msg)
-        except KeyError:
-            msg = (
-                f"{self.ref} recipe lacks information about the {compiler} compiler, "
-                f"support for the required C++{self._minimum_cpp_standard} features is assumed"
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-            self.output.warn(msg)
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25 <4]")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -121,11 +110,7 @@ class HictkConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.set_property("cmake_file_name", "hictk")
         self.cpp_info.set_property("cmake_target_name", "hictk::libhictk")
-        self.cpp_info.set_property("pkg_config_name", "hictk")
-
-        # TODO: to remove in conan v2 once legacy generators removed
-        self.cpp_info.names["cmake_find_package"] = "hictk"
-        self.cpp_info.names["cmake_find_package_multi"] = "hictk"
