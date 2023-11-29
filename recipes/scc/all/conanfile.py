@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches, replace_in_file
+from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches, replace_in_file, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -110,6 +110,7 @@ class SystemcComponentsConan(ConanFile):
              src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.components["scc-sysc"].libs = ["scc-sysc"]
