@@ -59,7 +59,7 @@ class PDCursesConan(ConanFile):
 
     def requirements(self):
         if self.options.with_sdl:
-            self.requires("sdl/2.28.3", transitive_libs=True)
+            self.requires("sdl/2.28.5", transitive_libs=True)
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
 
