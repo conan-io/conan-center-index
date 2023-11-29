@@ -57,11 +57,11 @@ class SAILConan(ConanFile):
         "with_png": "Deprecated",
         "with_tiff": "Deprecated",
         "with_webp": "Deprecated",
-        "with_highest_priority_codecs": "Enable highest priority codecs",
-        "with_high_priority_codecs": "Enable high priority codecs",
-        "with_medium_priority_codecs": "Enable medium priority codecs",
-        "with_low_priority_codecs": "Enable low priority codecs",
-        "with_lowest_priority_codecs": "Enable lowest priority codecs",
+        "with_highest_priority_codecs": "Enable codecs: GIF, JPEG, PNG, TIFF",
+        "with_high_priority_codecs": "Enable codecs: BMP, SVG",
+        "with_medium_priority_codecs": "Enable codecs: AVIF, JPEG2000, JPEGXL, WEBL",
+        "with_low_priority_codecs": "Enable codecs: ICO, PCX, PNM, PSD, QOI, TGA",
+        "with_lowest_priority_codecs": "Enable codecs: WAL, XBM",
     }
 
 
