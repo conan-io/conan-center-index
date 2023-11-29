@@ -69,7 +69,7 @@ class OpenTDFConan(ConanFile):
         if Version(self.version) >= "1.4.0":
             self.requires("magic_enum/0.9.5")
         self.requires("ms-gsl/4.0.0")
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("nlohmann_json/3.11.3")
         self.requires("jwt-cpp/0.6.0")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("boost/1.83.0")
