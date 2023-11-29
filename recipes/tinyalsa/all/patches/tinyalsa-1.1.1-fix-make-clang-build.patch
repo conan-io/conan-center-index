@@ -1,0 +1,40 @@
+diff --git a/utils/Makefile b/utils/Makefile
+index ad4bc5c..fb52cd3 100644
+--- a/utils/Makefile
++++ b/utils/Makefile
+@@ -8,21 +8,30 @@ CC = $(CROSS_COMPILE)gcc
+ 
+ CFLAGS += -Wall -Wextra -Werror -Wfatal-errors
+ CFLAGS += -I ../include
+-CFLAGS += -L ../src
+ CFLAGS += -O2
+ 
++LDFLAGS += -L ../src
++
+ VPATH = ../src:../include/tinyalsa
+ 
+ .PHONY: all
+ all: -ltinyalsa tinyplay tinycap tinymix tinypcminfo
+ 
+-tinyplay: tinyplay.c pcm.h mixer.h asoundlib.h libtinyalsa.a
++tinyplay: tinyplay.o libtinyalsa.a
++ 
++tinyplay.o: tinyplay.c pcm.h mixer.h asoundlib.h
++ 
++tinycap: tinycap.o libtinyalsa.a
++ 
++tinycap.o: tinycap.c pcm.h mixer.h asoundlib.h
++
++tinymix: tinymix.o libtinyalsa.a
+ 
+-tinycap: tinycap.c pcm.h mixer.h asoundlib.h libtinyalsa.a
++tinymix.o: tinymix.c pcm.h mixer.h asoundlib.h
+ 
+-tinymix: tinymix.c pcm.h mixer.h asoundlib.h libtinyalsa.a
++tinypcminfo: tinypcminfo.o libtinyalsa.a
+ 
+-tinypcminfo: tinypcminfo.c pcm.h mixer.h asoundlib.h libtinyalsa.a
++tinypcminfo.o: tinypcminfo.c pcm.h mixer.h asoundlib.h
+ 
+ .PHONY: clean
+ clean:

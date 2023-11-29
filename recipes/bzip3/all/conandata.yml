@@ -21,5 +21,5 @@ sources:
     url: "https://github.com/kspalaiologos/bzip3/releases/download/1.2.0/bzip3-1.2.0.tar.xz"
     sha256: "f0441519321070e03708638b37bdeb9105aff8f0a5c838e45aff1b0cbe752572"
   "1.1.8":
-    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.1.8/bzip3-1.1.8.tar.bz2"
-    sha256: "bc15d0e4599aad18d9ed71ee0f7e859af89051bf5105b0751e8ca3a26117567d"
+    url: "https://github.com/kspalaiologos/bzip3/releases/download/1.1.8/bzip3-1.1.8.tar.xz"
+    sha256: "80a226950832df5674e012a38cf5f45efc6405d51a1caceb96f80ec2861a6111"
