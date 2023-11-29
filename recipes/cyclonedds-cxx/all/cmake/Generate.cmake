@@ -18,33 +18,31 @@
 # this functionality changes, a modification to this file may be required.
 # See: https://github.com/eclipse-cyclonedds/cyclonedds-cxx/blob/master/src/idlcxx/Generate.cmake
 
+find_package(CycloneDDS REQUIRED)
+
+# find idlcxx shared library
+set(CMAKE_FIND_LIBRARY_SUFFIXES .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
+if(CMAKE_CROSSCOMPILING)
+  find_library(_idlcxx_shared_lib cycloneddsidlcxx NO_CMAKE_FIND_ROOT_PATH REQUIRED)
+else()
+  find_library(_idlcxx_shared_lib
+    NAMES cycloneddsidlcxx
+    PATHS ${CMAKE_CURRENT_LIST_DIR}/../../bin/
+          ${CMAKE_CURRENT_LIST_DIR}/../../lib/
+    NO_DEFAULT_PATH)
+endif()
+
+if(_idlcxx_shared_lib)
+  set(_idlcxx_depends "")
+else()
+  message(FATAL_ERROR "Cannot find idlcxx shared library")
+endif()
+
 function(IDLCXX_GENERATE)
   set(one_value_keywords TARGET DEFAULT_EXTENSIBILITY BASE_DIR OUTPUT_DIR)
   set(multi_value_keywords FILES FEATURES INCLUDES WARNINGS)
   cmake_parse_arguments(
     IDLCXX "" "${one_value_keywords}" "${multi_value_keywords}" "" ${ARGN})
-
-  find_package(CycloneDDS REQUIRED)
-
-  # find idlcxx shared library
-  set(CMAKE_FIND_LIBRARY_SUFFIXES .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
-  if(CMAKE_CROSSCOMPILING)
-    find_library(_idlcxx_shared_lib cycloneddsidlcxx NO_CMAKE_FIND_ROOT_PATH REQUIRED)
-  else()
-    find_library(_idlcxx_shared_lib
-      NAMES cycloneddsidlcxx
-      PATHS ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../../bin/
-            $ENV{PATH}
-            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../../lib/
-            $ENV{LD_LIBRARY_PATH}
-      NO_DEFAULT_PATH)
-  endif()
-
-  if(_idlcxx_shared_lib)
-    set(_idlcxx_depends "")
-  else()
-    message(FATAL_ERROR "Cannot find idlcxx shared library")
-  endif()
 
   idlc_generate_generic(TARGET ${IDLCXX_TARGET}
     BACKEND ${_idlcxx_shared_lib}
