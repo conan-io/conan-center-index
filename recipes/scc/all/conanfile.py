@@ -13,7 +13,7 @@ required_conan_version = ">=1.53.0"
 
 class SystemcComponentsConan(ConanFile):
     name = "scc"
-    description = "A light weight productivity library for SystemC and TLM 2.0"
+    description = "A light-weight productivity library for SystemC and TLM 2.0"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://minres.github.io/SystemC-Components"
@@ -50,7 +50,7 @@ class SystemcComponentsConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.83.0")
-        self.requires("fmt/9.1.0", force=True)  # must be < 10, version conflict with spdlog
+        self.requires("fmt/10.1.1")
         self.requires("lz4/1.9.4")
         self.requires("rapidjson/cci.20220822")
         self.requires("spdlog/1.12.0")

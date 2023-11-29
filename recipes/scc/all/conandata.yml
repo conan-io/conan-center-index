@@ -7,3 +7,7 @@ patches:
     - patch_file: "patches/2023.06-fix-conan-targets.patch"
       patch_description: "add find_package()-s and disable automatic Conan setup"
       patch_type: "conan"
+    - patch_file: "patches/2023.06-add-fmt-10-support.patch"
+      patch_description: "fix incompatibility with fmt 10.x and newer"
+      patch_type: "portability"
+      patch_source: "https://github.com/Minres/SystemC-Components/pull/51"
