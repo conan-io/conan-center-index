@@ -283,6 +283,9 @@ class CernRootConan(ConanFile):
         self._fix_source_permissions()
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "project(ROOT)", "project(ROOT)\n\ninclude(conan_deps.cmake)")
+        # Relax TBB version check
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "modules", "SearchInstalledSoftware.cmake"),
+                        "TBB 2018", "TBB")
 
     @property
     def _cmake_cxx_standard(self):
