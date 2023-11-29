@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 class TrantorConan(ConanFile):
     name = "trantor"
@@ -84,8 +84,7 @@ class TrantorConan(ConanFile):
         if is_msvc(self) and self.options.shared and "MDd" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration(f"{self.ref} does not support the MDd runtime on Visual Studio.")
 
-        if "with_spdlog" in self.options and \
-            not self.dependencies["spdlog"].options.header_only:
+        if self.options.get_safe("with_spdlog") and not self.dependencies["spdlog"].options.header_only:
             raise ConanInvalidConfiguration(f"{self.ref} requires header_only spdlog.")
 
     def source(self):
@@ -93,8 +92,6 @@ class TrantorConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # Trantor's CMakeLists.txt has BUILD_SHARED_LIBS option.
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         # TODO: support other tls providers
         if Version(self.version) >= "1.5.12":
             tc.variables["TRANTOR_USE_TLS"] = "openssl"
