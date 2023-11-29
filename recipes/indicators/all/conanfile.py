@@ -16,6 +16,7 @@ class IndicatorsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/p-ranav/indicators"
     topics = ("activity", "indicator", "loading", "spinner", "animation", "progress", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
