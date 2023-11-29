@@ -12,7 +12,7 @@ from conan.tools.scm import Version
 required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
 
-class IgnitionUitlsConan(ConanFile):
+class IgnitionUtilsConan(ConanFile):
     name = "ignition-utils"
     description = "Provides general purpose classes and functions designed for robotic applications."
     license = "Apache-2.0"
@@ -42,7 +42,7 @@ class IgnitionUitlsConan(ConanFile):
         return {
             "Visual Studio": "16",
             "msvc": "192",
-            "gcc": "7",
+            "gcc": "8",
             "clang": "5",
             "apple-clang": "10",
         }
