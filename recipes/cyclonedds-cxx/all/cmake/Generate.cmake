@@ -34,8 +34,7 @@ function(IDLCXX_GENERATE)
     find_library(_idlcxx_shared_lib
       NAMES cycloneddsidlcxx
       PATHS "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../../bin/"
-            "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../../lib/"
-      NO_DEFAULT_PATH)
+            "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../../lib/")
   endif()
 
   if(_idlcxx_shared_lib)
