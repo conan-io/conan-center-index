@@ -42,7 +42,7 @@ class IgnitionMathConan(ConanFile):
         return {
             "Visual Studio": "16",
             "msvc": "192",
-            "gcc": "7",
+            "gcc": "8",
             "clang": "5",
             "apple-clang": "10",
         }
