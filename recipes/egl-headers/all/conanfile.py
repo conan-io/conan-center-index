@@ -13,6 +13,7 @@ class EglHeadersConan(ConanFile):
     topics = ("egl-headers", "egl")
     homepage = "https://github.com/KhronosGroup/EGL-Registry"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -26,8 +27,7 @@ class EglHeadersConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -43,4 +43,5 @@ class EglHeadersConan(ConanFile):
         copy(self, "*", src=os.path.join(self.source_folder, "api", "EGL"), dst=os.path.join(self.package_folder, "include", "EGL"))
 
     def package_info(self):
-        pass
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
