@@ -19,7 +19,7 @@ class FastDoubleParserConan(ConanFile):
     no_copy_source = True
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
