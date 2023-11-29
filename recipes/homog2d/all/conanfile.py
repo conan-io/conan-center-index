@@ -15,6 +15,7 @@ class Homog2dConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/skramm/homog2d"
     topics = ("computational-geometry", "homography", "2d-geometric", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     @property
