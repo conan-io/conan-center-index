@@ -4,6 +4,7 @@ from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -59,9 +60,13 @@ class CpptraceConan(ConanFile):
         tc = CMakeToolchain(self)
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        if not self.options.shared:
-            tc.variables["CPPTRACE_STATIC"] = True
-        tc.variables["CPPTRACE_USE_SYSTEM_LIBDWARF"] = True
+        if Version(self.version) >= Version("0.3.0"):
+            tc.variables["CPPTRACE_USE_EXTERNAL_LIBDWARF"] = True
+            tc.variables["CPPTRACE_CONAN"] = True
+        else:
+            if not self.options.shared:
+                tc.variables["CPPTRACE_STATIC"] = True
+            tc.variables["CPPTRACE_USE_SYSTEM_LIBDWARF"] = True
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
