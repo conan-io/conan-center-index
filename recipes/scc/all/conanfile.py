@@ -19,16 +19,14 @@ class SystemcComponentsConan(ConanFile):
     homepage = "https://minres.github.io/SystemC-Components"
     topics = ("systemc", "modeling", "tlm", "scc")
 
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
         "enable_phase_callbacks": [True, False],
         "enable_phase_callbacks_tracing": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
         "enable_phase_callbacks": False,
         "enable_phase_callbacks_tracing": False,
@@ -40,10 +38,6 @@ class SystemcComponentsConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
