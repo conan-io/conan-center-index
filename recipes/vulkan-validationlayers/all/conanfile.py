@@ -6,6 +6,8 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, mkdir, rename, replace_in_file, rm
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import glob
 import os
 import shutil
@@ -21,7 +23,7 @@ class VulkanValidationLayersConan(ConanFile):
     homepage = "https://github.com/KhronosGroup/Vulkan-ValidationLayers"
     url = "https://github.com/conan-io/conan-center-index"
 
-    package_type = "static-library"
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_wsi_xcb": [True, False],
@@ -70,16 +72,21 @@ class VulkanValidationLayersConan(ConanFile):
 
     def requirements(self):
         # TODO: set private=True, once the issue is resolved https://github.com/conan-io/conan/issues/9390
-        private = dict(private=not hasattr(self, "settings_build")) if conan_version.major == 1 else {}
+        private = dict(private=not hasattr(self, "settings_build")) if conan_version.major == 1 else dict(visible=False)
 
-        self.requires("robin-hood-hashing/3.11.5")
         self.requires(f"spirv-headers/{self._vulkan_sdk_version}")
         self.requires(f"spirv-tools/{self._vulkan_sdk_version}", **private)
         self.requires(f"vulkan-headers/{self._vulkan_sdk_version}", transitive_headers=True)
+        if Version(self.version) >= "1.3.268.0":
+            self.requires(f"vulkan-utility-libraries/{self._vulkan_sdk_version}")
+
+        self.requires("robin-hood-hashing/3.11.5")
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_wsi_wayland"):
             self.requires("wayland/1.22.0")
+
+        # TODO: add support for mimalloc
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -120,6 +127,8 @@ class VulkanValidationLayersConan(ConanFile):
         tc.variables["INSTALL_TESTS"] = False
         tc.variables["BUILD_LAYERS"] = True
         tc.variables["BUILD_LAYER_SUPPORT_FILES"] = True
+        # Suppress overly noisy warnings
+        tc.extra_cxxflags.append("-w")
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -137,8 +146,9 @@ class VulkanValidationLayersConan(ConanFile):
                 os.path.join(self.generators_folder, "SPIRV-ToolsConfig.cmake"),
                 os.path.join(self.generators_folder, "SPIRV-Tools-optConfig.cmake"),
             )
-        replace_in_file(self, os.path.join(self.source_folder, "layers", "CMakeLists.txt"),
-                        "find_package(PythonInterp 3 QUIET)", "")
+        if Version(self.version) < "1.3.250.0":
+            replace_in_file(self, os.path.join(self.source_folder, "layers", "CMakeLists.txt"),
+                            "find_package(PythonInterp 3 QUIET)", "")
 
     def build(self):
         self._patch_sources()
@@ -169,7 +179,19 @@ class VulkanValidationLayersConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = ["VkLayer_utils"]
+        # The output of the package is a VkLayer_khronos_validation runtime library.
+
+        if Version(self.version) >= "1.3.268.0":
+            # v1.3.268+ links the VkLayer_utils library statically into the VkLayer_khronos_validation library.
+            # Headers have been moved to vulkan-utility-libraries.
+            self.cpp_info.includedirs = []
+            if is_msvc(self):
+                self.cpp_info.libdirs = []
+        else:
+            self.cpp_info.libs.append("VkLayer_utils")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["dl"]
 
         if self.settings.os == "Windows":
             manifest_subfolder = "bin"
