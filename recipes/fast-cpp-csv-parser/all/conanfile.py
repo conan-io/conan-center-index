@@ -14,7 +14,7 @@ class FastcppcsvparserConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ben-strasser/fast-cpp-csv-parser"
     topics = ("csv", "parser", "header-only")
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_thread": [True, False],
@@ -25,6 +25,9 @@ class FastcppcsvparserConan(ConanFile):
 
     no_copy_source = True
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def package_id(self):
         self.info.clear()
 
@@ -32,12 +35,8 @@ class FastcppcsvparserConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -48,9 +47,7 @@ class FastcppcsvparserConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
         self.cpp_info.includedirs.append(os.path.join("include", "fast-cpp-csv-parser"))
         if not self.options.with_thread:
             self.cpp_info.defines.append("CSV_IO_NO_THREAD")
