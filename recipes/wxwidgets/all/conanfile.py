@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.system import package_manager
 from conan.errors import ConanInvalidConfiguration
@@ -239,7 +240,7 @@ class wxWidgetsConan(ConanFile):
             tc.variables["wxBUILD_PRECOMP"] = "OFF"
 
         # platform-specific options
-        if self.settings.os == "Windows":
+        if is_msvc(self):
             tc.variables["wxBUILD_USE_STATIC_RUNTIME"] = "MT" in str(self.settings.compiler.runtime)
             tc.variables["wxBUILD_MSVC_MULTIPROC"] = True
         if self.settings.os == "Linux":
@@ -370,14 +371,14 @@ class wxWidgetsConan(ConanFile):
             suffix = version_suffix_major_minor
         elif self.settings.os == "Windows":
             toolkit = "msw"
-            if self.settings.compiler == "gcc":
-                prefix = "wx_"
-                version = ""
-                suffix = version_suffix_major_minor
-            else:
+            if is_msvc(self):
                 prefix = "wx"
                 version = f"{_version.major}{_version.minor}"
                 suffix = ""
+            else:
+                prefix = "wx_"
+                version = ""
+                suffix = version_suffix_major_minor
 
         def base_library_pattern(library):
             return "{prefix}base{version}{unicode}{debug}_%s{suffix}" % library
@@ -514,7 +515,7 @@ class wxWidgetsConan(ConanFile):
                                                   "version",
                                                   "shlwapi",
                                                   "oleacc"])
-        if self.settings.os == "Windows":
+        if is_msvc(self):
             self.cpp_info.includedirs.append(os.path.join("include", "msvc"))
         else:
             include_path = os.path.join("include", f"wx{version_suffix_major_minor}")
