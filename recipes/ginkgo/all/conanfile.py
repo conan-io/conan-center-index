@@ -57,9 +57,6 @@ class GinkgoConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16 <4]")
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -87,20 +84,19 @@ class GinkgoConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        is_windows_shared = self.options.shared and is_msvc(self)
+        if is_msvc(self) and self.options.shared:
+            if self.settings.build_type == "Debug" and Version(self.version) >= "1.7.0":
+                raise ConanInvalidConfiguration(
+                    "Ginkgo >= 1.7.0 cannot be built in shared debug mode on Windows"
+                )
+            if is_msvc_static_runtime(self):
+                raise ConanInvalidConfiguration(
+                    "Ginkgo does not support mixing static CRT and shared library"
+                )
 
-        if (
-            is_windows_shared
-            and self.settings.build_type == "Debug"
-            and Version(self.version) >= "1.7.0"
-        ):
-            raise ConanInvalidConfiguration(
-                "Ginkgo >= 1.7.0 cannot be built in shared debug mode on Windows"
-            )
-        if is_windows_shared and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration(
-                "Ginkgo does not support mixing static CRT and shared library"
-            )
+    def build_requirements(self):
+        if Version(self.version) >= "1.7.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
