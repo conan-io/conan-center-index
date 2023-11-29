@@ -149,6 +149,7 @@ class CycloneDDSCXXConan(ConanFile):
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
         self.cpp_info.includedirs = ["include/ddscxx"]
+        self.cpp_info.builddirs = [self._module_path]
         self.cpp_info.components["ddscxx"].libs = ["ddscxx"]
         self.cpp_info.components["ddscxx"].includedirs = ["include/ddscxx"]
         self.cpp_info.components["ddscxx"].set_property("cmake_target_name", "CycloneDDS-CXX::ddscxx")
