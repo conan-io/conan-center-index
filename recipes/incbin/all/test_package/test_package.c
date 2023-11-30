@@ -2,11 +2,7 @@
 #define INCBIN_STYLE INCBIN_STYLE_SNAKE
 #include "incbin.h"
 
-#ifdef _MSC_VER
 INCBIN(cmake, "CMakeLists.txt");
-#else
-INCBIN(cmake, INCBIN_FILE);
-#endif
 
 #include <stdio.h>
 
