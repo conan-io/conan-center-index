@@ -10,7 +10,7 @@ import os
 required_conan_version = ">=1.52.0"
 
 
-class PackageConan(ConanFile):
+class JsonDtoConan(ConanFile):
     name = "json_dto"
     license = "BSD-3-Clause"
     homepage = "https://github.com/Stiffstream/json_dto"
