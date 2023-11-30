@@ -451,7 +451,10 @@ class MagnumConan(ConanFile):
         self.cpp_info.components["magnum_main"].names["cmake_find_package_multi"] = "Magnum"
         self.cpp_info.components["magnum_main"].libs = [f"Magnum{lib_suffix}"]
         self.cpp_info.components["magnum_main"].requires = ["_magnum", "corrade::utility"]
-        _add_cmake_module("magnum_main", "conan-bugfix-global-target.cmake")
+
+        # Bugfix for the legacy cmake_find_package generator only
+        cmake_mod = os.path.join("lib", "cmake", "conan-bugfix-global-target.cmake")
+        self.cpp_info.components["magnum_main"].build_modules["cmake_find_package"].append(cmake_mod)
 
         if self.options.audio:
             _add_component("audio", "Audio", ["magnum_main", "corrade::plugin_manager", "openal-soft::openal-soft"])
