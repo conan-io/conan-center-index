@@ -128,7 +128,7 @@ class VulkanValidationLayersConan(ConanFile):
         tc.variables["BUILD_LAYERS"] = True
         tc.variables["BUILD_LAYER_SUPPORT_FILES"] = True
         # Suppress overly noisy warnings
-        tc.extra_cxxflags.append("-w")
+        # tc.extra_cxxflags.append("-w")
         tc.generate()
 
         deps = CMakeDeps(self)
