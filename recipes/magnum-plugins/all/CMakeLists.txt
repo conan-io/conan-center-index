@@ -1,10 +1,5 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(cmake_wrapper)
-
-set(CONAN_CMAKE_SILENT_OUTPUT 1)
-
-include(conanbuildinfo.cmake)
-conan_basic_setup()
 
 # The original project uses the path to the 'magnum' package, in Conan we cannot modify existing package
 set(MAGNUM_PLUGINS_DEBUG_BINARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/magnum-d)
@@ -38,4 +33,22 @@ set(MAGNUM_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDI
 set(MAGNUM_EXTERNAL_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/MagnumExternal)
 set(MAGNUM_PLUGINS_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/MagnumPlugins)
 
-add_subdirectory("source_subfolder")
+macro(custom_find_package name)
+    find_package(${name} ${ARGN}
+        # Allow only Conan packages
+        NO_DEFAULT_PATH
+        PATHS ${CMAKE_PREFIX_PATH}
+    )
+    string(TOUPPER ${name} name_upper)
+    set(${name_upper}_FOUND TRUE)
+    set(${name_upper}_VERSION_STRING ${${name}_VERSION_STRING})
+    set(${name_upper}_INCLUDE_DIRS ${${name}_INCLUDE_DIRS})
+    set(${name_upper}_INCLUDE_DIR ${${name}_INCLUDE_DIR})
+    set(${name_upper}_LIBRARIES ${${name}_LIBRARIES})
+    set(${name_upper}_DEFINITIONS ${${name}_DEFINITIONS})
+    unset(name_upper)
+endmacro()
+
+custom_find_package(Freetype REQUIRED CONFIG)
+
+add_subdirectory(src)
