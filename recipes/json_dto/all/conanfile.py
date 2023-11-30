@@ -39,7 +39,7 @@ class JsonDtoConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("rapidjson/1.1.0", transitive_headers=True)
+        self.requires("rapidjson/1.1.0")
 
     def package_id(self):
         self.info.clear()
