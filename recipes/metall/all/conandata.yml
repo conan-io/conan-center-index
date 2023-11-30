@@ -17,3 +17,6 @@ sources:
   "0.26":
     url: "https://github.com/LLNL/metall/archive/refs/tags/v0.26.tar.gz"
     sha256: "7453c87d99708be8542e354e582cbeefac1e5ba65e609cd85d7126c5b25a6d7b"
+  "0.27":
+    url: "https://github.com/LLNL/metall/archive/refs/tags/v0.27.tar.gz"
+    sha256: "6e6f17a760778f9162def939701f9381a75e5275fd1eb1b2af4b2e89e86e1c58"

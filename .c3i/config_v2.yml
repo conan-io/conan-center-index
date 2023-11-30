@@ -41,6 +41,7 @@ tasks:
       - qt
       - llvm
       - gstreamer
+    parallel_strategy: unlimited
   cci:
     conan_v2_run_export: false
     detailed_status_checks: false
