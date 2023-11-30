@@ -56,23 +56,6 @@ class CprConan(ConanFile):
         }.get(self._min_cppstd, {})
 
     @property
-    def _supports_openssl(self):
-        # https://github.com/libcpr/cpr/commit/b036a3279ba62720d1e43362d32202bf412ea152
-        # https://github.com/libcpr/cpr/releases/tag/1.5.0
-        return not is_apple_os(self)
-
-    @property
-    def _supports_winssl(self):
-        # https://github.com/libcpr/cpr/commit/18e1fc5c3fc0ffc07695f1d78897fb69e7474ea9
-        # https://github.com/libcpr/cpr/releases/tag/1.5.1
-        return self.settings.os == "Windows"
-
-    @property
-    def _supports_darwinssl(self):
-        # https://github.com/libcpr/cpr/releases/tag/1.6.1
-        return is_apple_os(self)
-
-    @property
     def _uses_valid_abi_and_compiler(self):
         # https://github.com/conan-io/conan-center-index/pull/5194#issuecomment-821908385
         return not (
@@ -106,17 +89,6 @@ class CprConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"] and self.options.with_ssl in ["openssl", CprConan._AUTO_SSL]:
             self.requires("openssl/[>=1.1 <4]")
 
-    # Check if the system supports the given ssl library
-    def _supports_ssl_library(self, library):
-        # A KeyError should never happen, as the options are validated by conan.
-        return {
-            "openssl": self._supports_openssl,
-            "darwinssl": self._supports_darwinssl,
-            "winssl": self._supports_winssl,
-            CprConan._AUTO_SSL: True,
-            CprConan._NO_SSL: True
-        }[library]
-
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
@@ -126,23 +98,17 @@ class CprConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        SSL_FAILURE_MESSAGES = {
-            "openssl": "OpenSSL is not supported on macOS or on CPR versions < 1.5.0",
-            "darwinssl": "DarwinSSL is only supported on macOS and on CPR versions >= 1.6.1",
-            "winssl": "WinSSL is only on Windows and on CPR versions >= 1.5.1",
-            CprConan._AUTO_SSL: "Automatic SSL selection is only available on CPR versions >= 1.6.0 (and only >= 1.6.2 on macOS)"
-        }
-
         if not self._uses_valid_abi_and_compiler:
             raise ConanInvalidConfiguration(f"Cannot compile {self.ref} with libstdc++ on clang < 9")
 
         ssl_library = str(self.options.with_ssl)
-        if not self._supports_ssl_library(ssl_library):
-            raise ConanInvalidConfiguration(
-                f"Invalid SSL selection for the given configuration: {SSL_FAILURE_MESSAGES[ssl_library]}"
-                if ssl_library in SSL_FAILURE_MESSAGES
-                else f"Invalid value of ssl option, {ssl_library}"
-            )
+        
+        if ssl_library == "openssl" and is_apple_os(self):
+            raise ConanInvalidConfiguration("OpenSSL is not supported on macOS")
+        if ssl_library == "darwinssl" and not is_apple_os(self):
+            raise ConanInvalidConfiguration("DarwinSSL is only supported on macOS")
+        if ssl_library == "winssl" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("WinSSL is only on Windows")
 
         if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL, "winssl") and ssl_library != self.dependencies["libcurl"].options.with_ssl:
             raise ConanInvalidConfiguration(
