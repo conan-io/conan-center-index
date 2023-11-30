@@ -2,12 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.layout import basic_layout
-from conan.tools.files import (
-    apply_conandata_patches,
-    copy,
-    export_conandata_patches,
-    get,
-)
+from conan.tools.files import copy, get
 from conan.tools.scm import Version
 import os
 
@@ -34,8 +29,6 @@ class BoostWinTLS(ConanFile):
     )
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {}
-    default_options = {}
 
     @property
     def _min_cppstd(self):
@@ -50,14 +43,11 @@ class BoostWinTLS(ConanFile):
             "Visual Studio": "16",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/[>=1.75 <2.0]")
+        self.requires("boost/1.83.0")
 
     def package_id(self):
         self.info.clear()
@@ -82,9 +72,6 @@ class BoostWinTLS(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def build(self):
-        apply_conandata_patches(self)
-
     def package(self):
         copy(
             self,
@@ -102,10 +89,3 @@ class BoostWinTLS(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.set_property("cmake_target_name", "boost-wintls")
-        self.cpp_info.filenames["cmake_find_package"] = "boost-wintls"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "boost-wintls"
-        self.cpp_info.names["cmake_find_package"] = "boost-wintls"
-        self.cpp_info.names["cmake_find_package_multi"] = "boost-wintls"
