@@ -5,6 +5,7 @@ from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -118,12 +119,16 @@ class OpenCVConan(ConanFile):
         "world": [True, False],
         "nonfree": [True, False],
         # dnn module options
+        "with_flatbuffers": [True, False],
+        "with_protobuf": [True, False],
         "with_vulkan": [True, False],
         "dnn_cuda": [True, False],
         # highgui module options
         "with_gtk": [True, False],
         "with_qt": [True, False],
+        "with_wayland": [True, False],
         # imgcodecs module options
+        "with_avif": [True, False],
         "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_png": [True, False],
         "with_tiff": [True, False],
@@ -173,12 +178,16 @@ class OpenCVConan(ConanFile):
         "world": False,
         "nonfree": False,
         # dnn module options
+        "with_flatbuffers": True,
+        "with_protobuf": True,
         "with_vulkan": False,
         "dnn_cuda": False,
         # highgui module options
-        "with_gtk": True,
+        "with_gtk": False,
         "with_qt": False,
+        "with_wayland": True,
         # imgcodecs module options
+        "with_avif": False,
         "with_jpeg": "libjpeg",
         "with_png": True,
         "with_tiff": True,
@@ -212,12 +221,20 @@ class OpenCVConan(ConanFile):
     short_paths = True
 
     @property
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+
+    @property
     def _is_legacy_one_profile(self):
         return not hasattr(self, "settings_build")
 
     @property
     def _contrib_folder(self):
         return os.path.join(self.source_folder, "contrib")
+
+    @property
+    def _extra_modules_folder(self):
+        return os.path.join(self._contrib_folder, "modules")
 
     @property
     def _has_with_jpeg2000_option(self):
@@ -257,7 +274,19 @@ class OpenCVConan(ConanFile):
 
     @property
     def _has_barcode_option(self):
-        return Version(self.version) >= "4.5.3"
+        return Version(self.version) >= "4.5.3" and Version(self.version) < "4.8.0"
+
+    @property
+    def _has_with_wayland_option(self):
+        return Version(self.version) >= "4.7.0" and self.settings.os in ["Linux", "FreeBSD"]
+
+    @property
+    def _has_with_avif_option(self):
+        return Version(self.version) >= "4.8.0"
+
+    @property
+    def _has_with_flatbuffers_option(self):
+        return Version(self.version) >= "4.8.0"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -302,11 +331,32 @@ class OpenCVConan(ConanFile):
             del self.options.wechat_qrcode
         if not self._has_barcode_option:
             del self.options.barcode
+        if not self._has_with_wayland_option:
+            del self.options.with_wayland
+        if not self._has_with_avif_option:
+            del self.options.with_avif
+        if not self._has_with_flatbuffers_option:
+            del self.options.with_flatbuffers
+
+        # Conditional default options
+        if self._is_mingw:
+            # These options are visible for Windows, but upstream disables them
+            # by default for MinGW (actually it would fail otherwise)
+            self.options.with_msmf = False
+            self.options.with_msmf_dxva = False
+        if self.settings.os == "Linux":
+            # Use Wayland by default, but fallback to GTK for old OpenCV versions.
+            # gtk/system is problematic for this recpe, there might be side effects
+            # in a big dependency graph
+            if not self._has_with_wayland_option:
+                self.options.with_gtk = True
 
     @property
     def _opencv_modules(self):
         def imageformats_deps():
             components = []
+            if self.options.get_safe("with_avif"):
+                components.append("libavif::libavif")
             if self.options.get_safe("with_jpeg2000"):
                 components.append("{0}::{0}".format(self.options.with_jpeg2000))
             if self.options.get_safe("with_png"):
@@ -333,15 +383,10 @@ class OpenCVConan(ConanFile):
             return ["eigen::eigen"] if self.options.with_eigen else []
 
         def ffmpeg():
+            components = []
             if self.options.get_safe("with_ffmpeg"):
-                return [
-                    "ffmpeg::avcodec", "ffmpeg::avdevice", "ffmpeg::avformat",
-                    "ffmpeg::avutil", "ffmpeg::swscale",
-                ]
-            return []
-
-        def freetype():
-            return ["freetype::freetype"] if self.options.freetype else []
+                components = ["ffmpeg::avcodec", "ffmpeg::avformat", "ffmpeg::avutil", "ffmpeg::swscale"]
+            return components
 
         def gtk():
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
@@ -356,6 +401,9 @@ class OpenCVConan(ConanFile):
         def parallel():
             return ["onetbb::onetbb"] if self.options.parallel == "tbb" else []
 
+        def protobuf():
+            return ["protobuf::protobuf"] if self.options.get_safe("with_protobuf") else []
+
         def qt():
             return ["qt::qt"] if self.options.get_safe("with_qt") else []
 
@@ -367,6 +415,12 @@ class OpenCVConan(ConanFile):
 
         def vulkan():
             return ["vulkan-headers::vulkan-headers"] if self.options.get_safe("with_vulkan") else []
+
+        def wayland():
+            return ["wayland::wayland-client", "wayland::wayland-cursor"] if self.options.get_safe("with_wayland") else []
+
+        def xkbcommon():
+            return ["xkbcommon::libxkbcommon"] if self.options.get_safe("with_wayland") else []
 
         def opencv_calib3d():
             return ["opencv_calib3d"] if self.options.calib3d else []
@@ -442,7 +496,7 @@ class OpenCVConan(ConanFile):
             "dnn": {
                 "is_built": self.options.dnn,
                 "mandatory_options": ["imgproc"],
-                "requires": ["opencv_core", "opencv_imgproc", "protobuf::protobuf"] + vulkan() + ipp(),
+                "requires": ["opencv_core", "opencv_imgproc"] + protobuf() + vulkan() + ipp(),
             },
             "features2d": {
                 "is_built": self.options.features2d,
@@ -465,7 +519,7 @@ class OpenCVConan(ConanFile):
                 "is_built": self.options.highgui,
                 "mandatory_options": ["imgproc"],
                 "requires": ["opencv_core", "opencv_imgproc"] + opencv_imgcodecs() +
-                            opencv_videoio() + freetype() + gtk() + qt() + ipp(),
+                            opencv_videoio() + gtk() + qt() + xkbcommon() + wayland() + ipp(),
                 "system_libs": [
                     (self.settings.os == "Windows", ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]),
                 ],
@@ -569,7 +623,7 @@ class OpenCVConan(ConanFile):
             "cudacodec": {
                 "is_built": self.options.cudacodec,
                 "mandatory_options": ["with_cuda", "videoio"],
-                "requires": ["opencv_core", "opencv_videoio", "opencv_cudev"] + ipp(),
+                "requires": ["opencv_core", "opencv_videoio"] + ipp(),
             },
             "cudafeatures2d": {
                 "is_built": self.options.cudafeatures2d,
@@ -854,6 +908,17 @@ class OpenCVConan(ConanFile):
         if Version(self.version) < "4.3.0":
             opencv_modules["stereo"].setdefault("mandatory_options", []).extend(["calib3d", "video"])
             opencv_modules["stereo"].setdefault("requires", []).extend(["opencv_calib3d", "opencv_video"])
+        if Version(self.version) >= "4.7.0":
+            opencv_modules["aruco"].setdefault("mandatory_options", []).append("objdetect")
+            opencv_modules["aruco"].setdefault("requires", []).append("opencv_objdetect")
+            opencv_modules["cudacodec"].setdefault("mandatory_options", []).extend(["cudaarithm", "cudawarping"])
+            opencv_modules["cudacodec"].setdefault("requires", []).extend(["opencv_cudaarithm", "opencv_cudawarping"])
+            opencv_modules["wechat_qrcode"].setdefault("mandatory_options", []).append("objdetect")
+            opencv_modules["wechat_qrcode"].setdefault("requires", []).append("opencv_objdetect")
+        else:
+            opencv_modules["cudacodec"].setdefault("requires", []).append("opencv_cudev")
+        if Version(self.version) < "4.8.0":
+            opencv_modules["dnn"].setdefault("mandatory_options", []).append("with_protobuf")
 
         return opencv_modules
 
@@ -900,7 +965,11 @@ class OpenCVConan(ConanFile):
                        "they are required by modules you have explicitly requested:\n")
 
             for option_to_enable in all_options_to_enable:
-                setattr(self.options, option_to_enable, True)
+                try:
+                    setattr(self.options, option_to_enable, True)
+                except ConanException:
+                    # It may not work in conan v2 and raise ConanException "Incorrect attempt to modify option"
+                    continue
 
                 direct_and_transitive = []
                 direct = ", ".join(direct_options_to_enable.get(option_to_enable, []))
@@ -963,12 +1032,16 @@ class OpenCVConan(ConanFile):
 
         if not self.options.dnn:
             self.options.rm_safe("dnn_cuda")
+            self.options.rm_safe("with_flatbuffers")
+            self.options.rm_safe("with_protobuf")
             self.options.rm_safe("with_vulkan")
         if not self.options.highgui:
             self.options.rm_safe("with_gtk")
+            self.options.rm_safe("with_wayland")
         if not (self.options.highgui or self.options.cvv):
             self.options.rm_safe("with_qt")
         if not self.options.imgcodecs:
+            self.options.rm_safe("with_avif")
             self.options.rm_safe("with_jpeg")
             self.options.rm_safe("with_jpeg2000")
             self.options.rm_safe("with_openexr")
@@ -1016,11 +1089,11 @@ class OpenCVConan(ConanFile):
         if self.options.with_ipp == "intel-ipp":
             self.requires("intel-ipp/2020")
         # dnn module dependencies
-        if self.options.dnn:
+        if self.options.get_safe("with_protobuf"):
             # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16678#issuecomment-1507811867
             self.requires("protobuf/3.21.12", transitive_libs=True)
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-headers/1.3.250.0")
+            self.requires("vulkan-headers/1.3.268.0")
         # gapi module dependencies
         if self.options.gapi:
             self.requires("ade/0.1.2d")
@@ -1029,7 +1102,12 @@ class OpenCVConan(ConanFile):
             self.requires("gtk/system")
         if self.options.get_safe("with_qt"):
             self.requires("qt/5.15.11")
+        if self.options.get_safe("with_wayland"):
+            self.requires("xkbcommon/1.6.0")
+            self.requires("wayland/1.22.0")
         # imgcodecs module dependencies
+        if self.options.get_safe("with_avif"):
+            self.requires("libavif/1.0.1")
         if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
@@ -1043,7 +1121,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_png"):
             self.requires("libpng/1.6.40")
         if self.options.get_safe("with_openexr"):
-            self.requires("openexr/3.1.9")
+            self.requires("openexr/3.2.1")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_webp"):
@@ -1065,7 +1143,7 @@ class OpenCVConan(ConanFile):
             self.requires("harfbuzz/8.2.2")
         # hdf module dependencies
         if self.options.hdf:
-            self.requires("hdf5/1.14.1")
+            self.requires("hdf5/1.14.2")
         # ovis module dependencies
         if self.options.ovis:
             self.requires("ogre/1.10.2")
@@ -1128,8 +1206,15 @@ class OpenCVConan(ConanFile):
             )
 
     def build_requirements(self):
-        if self.options.dnn and not self._is_legacy_one_profile:
-            self.tool_requires("protobuf/<host_version>")
+        if self.options.get_safe("with_protobuf"):
+            if not self._is_legacy_one_profile:
+                self.tool_requires("protobuf/<host_version>")
+        if self.options.get_safe("with_wayland"):
+            self.tool_requires("wayland-protocols/1.31")
+            if not self._is_legacy_one_profile:
+                self.tool_requires("wayland/<host_version>")
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
@@ -1139,19 +1224,72 @@ class OpenCVConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        for directory in ["libjasper", "libjpeg-turbo", "libjpeg", "libpng", "libtiff", "libwebp", "openexr", "protobuf", "zlib", "quirc"]:
+
+        # Patches in opencv
+        # -----------------
+
+        ## Remove 3rd party libs
+        for directory in [
+            "libjasper", "libjpeg", "libjpeg-turbo", "libpng", "libspng", "libtiff",
+            "libwebp", "openexr", "openjpeg", "protobuf", "quirc", "tbb", "zlib",
+        ]:
             rmdir(self, os.path.join(self.source_folder, "3rdparty", directory))
 
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "elseif(EMSCRIPTEN)", "elseif(QNXNTO)\nelseif(EMSCRIPTEN)")
+
+        ## Fix link to several dependencies
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "${GDAL_LIBRARY}", "GDAL::GDAL")
+        if Version(self.version) >= "4.8.0":
+            replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "${AVIF_LIBRARY}", "avif")
 
-        # Fix detection of ffmpeg
+        ## Fix detection of ffmpeg
         replace_in_file(self, os.path.join(self.source_folder, "modules", "videoio", "cmake", "detect_ffmpeg.cmake"),
                         "FFMPEG_FOUND", "ffmpeg_FOUND")
 
-        # Cleanup RPATH
+        ## Robust handling of wayland
+        if self.options.get_safe("with_wayland"):
+            detect_wayland = os.path.join(self.source_folder, "modules", "highgui", "cmake", "detect_wayland.cmake")
+
+            # We have to override *_LINK_LIBRARIES variables linked to highui because they are just link fkags, not cflags
+            # so include dirs are missing (OpenCV seems to assume system libs for wayland)
+            replace_in_file(
+                self,
+                detect_wayland,
+                "ocv_check_modules(WAYLAND_CLIENT wayland-client)",
+                "ocv_check_modules(WAYLAND_CLIENT wayland-client)\nfind_package(wayland REQUIRED CONFIG)\nset(WAYLAND_CLIENT_LINK_LIBRARIES wayland::wayland-client)",
+            )
+            replace_in_file(
+                self,
+                detect_wayland,
+                "ocv_check_modules(WAYLAND_CURSOR wayland-cursor)",
+                "ocv_check_modules(WAYLAND_CURSOR wayland-cursor)\nset(WAYLAND_CURSOR_LINK_LIBRARIES wayland::wayland-cursor)",
+            )
+            replace_in_file(
+                self,
+                detect_wayland,
+                "ocv_check_modules(XKBCOMMON xkbcommon)",
+                "ocv_check_modules(XKBCOMMON xkbcommon)\nfind_package(xkbcommon REQUIRED CONFIG)\nset(XKBCOMMON_LINK_LIBRARIES xkbcommon::libxkbcommon)",
+            )
+            # OpenCV uses pkgconfig to find wayland-protocols files, but we can't generate
+            # pkgconfig files of a build requirement with 1 profile, so here is a workaround
+            if self._is_legacy_one_profile:
+                replace_in_file(
+                    self,
+                    detect_wayland,
+                    "ocv_check_modules(WAYLAND_PROTOCOLS wayland-protocols>=1.13)",
+                    "set(HAVE_WAYLAND_PROTOCOLS TRUE)",
+                )
+                pkgdatadir = os.path.join(self.dependencies["wayland-protocols"].package_folder, "res", "wayland-protocols")
+                replace_in_file(
+                    self,
+                    detect_wayland,
+                    "pkg_get_variable(WAYLAND_PROTOCOLS_BASE wayland-protocols pkgdatadir)",
+                    f"set(WAYLAND_PROTOCOLS_BASE {pkgdatadir})",
+                )
+
+        ## Cleanup RPATH
         if Version(self.version) < "4.1.2":
             install_layout_file = os.path.join(self.source_folder, "CMakeLists.txt")
         else:
@@ -1161,7 +1299,8 @@ class OpenCVConan(ConanFile):
                               "")
         replace_in_file(self, install_layout_file, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
 
-        if self.options.dnn:
+        ## Fix discovery & link of protobuf
+        if self.options.get_safe("with_protobuf"):
             find_protobuf = os.path.join(self.source_folder, "cmake", "OpenCVFindProtobuf.cmake")
             # OpenCV expects to find FindProtobuf.cmake, not the config file
             replace_in_file(self, find_protobuf,
@@ -1173,8 +1312,21 @@ class OpenCVConan(ConanFile):
                                       'if(TARGET "${Protobuf_LIBRARIES}")',
                                       'if(FALSE)  # patch: disable if(TARGET "${Protobuf_LIBRARIES}")')
 
+        # Patches in opencv_contrib
+        # -------------------------
+
+        ## Remove unused extra modules to avoid side effects
+        if not self.options.with_cuda:
+            rmdir(self, os.path.join(self._extra_modules_folder, "cudev"))
+        for module in OPENCV_EXTRA_MODULES_OPTIONS:
+            if not self.options.get_safe(module):
+                rmdir(self, os.path.join(self._extra_modules_folder, module))
+        for module in ["cnn_3dobj", "julia", "matlab"]:
+            rmdir(self, os.path.join(self._extra_modules_folder, module))
+
+        ## Fix Freetype discovery logic in freetype extra module
         if self.options.freetype:
-            freetype_cmake = os.path.join(self._contrib_folder, "modules", "freetype", "CMakeLists.txt")
+            freetype_cmake = os.path.join(self._extra_modules_folder, "freetype", "CMakeLists.txt")
             replace_in_file(self, freetype_cmake, "ocv_check_modules(FREETYPE freetype2)", "find_package(Freetype REQUIRED MODULE)")
             replace_in_file(self, freetype_cmake, "FREETYPE_", "Freetype_")
 
@@ -1182,11 +1334,10 @@ class OpenCVConan(ConanFile):
             replace_in_file(self, freetype_cmake, "HARFBUZZ_", "harfbuzz_")
 
     def generate(self):
-        if self.options.dnn:
-            if self._is_legacy_one_profile:
+        VirtualBuildEnv(self).generate()
+        if self._is_legacy_one_profile:
+            if self.options.get_safe("with_protobuf") or self.options.get_safe("with_wayland"):
                 VirtualRunEnv(self).generate(scope="build")
-            else:
-                VirtualBuildEnv(self).generate()
 
         tc = CMakeToolchain(self)
         tc.variables["OPENCV_CONFIG_INSTALL_PATH"] = "cmake"
@@ -1244,8 +1395,10 @@ class OpenCVConan(ConanFile):
             # libavcodec;libavformat;libavutil;libswscale modules
             tc.variables["OPENCV_FFMPEG_USE_FIND_PACKAGE"] = "ffmpeg"
             tc.variables["OPENCV_INSTALL_FFMPEG_DOWNLOAD_SCRIPT"] = False
+            if Version(self.version) >= "4.7.0":
+                tc.variables["OPENCV_FFMPEG_ENABLE_LIBAVDEVICE"] = False
             ffmpeg_libraries = []
-            for component in ["avcodec", "avdevice", "avformat", "avutil", "swscale", "avresample"]:
+            for component in ["avcodec",  "avformat", "avutil", "swscale", "avresample"]:
                 if component == "avutil" or self.dependencies["ffmpeg"].options.get_safe(component):
                     ffmpeg_libraries.append(f"ffmpeg::{component}")
                     ffmpeg_component_version = self.dependencies["ffmpeg"].cpp_info.components[component].get_property("component_version")
@@ -1259,7 +1412,6 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_IMGCODEC_PFM"] = self.options.get_safe("with_imgcodec_pfm", False)
         tc.variables["WITH_IMGCODEC_PXM"] = self.options.get_safe("with_imgcodec_pxm", False)
         tc.variables["WITH_IMGCODEC_SUNRASTER"] = self.options.get_safe("with_imgcodec_sunraster", False)
-        tc.variables["WITH_INF_ENGINE"] = False
         tc.variables["WITH_IPP"] = bool(self.options.with_ipp)
         if self.options.with_ipp == "intel-ipp":
             ipp_root = self.dependencies["intel-ipp"].package_folder.replace("\\", "/")
@@ -1268,7 +1420,6 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_ITT"] = False
         tc.variables["WITH_LIBREALSENSE"] = False
         tc.variables["WITH_MFX"] = False
-        tc.variables["WITH_NGRAPH"] = False
         tc.variables["WITH_OPENCL"] = self.options.get_safe("with_opencl", False)
         tc.variables["WITH_OPENCLAMDBLAS"] = False
         tc.variables["WITH_OPENCLAMDFFT"] = False
@@ -1324,6 +1475,23 @@ class OpenCVConan(ConanFile):
 
         tc.variables["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
 
+        if Version(self.version) >= "4.6.0":
+            tc.variables["WITH_OPENVINO"] = False
+            tc.variables["WITH_TIMVX"] = False
+        else:
+            tc.variables["WITH_INF_ENGINE"] = False
+            tc.variables["WITH_NGRAPH"] = False
+
+        if Version(self.version) >= "4.7.0":
+            tc.variables["ENABLE_DELAYLOAD"] = False
+            tc.variables["WITH_CANN"] = False
+            tc.variables["WITH_SPNG"] = False # TODO: change with_png recipe option in order to use either libpng or libspng
+            tc.variables["WITH_WAYLAND"] = self.options.get_safe("with_wayland", False)
+
+        if Version(self.version) >= "4.8.0":
+            tc.variables["WITH_AVIF"] = self.options.get_safe("with_avif", False)
+            tc.variables["WITH_FLATBUFFERS"] = self.options.get_safe("with_flatbuffers", False)
+
         # Special world option merging all enabled modules into one big library file
         tc.variables["BUILD_opencv_world"] = self.options.world
 
@@ -1331,15 +1499,16 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_core"] = True
         for module in OPENCV_MAIN_MODULES_OPTIONS:
             tc.variables[f"BUILD_opencv_{module}"] = self.options.get_safe(module, False)
-        tc.variables["WITH_PROTOBUF"] = self.options.dnn
-        if self.options.dnn:
+        tc.variables["WITH_PROTOBUF"] = self.options.get_safe("with_protobuf", False)
+        if self.options.get_safe("with_protobuf"):
             tc.variables["PROTOBUF_UPDATE_FILES"] = True
         tc.variables["WITH_ADE"] = self.options.gapi
         if self.options.objdetect:
             tc.variables["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
 
         # Extra modules
-        tc.variables["OPENCV_EXTRA_MODULES_PATH"] = os.path.join(self._contrib_folder, "modules").replace("\\", "/")
+        if any([self.options.get_safe(module) for module in OPENCV_EXTRA_MODULES_OPTIONS]) or self.options.with_cuda:
+            tc.variables["OPENCV_EXTRA_MODULES_PATH"] = self._extra_modules_folder.replace("\\", "/")
         tc.variables["BUILD_opencv_cudev"] = self.options.with_cuda
         for module in OPENCV_EXTRA_MODULES_OPTIONS:
             tc.variables[f"BUILD_opencv_{module}"] = self.options.get_safe(module, False)
@@ -1378,6 +1547,12 @@ class OpenCVConan(ConanFile):
         tc.generate()
 
         CMakeDeps(self).generate()
+
+        if self.options.get_safe("with_wayland"):
+            deps = PkgConfigDeps(self)
+            if not self._is_legacy_one_profile:
+                deps.build_context_activated = ["wayland-protocols"]
+            deps.generate()
 
     def build(self):
         self._patch_sources()

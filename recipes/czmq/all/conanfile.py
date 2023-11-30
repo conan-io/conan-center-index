@@ -18,6 +18,7 @@ class CzmqConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zeromq/czmq"
     topics = ("zmq", "libzmq", "message-queue", "asynchronous")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -66,7 +67,7 @@ class CzmqConan(ConanFile):
         if self.options.get_safe("with_libmicrohttpd"):
             self.requires("libmicrohttpd/0.9.75")
         if self.options.get_safe("with_libcurl"):
-            self.requires("libcurl/8.2.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.get_safe("with_libuuid"):

@@ -45,7 +45,6 @@ authorized_users:
 - datalogics-robb
 - PinkySan
 - keysight-daryl
-- gunmetal313
 - rdeterre
 - Hopobcn
 - rikdev
@@ -56,7 +55,6 @@ authorized_users:
 - ledocc
 - fpelliccioni
 - PierreRamoin
-- yipdw
 - soporide
 - detwiler
 - hrantzsch
@@ -82,7 +80,6 @@ authorized_users:
 - BlueSolei
 - AndWass
 - SpaceIm
-- prsolucoes
 - yssource
 - dheater
 - GavinNL
@@ -109,20 +106,16 @@ authorized_users:
 - mbodmer
 - feragon
 - claremacrae
-- nicolastagliani
 - samuelpmish
 - Garcia6l20
-- RemySphere
 - pleroux0
 - qchateau
 - datalogics-kam
 - tt4g
 - akshit-sharma
-- jargonzombies
 - xqp
 - alnkpa
 - prince-chrismc
-- bk2221
 - igl42
 - casabre
 - Nipheris
@@ -135,7 +128,6 @@ authorized_users:
 - zod
 - Twon
 - miketsukerman
-- mgoldshteyn
 - dab0bby
 - atilag
 - floriansimon1
@@ -144,7 +136,6 @@ authorized_users:
 - mapau
 - igor-sadchenko
 - fulara
-- BNL-Corp
 - pyrige
 - ZaMaZaN4iK
 - rudolfheszele
@@ -189,7 +180,6 @@ authorized_users:
 - pavanbadugu
 - isnullxbh
 - Michanne
-- markusgod
 - syoliver
 - daravi
 - museghost
@@ -234,7 +224,6 @@ authorized_users:
 - yelu
 - bibermann
 - baltendorf
-- Mahe-Thomas
 - Eremiell
 - d70-t
 - ufkesba
@@ -272,7 +261,6 @@ authorized_users:
 - greeng3
 - mattgodbolt
 - mathbunnyru
-- ngerke
 - TheLavaBlock
 - greeng3
 - ItsBasi
@@ -289,7 +277,6 @@ authorized_users:
 - mjvankampen
 - ivan-kulikov-dev
 - ntagliani
-- bnlcorp
 - Alberto-Izquierdo
 - an-tao
 - p-ranav
@@ -381,10 +368,8 @@ authorized_users:
 - ubnt-kannan
 - taoyouh
 - skannan89
-- paulo-coutinho
 - AndreyMlashkin
 - AndyMender
-- triangulumlabs
 - Woazim
 - shubhamck
 - Lukas-Heiligenbrunner
@@ -402,11 +387,9 @@ authorized_users:
 - Jonathan-Eid
 - ihsandemir
 - Marks101
-- whuji
 - jiangdawhy
 - MichelleHetzel
 - Pro
-- anton-dirac
 - petiaccja
 - Expander
 - kdsx
@@ -421,7 +404,6 @@ authorized_users:
 - TheSalvator
 - fcelda
 - toge
-- maksim-0
 - blackencino
 - lukaszlaszko
 - pichi-router
@@ -547,7 +529,6 @@ authorized_users:
 - AshleyRoll
 - inparallel
 - vcampmany
-- 3d4m-vladimir
 - thesummer
 - NolanC33
 - Chnossos
@@ -589,7 +570,6 @@ authorized_users:
 - claudius-kienle
 - choll
 - erikzenker
-- dannftk
 - Jairard
 - Nicky-D
 - pgeler
@@ -638,7 +618,6 @@ authorized_users:
 - woidpointer
 - dkruempe
 - ehds
-- sase-cs
 - idealvin
 - seemk
 - chausner
@@ -673,7 +652,6 @@ authorized_users:
 - gjasny
 - eirikb
 - wpalfi
-- vkes
 - wouterz
 - szigetics
 - kovdan01
@@ -740,7 +718,6 @@ authorized_users:
 - jt416
 - Pollux42
 - gracicot
-- Siviuze
 - ggulgulia
 - ondrej-benus
 - RubyNova
@@ -750,7 +727,6 @@ authorized_users:
 - eerimoq
 - bb010g
 - paulocoutinhox
-- WilliamBehrens
 - greg7mdp
 - ruurdadema
 - steromano87
@@ -809,14 +785,12 @@ authorized_users:
 - luizgabriel
 - kshehata
 - dietssa
-- simoncent
 - staskau
 - Iswenzz
 - DAP-IT-Aachen
 - VladyslavUsenko
 - vdsbenoit
 - Macfly
-- hesham-essam
 - mkviatkovskii
 - sgoth
 - hellozee
@@ -868,7 +842,6 @@ authorized_users:
 - EstebanDugueperoux2
 - suhasHere
 - Tradias
-- NeXuS4Developer
 - jellespijker
 - bshoshany
 - Chrismarsh
@@ -1009,7 +982,6 @@ authorized_users:
 - ashley-b
 - psmitsu
 - Viatorus
-- mkoviazin
 - shtanko-sv
 - larshg
 - Wuqiqi123
@@ -1110,7 +1082,6 @@ authorized_users:
 - carterian8
 - jdoubleu
 - poretga99
-- stefanpantic-smallpdf
 - sebsnyk
 - mercierd
 - Tobulus
@@ -1261,3 +1232,16 @@ authorized_users:
 - Kischy
 - MangaD
 - fabiorossetto
+- Bronek
+- agdavydov81
+- sizeak
+- johannes-wolf
+- cyberflashguru
+- OndrejSlamecka
+- correaa
+- jakeheke75
+- NelDav
+- utelle
+- har-bw
+- abedra
+- bennettgoble

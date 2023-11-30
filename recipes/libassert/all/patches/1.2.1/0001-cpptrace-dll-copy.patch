@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ce5dbcf..085a1aa 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -161,7 +161,7 @@
+ 
+ # Don't run tests when library is used with add_subdirectory
+ if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+-  if(WIN32)
++  if(0)
+     add_custom_command(
+       TARGET assert POST_BUILD
+       COMMAND ${CMAKE_COMMAND} -E copy_if_different
