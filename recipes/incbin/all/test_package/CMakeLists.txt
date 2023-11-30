@@ -13,5 +13,5 @@ if(MSVC)
             ARGS ${CMAKE_CURRENT_LIST_DIR}/test_package.c -p g_ -Ssnakecase -o ${CMAKE_BINARY_DIR}/data.c
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
             COMMENT "Generating resources with incbin_tool")
-    target_sources(${PROJECT_NAME} ${CMAKE_BINARY_DIR}/data.c)
+    target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/data.c)
 endif()
