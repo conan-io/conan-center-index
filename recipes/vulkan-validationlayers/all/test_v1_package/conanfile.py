@@ -11,6 +11,13 @@ class TestPackageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    @property
+    def _vulkan_sdk_version(self):
+        return self.tested_reference_str.split("/")[1].split("#")[0]
+
+    def requirements(self):
+        self.requires(f"vulkan-loader/{self._vulkan_sdk_version}")
+
     def test(self):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
