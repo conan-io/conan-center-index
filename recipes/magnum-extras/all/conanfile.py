@@ -1,19 +1,22 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
 import os
 
-required_conan_version = ">=1.43.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, replace_in_file, rmdir, save
+
+required_conan_version = ">=1.53.0"
 
 
 class MagnumExtrasConan(ConanFile):
     name = "magnum-extras"
     description = "Extras for the Magnum C++11/C++14 graphics engine"
     license = "MIT"
-    topics = ("magnum", "graphics", "rendering", "3d", "2d", "opengl")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://magnum.graphics"
+    topics = ("magnum", "graphics", "rendering", "3d", "2d", "opengl")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,18 +35,6 @@ class MagnumExtrasConan(ConanFile):
         "application": "sdl2",
     }
 
-    short_paths = True
-    generators = "cmake", "cmake_find_package"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -59,71 +50,76 @@ class MagnumExtrasConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("magnum/{}".format(self.version))
-        self.requires("corrade/{}".format(self.version))
+        # https://github.com/mosra/magnum-extras/blob/v2020.06/src/Magnum/Ui/Anchor.h#L32-L33
+        self.requires(f"magnum/{self.version}", transitive_headers=True, transitive_libs=True)
+        self.requires(f"corrade/{self.version}", transitive_headers=True, transitive_libs=True)
         if self.settings.os in ["iOS", "Emscripten", "Android"] and self.options.ui_gallery:
-            self.requires("magnum-plugins/{}".format(self.version))
+            self.requires(f"magnum-plugins/{self.version}")
 
     def validate(self):
-        opt_name = "{}_application".format(self.options.application)
-        if not getattr(self.options["magnum"], opt_name):
-            raise ConanInvalidConfiguration("Magnum needs option '{opt}=True'".format(opt=opt_name))
-        if self.settings.os == "Emscripten" and self.options["magnum"].target_gl == "gles2":
+        opt_name = f"{self.options.application}_application"
+        if not self.dependencies["magnum"].options.get_safe(opt_name):
+            raise ConanInvalidConfiguration(f"Magnum needs option '{opt_name}=True'")
+        if self.settings.os == "Emscripten" and self.dependencies["magnum"].options.target_gl == "gles2":
             raise ConanInvalidConfiguration("OpenGL ES 3 required, use option 'magnum:target_gl=gles3'")
 
     def build_requirements(self):
-        self.build_requires("corrade/{}".format(self.version))
+        self.tool_requires(f"corrade/{self.version}")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_STATIC"] = not self.options.shared
-        cmake.definitions["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", False)
-        cmake.definitions["BUILD_TESTS"] = False
-        cmake.definitions["BUILD_GL_TESTS"] = False
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_STATIC"] = not self.options.shared
+        tc.variables["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", False)
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_GL_TESTS"] = False
+        tc.variables["WITH_PLAYER"] = self.options.player
+        tc.variables["WITH_UI"] = self.options.ui
+        tc.variables["WITH_UI_GALLERY"] = self.options.ui_gallery
+        tc.variables["MAGNUM_INCLUDE_INSTALL_DIR"] = os.path.join("include", "Magnum")
+        tc.generate()
 
-        cmake.definitions["WITH_PLAYER"] = self.options.player
-        cmake.definitions["WITH_UI"] = self.options.ui
-        cmake.definitions["WITH_UI_GALLERY"] = self.options.ui_gallery
-
-        cmake.configure()
-        return cmake
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
+                        "")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
-                              "")
+        # Remove unnecessary dependency on UseEmscripten
+        # https://github.com/mosra/magnum/issues/490
+        save(self, os.path.join(self.source_folder, "UseEmscripten.cmake"), "")
 
-        cmakelists = [os.path.join("src", "Magnum", "Ui", "CMakeLists.txt"),
-                      os.path.join("src", "player","CMakeLists.txt")]
-        app_name = "{}Application".format("XEgl" if self.options.application == "xegl" else str(self.options.application).capitalize())
-        for cmakelist in cmakelists:
-            tools.replace_in_file(os.path.join(self._source_subfolder, cmakelist),
-                                  "Magnum::Application",
-                                  "Magnum::{}".format(app_name))
+        app_name = "{}Application".format(
+            "XEgl" if self.options.application == "xegl" else str(self.options.application).capitalize()
+        )
+        for cmakelist in [
+            os.path.join("src", "Magnum", "Ui", "CMakeLists.txt"),
+            os.path.join("src", "player", "CMakeLists.txt"),
+        ]:
+            replace_in_file(self, os.path.join(self.source_folder, cmakelist),
+                            "Magnum::Application", f"Magnum::{app_name}")
 
     def build(self):
         self._patch_sources()
-
-        cm = self._configure_cmake()
-        cm.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        cm = self._configure_cmake()
-        cm.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "MagnumExtras")
@@ -135,10 +131,14 @@ class MagnumExtrasConan(ConanFile):
             self.cpp_info.components["ui"].set_property("cmake_target_name", "MagnumExtras::Ui")
             self.cpp_info.components["ui"].names["cmake_find_package"] = "Ui"
             self.cpp_info.components["ui"].names["cmake_find_package_multi"] = "Ui"
-            self.cpp_info.components["ui"].libs = ["MagnumUi{}".format(lib_suffix)]
-            self.cpp_info.components["ui"].requires = ["corrade::interconnect", "magnum::magnum_main", "magnum::gl", "magnum::text"]
+            self.cpp_info.components["ui"].libs = [f"MagnumUi{lib_suffix}"]
+            self.cpp_info.components["ui"].requires = [
+                "corrade::interconnect",
+                "magnum::magnum_main",
+                "magnum::gl",
+                "magnum::text",
+            ]
 
         if self.options.player or self.options.ui_gallery:
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info('Appending PATH environment variable: %s' % bin_path)
             self.env_info.path.append(bin_path)
