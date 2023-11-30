@@ -38,7 +38,7 @@ class Md4QtConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("icu/72.1")
+        self.requires("icu/74.1")
         self.requires("uriparser/0.9.7")
 
     def package_id(self):
