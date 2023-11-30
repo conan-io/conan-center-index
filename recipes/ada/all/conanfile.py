@@ -82,7 +82,8 @@ class AdaConan(ConanFile):
 
     def _patch_sources(self):
         # solve APPLE RELOCATABLE SHARED LIBS (KB-H077)
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ada-flags.cmake"), "set(CMAKE_MACOSX_RPATH OFF)", "")
+        if Version(self.version) < "2.6.10":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "ada-flags.cmake"), "set(CMAKE_MACOSX_RPATH OFF)", "")
 
     def build(self):
         self._patch_sources()

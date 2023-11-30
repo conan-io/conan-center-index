@@ -44,8 +44,6 @@ class Exiv2Conan(ConanFile):
         "win_unicode": False,
     }
 
-    provides = []
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -67,7 +65,7 @@ class Exiv2Conan(ConanFile):
         if self.options.with_xmp == "bundled":
             # recipe has bundled xmp-toolkit-sdk of old version
             # avoid conflict with a future xmp recipe
-            self.provides.append("xmp-toolkit-sdk")
+            self.provides = ["xmp-toolkit-sdk"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -76,7 +74,7 @@ class Exiv2Conan(ConanFile):
         self.requires("libiconv/1.17")
         if self.options.with_png:
             self.requires("libpng/1.6.40")
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_xmp == "bundled":
             self.requires("expat/2.5.0")
         if self.options.with_curl:

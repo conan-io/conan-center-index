@@ -16,9 +16,9 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
-        self.tool_requires("imake/1.0.8")
+        self.tool_requires("imake/1.0.9")
         if not self.conf_info.get("tools.gnu:make_program", check_type=str):
-            self.tool_requires("make/4.3")
+            self.tool_requires("make/4.4")
 
     @property
     def _settings_build(self):

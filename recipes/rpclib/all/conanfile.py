@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, mkdir, rename, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime
 
 required_conan_version = ">=1.53.0"
@@ -31,6 +31,9 @@ class rpclibConan(ConanFile):
     @property
     def _min_cppstd(self):
         return "11"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -60,6 +63,7 @@ class rpclibConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -85,7 +89,9 @@ class rpclibConan(ConanFile):
         # TODO: back to global scope after Conan 2.0
         self.cpp_info.components["_rpc"].libs = ["rpc"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["_rpc"].system_libs.append("pthread")
+            self.cpp_info.components["_rpc"].system_libs.extend(["m", "pthread"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["_rpc"].system_libs.extend(["mswsock", "ws2_32"])
 
         # TODO: Remove after Conan 2.0
         self.cpp_info.components["_rpc"].names["cmake_find_package"] = "rpc"

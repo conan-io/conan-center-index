@@ -1,6 +1,8 @@
-#include <iostream>
 #include <uconfig/uconfig.h>
 #include <uconfig/format/Env.h>
+
+#include <cstdlib>
+#include <iostream>
 
 struct AppConfig: public uconfig::Config<uconfig::EnvFormat>
 {
@@ -15,8 +17,6 @@ struct AppConfig: public uconfig::Config<uconfig::EnvFormat>
 };
 
 int main() {
-    setenv("APP_VARIABLE", "123456", 1);
-
     AppConfig app_config;
     uconfig::EnvFormat formatter;
 
@@ -24,8 +24,8 @@ int main() {
     std::map<std::string, std::string> config_map;
     app_config.Emit(formatter, "APP", &config_map);
 
-    for (const auto& [name, vlaue] : config_map) {
-        std::cout << name << "=" << vlaue << std::endl;
+    for (const auto& [name, value] : config_map) {
+        std::cout << name << "=" << value << std::endl;
     }
     return 0;
 }
