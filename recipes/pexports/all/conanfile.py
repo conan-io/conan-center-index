@@ -41,8 +41,9 @@ class PExportsConan(ConanFile):
         del self.info.settings.compiler
 
     def validate(self):
+        # FIXME: Need to build with Mac M1
         if self.settings.arch in ["armv8", "armv8.3"] and cross_building(self):
-            raise ConanInvalidConfiguration("pexports does not support cross-compilation to armv8")
+            raise ConanInvalidConfiguration(f"Conan recipe {self.ref} does not support armv8. Contributions are welcome!")
 
     def build_requirements(self):
         self.tool_requires("automake/1.16.5")
