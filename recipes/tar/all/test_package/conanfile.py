@@ -17,7 +17,7 @@ class TestPackageConan(ConanFile):
         self.tool_requires(self.tested_reference_str)
 
     def generate(self):
-        tar_bin = self.dependencies.build["tar"].conf_info.get("user.tar:tar")
+        tar_bin = self.dependencies.build["tar"].conf_info.get("user.tar:path")
         save(self, os.path.join(self.build_folder, "tar_bin"), tar_bin)
 
     def test(self):

@@ -103,7 +103,7 @@ class TarConan(ConanFile):
         self.cpp_info.includedirs = []
 
         tar_bin = os.path.join(self.package_folder, "bin", "tar")
-        self.conf_info.define("user.tar:tar", tar_bin)
+        self.conf_info.define("user.tar:path", tar_bin)
         self.env_info.TAR = tar_bin
 
         # TODO: to remove in conan v2
