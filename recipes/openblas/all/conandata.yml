@@ -42,4 +42,3 @@ patches:
       patch_description: "treat armv8 CMAKE_SYSTEM_PROCESSOR as arm64"
       patch_source: "https://github.com/xianyi/OpenBLAS/pull/4142"
       patch_type: "bugfix"
-
