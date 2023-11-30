@@ -6,3 +6,12 @@ find_package(incbin CONFIG REQUIRED)
 add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} incbin::incbin)
 target_compile_definitions(${PROJECT_NAME} PUBLIC INCBIN_FILE="${CMAKE_SOURCE_DIR}/CMakeLists.txt")
+
+if(MSVC)
+    add_custom_command(OUTPUT data.c
+            COMMAND incbin_tool
+            ARGS ${CMAKE_CURRENT_LIST_DIR}/test_package.c -p g_ -Ssnakecase -o ${CMAKE_BINARY_DIR}/data.c
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            COMMENT "Generating resources with incbin_tool")
+    target_sources(${PROJECT_NAME} ${CMAKE_BINARY_DIR}/data.c)
+endif()
