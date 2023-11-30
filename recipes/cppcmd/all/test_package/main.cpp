@@ -1,5 +1,7 @@
 #include <sstream>
 
+#include <cstdint>
+#include <limits>
 #include <cppcmd/CommandInterpreter.hpp>
 
 using namespace cppcmd;

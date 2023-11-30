@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, save, collect_libs
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, VCVars
@@ -37,20 +36,6 @@ class MimallocConan(ConanFile):
         "inject": False,
         "single_object": False,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "Visual Studio": "15",
-            "msvc": "191",
-            "clang": "5",
-            "apple-clang": "10",
-        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -108,14 +93,6 @@ class MimallocConan(ConanFile):
            self.options.get_safe("single_object") and \
            self.options.get_safe("inject"):
             raise ConanInvalidConfiguration("Single object is incompatible with library injection")
-
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

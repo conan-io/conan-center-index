@@ -1,0 +1,18 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7a986a0..3da94ff 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -25,13 +25,6 @@ project(capstone
+     VERSION 5.0
+ )
+ 
+-if (MSVC)
+-    add_compile_options(/W1 /w14189)
+-else()
+-    add_compile_options(-Wmissing-braces -Wunused-function -Warray-bounds -Wunused-variable -Wparentheses -Wint-in-bool-context)
+-endif()
+-
+-
+ # to configure the options specify them in in the command line or change them in the cmake UI.
+ # Don't edit the makefile!
+ option(BUILD_SHARED_LIBS "Build shared library" OFF)

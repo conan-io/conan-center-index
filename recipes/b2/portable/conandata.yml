@@ -62,3 +62,6 @@ sources:
   "4.10.0":
     url: "https://github.com/bfgroup/b2/releases/download/4.10.0/b2-4.10.0.tar.bz2"
     sha256: "aee0185473141d4acb56e39c78758b1016e66393ea5ca86ef29403bd9258f2e2"
+  "4.10.1":
+    url: "https://github.com/bfgroup/b2/releases/download/4.10.1/b2-4.10.1.tar.bz2"
+    sha256: "d0818276955c3351eac26e4aa1e61046cfded88773232d76f2833c93bb917633"

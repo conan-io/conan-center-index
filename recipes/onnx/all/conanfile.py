@@ -1,16 +1,17 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
+import sys
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
 
 class OnnxConan(ConanFile):
@@ -35,15 +36,26 @@ class OnnxConan(ConanFile):
     }
 
     @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
+
+    @property
     def _min_cppstd(self):
+        if Version(self.version) >= "1.15.0":
+            return 17
         if Version(self.version) >= "1.13.0" and is_msvc(self):
             return 17
         return 11
 
     @property
-    def _protobuf_version(self):
-        # onnx < 1.9.0 doesn't support protobuf >= 3.18
-        return "3.21.9" if Version(self.version) >= "1.9.0" else "3.17.1"
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "15",
+            "msvc": "191",
+            "gcc": "7",
+            "clang": "5",
+            "apple-clang": "10",
+        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -51,28 +63,33 @@ class OnnxConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.version < "1.9.0":
-            del self.options.disable_static_registration
 
     def configure(self):
-        if self.options.shared:
+        if is_msvc(self):
+            del self.options.shared
+            self.package_type = "static-library"
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"protobuf/{self._protobuf_version}", run=not cross_building(self), transitive_headers=True, transitive_libs=True)
+        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration("onnx shared is broken with Visual Studio")
+        if self._min_cppstd > 11:
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires(f"protobuf/{self._protobuf_version}")
+        if not self._is_legacy_one_profile:
+            self.tool_requires("protobuf/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -80,10 +97,13 @@ class OnnxConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if not cross_building(self):
+        if self._is_legacy_one_profile:
             env = VirtualRunEnv(self)
             env.generate(scope="build")
         tc = CMakeToolchain(self)
+        # https://cmake.org/cmake/help/v3.28/module/FindPythonInterp.html
+        # https://github.com/onnx/onnx/blob/1014f41f17ecc778d63e760a994579d96ba471ff/CMakeLists.txt#L119C1-L119C50
+        tc.variables["PYTHON_EXECUTABLE"] = sys.executable.replace("\\", "/")
         tc.variables["ONNX_BUILD_BENCHMARKS"] = False
         tc.variables["ONNX_USE_PROTOBUF_SHARED_LIBS"] = self.dependencies.host["protobuf"].options.shared
         tc.variables["BUILD_ONNX_PYTHON"] = False
@@ -91,7 +111,7 @@ class OnnxConan(ConanFile):
         tc.variables["ONNX_WERROR"] = False
         tc.variables["ONNX_COVERAGE"] = False
         tc.variables["ONNX_BUILD_TESTS"] = False
-        tc.variables["ONNX_USE_LITE_PROTO"] = False
+        tc.variables["ONNX_USE_LITE_PROTO"] = self.dependencies.host["protobuf"].options.lite
         tc.variables["ONNX_ML"] = True
         if Version(self.version) < "1.13.0":
             tc.variables["ONNXIFI_ENABLE_EXT"] = False
@@ -99,8 +119,7 @@ class OnnxConan(ConanFile):
         tc.variables["ONNX_VERIFY_PROTO3"] = Version(self.dependencies.host["protobuf"].ref.version).major == "3"
         if is_msvc(self):
             tc.variables["ONNX_USE_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
-        if self.version >= "1.9.0":
-            tc.variables["ONNX_DISABLE_STATIC_REGISTRATION"] = self.options.get_safe('disable_static_registration')
+        tc.variables["ONNX_DISABLE_STATIC_REGISTRATION"] = self.options.get_safe('disable_static_registration')
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -177,8 +196,7 @@ class OnnxConan(ConanFile):
                     }
                 }
             )
-        if Version(self.version) >= "1.11.0":
-            components["libonnx"]["defines"].append("__STDC_FORMAT_MACROS")
+        components["libonnx"]["defines"].append("__STDC_FORMAT_MACROS")
         return components
 
     def package_info(self):

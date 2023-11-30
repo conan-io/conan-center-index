@@ -1,43 +1,37 @@
-from conans import ConanFile, tools
-from conans.errors import ConanException
+from conan import ConanFile
+from conan.tools.build import build_jobs, cross_building
+from conan.tools.layout import basic_layout
 from io import StringIO
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "scons"
+    generators = "VirtualBuildEnv"
+    test_type = "explicit"
+
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
+
+    def layout(self):
+        basic_layout(self)
 
     def build(self):
-        scons_path = self.deps_user_info["scons"].scons
-        if not scons_path:
-            raise ConanException("scons could not be found")
-        if not scons_path.replace("\\", "/").startswith(self.deps_cpp_info["scons"].rootpath.replace("\\", "/")):
-            raise ConanException("an external scons was found")
-
         output = StringIO()
-        self.run("{} --version".format(scons_path), run_environment=True, output=output, ignore_errors=True)
-        self.output.info("output: %s" % output.getvalue())
-        output = StringIO()
-        self.run("{} --version".format(scons_path), run_environment=True, output=output)
-        text = output.getvalue()
-        if self.deps_cpp_info["scons"].version not in text:
-            raise ConanException("scons --version does not return correct version")
+        self.run("scons --version", output)
+        self.output.info(output.getvalue())
+        assert("SCons by Steven Knight" in output.getvalue())
 
         scons_args = [
-            "-j", str(tools.cpu_count()),
+            "-j", str(build_jobs(self)),
             "-C", self.source_folder,
             "-f", os.path.join(self.source_folder, "SConstruct"),
         ]
 
-        self.run("scons {}".format(" ".join(scons_args)), run_environment=True)
+        self.run("scons {}".format(" ".join(scons_args)))
 
     def test(self):
-        from io import StringIO
-
-        if not tools.cross_building(self):
-            bin_path = os.path.join(".", "test_package")
-            output = StringIO()
-            self.run(bin_path, run_environment=True, ignore_errors=True, output=output)
-            self.output.info("output: %s" % output.getvalue())
-            self.run(bin_path, run_environment=True)
+        if not cross_building(self):
+            # Scons build put executable righe here
+            bin_path = os.path.join(self.recipe_folder, "test_package")
+            self.run(bin_path, env="conanrun")

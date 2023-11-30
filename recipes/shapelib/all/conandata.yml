@@ -12,3 +12,6 @@ patches:
       patch_description: "Use the standard BUILD_TESTING variable to control building tests"
       patch_source: "https://github.com/OSGeo/shapelib/pull/46"
       patch_type: "portability"
+    - patch_file: "patches/0003-relocatable-shared-macos.patch"
+      patch_description: "Relocatable shared lib on macOS"
+      patch_type: "conan"

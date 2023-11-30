@@ -1,0 +1,14 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/lemire/streamvbyte/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "6b1920e9865146ba444cc317aa61cd39cdf760236e354ef7956011a9fe577882"
+patches:
+  "1.0.0":
+    - patch_file: "patches/1.0.0-0001-fix-cmake.patch"
+      patch_description: "fix install destination"
+      patch_source: "https://github.com/lemire/streamvbyte/pull/67"
+      patch_type: "portability"
+    - patch_file: "patches/1.0.0-0002-relocatable-shared-macos.patch"
+      patch_description: "Relocatable shared lib for macOS"
+      patch_source: "https://github.com/lemire/streamvbyte/pull/66"
+      patch_type: "portability"

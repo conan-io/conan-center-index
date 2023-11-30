@@ -7,13 +7,16 @@ import textwrap
 
 required_conan_version = ">=1.53.0"
 
+
 class Argtable3Conan(ConanFile):
     name = "argtable3"
     description = "A single-file, ANSI C, command-line parsing library that parses GNU-style command-line options."
     license = "BSD-3-clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.argtable.org/"
-    topics = ("conan", "argtable3", "command", "line", "argument", "parse", "parsing", "getopt")
+    topics = ("command", "line", "argument", "parse", "parsing", "getopt")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],

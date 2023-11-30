@@ -1,8 +1,9 @@
 // Demo program for clipping with Gaps objects.
 
-#include <iostream>
-#include <seqan/sequence.h>
 #include <seqan/align.h>
+#include <seqan/sequence.h>
+
+#include <iostream>
 
 using namespace seqan;
 

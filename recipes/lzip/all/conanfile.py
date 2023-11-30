@@ -1,102 +1,59 @@
-from conans import AutoToolsBuildEnvironment, CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-import contextlib
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.files import copy, get, replace_in_file, rmdir, patch, apply_conandata_patches, export_conandata_patches
+from conan.tools.layout import basic_layout
 import os
-import textwrap
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class LzipConan(ConanFile):
     name = "lzip"
     description = "Lzip is a lossless data compressor with a user interface similar to the one of gzip or bzip2"
-    topics = ("lzip", "compressor", "lzma")
     license = "GPL-v2-or-later"
-    homepage = "https://www.nongnu.org/lzip/"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.nongnu.org/lzip/"
+    topics = ("compressor", "lzma")
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
 
-    exports_sources = "patches/**"
+    def export_sources(self):
+        export_conandata_patches(self)
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Visual Studio is not supported")
+        if self.settings.os == "Windows" and self.settings.compiler != "gcc":
+            raise ConanInvalidConfiguration("Only gcc supported for windows builds")
 
     def package_id(self):
         del self.info.settings.compiler
-
-    def _detect_compilers(self):
-        tools.rmdir("detectdir")
-        tools.mkdir("detectdir")
-        with tools.chdir("detectdir"):
-            tools.save("CMakeLists.txt", textwrap.dedent("""\
-                cmake_minimum_required(VERSION 2.8)
-                project(test C CXX)
-                message(STATUS "CC=${CMAKE_C_COMPILER}")
-                message(STATUS "CXX=${CMAKE_CXX_COMPILER}")
-                file(WRITE cc.txt "${CMAKE_C_COMPILER}")
-                file(WRITE cxx.txt "${CMAKE_CXX_COMPILER}")
-                """))
-            CMake(self).configure(source_folder="detectdir", build_folder="detectdir")
-            cc = tools.load("cc.txt").strip()
-            cxx = tools.load("cxx.txt").strip()
-        return cc, cxx
+        del self.info.settings.build_type
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @contextlib.contextmanager
-    def _build_context(self):
-        env = {}
-        cc, cxx = self._detect_compilers()
-        if not tools.get_env("CC"):
-            env["CC"] = cc
-        if not tools.get_env("CXX"):
-            env["CXX"] = cxx
-        with tools.environment_append(env):
-            yield
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        conf_args = [
-        ]
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+        apply_conandata_patches(self)
+
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            with tools.environment_append({"CONAN_CPU_COUNT": "1"}):
-                autotools.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install(target="install-bin")
 
     def package_info(self):
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
+
+        bindir = os.path.join(self.package_folder, "bin")
+        self.runenv_info.prepend_path("PATH", bindir)

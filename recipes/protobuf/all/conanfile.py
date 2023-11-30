@@ -19,7 +19,7 @@ class ProtobufConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/protocolbuffers/protobuf"
     license = "BSD-3-Clause"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -48,18 +48,12 @@ class ProtobufConan(ConanFile):
     def _is_clang_x86(self):
         return self.settings.compiler == "clang" and self.settings.arch == "x86"
 
-    @property
-    def _can_disable_rtti(self):
-        return Version(self.version) >= "3.15.4"
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._can_disable_rtti:
-            del self.options.with_rtti
 
     def configure(self):
         if self.options.shared:
@@ -70,7 +64,7 @@ class ProtobufConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
@@ -79,7 +73,7 @@ class ProtobufConan(ConanFile):
         check_min_vs(self, "190")
 
         if self.settings.compiler == "clang":
-            if Version(self.version) >= "3.15.4" and Version(self.settings.compiler.version) < "4":
+            if Version(self.settings.compiler.version) < "4":
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 4")
 
     def source(self):
@@ -97,10 +91,8 @@ class ProtobufConan(ConanFile):
         tc.cache_variables["protobuf_BUILD_PROTOC_BINARIES"] = self.settings.os != "tvOS"
         if not self.options.debug_suffix:
             tc.cache_variables["protobuf_DEBUG_POSTFIX"] = ""
-        if Version(self.version) >= "3.14.0":
-            tc.cache_variables["protobuf_BUILD_LIBPROTOC"] = self.settings.os != "tvOS"
-        if self._can_disable_rtti:
-            tc.cache_variables["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
+        tc.cache_variables["protobuf_BUILD_LIBPROTOC"] = self.settings.os != "tvOS"
+        tc.cache_variables["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
         if is_msvc(self) or self._is_clang_cl:
             runtime = msvc_runtime_flag(self)
             if not runtime:
