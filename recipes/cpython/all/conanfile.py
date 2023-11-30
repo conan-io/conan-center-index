@@ -149,7 +149,7 @@ class CPythonConan(ConanFile):
                 self.requires("mpdecimal/2.5.1")
         if self.settings.os != "Windows":
             if not is_apple_os(self):
-                self.requires("util-linux-libuuid/2.39.2")
+                self.requires("util-linux-libuuid/2.39.2", force=True)
             self.requires("libxcrypt/4.4.36")
         if self.options.get_safe("with_bz2"):
             self.requires("bzip2/1.0.8")
@@ -220,18 +220,7 @@ class CPythonConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _generate_autotools(self):
-        tc = AutotoolsToolchain(self)
-        # TODO it's possible not all of these are needed
-        tc.update_configure_args({
-            "--prefix": f"{self.package_folder}",
-            "--bindir": "${prefix}/bin",
-            "--sbindir": "${prefix}/bin",
-            "--libexecdir": "${prefix}/bin",
-            "--libdir": "${prefix}/lib",
-            "--includedir": "${prefix}/include",
-            "--oldincludedir": "${prefix}/include",
-            "--datarootdir": "${prefix}/share",
-        })
+        tc = AutotoolsToolchain(self, prefix=self.package_folder)
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args += [
             "--with-doc-strings={}".format(yes_no(self.options.docstrings)),
@@ -277,19 +266,10 @@ class CPythonConan(ConanFile):
             # Building _testembed fails due to missing pthread/rt symbols
             tc.ldflags.append("-lpthread")
 
-        tc.make_args += ["DESTDIR=", "prefix=", "exec_prefix="]
-
-        build = None
-        if cross_building(self) and not cross_building(self, skip_x64_x86=True):
-            # Building from x86_64 to x86 is not a "real" cross build, so set build == host
-            build = get_gnu_triplet(
-                self, str(self.settings.os), str(self.settings.arch), str(self.settings.compiler)
-            )
         tc.generate()
 
         deps = AutotoolsDeps(self)
         deps.generate()
-
 
     def generate(self):
         if is_msvc(self):
@@ -607,7 +587,9 @@ class CPythonConan(ConanFile):
             rm(self, "vcruntime*", os.path.join(self.package_folder, "bin"), recursive=True)
         else:
             autotools = Autotools(self)
-            autotools.install(target="altinstall")
+            # FIXME: Autotools.install() always adds DESTDIR, we don't want this argument.
+            # Use .make() directly instead
+            autotools.make(target="altinstall")
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
 
