@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import copy, get, rmdir, save
 
 required_conan_version = ">=1.53.0"
 
@@ -93,7 +93,6 @@ class MagnumConan(ConanFile):
     def export_sources(self):
         copy(self, "cmake/*", self.recipe_folder, self.export_sources_folder)
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
-        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -202,7 +201,9 @@ class MagnumConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
+        # Remove unnecessary dependency on UseEmscripten
+        # https://github.com/mosra/magnum/issues/490
+        save(self, os.path.join(self.source_folder, "UseEmscripten.cmake"), "")
 
     def build(self):
         self._patch_sources()
