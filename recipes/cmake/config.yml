@@ -1,4 +1,6 @@
 versions:
+  "3.27.7":
+    folder: "binary"
   "3.27.6":
     folder: "binary"
   "3.27.5":

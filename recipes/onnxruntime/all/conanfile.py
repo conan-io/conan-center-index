@@ -41,10 +41,18 @@ class OnnxRuntimeConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
+        if Version(self.version) < "1.16.0":
+            return {
+                "Visual Studio": "16",
+                "msvc": "192",
+                "gcc": "7",
+                "clang": "5",
+                "apple-clang": "10",
+            }
         return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "7",
+            "Visual Studio": "17",
+            "msvc": "193",
+            "gcc": "9",
             "clang": "5",
             "apple-clang": "10",
         }
@@ -69,6 +77,7 @@ class OnnxRuntimeConan(ConanFile):
         return {
             "1.14": "1.13.1",
             "1.15": "1.14.1",
+            "1.16": "1.14.1",
         }[f"{version.major}.{version.minor}"]
 
     def requirements(self):
@@ -249,7 +258,10 @@ class OnnxRuntimeConan(ConanFile):
                 onnxruntime_libs.append("providers_xnnpack")
             self.cpp_info.libs = [f"onnxruntime_{lib}" for lib in onnxruntime_libs]
 
-        self.cpp_info.includedirs.append("include/onnxruntime/core/session")
+        if Version(self.version) < "1.16.0" or not self.options.shared:
+            self.cpp_info.includedirs.append("include/onnxruntime/core/session")
+        else:
+            self.cpp_info.includedirs.append("include/onnxruntime")
 
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
@@ -259,5 +271,30 @@ class OnnxRuntimeConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("shlwapi")
 
+        # conanv1 doesn't support traits and we only need headers from boost
+        self.cpp_info.requires = [
+            "abseil::abseil",
+            "protobuf::protobuf",
+            "date::date",
+            "re2::re2",
+            "onnx::onnx",
+            "flatbuffers::flatbuffers",
+            "boost::headers",
+            "safeint::safeint",
+            "nlohmann_json::nlohmann_json",
+            "eigen::eigen",
+            "ms-gsl::ms-gsl",
+            "cpuinfo::cpuinfo"
+        ]
+        if self.settings.os != "Windows":
+            self.cpp_info.requires.append("nsync::nsync")
+        else:
+            self.cpp_info.requires.append("wil::wil")
+        if self.options.with_xnnpack:
+            self.cpp_info.requires.append("xnnpack::xnnpack")
+
+        # https://github.com/microsoft/onnxruntime/blob/v1.16.0/cmake/CMakeLists.txt#L1759-L1763
+        self.cpp_info.set_property("cmake_file_name", "onnxruntime")
+        self.cpp_info.set_property("cmake_target_name", "onnxruntime::onnxruntime")
         # https://github.com/microsoft/onnxruntime/blob/v1.14.1/cmake/CMakeLists.txt#L1584
         self.cpp_info.set_property("pkg_config_name", "onnxruntime")

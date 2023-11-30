@@ -34,6 +34,10 @@ patches:
     - patch_file: "patches/251.15/0001-Remove-dependency-from-coreutils.patch"
       patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
       patch_type: "conan"
+    - patch_file: "patches/253.3/0002-meson-use-c_args-in-generator-scripts.patch"
+      patch_source: "https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/29538"
+      patch_description: "fixes cross-compilation by passing necessary compiler arguments to generator scripts"
+      patch_type: "portability"
   "253.6":
     - patch_file: "patches/253.3/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
       patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
@@ -41,6 +45,10 @@ patches:
     - patch_file: "patches/251.15/0001-Remove-dependency-from-coreutils.patch"
       patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
       patch_type: "conan"
+    - patch_file: "patches/253.3/0002-meson-use-c_args-in-generator-scripts.patch"
+      patch_source: "https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/29538"
+      patch_description: "fixes cross-compilation by passing necessary compiler arguments to generator scripts"
+      patch_type: "portability"
   "253.3":
     - patch_file: "patches/253.3/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
       patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
@@ -48,6 +56,10 @@ patches:
     - patch_file: "patches/251.15/0001-Remove-dependency-from-coreutils.patch"
       patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
       patch_type: "conan"
+    - patch_file: "patches/253.3/0002-meson-use-c_args-in-generator-scripts.patch"
+      patch_source: "https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/29538"
+      patch_description: "fixes cross-compilation by passing necessary compiler arguments to generator scripts"
+      patch_type: "portability"
   "252.9":
     - patch_file: "patches/248.12/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
       patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
