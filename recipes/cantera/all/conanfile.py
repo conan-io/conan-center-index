@@ -1,6 +1,8 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, save, load, chdir
 from conan.tools.layout import basic_layout
@@ -35,12 +37,29 @@ class canteraRecipe(ConanFile):
     scons_boost_inc_dir = ""
 
     @property
-    def _min_cppstd(self):
+    def _minimum_cpp_standard(self):
         return 17
-    
+
+    @property
+    def _compiler_required(self):
+        return {
+            "Visual Studio": "16",
+            "msvc": "191",
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "11.0",
+        }
+
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        if self.info.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        
+        minimum_version = self._compiler_required.get(str(self.info.settings.compiler), False)
+        if minimum_version:
+            if Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+        else:
+            self.output.warn(f"{self.ref} requires C++{self._minimum_cpp_standard}. Your compiler is unknown. Assuming it supports C++{self._minimum_cpp_standard}")
 
     def requirements(self):
         self.requires("boost/1.83.0", headers=True, libs=False)
