@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, save, load, chdir
+from conan.tools.files import get, save, load, chdir, rename, rmdir
 from conan.tools.layout import basic_layout
 
 class canteraRecipe(ConanFile):
@@ -119,6 +119,9 @@ class canteraRecipe(ConanFile):
     def package(self):
         with chdir(self, self.source_folder):
             self.run(f'scons install -Y "{self.source_folder}"')
+            rename(self, os.path.join(self.package_folder,"doc"), os.path.join(self.package_folder,"license"))
+            rmdir(self, os.path.join(self.package_folder,"samples"))
+
 
     def package_info(self):
         self.cpp_info.libs = ["cantera_shared"] if self.options.shared else ["cantera"]
