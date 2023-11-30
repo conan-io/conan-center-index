@@ -1,0 +1,113 @@
+Previously HardwarePicker would take the path returned by
+vtkRenderer::PickPropFrom, which returns the closest picked node
+(lowest z buffer value).  PickPropFrom also returns a vtkSelection with
+a list of all picked nodes.
+
+HardwarePicker would then extract the composite index and
+PointId/CellId from the first vtkSelectionNode in the returned
+selection, which is not guaranteed to be the closest picked node,
+resulting in incorrect ids being used.
+Further, this id would be used in ComputeIntersectionFromDataSet to
+compute the pick position and pick normal.
+
+This is fixed by making vtkHardwarePicker search the selection nodes
+itself to identify the closest picked node, ensuring that the
+picked prop and ids are extracted from the same node.
+
+
+--- Rendering/Core/vtkHardwarePicker.cxx	2023-02-15 12:03:53.000000000 +0800
++++ Rendering/Core/vtkHardwarePicker.cxx	2023-11-28 11:27:26.577620700 +0800
+@@ -372,23 +372,60 @@
+     double area[4] = { selectionX - this->PixelTolerance, selectionY - this->PixelTolerance,
+       selectionX + this->PixelTolerance, selectionY + this->PixelTolerance };
+     // do the hardware point pick in the given area
+-    this->SetPath(renderer->PickPropFrom(area[0], area[1], area[2], area[3], this->PickableProps,
+-      vtkDataObject::FIELD_ASSOCIATION_POINTS, this->HardwareSelection));
++    renderer->PickPropFrom(area[0], area[1], area[2], area[3], this->PickableProps,
++      vtkDataObject::FIELD_ASSOCIATION_POINTS, this->HardwareSelection);
+   }
+   else // pick a cell
+   {
+     // do the hardware cell pick
+-    this->SetPath(renderer->PickPropFrom(selectionX, selectionY, this->PickableProps,
+-      vtkDataObject::FIELD_ASSOCIATION_CELLS, this->HardwareSelection));
++    renderer->PickPropFrom(selectionX, selectionY, this->PickableProps,
++      vtkDataObject::FIELD_ASSOCIATION_CELLS, this->HardwareSelection);
++  }
++
++  // PickPropFrom returns the vtkAssemblyPath for the closest prop, but we also
++  // want the selection node so that query the selection list and composite
++  // index below. So here we search for the closest prop ourselves.
++  vtkSelectionNode* closestNode = nullptr;
++  vtkProp* closestProp = nullptr;
++
++  if (this->HardwareSelection && this->HardwareSelection->GetNode(0))
++  {
++    double closestDepth = 2.0;
++    unsigned int numPicked = this->HardwareSelection->GetNumberOfNodes();
++    for (unsigned int pIdx = 0; pIdx < numPicked; pIdx++)
++    {
++      vtkSelectionNode* selnode = this->HardwareSelection->GetNode(pIdx);
++      vtkProp* aProp =
++        vtkProp::SafeDownCast(selnode->GetProperties()->Get(vtkSelectionNode::PROP()));
++      if (aProp)
++      {
++        double adepth = selnode->GetProperties()->Get(vtkSelectionNode::ZBUFFER_VALUE());
++        if (adepth < closestDepth)
++        {
++          closestNode = selnode;
++          closestProp = aProp;
++          closestDepth = adepth;
++        }
++      }
++    }
++  }
++
++  if (closestProp)
++  {
++    closestProp->InitPathTraversal();
++    this->SetPath(closestProp->GetNextPath());
++  }
++  else
++  {
++    this->SetPath(nullptr);
+   }
+ 
+   if (this->Path) // if there was a pick
+   {
+-    vtkProp* propCandidate = this->Path->GetLastNode()->GetViewProp();
+     vtkAbstractMapper3D* mapper = nullptr;
+ 
+     // find the mapper and dataset corresponding to the picked prop
+-    int pickable = this->TypeDecipher(propCandidate, &mapper);
++    int pickable = this->TypeDecipher(closestProp, &mapper);
+     if (pickable)
+     {
+       if (mapper)
+@@ -431,7 +468,7 @@
+       // define FlatBlockIndex
+       if (this->CompositeDataSet)
+       {
+-        this->FlatBlockIndex = this->HardwareSelection->GetNode(0)->GetProperties()->Get(
++        this->FlatBlockIndex = closestNode->GetProperties()->Get(
+           vtkSelectionNode::COMPOSITE_INDEX());
+       }
+       // define selected dataset
+@@ -442,7 +479,7 @@
+                                   : nullptr);
+       // define PointId/CellId
+       vtkIdType selectionId =
+-        vtkIdTypeArray::SafeDownCast(this->HardwareSelection->GetNode(0)->GetSelectionList())
++        vtkIdTypeArray::SafeDownCast(closestNode->GetSelectionList())
+           ->GetValue(0);
+       // Note: the hardware selection may return a selectionId that does not correspond to a point
+       // or cell in the dataset. If that happens, if we were to use vtkExtractSelection, the
+@@ -525,7 +562,7 @@
+   if (this->Path)
+   {
+     // invoke pick method if one defined - prop goes first
+-    this->Path->GetFirstNode()->GetViewProp()->Pick();
++    closestProp->Pick();
+     this->InvokeEvent(vtkCommand::PickEvent, nullptr);
+     picked = 1;
+   }
