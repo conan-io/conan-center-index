@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir, replace_in_file, save
 from conan.tools.build import check_min_cppstd
@@ -161,6 +161,11 @@ class OpenTelemetryCppConan(ConanFile):
                 f"{self.ref} requires boost with these components: "
                 f"{', '.join(self._required_boost_components)}"
             )
+
+        if conan_version.major == 1 and self.settings.compiler == "apple-clang" and Version(self.version) >= "1.12.0":
+            # Only fails on apple-clang in this configuration for some reason:
+            # https://github.com/conan-io/conan-center-index/pull/21332#issuecomment-1830766894
+            raise ConanInvalidConfiguration("opentelemetry-cpp >= 1.12.0 does not support Apple Clang on Conan v1")
 
     def build_requirements(self):
         if self.options.with_otlp or self.options.with_otlp_grpc:
