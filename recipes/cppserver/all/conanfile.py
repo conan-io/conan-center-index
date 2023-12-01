@@ -57,17 +57,15 @@ class CppServer(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("asio/1.27.0")
+        self.requires("asio/1.28.2", transitive_headers=True)
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("cppcommon/1.0.3.0")
+        self.requires("cppcommon/1.0.4.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn(f"{self.ref} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif Version(self.settings.compiler.version) < minimum_version:
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports at least C++17")
 
     def build_requirements(self):
