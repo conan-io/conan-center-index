@@ -6,7 +6,6 @@ from io import StringIO
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir, unzip
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
@@ -392,7 +391,7 @@ class CPythonConan(ConanFile):
             projects = list(filter(project_build, projects))
             return projects
         else:
-            return "pythoncore", "python", "pythonw"
+            return ["pythoncore", "python", "pythonw"]
 
     @property
     def _msvc_discarded_projects(self):

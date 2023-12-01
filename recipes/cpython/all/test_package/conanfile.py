@@ -228,4 +228,4 @@ class TestPackageConan(ConanFile):
                 if self.deps_user_info["cpython"].module_requires_pythonhome == "True":
                     os.environ["PYTHONHOME"] = self.deps_user_info["cpython"].pythonhome
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(bin_path)
+            self.run(bin_path, env="conanrun")
