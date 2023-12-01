@@ -1,0 +1,33 @@
+From 45edf065cb7d02b466761083a6860f3ef2b149fe Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Fri, 1 Dec 2023 09:55:02 -0600
+Subject: [PATCH] Switch from the deprecated distutils module to the packaging
+ module
+
+The distutils module was removed in Python 3.12.
+---
+ gio/gdbus-2.0/codegen/utils.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/gio/gdbus-2.0/codegen/utils.py b/gio/gdbus-2.0/codegen/utils.py
+index 02046108d..08f1ba973 100644
+--- a/gio/gdbus-2.0/codegen/utils.py
++++ b/gio/gdbus-2.0/codegen/utils.py
+@@ -19,7 +19,7 @@
+ #
+ # Author: David Zeuthen <davidz@redhat.com>
+ 
+-import distutils.version
++import packaging.version
+ import os
+ import sys
+ 
+@@ -166,4 +166,4 @@ def version_cmp_key(key):
+         v = str(key[0])
+     else:
+         v = "0"
+-    return (distutils.version.LooseVersion(v), key[1])
++    return (packaging.version.Version(v), key[1])
+-- 
+2.43.0
+
