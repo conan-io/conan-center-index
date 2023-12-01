@@ -34,6 +34,7 @@ class HarfbuzzConan(ConanFile):
         "with_uniscribe": [True, False],
         "with_directwrite": [True, False],
         "with_subset": [True, False],
+        "with_coretext": [True, False],
     }
     default_options = {
         "shared": False,
@@ -45,6 +46,7 @@ class HarfbuzzConan(ConanFile):
         "with_uniscribe": True,
         "with_directwrite": False,
         "with_subset": False,
+        "with_coretext": True,
     }
 
     short_paths = True
@@ -63,6 +65,8 @@ class HarfbuzzConan(ConanFile):
             del self.options.with_gdi
             del self.options.with_uniscribe
             del self.options.with_directwrite
+        if not is_apple_os(self):
+            del self.options.with_coretext
 
     def configure(self):
         if self.options.shared:
@@ -142,6 +146,7 @@ class HarfbuzzConan(ConanFile):
             "icu": is_enabled(self.options.with_icu),
             "freetype": is_enabled(self.options.with_freetype),
             "gdi": is_enabled(self.options.get_safe("with_gdi")),
+            "coretext": is_enabled(self.options.get_safe("with_coretext")),
             "directwrite": is_enabled(self.options.get_safe("with_directwrite")),
             "gobject": is_enabled(can_run(self) and self.options.with_glib),
             "introspection": is_enabled(False),
