@@ -181,9 +181,9 @@ class wxWidgetsConan(ConanFile):
             self.requires("xz_utils/[>=5.4.4 <6]")
         if self.options.expat == "expat":
             self.requires("expat/2.5.0")
-        if self.options.regex == "regex" and self.version >= "3.1.6":
+        if self.options.regex == "regex":
             self.requires("pcre2/10.42")
-        if self.options.svg == "nanosvg" and self.version >= "3.1.7":
+        if self.options.get_safe("svg") == "nanosvg":
             self.requires("nanosvg/cci.20210904")
 
     def validate(self):
@@ -214,8 +214,6 @@ class wxWidgetsConan(ConanFile):
         # Fix for strcpy_s (fix upstream?)
         if is_apple_os(self):
             cmake_version = "3.0"
-            if self.version < "3.1.7":
-                cmake_version = "2.8.12"
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             f'cmake_minimum_required(VERSION {cmake_version})',
                             f'cmake_minimum_required(VERSION {cmake_version})\nadd_definitions(-D__STDC_WANT_LIB_EXT1__)')
@@ -299,9 +297,8 @@ class wxWidgetsConan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("expat", "cmake_file_name", "EXPAT")
         deps.set_property("expat", "cmake_target_name", "EXPAT")
-        if self.version >= "3.1.7":
-            deps.set_property("nanosvg", "cmake_file_name", "NanoSVG")
-            deps.set_property("nanosvg", "cmake_target_name", "NanoSVG::nanosvg")
+        deps.set_property("nanosvg", "cmake_file_name", "NanoSVG")
+        deps.set_property("nanosvg", "cmake_target_name", "NanoSVG::nanosvg")
         deps.generate()
 
     def build(self):
@@ -387,9 +384,6 @@ class wxWidgetsConan(ConanFile):
             return "{prefix}{toolkit}{version}{unicode}{debug}_%s{suffix}" % library
 
         libs = []
-        if not self.options.shared and self.version < "3.1.6":
-            regex_suffix = "{debug}" if self.settings.os == "Windows" else "{suffix}"
-            libs.append("wxregex{unicode}" + regex_suffix)
         libs.append("{prefix}base{version}{unicode}{debug}{suffix}")
         libs.append(library_pattern("core"))
         libs.append(library_pattern("adv"))
