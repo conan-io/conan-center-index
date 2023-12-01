@@ -39,7 +39,7 @@ class IncbinConan(ConanFile):
     def package(self):
         copy(self, "UNLICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "incbin.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder)
-        copy(self, "**/incbin_tool.exe", dst=os.path.join(self.package_folder, "bin"), src=self.build_folder, keep_path=False)
+        copy(self, "incbin_tool.exe", dst=os.path.join(self.package_folder, "bin"), src=self.build_folder, keep_path=False)
 
     def package_id(self):
         if not is_msvc(self):
