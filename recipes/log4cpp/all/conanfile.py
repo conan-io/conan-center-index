@@ -25,12 +25,10 @@ class Log4cppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_pthreads": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_pthreads": True,
     }
 
     def config_options(self):
@@ -58,9 +56,6 @@ class Log4cppConan(ConanFile):
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
-            f"--with-pthreads={yes_no(self.options.with_pthreads)}",
-            "--without-omnithreads",
-            "--disable-doxyen",
         ])
         tc.generate()
 
@@ -83,5 +78,4 @@ class Log4cppConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "log4cpp")
         self.cpp_info.libs = ["log4cpp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            if self.options.with_pthreads:
-                self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.append("pthread")
