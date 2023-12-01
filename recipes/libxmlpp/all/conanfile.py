@@ -53,7 +53,7 @@ class LibXMLPlusPlus(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libxml2/2.11.4")
+        self.requires("libxml2/2.11.5")
         if Version(self.version) <= "2.42.1":
             self.requires("glibmm/2.66.4", transitive_headers=True, transitive_libs=True)
         else:
@@ -75,7 +75,7 @@ class LibXMLPlusPlus(ConanFile):
             check_min_cppstd(self, 11)
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/1.2.3")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
 
