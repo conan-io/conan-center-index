@@ -1,4 +1,6 @@
 versions:
+  "20231101":
+    folder: all
   "20230901":
     folder: all
   "20230801":

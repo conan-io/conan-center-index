@@ -5,6 +5,7 @@ from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
+import glob
 import os
 
 required_conan_version = ">=1.53.0"
@@ -147,8 +148,10 @@ class DuckdbConan(ConanFile):
         cmake.install()
 
         if self.options.shared:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
             rm(self, "duckdb_*.lib", os.path.join(self.package_folder, "lib"))
+            for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
+                if not lib.endswith(".dll.a"):
+                    os.remove(lib)
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
