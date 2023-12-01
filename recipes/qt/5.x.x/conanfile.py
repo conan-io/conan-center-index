@@ -151,7 +151,7 @@ class QtConan(ConanFile):
             # In any case, check its actual version for compatibility
             from six import StringIO  # Python 2 and 3 compatible
             mybuf = StringIO()
-            cmd_v = f"\"{python_exe}\" --version 2>&1"
+            cmd_v = f"\"{python_exe}\" --version"
             self.run(cmd_v, mybuf)
             verstr = mybuf.getvalue().strip().split("Python ")[1]
             if verstr.endswith("+"):
@@ -355,7 +355,7 @@ class QtConan(ConanFile):
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.3.0")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
-            self.requires("freetype/2.13.2", override=True)
+            self.requires("freetype/2.13.2")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.14.2")
         if self.options.get_safe("with_icu", False):
@@ -370,7 +370,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.40")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.44.2", override=True)
+            self.requires("sqlite3/3.44.2")
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.1.0")
         if self.options.with_pq:
