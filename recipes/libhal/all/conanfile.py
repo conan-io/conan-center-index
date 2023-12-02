@@ -44,6 +44,7 @@ class LibHALConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("tl-function-ref/1.0.0")
         # NOTE from the author, kammce, and CCI maintainers:
         # although boost-leaf is deprecated, we've kept it for 2.x versions,
         # don't update it as upstream code won't work with boost itself
@@ -77,18 +78,20 @@ class LibHALConan(ConanFile):
         pass
 
     def package(self):
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(
-            self,
-            "*.h",
-            dst=os.path.join(self.package_folder, "include"),
-            src=os.path.join(self.source_folder, "include")
+        copy(self,
+             "LICENSE",
+             src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses")
         )
-        copy(
-            self,
+        copy(self,
+            "*.h",
+            src=os.path.join(self.source_folder, "include"),
+            dst=os.path.join(self.package_folder, "include")
+        )
+        copy(self,
             "*.hpp",
-            dst=os.path.join(self.package_folder, "include"),
-            src=os.path.join(self.source_folder, "include")
+            src=os.path.join(self.source_folder, "include"),
+            dst=os.path.join(self.package_folder, "include")
         )
 
     def package_info(self):
@@ -104,7 +107,8 @@ class LibHALConan(ConanFile):
                 "BOOST_LEAF_NO_THREADS"
             ]
 
-        # Note from CCI maintainers: Ensure users are aware of the deprecated dependency
-        if Version(self.version) < "3.0":
+        # Note from CCI maintainers: Ensure users are aware of the deprecated
+        # dependency
+        if version < "3.0":
             self.output.warning(f"{self.name} < 3.0.0 uses boost-leaf which is a deprecated recipe. "
                                 f"Once 3.0 is released, 2.x will also be deprecated.")
