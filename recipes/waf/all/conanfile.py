@@ -30,8 +30,8 @@ class WafConan(ConanFile):
 
     @property
     def _license_text(self):
-        _, license, _ = open(os.path.join(self.source_folder, "waf"), "rb").read().split(b'"""', 3)
-        return license.decode().lstrip()
+        license_text = self.source_path.joinpath("waf").read_bytes().split(b'"""', 3)[1]
+        return license_text.decode().lstrip()
 
     def build(self):
         pass
@@ -58,10 +58,10 @@ class WafConan(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
-        binpath = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH env var: {binpath}")
-        self.env_info.PATH.append(binpath)
-
         wafdir = os.path.join(self.package_folder, "lib")
-        self.output.info(f"Setting WAFDIR env var: {wafdir}")
+        self.buildenv_info.define_path("WAFDIR", wafdir)
+
+        # TODO: Legacy, remove in 2.0
+        binpath = os.path.join(self.package_folder, "bin")
+        self.env_info.PATH.append(binpath)
         self.env_info.WAFDIR = wafdir
