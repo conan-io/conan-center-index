@@ -63,15 +63,15 @@ class ElfutilsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.44.0")
+            self.requires("sqlite3/3.44.2")
         if self.options.with_bzlib:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.4")
+            self.requires("xz_utils/5.4.5")
         if self.options.get_safe("libdebuginfod"):
-            self.requires("libcurl/8.1.2")
+            self.requires("libcurl/8.4.0")
         if self.options.debuginfod:
             self.requires("libmicrohttpd/0.9.75")
 

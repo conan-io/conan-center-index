@@ -14,6 +14,7 @@ required_for_references:
 - ade
 - aeron
 - aggeom-agg
+- ags
 - alac
 - alembic
 - alpaca
@@ -129,6 +130,7 @@ required_for_references:
 - c-dbg-macro
 - c4core
 - caf
+- cairomm
 - cajun-jsonapi
 - calceph
 - canary
@@ -266,6 +268,7 @@ required_for_references:
 - decimal_for_cpp
 - deco
 - detools
+- dfp
 - di
 - dice-template-library
 - dime
@@ -385,6 +388,7 @@ required_for_references:
 - frozen
 - frugally-deep
 - fruit
+- ftjam
 - ftxui
 - function2
 - functionalplus
@@ -466,6 +470,7 @@ required_for_references:
 - hdrhistogram-c
 - heatshrink
 - hedley
+- hexl
 - hffix
 - hictk
 - hidapi
@@ -596,7 +601,9 @@ required_for_references:
 - libdc1394
 - libde265
 - libdeflate
+- libdicom
 - libdisasm
+- libdisplay-info
 - libdivide
 - libdmtx
 - libdrawille
@@ -640,6 +647,7 @@ required_for_references:
 - libltc
 - liblzf
 - libmad
+- libmagic
 - libmaxminddb
 - libmbus
 - libmediainfo
@@ -720,6 +728,7 @@ required_for_references:
 - libudev
 - libunistring
 - libunwind
+- liburing
 - libusb
 - libusb-compat
 - libuuid
@@ -806,6 +815,7 @@ required_for_references:
 - mdns
 - mdnsresponder
 - mdspan
+- mesa-glu
 - meshoptimizer
 - meson
 - metall
@@ -831,6 +841,7 @@ required_for_references:
 - mio
 - mm_file
 - modern-cpp-kafka
+- mold
 - moltenvk
 - mongo-c-driver
 - mongo-cxx-driver
@@ -878,6 +889,7 @@ required_for_references:
 - nlohmann_json
 - nlopt
 - nmea
+- nmos-cpp
 - nmslib
 - nng
 - nodejs
@@ -895,6 +907,7 @@ required_for_references:
 - nv-codec-headers
 - nvtx
 - oatpp
+- oatpp-postgresql
 - objectbox
 - objectbox-generator
 - observer-ptr-lite
@@ -915,6 +928,7 @@ required_for_references:
 - onnx
 - onnxruntime
 - open-dis-cpp
+- open-simulation-interface
 - open62541
 - openal
 - openal-soft
@@ -974,6 +988,7 @@ required_for_references:
 - pcre2
 - pdf-writer
 - pdfgen
+- pdfium
 - pdqsort
 - perf
 - perfetto
@@ -1092,6 +1107,7 @@ required_for_references:
 - rmm
 - roaring
 - robin-hood-hashing
+- rocksdb
 - rpclib
 - rply
 - rsync
@@ -1120,6 +1136,7 @@ required_for_references:
 - sdf
 - sdl
 - sdl_image
+- sdl_net
 - sdl_ttf
 - seadex-essentials
 - seasocks
@@ -1149,6 +1166,7 @@ required_for_references:
 - skyr-url
 - sml
 - snappy
+- snitch
 - snowhouse
 - so5extra
 - sobjectizer
@@ -1226,6 +1244,7 @@ required_for_references:
 - termcap
 - termcolor
 - tesseract
+- tgbot
 - tgc
 - thelink2012-any
 - threadpool

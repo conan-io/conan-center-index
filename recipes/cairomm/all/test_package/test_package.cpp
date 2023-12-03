@@ -5,9 +5,8 @@
 #include <cairommconfig.h>
 
 int main() {
-#if CAIROMM_MINOR_VERSION == 16
-  auto surface =
-      Cairo::ImageSurface::create(Cairo::Surface::Format::ARGB32, 600, 400);
+#if CAIROMM_MINOR_VERSION >= 16
+  auto surface = Cairo::ImageSurface::create(Cairo::Surface::Format::ARGB32, 600, 400);
 #else
   auto surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, 600, 400);
 #endif
