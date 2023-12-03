@@ -120,7 +120,7 @@ class IosCMakeConan(ConanFile):
         if is_apple_os(self):
             if not getattr(self, "settings_target", None):
                 #  not a build_require, but can be fine since its build as a ppr:b, but nothing to do
-                return
+                return None, None, None
             # this is where I want to be, expecting this as a build_require for a host
             target_os = str(self.settings_target.os)
             arch_flag = self.settings_target.arch
@@ -137,6 +137,9 @@ class IosCMakeConan(ConanFile):
 
     def package_info(self):
         target_os, arch_flag, target_version = self._platform_info
+        if not target_os:
+            return
+
         if self.options.toolchain_target == "auto":
             toolchain_target = self._guess_toolchain_target(target_os, arch_flag)
         else:
