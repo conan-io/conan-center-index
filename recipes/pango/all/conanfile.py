@@ -8,7 +8,7 @@ from conan.tools.files import chdir, copy, get, rename, replace_in_file, rm, rmd
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.60.0 <2 || >=2.0.5"
@@ -58,12 +58,6 @@ class PangoConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
-        if self.options.shared:
-            self.options["glib"].shared = True
-            self.options["harfbuzz"].shared = True
-            if self.options.with_cairo:
-                self.options["cairo"].shared = True
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -103,12 +97,24 @@ class PangoConan(ConanFile):
         ):
             raise ConanInvalidConfiguration("Xft requires freetype and fontconfig")
 
-        if self.options.shared and (
-            not self.dependencies.direct_host["glib"].options.shared
-            or not self.dependencies.direct_host["harfbuzz"].options.shared
-            or (self.options.with_cairo and not self.dependencies.direct_host["cairo"].options.shared)
-        ):
-            raise ConanInvalidConfiguration("Linking a shared library against static glib can cause unexpected behavior.")
+        if self.dependencies["glib"].options.shared and is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration(
+                "Linking shared glib with the MSVC static runtime is not supported"
+            )
+
+        if self.options.shared:
+            if not self.dependencies["glib"].options.shared:
+                raise ConanInvalidConfiguration(
+                    "Linking a shared library against static glib can cause unexpected behaviour."
+                )
+            if not self.dependencies["harfbuzz"].options.shared:
+                raise ConanInvalidConfiguration(
+                    "Linking a shared library against static harfbuzz can cause unexpected behaviour."
+                )
+            if self.options.with_cairo and not self.dependencies["cairo"].options.shared:
+                raise ConanInvalidConfiguration(
+                    "Linking a shared library against static cairo can cause unexpected behaviour."
+                )
 
     def build_requirements(self):
         self.tool_requires("glib/<host_version>")
@@ -158,14 +164,6 @@ class PangoConan(ConanFile):
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
-
-    def package_id(self):
-        if not self.dependencies.direct_host["glib"].options.shared:
-            self.info.requires["glib"].full_package_mode()
-        if not self.dependencies.direct_host["harfbuzz"].options.shared:
-            self.info.requires["harfbuzz"].full_package_mode()
-        if self.info.options.with_cairo and not self.dependencies.direct_host["cairo"].options.shared:
-            self.info.requires["cairo"].full_package_mode()
 
     def package_info(self):
         self.cpp_info.components["pango_"].libs = ["pango-1.0"]
