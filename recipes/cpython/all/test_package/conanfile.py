@@ -7,6 +7,7 @@ from conan.errors import ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import mkdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -41,7 +42,7 @@ class CmakePython3Abi(object):
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeDeps"
     test_type = "explicit"
 
     def requirements(self):
@@ -116,6 +117,9 @@ class TestPackageConan(ConanFile):
             tc.cache_variables[f"Python{py_major}_FIND_ABI"] = self._cmake_abi.cmake_arg
         tc.generate()
 
+        # The build also needs access to the run environment to run the python executable
+        VirtualRunEnv(self).generate(scope="run")
+        VirtualRunEnv(self).generate(scope="build")
 
     def build(self):
         cmake = CMake(self)
