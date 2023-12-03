@@ -103,8 +103,9 @@ class LibId3TagConan(ConanFile):
             cmake = CMake(self)
             cmake.install()
         else:
-            autotools = Autotools(self)
-            autotools.install()
+            with chdir(self, self.source_folder):
+                autotools = Autotools(self)
+                autotools.install()
             rm(self, "*.la", self.package_folder, recursive=True)
 
     def package_info(self):
