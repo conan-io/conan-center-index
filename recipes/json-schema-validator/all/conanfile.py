@@ -13,7 +13,7 @@ required_conan_version = ">=1.53.0"
 
 class JsonSchemaValidatorConan(ConanFile):
     name = "json-schema-validator"
-    description = "JSON schema validator for JSON for Modern C++ "
+    description = "JSON schema validator for JSON for Modern C++"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/pboettch/json-schema-validator"
