@@ -326,7 +326,7 @@ class GdalConan(ConanFile):
         # if self.options.with_dods_root:
         #     self.requires("libdap/3.20.6")
         if self.options.with_curl:
-            self.requires("libcurl/8.4.0")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.with_xml2:
             self.requires("libxml2/2.11.5")
         # if self.options.with_spatialite:
