@@ -284,7 +284,7 @@ class GdalConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/3.0.1")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.3")
         if self.options.with_charls:
@@ -326,13 +326,13 @@ class GdalConan(ConanFile):
         # if self.options.with_dods_root:
         #     self.requires("libdap/3.20.6")
         if self.options.with_curl:
-            self.requires("libcurl/8.3.0")
+            self.requires("libcurl/8.4.0")
         if self.options.with_xml2:
             self.requires("libxml2/2.11.5")
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.44.0")
+            self.requires("sqlite3/3.44.2")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
