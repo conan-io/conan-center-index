@@ -148,11 +148,11 @@ class TestPackageConan(ConanFile):
                 if self.settings.build_type == "Debug":
                     setup_args.append("--debug")
                 args = " ".join(f'"{a}"' for a in setup_args)
-                self.run(f"{self._python} {args}")
+                self.run(f"{self._python} {args}", env="conanrun")
 
     def _test_module(self, module, should_work):
         try:
-            self.run(f"{self._python} {self.source_folder}/test_package.py -b {self.build_folder} -t {module}")
+            self.run(f"{self._python} {self.source_folder}/test_package.py -b {self.build_folder} -t {module}", env="conanrun")
         except ConanException:
             if should_work:
                 self.output.warning(f"Module '{module}' does not work, but should have worked")
@@ -174,12 +174,12 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not cross_building(self, skip_x64_x86=True):
-            self.run(f"{self._python} --version")
+            self.run(f"{self._python} --version", env="conanrun")
 
-            self.run(f"{self._python} -c \"print('hello world')\"")
+            self.run(f"{self._python} -c \"print('hello world')\"", env="conanrun")
 
             buffer = StringIO()
-            self.run(f"{self._python} -c \"import sys; print('.'.join(str(s) for s in sys.version_info[:3]))\"", buffer)
+            self.run(f"{self._python} -c \"import sys; print('.'.join(str(s) for s in sys.version_info[:3]))\"", buffer, env="conanrun")
             self.output.info(buffer.getvalue())
             version_detected = buffer.getvalue().splitlines()[-1].strip()
             if self._clean_py_version != version_detected:
