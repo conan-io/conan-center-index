@@ -37,6 +37,7 @@ class JsonSchemaValidatorConan(ConanFile):
         "fPIC": True,
         "json_diagnostics": False,
     }
+
     short_paths = True
 
     @property
