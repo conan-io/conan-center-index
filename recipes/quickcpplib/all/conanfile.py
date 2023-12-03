@@ -118,21 +118,3 @@ class QuickcpplibCodeConan(ConanFile):
         self.cpp_info.components["quickcpplib_hl"].defines.append("QUICKCPPLIB_USE_STD_BYTE=1")
         self.cpp_info.components["quickcpplib_hl"].defines.append("QUICKCPPLIB_USE_STD_OPTIONAL=1")
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "quickcpplib"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "quickcpplib"
-        self.cpp_info.names["cmake_find_package"] = "quickcpplib"
-        self.cpp_info.names["cmake_find_package_multi"] = "quickcpplib"
-        self.cpp_info.components["hl"].names["cmake_find_package"] = "quickcpplib"
-        self.cpp_info.components["hl"].names["cmake_find_package_multi"] = "quickcpplib"
-        self.cpp_info.components["hl"].defines.append("QUICKCPPLIB_DISABLE_ABI_PERMUTATION")
-        self.cpp_info.components["hl"].defines.append("QUICKCPPLIB_USE_STD_BYTE=1")
-        self.cpp_info.components["hl"].defines.append("QUICKCPPLIB_USE_STD_OPTIONAL=1")
-        if not self._needs_span_lite:
-            self.cpp_info.components["hl"].defines.append("QUICKCPPLIB_USE_STD_SPAN=1")
-        self.cpp_info.components["hl"].set_property("cmake_target_name", "quickcpplib::hl")
-        self.cpp_info.components["hl"].bindirs = []
-        self.cpp_info.components["hl"].libdirs = []
-        self.cpp_info.components["hl"].resdirs = []
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["hl"].system_libs = ["dl", "pthread", "rt"]
