@@ -72,6 +72,12 @@ class Catch2Conan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+    
+    def compatibility(self):
+        if self.settings.compiler.cppstd == 14:
+            return [{"settings": [("compiler.cppstd", 14)]}]
+        else:
+            return [{"settings": [("compiler.cppstd", self.settings.compiler.cppstd)]}]
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
