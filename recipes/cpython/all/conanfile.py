@@ -49,7 +49,7 @@ class CPythonConan(ConanFile):
         "env_vars": [True, False],  # set environment variables
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
         "optimizations": False,
         "lto": False,
@@ -171,7 +171,6 @@ class CPythonConan(ConanFile):
             self.requires("xz_utils/5.4.5")
 
     def package_id(self):
-        del self.info.settings.compiler
         del self.info.options.env_vars
 
     def validate(self):
