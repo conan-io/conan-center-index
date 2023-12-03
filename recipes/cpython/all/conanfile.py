@@ -375,6 +375,11 @@ class CPythonConan(ConanFile):
             f'<Import Project="{conantoolchain_props}" /><Import Project="python.props" />',
         )
 
+        for project in ["python", "pythonw"]:
+            replace_in_file(self, os.path.join(self.source_folder, "PCbuild", f"{project}.vcxproj"),
+                            '<Import Project="python.props" />',
+                            f'<Import Project="python.props" /><Import Project="{self.generators_folder}/conan_zlib.props" />')
+
     @property
     def _solution_projects(self):
         if self.options.shared:
@@ -451,8 +456,8 @@ class CPythonConan(ConanFile):
         projects = self._solution_projects
         self.output.info(f"Building {len(projects)} Visual Studio projects: {projects}")
 
-        msbuild.build(os.path.join(self.source_folder, "PCbuild", "pcbuild.sln"),
-                      targets=projects)
+        sln = os.path.join(self.source_folder, "PCbuild", "pcbuild.sln")
+        msbuild.build(sln, targets=projects)
 
     def build(self):
         self._patch_sources()
