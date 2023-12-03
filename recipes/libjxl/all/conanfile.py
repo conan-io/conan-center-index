@@ -6,7 +6,6 @@ from conan import ConanFile
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import replace_in_file, copy, get, rm, rmdir, save
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -43,10 +42,7 @@ class LibjxlConan(ConanFile):
 
     def requirements(self):
         self.requires("brotli/1.1.0")
-        if Version(self.version) >= "0.7":
-            self.requires("highway/1.0.7")
-        else:
-            self.requires("highway/0.12.2")
+        self.requires("highway/1.0.7")
         self.requires("lcms/2.14")
 
     def source(self):
