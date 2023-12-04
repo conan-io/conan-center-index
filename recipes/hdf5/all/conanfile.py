@@ -86,10 +86,8 @@ class Hdf5Conan(ConanFile):
 
     def validate(self):
         if not can_run(self):
-            if Version(self.version) < "1.14.3":
-                raise ConanInvalidConfiguration(f"Current recipe doesn't support cross-building (yet) for Version {self.version}")
-            elif self.conf.get("user.qemu:path") is None:
-                raise ConanInvalidConfiguration(f"Current recipe doesn't support cross-building without a cross compile emulator")
+            # While building it runs some executables like H5detect
+            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
         if self.options.parallel and not self.options.enable_unsupported:
             if self.options.enable_cxx:
                 raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive, forcefully allow with enable_unsupported=True")
@@ -120,10 +118,6 @@ class Hdf5Conan(ConanFile):
         cmakedeps.generate()
 
         tc = CMakeToolchain(self)
-        if not can_run(self):
-            c = self.conf.get("user.qemu:path")
-            if c is not None:
-                tc.variables["CMAKE_CROSSCOMPILING_EMULATOR"] = c
         if not valid_min_cppstd(self, self._min_cppstd):
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         if self.settings.get_safe("compiler.libcxx"):
