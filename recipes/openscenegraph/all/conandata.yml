@@ -6,3 +6,15 @@ patches:
   3.6.5:
     - patch_file: patches/0005-use-JPEG-target-for-plugin.patch
     - patch_file: patches/0006-Declare-result-as-LONG-for-Mingw-build.patch
+    - patch_file: patches/0007-fix-msvc-with-std-c++17.patch
+      patch_type: bugfix
+      patch_source: https://github.com/openscenegraph/OpenSceneGraph/pull/1055
+    - patch_file: patches/0008-replace-mem-fun-ref.patch
+      patch_type: bugfix
+      patch_source: https://github.com/openscenegraph/OpenSceneGraph/commit/8a0114a46a4bad9041297950fe3bfbb2aea6e1da
+    - patch_file: patches/0009-replace-auto-ptr-in-plugins.patch
+      patch_type: portability
+      patch_source: https://github.com/openscenegraph/OpenSceneGraph/pull/1246
+    - patch_file: patches/0010-replace-ptr-fun-in-obj-plugin.patch
+      patch_type: portability
+      patch_source: https://github.com/openscenegraph/OpenSceneGraph/pull/1246
