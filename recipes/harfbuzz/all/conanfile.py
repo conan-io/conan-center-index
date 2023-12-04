@@ -197,8 +197,11 @@ class HarfbuzzConan(ConanFile):
                 self.cpp_info.system_libs.append("usp10")
             if self.options.with_directwrite:
                 self.cpp_info.system_libs.append("dwrite")
-        if is_apple_os(self):
-            self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText", "ApplicationServices"])
+        if is_apple_os(self) and self.options.get_safe("with_coretext", False):
+            if self.settings.os == "Macos":
+                self.cpp_info.frameworks.append("ApplicationServices")
+            else:
+                self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText"])
         if not self.options.shared:
             libcxx = stdcpp_library(self)
             if libcxx:
