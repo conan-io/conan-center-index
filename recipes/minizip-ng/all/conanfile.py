@@ -94,7 +94,7 @@ class MinizipNgConan(ConanFile):
 
     def build_requirements(self):
         if self._needs_pkg_config:
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if Version(self.version) >= "4.0.0":
             self.tool_requires("cmake/[>=3.19 <4]")
 
