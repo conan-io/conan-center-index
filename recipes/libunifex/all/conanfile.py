@@ -19,6 +19,14 @@ class LibunifexConan(ConanFile):
 
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "fPIC": [True, False],
+        "with_liburing": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+        "with_liburing": False,  # Enabled by default in the project, but incompatible with the Linux version used in C3I
+    }
 
     @property
     def _minimum_standard(self):
@@ -34,13 +42,19 @@ class LibunifexConan(ConanFile):
             "msvc": "193",
         }
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        if not self.settings.os == "Linux":
+            del self.options.with_liburing
+
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.settings.os == "Linux":
-            # v2.3+ is not compatible with the Linux version used in C3I
-            self.requires("liburing/2.2", transitive_headers=True, transitive_libs=True)
+        if self.options.get_safe("with_liburing"):
+            self.requires("liburing/2.4", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -62,6 +76,7 @@ class LibunifexConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["UNIFEX_BUILD_EXAMPLES"] = False
+        tc.cache_variables["UNIFEX_NO_LIBURING"] = not self.options.get_safe("with_liburing", False)
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("liburing", "cmake_file_name", "LIBURING")
@@ -101,15 +116,13 @@ class LibunifexConan(ConanFile):
 
         self.cpp_info.components["unifex"].libs = ["unifex"]
         self.cpp_info.components["unifex"].set_property("cmake_target_name", "unifex::unifex")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["unifex"].system_libs = ["pthread"]
+        if self.options.get_safe("with_liburing"):
+            self.cpp_info.components["unifex"].requires.append("liburing::liburing")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "unifex"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "unifex"
         self.cpp_info.names["cmake_find_package"] = "unifex"
         self.cpp_info.names["cmake_find_package_multi"] = "unifex"
         self.cpp_info.components["unifex"].names["cmake_find_package"] = "unifex"
         self.cpp_info.components["unifex"].names["cmake_find_package_multi"] = "unifex"
-
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["unifex"].system_libs = ["pthread"]
-            self.cpp_info.components["unifex"].requires.append("liburing::liburing")
