@@ -13,7 +13,7 @@ required_conan_version = ">=1.53.0"
 class LibjpegTurboConan(ConanFile):
     name = "libjpeg-turbo"
     description = "SIMD-accelerated libjpeg-compatible JPEG codec library"
-    license = "IJG, BSD-3-Clause, Zlib"
+    license = ("IJG", "BSD-3-Clause", "Zlib")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libjpeg-turbo.org"
     topics = ("jpeg", "libjpeg", "image", "multimedia", "format", "graphics")
