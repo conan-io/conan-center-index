@@ -45,7 +45,7 @@ class AndreasbuhrCppCoroConan(ConanFile):
         # Clang 17+ always requires C++20
         # Otherwise, require C++17
         compiler = self.settings.compiler
-        requires_cpp20 = compiler = "clang" and ("libstdc++" in compiler.get_safe("libcxx", "") or compiler.version >= Version("17"))
+        requires_cpp20 = compiler == "clang" and ("libstdc++" in compiler.get_safe("libcxx", "") or compiler.version >= Version("17"))
         return 20 if requires_cpp20 else 17
 
     def layout(self):
