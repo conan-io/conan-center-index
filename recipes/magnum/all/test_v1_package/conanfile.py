@@ -30,7 +30,7 @@ class TestPackageConan(ConanFile):
         for exec in self._executables:
             cmake.definitions["EXEC_{}".format(exec.replace("-", "_")).upper()] = True
         cmake.definitions["IMPORTER_PLUGINS_FOLDER"] = os.path.join(self.deps_user_info["magnum"].plugins_basepath, "importers").replace("\\", "/")
-        cmake.definitions["OBJ_FILE"] = os.path.join(self.source_folder, "triangleMesh.obj").replace("\\", "/")
+        cmake.definitions["OBJ_FILE"] = os.path.join(self.source_folder, os.pardir, "test_package", "triangleMesh.obj").replace("\\", "/")
         cmake.definitions["SHARED_PLUGINS"] = self.options["magnum"].shared_plugins
         cmake.configure()
         cmake.build()
