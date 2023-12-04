@@ -4,6 +4,15 @@ macro(custom_find_package name)
         NO_DEFAULT_PATH
         PATHS ${CMAKE_PREFIX_PATH}
     )
+    string(TOUPPER ${name} name_upper)
+    set(${name_upper}_FOUND TRUE)
+    set(${name_upper}_VERSION ${${name}_VERSION})
+    set(${name_upper}_VERSION_STRING ${${name}_VERSION_STRING})
+    set(${name_upper}_INCLUDE_DIRS ${${name}_INCLUDE_DIRS})
+    set(${name_upper}_INCLUDE_DIR ${${name}_INCLUDE_DIR})
+    set(${name_upper}_LIBRARIES ${${name}_LIBRARIES})
+    set(${name_upper}_DEFINITIONS ${${name}_DEFINITIONS})
+    unset(name_upper)
 endmacro()
 
 custom_find_package(nlohmann_json REQUIRED CONFIG)

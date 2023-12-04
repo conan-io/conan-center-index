@@ -3,11 +3,10 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs, rename
+from conan.tools.files import get, copy, rmdir, replace_in_file, collect_libs, rename
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
-
 
 required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
@@ -44,7 +43,6 @@ class ProjConan(ConanFile):
 
     def export_sources(self):
         copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
