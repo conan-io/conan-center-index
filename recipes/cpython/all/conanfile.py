@@ -1,11 +1,10 @@
 import os
 import re
 import textwrap
-from io import StringIO
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir, unzip
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
@@ -142,7 +141,8 @@ class CPythonConan(ConanFile):
                 self.requires("libffi/3.4.4")
             if Version(self.version) < "3.8":
                 self.requires("mpdecimal/2.4.2")
-            elif Version(self.version) < "3.10":
+            elif Version(self.version) < "3.10" or is_apple_os(self):
+                # FIXME: mpdecimal > 2.5.0 on MacOS causes the _decimal module to not be importable
                 self.requires("mpdecimal/2.5.0")
             else:
                 self.requires("mpdecimal/2.5.1")
@@ -624,7 +624,7 @@ class CPythonConan(ConanFile):
 
             if not os.path.exists(self._cpython_symlink):
                 os.symlink(f"python{self._version_suffix}", self._cpython_symlink)
-        self._fix_install_name()
+        fix_apple_shared_install_name(self)
 
     @property
     def _cpython_symlink(self):
@@ -672,19 +672,6 @@ class CPythonConan(ConanFile):
                 ".dll.a" if self.options.shared and self.settings.os == "Windows" else ""
             )
         return f"python{self._version_suffix}{lib_ext}"
-
-    def _fix_install_name(self):
-        if is_apple_os(self) and self.options.shared:
-            buffer = StringIO()
-            python = os.path.join(self.package_folder, "bin", "python")
-            self.run(f'otool -L "{python}"', buffer)
-            lines = buffer.getvalue().strip().split("\n")[1:]
-            for line in lines:
-                library = line.split()[0]
-                if library.startswith(self.package_folder):
-                    new = library.replace(self.package_folder, "@executable_path/..")
-                    self.output.info(f"patching {python}, replace {library} with {new}")
-                    self.run(f"install_name_tool -change {library} {new} {python}")
 
     def package_info(self):
         # FIXME: conan components Python::Interpreter component, need a target type

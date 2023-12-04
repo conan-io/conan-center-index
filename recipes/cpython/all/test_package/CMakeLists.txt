@@ -3,6 +3,12 @@ project(test_package C)
 
 find_package(cpython REQUIRED CONFIG)
 
+# FIXME: We can't modify CMake's FindPython to link dependencies pulled by
+# Conan, so here we just include them globally. This is mainly necessary for
+# MacOS missing crypt.h, which is available at configure time (in the main recipe)
+# but otherwise not at build time (in consumer packages).
+link_libraries(cpython::python)
+
 set(PY_VERSION_MAJOR "" CACHE STRING "MAJOR version of python")
 set(PY_VERSION_MAJOR_MINOR "" CACHE STRING "MAJOR.MINOR version of python")
 set(PY_VERSION "" CACHE STRING "Required version of python")

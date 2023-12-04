@@ -9,6 +9,7 @@ from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import mkdir
+from conan.tools.gnu import AutotoolsDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -120,6 +121,8 @@ class TestPackageConan(ConanFile):
         # The build also needs access to the run environment to run the python executable
         VirtualRunEnv(self).generate(scope="run")
         VirtualRunEnv(self).generate(scope="build")
+        # Just for the distutils build
+        AutotoolsDeps(self).generate(scope="build")
 
     def build(self):
         cmake = CMake(self)
@@ -152,7 +155,7 @@ class TestPackageConan(ConanFile):
                 if self.settings.build_type == "Debug":
                     setup_args.append("--debug")
                 args = " ".join(f'"{a}"' for a in setup_args)
-                self.run(f"{self._python} {args}", env="conanrun")
+                self.run(f"{self._python} {args}")
 
     def _test_module(self, module, should_work):
         try:
@@ -207,7 +210,7 @@ class TestPackageConan(ConanFile):
                 self._test_module("ctypes", True)
                 #self._test_module("ssl", True) # FIXME
 
-            if is_apple_os(self) and not self.dependencies["cpython"].options.shared:
+            if is_apple_os(self) and not self._cpython_option("shared"):
                 self.output.info(
                     "Not testing the module, because these seem not to work on apple when cpython is built as"
                     " a static library"
