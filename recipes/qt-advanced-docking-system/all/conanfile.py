@@ -123,10 +123,12 @@ class QtADS(ConanFile):
 
     def package_info(self):
         if Version(self.version) >= 4:
-            lib_name = f"qt{self._qt_major}advanceddocking"
-            self.cpp_info.includedirs.append(os.path.join("include", lib_name))
+            name = f"qt{self._qt_major}advanceddocking"
+            self.cpp_info.includedirs.append(os.path.join("include", name))
+            lib_name = f"{name}d" if self.settings.build_type == "Debug" else name
         else:
             lib_name = "qtadvanceddocking"
+
         if self.options.shared:
             self.cpp_info.libs = [lib_name]
         else:
