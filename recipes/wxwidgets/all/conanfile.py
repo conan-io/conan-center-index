@@ -438,15 +438,18 @@ class wxWidgetsConan(ConanFile):
                               "Cocoa",
                               "AudioToolbox",
                               "OpenGL",
+                              "AppKit",
                               "AVKit",
                               "AVFoundation",
                               "Foundation",
                               "IOKit",
                               "ApplicationServices",
+                              "CoreFoundation",
                               "CoreText",
                               "CoreGraphics",
                               "CoreServices",
                               "CoreMedia",
+                              "CFNetwork",
                               "Security",
                               "ImageIO",
                               "System",
@@ -502,6 +505,9 @@ class wxWidgetsConan(ConanFile):
                                               "rpcrt4",
                                               "winmm",
                                               "advapi32",
+                                              "msimg32",
+                                              "opengl32",
+                                              "ws2_32",
                                               "wsock32"])
             # Link a few libraries that are needed when using gcc on windows
             if self.settings.compiler == "gcc":
