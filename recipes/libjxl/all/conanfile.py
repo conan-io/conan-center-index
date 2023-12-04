@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import replace_in_file, copy, get, rmdir, save
+from conan.tools.files import replace_in_file, copy, get, rmdir, save, rm
 
 required_conan_version = ">=1.53.0"
 
@@ -85,16 +85,22 @@ class LibjxlConan(ConanFile):
                          "link_libraries(brotli::brotli highway::highway lcms::lcms)\n")
                         )
         # Do not link directly against libraries
-        jxl_cmake = os.path.join(self.source_folder, "lib", "jxl.cmake")
-        for lib, replacement in [
-            ("hwy", "highway::highway"),
-            ("brotlicommon-static", "brotli::brotli"),
-            ("brotlienc-static", "brotli::brotli"),
-            ("brotlidec-static", "brotli::brotli"),
-            ("lcms2", "lcms::lcms"),
+        for cmake in [
+            self.source_path.joinpath("lib", "jxl.cmake"),
+            self.source_path.joinpath("lib", "jpegli.cmake"),
         ]:
-            replace_in_file(self, jxl_cmake, lib, replacement)
+            content = cmake.read_text(encoding="utf8")
+            for lib, replacement in [
+                ("hwy", "highway::highway"),
+                ("brotlicommon-static", "brotli::brotli"),
+                ("brotlienc-static", "brotli::brotli"),
+                ("brotlidec-static", "brotli::brotli"),
+                ("lcms2", "lcms::lcms"),
+            ]:
+                content = content.replace(lib, replacement)
+            cmake.write_text(content, encoding="utf8")
         # Avoid "INTERFACE_LIBRARY targets may only have whitelisted properties" error with Conan v1
+        jxl_cmake = os.path.join(self.source_folder, "lib", "jxl.cmake")
         replace_in_file(self, jxl_cmake, '"$<BUILD_INTERFACE:$<TARGET_PROPERTY', "# ", strict=False)
         replace_in_file(self, jxl_cmake, "$<TARGET_PROPERTY", "# ", strict=False)
 
@@ -107,9 +113,11 @@ class LibjxlConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.options.shared:
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+            rm(self, "*-static.lib", os.path.join(self.package_folder, "lib"))
 
     def _lib_name(self, name):
         if not self.options.shared and self.settings.os == "Windows":
@@ -121,24 +129,25 @@ class LibjxlConan(ConanFile):
         self.cpp_info.components["jxl"].set_property("pkg_config_name", "libjxl")
         self.cpp_info.components["jxl"].libs = [self._lib_name("jxl")]
         self.cpp_info.components["jxl"].requires = ["brotli::brotli", "highway::highway", "lcms::lcms"]
+        if stdcpp_library(self):
+            self.cpp_info.components["jxl"].system_libs.append(stdcpp_library(self))
+        if not self.options.shared:
+            self.cpp_info.components["jxl"].defines.append("JXL_STATIC_DEFINE")
 
         # jxl_dec
         if not self.options.shared:
             self.cpp_info.components["jxl_dec"].set_property("pkg_config_name", "libjxl_dec")
             self.cpp_info.components["jxl_dec"].libs = [self._lib_name("jxl_dec")]
             self.cpp_info.components["jxl_dec"].requires = ["brotli::brotli", "highway::highway", "lcms::lcms"]
+            if stdcpp_library(self):
+                self.cpp_info.components["jxl_dec"].system_libs.append(stdcpp_library(self))
 
         # jxl_threads
         self.cpp_info.components["jxl_threads"].set_property("pkg_config_name", "libjxl_threads")
         self.cpp_info.components["jxl_threads"].libs = [self._lib_name("jxl_threads")]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["jxl_threads"].system_libs = ["pthread"]
-
-        if not self.options.shared:
-            self.cpp_info.components["jxl"].defines.append("JXL_STATIC_DEFINE")
-            self.cpp_info.components["jxl_threads"].defines.append("JXL_THREADS_STATIC_DEFINE")
-
         if stdcpp_library(self):
-            self.cpp_info.components["jxl"].system_libs.append(stdcpp_library(self))
-            self.cpp_info.components["jxl_dec"].system_libs.append(stdcpp_library(self))
             self.cpp_info.components["jxl_threads"].system_libs.append(stdcpp_library(self))
+        if not self.options.shared:
+            self.cpp_info.components["jxl_threads"].defines.append("JXL_THREADS_STATIC_DEFINE")
