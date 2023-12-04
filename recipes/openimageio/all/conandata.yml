@@ -1,10 +1,4 @@
 sources:
-  "2.2.7.0":
-    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.2.7.0.tar.gz"
-    sha256: "6126fb8b1a8be0106c78056652a249791e43b8741d6db3e9921a29ad823c1590"
-  "2.2.18.0":
-    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.2.18.0.tar.gz"
-    sha256: "b87a3086de76cc295f0d34f5785ddb1561acc61b64c1626b3dba38229fe09ce1"
   "2.3.7.2":
     url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.3.7.2.tar.gz"
     sha256: "b28be82fc9f6a833da8a21b4e6a658456ec16a653cd2d5794d082c14863979ab"
@@ -15,12 +9,6 @@ sources:
     url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.4.17.0.tar.gz"
     sha256: "7fe81d8e5bce30cc4a212f020ac3cc4344e6b7c1c0842475e3a048515099c65c"
 patches:
-  "2.2.7.0":
-    - patch_file: "patches/2.2.7.0-cmake-targets.patch"
-      patch_type: "conan"
-  "2.2.18.0":
-    - patch_file: "patches/2.2.18.0-cmake-targets.patch"
-      patch_type: "conan"
   "2.3.7.2":
     - patch_file: "patches/2.3.7.2-cmake-targets.patch"
       patch_type: "conan"
