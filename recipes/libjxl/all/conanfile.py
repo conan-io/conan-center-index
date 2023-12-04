@@ -1,7 +1,8 @@
 import os
 
-from conan import ConanFile
-from conan.tools.build import cross_building, stdcpp_library
+from conan import ConanFile, conan_version
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building, stdcpp_library, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import replace_in_file, copy, get, rmdir, save, rm
 
@@ -42,6 +43,10 @@ class LibjxlConan(ConanFile):
         self.requires("brotli/1.1.0")
         self.requires("highway/1.0.7")
         self.requires("lcms/2.14")
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
