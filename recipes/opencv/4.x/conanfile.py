@@ -1143,7 +1143,7 @@ class OpenCVConan(ConanFile):
             self.requires("harfbuzz/8.3.0")
         # hdf module dependencies
         if self.options.hdf:
-            self.requires("hdf5/1.14.2")
+            self.requires("hdf5/1.14.3")
         # ovis module dependencies
         if self.options.ovis:
             self.requires("ogre/1.10.2")
