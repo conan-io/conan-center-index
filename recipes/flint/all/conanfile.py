@@ -73,6 +73,10 @@ class FlintConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "MPFR_", "mpfr_")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "find_package(PThreads REQUIRED)",
+                        "find_package(PThreads REQUIRED)\n"
+                        "    set(PThreads_LIBRARIES ${PThreads_LIBS})")
 
     def build(self):
         self._patch_sources()
