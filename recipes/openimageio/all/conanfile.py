@@ -89,7 +89,10 @@ class OpenImageIOConan(ConanFile):
         self.requires("pugixml/1.13")
         self.requires("libsquish/1.15")
         self.requires("tsl-robin-map/1.2.1")
-        self.requires("fmt/10.1.1")
+        if Version(self.version) > "2.4.7.1":
+            self.requires("fmt/10.1.1")
+        else:
+            self.requires("fmt/8.1.1")
 
         # Optional libraries
         if self.options.with_libpng:

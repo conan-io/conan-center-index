@@ -348,7 +348,7 @@ index 1f47269bf..85b90d66a 100644
      add_oiio_plugin (jpeg2000input.cpp jpeg2000output.cpp
 -                     INCLUDE_DIRS ${OPENJPEG_INCLUDES}
 -                     LINK_LIBRARIES ${OPENJPEG_LIBRARIES}
-+                     LINK_LIBRARIES OpenJPEG::OpenJPEG
++                     LINK_LIBRARIES openjp2
                       DEFINITIONS "-DUSE_OPENJPEG")
  else()
      message (WARNING "Jpeg-2000 plugin will not be built")
@@ -390,7 +390,7 @@ diff --git a/src/ptex.imageio/CMakeLists.txt b/src/ptex.imageio/CMakeLists.txt
 index d7f0a9582..7cfce4a35 100644
 --- a/src/ptex.imageio/CMakeLists.txt
 +++ b/src/ptex.imageio/CMakeLists.txt
-@@ -2,8 +2,8 @@
+@@ -2,8 +2,9 @@
  # SPDX-License-Identifier: BSD-3-Clause
  # https://github.com/OpenImageIO/oiio
 
@@ -398,6 +398,7 @@ index d7f0a9582..7cfce4a35 100644
 +if (ptex_FOUND)
      add_oiio_plugin (ptexinput.cpp
 -                     LINK_LIBRARIES Ptex::Ptex_dynamic ZLIB::ZLIB
-+                     LINK_LIBRARIES Ptex::Ptex ZLIB::ZLIB
++                     LINK_LIBRARIES ${ptex_LIBRARIES} ZLIB::ZLIB
++                     INCLUDE_DIRS ${ptex_INCLUDE_DIRS}
                       DEFINITIONS "-DUSE_PTEX")
  endif ()
