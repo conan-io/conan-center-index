@@ -1,5 +1,12 @@
 # Changelog
 
+### 26-Oct-2023 - 12:13 CEST
+
+- [feature] Allow X.Y semver for version bumps
+- [feature] Add assert message for parent commit checks on PR checkout
+- [feature] JobRelauncher restarts both Conan v1 and v2 pipelines.
+- [fix] Do not close the report issue of the recipe export check
+
 ### 11-Oct-2023 - 12:17 CEST
 
 - [feature] Update Conan 2.x to the version 2.0.12 in the CI

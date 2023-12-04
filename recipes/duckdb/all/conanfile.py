@@ -5,6 +5,7 @@ from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
+import glob
 import os
 
 required_conan_version = ">=1.53.0"
@@ -68,6 +69,8 @@ class DuckdbConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "0.9.0":
+            del self.options.with_parquet
 
     def configure(self):
         if self.options.shared:
@@ -97,7 +100,8 @@ class DuckdbConan(ConanFile):
         tc.variables["DUCKDB_PATCH_VERSION"] = Version(self.version).patch
         tc.variables["DUCKDB_DEV_ITERATION"] = 0
         tc.variables["BUILD_ICU_EXTENSION"] = self.options.with_icu
-        tc.variables["BUILD_PARQUET_EXTENSION"] = self.options.with_parquet
+        if "with_parquet" in self.options:
+            tc.variables["BUILD_PARQUET_EXTENSION"] = self.options.with_parquet
         tc.variables["BUILD_TPCH_EXTENSION"] = self.options.with_tpch
         tc.variables["BUILD_TPCDS_EXTENSION"] = self.options.with_tpcds
         tc.variables["BUILD_FTS_EXTENSION"] = self.options.with_fts
@@ -144,8 +148,10 @@ class DuckdbConan(ConanFile):
         cmake.install()
 
         if self.options.shared:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
             rm(self, "duckdb_*.lib", os.path.join(self.package_folder, "lib"))
+            for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
+                if not lib.endswith(".dll.a"):
+                    os.remove(lib)
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
@@ -170,7 +176,7 @@ class DuckdbConan(ConanFile):
 
             if self.options.with_icu:
                 self.cpp_info.libs.append("icu_extension")
-            if self.options.with_parquet:
+            if self.options.get_safe("with_parquet", True):
                 self.cpp_info.libs.append("parquet_extension")
             if self.options.with_tpch:
                 self.cpp_info.libs.append("tpch_extension")

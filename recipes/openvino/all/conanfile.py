@@ -146,8 +146,7 @@ class OpenvinoConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
             if self._protobuf_required:
-                # we need to use static protobuf to overcome potential issues with multiple registrations inside
-                # protobuf when frontends (implemented as plugins) are loaded multiple times in runtime
+                # even though OpenVINO can work with dynamic protobuf, it's still recommended to use static
                 self.options["protobuf"].shared = False
 
     def build_requirements(self):
@@ -162,8 +161,8 @@ class OpenvinoConan(ConanFile):
             self.tool_requires("cmake/[>=3.18 <4]")
 
     def requirements(self):
-        self.requires("onetbb/2021.9.0")
-        self.requires("pugixml/1.13")
+        self.requires("onetbb/2021.10.0")
+        self.requires("pugixml/1.14")
         if self._target_x86_64:
             self.requires("xbyak/6.73")
         if self.options.get_safe("enable_gpu"):
@@ -176,7 +175,7 @@ class OpenvinoConan(ConanFile):
         if self.options.enable_onnx_frontend:
             self.requires(self._require("onnx"))
         if self.options.enable_tf_lite_frontend:
-            self.requires("flatbuffers/22.9.24")
+            self.requires("flatbuffers/23.5.26")
         if self._preprocessing_available:
             self.requires(self._require("ade"))
 
@@ -261,15 +260,11 @@ class OpenvinoConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support Debug build type")
 
     def validate(self):
-        # dynamically compiled frontends cannot be run against dynamic protobuf
-        if self._protobuf_required and self.options.shared and self.dependencies["protobuf"].options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref}:shared=True requires protobuf:shared=False for correct work.")
-
         if self.options.get_safe("enable_gpu") and not self.options.shared and self.options.enable_cpu:
             # GPU and CPU plugins cannot be simultaneously built statically, because they use different oneDNN versions
-            self.output.warning(f"{self.name} recipe builds GPU plugin without oneDNN (dGPU) support during static build,"
-                                "because CPU plugin compiled with different oneDNN version may cause ODR violation."
-                                "To enable oneDNN support for GPU plugin, please, either use shared build configuration"
+            self.output.warning(f"{self.name} recipe builds GPU plugin without oneDNN (dGPU) support during static build, "
+                                "because CPU plugin compiled with different oneDNN version may cause ODR violation. "
+                                "To enable oneDNN support for GPU plugin, please, either use shared build configuration "
                                 "or disable CPU plugin by setting 'enable_cpu' option to False.")
 
     def build(self):

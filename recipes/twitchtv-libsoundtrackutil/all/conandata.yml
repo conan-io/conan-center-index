@@ -5,4 +5,4 @@ sources:
 patches:
   "0.0.8":
     - patch_file: "patches/clang-8-fix.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/cmake-fixes.patch"
