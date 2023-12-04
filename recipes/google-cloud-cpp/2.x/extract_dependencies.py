@@ -103,7 +103,6 @@ _PROTO_BASE_COMPONENTS = {
     "api_field_behavior_protos",
     "api_context_protos",
     "api_logging_protos",
-
     "iam_credentials_v1_common_protos",
     "iam_credentials_v1_iamcredentials_protos",
 }
@@ -343,6 +342,7 @@ def main():
     proto_components = _PROTO_BASE_COMPONENTS.copy()
     files = sorted(glob.glob(os.path.join(deps_folder, "*.deps")))
     experimental = set(_experimental_components(source_folder))
+    components = set(_components(source_folder))
     for filename in files:
         component = os.path.basename(filename).replace(".deps", "")
         component = _PROTO_DEPS_REPLACED_NAMES.get(component, component)
@@ -350,6 +350,9 @@ def main():
             # Experimental components have an associated *_protos, component.
             # The Conan package only compiles the GA components, so we need
             # to skip these.
+            continue
+        if component == "compute":
+            # `compute` does not use gRPC or the `*.deps` files.
             continue
         component = component + "_protos"
         deps = _generate_proto_requires(filename)
@@ -361,12 +364,21 @@ def main():
         proto_components.add(component)
         proto_components.update(deps)
         print(f'    "{component}": {sorted(deps)},')
+    print(f'    "compute_internal_protos": ["protobuf::libprotobuf"],')
+    print(f'    "cloud_extended_operations_protos": ["protobuf::libprotobuf"],')
+    proto_components.add("compute_internal_protos")
+    proto_components.add("cloud_extended_operations_protos")
+    for component in sorted(components):
+        if not component.startswith("compute_"):
+            continue
+        proto_components.add(component + "_protos")
+        print(f'    "{component}_protos": ["compute_internal_protos", "cloud_extended_operations_protos", "protobuf::libprotobuf"],')
     print("}")
     proto_components = proto_components - _PROTO_DEPS_COMMON_REQUIRES
     names = ['"%s"' % c for c in proto_components]
     joined = ",\n    ".join(sorted(names))
     print(f"\nPROTO_COMPONENTS = {{\n    {joined}\n}}")
-    names = ['"%s"' % c for c in _components(source_folder)]
+    names = ['"%s"' % c for c in components]
     joined = ",\n    ".join(sorted(names))
     print(f"\nCOMPONENTS = {{\n    {joined}\n}}")
 

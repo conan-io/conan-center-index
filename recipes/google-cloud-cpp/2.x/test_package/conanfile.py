@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import can_run
 from conan.tools.env import VirtualRunEnv
+from conan.tools.scm import Version
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -17,6 +18,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["WITH_COMPUTE"] = Version(self.dependencies["google-cloud-cpp"].ref.version) >= '2.19.0'
         tc.generate()
         # Environment so that the compiled test executable can load shared libraries
         runenv = VirtualRunEnv(self)
@@ -34,4 +36,7 @@ class TestPackageConan(ConanFile):
             return
         for test in ["bigtable", "pubsub", "spanner", "speech", "storage"]:
             cmd = os.path.join(self.cpp.build.bindir, test)
+            self.run(cmd, env="conanrun")
+        if Version(self.dependencies["google-cloud-cpp"].ref.version) >= '2.19.0':
+            cmd = os.path.join(self.cpp.build.bindir, "compute")
             self.run(cmd, env="conanrun")
