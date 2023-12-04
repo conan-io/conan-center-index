@@ -48,7 +48,7 @@ class CPythonConan(ConanFile):
         "env_vars": [True, False],  # set environment variables
     }
     default_options = {
-        "shared": True,
+        "shared": False, # TODO Shared by default, a few misc things are broken in static builds
         "fPIC": True,
         "optimizations": False,
         "lto": False,
