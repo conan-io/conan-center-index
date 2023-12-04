@@ -20,7 +20,7 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
         for key, value in self.dependencies["openscenegraph"].options.items():
             if key.startswith("with_"):
-                tc.preprocessor_definitions[key.upper()] = 1 if value == "True" else 0
+                tc.preprocessor_definitions[key.upper()] = 1 if str(value) != "False" else 0
         if is_apple_os(self):
             tc.preprocessor_definitions["WITH_GIF"] = 0
             tc.preprocessor_definitions["WITH_JPEG"] = 0
