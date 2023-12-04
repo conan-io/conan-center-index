@@ -53,7 +53,7 @@ class LibassertConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= Version("1.2.2"):
-            self.requires("cpptrace/0.3.0")
+            self.requires("cpptrace/0.3.1")
         elif Version(self.version) >= Version("1.2.1"):
             self.requires("cpptrace/0.2.1")
 
