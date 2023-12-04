@@ -87,11 +87,11 @@ class OpenImageIOConan(ConanFile):
         self.requires("boost/1.83.0")
         self.requires("libtiff/4.6.0")
         # INFO: https://github.com/AcademySoftwareFoundation/OpenImageIO/blob/v2.5.4.0/src/libOpenImageIO/CMakeLists.txt#L126
-        self.requires("openexr/3.1.7", transitive_headers=True, transitive_libs=True)
+        self.requires("openexr/3.2.1", transitive_headers=True, transitive_libs=True)
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/3.0.1")
         self.requires("pugixml/1.14")
         self.requires("libsquish/1.15")
         self.requires("tsl-robin-map/1.2.1")
@@ -102,20 +102,20 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_libpng:
             self.requires("libpng/1.6.40")
         if self.options.with_freetype:
-            self.requires("freetype/2.13.0")
+            self.requires("freetype/2.13.2")
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.1")
+            self.requires("hdf5/1.14.2")
         if self.options.with_opencolorio:
-            self.requires("opencolorio/2.2.1")
+            self.requires("opencolorio/2.3.0")
         if self.options.with_opencv:
             # INFO: https://github.com/AcademySoftwareFoundation/OpenImageIO/blob/v2.5.4.0/src/libOpenImageIO/CMakeLists.txt#L131
-            self.requires("opencv/4.5.5", transitive_headers=True)
+            self.requires("opencv/4.8.1", transitive_headers=True)
         if self.options.with_tbb:
             self.requires("onetbb/2021.10.0")
         if self.options.with_dicom:
             self.requires("dcmtk/3.6.7")
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/6.0")
+            self.requires("ffmpeg/6.1")
         if self.options.with_giflib:
             self.requires("giflib/5.2.1")
         if self.options.with_libheif:
