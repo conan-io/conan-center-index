@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -526,7 +526,7 @@
+ endif()
+ 
+ if(USE_OPENMP)
+-  if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
++  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang|AppleClang")
+     target_link_libraries(lightgbm_objs PUBLIC OpenMP::OpenMP_CXX)
+     # c_api headers also includes OpenMP headers, thus compiling
+     # lightgbm_capi_objs needs include directory for OpenMP.
