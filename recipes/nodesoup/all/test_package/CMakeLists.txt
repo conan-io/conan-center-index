@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 project(test_package CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
 find_package(nodesoup REQUIRED CONFIG)
 
 add_executable(${CMAKE_PROJECT_NAME} test_package.cpp)

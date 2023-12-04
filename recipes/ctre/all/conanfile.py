@@ -17,6 +17,7 @@ class CtreConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/hanickadot/compile-time-regular-expressions"
     topics = ("cpp17", "regex", "compile-time-regular-expressions", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -38,8 +39,11 @@ class CtreConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC < 16")
         elif compiler == "gcc" and compiler_version < min_gcc:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < {min_gcc}")
-        elif compiler == "clang" and compiler_version < "6.0":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 6.0")
+        elif compiler == "clang":
+            if compiler_version < "6.0":
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 6.0")
+            if ctre_version == "3.4.1" and compiler_version >= "12.0" and not self.settings.compiler.get_safe("cppstd"):
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang >= 12.0 without cppstd. Please set cppstd.")
         elif compiler == "apple-clang":
             if compiler_version < "10.0":
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support Apple clang < 10.0")
@@ -53,7 +57,7 @@ class CtreConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],  strip_root=True)
 
     def package(self):
         copy(self, pattern="*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))

@@ -13,18 +13,18 @@ class VectorialConan(ConanFile):
     license = "BSD-2-Clause"
     homepage = "https://github.com/scoopr/vectorial"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-
-    def package_id(self):
-        self.info.clear()
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def package_id(self):
+        self.info.clear()
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -35,8 +35,6 @@ class VectorialConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]

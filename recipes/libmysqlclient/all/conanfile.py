@@ -63,10 +63,10 @@ class LibMysqlClientCConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) < "8.0.30":
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/1.1.1w")
         else:
             self.requires("openssl/[>=1.1 <4]")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zstd/1.5.5")
         self.requires("lz4/1.9.4")
         if self.settings.os == "FreeBSD":
@@ -104,7 +104,7 @@ class LibMysqlClientCConan(ConanFile):
         if is_apple_os(self):
             self.tool_requires("cmake/[>=3.18 <4]")
         if self.settings.os == "FreeBSD" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -127,14 +127,13 @@ class LibMysqlClientCConan(ConanFile):
                             f"# WARN_MISSING_SYSTEM_{lib.upper()}({lib.upper()}_WARN_GIVEN)",
                             strict=False)
 
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            f"SET({lib.upper()}_WARN_GIVEN)",
-                            f"# SET({lib.upper()}_WARN_GIVEN)",
-                            strict=False)
+            if lib != "libevent" or Version(self.version) < "8.0.34":
+                replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                f"SET({lib.upper()}_WARN_GIVEN)",
+                                f"# SET({lib.upper()}_WARN_GIVEN)",
+                                strict=False)
 
-        rmdir(self, os.path.join(self.source_folder, "extra"))
         for folder in ["client", "man", "mysql-test", "libbinlogstandalone"]:
-            rmdir(self, os.path.join(self.source_folder, folder))
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             f"ADD_SUBDIRECTORY({folder})\n",
                             "",
@@ -147,9 +146,10 @@ class LibMysqlClientCConan(ConanFile):
                             strict=False)
 
         # Upstream does not actually load lz4 directories for system, force it to
-        replace_in_file(self, os.path.join(self.source_folder, "libbinlogevents", "CMakeLists.txt"),
-                        "INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libbinlogevents/include)",
-                        "MY_INCLUDE_SYSTEM_DIRECTORIES(LZ4)\nINCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libbinlogevents/include)")
+        if Version(self.version) < "8.0.34":
+            replace_in_file(self, os.path.join(self.source_folder, "libbinlogevents", "CMakeLists.txt"),
+                            "INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libbinlogevents/include)",
+                            "MY_INCLUDE_SYSTEM_DIRECTORIES(LZ4)\nINCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libbinlogevents/include)")
 
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "zstd.cmake"),
                         "NAMES zstd",
@@ -180,7 +180,9 @@ class LibMysqlClientCConan(ConanFile):
                         "if(0)")
 
         # Do not copy shared libs of dependencies to package folder
-        deps_shared = ["SSL", "KERBEROS", "SASL", "LDAP", "PROTOBUF", "CURL"]
+        deps_shared = ["SSL", "KERBEROS", "SASL", "LDAP", "PROTOBUF"]
+        if Version(self.version) < "8.0.34":
+            deps_shared.append("CURL")
         for dep in deps_shared:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             f"MYSQL_CHECK_{dep}_DLLS()",
@@ -211,7 +213,7 @@ class LibMysqlClientCConan(ConanFile):
         tc.cache_variables["ENABLED_PROFILING"] = False
         tc.cache_variables["MYSQL_MAINTAINER_MODE"] = False
         tc.cache_variables["WIX_DIR"] = False
-        # Disable additional Linux distro-specific compiler checks. 
+        # Disable additional Linux distro-specific compiler checks.
         # The recipe already checks for minimum versions of supported
         # compilers.
         tc.cache_variables["FORCE_UNSUPPORTED_COMPILER"] = True
@@ -227,6 +229,9 @@ class LibMysqlClientCConan(ConanFile):
         tc.cache_variables["WITH_SSL"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
 
         tc.cache_variables["WITH_ZLIB"] = "system"
+
+        # Remove to ensure reproducible build, this only affects docs generation
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         tc.generate()
 
         deps = CMakeDeps(self)

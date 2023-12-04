@@ -15,8 +15,9 @@ class XpropertyConan(ConanFile):
     topics = ("observer", "traitlets")
     homepage = "https://github.com/jupyter-xeus/xproperty"
     url = "https://github.com/conan-io/conan-center-index"
-    no_copy_source = True
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -32,8 +33,7 @@ class XpropertyConan(ConanFile):
             check_min_cppstd(self, 14)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

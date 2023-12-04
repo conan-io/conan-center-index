@@ -1,11 +1,12 @@
+import os
+
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, replace_in_file, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
-import os
 
 required_conan_version = ">=1.53.0"
 
@@ -20,7 +21,14 @@ class LibSELinuxConan(ConanFile):
     topics = ("linux", "selinux", "security", "security-enhanced")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/SELinuxProject/selinux"
-    license = "Unlicense"
+    license = (
+        # https://github.com/SELinuxProject/selinux/blob/main/libselinux/LICENSE
+        # For the libselinux component: public domain with a limited liability clause
+        "libselinux-1.0",
+        # https://github.com/SELinuxProject/selinux/blob/main/libsepol/LICENSE
+        # For the libsepol component: LGPL-2.1
+        "LGPL-2.1-or-later",
+    )
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -48,33 +56,17 @@ class LibSELinuxConan(ConanFile):
         self.requires("pcre2/10.42")
 
     def validate(self):
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
     def build_requirements(self):
         self.tool_requires("flex/2.6.4")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         for download in self.conan_data["sources"][self.version]:
             get(self, **download)
-
-    @property
-    def _sepol_soversion(self):
-        return "2" if Version(self.version) >= "3.2" else "1"
-
-    @property
-    def _selinux_soversion(self):
-        return "1"
-
-    @property
-    def _sepol_library_target(self):
-        return f"libsepol.so.{self._sepol_soversion}" if self.options.shared else "libsepol.a"
-
-    @property
-    def _selinux_library_target(self):
-        return f"libselinux.so.{self._selinux_soversion}" if self.options.shared else "libselinux.a"
 
     @property
     def _sepol_source_folder(self):
@@ -100,13 +92,31 @@ class LibSELinuxConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         autotools = Autotools(self)
-        with chdir(self, os.path.join(self._sepol_source_folder, "src")):
-            autotools.make(self._sepol_library_target)
-        with chdir(self, os.path.join(self._selinux_source_folder)):
-            autotools.make()
+        for subdir in [self._sepol_source_folder, self._selinux_source_folder]:
+            with chdir(self, subdir):
+                # Build only .a or .so, not both
+                replace_in_file(self, os.path.join("src", "Makefile"),
+                                "all: $(LIBA) $(LIBSO) $(LIBPC)",
+                                "all: $(LIBSO)" if self.options.shared else "all: $(LIBA)")
+                # Skip utils dir by truncating its Makefile
+                save(self, os.path.join("utils", "Makefile"), "all:\n")
+                autotools.make()
+
+    def _copy_licenses(self):
+        copy(self, "LICENSE", self._selinux_source_folder, os.path.join(self.package_folder, "licenses"))
+        rename(self, os.path.join(self.package_folder, "licenses", "LICENSE"),
+               os.path.join(self.package_folder, "licenses", "LICENSE-libselinux"))
+        if Version(self.version) >= "3.5":
+            copy(self, "LICENSE", self._sepol_source_folder, os.path.join(self.package_folder, "licenses"))
+            rename(self, os.path.join(self.package_folder, "licenses", "LICENSE"),
+                   os.path.join(self.package_folder, "licenses", "LICENSE-libsepol"))
+        else:
+            copy(self, "COPYING", self._sepol_source_folder, os.path.join(self.package_folder, "licenses"))
+            rename(self, os.path.join(self.package_folder, "licenses", "COPYING"),
+                   os.path.join(self.package_folder, "licenses", "LICENSE-libsepol"))
 
     def package(self):
-        copy(self, "LICENSE", self._selinux_source_folder, os.path.join(self.package_folder, "licenses"))
+        self._copy_licenses()
         for library in [self._sepol_source_folder, self._selinux_source_folder]:
             copy(self, "*.h", os.path.join(library, "include"), os.path.join(self.package_folder, "include"))
             if self.options.shared:

@@ -1,78 +1,22 @@
 sources:
+  "1.3.268.0":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/vulkan-sdk-1.3.268.0.tar.gz"
+    sha256: "404fa621f1ab2731bcc68bcbff64d8c6de322faad2d87f9198641bd37255fd39"
+  "1.3.250.0":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.250.0.tar.gz"
+    sha256: "17f8683fd8320d5dfebdb22879f26f82c014d320a6a0622118cd298887626295"
+  "1.3.243.0":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.243.0.tar.gz"
+    sha256: "89a09547be30491ee0a11cd7c883e78a637fb761280d6c6c2174f37188527dc3"
   "1.3.239.0":
     url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.239.0.tar.gz"
     sha256: "fa2078408793b2173f174173a8784de56b6bbfbcb5fb958a07e46ef126c7eada"
-  "1.3.236.0":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.236.0.tar.gz"
-    sha256: "157d2230b50bb5be3ef9b9467aa90d1c109d5f188a49b11f741246d7ca583bf3"
-  "1.3.231.1":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.231.1.tar.gz"
-    sha256: "5226fbc6a90e4405200c8cfdd5733d5e0c6a64e64dcc614c485ea06e03d66578"
-  "1.3.231":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/v1.3.231.tar.gz"
-    sha256: "02e185b939635167ea8f8815f8daab76af36923a3b995951fe6a5d3e25c55bf7"
-  "1.3.224.0":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.224.0.tar.gz"
-    sha256: "9f102a89b7d350ce5a6c82887459821aa9725c521128495ed7cbda637ed52022"
-  "1.3.221":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/v1.3.221.tar.gz"
-    sha256: "ba7042b2b14a11646ba8bd33c041ccb4f1abe5bdfa2758e301a76bf6d31d2748"
-  "1.3.216.0":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.216.0.tar.gz"
-    sha256: "46188d3db019409b82f850628d5c175cc59dcdb3ce146f5c023b97709f67e8f1"
-  "1.3.211.0":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.211.0.tar.gz"
-    sha256: "bb42a8e0dda103f98bddb9ae2311ae8e8e988588b600a1114b74a1ba3a0843f4"
-  "1.3.204.1":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.204.1.tar.gz"
-    sha256: "5dcd42b564804f4c01891ddd429a4a5028113c4cf39b44256689e8f543773134"
-  "1.3.204.0":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.3.204.0.tar.gz"
-    sha256: "7e9700f454007ea6f1e6eb097a905e7c30ad2be740ddd9e76235658c98db2ddd"
   "1.2.198.0":
     url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/sdk-1.2.198.0.tar.gz"
     sha256: "7d5d56296dcd88af84ed0fde969038370cac8600c4ef7e328788b7422d9025bb"
-  "1.2.190":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/v1.2.190.tar.gz"
-    sha256: "f940bb72d123173187c5c341edb7af55fddc68efa79460f9b703a80e9f4bca44"
-  "1.2.189":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/v1.2.189.tar.gz"
-    sha256: "6e05f54a0c6a35625e8974f88c197b1817b2bddb253c38540ced9d2bc8132d6c"
-  "1.2.182":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/v1.2.182.tar.gz"
-    sha256: "0d1f9fde9d21642526e9baa55d30364c95035c4fe3c6db96836631991b44dd90"
-  "1.2.172":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/v1.2.172.tar.gz"
-    sha256: "713dcb73c73194d17251fcd9cff62e5831d4ec30dac2efcf6440595016368ddb"
-  "1.2.170.0":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/sdk-1.2.170.0.tar.gz"
-    sha256: "08c125987d4f6b086fcf952be7dce630b677fc943b336030178737bb1eb2ed49"
-  "1.2.162.0":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/sdk-1.2.162.0.tar.gz"
-    sha256: "f8f5ec2485e7fdba3f58c1cde5a25145ece1c6a686c91ba4016b28c0af3f21dd"
-  "1.2.154.0":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/sdk-1.2.154.0.tar.gz"
-    sha256: "418017d7bab907e72291476df231dd0e7dc7fe20b97e55389c975bcfc48d6433"
 patches:
-  "1.3.236.0":
-    - patch_file: "patches/1.3.236.0-0001-cmake-minimum-required-3.10.patch"
-      patch_description: "Do not use features of CMake 3.16, back to 3.10 as min version"
+  "1.3.268.0":
+    - patch_file: "patches/1.3.268.0-0001-fix-apple-arm.patch"
+      patch_description: "Apple: fix M1 build, as well as iOS & tvOS"
       patch_type: "portability"
-      patch_source: "https://github.com/KhronosGroup/Vulkan-Loader/pull/1102"
-  "1.3.231.1":
-    - patch_file: "patches/1.3.231.1-0001-no-find-package-wayland.patch"
-      patch_description: "CMake: remove attempt to find Wayland"
-      patch_type: "portability"
-      patch_source: "https://github.com/KhronosGroup/Vulkan-Loader/pull/1020"
-  "1.2.182":
-    - patch_file: "patches/1.2.182-0001-fix-mingw.patch"
-      patch_description: "Fix MinGW"
-      patch_type: "portability"
-  "1.2.154.0":
-    - patch_file: "patches/1.2.154.0-0001-fix-mingw.patch"
-      patch_description: "Fix MinGW"
-      patch_type: "portability"
-      patch_source:
-        - "https://github.com/KhronosGroup/Vulkan-Loader/pull/475"
-        - "https://github.com/KhronosGroup/Vulkan-Loader/pull/495"
-        - "https://github.com/KhronosGroup/Vulkan-Loader/pull/523"
+      patch_source: "https://github.com/KhronosGroup/Vulkan-Loader/pull/1349"
