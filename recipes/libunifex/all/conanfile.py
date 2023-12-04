@@ -39,7 +39,8 @@ class LibunifexConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Linux":
-            self.requires("liburing/2.4", transitive_headers=True, transitive_libs=True)
+            # v2.3+ is not compatible with the Linux version used in C3I
+            self.requires("liburing/2.2", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -59,7 +60,8 @@ class LibunifexConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["UNIFEX_BUILD_EXAMPLES"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("liburing", "cmake_file_name", "LIBURING")
