@@ -103,11 +103,6 @@ class PackageConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
 
-        # Rename c++ suffix to c to avoid CMake's confusion
-        fmi2_folder = path.join(self.source_folder, "Test", "FMI2")
-        rename(self, path.join(fmi2_folder, "fmi2_import_xml_test.cc"),
-               path.join(fmi2_folder, "fmi2_import_xml_test.c"))
-
         copy(self, "fmiModel*.h", self.dependencies["fmi1"].cpp_info.components["modex"].includedirs[0],
              path.join(self.build_folder, "fmis", "FMI1"))
         copy(self, "fmiPlatformTypes.h", self.dependencies["fmi1"].cpp_info.components["cosim"].includedirs[0],
