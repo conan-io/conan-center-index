@@ -149,7 +149,8 @@ class CPythonConan(ConanFile):
         if self.settings.os != "Windows":
             if not is_apple_os(self):
                 self.requires("util-linux-libuuid/2.39.2", force=True)
-            self.requires("libxcrypt/4.4.36")
+            # If crypt.h is detected, it is included in the public headers.
+            self.requires("libxcrypt/4.4.36", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_bz2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_gdbm", False):
