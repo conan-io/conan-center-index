@@ -79,7 +79,7 @@ class XkbcommonConan(ConanFile):
         self.tool_requires("meson/1.3.0")
         self.tool_requires("bison/3.8.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self._has_build_profile and self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/<host_version>")
             self.tool_requires("wayland-protocols/1.32")
