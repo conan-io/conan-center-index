@@ -234,7 +234,7 @@ class OpenSceneGraphConanFile(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("freetype", "cmake_module_file_name", "FREETYPE")
+        deps.set_property("freetype", "cmake_module_file_name", "Freetype")
         deps.set_property("giflib", "cmake_file_name", "GIFLIB")
         deps.generate()
 
@@ -266,7 +266,7 @@ class OpenSceneGraphConanFile(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
 
     def package(self):
