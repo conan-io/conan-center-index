@@ -375,7 +375,7 @@ index 560e8d486..94b5cd2dc 100644
      add_oiio_plugin (jpeg2000input.cpp jpeg2000output.cpp
 -                     INCLUDE_DIRS ${OPENJPEG_INCLUDES}
 -                     LINK_LIBRARIES ${OPENJPEG_LIBRARIES}
-+                     LINK_LIBRARIES OpenJPEG::OpenJPEG
++                     LINK_LIBRARIES openjp2
                       DEFINITIONS "-DUSE_OPENJPEG")
  else()
      message (WARNING "Jpeg-2000 plugin will not be built")
