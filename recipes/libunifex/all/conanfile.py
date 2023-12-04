@@ -5,7 +5,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file
-from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.52.0"
 
@@ -54,9 +53,6 @@ class LibunifexConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._minimum_standard}, which your compiler does not support."
             )
-
-        if self.version == "cci.20220430" and is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.ref} is not supported on MSVC")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
