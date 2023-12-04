@@ -83,6 +83,8 @@ class CAresConan(ConanFile):
             self.cpp_info.components["cares"].defines.append("CARES_STATICLIB")
         if self.settings.os == "Linux":
             self.cpp_info.components["cares"].system_libs.append("rt")
+            if Version(self.version) >= "1.23.0":
+                self.cpp_info.components["cares"].system_libs.append("pthread")
         elif self.settings.os == "Windows":
             self.cpp_info.components["cares"].system_libs.extend(["ws2_32", "advapi32"])
             if Version(self.version) >= "1.18.0":
