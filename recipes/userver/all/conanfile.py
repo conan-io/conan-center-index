@@ -30,6 +30,7 @@ class UserverConan(ConanFile):
         'with_clickhouse': [True, False],
         'with_rabbitmq': [True, False],
         'with_utest': [True, False],
+        'with_testsuite' : [True, False],
         'namespace': ['ANY'],
         'namespace_begin': ['ANY'],
         'namespace_end': ['ANY'],
@@ -47,6 +48,7 @@ class UserverConan(ConanFile):
         'with_clickhouse': True,
         'with_rabbitmq': True,
         'with_utest': True,
+        'with_testsuite': False,
         'namespace': 'userver',
         'namespace_begin': 'namespace userver {',
         'namespace_end': '}',
@@ -198,6 +200,7 @@ class UserverConan(ConanFile):
         tool_ch.variables[
             'USERVER_FEATURE_TESTSUITE'
         ] = self.options.with_utest
+        tool_ch.variables['USERVER_FEATURE_TESTSUITE'] = self.options.with_testsuite
 
         tool_ch.generate()
 
