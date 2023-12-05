@@ -33,6 +33,10 @@ sources:
       - "https://www.openssl.org/source/openssl-1.1.1w.tar.gz"
       - "https://www.openssl.org/source/old/1.1.1/openssl-1.1.1w.tar.gz"
       - "https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-1.1.1w.tar.gz"
+  1.1.1d:
+    sha256: 23011a5cc78e53d0dc98dfa608c51e72bcd350aa57df74c5d5574ba4ffb62e74
+    url: "https://github.com/Hexagon-HTC/openssl/archive/refs/tags/OpenSSL_1_1_1d.tar.gz"
+
 patches:
   1.0.2u:
     - patch_file: patches/1.0.2u-darwin-arm64.patch
