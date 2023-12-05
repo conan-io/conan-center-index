@@ -117,6 +117,8 @@ class GinkgoConan(ConanFile):
             tc.variables["GINKGO_BUILD_DPCPP"] = False
         tc.variables["GINKGO_BUILD_HWLOC"] = False
         tc.variables["GINKGO_BUILD_MPI"] = False
+        if Version(self.version) >= "1.4.0":
+            tc.variables["GINKGO_WITH_CCACHE"] = False
         tc.generate()
 
     def build(self):
