@@ -1,21 +1,24 @@
-from conan.tools.microsoft import is_msvc
-from conan.tools.microsoft.visual import vs_ide_version
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
 import os
 
-required_conan_version = ">=1.45.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import is_msvc, check_min_vs
+
+required_conan_version = ">=1.52.0"
 
 
 class CorradeConan(ConanFile):
     name = "corrade"
     description = "Corrade is a multiplatform utility library written in C++11/C++14."
-    topics = ("corrade", "magnum", "filesystem", "console", "environment", "os")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://magnum.graphics/corrade"
-    license = "MIT"
+    topics = ("magnum", "filesystem", "console", "environment", "os")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -38,22 +41,9 @@ class CorradeConan(ConanFile):
         "with_utility": True,
     }
 
-    generators = "cmake"
-    short_paths = True
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        self.copy("cmake/*")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        copy(self, "cmake/*", src=self.recipe_folder, dst=self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,79 +51,96 @@ class CorradeConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if is_msvc(self) and tools.Version(vs_ide_version(self)) < 14:
-            raise ConanInvalidConfiguration("Corrade requires Visual Studio version 14 or greater")
-
-        if not self.options.with_utility and (self.options.with_testsuite or self.options.with_interconnect or self.options.with_pluginmanager):
-            raise ConanInvalidConfiguration("Component 'utility' is required for 'test_suite', 'interconnect' and 'plugin_manager'")
+        check_min_vs(self, 190)
+        if not self.options.with_utility and (
+            self.options.with_testsuite or self.options.with_interconnect or self.options.with_pluginmanager
+        ):
+            raise ConanInvalidConfiguration(
+                "Component 'utility' is required for 'test_suite', 'interconnect' and 'plugin_manager'"
+            )
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
-            self.build_requires("corrade/{}".format(self.version))
+        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
+            self.tool_requires(f"corrade/{self.version}")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_STATIC"] = not self.options.shared
-        cmake.definitions["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", False)
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_STATIC"] = not self.options.shared
+        tc.variables["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", False)
 
-        cmake.definitions["BUILD_DEPRECATED"] = self.options.build_deprecated
-        cmake.definitions["WITH_INTERCONNECT"] = self.options.with_interconnect
-        cmake.definitions["WITH_MAIN"] = self.options.with_main
-        cmake.definitions["WITH_PLUGINMANAGER"] = self.options.with_pluginmanager
-        cmake.definitions["WITH_TESTSUITE"] = self.options.with_testsuite
-        cmake.definitions["WITH_UTILITY"] = self.options.with_utility
-        cmake.definitions["WITH_RC"] = self.options.with_utility
+        tc.variables["BUILD_DEPRECATED"] = self.options.build_deprecated
+        tc.variables["WITH_INTERCONNECT"] = self.options.with_interconnect
+        tc.variables["WITH_MAIN"] = self.options.with_main
+        tc.variables["WITH_PLUGINMANAGER"] = self.options.with_pluginmanager
+        tc.variables["WITH_TESTSUITE"] = self.options.with_testsuite
+        tc.variables["WITH_UTILITY"] = self.options.with_utility
+        tc.variables["WITH_RC"] = self.options.with_utility
 
         # Corrade uses suffix on the resulting "lib"-folder when running cmake.install()
         # Set it explicitly to empty, else Corrade might set it implicitly (eg. to "64")
-        cmake.definitions["LIB_SUFFIX"] = ""
+        tc.variables["LIB_SUFFIX"] = ""
 
         if is_msvc(self):
-            cmake.definitions["MSVC2015_COMPATIBILITY"] = vs_ide_version(self) == "14"
-            cmake.definitions["MSVC2017_COMPATIBILITY"] = vs_ide_version(self) == "15"
-            cmake.definitions["MSVC2019_COMPATIBILITY"] = vs_ide_version(self) == "16"
+            if check_min_vs(self, 193, raise_invalid=False):
+                tc.variables["MSVC2019_COMPATIBILITY"] = True
+            elif check_min_vs(self, 192, raise_invalid=False):
+                tc.variables["MSVC2017_COMPATIBILITY"] = True
+            elif check_min_vs(self, 191, raise_invalid=False):
+                tc.variables["MSVC2015_COMPATIBILITY"] = True
 
-        cmake.configure(build_folder=self._build_subfolder)
-
-        return cmake
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-
         share_cmake = os.path.join(self.package_folder, "share", "cmake", "Corrade")
-        self.copy("UseCorrade.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake"))
-        self.copy("CorradeLibSuffix.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake"))
-        self.copy("*.cmake", src=os.path.join(self.source_folder, "cmake"), dst=os.path.join("lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        copy(self, "UseCorrade.cmake",
+             src=share_cmake,
+             dst=os.path.join(self.package_folder, "lib", "cmake"))
+        copy(self, "CorradeLibSuffix.cmake",
+             src=share_cmake,
+             dst=os.path.join(self.package_folder, "lib", "cmake"))
+        copy(self, "*.cmake",
+            src=os.path.join(self.export_sources_folder, "cmake"),
+            dst=os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "Corrade")
-        self.cpp_info.names["cmake_find_package"] = "Corrade"
-        self.cpp_info.names["cmake_find_package_multi"] = "Corrade"
+        self.cpp_info.set_property("cmake_target_name", "Corrade::Corrade")
 
         suffix = "-d" if self.settings.build_type == "Debug" else ""
 
-        # The FindCorrade.cmake file provided by the library populates some extra stuff
-        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "conan-corrade-vars.cmake")])
-        self.cpp_info.components["_corrade"].build_modules.append(os.path.join("lib", "cmake", "conan-corrade-vars.cmake"))
+        cmake_modules = [
+            # Reproduces the variables and calls performed by the FindCorrade.cmake provided by the library
+            os.path.join("lib", "cmake", "conan-corrade-vars.cmake"),
+            # Autodetects LIB_SUFFIX (either "64" or "")
+            os.path.join("lib", "cmake", "CorradeLibSuffix.cmake"),
+            # Exports build flags and macros
+            os.path.join("lib", "cmake", "UseCorrade.cmake"),
+        ]
+        self.cpp_info.set_property("cmake_build_modules", cmake_modules)
+        self.cpp_info.components["_corrade"].build_modules["cmake_find_package"] = cmake_modules
+        self.cpp_info.components["_corrade"].build_modules["cmake_find_package_multi"] = cmake_modules
 
         if self.options.with_main:
             self.cpp_info.components["main"].set_property("cmake_target_name", "Corrade::Main")
@@ -153,10 +160,10 @@ class CorradeConan(ConanFile):
             self.cpp_info.components["utility"].requires = ["_corrade"]
 
             # This one is statically linked into utility
-            #self.cpp_info.components["containers"].set_property("cmake_target_name", "Corrade::Containers")
-            #self.cpp_info.components["containers"].names["cmake_find_package"] = "Containers"
-            #self.cpp_info.components["containers"].names["cmake_find_package_multi"] = "Containers"
-            #self.cpp_info.components["containers"].libs = ["CorradeContainers" + suffix]
+            # self.cpp_info.components["containers"].set_property("cmake_target_name", "Corrade::Containers")
+            # self.cpp_info.components["containers"].names["cmake_find_package"] = "Containers"
+            # self.cpp_info.components["containers"].names["cmake_find_package_multi"] = "Containers"
+            # self.cpp_info.components["containers"].libs = ["CorradeContainers" + suffix]
 
         if self.options.with_interconnect:
             self.cpp_info.components["interconnect"].set_property("cmake_target_name", "Corrade::Interconnect")
@@ -181,9 +188,12 @@ class CorradeConan(ConanFile):
 
         if self.options.with_utility:
             bindir = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bindir))
+            self.output.info(f"Appending PATH environment variable: {bindir}")
             self.env_info.PATH.append(bindir)
 
         # pkg_config: Add more explicit naming to generated files (avoid filesystem collision).
-        for key, cmp in self.cpp_info.components.items():
-            self.cpp_info.components[key].names["pkg_config"] = "{}_{}".format(self.name, key)
+        for key, component in self.cpp_info.components.items():
+            component.set_property("pkg_config_name", f"{self.name}_{key}")
+
+        self.cpp_info.names["cmake_find_package"] = "Corrade"
+        self.cpp_info.names["cmake_find_package_multi"] = "Corrade"

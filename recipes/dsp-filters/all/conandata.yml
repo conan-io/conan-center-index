@@ -1,0 +1,12 @@
+sources:
+  "cci.20170309":
+    url: "https://github.com/vinniefalco/DSPFilters/archive/acc49170e79a94fcb9c04b8a2116e9f8dffd1c7d.tar.gz"
+    sha256: "330c3960e55b8cdbf041d8ec4790a21a326dc331e43bf14c144ae5d88a47d53d"
+patches:
+  "cci.20170309":
+    - patch_file: "patches/0001-remove-explicit-cmake-options.patch"
+      patch_description: "Remove explicit STATIC and FPIC options in CMakeLists.txt"
+      patch_type: "conan"
+    - patch_file: "patches/0002-remove-msvc-cmake-flags.patch"
+      patch_description: "Remove MY_FLAGS options in CMakeLists.txt"
+      patch_type: "conan"

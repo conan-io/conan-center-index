@@ -1,16 +1,26 @@
 import os
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.build import cross_building
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
+
+required_conan_version = ">=1.53.0"
 
 
 class TcpWrappersConan(ConanFile):
     name = "tcp-wrappers"
-    homepage = "ftp://ftp.porcupine.org/pub/security/index.html"
     description = "A security tool which acts as a wrapper for TCP daemons"
-    topics = ("conan", "tcp", "ip", "daemon", "wrapper")
+    license = "TCP-wrappers"
     url = "https://github.com/conan-io/conan-center-index"
-    license = "BSD"
-    exports_sources = "patches/**"
+    homepage = "http://ftp.porcupine.org/pub/security/"
+    topics = ("tcp", "ip", "daemon", "wrapper")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -20,76 +30,91 @@ class TcpWrappersConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Visual Studio is not supported")
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("Visual Studio is not supported")
+        if cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building is not current supported.")
+
+    def build_requirements(self):
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:subsystem", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("tcp_wrappers_{}-ipv6.4".format(self.version), self._source_subfolder)
-
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
-    def build(self):
-        self._patch_sources()
-        with tools.chdir(self._source_subfolder):
-            autotools = AutoToolsBuildEnvironment(self)
-            make_args = [
-                "REAL_DAEMON_DIR={}".format(tools.unix_path(os.path.join(self.package_folder, "bin"))),
-                "-j1",
-                "SHEXT={}".format(self._shext),
-            ]
-            if self.options.shared:
-                make_args.append("shared=1")
-            env_vars = autotools.vars
-            if self.options.get_safe("fPIC", True):
-                env_vars["CFLAGS"] += " -fPIC"
-            env_vars["ENV_CFLAGS"] = env_vars["CFLAGS"]
-            # env_vars["SHEXT"] = self._shext
-            print(env_vars)
-            with tools.environment_append(env_vars):
-                autotools.make(target="linux", args=make_args)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _shext(self):
-        if tools.is_apple_os(self.settings.os):
+        if is_apple_os(self):
             return ".dylib"
         return ".so"
 
-    def package(self):
-        self.copy(pattern="DISCLAIMER", src=self._source_subfolder, dst="licenses")
-
-        for exe in ("safe_finger", "tcpd", "tcpdchk", "tcpdmatch", "try-from"):
-            self.copy(exe, src=self._source_subfolder, dst="bin", keep_path=False)
-        self.copy("tcpd.h", src=self._source_subfolder, dst="include", keep_path=False)
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.make_args.append("REAL_DAEMON_DIR=/bin")
+        tc.make_args.append(f"SHEXT={self._shext}")
         if self.options.shared:
-            self.copy("libwrap{}".format(self._shext), src=self._source_subfolder, dst="lib", keep_path=False)
+            tc.make_args.append("shared=1")
+        if self.options.get_safe("fPIC") or self.options.shared:
+            tc.make_args.append("ENV_CFLAGS=-fPIC")
+        tc.generate()
+
+    def build(self):
+        apply_conandata_patches(self)
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.make(target="linux")
+
+    def package(self):
+        copy(self, "DISCLAIMER",
+             src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses"))
+        for exe in ("safe_finger", "tcpd", "tcpdchk", "tcpdmatch", "try-from"):
+            copy(self, exe,
+                 src=self.source_folder,
+                 dst=os.path.join(self.package_folder, "bin"),
+                 keep_path=False)
+        copy(self, "tcpd.h",
+             src=self.source_folder,
+             dst=os.path.join(self.package_folder, "include"),
+             keep_path=False)
+        if self.options.shared:
+            copy(self, f"libwrap{self._shext}",
+                 src=self.source_folder,
+                 dst=os.path.join(self.package_folder, "lib"),
+                 keep_path=False)
         else:
-            self.copy("libwrap.a", src=self._source_subfolder, dst="lib", keep_path=False)
+            copy(self, "libwrap.a",
+                 src=self.source_folder,
+                 dst=os.path.join(self.package_folder, "lib"),
+                 keep_path=False)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["wrap"]
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        # TODO: to remove once conan v1 not supported anymore
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

@@ -81,7 +81,7 @@ class LibarchiveConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_libxml2:
@@ -91,7 +91,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_iconv:
             self.requires("libiconv/1.17")
         if self.options.with_pcreposix:
-            self.requires("pcre/10.42")
+            self.requires("pcre2/10.42")
         if self.options.with_nettle:
             self.requires("nettle/3.8.1")
         if self.options.with_openssl:
@@ -103,7 +103,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.2")
+            self.requires("xz_utils/5.4.4")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.get_safe("with_mbedtls"):
@@ -149,6 +149,7 @@ class LibarchiveConan(ConanFile):
         tc.variables["ENABLE_CPIO"] = False
         tc.variables["ENABLE_CAT"] = False
         tc.variables["ENABLE_TEST"] = False
+        tc.variables["ENABLE_UNZIP"] = False
         # too strict check
         tc.variables["ENABLE_WERROR"] = False
         if Version(self.version) >= "3.4.2":

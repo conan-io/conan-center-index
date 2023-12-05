@@ -46,7 +46,7 @@ class HazelcastCppClient(ConanFile):
     def requirements(self):
         self.requires("boost/1.79.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -84,6 +84,6 @@ class HazelcastCppClient(ConanFile):
         self.cpp_info.libs = ["hazelcast-cpp-client"]
         self.cpp_info.defines = ["BOOST_THREAD_VERSION=5"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["pthread", "m"])
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")

@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(cmake_wrapper)
 
-include("${{CMAKE_BINARY_DIR}}/conanbuildinfo.cmake")
-conan_basic_setup(TARGETS)
+find_package(libusb REQUIRED CONFIG)
 
 # autotools project does not allow building a shared mpfr library (because of libtool limitation)
 
@@ -14,10 +13,11 @@ if(BUILD_SHARED_LIBS)
 else()
     target_compile_definitions(usb PRIVATE LIBUSB_COMPAT_STATIC)
 endif()
-target_link_libraries(usb PRIVATE $<LINK_ONLY:CONAN_PKG::libusb>)
+target_link_libraries(usb PRIVATE $<LINK_ONLY:libusb::libusb>)
 if(MSVC)
+    find_package(dirent REQUIRED CONFIG)
     target_compile_definitions(usb PRIVATE _CRT_SECURE_NO_WARNINGS)
-    target_link_libraries(usb PRIVATE CONAN_PKG::dirent)
+    target_link_libraries(usb PRIVATE dirent::dirent)
 endif()
 
 install(TARGETS usb
