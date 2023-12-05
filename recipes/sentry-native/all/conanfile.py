@@ -195,6 +195,7 @@ class SentryNativeConan(ConanFile):
 
         self.cpp_info.components["sentry"].set_property("cmake_target_name", "sentry::sentry")
         self.cpp_info.components["sentry"].libs = ["sentry"]
+
         if self.settings.os in ("Android", "FreeBSD", "Linux"):
             self.cpp_info.components["sentry"].exelinkflags = ["-Wl,-E,--build-id=sha1"]
             self.cpp_info.components["sentry"].sharedlinkflags = ["-Wl,-E,--build-id=sha1"]
@@ -219,6 +220,8 @@ class SentryNativeConan(ConanFile):
                 self.cpp_info.components["breakpad"].frameworks.append("CoreFoundation")
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["breakpad"].system_libs.append("pthread")
+
+            self.cpp_info.components["sentry"].requires.append("breakpad")
 
         if self.options.backend == "crashpad" and self.options.with_crashpad == "sentry":
             # mini_chromium
@@ -261,6 +264,8 @@ class SentryNativeConan(ConanFile):
             self.cpp_info.components["crashpad_client"].set_property("cmake_target_name", "crashpad::client")
             self.cpp_info.components["crashpad_client"].libs = ["crashpad_client"]
             self.cpp_info.components["crashpad_client"].requires = ["crashpad_util", "crashpad_mini_chromium"]
+
+            self.cpp_info.components["sentry"].requires.append("crashpad_client")
 
             # snapshot
             self.cpp_info.components["crashpad_snapshot"].set_property("cmake_target_name", "crashpad::snapshot")

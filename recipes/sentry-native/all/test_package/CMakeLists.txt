@@ -5,9 +5,4 @@ find_package(sentry REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE sentry::sentry)
-
-if(APPLE OR WIN32)
-  target_link_libraries(${PROJECT_NAME} PRIVATE crashpad::client)
-endif()
-
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
