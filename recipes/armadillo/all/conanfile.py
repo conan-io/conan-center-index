@@ -286,12 +286,14 @@ class ArmadilloConan(ConanFile):
             if(DEFINED Armadillo_LIBRARIES)
                 set(ARMADILLO_LIBRARIES ${{Armadillo_LIBRARIES}})
             endif()
-            if(DEFINED Armadillo_VERSION_STRING)
-                set(ARMADILLO_VERSION_STRING ${{Armadillo_VERSION_STRING}})
-            endif()
             set(ARMADILLO_VERSION_MAJOR "{Version(self.version).major}")
             set(ARMADILLO_VERSION_MINOR "{Version(self.version).minor}")
             set(ARMADILLO_VERSION_PATCH "{Version(self.version).patch}")
+            if(DEFINED Armadillo_VERSION_STRING)
+                set(ARMADILLO_VERSION_STRING ${{Armadillo_VERSION_STRING}})
+            else()
+                set(ARMADILLO_VERSION_STRING "${{ARMADILLO_VERSION_MAJOR}}.${{ARMADILLO_VERSION_MINOR}}.${{ARMADILLO_VERSION_PATCH}}")
+            endif()
             set(ARMADILLO_VERSION_NAME "{self._get_arma_version_name}")
         """)
         save(self, module_file, content)
@@ -314,6 +316,14 @@ class ArmadilloConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Armadillo")
         self.cpp_info.set_property("cmake_target_name", "Armadillo::Armadillo")
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
+
+        # Remove when cmake_find_package and pkg_config generators are no
+        # longer supported
+        self.cpp_info.names["pkg_config"] = "armadillo"
+        self.cpp_info.names["cmake_find_package"] = "Armadillo"
+        self.cpp_info.names["cmake_find_package_multi"] = "Armadillo"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_vars_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_vars_rel_path]
 
         if self.options.get_safe("use_extern_rng"):
             self.cpp_info.defines.append("ARMA_USE_EXTERN_RNG")
