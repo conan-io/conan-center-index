@@ -8,7 +8,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, is_msvc, msvs_toolset, MSBuildToolchain
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class Cc65Conan(ConanFile):
@@ -33,7 +33,7 @@ class Cc65Conan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
-        if str(self.info.settings.compiler) in ["msvc", "Visual Studio"]:
+        if is_msvc(self.info):
             if self.info.settings.arch == "x86_64":
                 self.info.settings.arch = "x86"
         del self.info.settings.compiler
@@ -45,7 +45,7 @@ class Cc65Conan(ConanFile):
                 "cc65 needs to be able to run the built executables during the build process"
             )
         if is_msvc(self):
-            if self.settings.arch not in ("x86", "x86_64"):
+            if self.settings.arch not in ["x86", "x86_64"]:
                 raise ConanInvalidConfiguration(f"{self.settings.arch} is not supported on MSVC")
             if self.settings.arch == "x86_64":
                 self.output.info("This recipe will build x86 instead of x86_64 (the binaries are compatible)")
@@ -71,32 +71,12 @@ class Cc65Conan(ConanFile):
             tc.make_args.append("EXE_SUFFIX=.exe")
         tc.generate()
 
-    def _build_msvc(self):
-        msbuild = MSBuild(self)
-        msbuild.build(sln=os.path.join(self.source_folder, "src", "cc65.sln"))
-        with chdir(self, os.path.join(self.source_folder, "libsrc")):
-            autotools = Autotools(self)
-            autotools.configure()
-            autotools.make()
-
-    def _build_autotools(self):
-        with chdir(self, self.source_folder):
-            autotools = Autotools(self)
-            autotools.make()
-
     def _patch_sources(self):
         apply_conandata_patches(self)
         if is_msvc(self):
-            with chdir(self, os.path.join(self.source_folder, "src")):
-                for fn in os.listdir("."):
-                    if not fn.endswith(".vcxproj"):
-                        continue
-                    replace_in_file(self, fn, "v141", msvs_toolset(self))
-                    replace_in_file(self, fn,
-                                    ("<WindowsTargetPlatformVersion>"
-                                     "10.0.16299.0"
-                                     "</WindowsTargetPlatformVersion>"),
-                                    "")
+            for vcxproj in self.source_path.joinpath("src").rglob("*.vcxproj"):
+                replace_in_file(self, vcxproj, "v141", msvs_toolset(self))
+                replace_in_file(self, vcxproj, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
         if self.settings.os == "Windows":
             # Add ".exe" suffix to calls from cl65 to other utilities
             for fn, var in [
@@ -108,41 +88,41 @@ class Cc65Conan(ConanFile):
             ]:
                 v = f"{var},".ljust(5)
                 replace_in_file(self, os.path.join(self.source_folder, "src", "cl65", "main.c"),
-                    f'CmdInit (&{v} CmdPath, "{fn}");',
-                    f'CmdInit (&{v} CmdPath, "{fn}.exe");')
+                                f'CmdInit (&{v} CmdPath, "{fn}");',
+                                f'CmdInit (&{v} CmdPath, "{fn}.exe");')
 
     def build(self):
         self._patch_sources()
         if is_msvc(self):
-            self._build_msvc()
+            msbuild = MSBuild(self)
+            msbuild.platform = "Win32"
+            msbuild.build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
+            msbuild.build(sln=os.path.join(self.source_folder, "src", "cc65.sln"))
+            with chdir(self, os.path.join(self.source_folder, "libsrc")):
+                autotools = Autotools(self)
+                autotools.make()
         else:
-            self._build_autotools()
-
-    def _package_msvc(self):
-        copy(self, "*.exe",
-             dst=os.path.join(self.package_folder, "bin"),
-             src=os.path.join(self.source_folder, "bin"),
-             keep_path=False)
-        for dir in ("asminc", "cfg", "include", "lib", "target"):
-            copy(self, "*",
-                 dst=os.path.join(self.package_folder, "bin", "share", "cc65", dir),
-                 src=os.path.join(self.source_folder, dir))
-
-    def _package_autotools(self):
-        with chdir(self, os.path.join(self.source_folder)):
-            autotools = Autotools(self)
-            autotools.install()
-        rmdir(self, os.path.join(self.package_path, "samples"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
+            with chdir(self, self.source_folder):
+                autotools = Autotools(self)
+                autotools.make()
 
     def package(self):
-        copy(self, "LICENSE",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=self.source_folder)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
-            self._package_msvc()
+            copy(self, "*.exe",
+                 dst=os.path.join(self.package_folder, "bin"),
+                 src=os.path.join(self.source_folder, "bin"),
+                 keep_path=False)
+            for dir in ("asminc", "cfg", "include", "lib", "target"):
+                copy(self, "*",
+                     dst=os.path.join(self.package_folder, "bin", "share", "cc65", dir),
+                     src=os.path.join(self.source_folder, dir))
         else:
-            self._package_autotools()
+            with chdir(self, os.path.join(self.source_folder)):
+                autotools = Autotools(self)
+                autotools.install()
+            rmdir(self, os.path.join(self.package_path, "samples"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.frameworkdirs = []
