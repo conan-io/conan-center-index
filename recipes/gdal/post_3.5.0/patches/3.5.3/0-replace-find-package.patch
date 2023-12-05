@@ -46,10 +46,9 @@ diff --git a/cmake/helpers/CheckDependentLibraries.cmake b/cmake/helpers/CheckDe
  cmake_dependent_option(GDAL_USE_RASTERLITE2 "Set ON to use Rasterlite2" ON HAVE_RASTERLITE2 OFF)
  
 -find_package(LibKML COMPONENTS DOM ENGINE)
-+find_package2(LibKML COMPONENTS kmlengine kmldom kmlbase)
++find_package2(LibKML COMPONENTS DOM ENGINE)
  if (GDAL_USE_LIBKML)
--  if (NOT LibKML_FOUND)
-+  if (FALSE)
+   if (NOT LibKML_FOUND)
      message(FATAL_ERROR "Configured to use GDAL_USE_LIBKML, but not found")
    endif ()
  endif ()

@@ -156,7 +156,9 @@ class GdalConan(ConanFile):
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
         export_conandata_patches(self)
-        copy(self, "ConanFindPackage.cmake", src=os.path.join(self.recipe_folder, "cmake"), dst=self.export_sources_folder)
+        copy(self, "*.cmake",
+             src=os.path.join(self.recipe_folder, "cmake"),
+             dst=os.path.join(self.export_sources_folder, "src", "cmake", "helpers"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -345,9 +347,6 @@ class GdalConan(ConanFile):
         tc.cache_variables["BUILD_APPS"] = self.options.tools
         tc.cache_variables["BUILD_TESTING"] = False
 
-        tc.cache_variables["SQLite3_HAS_COLUMN_METADATA"] = self.dependencies["sqlite3"].options.enable_column_metadata
-        tc.cache_variables["SQLite3_HAS_RTREE"] = self.dependencies["sqlite3"].options.enable_rtree
-
         tc.cache_variables["GDAL_USE_ARCHIVE"] = self.options.with_libarchive
         tc.cache_variables["GDAL_USE_ARMADILLO"] = self.options.with_armadillo
         tc.cache_variables["GDAL_USE_ARROW"] = self.options.with_arrow
@@ -439,6 +438,16 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_ZLIB"] = True
         tc.cache_variables["GDAL_USE_ZLIB_INTERNAL"] = False
         tc.cache_variables["GDAL_USE_ZSTD"] = self.options.with_zstd
+
+        # https://github.com/OSGeo/gdal/blob/v3.8.1/cmake/modules/packages/FindSQLite3.cmake
+        if self.options.with_sqlite3:
+            tc.cache_variables["SQLite3_HAS_COLUMN_METADATA"] = self.dependencies["sqlite3"].options.enable_column_metadata
+            tc.cache_variables["SQLite3_HAS_RTREE"] = self.dependencies["sqlite3"].options.enable_rtree
+            tc.cache_variables["SQLite3_HAS_LOAD_EXTENSION"] = not self.dependencies["sqlite3"].options.omit_load_extension
+            tc.cache_variables["SQLite3_HAS_PROGRESS_HANDLER"] = True
+            tc.cache_variables["SQLite3_HAS_MUTEX_ALLOC"] = True
+            tc.preprocessor_definitions["SQLite3_HAS_COLUMN_METADATA"] = 1 if self.dependencies["sqlite3"].options.enable_column_metadata else 0
+            tc.preprocessor_definitions["SQLite3_HAS_RTREE"] = 1 if self.dependencies["sqlite3"].options.enable_rtree else 0
         # https://github.com/OSGeo/gdal/blob/v3.8.0/cmake/helpers/CheckDependentLibraries.cmake#L419-L450
         tc.cache_variables["HAVE_JPEGTURBO_DUAL_MODE_8_12"] = (
                 self.options.with_jpeg == "libjpeg-turbo" and
@@ -576,6 +585,9 @@ class GdalConan(ConanFile):
             "libjxl::jxl_threads":        "JXL_THREADS::JXL_THREADS",
             "libjpeg":                    "JPEG::JPEG",
             "libjpeg-turbo::jpeg":        "JPEG::JPEG",
+            "libkml::kmldom":             "LIBKML::DOM",
+            "libkml::kmlengine":          "LIBKML::ENGINE",
+            "libkml":                     "LIBKML::LibKML",
             "librasterlite2":             "RASTERLITE2::RASTERLITE2",
             "libspatialite":              "SPATIALITE::SPATIALITE",
             "libwebp":                    "WEBP::WebP",
@@ -602,9 +614,6 @@ class GdalConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        copy(self, "ConanFindPackage.cmake",
-             src=self.export_sources_folder,
-             dst=os.path.join(self.source_folder, "cmake", "helpers"))
         # Fix Deflate::Deflate not being correctly propagated internally.
         replace_in_file(self, os.path.join(self.source_folder, "port", "CMakeLists.txt"),
                         "PRIVATE Deflate::Deflate",

@@ -8,6 +8,7 @@ function(find_package2 pkgname)
     find_package(${pkgname} ${ARGN}
         QUIET
         CONFIG
+        GLOBAL
         # Forbid the use of system libs entirely
         NO_DEFAULT_PATH
         PATHS ${CMAKE_PREFIX_PATH}
@@ -20,16 +21,20 @@ function(find_package2 pkgname)
             list(APPEND targets ${lib})
         endif()
     endforeach()
-    set(${key}_TARGET "${targets}" CACHE STRING "")
-    set(${pkgname}_TARGET "${targets}" CACHE STRING "")
-    set(${key}_LIBRARIES "${${pkgname}_LIBRARIES}" CACHE STRING "")
-    set(${key}_LIBRARY "${${pkgname}_LIBRARIES}" CACHE STRING "")
-    set(${key}_INCLUDE_DIR "${${pkgname}_INCLUDE_DIR}" CACHE STRING "")
-    set(${key}_INCLUDE_DIRS "${${pkgname}_INCLUDE_DIRS}" CACHE STRING "")
+    # Add upper-case variables
     set(${key}_DEFINITIONS "${${pkgname}_DEFINITIONS}" CACHE STRING "")
     set(${key}_FOUND ${${pkgname}_FOUND} CACHE BOOL "")
-    set(${pkgname}_VERSION ${${pkgname}_VERSION_STRING} CACHE BOOL "")
+    set(${key}_INCLUDE_DIR "${${pkgname}_INCLUDE_DIR}" CACHE STRING "")
+    set(${key}_INCLUDE_DIRS "${${pkgname}_INCLUDE_DIRS}" CACHE STRING "")
+    set(${key}_LIBRARIES "${${pkgname}_LIBRARIES}" CACHE STRING "")
+    set(${key}_LIBRARY "${${pkgname}_LIBRARIES}" CACHE STRING "")
+    set(${key}_TARGET "${targets}" CACHE STRING "")
     set(${key}_VERSION ${${pkgname}_VERSION} CACHE BOOL "")
+
+    # Add as cache vars for global visibility
+    set(${pkgname}_FOUND ${${pkgname}_FOUND} CACHE BOOL "")
+    set(${pkgname}_TARGET "${targets}" CACHE STRING "")
+    set(${pkgname}_VERSION ${${pkgname}_VERSION_STRING} CACHE BOOL "")
 
     message(STATUS "Found ${pkgname}: ${${pkgname}_FOUND}")
     message(STATUS "  ${key}_TARGET: ${${key}_TARGET}")

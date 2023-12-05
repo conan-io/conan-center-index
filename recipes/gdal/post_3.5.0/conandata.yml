@@ -9,11 +9,11 @@ sources:
     url: "https://github.com/OSGeo/gdal/releases/download/v3.5.2/gdal-3.5.2.tar.gz"
     sha256: "fbd696e1b2a858fbd2eb3718db16b14ed9ba82521d3578770d480c74fe1146d2"
 patches:
-  "3.8.0":
-    - patch_file: "patches/3.8.0/0-replace-find-package.patch"
+  "3.8.1":
+    - patch_file: "patches/3.8.1/0-replace-find-package.patch"
       patch_description: "Use custom version of find_package() for Conan deps"
       patch_type: "conan"
-    - patch_file: "patches/3.8.0/1-fix-recursive-targets.patch"
+    - patch_file: "patches/3.8.1/1-fix-recursive-targets.patch"
       patch_description: "Fix CMake failure due to recursive CMakeDeps Conan targets"
       patch_type: "conan"
   "3.7.3":
