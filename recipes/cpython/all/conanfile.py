@@ -180,7 +180,7 @@ class CPythonConan(ConanFile):
                and (not is_msvc(self) or Version(self._version_number_only) >= "3.8")
 
     def requirements(self):
-        self.requires("zlib/[>=1.2.11 <2]", force=True)
+        self.requires("zlib/[>=1.2.11 <2]")
         if self._supports_modules:
             self.requires("openssl/[>=1.1 <4]")
             self.requires("expat/2.5.0")
@@ -194,7 +194,7 @@ class CPythonConan(ConanFile):
                 self.requires("mpdecimal/2.5.0")  # FIXME: no 2.5.1 to troubleshoot apple
         if self.settings.os != "Windows":
             if not is_apple_os(self):
-                self.requires("util-linux-libuuid/2.39.2", force=True)
+                self.requires("util-linux-libuuid/2.39.2")
             self.requires("libxcrypt/4.4.35")
         if self.options.get_safe("with_bz2"):
             self.requires("bzip2/1.0.8")
