@@ -53,7 +53,7 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.83.0", transitive_headers=True)
-        self.requires("function2/4.2.3", transitive_headers=True)
+        self.requires("function2/4.2.4", transitive_headers=True)
         self.requires("prometheus-cpp/1.1.0", transitive_headers=True)
 
     def validate(self):

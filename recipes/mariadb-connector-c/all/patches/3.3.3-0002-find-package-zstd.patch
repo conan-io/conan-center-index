@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f3b6cbd..5a60394 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -221,7 +221,7 @@ INCLUDE(${CC_SOURCE_DIR}/cmake/SearchLibrary.cmake)
+ 
+ # Compression plugins: ZSTD, ZLIB
+ 
+-INCLUDE(${CC_SOURCE_DIR}/cmake/FindZStd.cmake)
++find_package(ZSTD REQUIRED CONFIG)
+ 
+ IF(WITH_EXTERNAL_ZLIB)
+   IF(NOT ZLIB_FOUND)

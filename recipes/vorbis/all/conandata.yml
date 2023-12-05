@@ -6,5 +6,12 @@ sources:
     url: "https://github.com/xiph/vorbis/archive/v1.3.6.tar.gz"
     sha256: "43fc4bc34f13da15b8acfa72fd594678e214d1cab35fc51d3a54969a725464eb"
 patches:
+  "1.3.7":
+    - patch_file: "patches/1.3.7-0001-mingw-shared-def.patch"
+      patch_description: "MinGW: fix .def file for shared lib"
+      patch_type: "portability"
+      patch_source: "https://github.com/xiph/vorbis/pull/76"
   "1.3.6":
-    - patch_file: "patches/link-libm-find-package-ogg.patch"
+    - patch_file: "patches/1.3.6-0001-link-libm-find-package-ogg.patch"
+      patch_description: "CMake: robust discovery and link of libm and Ogg"
+      patch_type: "conan"

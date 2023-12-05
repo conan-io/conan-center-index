@@ -179,7 +179,7 @@ class SDLConan(ConanFile):
             # or because CMake's platform configuration is corrupt.
             self.tool_requires("cmake/[>=3.20 <4]")
         if self.settings.os == "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self.options.get_safe("wayland") and not self._is_legacy_one_profile:
             self.tool_requires("wayland/<host_version>")  # Provides wayland-scanner
 

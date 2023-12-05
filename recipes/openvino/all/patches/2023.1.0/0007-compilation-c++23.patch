@@ -1,0 +1,38 @@
+diff --git a/src/core/src/type.cpp b/src/core/src/type.cpp
+index 7d6aef2c46..c75d9a7476 100644
+--- a/src/core/src/type.cpp
++++ b/src/core/src/type.cpp
+@@ -37,7 +37,7 @@ std::string DiscreteTypeInfo::get_version() const {
+     if (version_id) {
+         return std::string(version_id);
+     }
+-    return nullptr;
++    return {};
+ }
+ 
+ DiscreteTypeInfo::operator std::string() const {
+diff --git a/src/frontends/onnx/frontend/src/ops_bridge.hpp b/src/frontends/onnx/frontend/src/ops_bridge.hpp
+index bbd6bfd129..4e2d2edb2b 100644
+--- a/src/frontends/onnx/frontend/src/ops_bridge.hpp
++++ b/src/frontends/onnx/frontend/src/ops_bridge.hpp
+@@ -5,6 +5,7 @@
+ #pragma once
+ 
+ #include <cstdint>
++#include <iterator>
+ #include <map>
+ #include <mutex>
+ #include <string>
+diff --git a/src/inference/src/dev/make_tensor.cpp b/src/inference/src/dev/make_tensor.cpp
+index 2e319c04c5..5e3fa241ea 100644
+--- a/src/inference/src/dev/make_tensor.cpp
++++ b/src/inference/src/dev/make_tensor.cpp
+@@ -520,7 +520,7 @@ public:
+     }
+ 
+     void allocate() noexcept override {
+-        if (ie::TBlob<T>::buffer() != tensor->data()) {
++        if ((void*)ie::TBlob<T>::buffer() != tensor->data()) {
+             ie::TBlob<T>::_allocator =
+                 ie::details::make_pre_allocator(static_cast<T*>(tensor->data()), tensor->get_byte_size());
+             ie::TBlob<T>::allocate();
