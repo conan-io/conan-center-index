@@ -270,9 +270,7 @@ class ArmadilloConan(ConanFile):
         with open(version_file, "r") as f:
             for line in f:
                 if "ARMA_VERSION_NAME" in line:
-                    version_name = line.split("\"")[-2].strip()
-                    self.output.warning(f"{version_name=}")
-                    return version_name
+                    return line.split("\"")[-2].strip()
         return ""
 
     @property
