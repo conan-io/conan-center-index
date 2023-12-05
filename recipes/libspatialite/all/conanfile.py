@@ -120,6 +120,9 @@ class LibspatialiteConan(ConanFile):
     def generate(self):
         if is_msvc(self):
             tc = NMakeToolchain(self)
+            tc.extra_defines.append("YY_NO_UNISTD_H")
+            if self.options.shared:
+                tc.extra_defines.append("DLL_EXPORT")
             tc.generate()
             deps = NMakeDeps(self)
             deps.generate()
@@ -194,12 +197,15 @@ class LibspatialiteConan(ConanFile):
         if not self.options.with_minizip:
             replace_in_file(self, gaiaconfig_msvc, "#define ENABLE_MINIZIP 1", "")
 
+        # Workaround for a NMakeDeps define quoting issue:
+        # https://github.com/conan-io/conan/issues/13603
+        replace_in_file(self, os.path.join(self.generators_folder, "conannmakedeps.bat"),
+                        r'/DSQLITE_API#\"__declspec(dllimport)\"',
+                        "/DSQLITE_API#__declspec(dllimport)", strict=False)
+
         target = "spatialite_i.lib" if self.options.shared else "spatialite.lib"
-        optflags = ["-DYY_NO_UNISTD_H"]
-        if self.options.shared:
-            optflags.append("-DDLL_EXPORT")
         with chdir(self, self.source_folder):
-            self.run(f"nmake -f makefile.vc {target} OPTFLAGS=\"{' '.join(optflags)}\"")
+            self.run(f"nmake -f makefile.vc {target}")
 
     def _build_autotools(self):
         # fix MinGW
