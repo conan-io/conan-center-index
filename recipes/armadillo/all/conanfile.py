@@ -1,11 +1,12 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches, save
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.build import cross_building
 from conan.errors import ConanInvalidConfiguration
 import os
+import textwrap
 
 required_conan_version = ">=1.55.0"
 
@@ -263,6 +264,40 @@ class ArmadilloConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    @property
+    def _get_arma_version_name(self):
+        version_file = os.path.join(self.source_folder, "include", "armadillo_bits", "arma_version.hpp")
+        with open(version_file, "r") as f:
+            for line in f:
+                if "ARMA_VERSION_NAME" in line:
+                    version_name = line.split("\"")[-2].strip()
+                    self.output.warning(f"{version_name=}")
+                    return version_name
+        return ""
+
+    @property
+    def _module_vars_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
+
+    def _create_cmake_module_variables(self, module_file):
+        content = textwrap.dedent(f"""\
+            set(ARMADILLO_FOUND TRUE)
+            if(DEFINED Armadillo_INCLUDE_DIRS)
+                set(ARMADILLO_INCLUDE_DIRS ${{Armadillo_INCLUDE_DIRS}})
+            endif()
+            if(DEFINED Armadillo_LIBRARIES)
+                set(ARMADILLO_LIBRARIES ${{Armadillo_LIBRARIES}})
+            endif()
+            if(DEFINED Armadillo_VERSION_STRING)
+                set(ARMADILLO_VERSION_STRING ${{Armadillo_VERSION_STRING}})
+            endif()
+            set(ARMADILLO_VERSION_MAJOR "{Version(self.version).major}")
+            set(ARMADILLO_VERSION_MINOR "{Version(self.version).minor}")
+            set(ARMADILLO_VERSION_PATCH "{Version(self.version).patch}")
+            set(ARMADILLO_VERSION_NAME "{self._get_arma_version_name}")
+        """)
+        save(self, module_file, content)
+
     def package(self):
         cmake = CMake(self)
         cmake.install()
@@ -271,12 +306,16 @@ class ArmadilloConan(ConanFile):
         copy(self, "NOTICE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_vars_rel_path))
+
 
     def package_info(self):
         self.cpp_info.libs = ["armadillo"]
         self.cpp_info.set_property("pkg_config_name", "armadillo")
+        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "Armadillo")
         self.cpp_info.set_property("cmake_target_name", "Armadillo::Armadillo")
+        self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
 
         if self.options.get_safe("use_extern_rng"):
             self.cpp_info.defines.append("ARMA_USE_EXTERN_RNG")
