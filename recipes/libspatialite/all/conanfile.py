@@ -100,7 +100,7 @@ class LibspatialiteConan(ConanFile):
         if self.options.get_safe("with_rttopo"):
             self.requires("librttopo/1.1.0")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.11.5")
+            self.requires("libxml2/2.12.1")
         if self.options.with_minizip:
             self.requires("minizip/1.2.13")
 
@@ -108,7 +108,7 @@ class LibspatialiteConan(ConanFile):
         if not is_msvc(self):
             self.tool_requires("libtool/2.4.7")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.0.3")
+                self.tool_requires("pkgconf/2.1.0")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
