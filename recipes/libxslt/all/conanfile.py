@@ -60,7 +60,7 @@ class LibxsltConan(ConanFile):
 
     def requirements(self):
         # see https://github.com/conan-io/conan-center-index/pull/16205#discussion_r1149570846
-        self.requires("libxml2/2.11.4", transitive_headers=True, transitive_libs=True)
+        self.requires("libxml2/2.11.5", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.options.plugins and not self.options.shared:
@@ -190,6 +190,7 @@ class LibxsltConan(ConanFile):
             autotools.install()
             os.remove(os.path.join(self.package_folder, "bin", "xslt-config"))
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             rm(self, "*.sh", os.path.join(self.package_folder, "lib"))
             rmdir(self, os.path.join(self.package_folder, "share"))
