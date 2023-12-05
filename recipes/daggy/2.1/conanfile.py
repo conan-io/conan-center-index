@@ -17,7 +17,8 @@ class DaggyConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/synacker/daggy"
-    topics = ("streaming", "qt", "monitoring", "process", "stream-processing", "extensible", "serverless-framework", "aggregation", "ssh2", "cross-platform", "ssh-client")
+    topics = ("streaming", "qt", "monitoring", "process", "stream-processing", "extensible",
+              "serverless-framework", "aggregation", "ssh2", "cross-platform", "ssh-client")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -64,7 +65,7 @@ class DaggyConan(ConanFile):
 
     def requirements(self):
         # Qt is used in the public headers
-        self.requires("qt/6.6.0", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/6.6.1", transitive_headers=True, transitive_libs=True)
         self.requires("kainjow-mustache/4.1")
         if self.options.with_yaml:
             self.requires("yaml-cpp/0.8.0")
