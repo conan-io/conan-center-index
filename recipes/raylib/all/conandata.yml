@@ -8,6 +8,14 @@ sources:
 patches:
   "4.0.0":
     - patch_file: "patches/4.0.0-0001-enable-cmake-build-android.patch"
+    - patch_file: "patches/4.0.0-0002-win32-glfw3native.patch"
+      patch_description: "Win32: resolve some symbols re-definition of windows.h in glfw3native.h"
+      patch_type: "portability"
+      patch_source: "https://github.com/raysan5/raylib/pull/2643"
   "3.5.0":
     - patch_file: "patches/3.5.0-0001-enable-cmake-build-android.patch"
     - patch_file: "patches/3.5.0-0002-cmake-project.patch"
+    - patch_file: "patches/3.5.0-0003-win32-glfw3native.patch"
+      patch_description: "Win32: resolve some symbols re-definition of windows.h in glfw3native.h"
+      patch_type: "portability"
+      patch_source: "https://github.com/raysan5/raylib/pull/2643"
