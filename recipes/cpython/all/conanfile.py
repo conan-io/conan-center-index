@@ -220,7 +220,7 @@ class CPythonConan(ConanFile):
             if self.dependencies["libffi"].ref.version >= "3.3" and is_msvc(self) and "d" in str(self.settings.compiler.runtime) and self.settings.compiler.runtime != "dynamic":
                 raise ConanInvalidConfiguration("libffi versions >= 3.3 cause 'read access violations' when using a debug runtime (MTd/MDd)")
 
-        if self._use_vendored_libffi and is_apple_os(self) and self.arch == "armv8":
+        if self._use_vendored_libffi and is_apple_os(self) and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("The vendored libffi predates Apple ARM CPUs, and are not supported")
 
     def source(self):
