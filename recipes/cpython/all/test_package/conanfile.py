@@ -208,7 +208,7 @@ class TestPackageConan(ConanFile):
                 self._test_module("sqlite3", self._cpython_option("with_sqlite3"))
                 self._test_module("decimal", True)
                 self._test_module("ctypes", True)
-                #self._test_module("ssl", True) # FIXME
+                self._test_module("ssl", True)
 
             if is_apple_os(self) and not self._cpython_option("shared"):
                 self.output.info(
