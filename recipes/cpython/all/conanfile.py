@@ -128,9 +128,14 @@ class CPythonConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     @property
+    def _use_vendored_libffi(self):
+        # cpython 3.7.x on MSVC and OSX uses an ancient libffi 2.00-beta (which is not available at cci, and is API/ABI incompatible with current 3.2+)
+        return Version(self.version) < "3.8" and (is_msvc(self) or is_apple_os(self))
+        # TODO provides=["libffi"]?
+
+    @property
     def _with_libffi(self):
-        # cpython 3.7.x on MSVC uses an ancient libffi 2.00-beta (which is not available at cci, and is API/ABI incompatible with current 3.2+)
-        return self._supports_modules and (not is_msvc(self) or Version(self.version) >= "3.8")
+        return self._supports_modules and not self._use_vendored_libffi
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]", force=True)
@@ -215,6 +220,9 @@ class CPythonConan(ConanFile):
             if self.dependencies["libffi"].ref.version >= "3.3" and is_msvc(self) and "d" in str(self.settings.compiler.runtime) and self.settings.compiler.runtime != "dynamic":
                 raise ConanInvalidConfiguration("libffi versions >= 3.3 cause 'read access violations' when using a debug runtime (MTd/MDd)")
 
+        if self._use_vendored_libffi and is_apple_os(self) and self.arch == "armv8":
+            raise ConanInvalidConfiguration("The vendored libffi predates Apple ARM CPUs, and are not supported")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -225,12 +233,13 @@ class CPythonConan(ConanFile):
             "--with-doc-strings={}".format(yes_no(self.options.docstrings)),
             "--with-pymalloc={}".format(yes_no(self.options.pymalloc)),
             "--with-system-expat",
-            "--with-system-ffi",
             "--enable-optimizations={}".format(yes_no(self.options.optimizations)),
             "--with-lto={}".format(yes_no(self.options.lto)),
             "--with-pydebug={}".format(yes_no(self.settings.build_type == "Debug")),
             "--disable-test-modules",
         ]
+        if not self._use_vendored_libffi:
+            tc.configure_args += ["--with-system-ffi"]
         if self._is_py2:
             tc.configure_args += ["--enable-unicode={}".format(yes_no(self.options.unicode))]
         if self._is_py3:
