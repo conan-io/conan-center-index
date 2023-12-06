@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, XCRun
 from conan.tools.build import build_jobs
-from conan.tools.files import chdir, copy, get, rename, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
@@ -125,6 +125,9 @@ class OpenSSLConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -516,6 +519,7 @@ class OpenSSLConan(ConanFile):
             self._run_make(targets=["install_sw"], parallel=False, install=True)
 
     def build(self):
+        apply_conandata_patches(self)
         self._make()
         configdata_pm = self._adjust_path(os.path.join(self.source_folder, "configdata.pm"))
         self.run(f"{self._perl} {configdata_pm} --dump")
