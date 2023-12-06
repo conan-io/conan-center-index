@@ -102,7 +102,7 @@ class OpenCascadeConan(ConanFile):
         self.requires("tcl/8.6.10")
         if self._link_tk:
             self.requires("tk/8.6.10")
-        self.requires("freetype/2.13.0")
+        self.requires("freetype/2.13.2")
         if self._link_opengl:
             self.requires("opengl/system")
         if self._is_linux:
@@ -110,13 +110,13 @@ class OpenCascadeConan(ConanFile):
             self.requires("xorg/system")
         # TODO: add vtk support?
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/6.0")
+            self.requires("ffmpeg/6.1")
         if self.options.with_freeimage:
             self.requires("freeimage/3.18.0")
         if self.options.with_openvr:
             self.requires("openvr/1.16.8")
         if self.options.with_rapidjson:
-            self.requires("rapidjson/1.1.0")
+            self.requires("rapidjson/cci.20230929")
         if self.options.get_safe("with_draco"):
             self.requires("draco/1.5.6")
         if self.options.with_tbb:
@@ -412,26 +412,27 @@ class OpenCascadeConan(ConanFile):
 
         # Honor fPIC option, compiler.cppstd and compiler.libcxx
         replace_in_file(self, occt_defs_flags_cmake, "-fPIC", "")
-        replace_in_file(self, occt_defs_flags_cmake, "-std=c++0x", "")
-        replace_in_file(self, occt_defs_flags_cmake, "-std=gnu++0x", "")
+        if Version(self.version) < "7.8.0":
+            replace_in_file(self, occt_defs_flags_cmake, "-std=c++0x", "")
+            replace_in_file(self, occt_defs_flags_cmake, "-std=gnu++0x", "")
         replace_in_file(self, occt_defs_flags_cmake, "-stdlib=libc++", "")
         replace_in_file(self, occt_csf_cmake,
-                              "set (CSF_ThreadLibs  \"pthread rt stdc++\")",
-                              "set (CSF_ThreadLibs  \"pthread rt\")")
+                              'set (CSF_ThreadLibs  "pthread rt stdc++")',
+                              'set (CSF_ThreadLibs  "pthread rt")')
 
         # No hardcoded link through #pragma
         if Version(self.version) < "7.6.0":
             replace_in_file(
                 self,
                 os.path.join(self.source_folder, "src", "Font", "Font_FontMgr.cxx"),
-                "#pragma comment (lib, \"freetype.lib\")",
+                '#pragma comment (lib, "freetype.lib")',
                 "",
             )
             replace_in_file(
                 self,
                 os.path.join(self.source_folder, "src", "Draw", "Draw.cxx"),
-                """#pragma comment (lib, "tcl" STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")
-#pragma comment (lib, "tk"  STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")""",
+                '#pragma comment (lib, "tcl" STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")\n'
+                '#pragma comment (lib, "tk"  STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")',
                 ""
             )
 
