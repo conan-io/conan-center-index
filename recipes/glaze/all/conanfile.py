@@ -28,7 +28,9 @@ class GlazeConan(ConanFile):
         return {
             "Visual Studio": "17",
             "msvc": "193",
-            "gcc": "10" if Version(self.version) < "1.9.0" else "11",
+            # there is compilation error on cci's gcc 11.
+            # https://c3i.jfrog.io/c3i/misc/logs/pr/21629/1-linux-gcc/glaze/1.9.0//5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9-test.txt
+            "gcc": "10" if Version(self.version) < "1.9.0" else "12",
             "clang": "12",
             "apple-clang": "13.1",
         }
