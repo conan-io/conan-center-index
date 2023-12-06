@@ -1,17 +1,5 @@
 versions:
-  "0.15.27":
+  "0.15.27.0":
     folder: all
-  "0.15.25-p0":
-    folder: all
-  "0.15.24-p0":
-    folder: all
-  "0.15.19-p0":
-    folder: all
-  "0.15.18-p0":
-    folder: all
-  "0.15.16-p0":
-    folder: all
-  "0.15.13-p0":
-    folder: all
-  "0.15.1-p0":
+  "0.15.25.0":
     folder: all
