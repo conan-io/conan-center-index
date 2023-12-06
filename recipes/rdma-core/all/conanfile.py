@@ -2,6 +2,7 @@ import os
 import re
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, copy, rmdir, load, save, replace_in_file
@@ -55,9 +56,14 @@ class PackageConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libudev/system")
 
+    def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            # libnl is only available on Linux
+            raise ConanInvalidConfiguration("rdma-core is only supported on Linux")
+
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
