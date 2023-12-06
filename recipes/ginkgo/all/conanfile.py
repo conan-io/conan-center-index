@@ -103,15 +103,22 @@ class GinkgoConan(ConanFile):
 
     def _get_visual_generator(self):
         compiler_version = str(self.settings.compiler.version)
+
         if self.settings.compiler == "msvc":
-            compiler_version = {
-                "170": "11",
-                "180": "12",
-                "190": "14",
-                "191": "15",
-                "192": "16",
-                "193": "17",
-            }[compiler_version]
+            toolset_override = self.conf.get("tools.microsoft.msbuild:vs_version", check_type=str)
+            if toolset_override:
+                visual_version = toolset_override
+            else:
+                visual_version = {
+                    "170": "11",
+                    "180": "12",
+                    "190": "14",
+                    "191": "15",
+                    "192": "16",
+                    "193": "17",
+                }[compiler_version]
+        else:
+            visual_version = compiler_version
 
         visual_gen_suffix = {
             "8": "8 2005",
@@ -123,7 +130,7 @@ class GinkgoConan(ConanFile):
             "15": "15 2017",
             "16": "16 2019",
             "17": "17 2022",
-        }[compiler_version]
+        }[visual_version]
 
         return f"Visual Studio {visual_gen_suffix}"
 
