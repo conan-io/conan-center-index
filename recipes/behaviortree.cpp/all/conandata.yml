@@ -1,7 +1,7 @@
 sources:
-  "4.3.7":
-    url: "https://github.com/BehaviorTree/BehaviorTree.CPP/archive/refs/tags/4.3.7.tar.gz"
-    sha256: "9410414e152d6aab94fc79ac0224b1e60a1f014c153973551455e521bf2a405a"
+  "4.4.2":
+    url: "https://github.com/BehaviorTree/BehaviorTree.CPP/archive/refs/tags/4.4.2.tar.gz"
+    sha256: "534622481349dd610443fe53f210e03279b04d091752aeb22a7cd506bd6e1616"
   "4.0.1":
     url: "https://github.com/BehaviorTree/BehaviorTree.CPP/archive/refs/tags/4.0.1.tar.gz"
     sha256: "71544f72abea8e8c246b016b7e8d87d96f731c8aa96698058d8e69d40e56f9b9"
