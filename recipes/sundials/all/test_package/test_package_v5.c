@@ -10,7 +10,7 @@ int main()
   SUNMatrix A = SUNDenseMatrix(1, 1);
   SUNLinearSolver LS = SUNLinSol_Dense(y, A);
 
-  N_Vector v = N_VNew_Serial(1);;
+  N_Vector v = N_VNew_Serial(1);
   N_VScale(2.0, y, v);
   return 0;
 }

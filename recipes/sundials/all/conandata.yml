@@ -1,4 +1,10 @@
 sources:
+  "6.6.2":
+    url: "https://github.com/LLNL/sundials/releases/download/v6.6.2/sundials-6.6.2.tar.gz"
+    sha256: "08f8223a5561327e44c072e46faa7f665c0c0bc8cd7e45d23f486c3d24c65009"
+  "5.8.0":
+    url: "https://github.com/LLNL/sundials/releases/download/v5.8.0/sundials-5.8.0.tar.gz"
+    sha256: "d4ed403351f72434d347df592da6c91a69452071860525385b3339c824e8a213"
   "5.4.0":
     url: "https://github.com/LLNL/sundials/releases/download/v5.4.0/sundials-5.4.0.tar.gz"
     sha256: "a60ba8155ca12261cf7623efcf9fd4232e95bcfefe480993ef71324176cb395b"

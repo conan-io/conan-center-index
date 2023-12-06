@@ -103,40 +103,19 @@ class SundialsConan(ConanFile):
         self.cpp_info.components["sundials_sunmatrixsparse"].libs = ["sundials_sunmatrixsparse"]
         self.cpp_info.components["sundials_sunnonlinsolfixedpoint"].libs = ["sundials_sunnonlinsolfixedpoint"]
         self.cpp_info.components["sundials_sunnonlinsolnewton"].libs = ["sundials_sunnonlinsolnewton"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["sundials_nvecmanyvector"].system_libs = ["m"]
-            self.cpp_info.components["sundials_nvecserial"].system_libs = ["m"]
-            self.cpp_info.components["sundials_sunlinsolpcg"].system_libs = ["m"]
-            self.cpp_info.components["sundials_sunlinsolspbcgs"].system_libs = ["m"]
-            self.cpp_info.components["sundials_sunlinsolspfgmr"].system_libs = ["m"]
-            self.cpp_info.components["sundials_sunlinsolspgmr"].system_libs = ["m"]
-            self.cpp_info.components["sundials_sunlinsolsptfqmr"].system_libs = ["m"]
-            self.cpp_info.components["sundials_sunmatrixband"].system_libs = ["m"]
-            self.cpp_info.components["sundials_sunmatrixdense"].system_libs = ["m"]
-            self.cpp_info.components["sundials_sunmatrixsparse"].system_libs = ["m"]
-            self.cpp_info.components["sundials_sunnonlinsolfixedpoint"].system_libs = ["m"]
-            self.cpp_info.components["sundials_sunnonlinsolnewton"].system_libs = ["m"]
         if self.options.build_arkode:
             self.cpp_info.components["sundials_arkode"].libs = ["sundials_arkode"]
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["sundials_arkode"].system_libs = ["m"]
         if self.options.build_cvode:
             self.cpp_info.components["sundials_cvode"].libs = ["sundials_cvode"]
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["sundials_cvode"].system_libs = ["m"]
         if self.options.build_cvodes:
             self.cpp_info.components["sundials_cvodes"].libs = ["sundials_cvodes"]
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["sundials_cvodes"].system_libs = ["m"]
         if self.options.build_ida:
             self.cpp_info.components["sundials_ida"].libs = ["sundials_ida"]
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["sundials_ida"].system_libs = ["m"]
         if self.options.build_idas:
             self.cpp_info.components["sundials_idas"].libs = ["sundials_idas"]
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["sundials_idas"].system_libs = ["m"]
         if self.options.build_kinsol:
             self.cpp_info.components["sundials_kinsol"].libs = ["sundials_kinsol"]
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["sundials_kinsol"].system_libs = ["m"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            for _, component in self.cpp_info.components.items():
+                component.system_libs.append("m")
