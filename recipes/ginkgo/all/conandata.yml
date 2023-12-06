@@ -17,7 +17,7 @@ patches:
     - patch_file: "patches/1.7.0-0002-msvc-c++20.patch"
       patch_type: "portability"
       patch_description: "Fix compilation with Visual Studio and C++20"
-      patch_source: "https://github.com/ginkgo-project/ginkgo/commit/876d8ffb8a632862899de446c694526a89a79863"
+      patch_source: "https://github.com/ginkgo-project/ginkgo/pull/1496"
   "1.4.0":
     - patch_file: "patches/1.4.0-0001-windows-symbols.patch"
       patch_type: "official"
