@@ -1,15 +1,9 @@
 versions:
-  "3.3":
-    folder: "3.3"
-  "4.0":
-    folder: "4.x"
-  "4.1":
-    folder: "4.x"
-  "4.2":
-    folder: "4.x"
-  "4.3":
+  "5.1":
     folder: "4.x"
   "4.4":
     folder: "4.x"
-  "5.1":
+  "4.3":
     folder: "4.x"
+  "3.3":
+    folder: "3.3"

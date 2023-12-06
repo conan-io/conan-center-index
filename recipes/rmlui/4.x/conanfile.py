@@ -51,7 +51,7 @@ class RmluiConan(ConanFile):
         return 14
 
     def export_sources(self):
-        export_conandata_patches(self)
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -65,36 +65,32 @@ class RmluiConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
-        def lazy_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
+        def loose_lt_semver(v1, v2):
+            return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))
 
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
             self.output.warning(f"{self.ref} recipe lacks information about the {self.settings.compiler} compiler support.")
         else:
-            if lazy_lt_semver(str(self.settings.compiler.version), min_version):
+            if loose_lt_semver(str(self.settings.compiler.version), min_version):
                 raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard} support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
     def requirements(self):
         if self.options.font_interface == "freetype":
-            self.requires("freetype/2.10.4")
+            self.requires("freetype/2.13.2")
 
         if self.options.with_lua_bindings:
-            self.requires("lua/5.3.5")
+            self.requires("lua/5.4.6")
 
         if self.options.with_thirdparty_containers:
-            self.requires("robin-hood-hashing/3.11.3", transitive_headers=True)
+            self.requires("robin-hood-hashing/3.11.5", transitive_headers=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -112,8 +108,6 @@ class RmluiConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         # If we are using robin_hood hashing provided by conan, we need to change its include path
         if self.options.with_thirdparty_containers:
             config_path = os.path.join(self.source_folder,
@@ -124,7 +118,7 @@ class RmluiConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
 
     def package(self):
