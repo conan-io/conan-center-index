@@ -53,15 +53,15 @@ class LibsystemdConan(ConanFile):
 
     def requirements(self):
         self.requires("libcap/2.69")
-        self.requires("libmount/2.39")
+        self.requires("libmount/2.39.2")
         if Version(self.version) >= "253.6":
-            self.requires("libxcrypt/4.4.35")
+            self.requires("libxcrypt/4.4.36")
         if self.options.with_selinux:
-            self.requires("libselinux/3.3")
+            self.requires("libselinux/3.5")
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_xz:
-            self.requires("xz_utils/5.4.4")
+            self.requires("xz_utils/5.4.5")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
 
@@ -70,11 +70,11 @@ class LibsystemdConan(ConanFile):
             raise ConanInvalidConfiguration("Only Linux supported")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/1.3.0")
         self.tool_requires("m4/1.4.19")
         self.tool_requires("gperf/3.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -126,7 +126,7 @@ class LibsystemdConan(ConanFile):
             "link-udev-shared", "link-systemctl-shared", "analyze", "pam",
             "link-networkd-shared", "link-timesyncd-shared", "kernel-install",
             "libiptc", "elfutils", "repart", "homed", "importd", "acl",
-            "dns-over-tls", "gnu-efi", "valgrind", "log-trace"]
+            "dns-over-tls", "log-trace"]
 
         if Version(self.version) >= "247.1":
             unrelated.append("oomd")
@@ -136,6 +136,10 @@ class LibsystemdConan(ConanFile):
             unrelated.append("link-boot-shared")
         if Version(self.version) >= "252.1":
             unrelated.append("link-journalctl-shared")
+        if Version(self.version) < "254.7":
+            unrelated.extend(["gnu-efi", "valgrind"])
+        else:
+            unrelated.extend(["passwdqc", "bootloader", "link-portabled-shared"])
 
         for opt in unrelated:
             tc.project_options[opt] = "false"
@@ -162,8 +166,10 @@ class LibsystemdConan(ConanFile):
         apply_conandata_patches(self)
 
         meson_build = os.path.join(self.source_folder, "meson.build")
-        replace_in_file(self, meson_build, "@CONAN_SRC_REL_PATH@",
-                        "'../{}'".format(os.path.basename(self.source_folder)))
+        replace_in_file(self, meson_build, "@CONAN_SRC_REL_PATH@", f"'../{self.source_path.name}'")
+        # Fix an invalid path separator, which breaks with newer Meson versions
+        replace_in_file(self, os.path.join(self.source_folder, "units", "meson.build"),
+                        r"system-systemd\\x2d", "system-systemd/x2d")
 
     def build(self):
         self._patch_sources()
