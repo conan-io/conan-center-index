@@ -46,7 +46,7 @@ class QCustomPlotConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= "2.0.0":
-            self.requires("qt/6.6.0", transitive_headers=True)
+            self.requires("qt/6.6.1", transitive_headers=True, transitive_libs=True)
         else:
             self.requires("qt/5.15.11", transitive_headers=True)
         if self.options.with_opengl and self.settings.os == "Windows":
