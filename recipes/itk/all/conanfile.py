@@ -72,12 +72,12 @@ class ITKConan(ConanFile):
         self.requires("expat/2.5.0")
         self.requires("fftw/3.3.10")
         self.requires("gdcm/3.0.21")
-        self.requires("hdf5/1.14.1")
+        self.requires("hdf5/1.14.3")
         self.requires("libjpeg/9e")
         self.requires("libpng/1.6.40")
-        self.requires("libtiff/4.5.1")
+        self.requires("libtiff/4.6.0")
         self.requires("openjpeg/2.5.0")
-        self.requires("onetbb/2021.9.0")
+        self.requires("onetbb/2021.10.0")
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
@@ -113,7 +113,6 @@ class ITKConan(ConanFile):
         tc.variables["ITK_USE_SYSTEM_FFTW"] = True
         tc.variables["ITK_USE_SYSTEM_GDCM"] = True
         tc.variables["ITK_USE_SYSTEM_HDF5"] = True
-        tc.variables["ITK_USE_SYSTEM_ICU"] = True
         tc.variables["ITK_USE_SYSTEM_JPEG"] = True
         tc.variables["ITK_USE_SYSTEM_PNG"] = True
         tc.variables["ITK_USE_SYSTEM_TIFF"] = True
@@ -232,8 +231,12 @@ class ITKConan(ConanFile):
 
         tc.generate()
 
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("fftw", "cmake_file_name", "FFTW")
+        # Use namespaced targets to avoid linking against plain library targets
+        deps.set_property("gdcm::gdcmMSFF", "cmake_target_name", "GDCM::gdcmMSFF")
+        deps.set_property("gdcm::gdcmDICT", "cmake_target_name", "GDCM::gdcmDICT")
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -242,6 +245,15 @@ class ITKConan(ConanFile):
                         os.path.join(self.source_folder, "Modules", "ThirdParty", "VNL", "src", "vxl", "config", "cmake", "config", "VXLIntrospectionConfig.cmake"),
                         "-DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}",
                         "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}")
+        # Ensure that new versions don't introduce any vendored libs by accident
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(ExternalProject)", "")
+        # Truncate some third-party modules that are provided by conan_cmake_project_include.cmake
+        for pkg in ["DCMTK", "DoubleConversion", "GDCM"]:
+            save(self, os.path.join(self.source_folder, "Modules", "ThirdParty", pkg, "CMakeLists.txt"),
+                 f"project(ITK{pkg})\n"
+                 f"set(ITK{pkg}_THIRD_PARTY 1)\n"
+                 f"set(ITK{pkg}_NO_SRC 1)\n"
+                 "itk_module_impl()\n")
 
     def build(self):
         self._patch_sources()
