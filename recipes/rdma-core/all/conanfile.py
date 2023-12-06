@@ -40,10 +40,6 @@ class PackageConan(ConanFile):
         "build_librdmacm": False,
     }
 
-    @property
-    def _optional_components(self):
-        return ["libefa", "libibnetdisc", "libmana", "libmlx4", "libmlx5", "librdmacm"]
-
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
