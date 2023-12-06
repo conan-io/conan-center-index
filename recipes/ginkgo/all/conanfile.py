@@ -138,7 +138,13 @@ class GinkgoConan(ConanFile):
         # and https://github.com/microsoft/vcpkg/pull/34280#discussion_r1351515284
         if Version(self.version) >= "1.5.0" and is_msvc(self) and self.options.shared:
             if self.conf.get("tools.cmake.cmaketoolchain:generator") == "Ninja":
-                tc.generator = self._get_visual_generator()
+                visual_generator = self._get_visual_generator()
+                self.output.warning(
+                    f"You asked for Ninja generator, but fallback to {visual_generator}, "
+                    "otherwise it will fail during creation of DLL with "
+                    "LINK : fatal error LNK1189: library limit of 65535 objects exceeded"
+                )
+                tc.generator = visual_generator
 
         tc.variables["GINKGO_BUILD_TESTS"] = False
         tc.variables["GINKGO_BUILD_EXAMPLES"] = False
