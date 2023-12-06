@@ -7,8 +7,8 @@ macro(custom_find_package name)
 endmacro()
 
 # https://github.com/InsightSoftwareConsortium/ITK/blob/v5.4rc01/Modules/ThirdParty/DCMTK/CMakeLists.txt#L99-L104
-#custom_find_package(DCMTK REQUIRED CONFIG)
-#set(ITKDCMTK_LIBRARIES dcmtk::dcmtk)
+custom_find_package(DCMTK REQUIRED CONFIG)
+set(ITKDCMTK_LIBRARIES dcmtk::dcmtk)
 
 # https://github.com/InsightSoftwareConsortium/ITK/blob/v5.4rc01/Modules/ThirdParty/Eigen3/CMakeLists.txt
 custom_find_package(Eigen3 REQUIRED CONFIG)

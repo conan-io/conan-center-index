@@ -65,8 +65,7 @@ class ITKConan(ConanFile):
         # - mkl
         # - vtk
         # - opencv
-        #todo: enable after fixing dcmtk compatibility with openssl on Windows
-        #self.requires("dcmtk/3.6.7")
+        self.requires("dcmtk/3.6.7")
         self.requires("double-conversion/3.3.0")
         self.requires("eigen/3.4.0")
         self.requires("expat/2.5.0")
@@ -106,7 +105,6 @@ class ITKConan(ConanFile):
         tc.variables["BUILD_DOCUMENTATION"] = False
         tc.variables["ITK_SKIP_PATH_LENGTH_CHECKS"] = True
 
-        tc.variables["ITK_USE_SYSTEM_LIBRARIES"] = True
         tc.variables["ITK_USE_SYSTEM_DCMTK"] = True
         tc.variables["ITK_USE_SYSTEM_DOUBLECONVERSION"] = True
         tc.variables["ITK_USE_SYSTEM_EIGEN"] = True
@@ -114,29 +112,26 @@ class ITKConan(ConanFile):
         tc.variables["ITK_USE_SYSTEM_GDCM"] = True
         tc.variables["ITK_USE_SYSTEM_HDF5"] = True
         tc.variables["ITK_USE_SYSTEM_JPEG"] = True
+        tc.variables["ITK_USE_SYSTEM_KWIML"] = False # FIXME: Missing Kwiml recipe
+        tc.variables["ITK_USE_SYSTEM_LIBRARIES"] = True
         tc.variables["ITK_USE_SYSTEM_PNG"] = True
         tc.variables["ITK_USE_SYSTEM_TIFF"] = True
+        tc.variables["ITK_USE_SYSTEM_VXL"] = False # FIXME: Missing VXL recipe
         tc.variables["ITK_USE_SYSTEM_ZLIB"] = True
-
-        # FIXME: Missing Kwiml recipe
-        tc.variables["ITK_USE_SYSTEM_KWIML"] = False
-        # FIXME: Missing VXL recipe
-        tc.variables["ITK_USE_SYSTEM_VXL"] = False
         tc.variables["GDCM_USE_SYSTEM_OPENJPEG"] = True
 
         tc.variables["ITK_BUILD_DEFAULT_MODULES"] = False
         tc.variables["Module_ITKDeprecated"] = False
-        tc.variables["Module_ITKMINC"] = False
         tc.variables["Module_ITKIOMINC"] = False
-
-        tc.variables["Module_ITKVideoBridgeOpenCV"] = False
-
-        #todo: enable after fixing dcmtk compatibility with openssl on Windows
-        tc.variables["Module_ITKDCMTK"] = False
-        tc.variables["Module_ITKIODCMTK"] = False
-
-        tc.variables["Module_ITKIOHDF5"] = True
         tc.variables["Module_ITKIOTransformHDF5"] = False
+        tc.variables["Module_ITKLevelSetsv4Visualization"] = False # Disabled on Linux (link errors)
+        tc.variables["Module_ITKMINC"] = False
+        tc.variables["Module_ITKVTK"] = False
+        tc.variables["Module_ITKVideoBridgeOpenCV"] = False
+        tc.variables["Module_ITKVideoBridgeVXL"] = False # Disabled because Vxl vidl is not built anymore
+        tc.variables["Module_ITKVideoIO"] = False
+        tc.variables["Module_ITKVtkGlue"] = False
+
         tc.variables["Module_ITKAnisotropicSmoothing"] = True
         tc.variables["Module_ITKAntiAlias"] = True
         tc.variables["Module_ITKBiasCorrection"] = True
@@ -147,6 +142,8 @@ class ITKConan(ConanFile):
         tc.variables["Module_ITKConnectedComponents"] = True
         tc.variables["Module_ITKConvolution"] = True
         tc.variables["Module_ITKCurvatureFlow"] = True
+        tc.variables["Module_ITKDCMTK"] = True
+        tc.variables["Module_ITKDICOMParser"] = True
         tc.variables["Module_ITKDeconvolution"] = True
         tc.variables["Module_ITKDeformableMesh"] = True
         tc.variables["Module_ITKDenoising"] = True
@@ -166,7 +163,9 @@ class ITKConan(ConanFile):
         tc.variables["Module_ITKGPUSmoothing"] = True
         tc.variables["Module_ITKGPUThresholding"] = True
         tc.variables["Module_ITKIOCSV"] = True
+        tc.variables["Module_ITKIODCMTK"] = True
         tc.variables["Module_ITKIOGE"] = True
+        tc.variables["Module_ITKIOHDF5"] = True
         tc.variables["Module_ITKIOIPL"] = True
         tc.variables["Module_ITKIOMesh"] = True
         tc.variables["Module_ITKIOPhilipsREC"] = True
@@ -215,20 +214,8 @@ class ITKConan(ConanFile):
         tc.variables["Module_ITKThresholding"] = True
         tc.variables["Module_ITKVideoCore"] = True
         tc.variables["Module_ITKVideoFiltering"] = True
-        tc.variables["Module_ITKVideoIO"] = False
         tc.variables["Module_ITKVoronoi"] = True
         tc.variables["Module_ITKWatersheds"] = True
-        tc.variables["Module_ITKDICOMParser"] = True
-
-        tc.variables["Module_ITKVTK"] = False
-        tc.variables["Module_ITKVtkGlue"] = False
-
-        # Disabled on Linux (link errors)
-        tc.variables["Module_ITKLevelSetsv4Visualization"] = False
-
-        # Disabled because Vxl vidl is not built anymore
-        tc.variables["Module_ITKVideoBridgeVXL"] = False
-
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -372,8 +359,7 @@ class ITKConan(ConanFile):
             "ITKIOBMP": {"requires": ["ITKIOImageBase"]},
             "ITKIOBioRad": {"requires": ["ITKIOImageBase"]},
             "ITKIOCSV": {"requires": ["ITKIOImageBase"]},
-            #todo: enable after fixing dcmtk compatibility with openssl on Windows
-            #"ITKIODCMTK": {"requires": ["ITKIOImageBase", "dcmtk::dcmtk"]},
+            "ITKIODCMTK": {"requires": ["ITKIOImageBase", "dcmtk::dcmtk"]},
             "ITKIOGDCM": {"requires": ["ITKCommon", "ITKIOImageBase", "gdcm::gdcmDICT", "gdcm::gdcmMSFF"]},
             "ITKIOIPL": {"requires": ["ITKIOImageBase"]},
             "ITKIOGE": {"requires": ["ITKIOIPL", "ITKIOImageBase"]},
