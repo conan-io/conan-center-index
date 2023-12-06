@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, mkdir
+from conan.tools.files import copy, get, mkdir, rmdir
+from conan.tools.scm import Version
 import glob
 import os
 import shutil
@@ -85,6 +86,7 @@ class SundialsConan(ConanFile):
             mkdir(self, os.path.join(self.package_folder, "bin"))
             for dll_path in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
                 shutil.move(dll_path, os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.components["sundials_nvecmanyvector"].libs = ["sundials_nvecmanyvector"]
@@ -103,6 +105,8 @@ class SundialsConan(ConanFile):
         self.cpp_info.components["sundials_sunmatrixsparse"].libs = ["sundials_sunmatrixsparse"]
         self.cpp_info.components["sundials_sunnonlinsolfixedpoint"].libs = ["sundials_sunnonlinsolfixedpoint"]
         self.cpp_info.components["sundials_sunnonlinsolnewton"].libs = ["sundials_sunnonlinsolnewton"]
+        if Version(self.version) >= "5.8.0":
+            self.cpp_info.components["sundials_generic"].libs = ["sundials_generic"]
         if self.options.build_arkode:
             self.cpp_info.components["sundials_arkode"].libs = ["sundials_arkode"]
         if self.options.build_cvode:
