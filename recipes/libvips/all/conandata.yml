@@ -1,4 +1,7 @@
 sources:
+  "8.15.0":
+    url: "https://github.com/libvips/libvips/releases/download/v8.15.0/vips-8.15.0.tar.xz"
+    sha256: "d33f81c6ab4bd1faeedc36dc32f880b19e9d5ff69b502e59d175332dfb8f63f1"
   "8.14.2":
     url: "https://github.com/libvips/libvips/releases/download/v8.14.2/vips-8.14.2.tar.xz"
     sha256: "27dad021f0835a5ab14e541d02abd41e4c3bd012d2196438df5a9e754984f7ce"
