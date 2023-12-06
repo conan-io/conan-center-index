@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, replace_in_file, copy
+from conan.tools.files import get, replace_in_file, copy, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -137,6 +137,7 @@ class RmluiConan(ConanFile):
         copy(self, pattern="*LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder, excludes=("Samples/*", "Tests/*"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "RmlUi"))
 
     def package_info(self):
         if Version(self.version) >= 4 and self.options.matrix_mode == "row_major":
