@@ -5,7 +5,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -149,9 +148,6 @@ class SentryNativeConan(ConanFile):
     def build_requirements(self):
         if self.settings.os == "Windows":
             self.tool_requires("cmake/[>=3.16.4 <4]")
-        if self.options.backend == "breakpad":
-            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
@@ -174,8 +170,6 @@ class SentryNativeConan(ConanFile):
             tc.variables["CRASHPAD_WER_ENABLED"] = True
         tc.generate()
         CMakeDeps(self).generate()
-        if self.options.backend == "breakpad":
-            PkgConfigDeps(self).generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -214,7 +208,6 @@ class SentryNativeConan(ConanFile):
 
         if self.options.backend == "breakpad" and self.options.with_breakpad == "sentry":
             self.cpp_info.components["breakpad"].set_property("cmake_target_name", "breakpad_client")
-            self.cpp_info.components["breakpad"].set_property("pkg_config_name", "breakpad-client")
             self.cpp_info.components["breakpad"].libs = ["breakpad_client"]
             if is_apple_os(self):
                 self.cpp_info.components["breakpad"].frameworks.append("CoreFoundation")
