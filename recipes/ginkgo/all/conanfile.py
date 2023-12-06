@@ -101,8 +101,45 @@ class GinkgoConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def _get_visual_generator(self):
+        compiler_version = str(self.settings.compiler.version)
+        if self.settings.compiler == "msvc":
+            compiler_version = {
+                "170": "11",
+                "180": "12",
+                "190": "14",
+                "191": "15",
+                "192": "16",
+                "193": "17",
+            }[compiler_version]
+
+        visual_gen_suffix = {
+            "8": "8 2005",
+            "9": "9 2008",
+            "10": "10 2010",
+            "11": "11 2012",
+            "12": "12 2013",
+            "14": "14 2015",
+            "15": "15 2017",
+            "16": "16 2019",
+            "17": "17 2022",
+        }[compiler_version]
+
+        return f"Visual Studio {visual_gen_suffix}"
+
     def generate(self):
         tc = CMakeToolchain(self)
+
+        # Since 1.5.0, force MSBuild generator if:
+        # - msvc & shared
+        # - user has set tools.cmake.cmaketoolchain:generator to Ninja
+        # It's a workaround for LINK : fatal error LNK1189: library limit of 65535 objects exceeded
+        # See https://github.com/ginkgo-project/ginkgo/issues/1495#issuecomment-1841983036
+        # and https://github.com/microsoft/vcpkg/pull/34280#discussion_r1351515284
+        if Version(self.version) >= "1.5.0" and is_msvc(self) and self.options.shared:
+            if self.conf.get("tools.cmake.cmaketoolchain:generator") == "Ninja":
+                tc.generator = self._get_visual_generator()
+
         tc.variables["GINKGO_BUILD_TESTS"] = False
         tc.variables["GINKGO_BUILD_EXAMPLES"] = False
         tc.variables["GINKGO_BUILD_BENCHMARKS"] = False
