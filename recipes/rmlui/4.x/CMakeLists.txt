@@ -6,12 +6,13 @@ if(NOT NO_FONT_INTERFACE_DEFAULT)
 endif()
 
 if(BUILD_LUA_BINDINGS)
-find_package(lua REQUIRED CONFIG)
-list(APPEND LUA_BINDINGS_LINK_LIBS lua::lua)
-
-if(NOT NO_THIRDPARTY_CONTAINERS)
-	find_package(robin_hood REQUIRED)
-	target_link_libraries(RmlCore robin_hood::robin_hood)
+    find_package(lua REQUIRED CONFIG)
+    list(APPEND LUA_BINDINGS_LINK_LIBS lua::lua)
 endif()
 
 add_subdirectory(src)
+
+if(NOT NO_THIRDPARTY_CONTAINERS)
+    find_package(robin_hood REQUIRED CONFIG)
+    target_link_libraries(RmlCore ${LIBRARY_VISIBILITY} robin_hood::robin_hood)
+endif()
