@@ -178,7 +178,32 @@ class ArrowConan(ConanFile):
                 v = v == "True"
             setattr(opts, k, v)
 
+        # These are only necessary to keep the linter happy
+        opts.shared = opts.get_safe("shared", False)
+        opts.acero = opts.get_safe("acero", False)
+        opts.cli = opts.get_safe("cli", False)
+        opts.deprecated = opts.get_safe("deprecated", False)
+        opts.encryption = opts.get_safe("encryption", False)
+        opts.filesystem_layer = opts.get_safe("filesystem_layer", False)
+        opts.gandiva = opts.get_safe("gandiva", False)
+        opts.hdfs_bridgs = opts.get_safe("hdfs_bridgs", False)
+        opts.plasma = opts.get_safe("plasma", False)
+        opts.runtime_simd_level = opts.get_safe("runtime_simd_level", False)
+        opts.simd_level = opts.get_safe("simd_level", False)
         opts.substrait = opts.get_safe("substrait", False)
+        opts.with_backtrace = opts.get_safe("with_backtrace", False)
+        opts.with_brotli = opts.get_safe("with_brotli", False)
+        opts.with_bz2 = opts.get_safe("with_bz2", False)
+        opts.with_csv = opts.get_safe("with_csv", False)
+        opts.with_cuda = opts.get_safe("with_cuda", False)
+        opts.with_lz4 = opts.get_safe("with_lz4", False)
+        opts.with_mimalloc = opts.get_safe("with_mimalloc", False)
+        opts.with_orc = opts.get_safe("with_orc", False)
+        opts.with_s3 = opts.get_safe("with_s3", False)
+        opts.with_snappy = opts.get_safe("with_snappy", False)
+        opts.with_zlib = opts.get_safe("with_zlib", False)
+        opts.with_zstd = opts.get_safe("with_zstd", False)
+
         if opts.parquet == "auto":
             opts.parquet = opts.substrait
         if opts.dataset_modules == "auto":
@@ -283,8 +308,8 @@ class ArrowConan(ConanFile):
             self.requires("libbacktrace/cci.20210118")
 
     def package_id(self):
-        for option, value in self._opts.items():
-            setattr(self.info.options, option, value)
+        for option, _ in self.info.options.items():
+            setattr(self.info.options, option, self._opts.get_safe(option, False))
 
     def validate(self):
         for option, value in self._opts.items():
@@ -466,14 +491,14 @@ class ArrowConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        cmake =CMake(self)
+        cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "cpp"))
         cmake.build()
 
     def package(self):
         copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, pattern="NOTICE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        cmake =CMake(self)
+        cmake = CMake(self)
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
