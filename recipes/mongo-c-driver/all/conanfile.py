@@ -70,7 +70,7 @@ class MongoCDriverConan(ConanFile):
         elif self.options.with_ssl == "libressl":
             self.requires("libressl/3.5.3")
         if self.options.with_sasl == "cyrus":
-            self.requires("cyrus-sasl/2.1.27")
+            self.requires("cyrus-sasl/2.1.28")
         if self.options.with_snappy:
             self.requires("snappy/1.1.10")
         if self.options.with_zlib:
@@ -78,7 +78,7 @@ class MongoCDriverConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_icu:
-            self.requires("icu/73.2")
+            self.requires("icu/74.2")
 
     def validate(self):
         if self.options.with_ssl == "darwin" and not is_apple_os(self):
@@ -91,7 +91,7 @@ class MongoCDriverConan(ConanFile):
     def build_requirements(self):
         if self.options.with_ssl == "libressl" or self.options.with_zstd:
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.0.3")
+                self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -153,6 +153,7 @@ class MongoCDriverConan(ConanFile):
             # Should be added because of
             # https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-initonceexecuteonce
             tc.preprocessor_definitions["_WIN32_WINNT"] = "0x0600"
+        tc.cache_variables["BUILD_VERSION"] = self.version
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -166,18 +167,14 @@ class MongoCDriverConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        to_replace_old_new = [
-            # Fix Snappy
-            {"old": "include (FindSnappy)\nif (SNAPPY_INCLUDE_DIRS)",
-             "new": "if(ENABLE_SNAPPY MATCHES \"ON\")\n  find_package(Snappy REQUIRED)"},
-            {"old": "SNAPPY_LIBRARIES", "new": "Snappy_LIBRARIES"},
-            {"old": "SNAPPY_INCLUDE_DIRS", "new": "Snappy_INCLUDE_DIRS"},
-            # Fix LibreSSL
-            {"old": "set (SSL_LIBRARIES -ltls -lcrypto)", "new": ""},
-        ]
-        for old_new in to_replace_old_new:
-            replace_in_file(self, os.path.join(self.source_folder, "src", "libmongoc", "CMakeLists.txt"),
-                                  old_new["old"], old_new["new"])
+        libmongoc_cmake = os.path.join(self.source_folder, "src", "libmongoc", "CMakeLists.txt")
+        replace_in_file(self, libmongoc_cmake,
+                        "include (FindSnappy)\nif (SNAPPY_INCLUDE_DIRS)",
+                        'if(ENABLE_SNAPPY MATCHES "ON")\n  find_package(Snappy REQUIRED)')
+        replace_in_file(self, libmongoc_cmake, "SNAPPY_LIBRARIES", "Snappy_LIBRARIES")
+        replace_in_file(self, libmongoc_cmake, "SNAPPY_INCLUDE_DIRS", "Snappy_INCLUDE_DIRS")
+        if Version(self.version) < "1.25":
+            replace_in_file(self, libmongoc_cmake, "set (SSL_LIBRARIES -ltls -lcrypto)", "")
         # cleanup rpath
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "set (CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)", "")
