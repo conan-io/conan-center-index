@@ -158,201 +158,137 @@ class ArrowConan(ConanFile):
         if Version(self.version) < "8.0.0":
             del self.options.substrait
 
-        self.options.parquet = self._parquet()
-        self.options.compute = self._compute()
-        self.options.dataset_modules = self._dataset_modules()
-        self.options.with_boost = self._with_boost()
-        self.options.with_flight_rpc = self._with_flight_rpc()
-        self.options.with_gflags = self._with_gflags()
-        self.options.with_glog = self._with_glog()
-        self.options.with_grpc = self._with_grpc()
-        self.options.with_jemalloc = self._with_jemalloc()
-        self.options.with_thrift = self._with_thrift()
-        self.options.with_llvm = self._with_llvm()
-        self.options.with_openssl = self._with_openssl()
-        self.options.with_protobuf = self._with_protobuf()
-        self.options.with_re2 = self._with_re2()
-        self.options.with_utf8proc = self._with_utf8proc()
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def _compute_options(self):
+        class ComputedOptions:
+            def get_safe(self, option, default=None):
+                if hasattr(self, option):
+                    return getattr(self, option)
+                return default
+
+            def items(self):
+                return self.__dict__.items()
+
+        opts = ComputedOptions()
+        for k, v in self.options.items():
+            if v in ["True", "False"]:
+                v = v == "True"
+            setattr(opts, k, v)
+
+        opts.substrait = opts.get_safe("substrait", False)
+        if opts.parquet == "auto":
+            opts.parquet = opts.substrait
+        if opts.dataset_modules == "auto":
+            opts.dataset_modules = opts.substrait
+        if opts.compute == "auto":
+            opts.compute = opts.parquet or opts.dataset_modules or opts.substrait
+        if opts.with_boost == "auto":
+            if opts.gandiva:
+                opts.with_boost = True
+            elif Version(self.version).major == 1:
+                if opts.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < Version("4.9"):
+                    opts.with_boost = True
+            else:
+                opts.with_boost = is_msvc(self)
+        if opts.with_flight_rpc == "auto":
+            opts.with_flight_rpc = opts.get_safe("with_flight_sql", False)
+        if opts.with_glog == "auto":
+            opts.with_glog = False
+        if opts.with_grpc == "auto":
+            opts.with_grpc = opts.with_flight_rpc
+        if opts.with_gflags == "auto":
+            opts.with_gflags = opts.with_glog or opts.with_grpc
+        if opts.with_jemalloc == "auto":
+            opts.with_jemalloc = "BSD" in str(self.settings.os)
+        if opts.with_thrift == "auto":
+            opts.with_thrift = opts.parquet
+        if opts.with_llvm == "auto":
+            opts.with_llvm = opts.gandiva
+        if opts.with_openssl == "auto":
+            opts.with_openssl = bool(opts.encryption or opts.with_flight_rpc or opts.with_s3)
+        if opts.with_protobuf == "auto":
+            opts.with_protobuf = opts.gandiva or opts.with_flight_rpc or opts.with_orc or opts.substrait
+        if opts.with_re2 == "auto":
+            opts.with_re2 = opts.gandiva or opts.parquet or (
+                    Version(self) >= "7.0.0" and (opts.compute or opts.dataset_modules))
+        if opts.with_utf8proc == "auto":
+            opts.with_utf8proc = opts.compute or opts.gandiva
+        if Version(self.version) >= "7.0.0" and opts.encryption:
+            opts.with_json = True
+
+        return opts
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def _compute(self):
-        if self.options.compute == "auto":
-            return bool(self._parquet() or self._dataset_modules()) or bool(self.options.get_safe("substrait", False))
-        else:
-            return bool(self.options.compute)
-
-    def _parquet(self):
-        if self.options.parquet == "auto":
-            return bool(self.options.get_safe("substrait", False))
-        else:
-            return bool(self.options.parquet)
-
-    def _dataset_modules(self):
-        if self.options.dataset_modules == "auto":
-            return bool(self.options.get_safe("substrait", False))
-        else:
-            return bool(self.options.dataset_modules)
-
-    def _with_jemalloc(self):
-        if self.options.with_jemalloc == "auto":
-            return bool("BSD" in str(self.settings.os))
-        else:
-            return bool(self.options.with_jemalloc)
-
-    def _with_re2(self):
-        if self.options.with_re2 == "auto":
-            if self.options.gandiva or self.options.parquet:
-                return True
-            if Version(self) >= "7.0.0" and (self._compute() or self._dataset_modules()):
-                return True
-            return False
-        else:
-            return bool(self.options.with_re2)
-
-    def _with_protobuf(self):
-        if self.options.with_protobuf == "auto":
-            return bool(self.options.gandiva or self._with_flight_rpc() or self.options.with_orc or self.options.get_safe("substrait", False))
-        else:
-            return bool(self.options.with_protobuf)
-
-    def _with_flight_rpc(self):
-        if self.options.with_flight_rpc == "auto":
-            return bool(self.options.get_safe("with_flight_sql", False))
-        else:
-            return bool(self.options.with_flight_rpc)
-
-    def _with_gflags(self):
-        if self.options.with_gflags == "auto":
-            return bool(self._with_glog() or self._with_grpc())
-        else:
-            return bool(self.options.with_gflags)
-
-    def _with_glog(self):
-        if self.options.with_glog == "auto":
-            return False
-        else:
-            return bool(self.options.with_glog)
-
-    def _with_grpc(self):
-        if self.options.with_grpc == "auto":
-            return self._with_flight_rpc()
-        else:
-            return bool(self.options.with_grpc)
-
-    def _with_boost(self):
-        if self.options.with_boost == "auto":
-            if self.options.gandiva:
-                return True
-            version = Version(self.version)
-            if version.major == "1":
-                if self._parquet() and self.settings.compiler == "gcc" and self.settings.compiler.version < Version("4.9"):
-                    return True
-            elif version.major >= "2":
-                if is_msvc(self):
-                    return True
-            return False
-        else:
-            return bool(self.options.with_boost)
-
-    def _with_thrift(self):
-        if self.options.with_thrift == "auto":
-            return bool(self._parquet())
-        else:
-            return bool(self.options.with_thrift)
-
-    def _with_utf8proc(self):
-        if self.options.with_utf8proc == "auto":
-            return bool(self._compute() or self.options.gandiva)
-        else:
-            return bool(self.options.with_utf8proc)
-
-    def _with_llvm(self):
-        if self.options.with_llvm == "auto":
-            return bool(self.options.gandiva)
-        else:
-            return bool(self.options.with_llvm)
-
-    def _with_openssl(self):
-        if self.options.with_openssl == "auto":
-            return bool(self.options.encryption or self._with_flight_rpc() or self.options.with_s3)
-        else:
-            return bool(self.options.with_openssl)
-
-    def _requires_rapidjson(self):
-        if self.options.with_json:
-            return True
-        if Version(self.version) >= "7.0.0" and self.options.encryption:
-            return True
-        return False
-
     def requirements(self):
-        if self.options.with_thrift:
+        self._opts = self._compute_options()
+
+        if self._opts.with_thrift:
             self.requires("thrift/0.17.0")
-        if self.options.with_protobuf:
+        if self._opts.with_protobuf:
             self.requires("protobuf/3.21.9")
-        if self.options.with_jemalloc:
+        if self._opts.with_jemalloc:
             self.requires("jemalloc/5.3.0")
-        if self.options.with_mimalloc:
+        if self._opts.with_mimalloc:
             self.requires("mimalloc/1.7.6")
-        if self.options.with_boost:
+        if self._opts.with_boost:
             self.requires("boost/1.83.0")
-        if self.options.with_gflags:
+        if self._opts.with_gflags:
             self.requires("gflags/2.2.2")
-        if self.options.with_glog:
+        if self._opts.with_glog:
             self.requires("glog/0.6.0")
-        if self.options.get_safe("with_gcs"):
+        if self._opts.get_safe("with_gcs"):
             self.requires("google-cloud-cpp/1.40.1")
-        if self.options.with_grpc:
+        if self._opts.with_grpc:
             self.requires("grpc/1.50.0")
-        if self._requires_rapidjson():
+        if self._opts.with_json:
             self.requires("rapidjson/1.1.0")
-        if self.options.with_llvm:
+        if self._opts.with_llvm:
             self.requires("llvm-core/13.0.0")
-        if self.options.with_openssl:
+        if self._opts.with_openssl:
             # aws-sdk-cpp requires openssl/1.1.1. it uses deprecated functions in openssl/3.0.0
-            if self.options.with_s3:
+            if self._opts.with_s3:
                 self.requires("openssl/1.1.1w")
             else:
                 self.requires("openssl/[>=1.1 <4]")
-        if self.options.get_safe("with_opentelemetry"):
+        if self._opts.get_safe("with_opentelemetry"):
             self.requires("opentelemetry-cpp/1.7.0")
-        if self.options.with_s3:
+        if self._opts.with_s3:
             self.requires("aws-sdk-cpp/1.9.234")
-        if self.options.with_brotli:
+        if self._opts.with_brotli:
             self.requires("brotli/1.1.0")
-        if self.options.with_bz2:
+        if self._opts.with_bz2:
             self.requires("bzip2/1.0.8")
-        if self.options.with_lz4:
+        if self._opts.with_lz4:
             self.requires("lz4/1.9.4")
-        if self.options.with_snappy:
+        if self._opts.with_snappy:
             self.requires("snappy/1.1.9")
         if Version(self.version) >= "6.0.0" and \
-            self.options.get_safe("simd_level") != None or \
-            self.options.get_safe("runtime_simd_level") != None:
+            self._opts.get_safe("simd_level") != None or \
+            self._opts.get_safe("runtime_simd_level") != None:
             self.requires("xsimd/9.0.1")
-        if self.options.with_zlib:
+        if self._opts.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
-        if self.options.with_zstd:
+        if self._opts.with_zstd:
             self.requires("zstd/1.5.5")
-        if self.options.with_re2:
+        if self._opts.with_re2:
             self.requires("re2/20230301")
-        if self.options.with_utf8proc:
+        if self._opts.with_utf8proc:
             self.requires("utf8proc/2.8.0")
-        if self.options.with_backtrace:
+        if self._opts.with_backtrace:
             self.requires("libbacktrace/cci.20210118")
 
+    def package_id(self):
+        for option, value in self._opts.items():
+            setattr(self.info.options, option, value)
+
     def validate(self):
-        # validate options with 'auto' as default value
-        auto_options = ["parquet", "compute", "dataset_modules", "with_boost", "with_flight_rpc", "with_gflags", "with_glog",
-                        "with_grpc", "with_jemalloc", "with_thrift", "with_llvm", "with_openssl", "with_protobuf", "with_re2", "with_utf8proc"]
-        for option in auto_options:
-            assert "auto" not in str(self.options.get_safe(option)), f"Option '{option}' contains 'auto' value, wich is not allowed. Generally the final value should be True/False"
+        for option, value in self._opts.items():
+            assert value != "auto", f"Option '{option}' contains 'auto' value, which is not allowed. There is a bug in the recipe."
 
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
@@ -363,20 +299,20 @@ class ArrowConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.options.get_safe("skyhook", False):
+        if self._opts.get_safe("skyhook", False):
             raise ConanInvalidConfiguration("CCI has no librados recipe (yet)")
-        if self.options.with_cuda:
+        if self._opts.with_cuda:
             raise ConanInvalidConfiguration("CCI has no cuda recipe (yet)")
-        if self.options.with_orc:
+        if self._opts.with_orc:
             raise ConanInvalidConfiguration("CCI has no orc recipe (yet)")
-        if self.options.with_s3 and not self.dependencies["aws-sdk-cpp"].options.config:
+        if self._opts.with_s3 and not self.dependencies["aws-sdk-cpp"].options.config:
             raise ConanInvalidConfiguration("arrow:with_s3 requires aws-sdk-cpp:config is True.")
 
-        if self.options.shared and self.options.with_jemalloc:
+        if self._opts.shared and self._opts.with_jemalloc:
             if self.dependencies["jemalloc"].options.enable_cxx:
                 raise ConanInvalidConfiguration("jemmalloc.enable_cxx of a static jemalloc must be disabled")
 
-        if Version(self.version) < "6.0.0" and self.options.get_safe("simd_level") == "default":
+        if Version(self.version) < "6.0.0" and self._opts.get_safe("simd_level") == "default":
             raise ConanInvalidConfiguration(f"In {self.ref}, simd_level options is not supported `default` value.")
 
     def build_requirements(self):
@@ -400,89 +336,89 @@ class ArrowConan(ConanFile):
             tc.variables["ARROW_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
         tc.variables["ARROW_DEPENDENCY_SOURCE"] = "SYSTEM"
         tc.variables["ARROW_PACKAGE_KIND"] = "conan" # See https://github.com/conan-io/conan-center-index/pull/14903/files#r1057938314 for details
-        tc.variables["ARROW_GANDIVA"] = bool(self.options.gandiva)
-        tc.variables["ARROW_PARQUET"] = self.options.parquet
-        tc.variables["ARROW_SUBSTRAIT"] = bool(self.options.get_safe("substrait", False))
-        tc.variables["ARROW_ACERO"] = bool(self.options.acero)
-        tc.variables["ARROW_DATASET"] = self.options.dataset_modules
-        tc.variables["ARROW_FILESYSTEM"] = bool(self.options.filesystem_layer)
-        tc.variables["PARQUET_REQUIRE_ENCRYPTION"] = bool(self.options.encryption)
-        tc.variables["ARROW_HDFS"] = bool(self.options.hdfs_bridgs)
+        tc.variables["ARROW_GANDIVA"] = self._opts.gandiva
+        tc.variables["ARROW_PARQUET"] = self._opts.parquet
+        tc.variables["ARROW_SUBSTRAIT"] = self._opts.get_safe("substrait", False)
+        tc.variables["ARROW_ACERO"] = self._opts.acero
+        tc.variables["ARROW_DATASET"] = self._opts.dataset_modules
+        tc.variables["ARROW_FILESYSTEM"] = self._opts.filesystem_layer
+        tc.variables["PARQUET_REQUIRE_ENCRYPTION"] = self._opts.encryption
+        tc.variables["ARROW_HDFS"] = self._opts.hdfs_bridgs
         tc.variables["ARROW_VERBOSE_THIRDPARTY_BUILD"] = True
-        tc.variables["ARROW_BUILD_SHARED"] = bool(self.options.shared)
-        tc.variables["ARROW_BUILD_STATIC"] = not bool(self.options.shared)
-        tc.variables["ARROW_NO_DEPRECATED_API"] = not bool(self.options.deprecated)
-        tc.variables["ARROW_FLIGHT"] = self.options.with_flight_rpc
-        tc.variables["ARROW_FLIGHT_SQL"] = bool(self.options.get_safe("with_flight_sql", False))
-        tc.variables["ARROW_COMPUTE"] = self.options.compute
-        tc.variables["ARROW_CSV"] = bool(self.options.with_csv)
-        tc.variables["ARROW_CUDA"] = bool(self.options.with_cuda)
-        tc.variables["ARROW_JEMALLOC"] = self.options.with_jemalloc
+        tc.variables["ARROW_BUILD_SHARED"] = self._opts.shared
+        tc.variables["ARROW_BUILD_STATIC"] = not self._opts.shared
+        tc.variables["ARROW_NO_DEPRECATED_API"] = not self._opts.deprecated
+        tc.variables["ARROW_FLIGHT"] = self._opts.with_flight_rpc
+        tc.variables["ARROW_FLIGHT_SQL"] = self._opts.get_safe("with_flight_sql", False)
+        tc.variables["ARROW_COMPUTE"] = self._opts.compute
+        tc.variables["ARROW_CSV"] = self._opts.with_csv
+        tc.variables["ARROW_CUDA"] = self._opts.with_cuda
+        tc.variables["ARROW_JEMALLOC"] = self._opts.with_jemalloc
         tc.variables["jemalloc_SOURCE"] = "SYSTEM"
-        tc.variables["ARROW_MIMALLOC"] = bool(self.options.with_mimalloc)
-        tc.variables["ARROW_JSON"] = bool(self.options.with_json)
+        tc.variables["ARROW_MIMALLOC"] = self._opts.with_mimalloc
+        tc.variables["ARROW_JSON"] = self._opts.with_json
         tc.variables["google_cloud_cpp_SOURCE"] = "SYSTEM"
-        tc.variables["ARROW_GCS"] = bool(self.options.get_safe("with_gcs", False))
+        tc.variables["ARROW_GCS"] = self._opts.get_safe("with_gcs", False)
         tc.variables["BOOST_SOURCE"] = "SYSTEM"
         tc.variables["Protobuf_SOURCE"] = "SYSTEM"
-        if self.options.with_protobuf:
-            tc.variables["ARROW_PROTOBUF_USE_SHARED"] = bool(self.dependencies["protobuf"].options.shared)
+        if self._opts.with_protobuf:
+            tc.variables["ARROW_PROTOBUF_USE_SHARED"] = self.dependencies["protobuf"].options.shared
         tc.variables["gRPC_SOURCE"] = "SYSTEM"
-        if self.options.with_grpc:
-            tc.variables["ARROW_GRPC_USE_SHARED"] = bool(self.dependencies["grpc"].options.shared)
+        if self._opts.with_grpc:
+            tc.variables["ARROW_GRPC_USE_SHARED"] = self.dependencies["grpc"].options.shared
 
-        tc.variables["ARROW_USE_GLOG"] = self.options.with_glog
+        tc.variables["ARROW_USE_GLOG"] = self._opts.with_glog
         tc.variables["GLOG_SOURCE"] = "SYSTEM"
-        tc.variables["ARROW_WITH_BACKTRACE"] = bool(self.options.with_backtrace)
-        tc.variables["ARROW_WITH_BROTLI"] = bool(self.options.with_brotli)
+        tc.variables["ARROW_WITH_BACKTRACE"] = self._opts.with_backtrace
+        tc.variables["ARROW_WITH_BROTLI"] = self._opts.with_brotli
         tc.variables["brotli_SOURCE"] = "SYSTEM"
-        if self.options.with_brotli:
-            tc.variables["ARROW_BROTLI_USE_SHARED"] = bool(self.dependencies["brotli"].options.shared)
+        if self._opts.with_brotli:
+            tc.variables["ARROW_BROTLI_USE_SHARED"] = self.dependencies["brotli"].options.shared
         tc.variables["gflags_SOURCE"] = "SYSTEM"
-        if self.options.with_gflags:
-            tc.variables["ARROW_GFLAGS_USE_SHARED"] = bool(self.dependencies["gflags"].options.shared)
-        tc.variables["ARROW_WITH_BZ2"] = bool(self.options.with_bz2)
+        if self._opts.with_gflags:
+            tc.variables["ARROW_GFLAGS_USE_SHARED"] = self.dependencies["gflags"].options.shared
+        tc.variables["ARROW_WITH_BZ2"] = self._opts.with_bz2
         tc.variables["BZip2_SOURCE"] = "SYSTEM"
-        if self.options.with_bz2:
-            tc.variables["ARROW_BZ2_USE_SHARED"] = bool(self.dependencies["bzip2"].options.shared)
-        tc.variables["ARROW_WITH_LZ4"] = bool(self.options.with_lz4)
+        if self._opts.with_bz2:
+            tc.variables["ARROW_BZ2_USE_SHARED"] = self.dependencies["bzip2"].options.shared
+        tc.variables["ARROW_WITH_LZ4"] = self._opts.with_lz4
         tc.variables["lz4_SOURCE"] = "SYSTEM"
-        if self.options.with_lz4:
-            tc.variables["ARROW_LZ4_USE_SHARED"] = bool(self.dependencies["lz4"].options.shared)
-        tc.variables["ARROW_WITH_SNAPPY"] = bool(self.options.with_snappy)
+        if self._opts.with_lz4:
+            tc.variables["ARROW_LZ4_USE_SHARED"] = self.dependencies["lz4"].options.shared
+        tc.variables["ARROW_WITH_SNAPPY"] = self._opts.with_snappy
         tc.variables["RapidJSON_SOURCE"] = "SYSTEM"
         tc.variables["Snappy_SOURCE"] = "SYSTEM"
-        if self.options.with_snappy:
-            tc.variables["ARROW_SNAPPY_USE_SHARED"] = bool(self.dependencies["snappy"].options.shared)
-        tc.variables["ARROW_WITH_ZLIB"] = bool(self.options.with_zlib)
+        if self._opts.with_snappy:
+            tc.variables["ARROW_SNAPPY_USE_SHARED"] = self.dependencies["snappy"].options.shared
+        tc.variables["ARROW_WITH_ZLIB"] = self._opts.with_zlib
         tc.variables["re2_SOURCE"] = "SYSTEM"
         tc.variables["ZLIB_SOURCE"] = "SYSTEM"
         tc.variables["xsimd_SOURCE"] = "SYSTEM"
-        tc.variables["ARROW_WITH_ZSTD"] = bool(self.options.with_zstd)
+        tc.variables["ARROW_WITH_ZSTD"] = self._opts.with_zstd
         if Version(self.version) >= "2.0":
             tc.variables["zstd_SOURCE"] = "SYSTEM"
-            tc.variables["ARROW_SIMD_LEVEL"] = str(self.options.simd_level).upper()
-            tc.variables["ARROW_RUNTIME_SIMD_LEVEL"] = str(self.options.runtime_simd_level).upper()
+            tc.variables["ARROW_SIMD_LEVEL"] = str(self._opts.simd_level).upper()
+            tc.variables["ARROW_RUNTIME_SIMD_LEVEL"] = str(self._opts.runtime_simd_level).upper()
         else:
             tc.variables["ZSTD_SOURCE"] = "SYSTEM"
-        if self.options.with_zstd:
-            tc.variables["ARROW_ZSTD_USE_SHARED"] = bool(self.dependencies["zstd"].options.shared)
+        if self._opts.with_zstd:
+            tc.variables["ARROW_ZSTD_USE_SHARED"] = self.dependencies["zstd"].options.shared
         tc.variables["ORC_SOURCE"] = "SYSTEM"
-        tc.variables["ARROW_WITH_THRIFT"] = bool(self.options.with_thrift)
+        tc.variables["ARROW_WITH_THRIFT"] = self._opts.with_thrift
         tc.variables["Thrift_SOURCE"] = "SYSTEM"
-        if self.options.with_thrift:
-            tc.variables["THRIFT_VERSION"] = bool(self.dependencies["thrift"].ref.version) # a recent thrift does not require boost
-            tc.variables["ARROW_THRIFT_USE_SHARED"] = bool(self.dependencies["thrift"].options.shared)
-        tc.variables["ARROW_USE_OPENSSL"] = self.options.with_openssl
-        if self.options.with_openssl:
+        if self._opts.with_thrift:
+            tc.variables["THRIFT_VERSION"] = self.dependencies["thrift"].ref.version # a recent thrift does not require boost
+            tc.variables["ARROW_THRIFT_USE_SHARED"] = self.dependencies["thrift"].options.shared
+        tc.variables["ARROW_USE_OPENSSL"] = self._opts.with_openssl
+        if self._opts.with_openssl:
             tc.variables["OPENSSL_ROOT_DIR"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
-            tc.variables["ARROW_OPENSSL_USE_SHARED"] = bool(self.dependencies["openssl"].options.shared)
-        if self.options.with_boost:
+            tc.variables["ARROW_OPENSSL_USE_SHARED"] = self.dependencies["openssl"].options.shared
+        if self._opts.with_boost:
             tc.variables["ARROW_USE_BOOST"] = True
-            tc.variables["ARROW_BOOST_USE_SHARED"] = bool(self.dependencies["boost"].options.shared)
-        tc.variables["ARROW_S3"] = bool(self.options.with_s3)
+            tc.variables["ARROW_BOOST_USE_SHARED"] = self.dependencies["boost"].options.shared
+        tc.variables["ARROW_S3"] = self._opts.with_s3
         tc.variables["AWSSDK_SOURCE"] = "SYSTEM"
-        tc.variables["ARROW_BUILD_UTILITIES"] = bool(self.options.cli)
+        tc.variables["ARROW_BUILD_UTILITIES"] = self._opts.cli
         tc.variables["ARROW_BUILD_INTEGRATION"] = False
         tc.variables["ARROW_INSTALL_NAME_RPATH"] = True
         tc.variables["ARROW_BUILD_EXAMPLES"] = False
@@ -490,15 +426,15 @@ class ArrowConan(ConanFile):
         tc.variables["ARROW_ENABLE_TIMING_TESTS"] = False
         tc.variables["ARROW_BUILD_BENCHMARKS"] = False
         tc.variables["LLVM_SOURCE"] = "SYSTEM"
-        tc.variables["ARROW_WITH_UTF8PROC"] = self.options.with_utf8proc
-        tc.variables["ARROW_BOOST_REQUIRED"] = self.options.with_boost
+        tc.variables["ARROW_WITH_UTF8PROC"] = self._opts.with_utf8proc
+        tc.variables["ARROW_BOOST_REQUIRED"] = self._opts.with_boost
         tc.variables["utf8proc_SOURCE"] = "SYSTEM"
-        if self.options.with_utf8proc:
-            tc.variables["ARROW_UTF8PROC_USE_SHARED"] = bool(self.dependencies["utf8proc"].options.shared)
+        if self._opts.with_utf8proc:
+            tc.variables["ARROW_UTF8PROC_USE_SHARED"] = self.dependencies["utf8proc"].options.shared
         tc.variables["BUILD_WARNING_LEVEL"] = "PRODUCTION"
         if is_msvc(self):
             tc.variables["ARROW_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
-        if self.options.with_llvm:
+        if self._opts.with_llvm:
             tc.variables["LLVM_DIR"] = self.dependencies["llvm-core"].package_folder.replace("\\", "/")
 
         tc.cache_variables["CMAKE_PROJECT_arrow_INCLUDE"] = os.path.join(self.source_folder, "conan_cmake_project_include.cmake")
@@ -549,130 +485,130 @@ class ArrowConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "Arrow")
 
-        suffix = "_static" if is_msvc(self) and not self.options.shared else ""
+        suffix = "_static" if is_msvc(self) and not self._opts.shared else ""
 
         self.cpp_info.components["libarrow"].set_property("pkg_config_name", "arrow")
         self.cpp_info.components["libarrow"].libs = [f"arrow{suffix}"]
-        if not self.options.shared:
+        if not self._opts.shared:
             self.cpp_info.components["libarrow"].defines = ["ARROW_STATIC"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libarrow"].system_libs = ["pthread", "m", "dl", "rt"]
 
-        if self.options.parquet:
+        if self._opts.parquet:
             self.cpp_info.components["libparquet"].set_property("pkg_config_name", "parquet")
             self.cpp_info.components["libparquet"].libs = [f"parquet{suffix}"]
             self.cpp_info.components["libparquet"].requires = ["libarrow"]
-            if not self.options.shared:
+            if not self._opts.shared:
                 self.cpp_info.components["libparquet"].defines = ["PARQUET_STATIC"]
 
-        if self.options.get_safe("substrait"):
+        if self._opts.get_safe("substrait"):
             self.cpp_info.components["libarrow_substrait"].set_property("pkg_config_name", "arrow_substrait")
             self.cpp_info.components["libarrow_substrait"].libs = [f"arrow_substrait{suffix}"]
             self.cpp_info.components["libarrow_substrait"].requires = ["libparquet", "dataset"]
 
         # Plasma was deprecated in Arrow 12.0.0
-        del self.options.plasma
+        del self._opts.plasma
 
-        if self.options.acero:
+        if self._opts.acero:
             self.cpp_info.components["libacero"].libs = [f"arrow_acero{suffix}"]
             self.cpp_info.components["libacero"].names["cmake_find_package"] = "acero"
             self.cpp_info.components["libacero"].names["cmake_find_package_multi"] = "acero"
             self.cpp_info.components["libacero"].names["pkg_config"] = "acero"
             self.cpp_info.components["libacero"].requires = ["libarrow"]
 
-        if self.options.gandiva:
+        if self._opts.gandiva:
             self.cpp_info.components["libgandiva"].set_property("pkg_config_name", "gandiva")
             self.cpp_info.components["libgandiva"].libs = [f"gandiva{suffix}"]
             self.cpp_info.components["libgandiva"].requires = ["libarrow"]
-            if not self.options.shared:
+            if not self._opts.shared:
                 self.cpp_info.components["libgandiva"].defines = ["GANDIVA_STATIC"]
 
-        if self.options.with_flight_rpc:
+        if self._opts.with_flight_rpc:
             self.cpp_info.components["libarrow_flight"].set_property("pkg_config_name", "flight_rpc")
             self.cpp_info.components["libarrow_flight"].libs = [f"arrow_flight{suffix}"]
             self.cpp_info.components["libarrow_flight"].requires = ["libarrow"]
 
-        if self.options.get_safe("with_flight_sql"):
+        if self._opts.get_safe("with_flight_sql"):
             self.cpp_info.components["libarrow_flight_sql"].set_property("pkg_config_name", "flight_sql")
             self.cpp_info.components["libarrow_flight_sql"].libs = [f"arrow_flight_sql{suffix}"]
             self.cpp_info.components["libarrow_flight_sql"].requires = ["libarrow", "libarrow_flight"]
 
-        if self.options.dataset_modules:
+        if self._opts.dataset_modules:
             self.cpp_info.components["dataset"].libs = ["arrow_dataset"]
-            if self.options.parquet:
+            if self._opts.parquet:
                 self.cpp_info.components["dataset"].requires = ["libparquet"]
 
-        if self.options.cli and (self.options.with_cuda or self.options.with_flight_rpc or self.options.parquet):
+        if self._opts.cli and (self._opts.with_cuda or self._opts.with_flight_rpc or self._opts.parquet):
             binpath = os.path.join(self.package_folder, "bin")
             self.output.info(f"Appending PATH env var: {binpath}")
             self.env_info.PATH.append(binpath)
 
-        if self.options.with_boost:
-            if self.options.gandiva:
+        if self._opts.with_boost:
+            if self._opts.gandiva:
                 # FIXME: only filesystem component is used
                 self.cpp_info.components["libgandiva"].requires.append("boost::boost")
-            if self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < Version("4.9"):
+            if self._opts.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < Version("4.9"):
                 self.cpp_info.components["libparquet"].requires.append("boost::boost")
             if Version(self.version) >= "2.0":
                 # FIXME: only headers components is used
                 self.cpp_info.components["libarrow"].requires.append("boost::boost")
-        if self.options.with_openssl:
+        if self._opts.with_openssl:
             self.cpp_info.components["libarrow"].requires.append("openssl::openssl")
-        if self.options.with_gflags:
+        if self._opts.with_gflags:
             self.cpp_info.components["libarrow"].requires.append("gflags::gflags")
-        if self.options.with_glog:
+        if self._opts.with_glog:
             self.cpp_info.components["libarrow"].requires.append("glog::glog")
-        if self.options.with_jemalloc:
+        if self._opts.with_jemalloc:
             self.cpp_info.components["libarrow"].requires.append("jemalloc::jemalloc")
-        if self.options.with_mimalloc:
+        if self._opts.with_mimalloc:
             self.cpp_info.components["libarrow"].requires.append("mimalloc::mimalloc")
-        if self.options.with_re2:
-            if self.options.gandiva:
+        if self._opts.with_re2:
+            if self._opts.gandiva:
                 self.cpp_info.components["libgandiva"].requires.append("re2::re2")
-            if self.options.parquet:
+            if self._opts.parquet:
                 self.cpp_info.components["libparquet"].requires.append("re2::re2")
             self.cpp_info.components["libarrow"].requires.append("re2::re2")
-        if self.options.with_llvm:
+        if self._opts.with_llvm:
             self.cpp_info.components["libgandiva"].requires.append("llvm-core::llvm-core")
-        if self.options.with_protobuf:
+        if self._opts.with_protobuf:
             self.cpp_info.components["libarrow"].requires.append("protobuf::protobuf")
-        if self.options.with_utf8proc:
+        if self._opts.with_utf8proc:
             self.cpp_info.components["libarrow"].requires.append("utf8proc::utf8proc")
-        if self.options.with_thrift:
+        if self._opts.with_thrift:
             self.cpp_info.components["libarrow"].requires.append("thrift::thrift")
-        if self.options.with_backtrace:
+        if self._opts.with_backtrace:
             self.cpp_info.components["libarrow"].requires.append("libbacktrace::libbacktrace")
-        if self.options.with_cuda:
+        if self._opts.with_cuda:
             self.cpp_info.components["libarrow"].requires.append("cuda::cuda")
-        if self._requires_rapidjson():
+        if self._opts.with_json:
             self.cpp_info.components["libarrow"].requires.append("rapidjson::rapidjson")
-        if self.options.with_s3:
+        if self._opts.with_s3:
             self.cpp_info.components["libarrow"].requires.append("aws-sdk-cpp::s3")
-        if self.options.get_safe("with_gcs"):
+        if self._opts.get_safe("with_gcs"):
             self.cpp_info.components["libarrow"].requires.append("google-cloud-cpp::storage")
-        if self.options.with_orc:
+        if self._opts.with_orc:
             self.cpp_info.components["libarrow"].requires.append("orc::orc")
-        if self.options.get_safe("with_opentelemetry"):
+        if self._opts.get_safe("with_opentelemetry"):
             self.cpp_info.components["libarrow"].requires.append("opentelemetry-cpp::opentelemetry-cpp")
-        if self.options.with_brotli:
+        if self._opts.with_brotli:
             self.cpp_info.components["libarrow"].requires.append("brotli::brotli")
-        if self.options.with_bz2:
+        if self._opts.with_bz2:
             self.cpp_info.components["libarrow"].requires.append("bzip2::bzip2")
-        if self.options.with_lz4:
+        if self._opts.with_lz4:
             self.cpp_info.components["libarrow"].requires.append("lz4::lz4")
-        if self.options.with_snappy:
+        if self._opts.with_snappy:
             self.cpp_info.components["libarrow"].requires.append("snappy::snappy")
-        if self.options.get_safe("simd_level") != None or self.options.get_safe("runtime_simd_level") != None:
+        if self._opts.get_safe("simd_level") != None or self._opts.get_safe("runtime_simd_level") != None:
             self.cpp_info.components["libarrow"].requires.append("xsimd::xsimd")
-        if self.options.with_zlib:
+        if self._opts.with_zlib:
             self.cpp_info.components["libarrow"].requires.append("zlib::zlib")
-        if self.options.with_zstd:
+        if self._opts.with_zstd:
             self.cpp_info.components["libarrow"].requires.append("zstd::zstd")
-        if self.options.with_boost:
+        if self._opts.with_boost:
             self.cpp_info.components["libarrow"].requires.append("boost::boost")
-        if self.options.with_grpc:
+        if self._opts.with_grpc:
             self.cpp_info.components["libarrow"].requires.append("grpc::grpc")
-        if self.options.with_flight_rpc:
+        if self._opts.with_flight_rpc:
             self.cpp_info.components["libarrow_flight"].requires.append("protobuf::protobuf")
 
         # TODO: to remove in conan v2
@@ -680,20 +616,20 @@ class ArrowConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "Arrow"
         self.cpp_info.components["libarrow"].names["cmake_find_package"] = "arrow"
         self.cpp_info.components["libarrow"].names["cmake_find_package_multi"] = "arrow"
-        if self.options.parquet:
+        if self._opts.parquet:
             self.cpp_info.components["libparquet"].names["cmake_find_package"] = "parquet"
             self.cpp_info.components["libparquet"].names["cmake_find_package_multi"] = "parquet"
-        if self.options.get_safe("substrait"):
+        if self._opts.get_safe("substrait"):
             self.cpp_info.components["libarrow_substrait"].names["cmake_find_package"] = "arrow_substrait"
             self.cpp_info.components["libarrow_substrait"].names["cmake_find_package_multi"] = "arrow_substrait"
-        if self.options.gandiva:
+        if self._opts.gandiva:
             self.cpp_info.components["libgandiva"].names["cmake_find_package"] = "gandiva"
             self.cpp_info.components["libgandiva"].names["cmake_find_package_multi"] = "gandiva"
-        if self.options.with_flight_rpc:
+        if self._opts.with_flight_rpc:
             self.cpp_info.components["libarrow_flight"].names["cmake_find_package"] = "flight_rpc"
             self.cpp_info.components["libarrow_flight"].names["cmake_find_package_multi"] = "flight_rpc"
-        if self.options.get_safe("with_flight_sql"):
+        if self._opts.get_safe("with_flight_sql"):
             self.cpp_info.components["libarrow_flight_sql"].names["cmake_find_package"] = "flight_sql"
             self.cpp_info.components["libarrow_flight_sql"].names["cmake_find_package_multi"] = "flight_sql"
-        if self.options.cli and (self.options.with_cuda or self.options.with_flight_rpc or self.options.parquet):
+        if self._opts.cli and (self._opts.with_cuda or self._opts.with_flight_rpc or self._opts.parquet):
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
