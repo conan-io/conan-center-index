@@ -1,7 +1,7 @@
 sources:
-  "1.9.0":
-    url: "https://github.com/stephenberry/glaze/archive/v1.9.0.tar.gz"
-    sha256: "7745bda3383e0a78602b5359b5c455381561e96e35f22a21ee913b1bc3f22da2"
+  "1.9.1":
+    url: "https://github.com/stephenberry/glaze/archive/v1.9.1.tar.gz"
+    sha256: "2c928508efb0398ed2fdc8a90e8e27eff5418420ff336d859f3ed659d11a1fc2"
   "1.8.5":
     url: "https://github.com/stephenberry/glaze/archive/v1.8.5.tar.gz"
     sha256: "5d876eed5689f1947ea4eafd9f13a4e0b527611a6b1857c79a5d598a856287b4"
