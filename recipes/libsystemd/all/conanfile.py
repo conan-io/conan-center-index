@@ -1,10 +1,11 @@
 import os
 import re
+import tarfile
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, replace_in_file, download, move_folder_contents
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -77,7 +78,12 @@ class LibsystemdConan(ConanFile):
             self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Extract using standard Python tools due to Conan's unzip() not handling backslashes in
+        # 'units/system-systemd\x2dcryptsetup.slice', etc. correctly.
+        download(self, **self.conan_data["sources"][self.version], filename="sources.tar.gz")
+        with tarfile.open("sources.tar.gz", "r:gz") as tar:
+            tar.extractall()
+        move_folder_contents(self, os.path.join(self.source_folder, f"systemd-stable-{self.version}"), self.source_folder)
 
     @property
     def _so_version(self):
@@ -164,12 +170,8 @@ class LibsystemdConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-
         meson_build = os.path.join(self.source_folder, "meson.build")
         replace_in_file(self, meson_build, "@CONAN_SRC_REL_PATH@", f"'../{self.source_path.name}'")
-        # Fix an invalid path separator, which breaks with newer Meson versions
-        replace_in_file(self, os.path.join(self.source_folder, "units", "meson.build"),
-                        r"system-systemd\\x2d", "system-systemd/x2d")
 
     def build(self):
         self._patch_sources()

@@ -1,7 +1,7 @@
 sources:
-  "254.7":
-    url: "https://github.com/systemd/systemd-stable/archive/v254.7.tar.gz"
-    sha256: "9d7b4b21d2db3b16286b9ec6657ba86bd797388c532bdc63862826f6d39fe8cb"
+  "255":
+    url: "https://github.com/systemd/systemd-stable/archive/v255.tar.gz"
+    sha256: "a3eb766ee96eb9f4cc25c2a6c933f3299e1b7ae22e72507dade0a5c86d92534f"
   "253.14":
     url: "https://github.com/systemd/systemd-stable/archive/v253.14.tar.gz"
     sha256: "9c83ac26f691ff2c482659884f01f1155ef5e1bd202204f9e3076a31e54ab155"
@@ -30,14 +30,7 @@ sources:
     url: "https://github.com/systemd/systemd-stable/archive/v246.16.tar.gz"
     sha256: "b69f9940d65870f090269a28f1047a633d4b80d0001e091d53a031dd40a822d2"
 patches:
-  "254.7":
-    - patch_file: "patches/254.7/0002-meson-use-c_args-in-generator-scripts.patch"
-      patch_source: "https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/29538"
-      patch_description: "fixes cross-compilation by passing necessary compiler arguments to generator scripts"
-      patch_type: "portability"
-    - patch_file: "patches/253.3/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
-      patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
-      patch_type: "conan"
+  "255":
     - patch_file: "patches/251.15/0001-Remove-dependency-from-coreutils.patch"
       patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
       patch_type: "conan"
