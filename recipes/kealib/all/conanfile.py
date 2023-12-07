@@ -75,6 +75,7 @@ class KealibConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["HDF5_USE_STATIC_LIBRARIES"] = not self.dependencies["hdf5"].options.shared
         tc.cache_variables["HDF5_PREFER_PARALLEL"] = self.dependencies["hdf5"].options.parallel
+        tc.cache_variables["HDF5_THREADSAFE"] = self.dependencies["hdf5"].options.get_safe("threadsafe", False)
         tc.cache_variables["LIBKEA_WITH_GDAL"] = False
         tc.generate()
 
