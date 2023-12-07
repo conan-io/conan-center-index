@@ -5,6 +5,7 @@ from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -43,8 +44,8 @@ class FlintConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("gmp/6.3.0", transitive_headers=True)
-        self.requires("mpfr/4.2.1", transitive_headers=True)
+        self.requires("gmp/6.3.0", transitive_headers=True, transitive_libs=True)
+        self.requires("mpfr/4.2.1", transitive_headers=True, transitive_libs=True)
         if is_msvc(self):
             self.requires("pthreads4w/3.0.0")
 
@@ -67,16 +68,17 @@ class FlintConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("pthreads4w", "cmake_file_name", "PThreads")
+        if Version(self.version) <= "3.0.1":
+            deps.set_property("pthreads4w", "cmake_file_name", "PThreads")
+        else:
+            # https://github.com/flintlib/flint/commit/c6cc1078cb55903b0853fb1b6dc660887842dadf
+            deps.set_property("pthreads4w", "cmake_file_name", "PThreads4W")
+        deps.set_property("pthreads4w", "cmake_target_name", "PThreads4W::PThreads4W")
         deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "MPFR_", "mpfr_")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "find_package(PThreads REQUIRED)",
-                        "find_package(PThreads REQUIRED)\n"
-                        "    set(PThreads_LIBRARIES ${PThreads_LIBS})")
 
     def build(self):
         self._patch_sources()
