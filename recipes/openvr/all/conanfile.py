@@ -5,7 +5,8 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, \
+    save, mkdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -90,19 +91,25 @@ class OpenvrConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    @property
+    def _lib_name(self):
+        if self.settings.os == "Windows" and self.settings.arch == "x86_64":
+            return "openvr_api64"
+        return "openvr_api"
+
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        copy(self, "openvr_api*.dll",
-            dst=os.path.join(self.package_folder, "bin"),
-            src=self.build_folder,
-            keep_path=False)
+        if self.settings.os == "Windows" and self.options.shared:
+            mkdir(self, os.path.join(self.package_folder, "bin"))
+            os.rename(os.path.join(self.package_folder, "lib", f"{self._lib_name}.dll"),
+                      os.path.join(self.package_folder, "bin", f"{self._lib_name}.dll"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "openvr")
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = [self._lib_name]
         self.cpp_info.includedirs.append(os.path.join("include", "openvr"))
 
         if not self.options.shared:
