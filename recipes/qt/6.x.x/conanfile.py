@@ -1039,7 +1039,9 @@ class QtConan(ConanFile):
 
             if self.settings.os == "Windows":
                 self.cpp_info.components["qtGui"].system_libs = ["advapi32", "gdi32", "ole32", "shell32", "user32", "d3d11",
-                    "dxgi", "dxguid", "d2d1", "dwrite", "d3d9", "setupapi", "SHCore", "d3d12"]
+                    "dxgi", "dxguid", "d2d1", "dwrite", "d3d9", "setupapi", "SHCore"]
+                if Version(self.version) >= "6.6.0":
+                    self.cpp_info.components["qtGui"].system_libs.append("d3d12")
                 if self.settings.compiler == "gcc":
                     self.cpp_info.components["qtGui"].system_libs.append("uuid")
                 _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
