@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rename
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rename, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -178,6 +178,10 @@ class JemallocConan(ConanFile):
         if is_msvc(self):
             shutil.copytree(os.path.join(self.source_folder, "include", "msvc_compat"),
                             os.path.join(self.package_folder, "include", "msvc_compat"))
+            if self.options.shared:
+                rmdir(self, os.path.join(self.package_folder, "lib"))
+                copy(self, "*.lib", os.path.join(self.build_folder, "lib"), os.path.join(self.package_folder, "lib"))
+                copy(self, "*.dll", os.path.join(self.build_folder, "lib"), os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "jemalloc")
