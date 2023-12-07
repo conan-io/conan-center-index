@@ -38,7 +38,7 @@ class TzTestConan(ConanFile):
         if can_run(self):
             if self.dependencies['tz'].options.with_binary_db:
                 self.output.info("Test that binary tzdb is readable")
-                with open("tzdata.info", "r") as fd:
+                with open(os.path.join(self.generators_folder, "tzdata.info"), "r") as fd:
                     self.tzdata = fd.read()
                 self.run(f"zdump {os.path.join(self.tzdata, 'America', 'Los_Angeles')}", env="conanrun")
             else:
