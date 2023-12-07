@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, rm, export_conandata_patches, apply_conandata_patches
 from conan.tools.scm import Version
 import os
 
@@ -69,6 +69,7 @@ class SDLImageConan(ConanFile):
     def export_sources(self):
         if Version(self.version) < "2.6":
             copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -96,7 +97,7 @@ class SDLImageConan(ConanFile):
 
     def requirements(self):
         # Headers are exposed https://github.com/conan-io/conan-center-index/pull/16167#issuecomment-1508347351
-        self.requires("sdl/2.28.3", transitive_headers=True)
+        self.requires("sdl/2.28.5", transitive_headers=True)
         if self.options.with_libtiff:
             self.requires("libtiff/4.6.0")
         if self.options.with_libjpeg:
@@ -106,7 +107,7 @@ class SDLImageConan(ConanFile):
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.2")
         if self.options.get_safe("with_avif"):
-            self.requires("libavif/1.0.1")
+            self.requires("libavif/1.0.2")
 
     def validate(self):
         if self.options.shared and not self.dependencies["sdl"].options.shared:
@@ -170,7 +171,10 @@ class SDLImageConan(ConanFile):
         cd.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         rmdir(self, os.path.join(self.source_folder, "external"))
+        if Version(self.version) >= "2.6":
+            rm(self, "Find*.cmake", os.path.join(self.source_folder, "cmake"))
         cmake = CMake(self)
         if Version(self.version) < "2.6":
             cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))

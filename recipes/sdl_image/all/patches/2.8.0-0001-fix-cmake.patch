@@ -1,0 +1,26 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f3cb86e..28710bd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -687,8 +687,8 @@ if(SDL2IMAGE_WEBP)
+         add_library(SDL2_image::external_libwebp ALIAS webp)
+     else()
+         message(STATUS "${PROJECT_NAME}: Using system libwebp")
+-        find_package(webp REQUIRED)
+-        list(APPEND PC_REQUIRES libwebp)
++        find_package(WebP REQUIRED)
++        list(APPEND PC_REQUIRES WebP::webp)
+     endif()
+     if(SDL2IMAGE_WEBP_SHARED)
+         target_include_directories(SDL2_image PRIVATE
+@@ -770,8 +770,8 @@ if(SDL2IMAGE_INSTALL)
+         FILES
+             "${CMAKE_CURRENT_BINARY_DIR}/SDL2_imageConfig.cmake"
+             "${CMAKE_CURRENT_BINARY_DIR}/SDL2_imageConfigVersion.cmake"
+-            cmake/Findlibjxl.cmake
+-            cmake/Findwebp.cmake
++#            cmake/Findlibjxl.cmake
++#            cmake/Findwebp.cmake
+         DESTINATION "${SDLIMAGE_INSTALL_CMAKEDIR}"
+         COMPONENT devel
+     )

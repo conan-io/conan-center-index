@@ -1,0 +1,35 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 438a0aa..b515b99 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -345,7 +345,7 @@ if(SDL2IMAGE_AVIF)
+         endif()
+     else()
+         message(STATUS "${PROJECT_NAME}: Using system libavif")
+-        find_package(libavif ${LIBAVIF_MINIMUM_VERSION} REQUIRED)
++        find_package(libavif REQUIRED)
+         list(APPEND PC_REQUIRES libavif)
+     endif()
+     if(SDL2IMAGE_AVIF_SHARED)
+@@ -607,8 +607,8 @@ if(SDL2IMAGE_WEBP)
+         list(APPEND INSTALL_EXTRA_TARGETS webp)
+     else()
+         message(STATUS "${PROJECT_NAME}: Using system libwebp")
+-        find_package(webp REQUIRED)
+-        list(APPEND PC_REQUIRES libwebp)
++        find_package(WebP REQUIRED)
++        list(APPEND PC_REQUIRES WebP::webp)
+     endif()
+     if(SDL2IMAGE_WEBP_SHARED)
+         target_include_directories(SDL2_image PRIVATE
+@@ -682,8 +682,8 @@ if(SDL2IMAGE_INSTALL)
+         FILES
+             "${CMAKE_CURRENT_BINARY_DIR}/SDL2_imageConfig.cmake"
+             "${CMAKE_CURRENT_BINARY_DIR}/SDL2_imageConfigVersion.cmake"
+-            cmake/Findlibjxl.cmake
+-            cmake/Findwebp.cmake
++#            cmake/Findlibjxl.cmake
++#            cmake/Findwebp.cmake
+         DESTINATION "${PKG_PREFIX}"
+         COMPONENT devel
+     )
