@@ -35,7 +35,7 @@ class LibRHashConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src", "librhash"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,7 +73,7 @@ class LibRHashConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.source_path.parent)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "librhash"))
         cmake.build()
 
     def package(self):

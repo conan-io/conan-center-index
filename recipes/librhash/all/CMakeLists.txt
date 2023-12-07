@@ -1,8 +1,8 @@
 # Based on https://github.com/rhash/RHash/pull/103
 cmake_minimum_required(VERSION 3.15)
-project(librhash LANGUAGES C)
+project(rhash LANGUAGES C)
 
-file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/version.h" versionfile)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../version.h" versionfile)
 string(REGEX MATCH "#define VERSION \"([0-9]*)\.([0-9]*)\.([0-9]*)\"" _ ${versionfile})
 set(RHASH_VERSION_MAJOR ${CMAKE_MATCH_1})
 set(RHASH_VERSION_MINOR ${CMAKE_MATCH_2})
@@ -13,11 +13,16 @@ option(USE_OPENSSL "Enable OpenSSL (optimized hash functions) support" ON)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
-set(SRC_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/src/librhash")
-file(GLOB SOURCE_FILES "${SRC_ROOT}/*.c")
-file(GLOB HEADER_FILES "${SRC_ROOT}/*.h")
+# Get the list of source files from the Makefile
+# https://github.com/rhash/RHash/blob/v1.4.4/librhash/Makefile#L6
+file(READ Makefile MAKEFILE_CONTENTS)
+if("${MAKEFILE_CONTENTS}" MATCHES "SOURCES *= *([^\n]+)")
+    string(REPLACE " " ";" SOURCE_FILES ${CMAKE_MATCH_1})
+else()
+    message(FATAL_ERROR "SOURCES line not found in Makefile")
+endif()
 
-add_library(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+add_library(${PROJECT_NAME} ${SOURCE_FILES})
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${CMAKE_PROJECT_NAME}")
 
 if(USE_OPENSSL)
@@ -43,5 +48,4 @@ install(TARGETS ${PROJECT_NAME}
        LIBRARY DESTINATION lib
        ARCHIVE DESTINATION lib)
 
-install(FILES "${SRC_ROOT}/rhash.h" "${SRC_ROOT}/rhash_torrent.h"
-        DESTINATION include)
+install(FILES "rhash.h" "rhash_torrent.h" DESTINATION include)
