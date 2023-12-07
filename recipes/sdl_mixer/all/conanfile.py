@@ -72,7 +72,7 @@ class SDLMixerConan(ConanFile):
     def requirements(self):
         # SDL_mixer public header includes several public headers of SDL:
         # SDL_stdinc.h, SDL_rwops.h, SDL_audio.h, SDL_endian.h and SDL_version.h
-        self.requires("sdl/2.26.5", transitive_headers=True)
+        self.requires("sdl/2.28.5", transitive_headers=True)
         if self.options.flac:
             self.requires("flac/1.4.2")
         if self.options.mpg123:
@@ -84,7 +84,7 @@ class SDLMixerConan(ConanFile):
             self.requires("vorbis/1.3.7")
         if self.options.opus:
             self.requires("openssl/[>=1.1 <4]")
-            self.requires("opus/1.3.1")
+            self.requires("opus/1.4")
             self.requires("opusfile/0.12")
         if self.options.mikmod:
             self.requires("libmikmod/3.3.11.1")
