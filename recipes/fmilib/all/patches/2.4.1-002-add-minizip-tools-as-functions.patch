@@ -1,7 +1,7 @@
-From ebe6fc7a2d4ef78b2e421c8fa23a30d28079319b Mon Sep 17 00:00:00 2001
+From 150530fed42e0193f0ccac73971bdce2d277b368 Mon Sep 17 00:00:00 2001
 From: Joakim Haugen <joakim.haugen@sintef.no>
-Date: Wed, 24 May 2023 15:27:49 +0200
-Subject: [PATCH] Add minizip tools as functions
+Date: Thu, 7 Dec 2023 15:42:49 +0100
+Subject: [PATCH 1/6] add minizip tools as functions
 
 ---
  src/ZIP/include/miniunz.h |  11 +

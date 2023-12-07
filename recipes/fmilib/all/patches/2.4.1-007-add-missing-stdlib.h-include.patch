@@ -1,7 +1,7 @@
-From 79a37f7a6173f8bdd3324a0442ab377bcb6f238a Mon Sep 17 00:00:00 2001
+From af5133fa4eba5c9eb8338bb4284383183d1ef3cd Mon Sep 17 00:00:00 2001
 From: Joakim Haugen <joakim.haugen@sintef.no>
-Date: Wed, 25 Oct 2023 13:56:43 +0200
-Subject: [PATCH] Add missing stdlib.h include for exit
+Date: Thu, 7 Dec 2023 15:46:39 +0100
+Subject: [PATCH 6/6] add missing stdlib.h include
 
 ---
  Test/jm_locale_test.c | 1 +

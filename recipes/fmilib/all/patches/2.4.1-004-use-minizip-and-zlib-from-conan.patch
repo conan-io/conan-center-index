@@ -1,17 +1,17 @@
-From 3195c7ee77f40cde7231357e6f6e8cf247fc3452 Mon Sep 17 00:00:00 2001
+From e006938706d06379f899edbe3fc8fe2367fec1f6 Mon Sep 17 00:00:00 2001
 From: Joakim Haugen <joakim.haugen@sintef.no>
-Date: Wed, 24 May 2023 16:26:15 +0200
-Subject: [PATCH 2/3] Use minizip and zlib from conan
+Date: Thu, 7 Dec 2023 15:44:54 +0100
+Subject: [PATCH 3/6] use minizip and zlib from conan
 
 ---
- Config.cmake/fmizip.cmake | 16 ++++++++++------
- 1 file changed, 10 insertions(+), 6 deletions(-)
+ Config.cmake/fmizip.cmake | 17 +++++++++++------
+ 1 file changed, 11 insertions(+), 6 deletions(-)
 
 diff --git a/Config.cmake/fmizip.cmake b/Config.cmake/fmizip.cmake
-index 091fc4d..7618d51 100644
+index 091fc4d..213b5f8 100644
 --- a/Config.cmake/fmizip.cmake
 +++ b/Config.cmake/fmizip.cmake
-@@ -19,28 +19,32 @@ if(NOT FMIZIPDIR)
+@@ -19,28 +19,33 @@ if(NOT FMIZIPDIR)
  	# set(DOXYFILE_EXTRA_SOURCES "${DOXYFILE_EXTRA_SOURCES} \"${FMIZIPDIR}/include\"")
  
      set(FMIZIP_LIBRARIES fmizip)
@@ -43,11 +43,12 @@ index 091fc4d..7618d51 100644
  
 -SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DZLIB_STATIC")
 +find_package(minizip CONFIG REQUIRED)
++find_package(ZLIB CONFIG REQUIRED)
  
  add_library(fmizip ${FMILIBKIND} ${FMIZIPSOURCE} ${FMIZIPHEADERS})
  
 -target_link_libraries(fmizip minizip jmutils)
-+target_link_libraries(fmizip minizip::minizip jmutils)
++target_link_libraries(fmizip minizip::minizip ZLIB::ZLIB jmutils)
  
  endif(NOT FMIZIPDIR)
 -- 

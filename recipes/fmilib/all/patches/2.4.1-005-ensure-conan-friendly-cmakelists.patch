@@ -1,7 +1,7 @@
-From dc7777f1212cc64c46a12cfd55ab76276a77ac56 Mon Sep 17 00:00:00 2001
+From 698a0134e382e3f82d8ae3f06cbbeb3ad7fc9873 Mon Sep 17 00:00:00 2001
 From: Joakim Haugen <joakim.haugen@sintef.no>
-Date: Wed, 24 May 2023 16:28:20 +0200
-Subject: [PATCH 3/3] Ensure conan friendly cmakelists
+Date: Thu, 7 Dec 2023 15:45:38 +0100
+Subject: [PATCH 4/6] ensure conan friendly cmakelists
 
 ---
  CMakeLists.txt | 4 ++--

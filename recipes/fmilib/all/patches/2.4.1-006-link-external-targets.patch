@@ -1,7 +1,7 @@
-From df411a1782a608cbfdc46c9ecafb0a4faae0151f Mon Sep 17 00:00:00 2001
+From 306cb206e8a62c82e6cb66e6c2e545980e1a2546 Mon Sep 17 00:00:00 2001
 From: Joakim Haugen <joakim.haugen@sintef.no>
-Date: Wed, 24 May 2023 16:46:58 +0200
-Subject: [PATCH] Debug testing
+Date: Thu, 7 Dec 2023 15:46:12 +0100
+Subject: [PATCH 5/6] link external targets
 
 ---
  Config.cmake/runtime_test.cmake | 8 ++++----

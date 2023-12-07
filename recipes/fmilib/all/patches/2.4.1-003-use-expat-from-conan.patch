@@ -1,7 +1,7 @@
-From c19a6b34a9f406e17da642f30e2507a5cc6b1519 Mon Sep 17 00:00:00 2001
+From e35f4b274bf51228e3928491d7205350a0593280 Mon Sep 17 00:00:00 2001
 From: Joakim Haugen <joakim.haugen@sintef.no>
-Date: Wed, 8 Nov 2023 12:16:23 +0100
-Subject: [PATCH] Do not add expat as external project
+Date: Thu, 7 Dec 2023 15:43:28 +0100
+Subject: [PATCH 2/6] use expat from conan
 
 ---
  Config.cmake/fmixml.cmake | 81 ++-------------------------------------
