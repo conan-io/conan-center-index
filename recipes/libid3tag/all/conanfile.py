@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get, rm, replace_in_file
@@ -51,8 +52,9 @@ class LibId3TagConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if self.settings.arch == "armv8" and self.options.shared:
-            raise ConanInvalidConfiguration("shared library build is not supported for armv8")
+        if cross_building(self) and self.settings.arch == "armv8" and self.options.shared:
+            # https://github.com/conan-io/conan-center-index/pull/18987#issuecomment-1668243831
+            raise ConanInvalidConfiguration("shared library cross-building is not supported for armv8")
 
     def build_requirements(self):
         if not is_msvc(self):
