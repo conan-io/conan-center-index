@@ -47,11 +47,11 @@ class GobjectIntrospectionConan(ConanFile):
         self.requires(f"glib/[>=2.{glib_minor}]", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/1.3.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self.settings.os == "Windows":
-            self.tool_requires("winflexbison/2.5.24")
+            self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("flex/2.6.4")
             self.tool_requires("bison/3.8.2")
@@ -123,5 +123,4 @@ class GobjectIntrospectionConan(ConanFile):
 
         # TODO: remove in conan v2
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH env var with: {bin_path}")
         self.env_info.PATH.append(bin_path)
