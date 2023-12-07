@@ -2,9 +2,8 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -31,17 +30,6 @@ class SrtConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _has_stdcxx_sync(self):
-        return Version(self.version) >= "1.4.2"
-
-    @property
-    def _has_posix_threads(self):
-        return not (is_msvc(self) or self.settings.compiler.get_safe("threads") == "win32")
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -55,8 +43,6 @@ class SrtConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
-        if not self._has_posix_threads and not self._has_stdcxx_sync:
-            self.requires("pthreads4w/3.0.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -67,8 +53,7 @@ class SrtConan(ConanFile):
         tc.variables["ENABLE_LOGGING"] = False
         tc.variables["ENABLE_SHARED"] = self.options.shared
         tc.variables["ENABLE_STATIC"] = not self.options.shared
-        if self._has_stdcxx_sync:
-            tc.variables["ENABLE_STDCXX_SYNC"] = True
+        tc.variables["ENABLE_STDCXX_SYNC"] = True
         tc.variables["ENABLE_ENCRYPTION"] = True
         tc.variables["USE_OPENSSL_PC"] = False
         if is_msvc(self):
@@ -81,16 +66,9 @@ class SrtConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         'set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")',
                         'list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")')
-        if not self._has_posix_threads and not self._has_stdcxx_sync:
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "include(FindThreads)",
-                            ("find_package(pthreads4w REQUIRED)\n"
-                             "link_libraries(pthreads4w::pthreads4w)\n"
-                             "include(FindThreads)"))
 
     def build(self):
         self._patch_sources()
