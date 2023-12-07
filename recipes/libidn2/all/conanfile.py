@@ -77,9 +77,11 @@ class LibIdn(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
+
         tc = AutotoolsToolchain(self)
         if not self.options.shared:
             tc.extra_defines.append("IDN2_STATIC")
@@ -91,8 +93,19 @@ class LibIdn(ConanFile):
             "--disable-rpath",
         ]
         tc.generate()
-        tc = AutotoolsDeps(self)
-        tc.generate()
+
+        if is_msvc(self):
+            env = Environment()
+            dep_info = self.dependencies["libiconv"].cpp_info.aggregated_components()
+            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in dep_info.includedirs] + [f"-D{d}" for d in dep_info.defines])
+            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in (dep_info.libs + dep_info.system_libs)])
+            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in dep_info.libdirs] + dep_info.sharedlinkflags + dep_info.exelinkflags)
+            env.append("CXXFLAGS", dep_info.cxxflags)
+            env.append("CFLAGS", dep_info.cflags)
+            env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
+        else:
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
         if is_msvc(self):
             env = Environment()
@@ -102,7 +115,7 @@ class LibIdn(ConanFile):
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f'{ar_wrapper} "lib -nologo"')
+            env.define("AR", f'{ar_wrapper} lib')
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
@@ -111,16 +124,14 @@ class LibIdn(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        with chdir(self, self.source_folder):
-            autotools = Autotools(self)
-            autotools.configure()
-            autotools.make()
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        with chdir(self, self.source_folder):
-            autotools = Autotools(self)
-            autotools.install()
+        autotools = Autotools(self)
+        autotools.install()
 
         os.unlink(os.path.join(self.package_folder, "lib", "libidn2.la"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
