@@ -134,21 +134,21 @@ class JemallocConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
         tc = AutotoolsToolchain(self)
+        enable_disable = lambda opt, val: f"--enable-{opt}" if val else f"--disable-{opt}"
         tc.configure_args.extend([
             f"--with-jemalloc-prefix={self.options.prefix}",
-            "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
-            "--enable-cxx" if self.options.enable_cxx else "--disable-cxx",
-            "--enable-fill" if self.options.enable_fill else "--disable-fill",
-            "--enable-xmalloc" if self.options.enable_cxx else "--disable-xmalloc",
-            "--enable-readlinkat" if self.options.enable_readlinkat else "--disable-readlinkat",
-            "--enable-syscall" if self.options.enable_syscall else "--disable-syscall",
-            "--enable-lazy-lock" if self.options.enable_lazy_lock else "--disable-lazy-lock",
-            "--enable-log" if self.options.enable_debug_logging else "--disable-log",
-            "--enable-initial-exec-tls" if self.options.enable_initial_exec_tls else "--disable-initial-exec-tls",
-            "--enable-libdl" if self.options.enable_libdl else "--disable-libdl",
+            enable_disable("debug", self.settings.build_type == "Debug"),
+            enable_disable("cxx", self.options.enable_cxx),
+            enable_disable("fill", self.options.enable_fill),
+            enable_disable("xmalloc", self.options.enable_cxx),
+            enable_disable("readlinkat", self.options.enable_readlinkat),
+            enable_disable("syscall", self.options.enable_syscall),
+            enable_disable("lazy-lock", self.options.enable_lazy_lock),
+            enable_disable("log", self.options.enable_debug_logging),
+            enable_disable("initial-exec-tls", self.options.enable_initial_exec_tls),
+            enable_disable("libdl", self.options.enable_libdl),
+            enable_disable("prof", self.options.enable_prof),
         ])
-        if self.options.enable_prof:
-            tc.configure_args.append("--enable-prof")
         env = tc.environment()
         if is_msvc(self):
             # Do not check whether the math library exists when compiled by MSVC
