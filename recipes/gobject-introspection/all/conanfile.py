@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
@@ -45,6 +46,14 @@ class GobjectIntrospectionConan(ConanFile):
         # https://gitlab.gnome.org/GNOME/gobject-introspection/-/blob/1.76.1/meson.build?ref_type=tags#L127-131
         glib_minor = Version(self.version).minor
         self.requires(f"glib/[>=2.{glib_minor}]", transitive_headers=True, transitive_libs=True)
+        # FIXME: gobject-introspection links against system python3 libs, which is not reliable
+
+    def validate(self):
+        if self.settings.os == "Windows" and self.settings.build_type == "Debug":
+            # fatal error LNK1104: cannot open file 'python37_d.lib'
+            raise ConanInvalidConfiguration(
+                "Debug build on Windows is disabled due to debug version of Python libs likely not being available."
+            )
 
     def build_requirements(self):
         self.tool_requires("meson/1.3.0")
