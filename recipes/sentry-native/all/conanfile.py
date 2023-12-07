@@ -206,9 +206,12 @@ class SentryNativeConan(ConanFile):
         if self.options.transport == "curl":
             self.cpp_info.components["sentry"].requires.extend(["libcurl::libcurl"])
 
+        if not self.options.shared:
+            self.cpp_info.components["sentry"].defines = ["SENTRY_BUILD_STATIC"]
+
         if self.options.backend == "breakpad" and self.options.with_breakpad == "sentry":
             self.cpp_info.components["breakpad"].set_property("cmake_target_name", "breakpad_client")
-            self.cpp_info.components["breakpad"].libs = ["breakpad_client"]
+            self.cpp_info.components["breakpad"].libs = ["breakpad_client"] if self.options.shared else []
             if is_apple_os(self):
                 self.cpp_info.components["breakpad"].frameworks.append("CoreFoundation")
             if self.settings.os in ["Linux", "FreeBSD"]:
@@ -323,9 +326,6 @@ class SentryNativeConan(ConanFile):
             self.cpp_info.components["crashpad_handler"].names["cmake_find_package_multi"] = "handler"
             self.cpp_info.components["crashpad_tools"].names["cmake_find_package"] = "tools"
             self.cpp_info.components["crashpad_tools"].names["cmake_find_package_multi"] = "tools"
-
-        if not self.options.shared:
-            self.cpp_info.defines = ["SENTRY_BUILD_STATIC"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "sentry"
