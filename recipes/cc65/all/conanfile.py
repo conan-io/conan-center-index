@@ -90,6 +90,11 @@ class Cc65Conan(ConanFile):
                 replace_in_file(self, os.path.join(self.source_folder, "src", "cl65", "main.c"),
                                 f'CmdInit (&{v} CmdPath, "{fn}");',
                                 f'CmdInit (&{v} CmdPath, "{fn}.exe");')
+            # Fix mkdir failing on Windows due to -p being unavailable there
+            # https://github.com/conan-io/conan-center-index/pull/18873#issuecomment-1841989876
+            replace_in_file(self, os.path.join(self.source_folder, "libsrc", "Makefile"),
+                            r'MKDIR = mkdir $(subst /,\,$1)',
+                            r'MKDIR = if not exist "$(subst /,\,$1)" mkdir "$(subst /,\,$1)"')
 
     def build(self):
         self._patch_sources()
