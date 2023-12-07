@@ -32,7 +32,7 @@ class PackageConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_fmus": True
+        "with_fmus": False
     }
 
     def export_sources(self):
