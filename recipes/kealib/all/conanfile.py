@@ -96,6 +96,9 @@ class KealibConan(ConanFile):
 
     def package_info(self):
         if is_msvc(self):
-            self.cpp_info.libs = ["libkea"]
+            if not self.options.shared and Version(self.version) <= "1.4.14":
+                self.cpp_info.libs = ["liblibkea"]
+            else:
+                self.cpp_info.libs = ["libkea"]
         else:
             self.cpp_info.libs = ["kea"]
