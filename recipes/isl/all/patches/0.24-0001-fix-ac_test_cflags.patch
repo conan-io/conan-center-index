@@ -1,0 +1,11 @@
+--- m4/ax_cc_maxopt.m4
++++ m4/ax_cc_maxopt.m4
+@@ -65,7 +65,7 @@
+ 	acx_maxopt_portable=$withval, acx_maxopt_portable=no)
+
+ # Try to determine "good" native compiler flags if none specified via CFLAGS
+-if test "$ac_test_CFLAGS" != "set"; then
++if test "x$ac_test_CFLAGS" = "x"; then
+   CFLAGS=""
+   case $ax_cv_c_compiler_vendor in
+     dec) CFLAGS="-newc -w0 -O5 -ansi_alias -ansi_args -fp_reorder -tune host"
