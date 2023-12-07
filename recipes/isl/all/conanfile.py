@@ -51,7 +51,8 @@ class IslConan(ConanFile):
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("Apple M1 is not yet supported. Contributions are welcome")
         if msvc_runtime_flag(self) == "MDd" and not check_min_vs(self, 192, raise_invalid=False):
-            # isl fails to link with this version of visual studio and MDd runtime: gmp.lib(bdiv_dbm1c.obj) : fatal error LNK1318: Unexpected PDB error; OK (0)
+            # isl fails to link with this version of visual studio and MDd runtime:
+            # gmp.lib(bdiv_dbm1c.obj) : fatal error LNK1318: Unexpected PDB error; OK (0)
             raise ConanInvalidConfiguration("isl cannot be built with MDd runtime with MSVC < 192")
 
     def requirements(self):
@@ -70,9 +71,9 @@ class IslConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         if self.options.autogen:
-            self.tool_requires("autoconf/2.71")    # Needed for autoreconf
-            self.tool_requires("automake/1.16.5")  # Needed for aclocal called by autoreconf--does Coanan 2.0 need a transitive_run trait?
-            self.tool_requires("libtool/2.4.7")    # Needed for libtool
+            self.tool_requires("autoconf/2.71")
+            self.tool_requires("automake/1.16.5")
+            self.tool_requires("libtool/2.4.7")
 
     def package_id(self):
         del self.info.options.autogen
