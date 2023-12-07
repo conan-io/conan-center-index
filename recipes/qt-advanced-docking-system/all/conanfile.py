@@ -69,7 +69,9 @@ class QtADS(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/6.6.1", transitive_headers=True, transitive_libs=True)
+        # 6.6 recipe is currently broken on Windows due to missing d3d12 system lib:
+        # https://github.com/conan-io/conan-center-index/pull/21676
+        self.requires("qt/6.5.3", transitive_headers=True, transitive_libs=True)
         self.requires("libpng/1.6.40")
 
     def validate(self):
@@ -98,8 +100,8 @@ class QtADS(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = "OFF"
         tc.variables["BUILD_STATIC"] = not self.options.shared
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         qt_version = self.dependencies["qt"].ref.version
