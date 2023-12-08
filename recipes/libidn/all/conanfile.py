@@ -1,15 +1,14 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import get, rmdir, export_conandata_patches, apply_conandata_patches, copy, chdir, replace_in_file, rm
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
+from conan.tools.files import get, rmdir, export_conandata_patches, apply_conandata_patches, copy, replace_in_file, rm, save
 from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import unix_path, is_msvc, check_min_vs
+from conan.tools.microsoft import unix_path, is_msvc
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibIdnConan(ConanFile):
@@ -56,17 +55,13 @@ class LibIdnConan(ConanFile):
     def requirements(self):
         self.requires("libiconv/1.17")
 
-    def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Shared libraries are not supported on Windows due to libtool limitation")
-
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         if is_msvc(self):
-            self.tool_requires("cccl/1.3")
+            self.tool_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -74,19 +69,14 @@ class LibIdnConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
+
         tc = AutotoolsToolchain(self)
         if not self.options.shared:
-            tc.defines.append("LIBIDN_STATIC")
-        env = tc.environment()
-        if is_msvc(self):
-            env.define("CC", "cccl")
-            env.define("CXX", "cccl")
-            env.define("LD", "cccl")
-            if check_min_vs(self, 180, raise_invalid=False):
-                tc.extra_cflags.append("-FS")
+            tc.extra_defines.append("LIBIDN_STATIC")
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args += [
             "--enable-threads={}".format(yes_no(self.options.threads)),
@@ -95,18 +85,48 @@ class LibIdnConan(ConanFile):
             "--disable-nls",
             "--disable-rpath",
         ]
-        tc.generate(env)
-        deps = AutotoolsDeps(self)
-        deps.generate()
+        if is_msvc(self):
+            tc.extra_cxxflags.append("-FS")
+        tc.generate()
+
+        if is_msvc(self):
+            env = Environment()
+            dep_info = self.dependencies["libiconv"].cpp_info.aggregated_components()
+            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in dep_info.includedirs] + [f"-D{d}" for d in dep_info.defines])
+            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in (dep_info.libs + dep_info.system_libs)])
+            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in dep_info.libdirs] + dep_info.sharedlinkflags + dep_info.exelinkflags)
+            env.append("CFLAGS", dep_info.cflags)
+            env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
+        else:
+            deps = AutotoolsDeps(self)
+            deps.generate()
+
+        if is_msvc(self):
+            env = Environment()
+            automake_conf = self.dependencies.build["automake"].conf_info
+            compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
+            ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
+            # Workaround for iconv.lib not being found due to linker flag order
+            libiconv_libdir = unix_path(self, self.dependencies["libiconv"].cpp_info.aggregated_components().libdir)
+            env.define("CC", f"{compile_wrapper} cl -nologo -L{libiconv_libdir}")
+            env.define("CXX", f"{compile_wrapper} cl -nologo")
+            env.define("LD", "link -nologo")
+            env.define("AR", f'{ar_wrapper} lib')
+            env.vars(self).save_script("conanbuild_msvc")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        # Disable examples and tests
+        for subdir in ["examples", "tests", "fuzz", "gltests", os.path.join("lib", "gltests"), "doc"]:
+            save(self, os.path.join(self.source_folder, subdir, "Makefile.in"), "all:\ninstall:\n")
+
         if is_msvc(self):
             if self.settings.arch in ("x86_64", "armv8", "armv8.3"):
                 ssize = "signed long long int"
             else:
                 ssize = "signed long int"
             replace_in_file(self, os.path.join(self.source_folder, "lib", "stringprep.h"), "ssize_t", ssize)
+
         if self.settings.os == "Windows":
             # Otherwise tries to create a symlink from GNUmakefile to itself, which fails on Windows
             replace_in_file(self, os.path.join(self.source_folder, "configure"),
@@ -116,22 +136,27 @@ class LibIdnConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with chdir(self, self.source_folder):
-            autotools = Autotools(self)
-            autotools.configure()
-            autotools.make(args=["V=1"])
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        with chdir(self, self.source_folder):
-            autotools = Autotools(self)
-            autotools.install()
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
 
+        if is_msvc(self) and self.options.shared:
+            os.rename(os.path.join(self.package_folder, "lib", "idn.dll.lib"),
+                      os.path.join(self.package_folder, "lib", "idn-12.lib"))
+
     def package_info(self):
-        self.cpp_info.libs = ["idn"]
+        if is_msvc(self) and self.options.shared:
+            self.cpp_info.libs = ["idn-12"]
+        else:
+            self.cpp_info.libs = ["idn"]
         self.cpp_info.set_property("pkg_config_name", "libidn")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.threads:
