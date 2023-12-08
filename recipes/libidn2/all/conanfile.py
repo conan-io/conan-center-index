@@ -1,10 +1,9 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -57,12 +56,6 @@ class LibIdn(ConanFile):
     def requirements(self):
         self.requires("libiconv/1.17")
 
-    def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration(
-                "Shared libraries are not supported on Windows due to libtool limitation"
-            )
-
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.win_bash = True
@@ -100,7 +93,6 @@ class LibIdn(ConanFile):
             env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in dep_info.includedirs] + [f"-D{d}" for d in dep_info.defines])
             env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in (dep_info.libs + dep_info.system_libs)])
             env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in dep_info.libdirs] + dep_info.sharedlinkflags + dep_info.exelinkflags)
-            env.append("CXXFLAGS", dep_info.cxxflags)
             env.append("CFLAGS", dep_info.cflags)
             env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
         else:
@@ -112,14 +104,11 @@ class LibIdn(ConanFile):
             automake_conf = self.dependencies.build["automake"].conf_info
             compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
             ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
+            dumpbin_nm = unix_path(self, os.path.join(self.source_folder, "dumpbin_nm.py"))
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
             env.define("AR", f'{ar_wrapper} lib')
-            env.define("NM", "dumpbin -symbols")
-            env.define("OBJDUMP", ":")
-            env.define("RANLIB", ":")
-            env.define("STRIP", ":")
             env.vars(self).save_script("conanbuild_msvc")
 
     def build(self):
@@ -137,8 +126,18 @@ class LibIdn(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
+        if is_msvc(self) and self.options.shared:
+            os.rename(os.path.join(self.package_folder, "lib", "idn2.dll.lib"),
+                      os.path.join(self.package_folder, "lib", "idn2-0.lib"))
+            copy(self, "idn2.exe",
+                 os.path.join(self.build_folder, "src", ".libs"),
+                 os.path.join(self.package_folder, "bin"))
+
     def package_info(self):
-        self.cpp_info.libs = ["idn2"]
+        if is_msvc(self) and self.options.shared:
+            self.cpp_info.libs = ["idn2-0"]
+        else:
+            self.cpp_info.libs = ["idn2"]
         self.cpp_info.set_property("pkg_config_name", "libidn2")
         if self.settings.os == "Windows":
             if not self.options.shared:
