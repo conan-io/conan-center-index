@@ -47,7 +47,7 @@ class LibjxlConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
-        if conan_version.major == 1 and str(self.settings.compiler.libcxx) == "libc++":
+        if conan_version.major == 1 and self.settings.get_safe("compiler.libcxx") == "libc++":
             raise ConanInvalidConfiguration("libc++ is not compatible with by libjxl due to limited std::atomic support")
 
     def source(self):
