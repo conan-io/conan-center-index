@@ -129,9 +129,12 @@ class CPythonConan(ConanFile):
 
     @property
     def _use_vendored_libffi(self):
-        # cpython 3.7.x on MSVC and OSX uses an ancient libffi 2.00-beta (which is not available at cci, and is API/ABI incompatible with current 3.2+)
-        return Version(self.version) < "3.8" and (is_msvc(self) or is_apple_os(self))
-        # TODO provides=["libffi"]?
+        # cpython < 3.8 on MSVC uses an ancient libffi 2.00-beta
+        # (which is not available at cci, and is API/ABI incompatible with current 3.2+)
+        # Mac also vendors this dependency until 3.12, but it's possible some of the later versions
+        # will work with Conan's libffi. TODO find the exact version
+        return (Version(self.version) < "3.8" and is_msvc(self)) or \
+               (Version(self.version) < "3.9" and is_apple_os(self))
 
     @property
     def _with_libffi(self):
