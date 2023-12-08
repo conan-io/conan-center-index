@@ -13,6 +13,10 @@ patches:
     - patch_file: "patches/cmake-3.0.1.patch"
       patch_description: "Disable string view to workaround clang 5 not having it"
       patch_type: "portability"
+    - patch_file: "patches/load-tzdb-from-envvar-and-windows-binary-db-support-3.0.1.patch"
+      patch_description: "Allow TZDB to be loaded by envvar and add ability for windows to read zic-compiled binary db"
+      patch_type: "portability"
+      patch_source: "https://github.com/HowardHinnant/date/pull/611"
   "3.0.0":
     - patch_file: "patches/cmake-3.0.0.patch"
       patch_description: "Disable string view to workaround clang 5 not having it"

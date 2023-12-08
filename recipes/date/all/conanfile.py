@@ -3,6 +3,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import get, rmdir, apply_conandata_patches, export_conandata_patches, copy
 from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 
 import os
 
@@ -22,7 +23,9 @@ class DateConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "header_only": [True, False],
-        "use_system_tz_db": [True, False],
+        "use_system_tz_db": [True, False, "deprecated"],
+        "with_tzdb": [False, "system", "download", "manual", "tz"],
+        "with_db_format": ["source", "binary"],
         "use_tz_db_in_dot": [True, False],
     }
     default_options = {
@@ -30,6 +33,8 @@ class DateConan(ConanFile):
         "fPIC": True,
         "header_only": False,
         "use_system_tz_db": False,
+        "with_tzdb": "tz",
+        "with_db_format": "binary",
         "use_tz_db_in_dot": False,
     }
 
@@ -52,8 +57,11 @@ class DateConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if not self.options.header_only and not self.options.use_system_tz_db:
+        if not self.options.header_only and not self.options.use_system_tz_db and self.options.with_tzdb == "download":
             self.requires("libcurl/[>=7.78 <9]")
+        if self.options.with_tzdb == "tz":
+            #self.requires("tz/2023c", options={"with_binary_db": self.options.with_db_format == "binary"})
+            self.requires("tz/2023c")
 
     def package_id(self):
         if self.info.options.header_only:
@@ -62,6 +70,12 @@ class DateConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
+        if self.options.with_tzdb != "download" and self.options.use_tz_db_in_dot:
+            raise ConanInvalidConfiguration("'use_tz_db_in_dot=True' is only valid when 'with_tzdb=\"download\"'")
+        if self.options.use_system_tz_db and (self.options.with_tzdb not in [False, "system"]):
+            raise ConanInvalidConfiguration("'use_system_tz_db' is deprecated. You must set 'with_tzdb=system'")
+        if (self.options.use_system_tz_db or self.options.with_tzdb == "system") and not self.options.with_db_format == "binary":
+            raise ConanInvalidConfiguration("date only supports using the operating system database in a binary format. You must set 'with_db_format=binary'")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -69,9 +83,10 @@ class DateConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_DATE_TESTING"] = False
-        tc.variables["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
+        tc.variables["USE_SYSTEM_TZ_DB"] = (self.options.use_system_tz_db or self.options.with_tzdb in ["system", "tz"]) and self.options.with_db_format == "binary"
         tc.variables["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
         tc.variables["BUILD_TZ_LIB"] = not self.options.header_only
+        tc.variables["MANUAL_TZ_DB"] = self.options.with_tzdb in ["manual", "tz"] and not self.options.with_db_format == "binary"
         # workaround for clang 5 not having string_view
         if Version(self.version) >= "3.0.0" and self.settings.compiler == "clang" \
                 and Version(self.settings.compiler.version) <= "5.0":
@@ -123,10 +138,10 @@ class DateConan(ConanFile):
                 self.cpp_info.components["date-tz"].system_libs.append("pthread")
                 self.cpp_info.components["date-tz"].system_libs.append("m")
 
-            if not self.options.use_system_tz_db:
+            if self.options.with_tzdb == "download":
                 self.cpp_info.components["date-tz"].requires.append("libcurl::libcurl")
 
-            if self.options.use_system_tz_db and not self.settings.os == "Windows":
+            if (self.options.use_system_tz_db or self.options.with_tzdb in ["system", "tz"]) and self.options.with_db_format == "binary":
                 use_os_tzdb = 1
             else:
                 use_os_tzdb = 0
