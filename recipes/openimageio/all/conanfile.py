@@ -92,7 +92,7 @@ class OpenImageIOConan(ConanFile):
         if Version(self.version) > "2.4.7.1":
             self.requires("fmt/10.1.1")
         else:
-            self.requires("fmt/8.1.1")
+            self.requires("fmt/9.1.0")
 
         # Optional libraries
         if self.options.with_libpng:
@@ -157,6 +157,7 @@ class OpenImageIOConan(ConanFile):
         tc.variables["EMBEDPLUGINS"] = True
         tc.variables["USE_PYTHON"] = False
         tc.variables["USE_EXTERNAL_PUGIXML"] = True
+        tc.variables["BUILD_MISSING_FMT"] = False
 
         # OIIO CMake files are patched to check USE_* flags to require or not use dependencies
         tc.variables["USE_JPEGTURBO"] = (

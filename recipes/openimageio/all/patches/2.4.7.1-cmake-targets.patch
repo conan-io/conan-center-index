@@ -356,11 +356,12 @@ diff --git a/src/libOpenImageIO/CMakeLists.txt b/src/libOpenImageIO/CMakeLists.t
 index 456aab81a..eb5bb00fc 100644
 --- a/src/libOpenImageIO/CMakeLists.txt
 +++ b/src/libOpenImageIO/CMakeLists.txt
-@@ -141,10 +141,14 @@ target_link_libraries (OpenImageIO
+@@ -141,12 +141,17 @@ target_link_libraries (OpenImageIO
              $<TARGET_NAME_IF_EXISTS:TBB::tbb>
              ${BZIP2_LIBRARIES}
              ZLIB::ZLIB
 -            $<TARGET_NAME_IF_EXISTS:Boost::thread>
++            tsl::robin_map
 +            Boost::filesystem Boost::thread Boost::system Boost::container
              ${CMAKE_DL_LIBS}
          )
@@ -370,8 +371,11 @@ index 456aab81a..eb5bb00fc 100644
 +endif ()
 +
  if (FREETYPE_FOUND)
-     target_link_libraries (OpenImageIO PRIVATE ${FREETYPE_LIBRARIES})
+-    target_link_libraries (OpenImageIO PRIVATE ${FREETYPE_LIBRARIES})
++    target_link_libraries (OpenImageIO PRIVATE Freetype::Freetype)
  endif()
+
+ if (WIN32)
 diff --git a/src/libutil/CMakeLists.txt b/src/libutil/CMakeLists.txt
 index 09b9139d0..a2d39982e 100644
 --- a/src/libutil/CMakeLists.txt
