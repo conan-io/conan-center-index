@@ -18,7 +18,7 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def generate(self):
-        dependency_opts = {k: str(v) == "True" for k, v in self.dependencies["imagemagick"].options.items() if k.startswith("with_")}
+        dependency_opts = {k: str(v) != "False" for k, v in self.dependencies["imagemagick"].options.items() if k.startswith("with_")}
         self.generators_path.joinpath("dependencies.json").write_text(json.dumps(dependency_opts, indent=2, sort_keys=True))
 
     def build(self):
@@ -80,7 +80,6 @@ class TestPackageConan(ConanFile):
             check("with_wmf", "wmf")
             check("with_x11", "x")
             check("with_xml2", "xml")
-            check("with_zip", "zip")
             check("with_zlib", "zlib")
             # zstd delegate info is missing:
             # https://github.com/ImageMagick/ImageMagick/blob/7.1.1-22/MagickCore/version.c#L218

@@ -32,7 +32,10 @@ class ImageMagicConan(ConanFile):
         "quantum_depth": [8, 16, 32],
         "utilities": [True, False],
         "with_bzlib": [True, False],
+        "with_cairo": [True, False],
         "with_djvu": [True, False],
+        "with_fftw": [True, False],
+        "with_fontconfig": [True, False],
         "with_freetype": [True, False],
         "with_heic": [True, False],
         "with_jbig": [True, False],
@@ -40,6 +43,7 @@ class ImageMagicConan(ConanFile):
         "with_jxl": [True, False],
         "with_lcms": [True, False],
         "with_lzma": [True, False],
+        "with_opencl": [True, False],
         "with_openexr": [True, False],
         "with_openjp2": [True, False],
         "with_openmp": [True, False],
@@ -64,20 +68,24 @@ class ImageMagicConan(ConanFile):
         "quantum_depth": 16,
         "utilities": True,
         "with_bzlib": True,
+        "with_cairo": True,
         "with_djvu": False,
+        "with_fftw": False,  # FFTW component failed to compile
+        "with_fontconfig": True,
         "with_freetype": True,
         "with_heic": True,
         "with_jbig": True,
         "with_jpeg": "libjpeg",
-        "with_jxl": False,
+        "with_jxl": False,  # FIXME: re-enable once migrated
         "with_lcms": True,
         "with_lzma": True,
+        "with_opencl": True,
         "with_openexr": True,
         "with_openjp2": True,
         "with_openmp": True,
         "with_pango": False,  # FIXME: re-enable once migrated
         "with_png": True,
-        "with_raw": False,
+        "with_raw": True,
         "with_threads": True,
         "with_tiff": True,
         "with_webp": True,
@@ -108,6 +116,12 @@ class ImageMagicConan(ConanFile):
         # None of the dependencies need transitive_headers=True
         if self.options.with_bzlib:
             self.requires("bzip2/1.0.8")
+        if self.options.with_cairo:
+            self.requires("cairo/1.18.0")
+        if self.options.with_fftw:
+            self.requires("fftw/3.3.10")
+        if self.options.with_fontconfig:
+            self.requires("fontconfig/2.14.2")
         if self.options.with_freetype:
             self.requires("freetype/2.13.2")
         if self.options.with_heic:
@@ -119,11 +133,13 @@ class ImageMagicConan(ConanFile):
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.1")
         if self.options.with_jxl:
-            self.requires("libjxl/0.6.1")
+            self.requires("libjxl/0.8.2")
         if self.options.with_lcms:
             self.requires("lcms/2.14")
         if self.options.with_lzma:
             self.requires("xz_utils/5.4.5")
+        if self.options.with_opencl:
+            self.requires("opencl-headers/2023.04.17")
         if self.options.with_openexr:
             self.requires("openexr/3.2.1")
         if self.options.with_openjp2:
@@ -184,12 +200,12 @@ class ImageMagicConan(ConanFile):
 
         tc.cache_variables["AUTOTRACE_DELEGATE"] = False
         tc.cache_variables["BZLIB_DELEGATE"] = self.options.with_bzlib
-        tc.cache_variables["CAIRO_DELEGATE"] = False
-        tc.cache_variables["DJVU_DELEGATE"] = False
+        tc.cache_variables["CAIRO_DELEGATE"] = self.options.with_cairo
+        tc.cache_variables["DJVU_DELEGATE"] = self.options.with_djvu
         tc.cache_variables["DPS_DELEGATE"] = False
-        tc.cache_variables["FFTW_DELEGATE"] = False
+        tc.cache_variables["FFTW_DELEGATE"] = self.options.with_fftw
         tc.cache_variables["FLIF_DELEGATE"] = False
-        tc.cache_variables["FONTCONFIG_DELEGATE"] = False
+        tc.cache_variables["FONTCONFIG_DELEGATE"] = self.options.with_fontconfig
         tc.cache_variables["FPX_DELEGATE"] = False
         tc.cache_variables["FREETYPE_DELEGATE"] = self.options.with_freetype
         tc.cache_variables["GS_DELEGATE"] = False
@@ -205,11 +221,11 @@ class ImageMagicConan(ConanFile):
         tc.cache_variables["LQR"] = False
         tc.cache_variables["LTDL_DELEGATE"] = False
         tc.cache_variables["LZMA_DELEGATE"] = self.options.with_lzma
-        tc.cache_variables["OPENCLLIB_DELEGATE"] = False
+        tc.cache_variables["OPENCLLIB_DELEGATE"] = self.options.with_opencl
         tc.cache_variables["OPENEXR_DELEGATE"] = self.options.with_openexr
         tc.cache_variables["OPENMP_SUPPORT"] = self.options.with_openmp
         tc.cache_variables["PANGO_DELEGATE"] = self.options.with_pango
-        tc.cache_variables["PANGOCAIRO_DELEGATE"] = self.options.with_pango
+        tc.cache_variables["PANGOCAIRO_DELEGATE"] = self.options.with_pango and self.dependencies["pango"].options.with_cairo
         tc.cache_variables["PNG_DELEGATE"] = self.options.with_png
         tc.cache_variables["RAQM_DELEGATE"] = False
         tc.cache_variables["RAW_R_DELEGATE"] = self.options.with_raw
@@ -255,7 +271,7 @@ class ImageMagicConan(ConanFile):
             "libxml2": "LibXml2",
             "lqr": "Lqr",
             "ltdl": "LTDL",
-            "opencl": "OpenCL",
+            "opencl-headers": "OpenCL",
             "openexr": "OpenEXR",
             "openjpeg": "OpenJPEG",
             "pango": "Pango",
@@ -272,7 +288,6 @@ class ImageMagicConan(ConanFile):
         for dep, cmake_name in cmake_names.items():
             deps.set_property(dep, "cmake_file_name", cmake_name)
             deps.set_property(dep, "cmake_target_name", f"{cmake_name}::{cmake_name}")
-        deps.set_property("pango::pangocairo", "cmake_file_name", "Pango::PangoCairo")
         deps.generate()
 
         deps = PkgConfigDeps(self)
@@ -294,7 +309,11 @@ class ImageMagicConan(ConanFile):
         # PangoCairo is provided by Pango
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "magick_find_delegate(DELEGATE PANGOCAIRO_DELEGATE NAME PangoCairo DEFAULT FALSE)\n",
-                        "magick_find_delegate(DELEGATE PANGOCAIRO_DELEGATE NAME Pango DEFAULT FALSE TARGETS Pango::PangoCairo)\n")
+                        "magick_find_delegate(DELEGATE PANGOCAIRO_DELEGATE NAME Pango DEFAULT FALSE TARGETS Pango::Pango)\n")
+        # Adjust libraw include
+        replace_in_file(self, os.path.join(self.source_folder, "coders/dng.c"),
+                        "#include <libraw.h>",
+                        "#include <libraw/libraw.h>")
 
     def build(self):
         self._patch_sources()
@@ -322,6 +341,12 @@ class ImageMagicConan(ConanFile):
         core_requires = []
         if self.options.with_bzlib:
             core_requires.append("bzip2::bzip2")
+        if self.options.with_cairo:
+            core_requires.append("cairo::cairo")
+        if self.options.with_fftw:
+            core_requires.append("fftw::fftw")
+        if self.options.with_fontconfig:
+            core_requires.append("fontconfig::fontconfig")
         if self.options.with_freetype:
             core_requires.append("freetype::freetype")
         if self.options.with_heic:
@@ -338,6 +363,8 @@ class ImageMagicConan(ConanFile):
             core_requires.append("lcms::lcms")
         if self.options.with_lzma:
             core_requires.append("xz_utils::xz_utils")
+        if self.options.with_opencl:
+            core_requires.append("opencl-headers::opencl-headers")
         if self.options.with_openexr:
             core_requires.append("openexr::openexr")
         if self.options.with_openjp2:
