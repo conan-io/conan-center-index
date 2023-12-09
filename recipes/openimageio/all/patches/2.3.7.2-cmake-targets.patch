@@ -563,7 +563,7 @@ diff --git a/src/libutil/CMakeLists.txt b/src/libutil/CMakeLists.txt
 index 7de38836..3e1609ad 100644
 --- a/src/libutil/CMakeLists.txt
 +++ b/src/libutil/CMakeLists.txt
-@@ -14,19 +14,19 @@ target_include_directories (OpenImageIO_Util
+@@ -14,19 +14,20 @@ target_include_directories (OpenImageIO_Util
  target_link_libraries (OpenImageIO_Util
          PUBLIC
              # For OpenEXR/Imath 3.x:
@@ -584,6 +584,7 @@ index 7de38836..3e1609ad 100644
 -            ${ILMBASE_LIBRARIES}
 +            OpenEXR::OpenEXR
              ${GCC_ATOMIC_LIBRARIES}
++            fmt::fmt
          PRIVATE
              ${SANITIZE_LIBRARIES}
 -            ${Boost_LIBRARIES}

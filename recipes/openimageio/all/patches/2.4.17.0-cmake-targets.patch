@@ -407,13 +407,15 @@ diff --git src/libutil/CMakeLists.txt src/libutil/CMakeLists.txt
 index 8933bfe5b..3970eb0c3 100644
 --- src/libutil/CMakeLists.txt
 +++ src/libutil/CMakeLists.txt
-@@ -21,8 +21,7 @@ target_link_libraries (OpenImageIO_Util
+@@ -20,8 +20,8 @@ target_link_libraries (OpenImageIO_Util
+             ${GCC_ATOMIC_LIBRARIES}
              ${OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY}
              ${OPENIMAGEIO_IMATH_TARGETS}
++            fmt::fmt
          PRIVATE
 -            $<TARGET_NAME_IF_EXISTS:Boost::filesystem>
 -            $<TARGET_NAME_IF_EXISTS:Boost::thread>
-+        Boost::filesystem Boost::thread Boost::system
++            Boost::filesystem Boost::thread Boost::system
              $<TARGET_NAME_IF_EXISTS:TBB::tbb>
              ${CMAKE_DL_LIBS}
          )
