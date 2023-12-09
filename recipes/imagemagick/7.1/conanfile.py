@@ -209,7 +209,7 @@ class ImageMagicConan(ConanFile):
         tc.cache_variables["OPENEXR_DELEGATE"] = self.options.with_openexr
         tc.cache_variables["OPENMP_SUPPORT"] = self.options.with_openmp
         tc.cache_variables["PANGO_DELEGATE"] = self.options.with_pango
-        tc.cache_variables["PANGOCAIRO_DELEGATE"] = False
+        tc.cache_variables["PANGOCAIRO_DELEGATE"] = self.options.with_pango
         tc.cache_variables["PNG_DELEGATE"] = self.options.with_png
         tc.cache_variables["RAQM_DELEGATE"] = False
         tc.cache_variables["RAW_R_DELEGATE"] = self.options.with_raw
@@ -272,6 +272,7 @@ class ImageMagicConan(ConanFile):
         for dep, cmake_name in cmake_names.items():
             deps.set_property(dep, "cmake_file_name", cmake_name)
             deps.set_property(dep, "cmake_target_name", f"{cmake_name}::{cmake_name}")
+        deps.set_property("pango::pangocairo", "cmake_file_name", "Pango::PangoCairo")
         deps.generate()
 
         deps = PkgConfigDeps(self)
@@ -290,6 +291,10 @@ class ImageMagicConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, subdir, "CMakeLists.txt"),
                             "LIBRARY DESTINATION bin\n",
                             "LIBRARY DESTINATION lib\n")
+        # PangoCairo is provided by Pango
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "magick_find_delegate(DELEGATE PANGOCAIRO_DELEGATE NAME PangoCairo DEFAULT FALSE)\n",
+                        "magick_find_delegate(DELEGATE PANGOCAIRO_DELEGATE NAME Pango DEFAULT FALSE TARGETS Pango::PangoCairo)\n")
 
     def build(self):
         self._patch_sources()
