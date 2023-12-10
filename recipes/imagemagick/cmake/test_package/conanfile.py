@@ -89,6 +89,4 @@ class TestPackageConan(ConanFile):
         check("with_x11", "x")
         check("with_xml2", "xml")
         check("with_zlib", "zlib")
-        # zstd delegate info is missing
-        # https://github.com/ImageMagick/ImageMagick/pull/6934
-        # check("with_zstd", "zstd")
+        check("with_zstd", "zstd")

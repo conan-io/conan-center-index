@@ -1,0 +1,28 @@
+--- MagickCore/opencl.c
++++ MagickCore/opencl.c
+@@ -90,9 +90,6 @@
+ #include "MagickCore/utility-private.h"
+ 
+ #if defined(MAGICKCORE_OPENCL_SUPPORT)
+-#if defined(MAGICKCORE_LTDL_DELEGATE)
+-#include "ltdl.h"
+-#endif
+ 
+ #ifndef MAGICKCORE_WINDOWS_SUPPORT
+ #include <dlfcn.h>
+@@ -2596,8 +2593,13 @@ MagickPrivate void OpenCLTerminus()
+     RelinquishSemaphoreInfo(&openCL_lock);
+   if (openCL_library != (MagickLibrary *) NULL)
+     {
+-      if (openCL_library->library != (void *) NULL)
+-        (void) lt_dlclose(openCL_library->library);
++      if (openCL_library->library != (void *) NULL) {
++#ifdef MAGICKCORE_WINDOWS_SUPPORT
++        (void) FreeLibrary((HMODULE)openCL_library->library);
++#else
++        (void) dlclose(openCL_library->library);
++#endif
++      }
+       openCL_library=(MagickLibrary *) RelinquishMagickMemory(openCL_library);
+     }
+ }

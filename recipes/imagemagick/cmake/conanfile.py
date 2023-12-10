@@ -3,8 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, rmdir, replace_in_file
-from conan.tools.gnu import PkgConfigDeps
+from conan.tools.files import get, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -70,7 +69,7 @@ class ImageMagicConan(ConanFile):
         "with_bzlib": True,
         "with_cairo": True,
         "with_djvu": False,
-        "with_fftw": False,  # FFTW component failed to compile
+        "with_fftw": True,
         "with_fontconfig": True,
         "with_freetype": True,
         "with_heic": True,
@@ -94,7 +93,9 @@ class ImageMagicConan(ConanFile):
         "with_zlib": True,
         "with_zstd": True,
     }
-    short_paths = True
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -160,7 +161,7 @@ class ImageMagicConan(ConanFile):
         if self.options.with_xml2:
             self.requires("libxml2/2.12.2")
         if self.options.with_zlib:
-            self.requires("zlib/1.3")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_djvu:
@@ -190,60 +191,65 @@ class ImageMagicConan(ConanFile):
         venv.generate()
 
         tc = CMakeToolchain(self)
-        tc.cache_variables["MAGICK_BUILD_STATIC"] = not self.options.shared
-        tc.cache_variables["BUILD_MAGICKPP"] = self.options.magickpp
-        tc.cache_variables["BUILD_UTILITIES"] = self.options.utilities
-        tc.cache_variables["CIPHER_SUPPORT"] = self.options.cipher_support
-        tc.cache_variables["EXCLUDE_DEPRECATED"] = self.options.exclude_deprecated
-        tc.cache_variables["MAGICKCORE_QUANTUM_DEPTH"] = self.options.quantum_depth
-        tc.cache_variables["MAGICK_HDRI_ENABLE"] = self.options.hdri
+        tc.variables["MAGICK_BUILD_STATIC"] = not self.options.shared
+        tc.variables["BUILD_MAGICKPP"] = self.options.magickpp
+        tc.variables["BUILD_UTILITIES"] = self.options.utilities
+        tc.variables["CIPHER_SUPPORT"] = self.options.cipher_support
+        tc.variables["EXCLUDE_DEPRECATED"] = self.options.exclude_deprecated
+        tc.variables["MAGICKCORE_QUANTUM_DEPTH"] = self.options.quantum_depth
+        tc.variables["MAGICK_HDRI_ENABLE"] = self.options.hdri
 
-        tc.cache_variables["AUTOTRACE_DELEGATE"] = False
-        tc.cache_variables["BZLIB_DELEGATE"] = self.options.with_bzlib
-        tc.cache_variables["CAIRO_DELEGATE"] = self.options.with_cairo
-        tc.cache_variables["DJVU_DELEGATE"] = self.options.with_djvu
-        tc.cache_variables["DPS_DELEGATE"] = False
-        tc.cache_variables["FFTW_DELEGATE"] = self.options.with_fftw
-        tc.cache_variables["FLIF_DELEGATE"] = False
-        tc.cache_variables["FONTCONFIG_DELEGATE"] = self.options.with_fontconfig
-        tc.cache_variables["FPX_DELEGATE"] = False
-        tc.cache_variables["FREETYPE_DELEGATE"] = self.options.with_freetype
-        tc.cache_variables["GS_DELEGATE"] = False
-        tc.cache_variables["GVC_DELEGATE"] = False
-        tc.cache_variables["HasJEMALLOC"] = False
-        tc.cache_variables["HasUMEM"] = False
-        tc.cache_variables["HEIC_DELEGATE"] = self.options.with_heic
-        tc.cache_variables["JBIG_DELEGATE"] = self.options.with_jbig
-        tc.cache_variables["JPEG_DELEGATE"] = self.options.with_jpeg
-        tc.cache_variables["JXL_DELEGATE"] = self.options.with_jxl
-        tc.cache_variables["LCMS_DELEGATE"] = self.options.with_lcms
-        tc.cache_variables["LIBOPENJP2_DELEGATE"] = self.options.with_openjp2
-        tc.cache_variables["LQR"] = False
-        tc.cache_variables["LTDL_DELEGATE"] = False
-        tc.cache_variables["LZMA_DELEGATE"] = self.options.with_lzma
-        tc.cache_variables["OPENCLLIB_DELEGATE"] = self.options.with_opencl
-        tc.cache_variables["OPENEXR_DELEGATE"] = self.options.with_openexr
-        tc.cache_variables["OPENMP_SUPPORT"] = self.options.with_openmp
-        tc.cache_variables["PANGO_DELEGATE"] = self.options.with_pango
-        tc.cache_variables["PANGOCAIRO_DELEGATE"] = self.options.with_pango and self.dependencies["pango"].options.with_cairo
-        tc.cache_variables["PNG_DELEGATE"] = self.options.with_png
-        tc.cache_variables["RAQM_DELEGATE"] = False
-        tc.cache_variables["RAW_R_DELEGATE"] = self.options.with_raw
-        tc.cache_variables["RSVG_DELEGATE"] = False
-        tc.cache_variables["THREADS_SUPPORT"] = self.options.with_threads
-        tc.cache_variables["TIFF_DELEGATE"] = self.options.with_tiff
-        tc.cache_variables["WEBP_DELEGATE"] = self.options.with_webp
-        tc.cache_variables["WEBPMUX_DELEGATE"] = False
-        tc.cache_variables["WMF_DELEGATE"] = False
-        tc.cache_variables["X11_DELEGATE"] = self.options.get_safe("with_x11", False)
-        tc.cache_variables["XML_DELEGATE"] = self.options.with_xml2
-        tc.cache_variables["ZLIB_DELEGATE"] = self.options.with_zlib
-        tc.cache_variables["ZSTD_DELEGATE"] = self.options.with_zstd
+        tc.variables["AUTOTRACE_DELEGATE"] = False
+        tc.variables["BZLIB_DELEGATE"] = self.options.with_bzlib
+        tc.variables["CAIRO_DELEGATE"] = self.options.with_cairo
+        tc.variables["DJVU_DELEGATE"] = self.options.with_djvu
+        tc.variables["DPS_DELEGATE"] = False
+        tc.variables["FFTW_DELEGATE"] = self.options.with_fftw
+        tc.variables["FLIF_DELEGATE"] = False
+        tc.variables["FONTCONFIG_DELEGATE"] = self.options.with_fontconfig
+        tc.variables["FPX_DELEGATE"] = False
+        tc.variables["FREETYPE_DELEGATE"] = self.options.with_freetype
+        tc.variables["GS_DELEGATE"] = False
+        tc.variables["GVC_DELEGATE"] = False
+        tc.variables["HasJEMALLOC"] = False
+        tc.variables["HasUMEM"] = False
+        tc.variables["HEIC_DELEGATE"] = self.options.with_heic
+        tc.variables["JBIG_DELEGATE"] = self.options.with_jbig
+        tc.variables["JPEG_DELEGATE"] = self.options.with_jpeg
+        tc.variables["JXL_DELEGATE"] = self.options.with_jxl
+        tc.variables["LCMS_DELEGATE"] = self.options.with_lcms
+        tc.variables["LIBOPENJP2_DELEGATE"] = self.options.with_openjp2
+        tc.variables["LQR"] = False
+        tc.variables["LTDL_DELEGATE"] = False
+        tc.variables["LZMA_DELEGATE"] = self.options.with_lzma
+        tc.variables["OPENCLLIB_DELEGATE"] = self.options.with_opencl
+        tc.variables["OPENEXR_DELEGATE"] = self.options.with_openexr
+        tc.variables["OPENMP_SUPPORT"] = self.options.with_openmp
+        tc.variables["PANGO_DELEGATE"] = self.options.with_pango
+        tc.variables["PANGOCAIRO_DELEGATE"] = self.options.with_pango and self.dependencies["pango"].options.with_cairo
+        tc.variables["PNG_DELEGATE"] = self.options.with_png
+        tc.variables["RAQM_DELEGATE"] = False
+        tc.variables["RAW_R_DELEGATE"] = self.options.with_raw
+        tc.variables["RSVG_DELEGATE"] = False
+        tc.variables["THREADS_SUPPORT"] = self.options.with_threads
+        tc.variables["TIFF_DELEGATE"] = self.options.with_tiff
+        tc.variables["WEBP_DELEGATE"] = self.options.with_webp
+        tc.variables["WEBPMUX_DELEGATE"] = False
+        tc.variables["WMF_DELEGATE"] = False
+        tc.variables["X11_DELEGATE"] = self.options.get_safe("with_x11", False)
+        tc.variables["XML_DELEGATE"] = self.options.with_xml2
+        tc.variables["ZLIB_DELEGATE"] = self.options.with_zlib
+        tc.variables["ZSTD_DELEGATE"] = self.options.with_zstd
         tc.generate()
 
         # TODO: fix this bug in the libheif recipe
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.dependencies["libheif"].cpp_info.components["heif"].system_libs.append("dl")
+
+        if self.options.with_raw:
+            self.dependencies["libraw"].cpp_info.includedirs.append(
+                os.path.join(self.dependencies["libraw"].cpp_info.includedir, "libraw")
+            )
 
         cmake_names = {
             "autotrace": "AUTOTRACE",
@@ -290,30 +296,12 @@ class ImageMagicConan(ConanFile):
             deps.set_property(dep, "cmake_target_name", f"{cmake_name}::{cmake_name}")
         deps.generate()
 
-        deps = PkgConfigDeps(self)
-        deps.generate()
-
     def _patch_sources(self):
-        # Fix mismatch with Conan's CMake variable capitalization.
-        # Also add REQUIRED since we explicitly enable/disable all dependencies.
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "    find_package(${MAGICK_FIND_NAME} QUIET)\n",
-                        "    find_package(${MAGICK_FIND_NAME} REQUIRED)\n"
-                        "    string(TOUPPER ${MAGICK_FIND_NAME} name_upper)\n"
-                        "    set(${name_upper}_FOUND ${${MAGICK_FIND_NAME}_FOUND})\n")
-        # Fix incorrect .so install location
-        for subdir in ["MagickCore", "MagickWand", "Magick++"]:
-            replace_in_file(self, os.path.join(self.source_folder, subdir, "CMakeLists.txt"),
-                            "LIBRARY DESTINATION bin\n",
-                            "LIBRARY DESTINATION lib\n")
+        apply_conandata_patches(self)
         # PangoCairo is provided by Pango
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "magick_find_delegate(DELEGATE PANGOCAIRO_DELEGATE NAME PangoCairo DEFAULT FALSE)\n",
                         "magick_find_delegate(DELEGATE PANGOCAIRO_DELEGATE NAME Pango DEFAULT FALSE TARGETS Pango::Pango)\n")
-        # Adjust libraw include
-        replace_in_file(self, os.path.join(self.source_folder, "coders/dng.c"),
-                        "#include <libraw.h>",
-                        "#include <libraw/libraw.h>")
 
     def build(self):
         self._patch_sources()
