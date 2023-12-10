@@ -35,6 +35,8 @@ class QuickJSConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.version >= "2023-12-09":
+            del self.options.use_bignum
 
     def configure(self):
         if self.options.shared:
@@ -56,7 +58,7 @@ class QuickJSConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["QUICKJS_SRC_DIR"] = self.source_folder.replace("\\", "/")
-        tc.variables["USE_BIGNUM"] = self.options.use_bignum
+        tc.variables["USE_BIGNUM"] = self.options.get_safe("use_bignum", True)
         tc.variables["DUMP_LEAKS"] = self.options.dump_leaks
         tc.generate()
 
@@ -73,7 +75,7 @@ class QuickJSConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["quickjs"]
 
-        if self.options.use_bignum == True:
+        if self.options.get_safe("use_bignum", True):
             self.cpp_info.defines.append("CONFIG_BIGNUM")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
