@@ -43,6 +43,7 @@ class OpenImageIOConan(ConanFile):
         "with_openvdb": [True, False],
         "with_ptex": [True, False],
         "with_libwebp": [True, False],
+        "build_testing": [True, False],
     }
     default_options = {
         "shared": False,
@@ -63,6 +64,7 @@ class OpenImageIOConan(ConanFile):
         "with_openvdb": False,  # FIXME: broken on M1
         "with_ptex": True,
         "with_libwebp": True,
+        "build_testing": False,
     }
 
     def export_sources(self):
@@ -81,7 +83,7 @@ class OpenImageIOConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("boost/1.83.0")
         self.requires("libtiff/4.6.0")
-        self.requires("openexr/3.1.9")
+        self.requires("openexr/3.2.1")
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
@@ -115,7 +117,7 @@ class OpenImageIOConan(ConanFile):
             if Version(self.version) >= "2.4.7.0":
                 self.requires("ffmpeg/6.0.1")
             else:
-                self.requires("ffmpeg/5.1.3")
+                self.requires("ffmpeg/4.4.4")
         # TODO: Field3D dependency
         if self.options.with_giflib:
             self.requires("giflib/5.2.1")
@@ -163,6 +165,9 @@ class OpenImageIOConan(ConanFile):
         tc.variables["USE_PYTHON"] = False
         tc.variables["USE_EXTERNAL_PUGIXML"] = True
         tc.variables["BUILD_MISSING_FMT"] = False
+
+        # The tests automatically download test images via git which is avoided by the default not to build the tests
+        tc.variables["BUILD_TESTING"] = self.options.build_testing
 
         # OIIO CMake files are patched to check USE_* flags to require or not use dependencies
         tc.variables["USE_JPEGTURBO"] = (
