@@ -219,6 +219,13 @@ class GinkgoConan(ConanFile):
         self.cpp_info.components["ginkgo_reference"].libs = [
             "ginkgo_reference" + debug_suffix]
 
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["ginkgo_core"].system_libs.append("m")
+            self.cpp_info.components["ginkgo_cuda"].system_libs.append("m")
+            self.cpp_info.components["ginkgo_omp"].system_libs.append("m")
+            self.cpp_info.components["ginkgo_hip"].system_libs.append("m")
+            self.cpp_info.components["ginkgo_reference"].system_libs.append("m")
+
         if has_dpcpp_device: # Always add these components
             # See https://github.com/conan-io/conan-center-index/pull/7044#discussion_r698181588
             self.cpp_info.components["ginkgo_core"].requires += ["ginkgo_dpcpp"]
@@ -231,6 +238,10 @@ class GinkgoConan(ConanFile):
             self.cpp_info.components["ginkgo_device"].set_property("cmake_target_name", "Ginkgo::ginkgo_device")
             self.cpp_info.components["ginkgo_device"].libs = [
                 "ginkgo_device" + debug_suffix]
+
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["ginkgo_dpcpp"].system_libs.append("m")
+                self.cpp_info.components["ginkgo_device"].system_libs.append("m")
 
             self.cpp_info.components["ginkgo_omp"].requires += [
                 "ginkgo_dpcpp", "ginkgo_device"]
