@@ -172,6 +172,7 @@ required_for_references:
 - cli11
 - clickhouse-cpp
 - clipboard_lite
+- clipp
 - clipper
 - clipper2
 - clove-unit
@@ -276,6 +277,7 @@ required_for_references:
 - dirent
 - discount
 - djinni-generator
+- djinni-support-lib
 - dlib
 - dlpack
 - docopt.cpp
@@ -493,6 +495,7 @@ required_for_references:
 - iconfontcppheaders
 - icu
 - id3v2lib
+- ignition-cmake
 - iir1
 - im95able-rea
 - imagl
@@ -534,6 +537,7 @@ required_for_references:
 - jsmn
 - json-c
 - json-schema-validator
+- json_dto
 - jsoncons
 - jsoncpp
 - jsonnet
@@ -621,6 +625,7 @@ required_for_references:
 - libfdk_aac
 - libffi
 - libfreenect
+- libftdi
 - libfuse
 - libgcrypt
 - libgd
@@ -878,6 +883,7 @@ required_for_references:
 - nanosvg
 - nas
 - nasm
+- ncurses
 - neargye-semver
 - netcdf
 - nettle
@@ -986,6 +992,7 @@ required_for_references:
 - pcl
 - pcre
 - pcre2
+- pdcurses
 - pdf-writer
 - pdfgen
 - pdfium
@@ -1216,6 +1223,7 @@ required_for_references:
 - stx
 - subunit
 - sundials
+- suyash-ulid
 - svector
 - svgpp
 - svgwrite
@@ -1258,6 +1266,7 @@ required_for_references:
 - tiny-dnn
 - tiny-regex-c
 - tiny-utf8
+- tinyalsa
 - tinycbor
 - tinycthread
 - tinycthreadpool
