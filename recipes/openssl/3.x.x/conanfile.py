@@ -91,7 +91,7 @@ class OpenSSLConan(ConanFile):
     default_options["fPIC"] = True
     default_options["no_md2"] = True
     default_options["openssldir"] = None
-    default_options["securitylevel"] = "1";
+    default_options["securitylevel"] = "1"
 
     @property
     def _is_clang_cl(self):
