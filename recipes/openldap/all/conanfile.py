@@ -2,8 +2,9 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir, move_folder_contents
+from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.env import VirtualRunEnv
+from conan.tools.files import chdir, copy, get, rm, rmdir, move_folder_contents, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 
@@ -30,9 +31,6 @@ class OpenldapConan(ConanFile):
         "fPIC": True,
         "with_cyrus_sasl": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
@@ -79,8 +77,12 @@ class OpenldapConan(ConanFile):
         tc = AutotoolsDeps(self)
         tc.generate()
 
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                        "WITH_SYSTEMD=no\nsystemdsystemunitdir=", "WITH_SYSTEMD=no")
+
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
             autotools.configure()
