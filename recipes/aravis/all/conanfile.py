@@ -54,7 +54,8 @@ class AravisConan(ConanFile):
             del self.options.fPIC
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.packet_socket
-        if Version(self.version) < "8.25":
+        # https://github.com/AravisProject/aravis/commit/b4211e5e0266d0226e936818b3faefd6d0daaa3a#diff-f28598af2e23aa5d2bc7c72e022ae2c56a33802eb970afffaeca1e40607f97fe
+        if Version(self.version) < "0.8.21":
             del self.options.gv_n_buffers
 
 
@@ -65,15 +66,6 @@ class AravisConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         if self.options.shared:
             self.options["glib"].shared = True
-
-        if self.options.get_safe("gv_n_buffers"):
-            try:
-                gv_n_buffers_val = int(str(self.options.gv_n_buffers))
-                if not (1 <= gv_n_buffers_val ):
-                    raise ConanInvalidConfiguration(
-                        f"gv_n_buffers_val must be greater than 1 Provided: {gv_n_buffers_val}")
-            except ValueError as e:
-                raise ConanInvalidConfiguration("gv_n_buffers_val must be an integer.") from e
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -100,6 +92,15 @@ class AravisConan(ConanFile):
                 "macOS builds are disabled when glib is shared until "
                 "conan-io/conan#7324 gets merged to fix macOS SIP issue #8443"
             )
+
+        if self.options.get_safe("gv_n_buffers"):
+            try:
+                gv_n_buffers_val = int(str(self.options.gv_n_buffers))
+                if gv_n_buffers_val < 1:
+                    raise ConanInvalidConfiguration(
+                        f"gv_n_buffers_val must be greater than 1 Provided: {gv_n_buffers_val}")
+            except ValueError as e:
+                raise ConanInvalidConfiguration("gv_n_buffers_val must be an integer.") from e
 
     def build_requirements(self):
         #windows build: meson/1.2.1 works, meson/1.2.2 breaks for some reason!
