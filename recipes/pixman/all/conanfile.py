@@ -20,7 +20,7 @@ class PixmanConan(ConanFile):
     description = "Pixman is a low-level software library for pixel manipulation"
     topics = ("graphics", "compositing", "rasterization")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://cairographics.org/"
+    homepage = "https://gitlab.freedesktop.org/pixman/pixman"
     license = ("LGPL-2.1-only", "MPL-1.1")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -54,7 +54,7 @@ class PixmanConan(ConanFile):
             raise ConanInvalidConfiguration("pixman can only be built as a static library on Windows")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/1.2.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
