@@ -137,6 +137,9 @@ class CeressolverConan(ConanFile):
             tc.variables["OPENMP"] = False
             tc.variables["TBB"] = self.options.use_TBB
             tc.variables["CXX11_THREADS"] = self.options.use_CXX11_threads
+        # IOS_DEPLOYMENT_TARGET variable was added to iOS.cmake file in 1.12.0 version
+        if self.settings.os == "iOS":
+            tc.variables["IOS_DEPLOYMENT_TARGET"] = self.settings.os.version
         tc.generate()
 
         CMakeDeps(self).generate()
