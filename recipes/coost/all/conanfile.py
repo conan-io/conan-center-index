@@ -55,7 +55,8 @@ class CoostConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         if Version(self.version) >= "3.0.2" and is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} shared not supported with Visual Studio")
+            # INFO: src\include\co\thread.h: error C2492: 'g_tid': data with thread storage duration may not have dll interface
+            raise ConanInvalidConfiguration(f"{self.ref} Conan recipe does not support -o shared=True with Visual Studio. Contributions are welcome.")
         if self.info.options.with_libcurl:
             if not self.info.options.with_openssl:
                 raise ConanInvalidConfiguration(f"{self.ref} requires with_openssl=True when using with_libcurl=True")
