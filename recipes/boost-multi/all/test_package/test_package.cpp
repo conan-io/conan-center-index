@@ -1,3 +1,4 @@
+#include <iostream>
 #include "multi/array.hpp"
 
 namespace multi = boost::multi;
