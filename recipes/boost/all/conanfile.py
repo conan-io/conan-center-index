@@ -1613,6 +1613,8 @@ class BoostConan(ConanFile):
                 libprefix = ""
                 if is_msvc(self) and (not self._shared or n in self._dependencies["static_only"]):
                     libprefix = "lib"
+                elif self._toolset == "clang-win":
+                    libprefix = "lib"
                 return libprefix + n
 
             all_detected_libraries = set(l[:-4] if l.endswith(".dll") else l for l in collect_libs(self))
