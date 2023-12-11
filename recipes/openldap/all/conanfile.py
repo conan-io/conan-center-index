@@ -56,6 +56,10 @@ class OpenldapConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         def yes_no(v):
             return "yes" if v else "no"
 
