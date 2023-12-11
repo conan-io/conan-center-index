@@ -36,7 +36,7 @@ class TestPackageConan(ConanFile):
         utilities_enabled = self.generators_path.joinpath("utilities_enabled").read_text() == "True"
 
         if utilities_enabled:
-            self.run("Magick identify -list format", env="conanrun")
+            self.run("identify -list format", env="conanrun")
 
         bin_path = os.path.join(self.cpp.build.bindir, "test_package")
         self.run(bin_path, env="conanrun")

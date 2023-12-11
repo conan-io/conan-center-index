@@ -24,12 +24,17 @@ class ImageMagicConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+
         "cipher_support": [True, False],
+        "dpc_support": [True, False],
         "exclude_deprecated": [True, False],
         "hdri": [True, False],
         "magickpp": [True, False],
         "quantum_depth": [8, 16, 32],
+        "security_policy": ["open", "limited", "secure", "websafe"],
         "utilities": [True, False],
+        "with_64bit_channel_mask_support": [True, False],
+
         "with_bzlib": [True, False],
         "with_cairo": [True, False],
         "with_djvu": [True, False],
@@ -60,12 +65,17 @@ class ImageMagicConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+
         "cipher_support": True,
+        "dpc_support": True,
         "exclude_deprecated": True,
         "hdri": True,
         "magickpp": True,
         "quantum_depth": 16,
+        "security_policy": "open",
         "utilities": True,
+        "with_64bit_channel_mask_support": False,
+
         "with_bzlib": True,
         "with_cairo": True,
         "with_djvu": False,
@@ -194,10 +204,15 @@ class ImageMagicConan(ConanFile):
         tc.variables["MAGICK_BUILD_STATIC"] = not self.options.shared
         tc.variables["BUILD_MAGICKPP"] = self.options.magickpp
         tc.variables["BUILD_UTILITIES"] = self.options.utilities
+        tc.variables["BUILD_TESTS"] = False
+
         tc.variables["CIPHER_SUPPORT"] = self.options.cipher_support
+        tc.variables["DPC_SUPPORT"] = self.options.dpc_support
         tc.variables["EXCLUDE_DEPRECATED"] = self.options.exclude_deprecated
         tc.variables["MAGICKCORE_QUANTUM_DEPTH"] = self.options.quantum_depth
         tc.variables["MAGICK_HDRI_ENABLE"] = self.options.hdri
+        tc.variables["SECURITY_POLICY"] = self.options.security_policy
+        tc.variables["WITH_64BIT_CHANNEL_MASK_SUPPORT"] = self.options.with_64bit_channel_mask_support
 
         tc.variables["AUTOTRACE_DELEGATE"] = False
         tc.variables["BZLIB_DELEGATE"] = self.options.with_bzlib
@@ -299,7 +314,7 @@ class ImageMagicConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         # PangoCairo is provided by Pango
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "delegates.cmake"),
                         "magick_find_delegate(DELEGATE PANGOCAIRO_DELEGATE NAME PangoCairo DEFAULT FALSE)\n",
                         "magick_find_delegate(DELEGATE PANGOCAIRO_DELEGATE NAME Pango DEFAULT FALSE TARGETS Pango::Pango)\n")
 

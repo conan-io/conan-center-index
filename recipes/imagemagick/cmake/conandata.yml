@@ -3,10 +3,9 @@ sources:
     source:
       url: "https://github.com/ImageMagick/ImageMagick/archive/refs/tags/7.1.1-22.tar.gz"
       sha256: "6dc2ac4292319b995c6f46de117cbe33089006371c7f1e1310748dfdfda35441"
-    cmake:  # 2023-11-22 version
-      # url: "https://codeload.github.com/Cyriuz/ImageMagick/zip/3a585aaec450e82bb1b9c76b2d4a44d3e1f7c558"
-      # sha256: "3c7c92591daa89f1df32768ba0893b5736cb982fdb8004745b9208d46b8d7a69"
-      url: "https://codeload.github.com/valgur/ImageMagick/zip/refs/heads/update/7.1.1-22"
+    cmake:  # 2023-12-12 version
+      url: "https://codeload.github.com/valgur/ImageMagick/zip/e2d7c88c28e31af065ed8b3aa7f5c1f9d81ef88e"
+      sha256: "c74972656fdff0c5a1271c410bfa110df444678428674abe90fb985389b15426"
 patches:
     "7.1.1-22":
       - patch_file: "patches/001-fix-missing-zstd-info.patch"
