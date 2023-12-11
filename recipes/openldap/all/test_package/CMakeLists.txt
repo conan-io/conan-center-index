@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(test_package LANGUAGES CXX)
+project(test_package LANGUAGES C)
 
 find_package(openldap REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
+add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} openldap::openldap)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)

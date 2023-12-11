@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rm, rmdir, move_folder_contents, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
@@ -13,7 +13,7 @@ required_conan_version = ">=1.53.0"
 
 class OpenldapConan(ConanFile):
     name = "openldap"
-    description = "OpenLDAP C++ library"
+    description = "OpenLDAP C library"
     license = "OLDAP-2.8"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.openldap.org/"
@@ -35,6 +35,8 @@ class OpenldapConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -47,8 +49,6 @@ class OpenldapConan(ConanFile):
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(f"{self.name} is only supported on Linux")
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

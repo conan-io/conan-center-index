@@ -32,7 +32,7 @@
 #include "openldap.h"
 
 #include <stdio.h>
-#include <cstdlib>
+#include <stdlib.h>
 
 static int do_uri_create(LDAPURLDesc *lud) {
   char *uri;
