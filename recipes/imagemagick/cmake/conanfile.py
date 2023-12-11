@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches, copy, move_folder_contents, mkdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -328,6 +328,21 @@ class ImageMagicConan(ConanFile):
         # License files are installed by the project
         cmake = CMake(self)
         cmake.install()
+        # Copy data and config files
+        mkdir(self, os.path.join(self.package_folder, "res", "share"))
+        mkdir(self, os.path.join(self.package_folder, "res", "etc"))
+        v = Version(self.version)
+        move_folder_contents(self, os.path.join(self.package_folder, "share", f"ImageMagick-{v.major}"),
+                             os.path.join(self.package_folder, "res", "share"))
+        move_folder_contents(self, os.path.join(self.package_folder, "etc", f"ImageMagick-{v.major}"),
+                             os.path.join(self.package_folder, "res", "etc"))
+        copy(self, "*/configure.xml",
+             os.path.join(self.package_folder, "lib"),
+             os.path.join(self.package_folder, "res", "share"),
+             keep_path=False)
+        rmdir(self, os.path.join(self.package_folder, "lib", f"ImageMagick-{v.major}.{v.minor}.{v.patch}"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "etc"))
 
     def _libname(self, library):
         suffix = "HDRI" if self.options.hdri else ""
@@ -402,6 +417,7 @@ class ImageMagicConan(ConanFile):
 
         include_dir_root = os.path.join("include", f"ImageMagick-{Version(self.version).major}")
         self.cpp_info.components["MagickCore"].includedirs = [include_dir_root]
+        self.cpp_info.components["MagickCore"].resdirs = ["res"]
         self.cpp_info.components["MagickCore"].libs.append(self._libname("MagickCore"))
         self.cpp_info.components["MagickCore"].requires = core_requires
         self.cpp_info.components["MagickCore"].set_property("pkg_config_name", "MagicCore")
@@ -421,6 +437,7 @@ class ImageMagicConan(ConanFile):
             self.cpp_info.components["MagickCore"].exelinkflags = openmp_flags
 
         self.cpp_info.components["MagickWand"].includedirs = [os.path.join(include_dir_root, "MagickWand")]
+        self.cpp_info.components["MagickWand"].resdirs = ["res"]
         self.cpp_info.components["MagickWand"].libs = [self._libname("MagickWand")]
         self.cpp_info.components["MagickWand"].requires = ["MagickCore"]
         self.cpp_info.components["MagickWand"].set_property("pkg_config_name", "MagickWand")
@@ -430,6 +447,7 @@ class ImageMagicConan(ConanFile):
 
         if self.options.magickpp:
             self.cpp_info.components["Magick++"].includedirs = [os.path.join(include_dir_root, "Magick++")]
+            self.cpp_info.components["Magick++"].resdirs = ["res"]
             self.cpp_info.components["Magick++"].libs = [self._libname("Magick++")]
             self.cpp_info.components["Magick++"].requires = ["MagickWand"]
             self.cpp_info.components["Magick++"].set_property("pkg_config_name", ["Magick++", self._libname("Magick++")])
@@ -440,6 +458,10 @@ class ImageMagicConan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.components["MagickCore"].defines.append("STATIC_MAGICK=1")
                 self.cpp_info.components["MagickCore"].defines.append("NOAUTOLINK_MAGICK=1")
+
+        resdir = os.path.join(self.package_folder, "res")
+        self.runenv_info.append_path("MAGICK_CONFIGURE_PATH", os.path.join(resdir, "etc"))
+        self.runenv_info.append_path("MAGICK_CONFIGURE_PATH", os.path.join(resdir, "share"))
 
         # TODO: Legacy, to be removed on Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "ImageMagick"
