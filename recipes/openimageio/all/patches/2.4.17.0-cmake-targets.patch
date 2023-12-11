@@ -325,6 +325,24 @@ index 100d4d773..ec7e01884 100644
  else()
      message (STATUS "FFmpeg not found: ffmpeg plugin will not be built")
  endif()
+diff --git src/heif.imageio/CMakeLists.txt src/heif.imageio/CMakeLists.txt
+index eed740900..72aaaff86 100644
+--- src/heif.imageio/CMakeLists.txt
++++ src/heif.imageio/CMakeLists.txt
+@@ -2,10 +2,10 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # https://github.com/AcademySoftwareFoundation/OpenImageIO
+ 
+-if (Libheif_FOUND)
++if (USE_LIBHEIF)
+     add_oiio_plugin (heifinput.cpp heifoutput.cpp
+-                     INCLUDE_DIRS ${LIBHEIF_INCLUDES}
+-                     LINK_LIBRARIES ${LIBHEIF_LIBRARIES}
++                     #INCLUDE_DIRS ${LIBHEIF_INCLUDES}
++                     LINK_LIBRARIES libheif::heif
+                      DEFINITIONS "-DUSE_HEIF=1")
+ else ()
+     message (WARNING "heif plugin will not be built")
 diff --git src/include/CMakeLists.txt src/include/CMakeLists.txt
 index 006cb65a7..2e2c2c2ea 100644
 --- src/include/CMakeLists.txt

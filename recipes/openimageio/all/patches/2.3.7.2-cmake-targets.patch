@@ -390,16 +390,15 @@ diff --git a/src/heif.imageio/CMakeLists.txt b/src/heif.imageio/CMakeLists.txt
 index fed80015..2593f585 100644
 --- a/src/heif.imageio/CMakeLists.txt
 +++ b/src/heif.imageio/CMakeLists.txt
-@@ -2,9 +2,10 @@
+@@ -2,9 +2,9 @@
  # SPDX-License-Identifier: BSD-3-Clause
  # https://github.com/OpenImageIO/oiio/blob/master/LICENSE.md
  
 -if (Libheif_FOUND)
-+if (libheif_FOUND)
++if (USE_LIBHEIF)
      add_oiio_plugin (heifinput.cpp heifoutput.cpp
 -                     LINK_LIBRARIES Libheif::Libheif
-+                     INCLUDE_DIRS ${LIBHEIF_INCLUDES}
-+                     LINK_LIBRARIES ${LIBHEIF_LIBRARIES}
++                     LINK_LIBRARIES libheif::heif
                       DEFINITIONS "-DUSE_HEIF=1")
  else ()
      message (WARNING "heif plugin will not be built")
