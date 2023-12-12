@@ -213,7 +213,7 @@ class SentryNativeConan(ConanFile):
 
         if self.options.backend == "breakpad" and self.options.with_breakpad == "sentry":
             self.cpp_info.components["breakpad"].set_property("cmake_target_name", "breakpad_client")
-            self.cpp_info.components["breakpad"].libs = ["breakpad_client"] if self.options.shared else []
+            self.cpp_info.components["breakpad"].libs = ["breakpad_client"]
             if is_apple_os(self):
                 self.cpp_info.components["breakpad"].frameworks.append("CoreFoundation")
             if self.settings.os in ["Linux", "FreeBSD"]:
