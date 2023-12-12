@@ -8,9 +8,10 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["ENABLE_DOUBLE_PRECISION"] = self.options["fftw"].precision == "double"
-        cmake.definitions["ENABLE_SINGLE_PRECISION"] = self.options["fftw"].precision == "single"
-        cmake.definitions["ENABLE_LONG_DOUBLE_PRECISION"] = self.options["fftw"].precision == "longdouble"
+        cmake.definitions["ENABLE_DOUBLE_PRECISION"] = self.options["fftw"].precision_double
+        cmake.definitions["ENABLE_SINGLE_PRECISION"] = self.options["fftw"].precision_single
+        cmake.definitions["ENABLE_LONG_DOUBLE_PRECISION"] = self.options["fftw"].precision_longdouble
+        cmake.definitions["ENABLE_QUAD_PRECISION"] = self.options["fftw"].precision_quad
         cmake.configure()
         cmake.build()
 
