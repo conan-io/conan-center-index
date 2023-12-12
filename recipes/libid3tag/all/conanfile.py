@@ -46,7 +46,10 @@ class LibId3TagConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        if is_msvc(self):
+            cmake_layout(self, src_folder="src")
+        else:
+            basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
