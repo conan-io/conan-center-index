@@ -31,8 +31,6 @@ class PackageConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-        if not is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.ref} can be built only by Visual Studio and msvc.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -60,5 +58,7 @@ class PackageConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.system_libs = ["ws2_32", "dbghelp"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["ws2_32", "dbghelp"]
+
         self.cpp_info.libs = ["OptickCore" + ("d" if self.settings.build_type == "Debug" else "")]
