@@ -447,10 +447,18 @@ index 560e8d486..402d4adad 100644
  else()
      message (WARNING "Jpeg-2000 plugin will not be built")
 diff --git src/libOpenImageIO/CMakeLists.txt src/libOpenImageIO/CMakeLists.txt
-index 9972a7150..27d9b003b 100644
+index 9972a7150..683a66238 100644
 --- src/libOpenImageIO/CMakeLists.txt
 +++ src/libOpenImageIO/CMakeLists.txt
-@@ -153,12 +153,17 @@ target_link_libraries (OpenImageIO
+@@ -145,7 +145,6 @@ target_link_libraries (OpenImageIO
+             ${OPENIMAGEIO_IMATH_TARGETS}
+         PRIVATE
+             ${OPENIMAGEIO_OPENEXR_TARGETS}
+-            ${OpenCV_LIBRARIES}
+             ${format_plugin_libs} # Add all the target link libraries from the plugins
+             $<TARGET_NAME_IF_EXISTS:OpenColorIO::OpenColorIO>
+             $<TARGET_NAME_IF_EXISTS:OpenColorIO::OpenColorIOHeaders>
+@@ -153,12 +152,19 @@ target_link_libraries (OpenImageIO
              $<TARGET_NAME_IF_EXISTS:TBB::tbb>
              ${BZIP2_LIBRARIES}
              ZLIB::ZLIB
@@ -460,12 +468,14 @@ index 9972a7150..27d9b003b 100644
              ${CMAKE_DL_LIBS}
          )
  
+-if (FREETYPE_FOUND)
+-    target_link_libraries (OpenImageIO PRIVATE ${FREETYPE_LIBRARIES})
 +if (USE_OPENCV)
-+    target_link_libraries (OpenImageIO PUBLIC opencv::opencv_core opencv::opencv_imgproc opencv::opencv_videoio)
++    target_link_libraries (OpenImageIO PRIVATE opencv::opencv_core
++                                               opencv::opencv_imgproc
++                                               opencv::opencv_videoio)
 +endif ()
 +
--if (USE_FREETYPE)
--    target_link_libraries (OpenImageIO PRIVATE ${FREETYPE_LIBRARIES})
 +if (USE_FREETYPE)
 +    target_link_libraries (OpenImageIO PRIVATE Freetype::Freetype)
  endif()
