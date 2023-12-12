@@ -133,7 +133,7 @@ class sqlite3mc(ConanFile):
         if self.options.require_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_icu:
-            self.requires("icu/[74.1]")
+            self.requires("icu/74.1")
 
     def generate(self):
         deps = CMakeDeps(self)
