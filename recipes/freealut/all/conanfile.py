@@ -41,6 +41,14 @@ class FreeAlutConan(ConanFile):
                 f"{self.ref} recipe is currently not prepared for Windows or Macos. Contributions are welcome."
             )
 
+        # freealut's cmake currently is using find_library instead of the package finders so it wouldn't get its public compile definitions.
+        # This causes al.h to be preprocessed as a dynamic library. Since Windows symbols are different for dynamic and static methods they aren't found.
+        if  self.settings.os == "Windows" and \
+            not self.dependencies["openal-soft"].options.shared:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} cmake is currently not prepared to use openal-soft as a static library on Windows."
+            )
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
