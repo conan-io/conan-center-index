@@ -1,4 +1,7 @@
 sources:
+  "cci.20231120":
+    url: "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/5e43c795daf43dd09398d8307212e85025215052.tar.gz"
+    sha256: "1ee9922fb059bc3b1dc5bbf71020e7a590b6ceb27fc3025d746e15be53fe31b7"
   "3.0.1":
     url: "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/refs/tags/v3.0.1.tar.gz"
     sha256: "2a84762b2d10bf540b9dc1802a198aca8ad1f3d795a4ae144212c595696a360c"
@@ -9,5 +12,22 @@ sources:
     url: "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/v2.3.0.zip"
     sha256: "1c222c372e90f1a0d5e765420974842cf2503683ca14c30f8a0df340ba541f02"
 patches:
+  "3.0.1":
+    - patch_file: "patches/3.0.1-add-missing-cstdio.patch"
+      patch_source: https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/commit/29d492b60c84ca784ea0943efc7d2e6e0f3bdaac
+      patch_type: backport
+      patch_description: Needed to build with GCC 13+
   "3.0.0":
     - patch_file: "patches/0001-fix-appleclang.patch"
+      patch_source: https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/commit/3f9f66740aa6cd8a329cc738c21aaff9020fed46
+      patch_type: backport
+      patch_description: Needed to build with apple-clang 13.1+
+    - patch_file: "patches/3.0.0-add-missing-cstdio.patch"
+      patch_source: https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/commit/29d492b60c84ca784ea0943efc7d2e6e0f3bdaac
+      patch_type: backport
+      patch_description: Needed to build with GCC 13+
+  "2.3.0":
+    - patch_file: "patches/2.3.0-add-missing-cstdio.patch"
+      patch_source: https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/commit/29d492b60c84ca784ea0943efc7d2e6e0f3bdaac
+      patch_type: backport
+      patch_description: Needed to build with GCC 13+
