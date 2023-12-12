@@ -79,6 +79,7 @@ class LibIdn(ConanFile):
         if not self.options.shared:
             tc.extra_defines.append("IDN2_STATIC")
         if is_msvc(self):
+            tc.extra_cflags.append("-FS")
             tc.extra_cxxflags.append("-FS")
         tc.configure_args += [
             f"--with-libiconv-prefix={unix_path(self, self.dependencies['libiconv'].package_folder)}",
