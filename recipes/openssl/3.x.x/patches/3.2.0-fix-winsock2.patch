@@ -1,0 +1,36 @@
+From ba58e9f1e22dd9ee2e37078640dcbe9f520a555d Mon Sep 17 00:00:00 2001
+From: Hugo Landau <hlandau@openssl.org>
+Date: Fri, 24 Nov 2023 10:03:30 +0000
+Subject: [PATCH] Only include winsock2.h for struct timeval if needed
+
+Fixes #22811
+
+Reviewed-by: Tomas Mraz <tomas@openssl.org>
+Reviewed-by: Matt Caswell <matt@openssl.org>
+Reviewed-by: Matthias St. Pierre <Matthias.St.Pierre@ncp-e.com>
+(Merged from https://github.com/openssl/openssl/pull/22813)
+---
+ include/openssl/e_ostime.h | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/include/openssl/e_ostime.h b/include/openssl/e_ostime.h
+index 8a7cc9880fa79..0e17487504992 100644
+--- a/include/openssl/e_ostime.h
++++ b/include/openssl/e_ostime.h
+@@ -22,7 +22,15 @@
+  */
+ 
+ # if defined(OPENSSL_SYS_WINDOWS)
+-#  include <winsock2.h>
++#  if !defined(_WINSOCKAPI_)
++    /*
++     * winsock2.h defines _WINSOCK2API_ and both winsock2.h and winsock.h define
++     * _WINSOCKAPI_. Both of these provide struct timeval. Don't include
++     * winsock2.h if either header has been included to avoid breakage with
++     * applications that prefer to use <winsock.h> over <winsock2.h>.
++     */
++#   include <winsock2.h>
++#  endif
+ # else
+ #  include <sys/time.h>
+ # endif

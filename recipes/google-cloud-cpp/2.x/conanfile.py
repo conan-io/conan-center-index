@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
@@ -21,6 +21,7 @@ from conan.errors import ConanInvalidConfiguration
 # than writing long lists of dependencies by hand.
 import components_2_5_0
 import components_2_12_0
+import components_2_15_1
 
 required_conan_version = ">=1.56.0"
 
@@ -46,6 +47,7 @@ class GoogleCloudCppConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     exports = ["components_2_5_0.py",
                "components_2_12_0.py",
+               "components_2_15_1.py",
                ]
 
     short_paths = True
@@ -53,14 +55,17 @@ class GoogleCloudCppConan(ConanFile):
     _GA_COMPONENTS = {
         '2.5.0': components_2_5_0.COMPONENTS,
         '2.12.0': components_2_12_0.COMPONENTS,
+        '2.15.1': components_2_15_1.COMPONENTS,
     }
     _PROTO_COMPONENTS = {
         '2.5.0': components_2_5_0.PROTO_COMPONENTS,
         '2.12.0': components_2_12_0.PROTO_COMPONENTS,
+        '2.15.1': components_2_15_1.PROTO_COMPONENTS,
     }
     _PROTO_COMPONENT_DEPENDENCIES = {
         "2.5.0": components_2_5_0.DEPENDENCIES,
         "2.12.0": components_2_12_0.DEPENDENCIES,
+        "2.15.1": components_2_15_1.DEPENDENCIES,
     }
     # Some components require custom dependency definitions.
     _REQUIRES_CUSTOM_DEPENDENCIES = {
@@ -180,7 +185,7 @@ class GoogleCloudCppConan(ConanFile):
             else:
                 replace_in_file(self, os.path.join(self.source_folder, "cmake/CompileProtos.cmake"),
                                 "${Protobuf_PROTOC_EXECUTABLE} ARGS",
-                                '${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" ${Protobuf_PROTOC_EXECUTABLE}')
+                                '${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" ${Protobuf_PROTOC_EXECUTABLE} ARGS')
 
     def build(self):
         self._patch_sources()
@@ -226,6 +231,11 @@ class GoogleCloudCppConan(ConanFile):
         if self.settings.os == "Android":
             result.remove('accesscontextmanager_protos')
             result.remove('talent_protos')
+        if Version(self.version) >= '2.15.1':
+            # This was converted to an interface library starting on 2.15.1
+            result.remove('logging_type_type_protos')
+            # These were removed (as they are not used) starting on 2.15.1
+            result.remove('devtools_source_v1_source_context_protos')
         return result
 
     def package(self):
@@ -257,7 +267,21 @@ class GoogleCloudCppConan(ConanFile):
 
         # A small number of gRPC-generated stubs are used directly in the common components
         # shared by all gRPC-based libraries.  These must be defined without reference to `grpc_utils`.
-        GRPC_UTILS_REQUIRED_PROTOS={"iam_protos", "longrunning_operations_protos", "rpc_error_details_protos", "rpc_status_protos"}
+        if Version(self.version) >= '2.15.1':
+            GRPC_UTILS_REQUIRED_PROTOS = {
+                "iam_credentials_v1_iamcredentials_protos",
+                "iam_v1_policy_protos",
+                "longrunning_operations_protos",
+                "rpc_error_details_protos",
+                "rpc_status_protos",
+            }
+        else:
+            GRPC_UTILS_REQUIRED_PROTOS = {
+                "iam_protos",
+                "longrunning_operations_protos",
+                "rpc_error_details_protos",
+                "rpc_status_protos",
+            }
         for component in GRPC_UTILS_REQUIRED_PROTOS:
             self._add_proto_component(component)
 
@@ -266,36 +290,51 @@ class GoogleCloudCppConan(ConanFile):
         self.cpp_info.components["grpc_utils"].names["pkg_config"] = "google_cloud_cpp_grpc_utils"
 
         for component in self._proto_components():
+            if Version(self.version) >= '2.15.1' and component == 'storage_protos':
+                # Starting with v2.15.1 the `storage_protos` are compiled only
+                # when needed. They are not used in Conan because they are only
+                # needed for an experimental library, supporting an allow-listed
+                # service.
+                continue
             if component not in GRPC_UTILS_REQUIRED_PROTOS:
                 self._add_proto_component(component)
 
         # Interface libraries for backwards compatibility
-        self.cpp_info.components["dialogflow_es_protos"].requires = ["cloud_dialogflow_v2_protos"]
-        self.cpp_info.components["logging_type_protos"].requires = ["logging_type_type_protos"]
-        self.cpp_info.components["speech_protos"].requires = ["cloud_speech_protos"]
-        self.cpp_info.components["texttospeech_protos"].requires = ["cloud_texttospeech_protos"]
-        self.cpp_info.components["trace_protos"].requires = [
-            "devtools_cloudtrace_v2_trace_protos",
-            "devtools_cloudtrace_v2_tracing_protos",
-        ]
+        if Version(self.version) < '2.15.1':
+            self.cpp_info.components["dialogflow_es_protos"].requires = ["cloud_dialogflow_v2_protos"]
+            self.cpp_info.components["logging_type_protos"].requires = ["logging_type_type_protos"]
+            self.cpp_info.components["speech_protos"].requires = ["cloud_speech_protos"]
+            self.cpp_info.components["texttospeech_protos"].requires = ["cloud_texttospeech_protos"]
+            self.cpp_info.components["trace_protos"].requires = [
+                "devtools_cloudtrace_v2_trace_protos",
+                "devtools_cloudtrace_v2_tracing_protos",
+            ]
+            self._add_grpc_component("bigquery", "cloud_bigquery_protos")
+        else:
+            self.cpp_info.components["cloud_bigquery_protos"].requires = ["bigquery_protos"]
+            self.cpp_info.components["cloud_dialogflow_v2_protos"].requires = ["dialogflow_es_protos"]
+            self.cpp_info.components["cloud_speech_protos"].requires = ["speech_protos"]
+            self.cpp_info.components["cloud_texttospeech_protos"].requires = ["texttospeech_protos"]
+            self.cpp_info.components["devtools_cloudtrace_v2_trace_protos"].requires = ["trace_protos"]
+            self.cpp_info.components["devtools_cloudtrace_v2_tracing_protos"].requires = ["trace_protos"]
+            self.cpp_info.components["logging_type_type_protos"].requires = ["logging_type_protos"]
 
         for component in self._components():
+            protos=f"{component}_protos"
             # bigquery proto library predates the adoption of more consistent naming
-            if component == 'bigquery':
+            if component == 'bigquery' and Version(self.version) < '2.15.1':
                 self._add_proto_component("cloud_bigquery_protos")
                 self._add_grpc_component(component, "cloud_bigquery_protos")
                 continue
-            if component == 'dialogflow_es':
+            if component == 'dialogflow_es' and Version(self.version) < '2.15.1':
                 self._add_proto_component("cloud_dialogflow_v2_protos")
                 self._add_grpc_component(component, "cloud_dialogflow_v2_protos")
                 continue
             # `storage` is the only component that does not depend on a matching `*_protos` library
-            protos=f"{component}_protos"
             if component in self._REQUIRES_CUSTOM_DEPENDENCIES:
                 continue
             self._add_grpc_component(component, protos)
 
-        self._add_grpc_component("bigquery", "cloud_bigquery_protos")
         self._add_grpc_component("bigtable", "bigtable_protos")
         self._add_grpc_component("iam", "iam_protos")
         self._add_grpc_component("pubsub", "pubsub_protos", ["abseil::absl_flat_hash_map"])

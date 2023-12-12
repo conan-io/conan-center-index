@@ -12,7 +12,7 @@ required_conan_version = ">=1.59.0"
 
 class fastgltf(ConanFile):
     name = "fastgltf"
-    description = "A blazing fast C++17 glTF 2.0 library powered by SIMD."
+    description = "A modern C++17 glTF 2.0 library focused on speed, correctness, and usability"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/spnda/fastgltf"
@@ -23,11 +23,15 @@ class fastgltf(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_small_vector": [True, False],
+        "disable_custom_memory_pool": [True, False],
+        "use_64bit_float": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_small_vector": False,
+        "disable_custom_memory_pool": False,
+        "use_64bit_float": False,
     }
 
     @property
@@ -50,6 +54,10 @@ class fastgltf(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        if Version(self.version) <= "0.6.0":
+            del self.options.disable_custom_memory_pool
+            del self.options.use_64bit_float
 
     def configure(self):
         if self.options.shared:
@@ -78,6 +86,10 @@ class fastgltf(ConanFile):
         tc.variables["FASTGLTF_DOWNLOAD_SIMDJSON"] = False
         if self.options.enable_small_vector:
             tc.variables["FASTGLTF_USE_SMALL_VECTOR"] = True
+        if self.options.get_safe("disable_custom_memory_pool"):
+            tc.variables["FASTGLTF_DISABLE_CUSTOM_MEMORY_POOL"] = True
+        if self.options.get_safe("use_64bit_float"):
+            tc.variables["FASTGLTF_USE_64BIT_FLOAT"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

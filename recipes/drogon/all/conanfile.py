@@ -127,7 +127,7 @@ class DrogonConan(ConanFile):
         if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.1.0")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.43.2")
+            self.requires("sqlite3/3.44.2")
         if self.options.get_safe("with_redis"):
             self.requires("hiredis/1.2.0")
         if self.options.get_safe("with_yaml_cpp", False):

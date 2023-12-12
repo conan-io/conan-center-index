@@ -1,0 +1,33 @@
+From fe9a125ba5809fc1f7aa5799d4285392e837f35e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Utkan=20K=C4=B1l=C4=B1=C3=A7?=
+ <65946928+utkankilic@users.noreply.github.com>
+Date: Wed, 25 Oct 2023 08:33:08 +0300
+Subject: [PATCH] Fix for non CWG 1270 revision compliant compilers (#173)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Utkan Kılıç utkankilic@gmail.com
+
+Signed-off-by: utkan.kilic <utkan.kilic@togg.com.tr>
+Co-authored-by: utkan.kilic <utkan.kilic@togg.com.tr>
+---
+ include/fastcdr/Cdr.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/fastcdr/Cdr.h b/include/fastcdr/Cdr.h
+index 254cd08..9d08820 100644
+--- a/include/fastcdr/Cdr.h
++++ b/include/fastcdr/Cdr.h
+@@ -3263,7 +3263,7 @@ private:
+     EncodingAlgorithmFlag current_encoding_ {EncodingAlgorithmFlag::PLAIN_CDR2};
+ 
+     //! @brief This attribute stores the option flags when the CDR type is DDS_CDR;
+-    std::array<uint8_t, 2> options_ {0};
++    std::array<uint8_t, 2> options_{{0}};
+ 
+     //! @brief The endianness that will be applied over the buffer.
+     uint8_t endianness_ {Endianness::LITTLE_ENDIANNESS};
+-- 
+2.34.1
+

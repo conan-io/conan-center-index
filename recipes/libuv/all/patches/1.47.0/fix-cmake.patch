@@ -1,0 +1,65 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7237785..3707621 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -461,7 +461,7 @@ if(LIBUV_BUILD_SHARED)
+   endif()
+   target_link_libraries(uv ${uv_libraries})
+   set_target_properties(uv PROPERTIES OUTPUT_NAME "uv")
+-endif()
++else()
+ 
+ add_library(uv_a STATIC ${uv_sources})
+ target_compile_definitions(uv_a PRIVATE ${uv_defines})
+@@ -481,7 +481,7 @@ set_target_properties(uv_a PROPERTIES OUTPUT_NAME "uv")
+ if(WIN32)
+   set_target_properties(uv_a PROPERTIES PREFIX "lib")
+ endif()
+-
++endif()
+ if(LIBUV_BUILD_TESTS)
+   # Small hack: use ${uv_test_sources} now to get the runner skeleton,
+   # before the actual tests are added.
+@@ -733,18 +733,18 @@ set(UV_VERSION_MAJOR "${CMAKE_MATCH_1}")
+ set(includedir ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR})
+ set(libdir ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+ set(prefix ${CMAKE_INSTALL_PREFIX})
+-configure_file(libuv-static.pc.in libuv-static.pc @ONLY)
++# configure_file(libuv-static.pc.in libuv-static.pc @ONLY)
+ 
+ install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_DOCDIR})
+ install(FILES LICENSE-extra DESTINATION ${CMAKE_INSTALL_DOCDIR})
+-install(FILES ${PROJECT_BINARY_DIR}/libuv-static.pc
+-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+-install(TARGETS uv_a EXPORT libuvConfig
+-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+-install(EXPORT libuvConfig
+-	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libuv
+-	NAMESPACE libuv::)
++#install(FILES ${PROJECT_BINARY_DIR}/libuv-static.pc
++#        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
++#install(TARGETS uv_a EXPORT libuvConfig
++#        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
++#install(EXPORT libuvConfig
++#	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libuv
++#	NAMESPACE libuv::)
+ 
+ if(LIBUV_BUILD_SHARED)
+   # The version in the filename is mirroring the behaviour of autotools.
+@@ -758,6 +758,15 @@ if(LIBUV_BUILD_SHARED)
+           RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+           LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+           ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
++else()
++  configure_file(libuv-static.pc.in libuv-static.pc @ONLY)
++  install(FILES ${PROJECT_BINARY_DIR}/libuv-static.pc
++          DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
++  install(TARGETS uv_a EXPORT libuvConfig
++          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
++  install(EXPORT libuvConfig
++      	  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libuv
++  	      NAMESPACE libuv::)
+ endif()
+ 
+ if(MSVC)

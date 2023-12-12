@@ -15,15 +15,6 @@ diff --git a/src/core.c b/src/core.c
 index e6d27e5f..fb7014b0 100644
 --- a/src/core.c
 +++ b/src/core.c
-@@ -186,7 +186,7 @@
- 
-     // Support retrieving native window handlers
-     #if defined(_WIN32)
--        #define GLFW_EXPOSE_NATIVE_WIN32
-+
-         #include <GLFW/glfw3native.h>       // WARNING: It requires customization to avoid windows.h inclusion!
- 
-         #if !defined(SUPPORT_BUSY_WAIT_LOOP)
 @@ -3346,10 +3346,12 @@ static bool InitGraphicsDevice(int width, int height)
      glfwSwapInterval(0);        // No V-Sync by default
  #endif

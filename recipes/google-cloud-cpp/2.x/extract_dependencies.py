@@ -41,17 +41,12 @@ _PROTO_DEPS_REPLACED_TARGETS = {
     "cloud_osconfig_v1_osconfig_protos": "osconfig_protos",
     "devtools_source_v1_source_protos": "devtools_source_v1_source_context_protos",
     "cloud_documentai_v1_documentai_protos": "documentai_protos",
+    "iam_v2_policy_protos": "iam_v2_protos",
 }
 
 # A few *.deps files use ad-hoc naming.
 _PROTO_DEPS_REPLACED_NAMES = {
     "common": "cloud_common_common",
-    "bigquery": "cloud_bigquery",
-    "dialogflow": "cloud_dialogflow_v2",
-    "logging_type": "logging_type_type",
-    "texttospeech": "cloud_texttospeech",
-    "speech": "cloud_speech",
-    "trace": "devtools_cloudtrace_v2_trace",
 }
 
 # A few *.deps files are not used.
@@ -90,7 +85,6 @@ _PROTO_BASE_COMPONENTS = {
     "type_expr_protos",
     "api_routing_protos",
     "api_usage_protos",
-    "logging_type_type_protos",
     "type_calendar_period_protos",
     "rpc_code_protos",
     "api_system_parameter_protos",
@@ -109,6 +103,9 @@ _PROTO_BASE_COMPONENTS = {
     "api_field_behavior_protos",
     "api_context_protos",
     "api_logging_protos",
+
+    "iam_credentials_v1_common_protos",
+    "iam_credentials_v1_iamcredentials_protos",
 }
 
 # A list of experimental components used when `google-cloud-cpp` does not
@@ -256,12 +253,24 @@ _HARD_CODED_DEPENDENCIES = {
         "api_system_parameter_protos",
         "api_usage_protos",
     ],
-    "devtools_cloudtrace_v2_tracing_protos": [
-        "devtools_cloudtrace_v2_trace_protos",
-        "devtools_cloudtrace_v2_trace_protos",
+    "iam_v1_options_protos": ["api_annotations_protos"],
+    "iam_v1_policy_protos": ["api_annotations_protos", "type_expr_protos"],
+    "iam_v1_iam_policy_protos": [
+        "api_annotations_protos",
         "api_client_protos",
         "api_field_behavior_protos",
-        "rpc_status_protos",
+        "api_resource_protos",
+        "iam_v1_options_protos",
+        "iam_v1_policy_protos",
+    ],
+    "iam_credentials_v1_common_protos": [
+        "api_field_behavior_protos",
+        "api_resource_protos",
+    ],
+    "iam_credentials_v1_iamcredentials_protos": [
+        "api_annotations_protos",
+        "api_client_protos",
+        "iam_credentials_v1_common_protos",
     ],
 }
 

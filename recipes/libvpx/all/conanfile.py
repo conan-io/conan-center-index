@@ -53,15 +53,16 @@ class LibVPXConan(ConanFile):
                 delattr(self.options, name)
 
     def configure(self):
-        if self.options.shared:
+        if self.settings.os == "Windows":
+            del self.options.shared
+            self.package_type = "static-library"
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Windows shared builds are not supported")
         if str(self.settings.compiler) not in ["Visual Studio", "msvc", "gcc", "clang", "apple-clang"]:
             raise ConanInvalidConfiguration(f"Unsupported compiler {self.settings.compiler}")
         if self.settings.os == "Macos" and self.settings.arch == "armv8" and Version(self.version) < "1.10.0":
@@ -255,7 +256,7 @@ class LibVPXConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "vpx")
         self.cpp_info.libs = [self._lib_name]
-        if not self.options.shared:
+        if not self.options.get_safe("shared"):
             libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)

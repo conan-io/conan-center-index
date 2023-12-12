@@ -44,7 +44,7 @@ class CoostConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libcurl:
-            self.requires("libcurl/8.2.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.with_libcurl or self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.settings.os == "Linux":

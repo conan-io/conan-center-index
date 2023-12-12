@@ -103,7 +103,7 @@ class SentryNativeConan(ConanFile):
 
     def requirements(self):
         if self.options.transport == "curl":
-            self.requires("libcurl/8.2.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.backend == "crashpad":
             if self.options.with_crashpad == "sentry":
                 self.requires(f"sentry-crashpad/{self.version}")

@@ -53,7 +53,7 @@ class KtxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("lodepng/cci.20200615")
+        self.requires("lodepng/cci.20230410")
         self.requires("zstd/1.5.5")
 
     def validate(self):

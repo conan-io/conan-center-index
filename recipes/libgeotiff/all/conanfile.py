@@ -15,7 +15,7 @@ class LibgeotiffConan(ConanFile):
     topics = ("geotiff", "tiff")
     homepage = "https://github.com/OSGeo/libgeotiff"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],

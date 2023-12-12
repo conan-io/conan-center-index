@@ -142,6 +142,11 @@ class LibX264Conan(ConanFile):
                 extra_cflags.append("-FS")
             env.vars(self).save_script("conanbuild_msvc")
 
+        if is_msvc(self) or self.settings.os in ["iOS", "watchOS", "tvOS"]:
+            # autotools does not know about the msvc and Apple embedded OS canonical name(s)
+            args["--build"] = None
+            args["--host"] = None
+
         # The finite-math-only optimization has no effect and can cause linking errors
         # when linked against glibc >= 2.31
         extra_cflags += ["-fno-finite-math-only"]

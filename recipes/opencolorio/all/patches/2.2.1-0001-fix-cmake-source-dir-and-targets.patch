@@ -12,15 +12,24 @@ index 17e188d..91af0ec 100755
      install(FILES
          ${CMAKE_CURRENT_LIST_DIR}/share/cmake/macros/VersionUtils.cmake
 diff --git a/share/cmake/modules/FindExtPackages.cmake b/share/cmake/modules/FindExtPackages.cmake
-index 5455a08..eb91a37 100644
+index 5455a08..420fbd4 100644
 --- a/share/cmake/modules/FindExtPackages.cmake
 +++ b/share/cmake/modules/FindExtPackages.cmake
+@@ -41,7 +41,7 @@ find_package(expat 2.4.1 REQUIRED)
+ 
+ # yaml-cpp
+ # https://github.com/jbeder/yaml-cpp
+-find_package(yaml-cpp 0.7.0 REQUIRED)
++find_package(yaml-cpp REQUIRED)
+ 
+ # pystring
+ # https://github.com/imageworks/pystring
 @@ -138,7 +138,7 @@ endif()
  
  # minizip-ng
  # https://github.com/zlib-ng/minizip-ng
 -find_package(minizip-ng 3.0.7 REQUIRED)
-+find_package(minizip 3.0.7 REQUIRED)
++find_package(minizip REQUIRED)
  
  if(OCIO_BUILD_APPS)
  
@@ -29,7 +38,7 @@ index 5455a08..eb91a37 100644
      # lcms2
      # https://github.com/mm2/Little-CMS
 -    find_package(lcms2 2.2 REQUIRED)
-+    find_package(lcms 2.2 REQUIRED)
++    find_package(lcms REQUIRED)
  endif()
  
  if(OCIO_BUILD_OPENFX)

@@ -34,6 +34,7 @@ class HarfbuzzConan(ConanFile):
         "with_uniscribe": [True, False],
         "with_directwrite": [True, False],
         "with_subset": [True, False],
+        "with_coretext": [True, False],
     }
     default_options = {
         "shared": False,
@@ -45,6 +46,7 @@ class HarfbuzzConan(ConanFile):
         "with_uniscribe": True,
         "with_directwrite": False,
         "with_subset": False,
+        "with_coretext": True,
     }
 
     short_paths = True
@@ -63,6 +65,8 @@ class HarfbuzzConan(ConanFile):
             del self.options.with_gdi
             del self.options.with_uniscribe
             del self.options.with_directwrite
+        if not is_apple_os(self):
+            del self.options.with_coretext
 
     def configure(self):
         if self.options.shared:
@@ -76,11 +80,11 @@ class HarfbuzzConan(ConanFile):
 
     def requirements(self):
         if self.options.with_freetype:
-            self.requires("freetype/2.13.0")
+            self.requires("freetype/2.13.2")
         if self.options.with_icu:
-            self.requires("icu/73.2")
+            self.requires("icu/74.1")
         if self.options.with_glib:
-            self.requires("glib/2.78.0")
+            self.requires("glib/2.78.1")
 
     def validate(self):
         if self.options.shared and self.options.with_glib and not self.dependencies["glib"].options.shared:
@@ -96,7 +100,7 @@ class HarfbuzzConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/1.2.3")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
         if self.options.with_glib:
@@ -142,6 +146,7 @@ class HarfbuzzConan(ConanFile):
             "icu": is_enabled(self.options.with_icu),
             "freetype": is_enabled(self.options.with_freetype),
             "gdi": is_enabled(self.options.get_safe("with_gdi")),
+            "coretext": is_enabled(self.options.get_safe("with_coretext")),
             "directwrite": is_enabled(self.options.get_safe("with_directwrite")),
             "gobject": is_enabled(can_run(self) and self.options.with_glib),
             "introspection": is_enabled(False),
@@ -192,8 +197,11 @@ class HarfbuzzConan(ConanFile):
                 self.cpp_info.system_libs.append("usp10")
             if self.options.with_directwrite:
                 self.cpp_info.system_libs.append("dwrite")
-        if is_apple_os(self):
-            self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText", "ApplicationServices"])
+        if is_apple_os(self) and self.options.get_safe("with_coretext", False):
+            if self.settings.os == "Macos":
+                self.cpp_info.frameworks.append("ApplicationServices")
+            else:
+                self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText"])
         if not self.options.shared:
             libcxx = stdcpp_library(self)
             if libcxx:

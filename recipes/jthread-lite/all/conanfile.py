@@ -12,8 +12,9 @@ class JthreadLiteConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/martinmoene/jthread-lite"
     description = "jthread lite - C++20's jthread for C++11 and later in a single-file header-only library "
-    topics = ("jthread-lite", "jthread", "cpp11")
+    topics = ("jthread", "cpp11")
     license = "BSL-1.0"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -28,8 +29,7 @@ class JthreadLiteConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

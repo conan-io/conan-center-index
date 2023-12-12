@@ -4,4 +4,4 @@ project(test_package LANGUAGES C)
 find_package(egl-headers REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} egl-headers::egl-headers)
+target_link_libraries(${PROJECT_NAME} PRIVATE egl-headers::egl-headers)

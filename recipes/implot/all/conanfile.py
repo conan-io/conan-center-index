@@ -39,7 +39,7 @@ class ImplotConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= "0.15":
-            self.requires("imgui/1.89.9", transitive_headers=True)
+            self.requires("imgui/1.90", transitive_headers=True)
         elif Version(self.version) >= "0.14":
             self.requires("imgui/1.89.4", transitive_headers=True)
         elif Version(self.version) >= "0.13":

@@ -50,7 +50,7 @@ class So5extraConan(ConanFile):
 
     def requirements(self):
         if self.version >= Version("1.6.0"):
-            self.requires("sobjectizer/5.8.0")
+            self.requires("sobjectizer/5.8.1")
         else:
             self.requires("sobjectizer/5.7.4")
 

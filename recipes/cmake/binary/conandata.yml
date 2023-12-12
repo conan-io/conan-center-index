@@ -1,4 +1,23 @@
 sources:
+  "3.27.9":
+    Linux:
+      armv8:
+        url: "https://cmake.org/files/v3.27/cmake-3.27.9-linux-aarch64.tar.gz"
+        sha256: "11bf3d30697df465cdf43664a9473a586f010c528376a966fd310a3a22082461"
+      x86_64:
+        url: "https://cmake.org/files/v3.27/cmake-3.27.9-linux-x86_64.tar.gz"
+        sha256: "72b01478eeb312bf1a0136208957784fe55a7b587f8d9f9142a7fc9b0b9e9a28"
+    Macos:
+      universal:
+        url: "https://cmake.org/files/v3.27/cmake-3.27.9-macos10.10-universal.tar.gz"
+        sha256: "2ced09b99b265d18c5e215984e5898b7e3a0cc7a1293c3f3b45e4bec87a46814"
+    Windows:
+      armv8:
+        url: "https://cmake.org/files/v3.27/cmake-3.27.9-windows-arm64.zip"
+        sha256: "bca795134956264ede142f79aa513476985f4f410f6501a727d602760e9212dd"
+      x86_64:
+        url: "https://cmake.org/files/v3.27/cmake-3.27.9-windows-x86_64.zip"
+        sha256: "c14e8b5d1c7be0baf0e7936ce8b5a39c5ee3450b14d7e3b32435083eddd9aff7"
   "3.27.7":
     Linux:
       armv8:
@@ -75,6 +94,25 @@ sources:
       x86_64:
         url: "https://cmake.org/files/v3.27/cmake-3.27.4-windows-x86_64.zip"
         sha256: "e5e060756444d0b2070328a8821c1ceb62bd6d267aae61bfff06f96c7ec943a6"
+  "3.26.6":
+    Linux:
+      armv8:
+        url: "https://cmake.org/files/v3.26/cmake-3.26.6-linux-aarch64.tar.gz"
+        sha256: "7b91a212b9e8ca38c1482ae40ff2d3e33e9d1c7b337b39f74bd4f34fd070bb1d"
+      x86_64:
+        url: "https://cmake.org/files/v3.26/cmake-3.26.6-linux-x86_64.tar.gz"
+        sha256: "2dd48ccd3e3d872ee4cc916f3f4e24812612421007e895f82bf9fc7e49831d62"
+    Macos:
+      universal:
+        url: "https://cmake.org/files/v3.26/cmake-3.26.6-macos10.10-universal.tar.gz"
+        sha256: "7a4500989351e1319bb86802ead09a13d2394636efeb5da6d78212e12f2cb961"
+    Windows:
+      armv8:
+        url: "https://cmake.org/files/v3.26/cmake-3.26.6-windows-arm64.zip"
+        sha256: "16cf13c42d3f4d63ad1d61d0333b6101c0e88f893ac39f435ef472b46f50e9b2"
+      x86_64:
+        url: "https://cmake.org/files/v3.26/cmake-3.26.6-windows-x86_64.zip"
+        sha256: "07b1c4cae3182ca1782a4d9775b5e5d164b475eb010e1dd98ce0c206c38fa73d"
   "3.26.5":
     Linux:
       armv8:

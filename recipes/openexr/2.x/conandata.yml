@@ -1,4 +1,7 @@
 sources:
+  "2.5.9":
+    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v2.5.9.tar.gz"
+    sha256: "05bb9c2da3ff3508eee51c30f59c7f2c59bf068f3b636d12d5991e8bbaf13e01"
   "2.5.7":
     url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v2.5.7.tar.gz"
     sha256: "36ecb2290cba6fc92b2ec9357f8dc0e364b4f9a90d727bf9a57c84760695272d"
@@ -17,3 +20,34 @@ sources:
   "2.4.0":
     url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v2.4.0.tar.gz"
     sha256: "4904c5ea7914a58f60a5e2fbc397be67e7a25c380d7d07c1c31a3eefff1c92f1"
+patches:
+  "2.5.7":
+    - patch_file: "patches/2.5.7-0001-cstdint-include.patch"
+      patch_description: "Add #include <cstdint> as required by newer gcc versions"
+      patch_type: "portability"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openexr/commit/310ae8600"
+  "2.5.5":
+    - patch_file: "patches/2.5.7-0001-cstdint-include.patch"
+      patch_description: "Add #include <cstdint> as required by newer gcc versions"
+      patch_type: "portability"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openexr/commit/310ae8600"
+  "2.5.4":
+    - patch_file: "patches/2.5.4-0001-cstdint-include.patch"
+      patch_description: "Add #include <cstdint> as required by newer gcc versions"
+      patch_type: "portability"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openexr/commit/310ae8600"
+  "2.5.3":
+    - patch_file: "patches/2.5.4-0001-cstdint-include.patch"
+      patch_description: "Add #include <cstdint> as required by newer gcc versions"
+      patch_type: "portability"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openexr/commit/310ae8600"
+  "2.5.2":
+    - patch_file: "patches/2.5.4-0001-cstdint-include.patch"
+      patch_description: "Add #include <cstdint> as required by newer gcc versions"
+      patch_type: "portability"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openexr/commit/310ae8600"
+  "2.4.0":
+    - patch_file: "patches/2.4.0-0001-cstdint-include.patch"
+      patch_description: "Add #include <cstdint> as required by newer gcc versions"
+      patch_type: "portability"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openexr/commit/310ae8600"

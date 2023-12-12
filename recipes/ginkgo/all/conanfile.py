@@ -74,16 +74,29 @@ class GinkgoConan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+        minimum_version = self._minimum_compilers_version.get(
+            str(self.settings.compiler)
+        )
+        if minimum_version and loose_lt_semver(
+            str(self.settings.compiler.version), minimum_version
+        ):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration(
-                "Ginkgo does not support mixing static CRT and shared library"
-            )
+        if is_msvc(self) and self.options.shared:
+            if self.settings.build_type == "Debug" and Version(self.version) >= "1.7.0":
+                raise ConanInvalidConfiguration(
+                    "Ginkgo >= 1.7.0 cannot be built in shared debug mode on Windows"
+                )
+            if is_msvc_static_runtime(self):
+                raise ConanInvalidConfiguration(
+                    "Ginkgo does not support mixing static CRT and shared library"
+                )
+
+    def build_requirements(self):
+        if Version(self.version) >= "1.7.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -98,8 +111,12 @@ class GinkgoConan(ConanFile):
         tc.variables["GINKGO_BUILD_OMP"] = self.options.openmp
         tc.variables["GINKGO_BUILD_CUDA"] = self.options.cuda
         tc.variables["GINKGO_BUILD_HIP"] = False
-        tc.variables["GINKGO_BUILD_DPCPP"] = False
+        if Version(self.version) >= "1.7.0":
+            tc.variables["GINKGO_BUILD_SYCL"] = False
+        else:
+            tc.variables["GINKGO_BUILD_DPCPP"] = False
         tc.variables["GINKGO_BUILD_HWLOC"] = False
+        tc.variables["GINKGO_BUILD_MPI"] = False
         tc.generate()
 
     def build(self):

@@ -116,9 +116,9 @@ class LibvipsConan(ConanFile):
 
     def requirements(self):
         self.requires("expat/2.5.0")
-        self.requires("glib/2.78.0", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.1", transitive_headers=True, transitive_libs=True)
         if self.options.with_cfitsio:
-            self.requires("cfitsio/4.2.0")
+            self.requires("cfitsio/4.3.0")
         if self.options.with_cgif:
             self.requires("cgif/0.3.2")
         if self.options.with_exif:
@@ -132,9 +132,9 @@ class LibvipsConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/3.0.1")
         elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.3")
+            self.requires("mozjpeg/4.1.5")
         if self.options.with_jpeg_xl:
             self.requires("libjxl/0.6.1")
         if self.options.with_lcms:
@@ -142,15 +142,15 @@ class LibvipsConan(ConanFile):
         if self.options.with_magick:
             self.requires("imagemagick/7.0.11-14")
         if self.options.with_matio:
-            self.requires("matio/1.5.23")
+            self.requires("matio/1.5.24")
         if self.options.with_openexr:
-            self.requires("openexr/3.1.9")
+            self.requires("openexr/3.2.1")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.0")
         if self.options.with_pangocairo:
             self.requires("pango/1.50.10")
         if self.options.with_pdfium:
-            self.requires("pdfium/cci.20210730")
+            self.requires("pdfium/95.0.4629")
         if self.options.with_png == "libpng":
             self.requires("libpng/1.6.40")
         elif self.options.with_png == "libspng":
@@ -199,7 +199,7 @@ class LibvipsConan(ConanFile):
             raise ConanInvalidConfiguration("librsvg recipe not available in conancenter yet")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/1.3.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
         if self.options.introspection:
@@ -280,6 +280,12 @@ class LibvipsConan(ConanFile):
         meson_build = os.path.join(self.source_folder, "meson.build")
         replace_in_file(self, meson_build, "subdir('test')", "")
         replace_in_file(self, meson_build, "subdir('fuzz')", "")
+
+        # workaround https://github.com/conan-io/conan/issues/14213
+        replace_in_file(self, meson_build,
+                        "cfg_var.set_quoted('VIPS_PREFIX', prefix_dir)",
+                        "cfg_var.set_quoted('VIPS_PREFIX', prefix_dir.replace('\\\\', '/'))"
+                        )
 
     def build(self):
         self._patch_sources()

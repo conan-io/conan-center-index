@@ -1,0 +1,25 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6b79a94..86eb065 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -742,13 +742,13 @@ if(JAS_ENABLE_LIBJPEG)
+ 		# (e.g., stdio.h and stdint.h).  So, we cannot reliably use
+ 		# check_include_file here.
+ 		jas_get_includes_from_targets(CMAKE_REQUIRED_INCLUDES JPEG::JPEG)
+-		check_c_source_compiles("
+-			#include <stdio.h>
+-			#include <stdint.h>
+-			#include <jpeglib.h>
+-			int main() {}
+-		" JAS_HAVE_JPEGLIB_H)
+-		if(JAS_HAVE_JPEGLIB_H)
++		# check_c_source_compiles("
++		# 	#include <stdio.h>
++		# 	#include <stdint.h>
++		# 	#include <jpeglib.h>
++		# 	int main() {}
++		# " JAS_HAVE_JPEGLIB_H)
++		if(1)
+ 			set(JAS_HAVE_LIBJPEG 1)
+ 			set(JAS_LIBJPEG_TARGET JPEG::JPEG)
+ 			list(APPEND JAS_PKGCONFIG_REQUIRES libjpeg)

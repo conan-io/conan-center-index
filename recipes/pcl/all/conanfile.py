@@ -361,7 +361,7 @@ class PclConan(ConanFile):
         return is_available and is_used
 
     def requirements(self):
-        self.requires("boost/1.82.0", transitive_headers=True)
+        self.requires("boost/1.83.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self._is_enabled("flann"):
             self.requires("flann/1.9.2", transitive_headers=True)
@@ -370,7 +370,7 @@ class PclConan(ConanFile):
         if self._is_enabled("qhull"):
             self.requires("qhull/8.0.1", transitive_headers=True)
         if self._is_enabled("qt"):
-            self.requires("qt/6.5.1")
+            self.requires("qt/6.6.1")
         if self._is_enabled("libusb"):
             self.requires("libusb/1.0.26", transitive_headers=True)
         if self._is_enabled("pcap"):
@@ -382,7 +382,7 @@ class PclConan(ConanFile):
             self.requires("glew/2.2.0", transitive_headers=True)
             self.requires("glu/system", transitive_headers=True)
         if self._is_enabled("opencv"):
-            self.requires("opencv/4.5.5", transitive_headers=True)
+            self.requires("opencv/4.8.1", transitive_headers=True)
         if self._is_enabled("zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
         # TODO:
@@ -440,6 +440,10 @@ class PclConan(ConanFile):
         tc.cache_variables["WITH_PCAP"] = self._is_enabled("pcap")
         tc.cache_variables["WITH_PNG"] = self._is_enabled("png")
         tc.cache_variables["WITH_QHULL"] = self._is_enabled("qhull")
+        if self._is_enabled("qhull"):
+            # Upstream FindQhull.cmake defines HAVE_QHULL which changes content of pcl_config.h
+            # Since we use CMakeDeps instead of this file, we have to manually inject HAVE_QHULL
+            tc.cache_variables["HAVE_QHULL"] = True
         tc.cache_variables["WITH_QT"] = self._is_enabled("qt")
         tc.cache_variables["WITH_VTK"] = self._is_enabled("vtk")
         tc.cache_variables["WITH_CUDA"] = self._is_enabled("cuda")
@@ -539,7 +543,6 @@ class PclConan(ConanFile):
                     component.requires.append(opt_dep)
             for dep in self._external_deps.get(name, []) + self._external_optional_deps.get(name, []):
                 component.requires += self._ext_dep_to_conan_target(dep)
-            self.output.info(f"Component {name} requires: {component.requires}")
 
         if self.options.apps:
             component = self.cpp_info.components["apps"]

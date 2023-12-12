@@ -46,7 +46,7 @@ class LibuclConan(ConanFile):
 
     def requirements(self):
         if self.options.enable_url_include:
-            self.requires("libcurl/8.2.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.enable_url_sign:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_lua == "lua":
