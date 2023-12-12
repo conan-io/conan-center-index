@@ -40,16 +40,6 @@ class GlazeConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        # there is a compilation error on cci's gcc 11.
-        # https://c3i.jfrog.io/c3i/misc/logs/pr/21629/1-linux-gcc/glaze/1.9.0//5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9-test.txt
-        if os.getenv('NOT_ON_C3I', '0') == '0':
-            if Version(self.version) >= "1.9.0" and \
-                self.info.settings.compiler == "gcc" and \
-                Version(self.info.settings.compiler.version) == "11":
-                raise ConanInvalidConfiguration(f"gcc 11 doesn't compile {self.ref} in C3I due to internal compiler error.\n" \
-                                                "However, it works fine with gcc11 in several environments.\n"
-                                                f"If you want to try {self.ref} with gcc11, set environment variable NOT_ON_C3I=1.")
-
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
