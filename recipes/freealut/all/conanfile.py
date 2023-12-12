@@ -46,7 +46,7 @@ class FreeAlutConan(ConanFile):
         if  self.settings.os == "Windows" and \
             not self.dependencies["openal-soft"].options.shared:
             raise ConanInvalidConfiguration(
-                f"{self.ref} cmake is currently not prepared to use openal-soft as a static library on Windows."
+                f"{self.ref} cmake is currently not prepared to use openal-soft as a static library on Windows. Add option openal-soft/*:shared=True."
             )
 
     def layout(self):
