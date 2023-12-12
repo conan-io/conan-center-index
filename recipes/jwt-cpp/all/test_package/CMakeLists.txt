@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(test_package CXX)
+project(test_package LANGUAGES CXX)
 
 find_package(jwt-cpp REQUIRED CONFIG)
 find_package(picojson REQUIRED CONFIG)
@@ -14,4 +14,8 @@ endif()
 
 if (jwt-cpp_VERSION VERSION_GREATER_EQUAL 0.6.0)
     target_compile_definitions(${PROJECT_NAME} PRIVATE HAS_DEFAULT_TRAITS)
+endif()
+
+if (jwt-cpp_VERSION VERSION_GREATER_EQUAL 0.7.0)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE GET_PAYLOAD_JSON)
 endif()
