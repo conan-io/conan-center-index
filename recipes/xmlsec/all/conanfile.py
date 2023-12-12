@@ -163,6 +163,8 @@ class XmlSecConan(ConanFile):
                 "iconv=no",
                 "crypto={}".format(",".join(crypto_engines)),
             ]
+            if Version(self.version) >= "1.2.35":
+                args.append("pedantic=no")
 
             with chdir(self, os.path.join(self.source_folder, "win32")):
                 self.run(f"cscript configure.js {' '.join(args)}")
