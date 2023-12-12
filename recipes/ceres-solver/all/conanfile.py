@@ -1,3 +1,6 @@
+import os
+import textwrap
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
@@ -6,8 +9,6 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
-import os
-import textwrap
 
 required_conan_version = ">=1.54.0"
 
@@ -160,6 +161,9 @@ class CeressolverConan(ConanFile):
             tc.variables["OPENMP"] = False
             tc.variables["TBB"] = self.options.use_TBB
             tc.variables["CXX11_THREADS"] = self.options.use_CXX11_threads
+        # IOS_DEPLOYMENT_TARGET variable was added to iOS.cmake file in 1.12.0 version
+        if self.settings.os == "iOS":
+            tc.variables["IOS_DEPLOYMENT_TARGET"] = self.settings.os.version
         tc.generate()
 
         CMakeDeps(self).generate()

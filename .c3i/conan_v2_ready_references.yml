@@ -204,6 +204,7 @@ required_for_references:
 - cpp-optparse
 - cpp-peglib
 - cpp-sort
+- cpp-validator
 - cpp_project_framework
 - cppbenchmark
 - cppcheck
@@ -251,6 +252,7 @@ required_for_references:
 - cwalk
 - cxxopts
 - cyclonedds
+- cyclonedds-cxx
 - cyrus-sasl
 - czmq
 - dacap-clip
@@ -518,6 +520,7 @@ required_for_references:
 - iowow
 - iqa
 - irrxml
+- isa-l
 - iso8601lib
 - itk
 - itlib
@@ -527,6 +530,7 @@ required_for_references:
 - jasper
 - jbig
 - jeaiii-itoa
+- jerryscript
 - jfalcou-eve
 - jinja2cpp
 - joltphysics
@@ -625,6 +629,7 @@ required_for_references:
 - libfdk_aac
 - libffi
 - libfreenect
+- libfreenect2
 - libftdi
 - libfuse
 - libgcrypt
@@ -763,6 +768,7 @@ required_for_references:
 - libzip
 - libzippp
 - lief
+- lightgbm
 - lightpcapng
 - linmath.h
 - linux-headers-generic
@@ -1000,6 +1006,7 @@ required_for_references:
 - perf
 - perfetto
 - perlinnoise
+- pexports
 - pffft
 - pfr
 - pgm-index
@@ -1247,6 +1254,7 @@ required_for_references:
 - tcp-wrappers
 - tcsbank-uconfig
 - tcsbank-uri-template
+- teemo
 - tensorflow-lite
 - tensorpipe
 - termcap
@@ -1365,6 +1373,7 @@ required_for_references:
 - vulkan-memory-allocator
 - vulkan-validationlayers
 - vvenc
+- waf
 - wasm-micro-runtime
 - wasmedge
 - wasmer
