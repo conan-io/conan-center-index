@@ -8,6 +8,10 @@ add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE jwt-cpp::jwt-cpp picojson::picojson)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
 
+if (MSVC)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE NOMINMAX)
+endif()
+
 if (jwt-cpp_VERSION VERSION_GREATER 0.4.0)
     target_compile_definitions(${PROJECT_NAME} PRIVATE JSON_TRAITS_NEEDED)
 endif()
