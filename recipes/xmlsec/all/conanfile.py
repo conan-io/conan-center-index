@@ -158,7 +158,7 @@ class XmlSecConan(ConanFile):
                 f"static={yes_no(not self.options.shared)}",
                 "include=\"{}\"".format(";".join(deps_includedirs)),
                 "lib=\"{}\"".format(";".join(deps_libdirs)),
-                "with-dl=no",
+                "with-dl={}".format(yes_no(Version(self.version) >= "1.2.35" and self.options.shared)),
                 f"xslt={yes_no(self.options.with_xslt)}",
                 "iconv=no",
                 "crypto={}".format(",".join(crypto_engines)),
@@ -201,8 +201,9 @@ class XmlSecConan(ConanFile):
             if not self.options.shared:
                 rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
             rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-            os.unlink(os.path.join(self.package_folder, "lib", "libxmlsec-openssl_a.lib" if self.options.shared else "libxmlsec-openssl.lib"))
-            os.unlink(os.path.join(self.package_folder, "lib", "libxmlsec_a.lib" if self.options.shared else "libxmlsec.lib"))
+            if Version(self.version) < "1.2.35":
+                os.unlink(os.path.join(self.package_folder, "lib", "libxmlsec-openssl_a.lib" if self.options.shared else "libxmlsec-openssl.lib"))
+                os.unlink(os.path.join(self.package_folder, "lib", "libxmlsec_a.lib" if self.options.shared else "libxmlsec.lib"))
         else:
             autotools = Autotools(self)
             autotools.install()
