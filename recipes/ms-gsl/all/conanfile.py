@@ -5,7 +5,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.50.0"
@@ -19,6 +18,7 @@ class MicrosoftGslConan(ConanFile):
     license = "MIT"
     topics = ("gsl", "guidelines", "core", "span")
     no_copy_source = True
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "on_contract_violation": ["terminate", "throw", "unenforced"]
@@ -45,6 +45,8 @@ class MicrosoftGslConan(ConanFile):
             "gcc": "5",
             "clang": "3.4",
             "apple-clang": "3.4",
+            "msvc": "190",
+            "Visual Studio": "14",
         }
 
     def config_options(self):
@@ -58,24 +60,17 @@ class MicrosoftGslConan(ConanFile):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
 
-        check_min_vs(self, "190")
-
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version:
-                if Version(self.settings.compiler.version) < minimum_version:
-                    raise ConanInvalidConfiguration(
-                        f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not fully support.")
-            else:
-                self.output.warn(f"{self.ref} requires C++{self._minimum_cpp_standard}. "
-                                 "Your compiler is unknown. Assuming it supports C++{self._minimum_cpp_standard}.")
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not fully support."
+            )
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         pass
@@ -90,16 +85,21 @@ class MicrosoftGslConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Microsoft.GSL")
         self.cpp_info.set_property("cmake_target_name", "Microsoft.GSL::GSL")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
 
-        self.cpp_info.filenames["cmake_find_package"] = "Microsoft.GSL"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Microsoft.GSL"
+        # TODO: back to global scope once support for legacy generators dropped
+        if Version(self.version) < "3.0.0":
+            self.cpp_info.components["_ms-gsl"].defines = [
+                self._contract_map[str(self.options.on_contract_violation)]
+            ]
+
+        # TODO: to remove once support for legacy generators dropped
         self.cpp_info.names["cmake_find_package"] = "Microsoft.GSL"
         self.cpp_info.names["cmake_find_package_multi"] = "Microsoft.GSL"
 
         self.cpp_info.components["_ms-gsl"].names["cmake_find_package"] = "GSL"
         self.cpp_info.components["_ms-gsl"].names["cmake_find_package_multi"] = "GSL"
-
-        if Version(self.version) < "3.0.0":
-            self.cpp_info.components["_ms-gsl"].defines = [
-                self._contract_map[str(self.options.on_contract_violation)]
-            ]
+        self.cpp_info.components["_ms-gsl"].set_property("cmake_target_name", "Microsoft.GSL::GSL")
+        self.cpp_info.components["_ms-gsl"].bindirs = []
+        self.cpp_info.components["_ms-gsl"].libdirs = []
