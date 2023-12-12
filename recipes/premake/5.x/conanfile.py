@@ -56,7 +56,8 @@ class PremakeConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
         if conan_version.major == 1 and self.settings.build_type == "Debug":
-            # https://c3i.jfrog.io/c3i/misc/summary.html?json=https://c3i.jfrog.io/c3i/misc/logs/pr/18844/15-linux-clang/premake/5.0.0-alpha15/summary.json
+            # This configuration fails without any error messages in C3I.
+            # https://c3i.jfrog.io/artifactory/misc/logs/pr/18844/15-linux-clang/premake/5.0.0-alpha15/
             raise ConanInvalidConfiguration("Debug build not supported with Conan 1.x")
 
     def source(self):
