@@ -110,7 +110,7 @@ class OpenldapConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["ldap", "lber"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread", "resolv"]
 
         # TODO: to remove in conan v2
         bin_path = os.path.join(self.package_folder, "bin")
