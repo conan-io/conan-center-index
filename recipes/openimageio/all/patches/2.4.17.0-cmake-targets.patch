@@ -313,7 +313,7 @@ index 100d4d773..ec7e01884 100644
  # https://github.com/AcademySoftwareFoundation/OpenImageIO
  
 -if (FFmpeg_FOUND)
-+if (ffmpeg_FOUND)
++if (USE_FFMPEG)
      add_oiio_plugin (ffmpeginput.cpp
 -                     INCLUDE_DIRS ${FFMPEG_INCLUDES}
 -                     LINK_LIBRARIES ${FFMPEG_LIBRARIES}
@@ -411,12 +411,13 @@ index 772b39ff2..898fb2be6 100644
              ${CMAKE_DL_LIBS}
          )
  
-+if (OpenCV_FOUND)
++if (USE_OPENCV)
 +    target_link_libraries (OpenImageIO PUBLIC opencv::opencv_core opencv::opencv_imgproc opencv::opencv_videoio)
 +endif ()
 +
- if (FREETYPE_FOUND)
+-if (FREETYPE_FOUND)
 -    target_link_libraries (OpenImageIO PRIVATE ${FREETYPE_LIBRARIES})
++if (USE_FREETYPE)
 +    target_link_libraries (OpenImageIO PRIVATE Freetype::Freetype)
  endif()
  
@@ -446,7 +447,7 @@ index ed42f1c94..82d2b9770 100644
  # https://github.com/AcademySoftwareFoundation/OpenImageIO
  
 -if (Ptex_FOUND)
-+if (ptex_FOUND)
++if (USE_PTEX)
      add_oiio_plugin (ptexinput.cpp
 -                     LINK_LIBRARIES Ptex::Ptex_dynamic ZLIB::ZLIB
 +                     LINK_LIBRARIES ${ptex_LIBRARIES} ZLIB::ZLIB

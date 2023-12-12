@@ -1,7 +1,7 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 54fe7d9c..97a1b8e4 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
+diff --git CMakeLists.txt CMakeLists.txt
+index 54fe7d9cc..5f21990a3 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
 @@ -111,7 +111,7 @@ message(STATUS "Setting Namespace to: ${PROJ_NAMESPACE_V}")
  
  
@@ -11,6 +11,15 @@ index 54fe7d9c..97a1b8e4 100644
        "${PROJECT_SOURCE_DIR}/src/cmake")
  
  include (GNUInstallDirs)
+@@ -133,7 +133,7 @@ include (pythonutils)
+ include (externalpackages)
+ 
+ # Include all our testing apparatus and utils, but not if it's a subproject
+-if (NOT ${PROJECT_NAME}_IS_SUBPROJECT)
++if (NOT ${PROJECT_NAME}_IS_SUBPROJECT AND BUILD_TESTING)
+     include (testing)
+ else ()
+     macro (oiio_add_tests)
 @@ -191,7 +191,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
      add_subdirectory (src/iinfo)
      add_subdirectory (src/maketx)
@@ -20,6 +29,15 @@ index 54fe7d9c..97a1b8e4 100644
      add_subdirectory (src/iv)
  endif ()
  
+@@ -282,7 +282,7 @@ install (EXPORT OIIO_EXPORTED_TARGETS
+         NAMESPACE ${PROJECT_NAME}::)
+ 
+ 
+-if (NOT ${PROJECT_NAME}_IS_SUBPROJECT)
++if (NOT ${PROJECT_NAME}_IS_SUBPROJECT AND BUILD_TESTING)
+     oiio_setup_test_data()
+     oiio_add_all_tests()
+ endif ()
 diff --git a/src/cmake/compiler.cmake b/src/cmake/compiler.cmake
 index 2a513f58..13568140 100644
 --- a/src/cmake/compiler.cmake
