@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.files import get, copy, rmdir, replace_in_file, save
 from conan.tools.build import check_min_cppstd
@@ -88,10 +89,17 @@ class BehaviorTreeCPPConan(ConanFile):
         if self.settings.compiler == "clang" and str(self.settings .compiler.libcxx) == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} needs recent libstdc++ with charconv. please switch to gcc, or to libc++")
 
+    def build_requirements(self):
+        if Version(self.version) >= "4.1.0":
+            self.tool_requires("cmake/[>=3.16.3 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+
         tc = CMakeToolchain(self)
         if Version(self.version) < "4.0":
             tc.variables["BUILD_EXAMPLES"] = False
