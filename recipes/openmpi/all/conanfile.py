@@ -171,6 +171,7 @@ class OpenMPIConan(ConanFile):
         self.runenv_info.define_path("MPI_HOME", self.package_folder)
         self.runenv_info.define_path("OPAL_PREFIX", self.package_folder)
         self.runenv_info.define_path("OPAL_EXEC_PREFIX", self.package_folder)
+        self.runenv_info.define_path("OPAL_LIBDIR", os.path.join(self.package_folder, "lib"))
         self.runenv_info.define_path("OPAL_DATADIR", os.path.join(self.package_folder, "res"))
         self.runenv_info.define_path("OPAL_DATAROOTDIR", os.path.join(self.package_folder, "res"))
 
@@ -180,5 +181,6 @@ class OpenMPIConan(ConanFile):
         self.env_info.MPI_HOME = self.package_folder
         self.env_info.OPAL_PREFIX = self.package_folder
         self.env_info.OPAL_EXEC_PREFIX = self.package_folder
+        self.env_info.OPAL_LIBDIR = os.path.join(self.package_folder, "lib")
         self.env_info.OPAL_DATADIR = os.path.join(self.package_folder, "res")
         self.env_info.OPAL_DATAROOTDIR = os.path.join(self.package_folder, "res")
