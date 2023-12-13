@@ -24,5 +24,5 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
-            command = f"mpiexec -mca plm_rsh_agent yes -np 2 {bin_path}"
+            command = f"mpiexec -mca plm_rsh_agent yes {bin_path}"
             self.run(command, env="conanrun")

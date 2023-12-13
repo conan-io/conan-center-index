@@ -1,5 +1,5 @@
 #include <mpi.h>
-#include <iostream>
+#include <stdio.h>
 
 int main(int argc, char* argv[])
 {
@@ -11,12 +11,12 @@ int main(int argc, char* argv[])
     int value = 17;
     int result = MPI_Send(&value, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
     if (result == MPI_SUCCESS)
-      std::cout << "Rank 0 OK!" << std::endl;
+      puts("Rank 0 OK!\n");
   } else if (rank == 1) {
     int value;
     int result = MPI_Recv(&value, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     if (result == MPI_SUCCESS && value == 17)
-      std::cout << "Rank 1 OK!" << std::endl;
+      puts("Rank 1 OK!\n");
   }
   MPI_Finalize();
   return 0;
