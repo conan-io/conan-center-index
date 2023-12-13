@@ -2,20 +2,19 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools import files
 from conan import ConanFile
 import os
-import textwrap
 
 required_conan_version = ">=1.59.0"
 
 class GTLabLoggingConan(ConanFile):
     name = "gtlab-logging"
     license = "BSD-3-Clause"
-    author = "Martin Siggel <martin.siggel@dlr.de>"
-    url = "https://github.com/dlr-gtlab/gt-logging"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/dlr-gtlab/gt-logging"
-    toppics = "logging", "qt"
+    topics = ("logging", "qt")
     description = "Simple logging interface with qt support"
 
     settings = "os", "arch", "compiler", "build_type"
+    
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -29,9 +28,8 @@ class GTLabLoggingConan(ConanFile):
         CMakeToolchain(self).generate()
         CMakeDeps(self).generate()
 
-
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -41,9 +39,9 @@ class GTLabLoggingConan(ConanFile):
         files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self.source_folder)
 
-    def build(self):    
+    def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder="src")
+        cmake.configure()
         cmake.build()
 
 
