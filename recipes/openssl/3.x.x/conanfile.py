@@ -85,13 +85,13 @@ class OpenSSLConan(ConanFile):
         "no_whirlpool": [True, False],
         "no_zlib": [True, False],
         "openssldir": [None, "ANY"],
-        "securitylevel": [None, "ANY"],
+        "securitylevel":  [None] + list(range(0, 6)),
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
     default_options["no_md2"] = True
     default_options["openssldir"] = None
-    default_options["securitylevel"] = "1"
+    default_options["securitylevel"] = 1
 
     @property
     def _is_clang_cl(self):
@@ -382,7 +382,7 @@ class OpenSSLConan(ConanFile):
         args.append("no-fips" if self.options.get_safe("no_fips", True) else "enable-fips")
         args.append("no-md2" if self.options.get_safe("no_md2", True) else "enable-md2")
 
-        if self.options.securitylevel:
+        if self.options.securitylevel != None:
             args.append("-DOPENSSL_TLS_SECURITY_LEVEL=%s" % str(self.options.securitylevel))
 
         if self.settings.os == "Neutrino":
