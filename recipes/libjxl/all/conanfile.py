@@ -1,7 +1,6 @@
 import os
 
-from conan import ConanFile, conan_version
-from conan.errors import ConanInvalidConfiguration
+from conan import ConanFile
 from conan.tools.build import cross_building, stdcpp_library, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import replace_in_file, copy, get, rmdir, save, rm
@@ -47,8 +46,6 @@ class LibjxlConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
-        if conan_version.major == 1 and self.settings.get_safe("compiler.libcxx") == "libc++":
-            raise ConanInvalidConfiguration("libc++ is not compatible with by libjxl due to limited std::atomic support")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -78,6 +75,10 @@ class LibjxlConan(ConanFile):
         deps.set_property("highway", "cmake_file_name", "HWY")
         deps.set_property("lcms", "cmake_file_name", "LCMS2")
         deps.generate()
+
+    @property
+    def _atomic_required(self):
+        return self.settings.get_safe("compiler.libcxx") in ["libstdc++", "libstdc++11"]
 
     def _patch_sources(self):
         # Disable tools and extras
@@ -110,6 +111,12 @@ class LibjxlConan(ConanFile):
         jxl_cmake = os.path.join(self.source_folder, "lib", "jxl.cmake")
         replace_in_file(self, jxl_cmake, '"$<BUILD_INTERFACE:$<TARGET_PROPERTY', "# ", strict=False)
         replace_in_file(self, jxl_cmake, "$<TARGET_PROPERTY", "# ", strict=False)
+        # Skip custom FindAtomic and force the use of atomic library directly for libstdc++
+        atomic_lib = "atomic" if self._atomic_required else ""
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "find_package(Atomics REQUIRED)",
+                        "set(ATOMICS_FOUND TRUE)\n"
+                        f"set(ATOMICS_LIBRARIES {atomic_lib})")
 
     def build(self):
         self._patch_sources()
@@ -138,6 +145,8 @@ class LibjxlConan(ConanFile):
         self.cpp_info.components["jxl"].requires = ["brotli::brotli", "highway::highway", "lcms::lcms"]
         if stdcpp_library(self):
             self.cpp_info.components["jxl"].system_libs.append(stdcpp_library(self))
+        if self._atomic_required:
+            self.cpp_info.components["jxl"].system_libs.append("atomic")
         if not self.options.shared:
             self.cpp_info.components["jxl"].defines.append("JXL_STATIC_DEFINE")
 
