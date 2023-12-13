@@ -35,10 +35,6 @@ class KealibConan(ConanFile):
         return 11
 
     @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "6",
-        }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -59,11 +55,6 @@ class KealibConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
         hdf5_opts = self.dependencies["hdf5"].options
         if not (hdf5_opts.enable_cxx and hdf5_opts.hl):
             raise ConanInvalidConfiguration("kealib requires hdf5 with cxx and hl enabled.")
@@ -77,6 +68,8 @@ class KealibConan(ConanFile):
         tc.cache_variables["HDF5_PREFER_PARALLEL"] = self.dependencies["hdf5"].options.parallel
         tc.cache_variables["HDF5_THREADSAFE"] = self.dependencies["hdf5"].options.get_safe("threadsafe", False)
         tc.cache_variables["LIBKEA_WITH_GDAL"] = False
+        # INFO: kealib uses C++11 but does not configure in cmake: https://github.com/ubarsc/kealib/pull/48
+        tc.variables["CMAKE_CXX_STANDARD"] = self.settings.get_safe("compiler.cppstd", self._min_cppstd)
         tc.generate()
 
         tc = CMakeDeps(self)
