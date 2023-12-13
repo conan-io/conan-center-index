@@ -47,10 +47,10 @@ class OpenMPIConan(ConanFile):
 
     def requirements(self):
         self.requires("libevent/2.1.12")
-        self.requires("zlib/1.2.13")
-        self.requires("hwloc/2.9.2")
-        self.requires("rdma-core/47.0")
-        self.requires("libnl/3.7.0")
+        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("hwloc/2.9.3")
+        self.requires("rdma-core/49.0")
+        self.requires("libnl/3.8.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
