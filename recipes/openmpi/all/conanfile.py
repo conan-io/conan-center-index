@@ -109,11 +109,7 @@ class OpenMPIConan(ConanFile):
         self.runenv.define_path("MPI_BIN", mpi_bin)
 
         # TODO: Legacy, to be removed on Conan 2.0
-        self.output.info(f"Creating MPI_HOME environment variable: {self.package_folder}")
         self.env_info.MPI_HOME = self.package_folder
-        self.output.info(f"Creating OPAL_PREFIX environment variable: {self.package_folder}")
         self.env_info.OPAL_PREFIX = self.package_folder
-        self.output.info(f"Creating MPI_BIN environment variable: {mpi_bin}")
         self.env_info.MPI_BIN = mpi_bin
-        self.output.info(f"Appending PATH environment variable: {mpi_bin}")
         self.env_info.PATH.append(mpi_bin)
