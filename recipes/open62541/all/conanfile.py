@@ -108,7 +108,7 @@ class Open62541Conan(ConanFile):
         # UA_COMPILE_AS_CXX=cpp_compatible
         "cpp_compatible": [True, False],
         # UA_ENABLE_STATUSCODE_DESCRIPTIONS=readable_statuscodes
-        "readable_statuscodes": [True, False]
+        "readable_statuscodes": [True, False],
     }
     default_options = {
         "fPIC": True,
@@ -136,7 +136,7 @@ class Open62541Conan(ConanFile):
         "typenames": True,
         "hardening": True,
         "cpp_compatible": False,
-        "readable_statuscodes": True
+        "readable_statuscodes": True,
     }
 
     exports = "submoduledata.yml"
@@ -215,10 +215,10 @@ class Open62541Conan(ConanFile):
                 raise ConanInvalidConfiguration(
                     "Lower Open62541 versions than 1.1.0 are not cpp compatible due to -fpermisive flags")
 
-        max_clang_version = "8" if Version(self.version) < "1.1.0" else "9"
-        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) > max_clang_version:
+        unsupported_clang_version = "8" if Version(self.version) < "1.1.0" else "9"
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) == unsupported_clang_version:
             raise ConanInvalidConfiguration(
-                "Open62541 supports Clang up to {} compiler version".format(max_clang_version))
+                f"{self.ref} does not support Clang version {self.settings.compiler.version}")
 
         if self.settings.compiler == "clang":
             if Version(self.settings.compiler.version) < "5":
@@ -353,7 +353,7 @@ class Open62541Conan(ConanFile):
             tc.variables["UA_MSVC_FORCE_STATIC_CRT"] = True
 
         tc.variables["UA_COMPILE_AS_CXX"] = self.options.cpp_compatible
-        
+
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
@@ -451,3 +451,4 @@ class Open62541Conan(ConanFile):
             self._module_file_rel_path]
         self.cpp_info.set_property("cmake_build_modules", [
                                    self._module_file_rel_path])
+        
