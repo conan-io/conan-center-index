@@ -29,6 +29,7 @@ required_conan_version = ">=1.53.0"
 CONFIGURE_OPTIONS = (
     "atomic",
     "chrono",
+    "cobalt",
     "container",
     "context",
     "contract",
