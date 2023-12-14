@@ -70,7 +70,7 @@ class MongoCDriverConan(ConanFile):
         elif self.options.with_ssl == "libressl":
             self.requires("libressl/3.5.3")
         if self.options.with_sasl == "cyrus":
-            self.requires("cyrus-sasl/2.1.27")
+            self.requires("cyrus-sasl/2.1.28")
         if self.options.with_snappy:
             self.requires("snappy/1.1.10")
         if self.options.with_zlib:
@@ -78,7 +78,7 @@ class MongoCDriverConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_icu:
-            self.requires("icu/73.2")
+            self.requires("icu/74.1")
 
     def validate(self):
         if self.options.with_ssl == "darwin" and not is_apple_os(self):
@@ -91,7 +91,7 @@ class MongoCDriverConan(ConanFile):
     def build_requirements(self):
         if self.options.with_ssl == "libressl" or self.options.with_zstd:
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.0.3")
+                self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
