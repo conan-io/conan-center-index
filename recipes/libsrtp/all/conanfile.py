@@ -63,16 +63,17 @@ class LibsrtpRecipe(ConanFile):
         deps.generate()
 
     def build(self):
-        replace_in_file(
-            self, os.path.join(self.source_folder, "CMakeLists.txt"),
-            "install(TARGETS srtp2 DESTINATION lib)",
-            (
-                "include(GNUInstallDirs)\n"
-                "install(TARGETS srtp2\n"
-                "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}\n"
-                "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}\n"
-                "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})"
-            ),
+        if Version(self.version) < "2.5.0":
+            replace_in_file(
+                self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                "install(TARGETS srtp2 DESTINATION lib)",
+                (
+                    "include(GNUInstallDirs)\n"
+                    "install(TARGETS srtp2\n"
+                    "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}\n"
+                    "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}\n"
+                    "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})"
+                ),
         )
         cmake = CMake(self)
         cmake.configure()
