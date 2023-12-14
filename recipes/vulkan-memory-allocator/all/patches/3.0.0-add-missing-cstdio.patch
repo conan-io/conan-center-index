@@ -1,0 +1,15 @@
+diff --git a/include/vk_mem_alloc.h b/include/vk_mem_alloc.h
+index 3b395a7..542191c 100644
+--- a/include/vk_mem_alloc.h
++++ b/include/vk_mem_alloc.h
+@@ -2575,6 +2575,10 @@ VMA_CALL_PRE void VMA_CALL_POST vmaFreeStatsString(
+     #include <intrin.h> // For functions like __popcnt, _BitScanForward etc.
+ #endif
+ 
++#if VMA_STATS_STRING_ENABLED
++    #include <cstdio> // For snprintf
++#endif
++
+ /*******************************************************************************
+ CONFIGURATION SECTION
+ 
