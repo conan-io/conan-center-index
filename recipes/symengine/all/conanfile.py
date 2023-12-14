@@ -38,7 +38,7 @@ class SymengineConan(ConanFile):
         if self.options.integer_class == "boostmp":
             self.requires("boost/1.83.0")
         else:
-            self.requires("gmp/6.2.1", transitive_headers=True, transitive_libs=True)
+            self.requires("gmp/6.3.0", transitive_headers=True, transitive_libs=True)
 
     def source(self):
         get(
