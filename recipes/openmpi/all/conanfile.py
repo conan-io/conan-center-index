@@ -27,6 +27,7 @@ class OpenMPIConan(ConanFile):
         "fortran": ["yes", "mpifh", "usempi", "usempi80", "no"],
         "cxx": [True, False],
         "cxx_exceptions": [True, False],
+        "external_hwloc": [True, False],
         "with_verbs": [True, False],
     }
     default_options = {
@@ -35,6 +36,7 @@ class OpenMPIConan(ConanFile):
         "fortran": "no",
         "cxx": False,
         "cxx_exceptions": False,
+        "external_hwloc": True,
         "with_verbs": False,  # TODO: can be enabled once rdma-core is available
     }
 
@@ -60,17 +62,24 @@ class OpenMPIConan(ConanFile):
             del self.info.options.cxx_exceptions
 
     def requirements(self):
-        self.requires("hwloc/2.9.3")
+        # OpenMPI public headers don't include anything besides stddef.h.
+        # transitive_headers=True is not needed for any dependencies.
         self.requires("libevent/2.1.12")
         self.requires("libtool/2.4.7")
         self.requires("zlib/[>=1.2.11 <2]")
         if not is_apple_os(self):
             self.requires("libnl/3.8.0")
-        if self.options.get_safe('with_verbs'):
+        if self.options.external_hwloc:
+            self.requires("hwloc/2.9.3")
+        else:
+            self.requires("libpciaccess/0.17")
+            self.requires("libudev/system")
+        if self.options.get_safe("with_verbs"):
             self.requires("rdma-core/49.0")
 
     def validate(self):
         if self.settings.os == "Windows":
+            # Requires Cygwin or WSL
             raise ConanInvalidConfiguration("OpenMPI doesn't support Windows")
 
     def source(self):
@@ -88,14 +97,13 @@ class OpenMPIConan(ConanFile):
             f"--enable-mpi-fortran={self.options.fortran}",
             f"--enable-mpi-cxx={yes_no(self.options.cxx)}",
             f"--enable-cxx-exceptions={yes_no(self.options.get_safe('cxx_exceptions'))}",
-            f"--with-hwloc={root('hwloc')}",
+            f"--with-hwloc={root('hwloc') if self.options.external_hwloc else 'internal'}",
             f"--with-libevent={root('libevent')}",
             f"--with-libltdl={root('libtool')}",
             f"--with-libnl={root('libnl') if not is_apple_os(self) else 'no'}",
             f"--with-verbs={root('rdma-core') if self.options.get_safe('with_verbs') else 'no'}",
             f"--with-zlib={root('zlib')}",
-            "--enable-ipv6",
-            "--with-sge",  # SGE or Grid Engine support
+            "--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic",
             "--disable-wrapper-rpath",
             "--disable-wrapper-runpath",
             "--exec-prefix=/",
@@ -170,6 +178,8 @@ class OpenMPIConan(ConanFile):
             self.cpp_info.system_libs = ["dl", "pthread", "rt", "util"]
 
         bin_folder = os.path.join(self.package_folder, "bin")
+        # Prepend to PATH to avoid a conflict with system MPI
+        self.runenv_info.prepend_path("PATH", bin_folder)
         self.runenv_info.define_path("MPI_BIN", bin_folder)
         self.runenv_info.define_path("MPI_HOME", self.package_folder)
         self.runenv_info.define_path("OPAL_PREFIX", self.package_folder)
