@@ -125,8 +125,6 @@ class GdkPixbufConan(ConanFile):
             "man": "false",
             "installed_tests": "false"
         })
-        if Version(self.version) < "2.42.0":
-            tc.project_options["gir"] = "false"
 
         if Version(self.version) >= "2.42.8":
             tc.project_options.update({
@@ -155,12 +153,11 @@ class GdkPixbufConan(ConanFile):
         replace_in_file(self, meson_build, "subdir('tests')", "#subdir('tests')")
         replace_in_file(self, meson_build, "subdir('thumbnailer')", "#subdir('thumbnailer')")
         replace_in_file(self, meson_build,
-                              "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')" if Version(self.version) >= "2.42.6"
-                              else "gmodule_dep.get_pkgconfig_variable('gmodule_supported')", "'true'")
+                              "gmodule_dep.get_variable(pkgconfig: 'gmodule_supported')",
+                              "'true'")
         # workaround https://gitlab.gnome.org/GNOME/gdk-pixbuf/-/issues/203
-        if Version(self.version) >= "2.42.6":
-            replace_in_file(self, os.path.join(self.source_folder, "build-aux", "post-install.py"),
-                                  "close_fds=True", "close_fds=(sys.platform != 'win32')")
+        replace_in_file(self, os.path.join(self.source_folder, "build-aux", "post-install.py"),
+                              "close_fds=True", "close_fds=(sys.platform != 'win32')")
         if Version(self.version) >= "2.42.9":
             replace_in_file(self, meson_build, "is_msvc_like ? 'png' : 'libpng'", "'libpng'")
             replace_in_file(self, meson_build, "is_msvc_like ? 'jpeg' : 'libjpeg'", "'libjpeg'")
