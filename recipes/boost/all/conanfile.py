@@ -442,6 +442,14 @@ class BoostConan(ConanFile):
             libraries.append("wave")
         if Version(self.version) >= "1.81.0":
             libraries.append("locale")
+        if Version(self.version) >= "1.84.0":
+            libraries.append("atomic")
+            libraries.append("filesystem")
+            libraries.append("log")
+            libraries.append("random")
+            libraries.append("stacktrace")
+            libraries.append("test")
+            libraries.append("thread")
         libraries.sort()
         return filter(lambda library: f"without_{library}" in self.options, libraries)
 
