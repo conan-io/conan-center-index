@@ -168,7 +168,6 @@ class LibfabricConan(ConanFile):
         copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         autotools = Autotools(self)
         autotools.install()
-
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.la", self.package_folder, recursive=True)
@@ -178,3 +177,4 @@ class LibfabricConan(ConanFile):
         self.cpp_info.libs = ["fabric"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m", "rt", "dl"]
+        self.cpp_info.system_libs.append("atomic")
