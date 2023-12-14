@@ -1,5 +1,21 @@
 # Changelog
 
+### 05-December-2023 - 16:23 CET
+
+- [fix] Use the correct profile to test a tool_require.
+- [feature] Add armv8 extra flag in profile arch when building in Macos M1.
+- [fix] Prioritization of non-shared builds.
+- [fix] Do not raise an exception in case slack fails.
+- [fix] Remove epochs.
+- [fix] Remove some dead code.
+
+### 26-Oct-2023 - 12:13 CEST
+
+- [feature] Allow X.Y semver for version bumps
+- [feature] Add assert message for parent commit checks on PR checkout
+- [feature] JobRelauncher restarts both Conan v1 and v2 pipelines.
+- [fix] Do not close the report issue of the recipe export check
+
 ### 11-Oct-2023 - 12:17 CEST
 
 - [feature] Update Conan 2.x to the version 2.0.12 in the CI
