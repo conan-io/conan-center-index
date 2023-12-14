@@ -61,7 +61,7 @@ class GrpcConan(ConanFile):
 
     @property
     def _cxxstd_required(self):
-        return 14 if Version(self.version) >= "1.47" else 11
+        return 14
 
     def export_sources(self):
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
@@ -85,13 +85,7 @@ class GrpcConan(ConanFile):
 
     def requirements(self):
         # abseil is public. See https://github.com/conan-io/conan-center-index/pull/17284#issuecomment-1526082638
-        if Version(self.version) < "1.47":
-            if is_msvc(self):
-                self.requires("abseil/20230802.1", transitive_headers=True, transitive_libs=True)
-            else:
-                self.requires("abseil/20230802.1", transitive_headers=True, transitive_libs=True)
-        else:
-            self.requires("abseil/20230802.1", transitive_headers=True, transitive_libs=True)
+        self.requires("abseil/20230802.1", transitive_headers=True, transitive_libs=True)
         self.requires("c-ares/1.22.1")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("re2/20231101")
@@ -106,7 +100,7 @@ class GrpcConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported by Visual Studio")
 
-        if Version(self.version) >= "1.47" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("GCC older than 6 is not supported")
 
         if self.settings.compiler.get_safe("cppstd"):
@@ -177,7 +171,7 @@ class GrpcConan(ConanFile):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
             tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
 
-        if is_msvc(self) and Version(self.version) >= "1.48":
+        if is_msvc(self):
             tc.cache_variables["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
 
         tc.generate()
