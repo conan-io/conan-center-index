@@ -99,8 +99,7 @@ class LibrdkafkaConan(ConanFile):
         tc.variables["WITH_SSL"] = self.options.ssl
         tc.variables["WITH_SASL"] = self.options.sasl
         tc.variables["ENABLE_LZ4_EXT"] = True
-        if Version(self.version) >= "1.9.0":
-            tc.variables["WITH_CURL"] = self.options.curl
+        tc.variables["WITH_CURL"] = self.options.curl
         tc.generate()
 
         cd = CMakeDeps(self)
@@ -113,8 +112,7 @@ class LibrdkafkaConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         # There are references to libcrypto.lib and libssl.lib in rdkafka_ssl.c for versions >= 1.8.0
-        if Version(self.version) >= "1.8.0" and is_msvc(self) and \
-                self.settings.build_type == "Debug" and self.options.get_safe("ssl", False):
+        if is_msvc(self) and self.settings.build_type == "Debug" and self.options.get_safe("ssl", False):
             rdkafka_ssl_path = os.path.join(self.source_folder, "src", "rdkafka_ssl.c")
             replace_in_file(self, rdkafka_ssl_path, "libcrypto.lib", "libcryptod.lib")
             replace_in_file(self, rdkafka_ssl_path, "libssl.lib", "libssld.lib")
