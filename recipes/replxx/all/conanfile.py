@@ -1,8 +1,7 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
 import os
 
@@ -33,6 +32,9 @@ class ReplxxConan(ConanFile):
     def _min_cppstd(self):
         return 11
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -53,17 +55,12 @@ class ReplxxConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["REPLXX_BuildExamples"] = False
-        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        tc.variables["REPLXX_BUILD_EXAMPLES"] = False
+        tc.variables["REPLXX_BUILD_PACKAGE"] = False
         tc.generate()
 
     def build(self):
-        if Version(self.version) < "0.0.3":
-            replace_in_file(self,
-                os.path.join(self.source_folder, "src", "io.cxx"),
-                "#include <array>\n",
-                "#include <array>\n#include <stdexcept>\n"
-            )
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -75,18 +72,18 @@ class ReplxxConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "replxx")
+        self.cpp_info.set_property("cmake_target_name", "replxx::replxx")
         libname = "replxx"
         if is_msvc(self) and not self.options.shared:
             libname += "-static"
         if self.settings.build_type == "Debug":
             libname += "-d"
+        elif self.settings.build_type == "RelWithDebInfo":
+            libname += "-rd"
         self.cpp_info.libs = [libname]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m"]
         if not self.options.shared:
             self.cpp_info.defines.append("REPLXX_STATIC")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "replxx"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "replxx"
