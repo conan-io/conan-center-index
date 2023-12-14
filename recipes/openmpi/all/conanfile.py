@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.files import copy, get, rm, rmdir, save
-from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
 
@@ -65,7 +65,6 @@ class OpenMPIConan(ConanFile):
         # OpenMPI public headers don't include anything besides stddef.h.
         # transitive_headers=True is not needed for any dependencies.
         self.requires("libevent/2.1.12")
-        self.requires("libtool/2.4.7")
         self.requires("zlib/[>=1.2.11 <2]")
         if not is_apple_os(self):
             self.requires("libnl/3.8.0")
@@ -99,7 +98,6 @@ class OpenMPIConan(ConanFile):
             f"--enable-cxx-exceptions={yes_no(self.options.get_safe('cxx_exceptions'))}",
             f"--with-hwloc={root('hwloc') if self.options.external_hwloc else 'internal'}",
             f"--with-libevent={root('libevent')}",
-            f"--with-libltdl",  # The path is provided via pkg-config, had issues otherwise
             f"--with-libnl={root('libnl') if not is_apple_os(self) else 'no'}",
             f"--with-verbs={root('rdma-core') if self.options.get_safe('with_verbs') else 'no'}",
             f"--with-zlib={root('zlib')}",
@@ -136,13 +134,14 @@ class OpenMPIConan(ConanFile):
         if is_apple_os(self):
             # macOS has no libnl
             tc.configure_args.append("--enable-mca-no-build=reachable-netlink")
+        # libtool's libltdl is not really needed, OpenMPI provides its own equivalent.
+        # Not adding it as it fails to be detected by ./configure in some cases.
+        # https://github.com/open-mpi/ompi/blob/v4.1.6/opal/mca/dl/dl.h#L20-L25
+        tc.configure_args.append("--with-libltdl=no")
         tc.generate()
 
         # TODO: might want to enable reproducible builds by setting
         #  $SOURCE_DATE_EPOCH, $USER and $HOSTNAME
-
-        deps = PkgConfigDeps(self)
-        deps.generate()
 
     def _patch_sources(self):
         # Not needed and fails with v5.0 due to additional Python dependencies
