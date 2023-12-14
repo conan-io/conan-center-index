@@ -158,11 +158,14 @@ class OpenMPIConan(ConanFile):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "MPI")
         self.cpp_info.set_property("cmake_target_name", "MPI::MPI")
-        self.cpp_info.set_property("cmake_target_aliases", ["MPI::MPI_C", "MPI::MPI_CXX"])
+        aliases = ["MPI::MPI_C"]
+        if self.options.cxx:
+            aliases.append("MPI::MPI_CXX")
+        self.cpp_info.set_property("cmake_target_aliases", aliases)
         # TODO: export a .cmake module to correctly set all variables set by CMake's FindMPI.cmake
 
         self.cpp_info.resdirs = ["res"]
-        self.cpp_info.libs = ["mpi", "open-rte", "open-pal"]
+        self.cpp_info.libs = ["mpi", "open-rte", "open-pal", "ompitrace"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "pthread", "rt", "util"]
 
