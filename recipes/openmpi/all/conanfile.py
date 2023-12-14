@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.files import copy, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
 
@@ -99,7 +99,7 @@ class OpenMPIConan(ConanFile):
             f"--enable-cxx-exceptions={yes_no(self.options.get_safe('cxx_exceptions'))}",
             f"--with-hwloc={root('hwloc') if self.options.external_hwloc else 'internal'}",
             f"--with-libevent={root('libevent')}",
-            f"--with-libltdl={root('libtool')}",
+            f"--with-libltdl",  # The path is provided via pkg-config, had issues otherwise
             f"--with-libnl={root('libnl') if not is_apple_os(self) else 'no'}",
             f"--with-verbs={root('rdma-core') if self.options.get_safe('with_verbs') else 'no'}",
             f"--with-zlib={root('zlib')}",
@@ -141,7 +141,7 @@ class OpenMPIConan(ConanFile):
         # TODO: might want to enable reproducible builds by setting
         #  $SOURCE_DATE_EPOCH, $USER and $HOSTNAME
 
-        deps = AutotoolsDeps(self)
+        deps = PkgConfigDeps(self)
         deps.generate()
 
     def build(self):
