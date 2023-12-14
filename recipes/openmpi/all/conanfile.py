@@ -64,7 +64,6 @@ class OpenMPIConan(ConanFile):
     def requirements(self):
         # OpenMPI public headers don't include anything besides stddef.h.
         # transitive_headers=True is not needed for any dependencies.
-        self.requires("libevent/2.1.12")
         self.requires("zlib/[>=1.2.11 <2]")
         if not is_apple_os(self):
             self.requires("libnl/3.8.0")
@@ -97,7 +96,6 @@ class OpenMPIConan(ConanFile):
             f"--enable-mpi-cxx={yes_no(self.options.cxx)}",
             f"--enable-cxx-exceptions={yes_no(self.options.get_safe('cxx_exceptions'))}",
             f"--with-hwloc={root('hwloc') if self.options.external_hwloc else 'internal'}",
-            f"--with-libevent={root('libevent')}",
             f"--with-libnl={root('libnl') if not is_apple_os(self) else 'no'}",
             f"--with-verbs={root('rdma-core') if self.options.get_safe('with_verbs') else 'no'}",
             f"--with-zlib={root('zlib')}",
@@ -138,6 +136,9 @@ class OpenMPIConan(ConanFile):
         # Not adding it as it fails to be detected by ./configure in some cases.
         # https://github.com/open-mpi/ompi/blob/v4.1.6/opal/mca/dl/dl.h#L20-L25
         tc.configure_args.append("--with-libltdl=no")
+        # OpenMPI expects a single libevent.* library file,
+        # ./configure with a external libevent fails.
+        tc.configure_args.append("--with-libevent=internal")
         tc.generate()
 
         # TODO: might want to enable reproducible builds by setting
