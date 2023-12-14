@@ -67,7 +67,7 @@ class LibfabricConan(ConanFile):
         "hook_debug": "yes",
         "hook_hmem": "yes",
         "mrail": "yes",
-        "opx": "yes",
+        "opx": "no",
         "perf": "yes",
         "psm": "no",
         "psm2": "no",
@@ -83,7 +83,7 @@ class LibfabricConan(ConanFile):
         "ucx": "no",
         "udp": "yes",
         "usnic": "no",
-        "verbs": "no",  # TODO: can be enabled once rdma-core is available
+        "verbs": "no",  # TODO: this and others can be enabled once rdma-core is available
     }
 
     def config_options(self):
@@ -110,7 +110,7 @@ class LibfabricConan(ConanFile):
 
         if is_enabled("usnic"):
             self.requires("libnl/3.8.0")
-        if is_enabled("efa") or is_enabled("verbs") or is_enabled("usnic"):
+        if is_enabled("efa") or is_enabled("opx") or is_enabled("usnic") or is_enabled("verbs"):
             self.requires("rdma-core/49.0")
         if is_enabled("opx"):
             self.requires("libnuma/2.0.14")
