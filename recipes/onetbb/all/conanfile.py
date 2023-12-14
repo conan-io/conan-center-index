@@ -52,7 +52,7 @@ class OneTBBConan(ConanFile):
 
     @property
     def _tbbbind_supported(self):
-        return Version(self.version) >= "2021.1.1" and not self.settings.os == "Macos"
+        return self.settings.os != "Macos"
 
     @property
     def _tbbbind_build(self):
