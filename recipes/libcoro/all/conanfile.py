@@ -65,7 +65,7 @@ class LibcoroConan(ConanFile):
     def requirements(self):
         if "with_ssl" not in self.options or self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
-        self.requires("c-ares/1.19.1", transitive_headers=True)
+        self.requires("c-ares/1.22.1", transitive_headers=True)
         self.requires("tl-expected/1.1.0", transitive_headers=True)
 
     def validate(self):
