@@ -41,8 +41,8 @@ class OpenTDFConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "17" if Version(self.version) < "1.1.5" else "15",
-            "msvc": "193" if Version(self.version) < "1.1.5" else "191",
+            "Visual Studio": "15",
+            "msvc": "191",
             "gcc": "7.5",
             "clang": "12",
             "apple-clang": "12",
@@ -155,8 +155,6 @@ class OpenTDFConan(ConanFile):
         ]
         if Version(self.version) >= "1.4.0":
             self.cpp_info.components["libopentdf"].requires.append("magic_enum::magic_enum")
-        if Version(self.version) < "1.1.0":
-            self.cpp_info.components["libopentdf"].requires.append("libarchive::libarchive")
         if Version(self.version) >= "1.4.0":
             self.cpp_info.components["libopentdf"].requires.append("magic_enum::magic_enum")
 
