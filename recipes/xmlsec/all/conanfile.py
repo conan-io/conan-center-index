@@ -64,7 +64,7 @@ class XmlSecConan(ConanFile):
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
         if self.options.with_xslt:
-            self.requires("libxslt/1.1.34")
+            self.requires("libxslt/1.1.37")
 
     def validate(self):
         if self.options.with_nss:
@@ -80,7 +80,7 @@ class XmlSecConan(ConanFile):
         if not is_msvc(self):
             self.tool_requires("libtool/2.4.7")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.0.3")
+                self.tool_requires("pkgconf/2.1.0")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -158,11 +158,13 @@ class XmlSecConan(ConanFile):
                 f"static={yes_no(not self.options.shared)}",
                 "include=\"{}\"".format(";".join(deps_includedirs)),
                 "lib=\"{}\"".format(";".join(deps_libdirs)),
-                "with-dl=no",
+                "with-dl={}".format(yes_no(Version(self.version) >= "1.2.35" and self.options.shared)),
                 f"xslt={yes_no(self.options.with_xslt)}",
                 "iconv=no",
                 "crypto={}".format(",".join(crypto_engines)),
             ]
+            if Version(self.version) >= "1.2.35":
+                args.append("pedantic=no")
 
             with chdir(self, os.path.join(self.source_folder, "win32")):
                 self.run(f"cscript configure.js {' '.join(args)}")
@@ -199,8 +201,9 @@ class XmlSecConan(ConanFile):
             if not self.options.shared:
                 rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
             rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-            os.unlink(os.path.join(self.package_folder, "lib", "libxmlsec-openssl_a.lib" if self.options.shared else "libxmlsec-openssl.lib"))
-            os.unlink(os.path.join(self.package_folder, "lib", "libxmlsec_a.lib" if self.options.shared else "libxmlsec.lib"))
+            if Version(self.version) < "1.2.35":
+                os.unlink(os.path.join(self.package_folder, "lib", "libxmlsec-openssl_a.lib" if self.options.shared else "libxmlsec-openssl.lib"))
+                os.unlink(os.path.join(self.package_folder, "lib", "libxmlsec_a.lib" if self.options.shared else "libxmlsec.lib"))
         else:
             autotools = Autotools(self)
             autotools.install()
