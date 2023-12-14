@@ -58,8 +58,6 @@ class HazelcastCppClient(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["WITH_OPENSSL"] = self.options.with_openssl
-        if Version(self.version) <= "4.0.0":
-            tc.variables["BUILD_STATIC_LIB"] = not self.options.shared
         tc.generate()
 
         deps = CMakeDeps(self)
