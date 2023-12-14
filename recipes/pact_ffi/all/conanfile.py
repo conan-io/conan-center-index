@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import get, copy, rm
 
 import os
@@ -62,6 +63,7 @@ class PactFFIConan(ConanFile):
         copy(self, "pact*.h", os.path.join(self.build_folder, "include"), os.path.join(self.package_folder, "include"))
         # we don't want the C++ binaries as part of this package
         rm(self, "libpact-cpp-consumer.*", self.package_folder, recursive=True)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["pact_ffi"]
