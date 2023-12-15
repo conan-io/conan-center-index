@@ -413,7 +413,7 @@ class GdalConan(ConanFile):
         tc.cache_variables["GDAL_USE_OPENJPEG"] = self.options.with_openjpeg
         tc.cache_variables["GDAL_USE_OPENSSL"] = self.options.with_openssl
         tc.cache_variables["GDAL_USE_ORACLE"] = False
-        tc.cache_variables["GDAL_USE_PARQUET"] = False
+        tc.cache_variables["GDAL_USE_PARQUET"] = self.options.with_arrow
         tc.cache_variables["GDAL_USE_PCRE"] = self.options.with_pcre
         tc.cache_variables["GDAL_USE_PCRE2"] = self.options.with_pcre2
         tc.cache_variables["GDAL_USE_PDFIUM"] = False  # self.options.with_pdfium
@@ -533,7 +533,6 @@ class GdalConan(ConanFile):
             "openjpeg": "OpenJPEG",
             "openssl": "OpenSSL",
             # "oracle": "Oracle",
-            # "parquet": "Parquet",
             "pcre": "PCRE",
             "pcre2": "PCRE2",
             "pdfium": "PDFIUM",
@@ -563,7 +562,8 @@ class GdalConan(ConanFile):
             deps.set_property(conan_name, "cmake_file_name", cmake_name)
 
         renamed_targets = {
-            "arrow":                      "Arrow::arrow_shared",
+            "arrow::libarrow":            "Arrow::arrow_shared",
+            "arrow::libparquet":          "Parquet::parquet_shared",
             "brunsli::brunslidec-c":      "BRUNSLI::DECODE",
             "brunsli::brunslienc-c":      "BRUNSLI::ENCODE",
             "c-blosc":                    "Blosc::Blosc",
