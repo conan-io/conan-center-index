@@ -134,6 +134,7 @@ class PocoConan(ConanFile):
 
     def package_id(self):
         del self.info.options.enable_active_record
+        del self.info.options.log_debug
 
     def validate(self):
         if self.options.enable_apacheconnector:
@@ -202,9 +203,6 @@ class PocoConan(ConanFile):
         tc.preprocessor_definitions["POCO_NO_AUTOMATIC_LIBS"] = "1"
         # Picked up from conan v1 CMake wrapper, don't know the rationale
         tc.preprocessor_definitions["XML_DTD"] = "1"
-        # Enable debug and trace logs for Release builds
-        if self.options.log_debug:
-            tc.preprocessor_definitions["POCO_LOG_DEBUG"] = "1"
         tc.generate()
 
         deps = CMakeDeps(self)
