@@ -116,16 +116,10 @@ class SDLMixerConan(ConanFile):
         tc.variables["MID_FLUIDSYNTH"] = self.options.fluidsynth
         if self.settings.os in ["Linux", "FreeBSD"]:
             tc.variables["MID_TINYMIDI"] = self.options.tinymidi
-            tc.variables["MID_NATIVE"] = False
+            tc.variables["MIDI_NATIVE"] = False
         else:
             tc.variables["MID_TINYMIDI"] = False
-            tc.variables["MID_NATIVE"] = self.options.nativemidi
-        tc.variables["FLAC_DYNAMIC"] = self.dependencies["flac"].options.shared if self.options.flac else False
-        tc.variables["MP3_MPG123_DYNAMIC"] = self.dependencies["mpg123"].options.shared if self.options.mpg123 else False
-        tc.variables["OGG_DYNAMIC"] = self.dependencies["ogg"].options.shared if self.options.ogg else False
-        tc.variables["OPUS_DYNAMIC"] = self.dependencies["opus"].options.shared if self.options.opus else False
-        tc.variables["MOD_MIKMOD_DYNAMIC"] = self.dependencies["libmikmod"].options.shared if self.options.mikmod else False
-        tc.variables["MOD_MODPLUG_DYNAMIC"] = self.dependencies["libmodplug"].options.shared if self.options.modplug else False
+            tc.variables["MIDI_NATIVE"] = self.options.nativemidi
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.15)
 project(sdl2_mixer)
 
 include(CheckTypeSize)
@@ -6,11 +6,8 @@ include(CheckTypeSize)
 macro(add_music_option type)
   option(${type} "${type} music support" OFF)
   message(STATUS "${type} ${${type}}")
-  if(${${type}})
+  if(${type})
     add_definitions("-DMUSIC_${type}")
-    if(${${type}_DYNAMIC})
-      add_definitions("-D${type}_DYNAMIC")
-    endif()
   endif()
 endmacro()
 
@@ -27,72 +24,70 @@ add_music_option(MID_NATIVE)
 add_music_option(MID_FLUIDSYNTH)
 add_music_option(MID_TINYMIDI)
 
-if(${MID_NATIVE})
+if(MIDI_NATIVE)
+  set(NATIVE_MIDI_SOURCES
+    src/native_midi/native_midi_common.c
+    src/native_midi/native_midi_common.h
+    src/native_midi/native_midi_haiku.cpp
+    src/native_midi/native_midi_mac.c
+    src/native_midi/native_midi_macosx.c
+    src/native_midi/native_midi_win32.c
+  )
 
-set(NATIVE_MIDI_SOURCES
-src/native_midi/native_midi_common.c
-src/native_midi/native_midi_common.h
-src/native_midi/native_midi_haiku.cpp
-src/native_midi/native_midi_mac.c
-src/native_midi/native_midi_macosx.c
-src/native_midi/native_midi_win32.c
-)
-
-set(NATIVE_MIDI_HEADERS
-src/native_midi/native_midi.h
-)
-
+  set(NATIVE_MIDI_HEADERS
+    src/native_midi/native_midi.h
+  )
 endif()
 
 set(SOURCES
-src/effect_position.c
-src/effect_stereoreverse.c
-src/effects_internal.c
-src/load_aiff.c
-src/load_voc.c
-src/mixer.c
-src/music.c
-src/music_cmd.c
-src/music_flac.c
-src/music_fluidsynth.c
-src/music_mad.c
-src/music_mikmod.c
-src/music_modplug.c
-src/music_mpg123.c
-src/music_nativemidi.c
-src/music_ogg.c
-src/music_opus.c
-src/music_timidity.c
-src/music_wav.c
-${NATIVE_MIDI_SOURCES}
+  src/effect_position.c
+  src/effect_stereoreverse.c
+  src/effects_internal.c
+  src/load_aiff.c
+  src/load_voc.c
+  src/mixer.c
+  src/music.c
+  src/music_cmd.c
+  src/music_flac.c
+  src/music_fluidsynth.c
+  src/music_mad.c
+  src/music_mikmod.c
+  src/music_modplug.c
+  src/music_mpg123.c
+  src/music_nativemidi.c
+  src/music_ogg.c
+  src/music_opus.c
+  src/music_timidity.c
+  src/music_wav.c
+  ${NATIVE_MIDI_SOURCES}
 )
 
 set(HEADERS
-src/effects_internal.h
-src/load_aiff.h
-src/load_voc.h
-src/mixer.h
-src/music.h
-src/music_cmd.h
-src/music_flac.h
-src/music_fluidsynth.h
-src/music_mad.h
-src/music_mikmod.h
-src/music_modplug.h
-src/music_mpg123.h
-src/music_nativemidi.h
-src/music_ogg.h
-src/music_opus.h
-src/music_timidity.h
-src/music_wav.h
-${NATIVE_MIDI_HEADERS}
+  src/effects_internal.h
+  src/load_aiff.h
+  src/load_voc.h
+  src/mixer.h
+  src/music.h
+  src/music_cmd.h
+  src/music_flac.h
+  src/music_fluidsynth.h
+  src/music_mad.h
+  src/music_mikmod.h
+  src/music_modplug.h
+  src/music_mpg123.h
+  src/music_nativemidi.h
+  src/music_ogg.h
+  src/music_opus.h
+  src/music_timidity.h
+  src/music_wav.h
+  ${NATIVE_MIDI_HEADERS}
 )
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 target_include_directories(${PROJECT_NAME} PRIVATE "src")
 
-if(${MID_NATIVE})
+if(MIDI_NATIVE)
   target_include_directories(${PROJECT_NAME} PRIVATE "src/native_midi")
 endif()
 
@@ -145,7 +140,7 @@ endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER src/SDL_mixer.h)
 
-if(${BUILD_SHARED_LIBS})
+if(BUILD_SHARED_LIBS)
   target_compile_definitions(${PROJECT_NAME} PRIVATE DLL_EXPORT)
 endif()
 
@@ -156,7 +151,9 @@ if(SSIZE_T STREQUAL "")
   target_compile_definitions(${PROJECT_NAME} PRIVATE ssize_t=signed) # non-standard type
 endif()
 
-include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME}
-  PUBLIC_HEADER DESTINATION "include/SDL2"
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  PUBLIC_HEADER DESTINATION include/SDL2
 )
