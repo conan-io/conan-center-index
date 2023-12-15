@@ -30,7 +30,10 @@ class GccConan(ConanFile):
     def configure(self):
         if self.settings.compiler in ["clang", "apple-clang"]:
             # Can't remove this from cxxflags with autotools - so get rid of it
-            del self.settings.compiler.libcxx
+            self.settings.rm_safe("compiler.libcxx")
+        # Do not override the C++11 cppstd set by the project
+        # Otherwise fails to compile with C++17 (for GCC v12)
+        self.settings.rm_safe("compiler.cppstd")
 
     def build_requirements(self):
         if self.settings.os == "Linux":
