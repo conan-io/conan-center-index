@@ -1,5 +1,14 @@
 # Changelog
 
+### 05-December-2023 - 16:23 CET
+
+- [fix] Use the correct profile to test a tool_require.
+- [feature] Add armv8 extra flag in profile arch when building in Macos M1.
+- [fix] Prioritization of non-shared builds.
+- [fix] Do not raise an exception in case slack fails.
+- [fix] Remove epochs.
+- [fix] Remove some dead code.
+
 ### 26-Oct-2023 - 12:13 CEST
 
 - [feature] Allow X.Y semver for version bumps
