@@ -1,4 +1,4 @@
 sources:
   "2.20.0":
-    url: "https://github.com/intel/libva/releases/download/2.20.0/libva-2.20.0.tar.bz2"
-    sha256: "f72bdb4f48dfe71ad01f1cbefe069672a2c949a6abd51cf3c4d4784210badc49"
+    url: "https://github.com/intel/libva/archive/refs/tags/2.20.0.tar.gz"
+    sha256: "117f8d658a5fc9ea406ca80a3eb4ae1d70b15a54807c9ed77199c812bed73b60"
