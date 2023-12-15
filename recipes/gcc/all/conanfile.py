@@ -158,28 +158,22 @@ class GccConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
 
         cc = os.path.join(bindir, f"gcc-{self.version}")
-        self.output.info("Creating CC env var with: " + cc)
-        self.buildenv_info.define("CC", cc)
+        self.buildenv_info.define_path("CC", cc)
 
         cxx = os.path.join(bindir, f"g++-{self.version}")
-        self.output.info("Creating CXX env var with: " + cxx)
-        self.buildenv_info.define("CXX", cxx)
+        self.buildenv_info.define_path("CXX", cxx)
 
         fc = os.path.join(bindir, f"gfortran-{self.version}")
-        self.output.info("Creating FC env var with: " + fc)
-        self.buildenv_info.define("FC", fc)
+        self.buildenv_info.define_path("FC", fc)
 
         ar = os.path.join(bindir, f"gcc-ar-{self.version}")
-        self.output.info("Creating AR env var with: " + ar)
-        self.buildenv_info.define("AR", ar)
+        self.buildenv_info.define_path("AR", ar)
 
         nm = os.path.join(bindir, f"gcc-nm-{self.version}")
-        self.output.info("Creating NM env var with: " + nm)
-        self.buildenv_info.define("NM", nm)
+        self.buildenv_info.define_path("NM", nm)
 
         ranlib = os.path.join(bindir, f"gcc-ranlib-{self.version}")
-        self.output.info("Creating RANLIB env var with: " + ranlib)
-        self.buildenv_info.define("RANLIB", ranlib)
+        self.buildenv_info.define_path("RANLIB", ranlib)
 
         # TODO: Remove after conan 2.0 is released
         self.env_info.CC = cc
