@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
@@ -163,6 +164,12 @@ class GdalConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if is_apple_os(self):
+            # FIXME: compilation fails on macOS due to difference in ICONV_CONST value in iconv() signature
+            # https://github.com/conan-io/conan-center-index/pull/19298#issuecomment-1840433415
+            # https://github.com/roboticslibrary/libiconv/blob/v1.17/include/iconv.h.in#L82
+            # https://lists.gnu.org/archive/html/bug-gnu-libiconv/2008-07/msg00005.html
+            self.options.with_libiconv = False
 
     def configure(self):
         if self.options.shared:
