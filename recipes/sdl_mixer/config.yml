@@ -1,3 +1,5 @@
 versions:
+  "2.6.3":
+    folder: "cmake"
   "2.0.4":
     folder: "all"
