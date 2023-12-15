@@ -782,13 +782,8 @@ class CPythonConan(ConanFile):
 
         if is_msvc(self):
             pythonhome = os.path.join(self.package_folder, "bin")
-        elif is_apple_os(self):
-            pythonhome = self.package_folder
         else:
-            version = Version(self.version)
-            pythonhome = os.path.join(
-                self.package_folder, "lib", f"python{version.major}.{version.minor}"
-            )
+            pythonhome = self.package_folder
         self.conf_info.define("user.cpython:pythonhome", pythonhome)
         self.user_info.pythonhome = pythonhome
 
