@@ -2,11 +2,13 @@ import os
 import shutil
 from conan import ConanFile
 from conan.tools.build import cross_building
+from conan.tools.cmake import cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
+    test_type = "explicit"
 
     @property
     def file_io(self):
@@ -30,6 +32,9 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
 
     def generate(self):
         buildenv = VirtualBuildEnv(self)
