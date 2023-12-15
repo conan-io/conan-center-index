@@ -93,7 +93,7 @@ class GdalConan(ConanFile):
         "fPIC": True,
         "tools": False,
         "with_armadillo": False,
-        "with_arrow": False,
+        "with_arrow": True,
         "with_basisu": False,
         "with_blosc": False,
         "with_brunsli": False,
@@ -351,7 +351,7 @@ class GdalConan(ConanFile):
         tc.variables["GDAL_USE_ARCHIVE"] = self.options.with_libarchive
         tc.variables["GDAL_USE_ARMADILLO"] = self.options.with_armadillo
         tc.variables["GDAL_USE_ARROW"] = self.options.with_arrow
-        tc.variables["GDAL_USE_ARROWDATASET"] = self.options.with_arrow
+        tc.variables["GDAL_USE_ARROWDATASET"] = self.options.with_arrow and self.dependencies["arrow"].options.dataset_modules
         tc.variables["GDAL_USE_BASISU"] = self.options.with_basisu
         tc.variables["GDAL_USE_BLOSC"] = self.options.with_blosc
         tc.variables["GDAL_USE_BRUNSLI"] = self.options.with_brunsli
@@ -413,7 +413,7 @@ class GdalConan(ConanFile):
         tc.variables["GDAL_USE_OPENJPEG"] = self.options.with_openjpeg
         tc.variables["GDAL_USE_OPENSSL"] = self.options.with_openssl
         tc.variables["GDAL_USE_ORACLE"] = False
-        tc.variables["GDAL_USE_PARQUET"] = self.options.with_arrow
+        tc.variables["GDAL_USE_PARQUET"] = self.options.with_arrow and self.dependencies["arrow"].options.parquet
         tc.variables["GDAL_USE_PCRE"] = self.options.with_pcre
         tc.variables["GDAL_USE_PCRE2"] = self.options.with_pcre2
         tc.variables["GDAL_USE_PDFIUM"] = False  # self.options.with_pdfium
@@ -439,6 +439,9 @@ class GdalConan(ConanFile):
         tc.variables["GDAL_USE_ZLIB"] = True
         tc.variables["GDAL_USE_ZLIB_INTERNAL"] = False
         tc.variables["GDAL_USE_ZSTD"] = self.options.with_zstd
+
+        tc.variables["Parquet_FOUND"] = self.options.with_arrow and self.dependencies["arrow"].options.parquet
+        tc.variables["ArrowDataset_FOUND"] = self.options.with_arrow and self.dependencies["arrow"].options.dataset_modules
 
         # https://github.com/OSGeo/gdal/blob/v3.8.1/cmake/modules/packages/FindSQLite3.cmake
         if self.options.with_sqlite3:
@@ -563,6 +566,7 @@ class GdalConan(ConanFile):
 
         renamed_targets = {
             "arrow::libarrow":            "Arrow::arrow_shared",
+            "arrow::dataset":             "ArrowDataset::arrow_dataset_shared",
             "arrow::libparquet":          "Parquet::parquet_shared",
             "brunsli::brunslidec-c":      "BRUNSLI::DECODE",
             "brunsli::brunslienc-c":      "BRUNSLI::ENCODE",
@@ -619,9 +623,14 @@ class GdalConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "port", "CMakeLists.txt"),
                         "PRIVATE Deflate::Deflate",
                         "PUBLIC Deflate::Deflate")
-        # JXL_THREADS is provided under the JXL package in Conan.
+        # Workaround for JXL_THREADS being provided by the JXL package on CCI.
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
                         "JXL_THREADS", "JXL", strict=False)
+        # Workaround for Parquet and ArrowDataset being provided by Arrow on CCI.
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
+                        "gdal_check_package(Parquet", "# gdal_check_package(Parquet")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
+                        "gdal_check_package(ArrowDataset", "# gdal_check_package(ArrowDataset")
 
     def build(self):
         self._patch_sources()
@@ -664,6 +673,10 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["armadillo::armadillo"])
         if self.options.with_arrow:
             self.cpp_info.requires.extend(["arrow::libarrow"])
+            if self.dependencies["arrow"].options.parquet:
+                self.cpp_info.requires.extend(["arrow::libparquet"])
+            if self.dependencies["arrow"].options.dataset_modules:
+                self.cpp_info.requires.extend(["arrow::dataset"])
         if self.options.with_basisu:
             self.cpp_info.requires.extend(["libbasisu::libbasisu"])
         if self.options.with_brunsli:
