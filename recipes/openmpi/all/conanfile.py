@@ -159,7 +159,6 @@ class OpenMPIConan(ConanFile):
         autotools = Autotools(self)
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "etc"))
         rmdir(self, os.path.join(self.package_folder, "res", "man"))
         rm(self, "*.la", self.package_folder, recursive=True)
@@ -168,17 +167,53 @@ class OpenMPIConan(ConanFile):
         # Based on https://cmake.org/cmake/help/latest/module/FindMPI.html#variables-for-using-mpi
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "MPI")
-        self.cpp_info.set_property("cmake_target_name", "MPI::MPI")
-        aliases = ["MPI::MPI_C"]
-        if self.options.cxx:
-            aliases.append("MPI::MPI_CXX")
-        self.cpp_info.set_property("cmake_target_aliases", aliases)
+        self.cpp_info.set_property("pkg_config_name", "_ompi-do-not-use")
         # TODO: export a .cmake module to correctly set all variables set by CMake's FindMPI.cmake
 
-        self.cpp_info.resdirs = ["res"]
-        self.cpp_info.libs = ["mpi", "open-rte", "open-pal", "ompitrace"]
+        requires = ["zlib::zlib"]
+        if not is_apple_os(self):
+            requires.append("libnl::libnl")
+        if self.options.external_hwloc:
+            requires.append("hwloc::hwloc")
+        else:
+            requires.append("libpciaccess::libpciaccess")
+            requires.append("libudev::system")
+        if self.options.get_safe("with_verbs"):
+            requires.append("rdma-core::libibverbs")
+
+        # The components are modelled based on OpenMPI's pkg-config files
+
+        # Run-time environment library
+        self.cpp_info.components["orte"].libs = ["open-rte", "open-pal"]
+        self.cpp_info.components["orte"].includedirs.append(os.path.join("include", "openmpi"))
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["dl", "pthread", "rt", "util"]
+            self.cpp_info.components["orte"].system_libs = ["dl", "pthread", "rt", "util"]
+        self.cpp_info.components["orte"].cflags = ["-pthread"]
+        if self.options.cxx_exceptions:
+            self.cpp_info.components["orte"].cflags.append("-fexceptions")
+        self.cpp_info.components["orte"].requires = requires
+
+        self.cpp_info.components["ompi"].libs = ["mpi"]
+        self.cpp_info.components["ompi"].requires = ["orte"]
+
+        self.cpp_info.components["ompi-c"].set_property("cmake_target_name", "MPI::MPI_C")
+        self.cpp_info.components["ompi-c"].requires = ["ompi"]
+
+        self.cpp_info.components["ompitrace"].libs = ["ompitrace"]
+        self.cpp_info.components["ompitrace"].requires = ["ompi"]
+
+        if self.options.cxx:
+            self.cpp_info.components["ompi-cxx"].set_property("cmake_target_name", "MPI::MPI_CXX")
+            self.cpp_info.components["ompi-cxx"].libs = ["mpi_cxx"]
+            self.cpp_info.components["ompi-cxx"].requires = ["mpi"]
+
+        if self.options.fortran != "no":
+            self.cpp_info.components["ompi-fort"].set_property("cmake_target_name", "MPI::MPI_Fortran")
+            self.cpp_info.components["ompi-fort"].libs = ["mpi_mpifh"]
+            self.cpp_info.components["ompi-fort"].requires = ["mpi"]
+            # Aliases
+            self.cpp_info.components["ompi-f77"].requires = ["ompi-fort"]
+            self.cpp_info.components["ompi-f90"].requires = ["ompi-fort"]
 
         bin_folder = os.path.join(self.package_folder, "bin")
         # Prepend to PATH to avoid a conflict with system MPI
@@ -200,3 +235,11 @@ class OpenMPIConan(ConanFile):
         self.env_info.OPAL_LIBDIR = os.path.join(self.package_folder, "lib")
         self.env_info.OPAL_DATADIR = os.path.join(self.package_folder, "res")
         self.env_info.OPAL_DATAROOTDIR = os.path.join(self.package_folder, "res")
+
+        self.cpp_info.names["cmake_find_package"] = "MPI"
+        self.cpp_info.names["cmake_find_package_multi"] = "MPI"
+        self.cpp_info.components["ompi-c"].names["cmake_find_package"] = "MPI_C"
+        if self.options.cxx:
+            self.cpp_info.components["ompi-cxx"].names["cmake_find_package"] = "MPI_CXX"
+        if self.options.fortran != "no":
+            self.cpp_info.components["ompi-fort"].names["cmake_find_package"] = "MPI_Fortran"
