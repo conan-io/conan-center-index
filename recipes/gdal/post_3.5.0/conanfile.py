@@ -222,7 +222,7 @@ class GdalConan(ConanFile):
         if self.options.with_hdf4:
             self.requires("hdf4/4.2.15")
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.2")
+            self.requires("hdf5/1.14.3")
         if self.options.with_heif:
             self.requires("libheif/1.16.2")
         if self.options.with_jpeg == "libjpeg":
@@ -294,7 +294,7 @@ class GdalConan(ConanFile):
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.4")
         if self.options.with_xml2:
-            self.requires("libxml2/2.11.5")
+            self.requires("libxml2/2.12.2")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         # Use of external shapelib is not recommended and is currently broken.
