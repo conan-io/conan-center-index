@@ -135,6 +135,6 @@ class PackageConan(ConanFile):
             self.cpp_info.components["libva-wayland"].requires = ["libva_", "wayland::wayland-client"]
 
         if self.options.get_safe("with_win32"):
-            self.cpp_info.components["libva-win32"].libs = ["va-win32"]
+            self.cpp_info.components["libva-win32"].libs = ["va_win32"]
             self.cpp_info.components["libva-win32"].set_property("pkg_config_name", "libva-win32")
             self.cpp_info.components["libva-win32"].requires = ["libva_"]
