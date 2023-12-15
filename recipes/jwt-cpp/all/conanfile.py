@@ -8,10 +8,10 @@ required_conan_version = ">=1.52.0"
 
 class JwtCppConan(ConanFile):
     name = "jwt-cpp"
+    description = "A C++ JSON Web Token library for encoding/decoding"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Thalhammer/jwt-cpp"
-    description = "A C++ JSON Web Token library for encoding/decoding"
     topics = ("json", "jwt", "jws", "jwe", "jwk", "jwks", "jose", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
@@ -46,11 +46,11 @@ class JwtCppConan(ConanFile):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder,"licenses"), src=self.source_folder)
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
         self.cpp_info.set_property("cmake_file_name", "jwt-cpp")
         self.cpp_info.set_property("cmake_target_name", "jwt-cpp::jwt-cpp")
 
         if self._supports_generic_json:
             self.cpp_info.defines.append("JWT_DISABLE_PICOJSON")
-
-        self.cpp_info.bindirs = []
-        self.cpp_info.libdirs = []
