@@ -74,24 +74,22 @@ class OnnxRuntimeConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    @property
-    def _onnx_version(self):
-        version = Version(self.version)
-        return {
-            "1.14": "1.13.1",
-            "1.15": "1.14.1",
-            "1.16": "1.14.1",
-        }[f"{version.major}.{version.minor}"]
-
     def requirements(self):
+        # ONNX versions are based on the minor version used at
+        # https://github.com/microsoft/onnxruntime/tree/main/cmake/external
+        if Version(self.version) >= "1.16":
+            self.requires("onnx/1.15.0")
+        elif Version(self.version) >= "1.15":
+            self.requires("onnx/1.14.1")
+        else:
+            self.requires("onnx/1.13.1")
         self.requires("abseil/20230802.1")
         self.requires("protobuf/3.21.12")
         self.requires("date/3.0.1")
-        self.requires("re2/20230901")
-        self.requires(f"onnx/{self._onnx_version}")
-        self.requires("flatbuffers/1.12.0")
-        self.requires("boost/1.83.0", headers=True, libs=False, run=False)  # for mp11, header only, no need for libraries to link/run
-        self.requires("safeint/3.0.28")
+        self.requires("re2/20231101")
+        self.requires("flatbuffers/1.12.0")  # v1.* is required, newer versions are not compatible
+        self.requires("boost/1.83.0", headers=True, libs=False)  # for mp11, header only, no need for libraries
+        self.requires("safeint/3.24")
         self.requires("nlohmann_json/3.11.3")
         self.requires("eigen/3.4.0")
         self.requires("ms-gsl/4.0.0")
