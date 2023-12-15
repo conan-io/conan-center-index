@@ -3,6 +3,7 @@ import os
 import yaml
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, collect_libs, copy, get, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -37,14 +38,14 @@ class YojimboConan(ConanFile):
 
     def configure(self):
         if self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration("Only 64-bit architecture supported")
+            raise ConanInvalidConfiguration("Only 64-bit x86 architecture is supported")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("libsodium/1.0.19")
-        self.requires("mbedtls/2.28.4")
+        self.requires("mbedtls/2.28.4")  # v3+ is not supported
 
     def build_requirements(self):
         self.tool_requires("premake/5.0.0-alpha15")
@@ -54,19 +55,15 @@ class YojimboConan(ConanFile):
 
         submodule_filename = os.path.join(self.export_sources_folder, "submoduledata.yml")
         with open(submodule_filename, "r", encoding="utf8") as submodule_stream:
-            submodules_data = yaml.load(submodule_stream, Loader=yaml.Loader)
-        for path, submodule in submodules_data["submodules"][self.version].items():
-            submodule_data = {
-                "url": submodule["url"],
-                "sha256": submodule["sha256"],
-                "destination": os.path.join(self.source_folder, submodule["destination"]),
-                "strip_root": True,
-            }
-            get(self, **submodule_data)
+            submodules_data = yaml.load(submodule_stream, Loader=yaml.SafeLoader)
+        for path, submodule_data in submodules_data["submodules"][self.version].items():
+            get(self, **submodule_data, strip_root=True)
             submodule_source = os.path.join(self.source_folder, path)
             rmdir(self, submodule_source)
 
     def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
         if is_msvc(self):
             tc = MSBuildToolchain(self)
             tc.generate()
@@ -81,19 +78,15 @@ class YojimboConan(ConanFile):
     def _patch_sources(self):
         # Before building we need to make some edits to the premake file to build using conan dependencies rather than local/bundled
         premake_path = os.path.join(self.source_folder, "premake5.lua")
+        deps = list(reversed(self.dependencies.host.topological_sort.values()))
+        includedirs = ', '.join(f'"{p}"'.replace("\\", "/") for dep in deps for p in dep.cpp_info.aggregated_components().includedirs)
+        libdirs = ', '.join(f'"{p}"'.replace("\\", "/") for dep in deps for p in dep.cpp_info.aggregated_components().libdirs)
+        if self.settings.os != "Windows":
+            includedirs += ', "netcode.io", "reliable.io"'
+        replace_in_file(self, premake_path, 'includedirs { ', 'includedirs { ".", ' + includedirs + ' } --')
+        replace_in_file(self, premake_path, 'libdirs { "', 'libdirs { ' + libdirs + '} --')
         if self.settings.os == "Windows":
-            # Edit the premake script to use conan rather than bundled dependencies
-            # Inject deps here because injecting MSBuildDeps did not have an effect for some reason.
-            deps = list(reversed(self.dependencies.host.topological_sort.values()))
-            includedirs = ', '.join(f'"{p}"'.replace("\\", "/") for dep in deps for p in dep.cpp_info.aggregated_components().includedirs)
-            libdirs = ', '.join(f'"{p}"'.replace("\\", "/") for dep in deps for p in dep.cpp_info.aggregated_components().libdirs)
-            replace_in_file(self, premake_path, 'includedirs { ".", "./windows"', 'includedirs { ".", ' + includedirs)
-            replace_in_file(self, premake_path, 'libdirs { "./windows"', 'libdirs { ' + libdirs)
-            # Edit the premake script to change the name of libsodium
             replace_in_file(self, premake_path, '"sodium"', '"libsodium"')
-        else:
-            # Edit the premake script to use  conan rather than local dependencies
-            replace_in_file(self, premake_path, '"/usr/local/include"', "")
 
     @property
     def _premake_generator(self):
