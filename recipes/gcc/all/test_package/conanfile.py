@@ -41,7 +41,8 @@ class TestPackageConan(ConanFile):
         buildenv.generate()
 
         runenv = VirtualRunEnv(self)
-        runenv.generate()
+        runenv.generate(scope="build")
+        runenv.generate(scope="run")
 
     def build(self):
         self.run("echo PATH: $PATH")
