@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, supported_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.scm import Version
@@ -38,7 +38,21 @@ class Catch2Conan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "14"
+        def extract_cpp_version(_cppstd):
+            return str(_cppstd).replace("gnu", "")
+
+        def add_millennium(_cppstd):
+            return "19%s" % _cppstd if _cppstd == "98" else "20%s" % _cppstd
+
+        def remove_millennium(_cppstd):
+            return _cppstd[-2:]
+
+        default_min_cppstd = "14"
+        if self.settings.compiler.get_safe("cppstd"):
+            compiler_cppstd = add_millennium(extract_cpp_version(self.settings.compiler.get_safe("cppstd")))
+            default_min_cppstd = add_millennium(default_min_cppstd)
+            return remove_millennium(max(compiler_cppstd, default_min_cppstd))
+        return default_min_cppstd
 
     @property
     def _min_console_width(self):
@@ -73,15 +87,10 @@ class Catch2Conan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
     
-    def compatibility(self):
-        if self.settings.compiler.cppstd == 14:
-            return [{"settings": [("compiler.cppstd", 14)]}]
-        else:
-            return [{"settings": [("compiler.cppstd", self.settings.compiler.cppstd)]}]
-
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
