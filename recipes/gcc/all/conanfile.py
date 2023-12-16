@@ -5,7 +5,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.apple import XCRun
 from conan.tools.files import copy, get, replace_in_file, rmdir, rm
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.microsoft import is_msvc
 import os
 
@@ -79,9 +79,11 @@ class GccConan(ConanFile):
 
     def generate(self):
         # Ensure binutils and flex are on the path.
-        # TODO: Remove when conan 2.0 is released as this will be default behaviour
         buildenv = VirtualBuildEnv(self)
         buildenv.generate()
+
+        runenv = VirtualRunEnv(self)
+        runenv.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--enable-languages=c,c++,fortran")
@@ -143,45 +145,24 @@ class GccConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", self.package_folder, recursive=True)
-        copy(
-            self,
-            pattern="COPYING*",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
-            keep_path=False,
-        )
+        copy(self, "COPYING*",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder,
+             keep_path=False)
 
     def package_info(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("rt")
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("dl")
+            self.cpp_info.system_libs = ["m", "rt", "pthread", "dl"]
 
-        bindir = os.path.join(self.package_folder, "bin")
+        def define_tool_var(var, name):
+            path = os.path.join(self.package_folder, "bin", f"{name}-{self.version}")
+            self.buildenv_info.define_path(var, path)
+            # TODO: Remove after conan 2.0 is released
+            setattr(self.env_info, var, path)
 
-        cc = os.path.join(bindir, f"gcc-{self.version}")
-        self.buildenv_info.define_path("CC", cc)
-
-        cxx = os.path.join(bindir, f"g++-{self.version}")
-        self.buildenv_info.define_path("CXX", cxx)
-
-        fc = os.path.join(bindir, f"gfortran-{self.version}")
-        self.buildenv_info.define_path("FC", fc)
-
-        ar = os.path.join(bindir, f"gcc-ar-{self.version}")
-        self.buildenv_info.define_path("AR", ar)
-
-        nm = os.path.join(bindir, f"gcc-nm-{self.version}")
-        self.buildenv_info.define_path("NM", nm)
-
-        ranlib = os.path.join(bindir, f"gcc-ranlib-{self.version}")
-        self.buildenv_info.define_path("RANLIB", ranlib)
-
-        # TODO: Remove after conan 2.0 is released
-        self.env_info.CC = cc
-        self.env_info.CXX = cxx
-        self.env_info.FC = fc
-        self.env_info.AR = ar
-        self.env_info.NM = nm
-        self.env_info.RANLIB = ranlib
+        define_tool_var("CC", "gcc")
+        define_tool_var("CXX", "g++")
+        define_tool_var("FC", "gfortran")
+        define_tool_var("AR", "gcc-ar")
+        define_tool_var("NM", "gcc-nm")
+        define_tool_var("RANLIB", "gcc-ranlib")
