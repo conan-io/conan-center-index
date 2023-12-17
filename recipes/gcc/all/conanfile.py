@@ -167,13 +167,6 @@ class GccConan(ConanFile):
         define_tool_var("NM", "gcc-nm")
         define_tool_var("RANLIB", "gcc-ranlib")
 
-        # FIXME: Add more detailed triplet identification as per https://github.com/conan-io/conan/issues/12789
-        # os_build, arch_build, os_host, arch_host = get_cross_building_settings(self)
-        # compiler = self.settings.get_safe("compiler")
-        # # e.g., x86_64-pc-linux-gnu
-        # triplet = _get_gnu_triplet(os_host, arch_host, compiler=compiler)
-        triplet = "x86_64-pc-linux-gnu"
-
         # Libs
         # Shared            | Static
         # ==================|====================
@@ -201,15 +194,18 @@ class GccConan(ConanFile):
         #                   | libgcc_eh.a           # libgcc exception handling. User by -static-libgcc
         #                   | libgcov.a             # test coverage library
 
+        # e.g. x86_64-pc-linux-gnu
+        triplet = os.listdir(os.path.join(self.package_folder, "libexec", "gcc"))[0]
+
         self.cpp_info.set_property("cmake_target_name", "gcc::gcc_all")
         self.cpp_info.bindirs = ["bin", os.path.join("bin", "libexec", "gcc", triplet, self.version)]
 
         self.cpp_info.components["gcc_eh"].set_property("cmake_target_name", "gcc::gcc_eh")
-        self.cpp_info.components["gcc_eh"].libdirs = [os.path.join("lib","gcc", triplet, self.version)]
+        self.cpp_info.components["gcc_eh"].libdirs = [os.path.join("lib", "gcc", triplet, self.version)]
         self.cpp_info.components["gcc_eh"].libs = ["gcc_eh"]
 
         self.cpp_info.components["gcc"].set_property("cmake_target_name", "gcc::gcc")
-        self.cpp_info.components["gcc"].libdirs = [os.path.join("lib","gcc", triplet, self.version)]
+        self.cpp_info.components["gcc"].libdirs = [os.path.join("lib", "gcc", triplet, self.version)]
         self.cpp_info.components["gcc"].libs = ["gcc"]
         self.cpp_info.components["gcc"].requires = ["gcc_eh"]
         if self.settings.os in ("Linux", "FreeBSD"):
@@ -324,12 +320,12 @@ class GccConan(ConanFile):
         self.cpp_info.components["cc1"].requires = ["gcc_s", "stdc++"]
 
         self.cpp_info.components["cp1plugin"].set_property("cmake_target_name", "gcc::cp1plugin")
-        self.cpp_info.components["cp1plugin"].libdirs = [os.path.join("lib","gcc", triplet, self.version, "plugin")]
+        self.cpp_info.components["cp1plugin"].libdirs = [os.path.join("lib", "gcc", triplet, self.version, "plugin")]
         self.cpp_info.components["cp1plugin"].libs = ["cp1plugin"]
         self.cpp_info.components["cp1plugin"].requires = ["gcc_s", "stdc++"]
 
         self.cpp_info.components["cc1plugin"].set_property("cmake_target_name", "gcc::cc1plugin")
-        self.cpp_info.components["cc1plugin"].libdirs = [os.path.join("lib","gcc", triplet, self.version, "plugin")]
+        self.cpp_info.components["cc1plugin"].libdirs = [os.path.join("lib", "gcc", triplet, self.version, "plugin")]
         self.cpp_info.components["cc1plugin"].libs = ["cc1plugin"]
         self.cpp_info.components["cc1plugin"].requires = ["gcc_s", "stdc++"]
 
@@ -338,10 +334,9 @@ class GccConan(ConanFile):
         self.cpp_info.components["lto_plugin"].libs = ["lto_plugin"]
 
         self.cpp_info.components["gcov"].set_property("cmake_target_name", "gcc::gcov")
-        self.cpp_info.components["gcov"].libdirs = [os.path.join("lib","gcc", triplet, self.version)]
+        self.cpp_info.components["gcov"].libdirs = [os.path.join("lib", "gcc", triplet, self.version)]
         self.cpp_info.components["gcov"].libs = ["gcov"]
 
         self.cpp_info.components["caf_single"].set_property("cmake_target_name", "gcc::caf_single")
-        self.cpp_info.components["caf_single"].libdirs = [os.path.join("lib","gcc", triplet, self.version)]
+        self.cpp_info.components["caf_single"].libdirs = [os.path.join("lib", "gcc", triplet, self.version)]
         self.cpp_info.components["caf_single"].libs = ["caf_single"]
-
