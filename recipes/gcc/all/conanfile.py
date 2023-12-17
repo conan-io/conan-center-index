@@ -166,3 +166,182 @@ class GccConan(ConanFile):
         define_tool_var("AR", "gcc-ar")
         define_tool_var("NM", "gcc-nm")
         define_tool_var("RANLIB", "gcc-ranlib")
+
+        # FIXME: Add more detailed triplet identification as per https://github.com/conan-io/conan/issues/12789
+        # os_build, arch_build, os_host, arch_host = get_cross_building_settings(self)
+        # compiler = self.settings.get_safe("compiler")
+        # # e.g., x86_64-pc-linux-gnu
+        # triplet = _get_gnu_triplet(os_host, arch_host, compiler=compiler)
+        triplet = "x86_64-pc-linux-gnu"
+
+        # Libs
+        # Shared            | Static
+        # ==================|====================
+        # libitm.so         | libitm.a              # GNU Transactional Memory Library. Transaction support for accesses to a process' memory, enabling easy-to-use synchronization of accesses to shared memory by several threads
+        # libgfortran.so    | libgfortran.a         # GNU Fortran Library
+        # libgomp.so        | libgomp.a             # GNU Offloading and Multi-Processing Project
+        # libubsan.so       | libubsan.a            # Undefined Behaviour sanitizer
+        # libtsan.so        | libtsan.a             # Thread sanitizer
+        # libstdc++.so      | libstdc++.a           # C++ Standard library
+        # libgcc_s.so       |                       # Dynamic gcc runtime. Combination of libgcc and libgcc_eh? Used by -shared-libgcc
+        # libcc1.so         |                       # GCC cc1 plugin for gdb
+        # liblsan.so        | liblsan.a             # Leak sanitizer
+        # libasan.so        | libasan.so            # Address sanitizer
+        # libssp.so         | libssp.a              # Stack Smashing Protector library
+        # libquadmath.so    | libquadmath.a         # GCC Quad Precision Math Library
+        # libcp1plugin.so   |                       # Library interface to C++ frontend
+        # libcc1plugin.so   |                       # Library interface to C frontend
+        # libatomic.so      | libatomic.a           # GNU atomic library
+        # liblto_plugin.so  |                       # Link time optimization plugin
+        #                   | libsupc++.a           # A subset of libstdc++.a. Contains only support routines defined by clause 18 of the standard.
+        #                   | libstdc++fs.a         # Experimental extension for std::filesystem
+        #                   | libssp_nonshared.a    #
+        #                   | libgcc.a              # Static gcc runtime. Used by -static-libgcc
+        #                   | libcaf_single.a
+        #                   | libgcc_eh.a           # libgcc exception handling. User by -static-libgcc
+        #                   | libgcov.a             # test coverage library
+
+        self.cpp_info.set_property("cmake_target_name", "gcc::gcc_all")
+        self.cpp_info.bindirs = ["bin", os.path.join("bin", "libexec", "gcc", triplet, self.version)]
+
+        self.cpp_info.components["gcc_eh"].set_property("cmake_target_name", "gcc::gcc_eh")
+        self.cpp_info.components["gcc_eh"].libdirs = [os.path.join("lib","gcc", triplet, self.version)]
+        self.cpp_info.components["gcc_eh"].libs = ["gcc_eh"]
+
+        self.cpp_info.components["gcc"].set_property("cmake_target_name", "gcc::gcc")
+        self.cpp_info.components["gcc"].libdirs = [os.path.join("lib","gcc", triplet, self.version)]
+        self.cpp_info.components["gcc"].libs = ["gcc"]
+        self.cpp_info.components["gcc"].requires = ["gcc_eh"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["gcc"].system_libs.append("m")
+            self.cpp_info.components["gcc"].system_libs.append("rt")
+            self.cpp_info.components["gcc"].system_libs.append("pthread")
+            self.cpp_info.components["gcc"].system_libs.append("dl")
+
+        self.cpp_info.components["gcc_s"].set_property("cmake_target_name", "gcc::gcc_s")
+        self.cpp_info.components["gcc_s"].libdirs = ["lib"]
+        self.cpp_info.components["gcc_s"].libs = ["gcc_s"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["gcc_s"].system_libs.append("m")
+            self.cpp_info.components["gcc_s"].system_libs.append("rt")
+            self.cpp_info.components["gcc_s"].system_libs.append("pthread")
+            self.cpp_info.components["gcc_s"].system_libs.append("dl")
+
+        self.cpp_info.components["gfortran"].set_property("cmake_target_name", "gcc::gfortran")
+        self.cpp_info.components["gfortran"].libdirs = ["lib"]
+        self.cpp_info.components["gfortran"].libs = ["gfortran"]
+        self.cpp_info.components["gfortran"].requires = ["gcc_s", "quadmath"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["gfortran"].system_libs.append("m")
+
+        self.cpp_info.components["quadmath"].set_property("cmake_target_name", "gcc::quadmath")
+        self.cpp_info.components["quadmath"].libdirs = ["lib"]
+        self.cpp_info.components["quadmath"].libs = ["quadmath"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["quadmath"].system_libs.append("m")
+
+        self.cpp_info.components["itm"].set_property("cmake_target_name", "gcc::itm")
+        self.cpp_info.components["itm"].libdirs = ["lib"]
+        self.cpp_info.components["itm"].libs = ["itm"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["itm"].system_libs.append("pthread")
+
+        self.cpp_info.components["tsan"].set_property("cmake_target_name", "gcc::tsan")
+        self.cpp_info.components["tsan"].libdirs = ["lib"]
+        self.cpp_info.components["tsan"].libs = ["tsan"]
+        self.cpp_info.components["tsan"].requires = ["gcc_s", "stdc++"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["tsan"].system_libs.append("pthread")
+            self.cpp_info.components["tsan"].system_libs.append("m")
+            self.cpp_info.components["tsan"].system_libs.append("dl")
+
+        self.cpp_info.components["stdc++"].set_property("cmake_target_name", "gcc::stdc++")
+        self.cpp_info.components["stdc++"].libdirs = ["lib"]
+        self.cpp_info.components["stdc++"].libs = ["stdc++"]
+        self.cpp_info.components["stdc++"].requires = ["gcc_s"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["stdc++"].system_libs.append("m")
+
+        self.cpp_info.components["stdc++fs"].set_property("cmake_target_name", "gcc::stdc++fs")
+        self.cpp_info.components["stdc++fs"].libdirs = ["lib"]
+        self.cpp_info.components["stdc++fs"].libs = ["stdc++fs"]
+
+        self.cpp_info.components["supc++"].set_property("cmake_target_name", "gcc::supc++")
+        self.cpp_info.components["supc++"].libdirs = ["lib"]
+        self.cpp_info.components["supc++"].libs = ["supc++"]
+
+        self.cpp_info.components["ssp"].set_property("cmake_target_name", "gcc::ssp")
+        self.cpp_info.components["ssp"].libdirs = ["lib"]
+        self.cpp_info.components["ssp"].libs = ["ssp"]
+
+        self.cpp_info.components["ssp_nonshared"].set_property("cmake_target_name", "gcc::ssp_nonshared")
+        self.cpp_info.components["ssp_nonshared"].libdirs = ["lib"]
+        self.cpp_info.components["ssp_nonshared"].libs = ["ssp_nonshared"]
+
+        self.cpp_info.components["atomic"].set_property("cmake_target_name", "gcc::atomic")
+        self.cpp_info.components["atomic"].libdirs = ["lib"]
+        self.cpp_info.components["atomic"].libs = ["atomic"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["atomic"].system_libs.append("pthread")
+
+        self.cpp_info.components["gomp"].set_property("cmake_target_name", "gcc::gomp")
+        self.cpp_info.components["gomp"].libdirs = ["lib"]
+        self.cpp_info.components["gomp"].libs = ["gomp"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["gomp"].system_libs.append("pthread")
+            self.cpp_info.components["gomp"].system_libs.append("dl")
+
+        self.cpp_info.components["asan"].set_property("cmake_target_name", "gcc::asan")
+        self.cpp_info.components["asan"].libdirs = ["lib"]
+        self.cpp_info.components["asan"].libs = ["asan"]
+        self.cpp_info.components["asan"].requires = ["gcc_s", "stdc++"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["asan"].system_libs.append("pthread")
+            self.cpp_info.components["asan"].system_libs.append("m")
+            self.cpp_info.components["asan"].system_libs.append("dl")
+
+        self.cpp_info.components["ubsan"].set_property("cmake_target_name", "gcc::ubsan")
+        self.cpp_info.components["ubsan"].libdirs = ["lib"]
+        self.cpp_info.components["ubsan"].libs = ["ubsan"]
+        self.cpp_info.components["ubsan"].requires = ["gcc_s", "stdc++"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["ubsan"].system_libs.append("pthread")
+            self.cpp_info.components["ubsan"].system_libs.append("dl")
+            self.cpp_info.components["ubsan"].system_libs.append("rt")
+
+        self.cpp_info.components["lsan"].set_property("cmake_target_name", "gcc::lsan")
+        self.cpp_info.components["lsan"].libdirs = ["lib"]
+        self.cpp_info.components["lsan"].libs = ["lsan"]
+        self.cpp_info.components["lsan"].requires = ["gcc_s", "stdc++"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["lsan"].system_libs.append("pthread")
+            self.cpp_info.components["lsan"].system_libs.append("dl")
+            self.cpp_info.components["lsan"].system_libs.append("rt")
+
+        self.cpp_info.components["cc1"].set_property("cmake_target_name", "gcc::cc1")
+        self.cpp_info.components["cc1"].libdirs = ["lib", "lib64"]
+        self.cpp_info.components["cc1"].libs = ["cc1"]
+        self.cpp_info.components["cc1"].requires = ["gcc_s", "stdc++"]
+
+        self.cpp_info.components["cp1plugin"].set_property("cmake_target_name", "gcc::cp1plugin")
+        self.cpp_info.components["cp1plugin"].libdirs = [os.path.join("lib","gcc", triplet, self.version, "plugin")]
+        self.cpp_info.components["cp1plugin"].libs = ["cp1plugin"]
+        self.cpp_info.components["cp1plugin"].requires = ["gcc_s", "stdc++"]
+
+        self.cpp_info.components["cc1plugin"].set_property("cmake_target_name", "gcc::cc1plugin")
+        self.cpp_info.components["cc1plugin"].libdirs = [os.path.join("lib","gcc", triplet, self.version, "plugin")]
+        self.cpp_info.components["cc1plugin"].libs = ["cc1plugin"]
+        self.cpp_info.components["cc1plugin"].requires = ["gcc_s", "stdc++"]
+
+        self.cpp_info.components["lto_plugin"].set_property("cmake_target_name", "gcc::lto_plugin")
+        self.cpp_info.components["lto_plugin"].libdirs = [os.path.join("libexec", "gcc", triplet, self.version)]
+        self.cpp_info.components["lto_plugin"].libs = ["lto_plugin"]
+
+        self.cpp_info.components["gcov"].set_property("cmake_target_name", "gcc::gcov")
+        self.cpp_info.components["gcov"].libdirs = [os.path.join("lib","gcc", triplet, self.version)]
+        self.cpp_info.components["gcov"].libs = ["gcov"]
+
+        self.cpp_info.components["caf_single"].set_property("cmake_target_name", "gcc::caf_single")
+        self.cpp_info.components["caf_single"].libdirs = [os.path.join("lib","gcc", triplet, self.version)]
+        self.cpp_info.components["caf_single"].libs = ["caf_single"]
+
