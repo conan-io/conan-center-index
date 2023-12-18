@@ -1,0 +1,62 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ce5dbcf..085a1aa 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -218,7 +218,6 @@
+   add_library(cpptrace STATIC ${sources} include/cpptrace/cpptrace.hpp)
+ else()
+   add_library(cpptrace SHARED ${sources} include/cpptrace/cpptrace.hpp)
+-  set_property(TARGET cpptrace PROPERTY POSITION_INDEPENDENT_CODE ON)
+ endif()
+ 
+ target_include_directories(
+@@ -298,7 +298,7 @@
+   target_compile_definitions(cpptrace PUBLIC CPPTRACE_GET_SYMBOLS_WITH_LIBDWARF)
+   if(CPPTRACE_USE_SYSTEM_LIBDWARF)
+     find_package(libdwarf REQUIRED)
+-    target_link_libraries(cpptrace PRIVATE libdwarf)
++    target_link_libraries(cpptrace PRIVATE libdwarf::libdwarf)
+   else()
+     add_subdirectory(bundled/libdwarf)
+     target_link_libraries(cpptrace PRIVATE dwarf)
+@@ -379,7 +379,7 @@
+   include(CMakePackageConfigHelpers)
+ 
+   if(CPPTRACE_GET_SYMBOLS_WITH_LIBDWARF)
+-    set(CPPTRACE_STATIC_EXPORT_TARGETS cpptrace dwarf)
++    set(CPPTRACE_STATIC_EXPORT_TARGETS cpptrace)
+   else()
+     set(CPPTRACE_STATIC_EXPORT_TARGETS cpptrace)
+   endif()
+
+diff --git a/src/symbols/symbols_with_libdwarf.cpp b/src/symbols/symbols_with_libdwarf.cpp
+index ce5dbcf..085a1aa 100644
+--- a/src/symbols/symbols_with_libdwarf.cpp
++++ b/src/symbols/symbols_with_libdwarf.cpp
+@@ -20,8 +20,8 @@
+ #include <unordered_map>
+ #include <vector>
+ 
+-#include <libdwarf.h>
+-#include <dwarf.h>
++#include <libdwarf/libdwarf.h>
++#include <libdwarf/dwarf.h>
+ 
+ // It's been tricky to piece together how to handle all this dwarf stuff. Some resources I've used are
+ // https://www.prevanders.net/libdwarf.pdf
+
+diff --git a/src/platform/dwarf.hpp b/src/platform/dwarf.hpp
+index ce5dbcf..085a1aa 100644
+--- a/src/platform/dwarf.hpp
++++ b/src/platform/dwarf.hpp
+@@ -9,8 +9,8 @@
+ #include <stdexcept>
+ #include <type_traits>
+ 
+-#include <libdwarf.h>
+-#include <dwarf.h>
++#include <libdwarf/libdwarf.h>
++#include <libdwarf/dwarf.h>
+ 
+ namespace cpptrace {
+ namespace detail {

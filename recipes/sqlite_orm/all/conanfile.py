@@ -39,7 +39,7 @@ class SqliteOrmConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("sqlite3/3.43.0", transitive_headers=True, transitive_libs=True)
+        self.requires("sqlite3/3.44.2", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
         self.info.clear()

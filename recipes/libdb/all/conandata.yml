@@ -5,10 +5,11 @@ sources:
 patches:
   "5.3.28":
     - patch_file: "patches/0001-rename_atomic_compare_exchange.patch"
-      base_path: "source_subfolder"
+      patch_description: "Rename __atomic_compare_exchange to __atomic_compare_exchange_db"
+      patch_type: "portability"
     - patch_file: "patches/0002-no-conditional-tcl-include.patch"
-      base_path: "source_subfolder"
+      patch_description: "Always include tcl.h. Remove conditions."
+      patch_type: "conan"
     - patch_file: "patches/0003-msvc-db_tcl-add-static-configuration.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0004-msvc-tcl-include-conanbuildinfo-props.patch"
-      base_path: "source_subfolder"
+      patch_description: "Add static configuration"
+      patch_type: "conan"
