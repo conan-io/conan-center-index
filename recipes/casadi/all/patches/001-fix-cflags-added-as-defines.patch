@@ -1,0 +1,22 @@
+diff --git a/cmake/FindBONMIN.cmake b/cmake/FindBONMIN.cmake
+index 27ae19d940..6fb59e06c3 100644
+--- a/cmake/FindBONMIN.cmake
++++ b/cmake/FindBONMIN.cmake
+@@ -36,5 +36,5 @@ if(BONMIN_FOUND)
+   else()
+     target_compile_definitions(bonmin INTERFACE HAVE_CSTDDEF)
+   endif()
+-  target_compile_definitions(bonmin INTERFACE ${BONMIN_CFLAGS_OTHER})
++  target_compile_options(bonmin INTERFACE ${BONMIN_CFLAGS_OTHER})
+ endif()
+diff --git a/cmake/FindIPOPT.cmake b/cmake/FindIPOPT.cmake
+index 0e57a7bcea..a6e4790f4f 100644
+--- a/cmake/FindIPOPT.cmake
++++ b/cmake/FindIPOPT.cmake
+@@ -55,5 +55,5 @@ if(IPOPT_FOUND)
+   else()
+     target_compile_definitions(ipopt INTERFACE HAVE_CSTDDEF)
+   endif()
+-  target_compile_definitions(ipopt INTERFACE ${IPOPT_CFLAGS_OTHER})
++  target_compile_options(ipopt INTERFACE ${IPOPT_CFLAGS_OTHER})
+ endif()
