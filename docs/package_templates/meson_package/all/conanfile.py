@@ -45,7 +45,7 @@ class PackageConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17
+        return 14
 
     # in case the project requires C++14/17/20/... the minimum compiler version should be listed
     @property
@@ -98,7 +98,7 @@ class PackageConan(ConanFile):
     # if another tool than the compiler or Meson is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         # CCI policy assumes that Meson may not be installed on consumers machine
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/1.2.3")
         # pkgconf is largely used by Meson, it should be added in build requirement when there are dependencies
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.0.3")
@@ -107,12 +107,18 @@ class PackageConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        # Meson feature options must be set to "enabled" or "disabled"
+        feature = lambda option: "enabled" if option else "disabled"
+
         # default_library and b_staticpic are automatically parsed when self.options.shared and self.options.fpic exist
         # buildtype is automatically parsed for self.settings
         tc = MesonToolchain(self)
         # In case need to pass definitions directly to the compiler
         tc.preprocessor_definitions["MYDEFINE"] = "MYDEF_VALUE"
-        tc.project_options["feature"] = "enabled" if self.options.get_safe("feature") else "disabled"
+        # Meson features are typically enabled automatically when possible.
+        # The default behavior can be changed to disable all features by setting "auto_features" to "disabled".
+        tc.project_options["auto_features"] = "disabled"
+        tc.project_options["feature"] = feature(self.options.get_safe("feature"))
         # Meson project options may vary their types
         tc.project_options["tests"] = False
         tc.generate()

@@ -1,0 +1,45 @@
+diff --git a/google/cloud/internal/oauth2_compute_engine_credentials.cc b/google/cloud/internal/oauth2_compute_engine_credentials.cc
+index 9cb45a6..5c6b45d 100644
+--- a/google/cloud/internal/oauth2_compute_engine_credentials.cc
++++ b/google/cloud/internal/oauth2_compute_engine_credentials.cc
+@@ -68,8 +68,8 @@ StatusOr<internal::AccessToken> ParseComputeEngineRefreshResponse(
+   auto payload = rest_internal::ReadAll(std::move(response).ExtractPayload());
+   if (!payload.ok()) return payload.status();
+   auto access_token = nlohmann::json::parse(*payload, nullptr, false);
+-  if (access_token.is_discarded() || access_token.count("access_token") == 0 or
+-      access_token.count("expires_in") == 0 or
++  if (access_token.is_discarded() || access_token.count("access_token") == 0 ||
++      access_token.count("expires_in") == 0 ||
+       access_token.count("token_type") == 0) {
+     auto error_payload =
+         *payload +
+diff --git a/google/cloud/storage/oauth2/compute_engine_credentials.cc b/google/cloud/storage/oauth2/compute_engine_credentials.cc
+index 365273a..92e631c 100644
+--- a/google/cloud/storage/oauth2/compute_engine_credentials.cc
++++ b/google/cloud/storage/oauth2/compute_engine_credentials.cc
+@@ -36,8 +36,8 @@ ParseComputeEngineRefreshResponse(
+   // Response should have the attributes "access_token", "expires_in", and
+   // "token_type".
+   auto access_token = nlohmann::json::parse(response.payload, nullptr, false);
+-  if (!access_token.is_object() || access_token.count("access_token") == 0 or
+-      access_token.count("expires_in") == 0 or
++  if (!access_token.is_object() || access_token.count("access_token") == 0 ||
++      access_token.count("expires_in") == 0 ||
+       access_token.count("token_type") == 0) {
+     auto payload =
+         response.payload +
+diff --git a/google/cloud/storage/oauth2/service_account_credentials.cc b/google/cloud/storage/oauth2/service_account_credentials.cc
+index 4c600db..34c4e72 100644
+--- a/google/cloud/storage/oauth2/service_account_credentials.cc
++++ b/google/cloud/storage/oauth2/service_account_credentials.cc
+@@ -85,8 +85,8 @@ ParseServiceAccountRefreshResponse(
+     storage::internal::HttpResponse const& response,
+     std::chrono::system_clock::time_point now) {
+   auto access_token = nlohmann::json::parse(response.payload, nullptr, false);
+-  if (access_token.is_discarded() || access_token.count("access_token") == 0 or
+-      access_token.count("expires_in") == 0 or
++  if (access_token.is_discarded() || access_token.count("access_token") == 0 ||
++      access_token.count("expires_in") == 0 ||
+       access_token.count("token_type") == 0) {
+     auto payload =
+         response.payload +

@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, save, replace_in_file, rmdir, copy
+from conan.tools.files import get, save, replace_in_file, rmdir, copy
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -38,9 +38,6 @@ class Nghttp2Conan(ConanFile):
         "with_asio": False,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -63,10 +60,10 @@ class Nghttp2Conan(ConanFile):
         if self.options.with_app or self.options.get_safe("with_asio"):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_app:
-            self.requires("c-ares/1.19.1")
+            self.requires("c-ares/1.20.1")
             self.requires("libev/4.33")
             self.requires("libevent/2.1.12")
-            self.requires("libxml2/2.11.4")
+            self.requires("libxml2/2.11.5")
             self.requires("zlib/[>=1.2.11 <2]")
             if self.options.with_jemalloc:
                 self.requires("jemalloc/5.3.0")
@@ -110,7 +107,6 @@ class Nghttp2Conan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         if not self.options.shared:
             # easier to patch here rather than have patch 'nghttp_static_include_directories' for each version
             save(self, os.path.join(self.source_folder, "lib", "CMakeLists.txt"),
