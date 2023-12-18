@@ -74,7 +74,6 @@ class MPUnitsConan(ConanFile):
                 f"{self.ref} requires at least {compiler} {min_version} ({compiler.version} in use)"
             )
 
-        # Note that apple-clang is disabled for now, its C++ 20 implementation are not up to speed
         # Re-enable once newer versions with better support come out
         if is_msvc(self):
             raise ConanInvalidConfiguration(
