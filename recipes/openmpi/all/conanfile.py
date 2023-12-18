@@ -184,6 +184,7 @@ class OpenMPIConan(ConanFile):
         # The components are modelled based on OpenMPI's pkg-config files
 
         # Run-time environment library
+        self.cpp_info.components["orte"].set_property("pkg_config_name", "orte")
         self.cpp_info.components["orte"].libs = ["open-rte", "open-pal"]
         self.cpp_info.components["orte"].includedirs.append(os.path.join("include", "openmpi"))
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -193,26 +194,33 @@ class OpenMPIConan(ConanFile):
             self.cpp_info.components["orte"].cflags.append("-fexceptions")
         self.cpp_info.components["orte"].requires = requires
 
+        self.cpp_info.components["ompi"].set_property("pkg_config_name", "ompi")
         self.cpp_info.components["ompi"].libs = ["mpi"]
         self.cpp_info.components["ompi"].requires = ["orte"]
 
+        self.cpp_info.components["ompi-c"].set_property("pkg_config_name", "ompi-c")
         self.cpp_info.components["ompi-c"].set_property("cmake_target_name", "MPI::MPI_C")
         self.cpp_info.components["ompi-c"].requires = ["ompi"]
 
+        self.cpp_info.components["ompitrace"].set_property("pkg_config_name", "ompitrace")
         self.cpp_info.components["ompitrace"].libs = ["ompitrace"]
         self.cpp_info.components["ompitrace"].requires = ["ompi"]
 
         if self.options.cxx:
+            self.cpp_info.components["ompi-cxx"].set_property("pkg_config_name", "ompi-cxx")
             self.cpp_info.components["ompi-cxx"].set_property("cmake_target_name", "MPI::MPI_CXX")
             self.cpp_info.components["ompi-cxx"].libs = ["mpi_cxx"]
             self.cpp_info.components["ompi-cxx"].requires = ["mpi"]
 
         if self.options.fortran != "no":
+            self.cpp_info.components["ompi-fort"].set_property("pkg_config_name", "ompi-fort")
             self.cpp_info.components["ompi-fort"].set_property("cmake_target_name", "MPI::MPI_Fortran")
             self.cpp_info.components["ompi-fort"].libs = ["mpi_mpifh"]
             self.cpp_info.components["ompi-fort"].requires = ["mpi"]
             # Aliases
+            self.cpp_info.components["ompi-f77"].set_property("pkg_config_name", "ompi-f77")
             self.cpp_info.components["ompi-f77"].requires = ["ompi-fort"]
+            self.cpp_info.components["ompi-f90"].set_property("pkg_config_name", "ompi-f90")
             self.cpp_info.components["ompi-f90"].requires = ["ompi-fort"]
 
         bin_folder = os.path.join(self.package_folder, "bin")
