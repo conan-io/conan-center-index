@@ -25,9 +25,10 @@ class TestPackageConan(ConanFile):
         if not self._is_legacy_one_profile:
             # For the grpc-cpp-plugin executable at build time
             self.tool_requires(self.tested_reference_str)
+            self.tool_requires("protobuf/<host_version")
 
     def generate(self):
-        # Set up environment so that we can run grpc-cpp-plugin at build time
+        # Set up environment so that we can run protoc & grpc-cpp-plugin at build time
         if self._is_legacy_one_profile:
             VirtualRunEnv(self).generate(scope="build")
         else:
