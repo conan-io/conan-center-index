@@ -43,7 +43,7 @@ class MPUnitsConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         # Note that msvc is disabled for now, its C++20 implementation are not up to speed
-        return {"gcc": "11", "clang": "16", "apple-clang": "15"}
+        return {"gcc": "11.2", "clang": "16", "apple-clang": "15"}
 
     @property
     def _use_libfmt(self):
