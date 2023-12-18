@@ -10,6 +10,10 @@ sources:
     - url: "https://github.com/opencv/opencv_contrib/archive/refs/tags/3.4.17.tar.gz"
       sha256: "2b4d3e91a5767a1ae4f4e2a71b0a93c9ec744755763653a650e40ace8f7b9a1b"
 patches:
+  "3.4.20":
+    - patch_file: "patches/3.4.17-0001-find-openexr.patch"
+      patch_description: "Robust discovery & injection of OpenEXR"
+      patch_type: "conan"
   "3.4.17":
     - patch_file: "patches/3.4.17-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
