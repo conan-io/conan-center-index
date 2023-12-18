@@ -10,7 +10,13 @@ patches:
     - patch_file: "patches/4.7.4-0001-fix-cmake.patch"
       patch_description: "fixes for cmake target_link_libraries and using deps"
       patch_type: "conan"
+    - patch_file: "patches/4.7.4-0002-fix-cross-compile.patch"
+      patch_description: "fixes 'Unable to find the math library' when cross compiling"
+      patch_type: "conan"
   "4.8.1":
     - patch_file: "patches/4.8.1-0001-fix-cmake.patch"
       patch_description: "fixes for cmake target_link_libraries and using deps"
+      patch_type: "conan"
+    - patch_file: "patches/4.8.1-0002-fix-cross-compile.patch"
+      patch_description: "fixes 'Unable to find the math library' when cross compiling"
       patch_type: "conan"
