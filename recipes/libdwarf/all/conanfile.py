@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rename
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import  Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -13,7 +14,6 @@ class LibdwarfConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.prevanders.net/dwarf.html"
     topics = ("debug", "dwarf", "dwarf2", "elf")
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -50,6 +50,8 @@ class LibdwarfConan(ConanFile):
         if self.options.with_dwarfgen or self.version == "20191104":
             self.requires("libelf/0.8.13")
         self.requires("zlib/[>=1.2.11 <2]")
+        if self.version != "20191104" and Version(self.version) >= "0.9.0":
+            self.requires("zstd/1.5.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
