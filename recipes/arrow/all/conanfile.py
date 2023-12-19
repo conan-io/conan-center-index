@@ -214,8 +214,7 @@ class ArrowConan(ConanFile):
             if opts.gandiva:
                 opts.with_boost = True
             elif Version(self.version).major == 1:
-                if opts.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < Version("4.9"):
-                    opts.with_boost = True
+                opts.with_boost = opts.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < Version("4.9")
             else:
                 opts.with_boost = is_msvc(self)
         if opts.with_flight_rpc == "auto":
