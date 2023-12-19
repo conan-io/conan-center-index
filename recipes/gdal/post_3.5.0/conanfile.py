@@ -565,7 +565,7 @@ class GdalConan(ConanFile):
             deps.set_property(conan_name, "cmake_file_name", cmake_name)
 
         renamed_targets = {
-            "arrow::libarrow":            "Arrow::arrow_shared",
+            "arrow::libarrow":            "Arrow::arrow_shared" if Version(self.version) >= "3.7" else "arrow_shared",
             "arrow::dataset":             "ArrowDataset::arrow_dataset_shared",
             "arrow::libparquet":          "Parquet::parquet_shared",
             "brunsli::brunslidec-c":      "BRUNSLI::DECODE",
