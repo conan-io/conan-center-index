@@ -32,12 +32,6 @@ class TestPackageConan(ConanFile):
         cmake.configure(variables=defs)
         cmake.build()
 
-    def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
-
-    def layout(self):
-        cmake_layout(self)
-
     def _ruby_version(self):
         tokens = re.split("[@#]", self.tested_reference_str)
         return tokens[0].split("/", 1)[1]
@@ -47,11 +41,9 @@ class TestPackageConan(ConanFile):
         output = StringIO()
         self.run("ruby --version", output, env="conanrun")
         output_str = str(output.getvalue()).strip()
-        self.output.info("Installed version: {}".format(output_str))
-        tokens = re.split("[@#]", self.tested_reference_str)
-        require_version = tokens[0].split("/", 1)[1]
-        self.output.info("Expected version: {}".format(self._ruby_version()))
-        assert_ruby_version = "ruby {}".format(self._ruby_version())
+        self.output.info(f"Installed version: {output_str}")
+        assert_ruby_version = f"ruby {self._ruby_version()}"
+        self.output.info(f"Expected version: {assert_ruby_version}")
         assert assert_ruby_version in output_str
 
     def test(self):
