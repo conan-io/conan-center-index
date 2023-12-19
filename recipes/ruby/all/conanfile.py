@@ -116,9 +116,9 @@ class RubyConan(ConanFile):
     def generate(self):
         td = AutotoolsDeps(self)
         # remove non-existing frameworks dirs, otherwise clang complains
-        for m in re.finditer(r"-F (\S+)", td.vars().get("LDFLAGS")):
+        for m in re.finditer(r'-F(?: |\")([^\r\n\t\f\v\" ]+)\"?', td.vars().get("LDFLAGS")):
             if not os.path.exists(m[1]):
-                td.environment.remove("LDFLAGS", f"-F {m[1]}")
+                td.environment.remove("LDFLAGS", m[0])
         if self.settings.os == "Windows":
             if is_msvc(self):
                 td.environment.append("LIBS", [f"{lib}.lib" for lib in self._windows_system_libs])
