@@ -1,7 +1,10 @@
-from conan import ConanFile
-from conan.tools.build import cross_building
-from conan.tools.cmake import CMake, cmake_layout
 import os
+import re
+from io import StringIO
+
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.cmake import CMake, cmake_layout
 
 
 class TestPackageConan(ConanFile):
@@ -9,7 +12,7 @@ class TestPackageConan(ConanFile):
     generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
 
     def requirements(self):
-        self.requires(self.tested_reference_str)
+        self.requires(self.tested_reference_str, run=True, libs=True)
 
     def layout(self):
         cmake_layout(self)
@@ -23,16 +26,37 @@ class TestPackageConan(ConanFile):
         defs = {}
         tested_options = self.dependencies[self.tested_reference_str].options
         if not tested_options.shared:
-            defs['RUBY_STATIC_RUBY'] = 1
+            defs["RUBY_STATIC_RUBY"] = 1
             if tested_options.with_static_linked_ext:
-                defs['RUBY_STATIC_LINKED_EXT'] = 1
+                defs["RUBY_STATIC_LINKED_EXT"] = 1
         cmake.configure(variables=defs)
         cmake.build()
 
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
+
+    def _ruby_version(self):
+        tokens = re.split("[@#]", self.tested_reference_str)
+        return tokens[0].split("/", 1)[1]
+
+    def _test_ruby_executable(self):
+        # test executable
+        output = StringIO()
+        self.run("ruby --version", output, env="conanrun")
+        output_str = str(output.getvalue()).strip()
+        self.output.info("Installed version: {}".format(output_str))
+        tokens = re.split("[@#]", self.tested_reference_str)
+        require_version = tokens[0].split("/", 1)[1]
+        self.output.info("Expected version: {}".format(self._ruby_version()))
+        assert_ruby_version = "ruby {}".format(self._ruby_version())
+        assert assert_ruby_version in output_str
+
     def test(self):
-        if not cross_building(self):
-            # test executable
-            self.run("ruby --version", env="conanrun")
+        if can_run(self):
+            self._test_ruby_executable()
 
             # test library
             bin_path = os.path.join(self.cpp.build.bindirs[0], "bin", "test_package")
