@@ -12,7 +12,10 @@ class TestPackageConan(ConanFile):
     generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
 
     def requirements(self):
-        self.requires(self.tested_reference_str, run=True, libs=True)
+        self.requires(self.tested_reference_str)
+
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def layout(self):
         cmake_layout(self)
@@ -36,20 +39,29 @@ class TestPackageConan(ConanFile):
         tokens = re.split("[@#]", self.tested_reference_str)
         return tokens[0].split("/", 1)[1]
 
-    def _test_ruby_executable(self):
+    def _test_ruby_executable_version(self):
         # test executable
         output = StringIO()
-        self.run("ruby --version", output, env="conanrun")
+        self.run("ruby --version", output, env="conanbuild")
         output_str = str(output.getvalue()).strip()
         self.output.info(f"Installed version: {output_str}")
         assert_ruby_version = f"ruby {self._ruby_version()}"
         self.output.info(f"Expected version: {assert_ruby_version}")
         assert assert_ruby_version in output_str
 
-    def test(self):
-        if can_run(self):
-            self._test_ruby_executable()
+    def _test_ruby_execute(self):
+        # test executable
+        output = StringIO()
+        self.run('ruby -e "puts RUBY_VERSION"', output, env="conanbuild")
+        output_str = str(output.getvalue()).strip()
+        self.output.info(f'ruby -e "PUTS RUBY_VERSION": {output_str}')
+        assert output_str == self._ruby_version()
 
+    def test(self):
+        self._test_ruby_executable_version()
+        self._test_ruby_execute()
+
+        if can_run(self):
             # test library
             bin_path = os.path.join(self.cpp.build.bindirs[0], "bin", "test_package")
             self.run(bin_path, env="conanrun")
