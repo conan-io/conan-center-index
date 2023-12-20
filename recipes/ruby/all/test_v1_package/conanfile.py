@@ -25,5 +25,5 @@ class TestPackageConan(ConanFile):
             self.run("ruby --version", run_environment=True)
 
             # test library
-            bin_path = os.path.join("bin", "test_package")
+            bin_path = os.path.join("bin", "test_v1_package")
             self.run(bin_path, run_environment=True)
