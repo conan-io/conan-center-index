@@ -51,6 +51,7 @@ class GdalConan(ConanFile):
         "with_jxl": [True, False],
         "with_kea": [True, False],
         "with_lerc": [True, False],
+        "with_libaec": [True, False],
         "with_libarchive": [True, False],
         "with_libcsf": [True, False],
         "with_libdeflate": [True, False],
@@ -116,6 +117,7 @@ class GdalConan(ConanFile):
         "with_jxl": False,
         "with_kea": False,
         "with_lerc": True,
+        "with_libaec": False,
         "with_libarchive": False,
         "with_libcsf": True,
         "with_libdeflate": True,
@@ -173,6 +175,8 @@ class GdalConan(ConanFile):
         if Version(self.version) < "3.7":
             # Latest versions of Arrow are no longer compatible with GDAL 3.5
             self.options.with_arrow = False
+        if Version(self.version) < "3.8":
+            del self.options.with_libaec
 
     def configure(self):
         if self.options.shared:
@@ -238,6 +242,8 @@ class GdalConan(ConanFile):
             self.requires("kealib/1.4.14")
         if self.options.with_lerc:
             self.requires("lerc/4.0.1")
+        if self.options.get_safe("with_libaec"):
+            self.requires("libaec/1.0.6")
         if self.options.with_libarchive:
             self.requires("libarchive/3.7.2")
         if self.options.with_libdeflate:
@@ -391,6 +397,7 @@ class GdalConan(ConanFile):
         tc.variables["GDAL_USE_KEA"] = self.options.with_kea
         tc.variables["GDAL_USE_LERC"] = self.options.with_lerc
         tc.variables["GDAL_USE_LERC_INTERNAL"] = False
+        tc.variables["GDAL_USE_LIBAEC"] = self.options.get_safe("with_libaec", False)
         tc.variables["GDAL_USE_LIBCSF"] = False
         tc.variables["GDAL_USE_LIBCSF_INTERNAL"] = self.options.with_libcsf
         tc.variables["GDAL_USE_LIBKML"] = self.options.with_libkml
@@ -502,6 +509,7 @@ class GdalConan(ConanFile):
             "json-c": "JSONC",
             "kealib": "KEA",
             "lerc": "LERC",
+            "libaec": "LIBAEC",
             "libarchive": "ARCHIVE",
             "libbasisu": "basisu",
             # "libcsf": "LIBCSF",
@@ -584,6 +592,7 @@ class GdalConan(ConanFile):
             "hdfs":                       "HDFS::HDFS",
             "kealib":                     "KEA::KEA",
             "lerc":                       "LERC::LERC",
+            "libaec":                     "LIBAEC::LIBAEC",
             "libarchive":                 "ARCHIVE::ARCHIVE",
             "libbasisu":                  "basisu::basisu_lib",
             "libdeflate":                 "Deflate::Deflate",
@@ -722,6 +731,8 @@ class GdalConan(ConanFile):
             self.cpp_info.requires.extend(["kealib::kealib"])
         if self.options.with_lerc:
             self.cpp_info.requires.extend(["lerc::lerc"])
+        if self.options.get_safe("with_libaec"):
+            self.cpp_info.requires.extend(["libaec::libaec"])
         if self.options.with_libarchive:
             self.cpp_info.requires.extend(["libarchive::libarchive"])
         if self.options.with_libdeflate:
