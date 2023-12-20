@@ -76,7 +76,7 @@ class FltkConan(ConanFile):
             self.requires("fontconfig/2.14.2")
             self.requires("xorg/system")
             if self.options.with_xft:
-                self.requires("libxft/2.3.6")
+                self.requires("libxft/2.3.8")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
