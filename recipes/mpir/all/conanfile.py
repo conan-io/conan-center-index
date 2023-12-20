@@ -100,7 +100,7 @@ class MpirConan(ConanFile):
                 tc.extra_cxxflags += [
                     "-Wno-implicit-function-declaration"
                     f"-isysroot {sdk_path}"
-                    "-arch", f"{to_apple_arch(self.settings_build.arch)}"
+                    "-arch", to_apple_arch(self)
                 ]
         # Disable docs
         tc.make_args.append("MAKEINFO=true")
