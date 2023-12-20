@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -44,7 +45,7 @@ class CoostConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libcurl:
-            self.requires("libcurl/8.2.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.with_libcurl or self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.settings.os == "Linux":
@@ -53,6 +54,9 @@ class CoostConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+        if Version(self.version) >= "3.0.2" and is_msvc(self) and self.options.shared:
+            # INFO: src\include\co\thread.h: error C2492: 'g_tid': data with thread storage duration may not have dll interface
+            raise ConanInvalidConfiguration(f"{self.ref} Conan recipe does not support -o shared=True with Visual Studio. Contributions are welcome.")
         if self.info.options.with_libcurl:
             if not self.info.options.with_openssl:
                 raise ConanInvalidConfiguration(f"{self.ref} requires with_openssl=True when using with_libcurl=True")
