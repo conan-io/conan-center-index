@@ -1,0 +1,37 @@
+diff --git a/ext/openssl/extconf.rb b/ext/openssl/extconf.rb
+--- ext/openssl/extconf.rb
++++ ext/openssl/extconf.rb
+@@ -46,6 +46,7 @@ def find_openssl_library
+     # required for static OpenSSL libraries
+     have_library("gdi32") # OpenSSL <= 1.0.2 (for RAND_screen())
+     have_library("crypt32")
++    have_library("advapi32")
+   end
+
+   return false unless have_header("openssl/ssl.h")
+@@ -56,9 +57,13 @@ def find_openssl_library
+
+   if $mswin
+     # OpenSSL >= 1.1.0: libcrypto.lib and libssl.lib.
++    # Potentially with 'd' appended (conan center index)
+     if have_library("libcrypto", "CRYPTO_malloc") &&
+         have_library("libssl", "SSL_new")
+       return true
++    elsif have_library("libcryptod", "CRYPTO_malloc") &&
++        have_library("libssld", "SSL_new")
++      return true
+     end
+
+     # OpenSSL <= 1.0.2: libeay32.lib and ssleay32.lib.
+diff --git a/ext/zlib/extconf.rb b/ext/zlib/extconf.rb
+--- ext/zlib/extconf.rb
++++ ext/zlib/extconf.rb
+@@ -11,7 +11,7 @@ require 'rbconfig'
+ dir_config 'zlib'
+
+ libs = $libs
+-if %w'z libz zlib1 zlib zdll zlibwapi'.find {|z| have_library(z, 'deflateReset')} and
++if %w'z zlibstatic zlibstaticd zlib zlibd libz zlib1 zdll zlibwapi'.find {|z| have_library(z, 'deflateReset')} and
+     have_header('zlib.h') then
+   have_zlib = true
+ else
