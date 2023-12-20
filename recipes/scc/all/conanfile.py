@@ -6,6 +6,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches, replace_in_file, rmdir
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -81,9 +82,15 @@ class SystemcComponentsConan(ConanFile):
         tc.variables["ENABLE_CONAN"] = False
         if self.settings.os == "Windows":
             tc.variables["SCC_LIMIT_TRACE_TYPE_LIST"] = True
+        if not is_msvc(self):
+            # Used at https://github.com/Minres/SystemC-Components/blob/2023.06/src/common/util/pool_allocator.h#L110
+            # but is not set anywhere
+            tc.preprocessor_definitions["_GLIBCXX_USE_NOEXCEPT"] = "noexcept"
         tc.generate()
+
         deps = CMakeDeps(self)
         deps.set_property("systemc", "cmake_file_name", "SystemC")
+        deps.set_property("systemc-cci", "cmake_target_name", "systemc-cci::systemc-cci")
         deps.set_property("yaml-cpp", "cmake_target_name", "yaml-cpp::yaml-cpp")
         deps.generate()
 
@@ -128,9 +135,6 @@ class SystemcComponentsConan(ConanFile):
 
         self.cpp_info.components["busses"].libs = ["busses"]
         self.cpp_info.components["busses"].requires = ["tlm-interfaces", "scc-sysc"]
-
-        self.cpp_info.components["cciapi"].libs = ["cciapi"]
-        self.cpp_info.components["cciapi"].requires = ["rapidjson::rapidjson"]
 
         self.cpp_info.components["fstapi"].libs = ["fstapi"]
         self.cpp_info.components["fstapi"].requires = ["zlib::zlib", "lz4::lz4"]
