@@ -9,7 +9,6 @@ from conan.tools.files import chdir, copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, is_msvc_static_runtime, msvc_runtime_flag
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
