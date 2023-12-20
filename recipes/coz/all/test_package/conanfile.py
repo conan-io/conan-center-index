@@ -17,14 +17,13 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def build(self):
-        # FIXME: To work properly Coz tool requires debug information https://github.com/plasma-umass/coz
-        # cmake = CMake(self, build_type="RelWithDebInfo")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if can_run(self):
+        # Coz requires debug information to work properly
+        if can_run(self) and self.settings.build_type in ["Debug", "RelWithDebInfo"]:
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
             self.run("coz run --- " + bin_path, env="conanrun")
