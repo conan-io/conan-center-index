@@ -12,11 +12,11 @@ required_conan_version = ">=1.53.0"
 
 class UnleashConan(ConanFile):
     name = "unleash-client-cpp"
-    description = "Unleash Client SDK for C++ projects."
+    description = "C++ client SDK for Unleash, an open-source feature flag management service."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/aruizs/unleash-client-cpp/"
-    topics = ("unleash", "feature", "flag", "toggle")
+    topics = ("unleash", "feature-flag")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
