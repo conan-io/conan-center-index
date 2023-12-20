@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 
@@ -45,6 +46,11 @@ class SleefConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "shared sleef not supported on Windows, it produces runtime errors"
             )
+        if cross_building(self) and self.settings.arch == "armv8":
+            # Fails with "No rule to make target `/bin/mkrename'"
+            # https://github.com/shibatch/sleef/issues/308
+            raise ConanInvalidConfiguration("sleef does not support cross-building to armv8")
+
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
