@@ -481,6 +481,7 @@ class GdalConan(ConanFile):
         jsonc.cpp_info.includedirs.append(os.path.join(jsonc.package_folder, "include", "json-c"))
 
         deps = CMakeDeps(self)
+        # https://gdal.org/development/building_from_source.html#cmake-package-dependent-options
         # Based on `grep -hPIR '(gdal_check_package|find_package2)\(' ~/.conan2/p/b/gdal*/b/src/cmake | sort -u`
         conan_to_cmake_pkg_name = {
             "armadillo": "Armadillo",
@@ -527,8 +528,6 @@ class GdalConan(ConanFile):
             "lz4": "LZ4",
             "mariadb-connector-c": "MySQL",
             "mongo-cxx-driver": "MONGOCXX",
-            # "mssql_ncli": "MSSQL_NCLI",
-            # "mssql_odbc": "MSSQL_ODBC",
             "netcdf": "NetCDF",
             "odbc": "ODBC",
             # "odbccpp": "ODBCCPP",
@@ -538,7 +537,6 @@ class GdalConan(ConanFile):
             "openexr": "OpenEXR",
             "openjpeg": "OpenJPEG",
             "openssl": "OpenSSL",
-            # "oracle": "Oracle",
             "pcre": "PCRE",
             "pcre2": "PCRE2",
             "pdfium": "PDFIUM",
@@ -560,6 +558,9 @@ class GdalConan(ConanFile):
             # "kdu": "KDU",
             # "luratech": "LURATECH",
             # "mrsid": "MRSID",
+            # "mssql_ncli": "MSSQL_NCLI",
+            # "mssql_odbc": "MSSQL_ODBC",
+            # "oracle": "Oracle",
             # "rdb": "rdb",
             # "teigha": "TEIGHA",
         }
