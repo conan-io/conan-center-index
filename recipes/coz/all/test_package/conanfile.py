@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake
+from conan.tools.files import chdir
 
 
 class TestPackageConan(ConanFile):
@@ -22,9 +23,18 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        # Coz requires debug information to work properly
-        if can_run(self) and self.settings.build_type in ["Debug", "RelWithDebInfo"]:
-            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
-            self.run(bin_path, env="conanrun")
-            self.run("coz run --- " + bin_path, env="conanrun")
-            print(open("profile.coz").read())
+        if self.settings.build_type not in ["Debug", "RelWithDebInfo"]:
+            self.output.info(f"Skipping coz test because {self.settings.build_type} "
+                             "build type does not contain debug information")
+            return
+        if self.settings.os == "Linux":
+            perf_even_paranoid = int(open("/proc/sys/kernel/perf_event_paranoid").read())
+            is_root = os.geteuid() == 0
+            if perf_even_paranoid > 2 and not is_root:
+                self.output.info("Skipping coz test because /proc/sys/kernel/perf_event_paranoid value "
+                                 f"must be <= 2 (currently {perf_even_paranoid}) and not running as root")
+                return
+        if can_run(self):
+            with chdir(self, self.cpp.build.bindir):
+                self.run("coz run --- ./test_package", env="conanrun")
+                print(open("profile.coz").read())
