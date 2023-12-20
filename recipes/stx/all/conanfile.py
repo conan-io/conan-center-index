@@ -1,10 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
-from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -58,50 +57,23 @@ class STXConan(ConanFile):
             self.requires('abseil/20230125.3')
 
     def validate(self):
-        compiler = self.settings.compiler
-        compiler_version = Version(self.settings.compiler.version)
-
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
+
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if is_msvc(self) and compiler_version < 16:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd} language and standard library features "
-                "which VS < 2019 lacks"
-            )
-
-        if compiler == 'gcc' and compiler_version < 8:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd} language and standard library features "
-                "which GCC < 8 lacks"
-            )
-
-        if compiler == 'clang' and compiler.libcxx and \
-                compiler.libcxx in ['libstdc++', 'libstdc++11'] and \
-                compiler_version < 9:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd} language and standard library features "
-                "which clang < 9 with libc++ lacks"
-            )
-
-        if (compiler == 'clang' and compiler.libcxx and
-                compiler.libcxx == 'libc++' and
-                compiler_version < 10):
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd} language and standard library features "
-                "which clang < 10 with libc++ lacks"
-            )
-
-        if compiler == 'apple-clang' and compiler_version < 12:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd} language and standard library features "
-                "which apple-clang < 12 with libc++ lacks"
-            )
+        if self.settings.compiler == "clang":
+            libcxx = stdcpp_library(self)
+            compiler_version = Version(self.settings.compiler.version)
+            if (libcxx == "stdc++" and compiler_version < 9) or (libcxx == "c++" and compiler_version < 10):
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd} language and standard library features "
+                    f"which clang < {compiler_version} with lib{libcxx} lacks"
+                )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
