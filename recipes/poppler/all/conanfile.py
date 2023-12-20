@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -87,6 +87,10 @@ class PopplerConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if conan_version.major == 1 and self.options.shared:
+            # Fails with an OpenSSL linking error otherwise.
+            # This appears to boil down to the order of the dependencies listed by CMakeDeps in v1.
+            self.options.with_libcurl = False
 
     def configure(self):
         if self.options.shared:
@@ -137,7 +141,7 @@ class PopplerConan(ConanFile):
         if self.options.with_libcurl:
             # https://gitlab.freedesktop.org/poppler/poppler/-/blob/poppler-23.11.0/poppler/CurlCachedFile.h#L18
             self.requires("libcurl/[>=7.78 <9]", transitive_headers=True, transitive_libs=True)
-            self.requires("openssl/[>=1.1 <4]", transitive_libs=True)
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
 
