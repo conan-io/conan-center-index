@@ -93,6 +93,10 @@ class FltkConan(ConanFile):
         tc.variables["OPTION_USE_XFT"] = self.options.with_xft
         if self.options.abi_version:
             tc.variables["OPTION_ABI_VERSION"] = self.options.abi_version
+        tc.variables["OPTION_USE_SYSTEM_LIBJPEG"] = True
+        tc.variables["OPTION_USE_SYSTEM_ZLIB"] = True
+        tc.variables["OPTION_USE_SYSTEM_LIBPNG"] = True
+
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
