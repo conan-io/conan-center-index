@@ -2,8 +2,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, to_apple_arch
 from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.gnu import Autotools, PkgConfigDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, unix_path, VCVars
 from conan.tools.scm import Version
@@ -68,6 +69,10 @@ class RubyConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def build_requirements(self):
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/2.1.0")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -114,17 +119,11 @@ class RubyConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        td = AutotoolsDeps(self)
-        # remove non-existing frameworks dirs, otherwise clang complains
-        for m in re.finditer(r'-F(?: |\")([^\r\n\t\f\v\" ]+)\"?', td.vars().get("LDFLAGS")):
-            if not os.path.exists(m[1]):
-                td.environment.remove("LDFLAGS", m[0])
-        if self.settings.os == "Windows":
-            if is_msvc(self):
-                td.environment.append("LIBS", [f"{lib}.lib" for lib in self._windows_system_libs])
-            else:
-                td.environment.append("LDFLAGS", [f"-l{lib}" for lib in self._windows_system_libs])
-        td.generate()
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
         tc = AutotoolsToolchain(self)
 
