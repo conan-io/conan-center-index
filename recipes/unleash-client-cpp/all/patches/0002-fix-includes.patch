@@ -1,0 +1,32 @@
+--- src/strategies/applicationhostname.cpp
++++ src/strategies/applicationhostname.cpp
+@@ -6,7 +6,7 @@
+ #else
+ #include <unistd.h>
+ #endif
+-#include <iostream>
++#include <sstream>
+ 
+ 
+ namespace unleash {
+
+--- src/strategies/remoteaddress.cpp
++++ src/strategies/remoteaddress.cpp
+@@ -1,5 +1,6 @@
+ #include "unleash/strategies/remoteaddress.h"
+ #include <nlohmann/json.hpp>
++#include <sstream>
+ 
+ namespace unleash {
+ RemoteAddress::RemoteAddress(std::string_view parameters, std::string_view constraints) : Strategy("remoteAddress", constraints) {
+
+--- src/strategies/userwithid.cpp
++++ src/strategies/userwithid.cpp
+@@ -1,6 +1,6 @@
+ #include "unleash/strategies/userwithid.h"
+-#include <iostream>
+ #include <nlohmann/json.hpp>
++#include <sstream>
+ 
+ namespace unleash {
+ UserWithId::UserWithId(std::string_view parameters, std::string_view constraints) : Strategy("userWithId", constraints) {

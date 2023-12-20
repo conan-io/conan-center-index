@@ -41,7 +41,7 @@ class UnleashConan(ConanFile):
             "gcc": "7",
             "clang": "4.0",
             "apple-clang": "3.8",
-            "intel": "17",
+            "intel-cc": "17",
         }
 
     def export_sources(self):
@@ -59,8 +59,8 @@ class UnleashConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpr/1.10.4")
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("cpr/1.10.5")
+        self.requires("nlohmann_json/3.11.3")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -79,8 +79,8 @@ class UnleashConan(ConanFile):
         tc.variables["ENABLE_TESTING"] = False
         tc.variables["ENABLE_TEST_COVERAGE"] = False
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)

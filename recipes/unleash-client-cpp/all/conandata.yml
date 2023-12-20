@@ -1,7 +1,13 @@
 sources:
-  "1.1.1":
+  "1.1.2":
     url: "https://github.com/aruizs/unleash-client-cpp/archive/refs/tags/v1.1.1.tar.gz"
     sha256: "2750dc231bf608910d4270ac39d83d46d25b88cc547a9d4d31f7ce4950effa7c"
 patches:
-  "1.1.1":
+  "1.1.2":
     - patch_file: "patches/0001-no-conan-cmake.patch"
+      patch_type: "conan"
+      patch_description: "Do not load Conan in CMakeLists.txt"
+    - patch_file: "patches/0002-fix-includes.patch"
+      patch_type: "portability"
+      patch_description: "Fix missing includes when building with Clang"
+      patch_source: "https://github.com/aruizs/unleash-client-cpp/pull/19"
