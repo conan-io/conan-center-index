@@ -69,7 +69,7 @@ class JsonSchemaValidatorConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nlohmann_json/3.11.2", transitive_headers=True)
+        self.requires("nlohmann_json/[>=3.11.2 <4]", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
