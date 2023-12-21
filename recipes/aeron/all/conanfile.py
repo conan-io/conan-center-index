@@ -72,7 +72,10 @@ class AeronConan(ConanFile):
             raise ConanInvalidConfiguration("This platform (os=Macos arch=armv8) is not yet supported by this recipe")
 
     def build_requirements(self):
-        self.tool_requires("zulu-openjdk/17.0.9")
+        if Version(self.version) >= "1.41":
+            self.tool_requires("zulu-openjdk/17.0.9")
+        else:
+            self.tool_requires("zulu-openjdk/11.0.19")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
