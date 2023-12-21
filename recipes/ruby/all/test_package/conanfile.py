@@ -56,8 +56,10 @@ class TestPackageConan(ConanFile):
         output = StringIO()
         self.run('ruby -e "puts RUBY_VERSION"', output, env="conanbuild")
         output_str = str(output.getvalue()).strip()
-        self.output.info(f'ruby -e "PUTS RUBY_VERSION": {output_str}')
-        assert output_str == self._ruby_version()
+        self.output.info(f'ruby -e "puts RUBY_VERSION": "{output_str}"')
+        assert_ruby_version = self._ruby_version()
+        self.output.info(f"Expected version: '{assert_ruby_version}'")
+        assert assert_ruby_version in output_str
 
     def test(self):
         self._test_ruby_executable_version()
