@@ -131,15 +131,18 @@ class FollyConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=False)
 
     def _cppstd_flag_value(self, cppstd):
-        cppstd_prefix_gnu, cppstd_value = (cppstd[:3], cppstd[3:]) if "gnu" in cppstd else ("", cppstd)
-        if not cppstd_prefix_gnu:
-            cppstd_prefix_gnu = "c"
+        cppstd = str(cppstd)
+        if cppstd.startswith("gnu"):
+            prefix = "gnu"
+            year = cppstd[3:]
+        else:
+            prefix = "c"
+            year = cppstd
         if is_msvc(self):
-            cppstd_prefix_gnu = ""
-            if cppstd_value > "17":
-                cppstd_value = "latest"
-        cxx_std_value = f"{cppstd_prefix_gnu}++{cppstd_value}"
-        return cxx_std_value
+            prefix = ""
+            if year > "17":
+                year = "latest"
+        return f"{prefix}++{year}"
 
     def generate(self):
         tc = CMakeToolchain(self)
