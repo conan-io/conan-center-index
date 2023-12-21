@@ -47,6 +47,7 @@ required_for_references:
 - asio
 - asio-grpc
 - asmjit
+- asn1c
 - assimp
 - astc-codec
 - astro-informatics-so3
@@ -270,11 +271,13 @@ required_for_references:
 - debug_assert
 - decimal_for_cpp
 - deco
+- dependencies
 - detools
 - dfp
 - di
 - dice-template-library
 - dime
+- directshowbaseclasses
 - directx-headers
 - dirent
 - discount
@@ -620,6 +623,7 @@ required_for_references:
 - libdxfrw
 - libe57format
 - libelf
+- libelfin
 - libenvpp
 - libepoxy
 - libev
@@ -1046,6 +1050,7 @@ required_for_references:
 - poshlib
 - pprint
 - pranav-csv2
+- premake
 - pretty-name
 - procxx-boost-ext-simd
 - proj
@@ -1246,6 +1251,7 @@ required_for_references:
 - taocpp-sequences
 - taocpp-taopq
 - taocpp-tuple
+- tar
 - taskflow
 - taywee-args
 - tcb-span
