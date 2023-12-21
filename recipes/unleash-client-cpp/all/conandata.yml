@@ -1,9 +1,12 @@
 sources:
-  "1.1.2":
+  "1.2.0":
+    url: "https://github.com/aruizs/unleash-client-cpp/archive/refs/tags/v1.2.0.tar.gz"
+    sha256: "d0a5d68d2c59f3321cc5eb67ee9f2c6271960cfc94d9269cd2126060935aa4f9"
+  "1.1.1":
     url: "https://github.com/aruizs/unleash-client-cpp/archive/refs/tags/v1.1.1.tar.gz"
     sha256: "2750dc231bf608910d4270ac39d83d46d25b88cc547a9d4d31f7ce4950effa7c"
 patches:
-  "1.1.2":
+  "1.1.1":
     - patch_file: "patches/0001-no-conan-cmake.patch"
       patch_type: "conan"
       patch_description: "Do not load Conan in CMakeLists.txt"
