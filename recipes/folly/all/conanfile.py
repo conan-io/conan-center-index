@@ -109,7 +109,7 @@ class FollyConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} could not be built on {self.settings.os}. PR's are welcome.")
 
-        if Version(self.version) >= "2020.08.10.00" and self.settings.compiler == "clang" and self.options.shared:
+        if self.settings.compiler == "clang" and self.options.shared:
             raise ConanInvalidConfiguration(f"Folly {self.version} could not be built by clang as a shared library")
 
         boost = self.dependencies["boost"]
