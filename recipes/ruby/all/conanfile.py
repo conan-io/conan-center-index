@@ -11,7 +11,6 @@ from conan.tools.scm import Version
 
 import glob
 import os
-import re
 
 required_conan_version = ">=1.53"
 
@@ -156,7 +155,7 @@ class RubyConan(ConanFile):
             tc.configure_args.append(f"--with-opt-dir={sep.join(opt_dirs)}")
 
         if cross_building(self) and is_apple_os(self):
-            apple_arch = to_apple_arch(self.settings.arch)
+            apple_arch = to_apple_arch(self)
             if apple_arch:
                 tc.configure_args.append(f"--with-arch={apple_arch}")
         if is_msvc(self):
