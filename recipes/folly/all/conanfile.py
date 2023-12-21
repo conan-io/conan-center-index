@@ -223,16 +223,12 @@ class FollyConan(ConanFile):
                 "folly_exception_counter",
                 "folly_exception_tracer",
                 "folly_exception_tracer_base",
-                "folly_test_util",
-                "follybenchmark",
-                "folly"
             ]
-        else:
-            self.cpp_info.components["libfolly"].libs = [
-                "folly_test_util",
-                "follybenchmark",
-                "folly"
-            ]
+        self.cpp_info.components["libfolly"].libs += [
+            "folly_test_util",
+            "follybenchmark",
+            "folly"
+        ]
 
         self.cpp_info.components["libfolly"].requires = [
             "boost::context", "boost::filesystem", "boost::program_options", "boost::regex", "boost::system", "boost::thread",
@@ -262,10 +258,11 @@ class FollyConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.components["libfolly"].system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
 
-        if (self.settings.os in ["Linux", "FreeBSD"] and self.settings.compiler == "clang" and
-            self.settings.compiler.libcxx == "libstdc++") or \
-           (self.settings.compiler == "apple-clang" and
-            Version(self.settings.compiler.version.value) == "9.0" and self.settings.compiler.libcxx == "libc++"):
+        if str(self.settings.compiler.libcxx) == "libstdc++" or (
+            self.settings.compiler == "apple-clang" and
+            Version(self.settings.compiler.version.value) == "9.0" and
+            self.settings.compiler.libcxx == "libc++"
+        ):
             self.cpp_info.components["libfolly"].system_libs.append("atomic")
 
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "11.0":
