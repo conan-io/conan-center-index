@@ -67,14 +67,23 @@ patches:
     - "base_path": "qtwebengine"
       "patch_description": "Workaround for too long .rps file name"
       "patch_file": "patches/c72097e_6.6.0.diff"
+    - "base_path": "qtbase"
+      "patch_description": "Fix build error with lambda on GCC 9.2"
+      "patch_file": "patches/32fa63f.patch"
   "6.6.0":
     - "base_path": "qtwebengine"
       "patch_description": "Workaround for too long .rps file name"
       "patch_file": "patches/c72097e_6.6.0.diff"
+    - "base_path": "qtbase"
+      "patch_description": "Fix build error with lambda on GCC 9.2"
+      "patch_file": "patches/32fa63f.patch"
   "6.5.3":
     - "base_path": "qtwebengine"
       "patch_description": "Workaround for too long .rps file name"
       "patch_file": "patches/c72097e.diff"
+    - "base_path": "qtbase"
+      "patch_description": "Fix build error with lambda on GCC 9.2"
+      "patch_file": "patches/32fa63f_6.5.0.patch"
   "6.4.2":
     - base_path: "qtbase/cmake"
       patch_description: "Fix pri helpers"
