@@ -1,4 +1,7 @@
 sources:
+  "1.4.7":
+    url: "https://github.com/QtExcel/QXlsx/archive/refs/tags/v1.4.7.zip"
+    sha256: "c65dd7ecf2a53b9d5cfd816e62715d2f62b2e05970121002d35b2b4ae570b645"
   "1.4.5":
     url: "https://github.com/QtExcel/QXlsx/archive/refs/tags/v1.4.5.zip"
     sha256: "eadcad2718335673f86fe20fd91e822e6c1e3624483be9d79cf79254e5426067"
