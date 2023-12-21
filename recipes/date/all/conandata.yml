@@ -21,6 +21,10 @@ patches:
     - patch_file: "patches/cmake-3.0.0.patch"
       patch_description: "Disable string view to workaround clang 5 not having it"
       patch_type: "portability"
+    - patch_file: "patches/load-tzdb-from-envvar-and-windows-binary-db-support-3.0.0.patch"
+      patch_description: "Allow TZDB to be loaded by envvar and add ability for windows to read zic-compiled binary db"
+      patch_type: "portability"
+      patch_source: "https://github.com/HowardHinnant/date/pull/611"
   "2.4.1":
     - patch_file: "patches/0001-fix-uwp.patch"
       patch_description: "Fix Universal Windows Platform (UWP) unhandled exception support. See https://github.com/microsoft/vcpkg/pull/8151#issuecomment-531175393."
@@ -31,3 +35,7 @@ patches:
     - patch_file: "patches/string_view.patch"
       patch_description: "Disable string view to workaround clang 5 not having it"
       patch_type: "portability"
+    - patch_file: "patches/load-tzdb-from-envvar-and-windows-binary-db-support-2.4.1.patch"
+      patch_description: "Allow TZDB to be loaded by envvar and add ability for windows to read zic-compiled binary db"
+      patch_type: "portability"
+      patch_source: "https://github.com/HowardHinnant/date/pull/611"
