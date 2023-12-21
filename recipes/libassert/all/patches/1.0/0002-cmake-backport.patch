@@ -1,0 +1,68 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b3cd118..0bb5de8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.1)
+ 
+ project(asserts)
+
++set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON) 
++
++# libassert uses relocs, -fpic has to be used to allow shared libs to link libassert as a static library.
++set(CMAKE_POSITION_INDEPENDENT_CODE ON)
++include(GNUInstallDirs)
++
+ add_library(asserts_library_warnings INTERFACE)
+ 
+ if(MSVC)
+@@ -11,8 +15,12 @@ else()
+ endif()
+ 
+ add_library(assert src/assert.cpp)
+-target_include_directories(assert PUBLIC
+-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>)
++target_include_directories(
++  assert
++  PUBLIC
++  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
++  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/assert/assert>
++)
+     
+ option(ASSERT_DECOMPOSE_BINARY_LOGICAL "Enables expression decomposition of && and ||" OFF)
+ option(ASSERT_LOWERCASE "Enables assert alias for ASSERT" OFF)
+@@ -43,7 +51,32 @@ set_target_properties(assert
+ 
+ target_link_libraries(assert PRIVATE asserts_library_warnings)
+ 
+-if (MSVC)
+-    target_link_libraries(assert PRIVATE dbghelp)
+-endif ()
++target_link_libraries(
++  assert
++  PRIVATE
++  $<$<CXX_COMPILER_ID:MSVC>:dbghelp>
++  ${CMAKE_DL_LIBS}
++)
++
++if(NOT CMAKE_SKIP_INSTALL_RULES)
++  install(
++    TARGETS assert
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  )
++
++  install(
++    FILES
++    include/assert.hpp
++    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/assert/assert
++  )
+ 
++  install(
++    FILES
++    third_party/magic_enum.hpp
++    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/assert/third_party
++  )
++
++endif()

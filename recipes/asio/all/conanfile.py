@@ -8,23 +8,24 @@ required_conan_version = ">=1.50.0"
 
 class Asio(ConanFile):
     name = "asio"
+    description = "Asio is a cross-platform C++ library for network and low-level I/O"
+    license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://think-async.com/Asio"
-    description = "Asio is a cross-platform C++ library for network and low-level I/O"
-    topics = ("asio", "network", "io", "low-level")
-    license = "BSL-1.0"
+    topics = ("network", "io", "low-level", "header-only")
+
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-
-    def package_id(self):
-        self.info.clear()
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def package_id(self):
+        self.info.clear()
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

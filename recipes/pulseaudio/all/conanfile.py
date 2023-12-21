@@ -58,39 +58,38 @@ class PulseAudioConan(ConanFile):
 
     def requirements(self):
         self.requires("libiconv/1.17")
-        self.requires("libsndfile/1.2.0")
-        self.requires("libcap/2.66")
+        self.requires("libsndfile/1.2.2")
+        self.requires("libcap/2.69")
         self.requires("libtool/2.4.7")
         if self.options.with_alsa:
-            self.requires("libalsa/1.2.7.2")
+            self.requires("libalsa/1.2.10")
         if self.options.with_glib:
-            self.requires("glib/2.76.0")
+            self.requires("glib/2.78.1")
         if self.options.get_safe("with_fftw"):
-            self.requires("fftw/3.3.9")
+            self.requires("fftw/3.3.10")
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_dbus:
-            self.requires("dbus/1.15.2")
+            self.requires("dbus/1.15.8")
 
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("pulseaudio supports only linux currently")
 
         if self.options.get_safe("with_fftw"):
-            fftw_precision = self.dependencies["fftw"].options.precision
-            if fftw_precision != "single":
+            if not self.dependencies["fftw"].options.precision_single:
                 raise ConanInvalidConfiguration(
-                    f"Pulse audio cannot use fftw {fftw_precision} precision. "
-                    "Either set option fftw:precision=single or pulseaudio:with_fftw=False"
+                    f"Pulse audio uses fftw single precision. "
+                     "Either set option -o fftw/*:precision_single=True or -o pulseaudio/*:with_fftw=False"
                 )
 
     def build_requirements(self):
         self.tool_requires("gettext/0.21")
         self.tool_requires("libtool/2.4.7")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

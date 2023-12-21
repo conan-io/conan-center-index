@@ -1,14 +1,10 @@
 sources:
   "1.6.1":
-    sha256: "b65e40713da57d004123b6319828be7f1273fbc6490e145874ee1177e112c459"
     url:
       - "https://archive.apache.org/dist/apr/apr-util-1.6.1.tar.gz"
       - "https://downloads.apache.org/apr/apr-util-1.6.1.tar.gz"
+    sha256: "b65e40713da57d004123b6319828be7f1273fbc6490e145874ee1177e112c459"
 patches:
   "1.6.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-cmake-build-only-shared-static.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0002-apu-config-prefix-env.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0003-disable-check-APR_LIBRARIES.patch"
+    - patch_file: "patches/0001-fix-cmake.patch"
+    - patch_file: "patches/0002-apu-config-prefix-env.patch"

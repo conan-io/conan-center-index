@@ -18,7 +18,6 @@ class LibelfConan(ConanFile):
     homepage = "https://directory.fsf.org/wiki/Libelf"
     license = "LGPL-2.0"
     topics = ("elf", "fsf", "libelf", "object-file")
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -41,7 +40,10 @@ class LibelfConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
+        if self.settings.os not in ["Linux", "FreeBSD", "Windows"]:
+            self.options.rm_safe("shared")
+            self.package_type = "static-library"
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
@@ -51,10 +53,6 @@ class LibelfConan(ConanFile):
             cmake_layout(self, src_folder="src")
         else:
             basic_layout(self, src_folder="src")
-
-    def validate(self):
-        if self.options.shared and self.settings.os not in ["Linux", "FreeBSD", "Windows"]:
-            raise ConanInvalidConfiguration("libelf can not be built as shared library on non linux/FreeBSD/windows platforms")
 
     def build_requirements(self):
         if self.settings.os != "Windows":
@@ -114,7 +112,7 @@ class LibelfConan(ConanFile):
             autotools = Autotools(self)
             autotools.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "locale"))
-            if self.options.shared:
+            if self.options.get_safe("shared"):
                 rm(self, "*.a", os.path.join(self.package_folder, "lib"))
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))

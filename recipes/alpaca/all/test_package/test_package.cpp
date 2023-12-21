@@ -1,11 +1,11 @@
 #include <alpaca/alpaca.h>
 
 struct Config {
-  std::string device;
-  std::pair<unsigned, unsigned> resolution;
-  std::array<double, 9> K_matrix;
-  std::vector<float> distortion_coeffients;
-  std::map<std::string, std::variant<uint16_t, std::string, bool>> parameters;
+    std::string device;
+    std::pair<unsigned, unsigned> resolution;
+    std::array<double, 9> K_matrix;
+    std::vector<float> distortion_coeffients;
+    std::map<std::string, std::variant<uint16_t, std::string, bool>> parameters;
 };
 
 int main() {
@@ -32,4 +32,3 @@ int main() {
     }
     return 0;
 }
-

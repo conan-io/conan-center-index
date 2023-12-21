@@ -92,17 +92,6 @@ def main():
                         " reviewing and consumers to evaluate patches"
                     )
 
-                # v2 migrations suggestion
-                if "base_path" in parsed["patches"][version][i]:
-                    base_path = parsed["patches"][version][i]["base_path"]
-                    print(
-                        f"::notice file={args.path},line={base_path.start_line},endline={base_path.end_line},"
-                        f"title=conandata.yml v2 migration suggestion"
-                        "::'base_path' should not be required once a recipe has been upgraded to take advantage of"
-                        " layouts (see https://docs.conan.io/en/latest/reference/conanfile/tools/layout.html) and"
-                        " the new helper (see https://docs.conan.io/en/latest/reference/conanfile/tools/files/patches.html#conan-tools-files-apply-conandata-patches)"
-                    )
-
 
 def pretty_print_yaml_validate_error(args, error):
     snippet = error.context_mark.get_snippet().replace("\n", "%0A")

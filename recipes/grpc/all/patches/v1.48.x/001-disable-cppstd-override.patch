@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 25990a5..f37849c 100644
+index 1ecaea8eb7..0788b88177 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -226,21 +226,6 @@ if (NOT DEFINED CMAKE_C_STANDARD)
@@ -24,3 +24,16 @@ index 25990a5..f37849c 100644
  if (NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
    set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
  endif()
+diff --git a/src/core/ext/xds/xds_http_fault_filter.cc b/src/core/ext/xds/xds_http_fault_filter.cc
+index 2a10d2fd27..0900fedf61 100644
+--- a/src/core/ext/xds/xds_http_fault_filter.cc
++++ b/src/core/ext/xds/xds_http_fault_filter.cc
+@@ -109,7 +109,7 @@ absl::StatusOr<Json> ParseHttpFaultIntoJson(
+       int abort_http_status_code =
+           envoy_extensions_filters_http_fault_v3_FaultAbort_http_status(
+               fault_abort);
+-      if (abort_http_status_code != 0 and abort_http_status_code != 200) {
++      if (abort_http_status_code != 0 && abort_http_status_code != 200) {
+         abort_grpc_status_code =
+             grpc_http2_status_to_grpc_status(abort_http_status_code);
+       }

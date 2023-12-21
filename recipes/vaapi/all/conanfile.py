@@ -3,27 +3,29 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import PkgConfig
 from conan.tools.system import package_manager
 
-required_conan_version = ">=1.47"
+required_conan_version = ">=1.50.0"
 
 
 class SysConfigVAAPIConan(ConanFile):
     name = "vaapi"
     version = "system"
     description = "VA-API is an open-source library and API specification, which provides access to graphics hardware acceleration capabilities for video processing."
-    topics = ("conan", "vaapi", "hwaccel", "video")
+    topics = ("hwaccel", "video")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://01.org/linuxmedia/vaapi"
     license = "MIT"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
+
+    def layout(self):
+        pass
+
+    def package_id(self):
+        self.info.clear()
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
-
-    def package_id(self):
-        del self.info.settings.compiler
-        del self.info.settings.arch
-        del self.info.settings.build_type
 
     def system_requirements(self):
         dnf = package_manager.Dnf(self)

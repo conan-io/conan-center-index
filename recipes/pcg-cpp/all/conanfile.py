@@ -11,9 +11,10 @@ class PcgcppConan(ConanFile):
     name = "pcg-cpp"
     description = "C++ implementation of the PCG family of random number generators."
     license = ("MIT", "Apache-2.0")
-    topics = ("pcg-cpp", "pcg", "rng", "random")
+    topics = ("pcg-cpp", "pcg", "rng", "random", "header-only")
     homepage = "https://github.com/imneme/pcg-cpp"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -28,8 +29,7 @@ class PcgcppConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -40,6 +40,4 @@ class PcgcppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []

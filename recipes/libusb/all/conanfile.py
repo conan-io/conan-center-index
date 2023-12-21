@@ -18,6 +18,7 @@ class LibUSBConan(ConanFile):
     homepage = "https://github.com/libusb/libusb"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("usb", "device")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],

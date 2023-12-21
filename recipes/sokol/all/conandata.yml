@@ -1,4 +1,7 @@
 sources:
+  "cci.20230925":
+    url: "https://github.com/floooh/sokol/archive/5633a0f91bf3354320837ce0c7b4748a953a1401.zip"
+    sha256: 9c854bc7e6f73024a99554e8e1c8850fddfc325bb2b1ece2c59502c0e3cef68d
   "cci.20210304":
     url: "https://github.com/floooh/sokol/archive/c5d55faa1036af9919bd28400e97d37548bb3789.zip"
     sha256: e61c782e287543ffb8077ac24a7bfee05e867ee27f6c3e9487a2dbfa1ca2b466

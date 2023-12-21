@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
@@ -15,6 +16,7 @@ class CpphttplibConan(ConanFile):
     homepage = "https://github.com/yhirose/cpp-httplib"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("http", "https", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_openssl": [True, False],
@@ -34,9 +36,9 @@ class CpphttplibConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_brotli"):
             self.requires("brotli/1.0.9")
 

@@ -14,7 +14,7 @@ class XorgMakedepend(ConanFile):
     description = "Utility to parse C source files to make dependency lists for Makefiles"
     topics = ("xorg", "dependency", "obsolete")
     license = "MIT"
-    homepage = "https://gitlab.freedesktop.org/xorg/util/cf"
+    homepage = "https://gitlab.freedesktop.org/xorg/util/makedepend"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
 
@@ -30,7 +30,7 @@ class XorgMakedepend(ConanFile):
         self.requires("xorg-proto/2022.2")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.4")
+        self.build_requires("pkgconf/2.0.3")
 
     def validate(self):
         if self.settings.os == "Windows":

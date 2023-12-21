@@ -1,114 +1,75 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, replace_in_file
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
-import shutil
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibmadConan(ConanFile):
     name = "libmad"
     description = "MAD is a high-quality MPEG audio decoder."
-    topics = ("conan", "mad", "MPEG", "audio", "decoder")
+    topics = ("mad", "MPEG", "audio", "decoder")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.underbit.com/products/mad/"
     license = "GPL-2.0-or-later"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
+    exports_sources = "CMakeLists.txt"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.options.shared and self._is_msvc:
-            raise ConanInvalidConfiguration("libmad does not support shared library for MSVC")
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    def build_requirements(self):
-        if not self._is_msvc:
-            self.build_requires("gnu-config/cci.20201022")
-            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-                self.build_requires("msys2/cci.latest")
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} shared not supported by msvc")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["LIBMAD_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["LIBMAD_VERSION"] = self.version
+        tc.variables["LIBMAD_VERSION_MAJOR"] = Version(self.version).major
+        tc.generate()
 
     def build(self):
-        if self._is_msvc:
-            self._build_msvc()
-        else:
-            self._build_autotools()
-
-    def _build_msvc(self):
-        with tools.chdir(os.path.join(self._source_subfolder, "msvc++")):
-            # cl : Command line error D8016: '/ZI' and '/Gy-' command-line options are incompatible
-            tools.replace_in_file("libmad.dsp", "/ZI ", "")
-            if self.settings.arch == "x86_64":
-                tools.replace_in_file("libmad.dsp", "Win32", "x64")
-                tools.replace_in_file("libmad.dsp", "FPM_INTEL", "FPM_DEFAULT")
-                tools.replace_in_file("mad.h", "# define FPM_INTEL", "# define FPM_DEFAULT")
-            with tools.vcvars(self.settings):
-                self.run("devenv libmad.dsp /upgrade")
-            msbuild = MSBuild(self)
-            msbuild.build(project_file="libmad.vcxproj")
-
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
-    def _build_autotools(self):
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_SUB,
-                    os.path.join(self._source_subfolder, "config.sub"))
-        shutil.copy(self._user_info_build["gnu-config"].CONFIG_GUESS,
-                    os.path.join(self._source_subfolder, "config.guess"))
-        autotools = self._configure_autotools()
-        autotools.make()
-
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        args = []
-        if self.options.shared:
-            args = ["--disable-static", "--enable-shared"]
-        else:
-            args = ["--disable-shared", "--enable-static"]
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
-        return self._autotools
+        replace_in_file(
+            self, os.path.join(self.source_folder, "msvc++", "mad.h"),
+            "# define FPM_INTEL", "# define FPM_DEFAULT",
+        )
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        cmake.build()
 
     def package(self):
-        self.copy("COPYRIGHT", dst="licenses", src=self._source_subfolder)
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        self.copy("CREDITS", dst="licenses", src=self._source_subfolder)
-        if self._is_msvc:
-            self.copy(pattern="*.lib", dst="lib", src=self._source_subfolder, keep_path=False)
-            self.copy(pattern="mad.h", dst="include", src=os.path.join(self._source_subfolder, "msvc++"))
-        else:
-            autotools = self._configure_autotools()
-            autotools.install()
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        for license_file in ("COPYRIGHT", "COPYING", "CREDITS"):
+            copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["libmad" if self._is_msvc else "mad"]
+        self.cpp_info.libs = ["mad"]

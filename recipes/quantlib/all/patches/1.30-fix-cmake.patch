@@ -1,0 +1,125 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 542877163..83e919784 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -69,40 +69,6 @@ option(QL_USE_STD_TUPLE "Use std::tuple instead of boost::tuple" OFF)
+ set(QL_EXTERNAL_SUBDIRECTORIES "" CACHE STRING "Optional list of external source directories to be added to the build (semicolon-separated)")
+ set(QL_EXTRA_LINK_LIBRARIES "" CACHE STRING "Optional extra link libraries to add to QuantLib")
+ 
+-# Require C++14 or higher
+-if (NOT DEFINED CMAKE_CXX_STANDARD)
+-    set(CMAKE_CXX_STANDARD 14)
+-elseif(CMAKE_CXX_STANDARD LESS 14)
+-    message(FATAL_ERROR "Please specify CMAKE_CXX_STANDARD of 14 or higher")
+-endif()
+-if (NOT DEFINED CMAKE_CXX_STANDARD_REQUIRED)
+-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-endif()
+-# Avoid use of compiler language extensions, i.e. -std=c++14 not -std=gnu++14
+-if (NOT DEFINED CMAKE_CXX_EXTENSIONS)
+-    set(CMAKE_CXX_EXTENSIONS FALSE)
+-endif()
+-
+-# Convenience option to activate all STD options
+-if (QL_USE_STD_CLASSES)
+-    if (CMAKE_CXX_STANDARD GREATER_EQUAL 17)
+-        set(QL_USE_STD_ANY ON)
+-        set(QL_USE_STD_OPTIONAL ON)
+-    endif()
+-    set(QL_USE_STD_FUNCTION ON)
+-    set(QL_USE_STD_SHARED_PTR ON)
+-    set(QL_USE_STD_TUPLE ON)
+-endif()
+-
+-if (CMAKE_CXX_STANDARD LESS 17)
+-    if (QL_USE_STD_ANY)
+-        message(FATAL_ERROR "QL_USE_STD_ANY requires at least C++17")
+-    endif()
+-    if (QL_USE_STD_OPTIONAL)
+-        message(FATAL_ERROR "QL_USE_STD_OPTIONAL requires at least C++17")
+-    endif()
+-endif ()
+-
+ # Set the default warning level we use to pass the GitHub workflows
+ if (QL_ENABLE_DEFAULT_WARNING_LEVEL)
+     if (MSVC)
+@@ -229,7 +195,7 @@ if (QL_TAGGED_LAYOUT)
+     endif()
+     set(DEBUG_POSTFIX ${DEBUG_POSTFIX}-mt)
+     set(RELEASE_POSTFIX ${RELEASE_POSTFIX}-mt)
+-    if (CMAKE_MSVC_RUNTIME_LIBRARY MATCHES ".*DLL$")
++    if (CMAKE_MSVC_RUNTIME_LIBRARY MATCHES "DLL")
+         set(DEBUG_POSTFIX ${DEBUG_POSTFIX}-gd)
+     else()
+         set(DEBUG_POSTFIX ${DEBUG_POSTFIX}-sgd)
+diff --git a/cmake/Platform.cmake b/cmake/Platform.cmake
+index 1da2834bc..aa4530798 100644
+--- a/cmake/Platform.cmake
++++ b/cmake/Platform.cmake
+@@ -1,12 +1,5 @@
+ # Platform-specific flags and settings
+ if (MSVC)
+-    # See cmake policy CMP00091
+-    # One of "MultiThreaded", "MultiThreadedDebug", "MultiThreadedDLL", "MultiThreadedDebugDLL"
+-    if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+-        set(CMAKE_MSVC_RUNTIME_LIBRARY
+-            "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+-    endif()
+-
+     # Export all symbols so MSVC can populate the .lib and .dll
+     if (BUILD_SHARED_LIBS)
+         # Temp: disable DLL builds on MSVC
+diff --git a/ql/CMakeLists.txt b/ql/CMakeLists.txt
+index fc137f41d..883b8a670 100644
+--- a/ql/CMakeLists.txt
++++ b/ql/CMakeLists.txt
+@@ -2344,6 +2344,8 @@ add_library(ql_library
+     ${QL_CONFIGURED_HEADERS}
+     ${QL_GENERATED_HEADERS})
+ 
++target_compile_features(ql_library PUBLIC cxx_std_14)
++
+ set_target_properties(ql_library PROPERTIES
+     EXPORT_NAME ${PACKAGE_NAME}
+     OUTPUT_NAME ${PACKAGE_NAME}
+@@ -2378,6 +2380,7 @@ target_link_libraries(ql_library PUBLIC
+     ${OpenMP_CXX_LIBRARIES})
+ 
+ install(TARGETS ql_library EXPORT QuantLibTargets
++    RUNTIME DESTINATION ${QL_INSTALL_BINDIR}
+     ARCHIVE DESTINATION ${QL_INSTALL_LIBDIR}
+     LIBRARY DESTINATION ${QL_INSTALL_LIBDIR})
+ 
+@@ -2398,32 +2401,3 @@ foreach(file ${QL_GENERATED_HEADERS})
+     file(RELATIVE_PATH path ${PROJECT_BINARY_DIR} ${dir})
+     install(FILES ${file} DESTINATION "${QL_INSTALL_INCLUDEDIR}/${path}")
+ endforeach()
+-
+-# Install config scripts for people using `find_package(QuantLib::QuantLib CONFIG ...)`
+-include(CMakePackageConfigHelpers)
+-write_basic_package_version_file(
+-    "${PROJECT_BINARY_DIR}/cmake/QuantLibConfigVersion.cmake"
+-    VERSION ${QL_VERSION}
+-    COMPATIBILITY AnyNewerVersion
+-)
+-export(EXPORT QuantLibTargets
+-    FILE "${PROJECT_BINARY_DIR}/cmake/QuantLibTargets.cmake"
+-    NAMESPACE QuantLib::
+-)
+-configure_file("${PROJECT_SOURCE_DIR}/cmake/QuantLibConfig.cmake.in"
+-    "${PROJECT_BINARY_DIR}/cmake/QuantLibConfig.cmake"
+-    COPYONLY
+-)
+-configure_package_config_file("${PROJECT_SOURCE_DIR}/cmake/QuantLibConfig.cmake.in"
+-    "${PROJECT_BINARY_DIR}/cmake/QuantLibConfig.cmake"
+-    INSTALL_DESTINATION "${QL_INSTALL_CMAKEDIR}"
+-)
+-install(EXPORT QuantLibTargets
+-    FILE QuantLibTargets.cmake
+-    NAMESPACE QuantLib::
+-    DESTINATION "${QL_INSTALL_CMAKEDIR}"
+-)
+-install(FILES "${PROJECT_BINARY_DIR}/cmake/QuantLibConfig.cmake"
+-    "${PROJECT_BINARY_DIR}/cmake/QuantLibConfigVersion.cmake"
+-    DESTINATION "${QL_INSTALL_CMAKEDIR}"
+-)

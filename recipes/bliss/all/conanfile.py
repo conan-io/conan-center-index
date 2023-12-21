@@ -1,18 +1,22 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.microsoft import check_min_vs, is_msvc
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.55.0"
 
 
 class BlissConan(ConanFile):
     name = "bliss"
-    description = "bliss is an open source tool for computing automorphism groups and canonical forms of graphs. "
-    topics = "conan", "bliss", "automorphism", "group", "graph"
+    description = "bliss is an open source tool for computing automorphism groups and canonical forms of graphs."
+    topics = ("automorphism", "group", "graph")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://users.aalto.fi/~tjunttil/bliss"
     license = "GPL-3-or-later", "LGPL-3-or-later"
-    settings = "arch", "os", "compiler", "build_type"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -23,18 +27,9 @@ class BlissConan(ConanFile):
         "fPIC": True,
         "with_exact_int": False,
     }
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake"
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,54 +37,57 @@ class BlissConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_exact_int == "gmp":
-            self.requires("gmp/6.2.0")
+            # gmp is fully transitive through bignum.hh public header of bliss
+            self.requires("gmp/6.2.1", transitive_headers=True, transitive_libs=True)
         elif self.options.with_exact_int == "mpir":
-            self.requires("mpir/3.0.0")
+            self.requires("mpir/3.0.0", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "15":
-            raise ConanInvalidConfiguration("bliss doesn't support Visual Studio < 2017")
+            check_min_cppstd(self, 11)
+        check_min_vs(self, "191")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["USE_GMP"] = self.options.with_exact_int != False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["USE_GMP"] = self.options.with_exact_int != False
+        tc.generate()
+        if bool(self.options.with_exact_int):
+            deps = CMakeDeps(self)
+            deps.set_property(self.options.with_exact_int, "cmake_file_name", "gmp")
+            deps.set_property(self.options.with_exact_int, "cmake_target_name", "gmp::gmp")
+            deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        self.copy("COPYING.LESSER", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING.LESSER", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["bliss" if self.options.shared else "bliss_static"]
         self.cpp_info.includedirs.append(os.path.join("include", "bliss"))
-        if self.options.with_exact_int != False:
+        if bool(self.options.with_exact_int):
             self.cpp_info.defines = ["BLISS_USE_GMP"]
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             self.cpp_info.cxxflags.append("/permissive-")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        # TODO: to remove in conan v2
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

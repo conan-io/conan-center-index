@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 from conan.tools.microsoft import check_min_vs
 import os
 
@@ -20,10 +21,12 @@ class Blend2dConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_jit": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_jit": True,
     }
 
     def export_sources(self):
@@ -41,15 +44,17 @@ class Blend2dConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("asmjit/cci.20221111")
+        if self.options.with_jit:
+            self.requires("asmjit/cci.20230325")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
-        # In Visual Studio < 16, there are compilation error. patch is already provided.
-        # https://github.com/blend2d/blend2d/commit/63db360c7eb2c1c3ca9cd92a867dbb23dc95ca7d
-        check_min_vs(self, 192)
+        if Version(self.version) < "0.8":
+            # In Visual Studio < 16, there are compilation error. patch is already provided.
+            # https://github.com/blend2d/blend2d/commit/63db360c7eb2c1c3ca9cd92a867dbb23dc95ca7d
+            check_min_vs(self, 192)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -66,6 +71,7 @@ class Blend2dConan(ConanFile):
             tc.variables["CMAKE_CXX_STANDARD"] = 11
         if not self.options.shared:
             tc.preprocessor_definitions["BL_STATIC"] = "1"
+        tc.variables["BLEND2D_NO_JIT"] = not self.options.with_jit
         tc.generate()
 
         deps = CMakeDeps(self)

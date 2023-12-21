@@ -13,6 +13,7 @@ class SysConfigOpenGLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.opengl.org/"
     license = "MIT"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):

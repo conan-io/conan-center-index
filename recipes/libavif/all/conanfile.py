@@ -1,10 +1,12 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
+from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibAVIFConan(ConanFile):
@@ -13,7 +15,8 @@ class LibAVIFConan(ConanFile):
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AOMediaCodec/libavif"
-    topics = ("avif")
+    topics = ("avif",)
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,6 +28,10 @@ class LibAVIFConan(ConanFile):
         "fPIC": True,
         "with_decoder": "dav1d",
     }
+
+    @property
+    def _depends_on_sharpyuv(self):
+        return Version(self.version) >= "0.11.0"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -47,14 +54,19 @@ class LibAVIFConan(ConanFile):
         return self.options.with_decoder == "dav1d"
 
     def requirements(self):
-        self.requires("libaom-av1/3.5.0")
+        self.requires("libaom-av1/3.6.1")
         self.requires("libyuv/1854")
         if self._has_dav1d:
-            self.requires("dav1d/1.0.0")
+            self.requires("dav1d/1.2.1")
+        if self._depends_on_sharpyuv:
+            self.requires("libwebp/1.3.2")
+
+    def validate(self):
+        if self._depends_on_sharpyuv and Version(self.dependencies["libwebp"].ref.version) < "1.3.0":
+            raise ConanInvalidConfiguration(f"{self.ref} requires libwebp >= 1.3.0 in order to get libsharpyuv")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -63,8 +75,6 @@ class LibAVIFConan(ConanFile):
         tc.variables["AVIF_CODEC_DAV1D"] = self.options.with_decoder == "dav1d"
         tc.variables["AVIF_CODEC_AOM_DECODE"] = self.options.with_decoder == "aom"
         tc.variables["LIBYUV_VERSION"] = self.dependencies["libyuv"].ref.version
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -110,10 +120,6 @@ class LibAVIFConan(ConanFile):
         save(self, alias, content)
 
     def package_info(self):
-        self.cpp_info.requires = ["libyuv::libyuv", "libaom-av1::libaom-av1"]
-        if self._has_dav1d:
-            self.cpp_info.requires.append("dav1d::dav1d")
-
         self.cpp_info.libs = ["avif"]
         if self.options.shared:
             self.cpp_info.defines = ["AVIF_DLL"]
@@ -121,6 +127,12 @@ class LibAVIFConan(ConanFile):
             self.cpp_info.system_libs.extend(["pthread", "m"])
             if self._has_dav1d:
                 self.cpp_info.system_libs.append("dl")
+
+        self.cpp_info.requires = ["libyuv::libyuv", "libaom-av1::libaom-av1"]
+        if self._has_dav1d:
+            self.cpp_info.requires.append("dav1d::dav1d")
+        if self._depends_on_sharpyuv:
+            self.cpp_info.requires.append("libwebp::sharpyuv")
 
         self.cpp_info.set_property("cmake_file_name", "libavif")
         self.cpp_info.set_property("cmake_target_name", "avif")

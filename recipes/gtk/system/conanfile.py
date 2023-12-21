@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import PkgConfig
 from conan.tools.system import package_manager
 
-required_conan_version = ">=1.47"
+required_conan_version = ">=1.50.0"
 
 
 class ConanGTK(ConanFile):
@@ -12,17 +12,21 @@ class ConanGTK(ConanFile):
     license = "LGPL-2.1-or-later"
     homepage = "https://www.gtk.org"
     description = "A free and open-source cross-platform widget toolkit for creating graphical user interfaces"
+    topics = ("gui", "widget", "graphical")
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {"version": [2, 3]}
     default_options = {"version": 2}
-    topics = ("gui", "widget", "graphical")
+
+    def layout(self):
+        pass
+
+    def package_id(self):
+        self.info.settings.clear()
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
-
-    def package_id(self):
-        self.info.settings.clear()
 
     def system_requirements(self):
         dnf = package_manager.Dnf(self)

@@ -1,4 +1,10 @@
 sources:
+  "1.3.0":
+    url: "https://github.com/progsource/maddy/archive/refs/tags/1.3.0.tar.gz"
+    sha256: "561681f8c8d2b998c153cda734107a0bc1dea4bb0df69fd813922da63fa9f3e7"
+  "1.2.1":
+    url: "https://github.com/progsource/maddy/archive/refs/tags/1.2.1.tar.gz"
+    sha256: "b6058bce7ca32506969633ee7a4042e75b07464489f1c44be00913543cd687ef"
   "1.1.2":
-    sha256: ce66e1ee63bda3a6ab9c814edc0ed818abecca1c2218307ff87fb9ec1fc970fc
-    url: https://github.com/progsource/maddy/archive/refs/tags/1.1.2.tar.gz
+    url: "https://github.com/progsource/maddy/archive/refs/tags/1.1.2.tar.gz"
+    sha256: "ce66e1ee63bda3a6ab9c814edc0ed818abecca1c2218307ff87fb9ec1fc970fc"

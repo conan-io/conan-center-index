@@ -8,11 +8,7 @@ sources:
 patches:
   cci.20210329:
     - patch_file: patches/bits.hpp.patch
-      base_path: source_subfolder
     - patch_file: patches/util.hpp.patch
-      base_path: source_subfolder
   3.0.0:
     - patch_file: patches/bits.hpp.patch
-      base_path: source_subfolder
     - patch_file: patches/util.hpp.patch
-      base_path: source_subfolder
