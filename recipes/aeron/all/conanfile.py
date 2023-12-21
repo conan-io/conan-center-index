@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import collect_libs, copy, get, replace_in_file, rename, rm
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -72,7 +72,7 @@ class AeronConan(ConanFile):
             raise ConanInvalidConfiguration("This platform (os=Macos arch=armv8) is not yet supported by this recipe")
 
     def build_requirements(self):
-        self.tool_requires("zulu-openjdk/11.0.19")
+        self.tool_requires("zulu-openjdk/17.0.9")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -80,6 +80,7 @@ class AeronConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_AERON_DRIVER"] = self.options.build_aeron_driver
         tc.cache_variables["BUILD_AERON_ARCHIVE_API"] = self.options.build_aeron_archive_api
@@ -98,9 +99,17 @@ class AeronConan(ConanFile):
         )
         tc.generate()
 
+        # Do not create a gradle cache under ~/.gradle
+        env = Environment()
+        env.define_path("GRADLE_USER_HOME", self.build_folder)
+        env.vars(self).save_script("conanbuild_gradle_home")
+
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "/MTd", "")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "/MT", "")
+        if Version(self.version) >= "1.42.0":
+            replace_in_file(self, os.path.join(self.source_folder, "build.gradle"),
+                            "def gitCommitHash = ", 'def gitCommitHash = "" //')
 
     def build(self):
         self._patch_sources()
