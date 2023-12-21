@@ -69,6 +69,8 @@ class RubyConan(ConanFile):
         export_conandata_patches(self)
 
     def build_requirements(self):
+        if self.settings.os != "Windows":
+            self.tool_requires("autoconf/2.71")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
 
