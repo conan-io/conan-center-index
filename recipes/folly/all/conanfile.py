@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, save
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.scm import Version
 import os
@@ -48,6 +48,7 @@ class FollyConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -124,9 +125,6 @@ class FollyConan(ConanFile):
         if self.options.get_safe("use_sse4_2") and str(self.settings.arch) not in ['x86', 'x86_64']:
             raise ConanInvalidConfiguration(f"{self.ref} can use the option use_sse4_2 only on x86 and x86_64 archs.")
 
-    def build_requirements(self):
-        pass
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=False)
 
@@ -146,15 +144,13 @@ class FollyConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+
+        tc.cache_variables["CMAKE_PROJECT_folly_INCLUDE"] = os.path.join(self.source_folder, "conan_deps.cmake")
+
         if can_run(self):
-            tc.variables["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE"] = "0"
-            tc.variables["FOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE__TRYRUN_OUTPUT"] = ""
-            tc.variables["FOLLY_HAVE_LINUX_VDSO_EXITCODE"] = "0"
-            tc.variables["FOLLY_HAVE_LINUX_VDSO_EXITCODE__TRYRUN_OUTPUT"] = ""
-            tc.variables["FOLLY_HAVE_WCHAR_SUPPORT_EXITCODE"] = "0"
-            tc.variables["FOLLY_HAVE_WCHAR_SUPPORT_EXITCODE__TRYRUN_OUTPUT"] = ""
-            tc.variables["HAVE_VSNPRINTF_ERRORS_EXITCODE"] = "0"
-            tc.variables["HAVE_VSNPRINTF_ERRORS_EXITCODE__TRYRUN_OUTPUT"] = ""
+            for var in ["FOLLY_HAVE_UNALIGNED_ACCESS", "FOLLY_HAVE_LINUX_VDSO", "FOLLY_HAVE_WCHAR_SUPPORT", "HAVE_VSNPRINTF_ERRORS"]:
+                tc.variables[f"{var}_EXITCODE"] = "0"
+                tc.variables[f"{var}_EXITCODE__TRYRUN_OUTPUT"] = ""
 
         if self.options.get_safe("use_sse4_2") and str(self.settings.arch) in ["x86", "x86_64"]:
             tc.preprocessor_definitions["FOLLY_SSE"] = "4"
@@ -176,6 +172,8 @@ class FollyConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0075"] = "NEW"
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        # Honor Boost_ROOT set by boost recipe
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0074"] = "NEW"
 
         cxx_std_value = self._cppstd_flag_value(self.settings.get_safe("compiler.cppstd", self._min_cppstd))
         # 2019.10.21.00 -> either MSVC_ flags or CXX_STD
@@ -183,6 +181,7 @@ class FollyConan(ConanFile):
             tc.variables["MSVC_LANGUAGE_VERSION"] = cxx_std_value
             tc.variables["MSVC_ENABLE_ALL_WARNINGS"] = False
             tc.variables["MSVC_USE_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
+            tc.preprocessor_definitions["NOMINMAX"] = ""
         else:
             tc.variables["CXX_STD"] = cxx_std_value
 
@@ -193,12 +192,35 @@ class FollyConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        # deps.set_property("backtrace", "cmake_file_name", "Backtrace")
+        deps.set_property("boost", "cmake_file_name", "Boost")
+        deps.set_property("bzip2", "cmake_file_name", "BZip2")
+        deps.set_property("double-conversion", "cmake_file_name", "DoubleConversion")
+        deps.set_property("fmt", "cmake_file_name", "fmt")
+        deps.set_property("gflags", "cmake_file_name", "Gflags")
+        deps.set_property("glog", "cmake_file_name", "Glog")
+        # deps.set_property("libaio", "cmake_file_name", "LibAIO")
+        deps.set_property("libdwarf", "cmake_file_name", "LibDwarf")
+        deps.set_property("libevent", "cmake_file_name", "LibEvent")
+        deps.set_property("libiberty", "cmake_file_name", "Libiberty")
+        deps.set_property("libsodium", "cmake_file_name", "Libsodium")
+        deps.set_property("libunwind", "cmake_file_name", "LibUnwind")
+        # deps.set_property("liburing", "cmake_file_name", "LibUring")
+        deps.set_property("lz4", "cmake_file_name", "LZ4")
+        deps.set_property("openssl", "cmake_file_name", "OpenSSL")
+        deps.set_property("snappy", "cmake_file_name", "Snappy")
+        deps.set_property("xz_utils", "cmake_file_name", "LibLZMA")
+        deps.set_property("zlib", "cmake_file_name", "ZLIB")
+        deps.set_property("zstd", "cmake_file_name", "Zstd")
         deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
         folly_deps = os.path.join(self.source_folder, "CMake", "folly-deps.cmake")
-        replace_in_file(self, folly_deps, "MODULE", "")
+        replace_in_file(self, folly_deps, " MODULE", " ")
+        replace_in_file(self, folly_deps, "OpenSSL 1.1.1", "OpenSSL")
+        # Disable example
+        save(self, os.path.join(self.source_folder, "folly", "logging", "example", "CMakeLists.txt"), "")
 
     def build(self):
         self._patch_sources()
@@ -325,34 +347,3 @@ class FollyConan(ConanFile):
             self.cpp_info.components["folly_exception_counter"].set_property("pkg_config_name", "libfolly_exception_counter")
             self.cpp_info.components["folly_exception_counter"].libs = ["folly_exception_counter"]
             self.cpp_info.components["folly_exception_counter"].requires = ["folly_exception_tracer"]
-
-
-    #  Folly release every two weeks and it is hard to maintain cmake scripts.
-    #  This script is used to fix CMake/folly-deps.cmake.
-    #  I attach it here for convenience. All the 00xx-find-packages.patches are generated by this script
-    #     ```shell
-    #     sed -i 's/^find_package(Boost.*$/find_package(Boost  /' CMake/folly-deps.cmake
-    #     sed -i 's/DoubleConversion MODULE/double-conversion /ig' CMake/folly-deps.cmake
-    #     sed -i 's/DOUBLE_CONVERSION/double-conversion/ig' CMake/folly-deps.cmake
-    #     sed -i 's/^find_package(Gflags.*$/find_package(gflags  REQUIRED)/g' CMake/folly-deps.cmake
-    #     sed -i 's/LIBGFLAGS_FOUND/gflags_FOUND/g'  CMake/folly-deps.cmake
-    #     sed -i 's/[^_]LIBGFLAGS_LIBRARY/{gflags_LIBRARIES/'  CMake/folly-deps.cmake
-    #     sed -i 's/[^_]LIBGFLAGS_INCLUDE/{gflags_INCLUDE/'  CMake/folly-deps.cmake
-    #     sed -i 's/find_package(Glog MODULE)/find_package(glog  REQUIRED)/g' CMake/folly-deps.cmake
-    #     sed -i 's/GLOG_/glog_/g' CMake/folly-deps.cmake
-    #     sed -i 's/find_package(LibEvent MODULE/find_package(Libevent /' CMake/folly-deps.cmake
-    #     sed -i 's/LIBEVENT_/Libevent_/ig' CMake/folly-deps.cmake
-    #     sed -i 's/OPENSSL_LIB/OpenSSL_LIB/g' CMake/folly-deps.cmake
-    #     sed -i 's/OPENSSL_INCLUDE/OpenSSL_INCLUDE/g' CMake/folly-deps.cmake
-    #     sed -i 's/BZIP2_/BZip2_/g' CMake/folly-deps.cmake
-    #     sed -i 's/(LZ4/(lz4/g' CMake/folly-deps.cmake
-    #     sed -i 's/LZ4_/lz4_/g' CMake/folly-deps.cmake
-    #     sed -i 's/Zstd /zstd /g'  CMake/folly-deps.cmake
-    #     sed -i 's/ZSTD_/zstd_/g' CMake/folly-deps.cmake
-    #     sed -i 's/(LibDwarf/(libdwarf/g' CMake/folly-deps.cmake
-    #     sed -i 's/LIBDWARF_/libdwarf_/g' CMake/folly-deps.cmake
-    #     sed -i 's/Libiberty/libiberty/g' CMake/folly-deps.cmake
-    #     sed -i 's/Libsodium/libsodium/ig' CMake/folly-deps.cmake
-    #     sed -i 's/LibUnwind/libunwind/g' CMake/folly-deps.cmake
-    #     sed -i 's/LibUnwind_/libunwind_/ig' CMake/folly-deps.cmake
-    #     ```
