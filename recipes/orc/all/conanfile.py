@@ -2,9 +2,9 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rmdir, save, replace_in_file
 from conan.tools.scm import Version
 
@@ -47,6 +47,10 @@ class OrcConan(ConanFile):
             "apple-clang": "12",
         }
 
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -80,7 +84,8 @@ class OrcConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("protobuf/<host_version>")
+        if not self._is_legacy_one_profile:
+            self.tool_requires("protobuf/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -90,8 +95,9 @@ class OrcConan(ConanFile):
         return ["LZ4", "ZSTD", "Protobuf", "Snappy", "ZLIB"]
 
     def generate(self):
-        venv = VirtualBuildEnv(self)
-        venv.generate()
+        VirtualBuildEnv(self).generate()
+        if self._is_legacy_one_profile:
+            VirtualRunEnv(self).generate(scope="build")
 
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_CPP_TESTS"] = False
