@@ -150,7 +150,7 @@ class LibheifConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["heif"].defines = ["LIBHEIF_STATIC_BUILD"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["heif"].system_libs.extend(["m", "pthread"])
+            self.cpp_info.components["heif"].system_libs.extend(["m", "pthread", "dl"])
         if not self.options.shared:
             libcxx = stdcpp_library(self)
             if libcxx:
