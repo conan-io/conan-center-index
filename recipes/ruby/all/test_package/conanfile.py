@@ -4,12 +4,12 @@ from io import StringIO
 
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeDeps", "VirtualRunEnv"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -20,19 +20,21 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
-    def build(self):
-        cmake = CMake(self)
+    def generate(self):
         # when --static-linked-ext is used, ruby defines EXTSTATIC as 1
         # But when ruby itself is static there's nothing, so:
         # We define RUBY_STATIC_RUBY when ruby itself is static
         # We define RUBY_STATIC_LINKED_EXT when the ruby extensions are static (same as EXTSTATIC but clearer)
-        defs = {}
-        tested_options = self.dependencies[self.tested_reference_str].options
-        if not tested_options.shared:
-            defs["RUBY_STATIC_RUBY"] = 1
-            if tested_options.with_static_linked_ext:
-                defs["RUBY_STATIC_LINKED_EXT"] = 1
-        cmake.configure(variables=defs)
+        # This is only for testing purposes
+        ruby_opts = self.dependencies[self.tested_reference_str].options
+        tc = CMakeToolchain(self)
+        tc.variables["RUBY_STATIC_RUBY"] = not ruby_opts.shared
+        tc.variables["RUBY_STATIC_LINKED_EXT"] = not ruby_opts.shared and ruby_opts.with_static_linked_ext
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def _ruby_version(self):
