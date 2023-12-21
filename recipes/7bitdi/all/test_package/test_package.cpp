@@ -9,10 +9,10 @@ struct LibInfo {
 
 template<class TProvider>
 auto& extractProvider(TProvider& provider) {
-    if constexpr (_7BIT_DI_VERSION_AS_NUMBER > 10000) {
-        return provider;
-    } else {
+    if constexpr (_7BIT_DI_VERSION_AS_NUMBER == 10000) {
         return *provider;
+    } else {
+        return provider;
     }
 }
 
