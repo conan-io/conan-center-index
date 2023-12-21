@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file, save
 import os
 
 required_conan_version = ">=1.54.0"
@@ -33,9 +33,6 @@ class LibheifConan(ConanFile):
         "with_libaomav1": False,
         "with_dav1d": False,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -75,14 +72,25 @@ class LibheifConan(ConanFile):
         tc.variables["WITH_EXAMPLES"] = False
         tc.variables["WITH_GDK_PIXBUF"] = False
         tc.generate()
+
         deps = CMakeDeps(self)
+        deps.set_property("libde265", "cmake_file_name", "LIBDE265")
+        deps.set_property("x265", "cmake_file_name", "X265")
+        deps.set_property("dav1d", "cmake_file_name", "DAV1D")
+        deps.set_property("libaom-av1", "cmake_file_name", "AOM")
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
+
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+        rmdir(self, os.path.join(self.source_folder, "cmake", "modules"))
+        save(self, os.path.join(self.source_folder, "gnome", "CMakeLists.txt"), "")
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
