@@ -2,7 +2,7 @@ from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, check_min_vs
 from conan.tools.scm import Version
 import os
@@ -44,8 +44,6 @@ class Exiv2Conan(ConanFile):
         "win_unicode": False,
     }
 
-    provides = []
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -67,7 +65,7 @@ class Exiv2Conan(ConanFile):
         if self.options.with_xmp == "bundled":
             # recipe has bundled xmp-toolkit-sdk of old version
             # avoid conflict with a future xmp recipe
-            self.provides.append("xmp-toolkit-sdk")
+            self.provides = ["xmp-toolkit-sdk"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -80,9 +78,9 @@ class Exiv2Conan(ConanFile):
         if self.options.with_xmp == "bundled":
             self.requires("expat/2.5.0")
         if self.options.with_curl:
-            self.requires("libcurl/8.2.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.get_safe("with_brotli"):
-            self.requires("brotli/1.0.9")
+            self.requires("brotli/1.1.0")
         if self.options.get_safe("with_inih"):
             self.requires("inih/57")
 
@@ -140,15 +138,23 @@ class Exiv2Conan(ConanFile):
 
         if is_msvc(self):
             tc.variables["EXIV2_ENABLE_DYNAMIC_RUNTIME"] = not is_msvc_static_runtime(self)
-        # set PIC manually because of object target exiv2_int
+        # set PIC manually because of the internal static library exiv2_int
         tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = bool(self.options.get_safe("fPIC", True))
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+                        "POSITION_INDEPENDENT_CODE ON", "")
+        # Enforce usage of FindEXPAT.cmake
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "findDependencies.cmake"),
+                        "find_package(EXPAT REQUIRED)", "find_package(EXPAT REQUIRED MODULE)")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
