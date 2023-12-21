@@ -77,11 +77,11 @@ class FollyConan(ConanFile):
         if not is_msvc(self):
             self.requires("libdwarf/20191104")
         self.requires("libsodium/1.0.19")
-        self.requires("xz_utils/5.4.4")
+        self.requires("xz_utils/5.4.5")
         # FIXME: Causing compilation issues on clang: self.requires("jemalloc/5.2.1")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libiberty/9.1.0")
-            self.requires("libunwind/1.6.2")
+            self.requires("libunwind/1.7.2")
             self.requires("fmt/10.1.1", transitive_headers=True, transitive_libs=True)
 
     @property
