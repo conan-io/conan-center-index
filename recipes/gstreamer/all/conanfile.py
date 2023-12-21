@@ -68,7 +68,7 @@ class GStreamerConan(ConanFile):
         # No longer the case, but see: https://github.com/conan-io/conan-center-index/pull/13400#issuecomment-1551565573 for context
         if not self._is_legacy_one_profile:
             self.tool_requires("glib/<host_version>")
-        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
