@@ -80,9 +80,9 @@ class XkbcommonConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         if self.options.get_safe("with_wayland"):
-            self.tool_requires("wayland-protocols/1.32")
             if self._has_build_profile:
                 self.tool_requires("wayland/<host_version>")
+            self.tool_requires("wayland-protocols/1.32")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
