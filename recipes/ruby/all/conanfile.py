@@ -178,6 +178,7 @@ class RubyConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "gems", "bundled_gems"), "rbs 2.0.0", "rbs 3.1.0")
+        replace_in_file(self, os.path.join(self.source_folder, "gems", "bundled_gems"), "debug 1.4.0", "debug 1.6.3")
 
     def build(self):
         self._patch_sources()
