@@ -202,8 +202,8 @@ class RubyConan(ConanFile):
 
         autotools = Autotools(self)
         if cross_building(self):
-            autotools.make(target="install-local")
-            autotools.make(target="install-arch")
+            autotools.make(target="install-local", args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+            autotools.make(target="install-arch", args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
         else:
             autotools.install()
 
