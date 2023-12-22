@@ -15,3 +15,7 @@ endif ()
 if (NOT EXISTS $ENV{ZSERIO_JAR_FILE})
     message(FATAL_ERROR "ZSERIO_JAR_FILE '$ENV{ZSERIO_JAR_FILE}' does not exist!")
 endif ()
+# check that zserio_generate_cpp function is available
+if (NOT COMMAND zserio_generate_cpp)
+    message(FATAL_ERROR("Function 'zserio_generate_cpp' is not available!"))
+endif ()
