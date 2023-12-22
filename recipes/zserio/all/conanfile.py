@@ -41,6 +41,9 @@ class ZserioConanFile(ConanFile):
         shutil.move("cpp/CMakeLists.txt", ".")
         shutil.rmtree("cpp")
 
+    def export_sources(self):
+        copy(self, "zserio_compiler.cmake", self.recipe_folder, self.export_sources_folder)
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.generate()
@@ -52,14 +55,25 @@ class ZserioConanFile(ConanFile):
 
         get(self, **self.conan_data["sources"][self.version]["compiler"], pattern="zserio.jar")
 
+    @property
+    def _cmake_module_path(self):
+        return os.path.join("lib", "cmake", "zserio")
+
     def package(self):
-        copy(self, "*.h", self.source_folder, os.path.join(self.package_folder, "include"))
-        copy(self, "*.lib", self.build_folder, os.path.join(self.package_folder, "lib"))
-        copy(self, "*.a", self.build_folder, os.path.join(self.package_folder, "lib"))
+        include_dir = os.path.join(self.package_folder, "include")
+        lib_dir = os.path.join(self.package_folder, "lib")
+        copy(self, "*.h", self.source_folder, include_dir)
+        copy(self, "*.lib", self.build_folder, lib_dir)
+        copy(self, "*.a", self.build_folder, lib_dir)
 
         copy(self, "zserio.jar", self.build_folder, os.path.join(self.package_folder, "bin"))
+        copy(self, "zserio_compiler.cmake", self.export_sources_folder,
+             os.path.join(self.package_folder, self._cmake_module_path))
 
     def package_info(self):
         self.cpp_info.components["ZserioCppRuntime"].libs = collect_libs(self)
 
         self.buildenv_info.define("ZSERIO_JAR_FILE", os.path.join(self.package_folder, "bin", "zserio.jar"))
+        zserio_compiler_module = os.path.join(self.package_folder, self._cmake_module_path,
+                                              "zserio_compiler.cmake")
+        self.cpp_info.set_property("cmake_build_modules", [zserio_compiler_module])
