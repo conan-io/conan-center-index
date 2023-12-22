@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, to_apple_arch
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, PkgConfigDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, unix_path, VCVars
@@ -175,8 +175,12 @@ class RubyConan(ConanFile):
             vc = VCVars(self)
             vc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "gems", "bundled_gems"), "rbs 2.0.0", "rbs 3.1.0")
+
+    def build(self):
+        self._patch_sources()
 
         autotools = Autotools(self)
 
