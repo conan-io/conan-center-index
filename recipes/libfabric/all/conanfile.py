@@ -90,6 +90,8 @@ class LibfabricConan(ConanFile):
         if is_apple_os(self):
             # Requires libnl, which is not available on macOS
             del self.options.usnic
+            # Fails due to missing Linux-specific process_vm_readv()
+            del self.options.shm
         if Version(self.version) < "1.18.1":
             del self.options.dmabuf_peer_mem
             del self.options.hook_hmem
