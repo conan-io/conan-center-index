@@ -47,7 +47,7 @@ class HictkConan(ConanFile):
         self.requires("hdf5/1.14.3", transitive_headers=True)
         self.requires("highfive/2.8.0", transitive_headers=True)
         self.requires("libdeflate/1.19", transitive_headers=True)
-        self.requires("parallel-hashmap/1.37", transitive_headers=True)
+        self.requires("parallel-hashmap/1.3.11", transitive_headers=True)  # Note: v1.3.11 is more recent than v1.37
         self.requires("span-lite/0.10.3", transitive_headers=True)
         self.requires("spdlog/1.12.0", transitive_headers=True)
         self.requires("xxhash/0.8.2", transitive_headers=True)
