@@ -38,7 +38,7 @@ class AzureStorageCppConan(ConanFile):
     @property
     def _minimum_compiler_version(self):
         return {
-            "gcc": "5",
+            "gcc": "6",
             "Visual Studio": "14",
             "msvc": "190",
             "clang": "3.4",
