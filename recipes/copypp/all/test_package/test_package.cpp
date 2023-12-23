@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cassert>
-#include "icurve/copypp"
+#include "icurve/copypp.hh"
 
 class A {
 public:
@@ -33,5 +33,6 @@ int main(void) {
     assert(a.id == b.id);
     assert(a.name == b.name);
     assert(a.sex == b.sex);
+    std::cout << "copypp ok" << std::endl;
     return EXIT_SUCCESS;
 }
