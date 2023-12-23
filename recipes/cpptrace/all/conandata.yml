@@ -1,5 +1,9 @@
 sources:
   # Newer versions at the top
+  "0.3.1":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.3.1.tar.gz"
+    sha256: "3c4c5b3406c2b598e5cd2a8cb97f9e8e1f54d6df087a0e62564e6fb68fed852d"
   "0.3.0":
     url:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.3.0.tar.gz"
@@ -9,6 +13,11 @@ sources:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.2.1.tar.gz"
     sha256: "3184f404c61b6b8ba6fe7c64fc40d1c3d6d87df59bcacf1845d846101bc22f9a"
 patches:
+  "0.3.0":
+    - patch_file: "patches/0.3.0/0001-cpptrace_export.patch"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/b3b9d5fda6c7f53b069848e7e79454f3618ca356"
+      patch_description: "Fix an incorrect CPPTRACE_EXPORT annotation"
   "0.2.1":
     - patch_file: "patches/0.2.1/0001-to_uintptr.patch"
       patch_type: "bugfix"
