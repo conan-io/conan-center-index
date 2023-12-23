@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
@@ -104,7 +104,9 @@ class AzureStorageCppConan(ConanFile):
         if not self.settings.compiler.cppstd:
             tc.variables["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
         if is_apple_os(self):
-            tc.variables["GETTEXT_LIB_DIR"] = self.dependencies["libgettext"].cpp_info.libdirs[0]
+            tc.variables["GETTEXT_LIB_DIR"] = self.dependencies["libgettext"].cpp_info.libdir
+        if not valid_min_cppstd(self, self._minimum_cpp_standard):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
         tc.generate()
 
         deps = CMakeDeps(self)
