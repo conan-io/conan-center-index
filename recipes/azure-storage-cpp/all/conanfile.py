@@ -61,7 +61,9 @@ class AzureStorageCppConan(ConanFile):
 
     def requirements(self):
         self.requires("cpprestsdk/2.10.19", transitive_headers=True, transitive_libs=True)
-        self.requires("libxml2/2.12.2", transitive_headers=True, transitive_libs=True)
+        # LibXML2 v2.12+ from CCI is not compatible. Needs to be built with -DLIBXML_OUTPUT_ENABLED:
+        # https://github.com/GNOME/libxml2/commit/5d2dbe79fae5618d0bd2a7e52be9cf98b11d98ad
+        self.requires("libxml2/2.11.5", transitive_headers=True, transitive_libs=True)
         if self.settings.os != "Windows":
             # Boost.Asio is used in a public header here:
             # https://github.com/Azure/azure-storage-cpp/blob/v7.5.0/Microsoft.WindowsAzure.Storage/includes/wascore/timer_handler.h#L27
