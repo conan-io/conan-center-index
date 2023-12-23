@@ -60,8 +60,8 @@ class AzureStorageCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpprestsdk/2.10.18", transitive_headers=True, transitive_libs=True)
-        self.requires("libxml2/2.11.5", transitive_headers=True, transitive_libs=True)
+        self.requires("cpprestsdk/2.10.19", transitive_headers=True, transitive_libs=True)
+        self.requires("libxml2/2.12.2", transitive_headers=True, transitive_libs=True)
         if self.settings.os != "Windows":
             # Boost.Asio is used in a public header here:
             # https://github.com/Azure/azure-storage-cpp/blob/v7.5.0/Microsoft.WindowsAzure.Storage/includes/wascore/timer_handler.h#L27
