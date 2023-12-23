@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building, can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc
@@ -66,6 +67,8 @@ class FlatccConan(ConanFile):
                 raise ConanInvalidConfiguration("Building flatcc libraries shared is not supported")
             if Version(self.version) == "0.6.0" and self.settings.compiler == "gcc":
                 raise ConanInvalidConfiguration("Building flatcc with MinGW is not supported")
+        if cross_building(self) and not can_run(self):
+            raise ConanInvalidConfiguration(f"Cross-building for a non-native architecture ({self.settings.arch}) is not supported")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
