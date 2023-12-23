@@ -1,0 +1,4 @@
+sources:
+  "cci.20230609":
+    url: "https://github.com/hyrise/sql-parser/archive/c2471248cef8cd33081e698e8ac65d691283dbd4.tar.gz"
+    sha256: "e2aa80cf8f56252ba8576df60b9da58054ad88a48b18313faa21d448b87b18a7"
