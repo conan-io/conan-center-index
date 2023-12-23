@@ -50,6 +50,10 @@ class AwsCdiSdkConan(ConanFile):
         self.requires("aws-sdk-cpp/1.9.234")
 
     def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD", "Windows"]:
+            # The code compiles either `os_linux.c` or `os_windows.c` depending on the OS, but `os_linux.c` is not compatible with macOS.
+            # https://github.com/aws/aws-cdi-sdk/tree/mainline/src/common/src
+            raise ConanInvalidConfiguration(f"{self.settings.os} is not supported")
         if not self.dependencies["aws-libfabric"].options.shared or not self.dependencies["aws-sdk-cpp"].options.shared:
             raise ConanInvalidConfiguration("Cannot build with static dependencies")
         if not self.dependencies["aws-sdk-cpp"].options.get_safe("monitoring"):
