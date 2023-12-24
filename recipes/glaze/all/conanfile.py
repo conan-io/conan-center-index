@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
@@ -50,6 +50,16 @@ class GlazeConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        replace_in_file(self, os.path.join(self.source_folder, "include", "glaze", "util", "expected.hpp"),
+                        "#if __has_include(<expected>)",
+                        "#if __cplusplus >= 202302L && __has_include(<expected>)"
+                        )
+        replace_in_file(self, os.path.join(self.source_folder, "include", "glaze", "util", "expected.hpp"),
+                        "#if defined(__cpp_lib_expected)",
+                        "#if __cplusplus >= 202302L && defined(__cpp_lib_expected)"
+                        )
 
     def package(self):
         copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
