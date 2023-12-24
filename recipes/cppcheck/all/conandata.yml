@@ -1,5 +1,5 @@
 sources:
-  "2.13.0":
+  "2.13":
     url: "https://github.com/danmar/cppcheck/archive/2.13.0.tar.gz"
     sha256: "bf045b029c404740dbc977997d93cb67db3138ac1c0e67d04ad9d90c76e1377b"
   "2.12.1":
