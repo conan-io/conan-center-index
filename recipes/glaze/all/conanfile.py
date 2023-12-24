@@ -55,7 +55,7 @@ class GlazeConan(ConanFile):
         if Version(self.version) >= "1.9.7":
             replace_in_file(self, os.path.join(self.source_folder, "include", "glaze", "csv", "write.hpp"),
                             "using item_type = std::decay_t<typename Element::type>;",
-                            "using item_type = typename Element::type;"
+                            "using item_type = typename std::decay<typename Element::type>::type;"
                             )
 
     def package(self):
