@@ -52,14 +52,15 @@ class GlazeConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
-        replace_in_file(self, os.path.join(self.source_folder, "include", "glaze", "util", "expected.hpp"),
-                        "#if __has_include(<expected>)",
-                        "#if __cplusplus >= 202302L && __has_include(<expected>)"
-                        )
-        replace_in_file(self, os.path.join(self.source_folder, "include", "glaze", "util", "expected.hpp"),
-                        "#if defined(__cpp_lib_expected)",
-                        "#if __cplusplus >= 202302L && defined(__cpp_lib_expected)"
-                        )
+        if Version(self.version) >= "1.9.7":
+            replace_in_file(self, os.path.join(self.source_folder, "include", "glaze", "util", "expected.hpp"),
+                            "#if __has_include(<expected>)",
+                            "#if __cplusplus >= 202302L && __has_include(<expected>)"
+                            )
+            replace_in_file(self, os.path.join(self.source_folder, "include", "glaze", "util", "expected.hpp"),
+                            "#if defined(__cpp_lib_expected)",
+                            "#if __cplusplus >= 202302L && defined(__cpp_lib_expected)"
+                            )
 
     def package(self):
         copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
