@@ -53,13 +53,9 @@ class GlazeConan(ConanFile):
 
     def build(self):
         if Version(self.version) >= "1.9.7":
-            replace_in_file(self, os.path.join(self.source_folder, "include", "glaze", "util", "expected.hpp"),
-                            "#if __has_include(<expected>)",
-                            "#if __cplusplus >= 202302L && __has_include(<expected>)"
-                            )
-            replace_in_file(self, os.path.join(self.source_folder, "include", "glaze", "util", "expected.hpp"),
-                            "#if defined(__cpp_lib_expected)",
-                            "#if __cplusplus >= 202302L && defined(__cpp_lib_expected)"
+            replace_in_file(self, os.path.join(self.source_folder, "include", "glaze", "csv", "write.hpp"),
+                            "using item_type = std::decay_t<typename Element::type>;",
+                            "using item_type = typename Element::type;"
                             )
 
     def package(self):
