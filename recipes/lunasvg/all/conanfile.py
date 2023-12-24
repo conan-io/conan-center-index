@@ -40,8 +40,8 @@ class LunaSVGConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "14": {
-                "gcc": "6",
-                "clang": "5",
+                "gcc": "5",
+                "clang": "3.5",
                 "apple-clang": "10",
                 "Visual Studio": "15",
                 "msvc": "191",
