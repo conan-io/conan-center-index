@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
@@ -69,6 +70,8 @@ class NetcdfConan(ConanFile):
                 self.requires("hdf5/1.12.0")
             else:
                 self.requires("hdf5/1.14.1")
+            if Version(self.version) >= "4.9.0":
+                self.requires("zlib/[>=1.2.11 <2]")
 
         if self.options.dap or self.options.byterange:
             self.requires("libcurl/[>=7.78.0 <9]")
@@ -125,6 +128,8 @@ class NetcdfConan(ConanFile):
         self.cpp_info.components["libnetcdf"].libs = ["netcdf"]
         if self._with_hdf5:
             self.cpp_info.components["libnetcdf"].requires.append("hdf5::hdf5")
+            if Version(self.version) >= "4.9.0":
+                self.cpp_info.components["libnetcdf"].requires.append("zlib::zlib")
         if self.options.dap or self.options.byterange:
             self.cpp_info.components["libnetcdf"].requires.append("libcurl::libcurl")
         if self.settings.os in ["Linux", "FreeBSD"]:
