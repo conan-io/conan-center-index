@@ -180,4 +180,5 @@ class LibfabricConan(ConanFile):
         self.cpp_info.libs = ["fabric"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m", "rt", "dl"]
-        self.cpp_info.system_libs.append("atomic")
+        if self.settings.compiler == "gcc":
+            self.cpp_info.system_libs.append("atomic")
