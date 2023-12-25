@@ -96,8 +96,7 @@ class OrcConan(ConanFile):
 
     def generate(self):
         VirtualBuildEnv(self).generate()
-        if self._is_legacy_one_profile:
-            VirtualRunEnv(self).generate(scope="build")
+        VirtualRunEnv(self).generate(scope="build")
 
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_CPP_TESTS"] = False
