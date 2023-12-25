@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
@@ -144,6 +144,8 @@ class LibfabricConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Do suppress the linter error for libcxx not being removed despite no C++ source files
+        save(self, os.path.join(self.source_folder, "dummy.cpp"), "")
 
     def generate(self):
         def yes_no_opt(opt):
