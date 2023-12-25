@@ -104,7 +104,6 @@ class LibfabricConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
     def requirements(self):
@@ -180,5 +179,5 @@ class LibfabricConan(ConanFile):
         self.cpp_info.libs = ["fabric"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m", "rt", "dl"]
-        if self.settings.compiler == "gcc":
+        if str(self.settings.compiler.libcxx) in ["libstc++", "libstdc++11"]:
             self.cpp_info.system_libs.append("atomic")
