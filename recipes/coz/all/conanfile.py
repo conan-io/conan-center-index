@@ -36,10 +36,11 @@ class CozConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
-        compiler = self.settings.compiler
         compiler_version = Version(self.settings.compiler.version)
-        if is_apple_os(self) or is_msvc(self) or (compiler == "gcc" and compiler_version < "5.0"):
-            raise ConanInvalidConfiguration(f"coz doesn't support compiler: {self.settings.compiler} on OS: {self.settings.os}.")
+        if self.settings.compiler == "gcc" and compiler_version < "5.0":
+            raise ConanInvalidConfiguration("coz requires GCC >= 5.0")
+        if is_apple_os(self) or is_msvc(self):
+            raise ConanInvalidConfiguration(f"coz doesn't support {self.settings.os}.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
