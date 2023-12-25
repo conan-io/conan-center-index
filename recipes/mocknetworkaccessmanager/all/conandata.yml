@@ -1,0 +1,4 @@
+sources:
+  "0.12.0":
+    url: "https://gitlab.com/julrich/MockNetworkAccessManager/-/archive/0.12.0/MockNetworkAccessManager-0.12.0.tar.gz"
+    sha256: "ac9ffb5e6e5ccdc1b7c76da7a92b5d845ec12eb48a39b0423005da4f6431b09f"
