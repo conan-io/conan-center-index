@@ -3,13 +3,14 @@ import os
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run, cross_building
+from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "VirtualRunEnv", "VCVars"
+    generators = "VCVars"
     test_type = "explicit"
 
     def build_requirements(self):
@@ -33,6 +34,11 @@ class TestPackageConan(ConanFile):
         return {
             "x86_64": "x64",
         }.get(str(self.settings.arch), str(self.settings.arch))
+
+    def generate(self):
+        VirtualBuildEnv(self).generate()
+        VirtualRunEnv(self).generate(scope="run")
+        VirtualRunEnv(self).generate(scope="build")
 
     def build(self):
         if not cross_building(self):
