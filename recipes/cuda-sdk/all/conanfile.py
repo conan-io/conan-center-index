@@ -1,9 +1,9 @@
 import os
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conan import ConanFile
 from conans.errors import ConanInvalidConfiguration
 import shutil
-from conans.tools import Version
-from conan.tools.files import copy
+from conan.tools.scm import Version
+from conan.tools.files import download, copy, unzip
 
 class CudaSdkConan(ConanFile):
     name = "cudasdk"
@@ -88,8 +88,10 @@ class CudaSdkConan(ConanFile):
             del self.options.visual_studio_integration
     
     def validate(self):
+        if self.settings.os != "Windows" and self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Only windows and linux os is supported")
         if self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration("Architecture not supported")
+            raise ConanInvalidConfiguration("Only x86_64 is supported")
         if self.options.cudnn == True and self.options.cudnn_version == "None":
             raise ConanInvalidConfiguration("Setting cudnn_version must be set when cudnn is true")
         if self.options.cudnn == False and self.options.cudnn_version != "none":
@@ -117,37 +119,24 @@ class CudaSdkConan(ConanFile):
     def _filepath_cudnn(self):
         return os.path.join(self._path_cudnn, self._filename_cudnn)
 
-    def source(self):
-        if self.options.cudnn:
-            copy(self, self._filename_cudnn, src=self._path_cudnn, dst=".")
-        src = self.conan_data["sources"][self.version]
-        self.output.info("Downloading: %s" % src["url"])
-        if "sha256" in src.keys():
-            tools.download(src["url"], self._filename, sha256=src["sha256"])
-        elif "sha1" in src.keys():
-            tools.download(src["url"], self._filename, sha1=src["sha1"])
-        else:
-            tools.download(src["url"], self._filename, md5=src["md5"])
-
     def build(self):
-        filepath = os.path.join(self.source_folder, self._filename)
-        filepath_cudnn = os.path.join(self.source_folder, self._filename_cudnn)
-        # on linux archive is packaged
-        # force overwrite for sanity sake 
-        self.run("7z x {}".format(filepath))
         if self.options.cudnn:
-            tools.unzip(filepath_cudnn, destination="cudnn", strip_root=True)
-        pass
+            unzip(self._path_cudnn, destination="cudnn", strip_root=True)
+        src = self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)]
+        download(self, **src, filename=self._filename)
+        if "Windows" == str(self.settings.os):
+            self.run("7z x {}".format(self._filename))
+        elif "Linux" == str(self.settings.os):
+            self.run("./{} --extract={}".format(self._filename, self.build_folder))
 
-    # only modern to legacy configuration supported
     def package(self):
-        # only windows settings for now 
-        self.copy("FindCUDASDK.cmake", ".", ".") 
-        self.copy("version.*", "nvcc", "CUDAToolkit") 
+        # only windows settings for now
+        self.copy("FindCUDASDK.cmake", ".", ".")
+        self.copy("version.*", "nvcc", "CUDAToolkit")
         # copy license files
         self.copy("EULA.txt", "licenses", os.path.join("cuda_documentation", "Doc"))
         if self.options.cudart:
-            self.copy("*", "nvcc", os.path.join("cuda_cudart", "cudart")) 
+            self.copy("*", "nvcc", os.path.join("cuda_cudart", "cudart"))
         if self.options.cuobjdump:
             self.copy("*", "nvcc", os.path.join("cuda_cuobjdump", "cuobjdump"))
         if self.options.cupti:
@@ -254,3 +243,4 @@ class CudaSdkConan(ConanFile):
         # adding nvcc to path
         self.env_info.PATH.append(os.path.join(self.package_folder, "nvcc", "bin"))
 
+'''
