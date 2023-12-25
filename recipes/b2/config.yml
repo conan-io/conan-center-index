@@ -7,3 +7,5 @@ versions:
     folder: portable
   "4.10.1":
     folder: portable
+  "5.0.0":
+    folder: portable
