@@ -90,15 +90,16 @@ class LibfabricConan(ConanFile):
         if is_apple_os(self):
             # Requires libnl, which is not available on macOS
             del self.options.usnic
-            # Fails due to missing Linux-specific process_vm_readv()
+            # shm2 and sm2 due to missing Linux-specific process_vm_readv syscall
             del self.options.shm
+            del self.options.sm2
         if Version(self.version) < "1.18.1":
             del self.options.dmabuf_peer_mem
             del self.options.hook_hmem
             del self.options.opx
-            del self.options.sm2
             del self.options.trace
             del self.options.ucx
+            self.options.rm_safe("sm2")
 
     def configure(self):
         if self.options.shared:
