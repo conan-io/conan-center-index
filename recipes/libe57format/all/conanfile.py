@@ -4,7 +4,9 @@ import textwrap
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir, save, replace_in_file
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -46,10 +48,16 @@ class LibE57FormatConan(ConanFile):
         if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "11")
 
+    def build_requirements(self):
+        if Version(self.version) >= "1.17":
+            self.tool_requires("cmake/[>=3.16.3 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
         tc = CMakeToolchain(self)
         tc.variables["E57_BUILD_SHARED"] = self.options.shared
         tc.variables["E57_BUILD_TEST"] = False
