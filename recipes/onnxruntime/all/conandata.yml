@@ -16,16 +16,10 @@ sources:
     sha256: "f998352b131bb89fa7dd1f1d87ddbafe647dfaddd11929b6b5168b3f4ef857de"
 patches:
   "1.16.3":
-    - patch_file: "patches/1.16.0-0001-cmake-dependencies.patch"
-      patch_description: "CMake: ensure conan dependencies are used"
-      patch_type: "conan"
     - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
       patch_description: "allow to build with abseil built without c++17 support"
       patch_type: "portability"
   "1.16.2":
-    - patch_file: "patches/1.16.0-0001-cmake-dependencies.patch"
-      patch_description: "CMake: ensure conan dependencies are used"
-      patch_type: "conan"
     - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
       patch_description: "allow to build with abseil built without c++17 support"
       patch_type: "portability"
