@@ -110,6 +110,10 @@ class LibvipsConan(ConanFile):
         if Version(self.version) < "8.15":
             del self.options.with_archive
             del self.options.with_highway
+        if is_msvc(self):
+            # deprecated build fails with
+            # vips7compat.h(1661): error C2016: C requires that a struct or union have at least one member
+            self.options.deprecated = False
 
     def configure(self):
         if self.options.shared:
@@ -123,7 +127,7 @@ class LibvipsConan(ConanFile):
 
     def requirements(self):
         self.requires("expat/2.5.0")
-        self.requires("glib/2.78.1", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_archive"):
             self.requires("libarchive/3.7.2")
         if self.options.with_cfitsio:
