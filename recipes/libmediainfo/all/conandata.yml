@@ -1,4 +1,7 @@
 sources:
+  "23.11":
+    url: "https://mediaarea.net/download/source/libmediainfo/23.11/libmediainfo_23.11.tar.xz"
+    sha256: "197e54fcc79e3c0d5df44a8f58dc4e018bc2f85d13fa3bed54af3dc56d5e853d"
   "22.03":
     url: "https://mediaarea.net/download/source/libmediainfo/22.03/libmediainfo_22.03.tar.xz"
     sha256: "fc50babb628e9cfba655288dae06d5c342b0d7e6941a32d64fbbb113248c80b9"
@@ -8,42 +11,3 @@ sources:
   "21.03":
     url: "https://mediaarea.net/download/source/libmediainfo/21.03/libmediainfo_21.03.tar.xz"
     sha256: "56b7e9abf80cba48032165cd7a46fd8d43dd63e3af35765f66c3f134caaca4ca"
-  "20.03":
-    url: "https://mediaarea.net/download/source/libmediainfo/20.03/libmediainfo_20.03.tar.xz"
-    sha256: "6848310eb7050efe7f90f18191dacfcc220c924390b8088fdf0d553274917f72"
-patches:
-  "22.03":
-    - patch_file: "patches/21.09-0001-cmake-get-property-location.patch"
-      patch_description: "CMake: remove use of LOCATION property"
-      patch_type: "portability"
-      patch_source: "https://github.com/MediaArea/MediaInfoLib/pull/1526"
-    - patch_file: "patches/21.09-0002-cmake-handle-dependencies.patch"
-      patch_description: "CMake: robust discovery and link of dependencies"
-      patch_type: "conan"
-  "21.09":
-    - patch_file: "patches/21.09-0001-cmake-get-property-location.patch"
-      patch_description: "CMake: remove use of LOCATION property"
-      patch_type: "portability"
-      patch_source: "https://github.com/MediaArea/MediaInfoLib/pull/1526"
-    - patch_file: "patches/21.09-0002-cmake-handle-dependencies.patch"
-      patch_description: "CMake: robust discovery and link of dependencies"
-      patch_type: "conan"
-  "21.03":
-    - patch_file: "patches/21.03-0001-cmake-get-property-location.patch"
-      patch_description: "CMake: remove use of LOCATION property"
-      patch_type: "portability"
-      patch_source: "https://github.com/MediaArea/MediaInfoLib/pull/1526"
-    - patch_file: "patches/21.03-0002-cmake-handle-dependencies.patch"
-      patch_description: "CMake: robust discovery and link of dependencies"
-      patch_type: "conan"
-  "20.03":
-    - patch_file: "patches/20.03-0001-cmake-get-property-location.patch"
-      patch_description: "CMake: remove use of LOCATION property"
-      patch_type: "portability"
-      patch_source: "https://github.com/MediaArea/MediaInfoLib/pull/1526"
-    - patch_file: "patches/20.03-0002-cmake-handle-dependencies.patch"
-      patch_description: "CMake: robust discovery and link of dependencies"
-      patch_type: "conan"
-    - patch_file: "patches/20.03-0003-cmake-minimum-required.patch"
-      patch_description: "CMake: fix cmake_minimum_required()"
-      patch_type: "conan"

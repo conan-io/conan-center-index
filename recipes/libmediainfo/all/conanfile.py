@@ -2,10 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import (
-    apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file,
-    rm, rmdir, save
-)
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -34,9 +31,6 @@ class LibmediainfoConan(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -50,7 +44,7 @@ class LibmediainfoConan(ConanFile):
 
     def requirements(self):
         self.requires("libcurl/[>=7.78.0 <9]")
-        self.requires("libzen/0.4.38", transitive_headers=True, transitive_libs=True)
+        self.requires("libzen/0.4.41", transitive_headers=True, transitive_libs=True)
         self.requires("tinyxml2/9.0.0")
         self.requires("zlib/[>=1.2.11 <2]")
 
@@ -65,16 +59,17 @@ class LibmediainfoConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_ZENLIB"] = False
         tc.variables["BUILD_ZLIB"] = False
+        tc.variables["ZenLib_LIBRARY"] = "zen::zen"
         if Version(self.version) < "22.03":
             # Generate a relocatable shared lib on Macos
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("tinyxml2", "cmake_file_name", "TinyXML")
+        deps.set_property("libzen", "cmake_target_name", "zen::zen")
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         # TODO: move this to a patch (see how https://github.com/MediaArea/MediaInfoLib/issues/1408 is addressed by upstream)
         postfix = ""
         if self.settings.build_type == "Debug":
@@ -85,6 +80,12 @@ class LibmediainfoConan(ConanFile):
         mediainfodll_h = os.path.join(self.source_folder, "Source", "MediaInfoDLL", "MediaInfoDLL.h")
         replace_in_file(self, mediainfodll_h, "MediaInfo.dll", f"MediaInfo{postfix}.dll")
         replace_in_file(self, mediainfodll_h, "libmediainfo.0.dylib", f"libmediainfo{postfix}.0.dylib")
+
+        replace_in_file(self, os.path.join(self.source_folder, "Project", "CMake", "CMakeLists.txt"),
+                        "if(MSVC AND BUILD_SHARED_LIBS)", "if(0)")
+        # CMake: remove use of LOCATION property"
+        replace_in_file(self, os.path.join(self.source_folder, "Project", "CMake", "CMakeLists.txt"),
+                        "set(ZLIB_LIBRARIES", "# set(ZLIB_LIBRARIES")
 
     def build(self):
         self._patch_sources()
