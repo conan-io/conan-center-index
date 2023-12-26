@@ -1,7 +1,7 @@
 #include <hazelcast/client/hazelcast_client.h>
-#include <cstdio>
+#include <iostream>
 
 int main() {
-    printf("Hazelcast version: %s", hazelcast::client::version());
+    std::cout << "Hazelcast version: " << hazelcast::client::version();
     return EXIT_SUCCESS;
 }
