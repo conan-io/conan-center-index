@@ -37,7 +37,7 @@ class ArucoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("opencv/4.5.5")
+        self.requires("opencv/4.8.1")
         self.requires("eigen/3.4.0")
 
     def source(self):
