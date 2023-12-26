@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, replace_in_file
+from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
@@ -17,7 +17,6 @@ class GlazeConan(ConanFile):
     topics = ("json", "memory", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     @property
     def _min_cppstd(self):
@@ -32,6 +31,9 @@ class GlazeConan(ConanFile):
             "clang": "12",
             "apple-clang": "13.1",
         }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -52,11 +54,7 @@ class GlazeConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
-        if Version(self.version) >= "1.9.7":
-            replace_in_file(self, os.path.join(self.source_folder, "include", "glaze", "csv", "write.hpp"),
-                            "using item_type = std::decay_t<typename Element::type>;",
-                            "using item_type = typename std::decay<typename Element::type>::type;"
-                            )
+        apply_conandata_patches(self)
 
     def package(self):
         copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
