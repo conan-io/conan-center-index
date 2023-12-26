@@ -24,6 +24,10 @@ class MockNetworkAccessManagerConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, "11")
+
     def requirements(self):
         self.requires("qt/5.15.11", transitive_headers=True)
 
