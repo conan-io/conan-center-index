@@ -102,7 +102,8 @@ class LeptonicaConan(ConanFile):
             tc.variables["LIBWEBP_SUPPORT"] = self.options.with_webp
             tc.variables["OPENJPEG_SUPPORT"] = self.options.with_openjpeg
         if Version(self.version) >= "1.84.0" and self.options.with_openjpeg:
-            tc.preprocessor_definitions["LIBJP2K_HEADER"] = f"<{self.dependencies["openjpeg"].cpp_info.includedirs[1]}/openjpeg.h>"
+            jp2k_include_dir = self.dependencies["openjpeg"].cpp_info.includedirs[1]
+            tc.preprocessor_definitions["LIBJP2K_HEADER"] = f"<{jp2k_include_dir}/openjpeg.h>"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
