@@ -3,7 +3,7 @@ from conan import ConanFile
 from conans.errors import ConanInvalidConfiguration
 import shutil
 from conan.tools.scm import Version
-from conan.tools.files import download, copy, unzip
+from conan.tools.files import download, copy, unzip, rm, symlinks
 
 class CudaSdkConan(ConanFile):
     name = "cudasdk"
@@ -17,13 +17,15 @@ class CudaSdkConan(ConanFile):
     settings = "os", "arch"
     options = {
         # package layout - legacy = nvcc/visualstudiointegration , modern = bin/lib/extras
-        "layout": ["legacy", "modern"], 
+        "layout": ["legacy", "modern"],
+        "cccl": [True, False],
         "cudnn": [True, False],
         "cudnn_version": ["none", "ANY"],
         "cudart": [True, False], 
         "cuobjdump": [True, False], 
         "cupti": [True, False], 
         "cuxxfit": [True, False], 
+        "gdb": [True, False],
         "memcheck": [True, False], 
         "nvcc": [True, False], 
         "nvdisasm": [True, False], 
@@ -47,10 +49,12 @@ class CudaSdkConan(ConanFile):
     }
     default_options = {
         "layout": "legacy",
+        "cccl": True,
         "cudnn": False,
         "cudnn_version": "none",
         "cudart": True, 
         "cuobjdump": True, 
+        "gdb": True,
         "cupti": True, 
         "cuxxfit": True, 
         "memcheck": True, 
@@ -78,13 +82,19 @@ class CudaSdkConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def requirements(self):
+        if self.options.cccl:
+            self.requires("thrust/1.17.2")
+
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.build_requires("7zip/19.00")
 
     def config_options(self):
+        if self.settings.os != "Linux":
+            del self.options.gdb
+            del self.options.cccl
         if self.settings.os != "Windows":
-            del self.options.nvtx
             del self.options.visual_studio_integration
     
     def validate(self):
@@ -129,7 +139,85 @@ class CudaSdkConan(ConanFile):
         elif "Linux" == str(self.settings.os):
             self.run("./{} --extract={}".format(self._filename, self.build_folder))
 
-    def package(self):
+    def _package_linux(self):
+        targets = os.path.join("targets", "{}-linux".format(self.settings.arch))
+        inc_dst = os.path.join(targets, "include")
+        lib_dst = os.path.join(targets, "lib")
+        # only windows settings for now
+        #copy(self, "FindCUDASDK.cmake", ".", ".")
+        copy(self, "version.*", self.build_folder, self.package_folder)
+        # copy license files
+        copy(self, "EULA.txt", self.build_folder, os.path.join(self.package_folder, "licenses"))
+        # os.path.join("cuda_documentation", "Doc"))
+        if self.options.cccl:
+            copy(self, "*", os.path.join(self.build_folder, "cuda_cccl"), self.package_folder)
+        if self.options.thrust == False:
+            rm(self, "*", os.path.join(self.package_folder, inc_dir, "thrust"))
+            rm(self, "*", os.path.join(self.package_folder, lib_dir, "cmake", "thrust"))
+        if self.options.cudart:
+            copy(self, "*", os.path.join(self.build_folder, "cuda_cudart"), self.package_folder)
+        if self.options.cuobjdump:
+            copy(self, "*", os.path.join(self.build_folder, "cuda_cuobjdump"), self.package_folder)
+        if self.options.cupti:
+            copy(self, "*", os.path.join(self.build_folder, "cuda_cupti"), self.package_folder)
+            rm(self, "*", os.path.join(self.package_folder, "doc"))
+            rm(self, "*", os.path.join(self.package_folder, "samples"))
+        if self.options.cuxxfit:
+            copy(self, "*", os.path.join(self.build_folder, "cuda_cuxxfit"), self.package_folder)
+        # skip cuda_demo_suite
+        # skip cuda_documentation
+        if self.options.gdb:
+            copy(self, "*", os.path.join(self.build_folder, "cuda_gdb"), self.package_folder)
+        if self.options.memcheck:
+            copy(self, "*", os.path.join(self.build_folder, "cuda_memcheck"), self.package_folder)
+        # skip nsight
+        if self.options.nvcc:
+            copy(self, "*", os.path.join(self.build_folder, "cuda_nvcc"), self.package_folder)
+        if self.options.nvdisasm:
+            copy(self, "*", os.path.join(self.build_folder, "cuda_nvdisasm"), self.package_folder)
+        if self.options.nvml:
+            copy(self, "*", os.path.join(self.build_folder, "cuda_nvml_dev"), self.package_folder)
+        if self.options.nvprof:
+            copy(self, "*", os.path.join(self.build_folder, "cuda_nvprof"), self.package_folder)
+        if self.options.nvprune:
+            copy(self, "*", os.path.join(self.build_folder, "cuda_nvprune"), self.package_folder)
+        if self.options.nvrtc:
+            copy(self, "*", os.path.join(self.build_folder, "cuda_nvrtc"), self.package_folder)
+        if self.options.nvtx:
+            copy(self, "*", os.path.join(self.build_folder, "cuda_nvtx"), self.package_folder)
+        # skip nvvp
+        # skip cuda_samples
+        if self.options.sanitizer_api:
+            copy(self, "*", os.path.join(self.build_folder, "cuda_sanitizer_api"), self.package_folder)
+        # skip integration
+        if self.options.cublas:
+            copy(self, "*", os.path.join(self.build_folder, "libcublas"), self.package_folder)
+            rm(self, "cublas_version.txt", os.path.join(self.package_folder))
+        if self.options.cufft:
+            copy(self, "*", os.path.join(self.build_folder, "libcufft"), self.package_folder)
+        if self.options.curand:
+            copy(self, "*", os.path.join(self.build_folder, "libcurand"), self.package_folder)            
+        if self.options.cusolver:
+            copy(self, "*", os.path.join(self.build_folder, "libcusolver"), self.package_folder)            
+        if self.options.cusparse:
+            copy(self, "*", os.path.join(self.build_folder, "libcusparse"), self.package_folder)
+        if self.options.npp:
+            copy(self, "*", os.path.join(self.build_folder, "libnpp"), self.package_folder)
+        if self.options.nvjpeg:
+            copy(self, "*", os.path.join(self.build_folder, "libnvjpeg"), self.package_folder)
+        # skip nsight_compute
+        # skip nsigth_systems
+        if self.options.cudnn:
+            self.copy("LICENSE", "licenses", os.path.join("cudnn"))
+            self.copy("*", os.path.join("nvcc", "include"), os.path.join("cudnn", "include"))
+            self.copy("*", os.path.join("nvcc", "lib", "x64"), os.path.join("cudnn", "lib"))
+            self.copy("*", os.path.join("nvcc", "bin"), os.path.join("cudnn", "bin"))
+        os.symlink(os.path.join(self.package_folder, inc_dst), os.path.join(self.package_folder, "include"))
+        os.symlink(os.path.join(self.package_folder, lib_dst), os.path.join(self.package_folder, "lib64"))
+        symlinks.absolute_to_relative_symlinks(self, self.package_folder)
+
+
+    def _package_windows(self):
         # only windows settings for now
         self.copy("FindCUDASDK.cmake", ".", ".")
         self.copy("version.*", "nvcc", "CUDAToolkit")
@@ -197,6 +285,12 @@ class CudaSdkConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "nvcc"), "*.nvi")
         tools.remove_files_by_mask(os.path.join(self.package_folder, "CUDAVisualStudioIntegration"), "*.nvi")
 
+    def package(self):
+        if self.settings.os == "Linux":
+            self._package_linux()
+        elif self.settings.os == "Windows":
+            self._package_windows()
+
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "CUDASDK"
         self.cpp_info.names["cmake_find_package_multi"] = "CUDASDK"
@@ -233,14 +327,26 @@ class CudaSdkConan(ConanFile):
             self.cpp_info.components[name].resdirs = []
             self.cpp_info.components[name].bindirs = []
             self.cpp_info.components[name].includedirs = []
+        # not sure due to policy CMP0149
+        #self.conf_info["tools.microsoft:winsdk_version="]
             
         # setting sdk path information
         self.env_info.CUDASDK_PATH = self.package_folder
         self.env_info.CUDASDK_VERSION = self.version
-        # setting toolkit & cuda root 
-        self.env_info.CUDAToolkit_ROOT = os.path.join(self.package_folder, "nvcc")
-        self.env_info.CUDA_PATH = os.path.join(self.package_folder, "nvcc")
-        # adding nvcc to path
-        self.env_info.PATH.append(os.path.join(self.package_folder, "nvcc", "bin"))
-
-'''
+        if self.settings.os == "Windows":
+            self.conf_info.append("tools.cmake.cmaketoolchain:user_toolchain", os.path.join(self.package_folder))
+            # setting toolkit & cuda root 
+            self.env_info.CUDAToolkit_ROOT = os.path.join(self.package_folder, "nvcc")
+            self.env_info.CUDA_PATH = os.path.join(self.package_folder, "nvcc")
+            # adding nvcc to path
+            self.env_info.PATH.append(os.path.join(self.package_folder, "nvcc", "bin"))
+        else:        
+            self.conf_info.update("tools.build:compiler_executables", { "cuda": os.path.join(self.package_folder, "bin", "nvcc") })
+            #self.buildenv_info.define("CUDAToolkit_ROOT", os.path.join(self.package_folder, "bin"))
+            
+            # setting toolkit & cuda root 
+            #self.env_info.CUDAToolkit_ROOT = self.package_folder
+            #self.env_info.CUDA_PATH = self.package_folder, "nvcc"
+            # adding nvcc to path
+            #self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            pass
