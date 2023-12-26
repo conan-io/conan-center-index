@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
-from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm, export_conandata_patches, mkdir
+from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm, export_conandata_patches, mkdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
@@ -81,13 +81,10 @@ class LibMysqlClientCConan(ConanFile):
 
     def validate(self):
         def loose_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
+            return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+        if minimum_version and loose_lt_semver(self.settings.compiler.version, minimum_version):
             raise ConanInvalidConfiguration(f"{self.ref} requires {self.settings.compiler} {minimum_version} or newer")
 
         # mysql < 8.0.29 uses `requires` in source code. It is the reserved keyword in C++20.
@@ -99,7 +96,7 @@ class LibMysqlClientCConan(ConanFile):
         if is_apple_os(self):
             self.tool_requires("cmake/[>=3.18 <4]")
         if self.settings.os == "FreeBSD" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -107,14 +104,11 @@ class LibMysqlClientCConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        libs_to_remove = ["icu", "libevent", "re2", "rapidjson", "protobuf", "libedit"]
+        libs_to_remove = ["icu", "libevent", "re2", "rapidjson", "protobuf", "libedit", "boost"]
         for lib in libs_to_remove:
+            save(self, os.path.join(self.source_folder, "cmake", f"{lib}.cmake"), "")
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             f"MYSQL_CHECK_{lib.upper()}()\n",
-                            "",
-                            strict=False)
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            f"INCLUDE({lib})\n",
                             "",
                             strict=False)
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
@@ -129,16 +123,10 @@ class LibMysqlClientCConan(ConanFile):
                                 strict=False)
 
         for folder in ["client", "man", "mysql-test", "libbinlogstandalone"]:
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            f"ADD_SUBDIRECTORY({folder})\n",
-                            "",
-                            strict=False)
+            save(self, os.path.join(self.source_folder, folder, "CMakeLists.txt"), "")
         rmdir(self, os.path.join(self.source_folder, "storage", "ndb"))
-        for t in ["INCLUDE(cmake/boost.cmake)\n", "MYSQL_CHECK_EDITLINE()\n"]:
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            t,
-                            "",
-                            strict=False)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "MYSQL_CHECK_EDITLINE()\n", "", strict=False)
 
         # Upstream does not actually load lz4 directories for system, force it to
         if Version(self.version) < "8.0.34":
@@ -152,22 +140,24 @@ class LibMysqlClientCConan(ConanFile):
 
         # Fix discovery & link to OpenSSL
         ssl_cmake = os.path.join(self.source_folder, "cmake", "ssl.cmake")
+        openssl_info = self.dependencies["openssl"].cpp_info
         replace_in_file(self, ssl_cmake,
                         "NAMES ssl",
-                        f"NAMES ssl {self.dependencies['openssl'].cpp_info.components['ssl'].libs[0]}")
+                        f"NAMES ssl {openssl_info.components['ssl'].libs[0]}")
 
         replace_in_file(self, ssl_cmake,
                         "NAMES crypto",
-                        f"NAMES crypto {self.dependencies['openssl'].cpp_info.components['crypto'].libs[0]}")
+                        f"NAMES crypto {openssl_info.components['crypto'].libs[0]}")
 
         replace_in_file(self, ssl_cmake,
                         "IF(NOT OPENSSL_APPLINK_C)\n",
                         "IF(FALSE AND NOT OPENSSL_APPLINK_C)\n",
                         strict=False)
 
-        replace_in_file(self, ssl_cmake,
-                        "SET(SSL_LIBRARIES ${MY_OPENSSL_LIBRARY} ${MY_CRYPTO_LIBRARY})",
-                        "find_package(OpenSSL REQUIRED MODULE)\nset(SSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)")
+        if Version(self.version) < "8.2.0":
+            replace_in_file(self, ssl_cmake,
+                            "SET(SSL_LIBRARIES ${MY_OPENSSL_LIBRARY} ${MY_CRYPTO_LIBRARY})",
+                            "find_package(OpenSSL REQUIRED MODULE)\nset(SSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)")
 
         # And do not merge OpenSSL libs into mysqlclient lib
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "libutils.cmake"),
@@ -175,13 +165,19 @@ class LibMysqlClientCConan(ConanFile):
                         "if(0)")
 
         # Do not copy shared libs of dependencies to package folder
-        deps_shared = ["SSL", "KERBEROS", "SASL", "LDAP", "PROTOBUF"]
+        deps_shared = ["KERBEROS", "SASL", "LDAP", "PROTOBUF"]
         if Version(self.version) < "8.0.34":
             deps_shared.append("CURL")
+        if Version(self.version) < "8.2.0":
+            deps_shared.append("SSL")
         for dep in deps_shared:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            f"MYSQL_CHECK_{dep}_DLLS()",
-                            "")
+                            f"MYSQL_CHECK_{dep}_DLLS()", "")
+
+        if Version(self.version) >= "8.2.0":
+            # patchelf is not needed since we are not copying the shared libs
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "IF(NOT PATCHELF_EXECUTABLE)", "if(0)")
 
         if self.settings.os == "Macos":
             replace_in_file(self, os.path.join(self.source_folder, "libmysql", "CMakeLists.txt"),
