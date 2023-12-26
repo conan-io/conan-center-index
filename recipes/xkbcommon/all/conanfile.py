@@ -177,3 +177,4 @@ class XkbcommonConan(ConanFile):
         # "steals" the default global pkg_config name)
         self.cpp_info.set_property("pkg_config_name", "xkbcommon_all_do_not_use")
         self.cpp_info.names["pkg_config"] = "xkbcommon_all_do_not_use"
+
