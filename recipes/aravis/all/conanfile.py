@@ -72,8 +72,8 @@ class AravisConan(ConanFile):
 
     def requirements(self):
         # glib-object.h and gio/gio.h are used in several public headers
-        self.requires("glib/2.78.0", transitive_headers=True)
-        self.requires("libxml2/2.11.4")
+        self.requires("glib/2.78.1", transitive_headers=True)
+        self.requires("libxml2/2.12.2")
         self.requires("zlib/[>=1.2.11 <2]")
 
         if self.options.usb:
@@ -104,10 +104,10 @@ class AravisConan(ConanFile):
 
     def build_requirements(self):
         #windows build: meson/1.2.1 works, meson/1.2.2 breaks for some reason!
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/1.3.0")
         self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self.options.introspection:
             self.tool_requires("gobject-introspection/1.72.0")
 
