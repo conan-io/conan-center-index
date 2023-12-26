@@ -40,7 +40,7 @@ class AwsCS3(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) < "0.4.6":
+        if Version(self.version) < "0.4.5":
             self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-cal/0.5.13")
             if Version(self.version) < "0.1.49":
