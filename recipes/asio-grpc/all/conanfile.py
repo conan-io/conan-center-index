@@ -56,7 +56,7 @@ class AsioGrpcConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} 'recycling_allocator' cannot be used in combination with the 'unifex' backend.")
 
     def requirements(self):
-        self.requires("grpc/1.50.1")
+        self.requires("grpc/1.54.3")
         if self._local_allocator_option == "boost_container" or self.options.backend == "boost":
             self.requires("boost/1.83.0")
         if self.options.backend == "asio":
