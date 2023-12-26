@@ -315,11 +315,11 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.239.0")
+            self.requires("vulkan-loader/1.3.268.0")
             if is_apple_os(self):
                 self.requires("moltenvk/1.2.2")
         if self.options.with_glib:
-            self.requires("glib/2.78.1")
+            self.requires("glib/2.78.3")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.3.0")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
@@ -351,7 +351,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_x11") or self.options.qtwayland:
-            self.requires("xkbcommon/1.5.0")
+            self.requires("xkbcommon/1.6.0")
         if self.options.get_safe("with_x11", False):
             self.requires("xorg/system")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
@@ -374,7 +374,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
-            self.requires("dbus/1.15.6")
+            self.requires("dbus/1.15.8")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_md4c", False):
@@ -384,7 +384,7 @@ class QtConan(ConanFile):
         self.tool_requires("cmake/[>=3.21.1 <4]")
         self.tool_requires("ninja/1.11.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self.settings.os == "Windows":
             self.tool_requires('strawberryperl/5.32.1.1')
 
