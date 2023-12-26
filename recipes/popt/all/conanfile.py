@@ -54,6 +54,7 @@ class PoptConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     def build_requirements(self):
+        self.tool_requires("libtool/2.4.7")
         self.tool_requires("gnu-config/cci.20210814")
         if self._settings_build.os == "Windows":
             self.win_bash = True
@@ -107,6 +108,7 @@ class PoptConan(ConanFile):
     def build(self):
         self._patch_sources()
         autotools = Autotools(self)
+        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
