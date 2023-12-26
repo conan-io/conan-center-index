@@ -25,6 +25,7 @@ patches:
     - patch_file: "patches/2.3.9-0002-rename-inner-selector.patch"
       patch_description: "rename inner selector to subselector"
       patch_type: "portability"
+      patch_source: "https://github.com/sammycage/lunasvg/pull/147"
   "2.3.8":
     - patch_file: "patches/2.3.5-0001-fix-cmake.patch"
       patch_description: "use external plutovg and fix installation path for conan"
