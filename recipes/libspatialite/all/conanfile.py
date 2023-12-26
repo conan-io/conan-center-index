@@ -159,6 +159,7 @@ class LibspatialiteConan(ConanFile):
                     "--enable-geosonlyreentrant=no",
                     "--enable-geos370=yes",
                     f"--enable-rttopo={yes_no(self.options.with_rttopo)}",
+                    "--with-geosconfig=true",  # Using `true` command for a no-op
                 ])
             tc.generate()
 
@@ -207,7 +208,7 @@ class LibspatialiteConan(ConanFile):
         with chdir(self, self.source_folder):
             self.run(f"nmake -f makefile.vc {target}")
 
-    def _build_autotools(self):
+    def _patch_autotools(self):
         # fix MinGW
         replace_in_file(
             self, os.path.join(self.source_folder, "configure.ac"),
@@ -216,9 +217,18 @@ class LibspatialiteConan(ConanFile):
         )
         # Disable tests
         replace_in_file(self, os.path.join(self.source_folder, "Makefile.am"),
-                              "SUBDIRS = src test $(EXAMPLES)",
-                              "SUBDIRS = src $(EXAMPLES)")
+                        "SUBDIRS = src test $(EXAMPLES)",
+                        "SUBDIRS = src $(EXAMPLES)")
+        # We can't use geos-config file in conan because it's a non-relocatable file,
+        # therefore not packaged by geos recipe of conan-center-index.
+        # Instead, we rely on AutoToolsBuildEnvironment helper to inject proper flags.
+        configure_ac = os.path.join(self.source_folder, "configure.ac")
+        replace_in_file(self, configure_ac, "AC_MSG_ERROR([the user-specified geos-config", "echo # ")
+        replace_in_file(self, configure_ac, "AC_CHECK_HEADERS([geos_c.h", "# ")
+        replace_in_file(self, configure_ac, "AC_SEARCH_LIBS(GEOSCoveredBy", "# ")
 
+    def _build_autotools(self):
+        self._patch_autotools()
         autotools = Autotools(self)
         autotools.autoreconf()
         autotools.configure()
