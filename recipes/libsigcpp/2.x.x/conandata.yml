@@ -1,4 +1,7 @@
 sources:
+  "2.12.1":
+    url: "https://ftp2.nluug.nl/windowing/gnome/sources/libsigc++/2.12/libsigc++-2.12.1.tar.xz"
+    sha256: "a9dbee323351d109b7aee074a9cb89ca3e7bcf8ad8edef1851f4cf359bd50843"
   "2.10.8":
     url: "https://ftp2.nluug.nl/windowing/gnome/sources/libsigc++/2.10/libsigc++-2.10.8.tar.xz"
     sha256: "235a40bec7346c7b82b6a8caae0456353dc06e71f14bc414bcc858af1838719a"
