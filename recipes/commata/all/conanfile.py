@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
@@ -52,6 +52,14 @@ class CommataConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        # waiting for merge PR and release newer version. https://github.com/furfurylic/commata/pull/2
+        if Version(self.version) >= "0.2.7":
+            replace_in_file(self, os.path.join(self.source_folder, "include", "commata", "typing_aid.hpp"),
+                "#include <type_traits>",
+                """#include <type_traits>
+#include <optional>""")
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
