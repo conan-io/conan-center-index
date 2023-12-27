@@ -48,6 +48,8 @@ class MockNetworkAccessManagerConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "11")
+        if self.settings.os != "Macos":
+            raise ConanInvalidConfiguration(f"Only Macos is supported for now, got {self.settings.os}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
