@@ -1,9 +1,15 @@
 sources:
-  "1.8.1":
-    url: "https://github.com/bbc/audiowaveform/archive/refs/tags/1.8.1.tar.gz"
-    sha256: "bd1254a4ddbc0eb68eb8dbd549335c3207260afdae4bf80cfe5d4129de51d1e7"
+  "1.9.1":
+    url: "https://github.com/bbc/audiowaveform/archive/refs/tags/1.9.1.tar.gz"
+    sha256: "04dabd18c783758d666bc946f58d7d5c8ebfdb8b328048b9a884bc0ac8cdf068"
 patches:
-  "1.8.1":
-    - patch_file: "patches/1.8.1-find_packages.patch"
+  "1.9.1":
+    - patch_file: "patches/1.9.1-find_packages.patch"
       patch_description: "Inject thirdparties from conan"
+      patch_type: "conan"
+    - patch_file: "patches/1.9.1-disable_documentation.patch"
+      patch_description: "Remove documenation"
+      patch_type: "conan"
+    - patch_file: "patches/1.9.1-remove_flags.patch"
+      patch_description: "Remove custom compile flags"
       patch_type: "conan"

@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -35,12 +36,10 @@ class AudiowaveformConan(ConanFile):
         self.requires("libmad/0.15.1b")
         self.requires("libsndfile/1.2.2")
         self.requires("boost/1.83.0")
-        #temporary workaround: zlib isn't needed directly
-        #'libid3tag/0.15.1b' requires 'zlib/1.2.11' while 'libgd/2.3.3' requires 'zlib/1.2.13'
-        self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        pass
+        if is_msvc(self)
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built on Visual Studio and msvc.")
 
     def build_requirements(self):
         pass

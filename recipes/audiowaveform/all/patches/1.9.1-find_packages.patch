@@ -1,6 +1,7 @@
+Use packages that are provided by conan
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -87,41 +87,11 @@ if(BUILD_STATIC)
+@@ -88,40 +88,11 @@ if(BUILD_STATIC)
      endif()
  endif(BUILD_STATIC)
  
@@ -38,16 +39,15 @@
 -    message(STATUS "Boost_LIBRARIES='${Boost_LIBRARIES}'")
 -    include_directories(${Boost_INCLUDE_DIRS})
 -endif(Boost_FOUND)
--
 +find_package(libgd REQUIRED CONFIG)
 +find_package(SndFile REQUIRED CONFIG)
 +find_package(libmad REQUIRED CONFIG)
 +find_package(libid3tag REQUIRED CONFIG)
 +find_package(Boost COMPONENTS program_options filesystem regex REQUIRED)
+ 
  #-------------------------------------------------------------------------------
  #
- # Packaging
-@@ -279,11 +249,11 @@ add_executable(audiowaveform ${SRCS})
+@@ -278,11 +249,11 @@ add_executable(audiowaveform ${SRCS})
  
  # Specify libraries to link against.
  set(LIBS
