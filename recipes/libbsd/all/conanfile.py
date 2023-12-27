@@ -34,13 +34,16 @@ class LibBsdConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-    
+
     def configure(self):
         if self.options.shared:
            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-    
+
+    def requirements(self):
+        self.requires("libmd/1.1.0")
+
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -53,7 +56,7 @@ class LibBsdConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
-    
+
     def validate(self):
         if not is_apple_os(self) and self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} is only available for GNU-like operating systems (e.g. Linux)")
@@ -82,6 +85,7 @@ class LibBsdConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["bsd"].libs = ["bsd"]
         self.cpp_info.components["bsd"].set_property("pkg_config_name", "libbsd")
+        self.cpp_info.components["bsd"].requires = ["libmd::libmd"]
 
         self.cpp_info.components["libbsd-overlay"].libs = []
         self.cpp_info.components["libbsd-overlay"].requires = ["bsd"]
