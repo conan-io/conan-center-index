@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc
@@ -18,6 +19,10 @@ class AudiowaveformConan(ConanFile):
     topics = ("audio", "c-plus-plus")
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
+
+    @property
+    def _min_cppstd(self):
+        return 11
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -39,6 +44,8 @@ class AudiowaveformConan(ConanFile):
         self.requires("boost/1.83.0")
 
     def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
         if is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built on Visual Studio and msvc.")
 
@@ -51,6 +58,8 @@ class AudiowaveformConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_TESTS"] = False
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
