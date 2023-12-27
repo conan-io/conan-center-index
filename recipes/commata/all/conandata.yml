@@ -14,3 +14,9 @@ sources:
   "0.2.5":
     url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.5.tar.gz"
     sha256: "d1be1f366267af6c466c29f846f5968f57626a8a6635a2ea9a3de3f6fb88e53b"
+patches:
+  "0.2.7":
+    - patch_file: "patches/0.2.7-0001-include-optional.patch"
+      patch_description: "include <optional> header"
+      patch_type: "portability"
+      patch_source: "https://github.com/furfurylic/commata/pull/2"
