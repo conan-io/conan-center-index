@@ -118,10 +118,10 @@ class Cc65Conan(ConanFile):
                  dst=os.path.join(self.package_folder, "bin"),
                  src=os.path.join(self.source_folder, "bin"),
                  keep_path=False)
-            for dir in ("asminc", "cfg", "include", "lib", "target"):
+            for folder in ("asminc", "cfg", "include", "lib", "target"):
                 copy(self, "*",
-                     dst=os.path.join(self.package_folder, "bin", "share", "cc65", dir),
-                     src=os.path.join(self.source_folder, dir))
+                     dst=os.path.join(self.package_folder, "bin", "share", "cc65", folder),
+                     src=os.path.join(self.source_folder, folder))
         else:
             with chdir(self, os.path.join(self.source_folder)):
                 autotools = Autotools(self)
