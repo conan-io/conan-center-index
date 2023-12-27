@@ -23,6 +23,7 @@ class LibvaultConan(ConanFile):
     topics = ("vault", "libvault", "secrets", "passwords")
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt", "patches/**"]
+    package_type = "library"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
@@ -39,7 +40,7 @@ class LibvaultConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("libcurl/7.86.0")
+        self.requires("libcurl/7.86.0", transitive_headers=True)
         self.requires("catch2/3.2.0")
 
     def validate(self):
