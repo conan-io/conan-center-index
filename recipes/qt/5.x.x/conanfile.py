@@ -338,6 +338,9 @@ class QtConan(ConanFile):
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
 
+        if Version(self.version) < "5.15.9" and self.settings.os == "Macos" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("qt doesnot support macOS on ARM before 5.15.9 (QTBUG-85279)")
+
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.openssl:
