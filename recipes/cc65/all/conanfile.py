@@ -63,9 +63,9 @@ class Cc65Conan(ConanFile):
             tc.generate()
         tc = AutotoolsToolchain(self)
         tc.make_args += [
-            f"PREFIX=/",
-            f"datadir=/bin/share/cc65",
-            f"samplesdir=/samples",
+            "PREFIX=/",
+            "datadir=/bin/share/cc65",
+            "samplesdir=/samples",
         ]
         if self.settings.os == "Windows":
             tc.make_args.append("EXE_SUFFIX=.exe")
