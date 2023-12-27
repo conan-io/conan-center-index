@@ -39,7 +39,7 @@ class TarConan(ConanFile):
     def requirements(self):
         self.requires("bzip2/1.0.8", run=True, headers=False, libs=False)
         self.requires("lzip/1.23", run=True, headers=False, libs=False)
-        self.requires("xz_utils/5.4.4", run=True, headers=False, libs=False)
+        self.requires("xz_utils/5.4.5", run=True, headers=False, libs=False)
         self.requires("zstd/1.5.5", run=True, headers=False, libs=False)
         # self.requires("lzo/2.10", run=True, headers=False, libs=False)
 
