@@ -29,6 +29,10 @@ class TaglibConan(ConanFile):
         "bindings": True,
     }
 
+    @property
+    def _is_v2(self):
+        return Version(self.version, qualifier=True) >= 2
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -45,6 +49,9 @@ class TaglibConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
+        if self._is_v2:
+            self.requires("utfcpp/4.0.1")
+
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -67,10 +74,7 @@ class TaglibConan(ConanFile):
             os.path.join(self.source_folder, "taglib", "CMakeLists.txt"),
             os.path.join(self.source_folder, "bindings", "c", "CMakeLists.txt"),
         ]:
-            if Version(self.version) >= "1.13":
-                replace_in_file(self, cmakelists, "INSTALL_NAME_DIR ${CMAKE_INSTALL_LIBDIR}", "")
-            else:
-                replace_in_file(self, cmakelists, "INSTALL_NAME_DIR ${LIB_INSTALL_DIR}", "")
+            replace_in_file(self, cmakelists, "INSTALL_NAME_DIR ${", "# INSTALL_NAME_DIR ${")
 
     def build(self):
         self._patch_sources()
@@ -83,6 +87,7 @@ class TaglibConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rm(self, "taglib-config", os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
@@ -92,6 +97,8 @@ class TaglibConan(ConanFile):
         self.cpp_info.components["tag"].includedirs.append(os.path.join("include", "taglib"))
         self.cpp_info.components["tag"].libs = ["tag"]
         self.cpp_info.components["tag"].requires = ["zlib::zlib"]
+        if self._is_v2:
+            self.cpp_info.components["tag"].requires.append("utfcpp::utfcpp")
         if not self.options.shared:
             self.cpp_info.components["tag"].defines.append("TAGLIB_STATIC")
             if self.settings.os in ["Linux", "FreeBSD"]:
