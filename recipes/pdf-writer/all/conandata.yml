@@ -1,4 +1,7 @@
 sources:
+  "4.6.2":
+    url: "https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.6.2.tar.gz"
+    sha256: "0a36815ccc9d207028567f90039785c824b211169ba5da68de84d0c15455ab62"
   "4.6.1":
     url: "https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.6.1.tar.gz"
     sha256: "6e95fcb26ec679fa12ce6638d35a591e80960b35956a142d9a80b9a8c80ca824"
