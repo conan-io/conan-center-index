@@ -211,6 +211,10 @@ class LeptonicaConan(ConanFile):
                                       "set(functions_list\n    "
                                       "fstatat\n)")
 
+        if Version(self.version) >= "1.83.0":
+            libwebp_version = self.dependencies["libwebp"].ref.version
+            replace_in_file(self, cmakelists, "set(MINIMUM_WEBPMUX_VERSION 0.5.0)", f"set(MINIMUM_WEBPMUX_VERSION {libwebp_version})")
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
