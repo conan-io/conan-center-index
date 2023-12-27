@@ -38,7 +38,7 @@ class AudiowaveformConan(ConanFile):
         self.requires("boost/1.83.0")
 
     def validate(self):
-        if is_msvc(self)
+        if is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built on Visual Studio and msvc.")
 
     def build_requirements(self):
