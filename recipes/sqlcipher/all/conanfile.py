@@ -199,6 +199,8 @@ class SqlcipherConan(ConanFile):
                 copy(self, os.path.basename(gnu_config), os.path.dirname(gnu_config), os.path.join(self.source_folder, "build-aux"))
         configure = os.path.join(self.source_folder, "configure")
         self._chmod_plus_x(configure)
+        replace_in_file(self, configure, 'LIBS="-lcrypto $LIBS"', "", strict=False)
+        replace_in_file(self, configure, 'LIBS="-lcrypto  $LIBS"', "", strict=False)
         # relocatable shared libs on macOS
         replace_in_file(self, configure, "-install_name \\$rpath/", "-install_name @rpath/")
         # avoid SIP issues on macOS when dependencies are shared
