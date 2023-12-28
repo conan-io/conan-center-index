@@ -4,7 +4,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
@@ -127,6 +127,9 @@ class AprUtilConan(ConanFile):
             tc.variables["INSTALL_PDB"] = False
             tc.variables["APU_HAVE_CRYPTO"] = self._with_crypto
             tc.variables["APR_HAS_LDAP"] = self.options.with_ldap
+            apr_info = self.dependencies["apr"].cpp_info.aggregated_components()
+            tc.variables["APR_INCLUDE_DIR"] = apr_info.includedir.replace("\\", "/")
+            tc.variables["APR_LIBRARIES"] = ";".join(apr_info.libs)
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()
@@ -164,8 +167,12 @@ class AprUtilConan(ConanFile):
             deps = AutotoolsDeps(self)
             deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), " SHARED ", " ")
+
+    def build(self):
+        self._patch_sources()
         if self.settings.os == "Windows":
             cmake = CMake(self)
             cmake.configure()
