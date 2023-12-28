@@ -34,7 +34,7 @@ class TaglibConan(ConanFile):
 
     @property
     def _is_v2(self):
-        return Version(self.version, qualifier=True) >= 2
+        return self.version.startswith("2.")
 
     @property
     def _min_cppstd(self):
