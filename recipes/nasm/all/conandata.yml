@@ -15,5 +15,7 @@ sources:
     sha256: "aa0213008f0433ecbe07bb628506a5c4be8079be20fc3532a5031fd639db9a5e"
     url: "https://www.nasm.us/pub/nasm/releasebuilds/2.13.01/nasm-2.13.01.tar.xz"
 patches:
+  "2.16.01":
+    - patch_file: "patches/2.16.01-0001-disable-newly-integrated-dependency-tracking.patch"
   "2.15.05":
     - patch_file: "patches/2.15.05-0001-disable-newly-integrated-dependency-tracking.patch"
