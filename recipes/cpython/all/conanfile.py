@@ -133,8 +133,10 @@ class CPythonConan(ConanFile):
         # (which is not available at cci, and is API/ABI incompatible with current 3.2+)
         # Mac also vendors this dependency until 3.12, but it's possible some of the later versions
         # will work with Conan's libffi. TODO find the exact version
+        # Debug on 3.9 also seems to not work, unsure why.
         return (Version(self.version) < "3.8" and is_msvc(self)) or \
-               (Version(self.version) < "3.9" and is_apple_os(self))
+               (Version(self.version) < "3.9" and is_apple_os(self)) or \
+               (Version(self.version) < "3.10" and is_apple_os(self) and self.settings.build_type == "Debug")
 
     @property
     def _with_libffi(self):
