@@ -1,6 +1,6 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -482,16 +482,20 @@ IF(ASSIMP_HUNTER_ENABLED)
+@@ -482,11 +482,11 @@ IF(ASSIMP_HUNTER_ENABLED)
    set(ASSIMP_BUILD_MINIZIP TRUE)
  ELSE()
    # If the zlib is already found outside, add an export in case assimpTargets can't find it.
@@ -12,19 +12,9 @@
  
    IF ( NOT ASSIMP_BUILD_ZLIB )
 -    FIND_PACKAGE(ZLIB)
-+    if(ASSIMP_BUILD_ASSBIN_IMPORTER OR ASSIMP_BUILD_ASSBIN_EXPORTER OR ASSIMP_BUILD_ASSXML_EXPORTER OR
-+       ASSIMP_BUILD_BLEND_IMPORTER OR ASSIMP_BUILD_FBX_IMPORTER OR ASSIMP_BUILD_Q3BSP_IMPORTER OR
-+       ASSIMP_BUILD_X_IMPORTER OR ASSIMP_BUILD_XGL_IMPORTER)
-+        find_package(ZLIB REQUIRED)
-+    endif()
++    find_package(ZLIB REQUIRED)
    ENDIF()
- 
--  IF( NOT ZLIB_FOUND )
-+  IF(0)
-     MESSAGE(STATUS "compiling zlib from sources")
-     INCLUDE(CheckIncludeFile)
-     INCLUDE(CheckTypeSize)
-@@ -521,12 +525,14 @@ ENDIF()
+@@ -521,12 +521,14 @@ ENDIF()
  
  IF( NOT IOS )
    IF( NOT ASSIMP_BUILD_MINIZIP )
@@ -41,98 +31,6 @@
      ENDIF()
    ENDIF ()
  ENDIF ()
---- a/code/AssetLib/3MF/D3MFExporter.cpp
-+++ b/code/AssetLib/3MF/D3MFExporter.cpp
-@@ -57,7 +57,7 @@
- #ifdef ASSIMP_USE_HUNTER
- #include <zip/zip.h>
- #else
--#include <contrib/zip/src/zip.h>
-+#include <zip/zip.h>
- #endif
- 
- namespace Assimp {
---- a/code/AssetLib/Blender/BlenderTessellator.h
-+++ b/code/AssetLib/Blender/BlenderTessellator.h
-@@ -147,7 +147,7 @@
- #ifdef ASSIMP_USE_HUNTER
- #  include <poly2tri/poly2tri.h>
- #else
--#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
-+#  include <poly2tri/poly2tri.h>
- #endif
- 
- namespace Assimp
---- a/code/AssetLib/IFC/IFCGeometry.cpp
-+++ b/code/AssetLib/IFC/IFCGeometry.cpp
-@@ -53,8 +53,8 @@
- #  include <poly2tri/poly2tri.h>
- #  include <polyclipping/clipper.hpp>
- #else
--#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
--#  include "../contrib/clipper/clipper.hpp"
-+#  include <poly2tri/poly2tri.h>
-+#  include <polyclipping/clipper.hpp>
- #endif
- 
- #include <memory>
---- a/code/AssetLib/IFC/IFCOpenings.cpp
-+++ b/code/AssetLib/IFC/IFCOpenings.cpp
-@@ -53,8 +53,8 @@
- #  include <poly2tri/poly2tri.h>
- #  include <polyclipping/clipper.hpp>
- #else
--#  include "../contrib/poly2tri/poly2tri/poly2tri.h"
--#  include "../contrib/clipper/clipper.hpp"
-+#  include <poly2tri/poly2tri.h>
-+#  include <polyclipping/clipper.hpp>
- #endif
- 
- #include <iterator>
---- a/code/AssetLib/M3D/M3DWrapper.h
-+++ b/code/AssetLib/M3D/M3DWrapper.h
-@@ -59,7 +59,7 @@
- 
- // Share stb_image's PNG loader with other importers/exporters instead of bringing our own copy.
- #define STBI_ONLY_PNG
--#include <stb/stb_image.h>
-+#include <stb_image.h>
- 
- #include "m3d.h"
- 
---- a/code/AssetLib/MMD/MMDPmxParser.cpp
-+++ b/code/AssetLib/MMD/MMDPmxParser.cpp
-@@ -45,7 +45,7 @@
- #ifdef ASSIMP_USE_HUNTER
- #  include <utf8.h>
- #else
--#  include "../contrib/utf8cpp/source/utf8.h"
-+#  include <utf8.h>
- #endif
- #include <assimp/Exceptional.h>
- 
---- a/code/AssetLib/SIB/SIBImporter.cpp
-+++ b/code/AssetLib/SIB/SIBImporter.cpp
-@@ -59,7 +59,7 @@
- #ifdef ASSIMP_USE_HUNTER
- #include <utf8.h>
- #else
--#include "../contrib/utf8cpp/source/utf8.h"
-+#include <utf8.h>
- #endif
- #include <assimp/importerdesc.h>
- #include <assimp/scene.h>
---- a/code/AssetLib/STEPParser/STEPFileEncoding.cpp
-+++ b/code/AssetLib/STEPParser/STEPFileEncoding.cpp
-@@ -48,7 +48,7 @@
- #ifdef ASSIMP_USE_HUNTER
- #  include <utf8.h>
- #else
--#  include <contrib/utf8cpp/source/utf8.h>
-+#  include <utf8.h>
- #endif
- 
- #include <memory>
 --- a/code/CMakeLists.txt
 +++ b/code/CMakeLists.txt
 @@ -899,6 +899,7 @@ IF(ASSIMP_HUNTER_ENABLED)
@@ -210,10 +108,10 @@
    SET( stb_SRCS
      ../contrib/stb/stb_image.h
    )
--  INCLUDE_DIRECTORIES("../contrib")
+   INCLUDE_DIRECTORIES("../contrib")
    SOURCE_GROUP( Contrib\\stb FILES ${stb_SRCS})
  ENDIF()
- 
+-
 @@ -1138,14 +1154,7 @@ SET( assimp_src
    ${ASSIMP_EXPORTER_SRCS}
  
@@ -305,36 +203,3 @@
    else ()
      INCLUDE_DIRECTORIES("../")
    endif ()
---- a/code/Common/Assimp.cpp
-+++ b/code/Common/Assimp.cpp
-@@ -1290,7 +1290,7 @@
- #   endif
- 
- #   define STB_IMAGE_IMPLEMENTATION
--#   include "stb/stb_image.h"
-+#   include "stb_image.h"
- 
- #   if _MSC_VER
- #       pragma warning(pop)
---- a/code/Common/BaseImporter.cpp
-+++ b/code/Common/BaseImporter.cpp
-@@ -332,7 +332,7 @@
- #ifdef ASSIMP_USE_HUNTER
- #include <utf8.h>
- #else
--#include "../contrib/utf8cpp/source/utf8.h"
-+#include <utf8.h>
- #endif
- 
- // ------------------------------------------------------------------------------------------------
---- a/code/Pbrt/PbrtExporter.cpp
-+++ b/code/Pbrt/PbrtExporter.cpp
-@@ -83,7 +83,7 @@
- #include <sstream>
- #include <string>
- 
--#include "stb/stb_image.h"
-+#include "stb_image.h"
- 
- using namespace Assimp;
- 

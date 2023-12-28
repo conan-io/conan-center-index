@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -247,6 +247,17 @@ class AssimpConan(ConanFile):
             vendors.extend(["pugixml", "draco", "openddlparser"])
         for vendor in vendors:
             rmdir(self, os.path.join(self.source_folder, "contrib", vendor))
+
+        # Make vendored headers redirect to external ones
+        for contrib_header, include in [
+            (os.path.join("clipper", "clipper.hpp"), "polyclipping/clipper.hpp"),
+            (os.path.join("poly2tri", "poly2tri", "poly2tri.h"), "poly2tri/poly2tri.h"),
+            (os.path.join("stb", "stb_image.h"), "stb_image.h"),
+            (os.path.join("utf8cpp", "source", "utf8.h"), "utf8.h"),
+            (os.path.join("zip", "src", "zip.h"), "zip/zip.h"),
+        ]:
+            save(self, os.path.join(self.source_folder, "contrib", contrib_header),
+                 f"#include <{include}>\n")
 
     def build(self):
         self._patch_sources()
