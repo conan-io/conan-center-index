@@ -67,15 +67,14 @@ class GlibmmConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.options.shared:
-            wildcard = "" if Version(conan_version) < "2.0.0" else "/*"
+            wildcard = "" if conan_version.major == 1 else "/*"
             self.options[f"glib{wildcard}"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.78.0", transitive_headers=True)
+        self.requires("glib/2.78.3", transitive_headers=True)
         if self._abi_version == "2.68":
             self.requires("libsigcpp/3.0.7", transitive_headers=True)
         else:
@@ -96,10 +95,15 @@ class GlibmmConan(ConanFile):
         if self.dependencies["glib"].options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Linking shared glib with the MSVC static runtime is not supported")
 
+        if not self.options.shared and Version(self.version) >= "2.78":
+            # The project does not support static builds out of the box
+            # and extensive patching is required, including at the source code level.
+            raise ConanInvalidConfiguration("Static builds are not supported")
+
     def build_requirements(self):
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/1.3.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -129,12 +133,9 @@ class GlibmmConan(ConanFile):
             # when building a static build !defined(GLiBMM_GEN_EXTRA_DEFS_STATIC)
             # evaluates to 0
             if not self.options.shared:
-                replace_in_file(self,
-                                      os.path.join(self.source_folder, "tools",
-                                                   "extra_defs_gen", "generate_extra_defs.h"),
-                                      "#if defined (_MSC_VER) && !defined (GLIBMM_GEN_EXTRA_DEFS_STATIC)",
-                                      "#if 0",
-                                      )
+                replace_in_file(self, os.path.join(self.source_folder, "tools", "extra_defs_gen", "generate_extra_defs.h"),
+                                "#if defined (_MSC_VER) && !defined (GLIBMM_GEN_EXTRA_DEFS_STATIC)",
+                                "#if 0")
 
             # when using cpp_std=c++NM the /permissive- flag is added which
             # attempts enforcing standard conformant c++ code
@@ -142,6 +143,11 @@ class GlibmmConan(ConanFile):
             # conformant! see:
             # https://developercommunity.visualstudio.com/t/error-c2760-in-combaseapih-with-windows-sdk-81-and/185399
             replace_in_file(self, meson_build, "cpp_std=c++", "cpp_std=vc++")
+        if not self.options.shared:
+            replace_in_file(self, os.path.join(self.source_folder, "glib", "glibmmconfig.h.meson"),
+                            "#  define GLIBMM_DLL 1", "#  define GLIBMM_DLL 0")
+        replace_in_file(self, os.path.join(self.source_folder, "glib", "meson.build"),
+                        "error('Static builds are not supported by MSVC-style builds')", "")
 
     def build(self):
         self._patch_sources()
