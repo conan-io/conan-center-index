@@ -1,5 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
 from conan.tools.files import copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -48,8 +50,8 @@ class IslConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Cannot build shared isl library on Windows (due to libtool refusing to link to static/import libraries)")
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("Apple M1 is not yet supported. Contributions are welcome")
+        if is_apple_os(self) and cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building with Apple Clang is not supported yet")
         if msvc_runtime_flag(self) == "MDd" and not check_min_vs(self, 192, raise_invalid=False):
             # isl fails to link with this version of visual studio and MDd runtime:
             # gmp.lib(bdiv_dbm1c.obj) : fatal error LNK1318: Unexpected PDB error; OK (0)
