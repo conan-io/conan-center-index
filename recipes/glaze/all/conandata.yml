@@ -1,4 +1,7 @@
 sources:
+  "1.9.8.1":
+    url: "https://github.com/stephenberry/glaze/archive/v1.9.8.1.tar.gz"
+    sha256: "f1dd8d93440096d186695814848c9cd350a9ec5b0e114e933579ef2467a35558"
   "1.9.5":
     url: "https://github.com/stephenberry/glaze/archive/v1.9.5.tar.gz"
     sha256: "3800fa7283a1d4e5bd2c746fe9e268d2f8af76d3a75be7318b2084f38f529c7f"
@@ -23,3 +26,9 @@ sources:
   "1.6.1":
     url: "https://github.com/stephenberry/glaze/archive/v1.6.1.tar.gz"
     sha256: "c52c0f66d98d829ae1f2b859abddc84132ad49aea4c76f3286970fbab1489c10"
+patches:
+  "1.9.8.1":
+    - patch_file: "patches/1.9.8.1-0001-fix-msvc-bug.patch"
+      patch_description: "workaround MSVC compilation error for some versions"
+      patch_type: "portability"
+      patch_source: "https://github.com/stephenberry/glaze/pull/653"
