@@ -51,7 +51,7 @@ class OsmanipConan(ConanFile):
         if Version(self.version) < "4.2.0":
             self.requires("arsenalgear/1.2.2", transitive_headers=True)
         else:
-            self.requires("arsenalgear/2.1.0", transitive_headers=True)
+            self.requires("arsenalgear/2.0.1", transitive_headers=True)
 
     @property
     def _min_cppstd(self):
