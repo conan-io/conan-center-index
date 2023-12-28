@@ -2,6 +2,8 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -48,6 +50,8 @@ class TarConan(ConanFile):
             raise ConanInvalidConfiguration("This recipe does not support Windows builds of tar")  # FIXME: fails on MSVC and mingw-w64
         if not self.dependencies["bzip2"].options.build_executable:
             raise ConanInvalidConfiguration("bzip2:build_executable must be enabled")
+        if is_apple_os(self) and cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building is not supported. Contributions are welcome!")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
