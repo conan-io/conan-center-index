@@ -1,4 +1,7 @@
 sources:
+  "0.21.2":
+    url: "https://download.gnome.org/sources/libsecret/0.21/libsecret-0.21.2.tar.xz"
+    sha256: "e4a341496a0815e64c8d3b8fabab33d7bae7efdeab77b843669731d5b181dcee"
   "0.20.5":
     url: "https://download.gnome.org/sources/libsecret/0.20/libsecret-0.20.5.tar.xz"
     sha256: "3fb3ce340fcd7db54d87c893e69bfc2b1f6e4d4b279065ffe66dac9f0fd12b4d"
