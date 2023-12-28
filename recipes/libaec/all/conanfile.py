@@ -96,13 +96,13 @@ class LibaecConan(ConanFile):
         self.cpp_info.components["aec"].set_property("cmake_target_name", "libaec::aec")
         aec_name = "aec"
         if self.settings.os == "Windows" and not self.options.shared:
-            aec_name = "aec_static"
+            aec_name = "aec-static"
         self.cpp_info.components["aec"].libs = [aec_name]
 
         self.cpp_info.components["sz"].set_property("cmake_target_name", "libaec::sz")
         szip_name = "sz"
         if self.settings.os == "Windows":
-            szip_name = "szip" if self.options.shared else "szip_static"
+            szip_name = "szip" if self.options.shared else "szip-static"
         self.cpp_info.components["sz"].libs = [szip_name]
 
         # TODO: Legacy, to be removed on Conan 2.0
