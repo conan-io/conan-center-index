@@ -215,6 +215,8 @@ class AssimpConan(ConanFile):
         tc.generate()
 
         cd = CMakeDeps(self)
+        cd.set_property("rapidjson", "cmake_target_name", "rapidjson::rapidjson")
+        cd.set_property("utfcpp", "cmake_target_name", "utf8cpp::utf8cpp")
         cd.generate()
 
     def _patch_sources(self):
