@@ -9,7 +9,9 @@ from conan.tools.microsoft import check_min_vs, is_msvc, unix_path, unix_path_pa
 from conan.tools.apple import is_apple_os
 from conan.tools.scm import Version
 
+
 required_conan_version = ">=1.57.0"
+
 
 class GetTextConan(ConanFile):
     name = "gettext"
