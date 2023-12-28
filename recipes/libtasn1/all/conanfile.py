@@ -2,10 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import  copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
@@ -33,9 +34,6 @@ class LibTasn1Conan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -81,8 +79,18 @@ class LibTasn1Conan(ConanFile):
             tc.extra_ldflags.append("-Wl,-rpath,@loader_path/../lib")
         tc.generate()
 
+    def _patch_sources(self):
+        if Version(self.version) >= "4.19.0":
+            replace_in_file(self, os.path.join(self.source_folder, "config.h.in"),
+                            "# define _GL_EXTERN_INLINE _GL_UNUSED static",
+                            "# define _GL_EXTERN_INLINE _GL_UNUSED")
+        else:
+            replace_in_file(self, os.path.join(self.source_folder, "config.h.in"),
+                            "# define _GL_EXTERN_INLINE static _GL_UNUSED",
+                            "# define _GL_EXTERN_INLINE _GL_UNUSED")
+
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
