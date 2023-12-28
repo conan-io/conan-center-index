@@ -58,7 +58,7 @@ class TkConan(ConanFile):
             f"tcl/{self.version}", transitive_headers=True, transitive_libs=True
         )
         if self.settings.os == "Linux":
-            self.requires("fontconfig/2.13.93")
+            self.requires("fontconfig/2.14.2")
             self.requires("xorg/system")
 
     @property
@@ -199,10 +199,17 @@ class TkConan(ConanFile):
         }
         config_dir = self._get_configure_folder("win")
         with chdir(self, config_dir):
-            self.run(
-                f"""nmake -nologo -f makefile.vc {' '.join([f'{k}="{v}"' for k, v in flags.items()])} {target}""",
-                env="conanbuild",
-            )
+            args = " ".join(f'{k}="{v}"' for k, v in flags.items())
+            self.run(f"nmake -nologo -f makefile.vc {args} {target}")
+
+    def _patch_sources(self):
+        makefile = os.path.join(self.source_folder, "unix", "Makefile.in")
+        replace_in_file(self, makefile, "LDFLAGS			= @LDFLAGS_DEFAULT@ @LDFLAGS@", "")
+        replace_in_file(self, makefile, " ${CFLAGS}", " ${CFLAGS} ${CPPFLAGS}")
+        configure = os.path.join(self.source_folder, "unix", "configure")
+        replace_in_file(self, configure,
+                        "case 1: case (sizeof(${tcl_type_64bit})==sizeof(long)): ;",
+                        "case 1: case (sizeof(${tcl_type_64bit})!=sizeof(long)): ;")
 
     def build(self):
         apply_conandata_patches(self)
