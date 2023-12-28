@@ -81,12 +81,12 @@ class TesseractConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("leptonica/1.82.0")
+        self.requires("leptonica/1.83.1")
         if self.settings.os == "Windows" and Version(self.version) >= "5.0.0":
             self.requires("libtiff/4.6.0")
         # libarchive is required for 4.x so default value is true
         if self.options.get_safe("with_libarchive", default=True):
-            self.requires("libarchive/3.7.1")
+            self.requires("libarchive/3.7.2")
         # libcurl is not required for 4.x
         if self.options.get_safe("with_libcurl", default=False):
             self.requires("libcurl/[>=7.78.0 <9]")
