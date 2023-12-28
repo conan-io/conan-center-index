@@ -126,7 +126,7 @@ class ArmadilloConan(ConanFile):
 
         for value, options in self._co_dependencies.items():
             options_without_value = [
-                x for x in options if getattr(self.options, x) != value
+                x for x in options if self.options.get_safe(x) != value
             ]
             if options_without_value and (len(options) != len(options_without_value)):
                 raise ConanInvalidConfiguration(
@@ -146,22 +146,16 @@ class ArmadilloConan(ConanFile):
                 "OpenBLAS can only provide LAPACK functionality when also providing BLAS functionality. Set use_blas=openblas and try again."
             )
 
-        deprecated_opts = list(
-            set(
-                [
-                    opt
-                    for opt in [
-                        str(self.options.use_blas),
-                        str(self.options.use_lapack),
-                    ]
-                    if "system" in opt
-                ]
-            )
-        )
+        deprecated_opts = sorted({
+            opt for opt in [
+                str(self.options.use_blas),
+                str(self.options.use_lapack),
+            ] if "system" in opt
+        })
 
         for opt in deprecated_opts:
             self.output.warning(
-                f"DEPRECATION NOTICE: Value {opt} uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
+                f"DEPRECATION NOTICE: Value '{opt}' uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
             )
 
         # Ignore use_extern_rng when the option has been removed
@@ -246,11 +240,7 @@ class ArmadilloConan(ConanFile):
         deps.generate()
 
     def source(self):
-        get(self,
-            **self.conan_data["sources"][self.version],
-            strip_root=True,
-            filename="f{self.name}-{self.version}.tar.xz"
-        )
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
