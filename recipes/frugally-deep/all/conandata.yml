@@ -1,4 +1,7 @@
 sources:
+  "0.15.29":
+    url: "https://github.com/Dobiasd/frugally-deep/archive/v0.15.29.tar.gz"
+    sha256: "032cd525d4a7b9b3ebe28fd5e3984ac3e569da496f65d52c81030aabd9d0c52e"
   "0.15.25-p0":
     url: "https://github.com/Dobiasd/frugally-deep/archive/v0.15.25-p0.tar.gz"
     sha256: "d1204bc13ace603e97696aa7a1331d6af819c3a9b4952b4fd1e3d72dd8f524c3"
