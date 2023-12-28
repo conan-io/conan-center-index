@@ -1,0 +1,31 @@
+--- backend/CMakeLists.txt
++++ backend/CMakeLists.txt
+@@ -13,10 +13,10 @@
+ set(zint_OUTPUT_SRCS vector.c ps.c svg.c emf.c bmp.c pcx.c gif.c png.c tif.c raster.c output.c)
+ set(zint_SRCS ${zint_OUTPUT_SRCS} ${zint_COMMON_SRCS} ${zint_ONEDIM_SRCS} ${zint_POSTAL_SRCS} ${zint_TWODIM_SRCS})
+ 
+-add_library(zint SHARED ${zint_SRCS})
+-
+-if(ZINT_STATIC)
+-    add_library(zint-static STATIC ${zint_SRCS})
++add_library(zint ${zint_SRCS})
++if(NOT BUILD_SHARED_LIBS)
++    set_target_properties(zint PROPERTIES OUTPUT_NAME "zint-static")# ARCHIVE_OUTPUT_NAME "zint-static")
+ endif()
+ 
++target_include_directories(zint PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+ function(zint_target_link_libraries library)
+--- backend_qt/CMakeLists.txt
++++ backend_qt/CMakeLists.txt
+@@ -12,7 +12,6 @@
+     qt5_wrap_cpp(QZint_SRCS qzint.h)
+ endif()
+ 
+-add_library(${PROJECT_NAME} STATIC ${QZint_SRCS})
++add_library(${PROJECT_NAME} ${QZint_SRCS})
+-
+ set_target_properties(${PROJECT_NAME} PROPERTIES  SOVERSION "${ZINT_VERSION_MAJOR}.${ZINT_VERSION_MINOR}"
+                                         VERSION ${ZINT_VERSION})
+@@ -22,1 +22,1 @@
+-target_link_libraries(${PROJECT_NAME} zint Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Gui)
++target_link_libraries(${PROJECT_NAME} PUBLIC zint Qt${QT_VERSION_MAJOR}::Gui)

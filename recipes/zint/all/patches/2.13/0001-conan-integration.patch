@@ -1,0 +1,20 @@
+--- backend_qt/CMakeLists.txt
++++ backend_qt/CMakeLists.txt
+@@ -12,7 +12,7 @@
+     qt5_wrap_cpp(QZint_SRCS qzint.h)
+ endif()
+ 
+-add_library(${PROJECT_NAME} STATIC ${QZint_SRCS})
++add_library(${PROJECT_NAME} ${QZint_SRCS})
+ 
+ set_target_properties(${PROJECT_NAME} PROPERTIES  SOVERSION "${ZINT_VERSION_MAJOR}.${ZINT_VERSION_MINOR}"
+                                         VERSION ${ZINT_VERSION})
+@@ -24,7 +24,7 @@
+ else()
+     target_link_libraries(${PROJECT_NAME} zint-static)
+ endif()
+-target_link_libraries(${PROJECT_NAME} Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Gui)
++target_link_libraries(${PROJECT_NAME} PUBLIC Qt${QT_VERSION_MAJOR}::Gui)
+ 
+ if(ZINT_TEST)
+     add_subdirectory(tests)
