@@ -9,26 +9,30 @@ index 491ae46..c0a4f3d 100644
  include(setup)
  
  project(nativeipc)
-diff --git a/cmakeUtils/conanutils.cmake b/cmakeUtils/conanutils.cmake
-index cc6c07c..cbf0cd6 100644
---- a/cmakeUtils/conanutils.cmake
-+++ b/cmakeUtils/conanutils.cmake
-@@ -59,7 +59,8 @@ macro(run_conan)
-       set(_keeprpath "KEEP_RPATHS")
-     endif()
+diff --git a/cmakeUtils/setup.cmake b/cmakeUtils/setup.cmake
+--- cmakeUtils/setup.cmake
++++ cmakeUtils/setup.cmake
+@@ -1,6 +1,4 @@
+ include(utilities)
+-include(conan)
+-include(conanutils)
  
--    conan_cmake_run(CONANFILE conan/conanfile.py
-+    if(NOT CONAN_EXPORTED)
-+      conan_cmake_run(CONANFILE conan/conanfile.py
-         BASIC_SETUP
-         CMAKE_TARGETS
-         NO_OUTPUT_DIRS
-@@ -71,4 +72,5 @@ macro(run_conan)
-         RELWITHDEBINFO_PROFILE ${_profile}
-         ENV "CONAN_CMAKE_BINARY_DIR_PATH=${CMAKE_BINARY_DIR}"
-         )
-+    endif()
- endmacro()
+ macro(setup_project)
+     if(NOT CMAKE_BUILD_TYPE)
+@@ -13,13 +11,9 @@
+     option(ENABLE_CODE_DOCUMENTATION "enable code documenation generation" OFF)
+     option(MSVC_DYNAMIC_RUNTIME "change default runtime" ON)
+ 
+-    conan_check(VERSION 1.22.2 REQUIRED)
+-
+     setup_default_cxx_compile_options()
+ 
+     set_output_directories(${CMAKE_BINARY_DIR}/bin)
+-
+-    run_conan()
+ 
+     include(CTest)
+     if(BUILD_TESTING)
 diff --git a/cmakeUtils/unix.cmake b/cmakeUtils/unix.cmake
 index 5f4bb4c..9b2856a 100644
 --- a/cmakeUtils/unix.cmake
@@ -46,7 +50,18 @@ diff --git a/libnativeipc/CMakeLists.txt b/libnativeipc/CMakeLists.txt
 index fe5cc30..173a156 100644
 --- a/libnativeipc/CMakeLists.txt
 +++ b/libnativeipc/CMakeLists.txt
-@@ -81,7 +81,9 @@ if(MSVC)
+@@ -59,8 +59,9 @@
+   include/nativeipc
+   )
+ 
++find_package(libuv REQUIRED CONFIG)
+ target_link_libraries(nativeipc PRIVATE
+-  CONAN_PKG::libuv)
++  uv)
+ 
+ target_compile_definitions(nativeipc PRIVATE)
+ 
+@@ -81,7 +82,9 @@
  endif()
  
  install(TARGETS nativeipc

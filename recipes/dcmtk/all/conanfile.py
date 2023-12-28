@@ -144,7 +144,9 @@ class DCMTKConan(ConanFile):
         tc.variables["DCMTK_WITH_DOXYGEN"] = False
         tc.variables["DCMTK_WIDE_CHAR_FILE_IO_FUNCTIONS"] = self.options.wide_io
         tc.variables["DCMTK_WIDE_CHAR_MAIN_FUNCTION"] = self.options.wide_io
-        tc.variables["DCMTK_ENABLE_STL"] = self.options.enable_stl
+        # Upstream CMakeLists really expects ON value and no other value (like TRUE) in its internal logic
+        # to enable STL features (see DCMTK_TEST_ENABLE_STL_FEATURE() function in CMake/GenerateDCMTKConfigure.cmake)
+        tc.variables["DCMTK_ENABLE_STL"] = "ON" if self.options.enable_stl else "OFF"
         tc.variables["DCMTK_ENABLE_CXX11"] = True
         tc.variables["DCMTK_ENABLE_MANPAGE"] = False
         tc.cache_variables["DCMTK_DEFAULT_DICT"] = self.options.default_dict
@@ -159,32 +161,34 @@ class DCMTKConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _collect_cmake_required(self, dependency):
-        dep = self.dependencies.host[dependency]
+    def _collect_cmake_required(self, host_dependency):
+        """
+        Collect all compile & link flags of a host dependency so that they can be used in:
+          - CMAKE_REQUIRED_FLAGS
+          - CMAKE_REQUIRED_INCLUDES
+          - CMAKE_REQUIRED_DEFINITIONS
+          - CMAKE_REQUIRED_LINK_OPTIONS
+          - CMAKE_REQUIRED_LIBRARIES
+        These variables are listened by CMake functions like check_symbol_exists() etc
+        """
+        # Aggregate cpp_info of dependency and all its depencencies (direct and transitive)
+        dep = self.dependencies.host[host_dependency]
         dep_cpp_info = dep.cpp_info.aggregated_components()
+        for _, trans_dep in dep.dependencies.items():
+            if trans_dep.context == "host":
+                dep_cpp_info.merge(trans_dep.cpp_info.aggregated_components())
+
         dep_includes = [p.replace("\\", "/") for p in dep_cpp_info.includedirs]
-        dep_defs = [d for d in dep_cpp_info.defines]
         libdirs_flag = "/LIBPATH:" if is_msvc(self) else "-L"
         dep_libdirs = ["{}{}".format(libdirs_flag, p.replace("\\", "/")) for p in dep_cpp_info.libdirs]
-        dep_libs = [l for l in dep_cpp_info.libs]
-        dep_system_libs = [s for s in dep_cpp_info.system_libs]
         dep_frameworks = [f"-framework {f}" for f in dep_cpp_info.frameworks]
-        for _, trans_dependency in dep.dependencies.items():
-            if trans_dependency.context != "host":
-                continue
-            trans_dep_cpp_info = trans_dependency.cpp_info.aggregated_components()
-            dep_includes.extend([p.replace("\\", "/") for p in trans_dep_cpp_info.includedirs])
-            dep_defs.extend([d for d in trans_dep_cpp_info.defines])
-            dep_libdirs.extend(["{}{}".format(libdirs_flag, p.replace("\\", "/")) for p in trans_dep_cpp_info.libdirs])
-            dep_libs.extend([l for l in trans_dep_cpp_info.libs])
-            dep_system_libs.extend([s for s in trans_dep_cpp_info.system_libs])
-            dep_frameworks.extend([f"-framework {f}" for f in trans_dep_cpp_info.frameworks])
 
         return {
+            "flags": ";".join(dep_cpp_info.cflags + dep_cpp_info.cxxflags),
             "includes": ";".join(dep_includes),
-            "definitions": ";".join(dep_defs),
-            "link_options": ";".join(dep_libdirs + dep_frameworks),
-            "libraries": ";".join(dep_libs + dep_system_libs),
+            "definitions": ";".join(dep_cpp_info.defines),
+            "link_options": ";".join(dep_libdirs + dep_cpp_info.exelinkflags + dep_frameworks),
+            "libraries": ";".join(dep_cpp_info.libs + dep_cpp_info.system_libs),
         }
 
     def _patch_sources(self):
@@ -199,6 +203,7 @@ class DCMTKConan(ConanFile):
                 os.path.join(self.source_folder, "CMake", "dcmtkPrepare.cmake"),
                 "set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${OPENSSL_LIBS} ${THREAD_LIBS})",
                 textwrap.dedent(f"""\
+                    list(APPEND CMAKE_REQUIRED_FLAGS "{cmake_required['flags']}")
                     list(APPEND CMAKE_REQUIRED_INCLUDES "{cmake_required['includes']}")
                     list(APPEND CMAKE_REQUIRED_DEFINITIONS "{cmake_required['definitions']}")
                     list(APPEND CMAKE_REQUIRED_LINK_OPTIONS "{cmake_required['link_options']}")
@@ -213,6 +218,7 @@ class DCMTKConan(ConanFile):
                 os.path.join(self.source_folder, "CMake", "3rdparty.cmake"),
                 "set(CMAKE_REQUIRED_LIBRARIES ${LIBICONV_LIBS})",
                 textwrap.dedent(f"""\
+                    list(APPEND CMAKE_REQUIRED_FLAGS "{cmake_required['flags']}")
                     list(APPEND CMAKE_REQUIRED_DEFINITIONS "{cmake_required['definitions']}")
                     list(APPEND CMAKE_REQUIRED_LINK_OPTIONS "{cmake_required['link_options']}")
                     list(APPEND CMAKE_REQUIRED_LIBRARIES "{cmake_required['libraries']}")

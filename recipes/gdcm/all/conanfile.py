@@ -60,7 +60,7 @@ class GDCMConan(ConanFile):
         self.requires("expat/2.5.0")
         self.requires("openjpeg/2.5.0")
         if self.options.with_zlibng:
-            self.requires("zlib-ng/2.0.7")
+            self.requires("zlib-ng/2.1.3")
         else:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os != "Windows":
@@ -68,7 +68,7 @@ class GDCMConan(ConanFile):
             if Version(self.version) >= Version("3.0.20"):
                 self.requires("libiconv/1.17")
         if self.options.with_json:
-            self.requires("json-c/0.16")
+            self.requires("json-c/0.17")
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
 
@@ -104,8 +104,8 @@ class GDCMConan(ConanFile):
         # https://sourceforge.net/p/gdcm/bugs/548/
         tc.preprocessor_definitions["CHARLS_NO_DEPRECATED_WARNING"] = "1"
 
-        #gdcm currently uses functionality that is deprecated since OpenSSL 3.0
-        tc.preprocessor_definitions["OPENSSL_API_COMPAT"] = "0x10101000L"
+        #gdcm currently uses functionality that is deprecated since OpenSSL 1.1.0
+        tc.preprocessor_definitions["OPENSSL_API_COMPAT"] = "0x10000000L"
 
         tc.generate()
         deps = CMakeDeps(self)

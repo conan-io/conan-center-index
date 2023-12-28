@@ -187,6 +187,7 @@ class TestPackageConan(ConanFile):
                         self.output.info("Testing module (spam) using setup.py built module")
                         self._test_module("spam", True)
 
-            # MSVC builds need PYTHONHOME set.
-            with tools.environment_append({"PYTHONHOME": self.deps_user_info["cpython"].pythonhome}) if self.deps_user_info["cpython"].module_requires_pythonhome == "True" else tools.no_op():
+            # MSVC builds need PYTHONHOME set. Linux and Mac don't require it to be set if tested after building,
+            # but if the package is relocated then it needs to be set.
+            with tools.environment_append({"PYTHONHOME": self.deps_user_info["cpython"].pythonhome}):
                 self.run(os.path.join("bin", "test_package"), run_environment=True)

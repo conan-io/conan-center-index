@@ -49,7 +49,7 @@ class LibmediainfoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcurl/8.1.2")
+        self.requires("libcurl/[>=7.78.0 <9]")
         self.requires("libzen/0.4.38", transitive_headers=True, transitive_libs=True)
         self.requires("tinyxml2/9.0.0")
         self.requires("zlib/[>=1.2.11 <2]")

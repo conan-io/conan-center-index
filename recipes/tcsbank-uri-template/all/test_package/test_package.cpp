@@ -1,5 +1,6 @@
-#include <uri-template/uri-template.h>
 #include <iostream>
+
+#include <uri-template/uri-template.h>
 
 int main() {
     const std::string uri = "http://example.com/search?q=cat&lang=en";
