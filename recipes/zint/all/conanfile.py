@@ -12,7 +12,7 @@ class ZintConan(ConanFile):
     name = "zint"
     description = "Zint Barcode Generator"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://sourceforge.net/p/zint/code"
+    homepage = "https://www.zint.org.uk"
     license = "GPL-3.0"
     topics = ("barcode", "qt")
     package_type = "library"
