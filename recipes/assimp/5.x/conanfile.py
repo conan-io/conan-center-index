@@ -106,6 +106,7 @@ class AssimpConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -216,6 +217,17 @@ class AssimpConan(ConanFile):
         if self.settings.os == "Windows":
             tc.preprocessor_definitions["NOMINMAX"] = 1
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW" # to avoid warnings
+
+        tc.cache_variables["CMAKE_PROJECT_Assimp_INCLUDE"] = "conan_deps.cmake"
+        tc.cache_variables["WITH_CLIPPER"] = self._depends_on_clipper
+        tc.cache_variables["WITH_DRACO"] = self._depends_on_draco
+        tc.cache_variables["WITH_IRRXML"] = Version(self.version) < "5.1.0"
+        tc.cache_variables["WITH_KUBAZIP"] = self._depends_on_kuba_zip
+        tc.cache_variables["WITH_OPENDDL"] = self._depends_on_openddlparser
+        tc.cache_variables["WITH_POLY2TRI"] = self._depends_on_poly2tri
+        tc.cache_variables["WITH_PUGIXML"] = Version(self.version) >= "5.1.0"
+        tc.cache_variables["WITH_RAPIDJSON"] = self._depends_on_rapidjson
+        tc.cache_variables["WITH_STB"] = self._depends_on_stb
         tc.generate()
 
         cd = CMakeDeps(self)
@@ -233,20 +245,19 @@ class AssimpConan(ConanFile):
             ('SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_DEBUG /Zi /Od")', ""),
             ('SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")', ""),
             ('SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG:FULL /PDBALTPATH:%_PDB% /OPT:REF /OPT:ICF")', ""),
-            ("/WX", "")
+            ("/WX", ""),
+            ("-Werror", ""),
         ]
 
         for before, after in replace_mapping:
-            replace_in_file(self, os.path.join(
-                self.source_folder, "CMakeLists.txt"), before, after, strict=False)
-        # Take care to not use these vendored libs
-        vendors = ["poly2tri", "rapidjson", "utf8cpp", "zip", "unzip", "stb", "zlib", "clipper"]
-        if Version(self.version) < "5.1.0":
-            vendors.append("irrXML")
-        else:
-            vendors.extend(["pugixml", "draco", "openddlparser"])
-        for vendor in vendors:
-            rmdir(self, os.path.join(self.source_folder, "contrib", vendor))
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), before, after, strict=False)
+            replace_in_file(self, os.path.join(self.source_folder, "code", "CMakeLists.txt"), before, after, strict=False)
+
+        # Take care to not use vendored libs
+        allow_vendored = ["Open3DGC"]
+        for contrib_dir in self.source_path.joinpath("contrib").iterdir():
+            if contrib_dir.is_dir() and contrib_dir.name not in allow_vendored:
+                rmdir(self, contrib_dir)
 
         # Make vendored headers redirect to external ones
         for contrib_header, include in [
