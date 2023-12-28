@@ -17,15 +17,5 @@ sources:
 patches:
   "5.2.2":
     - patch_file: "patches/0005-fix-unzip.patch"
-    - patch_file: "patches/0006-unvendor-deps-5.2.x.patch"
   "5.1.6":
-    - patch_file: "patches/0004-unvendor-deps-5.1.6.patch"
     - patch_file: "patches/0005-fix-unzip.patch"
-  "5.1.0":
-    - patch_file: "patches/0003-unvendor-deps-5.1.x.patch"
-  "5.0.1":
-    - patch_file: "patches/0001-unvendor-deps-5.0.x.patch"
-    - patch_file: "patches/0002-fix-all-exporters-disabled.patch"
-  "5.0.0":
-    - patch_file: "patches/0001-unvendor-deps-5.0.x.patch"
-    - patch_file: "patches/0002-fix-all-exporters-disabled.patch"

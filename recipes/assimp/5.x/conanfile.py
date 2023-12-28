@@ -137,8 +137,6 @@ class AssimpConan(ConanFile):
 
     @property
     def _depends_on_draco(self):
-        if Version(self.version) < "5.1.0":
-            return False
         return self.options.with_gltf or self.options.with_gltf_exporter
 
     @property
@@ -147,27 +145,20 @@ class AssimpConan(ConanFile):
 
     @property
     def _depends_on_stb(self):
-        if Version(self.version) < "5.1.0":
-            return False
         return self.options.with_m3d or self.options.with_m3d_exporter or \
             self.options.with_pbrt_exporter
 
     @property
     def _depends_on_openddlparser(self):
-        if Version(self.version) < "5.1.0":
-            return False
         return self.options.with_opengex
 
     def requirements(self):
         # TODO: unvendor others libs:
         # - Open3DGC
         self.requires("minizip/1.2.13")
+        self.requires("pugixml/1.13")
         self.requires("utfcpp/3.2.3")
         self.requires("zlib/[>=1.2.11 <2]")
-        if Version(self.version) < "5.1.0":
-            self.requires("irrxml/1.2")
-        else:
-            self.requires("pugixml/1.13")
         if self._depends_on_kuba_zip:
             self.requires("kuba-zip/0.2.6")
         if self._depends_on_poly2tri:
@@ -192,14 +183,9 @@ class AssimpConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) >= "5.1.0":
-            tc.variables["ASSIMP_HUNTER_ENABLED"] = False
-            tc.variables["ASSIMP_IGNORE_GIT_HASH"] = True
-            tc.variables["ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR"] = False
-        else:
-            tc.variables["HUNTER_ENABLED"] = False
-            tc.variables["IGNORE_GIT_HASH"] = True
-            tc.variables["SYSTEM_IRRXML"] = True
+        tc.variables["ASSIMP_HUNTER_ENABLED"] = False
+        tc.variables["ASSIMP_IGNORE_GIT_HASH"] = True
+        tc.variables["ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR"] = False
         tc.variables["ASSIMP_ANDROID_JNIIOSYSTEM"] = False
         tc.variables["ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT"] = False
         tc.variables["ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT"] = False
@@ -221,11 +207,9 @@ class AssimpConan(ConanFile):
         tc.cache_variables["CMAKE_PROJECT_Assimp_INCLUDE"] = "conan_deps.cmake"
         tc.cache_variables["WITH_CLIPPER"] = self._depends_on_clipper
         tc.cache_variables["WITH_DRACO"] = self._depends_on_draco
-        tc.cache_variables["WITH_IRRXML"] = Version(self.version) < "5.1.0"
         tc.cache_variables["WITH_KUBAZIP"] = self._depends_on_kuba_zip
         tc.cache_variables["WITH_OPENDDL"] = self._depends_on_openddlparser
         tc.cache_variables["WITH_POLY2TRI"] = self._depends_on_poly2tri
-        tc.cache_variables["WITH_PUGIXML"] = Version(self.version) >= "5.1.0"
         tc.cache_variables["WITH_RAPIDJSON"] = self._depends_on_rapidjson
         tc.cache_variables["WITH_STB"] = self._depends_on_stb
         tc.generate()
@@ -259,6 +243,22 @@ class AssimpConan(ConanFile):
             if contrib_dir.is_dir() and contrib_dir.name not in allow_vendored:
                 rmdir(self, contrib_dir)
 
+        # Do not build vendored libs
+        code_cmakelists = self.source_path.joinpath("code", "CMakeLists.txt")
+        content = code_cmakelists.read_text(encoding="utf-8")
+        for vendored_lib in [
+            "unzip_compile",
+            "Poly2Tri",
+            "Clipper",
+            "openddl_parser",
+            # "open3dgc",
+            "ziplib",
+            "Pugixml",
+            "stb",
+        ]:
+            content = content.replace("${%s_SRCS}" % vendored_lib, "")
+        code_cmakelists.write_text(content, encoding="utf-8")
+
         # Make vendored headers redirect to external ones
         for contrib_header, include in [
             (os.path.join("clipper", "clipper.hpp"), "polyclipping/clipper.hpp"),
@@ -269,6 +269,12 @@ class AssimpConan(ConanFile):
         ]:
             save(self, os.path.join(self.source_folder, "contrib", contrib_header),
                  f"#include <{include}>\n")
+
+        # misc
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "use_pkgconfig(UNZIP minizip)", "set(UNZIP_FOUND TRUE)")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "INSTALL( TARGETS zlib", "message(TRACE #", strict=False)
 
     def build(self):
         self._patch_sources()
