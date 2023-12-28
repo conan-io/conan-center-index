@@ -39,7 +39,7 @@ function(_find_nvcc_read_file_version_txt version_file cuda_version is_valid)
   endif()
 endfunction()
 
-# read and parse version.json 
+# read and parse version.json
 # \TODO use string(JSON ... ) if cmake version is >=3.19
 function(_find_nvcc_read_file_version_json version_file cuda_version is_valid)
   set(${is_valid}
@@ -237,7 +237,7 @@ function(_find_nvcc cuda_path)
 endfunction()
 
 function(_cudasdk_make_targets)
-  set(cuda_targets cudart cudart_static cuda_driver cublas cublas_static 
+  set(cuda_targets cudart cudart_static cuda_driver cublas cublas_static
     cublasLt cublasLt_static cuFile cuFile_static cuFile_rdma cuFile_rdma_static
     cufft cufftw cufft_static cufft_static_nocallback cufftw_static curand curand_static cusolver cusolver_static
     cusparse cusparse_static cupti cupti_static nppc nppc_static nppial nppial_static nppicc nppicc_static nppicom nppicom_static
