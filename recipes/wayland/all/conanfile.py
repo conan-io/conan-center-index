@@ -50,7 +50,7 @@ class WaylandConan(ConanFile):
         if self.options.enable_libraries:
             self.requires("libffi/3.4.4")
         if self.options.enable_dtd_validation:
-            self.requires("libxml2/2.11.5")
+            self.requires("libxml2/2.12.3")
         self.requires("expat/2.5.0")
 
     def validate(self):
@@ -60,7 +60,7 @@ class WaylandConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("meson/1.3.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if cross_building(self):
             self.tool_requires(str(self.ref))
 
