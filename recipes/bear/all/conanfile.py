@@ -9,7 +9,7 @@ from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
 
 class BearConan(ConanFile):
@@ -19,6 +19,7 @@ class BearConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rizsotto/Bear"
     topics = ("clang", "compilation", "database", "llvm")
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
 
     @property
@@ -40,14 +41,15 @@ class BearConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("grpc/1.50.1")
-        self.requires("fmt/9.1.0")
-        self.requires("spdlog/1.11.0")
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("grpc/1.54.3")
+        self.requires("fmt/10.1.1")
+        self.requires("spdlog/1.12.0")
+        self.requires("nlohmann_json/3.11.3")
 
     def build_requirements(self):
-        self.tool_requires("grpc/1.50.1")
-
+        if self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/2.1.0")
+        self.tool_requires("grpc/<host_version>")
     def package_id(self):
         del self.info.settings.compiler
         del self.info.settings.build_type
@@ -71,15 +73,15 @@ class BearConan(ConanFile):
         tc.variables["ENABLE_UNIT_TESTS"] = False
         tc.variables["ENABLE_FUNC_TESTS"] = False
         tc.generate()
-        # In case there are dependencies listed on requirements, CMakeDeps should be used
+
         tc = CMakeDeps(self)
         tc.generate()
-        
+
         pc = PkgConfigDeps(self)
         pc.generate()
 
         tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
+        tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
