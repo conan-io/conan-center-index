@@ -152,12 +152,6 @@ class AssimpConan(ConanFile):
             self.options.with_pbrt_exporter
 
     @property
-    def _depends_on_zlib(self):
-        return self.options.with_assbin or self.options.with_assbin_exporter or \
-            self.options.with_assxml_exporter or self.options.with_blend or self.options.with_fbx or \
-            self.options.with_q3bsp or self.options.with_x or self.options.with_xgl
-
-    @property
     def _depends_on_openddlparser(self):
         if Version(self.version) < "5.1.0":
             return False
@@ -168,6 +162,7 @@ class AssimpConan(ConanFile):
         # - Open3DGC
         self.requires("minizip/1.2.13")
         self.requires("utfcpp/3.2.3")
+        self.requires("zlib/[>=1.2.11 <2]")
         if Version(self.version) < "5.1.0":
             self.requires("irrxml/1.2")
         else:
@@ -178,8 +173,6 @@ class AssimpConan(ConanFile):
             self.requires("poly2tri/cci.20130502")
         if self._depends_on_rapidjson:
             self.requires("rapidjson/cci.20220822")
-        if self._depends_on_zlib:
-            self.requires("zlib/[>=1.2.11 <2]")
         if self._depends_on_draco:
             self.requires("draco/1.5.6")
         if self._depends_on_clipper:
