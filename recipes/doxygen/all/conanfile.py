@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -47,6 +47,7 @@ class DoxygenConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -81,6 +82,7 @@ class DoxygenConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_PROJECT_doxygen_INCLUDE"] = "conan_deps.cmake"
         tc.variables["build_parse"] = self.options.enable_parse
         tc.variables["build_search"] = self.options.enable_search
         tc.variables["build_app"] = self.options.enable_app
