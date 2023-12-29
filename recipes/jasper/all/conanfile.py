@@ -66,6 +66,7 @@ class JasperConan(ConanFile):
         tc.variables["JAS_ENABLE_SHARED"] = self.options.shared
         tc.variables["JAS_LIBJPEG_REQUIRED"] = "REQUIRED"
         tc.variables["JAS_ENABLE_LIBJPEG"] = bool(self.options.with_libjpeg)
+        tc.variables["JAS_HAVE_JPEGLIB_H"] = True
         if Version(self.version) >= "3.0.0":
             tc.variables["JAS_ENABLE_LIBHEIF"] = False
         tc.variables["JAS_ENABLE_OPENGL"] = False
