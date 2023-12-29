@@ -13,7 +13,6 @@ class TestPackageConan(ConanFile):
         self.tool_requires(self.tested_reference_str)
 
     def build(self):
-        self.output.info(f"tools.build:compiler_executables: {self.conf.get('tools.build:compiler_executables')}")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
