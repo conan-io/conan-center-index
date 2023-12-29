@@ -1,8 +1,23 @@
+if(CMAKE_CROSSCOMPILING)
+  find_program(GETTEXT_MSGMERGE_EXECUTABLE
+               NAMES msgmerge
+               PATHS ENV PATH
+               NO_DEFAULT_PATH)
+  find_program(GETTEXT_MSGFMT_EXECUTABLE
+               NAMES msgfmt
+               PATHS ENV PATH
+               NO_DEFAULT_PATH)
+else()
+  find_program(GETTEXT_MSGMERGE_EXECUTABLE
+               NAMES msgmerge
+               PATHS "${CMAKE_CURRENT_LIST_DIR}/../../../bin/"
+               NO_DEFAULT_PATH)
+  find_program(GETTEXT_MSGFMT_EXECUTABLE
+               NAMES msgfmt
+               PATHS ENV PATH
+               NO_DEFAULT_PATH)
+endif()
 
-cmake_minimum_required(VERSION 3.15)
-
-find_program(GETTEXT_MSGMERGE_EXECUTABLE msgmerge)
-find_program(GETTEXT_MSGFMT_EXECUTABLE msgfmt)
 
 if(NOT GETTEXT_MSGMERGE_EXECUTABLE)
   message(FATAL_ERROR "Gettext msgmerge not found")
