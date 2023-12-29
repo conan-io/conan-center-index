@@ -9,7 +9,7 @@ required_conan_version = ">=1.53.0"
 class Drmp3Conan(ConanFile):
     name = "drmp3"
     description = "MP3 audio decoder."
-    homepage = "https://mackron.github.io/"
+    homepage = "https://github.com/mackron/dr_libs"
     topics = ("audio", "mp3", "sound")
     license = ("Unlicense", "MIT-0")
     url = "https://github.com/conan-io/conan-center-index"
