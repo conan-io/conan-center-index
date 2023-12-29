@@ -47,6 +47,7 @@ class GetTextConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "cmake/FindGettext.cmake", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -169,13 +170,18 @@ class GetTextConan(ConanFile):
         copy(self, "*gnuintl*.so*", self.build_folder, dest_lib_dir, keep_path=False)
         copy(self, "*gnuintl*.dylib", self.build_folder, dest_lib_dir, keep_path=False)
         copy(self, "*libgnuintl.h", self.build_folder, dest_include_dir, keep_path=False)
+        copy(self, "FindGettext.cmake", src=os.path.join(self.export_sources_folder, "cmake"), dst=os.path.join(self.package_folder, "lib", "cmake"))
         rename(self, os.path.join(dest_include_dir, "libgnuintl.h"), os.path.join(dest_include_dir, "libintl.h"))
 
     def package_info(self):
         aclocal = os.path.join(self.package_folder, "res", "aclocal")
         autopoint = os.path.join(self.package_folder, "bin", "autopoint")
+        msgmerge = os.path.join(self.package_folder, "bin", "msgmerge")
+        msgfmt = os.path.join(self.package_folder, "bin", "msgfmt")
         self.buildenv_info.append_path("ACLOCAL_PATH", aclocal)
         self.buildenv_info.define_path("AUTOPOINT", autopoint)
+        self.buildenv_info.define_path("MSGMERGE", msgmerge)
+        self.buildenv_info.define_path("MSGFMT", msgfmt)
 
         # TODO: Generate FindGettext.cmake: https://cmake.org/cmake/help/latest/module/FindGettext.html
         # TODO: Generate components for libgettext, libstyletext and gnuintl
@@ -188,6 +194,13 @@ class GetTextConan(ConanFile):
         self.cpp_info.libs = ["gnuintl"]
         if is_apple_os(self):
             self.cpp_info.frameworks.append("CoreFoundation")
+
+        self.cpp_info.components["libgettext"].set_property("cmake_file_name", "Gettext")
+        self.cpp_info.components["libgettext"].set_property("cmake_target_name", "Gettext::Gettext")
+        self.cpp_info.components["libgettext"].libs = ["gettextstyle", "gettextpo"]
+
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "FindGettext.cmake")])
 
         # TODO: the following can be removed when the recipe supports Conan >= 2.0 only
         self.cpp_info.names["cmake_find_package"] = "Intl"
