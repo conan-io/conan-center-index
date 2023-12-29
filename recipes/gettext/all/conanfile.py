@@ -3,8 +3,8 @@ from glob import glob
 
 from conan import ConanFile
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, chdir, rm, rename
-from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, chdir, rm, rename, mkdir
+from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path, unix_path_package_info_legacy
 from conan.tools.apple import is_apple_os
@@ -46,6 +46,11 @@ class GetTextConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def build_folder(self):
+        bf = super().build_folder
+        return os.path.join(bf, self._build_subfolder) if self._build_subfolder else bf
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -91,7 +96,7 @@ class GetTextConan(ConanFile):
             "HELP2MAN=/bin/true",
             "EMACS=no",
             "--datarootdir=${prefix}/res",
-            "--with-libiconv-prefix={}".format(libiconv_root),
+            f"--with-libiconv-prefix={libiconv_root}",
             "--disable-nls",
             "--disable-dependency-tracking",
             "--enable-relocatable",
@@ -146,26 +151,28 @@ class GetTextConan(ConanFile):
             env.define("RC", f"windres --target=pe-{windres_arch}")
             env.vars(self).save_script("conanbuild_msvc")
         tc.generate()
-
-    @property
-    def build_folder(self):
-        bf = super().build_folder
-        return os.path.join(bf, self._build_subfolder) if self._build_subfolder else bf
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
+
         # INFO: Build libintl
         self.output.info("Building libintl")
         self._build_subfolder = "libintl_build"
         autotools = Autotools(self)
-        autotools.configure()
-        autotools.make("gettext-runtime")
+        autotools.configure("gettext-runtime")
+        autotools.make()
+
         # INFO: Build msgmerge and msgfmt
         self.output.info("Building gettext-tools")
         self._build_subfolder = "gettext_build"
-        autotools = Autotools(self)
-        autotools.configure(args=["--disable-shared", "--disable-static"])
-        autotools.make("gettext-tools")
+        self.output.warning(f"BUILD FOLDER: {self.build_folder}")
+        mkdir(self, self.build_folder)
+        with chdir(self, self.build_folder):
+            autotools = Autotools(self)
+            autotools.configure("gettext-tools", args=["--disable-shared", "--disable-static"])
+            autotools.make()
 
 
     def _fix_msvc_libname(self):
@@ -186,7 +193,7 @@ class GetTextConan(ConanFile):
         copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         self._build_subfolder = "gettext_build"
         autotools = Autotools(self)
-        autotools.install()
+        autotools.install("install-gettext-tools")
 
         self._build_subfolder = "libintl_build"
         rmdir(self, os.path.join(self.package_folder, "share", "doc"))
@@ -202,8 +209,9 @@ class GetTextConan(ConanFile):
         copy(self, "*gnuintl*.so*", self.build_folder, dest_lib_dir, keep_path=False)
         copy(self, "*gnuintl*.dylib", self.build_folder, dest_lib_dir, keep_path=False)
         copy(self, "*libgnuintl.h", self.build_folder, dest_include_dir, keep_path=False)
-        copy(self, "FindGettext.cmake", src=os.path.join(self.export_sources_folder, "cmake"), dst=os.path.join(self.package_folder, "lib", "cmake"))
         rename(self, os.path.join(dest_include_dir, "libgnuintl.h"), os.path.join(dest_include_dir, "libintl.h"))
+
+        copy(self, "FindGettext.cmake", src=os.path.join(self.export_sources_folder, "cmake"), dst=os.path.join(self.package_folder, "lib", "cmake"))
         self._fix_msvc_libname()
 
     def package_info(self):
