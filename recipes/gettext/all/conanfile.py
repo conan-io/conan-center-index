@@ -1,4 +1,5 @@
 import os
+from glob import glob
 
 from conan import ConanFile
 from conan.tools.env import Environment, VirtualBuildEnv
@@ -32,6 +33,7 @@ class GetTextConan(ConanFile):
         "fPIC": True,
         "threads": "posix",
     }
+    _build_subfolder = "libintl_build"
 
     @property
     def _gettext_tools_folder(self):
@@ -145,11 +147,26 @@ class GetTextConan(ConanFile):
             env.vars(self).save_script("conanbuild_msvc")
         tc.generate()
 
+    @property
+    def build_folder(self):
+        bf = super().build_folder
+        return os.path.join(bf, self._build_subfolder) if self._build_subfolder else bf
+
     def build(self):
         apply_conandata_patches(self)
+        # INFO: Build libintl
+        self.output.info("Building libintl")
+        self._build_subfolder = "libintl_build"
         autotools = Autotools(self)
         autotools.configure()
-        autotools.make()
+        autotools.make("gettext-runtime")
+        # INFO: Build msgmerge and msgfmt
+        self.output.info("Building gettext-tools")
+        self._build_subfolder = "gettext_build"
+        autotools = Autotools(self)
+        autotools.configure(args=["--disable-shared", "--disable-static"])
+        autotools.make("gettext-tools")
+
 
     def _fix_msvc_libname(self):
         """Remove lib prefix & change extension to .lib in case of cl like compiler
@@ -167,9 +184,11 @@ class GetTextConan(ConanFile):
 
     def package(self):
         copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        self._build_subfolder = "gettext_build"
         autotools = Autotools(self)
         autotools.install()
 
+        self._build_subfolder = "libintl_build"
         rmdir(self, os.path.join(self.package_folder, "share", "doc"))
         rmdir(self, os.path.join(self.package_folder, "share", "info"))
         rmdir(self, os.path.join(self.package_folder, "share", "man"))
