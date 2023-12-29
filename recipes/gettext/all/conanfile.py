@@ -1,5 +1,5 @@
 import os
-from glob import glob
+import glob
 
 from conan import ConanFile
 from conan.tools.env import Environment, VirtualBuildEnv
