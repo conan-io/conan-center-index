@@ -17,8 +17,11 @@ class ZserioConanFile(ConanFile):
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://zserio.org"
     topics = ("zserio", "C++", "serialization")
-    package_type = "static-library"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+
+    options = { "shared": [False] }
+    default_options = { "shared": False }
 
     @property
     def _min_cppstd(self):
