@@ -1,4 +1,5 @@
 #include <iostream>
+#include "lemon/connectivity.h"
 #include "lemon/list_graph.h"
 
 using namespace lemon;
