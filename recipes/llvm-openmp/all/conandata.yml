@@ -42,7 +42,7 @@ sources:
     url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/openmp-8.0.1.src.tar.xz"
     sha256: "3e85dd3cad41117b7c89a41de72f2e6aa756ea7b4ef63bb10dcddf8561a7722c"
 patches:
-  "17.0.0-rc4":
+  "17.0.4":
     - patch_file: "patches/17/0001-disable-build-testing.patch"
       patch_description: "Disable building of tools, gdb-plugin, tests and docs"
       patch_type: "conan"
