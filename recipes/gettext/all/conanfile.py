@@ -156,24 +156,19 @@ class GetTextConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-
-        # INFO: Build libintl
-        self.output.info("Building libintl")
+        # INFO: We do a separated build to avoid generating executable with shared libraries and an linker error produced by textstyle
+        # First we build libintl in a separated folder, hornoring the shared option
+        # Then we build all executables using static linkage only
         self._build_subfolder = "libintl_build"
         autotools = Autotools(self)
         autotools.configure("gettext-runtime")
         autotools.make()
-
-        # INFO: Build msgmerge and msgfmt
-        self.output.info("Building gettext-tools")
         self._build_subfolder = "gettext_build"
-        self.output.warning(f"BUILD FOLDER: {self.build_folder}")
         mkdir(self, self.build_folder)
         with chdir(self, self.build_folder):
             autotools = Autotools(self)
-            autotools.configure("gettext-tools", args=["--disable-shared", "--disable-static"])
+            autotools.configure(args=["--disable-shared", "--disable-static"])
             autotools.make()
-
 
     def _fix_msvc_libname(self):
         """Remove lib prefix & change extension to .lib in case of cl like compiler
@@ -191,26 +186,23 @@ class GetTextConan(ConanFile):
 
     def package(self):
         copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        # INFO: We package only the libintl library and the gettext tools (executables)
         self._build_subfolder = "gettext_build"
         autotools = Autotools(self)
-        autotools.install("install-gettext-tools")
-
-        self._build_subfolder = "libintl_build"
+        autotools.install()
+        rmdir(self, os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "include"))
         rmdir(self, os.path.join(self.package_folder, "share", "doc"))
         rmdir(self, os.path.join(self.package_folder, "share", "info"))
         rmdir(self, os.path.join(self.package_folder, "share", "man"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        dest_lib_dir = os.path.join(self.package_folder, "lib")
-        dest_runtime_dir = os.path.join(self.package_folder, "bin")
-        dest_include_dir = os.path.join(self.package_folder, "include")
-        copy(self, "*gnuintl*.dll", self.build_folder, dest_runtime_dir, keep_path=False)
-        copy(self, "*gnuintl*.lib", self.build_folder, dest_lib_dir, keep_path=False)
-        copy(self, "*gnuintl*.a", self.build_folder, dest_lib_dir, keep_path=False)
-        copy(self, "*gnuintl*.so*", self.build_folder, dest_lib_dir, keep_path=False)
-        copy(self, "*gnuintl*.dylib", self.build_folder, dest_lib_dir, keep_path=False)
-        copy(self, "*libgnuintl.h", self.build_folder, dest_include_dir, keep_path=False)
-        rename(self, os.path.join(dest_include_dir, "libgnuintl.h"), os.path.join(dest_include_dir, "libintl.h"))
-
+        self._build_subfolder = "libintl_build"
+        copy(self, "*gnuintl*.dll", self.build_folder, os.path.join(self.package_folder, "bin"), keep_path=False)
+        copy(self, "*gnuintl*.lib", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*gnuintl*.a", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*gnuintl*.so*", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*gnuintl*.dylib", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*libgnuintl.h", self.build_folder, os.path.join(self.package_folder, "include"), keep_path=False)
+        rename(self, os.path.join(self.package_folder, "include", "libgnuintl.h"), os.path.join(self.package_folder, "include", "libintl.h"))
         copy(self, "FindGettext.cmake", src=os.path.join(self.export_sources_folder, "cmake"), dst=os.path.join(self.package_folder, "lib", "cmake"))
         self._fix_msvc_libname()
 
