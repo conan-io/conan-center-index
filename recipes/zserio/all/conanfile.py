@@ -13,7 +13,7 @@ required_conan_version = ">=1.54.0"
 class ZserioConanFile(ConanFile):
     name = "zserio"
     description = "Zserio C++ Runtime Library"
-    license = "BSD-3 Clause"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://zserio.org"
     topics = ("zserio", "C++", "serialization")
