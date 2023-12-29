@@ -8,7 +8,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=2.0.0"
+required_conan_version = ">=1.54.0"
 
 class ZserioConanFile(ConanFile):
     name = "zserio"
