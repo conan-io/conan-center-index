@@ -28,9 +28,6 @@ class ZserioConanFile(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if Version(self.version) < "2.13.0":
-            raise ConanInvalidConfiguration("Minimum available version is 2.13.0")
-
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
 
