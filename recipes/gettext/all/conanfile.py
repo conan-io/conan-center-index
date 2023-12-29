@@ -143,7 +143,6 @@ class GetTextConan(ConanFile):
             windres_arch = {"x86": "i686", "x86_64": "x86-64"}[str(self.settings.arch)]
             env.define("RC", f"windres --target=pe-{windres_arch}")
             env.vars(self).save_script("conanbuild_msvc")
-
         tc.generate()
 
     def build(self):
@@ -151,6 +150,20 @@ class GetTextConan(ConanFile):
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
+
+    def _fix_msvc_libname(self):
+        """Remove lib prefix & change extension to .lib in case of cl like compiler
+        """
+        if self.settings.get_safe("compiler.runtime"):
+            libdirs = getattr(self.cpp.package, "libdirs")
+            for libdir in libdirs:
+                for ext in [".dll.a", ".dll.lib", ".a"]:
+                    full_folder = os.path.join(self.package_folder, libdir)
+                    for filepath in glob.glob(os.path.join(full_folder, f"*{ext}")):
+                        libname = os.path.basename(filepath)[0:-len(ext)]
+                        if libname[0:3] == "lib":
+                            libname = libname[3:]
+                        rename(self, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))
 
     def package(self):
         copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -172,6 +185,7 @@ class GetTextConan(ConanFile):
         copy(self, "*libgnuintl.h", self.build_folder, dest_include_dir, keep_path=False)
         copy(self, "FindGettext.cmake", src=os.path.join(self.export_sources_folder, "cmake"), dst=os.path.join(self.package_folder, "lib", "cmake"))
         rename(self, os.path.join(dest_include_dir, "libgnuintl.h"), os.path.join(dest_include_dir, "libintl.h"))
+        self._fix_msvc_libname()
 
     def package_info(self):
         aclocal = os.path.join(self.package_folder, "res", "aclocal")
@@ -182,11 +196,6 @@ class GetTextConan(ConanFile):
         self.buildenv_info.define_path("AUTOPOINT", autopoint)
         self.buildenv_info.define_path("MSGMERGE", msgmerge)
         self.buildenv_info.define_path("MSGFMT", msgfmt)
-
-        # TODO: Generate FindGettext.cmake: https://cmake.org/cmake/help/latest/module/FindGettext.html
-        # TODO: Generate components for libgettext, libstyletext and gnuintl
-        # TODO: Export cppinfo libgettext
-        # TODO: Export cppinfo libstyletext
 
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "Intl")
