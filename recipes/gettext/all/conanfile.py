@@ -195,10 +195,6 @@ class GetTextConan(ConanFile):
         if is_apple_os(self):
             self.cpp_info.frameworks.append("CoreFoundation")
 
-        self.cpp_info.components["libgettext"].set_property("cmake_file_name", "Gettext")
-        self.cpp_info.components["libgettext"].set_property("cmake_target_name", "Gettext::Gettext")
-        self.cpp_info.components["libgettext"].libs = ["gettextstyle", "gettextpo"]
-
         self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
         self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "FindGettext.cmake")])
 

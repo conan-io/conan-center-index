@@ -10,11 +10,11 @@ if(CMAKE_CROSSCOMPILING)
 else()
   find_program(GETTEXT_MSGMERGE_EXECUTABLE
                NAMES msgmerge
-               PATHS "${CMAKE_CURRENT_LIST_DIR}/../../../bin/"
+               PATHS "${CMAKE_CURRENT_LIST_DIR}/../../bin/"
                NO_DEFAULT_PATH)
   find_program(GETTEXT_MSGFMT_EXECUTABLE
                NAMES msgfmt
-               PATHS ENV PATH
+               PATHS "${CMAKE_CURRENT_LIST_DIR}/../../bin/"
                NO_DEFAULT_PATH)
 endif()
 
@@ -42,7 +42,7 @@ if(GETTEXT_MSGMERGE_EXECUTABLE)
   unset(msgmerge_namewe)
 endif()
 
-include(FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Gettext
                                   REQUIRED_VARS GETTEXT_MSGMERGE_EXECUTABLE GETTEXT_MSGFMT_EXECUTABLE
                                   VERSION_VAR GETTEXT_VERSION_STRING)
