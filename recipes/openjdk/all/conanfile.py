@@ -67,8 +67,8 @@ class OpenJDK(ConanFile):
     def package_info(self):
         self.output.info(f"Creating JAVA_HOME environment variable with : {self.package_folder}")
 
-        self.runenv_info.append("JAVA_HOME", self.package_folder)
-        self.buildenv_info.append("JAVA_HOME", self.package_folder)
+        self.runenv_info.define_path("JAVA_HOME", self.package_folder)
+        self.buildenv_info.define_path("JAVA_HOME", self.package_folder)
 
         # TODO: remove `env_info` once the recipe is only compatible with Conan >= 2.0
         self.env_info.JAVA_HOME = self.package_folder
