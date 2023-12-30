@@ -1,7 +1,7 @@
 sources:
   "74.2":
-    url: "https://github.com/unicode-org/icu/releases/download/release-74-2/icu4c-74_2-src.tgz"
-    sha256: "5e4fb11d6a3e6b85afb55de8da8a71538f1d8fd64fce893986b37d60e5bb0091"
+    url: "https://github.com/unicode-org/icu/releases/download/release-74-2/icu4c-74_2-src-FIXED.tgz"
+    sha256: "68db082212a96d6f53e35d60f47d38b962e9f9d207a74cfac78029ae8ff5e08c"
   "74.1":
     url: "https://github.com/unicode-org/icu/releases/download/release-74-1/icu4c-74_1-src.tgz"
     sha256: "86ce8e60681972e60e4dcb2490c697463fcec60dd400a5f9bffba26d0b52b8d0"
