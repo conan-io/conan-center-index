@@ -143,7 +143,7 @@ class CPythonConan(ConanFile):
         return self._supports_modules and not self._use_vendored_libffi
 
     def requirements(self):
-        self.requires("zlib/[>=1.2.11 <2]", force=True)
+        self.requires("zlib/[>=1.2.11 <2]")
         if self._supports_modules:
             self.requires("openssl/[>=1.1 <4]")
             self.requires("expat/2.5.0")
@@ -158,7 +158,7 @@ class CPythonConan(ConanFile):
                 self.requires("mpdecimal/2.5.1")
         if self.settings.os != "Windows":
             if not is_apple_os(self):
-                self.requires("util-linux-libuuid/2.39.2", force=True)
+                self.requires("util-linux-libuuid/2.39.2")
             # If crypt.h is detected, it is included in the public headers.
             self.requires("libxcrypt/4.4.36", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_bz2"):
