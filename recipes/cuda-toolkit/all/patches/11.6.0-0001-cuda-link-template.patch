@@ -1,0 +1,13 @@
+diff --git a/visual_studio_integration/CUDAVisualStudioIntegration/extras/visual_studio_integration/MSBuildExtensions/CUDA 11.6.props b/visual_studio_integration/CUDAVisualStudioIntegration/extras/visual_studio_integration/MSBuildExtensions/CUDA 11.6.props
+index da97789..74fb45d 100644
+--- a/visual_studio_integration/CUDAVisualStudioIntegration/extras/visual_studio_integration/MSBuildExtensions/CUDA 11.6.props	
++++ b/visual_studio_integration/CUDAVisualStudioIntegration/extras/visual_studio_integration/MSBuildExtensions/CUDA 11.6.props	
+@@ -203,7 +203,7 @@ set CUDAFE_FLAGS=--sdk_dir "$(WindowsSdkDir)"
+             <Inputs></Inputs>
+ 
+             <HostCommandLineTemplate>-Xcompiler &quot;/EHsc [Warning] /nologo [Optimization] [ProgramDataBaseFileName] [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]&quot;</HostCommandLineTemplate>
+-            <LinkCommandLineTemplate>"$(CudaToolkitNvccPath)" -dlink [LinkOut] %(HostCommandLineTemplate) [AdditionalLibraryDirectories] [AdditionalDependencies] [AdditionalOptions] [CodeGeneration] [GPUDebugInfo] [TargetMachinePlatform] [Inputs]</LinkCommandLineTemplate>
++            <LinkCommandLineTemplate>echo [AdditionalLibraryDirectories] &gt; $(IntDir)$(TargetName).device-link.tmp &amp;&amp; echo; &gt;&gt; $(IntDir)$(TargetName).device-link.tmp &amp;&amp; echo; &gt;&gt; $(IntDir)$(TargetName).device-link.tmp &amp;&amp; echo;  &gt;&gt; $(IntDir)$(TargetName).device-link.tmp &amp;&amp;  echo [AdditionalOptions] &gt;&gt; $(IntDir)$(TargetName).device-link.tmp  &amp;&amp; "$(CudaToolkitNvccPath)" -dlink [LinkOut] %(HostCommandLineTemplate) --options-file $(IntDir)$(TargetName).device-link.tmp [CodeGeneration] [GPUDebugInfo] [TargetMachinePlatform] [Inputs]</LinkCommandLineTemplate>
+             <CommandLineTemplate>
+ # (Approximate command-line.  Settings inherited from host are not visible below.)
+ # (Please see the output window after a build for the full command-line)

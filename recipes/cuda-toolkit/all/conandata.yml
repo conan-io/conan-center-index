@@ -8,3 +8,7 @@ sources:
       x86_64:
         url: "https://developer.download.nvidia.com/compute/cuda/11.6.0/local_installers/cuda_11.6.0_510.39.01_linux.run"
         sha256: "1783da6d63970786040980b57fa3cb6420142159fc7d0e66f8f05c4905d98c83"
+patches:
+  "11.6.0":
+    "Windows":
+      - patch_file: "patches/11.6.0-0001-cuda-link-template.patch"
