@@ -101,6 +101,7 @@ class LibPslConan(ConanFile):
         meson.install()
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
         fix_msvc_libname(self)
 
