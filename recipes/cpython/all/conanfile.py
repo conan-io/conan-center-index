@@ -222,7 +222,7 @@ class CPythonConan(ConanFile):
                     raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
 
         if self._with_libffi:
-            if self.dependencies["libffi"].ref.version >= "3.3" and is_msvc(self) and "d" in str(self.settings.compiler.runtime) and self.settings.compiler.runtime != "dynamic":
+            if self.dependencies["libffi"].ref.version >= "3.3" and is_msvc(self) and "d" in str(self.settings.compiler.runtime):
                 raise ConanInvalidConfiguration("libffi versions >= 3.3 cause 'read access violations' when using a debug runtime (MTd/MDd)")
 
         if self._use_vendored_libffi and is_apple_os(self) and self.settings.arch == "armv8":
