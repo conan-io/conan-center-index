@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get, save
+from conan.tools.files import collect_libs, copy, get, save, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -77,6 +77,7 @@ class LibsrtpRecipe(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", f"libsrtp{Version(self.version).major}")
