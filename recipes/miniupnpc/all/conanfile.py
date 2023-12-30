@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -66,8 +67,12 @@ class MiniupnpcConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=os.path.join(self.source_folder, "miniupnpc"),
-                              dst=os.path.join(self.package_folder, "licenses"))
+        if Version(self.version) >= "2.2.4":
+            copy(self, "LICENSE", src=self.source_folder,
+                                  dst=os.path.join(self.package_folder, "licenses"))
+        else:
+            copy(self, "LICENSE", src=os.path.join(self.source_folder, "miniupnpc"),
+                                  dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
