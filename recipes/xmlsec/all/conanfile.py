@@ -120,6 +120,8 @@ class XmlSecConan(ConanFile):
                 "--enable-docs=no",
                 "--enable-mans=no",
             ])
+            if Version(self.version) >= "1.3.2":
+                tc.configure_args.append("--enable-pedantic=no")
             tc.generate()
 
             deps = AutotoolsDeps(self)
