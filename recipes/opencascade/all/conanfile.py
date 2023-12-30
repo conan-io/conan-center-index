@@ -106,7 +106,7 @@ class OpenCascadeConan(ConanFile):
         if self._link_opengl:
             self.requires("opengl/system")
         if self._is_linux:
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/2.15.0")
             self.requires("xorg/system")
         # TODO: add vtk support?
         if self.options.with_ffmpeg:
