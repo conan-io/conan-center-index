@@ -3,7 +3,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, VCVars
 from conan.tools.scm import Version
@@ -84,6 +84,8 @@ class LibpqConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/2.1.0")
         if is_msvc(self):
             self.tool_requires("strawberryperl/5.32.1.1")
         elif self._settings_build.os == "Windows":
@@ -97,6 +99,7 @@ class LibpqConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
         if is_msvc(self):
             vcvars = VCVars(self)
             vcvars.generate()
@@ -108,6 +111,7 @@ class LibpqConan(ConanFile):
             if not cross_building(self):
                 env = VirtualRunEnv(self)
                 env.generate(scope="build")
+
             tc = AutotoolsToolchain(self)
             tc.configure_args.append("--without-readline")
             tc.configure_args.append("--with-openssl" if self.options.with_openssl else "--without-openssl")
@@ -125,7 +129,12 @@ class LibpqConan(ConanFile):
             if self.settings.os == "Windows":
                 tc.make_args.append(f"MAKE_DLL={str(self.options.shared).lower()}")
             tc.generate()
-            AutotoolsDeps(self).generate()
+
+            deps = AutotoolsDeps(self)
+            deps.generate()
+
+            deps = PkgConfigDeps(self)
+            deps.generate()
 
     def _patch_sources(self):
         if is_msvc(self):
