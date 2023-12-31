@@ -37,7 +37,7 @@ class ReflectCppConan(ConanFile):
         return {
             "Visual Studio": "17",
             "msvc": "193",
-            "gcc": "11",
+            "gcc": "11.4",
             "clang": "16",
             "apple-clang": "15",
         }

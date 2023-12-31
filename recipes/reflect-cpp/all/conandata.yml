@@ -1,4 +1,4 @@
 sources:
-  "0.4.0":
-    url: "https://github.com/getml/reflect-cpp/archive/v0.4.0.tar.gz"
-    sha256: "20E996862F96F0746DCFC801245600FCD982A3181E15A924A6863C41814FD632"
+  "0.5.0":
+    url: "https://github.com/getml/reflect-cpp/archive/v0.5.0.tar.gz"
+    sha256: "F0A92DDB64C7DDD112D7996ED45BDE9D5A9F7C28A5BEFA5E4DFE4FEF6B3083ED"
