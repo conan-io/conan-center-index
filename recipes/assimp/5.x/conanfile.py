@@ -253,26 +253,26 @@ class AssimpConan(ConanFile):
         replace_mapping = [
             ("-fPIC", ""),
             ("-g ", ""),
+            ("/WX", ""),
+            ("-Werror", ""),
             ("SET(CMAKE_POSITION_INDEPENDENT_CODE ON)", ""),
             ('SET(CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MDd /Ob2 /DEBUG:FULL /Zi")', ""),
             ('SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_DEBUG /Zi /Od")', ""),
             ('SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")', ""),
             ('SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG:FULL /PDBALTPATH:%_PDB% /OPT:REF /OPT:ICF")', ""),
-            ("/WX", ""),
-            ("-Werror", ""),
         ]
-
         for before, after in replace_mapping:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), before, after, strict=False)
             replace_in_file(self, os.path.join(self.source_folder, "code", "CMakeLists.txt"), before, after, strict=False)
 
-        # Take care to not use vendored libs
+        # Make sure vendored libs are not used by accident by removing their subdirs
         allow_vendored = ["Open3DGC"]
         for contrib_dir in self.source_path.joinpath("contrib").iterdir():
             if contrib_dir.is_dir() and contrib_dir.name not in allow_vendored:
                 rmdir(self, contrib_dir)
 
-        # Do not build vendored libs
+        # Do not include add vendored library sources to the build
+        # https://github.com/assimp/assimp/blob/v5.3.1/code/CMakeLists.txt#L1151-L1159
         code_cmakelists = self.source_path.joinpath("code", "CMakeLists.txt")
         content = code_cmakelists.read_text(encoding="utf-8")
         for vendored_lib in [
@@ -288,7 +288,7 @@ class AssimpConan(ConanFile):
             content = content.replace("${%s_SRCS}" % vendored_lib, "")
         code_cmakelists.write_text(content, encoding="utf-8")
 
-        # Make vendored headers redirect to external ones
+        # Make vendored headers redirect to external ones.
         for contrib_header, include in [
             (os.path.join("clipper", "clipper.hpp"), "polyclipping/clipper.hpp"),
             (os.path.join("poly2tri", "poly2tri", "poly2tri.h"), "poly2tri/poly2tri.h"),
@@ -299,11 +299,15 @@ class AssimpConan(ConanFile):
             save(self, os.path.join(self.source_folder, "contrib", contrib_header),
                  f"#include <{include}>\n")
 
-        # misc
+        # minizip is provided via conan_deps.cmake, no need to use pkgconfig
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "use_pkgconfig(UNZIP minizip)", "set(UNZIP_FOUND TRUE)")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "INSTALL( TARGETS zlib", "message(TRACE #", strict=False)
+
+        # ZLIB is unvendored, no need to install it
+        # https://github.com/assimp/assimp/blob/v5.3.1/CMakeLists.txt#L483-L487
+        if Version(self.version) >= "5.2.0":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "INSTALL( TARGETS zlib", "set(_ #")
 
     def build(self):
         self._patch_sources()
