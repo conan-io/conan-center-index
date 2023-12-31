@@ -64,6 +64,7 @@ class MpirConan(ConanFile):
             raise ConanInvalidConfiguration("Cross-building doesn't work (yet)")
 
     def build_requirements(self):
+        self.tool_requires("libtool/2.4.7")
         self.tool_requires("yasm/1.3.0")
         if not is_msvc(self):
             self.tool_requires("m4/1.4.19")
@@ -84,6 +85,7 @@ class MpirConan(ConanFile):
     def _generate_autotools(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--disable-silent-rules")
         tc.configure_args.append("--enable-cxx" if self.options.get_safe("enable_cxx") else "--disable-cxx")
