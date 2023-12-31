@@ -305,9 +305,9 @@ class AssimpConan(ConanFile):
 
         # ZLIB is unvendored, no need to install it
         # https://github.com/assimp/assimp/blob/v5.3.1/CMakeLists.txt#L483-L487
-        if Version(self.version) >= "5.2.0":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "INSTALL( TARGETS zlib", "set(_ #")
+        # https://github.com/assimp/assimp/blob/v5.1.6/CMakeLists.txt#L463-L466
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "INSTALL( TARGETS zlib", "set(_ #")
 
     def build(self):
         self._patch_sources()
