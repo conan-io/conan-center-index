@@ -112,6 +112,9 @@ class OpenblasConan(ConanFile):
         # which is required to successfully compile on older gcc versions.
         tc.cache_variables["ANDROID"] = self.settings.os in ["Linux", "Android"]
 
+        if self.settings.arch == "armv8":
+            # OpenBLAS fails to detect the appropriate architecture for armv8, so help it out
+            tc.variables["TARGET"] = "ARMV8"
         tc.generate()
 
     def build(self):
