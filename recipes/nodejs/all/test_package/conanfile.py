@@ -19,7 +19,7 @@ class TestPackageConan(ConanFile):
 
     def _get_libc_version(self):
         stdout = StringIO()
-        self.run("ldd --version", stdout, env="buildenv")
+        self.run("ldd --version 2>&1", stdout, env="buildenv")
         stdout = stdout.getvalue()
         try:
             return Version(stdout.splitlines()[0].split()[-1])
@@ -31,7 +31,6 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 libc_version = self._get_libc_version()
-                self.output.info(f"System libc version: {libc_version}")
                 if libc_version and libc_version < "2.29":
                     self.output.warning(f"System libc version {libc_version} < 2.29, skipping test_package")
                     return
