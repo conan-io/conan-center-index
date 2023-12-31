@@ -152,6 +152,5 @@ class SwigConan(ConanFile):
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._cmake_module_rel_path]
 
         bindir = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bindir}")
         self.env_info.PATH.append(bindir)
         self.env_info.SWIG_LIB = os.path.join(self.package_folder, "bin", "swiglib")
