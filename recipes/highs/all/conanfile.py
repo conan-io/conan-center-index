@@ -46,12 +46,14 @@ class HiGHSConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["SHARED"] = self.options.shared
+        tc.variables["FAST_BUILD"] = True
         tc.variables["BUILD_TESTING"] = False
         tc.variables["PYTHON"] = False
         tc.variables["FORTRAN"] = False
         tc.variables["CSHARP"] = False
+        tc.variables["EXP"] = False
         tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["JULIA"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
