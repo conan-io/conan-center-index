@@ -69,10 +69,12 @@ class HiGHSConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.set_property("cmake_file_name", "highs")
+        self.cpp_info.set_property("cmake_target_name", "highs::highs")
+        self.cpp_info.set_property("pkg_config_name", "highs")
+        self.cpp_info.libs = ["highs"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
-        if is_msvc(self) and Version(self.version) < Version("1.5.3"):
+            self.cpp_info.system_libs.extend(["m", "pthread"])
+        if is_msvc(self) and Version(self.version) < "1.5.3":
             # https://github.com/ERGO-Code/HiGHS/commit/7d784db29ab22003670b8b2eb494ab1a97f1815b
             self.cpp_info.defines.append("_ITERATOR_DEBUG_LEVEL=0")
