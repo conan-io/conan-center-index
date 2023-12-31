@@ -96,12 +96,9 @@ class SwigConan(ConanFile):
             tc.extra_defines.append("HAVE_UNISTD_H=1")
         elif self.settings.os == "Windows":
             if is_msvc(self):
-                env.define("CC", "cccl")
-                env.define("CXX", "cccl")
-                self.output.warning("Visual Studio compiler cannot create ccache-swig. Disabling ccache-swig.")
+                env.define("CC", "cccl -FS")
+                env.define("CXX", "cccl -FS")
                 tc.configure_args.append("--disable-ccache")
-                tc.extra_cflags.append("-FS")
-                tc.extra_cxxflags.append("-FS")
             else:
                 tc.extra_ldflags.append("-static")
                 tc.configure_args.append("LIBS=-lmingwex -lssp")
