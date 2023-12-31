@@ -1,4 +1,4 @@
 sources:
-  "20231023":
-    url: "http://git.savannah.gnu.org/gitweb/?p=gnulib.git;a=snapshot;h=f8ce7e779de156cb6d0fa51dbaef49cd255b7171;sf=tgz"
-    sha256: "1521fe4ccf319487afbad78c7fd5bc76d8134ee4feef013e1fb2e40022ce73cd"
+  "20231231":
+    url: "http://git.savannah.gnu.org/gitweb/?p=gnulib.git;a=snapshot;h=4f6545e79c4a7cd7feb2c8f23f1d5167e7165907;sf=tgz"
+    sha256: "8b95e1ac4dc3a925dd282031445f544f332cdb0b0df2f0b97f5675b7ec42acff"
