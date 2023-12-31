@@ -45,7 +45,7 @@ class LibmediainfoConan(ConanFile):
     def requirements(self):
         self.requires("libcurl/[>=7.78.0 <9]")
         self.requires("libzen/0.4.41", transitive_headers=True, transitive_libs=True)
-        self.requires("tinyxml2/9.0.0")
+        self.requires("tinyxml2/10.0.0")
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
