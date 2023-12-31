@@ -26,12 +26,16 @@ class LibpqConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_openssl": [True, False],
+        "with_icu": [True, False],
+        "with_zlib": [True, False],
         "disable_rpath": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_openssl": False,
+        "with_openssl": True,
+        "with_icu": True,
+        "with_zlib": True,
         "disable_rpath": False,
     }
 
@@ -51,8 +55,13 @@ class LibpqConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-            self.options.rm_safe("disable_rpath")
+            del self.options.fPIC
+            del self.options.disable_rpath
+            # TODO: add Windows support for these
+            del self.options.with_icu
+            del self.options.with_zlib
+        if Version(self.version) < "10":
+            self.options.rm_safe("with_icu")
 
     def configure(self):
         if self.options.shared:
@@ -69,6 +78,10 @@ class LibpqConan(ConanFile):
                 self.requires("openssl/1.1.1w")
             else:
                 self.requires("openssl/[>=1.1 <4]")
+        if self.options.get_safe("with_icu"):
+            self.requires("icu/74.2")
+        if self.options.with_zlib:
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
         if is_msvc(self):
@@ -96,20 +109,21 @@ class LibpqConan(ConanFile):
                 env = VirtualRunEnv(self)
                 env.generate(scope="build")
             tc = AutotoolsToolchain(self)
-            tc.configure_args.append('--without-readline')
-            tc.configure_args.append('--without-zlib')
-            tc.configure_args.append('--with-openssl' if self.options.with_openssl else '--without-openssl')
+            tc.configure_args.append("--without-readline")
+            tc.configure_args.append("--with-openssl" if self.options.with_openssl else "--without-openssl")
+            tc.configure_args.append("--with-icu" if self.options.get_safe("with_icu") else "--without-icu")
+            tc.configure_args.append("--with-zlib" if self.options.with_zlib else "--without-zlib")
             if cross_building(self) and not self.options.with_openssl:
                 tc.configure_args.append("--disable-strong-random")
             if cross_building(self, skip_x64_x86=True):
                 tc.configure_args.append("USE_DEV_URANDOM=1")
             if self.settings.os != "Windows" and self.options.disable_rpath:
-                tc.configure_args.append('--disable-rpath')
+                tc.configure_args.append("--disable-rpath")
             if self._is_clang8_x86:
                 tc.extra_cflags.append("-msse2")
             tc.make_args.append(f"DESTDIR={unix_path(self, self.package_folder)}")
             if self.settings.os == "Windows":
-                tc.make_args.append("MAKE_DLL={}".format(str(self.options.shared).lower()))
+                tc.make_args.append(f"MAKE_DLL={str(self.options.shared).lower()}")
             tc.generate()
             AutotoolsDeps(self).generate()
 
@@ -258,6 +272,10 @@ class LibpqConan(ConanFile):
 
         if self.options.with_openssl:
             self.cpp_info.components["pq"].requires.append("openssl::openssl")
+        if self.options.get_safe("with_icu"):
+            self.cpp_info.components["pq"].requires.append("icu::icu")
+        if self.options.with_zlib:
+            self.cpp_info.components["pq"].requires.append("zlib::zlib")
 
         if not self.options.shared:
             if is_msvc(self):
