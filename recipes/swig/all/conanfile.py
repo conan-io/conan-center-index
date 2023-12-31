@@ -20,7 +20,7 @@ class SwigConan(ConanFile):
     homepage = "http://www.swig.org"
     topics = ("python", "java", "wrapper")
 
-    package_type = "build-scripts"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
 
     @property

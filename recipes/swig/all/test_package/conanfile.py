@@ -15,7 +15,7 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def requirements(self):
-        self.requires(self.tested_reference_str)
+        self.requires(self.tested_reference_str, visible=False)
 
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
