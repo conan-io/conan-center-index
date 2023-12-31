@@ -81,7 +81,10 @@ class TesseractConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("leptonica/1.83.1")
+        if Version(self.version) >= "5.2.0":
+            self.requires("leptonica/1.83.1")
+        else:
+            self.requires("leptonica/1.82.0")
         if self.settings.os == "Windows" and Version(self.version) >= "5.0.0":
             self.requires("libtiff/4.6.0")
         # libarchive is required for 4.x so default value is true
@@ -177,7 +180,7 @@ class TesseractConan(ConanFile):
     def package_info(self):
         # Official CMake imported target is:
         # - libtesseract if < 5.0.0
-        # - Tesseract::libtesseract if >= 5.0.0 (not yet released)
+        # - Tesseract::libtesseract if >= 5.0.0
         # We provide both targets
         self.cpp_info.set_property("cmake_file_name", "Tesseract")
         self.cpp_info.set_property("cmake_target_name", "Tesseract::libtesseract")
