@@ -48,6 +48,7 @@ class BearConan(ConanFile):
         self.requires("nlohmann_json/3.11.3")
 
     def build_requirements(self):
+        self.tool_requires("cmake/[>=3.28 <4]")
         if self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         self.tool_requires("grpc/<host_version>")
