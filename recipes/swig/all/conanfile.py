@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
@@ -114,8 +114,16 @@ class SwigConan(ConanFile):
         deps = AutotoolsDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # Rely on AutotoolsDeps instead of pcre2-config
+        # https://github.com/swig/swig/blob/v4.1.1/configure.ac#L70-L92
+        # https://github.com/swig/swig/blob/v4.0.2/configure.ac#L65-L86
+        replace_in_file(self, os.path.join(self.source_folder, "configure.ac"),
+                        'AS_IF([test "x$with_pcre" != xno],', 'AS_IF([false],')
+
+    def build(self):
+        self._patch_sources()
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
             self.run("./autogen.sh")
