@@ -94,7 +94,7 @@ class LibMysqlClientCConan(ConanFile):
 
     def build_requirements(self):
         if is_apple_os(self):
-            self.tool_requires("cmake/[>=3.18 <4]")
+            self.tool_requires("cmake/[>=3.20 <4]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
 
