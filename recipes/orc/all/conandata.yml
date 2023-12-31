@@ -1,4 +1,4 @@
 sources:
-  "1.9.1":
-    url: "https://github.com/apache/orc/archive/v1.9.1.tar.gz"
-    sha256: "7f8bbc862521ae99889205fb788e4906ecaaa6e503f075f6d3b78eeda8649322"
+  "1.9.2":
+    url: "https://github.com/apache/orc/archive/v1.9.2.tar.gz"
+    sha256: "cb933316cd40d611bcd1a2ccc6805455efcf88b8027ada6b3888666d4afee63a"
