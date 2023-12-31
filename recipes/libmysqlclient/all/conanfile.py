@@ -95,7 +95,7 @@ class LibMysqlClientCConan(ConanFile):
     def build_requirements(self):
         if is_apple_os(self):
             self.tool_requires("cmake/[>=3.18 <4]")
-        if self.settings.os == "FreeBSD" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
@@ -217,8 +217,7 @@ class LibMysqlClientCConan(ConanFile):
         if is_msvc(self):
             tc.cache_variables["WINDOWS_RUNTIME_MD"] = not is_msvc_static_runtime(self)
 
-        tc.cache_variables["WITH_SSL"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
-
+        tc.cache_variables["WITH_SSL"] = "system"
         tc.cache_variables["WITH_ZLIB"] = "system"
 
         # Remove to ensure reproducible build, this only affects docs generation
@@ -228,9 +227,8 @@ class LibMysqlClientCConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-        if self.settings.os == "FreeBSD":
-            deps = PkgConfigDeps(self)
-            deps.generate()
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def build(self):
         self._patch_sources()
