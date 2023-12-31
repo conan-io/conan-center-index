@@ -40,6 +40,10 @@ class GnuLibConanFile(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
 
+        # Set GNULIB_SRCDIR for the standard ./bootstrap script from build-aux
+        # https://github.com/digitalocean/gnulib/blob/master/build-aux/bootstrap#L58-L62
+        self.buildenv_info.define_path("GNULIB_SRCDIR", os.path.join(self.package_folder, "bin"))
+
         # TODO: Legacy, to be removed on Conan 2.0
         binpath = os.path.join(self.package_folder, "bin")
         self.env_info.PATH.append(binpath)
