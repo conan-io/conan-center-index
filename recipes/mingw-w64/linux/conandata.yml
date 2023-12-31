@@ -7,12 +7,12 @@ sources:
       url:
         - "https://mirrors.dotsrc.org/gnu/binutils/binutils-2.35.2.tar.xz"
         - "https://mirror.kumi.systems/gnu/binutils/binutils-2.35.2.tar.xz"
-        - "http://ftp.gnu.org/gnu/binutils/binutils-2.35.2.tar.xz"
+        - "https://ftpmirror.gnu.org/binutils/binutils-2.35.2.tar.xz"
       sha256: "dcd5b0416e7b0a9b24bed76cd8c6c132526805761863150a26d016415b8bdc7b"
     gcc:
-      "10.3.0":
+      "10.5.0":
         url:
-          - "https://mirrors.dotsrc.org/gnu/gcc/gcc-10.3.0/gcc-10.3.0.tar.xz"
-          - "https://mirror.kumi.systems/gnu/gcc/gcc-10.3.0/gcc-10.3.0.tar.xz"
-          - "http://ftp.gnu.org/gnu/gcc/gcc-10.3.0/gcc-10.3.0.tar.xz"
-        sha256: "64f404c1a650f27fc33da242e1f2df54952e3963a49e06e73f6940f3223ac344"
+          - "https://mirrors.dotsrc.org/gnu/gcc/gcc-10.5.0/gcc-10.5.0.tar.xz"
+          - "https://mirror.kumi.systems/gnu/gcc/gcc-10.5.0/gcc-10.5.0.tar.xz"
+          - "https://ftpmirror.gnu.org/gcc/gcc-10.5.0/gcc-10.5.0.tar.xz"
+        sha256: "25109543fdf46f397c347b5d8b7a2c7e5694a5a51cce4b9c6e1ea8a71ca307c1"
