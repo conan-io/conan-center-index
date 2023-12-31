@@ -188,6 +188,13 @@ class LibpqConan(ConanFile):
                 "ifeq ($(enable_thread_safety), yes)\nOBJS += pthread-win32.o\nendif",
                 "")
 
+        if Version(self.version) >= "15":
+            # Disable a check that gives false positives for statically linked builds
+            # https://github.com/postgres/postgres/commit/e9bc0441f1446f6614fa6712841acec91890e089
+            replace_in_file(self, os.path.join(self.source_folder, "src", "interfaces", "libpq", "Makefile"),
+                            "echo 'libpq must not be calling any function which invokes exit'",
+                            "echo #")
+
     def build(self):
         apply_conandata_patches(self)
         self._patch_sources()
