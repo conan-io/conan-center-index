@@ -100,6 +100,7 @@ class SwigConan(ConanFile):
                 env.define("CXX", "cccl")
                 self.output.warning("Visual Studio compiler cannot create ccache-swig. Disabling ccache-swig.")
                 tc.configure_args.append("--disable-ccache")
+                tc.extra_cflags.append("-FS")
                 tc.extra_cxxflags.append("-FS")
             else:
                 tc.extra_ldflags.append("-static")
