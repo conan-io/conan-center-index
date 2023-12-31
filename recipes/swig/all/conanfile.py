@@ -9,7 +9,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
+required_conan_version = ">=1.53.0"
 
 
 class SwigConan(ConanFile):
@@ -67,10 +67,6 @@ class SwigConan(ConanFile):
         else:
             self.tool_requires("bison/3.8.2")
         self.tool_requires("automake/1.16.5")
-        if self._use_pcre2:
-            self.tool_requires("pcre2/<host_version>")
-        else:
-            self.tool_requires("pcre/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
