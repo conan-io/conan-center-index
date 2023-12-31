@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
@@ -52,10 +53,17 @@ class LibreSSLConan(ConanFile):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Static runtime linked into shared LibreSSL not supported")
 
+    def build_requirements(self):
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            # Required for an up-to-date assembler
+            self.tool_requires("binutils/2.41")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
+
         tc = CMakeToolchain(self)
         tc.variables["LIBRESSL_SKIP_INSTALL"] = False
         tc.variables["LIBRESSL_APPS"] = False # Warning: if enabled, do not use cmake installation, to avoid installing files in OPENSSLDIR
