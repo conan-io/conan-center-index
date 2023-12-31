@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, copy, rm, rmdir
@@ -48,10 +48,11 @@ class BearConan(ConanFile):
         self.requires("nlohmann_json/3.11.3")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.28 <4]")
         if self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         self.tool_requires("grpc/<host_version>")
+        # Older version of CMake fails to build object libraries in the correct order
+        self.tool_requires("cmake/[>=3.20 <4]")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -73,6 +74,8 @@ class BearConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.variables["ENABLE_UNIT_TESTS"] = False
         tc.variables["ENABLE_FUNC_TESTS"] = False
         tc.generate()
