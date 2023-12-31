@@ -73,6 +73,8 @@ class LibTasn1Conan(ConanFile):
         tc = AutotoolsToolchain(self)
         if not is_msvc(self):
             tc.extra_cflags.append("-std=c99")
+        else:
+            tc.extra_cflags.append("-std=gnu99")
         tc.configure_args.append("--disable-doc")
         # Workaround against SIP on macOS
         if self.settings.os == "Macos" and self.options.shared:
