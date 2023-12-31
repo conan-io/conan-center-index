@@ -295,15 +295,15 @@ class MingwConan(ConanFile):
 
         if getattr(self, "settings_target", None):
             if self.settings_target.compiler != "gcc":
-                raise ConanInvalidConfiguration("Only GCC is allowed as compiler.")
+                self.output.warning("Only GCC is allowed as the compiler.")
             if str(self.settings_target.compiler.threads) != str(self.options.threads):
-                raise ConanInvalidConfiguration(
+                self.output.warning(
                     f"Build requires 'mingw' provides binaries for gcc with threads={self.options.threads},"
                     f" your profile:host declares threads={self.settings_target.compiler.threads},"
                     " please use the same value for both."
                 )
             if str(self.settings_target.compiler.exception) != str(self.options.exception):
-                raise ConanInvalidConfiguration(
+                self.output.warning(
                     f"Build requires 'mingw' provides binaries for gcc with exception={self.options.exception},"
                     f" your profile:host declares exception={self.settings_target.compiler.exception},"
                     " please use the same value for both."
