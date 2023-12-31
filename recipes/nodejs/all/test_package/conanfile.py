@@ -31,6 +31,7 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 libc_version = self._get_libc_version()
+                self.output.info(f"System libc version: {libc_version}")
                 if libc_version and libc_version < "2.29":
                     self.output.warning(f"System libc version {libc_version} < 2.29, skipping test_package")
                     return
