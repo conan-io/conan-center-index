@@ -49,7 +49,7 @@
 //
 // * q_start[0] must be zero
 //
-#include <highs/Highs.h>
+#include "Highs.h"
 #include <cassert>
 
 using std::cout;
