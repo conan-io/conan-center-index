@@ -31,8 +31,6 @@ class OpenmeshConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        if self.settings.get_safe("compiler.libcxx") == "libc++":
-            return 14
         return 11
 
     def export_sources(self):

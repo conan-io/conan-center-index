@@ -11,6 +11,9 @@ sources:
 patches:
   "10.0":
     - patch_file: "patches/cmake-install_9.0.patch"
+    - patch_file: "patches/restore-cxx11-compatibility.patch"
+      patch_description: "Revert a minor change that broke C++11 compatibility for libc++"
+      patch_type: "portability"
   "9.0":
     - patch_file: "patches/cmake-install_9.0.patch"
   "8.1":
