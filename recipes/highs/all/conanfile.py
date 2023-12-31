@@ -3,8 +3,6 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
-from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.54.0"
 
@@ -77,6 +75,3 @@ class HiGHSConan(ConanFile):
         self.cpp_info.libs = ["highs"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
-        if is_msvc(self) and Version(self.version) < "1.5.3":
-            # https://github.com/ERGO-Code/HiGHS/commit/7d784db29ab22003670b8b2eb494ab1a97f1815b
-            self.cpp_info.defines.append("_ITERATOR_DEBUG_LEVEL=0")
