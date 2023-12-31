@@ -2,7 +2,9 @@
 
 #include <rpp/rpp.hpp>
 
-#include <iostream>
+#include <cctype>
+#include <cstdio>
+#include <functional>
 
 int main()
 {
