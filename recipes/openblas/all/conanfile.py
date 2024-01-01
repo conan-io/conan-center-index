@@ -111,13 +111,9 @@ class OpenblasConan(ConanFile):
         # This is a workaround to add the libm dependency on linux,
         # which is required to successfully compile on older gcc versions.
         tc.cache_variables["ANDROID"] = self.settings.os in ["Linux", "Android"]
-
-        if self.settings.arch == "armv8":
-            # OpenBLAS fails to detect the appropriate architecture for armv8, so help it out
-            tc.variables["TARGET"] = "ARMV8"
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         if Version(self.version) < "0.3.21":
             if Version(self.version) >= "0.3.12":
                 search = """message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")"""
@@ -142,6 +138,20 @@ endif()"""
                 search,
                 replace,
             )
+
+        if Version(self.version) < "0.3.24":
+            # OpenBLAS fails to detect the appropriate target architecture for armv8, so help it out.
+            # This will ensure ARM64 is set, which will set TARGET=ARMV8 appropriately.
+            # This is a portability hotfix of https://github.com/OpenMathLib/OpenBLAS/pull/4142
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "cmake", "system_check.cmake"),
+                'elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64.*|AARCH64.*|arm64.*|ARM64.*)")',
+                'elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64.*|AARCH64.*|arm64.*|ARM64.*|armv8.*)")'
+            )
+
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
