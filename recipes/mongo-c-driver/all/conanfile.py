@@ -154,6 +154,11 @@ class MongoCDriverConan(ConanFile):
             # https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-initonceexecuteonce
             tc.preprocessor_definitions["_WIN32_WINNT"] = "0x0600"
         tc.cache_variables["BUILD_VERSION"] = self.version
+        # Skip some fragile checks
+        # https://github.com/mongodb/mongo-c-driver/blob/1.25.3/src/libmongoc/CMakeLists.txt#L266-L276
+        tc.variables["HAVE_ASN1_STRING_GET0_DATA"] = True  # Requires OpenSSL 1.1.0+
+        # https://github.com/mongodb/mongo-c-driver/blob/1.25.3/src/libmongoc/CMakeLists.txt#L366-L375
+        tc.variables["SASL2_HAVE_SASL_CLIENT_DONE"] = True # Requires Cyrus-SASL 2.1.23+
         tc.generate()
 
         deps = CMakeDeps(self)
