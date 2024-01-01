@@ -25,12 +25,12 @@ class MingwConan(ConanFile):
     options = {
         "threads": ["posix", "win32"],
         "exception": ["seh", "sjlj"],
-        "gcc": ["10.3.0"],
+        "gcc": ["10.5.0"],
     }
     default_options = {
         "threads": "posix",
         "exception": "seh",
-        "gcc": "10.3.0",
+        "gcc": "10.5.0",
     }
     options_description = {
         "threads": "Threading model: posix or win32",
