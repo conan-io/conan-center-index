@@ -76,6 +76,8 @@ class OpenCascadeConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if Version(self.version) >= "7.8":
+            return "14"
         return "11"
 
     def export_sources(self):
