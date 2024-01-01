@@ -35,7 +35,7 @@ class FirebirdConan(ConanFile):
         # https://github.com/FirebirdSQL/firebird/blob/v5.0.0-RC1/configure.ac
         # https://github.com/FirebirdSQL/firebird/blob/v5.0.0-RC1/builds/posix/Makefile.in#L185-L239
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("icu/73.2")
+        self.requires("icu/74.2")
         self.requires("termcap/1.3.1")
         # TODO: should potentially unvendor these:
         # https://github.com/FirebirdSQL/firebird/tree/v5.0.0-RC1/extern
