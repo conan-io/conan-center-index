@@ -71,7 +71,7 @@ class BehaviorTreeCPPConan(ConanFile):
         self.requires("zeromq/4.3.5")
         self.requires("cppzmq/4.10.0")
         self.requires("minitrace/cci.20230905")
-        self.requires("tinyxml2/9.0.0")
+        self.requires("tinyxml2/10.0.0")
         self.requires("foonathan-lexy/2022.12.1")
         if Version(self.version) >= "4.1.1":
             self.requires("sqlite3/3.44.2")
