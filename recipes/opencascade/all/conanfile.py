@@ -80,6 +80,18 @@ class OpenCascadeConan(ConanFile):
             return "14"
         return "11"
 
+    @property
+    def _compilers_minimum_version(self):
+        if Version(self.version) >= "7.8":
+            return {
+                "gcc": "7",
+                "clang": "7",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            }
+        return {}
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -130,6 +142,12 @@ class OpenCascadeConan(ConanFile):
         if self.settings.compiler == "clang" and self.settings.compiler.version == "6.0" and \
            self.settings.build_type == "Release":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support Clang 6.0 if Release build type")
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
