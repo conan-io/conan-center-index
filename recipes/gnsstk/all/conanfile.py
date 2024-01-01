@@ -1,9 +1,9 @@
 import os
 
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
-from conan.tools.files import get, copy, rmdir, save, replace_in_file
+from conan.tools.files import get, copy, rmdir, save, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -40,6 +40,9 @@ class GNSSTkConan(ConanFile):
     def _min_cppstd(self):
         return 11
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -65,15 +68,15 @@ class GNSSTkConan(ConanFile):
         tc.cache_variables["BUILD_EXT"] = self.options.build_ext
         tc.cache_variables["VERSIONED_HEADER_INSTALL"] = True
         tc.cache_variables["USE_RPATH"] = False
-        if not self.settings.compiler.cppstd:
+        if not valid_min_cppstd(self, self._min_cppstd):
             # The C++ standard is not set correctly by the project for apple-clang
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
 
     def _patch_sources(self):
-        # Disable examples
+        apply_conandata_patches(self)
+        # Disable examples and tests
         save(self, os.path.join(self.source_folder, "examples", "CMakeLists.txt"), "")
-        # Disable tests
         save(self, os.path.join(self.source_folder, "core", "tests", "CMakeLists.txt"), "")
         # Disable warnings as errors
         replace_in_file(self, os.path.join(self.source_folder, "BuildSetup.cmake"),
