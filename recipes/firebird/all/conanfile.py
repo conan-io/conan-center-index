@@ -5,8 +5,8 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, chdir, replace_in_file
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.files import copy, get, chdir, replace_in_file, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.54.0"
@@ -31,27 +31,18 @@ class FirebirdConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # Based on the following, with CLIENT_ONLY_FLG=Y
-        # https://github.com/FirebirdSQL/firebird/blob/v5.0.0-RC2/configure.ac
-        # https://github.com/FirebirdSQL/firebird/blob/v5.0.0-RC2/builds/posix/Makefile.in#L185-L239
-        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("icu/74.2")
         self.requires("termcap/1.3.1")
+        self.requires("zlib/[>=1.2.11 <2]")
+
+        # Newer versions of re2 add abseil as a transitive dependency,
+        # which makes ./configure unusably slow for some reason
+        self.requires("re2/20230301")
+        # self.requires("abseil/20230802.1")  # only absl_int128 is used
 
         # TODO: enable when merged
         # https://github.com/conan-io/conan-center-index/pull/18852
         # self.requires("libtommath/1.2.0")
-
-        # TODO: should potentially unvendor these:
-        # https://github.com/FirebirdSQL/firebird/tree/v5.0.0-RC2/extern
-        # - SfIO
-        # - boost
-        # - cloop
-        # - decNumber
-        # - absl (for int128)
-        # - libcds
-        # - libtomcrypt
-        # - ttmath
 
     def validate(self):
         if self.settings.os == "Windows":
@@ -76,10 +67,14 @@ class FirebirdConan(ConanFile):
             env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
-        tc.configure_args.append("--enable-client-only")
-        tc.configure_args.append("--with-builtin-tommath")
-        tc.configure_args.append("--with-builtin-tomcrypt")
-        tc.configure_args.append(f"--with-termlib={self.dependencies['termcap'].package_folder}")
+        tc.configure_args += [
+            "--enable-client-only",
+            "--with-system-re2",
+            f"--with-termlib={self.dependencies['termcap'].package_folder}",
+            "--disable-rpath",
+            "--with-builtin-tommath",
+            "--with-builtin-tomcrypt",
+        ]
         # Disabled because test_package fails with "double free or corruption (out), Aborted (core dumped)"
         # if self.settings.build_type == "Debug":
         #     tc.configure_args.append("--enable-developer")
@@ -88,12 +83,15 @@ class FirebirdConan(ConanFile):
         deps = AutotoolsDeps(self)
         deps.generate()
 
-        deps = PkgConfigDeps(self)
-        deps.generate()
-
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "extern", "cloop", "Makefile"),
                         "$(LIBS)", "$(LDFLAGS) $(LIBS)")
+        # Enable only specific vendored libraries
+        # TODO: unvendor
+        allow_vendored = ["absl", "cloop", "decNumber", "icu", "libtomcrypt", "libtommath", "ttmath"]
+        for subdir in self.source_path.joinpath("extern").iterdir():
+            if subdir.name not in allow_vendored:
+                rmdir(self, subdir)
 
     def build(self):
         self._patch_sources()
@@ -122,8 +120,9 @@ class FirebirdConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "firebird")
         self.cpp_info.libs = ["fbclient"]
-        # TODO: unvendor
-        self.cpp_info.libs += ["tomcrypt", "tommath"]
-
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
+
+        # TODO: unvendor
+        self.cpp_info.libs.append("tomcrypt")
+        self.cpp_info.libs.append("tommath")
