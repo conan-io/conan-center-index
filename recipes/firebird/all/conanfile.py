@@ -6,7 +6,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, chdir, replace_in_file
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.54.0"
@@ -32,27 +32,26 @@ class FirebirdConan(ConanFile):
 
     def requirements(self):
         # Based on the following, with CLIENT_ONLY_FLG=Y
-        # https://github.com/FirebirdSQL/firebird/blob/v5.0.0-RC1/configure.ac
-        # https://github.com/FirebirdSQL/firebird/blob/v5.0.0-RC1/builds/posix/Makefile.in#L185-L239
+        # https://github.com/FirebirdSQL/firebird/blob/v5.0.0-RC2/configure.ac
+        # https://github.com/FirebirdSQL/firebird/blob/v5.0.0-RC2/builds/posix/Makefile.in#L185-L239
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("icu/74.2")
         self.requires("termcap/1.3.1")
+
+        # TODO: enable when merged
+        # https://github.com/conan-io/conan-center-index/pull/18852
+        # self.requires("libtommath/1.2.0")
+
         # TODO: should potentially unvendor these:
-        # https://github.com/FirebirdSQL/firebird/tree/v5.0.0-RC1/extern
+        # https://github.com/FirebirdSQL/firebird/tree/v5.0.0-RC2/extern
         # - SfIO
         # - boost
-        # - btyacc
         # - cloop
         # - decNumber
-        # - editline
-        # - icu
         # - absl (for int128)
         # - libcds
         # - libtomcrypt
-        # - libtommath
-        # - re2
         # - ttmath
-        # - zlib
 
     def validate(self):
         if self.settings.os == "Windows":
@@ -62,6 +61,8 @@ class FirebirdConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -69,9 +70,11 @@ class FirebirdConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
+
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--enable-client-only")
         tc.configure_args.append("--with-builtin-tommath")
@@ -81,7 +84,11 @@ class FirebirdConan(ConanFile):
         # if self.settings.build_type == "Debug":
         #     tc.configure_args.append("--enable-developer")
         tc.generate()
+
         deps = AutotoolsDeps(self)
+        deps.generate()
+
+        deps = PkgConfigDeps(self)
         deps.generate()
 
     def _patch_sources(self):
@@ -92,7 +99,6 @@ class FirebirdConan(ConanFile):
         self._patch_sources()
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
-            # self.run("NOCONFIGURE=1 ./autogen.sh")
             autotools.configure()
             autotools.make()
 
