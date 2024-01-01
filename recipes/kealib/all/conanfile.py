@@ -34,8 +34,6 @@ class KealibConan(ConanFile):
     def _min_cppstd(self):
         return 11
 
-    @property
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
