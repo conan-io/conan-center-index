@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
-from conan.tools.files import get, copy, rmdir, save, replace_in_file, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, copy, rmdir, save, replace_in_file, export_conandata_patches, apply_conandata_patches, mkdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -65,9 +65,9 @@ class GNSSTkConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         # https://github.com/SGL-UT/gnsstk/blob/v14.0.0/CMakeLists.txt#L41-L51
-        tc.cache_variables["BUILD_EXT"] = self.options.build_ext
-        tc.cache_variables["VERSIONED_HEADER_INSTALL"] = True
-        tc.cache_variables["USE_RPATH"] = False
+        tc.variables["BUILD_EXT"] = self.options.build_ext
+        tc.variables["VERSIONED_HEADER_INSTALL"] = True
+        tc.variables["USE_RPATH"] = False
         if not valid_min_cppstd(self, self._min_cppstd):
             # The C++ standard is not set correctly by the project for apple-clang
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
@@ -81,7 +81,7 @@ class GNSSTkConan(ConanFile):
         # Disable warnings as errors
         replace_in_file(self, os.path.join(self.source_folder, "BuildSetup.cmake"),
                         "-Werror=return-type -Werror=deprecated", "")
-        # Do not force shared library
+        # Allow static library output
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         " SHARED ", " ")
 
@@ -97,6 +97,10 @@ class GNSSTkConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
+        if self.settings.os == "Windows" and self.options.shared:
+            mkdir(self, os.path.join(self.package_folder, "bin"))
+            os.rename(os.path.join(self.package_folder, "lib", "gnsstk.dll"),
+                      os.path.join(self.package_folder, "bin", "gnsstk.dll"))
 
     def package_info(self):
         # https://github.com/SGL-UT/gnsstk/blob/stable/GNSSTKConfig.cmake.in
