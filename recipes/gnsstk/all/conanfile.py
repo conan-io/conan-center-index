@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
-from conan.tools.files import get, copy, rmdir, save, replace_in_file, export_conandata_patches, apply_conandata_patches, mkdir
+from conan.tools.files import get, copy, rmdir, save, replace_in_file, export_conandata_patches, apply_conandata_patches, mkdir, rename
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -99,8 +99,8 @@ class GNSSTkConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.os == "Windows" and self.options.shared:
             mkdir(self, os.path.join(self.package_folder, "bin"))
-            os.rename(os.path.join(self.package_folder, "lib", "gnsstk.dll"),
-                      os.path.join(self.package_folder, "bin", "gnsstk.dll"))
+            rename(self, os.path.join(self.package_folder, "lib", "gnsstk.dll"),
+                   os.path.join(self.package_folder, "bin", "gnsstk.dll"))
 
     def package_info(self):
         # https://github.com/SGL-UT/gnsstk/blob/stable/GNSSTKConfig.cmake.in
@@ -113,6 +113,9 @@ class GNSSTkConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", versioned_dir))
         # The examples use the headers without a directory prefix
         self.cpp_info.includedirs.append(os.path.join("include", versioned_dir, "gnsstk"))
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         if self.settings.os != "Windows":
             self.cpp_info.defines.append("GNSSTK_STATIC_DEFINE")
