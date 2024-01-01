@@ -80,25 +80,21 @@ class MsixConan(ConanFile):
 
     def requirements(self):
         if self.settings.os in ["Linux", "FreeBSD"] and not self.options.skip_bundles:
-            self.requires("icu/73.2")
+            self.requires("icu/74.2")
         if self.options.crypto_lib == "openssl":
             self.requires("openssl/1.1.1w")
         if self.options.use_external_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.xml_parser == "xerces":
             self.requires("xerces-c/3.2.4")
 
     def _validate_compiler_settings(self):
         compiler = self.settings.compiler
         if compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "17")
+            check_min_cppstd(self, 17)
 
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warning(
-                f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support."
-            )
-        elif Version(self.settings.compiler.version) < min_version:
+        if  min_version and Version(self.settings.compiler.version) < min_version:
             raise ConanInvalidConfiguration(
                 f"{self.name} requires C++17 support. The current compiler"
                 f" {self.settings.compiler} {self.settings.compiler.version} does not support it."
