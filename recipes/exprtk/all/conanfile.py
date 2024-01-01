@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy, load, save
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -36,12 +37,16 @@ class ExprTkConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _extract_license(self):
-        exprtk_header_file = "exprtk.hpp"
-        file = os.path.join(self.source_folder, exprtk_header_file)
-        file_content = load(self, file)
-        license_end = "/MIT                        *"
-        license_contents = file_content[2:file_content.find(license_end) + len(license_end)]
-        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
+        if Version(self.version) >= "0.0.3":
+            license_file = "license.txt"
+            copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        else:
+            exprtk_header_file = "exprtk.hpp"
+            file = os.path.join(self.source_folder, exprtk_header_file)
+            file_content = load(self, file)
+            license_end = "/MIT                        *"
+            license_contents = file_content[2:file_content.find(license_end) + len(license_end)]
+            save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package(self):
         self._extract_license()
