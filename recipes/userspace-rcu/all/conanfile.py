@@ -41,6 +41,9 @@ class UserspaceRCUConan(ConanFile):
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration(f"Building for {self.settings.os} unsupported")
+        if self.version == "0.11.4" and self.settings.compiler == "apple-clang":
+            # Fails with "cds_hlist_add_head_rcu.c:19:10: fatal error: 'urcu/urcu-memb.h' file not found"
+            raise ConanInvalidConfiguration(f"{self.ref} is not compatible with apple-clang")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
