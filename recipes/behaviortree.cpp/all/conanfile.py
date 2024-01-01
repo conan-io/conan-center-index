@@ -23,12 +23,14 @@ class BehaviorTreeCPPConan(ConanFile):
         "fPIC": [True, False],
         "with_tools": [True, False],
         "with_coroutines": [True, False],
+        "with_manual_selector": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_tools": False,
         "with_coroutines": False,
+        "with_manual_selector": False,
     }
 
     @property
@@ -62,6 +64,8 @@ class BehaviorTreeCPPConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "4.1.1":
+            del self.options.with_manual_selector
 
     def configure(self):
         if self.options.shared:
@@ -87,10 +91,11 @@ class BehaviorTreeCPPConan(ConanFile):
         return Version(self.version) >= "4.3.4"
 
     def requirements(self):
+        self.requires("zeromq/4.3.5")
         if self.options.with_coroutines:
             self.requires("boost/1.83.0")
-        self.requires("ncurses/6.4")
-        self.requires("zeromq/4.3.5")
+        if self.options.get_safe("with_manual_selector"):
+            self.requires("ncurses/6.4")
         if self._with_lexy:
             self.requires("foonathan-lexy/2022.12.1")
         if self._with_minitrace:
@@ -144,12 +149,14 @@ class BehaviorTreeCPPConan(ConanFile):
             tc.variables["BUILD_UNIT_TESTS"] = False
             tc.variables["BUILD_TOOLS"] = self.options.with_tools
             tc.variables["ENABLE_COROUTINES"] = self.options.with_coroutines
+            tc.variables["BUILD_MANUAL_SELECTOR"] = self.options.get_safe("with_manual_selector", False)
         else:
             tc.variables["BTCPP_SHARED_LIBS"] = self.options.shared
             tc.variables["BTCPP_EXAMPLES"] = False
             tc.variables["BTCPP_UNIT_TESTS"] = False
             tc.variables["BTCPP_BUILD_TOOLS"] = self.options.with_tools
             tc.variables["BTCPP_ENABLE_COROUTINES"] = self.options.with_coroutines
+            tc.variables["BTCPP_MANUAL_SELECTOR"] = self.options.get_safe("with_manual_selector", False)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
@@ -205,10 +212,9 @@ class BehaviorTreeCPPConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", cmake_file_name)
         self.cpp_info.set_property("cmake_target_name", f"BT::{libname}")
 
-        requires = [
-            "zeromq::zeromq",
-            "ncurses::ncurses",
-        ]
+        requires = ["zeromq::zeromq"]
+        if self.options.get_safe("with_manual_selector"):
+            requires.append("ncurses::ncurses")
         if self.options.with_coroutines:
             requires.append("boost::coroutine")
         if self._with_lexy:
