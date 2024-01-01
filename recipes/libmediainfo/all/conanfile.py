@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
@@ -31,6 +32,13 @@ class LibmediainfoConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _min_cppstd(self):
+        if Version(self.version) >= "23.11":
+            # https://github.com/MediaArea/MediaInfoLib/commit/3bc1fa4c1ea4f15abe053d620b6b585cd8c01998
+            return 11
+        return None
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -49,6 +57,8 @@ class LibmediainfoConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
+        if self.settings.compiler.cppstd and self._min_cppstd:
+            check_min_cppstd(self, self._min_cppstd)
         if not self.dependencies["libzen"].options.enable_unicode:
             raise ConanInvalidConfiguration("This package requires libzen with unicode support")
 
@@ -57,6 +67,8 @@ class LibmediainfoConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if self._min_cppstd and not valid_min_cppstd(self, self._min_cppstd):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.variables["BUILD_ZENLIB"] = False
         tc.variables["BUILD_ZLIB"] = False
         tc.variables["ZenLib_LIBRARY"] = "zen::zen"
