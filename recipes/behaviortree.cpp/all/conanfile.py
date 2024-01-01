@@ -72,7 +72,7 @@ class BehaviorTreeCPPConan(ConanFile):
 
     @property
     def _with_tinyxml2(self):
-        return Version(self.version) >= "3.8.0"
+        return Version(self.version) >= "4.0.0"
 
     @property
     def _with_lexy(self):
@@ -98,7 +98,7 @@ class BehaviorTreeCPPConan(ConanFile):
         if self._with_sqlite3:
             self.requires("sqlite3/3.44.2")
         if self._with_tinyxml2:
-            self.requires("tinyxml2/10.0.0", transitive_libs=Version(self.version) < "4.0")
+            self.requires("tinyxml2/10.0.0")
 
         # TODO: other vendored dependencies
         # - cppzmq is customized and not compatible with Conan version
