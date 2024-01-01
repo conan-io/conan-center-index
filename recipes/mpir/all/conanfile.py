@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import XCRun, to_apple_arch
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, is_msvc_static_runtime, msvc_runtime_flag
@@ -40,6 +40,9 @@ class MpirConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -99,9 +102,9 @@ class MpirConan(ConanFile):
                 # there is no CFLAGS_FOR_BUILD/CXXFLAGS_FOR_BUILD
                 sdk_path = XCRun(self).sdk_path
                 tc.extra_cxxflags += [
-                    "-Wno-implicit-function-declaration"
-                    f"-isysroot {sdk_path}"
-                    "-arch", to_apple_arch(self)
+                    "-Wno-implicit-function-declaration",
+                    f"-isysroot {sdk_path}",
+                    "-arch", f"{to_apple_arch(self.settings_build.arch)}",
                 ]
         # Disable docs
         tc.make_args.append("MAKEINFO=true")
@@ -171,6 +174,7 @@ class MpirConan(ConanFile):
                 replace_in_file(self, full_file, 'check_config $(Platform) $(Configuration) 15', f'check_config $(Platform) $(Configuration) {ver}', strict=False)
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         if is_msvc(self):
             self._patch_new_msvc_version(16, "v142")
             self._patch_new_msvc_version(17, "v143")
