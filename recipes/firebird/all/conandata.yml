@@ -1,4 +1,4 @@
 sources:
-  "5.0.0-rc1":
-    url: "https://github.com/FirebirdSQL/firebird/releases/download/v5.0.0-RC1/Firebird-5.0.0.1227-ReleaseCandidate1-source.tar.xz"
-    sha256: "647710a4ccba7dbbb2d0fb14bf6e8a967765b088c3d1c4b5925679a281792a38"
+  "5.0.0-rc2":
+    url: "https://github.com/FirebirdSQL/firebird/releases/download/v5.0.0-RC2/Firebird-5.0.0.1304-RC2-source.tar.xz"
+    sha256: "3945439038ca776bb840715fb9bbb6bfb13ab084cd226ca0084a0c43e317c357"
