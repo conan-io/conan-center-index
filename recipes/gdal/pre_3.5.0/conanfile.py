@@ -250,7 +250,7 @@ class GdalConan(ConanFile):
         self.requires("libgeotiff/1.7.1")
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
         self.requires("libtiff/4.6.0")
-        self.requires("proj/9.3.0")
+        self.requires("proj/9.3.1")
         if Version(self.version) >= "3.1.0":
             self.requires("flatbuffers/2.0.5")
         if self.options.get_safe("with_zlib", True):
@@ -328,7 +328,7 @@ class GdalConan(ConanFile):
         if self.options.with_curl:
             self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.with_xml2:
-            self.requires("libxml2/2.11.5")
+            self.requires("libxml2/2.11.6")
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
@@ -412,7 +412,7 @@ class GdalConan(ConanFile):
         if not is_msvc(self):
             self.tool_requires("libtool/2.4.7")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.0.3")
+                self.tool_requires("pkgconf/2.1.0")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
