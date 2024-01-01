@@ -231,7 +231,7 @@ class BehaviorTreeCPPConan(ConanFile):
         self.cpp_info.components[libname].libs = [f"{libname}{postfix}"]
         self.cpp_info.components[libname].requires = requires
         if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.components[libname].system_libs.append("pthread")
+            self.cpp_info.components[libname].system_libs.extend(["pthread", "dl"])
         if Version(self.version) >= "4.0" and \
             self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
             self.cpp_info.components[libname].system_libs.append("stdc++fs")
