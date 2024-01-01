@@ -54,6 +54,12 @@ class OpenblasConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def validate(self):
+        if Version(self.version) < "0.3.24" and self.settings.arch == "armv8":
+            # OpenBLAS fails to detect the appropriate target architecture for armv8 for versions < 0.3.24, as it matches the 32 bit variant instead of 64.
+            # This was fixed in https://github.com/OpenMathLib/OpenBLAS/pull/4142, which was introduced in 0.3.24.
+            # This would be a reasonably trivial hotfix to backport.
+            raise ConanInvalidConfiguration("armv8 builds are not currently supported for versions lower than 0.3.24. Contributions to support this are welcome.")
+
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
