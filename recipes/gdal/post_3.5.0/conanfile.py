@@ -189,7 +189,7 @@ class GdalConan(ConanFile):
         self.requires("json-c/0.17")
         self.requires("libgeotiff/1.7.1")
         self.requires("libtiff/4.6.0")
-        self.requires("proj/9.3.0")
+        self.requires("proj/9.3.1")
         # Used in a public header here:
         # https://github.com/OSGeo/gdal/blob/v3.7.1/port/cpl_minizip_ioapi.h#L26
         self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True, transitive_libs=True)
