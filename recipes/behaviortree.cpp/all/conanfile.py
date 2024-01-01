@@ -34,7 +34,9 @@ class BehaviorTreeCPPConan(ConanFile):
 
     @property
     def _minimum_cppstd_required(self):
-        return 14 if Version(self.version) < "4.0" else 17
+        if Version(self.version) >= "4.0":
+            return 17
+        return 14
 
     @property
     def _minimum_compilers_version(self):
@@ -71,6 +73,8 @@ class BehaviorTreeCPPConan(ConanFile):
         self.requires("minitrace/cci.20230905")
         self.requires("tinyxml2/9.0.0")
         self.requires("foonathan-lexy/2022.12.1")
+        if Version(self.version) >= "4.1.1":
+            self.requires("sqlite3/3.44.2")
 
     def validate(self):
         if self.info.settings.os == "Windows" and self.info.options.shared:
@@ -185,6 +189,8 @@ class BehaviorTreeCPPConan(ConanFile):
             "tinyxml2::tinyxml2",
             "foonathan-lexy::foonathan-lexy",
         ]
+        if Version(self.version) >= "4.1.1":
+            self.cpp_info.components[libname].requires.append("sqlite3::sqlite3")
         if self.options.with_coroutines:
             self.cpp_info.components[libname].requires.append("boost::coroutine")
         if self.settings.os in ("Linux", "FreeBSD"):
