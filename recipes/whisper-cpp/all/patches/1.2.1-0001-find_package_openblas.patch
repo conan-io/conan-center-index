@@ -1,11 +1,9 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 92b5d0c..b0c2c86 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -127,17 +127,9 @@ if (APPLE)
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -100,15 +100,7 @@
  endif()
 
- if (WHISPER_OPENBLAS)
+ if (WHISPER_SUPPORT_OPENBLAS)
 -    find_library(OPENBLAS_LIB
 -        NAMES openblas libopenblas
 -        )
@@ -17,9 +15,8 @@ index 92b5d0c..b0c2c86 100644
 -    else()
 -        message(WARNING "OpenBLAS not found")
 -    endif()
-+    find_package(OpenBLAS REQUIRED CONFIG)
++    find_package(BLAS REQUIRED CONFIG)
 +    set(WHISPER_EXTRA_LIBS  ${WHISPER_EXTRA_LIBS} OpenBLAS::OpenBLAS)
 +    set(WHISPER_EXTRA_FLAGS ${WHISPER_EXTRA_FLAGS} -DGGML_USE_OPENBLAS)
  endif()
 
- if (WHISPER_CUBLAS)
