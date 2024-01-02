@@ -76,7 +76,11 @@ class ZserioConanFile(ConanFile):
     def package_info(self):
         self.cpp_info.components["ZserioCppRuntime"].libs = collect_libs(self)
 
-        self.buildenv_info.define("ZSERIO_JAR_FILE", os.path.join(self.package_folder, "bin", "zserio.jar"))
+        zserio_jar_file = os.path.join(self.package_folder, "bin", "zserio.jar")
+        self.buildenv_info.define("ZSERIO_JAR_FILE", zserio_jar_file)
         zserio_compiler_module = os.path.join(self.package_folder, self._cmake_module_path,
                                               "zserio_compiler.cmake")
         self.cpp_info.set_property("cmake_build_modules", [zserio_compiler_module])
+
+        # TODO: remove in conan v2
+        self.env_info.ZSERIO_JAR_FILE = zserio_jar_file
