@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
-from conan.tools.apple import is_apple_os
 import os
 
 required_conan_version = ">=1.53.0"
