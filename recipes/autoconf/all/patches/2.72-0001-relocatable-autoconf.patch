@@ -13,72 +13,79 @@ diff --git a/Makefile.in b/Makefile.in
 diff --git a/bin/autoconf.in b/bin/autoconf.in
 --- a/bin/autoconf.in
 +++ b/bin/autoconf.in
-@@ -26,10 +26,12 @@
+@@ -26,10 +26,14 @@
  use 5.006;
  use strict;
  use warnings FATAL => 'all';
-+use FindBin;
++use Cwd 'abs_path';
++use File::Basename;
  
  BEGIN
  {
 -  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || '@pkgdatadir@';
-+  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "${FindBin::Bin}/../res/autoconf";
++  my $scriptpath = abs_path(dirname(__FILE__));
++  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "$scriptpath/../res/autoconf";
 +  $ENV{'trailer_m4'} ||= "$pkgdatadir/autoconf/trailer.m4";
    unshift @INC, $pkgdatadir;
  
    # Override SHELL.  On DJGPP SHELL may not be set to a shell
-
 diff --git a/bin/autoheader.in b/bin/autoheader.in
 --- a/bin/autoheader.in
 +++ b/bin/autoheader.in
-@@ -29,10 +29,11 @@
+@@ -29,10 +29,13 @@
  use 5.006;
  use strict;
  use warnings FATAL => 'all';
-+use FindBin;
++use Cwd 'abs_path';
++use File::Basename;
  
  BEGIN
  {
 -  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || '@pkgdatadir@';
-+  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "${FindBin::Bin}/../res/autoconf";
++  my $scriptpath = abs_path(dirname(__FILE__));
++  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "$scriptpath/../res/autoconf";
    unshift @INC, "$pkgdatadir";
  
    # Override SHELL.  On DJGPP SHELL may not be set to a shell
-@@ -54,7 +55,7 @@
+@@ -54,7 +57,8 @@
  our ($config_h, %symbol, %verbatim);
  
  # Lib files.
 -my $autom4te = $ENV{'AUTOM4TE'} || '@bindir@/@autom4te-name@';
-+my $autom4te = $ENV{'AUTOM4TE'} || "${FindBin::Bin}/@autom4te-name@";
++my $scriptpath = abs_path(dirname(__FILE__));
++my $autom4te = $ENV{'AUTOM4TE'} || "$scriptpath/@autom4te-name@";
  my $config_h_in;
  my @prepend_include;
  my @include;
 diff --git a/bin/autom4te.in b/bin/autom4te.in
 --- a/bin/autom4te.in
 +++ b/bin/autom4te.in
-@@ -25,10 +25,11 @@
+@@ -25,10 +25,13 @@
  use 5.006;
  use strict;
  use warnings FATAL => 'all';
-+use FindBin;
++use Cwd 'abs_path';
++use File::Basename;
  
  BEGIN
  {
 -  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || '@pkgdatadir@';
-+  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "${FindBin::Bin}/../res/autoconf";
++  my $scriptpath = abs_path(dirname(__FILE__));
++  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "$scriptpath/../res/autoconf";
    unshift @INC, $pkgdatadir;
  
    # Override SHELL.  On DJGPP SHELL may not be set to a shell
-@@ -48,7 +49,7 @@
+@@ -48,7 +51,8 @@
  use Autom4te::XFile;
  
  # Data directory.
 -my $pkgdatadir = $ENV{'AC_MACRODIR'} || '@pkgdatadir@';
-+my $pkgdatadir = $ENV{'AC_MACRODIR'} || "${FindBin::Bin}/../res/autoconf";
++my $scriptpath = abs_path(dirname(__FILE__));
++my $pkgdatadir = $ENV{'AC_MACRODIR'} || "$scriptpath/../res/autoconf";
  
  # $LANGUAGE{LANGUAGE} -- Automatic options for LANGUAGE.
  my %language;
-@@ -91,7 +92,7 @@
+@@ -91,7 +95,7 @@
  my $freeze = 0;
  
  # $M4.
@@ -87,7 +94,7 @@ diff --git a/bin/autom4te.in b/bin/autom4te.in
  # Some non-GNU m4's don't reject the --help option, so give them /dev/null.
  fatal "need GNU m4 1.4 or later: $m4"
    if system "$m4 --help </dev/null 2>&1 | grep reload-state >/dev/null";
-@@ -321,6 +324,12 @@
+@@ -321,6 +325,12 @@
  	if /^\s*(\#.*)?$/;
  
        my @words = shellwords ($_);
@@ -103,80 +110,89 @@ diff --git a/bin/autom4te.in b/bin/autom4te.in
 diff --git a/bin/autoreconf.in b/bin/autoreconf.in
 --- a/bin/autoreconf.in
 +++ b/bin/autoreconf.in
-@@ -28,11 +28,12 @@
+@@ -28,11 +28,14 @@
  use 5.006;
  use strict;
  use warnings FATAL => 'all';
-+use FindBin;
++use Cwd 'abs_path';
++use File::Basename;
  
  my $buildauxdir;
  BEGIN
  {
 -  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || '@pkgdatadir@';
-+  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "${FindBin::Bin}/../res/autoconf";
++  my $scriptpath = abs_path(dirname(__FILE__));
++  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "$scriptpath/../res/autoconf";
    unshift @INC, $pkgdatadir;
  
    $buildauxdir = $ENV{'autom4te_buildauxdir'} || $pkgdatadir . '/build-aux';
-@@ -116,9 +117,9 @@
+@@ -116,9 +119,10 @@
  ";
  
  # Lib files.
 -my $autoconf    = $ENV{'AUTOCONF'}    || '@bindir@/@autoconf-name@';
 -my $autoheader  = $ENV{'AUTOHEADER'}  || '@bindir@/@autoheader-name@';
 -my $autom4te    = $ENV{'AUTOM4TE'}    || '@bindir@/@autom4te-name@';
-+my $autoconf    = $ENV{'AUTOCONF'}    || "${FindBin::Bin}/@autoconf-name@";
-+my $autoheader  = $ENV{'AUTOHEADER'}  || "${FindBin::Bin}/@autoheader-name@";
-+my $autom4te    = $ENV{'AUTOM4TE'}    || "${FindBin::Bin}/@autom4te-name@";
++my $scriptpath = abs_path(dirname(__FILE__));
++my $autoconf    = $ENV{'AUTOCONF'}    || "$scriptpath/@autoconf-name@";
++my $autoheader  = $ENV{'AUTOHEADER'}  || "$scriptpath/@autoheader-name@";
++my $autom4te    = $ENV{'AUTOM4TE'}    || "$scriptpath/@autom4te-name@";
  my $automake    = $ENV{'AUTOMAKE'}    || 'automake';
  my $aclocal     = $ENV{'ACLOCAL'}     || 'aclocal';
  my $libtoolize  = $ENV{'LIBTOOLIZE'}  || 'libtoolize';
 diff --git a/bin/autoscan.in b/bin/autoscan.in
 --- a/bin/autoscan.in
 +++ b/bin/autoscan.in
-@@ -27,10 +27,11 @@
+@@ -27,10 +27,13 @@
  use 5.006;
  use strict;
  use warnings FATAL => 'all';
-+use FindBin;
++use Cwd 'abs_path';
++use File::Basename;
  
  BEGIN
  {
 -  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || '@pkgdatadir@';
-+  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "${FindBin::Bin}/../res/autoconf";
++  my $scriptpath = abs_path(dirname(__FILE__));
++  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "$scriptpath/../res/autoconf";
    unshift @INC, $pkgdatadir;
  
    # Override SHELL.  On DJGPP SHELL may not be set to a shell
-@@ -95,7 +96,7 @@
+@@ -95,7 +98,8 @@
  my $log;
  
  # Autoconf and lib files.
 -my $autom4te = $ENV{'AUTOM4TE'} || '@bindir@/@autom4te-name@';
-+my $autom4te = $ENV{'AUTOM4TE'} || "${FindBin::Bin}/@autom4te-name@";
++my $scriptpath = abs_path(dirname(__FILE__));
++my $autom4te = $ENV{'AUTOM4TE'} || "$scriptpath/@autom4te-name@";
  my $autoconf = "$autom4te --language=autoconf";
  my @prepend_include;
  my @include = ('@pkgdatadir@');
 diff --git a/bin/autoupdate.in b/bin/autoupdate.in
 --- a/bin/autoupdate.in
 +++ b/bin/autoupdate.in
-@@ -28,10 +28,11 @@
+@@ -28,10 +28,13 @@
  use 5.006;
  use strict;
  use warnings FATAL => 'all';
-+use FindBin;
++use Cwd 'abs_path';
++use File::Basename;
  
  BEGIN
  {
 -  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || '@pkgdatadir@';
-+  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "${FindBin::Bin}/../res/autoconf";
++  my $scriptpath = abs_path(dirname(__FILE__));
++  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "$scriptpath/../res/autoconf";
    unshift @INC, $pkgdatadir;
  
    # Override SHELL.  On DJGPP SHELL may not be set to a shell
-@@ -51,14 +52,14 @@
+@@ -51,14 +54,15 @@
  use Autom4te::XFile;
  
  # Lib files.
 -my $autom4te = $ENV{'AUTOM4TE'} || '@bindir@/@autom4te-name@';
-+my $autom4te = $ENV{'AUTOM4TE'} || "${FindBin::Bin}/@autom4te-name@";
++my $scriptpath = abs_path(dirname(__FILE__));
++my $autom4te = $ENV{'AUTOM4TE'} || "$scriptpath/@autom4te-name@";
  my $autoconf = "$autom4te --language=autoconf";
  # We need to find m4sugar.
  my @prepend_include;
@@ -191,16 +207,18 @@ diff --git a/bin/autoupdate.in b/bin/autoupdate.in
 diff --git a/bin/ifnames.in b/bin/ifnames.in
 --- a/bin/ifnames.in
 +++ b/bin/ifnames.in
-@@ -32,10 +32,11 @@
+@@ -32,10 +32,13 @@
  use 5.006;
  use strict;
  use warnings FATAL => 'all';
-+use FindBin;
++use Cwd 'abs_path';
++use File::Basename;
  
  BEGIN
  {
 -  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || '@pkgdatadir@';
-+  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "${FindBin::Bin}/../res/autoconf";
++  my $scriptpath = abs_path(dirname(__FILE__));
++  my $pkgdatadir = $ENV{'autom4te_perllibdir'} || "$scriptpath/../res/autoconf";
    unshift @INC, $pkgdatadir;
  
    # Override SHELL.  On DJGPP SHELL may not be set to a shell
