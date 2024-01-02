@@ -147,6 +147,9 @@ class BehaviorTreeCPPConan(ConanFile):
         tc.variables["WITH_LEXY"] = self._with_lexy
         tc.variables["WITH_MINITRACE"] = self._with_minitrace
         tc.variables["WITH_TINYXML2"] = self._with_tinyxml2
+        if not self.options.get_safe("with_manual_selector"):
+            # Avoid accidental use of system ncurses
+            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Curses"] = True
         if Version(self.version) < "4.0":
             tc.variables["BUILD_EXAMPLES"] = False
             tc.variables["BUILD_UNIT_TESTS"] = False
