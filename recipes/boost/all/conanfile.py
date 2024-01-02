@@ -175,6 +175,16 @@ class BoostConan(ConanFile):
         }.get(str(self.settings.compiler))
 
     @property
+    def _min_compiler_version_default_cxx20(self):
+        return {
+            "gcc": 11,
+            "clang": 12,
+            "apple-clang": 13,
+            "Visual Studio": 16,
+            "msvc": 192,
+        }.get(str(self.settings.compiler))
+
+    @property
     def _min_compiler_version_nowide(self):
         # Nowide needs c++11 + swappable std::fstream
         return {
@@ -369,6 +379,28 @@ class BoostConan(ConanFile):
                     self.output.warning("Assuming the compiler supports c++11 by default")
                 elif Version(self.settings.compiler.version) < min_compiler_version:
                     disable_locale()
+
+        if Version(self.version) >= "1.84.0":
+            # Starting from 1.84.0, Boost.Cobalt requires a c++20 capable compiler
+            # ==> disable it by default for older compilers or c++ standards
+
+            def disable_cobalt():
+                super_modules = self._all_super_modules("cobalt")
+                for smod in super_modules:
+                    try:
+                        setattr(self.options, f"without_{smod}", True)
+                    except ConanException:
+                        pass
+
+            if self.settings.compiler.get_safe("cppstd"):
+                if not valid_min_cppstd(self, 20):
+                    disable_cobalt()
+            else:
+                min_compiler_version = self._min_compiler_version_default_cxx20
+                if min_compiler_version is None:
+                    self.output.warning("Assuming the compiler supports c++20 by default")
+                elif Version(self.settings.compiler.version) < min_compiler_version:
+                    disable_cobalt()
 
     @property
     def _configure_options(self):
