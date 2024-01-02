@@ -71,6 +71,8 @@ class GNSSTkConan(ConanFile):
         if not valid_min_cppstd(self, self._min_cppstd):
             # The C++ standard is not set correctly by the project for apple-clang
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        # Relocatable shared libs on macOS
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
     def _patch_sources(self):
