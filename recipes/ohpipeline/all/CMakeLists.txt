@@ -360,6 +360,7 @@ set(ODP_HEADERS
     OpenHome/Net/Odp/CpDeviceOdp.h
 )
 target_sources(Odp PUBLIC FILE_SET HEADERS FILES "${ODP_HEADERS}")
+target_compile_features(Odp PUBLIC cxx_std_11)
 install(TARGETS Odp
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
