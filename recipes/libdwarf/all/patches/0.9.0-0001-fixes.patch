@@ -1,0 +1,26 @@
+diff --git src/bin/dwarfdump/CMakeLists.txt src/bin/dwarfdump/CMakeLists.txt
+--- src/bin/dwarfdump/CMakeLists.txt
++++ src/bin/dwarfdump/CMakeLists.txt
+@@ -70,3 +70,3 @@
+ 
+-if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
++if(0)
+ 	set(SUFFIX 64)
+diff --git src/lib/libdwarf/CMakeLists.txt src/lib/libdwarf/CMakeLists.txt
+--- src/lib/libdwarf/CMakeLists.txt
++++ src/lib/libdwarf/CMakeLists.txt
+@@ -114,3 +114,2 @@ foreach(i RANGE ${targetCount})
+-set(SUFFIX $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>:64>)
+ set(LIBDIR lib${SUFFIX})
+ set(BINDIR bin${SUFFIX})
+diff --git src/lib/libdwarf/libdwarf.h src/lib/libdwarf/libdwarf.h
+index 9a0783e3..0bce4d09 100644
+--- src/lib/libdwarf/libdwarf.h
++++ src/lib/libdwarf/libdwarf.h
+@@ -53,5 +53,5 @@
+ #ifndef LIBDWARF_STATIC
+-# if defined(_WIN32) || defined(__CYGWIN__)
++# if defined(LIBDWARF_SHARED) && (defined(_WIN32) || defined(__CYGWIN__))
+ #  ifdef LIBDWARF_BUILD
+ #   define DW_API __declspec(dllexport)
+ #  else /* !LIBDWARF_BUILD */
