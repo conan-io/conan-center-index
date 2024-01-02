@@ -5,6 +5,7 @@ import textwrap
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir, unzip
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
@@ -131,12 +132,7 @@ class CPythonConan(ConanFile):
     def _use_vendored_libffi(self):
         # cpython < 3.8 on MSVC uses an ancient libffi 2.00-beta
         # (which is not available at cci, and is API/ABI incompatible with current 3.2+)
-        # Mac also vendors this dependency until 3.12, but it's possible some of the later versions
-        # will work with Conan's libffi. TODO find the exact version
-        # Debug on 3.9 also seems to not work, unsure why.
-        return (Version(self.version) < "3.8" and is_msvc(self)) or \
-               (Version(self.version) < "3.9" and is_apple_os(self)) or \
-               (Version(self.version) < "3.10" and is_apple_os(self) and self.settings.build_type == "Debug")
+        return Version(self.version) < "3.8" and is_msvc(self)
 
     @property
     def _with_libffi(self):
@@ -225,9 +221,6 @@ class CPythonConan(ConanFile):
             if self.dependencies["libffi"].ref.version >= "3.3" and is_msvc(self) and "d" in str(self.settings.compiler.runtime):
                 raise ConanInvalidConfiguration("libffi versions >= 3.3 cause 'read access violations' when using a debug runtime (MTd/MDd)")
 
-        if self._use_vendored_libffi and is_apple_os(self) and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("The vendored libffi predates Apple ARM CPUs, and are not supported")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -285,6 +278,9 @@ class CPythonConan(ConanFile):
         deps.generate()
 
     def generate(self):
+        # Several parts of the build process run the python executable to test things, such as importing modules. 
+        VirtualRunEnv(self).generate(scope="build")
+        
         if is_msvc(self):
             # The msbuild generator only works with Visual Studio
             deps = MSBuildDeps(self)
