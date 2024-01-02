@@ -4,10 +4,9 @@ from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, chdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc, NMakeDeps
 
 required_conan_version = ">=1.53.0"
 
@@ -39,8 +38,9 @@ class LibTomCryptConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-        if self.settings.os == "Windows":
-            copy(self, f"tomcrypt-{self.version}.def", self.recipe_folder, self.export_sources_folder)
+        copy(self, f"tomcrypt-{self.version}.def",
+             self.recipe_folder,
+             os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -89,11 +89,12 @@ class LibTomCryptConan(ConanFile):
         tc.make_args += ["-f", makefile]
         tc.generate()
 
-        tc = PkgConfigDeps(self)
-        tc.generate()
-
-        tc = AutotoolsDeps(self)
-        tc.generate()
+        if is_msvc(self):
+            deps = NMakeDeps(self)
+            deps.generate()
+        else:
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -121,7 +122,9 @@ class LibTomCryptConan(ConanFile):
             copy(self, "*.a", self.source_folder, os.path.join(self.package_folder, "lib"))
             copy(self, "*.lib", self.source_folder, os.path.join(self.package_folder, "lib"))
             copy(self, "*.dll", self.source_folder, os.path.join(self.package_folder, "bin"))
-            copy(self, "tomcrypt*.h", os.path.join(self.source_folder, "src", "headers"), os.path.join(self.package_folder, "include"))
+            copy(self, "tomcrypt*.h",
+                 os.path.join(self.source_folder, "src", "headers"),
+                 os.path.join(self.package_folder, "include"))
         else:
             with chdir(self, self.source_folder):
                 autotools = Autotools(self)
