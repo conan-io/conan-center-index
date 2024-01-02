@@ -11,4 +11,4 @@ foreach(cache_variable ${cache_variables})
 endforeach()
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} OPENSCENEGRAPH::OPENSCENEGRAPH)
+target_link_libraries(${PROJECT_NAME} OpenSceneGraph::OpenSceneGraph)
