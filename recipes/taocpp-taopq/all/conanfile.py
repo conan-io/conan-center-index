@@ -70,7 +70,8 @@ class TaoCPPTaopqConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version.replace("cci.", "")) < "20211017":
+        # Option names changed in https://github.com/taocpp/taopq/commit/d77896ab80369f13512a7f0ba8af818a03de1cdf
+        if Version(self.version) < "cci.20211017":
             tc.variables["TAOPQ_BUILD_TESTS"] = False
             tc.variables["TAOPQ_INSTALL_DOC_DIR"] = "licenses"
         else:
