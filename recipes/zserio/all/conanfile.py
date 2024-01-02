@@ -78,6 +78,8 @@ class ZserioConanFile(ConanFile):
 
         zserio_jar_file = os.path.join(self.package_folder, "bin", "zserio.jar")
         self.buildenv_info.define("ZSERIO_JAR_FILE", zserio_jar_file)
+
+        self.cpp_info.builddirs.append(self._cmake_module_path)
         zserio_compiler_module = os.path.join(self.package_folder, self._cmake_module_path,
                                               "zserio_compiler.cmake")
         self.cpp_info.set_property("cmake_build_modules", [zserio_compiler_module])
