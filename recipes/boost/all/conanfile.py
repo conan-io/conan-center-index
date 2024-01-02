@@ -164,12 +164,10 @@ class BoostConan(ConanFile):
     @property
     def _min_compiler_version_default_cxx11(self):
         # Minimum compiler version having c++ standard >= 11
-        if self.settings.compiler == "apple-clang":
-            # For now, assume apple-clang will enable c++11 in the distant future
-            return 99
         return {
             "gcc": 6,
             "clang": 6,
+            "apple-clang": 14,
             "Visual Studio": 14,  # guess
             "msvc": 190,  # guess
         }.get(str(self.settings.compiler))
@@ -177,11 +175,12 @@ class BoostConan(ConanFile):
     @property
     def _min_compiler_version_default_cxx20(self):
         return {
-            "gcc": 11,
-            "clang": 12,
-            "apple-clang": 13,
-            "Visual Studio": 16,
-            "msvc": 192,
+            "gcc": 99,
+            "clang": 99,
+            # As of the end of 2023, only apple-clang >=14 use C++20 as their default C++ version.
+            "apple-clang": 14,
+            "Visual Studio": 99,
+            "msvc": 999,
         }.get(str(self.settings.compiler))
 
     @property
@@ -389,6 +388,7 @@ class BoostConan(ConanFile):
                 for smod in super_modules:
                     try:
                         setattr(self.options, f"without_{smod}", True)
+                        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa without_{smod}")
                     except ConanException:
                         pass
 
