@@ -33,6 +33,9 @@ class ZserioConanFile(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
+        if self.settings.os not in ["Linux", "Windows"]:
+            raise ConanInvalidConfiguration("Zserio currently supports only Windows and Linux")
+
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
 
