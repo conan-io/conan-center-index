@@ -48,6 +48,10 @@ class IgnitionUtilsConan(ConanFile):
             "apple-clang": "10",
         }
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -87,6 +91,11 @@ class IgnitionUtilsConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("ignition-cmake/<host_version>")
         self.tool_requires("doxygen/1.9.4")
+        if self._settings_build.os == "Windows":
+            # For sed
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
