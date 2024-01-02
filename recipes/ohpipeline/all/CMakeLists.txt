@@ -152,8 +152,8 @@ add_library(ohPipeline
     OpenHome/SocketHttp.cpp
     OpenHome/SocketSsl.cpp
 )
-target_link_libraries(ohPipeline PRIVATE libressl::libressl ohNetCore ohNet)
-target_include_directories(ohPipeline PRIVATE ${PROJECT_SOURCE_DIR})
+target_link_libraries(ohPipeline PUBLIC libressl::libressl ohNetCore ohNet)
+target_include_directories(ohPipeline PUBLIC ${PROJECT_SOURCE_DIR})
 set(ohPipeline_HEADERS
     OpenHome/Media/Pipeline/VolumeRamper.h
     OpenHome/Media/Pipeline/AudioDumper.h
