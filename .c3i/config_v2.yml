@@ -67,7 +67,6 @@ tasks:
 
 configurations:
   - id: linux-gcc
-    epochs: [0, 20211221, 20220120, 20220628, 20230606]
     hrname: "Linux, GCC"
     build_profile:
       os: "Linux"
@@ -80,10 +79,10 @@ configurations:
               compiler.version: ["11"]
               build_type: ["Release"]
   - id: macos-clang
-    epochs: [0, 20211221, 20220120, 20220628, 20230606]
     hrname: "macOS, Clang"
     build_profile:
       os: "Macos"
+      arch: "armv8"
     content:
       - os: [ "Macos" ]
         arch: [ "x86_64" ]
@@ -93,11 +92,10 @@ configurations:
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release"]
   - id: macos-m1-clang
-    epochs: [0, 20211221, 20220120, 20220628, 20230606]
     hrname: "macOS M1, Clang"
     build_profile:
       os: "Macos"
-      arch: "x86_64"
+      arch: "armv8"
     content:
       - os: [ "Macos" ]
         arch: [ "armv8" ]
@@ -107,7 +105,6 @@ configurations:
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release"]
   - id: windows-msvc
-    epochs: [20230606]
     hrname: "Windows, MSVC"
     build_profile:
       os: "Windows"
