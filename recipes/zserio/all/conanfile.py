@@ -15,15 +15,19 @@ class ZserioConanFile(ConanFile):
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://zserio.org"
     topics = ("zserio", "cpp", "c++", "serialization")
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
 
-    options = { "shared": [False] }
-    default_options = { "shared": False }
+    options = { "fPIC": [True, False] }
+    default_options = { "fPIC": False }
 
     @property
     def _min_cppstd(self):
         return 11
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def layout(self):
         cmake_layout(self, src_folder="src")
