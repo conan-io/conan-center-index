@@ -17,3 +17,9 @@ sources:
   "1.2.30":
     url: "https://www.aleksey.com/xmlsec/download/older-releases/xmlsec1-1.2.30.tar.gz"
     sha256: "2d84360b03042178def1d9ff538acacaed2b3a27411db7b2874f1612ed71abc8"
+patches:
+  "1.2.38":
+    - patch_file: "patches/1.2.38-fix-openssl-engine-headers-install-on-windows.patch"
+      patch_description: "Fix OpenSSL engine headers install on Windows"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/lsh123/xmlsec/pull/736/files"

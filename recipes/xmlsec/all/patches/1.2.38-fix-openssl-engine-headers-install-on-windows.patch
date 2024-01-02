@@ -1,0 +1,28 @@
+From 980fb52b63a4d5d3968f01df15e4cb0dcfc6e4d2 Mon Sep 17 00:00:00 2001
+From: Alexey Katargin <gureedo@gmail.com>
+Date: Wed, 20 Dec 2023 17:38:40 +0100
+Subject: [PATCH] fix openssl engine headers install on windows
+
+---
+ win32/Makefile.msvc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/win32/Makefile.msvc b/win32/Makefile.msvc
+index 7eeb4ce0..27c62602 100755
+--- a/win32/Makefile.msvc
++++ b/win32/Makefile.msvc
+@@ -642,9 +642,9 @@ install : all
+ 	if not exist $(LIBPREFIX) mkdir $(LIBPREFIX)
+ 
+ 	:: include files
+-	if exist $(BASEDIR)\include\$(XMLSEC_NAME) copy $(BASEDIR)\include\$(XMLSEC_NAME)\*.h $(INCPREFIX)\$(XMLSEC_NAME)	
++	if exist $(BASEDIR)\include\$(XMLSEC_NAME) copy $(BASEDIR)\include\$(XMLSEC_NAME)\*.h $(INCPREFIX)\$(XMLSEC_NAME)
+ 	if exist $(BINDIR)\$(XMLSEC_OPENSSL_SO) if not exist $(INCPREFIX)\$(XMLSEC_NAME)\openssl mkdir $(INCPREFIX)\$(XMLSEC_NAME)\openssl
+-	if exist $(BINDIR)\$(XMLSEC_OPENSSL_A) if not exist $(INCPREFIX)\$(XMLSEC_NAME)\openssl mkdir $(INCPREFIX)\$(XMLSEC_NAME)\opensslmsvc if exists
++	if exist $(BINDIR)\$(XMLSEC_OPENSSL_A) if not exist $(INCPREFIX)\$(XMLSEC_NAME)\openssl mkdir $(INCPREFIX)\$(XMLSEC_NAME)\openssl
+ 	if exist $(BINDIR)\$(XMLSEC_OPENSSL_SO) copy $(BASEDIR)\include\$(XMLSEC_NAME)\openssl\*.h $(INCPREFIX)\$(XMLSEC_NAME)\openssl
+     if exist $(BINDIR)\$(XMLSEC_OPENSSL_A) copy $(BASEDIR)\include\$(XMLSEC_NAME)\openssl\*.h $(INCPREFIX)\$(XMLSEC_NAME)\openssl
+ 	if exist $(BINDIR)\$(XMLSEC_NSS_SO) if not exist $(INCPREFIX)\$(XMLSEC_NAME)\nss mkdir $(INCPREFIX)\$(XMLSEC_NAME)\nss
+-- 
+2.43.0.windows.1
+
