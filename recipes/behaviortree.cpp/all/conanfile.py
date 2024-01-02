@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, copy, rmdir, replace_in_file, save
+from conan.tools.files import get, copy, rmdir, replace_in_file, save, rm
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -167,7 +167,10 @@ class BehaviorTreeCPPConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("zeromq", "cmake_file_name", "ZMQ")
+        if Version(self.version) >= "4.1.0":
+            deps.set_property("zeromq", "cmake_file_name", "ZeroMQ")
+        else:
+            deps.set_property("zeromq", "cmake_file_name", "ZMQ")
         deps.generate()
 
     def _patch_sources(self):
@@ -193,6 +196,8 @@ class BehaviorTreeCPPConan(ConanFile):
             replace_in_file(self, cmakelists, "3rdparty/tinyxml2/tinyxml2.cpp", "")
             replace_in_file(self, os.path.join(self.source_folder, "src", "xml_parsing.cpp"),
                             "tinyxml2/tinyxml2.h", "tinyxml2.h")
+        # Ensure ZeroMQ and other packages are provided by Conan
+        rm(self, "Find*.cmake", os.path.join(self.source_folder, "cmake"))
 
     def build(self):
         self._patch_sources()
