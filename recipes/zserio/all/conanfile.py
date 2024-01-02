@@ -2,11 +2,9 @@ import os
 import shutil
 
 from conan import ConanFile
-from conan.tools.files import copy, get, collect_libs
+from conan.tools.files import collect_libs, copy, download, get
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.54.0"
 
@@ -41,6 +39,9 @@ class ZserioConanFile(ConanFile):
         shutil.move("cpp/CMakeLists.txt", ".")
         shutil.rmtree("cpp")
 
+        license_link = f"https://raw.githubusercontent.com/ndsev/zserio/v{self.version}/LICENSE"
+        download(self, license_link, "LICENSE")
+
     def export_sources(self):
         copy(self, "zserio_compiler.cmake", self.recipe_folder, self.export_sources_folder)
 
@@ -60,6 +61,8 @@ class ZserioConanFile(ConanFile):
         return os.path.join("lib", "cmake", "zserio")
 
     def package(self):
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+
         include_dir = os.path.join(self.package_folder, "include")
         lib_dir = os.path.join(self.package_folder, "lib")
         copy(self, "*.h", self.source_folder, include_dir)
