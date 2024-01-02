@@ -279,23 +279,20 @@ class OpenSceneGraphConanFile(ConanFile):
         rm(self, "*.pdb", self.package_folder, True)
 
     def package_info(self):
-        # FindOpenSceneGraph.cmake is shipped with cmake and is a traditional cmake script
+        # FIXME: FindOpenSceneGraph.cmake is shipped with cmake and is a traditional cmake script
+        # https://github.com/openscenegraph/OpenSceneGraph/blob/master/packaging/cmake/OpenSceneGraphConfig.cmake.in
         # It doesn't setup targets and only provides a few variables:
         #  - OPENSCENEGRAPH_FOUND
         #  - OPENSCENEGRAPH_VERSION
         #  - OPENSCENEGRAPH_INCLUDE_DIRS
         #  - OPENSCENEGRAPH_LIBRARIES
-        # Unfortunately, the cmake_find_package generators don't currently allow directly setting variables,
-        # but it will set the last three of these if the name of the package is OPENSCENEGRAPH (it uses
-        # the filename for the first, so OpenSceneGraph_FOUND gets set, not OPENSCENEGRAPH_FOUND)
+
         self.cpp_info.set_property("cmake_file_name", "OpenSceneGraph")
-        self.cpp_info.set_property("cmake_target_name", "OPENSCENEGRAPH::OPENSCENEGRAPH")
+        self.cpp_info.set_property("cmake_target_name", "OpenSceneGraph::OpenSceneGraph")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "OpenSceneGraph"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenSceneGraph"
-        self.cpp_info.names["cmake_find_package"] = "OPENSCENEGRAPH"
-        self.cpp_info.names["cmake_find_package_multi"] = "OPENSCENEGRAPH"
+        self.cpp_info.names["cmake_find_package"] = "OpenSceneGraph"
+        self.cpp_info.names["cmake_find_package_multi"] = "OpenSceneGraph"
 
         if self.settings.build_type == "Debug":
             postfix = "d"
