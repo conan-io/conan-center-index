@@ -1,0 +1,24 @@
+Workaround for iconv() signature differences on different platforms.
+https://github.com/bnoordhuis/libiconv/blob/master/include/iconv.h.in#L83
+https://github.com/OSGeo/gdal/issues/7472
+
+--- port/cpl_recode_iconv.cpp
++++ port/cpl_recode_iconv.cpp
+@@ -121,7 +121,7 @@
+     while( nSrcLen > 0 )
+     {
+         size_t nConverted =
+-            iconv( sConv, &pszSrcBuf, &nSrcLen, &pszDstBuf, &nDstLen );
++            iconv( sConv, const_cast<char**>(&pszSrcBuf), &nSrcLen, &pszDstBuf, &nDstLen );
+ 
+         if( nConverted == static_cast<size_t>(-1) )
+         {
+@@ -286,7 +286,7 @@
+     while( nSrcLen > 0 )
+     {
+         const size_t nConverted =
+-            iconv( sConv, &pszSrcBuf, &nSrcLen, &pszDstBuf, &nDstLen );
++            iconv( sConv, const_cast<char**>(&pszSrcBuf), &nSrcLen, &pszDstBuf, &nDstLen );
+ 
+         if( nConverted == static_cast<size_t>(-1) )
+         {
