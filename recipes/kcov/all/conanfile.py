@@ -59,6 +59,9 @@ class KcovConan(ConanFile):
         apply_conandata_patches(self)
         rm(self, "Find*.cmake", os.path.join(self.source_folder, "cmake"))
         src_cmakelists = os.path.join(self.source_folder, "src", "CMakeLists.txt")
+        # Optional dependency, not available on CCI
+        replace_in_file(self, src_cmakelists, "find_package (Bfd)", "")
+        # Fix LibElf and ElfUtils capitalization
         replace_in_file(self, src_cmakelists, "find_package (LibElf)", "find_package (LIBELF REQUIRED CONFIG)")
         replace_in_file(self, src_cmakelists, "ElfUtils", "Elfutils", strict=False)
         replace_in_file(self, src_cmakelists, "${LIBELF_LIBRARIES}", "${LIBELF_LIBRARIES} ${Elfutils_LIBRARIES}")
