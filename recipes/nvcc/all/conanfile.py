@@ -16,12 +16,10 @@ class NvccConan(ConanFile):
     topics = ("nvcc", "compiler", "cuda", "nvidia", "SDK")
     exports_sources = ["nvcc_toolchain.cmake"]
     settings = "os", "arch"
+    provides = ["cudart", "nvrtc"]
     options = {}
     default_options = {}
     no_copy_source = True
-
-    def requirements(self):
-        pass
 
     def validate(self):
         if not self.settings.os in ["Windows", "Linux"]:
@@ -36,7 +34,7 @@ class NvccConan(ConanFile):
                 get(self, **src, strip_root=True)
         else:
             get(self, **srcs, strip_root=True)
-    
+
     def package(self):
         def install_custom(name, src_rel, dst_rel=None):
             if dst_rel is None:
