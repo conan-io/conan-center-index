@@ -28,8 +28,8 @@
  	lib /out:$(LIBMAIN_S) $(OBJECTS)
  
 +#Create DLL + import library tomcrypt.dll.lib
-+$(LIBMAIN_D) $(LIBMAIN_I): $(OBJECTS) ..\tomcrypt.def
-+	link /dll /out:$(LIBMAIN_D) /implib:$(LIBMAIN_I) /def:..\tomcrypt.def $(LTC_LDFLAGS) $(OBJECTS)
++$(LIBMAIN_D) $(LIBMAIN_I): $(OBJECTS) ..\tomcrypt-1.18.2.def
++	link /dll /out:$(LIBMAIN_D) /implib:$(LIBMAIN_I) /def:..\tomcrypt-1.18.2.def $(LTC_LDFLAGS) $(OBJECTS)
 +
  #Demo tools/utilities
  hashsum.exe: demos/hashsum.c tests/common.c $(LIBMAIN_S)

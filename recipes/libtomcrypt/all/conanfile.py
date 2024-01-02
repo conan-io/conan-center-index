@@ -33,14 +33,14 @@ class LibTomCryptConan(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-        if self.settings.os == "Windows":
-            copy(self, "tomcrypt.def", self.recipe_folder, self.export_sources_folder)
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        export_conandata_patches(self)
+        if self.settings.os == "Windows":
+            copy(self, f"tomcrypt-{self.version}.def", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
