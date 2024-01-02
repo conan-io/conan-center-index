@@ -1,16 +1,28 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, chdir
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.53.0"
 
 
 class LibTomCryptConan(ConanFile):
     name = "libtomcrypt"
-    description = "LibTomCrypt is a fairly comprehensive, modular and portable cryptographic toolkit that provides developers with a vast array of well known published block ciphers, one-way hash functions, chaining modes, pseudo-random number generators, public key cryptography and a plethora of other routines."
-    topics = "libtomcrypt", "cryptography", "encryption", "libtom"
+    description = ("LibTomCrypt is a cryptographic toolkit that provides well-known"
+                   " published block ciphers, one-way hash functions, chaining modes,"
+                   " pseudo-random number generators, public key cryptography and other routines.")
     license = "Unlicense"
-    homepage = "https://www.libtom.net/"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.libtom.net/"
+    topics = ("cryptography", "encryption", "libtom")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,12 +33,10 @@ class LibTomCryptConan(ConanFile):
         "fPIC": True,
     }
 
-    
-    exports_sources = ["patches/*", "tomcrypt.def"]
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
+        if self.settings.os == "Windows":
+            copy(self, "tomcrypt.def", self.recipe_folder, self.export_sources_folder)
 
     @property
     def _settings_build(self):
@@ -38,110 +48,94 @@ class LibTomCryptConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio":
-            self.build_requires("make/4.3")
-        if self.settings.compiler != "Visual Studio" and self.settings.os != "Windows" and self.options.shared:
-            self.build_requires("libtool/2.4.6")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if tools.Version(self.version) >= "1.18.2":
-            self.requires("libtommath/1.2.0")
+        self.requires("libtommath/1.2.1")
 
-    def _run_makefile(self, target=None):
-        target = target or ""
-        autotools = AutoToolsBuildEnvironment(self)
-        autotools.libs = []
-        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
-            autotools.link_flags.append("-lcrypt32")
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            # FIXME: should be handled by helper
-            autotools.link_flags.append("-arch arm64")
-        args = autotools.vars
-        args.update({
-            "PREFIX": self.package_folder,
-        })
-        if self.settings.compiler != "Visual Studio":
-            if tools.get_env("CC"):
-                args["CC"] = tools.get_env("CC")
-            if tools.get_env("LD"):
-                args["LD"] = tools.get_env("LD")
-            if tools.get_env("AR"):
-                args["AR"] = tools.get_env("AR")
+    def build_requirements(self):
+        if not is_msvc(self):
+            if self.options.shared:
+                self.build_requires("libtool/2.4.7")
+            if self._settings_build.os == "Windows":
+                self.build_requires("make/4.4")
 
-            args["LIBTOOL"] = "libtool"
-        arg_str = " ".join("{}=\"{}\"".format(k, v) for k, v in args.items())
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-        with tools.environment_append(args):
-            with tools.chdir(self._source_subfolder):
-                if self.settings.compiler == "Visual Studio":
-                    if self.options.shared:
-                        target = "tomcrypt.dll"
-                    else:
-                        target = "tomcrypt.lib"
-                    with tools.vcvars(self):
-                        self.run("nmake -f makefile.msvc {} {}".format(
-                            target,
-                            arg_str,
-                        ), run_environment=True)
-                else:
-                    if self.settings.os == "Windows":
-                        makefile = "makefile.mingw"
-                        if self.options.shared:
-                            target = "libtomcrypt.dll"
-                        else:
-                            target = "libtomcrypt.a"
-                    else:
-                        if self.options.shared:
-                            makefile = "makefile.shared"
-                        else:
-                            makefile = "makefile.unix"
-                    self.run("{} -f {} {} {} -j{}".format(
-                        tools.get_env("CONAN_MAKE_PROGRAM", "make"),
-                        makefile,
-                        target,
-                        arg_str,
-                        tools.cpu_count(),
-                    ), run_environment=True)
+    def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+
+        if not cross_building(self):
+            venv = VirtualRunEnv(self)
+            venv.generate(scope="build")
+
+        tc = AutotoolsToolchain(self)
+        if self.settings.os == "Windows" and not is_msvc(self):
+            tc.ldflags.append("-lcrypt32")
+        if self.settings.os == "Windows":
+            makefile = "makefile.mingw"
+        else:
+            if self.options.shared:
+                makefile = "makefile.shared"
+            else:
+                makefile = "makefile.unix"
+        tc.make_args += ["-f", makefile]
+        tc.generate()
+
+        tc = PkgConfigDeps(self)
+        tc.generate()
+
+        tc = AutotoolsDeps(self)
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        self._run_makefile()
+        apply_conandata_patches(self)
+        with chdir(self, self.source_folder):
+            if is_msvc(self):
+                if self.options.shared:
+                    target = "tomcrypt.dll"
+                else:
+                    target = "tomcrypt.lib"
+                self.run(f"nmake -f makefile.msvc {target}")
+            else:
+                target = None
+                if self.settings.os == "Windows":
+                    if self.options.shared:
+                        target = "libtomcrypt.dll"
+                    else:
+                        target = "libtomcrypt.a"
+                autotools = Autotools(self)
+                autotools.make(target=target)
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         if self.settings.os == "Windows":
             # The mingw makefile uses `cmd`, which is only available on Windows
-            self.copy("*.a", src=self._source_subfolder, dst="lib")
-            self.copy("*.lib", src=self._source_subfolder, dst="lib")
-            self.copy("*.dll", src=self._source_subfolder, dst="bin")
-            _header_subfolder = os.path.join(self._source_subfolder, "src", "headers")
-            self.copy("tomcrypt*.h", src=_header_subfolder, dst="include")
+            copy(self, "*.a", self.source_folder, os.path.join(self.package_folder, "lib"))
+            copy(self, "*.lib", self.source_folder, os.path.join(self.package_folder, "lib"))
+            copy(self, "*.dll", self.source_folder, os.path.join(self.package_folder, "bin"))
+            copy(self, "tomcrypt*.h", os.path.join(self.source_folder, "src", "headers"), os.path.join(self.package_folder, "include"))
         else:
-            self._run_makefile("install")
+            with chdir(self, self.source_folder):
+                autotools = Autotools(self)
+                autotools.make(target="install", args=[f"PREFIX={self.package_folder}"])
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            os.rename(os.path.join(self.package_folder, "lib", "tomcrypt.dll.lib"),
-                      os.path.join(self.package_folder, "lib", "tomcrypt.lib"))
+        if is_msvc(self) and self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "tomcrypt.dll.lib"),
+                   os.path.join(self.package_folder, "lib", "tomcrypt.lib"))
 
     def package_info(self):
-        self.cpp_info.libs = ["tomcrypt"]
         self.cpp_info.set_property("pkg_config_name", "libtomcrypt")
-        if not self.options.shared:
-            if self.settings.os == "Windows":
-                self.cpp_info.system_libs = ["advapi32", "crypt32"]
-
-        # TODO: to remove in conan v2 once pkg_config generators removed
-        self.cpp_info.names["pkg_config"] = "tomcrypt"
+        self.cpp_info.libs = ["tomcrypt"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["advapi32", "crypt32"]
