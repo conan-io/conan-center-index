@@ -2,13 +2,14 @@ import os
 import glob
 
 from conan import ConanFile
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, chdir, rm, rename, mkdir
 from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path, unix_path_package_info_legacy
 from conan.tools.apple import is_apple_os
 from conan.tools.scm import Version
+from conan.tools.build import cross_building
 
 
 required_conan_version = ">=1.57.0"
@@ -48,6 +49,11 @@ class GetTextConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+               self.settings.compiler.get_safe("runtime")
+
+    @property
     def build_folder(self):
         bf = super().build_folder
         return os.path.join(bf, self._build_subfolder) if self._build_subfolder else bf
@@ -79,7 +85,7 @@ class GetTextConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        if is_msvc(self):
+        if is_msvc(self) or self._is_clang_cl:
             self.build_requires("automake/1.16.5")
 
     def source(self):
@@ -88,6 +94,10 @@ class GetTextConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
         libiconv = self.dependencies["libiconv"]
@@ -121,38 +131,87 @@ class GetTextConan(ConanFile):
             "--without-included-gettext",
         ])
 
-        if is_msvc(self):
+        env = tc.environment()
+        if is_msvc(self) or self._is_clang_cl:
+            def programs():
+                rc = None
+                if self.settings.arch == "x86_64":
+                    rc = "windres --target=pe-x86-64"
+                elif self.settings.arch == "x86":
+                    rc = "windres --target=pe-i386"
+                if self._is_clang_cl:
+                    compiler = self.conf.get("tools.build:compiler_executable", check_type=str) or "clang-cl"
+                    return compiler, os.getenv("AR", "llvm-lib"), os.getenv("LD", "lld-link"), rc
+                if is_msvc(self):
+                    return "cl -nologo", "lib", "link", rc
+
+            target = None
+            if self.settings.arch == "x86_64":
+                target = "x86_64-w64-mingw32"
+            elif self.settings.arch == "x86":
+                target = "i686-w64-mingw32"
+            if target is not None:
+                tc.configure_args += [f"--host={target}", f"--build={target}"]
+
             if check_min_vs(self, "180", raise_invalid=False):
-                tc.extra_cflags.append("-FS") #TODO: reference github issue
+                # INFO: https://github.com/conan-io/conan/issues/15365
+                tc.extra_cflags.append("-FS")
 
             # The flag above `--with-libiconv-prefix` fails to correctly detect libiconv on windows+msvc
             # so it needs an extra nudge. We could use `AutotoolsDeps` but it's currently affected by the
             # following outstanding issue: https://github.com/conan-io/conan/issues/12784
-            iconv_includedir = unix_path(self, libiconv.cpp_info.aggregated_components().includedirs[0])
-            iconv_libdir = unix_path(self, libiconv.cpp_info.aggregated_components().libdirs[0])
-            tc.extra_cflags.append(f"-I{iconv_includedir}")
-            tc.extra_ldflags.append(f"-L{iconv_libdir}")
+            #iconv_includedir = unix_path(self, libiconv.cpp_info.aggregated_components().includedirs[0])
+            #iconv_libdir = unix_path(self, libiconv.cpp_info.aggregated_components().libdirs[0])
+            #tc.extra_cflags.append(f"-I{iconv_includedir}")
+            #tc.extra_ldflags.append(f"-L{iconv_libdir}")
+
+            compile_wrapper = unix_path(self, self.conf.get("user.automake:compile-wrapper", check_type=str))
+            ar_wrapper = unix_path(self, self.conf.get("user.automake:lib-wrapper", check_type=str))
+            compile_wrapper = unix_path(self, self.dependencies.build["automake"].conf_info.get("user.automake:compile-wrapper"))
+            ar_wrapper = unix_path(self, self.dependencies.build["automake"].conf_info.get("user.automake:lib-wrapper"))
+            cc, ar, link, rc = programs()
+            env.define("CC", f"{compile_wrapper} {cc}")
+            env.define("CXX", f"{compile_wrapper} {cc}")
+            env.define("LD", link)
+            env.define("AR", f"{ar_wrapper} {ar}")
+            env.define("NM", "dumpbin -symbols")
+            env.define("RANLIB", ":")
+            env.define("STRIP", ":")
+            if rc is not None:
+                env.define("RC", rc)
+                env.define("WINDRES", rc)
+        tc.generate(env)
+
+        if is_msvc(self) or self._is_clang_cl:
+            # Custom AutotoolsDeps for cl like compilers
+            # workaround for https://github.com/conan-io/conan/issues/12784
+            includedirs = []
+            defines = []
+            libs = []
+            libdirs = []
+            linkflags = []
+            cxxflags = []
+            cflags = []
+            for dependency in self.dependencies.values():
+                deps_cpp_info = dependency.cpp_info.aggregated_components()
+                includedirs.extend(deps_cpp_info.includedirs)
+                defines.extend(deps_cpp_info.defines)
+                libs.extend(deps_cpp_info.libs + deps_cpp_info.system_libs)
+                libdirs.extend(deps_cpp_info.libdirs)
+                linkflags.extend(deps_cpp_info.sharedlinkflags + deps_cpp_info.exelinkflags)
+                cxxflags.extend(deps_cpp_info.cxxflags)
+                cflags.extend(deps_cpp_info.cflags)
 
             env = Environment()
-            compile_wrapper = self.dependencies.build["automake"].conf_info.get("user.automake:compile-wrapper")
-            lib_wrapper = self.dependencies.build["automake"].conf_info.get("user.automake:lib-wrapper")
-            env.define("CC", "{} cl -nologo".format(unix_path(self, compile_wrapper)))
-            env.define("LD", "link -nologo")
-            env.define("NM", "dumpbin -symbols")
-            env.define("STRIP", ":")
-            env.define("AR", "{} lib".format(unix_path(self, lib_wrapper)))
-            env.define("RANLIB", ":")
-
-            # One of the checks performed by the configure script requires this as a preprocessor flag
-            # rather than a C compiler flag
-            env.prepend("CPPFLAGS", f"-I{iconv_includedir}")
-
-            windres_arch = {"x86": "i686", "x86_64": "x86-64"}[str(self.settings.arch)]
-            env.define("RC", f"windres --target=pe-{windres_arch}")
-            env.vars(self).save_script("conanbuild_msvc")
-        tc.generate()
-        deps = AutotoolsDeps(self)
-        deps.generate()
+            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in includedirs] + [f"-D{d}" for d in defines])
+            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in libs])
+            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in libdirs] + linkflags)
+            env.append("CXXFLAGS", cxxflags)
+            env.append("CFLAGS", cflags)
+            env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
+        else:
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
