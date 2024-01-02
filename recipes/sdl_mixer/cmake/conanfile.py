@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.57.0"
 
@@ -107,6 +108,8 @@ class SDLMixerConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+        if Version(self.version) <= "2.6.3":
+            tc.cache_variables["SDL2MIXER_DEBUG_POSTFIX"] = ""
         tc.variables["SDL2MIXER_VENDORED"] = False
         tc.variables["SDL2MIXER_SAMPLES"] = False
         tc.variables["SDL2MIXER_CMD"] = self.options.cmd
