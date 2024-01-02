@@ -71,7 +71,6 @@ class FirebirdConan(ConanFile):
             "--enable-client-only",
             "--with-system-re2",
             f"--with-termlib={self.dependencies['termcap'].package_folder}",
-            "--disable-rpath",
             "--with-builtin-tommath",
             "--with-builtin-tomcrypt",
         ]
