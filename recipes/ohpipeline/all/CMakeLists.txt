@@ -166,6 +166,7 @@ set(ohPipeline_HEADERS
     OpenHome/Media/Pipeline/Flusher.h
     OpenHome/Media/Pipeline/Logger.h
     OpenHome/Media/Pipeline/Msg.h
+    OpenHome/Media/Pipeline/Msg.inl
     OpenHome/Media/Pipeline/Muter.h
     OpenHome/Media/Pipeline/MuterVolume.h
     OpenHome/Media/Pipeline/PreDriver.h
@@ -303,10 +304,12 @@ set(OHMEDIAPLAYER_HEADERS
     OpenHome/Av/MediaPlayer.h
     OpenHome/Av/Logger.h
     OpenHome/Json.h
+    OpenHome/Observable.h
     OpenHome/Av/Utils/FormUrl.h
     OpenHome/NtpClient.h
     OpenHome/UnixTimestamp.h
     OpenHome/Configuration/ProviderConfig.h
+    OpenHome/Configuration/IStore.h
     OpenHome/Configuration/ProviderConfigApp.h
     OpenHome/PowerManager.h
     OpenHome/ThreadPool.h
@@ -483,6 +486,7 @@ set(SOURCE_SONGCAST_HEADERS
     OpenHome/Av/Songcast/Ohm.h
     OpenHome/Av/Songcast/OhmMsg.h
     OpenHome/Av/Songcast/OhmSender.h
+    OpenHome/Av/Songcast/OhmSenderDriver.h
     OpenHome/Av/Songcast/OhmSocket.h
     OpenHome/Av/Songcast/ProtocolOhBase.h
     OpenHome/Av/Songcast/ProtocolOhu.h
