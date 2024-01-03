@@ -56,11 +56,11 @@ index cf80c9122..fe4a95dc9 100644
  
  # Only need to define _TCL_H
 -_TCL_H = ..\generic\tcl.h
-+_TCL_H = ..\include\tcl.h
++_TCL_H = $(_TCLDIR)\include\tcl.h
  
  # END Case 2(a) - Building Tcl itself
  
-@@ -262,12 +262,12 @@
+@@ -262,7 +262,7 @@
  !endif # TCLDIR == ""
  
  _TCLDIR	= $(TCLDIR:/=\)
@@ -69,12 +69,6 @@ index cf80c9122..fe4a95dc9 100644
  !if !exist("$(_TCL_H)")
  !error Could not locate tcl.h. Please set the TCLDIR macro to point to the Tcl *source* directory.
  !endif
- 
--_TK_H = ..\generic\tk.h
-+_TK_H = ..\include\tk.h
- 
- # END Case 2(b) - Building Tk
- 
 @@ -283,9 +283,9 @@
  !if exist("$(_TCLDIR)\include\tcl.h") # Case 2(c) with TCLDIR defined
  TCLINSTALL	= 1
@@ -95,27 +89,6 @@ index cf80c9122..fe4a95dc9 100644
 +_TCL_H          = $(_TCLDIR)\include\tcl.h
  
  !endif # exist(...) && !$(NEED_TCL_SOURCE)
- 
-@@ -332,9 +332,9 @@
- !if exist("$(_TKDIR)\include\tk.h")
- TKINSTALL      = 1
- _TK_H          = $(_TKDIR)\include\tk.h
--!elseif exist("$(_TKDIR)\generic\tk.h")
-+!elseif exist("$(_TKDIR)\include\tk.h")
- TKINSTALL      = 0
--_TK_H          = $(_TKDIR)\generic\tk.h
-+_TK_H          = $(_TKDIR)\include\tk.h
- !endif
- 
- !else # TKDIR not defined
-@@ -360,7 +360,7 @@
- !include nmakehlp.out
- TKINSTALL      = 0
- TKDIR          = $(_TKDIR)
--_TK_H          = $(_TKDIR)\generic\tk.h
-+_TK_H          = $(_TKDIR)\include\tk.h
- 
- !endif # exist("$(_INSTALLDIR)\include\tk.h") && !$(NEED_TK_SOURCE)
  
 @@ -626,7 +626,7 @@
  # generated libraries only usable by the specific VC++ version that
@@ -191,3 +164,39 @@ index cf80c9122..fe4a95dc9 100644
  !endif
  
  INCLUDES = $(TCL_INCLUDES) $(TK_INCLUDES) $(PRJ_INCLUDES)
+diff --git a/win/rules.vc b/win/rules.vc
+index 58c70fa26..e7f953b4c 100644
+--- a/win/rules.vc
++++ b/win/rules.vc
+@@ -255,7 +255,7 @@
+ TCLINSTALL = 0 # Tk always builds against Tcl source, not an installed Tcl
+ !if "$(TCLDIR)" == ""
+ !if [echo TCLDIR = \> nmakehlp.out] \
+-   || [nmakehlp -L generic\tcl.h >> nmakehlp.out]
++   || [nmakehlp -L $(_TCL_H) >> nmakehlp.out]
+ !error *** Could not locate Tcl source directory.
+ !endif
+ !include nmakehlp.out
+@@ -305,7 +305,7 @@
+ !else # exist(...) && !$(NEED_TCL_SOURCE)
+ 
+ !if [echo _TCLDIR = \> nmakehlp.out] \
+-   || [nmakehlp -L generic\tcl.h >> nmakehlp.out]
++   || [nmakehlp -L $(_TCL_H) >> nmakehlp.out]
+ !error *** Could not locate Tcl source directory.
+ !endif
+ !include nmakehlp.out
+@@ -689,6 +689,13 @@
+ # DOTVERSION - set as (for example) 2.5
+ # VERSION - set as (for example 25)
+ #--------------------------------------------------------------
++
++!if !exists($(_TCL_H))
++!error Error: Cannot parse $(_TCL_H): file not found
++!endif
++!if !exists($(_TK_H))
++!error Error: Cannot parse $(_TK_H): file not found
++!endif
+ 
+ !if [echo REM = This file is generated from rules.vc > versions.vc]
+ !endif

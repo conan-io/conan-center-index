@@ -86,12 +86,7 @@ class TkConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(
-            self,
-            **self.conan_data["sources"][self.version],
-            strip_root=True,
-            destination=self.source_folder,
-        )
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         buildenv = VirtualBuildEnv(self)
@@ -203,6 +198,7 @@ class TkConan(ConanFile):
             self.run(f"nmake -nologo -f makefile.vc {args} {target}")
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         makefile = os.path.join(self.source_folder, "unix", "Makefile.in")
         replace_in_file(self, makefile, "LDFLAGS			= @LDFLAGS_DEFAULT@ @LDFLAGS@", "")
         replace_in_file(self, makefile, " ${CFLAGS}", " ${CFLAGS} ${CPPFLAGS}")
@@ -212,7 +208,7 @@ class TkConan(ConanFile):
                         "case 1: case (sizeof(${tcl_type_64bit})!=sizeof(long)): ;")
 
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         if is_msvc(self):
             self._build_nmake()
         else:
