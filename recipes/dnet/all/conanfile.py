@@ -14,6 +14,7 @@ class dnetConan(ConanFile):
     topics = ("dnet", "libdnet", "libdumbnet")
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -34,14 +35,8 @@ class dnetConan(ConanFile):
 
     def configure(self):
         self.options.rm_safe("fPIC")
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -68,9 +63,7 @@ class dnetConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs.append("dnet")
-        self.cpp_info.includedirs = ["include"]
-
-        self.cpp_info.includedirs.extend(["include/dnet"])
+        self.cpp_info.includedirs.append(os.path.join("include", "dnet"))
  
         if self.settings.os == 'Windows':
             self.cpp_info.system_libs = ['Iphlpapi', 'wsock32']
