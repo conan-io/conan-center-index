@@ -59,11 +59,11 @@ class MPUnitsConan(ConanFile):
         return "clang" in compiler and compiler.libcxx == "libc++" and version < 14
 
     def requirements(self):
-        self.requires("gsl-lite/0.40.0")
+        self.requires("gsl-lite/0.41.0")
         if self._use_libfmt:
-            self.requires("fmt/10.1.0")
+            self.requires("fmt/10.2.0")
         if self._use_range_v3:
-            self.requires("range-v3/0.11.0")
+            self.requires("range-v3/0.12.0")
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
@@ -81,7 +81,7 @@ class MPUnitsConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires at least {compiler} {min_version} ({compiler.version} in use)"
             )
-        
+
         # Note that apple-clang and msvc are disabled for now, their C++ 20 implementations are not up to speed
         # Re-enable once newer versions with better support come out
         if is_msvc(self) or compiler == "apple-clang":

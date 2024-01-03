@@ -57,9 +57,9 @@ class MPUnitsConan(ConanFile):
         return "clang" in compiler and compiler.libcxx == "libc++" and version < 14
 
     def requirements(self):
-        self.requires("gsl-lite/0.40.0")
+        self.requires("gsl-lite/0.41.0")
         if self._use_libfmt:
-            self.requires("fmt/10.1.0")
+            self.requires("fmt/10.2.0")
         if self._use_range_v3:
             self.requires("range-v3/0.12.0")
 
