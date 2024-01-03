@@ -74,8 +74,8 @@ class ZserioConanFile(ConanFile):
         include_dir = os.path.join(self.package_folder, "include")
         lib_dir = os.path.join(self.package_folder, "lib")
         copy(self, "*.h", self.source_folder, include_dir)
-        copy(self, "*.lib", self.build_folder, lib_dir)
-        copy(self, "*.a", self.build_folder, lib_dir)
+        copy(self, "*.lib", self.build_folder, lib_dir, keep_path=False)
+        copy(self, "*.a", self.build_folder, lib_dir, keep_path=False)
 
         copy(self, "zserio.jar", self.build_folder, os.path.join(self.package_folder, "bin"))
         copy(self, "zserio_compiler.cmake", self.export_sources_folder,
