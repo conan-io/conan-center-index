@@ -22,7 +22,6 @@ class NvccConan(ConanFile):
     topics = ("nvcc", "compiler", "cuda", "nvidia", "SDK")
     exports_sources = ["nvcc_toolchain.cmake"]
     settings = "os", "arch"
-    provides = ["cudart", "nvrtc"]
     options = {}
     default_options = {}
     no_copy_source = True
@@ -102,8 +101,10 @@ class NvccConan(ConanFile):
             self.cpp_info.components[component].resdirs = []
             self.cpp_info.components[component].bindirs = bin_dir()
             self.cpp_info.components[component].includedirs = [incdir]
-            self.cpp_info.components[component].lib = libname
+            self.cpp_info.components[component].libs = [libname]
 
+        if bin_dir():
+            self.runenv_info.prepend_path("PATH", join(self.package_folder, bin_dir()[0]))
         self.conf_info.append("tools.cmake.cmaketoolchain:user_toolchain", join(self.package_folder, "nvcc_toolchain.cmake"))
         if self.settings.os == "Windows":
             self.conf_info.update("tools.build:compiler_executables", { "cuda": join(self.package_folder, "bin", "nvcc.exe") })
