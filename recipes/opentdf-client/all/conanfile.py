@@ -69,11 +69,11 @@ class OpenTDFConan(ConanFile):
         if Version(self.version) >= "1.4.0":
             self.requires("magic_enum/0.8.2")
         self.requires("ms-gsl/2.1.0")
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("nlohmann_json/3.11.3")
         self.requires("jwt-cpp/0.4.0")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("boost/1.83.0")
-        self.requires("libxml2/2.11.4")
+        self.requires("libxml2/2.11.6")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
