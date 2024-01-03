@@ -1,12 +1,18 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, save, copy, symlinks
+from conan.tools.files import get, save, copy, symlinks, patch, export_conandata_patches, rm
 from conan.tools.scm import Version
 import os
 from os.path import isdir, join, exists
 
 required_conan_version = ">=1.47.0"
 
+# TODO
+# - [ ] nvcc.profile patch for windows & linux
+# - [ ] MSbuild Platform patch for  windows
+# - [ ] Put DLL files in bin path (windows)
+# - [ ] Create cudart "depends" - library that requires nvcc package
+# - [ ] Create nvrtc "depends" - library that requires nvcc package
 class NvccConan(ConanFile):
     name = "nvcc"
     description = "NVIDIA CUDA Compiler Driver NVCC"
@@ -27,6 +33,9 @@ class NvccConan(ConanFile):
         if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Only x86_64 is supported")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def build(self):
         srcs = self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)]
         if isinstance(srcs, list):
@@ -34,16 +43,14 @@ class NvccConan(ConanFile):
                 get(self, **src, strip_root=True)
         else:
             get(self, **srcs, strip_root=True)
+        copy(self, "*.dll", join(self.build_folder, "lib"), join(self.build_folder, "bin"))
+        rm(self, "*.dll", join(self.build_folder, "lib"))
+        for it in self.conan_data.get("patches", {}).get(str(self.version), []):
+            if str(self.settings.os).lower() in it.get("patch_file", ""):
+                patch(self, **it, base_path=self.build_folder)
 
     def package(self):
-        def install_custom(name, src_rel, dst_rel=None):
-            if dst_rel is None:
-                dst_rel = src_rel
-            src = join(self.build_folder, name, src_rel)
-            dst = join(self.package_folder, dst_rel)
-            if exists(src):
-                copy(self, "*", src, dst)
-
+        copy(self, "nvcc_toolchain.cmake", self.export_sources_folder, self.package_folder)
         copy(self, "LICENSE", self.build_folder, join(self.package_folder, "licenses"))
         dirs = ["bin", "lib", "lib64", "include", "nvvm"]
         for name in dirs:
@@ -55,40 +62,47 @@ class NvccConan(ConanFile):
 
 
     def package_info(self):
+        def lib(name):
+            libdirs = ["lib", "lib64", "lib/x64", "nvvm/lib", "nvvm/lib64", "nvvm/lib/x64"]
+            libnames = [f"lib{name}.a", f"lib{name}.so", f"{name}.lib"]
+            for libdir in libdirs:
+                for libname in libnames:
+                    if exists(join(self.package_folder, libdir, libname)):
+                        incdir = "include"
+                        if libdir.startswith("nvvm"):
+                            incdir = "nvvm/include"
+                        return [libdir, incdir, name]
+            return [None, None, None]
+        
         def bin_dir():
             if self.settings.os == "Windows":
-                return "bin"
-            return "lib64"
-
-        def lib_dir():
-            if self.settings.os == "Windows":
-                return "lib/x64"
-            return "lib64"
-
-        def lib_name(name):
-            if exists(join(self.package_folder, lib_dir(), f"lib{name}.so")) or exists(join(self.package_folder, lib_dir(), f"lib{name}.a")):
-                return [f"lib{name}"]
-            elif exists(join(self.package_folder, lib_dir(), f"{name}.lib")):
-                return [f"{name}.lib"]
-            elif exists(join(self.package_folder, "lib", f"{name}.lib")):
-                return [f"{name}.lib"]
+                if exists(join(self.package_folder, "bin")):
+                    return ["bin"]
+                return []
+            if exists(join(self.package_folder, "lib")):
+                return ["lib"]
+            if exists(join(self.package_folder, "lib64")):
+                return ["lib64"]
             return []
-
-        self.cpp_info.set_property("cmake_file_name", "nvcc")
-        self.cpp_info.components["nvvm"].set_property("cmake_target_name", "nvvm")
-        self.cpp_info.components["nvvm"].libdirs = [f"nvvm/{lib_dir()}"]
-        self.cpp_info.components["nvvm"].resdirs = []
-        self.cpp_info.components["nvvm"].bindirs = [f"nvvm/{bin_dir()}"]
-        self.cpp_info.components["nvvm"].includedirs = ["nvvm/include"]
-        self.cpp_info.components["nvvm"].lib = lib_name("nvvm")
-
-        if self.version >= Version("11.1"):
-            self.cpp_info.components["nvptxcompiler_static"].set_property("cmake_target_name", "nvptxcompiler_static")
-            self.cpp_info.components["nvptxcompiler_static"].libdirs = ["lib"]
-            self.cpp_info.components["nvptxcompiler_static"].resdirs = []
-            self.cpp_info.components["nvptxcompiler_static"].bindirs = ["bin"]
-            self.cpp_info.components["nvptxcompiler_static"].includedirs = ["include"]
-            self.cpp_info.components["nvptxcompiler_static"].lib = lib_name("nvptxcompiler_static")
+        components = ["cuda_driver",
+            "cudadevrt", "cudart", "cudart_static",
+            "nvrtc", "nvrtc_static", "nvrtc_builtins", "nvrtc_buildins_static",
+            "nvptxcompiler_static",
+            "OpenCL"]
+        libraries = {
+            "cuda_device": "cuda"
+        }
+        libraryToTargetName = {"cuda": "cuda_driver"}
+        for component in components:
+            libdir, incdir, libname = lib(libraries.get(component, component))
+            if libname is None:
+                continue
+            self.cpp_info.components[component].set_property("cmake_target_aliases", [f"CUDA::{component}"])
+            self.cpp_info.components[component].libdirs = [libdir]
+            self.cpp_info.components[component].resdirs = []
+            self.cpp_info.components[component].bindirs = bin_dir()
+            self.cpp_info.components[component].includedirs = [incdir]
+            self.cpp_info.components[component].lib = libname
 
         self.conf_info.append("tools.cmake.cmaketoolchain:user_toolchain", join(self.package_folder, "nvcc_toolchain.cmake"))
         if self.settings.os == "Windows":
