@@ -5,7 +5,7 @@
  namespace lemon {
 
 -#ifdef _MSC_VER
-+#if ((defined _MSC_VER) && _MSVC_LANG < 202002L)
++#if defined(_MSC_VER) && (!defined(_MSVC_LANG) || _MSVC_LANG < 202002L)
  #define LEMON_SCOPE_FIX(OUTER, NESTED) OUTER::NESTED
  #else
  #define LEMON_SCOPE_FIX(OUTER, NESTED) typename OUTER::template NESTED
