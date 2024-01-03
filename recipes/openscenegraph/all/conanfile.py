@@ -80,7 +80,8 @@ class OpenSceneGraphConanFile(ConanFile):
     }
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        copy(self, "conan-official-osg-variables.cmake", self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
 
     def config_options(self):
@@ -274,25 +275,58 @@ class OpenSceneGraphConanFile(ConanFile):
         cmake.install()
 
         copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "conan-official-osg-variables.cmake",
+             dst=os.path.join(self.package_folder, "lib", "cmake"),
+             src=os.path.join(self.source_folder, os.pardir))
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", self.package_folder, True)
 
     def package_info(self):
-        # FIXME: FindOpenSceneGraph.cmake is shipped with cmake and is a traditional cmake script
         # https://github.com/openscenegraph/OpenSceneGraph/blob/master/packaging/cmake/OpenSceneGraphConfig.cmake.in
-        # It doesn't setup targets and only provides a few variables:
-        #  - OPENSCENEGRAPH_FOUND
-        #  - OPENSCENEGRAPH_VERSION
-        #  - OPENSCENEGRAPH_INCLUDE_DIRS
-        #  - OPENSCENEGRAPH_LIBRARIES
-
         self.cpp_info.set_property("cmake_file_name", "OpenSceneGraph")
-        self.cpp_info.set_property("cmake_target_name", "OpenSceneGraph::OpenSceneGraph")
+        # https://github.com/openscenegraph/OpenSceneGraph/blob/master/CMakeModules/FindOSG.cmake
+        self.cpp_info.set_property("cmake_module_file_name", "OSG")
+        # Disable the automatically created targets, use the "openscenegraph" component instead
+        self.cpp_info.set_property("pkg_config_name", None)
+        self.cpp_info.set_property("cmake_target_name", None)
+
+        # Export CMake variables set by the project
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
+        cmake_vars_module = os.path.join("lib", "cmake", "conan-official-osg-variables.cmake")
+        self.cpp_info.set_property("cmake_build_modules", [cmake_vars_module])
+
+        # The main component that depends on all non-plugin components
+        # https://github.com/openscenegraph/OpenSceneGraph/blob/master/packaging/pkgconfig/openscenegraph.pc.in
+        openscenegraph = self.cpp_info.components["openscenegraph"]
+        openscenegraph.set_property("pkg_config_name", "openscenegraph")
+        # Unofficial CMake target
+        openscenegraph.set_property("cmake_target_name", "OpenSceneGraph::OpenSceneGraph")
+        openscenegraph.requires = [
+            "osg",
+            "osgDB",
+            "osgFX",
+            "osgGA",
+            "osgParticle",
+            "osgSim",
+            "osgText",
+            "osgUtil",
+            "osgTerrain",
+            "osgManipulator",
+            "osgViewer",
+            "osgWidget",
+            "osgShadow",
+            "osgAnimation",
+            "osgVolume",
+        ]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "OpenSceneGraph"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenSceneGraph"
+        self.cpp_info.filenames["cmake_find_package"] = "OpenSceneGraph"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenSceneGraph"
+        openscenegraph.names["cmake_find_package"] = "OpenSceneGraph"
+        openscenegraph.names["cmake_find_package_multi"] = "OpenSceneGraph"
+        self.cpp_info.build_modules["cmake_find_package"].append(cmake_vars_module)
+        self.cpp_info.build_modules["cmake_find_package_multi"].append(cmake_vars_module)
 
         if self.settings.build_type == "Debug":
             postfix = "d"
@@ -332,11 +366,14 @@ class OpenSceneGraphConanFile(ConanFile):
         # Core libraries
         # requires obtained from osg's source code
 
-        # TODO: FindOpenThreads.cmake is shipped with CMake, so we should generate separate
-        # files for it with cmake_find_package and cmake_find_package_multi
+        # The project installs FindOpenThreads.cmake as a separate module.
+        # Conan cannot recreate that, but let's export it as a component instead.
+        # https://github.com/openscenegraph/OpenSceneGraph/blob/master/CMakeModules/FindOpenThreads.cmake
+        # https://github.com/openscenegraph/OpenSceneGraph/blob/master/packaging/pkgconfig/openthreads.pc.in
         library = self.cpp_info.components["OpenThreads"]
         library.libs = ["OpenThreads" + postfix]
         library.set_property("pkg_config_name", "openthreads")
+        library.set_property("cmake_target_name", "OpenThreads::OpenThreads")
         if self.settings.os in ["Linux", "FreeBSD"]:
             library.system_libs = ["pthread"]
 
