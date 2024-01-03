@@ -388,7 +388,6 @@ class BoostConan(ConanFile):
                 for smod in super_modules:
                     try:
                         setattr(self.options, f"without_{smod}", True)
-                        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa without_{smod}")
                     except ConanException:
                         pass
 
@@ -497,6 +496,9 @@ class BoostConan(ConanFile):
 
         if is_msvc(self) and self._shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
+
+        if Version(self.version) >= "1.84.0" and is_msvc(self) and self._shared and not self.options.without_fiber:
+            raise ConanInvalidConfiguration("Boost.fiber can not be built as shared library on MSVC.")
 
         if not self.options.without_locale and self.options.i18n_backend_iconv == "off" and \
            not self.options.i18n_backend_icu and not self._is_windows_platform:
