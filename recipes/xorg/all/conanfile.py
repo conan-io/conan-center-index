@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.gnu import PkgConfig
 from conan.tools.system import package_manager
 from conan.errors import ConanInvalidConfiguration
@@ -72,6 +72,11 @@ class XorgConan(ConanFile):
                            "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util", "xcb-util-cursor"], update=True, check=True)
 
     def package_info(self):
+        if conan_version.major >= 2:
+            self.cpp_info.bindirs = []
+            self.cpp_info.includedirs = []
+            self.cpp_info.libdirs = []
+
         for name in ["x11", "x11-xcb", "fontenc", "ice", "sm", "xau", "xaw7",
                      "xcomposite", "xcursor", "xdamage", "xdmcp", "xext", "xfixes", "xi",
                      "xinerama", "xkbfile", "xmu", "xmuu", "xpm", "xrandr", "xrender", "xres",
@@ -88,6 +93,9 @@ class XorgConan(ConanFile):
                 "pkg_config_name", name)
             self.cpp_info.components[name].set_property(
                 "component_version", pkg_config.version)
+            self.cpp_info.components[name].bindirs = []
+            self.cpp_info.components[name].includedirs = []
+            self.cpp_info.components[name].libdirs = []
             self.cpp_info.components[name].set_property("pkg_config_custom_content",
                                                         "\n".join(f"{key}={value}" for key, value in pkg_config.variables.items() if key not in ["pcfiledir","prefix", "includedir"]))
 
