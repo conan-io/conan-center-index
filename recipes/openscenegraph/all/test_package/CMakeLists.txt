@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-find_package(OpenSceneGraph REQUIRED)
+find_package(OpenSceneGraph REQUIRED CONFIG)
 
 get_property(cache_variables DIRECTORY PROPERTY CACHE_VARIABLES)
 foreach(cache_variable ${cache_variables})
