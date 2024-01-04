@@ -89,9 +89,8 @@ class NvccConan(ConanFile):
             "nvptxcompiler_static",
             "OpenCL"]
         libraries = {
-            "cuda_device": "cuda"
+            "cuda_driver": "cuda"
         }
-        libraryToTargetName = {"cuda": "cuda_driver"}
         for component in components:
             libdir, incdir, libname = lib(libraries.get(component, component))
             if libname is None:
@@ -102,7 +101,6 @@ class NvccConan(ConanFile):
             self.cpp_info.components[component].bindirs = bin_dir()
             self.cpp_info.components[component].includedirs = [incdir]
             self.cpp_info.components[component].libs = [libname]
-
         if bin_dir():
             self.runenv_info.prepend_path("PATH", join(self.package_folder, bin_dir()[0]))
         self.conf_info.append("tools.cmake.cmaketoolchain:user_toolchain", join(self.package_folder, "nvcc_toolchain.cmake"))
