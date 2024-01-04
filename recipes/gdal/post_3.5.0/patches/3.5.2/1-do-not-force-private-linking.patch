@@ -1,20 +1,20 @@
 diff --git a/cmake/helpers/GdalDriverHelper.cmake b/cmake/helpers/GdalDriverHelper.cmake
 --- a/cmake/helpers/GdalDriverHelper.cmake
 +++ b/cmake/helpers/GdalDriverHelper.cmake
-@@ -276,14 +276,12 @@
+@@ -276,7 +276,7 @@
      set(_oneValueArgs)
      set(_multiValueArgs PRIVATE)
      cmake_parse_arguments(_DRIVER "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
 -    if (NOT _DRIVER_PRIVATE)
--        message(FATAL_ERROR "gdal_target_link_libraries(): PRIVATE is a mandatory argument.")
--    endif ()
++    if (FALSE AND NOT _DRIVER_PRIVATE)
+         message(FATAL_ERROR "gdal_target_link_libraries(): PRIVATE is a mandatory argument.")
+     endif ()
      is_plugin(RES ${target})
-     if (RES)
-         target_link_libraries(${target} PRIVATE ${_DRIVER_PRIVATE})
+@@ -285,6 +285,7 @@
      else ()
--        gdal_target_interfaces(${target} ${_DRIVER_PRIVATE})
-+        gdal_target_interfaces(${target} "" ${_DRIVER_PRIVATE})
+         gdal_target_interfaces(${target} ${_DRIVER_PRIVATE})
          gdal_add_private_link_libraries(${_DRIVER_PRIVATE})
 +        target_link_libraries(${ARGV})
      endif ()
  endfunction()
+ 
