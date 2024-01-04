@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library
@@ -25,10 +25,22 @@ class LibMysqlClientCConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_boost": [True, False],
+        "with_curl": [True, False],
+        "with_kerberos": [True, False],
+        "with_ldap": [True, False],
+        "with_protobuf": [True, False],
+        "with_sasl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_curl": True,
+        "with_boost": False, # Disabled by default due to a rigid version requirement
+        "with_kerberos": False, # TODO: enable once krb5 is available in CCI
+        "with_ldap": False, # TODO: enable once https://github.com/conan-io/conan-center-index/pull/18800 is merged
+        "with_protobuf": True,
+        "with_sasl": False, # TODO: enable once with_gssapi=True in cyrus-sasl
     }
 
     package_type = "library"
@@ -62,15 +74,36 @@ class LibMysqlClientCConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # Required
         if Version(self.version) < "8.0.30":
             self.requires("openssl/1.1.1w")
         else:
             self.requires("openssl/[>=1.1 <4]")
-        self.requires("zlib/[>=1.2.13 <2]")
-        self.requires("zstd/1.5.5")
-        self.requires("lz4/1.9.4")
         if self.settings.os == "FreeBSD":
             self.requires("libunwind/1.7.2")
+        # Dependencies that would otherwise be bundled
+        self.requires("icu/74.2")
+        self.requires("editline/3.1")
+        self.requires("libevent/2.1.12")
+        self.requires("lz4/1.9.4")
+        self.requires("rapidjson/cci.20230929")
+        self.requires("zlib/[>=1.2.13 <2]")
+        self.requires("zstd/1.5.5")
+        # Optional deps
+        if self.options.with_boost:
+            # Requires an exact version of boost
+            self.requires("boost/1.77.0")
+        if self.options.with_sasl:
+            self.requires("cyrus-sasl/2.1.28")
+        if self.options.with_curl:
+            self.requires("libcurl/[>=7.78.0 <9]")
+        if self.options.with_kerberos:
+            # TODO: add krb5 package to CCI for Kerberos support
+            self.requires("krb5/1.21.2")
+        if self.options.with_ldap:
+            self.requires("openldap/2.6.6")
+        if self.options.with_protobuf:
+            self.requires("protobuf/3.21.12")
 
     def validate_build(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -92,11 +125,17 @@ class LibMysqlClientCConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd") == "20" and Version(self.version) < "8.0.29":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support C++20")
 
+        if self.options.with_sasl and not self.dependencies["cyrus-sasl"].options.with_gssapi:
+            # TODO: enable once with_gssapi=True in cyrus-sasl, which requires krb5 package
+            raise ConanInvalidConfiguration(f"{self.ref} requires cyrus-sasl with with_gssapi=True")
+
     def build_requirements(self):
         if is_apple_os(self):
             self.tool_requires("cmake/[>=3.20 <4]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
+        if self.options.with_protobuf:
+            self.tool_requires("protobuf/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -109,33 +148,50 @@ class LibMysqlClientCConan(ConanFile):
             vrenv = VirtualRunEnv(self)
             vrenv.generate(scope="build")
 
+        def root(pkg):
+            return self.dependencies[pkg].package_folder.replace("\\", "/")
+
         tc = CMakeToolchain(self)
         # Not used anywhere in the CMakeLists
-        tc.variables["DISABLE_SHARED"] = not self.options.shared
-        tc.variables["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
-        tc.variables["WITHOUT_SERVER"] = True
-        tc.variables["WITH_UNIT_TESTS"] = False
-        tc.variables["ENABLED_PROFILING"] = False
-        tc.variables["MYSQL_MAINTAINER_MODE"] = False
-        tc.variables["WIX_DIR"] = False
+        tc.cache_variables["DISABLE_SHARED"] = not self.options.shared
+        tc.cache_variables["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
+        tc.cache_variables["WITHOUT_SERVER"] = True
+        tc.cache_variables["WITH_UNIT_TESTS"] = False
+        tc.cache_variables["ENABLED_PROFILING"] = False
+        tc.cache_variables["MYSQL_MAINTAINER_MODE"] = False
+        tc.cache_variables["WIX_DIR"] = False
         # Disable additional Linux distro-specific compiler checks.
         # The recipe already checks for minimum versions of supported
         # compilers.
-        tc.variables["FORCE_UNSUPPORTED_COMPILER"] = True
-        tc.variables["WITH_LZ4"] = "system"
-        tc.variables["WITH_SSL"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
-        tc.variables["WITH_ZLIB"] = "system"
-        tc.variables["WITH_ZSTD"] = "system"
-        tc.variables["ZSTD_INCLUDE_DIR"] = self.dependencies["zstd"].cpp_info.aggregated_components().includedirs[0].replace("\\", "/")
+        tc.cache_variables["FORCE_UNSUPPORTED_COMPILER"] = True
+        tc.cache_variables["WITH_BOOST"] = root("boost") if self.options.with_boost else "bundled"
+        tc.cache_variables["WITH_CURL"] = root("libcurl") if self.options.with_curl else "none"
+        tc.cache_variables["WITH_EDITLINE"] = "system"
+        tc.cache_variables["WITH_FIDO"] = "bundled" # Not available on CCI
+        tc.cache_variables["WITH_ICU"] = root("icu")
+        tc.cache_variables["WITH_KERBEROS"] = root("krb5") if self.options.with_kerberos else "none"
+        tc.cache_variables["WITH_LDAP"] = root("openldap") if self.options.with_ldap else "none"
+        tc.cache_variables["WITH_LIBEVENT"] = "system"
+        tc.cache_variables["WITH_LZ4"] = "system"
+        tc.cache_variables["WITH_PROTOBUF"] = "system" # Optionally disabled in _patch_sources()
+        tc.cache_variables["WITH_SASL"] = root("cyrus-sasl") if self.options.with_sasl else "none"
+        tc.cache_variables["WITH_SSL"] = root("openssl")
+        tc.cache_variables["WITH_ZLIB"] = "system"
+        tc.cache_variables["WITH_ZSTD"] = "system"
+        tc.cache_variables["ZSTD_INCLUDE_DIR"] = self.dependencies["zstd"].cpp_info.aggregated_components().includedirs[0].replace("\\", "/")
+        libevent = self.dependencies["libevent"].cpp_info.aggregated_components()
+        tc.cache_variables["LIBEVENT_INCLUDE_PATH"] = libevent.includedir
+        tc.cache_variables["LIBEVENT_LIB_PATHS"] = libevent.libdir
+        tc.cache_variables["SYSTEM_RAPIDJSON_FOUND"] = 1
+        tc.cache_variables["RAPIDJSON_INCLUDE_DIR"] = self.dependencies["rapidjson"].cpp_info.includedir.replace("\\", "/")
         if is_msvc(self):
-            tc.variables["WINDOWS_RUNTIME_MD"] = not is_msvc_static_runtime(self)
+            tc.cache_variables["WINDOWS_RUNTIME_MD"] = not is_msvc_static_runtime(self)
         # Remove to ensure reproducible build, this only affects docs generation
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
-        # Allow non-cache_variables to be used
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("editline", "cmake_file_name", "EDITLINE")
         deps.generate()
 
         deps = PkgConfigDeps(self)
@@ -144,7 +200,20 @@ class LibMysqlClientCConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        libs_to_remove = ["icu", "libevent", "re2", "rapidjson", "protobuf", "libedit", "boost"]
+        libs_to_remove = []
+        # Rapidjson vars are set via CMakeToolchain
+        libs_to_remove.append("rapidjson")
+        # Disable unwanted dependencies entirely
+        if not self.options.with_boost:
+            libs_to_remove.append("boost")
+        if not self.options.with_protobuf:
+            libs_to_remove.append("protobuf")
+        if not self.options.with_ldap:
+            libs_to_remove.append("ldap")
+        if not self.options.with_sasl:
+            libs_to_remove.append("sasl")
+        if not self.options.with_kerberos:
+            libs_to_remove.append("kerberos")
         for lib in libs_to_remove:
             save(self, os.path.join(self.source_folder, "cmake", f"{lib}.cmake"), "")
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
@@ -155,8 +224,7 @@ class LibMysqlClientCConan(ConanFile):
                             f"WARN_MISSING_SYSTEM_{lib.upper()}({lib.upper()}_WARN_GIVEN)",
                             f"# WARN_MISSING_SYSTEM_{lib.upper()}({lib.upper()}_WARN_GIVEN)",
                             strict=False)
-
-            if lib != "libevent" or Version(self.version) < "8.0.34":
+            if Version(self.version) < "8.0.34":
                 replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                 f"SET({lib.upper()}_WARN_GIVEN)",
                                 f"# SET({lib.upper()}_WARN_GIVEN)",
@@ -165,8 +233,6 @@ class LibMysqlClientCConan(ConanFile):
         for folder in ["client", "man", "mysql-test", "libbinlogstandalone"]:
             save(self, os.path.join(self.source_folder, folder, "CMakeLists.txt"), "")
         rmdir(self, os.path.join(self.source_folder, "storage", "ndb"))
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "MYSQL_CHECK_EDITLINE()\n", "", strict=False)
 
         # Upstream does not actually load lz4 directories for system, force it to
         if Version(self.version) < "8.0.34":
@@ -174,6 +240,12 @@ class LibMysqlClientCConan(ConanFile):
                             "INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libbinlogevents/include)",
                             "MY_INCLUDE_SYSTEM_DIRECTORIES(LZ4)\nINCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libbinlogevents/include)")
 
+        # Inject editline from Conan
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "readline.cmake"),
+                        "MARK_AS_ADVANCED(EDITLINE_INCLUDE_DIR EDITLINE_LIBRARY)",
+                        "find_package(EDITLINE REQUIRED CONFIG)")
+
+        # Inject zstd from Conan
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "zstd.cmake"),
                         "NAMES zstd",
                         f"NAMES zstd {self.dependencies['zstd'].cpp_info.aggregated_components().libs[0]}")
