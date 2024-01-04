@@ -4,7 +4,7 @@ import stat
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.scm import Version
@@ -137,10 +137,12 @@ class CernRootConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_PROJECT_ROOT_INCLUDE"] = "conan_deps.cmake"
+        if not valid_min_cppstd(self, self._minimum_cpp_standard):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
+        tc.variables["BUILD_SHARED_LIBS"] = True
         # Configure build options found at
         # https://github.com/root-project/root/blob/v6-22-06/cmake/modules/RootBuildOptions.cmake#L80-L193
-        tc.variables["CMAKE_CXX_STANDARD"] = self._cmake_cxx_standard
-        tc.variables["BUILD_SHARED_LIBS"] = True
         tc.variables["shared"] = True
         tc.variables["asimage"] = self.options.asimage
         tc.variables["fail-on-missing"] = True
@@ -281,15 +283,9 @@ class CernRootConan(ConanFile):
         apply_conandata_patches(self)
         self._patch_source_cmake()
         self._fix_source_permissions()
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "project(ROOT)", "project(ROOT)\n\ninclude(conan_deps.cmake)")
         # Relax TBB version check
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "modules", "SearchInstalledSoftware.cmake"),
                         "TBB 2018", "TBB")
-
-    @property
-    def _cmake_cxx_standard(self):
-        return str(self.settings.get_safe("compiler.cppstd", self._minimum_cpp_standard))
 
     @property
     def _cmake_pyrootopt(self):

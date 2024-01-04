@@ -6,3 +6,7 @@ patches:
   "v6-22-06":
     - patch_file: "patches/0001-add-missing-includes.patch"
     - patch_file: "patches/0002-cmake-missing-link-libraries.patch"
+    - patch_file: "patches/0003-backport-empty-define-filtering.patch"
+      patch_description: "Backport filtering of empty -D flags"
+      patch_type: "portability"
+      patch_source: "https://github.com/root-project/root/blob/798b9b079f7b6c136bdaaf6787729a1bef865429/cmake/modules/RootMacros.cmake"
