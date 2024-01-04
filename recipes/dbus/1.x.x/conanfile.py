@@ -26,6 +26,7 @@ class DbusConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "dbus_user": ["ANY"],
         "system_socket": [None, "ANY"],
         "system_pid_file": [None, "ANY"],
         "with_x11": [True, False],
@@ -37,6 +38,7 @@ class DbusConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "dbus_user": "messagebus",
         "system_socket": None,
         "system_pid_file": None,
         "with_x11": False,
@@ -95,6 +97,7 @@ class DbusConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["asserts"] = not is_apple_os(self)
         tc.project_options["checks"] = False
+        tc.project_options["dbus_user"] = str(self.options.dbus_user)
         tc.project_options["doxygen_docs"] = "disabled"
         tc.project_options["modular_tests"] = "disabled"
         tc.project_options["system_socket"] = str(self.options.get_safe("system_socket", ""))
