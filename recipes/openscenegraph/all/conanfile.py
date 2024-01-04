@@ -321,8 +321,8 @@ class OpenSceneGraphConanFile(ConanFile):
         ]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "OpenSceneGraph"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenSceneGraph"
+        self.cpp_info.names["cmake_find_package"] = "OpenSceneGraph"
+        self.cpp_info.names["cmake_find_package_multi"] = "OpenSceneGraph"
         openscenegraph.names["cmake_find_package"] = "OpenSceneGraph"
         openscenegraph.names["cmake_find_package_multi"] = "OpenSceneGraph"
         self.cpp_info.build_modules["cmake_find_package"].append(cmake_vars_module)
@@ -561,18 +561,18 @@ class OpenSceneGraphConanFile(ConanFile):
             setup_plugin("imageio").frameworks = ["Accelerate"]
 
         if (
-            (self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version) >= "10.8") or
-            (self.settings.os == "iOS" and self.settings.os.version and Version(self.settings.os.version) >= "6.0")
+                (self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version) >= "10.8") or
+                (self.settings.os == "iOS" and self.settings.os.version and Version(self.settings.os.version) >= "6.0")
         ):
             plugin = setup_plugin("avfoundation")
             plugin.requires.append("osgViewer")
             plugin.frameworks = ["AVFoundation", "Cocoa", "CoreVideo", "CoreMedia", "QuartzCore"]
 
         if (
-            is_apple_os(self)
-            and self.settings.os.version
-            and Version(self.settings.os.version) <= "10.6"
-            and self.settings.arch == "x86"
+                is_apple_os(self)
+                and self.settings.os.version
+                and Version(self.settings.os.version) <= "10.6"
+                and self.settings.arch == "x86"
         ):
             setup_plugin("qt").frameworks = ["QuickTime"]
 
