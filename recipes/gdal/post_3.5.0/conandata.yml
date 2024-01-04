@@ -16,9 +16,6 @@ patches:
     - patch_file: "patches/3.8.1/1-fix-recursive-targets.patch"
       patch_description: "Fix CMake failure due to recursive CMakeDeps Conan targets"
       patch_type: "conan"
-    - patch_file: "patches/3.7.3/3-iconv-compatibility.patch"
-      patch_description: "Fix iconv() signature incompatibility on some platforms"
-      patch_type: "portability"
   "3.7.3":
     - patch_file: "patches/3.7.3/0-replace-find-package.patch"
       patch_description: "Use custom version of find_package() for Conan deps"
@@ -26,9 +23,6 @@ patches:
     - patch_file: "patches/3.7.3/1-fix-recursive-targets.patch"
       patch_description: "Fix CMake failure due to recursive CMakeDeps Conan targets"
       patch_type: "conan"
-    - patch_file: "patches/3.7.3/3-iconv-compatibility.patch"
-      patch_description: "Fix iconv() signature incompatibility on some platforms"
-      patch_type: "portability"
   "3.5.3":
     - patch_file: "patches/3.5.3/0-replace-find-package.patch"
       patch_description: "Use custom version of find_package() for Conan deps"
@@ -36,6 +30,3 @@ patches:
     - patch_file: "patches/3.5.3/1-fix-recursive-targets.patch"
       patch_description: "Fix CMake failure due to recursive CMakeDeps Conan targets"
       patch_type: "conan"
-    - patch_file: "patches/3.5.3/3-iconv-compatibility.patch"
-      patch_description: "Fix iconv() signature incompatibility on some platforms"
-      patch_type: "portability"

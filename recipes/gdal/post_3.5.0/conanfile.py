@@ -476,6 +476,10 @@ class GdalConan(ConanFile):
                 self.options.with_hdf4 and
                 Version(self.dependencies["hdf4"].ref.version) >= "4.2.5"
         )
+        # https://github.com/OSGeo/gdal/blob/4bb78aab3ae9ab5433042bc27239d1555cbe272e/cmake/helpers/CheckDependentLibraries.cmake#L301-L318
+        # The detection fails for some reason
+        # Setting it to non-const is compatible with all platforms
+        tc.variables["_ICONV_SECOND_ARGUMENT_IS_NOT_CONST"] = True
         tc.generate()
 
         jsonc = self.dependencies["json-c"]
