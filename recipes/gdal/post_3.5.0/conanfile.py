@@ -57,7 +57,7 @@ class GdalConan(ConanFile):
         "with_libdeflate": [True, False],
         "with_libiconv": [True, False],
         "with_libkml": [True, False],
-        "with_libtiff": ["deprecated", True, False],
+        "with_libtiff": ["deprecated", True, False], # always enabled
         "with_lzma": [True, False],
         "with_lz4": [True, False],
         "with_mongocxx": [True, False],
@@ -75,7 +75,7 @@ class GdalConan(ConanFile):
         "with_png": [True, False],
         "with_podofo": [True, False],
         "with_poppler": [True, False],
-        "with_proj": ["deprecated", True, False],
+        "with_proj": ["deprecated", True, False], # always enabled
         "with_publicdecompwt": [True, False],
         "with_qhull": [True, False],
         "with_rasterlite2": [True, False],
@@ -86,7 +86,7 @@ class GdalConan(ConanFile):
         "with_webp": [True, False],
         "with_xerces": [True, False],
         "with_xml2": [True, False],
-        "with_zlib": ["deprecated", True, False],
+        "with_zlib": ["deprecated", True, False], # always enabled
         "with_zstd": [True, False],
     }
     default_options = {
