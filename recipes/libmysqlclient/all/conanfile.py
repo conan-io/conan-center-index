@@ -197,31 +197,34 @@ class LibMysqlClientCConan(ConanFile):
 
         tc = CMakeToolchain(self)
         # Not used anywhere in the CMakeLists
-        tc.cache_variables["DISABLE_SHARED"] = not self.options.shared
-        tc.cache_variables["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
-        tc.cache_variables["WITHOUT_SERVER"] = True
-        tc.cache_variables["WITH_UNIT_TESTS"] = False
-        tc.cache_variables["ENABLED_PROFILING"] = False
-        tc.cache_variables["MYSQL_MAINTAINER_MODE"] = False
-        tc.cache_variables["WIX_DIR"] = False
+        tc.variables["DISABLE_SHARED"] = not self.options.shared
+        tc.variables["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
+        tc.variables["WITHOUT_SERVER"] = True
+        tc.variables["WITH_UNIT_TESTS"] = False
+        tc.variables["ENABLED_PROFILING"] = False
+        tc.variables["MYSQL_MAINTAINER_MODE"] = False
+        tc.variables["WIX_DIR"] = False
         # Disable additional Linux distro-specific compiler checks.
         # The recipe already checks for minimum versions of supported
         # compilers.
-        tc.cache_variables["FORCE_UNSUPPORTED_COMPILER"] = True
+        tc.variables["FORCE_UNSUPPORTED_COMPILER"] = True
 
-        tc.cache_variables["WITH_LZ4"] = "system"
+        tc.variables["WITH_LZ4"] = "system"
 
-        tc.cache_variables["WITH_ZSTD"] = "system"
-        tc.cache_variables["ZSTD_INCLUDE_DIR"] = self.dependencies["zstd"].cpp_info.aggregated_components().includedirs[0].replace("\\", "/")
+        tc.variables["WITH_ZSTD"] = "system"
+        tc.variables["ZSTD_INCLUDE_DIR"] = self.dependencies["zstd"].cpp_info.aggregated_components().includedirs[0].replace("\\", "/")
 
         if is_msvc(self):
-            tc.cache_variables["WINDOWS_RUNTIME_MD"] = not is_msvc_static_runtime(self)
+            tc.variables["WINDOWS_RUNTIME_MD"] = not is_msvc_static_runtime(self)
 
-        tc.cache_variables["WITH_SSL"] = "system"
-        tc.cache_variables["WITH_ZLIB"] = "system"
+        tc.variables["WITH_SSL"] = "system"
+        tc.variables["WITH_ZLIB"] = "system"
 
         # Remove to ensure reproducible build, this only affects docs generation
-        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
+
+        # Allow non-cache_variables to be used
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
