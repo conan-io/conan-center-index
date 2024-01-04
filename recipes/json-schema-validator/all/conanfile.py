@@ -97,6 +97,7 @@ class JsonSchemaValidatorConan(ConanFile):
             tc.variables["JSON_VALIDATOR_BUILD_EXAMPLES"] = False
             tc.variables["JSON_VALIDATOR_INSTALL"] = True
             tc.variables["JSON_VALIDATOR_SHARED_LIBS"] = self.options.shared
+            tc.variables["CMAKE_INSTALL_RUNTIMEDIR"] = "bin"
         if self.options.json_diagnostics:
             tc.preprocessor_definitions["JSON_DIAGNOSTICS"] = '1'
         if Version(self.version) < "2.1.0":
