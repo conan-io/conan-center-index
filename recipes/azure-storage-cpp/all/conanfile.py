@@ -104,8 +104,6 @@ class AzureStorageCppConan(ConanFile):
         tc.variables["CMAKE_FIND_FRAMEWORK"] = "LAST"
         tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_SAMPLES"] = False
-        if not self.settings.compiler.cppstd:
-            tc.variables["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
         if is_apple_os(self):
             tc.variables["GETTEXT_LIB_DIR"] = self.dependencies["libgettext"].cpp_info.libdir
         if not valid_min_cppstd(self, self._minimum_cpp_standard):
@@ -113,14 +111,16 @@ class AzureStorageCppConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("libuuid", "cmake_file_name", "UUID")
+        deps.set_property("util-linux-libuuid", "cmake_file_name", "UUID")
         deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
         cmakelists_path = os.path.join(self.source_folder, "Microsoft.WindowsAzure.Storage", "CMakeLists.txt")
+        # Do not force C++11 and libc++
         replace_in_file(self, cmakelists_path, "-std=c++11", "")
         replace_in_file(self, cmakelists_path, "-stdlib=libc++", "")
+        # Let Conan handle the Boost defines
         replace_in_file(self, cmakelists_path, "add_definitions(-DBOOST_LOG_DYN_LINK)", "")
 
     def build(self):
