@@ -149,8 +149,8 @@ class LibsrtpRecipe(ConanFile):
 
         self.cpp_info.names["cmake_find_package"] = "libsrtp"
         self.cpp_info.names["cmake_find_package_multi"] = "libsrtp"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_vars_file]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_target_file]
+        self.cpp_info.filenames["cmake_find_package"] = [self._module_vars_file]
+        self.cpp_info.filenames["cmake_find_package_multi"] = [self._module_target_file]
 
         self.cpp_info.libs = collect_libs(self)
 
