@@ -142,6 +142,7 @@ class LibsrtpRecipe(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "libsrtp")
         self.cpp_info.set_property("cmake_target_aliases", ["srtp2"])
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_file])
+        self.cpp_info.builddirs.append(os.path.join(self.package_folder, "lib", "cmake"))
 
         self.cpp_info.libs = collect_libs(self)
 
