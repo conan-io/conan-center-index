@@ -101,6 +101,46 @@ class LibMysqlClientCConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def generate(self):
+        vbenv = VirtualBuildEnv(self)
+        vbenv.generate()
+
+        if not cross_building(self):
+            vrenv = VirtualRunEnv(self)
+            vrenv.generate(scope="build")
+
+        tc = CMakeToolchain(self)
+        # Not used anywhere in the CMakeLists
+        tc.variables["DISABLE_SHARED"] = not self.options.shared
+        tc.variables["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
+        tc.variables["WITHOUT_SERVER"] = True
+        tc.variables["WITH_UNIT_TESTS"] = False
+        tc.variables["ENABLED_PROFILING"] = False
+        tc.variables["MYSQL_MAINTAINER_MODE"] = False
+        tc.variables["WIX_DIR"] = False
+        # Disable additional Linux distro-specific compiler checks.
+        # The recipe already checks for minimum versions of supported
+        # compilers.
+        tc.variables["FORCE_UNSUPPORTED_COMPILER"] = True
+        tc.variables["WITH_LZ4"] = "system"
+        tc.variables["WITH_SSL"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
+        tc.variables["WITH_ZLIB"] = "system"
+        tc.variables["WITH_ZSTD"] = "system"
+        tc.variables["ZSTD_INCLUDE_DIR"] = self.dependencies["zstd"].cpp_info.aggregated_components().includedirs[0].replace("\\", "/")
+        if is_msvc(self):
+            tc.variables["WINDOWS_RUNTIME_MD"] = not is_msvc_static_runtime(self)
+        # Remove to ensure reproducible build, this only affects docs generation
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
+        # Allow non-cache_variables to be used
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
     def _patch_sources(self):
         apply_conandata_patches(self)
 
@@ -138,11 +178,6 @@ class LibMysqlClientCConan(ConanFile):
                         "NAMES zstd",
                         f"NAMES zstd {self.dependencies['zstd'].cpp_info.aggregated_components().libs[0]}")
 
-        # Fix discovery & link to OpenSSL
-        replace_in_file(self,  os.path.join(self.source_folder, "cmake", "ssl.cmake"),
-                        "FUNCTION(MYSQL_CHECK_SSL)",
-                        "FUNCTION(MYSQL_CHECK_SSL)\nfind_package(OpenSSL REQUIRED CONFIG)\nreturn()")
-
         # And do not merge OpenSSL libs into mysqlclient lib
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "libutils.cmake"),
                         'IF(WIN32 AND ${TARGET} STREQUAL "mysqlclient")',
@@ -170,52 +205,6 @@ class LibMysqlClientCConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "install_macros.cmake"),
                         "  INSTALL_DEBUG_SYMBOLS(",
                         "  # INSTALL_DEBUG_SYMBOLS(")
-
-    def generate(self):
-        vbenv = VirtualBuildEnv(self)
-        vbenv.generate()
-
-        if not cross_building(self):
-            vrenv = VirtualRunEnv(self)
-            vrenv.generate(scope="build")
-
-        tc = CMakeToolchain(self)
-        # Not used anywhere in the CMakeLists
-        tc.variables["DISABLE_SHARED"] = not self.options.shared
-        tc.variables["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
-        tc.variables["WITHOUT_SERVER"] = True
-        tc.variables["WITH_UNIT_TESTS"] = False
-        tc.variables["ENABLED_PROFILING"] = False
-        tc.variables["MYSQL_MAINTAINER_MODE"] = False
-        tc.variables["WIX_DIR"] = False
-        # Disable additional Linux distro-specific compiler checks.
-        # The recipe already checks for minimum versions of supported
-        # compilers.
-        tc.variables["FORCE_UNSUPPORTED_COMPILER"] = True
-        tc.variables["WITH_LZ4"] = "system"
-        tc.variables["WITH_SSL"] = "system"
-        tc.variables["WITH_ZLIB"] = "system"
-        tc.variables["WITH_ZSTD"] = "system"
-        tc.variables["ZSTD_INCLUDE_DIR"] = self.dependencies["zstd"].cpp_info.aggregated_components().includedirs[0].replace("\\", "/")
-        if is_msvc(self):
-            tc.variables["WINDOWS_RUNTIME_MD"] = not is_msvc_static_runtime(self)
-        # Remove to ensure reproducible build, this only affects docs generation
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
-        # Allow non-cache_variables to be used
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-
-        # Set by ssl.cmake
-        tc.preprocessor_definitions["HAVE_TLSv13"] = "1"
-        openssl_info = self.dependencies["openssl"].cpp_info
-        tc.variables["SSL_LIBRARY"] = openssl_info.components["ssl"].libs[0]
-        tc.variables["CRYPTO_LIBRARY"] = openssl_info.components["crypto"].libs[0]
-        tc.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
-
-        deps = PkgConfigDeps(self)
-        deps.generate()
 
     def build(self):
         self._patch_sources()
