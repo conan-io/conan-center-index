@@ -241,7 +241,9 @@ class CyrusSaslConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libsasl2")
         self.cpp_info.libs = ["sasl2"]
 
-        if is_msvc(self):
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["resolv", "crypt"]
+        elif is_msvc(self):
             self.cpp_info.system_libs = ["ws2_32"]
 
         # TODO: to remove in conan v2
