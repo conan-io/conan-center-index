@@ -27,10 +27,10 @@ diff --git a/cmake/helpers/GdalDriverHelper.cmake b/cmake/helpers/GdalDriverHelp
              get_property(_res TARGET ${_LIB} PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
              if (_res)
                  target_include_directories(${_TARGET} PRIVATE ${_res})
-@@ -251,6 +251,10 @@
-             get_property(_res TARGET ${_LIB} PROPERTY INTERFACE_LINK_LIBRARIES)
+@@ -247,6 +247,10 @@
+             get_property(_res TARGET ${_LIB} PROPERTY INTERFACE_COMPILE_OPTIONS)
              if (_res)
-                 gdal_target_interfaces(${_TARGET} ${_res})
+                 target_compile_options(${_TARGET} PRIVATE ${_res})
 +            endif ()
 +            get_property(_res TARGET ${_LIB} PROPERTY INTERFACE_LINK_LIBRARIES)
 +            if (_res)
@@ -38,7 +38,7 @@ diff --git a/cmake/helpers/GdalDriverHelper.cmake b/cmake/helpers/GdalDriverHelp
              endif ()
          endif ()
      endforeach ()
-@@ -280,15 +284,13 @@
+@@ -276,14 +280,12 @@
      set(_oneValueArgs)
      set(_multiValueArgs PRIVATE)
      cmake_parse_arguments(_DRIVER "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
@@ -55,4 +55,3 @@ diff --git a/cmake/helpers/GdalDriverHelper.cmake b/cmake/helpers/GdalDriverHelp
 +        target_link_libraries(${ARGV})
      endif ()
  endfunction()
- 
