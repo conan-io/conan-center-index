@@ -13,7 +13,7 @@ list(APPEND onnxruntime_EXTERNAL_LIBRARIES re2::re2)
 find_package(Flatbuffers REQUIRED CONFIG)
 list(APPEND onnxruntime_EXTERNAL_LIBRARIES flatbuffers::flatbuffers)
 
-find_package(Protobuf 3.21.12 REQUIRED CONFIG)
+find_package(Protobuf REQUIRED CONFIG)
 list(APPEND onnxruntime_EXTERNAL_LIBRARIES protobuf::libprotobuf)
 set(ONNX_CUSTOM_PROTOC_EXECUTABLE protoc)
 set(PROTOC_EXECUTABLE protoc)
