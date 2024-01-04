@@ -141,6 +141,7 @@ class LibsrtpRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", f"libsrtp{Version(self.version).major}")
+        self.cpp_info.includedirs.append("include")
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "libsrtp")
         self.cpp_info.set_property("cmake_target_name", "libsrtp")
