@@ -38,7 +38,7 @@ class OpenALSoftConan(ConanFile):
         return {
             "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "5",
+            "gcc": "6",
             "clang": "5",
         }
 
