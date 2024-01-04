@@ -14,6 +14,7 @@ required_for_references:
 - ade
 - aeron
 - aggeom-agg
+- ags
 - alac
 - alembic
 - alpaca
@@ -46,6 +47,7 @@ required_for_references:
 - asio
 - asio-grpc
 - asmjit
+- asn1c
 - assimp
 - astc-codec
 - astro-informatics-so3
@@ -129,6 +131,7 @@ required_for_references:
 - c-dbg-macro
 - c4core
 - caf
+- cairomm
 - cajun-jsonapi
 - calceph
 - canary
@@ -170,6 +173,7 @@ required_for_references:
 - cli11
 - clickhouse-cpp
 - clipboard_lite
+- clipp
 - clipper
 - clipper2
 - clove-unit
@@ -191,9 +195,11 @@ required_for_references:
 - console_bridge
 - continuable
 - coost
+- copypp
 - corrade
 - cose-c
 - cotila
+- coz
 - cpp-httplib
 - cpp-ipc
 - cpp-jwt
@@ -201,6 +207,7 @@ required_for_references:
 - cpp-optparse
 - cpp-peglib
 - cpp-sort
+- cpp-validator
 - cpp_project_framework
 - cppbenchmark
 - cppcheck
@@ -248,6 +255,7 @@ required_for_references:
 - cwalk
 - cxxopts
 - cyclonedds
+- cyclonedds-cxx
 - cyrus-sasl
 - czmq
 - dacap-clip
@@ -265,14 +273,18 @@ required_for_references:
 - debug_assert
 - decimal_for_cpp
 - deco
+- dependencies
 - detools
+- dfp
 - di
 - dice-template-library
 - dime
+- directshowbaseclasses
 - directx-headers
 - dirent
 - discount
 - djinni-generator
+- djinni-support-lib
 - dlib
 - dlpack
 - docopt.cpp
@@ -361,6 +373,7 @@ required_for_references:
 - flatbush
 - flecs
 - flex
+- flint
 - fltk
 - fmi1
 - fmi2
@@ -385,6 +398,7 @@ required_for_references:
 - frozen
 - frugally-deep
 - fruit
+- ftjam
 - ftxui
 - function2
 - functionalplus
@@ -466,6 +480,7 @@ required_for_references:
 - hdrhistogram-c
 - heatshrink
 - hedley
+- hexl
 - hffix
 - hictk
 - hidapi
@@ -488,6 +503,7 @@ required_for_references:
 - iconfontcppheaders
 - icu
 - id3v2lib
+- ignition-cmake
 - iir1
 - im95able-rea
 - imagl
@@ -510,6 +526,7 @@ required_for_references:
 - iowow
 - iqa
 - irrxml
+- isa-l
 - iso8601lib
 - itk
 - itlib
@@ -519,6 +536,7 @@ required_for_references:
 - jasper
 - jbig
 - jeaiii-itoa
+- jerryscript
 - jfalcou-eve
 - jinja2cpp
 - joltphysics
@@ -529,6 +547,7 @@ required_for_references:
 - jsmn
 - json-c
 - json-schema-validator
+- json_dto
 - jsoncons
 - jsoncpp
 - jsonnet
@@ -596,7 +615,9 @@ required_for_references:
 - libdc1394
 - libde265
 - libdeflate
+- libdicom
 - libdisasm
+- libdisplay-info
 - libdivide
 - libdmtx
 - libdrawille
@@ -605,6 +626,7 @@ required_for_references:
 - libdxfrw
 - libe57format
 - libelf
+- libelfin
 - libenvpp
 - libepoxy
 - libev
@@ -614,6 +636,8 @@ required_for_references:
 - libfdk_aac
 - libffi
 - libfreenect
+- libfreenect2
+- libftdi
 - libfuse
 - libgcrypt
 - libgd
@@ -630,6 +654,7 @@ required_for_references:
 - libhydrogen
 - libiberty
 - libiconv
+- libid3tag
 - libinterpolate
 - libipt
 - libjpeg
@@ -640,6 +665,7 @@ required_for_references:
 - libltc
 - liblzf
 - libmad
+- libmagic
 - libmaxminddb
 - libmbus
 - libmediainfo
@@ -720,6 +746,7 @@ required_for_references:
 - libudev
 - libunistring
 - libunwind
+- liburing
 - libusb
 - libusb-compat
 - libuuid
@@ -749,11 +776,13 @@ required_for_references:
 - libzip
 - libzippp
 - lief
+- lightgbm
 - lightpcapng
 - linmath.h
 - linux-headers-generic
 - linux-syscall-support
 - litehtml
+- lksctp-tools
 - llhttp
 - llvm-openmp
 - lmdb
@@ -806,6 +835,7 @@ required_for_references:
 - mdns
 - mdnsresponder
 - mdspan
+- mesa-glu
 - meshoptimizer
 - meson
 - metall
@@ -831,6 +861,7 @@ required_for_references:
 - mio
 - mm_file
 - modern-cpp-kafka
+- mold
 - moltenvk
 - mongo-c-driver
 - mongo-cxx-driver
@@ -867,6 +898,7 @@ required_for_references:
 - nanosvg
 - nas
 - nasm
+- ncurses
 - neargye-semver
 - netcdf
 - nettle
@@ -878,6 +910,7 @@ required_for_references:
 - nlohmann_json
 - nlopt
 - nmea
+- nmos-cpp
 - nmslib
 - nng
 - nodejs
@@ -895,6 +928,7 @@ required_for_references:
 - nv-codec-headers
 - nvtx
 - oatpp
+- oatpp-postgresql
 - objectbox
 - objectbox-generator
 - observer-ptr-lite
@@ -915,6 +949,7 @@ required_for_references:
 - onnx
 - onnxruntime
 - open-dis-cpp
+- open-simulation-interface
 - open62541
 - openal
 - openal-soft
@@ -972,12 +1007,15 @@ required_for_references:
 - pcl
 - pcre
 - pcre2
+- pdcurses
 - pdf-writer
 - pdfgen
+- pdfium
 - pdqsort
 - perf
 - perfetto
 - perlinnoise
+- pexports
 - pffft
 - pfr
 - pgm-index
@@ -1017,6 +1055,7 @@ required_for_references:
 - poshlib
 - pprint
 - pranav-csv2
+- premake
 - pretty-name
 - procxx-boost-ext-simd
 - proj
@@ -1092,6 +1131,7 @@ required_for_references:
 - rmm
 - roaring
 - robin-hood-hashing
+- rocksdb
 - rpclib
 - rply
 - rsync
@@ -1120,6 +1160,7 @@ required_for_references:
 - sdf
 - sdl
 - sdl_image
+- sdl_net
 - sdl_ttf
 - seadex-essentials
 - seasocks
@@ -1149,6 +1190,7 @@ required_for_references:
 - skyr-url
 - sml
 - snappy
+- snitch
 - snowhouse
 - so5extra
 - sobjectizer
@@ -1198,6 +1240,7 @@ required_for_references:
 - stx
 - subunit
 - sundials
+- suyash-ulid
 - svector
 - svgpp
 - svgwrite
@@ -1213,6 +1256,7 @@ required_for_references:
 - taocpp-sequences
 - taocpp-taopq
 - taocpp-tuple
+- tar
 - taskflow
 - taywee-args
 - tcb-span
@@ -1221,11 +1265,13 @@ required_for_references:
 - tcp-wrappers
 - tcsbank-uconfig
 - tcsbank-uri-template
+- teemo
 - tensorflow-lite
 - tensorpipe
 - termcap
 - termcolor
 - tesseract
+- tgbot
 - tgc
 - thelink2012-any
 - threadpool
@@ -1239,6 +1285,7 @@ required_for_references:
 - tiny-dnn
 - tiny-regex-c
 - tiny-utf8
+- tinyalsa
 - tinycbor
 - tinycthread
 - tinycthreadpool
@@ -1337,6 +1384,7 @@ required_for_references:
 - vulkan-memory-allocator
 - vulkan-validationlayers
 - vvenc
+- waf
 - wasm-micro-runtime
 - wasmedge
 - wasmer
