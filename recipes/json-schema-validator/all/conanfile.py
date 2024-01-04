@@ -95,6 +95,8 @@ class JsonSchemaValidatorConan(ConanFile):
         else:
             tc.variables["JSON_VALIDATOR_BUILD_TESTS"] = False
             tc.variables["JSON_VALIDATOR_BUILD_EXAMPLES"] = False
+            tc.variables["JSON_VALIDATOR_INSTALL"] = True
+            tc.variables["JSON_VALIDATOR_SHARED_LIBS"] = self.options.shared
         if self.options.json_diagnostics:
             tc.preprocessor_definitions["JSON_DIAGNOSTICS"] = '1'
         if Version(self.version) < "2.1.0":
@@ -150,6 +152,8 @@ class JsonSchemaValidatorConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+        elif self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("JSON_SCHEMA_VALIDATOR_EXPORTS=1")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "nlohmann_json_schema_validator"
