@@ -139,25 +139,9 @@ class LibMysqlClientCConan(ConanFile):
                         f"NAMES zstd {self.dependencies['zstd'].cpp_info.aggregated_components().libs[0]}")
 
         # Fix discovery & link to OpenSSL
-        ssl_cmake = os.path.join(self.source_folder, "cmake", "ssl.cmake")
-        openssl_info = self.dependencies["openssl"].cpp_info
-        replace_in_file(self, ssl_cmake,
-                        "NAMES ssl",
-                        f"NAMES ssl {openssl_info.components['ssl'].libs[0]}")
-
-        replace_in_file(self, ssl_cmake,
-                        "NAMES crypto",
-                        f"NAMES crypto {openssl_info.components['crypto'].libs[0]}")
-
-        replace_in_file(self, ssl_cmake,
-                        "IF(NOT OPENSSL_APPLINK_C)\n",
-                        "IF(FALSE AND NOT OPENSSL_APPLINK_C)\n",
-                        strict=False)
-
-        if Version(self.version) < "8.2.0":
-            replace_in_file(self, ssl_cmake,
-                            "SET(SSL_LIBRARIES ${MY_OPENSSL_LIBRARY} ${MY_CRYPTO_LIBRARY})",
-                            "find_package(OpenSSL REQUIRED MODULE)\nset(SSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)")
+        replace_in_file(self,  os.path.join(self.source_folder, "cmake", "ssl.cmake"),
+                        "FUNCTION(MYSQL_CHECK_SSL)",
+                        "FUNCTION(MYSQL_CHECK_SSL)\nfind_package(OpenSSL REQUIRED CONFIG)\nreturn()")
 
         # And do not merge OpenSSL libs into mysqlclient lib
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "libutils.cmake"),
@@ -208,23 +192,23 @@ class LibMysqlClientCConan(ConanFile):
         # The recipe already checks for minimum versions of supported
         # compilers.
         tc.variables["FORCE_UNSUPPORTED_COMPILER"] = True
-
         tc.variables["WITH_LZ4"] = "system"
-
-        tc.variables["WITH_ZSTD"] = "system"
-        tc.variables["ZSTD_INCLUDE_DIR"] = self.dependencies["zstd"].cpp_info.aggregated_components().includedirs[0].replace("\\", "/")
-
-        if is_msvc(self):
-            tc.variables["WINDOWS_RUNTIME_MD"] = not is_msvc_static_runtime(self)
-
         tc.variables["WITH_SSL"] = "system"
         tc.variables["WITH_ZLIB"] = "system"
-
+        tc.variables["WITH_ZSTD"] = "system"
+        tc.variables["ZSTD_INCLUDE_DIR"] = self.dependencies["zstd"].cpp_info.aggregated_components().includedirs[0].replace("\\", "/")
+        if is_msvc(self):
+            tc.variables["WINDOWS_RUNTIME_MD"] = not is_msvc_static_runtime(self)
         # Remove to ensure reproducible build, this only affects docs generation
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
-
         # Allow non-cache_variables to be used
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+
+        # Set by ssl.cmake
+        tc.preprocessor_definitions["HAVE_TLSv13"] = "1"
+        openssl_info = self.dependencies["openssl"].cpp_info
+        tc.variables["SSL_LIBRARY"] = openssl_info.components["ssl"].libs[0]
+        tc.variables["CRYPTO_LIBRARY"] = openssl_info.components["crypto"].libs[0]
         tc.generate()
 
         deps = CMakeDeps(self)
