@@ -166,12 +166,6 @@ class GdalConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if is_apple_os(self):
-            # FIXME: compilation fails on macOS due to difference in ICONV_CONST value in iconv() signature
-            # https://github.com/conan-io/conan-center-index/pull/19298#issuecomment-1840433415
-            # https://github.com/roboticslibrary/libiconv/blob/v1.17/include/iconv.h.in#L82
-            # https://lists.gnu.org/archive/html/bug-gnu-libiconv/2008-07/msg00005.html
-            self.options.with_libiconv = False
         if Version(self.version) < "3.7":
             # Latest versions of Arrow are no longer compatible with GDAL 3.5
             self.options.with_arrow = False
