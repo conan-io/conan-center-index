@@ -5,6 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.system import package_manager
 import os
@@ -143,7 +144,7 @@ class PclConan(ConanFile):
         "with_libusb": True,
         "with_opencv": True,
         "with_opengl": True,
-        "with_openmp": False,
+        "with_openmp": True,
         "with_pcap": True,
         "with_png": True,
         "with_qhull": True,
@@ -188,13 +189,19 @@ class PclConan(ConanFile):
     def _external_optional_deps(self):
         return {
             "2d": ["vtk"],
-            "io": ["davidsdk", "dssdk", "ensenso", "fzapi", "libusb", "openni", "openni2", "pcap", "png", "rssdk", "rssdk2", "vtk"],
+            "features": ["openmp"],
+            "filters": ["openmp"],
+            "io": ["davidsdk", "dssdk", "ensenso", "fzapi", "libusb", "openmp", "openni", "openni2", "pcap", "png", "rssdk", "rssdk2", "vtk"],
             "kdtree": ["flann"],
+            "keypoints": ["openmp"],
             "people": ["openni"],
             "recognition": ["metslib"],
+            "registration": ["openmp"],
             "search": ["flann"],
             "simulation": ["opengl"],
-            "surface": ["qhull", "vtk"],
+            "segmentation": ["openmp"],
+            "surface": ["openmp", "qhull", "vtk"],
+            "tracking": ["openmp"],
             "visualization": ["davidsdk", "dssdk", "ensenso", "opengl", "openni", "openni2", "qvtk", "rssdk"],
             "apps": ["cuda", "libusb", "opengl", "openni", "png", "qhull", "qt", "qvtk", "vtk"],
             "tools": ["cuda", "davidsdk", "dssdk", "ensenso", "opencv", "opengl", "openni", "openni2", "qhull", "rssdk", "vtk"],
@@ -216,6 +223,7 @@ class PclConan(ConanFile):
             "metslib": [],
             "opencv": ["opencv::opencv"],
             "opengl": ["opengl::opengl", "freeglut::freeglut", "glew::glew", "glu::glu" if is_apple_os(self) or self.settings.os == "Windows" else "mesa-glu::mesa-glu"],
+            "openmp": ["llvm-openmp::llvm-openmp"] if self.settings.compiler in ["clang", "apple-clang"] else [],
             "openni": [],
             "openni2": [],
             "pcap": ["libpcap::libpcap"],
@@ -393,6 +401,12 @@ class PclConan(ConanFile):
             self.requires("opencv/4.8.1", transitive_headers=True)
         if self._is_enabled("zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
+        if self._is_enabled("openmp"):
+            if self._is_enabled("openmp"):
+                if self.settings.compiler in ["clang", "apple-clang"]:
+                    self.requires("llvm-openmp/17.0.4", transitive_headers=True, transitive_libs=True)
+                else:
+                    self.output.info("Using system OpenMP")
         # TODO:
         # self.requires("vtk/9.x.x", transitive_headers=True)
         # self.requires("openni/x.x.x", transitive_headers=True)
@@ -402,7 +416,6 @@ class PclConan(ConanFile):
         # self.requires("dssdk/x.x.x", transitive_headers=True)
         # self.requires("rssdk/x.x.x", transitive_headers=True)
         # self.requires("metslib/x.x.x", transitive_headers=True)
-        # self.requires("openmp/system", transitive_headers=True)
         # self.requires("opennurbs/x.x.x", transitive_headers=True)
         # self.requires("poisson4/x.x.x", transitive_headers=True)
 
@@ -574,18 +587,28 @@ class PclConan(ConanFile):
         if not self.options.shared:
             if self.settings.os in ["Linux", "FreeBSD"]:
                 common.system_libs.append("pthread")
-            if self.options.with_openmp:
-                if self.settings.os == "Linux":
-                    if self.settings.compiler == "gcc":
-                        common.sharedlinkflags.append("-fopenmp")
-                        common.exelinkflags.append("-fopenmp")
-                elif self.settings.os == "Windows":
-                    if self.settings.compiler == "msvc":
-                        common.system_libs.append("delayimp")
-                    elif self.settings.compiler == "gcc":
-                        common.system_libs.append("gomp")
         if self.settings.os == "Windows":
             common.system_libs.append("ws2_32")
+
+        if self.options.with_openmp:
+            openmp_flags = []
+            if is_msvc(self):
+                openmp_flags = ["-openmp"]
+            elif self.settings.compiler in ["clang", "apple-clang"]:
+                openmp_flags = ["-Xpreprocessor", "-fopenmp"]
+            elif self.settings.compiler == "gcc":
+                openmp_flags = ["-fopenmp"]
+            elif self.settings.compiler == "intel-cc":
+                openmp_flags = ["/Qopenmp"] if self.settings.os == "Windows" else ["-Qopenmp"]
+            self.cpp_info.cflags += openmp_flags
+            self.cpp_info.cxxflags += openmp_flags
+            self.cpp_info.sharedlinkflags += openmp_flags
+            self.cpp_info.exelinkflags += openmp_flags
+            if self.settings.os == "Windows":
+                if is_msvc(self):
+                    self.cpp_info.system_libs.append("delayimp")
+                elif self.settings.compiler == "gcc":
+                    self.cpp_info.system_libs.append("gomp")
 
         # TODO: Legacy, to be removed on Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "PCL"
