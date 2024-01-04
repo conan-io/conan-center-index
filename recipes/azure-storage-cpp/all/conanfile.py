@@ -108,6 +108,10 @@ class AzureStorageCppConan(ConanFile):
             tc.variables["GETTEXT_LIB_DIR"] = self.dependencies["libgettext"].cpp_info.libdir
         if not valid_min_cppstd(self, self._minimum_cpp_standard):
             tc.variables["CMAKE_CXX_STANDARD"] = self._minimum_cpp_standard
+        # Allow non-cache_variables to be used
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        # Relocatable shared libs on macOS
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
