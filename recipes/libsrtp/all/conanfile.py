@@ -135,23 +135,13 @@ class LibsrtpRecipe(ConanFile):
     def _module_vars_file(self):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
-    @property
-    def _module_target_file(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", f"libsrtp{Version(self.version).major}")
-        self.cpp_info.includedirs.append("include")
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "libsrtp")
         self.cpp_info.set_property("cmake_target_name", "libsrtp")
         self.cpp_info.set_property("cmake_target_aliases", ["srtp2"])
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_file])
-
-        self.cpp_info.names["cmake_find_package"] = "libsrtp"
-        self.cpp_info.names["cmake_find_package_multi"] = "libsrtp"
-        self.cpp_info.filenames["cmake_find_package"] = "libsrtp"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "libsrtp"
 
         self.cpp_info.libs = collect_libs(self)
 
