@@ -514,7 +514,10 @@ class PclConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        for mod in ["Eigen", "FLANN", "GLEW", "Pcap", "Qhull", "libusb"]:
+        packages = ["Eigen", "FLANN", "GLEW", "Pcap", "Qhull", "libusb"]
+        if Version(self.version) >= "1.14.0":
+            packages.remove("Eigen")
+        for mod in packages:
             os.remove(os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake"))
 
     def build(self):
