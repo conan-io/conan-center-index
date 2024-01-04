@@ -501,7 +501,6 @@ class PclConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("eigen", "cmake_file_name", "EIGEN")
         deps.set_property("flann", "cmake_file_name", "FLANN")
         deps.set_property("flann", "cmake_target_name", "FLANN::FLANN")
         deps.set_property("libpcap", "cmake_file_name", "PCAP")
