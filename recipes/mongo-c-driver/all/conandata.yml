@@ -1,7 +1,7 @@
 sources:
-  "1.25.3":
-    url: "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/1.25.3.tar.gz"
-    sha256: "d7cdedc5164b7b8ca39bb45bee789da44097052c882fa84996e4d90eec6fe8d3"
+  "1.25.4":
+    url: "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/1.25.4.tar.gz"
+    sha256: "0ab3c5b238803b82a6b217d1ef21ea71a6e96251063322dc1038bea70a3da541"
   "1.24.3":
     url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.24.3/mongo-c-driver-1.24.3.tar.gz"
     sha256: "cc0ad1006447ded21bbefecf57d6fef61afe6f0d56a4e28da73805d50fdb81b5"
@@ -27,14 +27,14 @@ sources:
     url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.17.6/mongo-c-driver-1.17.6.tar.gz"
     sha256: "8644deec7ae585e8d12566978f2017181e883f303a028b5b3ccb83c91248b150"
 patches:
-  "1.25.3":
-    - patch_file: "patches/1.25.3-0001-disable-shared-when-static.patch"
+  "1.25.4":
+    - patch_file: "patches/1.25.4-0001-disable-shared-when-static.patch"
       patch_description: "separate static and shared builds"
       patch_type: "conan"
-    - patch_file: "patches/1.25.3-0003-disable-warning-errors.patch"
+    - patch_file: "patches/1.25.4-0003-disable-warning-errors.patch"
       patch_description: "disable compiler flags to make warnings into errors"
       patch_type: "conan"
-    - patch_file: "patches/1.25.3-0004-disable-check-symbol-on-msvc.patch"
+    - patch_file: "patches/1.25.4-0004-disable-check-symbol-on-msvc.patch"
       patch_description: "disable check symbol on msvc"
       patch_type: "conan"
   "1.24.3":
