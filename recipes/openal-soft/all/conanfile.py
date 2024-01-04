@@ -154,3 +154,5 @@ class OpenALSoftConan(ConanFile):
                 self.cpp_info.system_libs.append(libcxx)
         if not self.options.shared:
             self.cpp_info.defines.append("AL_LIBTYPE_STATIC")
+        if self.settings.get_safe("compiler.libcxx") in ["libstdc++", "libstdc++11"]:
+            self.cpp_info.system_libs.append("atomic")
