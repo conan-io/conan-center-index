@@ -312,6 +312,7 @@ class PocoConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        # INFO: missing headers https://github.com/pocoproject/poco/issues/4378
         if self.options.get_safe("with_sql_parser", False):
             copy(
                 self,
