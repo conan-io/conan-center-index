@@ -55,7 +55,6 @@ class LibsrtpRecipe(ConanFile):
 
         if self.options.with_nss:
             self.requires("nss3")
-            self.requires("nspr")
 
         if self.options.with_mbedtls:
             self.requires("mbedtls")
@@ -66,6 +65,8 @@ class LibsrtpRecipe(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_OPENSSL"] = self.options.with_openssl
+        tc.variables["ENABLE_NSS"] = self.options.with_nss
+        tc.variables["ENABLE_MBEDTLS"] = self.options.with_mbedtls
         tc.variables["TEST_APPS"] = False
         if Version(self.version) < "2.4.0":
             # Relocatable shared libs on Macos
@@ -110,6 +111,7 @@ class LibsrtpRecipe(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+
         cmake = CMake(self)
         cmake.install()
 
@@ -124,6 +126,9 @@ class LibsrtpRecipe(ConanFile):
             set(libsrtp_FOUND ${libsrtp_FOUND})
             if(DEFINED libsrtp_INCLUDE_DIR)
                 set(libsrtp_INCLUDE_DIR ${libsrtp_INCLUDE_DIR})
+            endif()
+            if(DEFINED libsrtp_LIBRARY)
+                set(libsrtp_LIBRARY ${libsrtp_LIBRARY})
             endif()
             if(DEFINED libsrtp_LIBRARIES)
                 set(libsrtp_LIBRARIES ${libsrtp_LIBRARIES})
@@ -142,7 +147,7 @@ class LibsrtpRecipe(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "libsrtp")
         self.cpp_info.set_property("cmake_target_aliases", ["srtp2"])
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_file])
-        self.cpp_info.builddirs.append(os.path.join(self.package_folder, "lib", "cmake"))
+        #self.cpp_info.builddirs.append(os.path.join(self.package_folder, "lib", "cmake"))
 
         self.cpp_info.libs = collect_libs(self)
 
