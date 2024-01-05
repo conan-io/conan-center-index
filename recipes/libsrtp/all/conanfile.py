@@ -67,6 +67,7 @@ class LibsrtpRecipe(ConanFile):
         tc.variables["ENABLE_OPENSSL"] = self.options.with_openssl
         tc.variables["ENABLE_NSS"] = self.options.with_nss
         tc.variables["ENABLE_MBEDTLS"] = self.options.with_mbedtls
+        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["TEST_APPS"] = False
         if Version(self.version) < "2.4.0":
             # Relocatable shared libs on Macos
