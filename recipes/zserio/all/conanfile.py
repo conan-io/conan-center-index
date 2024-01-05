@@ -42,10 +42,7 @@ class ZserioConanFile(ConanFile):
 
     def source(self):
         sources = self.conan_data["sources"][self.version]
-        get(self, **sources["runtime"], pattern="runtime_libs/cpp/*", strip_root=True)
-        shutil.move("cpp/zserio", ".")
-        shutil.move("cpp/CMakeLists.txt", ".")
-        shutil.rmtree("cpp")
+        get(self, **sources["runtime"], strip_root=True)
 
     def export_sources(self):
         copy(self, "zserio_compiler.cmake", self.recipe_folder, self.export_sources_folder)
@@ -56,7 +53,7 @@ class ZserioConanFile(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder="cpp")
         cmake.build()
 
         sources = self.conan_data["sources"][self.version]
@@ -74,7 +71,7 @@ class ZserioConanFile(ConanFile):
 
         include_dir = os.path.join(self.package_folder, "include")
         lib_dir = os.path.join(self.package_folder, "lib")
-        copy(self, "*.h", self.source_folder, include_dir)
+        copy(self, "*.h", os.path.join(self.source_folder, "cpp"), include_dir)
         copy(self, "*.lib", self.build_folder, lib_dir, keep_path=False)
         copy(self, "*.a", self.build_folder, lib_dir, keep_path=False)
 
