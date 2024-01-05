@@ -4,4 +4,4 @@ project(test_package LANGUAGES C)
 find_package(libsrtp REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} PRIVATE libsrtp)
+target_link_libraries(${PROJECT_NAME} PRIVATE libsrtp::libsrtp)
