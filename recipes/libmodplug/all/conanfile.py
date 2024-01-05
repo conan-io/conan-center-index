@@ -70,6 +70,6 @@ class LibmodplugConan(ConanFile):
             self.cpp_info.system_libs.extend(["m"])
         if not self.options.shared:
             self.cpp_info.defines.append("MODPLUG_STATIC")
-            libcxx = stdcpp_library(self)
-            if libcxx:
-                self.cpp_info.system_libs.append(libcxx)
+        libcxx = stdcpp_library(self)
+        if libcxx:
+            self.cpp_info.system_libs.append(libcxx)
