@@ -1,56 +1,22 @@
-diff --git a/cmake/helpers/GdalGenerateConfig.cmake b/cmake/helpers/GdalGenerateConfig.cmake
---- a/cmake/helpers/GdalGenerateConfig.cmake
-+++ b/cmake/helpers/GdalGenerateConfig.cmake
-@@ -44,6 +44,10 @@
-         elseif(_lib STREQUAL "general")
-             continue()
-         endif()
-+        if(_lib IN_LIST _seen_libs)
-+            continue()
-+        endif()
-+        list(APPEND _seen_libs "${_lib}")
-         gdal_resolve_link_genex(_lib "${_lib}")
-         if(_lib)
-             list(APPEND _libs "${_lib}")
-@@ -64,7 +68,10 @@
-     while(_input MATCHES "^(.*)\\\$<([^:>]*):*([^>]*)>")
-         set(_match "${CMAKE_MATCH_0}")
-         set(_first "${CMAKE_MATCH_1}")
--        gdal_evaluate_link_genex(_second "${CMAKE_MATCH_2}" "${CMAKE_MATCH_3}")
-+        if(NOT _first IN_LIST _genex_seen)
-+            gdal_evaluate_link_genex(_second "${CMAKE_MATCH_2}" "${CMAKE_MATCH_3}")
-+        endif()
-+        list(APPEND _genex_seen "${_first}")
-         string(REPLACE "${_match}" "${_first}${_second}" _input "${_input}")
-     endwhile()
-     set("${_result}" "${_input}" PARENT_SCOPE)
 diff --git a/cmake/helpers/GdalDriverHelper.cmake b/cmake/helpers/GdalDriverHelper.cmake
 --- a/cmake/helpers/GdalDriverHelper.cmake
 +++ b/cmake/helpers/GdalDriverHelper.cmake
-@@ -233,9 +233,9 @@
-     endif ()
- endfunction()
- 
--function(gdal_target_interfaces _TARGET)
-+function(gdal_target_interfaces _TARGET _seen_libs)
-     foreach (_LIB IN ITEMS ${ARGN})
--        if (TARGET ${_LIB})
-+        if (TARGET ${_LIB} AND NOT ${_LIB} IN_LIST _seen_libs)
-             get_property(_res TARGET ${_LIB} PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-             if (_res)
-                 target_include_directories(${_TARGET} PRIVATE ${_res})
-@@ -250,7 +250,7 @@
+@@ -249,6 +249,7 @@
+                 target_compile_options(${_TARGET} PRIVATE ${_res})
              endif ()
              get_property(_res TARGET ${_LIB} PROPERTY INTERFACE_LINK_LIBRARIES)
++            list(REMOVE_ITEM _res ${_LIB})
              if (_res)
--                gdal_target_interfaces(${_TARGET} ${_res})
-+                gdal_target_interfaces(${_TARGET} "${_seen_libs};${ARGN}" ${_res})
+                 gdal_target_interfaces(${_TARGET} ${_res})
              endif ()
-         endif ()
-     endforeach ()
-@@ -296,4 +296,4 @@
-         endforeach()
-     else ()
--        gdal_target_interfaces(${target} ${_DRIVER_PRIVATE})
-+        gdal_target_interfaces(${target} "" ${_DRIVER_PRIVATE})
-         gdal_add_private_link_libraries(${_DRIVER_PRIVATE})
+diff --git a/cmake/helpers/GdalGenerateConfig.cmake b/cmake/helpers/GdalGenerateConfig.cmake
+--- a/cmake/helpers/GdalGenerateConfig.cmake
++++ b/cmake/helpers/GdalGenerateConfig.cmake
+@@ -50,6 +50,7 @@
+             if(TARGET "${_lib}")
+                 get_target_property(_link_libraries ${_lib} INTERFACE_LINK_LIBRARIES)
+                 get_target_property(_type ${_lib} TYPE)
++                list(REMOVE_ITEM _link_libraries ${_lib})
+                 if(_link_libraries AND NOT TYPE STREQUAL "SHARED_LIBRARY")
+                     list(INSERT ARGN 0 ${_link_libraries})
+                 endif()
