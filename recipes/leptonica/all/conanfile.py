@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir, save
@@ -44,6 +45,17 @@ class LeptonicaConan(ConanFile):
         "with_webp": True,
     }
 
+    # in case the project requires C17... the minimum compiler version should be listed
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "apple-clang": "11",
+            "clang": "7",
+            "gcc": "8",
+            "msvc": "192",
+            "Visual Studio": "16",
+        }
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -84,10 +96,20 @@ class LeptonicaConan(ConanFile):
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
 
+    def validate(self):
+        if Version(self.version) >= "1.84.0":
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C17, which your compiler does not support."
+                )
+
     def build_requirements(self):
         if self.options.with_webp or self.options.with_openjpeg:
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
                 self.tool_requires("pkgconf/2.1.0")
+        if Version(self.version) >= "1.84.0":
+            self.tool_requires("cmake/[>=3.21 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
