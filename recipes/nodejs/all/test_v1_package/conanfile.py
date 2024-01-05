@@ -10,8 +10,8 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch"
     test_type = "explicit"
 
-    def requirements(self):
-        self.requires(self.tested_reference_str)
+    def build_requirements(self):
+        self.build_requires(self.tested_reference_str)
 
     def test(self):
         if not cross_building(self):
