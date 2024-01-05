@@ -20,7 +20,10 @@ class CudaRtConan(ConanFile):
     no_copy_source = True
 
     def requirements(self):
-        self.requires(f"nvcc/{self.version}")
+        cudart = {
+            "12.0.107": "12.0.76"
+        }
+        self.requires(f"nvcc/{cudart.get(self.version, self.version)}")
 
     def package_info(self):
         nvcc = self.dependencies["nvcc"]

@@ -1,0 +1,24 @@
+diff --git a/visual_studio_integration/MSBuildExtensions/CUDA 12.3.props b/visual_studio_integration/MSBuildExtensions/CUDA 12.3.props
+index aff64fd..9f584e5 100644
+--- a/visual_studio_integration/MSBuildExtensions/CUDA 12.3.props	
++++ b/visual_studio_integration/MSBuildExtensions/CUDA 12.3.props	
+@@ -9,7 +9,9 @@
+     </PropertyGroup>
+ 
+     <PropertyGroup>
++        <CudaToolkitDir Condition="'$(CudaToolkitDir)' == '' AND !Exists($(CudaToolkitCustomDir))">$([System.Text.RegularExpressions.Regex]::Replace( $(CudaToolkitCustomDir), '(nvcc[\\\/]?)$', '' ) )</CudaToolkitDir>
+         <CudaToolkitDir Condition="'$(CudaToolkitDir)' == ''">$(CudaToolkitCustomDir)</CudaToolkitDir>
++
+         <CudToolkitMajorVersion>12</CudToolkitMajorVersion>
+         <CudaToolkitMinorVersion>3</CudaToolkitMinorVersion>
+         <CudaToolkitVersionedPath>$(CUDA_PATH_V12_3)</CudaToolkitVersionedPath>
+@@ -43,7 +45,8 @@
+         <CudaToolkitBinDir Condition="'$(CudaToolkitBinDir)' == ''">$(CudaToolkitDir)bin</CudaToolkitBinDir>
+ 
+         <CudaToolkitLibDir Condition="'$(CudaToolkitLibDir)' == '' AND Exists('$(CudaToolkitDir)lib\x64')">$(CudaToolkitDir)lib\x64</CudaToolkitLibDir>
+-        <CudaToolkitLibDir Condition="'$(CudaToolkitLibDir)' == ''">$(CudaToolkitDir)lib64</CudaToolkitLibDir>
++        <CudaToolkitLibDir Condition="'$(CudaToolkitLibDir)' == '' AND Exists('$(CudaToolkitDir)lib64')">$(CudaToolkitDir)lib64</CudaToolkitLibDir>
++        <CudaToolkitLibDir Condition="'$(CudaToolkitLibDir)' == ''">$(CudaToolkitDir)lib</CudaToolkitLibDir>
+     </PropertyGroup>
+ 
+     <PropertyGroup>
