@@ -1,7 +1,7 @@
 sources:
-  "1.24.0":
-    url: "https://github.com/c-ares/c-ares/releases/download/cares-1_24_0/c-ares-1.24.0.tar.gz"
-    sha256: "c517de6d5ac9cd55a9b72c1541c3e25b84588421817b5f092850ac09a8df5103"
+  "1.25.0":
+    url: "https://github.com/c-ares/c-ares/releases/download/cares-1_25_0/c-ares-1.25.0.tar.gz"
+    sha256: "71832b93a48f5ff579c505f4869120c14e57b783275367207f1a98314aa724e5"
   "1.22.1":
     url: "https://github.com/c-ares/c-ares/releases/download/cares-1_22_1/c-ares-1.22.1.tar.gz"
     sha256: "f67c180deb799c670d9dda995a18ce06f6c7320b6c6363ff8fa85b77d0da9db8"
