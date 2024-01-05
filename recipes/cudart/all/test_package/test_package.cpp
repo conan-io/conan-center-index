@@ -4,8 +4,10 @@
 
 int main(void)
 {
-    int devs = 0;
-    cudaError_t status = cudaGetDeviceCount(&devs);
-    printf("devs available: %d (status %d: \"%s\")\n", devs, status, cudaGetErrorString(status));
+    int runtimeVersion = 0, driverVersion = 0;
+    cudaError_t status = cudaRuntimeGetVersion(&runtimeVersion);
+    printf("runtime version available: %d (status %d: \"%s\")\n", runtimeVersion, status, cudaGetErrorString(status));
+    status = cudaDriverGetVersion(&driverVersion);
+    printf("driver version available: %d (status %d: \"%s\")\n", runtimeVersion, status, cudaGetErrorString(status));
     return EXIT_SUCCESS;
 }
