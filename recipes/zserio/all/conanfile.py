@@ -17,6 +17,7 @@ class ZserioConanFile(ConanFile):
     topics = ("zserio", "cpp", "c++", "serialization")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+    short_paths = True # TODO: remove in conan v2
 
     options = {
         "shared": [True, False],
