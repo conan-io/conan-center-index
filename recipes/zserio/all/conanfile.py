@@ -41,14 +41,11 @@ class ZserioConanFile(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version]["runtime"],
-            pattern="runtime_libs/cpp/*", strip_root=True)
+        sources = self.conan_data["sources"][self.version]
+        get(self, **sources["runtime"], pattern="runtime_libs/cpp/*", strip_root=True)
         shutil.move("cpp/zserio", ".")
         shutil.move("cpp/CMakeLists.txt", ".")
         shutil.rmtree("cpp")
-
-        license_link = f"https://raw.githubusercontent.com/ndsev/zserio/v{self.version}/LICENSE"
-        download(self, license_link, "LICENSE")
 
     def export_sources(self):
         copy(self, "zserio_compiler.cmake", self.recipe_folder, self.export_sources_folder)
@@ -62,14 +59,18 @@ class ZserioConanFile(ConanFile):
         cmake.configure()
         cmake.build()
 
-        get(self, **self.conan_data["sources"][self.version]["compiler"], pattern="zserio.jar")
+        sources = self.conan_data["sources"][self.version]
+
+        get(self, **sources["compiler"], pattern="zserio.jar")
+
+        download(self, filename="LICENSE", **sources["license"])
 
     @property
     def _cmake_module_path(self):
         return os.path.join("lib", "cmake", "zserio")
 
     def package(self):
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", self.build_folder, os.path.join(self.package_folder, "licenses"))
 
         include_dir = os.path.join(self.package_folder, "include")
         lib_dir = os.path.join(self.package_folder, "lib")
