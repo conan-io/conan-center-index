@@ -133,7 +133,7 @@ class SDLMixerConan(ConanFile):
         # VORBIS
         if self.options.vorbis == "stb":
             tc.variables["SDL2MIXER_VORBIS"] = "STB"
-        elif self.options.vorbis == "voribisfile":
+        elif self.options.vorbis == "vorbisfile":
             tc.variables["SDL2MIXER_VORBIS"] = "VORBISFILE"
         elif self.options.vorbis == "tremor":
             tc.variables["SDL2MIXER_VORBIS"] = "TREMOR"
