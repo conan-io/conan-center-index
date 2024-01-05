@@ -50,9 +50,9 @@ class DataFrameConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        if Version < "2.1.0":
+        if Version(self.version) < "2.1.0":
             return "17"
-        elif Version <= "2.2.0":
+        elif Version(self.version) <= "2.2.0":
             return "20"
         else:
             return "23"
