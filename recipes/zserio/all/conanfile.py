@@ -47,8 +47,12 @@ class ZserioConanFile(ConanFile):
         if self.options.shared:
             raise ConanInvalidConfiguration("Zserio C++ runtime cannot be built as a shared library.")
 
-        if self.settings.os not in ["Linux", "Windows"]:
-            raise ConanInvalidConfiguration("Zserio currently supports only Windows and Linux")
+        if self.settings.os not in ["Linux", "Windows", "Macos"]:
+            raise ConanInvalidConfiguration(f"Zserio doesn't support '{self.settings.os}'.")
+
+        # experimental Macos support
+        if self.settings.os == "Macos":
+            self.output.warning("Macos is support is experimental! It's not (yet) supported by the upstream!")
 
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
