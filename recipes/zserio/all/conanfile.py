@@ -16,11 +16,17 @@ class ZserioConanFile(ConanFile):
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://zserio.org"
     topics = ("zserio", "cpp", "c++", "serialization")
-    package_type = "static-library"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
 
-    options = { "fPIC": [True, False] }
-    default_options = { "fPIC": False }
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": False
+    }
 
     @property
     def _min_cppstd(self):
@@ -30,10 +36,17 @@ class ZserioConanFile(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
+        if self.options.shared:
+            raise ConanInvalidConfiguration("Zserio C++ runtime cannot be built as a shared library.")
+
         if self.settings.os not in ["Linux", "Windows"]:
             raise ConanInvalidConfiguration("Zserio currently supports only Windows and Linux")
 
