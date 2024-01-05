@@ -5,6 +5,12 @@ function(find_package2 pkgname)
     list(REMOVE_ITEM ARGN OUT_DEPENDENCY _find_dependency)
     # Force CONFIG mode
     list(REMOVE_ITEM ARGN MODULE NO_CONFIG NO_MODULE)
+    string(TOUPPER ${pkgname} key)
+    if(DEFINED GDAL_USE_${key} AND NOT GDAL_USE_${key})
+        set(${pkgname}_FOUND)
+        set(${key}_FOUND)
+        return()
+    endif()
     find_package(${pkgname} ${ARGN}
         QUIET
         CONFIG
@@ -14,7 +20,6 @@ function(find_package2 pkgname)
         PATHS ${CMAKE_PREFIX_PATH}
     )
     # Add variables with upper-case package name in addition to the default ones
-    string(TOUPPER ${pkgname} key)
     set(targets "")
     foreach(lib ${${pkgname}_LIBRARIES})
         if(TARGET ${lib})

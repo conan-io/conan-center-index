@@ -411,9 +411,8 @@ class GdalConan(ConanFile):
         tc.variables["GDAL_USE_OGDI"] = False
         tc.variables["GDAL_USE_OPENCAD"] = False
         tc.variables["GDAL_USE_OPENCAD_INTERNAL"] = self.options.with_opencad
-        tc.variables["GDAL_USE_OPENCL"] = False
-        tc.variables["GDAL_USE_OPENEXR"] = self.options.with_exr
         tc.variables["GDAL_USE_OPENCL"] = self.options.with_opencl
+        tc.variables["GDAL_USE_OPENEXR"] = self.options.with_exr
         tc.variables["GDAL_USE_OPENJPEG"] = self.options.with_openjpeg
         tc.variables["GDAL_USE_OPENSSL"] = self.options.with_openssl
         tc.variables["GDAL_USE_ORACLE"] = False
