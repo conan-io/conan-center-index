@@ -1,4 +1,7 @@
 sources:
+  "5.3.3":
+    url: "https://github.com/tesseract-ocr/tesseract/archive/5.3.3.tar.gz"
+    sha256: "dc4329f85f41191b2d813b71b528ba6047745813474e583ccce8795ff2ff5681"
   "5.3.0":
     url: "https://github.com/tesseract-ocr/tesseract/archive/5.3.0.tar.gz"
     sha256: "7e70870f8341e5ea228af2836ce79a36eefa11b01b56177b4a8997f330c014b8"
@@ -15,6 +18,10 @@ sources:
     url: "https://github.com/tesseract-ocr/tesseract/archive/4.1.1.tar.gz"
     sha256: "2a66ff0d8595bff8f04032165e6c936389b1e5727c3ce5a27b3e059d218db1cb"
 patches:
+  "5.3.3":
+    - patch_file: "patches/0004-control-optimizations-5.3.3.patch"
+      patch_description: "fix condition for cpu optimizations"
+      patch_type: "portability"
   "5.3.0":
     - patch_file: "patches/0004-control-optimizations-5.3.0.patch"
       patch_description: "fix condition for cpu optimizations"

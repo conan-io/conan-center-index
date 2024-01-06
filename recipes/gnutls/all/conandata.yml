@@ -1,4 +1,10 @@
 sources:
+  "3.8.2":
+    url:
+      - "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.2.tar.xz"
+      - "http://www.ring.gr.jp/pub/net/gnupg/gnutls/v3.8/gnutls-3.8.2.tar.xz"
+      - "https://www.mirrorservice.org/sites/ftp.gnupg.org/gcrypt/gnutls/v3.8/gnutls-3.8.2.tar.xz"
+    sha256: "e765e5016ffa9b9dd243e363a0460d577074444ee2491267db2e96c9c2adef77"
   "3.7.8":
     url:
       - "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.7/gnutls-3.7.8.tar.xz"

@@ -1,4 +1,10 @@
 sources:
+  "0.190":
+    url: "https://sourceware.org/elfutils/ftp/0.190/elfutils-0.190.tar.bz2"
+    sha256: "8e00a3a9b5f04bc1dc273ae86281d2d26ed412020b391ffcc23198f10231d692"
+  "0.189":
+    url: "https://sourceware.org/elfutils/ftp/0.189/elfutils-0.189.tar.bz2"
+    sha256: "39bd8f1a338e2b7cd4abc3ff11a0eddc6e690f69578a57478d8179b4148708c8"
   "0.186":
     url: "https://sourceware.org/elfutils/ftp/0.186/elfutils-0.186.tar.bz2"
     sha256: "7f6fb9149b1673d38d9178a0d3e0fb8a1ec4f53a9f4c2ff89469609879641177"
@@ -6,13 +12,25 @@ sources:
     url: "https://sourceware.org/elfutils/ftp/0.180/elfutils-0.180.tar.bz2"
     sha256: "b827b6e35c59d188ba97d7cf148fa8dc6f5c68eb6c5981888dfdbb758c0b569d"
 patches:
+  "0.190":
+    - patch_file: "patches/0.189-0002-add-enable-static-option-to-configure.patch"
+      patch_description: "Enable static library building."
+      patch_type: "conan"
+  "0.189":
+    - patch_file: "patches/0.189-0002-add-enable-static-option-to-configure.patch"
+      patch_description: "Enable static library building."
+      patch_type: "conan"
   "0.186":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.186-0001-Add-enable-werror-configure-option.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.186-0002-add-enable-static-option-to-configure.patch"
+    - patch_file: "patches/0.186-0001-remove-werror-configure-option.patch"
+      patch_description: "Disable -Werror flag."
+      patch_type: "conan"
+    - patch_file: "patches/0.186-0002-add-enable-static-option-to-configure.patch"
+      patch_description: "Enable static library building."
+      patch_type: "conan"
   "0.180":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.180-0001-Add-enable-werror-configure-option.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0.180-0002-add-enable-static-option-to-configure.patch"
+    - patch_file: "patches/0.180-0001-remove-werror-configure-option.patch"
+      patch_description: "Disable -Werror flag."
+      patch_type: "conan"
+    - patch_file: "patches/0.180-0002-add-enable-static-option-to-configure.patch"
+      patch_description: "Enable static library building."
+      patch_type: "conan"

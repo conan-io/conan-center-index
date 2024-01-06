@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout, CMakeDeps, CMakeToolchain
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -85,7 +85,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.11.4")
+            self.requires("libxml2/2.12.3")
         if self.options.with_expat:
             self.requires("expat/2.5.0")
         if self.options.with_iconv:
@@ -93,7 +93,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_pcreposix:
             self.requires("pcre2/10.42")
         if self.options.with_nettle:
-            self.requires("nettle/3.8.1")
+            self.requires("nettle/3.9.1")
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_libb2:
@@ -103,11 +103,11 @@ class LibarchiveConan(ConanFile):
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.4")
+            self.requires("xz_utils/5.4.5")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.get_safe("with_mbedtls"):
-            self.requires("mbedtls/3.2.1")
+            self.requires("mbedtls/3.5.1")
 
     def validate(self):
         if self.settings.os != "Windows" and self.options.with_cng:
@@ -149,6 +149,7 @@ class LibarchiveConan(ConanFile):
         tc.variables["ENABLE_CPIO"] = False
         tc.variables["ENABLE_CAT"] = False
         tc.variables["ENABLE_TEST"] = False
+        tc.variables["ENABLE_UNZIP"] = False
         # too strict check
         tc.variables["ENABLE_WERROR"] = False
         if Version(self.version) >= "3.4.2":
@@ -171,9 +172,6 @@ class LibarchiveConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-
-        if self.options.shared:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")

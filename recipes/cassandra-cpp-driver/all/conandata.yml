@@ -1,4 +1,7 @@
 sources:
+  "2.17.1":
+    url: "https://github.com/datastax/cpp-driver/archive/2.17.1.tar.gz"
+    sha256: "53b4123aad59b39f2da0eb0ce7fe0e92559f7bba0770b2e958254f17bffcd7cf"
   "2.17.0":
     url: "https://github.com/datastax/cpp-driver/archive/2.17.0.tar.gz"
     sha256: "075af6a6920b0a8b12e37b8e5aa335b0c7919334aa1b451642668e6e37c5372f"
@@ -9,6 +12,20 @@ sources:
     url: "https://github.com/datastax/cpp-driver/archive/2.15.3.tar.gz"
     sha256: "eccb53c5151621c3b647fc83781a542cfb93e76687b4178ebce418fc4c817293"
 patches:
+  "2.17.1":
+    - patch_file: "patches/2.16.2/fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+    - patch_file: "patches/2.15.3/fix-rapidjson.patch"
+      patch_description: "fix include path for cci package"
+      patch_type: "conan"
+    - patch_file: "patches/2.15.3/fix-atomic.patch"
+      patch_description: "Adapt MemoryOrder definition for C++ 20"
+      patch_type: "portability"
+      patch_source: "https://github.com/datastax/cpp-driver/pull/533"
+    - patch_file: "patches/2.15.3/remove-attribute-for-msvc.patch"
+      patch_description: "remove attribute for msvc"
+      patch_type: "portability"
   "2.17.0":
     - patch_file: "patches/2.16.2/fix-cmake.patch"
       patch_description: "use cci package"

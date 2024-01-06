@@ -139,6 +139,7 @@ class ArrowConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -300,7 +301,7 @@ class ArrowConan(ConanFile):
         if self.options.with_mimalloc:
             self.requires("mimalloc/1.7.6")
         if self.options.with_boost:
-            self.requires("boost/1.82.0")
+            self.requires("boost/1.83.0")
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
         if self.options.with_glog:
@@ -316,15 +317,15 @@ class ArrowConan(ConanFile):
         if self.options.with_openssl:
             # aws-sdk-cpp requires openssl/1.1.1. it uses deprecated functions in openssl/3.0.0
             if self.options.with_s3:
-                self.requires("openssl/1.1.1t")
+                self.requires("openssl/1.1.1w")
             else:
-                self.requires("openssl/1.1.1t")
+                self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_opentelemetry"):
             self.requires("opentelemetry-cpp/1.7.0")
         if self.options.with_s3:
             self.requires("aws-sdk-cpp/1.9.234")
         if self.options.with_brotli:
-            self.requires("brotli/1.0.9")
+            self.requires("brotli/1.1.0")
         if self.options.with_bz2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lz4:
@@ -338,9 +339,9 @@ class ArrowConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.5")
         if self.options.with_re2:
-            self.requires("re2/20220601")
+            self.requires("re2/20230301")
         if self.options.with_utf8proc:
             self.requires("utf8proc/2.8.0")
         if self.options.with_backtrace:
@@ -499,6 +500,8 @@ class ArrowConan(ConanFile):
             tc.variables["ARROW_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
         if self.options.with_llvm:
             tc.variables["LLVM_DIR"] = self.dependencies["llvm-core"].package_folder.replace("\\", "/")
+
+        tc.cache_variables["CMAKE_PROJECT_arrow_INCLUDE"] = os.path.join(self.source_folder, "conan_cmake_project_include.cmake")
         tc.generate()
 
         deps = CMakeDeps(self)
