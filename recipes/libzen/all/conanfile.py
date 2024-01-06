@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save, replace_in_file
 import os
 import textwrap
 
@@ -57,8 +57,14 @@ class LibzenConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # Enable WIN32 shared libraries
+        replace_in_file(self, os.path.join(self.source_folder, "Project", "CMake", "CMakeLists.txt"),
+                        "set(BUILD_SHARED_LIBS OFF)", "")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "Project", "CMake"))
         cmake.build()

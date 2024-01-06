@@ -195,9 +195,11 @@ required_for_references:
 - console_bridge
 - continuable
 - coost
+- copypp
 - corrade
 - cose-c
 - cotila
+- coz
 - cpp-httplib
 - cpp-ipc
 - cpp-jwt
@@ -371,6 +373,7 @@ required_for_references:
 - flatbush
 - flecs
 - flex
+- flint
 - fltk
 - fmi1
 - fmi2
@@ -651,6 +654,7 @@ required_for_references:
 - libhydrogen
 - libiberty
 - libiconv
+- libid3tag
 - libinterpolate
 - libipt
 - libjpeg
@@ -778,6 +782,7 @@ required_for_references:
 - linux-headers-generic
 - linux-syscall-support
 - litehtml
+- lksctp-tools
 - llhttp
 - llvm-openmp
 - lmdb
