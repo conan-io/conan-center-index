@@ -51,13 +51,13 @@ class ReflectCppConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.get_safe("with_json", True):
+        if self.options.with_json:
             self.requires("yyjson/0.8.0", transitive_headers=True)
-        if self.options.get_safe("with_xml", True):
+        if self.options.with_xml:
             self.requires("pugixml/1.14", transitive_headers=True)
-        if self.options.get_safe("with_flatbuffers", True):
+        if self.options.with_flatbuffers:
             self.requires("flatbuffers/23.5.26", transitive_headers=True)
-        if self.options.get_safe("with_yaml", True):
+        if self.options.with_yaml:
             self.requires("yaml-cpp/0.8.0", transitive_headers=True)
             
     def package_id(self):
