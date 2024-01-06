@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save
 from conan.tools.scm import Version
 import os
@@ -53,10 +54,16 @@ class JasperConan(ConanFile):
         elif self.options.with_libjpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
 
+    def build_requirements(self):
+        if Version(self.version) >= "4.1.1":
+            self.tool_requires("cmake/[>=3.20 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
+
         tc = CMakeToolchain(self)
         if Version(self.version) >= "4.0.0":
             tc.variables["JAS_ENABLE_PIC"] = self.options.get_safe("fPIC", True)
@@ -66,6 +73,7 @@ class JasperConan(ConanFile):
         tc.variables["JAS_ENABLE_SHARED"] = self.options.shared
         tc.variables["JAS_LIBJPEG_REQUIRED"] = "REQUIRED"
         tc.variables["JAS_ENABLE_LIBJPEG"] = bool(self.options.with_libjpeg)
+        tc.variables["JAS_HAVE_JPEGLIB_H"] = True
         if Version(self.version) >= "3.0.0":
             tc.variables["JAS_ENABLE_LIBHEIF"] = False
         tc.variables["JAS_ENABLE_OPENGL"] = False
