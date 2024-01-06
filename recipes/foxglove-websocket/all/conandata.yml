@@ -1,4 +1,7 @@
 sources:
+  1.2.0:
+    url: https://github.com/foxglove/ws-protocol/archive/refs/tags/releases/cpp/v1.2.0.tar.gz
+    sha256: 0471d3932500ed6acd87a99cd76e048366c82f2527c1631afcee4f8ab71c4ab7
   1.1.0:
     url: https://github.com/foxglove/ws-protocol/archive/refs/tags/releases/cpp/v1.1.0.tar.gz
     sha256: 3ad1f639e340e878dd638d542e57185b8c7c08fdfcb03d8c43d054957078a81f
