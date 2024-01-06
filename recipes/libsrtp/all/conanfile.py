@@ -81,31 +81,9 @@ class LibsrtpRecipe(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        if Version(self.version) < "2.5.0":
-            replace_in_file(
-                self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                "install(TARGETS srtp2 DESTINATION lib)",
-                (
-                    "include(GNUInstallDirs)\n"
-                    "install(TARGETS srtp2\n"
-                    "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}\n"
-                    "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}\n"
-                    "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})"
-                ),
-            )
-        else:
-            replace_in_file(
-                self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                "install(TARGETS srtp2 DESTINATION lib\n  EXPORT libSRTPTargets\n)",
-                (
-                    "include(GNUInstallDirs)\n"
-                    "install(TARGETS srtp2\n"
-                    "EXPORT libSRTPTargets\n"
-                    "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}\n"
-                    "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}\n"
-                    "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})"
-                ),
-            )
+        save(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+             "\ninstall(TARGETS srtp2 RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})\n",
+             append=True)
 
     def build(self):
         self._patch_sources()
