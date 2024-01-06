@@ -21,11 +21,13 @@ class ReflectCppConan(ConanFile):
         "with_json" : [True, False],
         "with_xml" : [True, False],
         "with_flatbuffers" : [True, False],
+        "with_yaml": [True, False],
     }
     default_options = {
         "with_json" : False,
         "with_xml" : False,
         "with_flatbuffers" : False,
+        "with_yaml" : False,
     }
 
     @property
@@ -55,6 +57,8 @@ class ReflectCppConan(ConanFile):
             self.requires("pugixml/1.14", transitive_headers=True)
         if self.options.get_safe("with_flatbuffers", True):
             self.requires("flatbuffers/23.5.26", transitive_headers=True)
+        if self.options.get_safe("with_yaml", True):
+            self.requires("yaml-cpp/0.8.0", transitive_headers=True)
             
     def package_id(self):
         self.info.clear()
