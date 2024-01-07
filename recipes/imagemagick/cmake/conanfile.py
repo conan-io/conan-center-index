@@ -236,7 +236,7 @@ class ImageMagicConan(ConanFile):
         tc.variables["HAVE_UMEM"] = False
         tc.variables["HEIC_DELEGATE"] = self.options.with_heic
         tc.variables["JBIG_DELEGATE"] = self.options.with_jbig
-        tc.variables["JPEG_DELEGATE"] = self.options.with_jpeg
+        tc.variables["JPEG_DELEGATE"] = bool(self.options.with_jpeg)
         tc.variables["JXL_DELEGATE"] = self.options.with_jxl
         tc.variables["LCMS_DELEGATE"] = self.options.with_lcms
         tc.variables["LIBOPENJP2_DELEGATE"] = self.options.with_openjp2
