@@ -1,18 +1,8 @@
 sources:
-  "7.1.1-22":
+  "7.1.1-25":
     source:
-      url: "https://github.com/ImageMagick/ImageMagick/archive/refs/tags/7.1.1-22.tar.gz"
-      sha256: "6dc2ac4292319b995c6f46de117cbe33089006371c7f1e1310748dfdfda35441"
-    cmake:  # 2023-12-12 version
-      url: "https://codeload.github.com/valgur/ImageMagick/zip/e2d7c88c28e31af065ed8b3aa7f5c1f9d81ef88e"
-      sha256: "c74972656fdff0c5a1271c410bfa110df444678428674abe90fb985389b15426"
-patches:
-  "7.1.1-22":
-    - patch_file: "patches/001-fix-missing-zstd-info.patch"
-      patch_type: "bugfix"
-      patch_description: "Fix zstd not being listed under GetMagickDelegates()"
-      patch_source: "https://github.com/ImageMagick/ImageMagick/pull/6934"
-    - patch_file: "patches/002-do-not-use-lt_dlclose.patch"
-      patch_type: "portability"
-      patch_description: "Replace lt_dlclose() with dlclose() / FreeLibrary() to avoid libtool dependency"
-      patch_source: "https://github.com/valgur/ImageMagick/commit/f9ac3ad9de31c845efe7f5fbd9e906656af1ce07"
+      url: "https://github.com/ImageMagick/ImageMagick/archive/refs/tags/7.1.1-25.tar.gz"
+      sha256: "983df08061bdcf95fe49146444fd1deb9c176b06359d3431053f59813c3e9668"
+    cmake:  # 2024-01-07 version
+      url: "https://codeload.github.com/valgur/ImageMagick/zip/adf2813a611603f588b6a62f99f0feb604fbbeda"
+      sha256: "9013e3c925feb45582a55db9666354e393e546bde5f642f590de8ced62b36ee6"

@@ -1,9 +1,10 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches, copy, move_folder_contents, mkdir
+from conan.tools.files import get, rmdir, replace_in_file, copy, move_folder_contents, mkdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -46,6 +47,7 @@ class ImageMagicConan(ConanFile):
         "with_jpeg": [None, "libjpeg", "libjpeg-turbo"],
         "with_jxl": [True, False],
         "with_lcms": [True, False],
+        "with_ltdl": [True, False],
         "with_lzma": [True, False],
         "with_opencl": [True, False],
         "with_openexr": [True, False],
@@ -87,6 +89,7 @@ class ImageMagicConan(ConanFile):
         "with_jpeg": "libjpeg",
         "with_jxl": False,  # FIXME: re-enable once migrated
         "with_lcms": True,
+        "with_ltdl": True,
         "with_lzma": True,
         "with_opencl": True,
         "with_openexr": True,
@@ -103,9 +106,6 @@ class ImageMagicConan(ConanFile):
         "with_zlib": True,
         "with_zstd": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -147,6 +147,8 @@ class ImageMagicConan(ConanFile):
             self.requires("libjxl/0.8.2")
         if self.options.with_lcms:
             self.requires("lcms/2.14")
+        if self.options.with_ltdl:
+            self.requires("libtool/2.4.7")
         if self.options.with_lzma:
             self.requires("xz_utils/5.4.5")
         if self.options.with_opencl:
@@ -178,6 +180,10 @@ class ImageMagicConan(ConanFile):
             self.output.warning("Conan package for djvu is not available, this package will be used from system.")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
+
+    def validate(self):
+        if self.options.with_opencl and not self.options.with_ltdl:
+            raise ConanInvalidConfiguration("OpenCL support requires with_ltdl=True")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.19 <4]")
@@ -226,8 +232,8 @@ class ImageMagicConan(ConanFile):
         tc.variables["FREETYPE_DELEGATE"] = self.options.with_freetype
         tc.variables["GS_DELEGATE"] = False
         tc.variables["GVC_DELEGATE"] = False
-        tc.variables["HasJEMALLOC"] = False
-        tc.variables["HasUMEM"] = False
+        tc.variables["HAVE_JEMALLOC"] = False
+        tc.variables["HAVE_UMEM"] = False
         tc.variables["HEIC_DELEGATE"] = self.options.with_heic
         tc.variables["JBIG_DELEGATE"] = self.options.with_jbig
         tc.variables["JPEG_DELEGATE"] = self.options.with_jpeg
@@ -235,7 +241,7 @@ class ImageMagicConan(ConanFile):
         tc.variables["LCMS_DELEGATE"] = self.options.with_lcms
         tc.variables["LIBOPENJP2_DELEGATE"] = self.options.with_openjp2
         tc.variables["LQR"] = False
-        tc.variables["LTDL_DELEGATE"] = False
+        tc.variables["LTDL_DELEGATE"] = self.options.with_ltdl
         tc.variables["LZMA_DELEGATE"] = self.options.with_lzma
         tc.variables["OPENCLLIB_DELEGATE"] = self.options.with_opencl
         tc.variables["OPENEXR_DELEGATE"] = self.options.with_openexr
@@ -255,6 +261,8 @@ class ImageMagicConan(ConanFile):
         tc.variables["XML_DELEGATE"] = self.options.with_xml2
         tc.variables["ZLIB_DELEGATE"] = self.options.with_zlib
         tc.variables["ZSTD_DELEGATE"] = self.options.with_zstd
+
+        tc.variables["HAVE_LIBRAW_LIBRAW_H"] = True
         tc.generate()
 
         # TODO: fix this bug in the libheif recipe
@@ -288,10 +296,10 @@ class ImageMagicConan(ConanFile):
             "libpng": "PNG",
             "libraw": "libraw",
             "libtiff": "TIFF",
+            "libtool": "LTDL",
             "libwebp": "WebP",
             "libxml2": "LibXml2",
             "lqr": "Lqr",
-            "ltdl": "LTDL",
             "opencl-headers": "OpenCL",
             "openexr": "OpenEXR",
             "openjpeg": "OpenJPEG",
@@ -312,11 +320,12 @@ class ImageMagicConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # PangoCairo is provided by Pango
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "delegates.cmake"),
                         "magick_find_delegate(DELEGATE PANGOCAIRO_DELEGATE NAME PangoCairo DEFAULT FALSE)\n",
                         "magick_find_delegate(DELEGATE PANGOCAIRO_DELEGATE NAME Pango DEFAULT FALSE TARGETS Pango::Pango)\n")
+        replace_in_file(self, os.path.join(self.source_folder, "coders", "heic.c"),
+                        "<heif.h>", "<libheif/heif.h>")
 
     def build(self):
         self._patch_sources()
@@ -379,6 +388,8 @@ class ImageMagicConan(ConanFile):
             core_requires.append("libjxl::libjxl")
         if self.options.with_lcms:
             core_requires.append("lcms::lcms")
+        if self.options.with_ltdl:
+            core_requires.append("libtool::libtool")
         if self.options.with_lzma:
             core_requires.append("xz_utils::xz_utils")
         if self.options.with_opencl:
