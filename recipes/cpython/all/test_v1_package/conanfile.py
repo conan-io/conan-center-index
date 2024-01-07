@@ -1,5 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools, RunEnvironment
 from conans.errors import ConanException
+from conan.tools.env import VirtualRunEnv
 from io import StringIO
 import os
 import re
@@ -65,6 +66,11 @@ class TestPackageConan(ConanFile):
     @property
     def _supports_modules(self):
         return self.settings.compiler != "Visual Studio" or self.options["cpython"].shared
+
+    def generate(self):
+        # The build also needs access to the run environment to run the python executable
+        VirtualRunEnv(self).generate(scope="run")
+        VirtualRunEnv(self).generate(scope="build")
 
     def build(self):
         if not tools.cross_building(self, skip_x64_x86=True):

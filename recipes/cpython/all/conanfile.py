@@ -278,9 +278,7 @@ class CPythonConan(ConanFile):
         deps.generate()
 
     def generate(self):
-        # Several parts of the build process run the python executable to test things, such as importing modules.
-        if is_apple_os(self): # FIXME I think this breaks Linux?
-            VirtualRunEnv(self).generate(scope="build")
+        VirtualRunEnv(self).generate(scope="build")
         
         if is_msvc(self):
             # The msbuild generator only works with Visual Studio
