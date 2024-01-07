@@ -23,6 +23,9 @@ add_library(Xpm
     src/create.c
     src/CrIFrBuf.c
     src/CrIFrDat.c
+    src/CrPFrBuf.c
+    src/CrPFrDat.c
+    src/CrPFrI.c
     src/data.c
     src/hashtab.c
     src/Image.c
