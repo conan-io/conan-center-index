@@ -9,7 +9,7 @@ from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir, unzip
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import MSBuildDeps, MSBuildToolchain, MSBuild, is_msvc, is_msvc_static_runtime, msvc_runtime_flag
+from conan.tools.microsoft import MSBuildDeps, MSBuildToolchain, MSBuild, is_msvc, is_msvc_static_runtime, msvc_runtime_flag, msvs_toolset
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.58.0"
@@ -469,7 +469,13 @@ class CPythonConan(ConanFile):
         self.output.info(f"Building {len(projects)} Visual Studio projects: {projects}")
 
         sln = os.path.join(self.source_folder, "PCbuild", "pcbuild.sln")
-        msbuild.build(sln, targets=projects)
+        if Version(self.version) > "3.8.0":
+            msbuild.build(sln, targets=projects)
+        else:
+            # In these versions, solution files do not pick up the toolset automatically.
+            # All of these versions are EOL, so a hacky solution is fine for now.
+            cmd = msbuild.command(sln, targets=projects)
+            self.run(f"{cmd} /p:PlatformToolset={msvs_toolset(self)}")
 
     def build(self):
         self._patch_sources()
