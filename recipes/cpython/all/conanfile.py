@@ -339,7 +339,8 @@ class CPythonConan(ConanFile):
             else:
                 replace_in_file(self, setup_py, "'/usr/local/ssl/include',", f"{(openssl.includedirs + zlib.includedirs)[1:-2]}") 
                 replace_in_file(self, setup_py, "'/usr/contrib/ssl/include/'", "")
-                replace_in_file(self, setup_py, "lib_dirs = []", f"lib_dirs = {openssl.libs + zlib.libs}")
+                replace_in_file(self, setup_py, "lib_dirs = []", f"lib_dirs = {openssl.libdirs + zlib.libdirs}")
+                replace_in_file(self, setup_py, "libraries = ['ssl', 'crypto'],", f"libraries = {openssl.libs + zlib.libs}, #")
 
         # Enable static MSVC cpython
         if not self.options.shared:
