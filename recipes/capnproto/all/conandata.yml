@@ -1,4 +1,7 @@
 sources:
+  "1.0.1.1":
+    url: "https://github.com/capnproto/capnproto/archive/v1.0.1.1.tar.gz"
+    sha256: "462619273f495f4a4bda83e70fb4db272dac408cfd2343c2539023e0b3887b88"
   "1.0.1":
     url: "https://github.com/capnproto/capnproto/archive/v1.0.1.tar.gz"
     sha256: "5bdb16f6b389a9e29b04214b9bae1759e8b7fe2b45049d7e3f1f286ba050a200"
