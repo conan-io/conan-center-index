@@ -1,7 +1,7 @@
 sources:
-  "2.8.1":
-    url: "https://github.com/libsdl-org/SDL_image/releases/download/release-2.8.0/SDL2_image-2.8.0.tar.gz"
-    sha256: "76ba035fd032c12987e4a0d39aa1f2e79989a51cea72f79d18ab084a24adc9cc"
+  "2.8.2":
+    url: "https://github.com/libsdl-org/SDL_image/releases/download/release-2.8.2/SDL2_image-2.8.2.tar.gz"
+    sha256: "8f486bbfbcf8464dd58c9e5d93394ab0255ce68b51c5a966a918244820a76ddc"
   "2.6.3":
     url: "https://github.com/libsdl-org/SDL_image/releases/download/release-2.6.3/SDL2_image-2.6.3.tar.gz"
     sha256: "931c9be5bf1d7c8fae9b7dc157828b7eee874e23c7f24b44ba7eff6b4836312c"
@@ -9,8 +9,8 @@ sources:
     url: "https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.5.tar.gz"
     sha256: "bdd5f6e026682f7d7e1be0b6051b209da2f402a2dd8bd1c4bd9c25ad263108d0"
 patches:
-  "2.8.1":
-    - patch_file: "patches/2.8.1-0001-fix-cmake.patch"
+  "2.8.2":
+    - patch_file: "patches/2.8.2-0001-fix-cmake.patch"
       patch_description: "use cci's package"
       patch_type: "conan"
   "2.6.3":
