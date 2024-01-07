@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, mkdir, rmdir
 from conan.tools.scm import Version
@@ -87,6 +88,7 @@ class SundialsConan(ConanFile):
             for dll_path in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
                 shutil.move(dll_path, os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.components["sundials_nvecmanyvector"].libs = ["sundials_nvecmanyvector"]
