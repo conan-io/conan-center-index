@@ -96,8 +96,9 @@ class GeosConan(ConanFile):
     def _patch_sources(self):
         # Avoid setting CMAKE_BUILD_TYPE default when multi-config generators are used.
         # https://github.com/libgeos/geos/pull/945
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "set(CMAKE_BUILD_TYPE ${DEFAULT_BUILD_TYPE})", "", strict=False)
+        if Version(self.version) <= "3.12.1":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "set(CMAKE_BUILD_TYPE ${DEFAULT_BUILD_TYPE})", "")
 
     def build(self):
         self._patch_sources()
