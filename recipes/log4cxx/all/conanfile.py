@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import copy, get, rmdir, save, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -44,9 +44,6 @@ class Log4cxxConan(ConanFile):
             "apple-clang": "10",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -76,7 +73,7 @@ class Log4cxxConan(ConanFile):
     def build_requirements(self):
         if self.settings.os != "Windows":
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.0.3")
+                self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         # OSError: [WinError 123] The filename, directory name, or volume label syntax is incorrect:
@@ -89,11 +86,21 @@ class Log4cxxConan(ConanFile):
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["LOG4CXX_INSTALL_PDB"] = False
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+
+        deps = CMakeDeps(self)
+        # To match find_package() and CMake variable names in the project
+        deps.set_property("apr", "cmake_file_name", "APR")
+        deps.set_property("apr-util", "cmake_file_name", "APR_UTIL")
+        deps.generate()
+
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "find_package(APR-Util ", "find_package(APR_UTIL ")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "find_package(EXPAT REQUIRED)", "find_package(EXPAT REQUIRED MODULE)")
 
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -125,7 +132,7 @@ class Log4cxxConan(ConanFile):
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "log4cxx")

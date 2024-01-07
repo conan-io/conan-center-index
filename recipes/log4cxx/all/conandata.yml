@@ -11,20 +11,3 @@ sources:
   "0.12.0":
     url: "https://archive.apache.org/dist/logging/log4cxx/0.12.0/apache-log4cxx-0.12.0.tar.gz"
     sha256: "bd5b5009ca914c8fa7944b92ea6b4ca6fb7d146f65d526f21bf8b3c6a0520e44"
-patches:
-  "1.2.0":
-    - patch_file: "patches/1.1.0-0001-find-apr.patch"
-      patch_description: "use cci's package name"
-      patch_type: "conan"
-  "1.1.0":
-    - patch_file: "patches/1.1.0-0001-find-apr.patch"
-      patch_description: "use cci's package name"
-      patch_type: "conan"
-  "0.12.1":
-    - patch_file: "patches/0.12.0-0001-find-apr.patch"
-      patch_description: "use cci's package name"
-      patch_type: "conan"
-  "0.12.0":
-    - patch_file: "patches/0.12.0-0001-find-apr.patch"
-      patch_description: "use cci's package name"
-      patch_type: "conan"
