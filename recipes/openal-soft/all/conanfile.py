@@ -60,7 +60,7 @@ class OpenALSoftConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os == "Linux":
             self.requires("libalsa/1.2.10")
 
     def validate(self):
