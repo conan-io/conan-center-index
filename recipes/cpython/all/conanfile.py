@@ -221,6 +221,9 @@ class CPythonConan(ConanFile):
             if self.dependencies["libffi"].ref.version >= "3.3" and is_msvc(self) and "d" in str(self.settings.compiler.runtime):
                 raise ConanInvalidConfiguration("libffi versions >= 3.3 cause 'read access violations' when using a debug runtime (MTd/MDd)")
 
+        if is_apple_os(self) and self.settings.arch == "armv8" and Version(self.version) < "3.8.0":
+            raise ConanInvalidConfiguration("cpython 3.7 and older does not support Apple ARM CPUs")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
