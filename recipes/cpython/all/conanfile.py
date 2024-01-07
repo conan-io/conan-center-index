@@ -296,8 +296,9 @@ class CPythonConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        setup_py = os.path.join(self.source_folder, "setup.py")
         if self._is_py3 and Version(self.version) < "3.10":
-            replace_in_file(self, os.path.join(self.source_folder, "setup.py"), ":libmpdec.so.2", "mpdec")
+            replace_in_file(self, setup_py, ":libmpdec.so.2", "mpdec")
         if is_msvc(self):
             runtime_library = {
                 "MT": "MultiThreaded",
@@ -318,22 +319,27 @@ class CPythonConan(ConanFile):
         if self.options.get_safe("with_curses", False):
             # FIXME: this will link to ALL libraries of ncurses. Only need to link to ncurses(w) (+ eventually tinfo)
             ncurses_info = self.dependencies["ncurses"].cpp_info.aggregated_components()
-            replace_in_file(self, os.path.join(self.source_folder, "setup.py"),
+            replace_in_file(self, setup_py,
                 "curses_libs = ",
                 "curses_libs = {} #".format(repr(ncurses_info.libs + ncurses_info.system_libs)))
 
         if self._supports_modules:
             openssl = self.dependencies["openssl"].cpp_info.aggregated_components()
             zlib = self.dependencies["zlib"].cpp_info.aggregated_components()
-            replace_in_file(self, os.path.join(self.source_folder, "setup.py"),
-                            "openssl_includes = ",
-                            f"openssl_includes = {openssl.includedirs + zlib.includedirs} #")
-            replace_in_file(self, os.path.join(self.source_folder, "setup.py"),
-                            "openssl_libdirs = ",
-                            f"openssl_libdirs = {openssl.libdirs + zlib.libdirs} #")
-            replace_in_file(self, os.path.join(self.source_folder, "setup.py"),
-                            "openssl_libs = ",
-                            f"openssl_libs = {openssl.libs + zlib.libs} #")
+            if self._is_py3:
+                replace_in_file(self, setup_py,
+                                "openssl_includes = ",
+                                f"openssl_includes = {openssl.includedirs + zlib.includedirs} #")
+                replace_in_file(self, setup_py,
+                                "openssl_libdirs = ",
+                                f"openssl_libdirs = {openssl.libdirs + zlib.libdirs} #")
+                replace_in_file(self, setup_py,
+                                "openssl_libs = ",
+                                f"openssl_libs = {openssl.libs + zlib.libs} #")
+            else:
+                replace_in_file(self, setup_py, "'/usr/local/ssl/include',", f"{(openssl.includedirs + zlib.includedirs)[1:-2]}") 
+                replace_in_file(self, setup_py, "'/usr/contrib/ssl/include/'", "")
+                replace_in_file(self, setup_py, "lib_dirs = []", f"lib_dirs = {openssl.libs + zlib.libs}")
 
         # Enable static MSVC cpython
         if not self.options.shared:
