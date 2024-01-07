@@ -161,17 +161,17 @@ class ImageMagicConan(ConanFile):
             if self.settings.compiler in ["clang", "apple-clang"]:
                 self.requires("llvm-openmp/17.0.4")
         if self.options.with_pango:
-            self.requires("pango/1.48.5")
+            self.requires("pango/1.50.10")
         if self.options.with_png:
             self.requires("libpng/1.6.40")
         if self.options.with_raw:
-            self.requires("libraw/0.21.1")
+            self.requires("libraw/0.21.2")
         if self.options.with_tiff:
             self.requires("libtiff/4.6.0")
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
         if self.options.with_xml2:
-            self.requires("libxml2/2.12.2")
+            self.requires("libxml2/2.12.3")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
