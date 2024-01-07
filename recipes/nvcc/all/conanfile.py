@@ -66,48 +66,38 @@ class NvccConan(ConanFile):
             copy(self, "*", join(self.build_folder, "visual_studio_integration"), join(self.package_folder, "CUDAVisualStudioIntegration", "extras", "visual_studio_integration"))
         symlinks.absolute_to_relative_symlinks(self, self.package_folder)
 
+    @property
+    def _is_windows(self):
+        return str(self.settings.os) == "Windows"
+
     def package_info(self):
-        def lib(name):
-            libdirs = ["lib", "lib64", "lib/x64", "nvvm/lib", "nvvm/lib64", "nvvm/lib/x64"]
-            libnames = [f"lib{name}.a", f"lib{name}.so", f"{name}.lib"]
-            for libdir in libdirs:
-                for libname in libnames:
-                    if exists(join(self.package_folder, libdir, libname)):
-                        incdir = "include"
-                        if libdir.startswith("nvvm"):
-                            incdir = "nvvm/include"
-                        return [libdir, incdir, name]
-            return [None, None, None]
-        
-        def bin_dir():
-            if self.settings.os == "Windows":
-                if exists(join(self.package_folder, "bin")):
-                    return ["bin"]
-                return []
-            if exists(join(self.package_folder, "lib")):
-                return ["lib"]
-            if exists(join(self.package_folder, "lib64")):
-                return ["lib64"]
-            return []
-        components = ["cuda_driver",
-            "cudadevrt", "cudart", "cudart_static",
-            "nvrtc", "nvrtc_static", "nvrtc_builtins", "nvrtc_buildins_static",
-            "nvptxcompiler_static",
-            "OpenCL"]
-        libraries = {
-            "cuda_driver": "cuda"
-        }
-        for component in components:
-            libdir, incdir, libname = lib(libraries.get(component, component))
-            if libname is None:
-                continue
-            self.cpp_info.components[component].set_property("cmake_target_aliases", [f"CUDA::{component}"])
-            self.cpp_info.components[component].libdirs = ['lib']
-            self.cpp_info.components[component].resdirs = []
-            self.cpp_info.components[component].includedirs = [incdir]
-            self.cpp_info.components[component].libs = [libname]
-        run_extension = ".exe" if self.settings.os == "Windows" else ""
+        # nvcc libraries
+        if self.version >= Version("11.1"):
+            self.cpp_info.components["nvptxcompiler_static"].set_property("cmake_target_aliases", ["CUDA::nvptxcompiler_static"])
+            self.cpp_info.components["nvptxcompiler_static"].libs = ["nvptxcompiler_static"]
+
+        # nvvm libraries
+        self.cpp_info.components["nvvm"].includedirs = ["nvvm/include"]
+        self.cpp_info.components["nvvm"].libdirs = ["nvvm/lib"]
+        self.cpp_info.components["nvvm"].bindirs = ["nvvm/bin"] if self._is_windows else ["nvvm/bin", "nvvm/lib"]
+        self.cpp_info.components["nvvm"].libs = ["nvvm"]
+
+        # cudart libraries
+        self.cpp_info.components["cudart"].set_property("cmake_target_aliases", ["CUDA::cudart"])
+        self.cpp_info.components["cudart"].libs = ["cudart"]
+
+        self.cpp_info.components["cudart_static"].set_property("cmake_target_aliases", ["CUDA::cudart_static"])
+        self.cpp_info.components["cudart_static"].libs = ["cudart_static"]
+
+        self.cpp_info.components["cuda"].set_property("cmake_target_aliases", ["CUDA::cuda_driver"])
+        self.cpp_info.components["cuda"].libs = ["cuda"]
+
+        self.cpp_info.components["cudadevrt"].set_property("cmake_target_aliases", ["CUDA::cudadevrt"])
+        self.cpp_info.components["cudadevrt"].libs = ["cudadevrt"]
+
+        # toolchain
+        run_extension = ".exe" if self._is_windows else ""
         self.conf_info.update("tools.build:compiler_executables", { "cuda": join(self.package_folder, "bin", "nvcc" + run_extension) })
         self.conf_info.append("tools.cmake.cmaketoolchain:user_toolchain", join(self.package_folder, "nvcc_toolchain.cmake"))
-        if self.settings.os == "Windows":
+        if self._is_windows:
             self.conf_info.define("tools.cmake.cmaketoolchain:toolset_arch", f"x64,cuda={self.package_folder.replace(os.sep, '/')}")
