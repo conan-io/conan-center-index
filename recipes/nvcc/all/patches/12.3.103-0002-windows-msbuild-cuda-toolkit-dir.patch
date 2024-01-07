@@ -1,7 +1,7 @@
 diff --git a/visual_studio_integration/MSBuildExtensions/CUDA 12.3.props b/visual_studio_integration/MSBuildExtensions/CUDA 12.3.props
 index aff64fd..9f584e5 100644
---- a/visual_studio_integration/MSBuildExtensions/CUDA 12.3.props	
-+++ b/visual_studio_integration/MSBuildExtensions/CUDA 12.3.props	
+--- a/visual_studio_integration/MSBuildExtensions/CUDA 12.3.props
++++ b/visual_studio_integration/MSBuildExtensions/CUDA 12.3.props
 @@ -9,7 +9,9 @@
      </PropertyGroup>
  

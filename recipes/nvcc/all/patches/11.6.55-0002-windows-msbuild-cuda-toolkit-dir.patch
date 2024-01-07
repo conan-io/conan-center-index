@@ -1,7 +1,7 @@
 diff --git a/visual_studio_integration/MSBuildExtensions/CUDA 11.6.props b/visual_studio_integration/MSBuildExtensions/CUDA 11.6.props
 index da97789..b61a752 100644
---- a/visual_studio_integration/MSBuildExtensions/CUDA 11.6.props	
-+++ b/visual_studio_integration/MSBuildExtensions/CUDA 11.6.props	
+--- a/visual_studio_integration/MSBuildExtensions/CUDA 11.6.props
++++ b/visual_studio_integration/MSBuildExtensions/CUDA 11.6.props
 @@ -9,7 +9,9 @@
      </PropertyGroup>
  
