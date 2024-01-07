@@ -71,11 +71,6 @@ class NvccConan(ConanFile):
         return str(self.settings.os) == "Windows"
 
     def package_info(self):
-        # nvcc libraries
-        if self.version >= Version("11.1"):
-            self.cpp_info.components["nvptxcompiler_static"].set_property("cmake_target_aliases", ["CUDA::nvptxcompiler_static"])
-            self.cpp_info.components["nvptxcompiler_static"].libs = ["nvptxcompiler_static"]
-
         # nvvm libraries
         self.cpp_info.components["nvvm"].includedirs = ["nvvm/include"]
         self.cpp_info.components["nvvm"].libdirs = ["nvvm/lib"]
@@ -86,14 +81,27 @@ class NvccConan(ConanFile):
         self.cpp_info.components["cudart"].set_property("cmake_target_aliases", ["CUDA::cudart"])
         self.cpp_info.components["cudart"].libs = ["cudart"]
 
+        self.cpp_info.components["cudart_static_deps"].set_property("cmake_target_aliases", ["CUDA::cudart_static_deps"])
+        self.cpp_info.components["cudart_static_deps"].libdirs = []
+        self.cpp_info.components["cudart_static_deps"].bindirs = []
+        # unix system_libs
+        if self.settings.os in ["Linux"]:
+            self.cpp_info.components["cudart_static_deps"].system_libs = ["pthread", "rt"]
         self.cpp_info.components["cudart_static"].set_property("cmake_target_aliases", ["CUDA::cudart_static"])
         self.cpp_info.components["cudart_static"].libs = ["cudart_static"]
+        self.cpp_info.components["cudart_static"].requires = ["cudart_static_deps"]
 
-        self.cpp_info.components["cuda"].set_property("cmake_target_aliases", ["CUDA::cuda_driver"])
+        self.cpp_info.components["cuda"].set_property("cmake_target_aliases", ["CUDA::cuda_driver", "CUDA::cuda"])
         self.cpp_info.components["cuda"].libs = ["cuda"]
 
         self.cpp_info.components["cudadevrt"].set_property("cmake_target_aliases", ["CUDA::cudadevrt"])
         self.cpp_info.components["cudadevrt"].libs = ["cudadevrt"]
+
+        # nvcc libraries
+        if self.version >= Version("11.1"):
+            self.cpp_info.components["nvptxcompiler_static"].set_property("cmake_target_aliases", ["CUDA::nvptxcompiler_static"])
+            self.cpp_info.components["nvptxcompiler_static"].libs = ["nvptxcompiler_static"]
+            self.cpp_info.components["nvptxcompiler_static"].requires = ["cudart_static_deps"]
 
         # toolchain
         run_extension = ".exe" if self._is_windows else ""
