@@ -1,4 +1,4 @@
-diff --git a/bin/nvcc.profile b/bin/nvcc.profile
+diff --git a/bin/nvcc.profile b/nvcc/bin/nvcc.profile
 index c654e27..0012f8d 100644
 --- a/bin/nvcc.profile
 +++ b/bin/nvcc.profile

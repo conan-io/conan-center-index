@@ -1,13 +1,13 @@
 sources:
-  "12.3.52":
+  "12.3.103":
       Windows:
         x86_64:
           - url: "https://developer.download.nvidia.com/compute/cuda/redist/cuda_nvcc/windows-x86_64/cuda_nvcc-windows-x86_64-12.3.103-archive.zip"
             sha256: "8be94b093fc7c46b1e0a995c19d144c6cdebefb3040fa9ec6aa4dcba1a037d55"
-          - url: "https://developer.download.nvidia.com/compute/cuda/redist/visual_studio_integration/windows-x86_64/visual_studio_integration-windows-x86_64-12.3.101-archive.zip"
-            sha256: "207d1feca96de6cce11a38293ccaa39ea548527912395fcd225a0a61ea870a58"
           - url: "https://developer.download.nvidia.com/compute/cuda/redist/cuda_cudart/windows-x86_64/cuda_cudart-windows-x86_64-12.3.101-archive.zip"
             sha256: "310a71bc9c92d6e61eeddf3489cc195519665fbfaca16c618b03da0ac5ea9f7d"
+          - url: "https://developer.download.nvidia.com/compute/cuda/redist/visual_studio_integration/windows-x86_64/visual_studio_integration-windows-x86_64-12.3.101-archive.zip"
+            sha256: "207d1feca96de6cce11a38293ccaa39ea548527912395fcd225a0a61ea870a58"
       Linux:
         x86_64:
           - url: "https://developer.download.nvidia.com/compute/cuda/redist/cuda_nvcc/linux-x86_64/cuda_nvcc-linux-x86_64-12.3.103-archive.tar.xz"
@@ -19,12 +19,11 @@ sources:
         x86_64:
           - url: "https://developer.download.nvidia.com/compute/cuda/redist/cuda_nvcc/windows-x86_64/cuda_nvcc-windows-x86_64-11.6.55-archive.zip"
             sha256: "4b5f28340404e772234fcd212aafb029c487becad42e69634bde4ca126ecad87"
-          - url: "https://developer.download.nvidia.com/compute/cuda/redist/visual_studio_integration/windows-x86_64/visual_studio_integration-windows-x86_64-11.6.55-archive.zip"
-            sha256: "57eed1a2782783aa90c9a0d7457f200d6df9d24e3430c31110b813bb24175854"
           - url: "https://developer.download.nvidia.com/compute/cuda/redist/cuda_cudart/windows-x86_64/cuda_cudart-windows-x86_64-11.6.55-archive.zip"
             sha256: "d73be9aa0d66b282e94c75032763249a753efb9d63de891ae9a1c4a62ed1aca1"
-          - url: "https://developer.download.nvidia.com/compute/cuda/redist/cuda_nvrtc/windows-x86_64/cuda_nvrtc-windows-x86_64-11.6.55-archive.zip"
-            sha256: "4edf60f8a9f3baade040154f2008fe702c9672cb2c93b3dbbad545d312cd652a"
+          - url: "https://developer.download.nvidia.com/compute/cuda/redist/visual_studio_integration/windows-x86_64/visual_studio_integration-windows-x86_64-11.6.55-archive.zip"
+            sha256: "57eed1a2782783aa90c9a0d7457f200d6df9d24e3430c31110b813bb24175854"
+            destination: "visual_studio_integration"
       Linux:
         x86_64:
           - url: "https://developer.download.nvidia.com/compute/cuda/redist/cuda_nvcc/linux-x86_64/cuda_nvcc-linux-x86_64-11.6.55-archive.tar.xz"
@@ -32,14 +31,14 @@ sources:
           - url: "https://developer.download.nvidia.com/compute/cuda/redist/cuda_cudart/linux-x86_64/cuda_cudart-linux-x86_64-11.6.55-archive.tar.xz"
             sha256: "734a77b3a26a9d08489d43afb74bad230c7c4a0ed2d17a6317a47cf363dca521"
 patches:
-  "12.3.52":
-    - patch_file: patches/12.3.52-0001-windows-nvcc-profile.patch
+  "12.3.103":
+    - patch_file: patches/12.3.103-0001-windows-nvcc-profile.patch
       patch_description: "Modify library path"
       patch_type: "conan"
-    - patch_file: patches/12.3.52-0001-linux-nvcc-profile.patch
+    - patch_file: patches/12.3.103-0001-linux-nvcc-profile.patch
       patch_description: "Modify library path"
       patch_type: "conan"
-    - patch_file: patches/12.3.52-0002-windows-msbuild-cuda-toolkit-dir.patch
+    - patch_file: patches/12.3.103-0002-windows-msbuild-cuda-toolkit-dir.patch
       patch_description: "Replace legacy with modern CUDA Toolkit path"
       patch_type: "conan"
   "11.6.55":
