@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 
 project(libXpm VERSION "${CONAN_libXpm_VERSION}" LANGUAGES C)
 
@@ -16,8 +16,7 @@ endif()
 
 # ---- Library ----
 
-add_library(
-    Xpm
+add_library(Xpm
     src/Attrib.c
     src/CrBufFrI.c
     src/CrDatFrI.c
@@ -41,12 +40,9 @@ add_library(
     src/WrFFrI.c
 )
 
-if(WIN32)
-  target_sources(Xpm PRIVATE windows/libXpm.def)
-  target_compile_definitions(Xpm PRIVATE FOR_MSW)
-else()
-  target_sources(
-      Xpm PRIVATE
+if(UNIX)
+  # *P.c files deal with X11 Pixmaps and require X11
+  target_sources(Xpm PRIVATE
       src/CrBufFrP.c
       src/CrDatFrP.c
       src/CrIFrP.c
@@ -55,6 +51,11 @@ else()
   )
   target_include_directories(Xpm PRIVATE "${X11_INCLUDE_DIR}")
   target_link_libraries(Xpm PRIVATE "${X11_LIBRARY}")
+endif()
+
+if(WIN32)
+  set_target_properties(Xpm PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+  target_compile_definitions(Xpm PRIVATE FOR_MSW)
 endif()
 
 if(MSVC)
