@@ -68,6 +68,8 @@ class LibSigCppConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Avoid 'short_paths=True required' warning due to an unused folder
+        rmdir(self, os.path.join(self.source_folder, "untracked"))
 
     def generate(self):
         tc = CMakeToolchain(self)
