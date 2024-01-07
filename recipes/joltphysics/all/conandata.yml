@@ -1,7 +1,7 @@
 sources:
-  "4.0.1":
-    url: "https://github.com/jrouwe/JoltPhysics/archive/refs/tags/v4.0.1.tar.gz"
-    sha256: "e0bb4fa07047ca9c38bd71262427ad2972a7f45f8dff74587f73457f3b60df82"
+  "4.0.2":
+    url: "https://github.com/jrouwe/JoltPhysics/archive/refs/tags/v4.0.2.tar.gz"
+    sha256: "046baf71d05e47de7a530ce5d58a587a93ea7e9ea1ef8bf3ff80238fb95650ae"
   "3.0.1":
     url: "https://github.com/jrouwe/JoltPhysics/archive/refs/tags/v3.0.1.tar.gz"
     sha256: "7ebb40bf2dddbcf0515984582aaa197ddd06e97581fd55b98cb64f91b243b8a6"
@@ -9,8 +9,8 @@ sources:
     url: "https://github.com/jrouwe/JoltPhysics/archive/refs/tags/v2.0.1.tar.gz"
     sha256: "96ae2e8691c4802e56bf2587da30f2cc86b8abe82a78bc2398065bd87dd718af"
 patches:
-  "4.0.1":
-    - patch_file: "patches/4.0.1-0001-fix-cmake.patch"
+  "4.0.2":
+    - patch_file: "patches/4.0.2-0001-fix-cmake.patch"
       patch_description: "Fix CMakeLists: no warnings as errors, add install target, and add profile & debug_renderer options"
       patch_type: "conan"
   "3.0.1":

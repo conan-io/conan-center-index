@@ -1,5 +1,5 @@
 diff --git a/Build/CMakeLists.txt b/Build/CMakeLists.txt
-index a49e61c..51e2777 100644
+index e957db0..6e25166 100644
 --- a/Build/CMakeLists.txt
 +++ b/Build/CMakeLists.txt
 @@ -60,11 +60,11 @@ include(CMakeDependentOption)
@@ -17,10 +17,10 @@ index a49e61c..51e2777 100644
 +#	set(CMAKE_CONFIGURATION_TYPES "Debug;Release;ReleaseASAN;ReleaseUBSAN;ReleaseCoverage;Distribution")
 +#endif()
  
- if (("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows" OR "${CMAKE_SYSTEM_NAME}" STREQUAL "WindowsStore") AND NOT MINGW)
+ if (MSVC)
  	# Fill in the path to the asan libraries
 diff --git a/Jolt/Jolt.cmake b/Jolt/Jolt.cmake
-index c0f7099..c1210c3 100644
+index c0f7099..87c7aa8 100644
 --- a/Jolt/Jolt.cmake
 +++ b/Jolt/Jolt.cmake
 @@ -446,6 +446,21 @@ source_group(TREE ${JOLT_PHYSICS_ROOT} FILES ${JOLT_PHYSICS_SRC_FILES})
@@ -45,13 +45,14 @@ index c0f7099..c1210c3 100644
  
  if (BUILD_SHARED_LIBS)
  	# Set default visibility to hidden
-@@ -475,12 +490,11 @@ if (BUILD_SHARED_LIBS)
+@@ -475,12 +490,12 @@ if (BUILD_SHARED_LIBS)
  endif()
  
  target_include_directories(Jolt PUBLIC ${PHYSICS_REPO_ROOT})
 -target_precompile_headers(Jolt PRIVATE ${JOLT_PHYSICS_ROOT}/Jolt.h)
 -target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Debug>:_DEBUG;JPH_PROFILE_ENABLED;JPH_DEBUG_RENDERER>")
 -target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Release>:NDEBUG;JPH_PROFILE_ENABLED;JPH_DEBUG_RENDERER>")
++#target_precompile_headers(Jolt PRIVATE ${JOLT_PHYSICS_ROOT}/Jolt.h)
 +target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Debug>:_DEBUG>")
 +target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Release>:NDEBUG>")
  target_compile_definitions(Jolt PUBLIC "$<$<CONFIG:Distribution>:NDEBUG>")
