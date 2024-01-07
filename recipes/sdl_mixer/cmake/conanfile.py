@@ -191,6 +191,11 @@ class SDLMixerConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SDL2_mixer")
         self.cpp_info.set_property("cmake_target_name", "SDL2_mixer::SDL2_mixer")
+        # https://github.com/libsdl-org/SDL_mixer/blob/release-2.6.3/CMakeLists.txt#L164-L172
+        if not self.options.shared:
+            self.cpp_info.set_property("cmake_target_aliases", ["SDL2_mixer::SDL2_mixer-static"])
+        # The project only creates a pkg-config file for a shared lib, but add it for static as well, unofficially
+        # https://github.com/libsdl-org/SDL_mixer/blob/release-2.6.3/CMakeLists.txt#L828
         self.cpp_info.set_property("pkg_config_name", "SDL2_mixer")
 
         self.cpp_info.libs = ["SDL2_mixer"]
