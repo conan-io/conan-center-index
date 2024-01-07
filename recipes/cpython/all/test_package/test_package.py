@@ -17,7 +17,7 @@ def add_test(fn):
     name = fn.__name__[fn.__name__.find("_") + 1 :]
 
     def inner_fn():
-        print(f"testing {name}")
+        print("testing {}".format(name))
         sys.stdout.flush()
         fn()
 
@@ -90,7 +90,7 @@ def test_spam():
         raise Exception("spam.__doc__ does not contain the expected text")
 
     cmd = {"Windows": "dir"}.get(platform.system(), "ls")
-    print(f'About to run spam.system("{cmd}")')
+    print('About to run spam.system("{}")'.format(cmd))
     sys.stdout.flush()
 
     spam.system(cmd)
@@ -118,9 +118,9 @@ def test_bsddb():
     if len(db) != 2:
         raise Exception("Wrong length")
     if db["key1"] != "value1":
-        raise Exception(f"value1 incorrect {db['key1']}")
+        raise Exception("value1 incorrect {}".format(db["key1"]))
     if db["key2"] != "value2":
-        raise Exception(f"value2 incorrect {db['key2']}")
+        raise Exception("value2 incorrect {}".format(db["key2"]))
 
 
 @add_test
@@ -185,7 +185,7 @@ def test_decimal():
 def test_curses():
     import _curses
 
-    print(f"Using _curses version {_curses.version}")
+    print("Using _curses version {}".format(_curses.version))
 
 
 @add_test
@@ -193,15 +193,15 @@ def test_ctypes():
     import _ctypes
 
     errno = _ctypes.get_errno()
-    print(f"errno={errno}")
+    print("errno={}".format(errno))
 
 
 @add_test
 def test_tkinter():
     import _tkinter
 
-    print(f"tcl version: {_tkinter.TCL_VERSION}")
-    print(f"tk version: {_tkinter.TK_VERSION}")
+    print("tcl version: {}".format(_tkinter.TCL_VERSION))
+    print("tk version: {}".format(_tkinter.TK_VERSION))
 
 
 @add_test
@@ -209,7 +209,7 @@ def test_ssl():
     import ssl
 
     default_context = ssl.create_default_context()
-    print(f"default_context.options={default_context.options}")
+    print("default_context.options={}".format(default_context.options))
 
 
 def main():
