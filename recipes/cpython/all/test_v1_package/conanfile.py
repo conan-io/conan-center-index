@@ -72,6 +72,13 @@ class TestPackageConan(ConanFile):
         VirtualRunEnv(self).generate(scope="run")
         VirtualRunEnv(self).generate(scope="build")
 
+    def build_requirements(self):
+        # The main recipe does not require CMake, but we test with it.
+        # The interesting problem that arises here is if you have CMake installed
+        # with your global pip, then it will fail to run in this test package.
+        # To avoid that, just add a requirement on CMake.
+        self.tool_requires("cmake/[>=3.15 <4]")
+
     def build(self):
         if not tools.cross_building(self, skip_x64_x86=True):
             command = "{} --version".format(self.deps_user_info["cpython"].python)
