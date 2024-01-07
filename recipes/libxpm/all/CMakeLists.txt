@@ -72,6 +72,12 @@ endif()
 
 target_include_directories(Xpm PRIVATE include/X11)
 
+target_compile_definitions(Xpm PRIVATE
+    # Build without the --enable-open-zfile option:
+    # https://gitlab.freedesktop.org/xorg/lib/libxpm/-/blob/libXpm-3.5.17/configure.ac?ref_type=tags#L67-88
+    NO_ZPIPE
+)
+
 set_target_properties(
     Xpm PROPERTIES
     VERSION "${PROJECT_VERSION}"
