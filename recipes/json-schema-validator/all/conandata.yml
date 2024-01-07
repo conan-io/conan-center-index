@@ -1,4 +1,7 @@
 sources:
+  "2.3.0":
+    url: "https://github.com/pboettch/json-schema-validator/archive/refs/tags/2.3.0.tar.gz"
+    sha256: "2c00b50023c7d557cdaa71c0777f5bcff996c4efd7a539e58beaa4219fa2a5e1"
   "2.2.0":
     url: "https://github.com/pboettch/json-schema-validator/archive/refs/tags/2.2.0.tar.gz"
     sha256: "03897867bd757ecac1db7545babf0c6c128859655b496582a9cea4809c2260aa"

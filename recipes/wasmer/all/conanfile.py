@@ -94,5 +94,8 @@ class WasmerConan(ConanFile):
                     self.cpp_info.system_libs.append("rt")
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["bcrypt", "userenv", "ws2_32"]
-            elif is_apple_os(self) and Version(self.version) >= "3.2.0":
-                self.cpp_info.frameworks = ["Security"]
+            elif is_apple_os(self):
+                if Version(self.version) >= "3.2.0":
+                    self.cpp_info.frameworks += ["Security"]
+                if Version(self.version) >= "4.2.5":
+                    self.cpp_info.frameworks += ["CoreFoundation", "SystemConfiguration"]
