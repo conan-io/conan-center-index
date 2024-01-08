@@ -17,6 +17,7 @@ class RotorConan(ConanFile):
         "Event loop friendly C++ actor micro-framework, supervisable"
     )
     topics = ("concurrency", "actor-framework", "actors", "actor-model", "erlang", "supervising", "supervisor")
+    exports_sources = "CMakeLists.txt", "src/*", "include/*", "test_package/*", "cmake/*", "tests/*", "examples/*"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -49,7 +50,7 @@ class RotorConan(ConanFile):
                 pass
 
     def requirements(self):
-        self.requires("boost/1.81.0")
+        self.requires("boost/1.83.0", transitive_headers=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -120,6 +121,3 @@ class RotorConan(ConanFile):
         if self.options.enable_thread:
             self.cpp_info.components["thread"].libs = ["rotor_thread"]
             self.cpp_info.components["thread"].requires = ["core"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "rotor"
