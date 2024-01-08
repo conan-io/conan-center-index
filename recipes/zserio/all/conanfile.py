@@ -15,16 +15,13 @@ class ZserioConanFile(ConanFile):
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://zserio.org"
     topics = ("zserio", "cpp", "c++", "serialization")
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True # TODO: remove in conan v2
-
     options = {
-        "shared": [True, False],
         "fPIC": [True, False]
     }
     default_options = {
-        "shared": False,
         "fPIC": False
     }
 
@@ -32,23 +29,19 @@ class ZserioConanFile(ConanFile):
     def _min_cppstd(self):
         return 11
 
+    def export_sources(self):
+        copy(self, "zserio_compiler.cmake", self.recipe_folder, self.export_sources_folder)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.options.shared:
-            raise ConanInvalidConfiguration("Zserio C++ runtime cannot be built as a shared library.")
-
         if self.settings.os not in ["Linux", "Windows", "Macos"]:
-            raise ConanInvalidConfiguration(f"Zserio doesn't support '{self.settings.os}'.")
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support '{self.settings.os}'.")
 
         # experimental Macos support
         if self.settings.os == "Macos":
@@ -60,9 +53,7 @@ class ZserioConanFile(ConanFile):
     def source(self):
         sources = self.conan_data["sources"][self.version]
         get(self, **sources["runtime"], strip_root=True)
-
-    def export_sources(self):
-        copy(self, "zserio_compiler.cmake", self.recipe_folder, self.export_sources_folder)
+        download(self, filename="LICENSE", **sources["license"])
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -72,12 +63,8 @@ class ZserioConanFile(ConanFile):
         cmake = CMake(self)
         cmake.configure(build_script_folder="cpp")
         cmake.build()
-
         sources = self.conan_data["sources"][self.version]
-
         get(self, **sources["compiler"], pattern="zserio.jar")
-
-        download(self, filename="LICENSE", **sources["license"])
 
     @property
     def _cmake_module_path(self):
@@ -97,7 +84,8 @@ class ZserioConanFile(ConanFile):
              os.path.join(self.package_folder, self._cmake_module_path))
 
     def package_info(self):
-        self.cpp_info.components["ZserioCppRuntime"].libs = ["ZserioCppRuntime"]
+        self.cpp_info.libs = ["ZserioCppRuntime"]
+        self.cpp_info.set_property("cmake_target_name", "zserio::ZserioCppRuntime")
 
         zserio_jar_file = os.path.join(self.package_folder, "bin", "zserio.jar")
         self.buildenv_info.define("ZSERIO_JAR_FILE", zserio_jar_file)
