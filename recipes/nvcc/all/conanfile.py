@@ -1,10 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, save, copy, symlinks, patch, export_conandata_patches, rm, rmdir, rename
+from conan.tools.files import get, save, copy, symlinks, patch, export_conandata_patches, rm, rmdir, rename, replace_in_file
 from conan.tools.scm import Version
 import os
 from os import chmod
 from os.path import isdir, join, exists
+from re import match
 
 required_conan_version = ">=1.47.0"
 
@@ -51,9 +52,21 @@ class NvccConan(ConanFile):
         if exists(join(nvvm_root, "nvvm-samples")):
             rmdir(self, join(self, nvvm_root, "nvvm-samples"))
         # patching
-        for it in self.conan_data.get("patches", {}).get(str(self.version), []):
-            if str(self.settings.os).lower() in it.get("patch_file", ""):
-                patch(self, **it, base_path=self.build_folder)
+        nvcc_profile_path = join(self.build_folder, "bin", "nvcc.profile")
+        if self._is_windows:
+            replace_in_file(self, nvcc_profile_path, "$(_WIN_PLATFORM_)", "")
+            major, minor = match(r"(\d+)\.(\d+)", self.version).groups()
+            props_path = join(self.build_folder, "visual_studio_integration", "MSBuildExtensions", f"CUDA {major}.{minor}.props")
+            replace_in_file(self, props_path,
+                r'''<CudaToolkitDir Condition="'$(CudaToolkitDir)' == ''">$(CudaToolkitCustomDir)</CudaToolkitDir>''',
+                r'''<CudaToolkitDir Condition="'$(CudaToolkitDir)' == '' AND !Exists($(CudaToolkitCustomDir))">$([System.Text.RegularExpressions.Regex]::Replace( $(CudaToolkitCustomDir), '(nvcc[\\\/]?)$', '' ) )</CudaToolkitDir>'''
+                r'''<CudaToolkitDir Condition="'$(CudaToolkitDir)' == ''">$(CudaToolkitCustomDir)</CudaToolkitDir>''')
+            replace_in_file(self, props_path,
+                r'''<CudaToolkitLibDir Condition="'$(CudaToolkitLibDir)' == ''">$(CudaToolkitDir)lib64</CudaToolkitLibDir>''',
+                r'''<CudaToolkitLibDir Condition="'$(CudaToolkitLibDir)' == '' AND Exists('$(CudaToolkitDir)lib64')">$(CudaToolkitDir)lib64</CudaToolkitLibDir>'''
+                r'''<CudaToolkitLibDir Condition="'$(CudaToolkitLibDir)' == ''">$(CudaToolkitDir)lib</CudaToolkitLibDir>''')
+        else:
+            replace_in_file(self, nvcc_profile_path, "$(_TARGET_SIZE_)", "")
 
     def package(self):
         copy(self, "nvcc_toolchain.cmake", self.export_sources_folder, self.package_folder)
