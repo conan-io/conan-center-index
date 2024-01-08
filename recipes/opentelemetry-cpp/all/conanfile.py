@@ -96,8 +96,10 @@ class OpenTelemetryCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-    if self.options.with_otlp != "deprecated":
-        self.output.warning(f"{self.ref}:with_otlp option is deprecated, do not use anymore. Please, consider with_otlp_grpc or with_otlp_http instead.")
+        if self.options.with_otlp != "deprecated":
+            self.output.warning(f"{self.ref}:with_otlp option is deprecated, do not use anymore. "
+                                "Please, consider with_otlp_grpc or with_otlp_http instead.")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
