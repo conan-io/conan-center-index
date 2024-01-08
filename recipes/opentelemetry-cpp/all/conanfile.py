@@ -96,7 +96,8 @@ class OpenTelemetryCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-
+    if self.options.with_otlp != "deprecated":
+        self.output.warning(f"{self.ref}:with_otlp option is deprecated, do not use anymore. Please, consider with_otlp_grpc or with_otlp_http instead.")
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -107,10 +108,9 @@ class OpenTelemetryCppConan(ConanFile):
         if self.options.with_abseil:
             self.requires("abseil/20230125.3", transitive_headers=True)
 
-        if self.options.with_otlp or self.options.with_otlp_grpc:
+        if self.options.with_otlp_grpc:
             self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
-            if self.options.with_otlp_grpc:
-                self.requires("grpc/1.54.3", transitive_headers=True, transitive_libs=True)
+            self.requires("grpc/1.54.3", transitive_headers=True, transitive_libs=True)
 
         if (self.options.with_zipkin or
            self.options.with_elasticsearch or
@@ -168,11 +168,10 @@ class OpenTelemetryCppConan(ConanFile):
             raise ConanInvalidConfiguration("opentelemetry-cpp >= 1.12.0 does not support Apple Clang on Conan v1")
 
     def build_requirements(self):
-        if self.options.with_otlp or self.options.with_otlp_grpc:
+        if self.options.with_otlp_grpc:
             self.tool_requires("opentelemetry-proto/1.0.0")
             self.tool_requires("protobuf/<host_version>")
-            if self.options.with_otlp_grpc:
-                self.tool_requires("grpc/<host_version>")
+            self.tool_requires("grpc/<host_version>")
 
     def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent("""\
@@ -205,7 +204,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_GSL"] = self.options.with_gsl
         tc.cache_variables["WITH_ABSEIL"] = self.options.with_abseil
         if Version(self.version) < "1.10":
-            tc.cache_variables["WITH_OTLP"] = self.options.with_otlp
+            tc.cache_variables["WITH_OTLP"] = self.options.with_otlp_grpc or self.options.with_otlp_http
         tc.cache_variables["WITH_OTLP_GRPC"] = self.options.with_otlp_grpc
         tc.cache_variables["WITH_OTLP_HTTP"] = self.options.with_otlp_http
         tc.cache_variables["WITH_ZIPKIN"] = self.options.with_zipkin
