@@ -1,12 +1,7 @@
-cmake_minimum_required(VERSION 3.1)
-project(PackageTest CXX)
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(xege REQUIRED CONFIG)
 
-add_executable(example example.cpp)
-target_link_libraries(example ${CONAN_LIBS})
-
-if(MSYS OR MINGW)
-    target_link_libraries(example -static-libgcc -static-libstdc++)
-endif()
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE xege::xege)

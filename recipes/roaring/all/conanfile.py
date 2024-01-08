@@ -22,6 +22,7 @@ class RoaringConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_avx": [True, False],
+        "with_avx512": [True, False],
         "with_neon": [True, False],
         "native_optimization": [True, False],
     }
@@ -29,15 +30,23 @@ class RoaringConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_avx": True,
+        "with_avx512": True,
         "with_neon": True,
         "native_optimization": False,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 11
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.arch not in ("x86", "x86_64"):
             del self.options.with_avx
+            del self.options.with_avx512
+        elif Version(self.version) < "1.1.0":
+            del self.options.with_avx512
         if not str(self.settings.arch).startswith("arm"):
             del self.options.with_neon
 
@@ -50,7 +59,7 @@ class RoaringConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "11")
+            check_min_cppstd(self, self._min_cppstd)
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "11":
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires at least apple-clang 11 to support runtime dispatching.",
@@ -62,6 +71,8 @@ class RoaringConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["ROARING_DISABLE_AVX"] = not self.options.get_safe("with_avx", False)
+        if "with_avx512" in self.options:
+            tc.variables["ROARING_DISABLE_AVX512"] = not self.options.with_avx512
         tc.variables["ROARING_DISABLE_NEON"] = not self.options.get_safe("with_neon", False)
         tc.variables["ROARING_DISABLE_NATIVE"] = not self.options.native_optimization
         tc.variables["ROARING_BUILD_STATIC"] = not self.options.shared
@@ -71,7 +82,8 @@ class RoaringConan(ConanFile):
         tc.generate()
 
     def build(self):
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_MACOSX_RPATH OFF)", "")
+        if Version(self.version) < "2.0.0":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_MACOSX_RPATH OFF)", "")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

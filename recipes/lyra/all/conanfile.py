@@ -47,7 +47,6 @@ class LyraConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "lyra")
         self.cpp_info.set_property("cmake_target_name", "bfg::lyra")
-
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["_lyra"].set_property(
             "cmake_target_name", "bfg::lyra")
@@ -57,3 +56,5 @@ class LyraConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "bfg"
         self.cpp_info.components["_lyra"].names["cmake_find_package"] = "lyra"
         self.cpp_info.components["_lyra"].names["cmake_find_package_multi"] = "lyra"
+        self.cpp_info.components["_lyra"].libdirs = []
+        self.cpp_info.libdirs = []

@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
 
@@ -20,6 +21,7 @@ class UnitsConan(ConanFile):
               "no-dependencies")
     homepage = "https://github.com/nholthaus/units"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -36,6 +38,9 @@ class UnitsConan(ConanFile):
             "msvc": "190",
         }
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def package_id(self):
         self.info.clear()
 
@@ -49,8 +54,7 @@ class UnitsConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -64,4 +68,3 @@ class UnitsConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "units::units")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []

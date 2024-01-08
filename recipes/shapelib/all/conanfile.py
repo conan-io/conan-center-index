@@ -4,16 +4,17 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class ShapelibConan(ConanFile):
     name = "shapelib"
     description = "C library for reading and writing ESRI Shapefiles"
-    license = "LGPL-2.0-or-later"
+    license = "LGPL-2.0-or-later", "MIT"
     topics = ("osgeo", "shapefile", "esri", "geospatial")
     homepage = "https://github.com/OSGeo/shapelib"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -45,7 +46,6 @@ class ShapelibConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.variables["BUILD_TESTING"] = False
         tc.variables["USE_RPATH"] = False
         tc.generate()
@@ -58,6 +58,7 @@ class ShapelibConan(ConanFile):
 
     def package(self):
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "license.html", os.path.join(self.source_folder, "web"), os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rm(self, "*.exe", os.path.join(self.package_folder, "bin"))

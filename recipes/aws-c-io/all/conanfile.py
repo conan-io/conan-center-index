@@ -45,12 +45,15 @@ class AwsCIO(ConanFile):
         if Version(self.version) <= "0.10.9":
             self.requires("aws-c-common/0.6.11", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-cal/0.5.11")
-        else:
+        elif Version(self.version) <= "0.13.4":
             self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-cal/0.5.13")
+        else:
+            self.requires("aws-c-common/0.9.0", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-cal/0.6.1", transitive_headers=True)
 
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-            self.requires("s2n/1.3.31")
+            self.requires("s2n/1.3.50")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

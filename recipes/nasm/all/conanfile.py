@@ -17,13 +17,27 @@ class NASMConan(ConanFile):
     homepage = "http://www.nasm.us"
     description = "The Netwide Assembler, NASM, is an 80x86 and x86-64 assembler"
     license = "BSD-2-Clause"
-    topics = ("nasm", "installer", "assembler")
+    topics = ("asm", "installer", "assembler",)
 
     settings = "os", "arch", "compiler", "build_type"
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _nasm(self):
+        suffix = "w.exe" if is_msvc(self) else ""
+        return os.path.join(self.package_folder, "bin", f"nasm{suffix}")
+
+    @property
+    def _ndisasm(self):
+        suffix = "w.exe" if is_msvc(self) else ""
+        return os.path.join(self.package_folder, "bin", f"ndisasm{suffix}")
+
+    def _chmod_plus_x(self, filename):
+        if os.name == "posix":
+            os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -94,10 +108,21 @@ class NASMConan(ConanFile):
             autotools = Autotools(self)
             autotools.install()
             rmdir(self, os.path.join(self.package_folder, "share"))
+        self._chmod_plus_x(self._nasm)
+        self._chmod_plus_x(self._ndisasm)
 
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
 
+        compiler_executables = {"asm": self._nasm}
+        self.conf_info.update("tools.build:compiler_executables", compiler_executables)
+        self.buildenv_info.define_path("NASM", self._nasm)
+        self.buildenv_info.define_path("NDISASM", self._ndisasm)
+        self.buildenv_info.define_path("AS", self._nasm)
+
         # TODO: Legacy, to be removed on Conan 2.0
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        self.env_info.NASM = self._nasm
+        self.env_info.NDISASM = self._ndisasm
+        self.env_info.AS = self._nasm

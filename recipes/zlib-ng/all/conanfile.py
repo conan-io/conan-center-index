@@ -34,7 +34,7 @@ class ZlibNgConan(ConanFile):
         "fPIC": True,
         "zlib_compat": False,
         "with_gzfileop": True,
-        "with_optim": False,
+        "with_optim": True,
         "with_new_strategies": True,
         "with_native_instructions": False,
         "with_reduced_mem": False,
