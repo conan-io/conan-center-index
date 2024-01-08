@@ -5,15 +5,15 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, download, export_conandata_patches, get, save
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, download, export_conandata_patches, get, save, load
 
 required_conan_version = ">=1.53.0"
 
 
 class MicroprofileConan(ConanFile):
     name = "microprofile"
+    license = "DocumentRef-README.md:LicenseRef-Unlicense"
     description = "Microprofile is a embeddable profiler in a few files, written in C++"
-    license = "Unlicense"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jonasmr/microprofile"
     topics = ("profiler", "embedded", "timer")
@@ -135,7 +135,6 @@ class MicroprofileConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
-        download(self, filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -152,8 +151,12 @@ class MicroprofileConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    def _extract_license(self):
+        readme = load(self, os.path.join(self.source_folder, "README.md"),)
+        return readme[readme.find("# License"):]
+
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
         cmake = CMake(self)
         cmake.install()
 
@@ -203,5 +206,5 @@ class MicroprofileConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread", "m"]
         self.cpp_info.defines.append("MICROPROFILE_USE_CONFIG")

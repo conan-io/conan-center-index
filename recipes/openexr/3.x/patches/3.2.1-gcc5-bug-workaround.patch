@@ -1,0 +1,13 @@
+diff --git a/src/lib/OpenEXR/ImfAttribute.h b/src/lib/OpenEXR/ImfAttribute.h
+index bccd980..c8438f3 100644
+--- a/src/lib/OpenEXR/ImfAttribute.h
++++ b/src/lib/OpenEXR/ImfAttribute.h
+@@ -108,7 +108,7 @@ public:
+     // that the type T is copyable/assignable/moveable.
+     //------------------------------------------------------------
+ 
+-    TypedAttribute () = default;
++    TypedAttribute () {};
+     TypedAttribute (const T& value);
+     TypedAttribute (const TypedAttribute<T>& other) = default;
+     TypedAttribute (TypedAttribute<T>&& other)      = default;

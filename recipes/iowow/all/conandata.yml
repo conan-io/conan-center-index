@@ -1,0 +1,20 @@
+sources:
+  "1.4.17":
+    url: "https://github.com/Softmotions/iowow/archive/refs/tags/v1.4.17.tar.gz"
+    sha256: "13a851026dbc1f31583fba96986e86e94a7554f9e7d38aa12a9ea5dbebdf328b"
+  "1.4.16":
+    url: "https://github.com/Softmotions/iowow/archive/refs/tags/v1.4.16.tar.gz"
+    sha256: "6e3b92b6c342ef6ef4a2731ca2d43368749d66ca876b24b773587364cff01003"
+patches:
+  "1.4.17":
+    - patch_file: "patches/1.4.16-0002-fix-uint64_t-format.patch"
+      patch_description: "fix uint64_t printf format"
+      patch_type: "portability"
+  "1.4.16":
+    - patch_file: "patches/1.4.16-0001-some-fix-for-macOS.patch"
+      patch_description: "Some fixes for macOS"
+      patch_type: "portability"
+      patch_source: "https://github.com/Softmotions/iowow/pull/56"
+    - patch_file: "patches/1.4.16-0002-fix-uint64_t-format.patch"
+      patch_description: "fix uint64_t printf format"
+      patch_type: "portability"

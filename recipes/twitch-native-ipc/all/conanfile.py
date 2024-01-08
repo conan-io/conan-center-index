@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm
-from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -31,6 +31,10 @@ class TwitchNativeIpcConan(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        return "17"
+
+    @property
     def _compilers_min_version(self):
         return {
             "gcc": "8",
@@ -48,16 +52,6 @@ class TwitchNativeIpcConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 17)
-
-        min_version = self._compilers_min_version.get(str(self.settings.compiler), False)
-        if min_version:
-            if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("twitch-native-ipc requires C++17")
-        else:
-            self.output.warning("unknown compiler, assuming C++17 support")
-
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
@@ -67,6 +61,16 @@ class TwitchNativeIpcConan(ConanFile):
     def requirements(self):
         self.requires("libuv/1.46.0")
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_min_version.get(str(self.settings.compiler))
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -74,7 +78,7 @@ class TwitchNativeIpcConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_CODE_FORMATTING"] = False
         tc.variables["BUILD_TESTING"] = False
-        if self.settings.os == "Windows":
+        if is_msvc(self):
             tc.variables["MSVC_DYNAMIC_RUNTIME"] = not is_msvc_static_runtime(self)
         tc.generate()
         tc = CMakeDeps(self)

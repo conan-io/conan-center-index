@@ -91,6 +91,7 @@ class LibX264Conan(ConanFile):
             args["--enable-pic"] = ""
         if self.settings.build_type == "Debug":
             args["--enable-debug"] = ""
+
         if is_apple_os(self) and self.settings.arch == "armv8":
             # bitstream-a.S:29:18: error: unknown token in expression
             extra_asflags.append("-arch arm64")
@@ -111,6 +112,7 @@ class LibX264Conan(ConanFile):
             # FIXME: get using user_build_info
             env.define("AS", unix_path(self, os.path.join(self.dependencies.build["nasm"].package_folder, "bin", "nasm{}".format(".exe" if self.settings.os == "Windows" else ""))))
             env.vars(self).save_script("conanbuild_nasm")
+
         if cross_building(self):
             if self.settings.os == "Android":
                 # the as of ndk does not work well for building libx264
@@ -132,12 +134,23 @@ class LibX264Conan(ConanFile):
                 abi = "androideabi" if self.settings.arch == "armv7" else "android"
                 args["--cross-prefix"] = f"{ndk_root}/bin/{arch}-linux-{abi}-"
                 env.vars(self).save_script("conanbuild_android")
+
         if is_msvc(self):
             env = Environment()
             env.define("CC", "cl -nologo")
             if check_min_vs(self, 180, False):
                 extra_cflags.append("-FS")
             env.vars(self).save_script("conanbuild_msvc")
+
+        if is_msvc(self) or self.settings.os in ["iOS", "watchOS", "tvOS"]:
+            # autotools does not know about the msvc and Apple embedded OS canonical name(s)
+            args["--build"] = None
+            args["--host"] = None
+
+        # The finite-math-only optimization has no effect and can cause linking errors
+        # when linked against glibc >= 2.31
+        extra_cflags += ["-fno-finite-math-only"]
+
         if extra_asflags:
             args["--extra-asflags"] = " ".join(extra_asflags)
         if extra_cflags:
