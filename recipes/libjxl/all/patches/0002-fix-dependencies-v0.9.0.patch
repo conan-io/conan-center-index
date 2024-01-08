@@ -1,0 +1,119 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7036ee3..9e19fd8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -174,7 +174,7 @@ endif()
+ message(STATUS
+     "Compiled IDs C:${CMAKE_C_COMPILER_ID}, C++:${CMAKE_CXX_COMPILER_ID}")
+ 
+-set(JXL_HWY_INCLUDE_DIRS "$<BUILD_INTERFACE:$<TARGET_PROPERTY:$<IF:$<TARGET_EXISTS:hwy::hwy>,hwy::hwy,hwy>,INTERFACE_INCLUDE_DIRECTORIES>>")
++set(JXL_HWY_INCLUDE_DIRS "$<BUILD_INTERFACE:$<TARGET_PROPERTY:highway::highway,INTERFACE_INCLUDE_DIRECTORIES>>")
+ # Always disable SSSE3 since it is rare to have SSSE3 but not SSE4
+ set(HWY_DISABLED_TARGETS "HWY_SSSE3")
+ if (NOT JPEGXL_ENABLE_AVX512)
+diff --git a/lib/jpegli.cmake b/lib/jpegli.cmake
+index f06912f..e04d941 100644
+--- a/lib/jpegli.cmake
++++ b/lib/jpegli.cmake
+@@ -6,7 +6,7 @@
+ include(jxl_lists.cmake)
+ 
+ set(JPEGLI_INTERNAL_LIBS
+-  hwy
++  highway::highway
+   Threads::Threads
+   ${ATOMICS_LIBRARIES}
+ )
+@@ -23,12 +23,12 @@ elseif(JPEGLI_LIBJPEG_LIBRARY_SOVERSION STREQUAL "8")
+   set(JPEG_LIB_VERSION 80)
+ endif()
+ 
+-configure_file(
+-  ../third_party/libjpeg-turbo/jconfig.h.in include/jpegli/jconfig.h)
+-configure_file(
+-  ../third_party/libjpeg-turbo/jpeglib.h include/jpegli/jpeglib.h COPYONLY)
+-configure_file(
+-  ../third_party/libjpeg-turbo/jmorecfg.h include/jpegli/jmorecfg.h COPYONLY)
++#configure_file(
++#  ../third_party/libjpeg-turbo/jconfig.h.in include/jpegli/jconfig.h)
++#configure_file(
++#  ../third_party/libjpeg-turbo/jpeglib.h include/jpegli/jpeglib.h COPYONLY)
++#configure_file(
++#  ../third_party/libjpeg-turbo/jmorecfg.h include/jpegli/jmorecfg.h COPYONLY)
+ 
+ add_library(jpegli-static STATIC EXCLUDE_FROM_ALL "${JPEGXL_INTERNAL_JPEGLI_SOURCES}")
+ target_compile_options(jpegli-static PRIVATE "${JPEGXL_INTERNAL_FLAGS}")
+diff --git a/lib/jxl.cmake b/lib/jxl.cmake
+index 5f46c90..b2d2de7 100644
+--- a/lib/jxl.cmake
++++ b/lib/jxl.cmake
+@@ -14,20 +14,20 @@ list(APPEND JPEGXL_INTERNAL_DEC_SOURCES ${JPEGXL_INTERNAL_DEC_JPEG_SOURCES})
+ endif()
+ 
+ set_source_files_properties(jxl/enc_fast_lossless.cc PROPERTIES COMPILE_FLAGS -O3)
+-
++find_package(highway REQUIRED CONFIG)
+ set(JPEGXL_DEC_INTERNAL_LIBS
+-  hwy
++  highway::highway
+   Threads::Threads
+   ${ATOMICS_LIBRARIES}
+ )
+ 
+-if (JPEGXL_ENABLE_TRANSCODE_JPEG OR JPEGXL_ENABLE_BOXES)
+-list(APPEND JPEGXL_DEC_INTERNAL_LIBS brotlidec brotlicommon)
+-endif()
+-
++#if (JPEGXL_ENABLE_TRANSCODE_JPEG OR JPEGXL_ENABLE_BOXES)
++#list(APPEND JPEGXL_DEC_INTERNAL_LIBS brotlidec brotlicommon)
++#endif()
++find_package(brotli REQUIRED CONFIG)
+ set(JPEGXL_INTERNAL_LIBS
+   ${JPEGXL_DEC_INTERNAL_LIBS}
+-  brotlienc
++  brotli::brotli
+ )
+ 
+ if (JPEGXL_ENABLE_TRANSCODE_JPEG)
+@@ -96,8 +96,8 @@ target_compile_options(jxl_dec-obj PUBLIC ${JPEGXL_COVERAGE_FLAGS})
+ set_property(TARGET jxl_dec-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+ target_include_directories(jxl_dec-obj PUBLIC
+   "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
+   "${JXL_HWY_INCLUDE_DIRS}"
+-  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:brotlicommon,INTERFACE_INCLUDE_DIRECTORIES>>"
++  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:brotli::brotli,INTERFACE_INCLUDE_DIRECTORIES>>"
+ )
+ target_compile_definitions(jxl_dec-obj PUBLIC
+   ${OBJ_COMPILE_DEFINITIONS}
+@@ -111,8 +111,8 @@ target_compile_options(jxl_enc-obj PUBLIC ${JPEGXL_COVERAGE_FLAGS})
+ set_property(TARGET jxl_enc-obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+ target_include_directories(jxl_enc-obj PUBLIC
+   ${PROJECT_SOURCE_DIR}
+   ${JXL_HWY_INCLUDE_DIRS}
+-  $<TARGET_PROPERTY:brotlicommon,INTERFACE_INCLUDE_DIRECTORIES>
++  "$<BUILD_INTERFACE:$<TARGET_PROPERTY:brotli::brotli,INTERFACE_INCLUDE_DIRECTORIES>>"
+ )
+ target_compile_definitions(jxl_enc-obj PUBLIC
+   ${OBJ_COMPILE_DEFINITIONS}
+diff --git a/lib/jxl_cms.cmake b/lib/jxl_cms.cmake
+index f8812ef..bcffe1c 100644
+--- a/lib/jxl_cms.cmake
++++ b/lib/jxl_cms.cmake
+@@ -28,13 +28,14 @@ set(JXL_CMS_PK_LIBS "")
+ if (JPEGXL_ENABLE_SKCMS)
+   target_link_libraries(jxl_cms PRIVATE skcms)
+ else()
+-  target_link_libraries(jxl_cms PRIVATE lcms2)
++  find_package(lcms REQUIRED CONFIG)
++  target_link_libraries(jxl_cms PRIVATE lcms::lcms)
+   if (JPEGXL_FORCE_SYSTEM_LCMS2)
+-    set(JXL_CMS_PK_LIBS "-llcms2")
++#    set(JXL_CMS_PK_LIBS "-llcms2")
+   endif()
+ endif()
+ 
+-target_link_libraries(jxl_cms PRIVATE hwy)
++target_link_libraries(jxl_cms PRIVATE highway::highway)
+ 
+ set_target_properties(jxl_cms PROPERTIES
+         VERSION ${JPEGXL_LIBRARY_VERSION}

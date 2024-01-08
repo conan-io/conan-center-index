@@ -1,7 +1,7 @@
 sources:
-  "0.8.2":
-    url: "https://github.com/libjxl/libjxl/archive/v0.8.2.tar.gz"
-    sha256: "c70916fb3ed43784eb840f82f05d390053a558e2da106e40863919238fa7b420"
+  "0.9.0":
+    url: "https://github.com/libjxl/libjxl/archive/v0.9.0.tar.gz"
+    sha256: "d83bbe188d8fa9725bb75109c922c37fcff8c3b802808f3a6c2c14aaf8337d9f"
   "0.6.1":
     url: "https://github.com/libjxl/libjxl/archive/v0.6.1.tar.gz"
     sha256: "ccbd5a729d730152303be399f033b905e608309d5802d77a61a95faa092592c5"
@@ -9,11 +9,11 @@ sources:
     url: "https://github.com/libjxl/libjxl/archive/v0.5.tar.gz"
     sha256: "911cb4b50eb621131ca22382166f40d4914a4ff4453dd299ade1e3292f311f89"
 patches:
-  "0.8.2":
-    - patch_file: "patches/0001-clean-targets-v0.8.2.patch"
+  "0.9.0":
+    - patch_file: "patches/0001-clean-targets-v0.9.0.patch"
       patch_description: "remove several targets not used in conan recipe"
       patch_type: "conan"
-    - patch_file: "patches/0002-fix-dependencies-v0.8.2.patch"
+    - patch_file: "patches/0002-fix-dependencies-v0.9.0.patch"
       patch_description: "use find_package for third party libraries"
       patch_type: "conan"
   "0.6.1":
