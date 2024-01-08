@@ -1,0 +1,18 @@
+diff --git a/gtsam/discrete/DecisionTree-inl.h b/gtsam/discrete/DecisionTree-inl.h
+index 2efd069cc..659ce226e 100644
+--- a/gtsam/discrete/DecisionTree-inl.h
++++ b/gtsam/discrete/DecisionTree-inl.h
+@@ -668,8 +668,13 @@ namespace gtsam {
+   void DecisionTree<L, Y>::dot(const std::string& name, bool showZero) const {
+     std::ofstream os((name + ".dot").c_str());
+     dot(os, showZero);
++#ifdef TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
++    // system() is turned off for iOS
++    int result = -1;
++#else
+     int result = system(
+         ("dot -Tpdf " + name + ".dot -o " + name + ".pdf >& /dev/null").c_str());
++#endif
+     if (result==-1) throw std::runtime_error("DecisionTree::dot system call failed");
+ }
+ 

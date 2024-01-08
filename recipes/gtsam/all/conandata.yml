@@ -48,3 +48,6 @@ patches:
     - patch_file: "patches/4.0.3-0004-cmake-project.patch"
       patch_description: "CMake: move project() after cmake_minimum_required()"
       patch_type: "conan"
+    - patch_file: "patches/4.0.3-0005-fix_iOSSimulator.patch"
+      patch_description: "Turn off using system() function for iOS and iOSSimulator"
+      patch_type: "HxGN-CV-DT"
