@@ -1,4 +1,7 @@
 sources:
+  "0.173.2":
+    url: "https://github.com/danielaparker/jsoncons/archive/refs/tags/v0.173.2.tar.gz"
+    sha256: "c689e9275fe428abf2914e4588321ed0fa756cce6448af94fbd625eb0a618a57"
   "0.173.0":
     url: "https://github.com/danielaparker/jsoncons/archive/refs/tags/v0.173.0.tar.gz"
     sha256: "61abb5e4fbdb3ef7601b4fdc263bc806785609c47b4d7e81f8c3110bd53a9282"
