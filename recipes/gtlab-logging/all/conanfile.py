@@ -54,16 +54,11 @@ class GTLabLoggingConan(ConanFile):
         files.copy(self, os.path.join("LICENSES", "BSD-3-Clause.txt"), dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
     def package_info(self):
-        self.cpp_info.libs = ["GTlabLogging"]
+        self.cpp_info.libs = ["GTlabLogging"] if self.settings.build_type != "Debug" else ["GTlabLogging-d"]
         
         self.cpp_info.includedirs.append(os.path.join("include", "logging"))
 
-        self.cpp_info.libdirs = ['lib', 'lib/logging']
-
-        if self.settings.build_type != "Debug":
-            self.cpp_info.libs = ['GTlabLogging']
-        else:
-            self.cpp_info.libs = ['GTlabLogging-d']
+        self.cpp_info.libdirs = [os.path.join("lib", "logging")]
 
         self.cpp_info.set_property("cmake_file_name", "GTlabLogging")
         self.cpp_info.set_property("cmake_target_name", "GTlab::Logging")
