@@ -7,6 +7,7 @@ from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.54.0"
 
@@ -287,7 +288,7 @@ class DCMTKConan(ConanFile):
         def xml2():
             return ["libxml2::libxml2"] if self.options.with_libxml2 else []
 
-        return {
+        components = {
             "ofstd"   : charset_conversion(),
             "oflog"   : ["ofstd"],
             "dcmdata" : ["ofstd", "oflog"] + zlib(),
@@ -314,7 +315,15 @@ class DCMTKConan(ConanFile):
             "dcmseg"  : ["dcmfg", "dcmiod", "dcmdata", "ofstd", "oflog"],
             "dcmtract": ["dcmiod", "dcmdata", "ofstd", "oflog"],
             "dcmpmap" : ["dcmfg", "dcmiod", "dcmdata", "ofstd", "oflog"],
+            "dcmect"  : ["dcmfg", "dcmiod", "dcmdata", "ofstd", "oflog"],
         }
+        if Version(self.version) >= "3.6.8":
+            components["dcmxml"] = ["dcmdata", "ofstd", "oflog"] + zlib() + xml2()
+            components["oficonv"] = []
+            components["dcmpstat"] += ["dcmiod"]
+            components["i2d"] += ["dcmxml"]
+            components["ofstd"] += ["oficonv"]
+        return components
 
     @property
     def _dcm_datadictionary_path(self):
@@ -326,7 +335,7 @@ class DCMTKConan(ConanFile):
 
         for target_lib, requires in self._dcmtk_components.items():
             self.cpp_info.components[target_lib].set_property("cmake_target_name", f"DCMTK::{target_lib}")
-            # Before 3.6.7, targets were not namespaced, therefore they are also exposed for conveniency
+            # Before 3.6.7, targets were not namespaced, therefore they are also exposed for convenience
             self.cpp_info.components[target_lib].set_property("cmake_target_aliases", [target_lib])
 
             self.cpp_info.components[target_lib].libs = [target_lib]
@@ -338,13 +347,18 @@ class DCMTKConan(ConanFile):
             self.cpp_info.components[target_lib].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 
         if self.settings.os == "Windows":
-            self.cpp_info.components["ofstd"].system_libs.extend([
-                "iphlpapi", "ws2_32", "netapi32", "wsock32"
-            ])
+            windows_libs = ["iphlpapi", "ws2_32", "netapi32", "wsock32"]
+            self.cpp_info.components["ofstd"].system_libs.extend(windows_libs)
+            if Version(self.version) >= "3.6.8":
+                self.cpp_info.components["oficonv"].system_libs.extend(windows_libs)
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ofstd"].system_libs.append("m")
             if self.options.with_multithreading:
                 self.cpp_info.components["ofstd"].system_libs.append("pthread")
+            if Version(self.version) >= "3.6.8":
+                if self.options.with_multithreading:
+                    self.cpp_info.components["oficonv"].system_libs.append("pthread")
+                self.cpp_info.components["oficonv"].system_libs.append("rt")
 
         if self.options.default_dict == "external":
             dcmdictpath = os.path.join(self._dcm_datadictionary_path, "dcmtk", "dicom.dic")
