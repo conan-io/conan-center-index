@@ -1,0 +1,9 @@
+sources:
+  "2.7.0":
+    url: "https://github.com/speedb-io/speedb/archive/refs/tags/speedb/v2.7.0.tar.gz"
+    sha256: "9e787e541badc2fedcd68893f0e68866e0f3180d2f15b84adca4b176e6d28b98"
+patches:
+  "2.7.0":
+    - patch_file: "patches/2.7.0-0001-use-cci.patch"
+      patch_description: "use cci's package"
+      patch_type: "conan"
