@@ -165,25 +165,6 @@ class GdalConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _has_with_blosc_option(self):
-        return Version(self.version) >= "3.4.0"
-
-    @property
-    def _has_with_lz4_option(self):
-        return Version(self.version) >= "3.4.0"
-
-    @property
-    def _has_with_brunsli_option(self):
-        return Version(self.version) >= "3.4.0"
-
-    @property
-    def _has_with_pcre2_option(self):
-        return Version(self.version) >= "3.4.1"
-
-    @property
-    def _has_reentrant_qhull_support(self):
-        return Version(self.version) >= "3.4.1"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -193,14 +174,6 @@ class GdalConan(ConanFile):
             del self.options.fPIC
         # if Version(self.version) < "3.0.0":
         #     del self.options.with_tiledb
-        if not self._has_with_blosc_option:
-            del self.options.with_blosc
-        if not self._has_with_lz4_option:
-            del self.options.with_lz4
-        if not self._has_with_brunsli_option:
-            del self.options.with_brunsli
-        if not self._has_with_pcre2_option:
-            del self.options.with_pcre2
 
     def configure(self):
         if self.options.shared:
@@ -221,7 +194,7 @@ class GdalConan(ConanFile):
             self.options.rm_safe("with_png")  # and it's not trivial to fix
 
         if self.options.with_qhull:
-            self.options["qhull"].reentrant = self._has_reentrant_qhull_support
+            self.options["qhull"].reentrant = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -242,9 +215,9 @@ class GdalConan(ConanFile):
             self.requires("libiconv/1.17")
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.5.5")
-        if self.options.get_safe("with_blosc"):
+        if self.options.with_blosc:
             self.requires("c-blosc/1.21.5")
-        if self.options.get_safe("with_lz4"):
+        if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_pg:
             self.requires("libpq/15.4")
@@ -364,15 +337,13 @@ class GdalConan(ConanFile):
             raise ConanInvalidConfiguration("Enable either pcre or pcre2, not both")
         if self.options.get_safe("with_pcre2") and not self.dependencies["pcre2"].options.build_pcre2_8:
             raise ConanInvalidConfiguration("gdal:with_pcre2=True requires pcre2:build_pcre2_8=True")
-        if self.options.get_safe("with_brunsli"):
+        if self.options.with_brunsli:
             raise ConanInvalidConfiguration("brunsli not available in conan-center yet")
         if self.options.with_libdeflate and not self.options.get_safe("with_zlib", True):
             raise ConanInvalidConfiguration("gdal:with_libdeflate=True requires gdal:with_zlib=True")
         if self.options.with_qhull:
-            if self._has_reentrant_qhull_support and not self.dependencies["qhull"].options.reentrant:
+            if not self.dependencies["qhull"].options.reentrant:
                 raise ConanInvalidConfiguration(f"{self.ref} depends on reentrant qhull.")
-            elif not self._has_reentrant_qhull_support and self.dependencies["qhull"].options.reentrant:
-                raise ConanInvalidConfiguration(f"{self.ref} depends on non-reentrant qhull.")
         if hasattr(self, "settings_build") and cross_building(self):
             if self.options.shared:
                 raise ConanInvalidConfiguration(f"{self.ref} can't cross-build shared lib")
@@ -447,10 +418,7 @@ class GdalConan(ConanFile):
             replace_in_file(self, gnumakefile_apps,
                                   "default:	gdal-config-inst gdal-config $(BIN_LIST)",
                                   "default:	gdal-config-inst gdal-config")
-            if Version(self.version) < "3.4.0":
-                clean_pattern = "$(RM) *.o $(BIN_LIST) core gdal-config gdal-config-inst"
-            else:
-                clean_pattern = "$(RM) *.o $(BIN_LIST) $(NON_DEFAULT_LIST) core gdal-config gdal-config-inst"
+            clean_pattern = "$(RM) *.o $(BIN_LIST) $(NON_DEFAULT_LIST) core gdal-config gdal-config-inst"
             replace_in_file(self, gnumakefile_apps,
                                   clean_pattern,
                                   "$(RM) *.o core gdal-config gdal-config-inst")
@@ -603,9 +571,9 @@ class GdalConan(ConanFile):
             args.append("PODOFO_ENABLED=YES")
         if self.options.get_safe("with_zstd"):
             args.append("ZSTD_CFLAGS=\"-I{}\"".format(include_paths("zstd")))
-        if self.options.get_safe("with_blosc"):
+        if self.options.with_blosc:
             args.append("BLOSC_CFLAGS=\"-I{}\"".format(include_paths("c-blosc")))
-        if self.options.get_safe("with_lz4"):
+        if self.options.with_lz4:
             args.append("LZ4_CFLAGS=\"-I{}\"".format(include_paths("lz4")))
         if self.options.with_webp:
             args.append("WEBP_ENABLED=YES")
@@ -627,7 +595,7 @@ class GdalConan(ConanFile):
             args.append("OPENSSL_INC=\"-I{}\"".format(include_paths("openssl")))
         if self.options.without_lerc:
             args.append("HAVE_LERC=0")
-        if self.options.get_safe("with_brunsli"):
+        if self.options.with_brunsli:
             args.extend([
                 "BRUNSLI_DIR=\"{}\"".format(rootpath("brunsli")),
                 "BRUNSLI_INC=\"{}\"".format(include_paths("brunsli")),
@@ -712,10 +680,8 @@ class GdalConan(ConanFile):
             tc.configure_args.append("--with-libiconv-prefix={}".format(rootpath_no(self.options.with_libiconv, "libiconv")))
             tc.configure_args.append("--with-liblzma=no") # always disabled: liblzma is an optional transitive dependency of gdal (through libtiff).
             tc.configure_args.append("--with-zstd={}".format(yes_no(self.options.get_safe("with_zstd")))) # Optional direct dependency of gdal only if lerc lib enabled
-            if self._has_with_blosc_option:
-                tc.configure_args.append("--with-blosc={}".format(yes_no(self.options.with_blosc)))
-            if self._has_with_lz4_option:
-                tc.configure_args.append("--with-lz4={}".format(yes_no(self.options.with_lz4)))
+            tc.configure_args.append("--with-blosc={}".format(yes_no(self.options.with_blosc)))
+            tc.configure_args.append("--with-lz4={}".format(yes_no(self.options.with_lz4)))
             # Drivers:
             if not (self.options.with_zlib and self.options.with_png and bool(self.options.with_jpeg)):
                 # MRF raster driver always depends on zlib, libpng and libjpeg: https://github.com/OSGeo/gdal/issues/2581
@@ -775,8 +741,7 @@ class GdalConan(ConanFile):
             tc.configure_args.append("--without-spatialite") # TODO: to implement when libspatialite lib available
             tc.configure_args.append("--with-sqlite3={}".format(yes_no(self.options.get_safe("with_sqlite3"))))
             tc.configure_args.append("--without-rasterlite2") # TODO: to implement when rasterlite2 lib available
-            if self._has_with_pcre2_option:
-                tc.configure_args.append("--with-pcre2={}".format(yes_no(self.options.get_safe("with_pcre2"))))
+            tc.configure_args.append("--with-pcre2={}".format(yes_no(self.options.get_safe("with_pcre2"))))
             tc.configure_args.append("--with-pcre={}".format(yes_no(self.options.get_safe("with_pcre"))))
             tc.configure_args.append("--without-teigha") # commercial library
             tc.configure_args.append("--without-idb") # commercial library
@@ -808,8 +773,7 @@ class GdalConan(ConanFile):
             tc.configure_args.append("--without-tiledb") # TODO: to implement when tiledb lib available
             tc.configure_args.append("--without-mdb")
             tc.configure_args.append("--without-rasdaman") # TODO: to implement when rasdaman lib available
-            if self._has_with_brunsli_option:
-                tc.configure_args.append("--with-brunsli={}".format(yes_no(self.options.with_brunsli)))
+            tc.configure_args.append("--with-brunsli={}".format(yes_no(self.options.with_brunsli)))
             tc.configure_args.append("--without-rdb") # commercial library
             tc.configure_args.append("--without-armadillo") # TODO: to implement when armadillo lib available
             tc.configure_args.append("--with-cryptopp={}".format(rootpath_no(self.options.with_cryptopp, "cryptopp")))
