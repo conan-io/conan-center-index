@@ -129,9 +129,11 @@ class AprUtilConan(ConanFile):
             tc.variables["APR_HAS_LDAP"] = self.options.with_ldap
             apr_info = self.dependencies["apr"].cpp_info.aggregated_components()
             tc.variables["APR_INCLUDE_DIR"] = apr_info.includedir.replace("\\", "/")
-            tc.variables["APR_LIBRARIES"] = ";".join(apr_info.libs)
+            libdir = apr_info.libdir.replace("\\", "/")
+            tc.variables["APR_LIBRARIES"] = ";".join(f"{libdir}/{lib}.lib" for lib in apr_info.libs)
             tc.generate()
             deps = CMakeDeps(self)
+            deps.set_property("expat", "cmake_find_mode", "module")
             deps.generate()
         else:
             if not cross_building(self):
