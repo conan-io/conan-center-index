@@ -1,0 +1,15 @@
+diff --git a/build/cmake/CMakeLists.txt b/build/cmake/CMakeLists.txt
+index 419c243..737c2e9 100644
+--- a/build/cmake/CMakeLists.txt
++++ b/build/cmake/CMakeLists.txt
+@@ -40,7 +40,9 @@ set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+ set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+ 
+-find_package (OpenGL REQUIRED)
++if (WIN32)
++	find_package (OpenGL REQUIRED)
++endif()
+ 
+ # X11 required except for Windows and Apple OSX platforms
+ if (NOT WIN32 AND NOT APPLE)
