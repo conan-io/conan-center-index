@@ -43,8 +43,8 @@ class OatppLibresslConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"oatpp/{self.version}")
-        self.requires("libressl/3.5.3")
+        self.requires(f"oatpp/{self.version}", transitive_headers=True)
+        self.requires("libressl/3.5.3", transitive_headers=True)
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
