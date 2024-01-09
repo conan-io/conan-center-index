@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import copy, export_conandata_patches, get, patch, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
@@ -19,7 +19,7 @@ class GmpConan(ConanFile):
         "on signed integers, rational numbers, and floating-point numbers."
     )
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("gmp", "math", "arbitrary", "precision", "integer")
+    topics = ("math", "arbitrary", "precision", "integer")
     license = ("LGPL-3.0", "GPL-2.0")
     homepage = "https://gmplib.org"
 
@@ -83,8 +83,8 @@ class GmpConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         if is_msvc(self):
-            self.tool_requires("yasm/1.3.0") # Needed for determining 32-bit word size
-            self.tool_requires("automake/1.16.5") # Needed for lib-wrapper
+            self.tool_requires("yasm/1.3.0")  # Needed for determining 32-bit word size
+            self.tool_requires("automake/1.16.5")  # Needed for lib-wrapper
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -130,7 +130,16 @@ class GmpConan(ConanFile):
         tc.generate(env)
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
+        # Usage allowed after consideration with CCI maintainers
+        for it in self.conan_data.get("patches", {}).get(self.version, []):
+            if "patch_os" not in it or self.settings.os == it["patch_os"]:
+                entry = it.copy()
+                patch_file = entry.pop("patch_file")
+                patch_file_path = os.path.join(self.export_sources_folder, patch_file)
+                if "patch_description" not in entry:
+                    entry["patch_description"] = patch_file
+                patch(self, patch_file=patch_file_path, **entry)
+
         # Fix permission issue
         if is_apple_os(self):
             configure_file = os.path.join(self.source_folder, "configure")

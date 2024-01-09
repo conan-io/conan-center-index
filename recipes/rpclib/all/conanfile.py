@@ -1,12 +1,10 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, export_conandata_patches, get, rmdir, rename, mkdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -32,17 +30,7 @@ class rpclibConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "15",
-            "msvc": "14.1",
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "5.1",
-        }
+        return "11"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -59,13 +47,8 @@ class rpclibConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -80,6 +63,7 @@ class rpclibConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -102,9 +86,15 @@ class rpclibConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "rpclib::rpc")
         self.cpp_info.set_property("pkg_config_name", "rpclib")
 
+        # TODO: back to global scope after Conan 2.0
+        self.cpp_info.components["_rpc"].libs = ["rpc"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["_rpc"].system_libs.extend(["m", "pthread"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["_rpc"].system_libs.extend(["mswsock", "ws2_32"])
+
         # TODO: Remove after Conan 2.0
         self.cpp_info.components["_rpc"].names["cmake_find_package"] = "rpc"
         self.cpp_info.components["_rpc"].names["cmake_find_package_multi"] = "rpc"
-        self.cpp_info.components["_rpc"].libs = ["rpc"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["_rpc"].system_libs = ["pthread"]
+        self.cpp_info.components["_rpc"].set_property("cmake_target_name", "rpclib::rpc")
+        self.cpp_info.components["_rpc"].set_property("pkg_config_name", "rpclib")

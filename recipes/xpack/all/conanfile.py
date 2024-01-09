@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.layout import basic_layout
 import os
 
@@ -13,6 +13,7 @@ class XpackConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xyz347/xpack"
     topics = ("json", "bson", "reflection", "xml", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -27,8 +28,8 @@ class XpackConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("rapidjson/cci.20220822", transitive_headers=True)
-        self.requires("rapidxml/1.13", transitive_headers=True)
+        self.requires("rapidjson/cci.20220822")
+        self.requires("rapidxml/1.13")
 
     def package_id(self):
         self.info.clear()

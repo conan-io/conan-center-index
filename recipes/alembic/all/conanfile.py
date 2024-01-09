@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -45,7 +46,7 @@ class AlembicConan(ConanFile):
     def requirements(self):
         self.requires("imath/3.1.9", transitive_headers=True)
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.1")
+            self.requires("hdf5/1.14.2")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -70,6 +71,8 @@ class AlembicConan(ConanFile):
         tc.variables["ALEMBIC_USING_IMATH_3"] = False
         tc.variables["ALEMBIC_ILMBASE_FOUND"] = 1
         tc.variables["ALEMBIC_ILMBASE_LIBS"] = "OpenEXR::OpenEXR"
+        if Version(self.version) >= "1.8.4":
+            tc.variables["ALEMBIC_DEBUG_WARNINGS_AS_ERRORS"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

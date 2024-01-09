@@ -12,8 +12,8 @@ required_conan_version = ">=1.59.0"
 
 class MPUnitsConan(ConanFile):
     name = "mp-units"
-    homepage = "https://github.com/mpusz/units"
-    description = "Physical Quantities and Units library for C++"
+    homepage = "https://github.com/mpusz/mp-units"
+    description = "A Physical Quantities and Units library for C++"
     topics = (
         "units",
         "dimensions",

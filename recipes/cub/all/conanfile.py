@@ -15,8 +15,9 @@ class CubConan(ConanFile):
     description = "Cooperative primitives for CUDA C++"
     license = "BSD 3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/project/cub"
-    topics = ("algorithms", "cuda", "gpu", "nvidia", "nvidia-hpc-sdk")
+    homepage = "https://github.com/NVIDIA/cub"
+    topics = ("algorithms", "cuda", "gpu", "nvidia", "nvidia-hpc-sdk", "header-only")
+
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
@@ -29,7 +30,7 @@ class CubConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
-            "msvc": "14.1",
+            "msvc": "191",
             "gcc": "5",
             "clang": "5",
             "apple-clang": "5.1",
@@ -54,29 +55,23 @@ class CubConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        copy(
-            self,
-            pattern="LICENSE.TXT",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
-        )
-        copy(
-            self,
-            pattern="*.cuh",
-            dst=os.path.join(self.package_folder, "include", "cub"),
-            src=os.path.join(self.source_folder, "cub"),
-        )
+        copy(self, "LICENSE.TXT",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        copy(self, "*.cuh",
+             dst=os.path.join(self.package_folder, "include", "cub"),
+             src=os.path.join(self.source_folder, "cub"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
 
         # Follows the naming conventions of the official CMake config file:
         # https://github.com/NVIDIA/cub/blob/main/cub/cmake/cub-config.cmake
-
         self.cpp_info.set_property("cmake_file_name", "cub")
         self.cpp_info.set_property("cmake_target_name", "CUB::CUB")
-        self.cpp_info.set_property("pkg_config_name", "cub")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "cub"
