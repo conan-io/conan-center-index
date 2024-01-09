@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
 
@@ -15,8 +16,9 @@ class ThrustConan(ConanFile):
         "the C++ Standard Template Library (STL)."
     )
     topics = ("parallel", "stl", "header-only", "cuda", "gpgpu")
-    homepage = "https://thrust.github.io/"
+    homepage = "https://nvidia.github.io/thrust/"
     url = "https://github.com/conan-io/conan-center-index"
+
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
@@ -31,8 +33,11 @@ class ThrustConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # Otherwise CUB from system CUDA is used, which is not guaranteed to be compatible
-        self.requires("cub/1.17.2")
+        if Version(self.version) >= "2.0":
+            self.requires(f"cub/{self.version}")
+            self.requires(f"libcudacxx/{self.version}")
+        else:
+            self.requires("cub/1.17.2")
 
         if self.options.device_system == "tbb":
             self.requires("onetbb/2021.10.0")
@@ -51,19 +56,16 @@ class ThrustConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        copy(
-            self,
-            pattern="LICENSE",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
-        )
+        source_folder = self.source_folder
+        if Version(self.version) >= "2.2.0":
+            source_folder = os.path.join(self.source_folder, "thrust")
+        copy(self, "LICENSE",
+             src=source_folder,
+             dst=os.path.join(self.package_folder, "licenses"))
         for pattern in ["*.h", "*.inl"]:
-            copy(
-                self,
-                pattern=pattern,
-                src=os.path.join(self.source_folder, "thrust"),
-                dst=os.path.join(self.package_folder, "include", "thrust"),
-            )
+            copy(self, pattern,
+                 src=os.path.join(source_folder, "thrust"),
+                 dst=os.path.join(self.package_folder, "include", "thrust"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
