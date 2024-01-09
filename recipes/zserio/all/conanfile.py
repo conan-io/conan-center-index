@@ -71,7 +71,7 @@ class ZserioConanFile(ConanFile):
         return os.path.join("lib", "cmake", "zserio")
 
     def package(self):
-        copy(self, "LICENSE", self.build_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
         include_dir = os.path.join(self.package_folder, "include")
         lib_dir = os.path.join(self.package_folder, "lib")
