@@ -1,0 +1,32 @@
+diff --git a/modules/flann/include/opencv2/flann/any.h b/modules/flann/include/opencv2/flann/any.h
+index 4906fec081..9341cf3886 100644
+--- a/modules/flann/include/opencv2/flann/any.h
++++ b/modules/flann/include/opencv2/flann/any.h
+@@ -18,6 +18,7 @@
+ #include <stdexcept>
+ #include <ostream>
+ #include <typeinfo>
++#include <typeindex>
+ 
+ namespace cvflann
+ {
+@@ -271,7 +272,8 @@ public:
+     template<typename T>
+     T& cast()
+     {
+-        if (policy->type() != typeid(T)) throw anyimpl::bad_any_cast();
++        static std::type_index rhsType(typeid(T));
++        if (std::type_index{policy->type()} != rhsType) throw anyimpl::bad_any_cast();
+         T* r = reinterpret_cast<T*>(policy->get_value(&object));
+         return *r;
+     }
+@@ -280,7 +282,8 @@ public:
+     template<typename T>
+     const T& cast() const
+     {
+-        if (policy->type() != typeid(T)) throw anyimpl::bad_any_cast();
++        static std::type_index rhsType(typeid(T));
++        if (std::type_index{policy->type()} != rhsType) throw anyimpl::bad_any_cast();
+         const T* r = reinterpret_cast<const T*>(policy->get_value(&object));
+         return *r;
+     }
