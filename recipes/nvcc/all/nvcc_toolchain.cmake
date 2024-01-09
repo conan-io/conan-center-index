@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.9)
 
+if (POLICY CMP0104)
+  cmake_policy(SET CMP0104 NEW)
+endif()
+
 # parse nvcc --version
 #[=======================================================================[.rst:
 _cudatoolkit_toolchain_version_nvcc
@@ -139,9 +143,6 @@ Result variables
 
 For parity with FindCUDAToolkit.cmake will set variables
 
-``CUDAToolkit_FOUND``
-    A boolean specifying whether or not the CUDA Toolkit was found.
-
 ``CUDAToolkit_VERSION``
     The exact version of the CUDA Toolkit found (as reported by
     ``nvcc --version`` or ``version.txt``).
@@ -187,6 +188,9 @@ For parity with FindCUDAToolkit.cmake will set variables
     modules that depend on this one.
 #]=======================================================================]
 function(_cudatoolkit_toolchain package_path)
+  if (CUDAToolkit_NVCC_EXECUTABLE)
+    return()
+  endif()
   set(cuda_version "")
   set(nvcc_dir "")
   set(int_dir "")
@@ -199,10 +203,6 @@ function(_cudatoolkit_toolchain package_path)
 
   # find CUDAToolkit_LIBRARY_ROOT
   set(cudatoolkit_library_root "${package_path}${nvcc_dir}")
-  if (NOT (EXISTS "${cudatoolkit_library_root}/nvvm"))
-      message(FATAL_ERROR "CUDA Tolkit library root does not exists: ${cudatoolkit_library_root}")
-      return()
-  endif()
 
   # find CUDAToolkit_INCLUDE_DIRS
   set(cudatoolkit_include_dirs "${cudatoolkit_library_root}/include")
@@ -250,8 +250,6 @@ function(_cudatoolkit_toolchain package_path)
     set(CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR "${vs_platform_toolset_cuda_custom_dir}/" CACHE INTERNAL "TOOLSET_CUDA_CUSTOM_DIR" FORCE)
   endif()
 
-
-  #set(CUDAToolkit_FOUND TRUE)
   set(CUDAToolkit_LIBRARY_ROOT "${cudatoolkit_library_root}" PARENT_SCOPE)
   set(CUDAToolkit_BIN_DIR "${cudatoolkit_bin_dir}" PARENT_SCOPE)
   set(CUDAToolkit_NVCC_EXECUTABLE "${cudatoolkit_nvcc_executable}" PARENT_SCOPE)
@@ -261,10 +259,13 @@ function(_cudatoolkit_toolchain package_path)
   set(CUDAToolkit_VERSION_MAJOR "${cudatoolkit_version_major}" PARENT_SCOPE)
   set(CUDAToolkit_VERSION_MINOR "${cudatoolkit_version_minor}" PARENT_SCOPE)
   set(CUDAToolkit_VERSION_MINOR "${cudatoolkit_version_patch}" PARENT_SCOPE)
+  if (CUDAToolkit_INCLUDE_DIRS)
+    set(cudatoolkit_include_dirs "${cudatoolkit_include_dirs};${CUDAToolkit_INCLUDE_DIRS}")
+  endif()
   set(CUDAToolkit_INCLUDE_DIRS "${cudatoolkit_include_dirs}" PARENT_SCOPE)
   set(CUDAToolkit_TARGET_DIR "${cudatoolkit_target_dir}" PARENT_SCOPE)
-  #set(CUDAToolkit_ROOT "${package_path}" PARENT_SCOPE)
-  #set(CUDAToolkit_ROOT "${package_path}" CACHE PATH "CUDA Toolkit root" FORCE)
+  set(CUDAToolkit_ROOT "${package_path}" PARENT_SCOPE)
+  set(CUDAToolkit_ROOT "${package_path}" CACHE PATH "CUDA Toolkit root" FORCE)
 
   _cudatoolkit_toolchain_architectures(toolkit_architectures "${cudatoolkit_nvcc_executable}")
   set(CMAKE_CUDA_ARCHITECTURES "${toolkit_architectures}" CACHE STRING "CUDA Architectures" FORCE)
@@ -272,4 +273,4 @@ function(_cudatoolkit_toolchain package_path)
 
 endfunction()
 
-_cudatoolkit_toolchain("${CMAKE_CURRENT_LIST_DIR}")
+_cudatoolkit_toolchain("${CMAKE_CURRENT_LIST_DIR}/..")
