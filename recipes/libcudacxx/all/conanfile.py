@@ -37,6 +37,9 @@ class LibcudacxxConan(ConanFile):
             "apple-clang": "10",
         }
 
+    def export_sources(self):
+        copy(self, "*.cmake", os.path.join(self.recipe_folder, "cmake"), self.export_sources_folder)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -63,6 +66,9 @@ class LibcudacxxConan(ConanFile):
         copy(self, "*",
              src=os.path.join(self.source_folder, "include"),
              dst=os.path.join(self.package_folder, "include"))
+        copy(self, "conan-libcudacxx-official-config.cmake",
+             src=self.export_sources_folder,
+             dst=os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
@@ -73,7 +79,9 @@ class LibcudacxxConan(ConanFile):
         # Follows the naming conventions of the official CMake config file:
         # https://github.com/NVIDIA/cccl/blob/main/libcudacxx/lib/cmake/libcudacxx/libcudacxx-config.cmake
         self.cpp_info.set_property("cmake_file_name", "libcudacxx")
-        self.cpp_info.set_property("cmake_target_name", "libcudacxx::libcudacxx")
+        self.cpp_info.set_property("cmake_target_name", "_libcudacxx_internal")
 
-        # FIXME: CMakeDeps exports libcudacxx as a SYSTEM include, which will cause issues with nvcc
+        # The CMake module ensures that the include dir is exported as a non-SYSTEM include in CMake
         # https://github.com/NVIDIA/cccl/blob/v2.2.0/libcudacxx/lib/cmake/libcudacxx/libcudacxx-config.cmake#L11-L29
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "conan-libcudacxx-official-config.cmake")])
