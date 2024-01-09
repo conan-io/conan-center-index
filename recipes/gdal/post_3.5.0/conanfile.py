@@ -197,9 +197,9 @@ class GdalConan(ConanFile):
         if self.options.with_brunsli:
             self.requires("brunsli/cci.20231024")
         if self.options.with_cfitsio:
-            self.requires("cfitsio/4.3.0")
+            self.requires("cfitsio/4.3.1")
         if self.options.with_cryptopp:
-            self.requires("cryptopp/8.8.0")
+            self.requires("cryptopp/8.9.0")
         if self.options.with_curl:
             self.requires("libcurl/[>=7.78 <9]")
         if self.options.with_dds:
@@ -220,7 +220,7 @@ class GdalConan(ConanFile):
         if self.options.with_gta:
             self.requires("libgta/1.2.1")
         if self.options.with_hdf4:
-            self.requires("hdf4/4.2.15")
+            self.requires("hdf4/4.2.16-2")
         if self.options.with_hdf5:
             self.requires("hdf5/1.14.3")
         if self.options.with_heif:
@@ -296,13 +296,13 @@ class GdalConan(ConanFile):
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.4")
         if self.options.with_xml2:
-            self.requires("libxml2/2.12.2")
+            self.requires("libxml2/2.12.3")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         # Use of external shapelib is not recommended and is currently broken.
         # https://github.com/OSGeo/gdal/issues/5711
         # if self.options.with_shapelib:
-        #     self.requires("shapelib/1.5.0")
+        #     self.requires("shapelib/1.6.0")
 
     def build_requirements(self):
         # https://github.com/conan-io/conan/issues/3482#issuecomment-662284561
