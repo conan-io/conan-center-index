@@ -1,10 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, save, copy, symlinks, patch, export_conandata_patches, rm, rmdir, rename, replace_in_file
+from conan.tools.files import get, copy, symlinks, export_conandata_patches, rm, rmdir, rename, replace_in_file
 from conan.tools.scm import Version
-import os
-from os import chmod
-from os.path import isdir, join, exists
+from os import chmod, sep
+from os.path import join, exists
 from re import match
 
 required_conan_version = ">=1.47.0"
@@ -143,4 +142,4 @@ class NvccConan(ConanFile):
         self.conf_info.update("tools.build:compiler_executables", { "cuda": join(self.package_folder, "bin", "nvcc" + run_extension) })
         self.conf_info.append("tools.cmake.cmaketoolchain:user_toolchain", join(self.package_folder, "res", "nvcc_toolchain.cmake"))
         if self._is_windows:
-            self.conf_info.define("tools.cmake.cmaketoolchain:toolset_arch", f"x64,cuda={join(self.package_folder, 'res').replace(os.sep, '/')}")
+            self.conf_info.define("tools.cmake.cmaketoolchain:toolset_arch", f"x64,cuda={join(self.package_folder, 'res').replace(sep, '/')}")
