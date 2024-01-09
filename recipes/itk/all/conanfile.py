@@ -272,7 +272,7 @@ class ITKConan(ConanFile):
         def libdl():
             return ["dl"] if self.settings.os in ["Linux", "FreeBSD"] else []
 
-        return {
+        components = {
             "itksys": {"system_libs": libdl()},
             "itkvcl": {"system_libs": libm()},
             "itkv3p_netlib": {"system_libs": libm()},
@@ -453,9 +453,13 @@ class ITKConan(ConanFile):
                 ],
             },
             "ITKVideoCore": {"requires": ["ITKCommon"]},
-            "ITKVideoIO": {"requires": ["ITKVideoCore", "ITKIOImageBase"]},
-            "ITKVideoBridgeOpenCV": {"requires": ["ITKVideoIO", "opencv::opencv_core"]},
         }
+        
+        if self.options.with_opencv:
+            components["ITKVideoIO"] = {"requires": ["ITKVideoCore", "ITKIOImageBase"]},
+            components["ITKVideoBridgeOpenCV"] = {"requires": ["ITKVideoIO", "opencv::opencv_core"]}
+        
+        return components
 
     def _create_cmake_module_alias_targets(self):
         targets = {target:f"ITK::{target}" for target in self._itk_components.keys()}
