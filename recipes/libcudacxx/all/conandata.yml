@@ -1,0 +1,4 @@
+sources:
+  "2.2.0":
+    url: "https://github.com/NVIDIA/cccl/archive/refs/tags/v2.2.0.tar.gz"
+    sha256: "e27678a9d583f9994e591367e864425e722050a9ee1d721b2bd736b442b768d4"
