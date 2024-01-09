@@ -1,0 +1,76 @@
+C++20 gcc-11 compatibility
+
+https://patch-diff.githubusercontent.com/raw/InsightSoftwareConsortium/ITK/pull/2589
+
+diff --git a/Modules/Core/Common/src/itkSmapsFileParser.cxx b/Modules/Core/Common/src/itkSmapsFileParser.cxx
+index ab05be764e6..1befed54917 100644
+--- a/Modules/Core/Common/src/itkSmapsFileParser.cxx
++++ b/Modules/Core/Common/src/itkSmapsFileParser.cxx
+@@ -300,7 +300,7 @@ ITKCommon_EXPORT std::istream &
+ template <typename TFirstType>
+ struct MapRecordPlusor
+ {
+-  MapRecordPlusor<TFirstType>(const char * token = "Size")
++  MapRecordPlusor(const char * token = "Size")
+     : m_Token(token)
+   {}
+ 
+@@ -320,7 +320,7 @@ struct MapRecordPlusor
+ template <typename TFirstType>
+ struct MapRecordConditionalPlusor
+ {
+-  MapRecordConditionalPlusor<TFirstType>(const char * filter, const char * token = "Size")
++  MapRecordConditionalPlusor(const char * filter, const char * token = "Size")
+     : m_Filter(filter)
+     , m_Token(token)
+   {}
+diff --git a/Modules/ThirdParty/VNL/src/vxl/core/vnl/algo/vnl_svd_fixed.h b/Modules/ThirdParty/VNL/src/vxl/core/vnl/algo/vnl_svd_fixed.h
+index ccdf96de110..daf274d85ba 100644
+--- a/Modules/ThirdParty/VNL/src/vxl/core/vnl/algo/vnl_svd_fixed.h
++++ b/Modules/ThirdParty/VNL/src/vxl/core/vnl/algo/vnl_svd_fixed.h
+@@ -163,7 +163,7 @@ class vnl_svd_fixed
+   bool valid_;        // false if the NETLIB call failed.
+ 
+   // Disallow assignment.
+-  vnl_svd_fixed<T,R,C>(vnl_svd_fixed<T,R,C> const &) { }
++  vnl_svd_fixed(vnl_svd_fixed<T,R,C> const &) { }
+   vnl_svd_fixed<T,R,C>& operator=(vnl_svd_fixed<T,R,C> const &) { return *this; }
+ };
+ 
+diff --git a/Modules/ThirdParty/VNL/src/vxl/core/vnl/vnl_matrix.h b/Modules/ThirdParty/VNL/src/vxl/core/vnl/vnl_matrix.h
+index af4d926188b..60517514159 100644
+--- a/Modules/ThirdParty/VNL/src/vxl/core/vnl/vnl_matrix.h
++++ b/Modules/ThirdParty/VNL/src/vxl/core/vnl/vnl_matrix.h
+@@ -735,7 +735,7 @@ class VNL_EXPORT vnl_matrix
+ //--------------------------------------------------------------------------------
+ 
+  protected:
+-  vnl_matrix<T>( unsigned ext_num_rows, unsigned ext_num_cols,
++  vnl_matrix( unsigned ext_num_rows, unsigned ext_num_cols,
+       T * continuous_external_memory_block, bool manage_own_memory )
+   : num_rows{ ext_num_rows}
+   , num_cols{ ext_num_cols}
+diff --git a/Modules/ThirdParty/VNL/src/vxl/core/vnl/vnl_vector.h b/Modules/ThirdParty/VNL/src/vxl/core/vnl/vnl_vector.h
+index 970c7c23c04..a3f970dd8bc 100644
+--- a/Modules/ThirdParty/VNL/src/vxl/core/vnl/vnl_vector.h
++++ b/Modules/ThirdParty/VNL/src/vxl/core/vnl/vnl_vector.h
+@@ -449,7 +449,7 @@ class VNL_EXPORT vnl_vector
+     set_data(datain, this->size(), LetArrayManageMemory);
+   }
+  protected:
+-  vnl_vector<T>( size_t ext_num_elmts, T * extdata, bool manage_own_memory )
++  vnl_vector( size_t ext_num_elmts, T * extdata, bool manage_own_memory )
+     : num_elmts{ ext_num_elmts }
+     , data{ extdata }
+     , m_LetArrayManageMemory{ manage_own_memory }
+--- a/Modules/ThirdParty/VNL/src/vxl/CMakeLists.txt
++++ b/Modules/ThirdParty/VNL/src/vxl/CMakeLists.txt
+@@ -29,7 +29,7 @@
+ if(NOT CMAKE_CXX_EXTENSIONS)
+   set(CMAKE_CXX_EXTENSIONS OFF)
+ endif()
+-set(VALID_CXX_STANDARDS "11" "14" "17")
++set(VALID_CXX_STANDARDS "11" "14" "17" "20")
+ if(NOT CMAKE_CXX_STANDARD IN_LIST VALID_CXX_STANDARDS )
+    MESSAGE(FATAL_ERROR "CMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD} not in know standards list\n ${VALID_CXX_STANDARDS}.")
+ endif()
