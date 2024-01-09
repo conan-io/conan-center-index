@@ -76,7 +76,7 @@ class FltkConan(ConanFile):
             self.requires("fontconfig/2.14.2")
             self.requires("xorg/system")
             if self.options.with_xft:
-                self.requires("libxft/2.3.6")
+                self.requires("libxft/2.3.8")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -93,6 +93,10 @@ class FltkConan(ConanFile):
         tc.variables["OPTION_USE_XFT"] = self.options.with_xft
         if self.options.abi_version:
             tc.variables["OPTION_ABI_VERSION"] = self.options.abi_version
+        tc.variables["OPTION_USE_SYSTEM_LIBJPEG"] = True
+        tc.variables["OPTION_USE_SYSTEM_ZLIB"] = True
+        tc.variables["OPTION_USE_SYSTEM_LIBPNG"] = True
+
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
