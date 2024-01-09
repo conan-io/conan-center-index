@@ -67,7 +67,7 @@ class RestinioConan(ConanFile):
             "gcc": "9",
             "clang": "10",
             "apple-clang": "11",
-            "Visual Studio": "17",
+            "Visual Studio": "15",
             "msvc": "191"
         }
 
