@@ -6,6 +6,7 @@ from conan.tools.files import apply_conandata_patches, chdir, copy, export_conan
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
+from conan.tools.scm import Version
 
 import fnmatch
 import os
@@ -85,7 +86,7 @@ class OpenSSLConan(ConanFile):
         "no_whirlpool": [True, False],
         "no_zlib": [True, False],
         "openssldir": [None, "ANY"],
-        "securitylevel":  [None] + list(range(0, 6)),
+        "securitylevel": [0, 1, 2, 3, 4, 5],
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
@@ -111,6 +112,8 @@ class OpenSSLConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
+        self.options.securitylevel = 1 if Version(self.version) < "3.2" else 2
+
         if self.settings.os != "Windows":
             self.options.rm_safe("capieng_dialog")
             self.options.rm_safe("enable_capieng")
