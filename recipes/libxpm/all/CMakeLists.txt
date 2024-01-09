@@ -23,9 +23,6 @@ add_library(Xpm
     src/create.c
     src/CrIFrBuf.c
     src/CrIFrDat.c
-    src/CrPFrBuf.c
-    src/CrPFrDat.c
-    src/CrPFrI.c
     src/data.c
     src/hashtab.c
     src/Image.c
@@ -44,11 +41,14 @@ add_library(Xpm
 )
 
 if(UNIX)
-  # *P.c files deal with X11 Pixmaps and require X11
+  # Pixmap-related functions require X11 and are not available on Windows
   target_sources(Xpm PRIVATE
       src/CrBufFrP.c
       src/CrDatFrP.c
       src/CrIFrP.c
+      src/CrPFrBuf.c
+      src/CrPFrDat.c
+      src/CrPFrI.c
       src/RdFToP.c
       src/WrFFrP.c
   )
@@ -72,11 +72,13 @@ endif()
 
 target_include_directories(Xpm PRIVATE include/X11)
 
-target_compile_definitions(Xpm PRIVATE
-    # Build without the --enable-open-zfile option:
-    # https://gitlab.freedesktop.org/xorg/lib/libxpm/-/blob/libXpm-3.5.17/configure.ac?ref_type=tags#L67-88
-    NO_ZPIPE
-)
+if(NOT WIN32)
+    target_compile_definitions(Xpm PRIVATE
+        # Build without the --enable-open-zfile option:
+        # https://gitlab.freedesktop.org/xorg/lib/libxpm/-/blob/libXpm-3.5.17/configure.ac?ref_type=tags#L67-88
+        NO_ZPIPE
+    )
+endif()
 
 set_target_properties(
     Xpm PROPERTIES
