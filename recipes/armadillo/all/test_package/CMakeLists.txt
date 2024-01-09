@@ -8,7 +8,7 @@ if (LINK_HDF5)
 endif()
 
 add_executable(example src/example.cpp)
-target_link_libraries(example Armadillo::Armadillo ${HDF5_TARGETS})
+target_link_libraries(example armadillo::armadillo ${HDF5_TARGETS})
 set_property(TARGET example PROPERTY CXX_STANDARD 11)
 
 # Test whether variables from https://cmake.org/cmake/help/latest/module/FindArmadillo.html are properly defined

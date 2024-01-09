@@ -7,7 +7,7 @@ conan_basic_setup(TARGETS)
 find_package(Armadillo REQUIRED)
 
 add_executable(example ../test_package/src/example.cpp)
-target_link_libraries(example Armadillo::Armadillo)
+target_link_libraries(example armadillo::armadillo)
 set_property(TARGET example PROPERTY CXX_STANDARD 11)
 
 # Test whether variables from https://cmake.org/cmake/help/latest/module/FindArmadillo.html are properly defined
