@@ -1,0 +1,414 @@
+diff --git a/gtsam/3rdparty/Eigen/bench/BenchSparseUtil.h b/gtsam/3rdparty/Eigen/bench/BenchSparseUtil.h
+index 13981f6b7..75ad1df3c 100644
+--- a/gtsam/3rdparty/Eigen/bench/BenchSparseUtil.h
++++ b/gtsam/3rdparty/Eigen/bench/BenchSparseUtil.h
+@@ -3,7 +3,6 @@
+ #include <bench/BenchTimer.h>
+ #include <set>
+ 
+-using namespace std;
+ using namespace Eigen;
+ using namespace Eigen;
+ 
+diff --git a/gtsam/3rdparty/Eigen/bench/BenchUtil.h b/gtsam/3rdparty/Eigen/bench/BenchUtil.h
+index 8883a1380..5a65b91c1 100644
+--- a/gtsam/3rdparty/Eigen/bench/BenchUtil.h
++++ b/gtsam/3rdparty/Eigen/bench/BenchUtil.h
+@@ -5,7 +5,6 @@
+ #include <Eigen/Core>
+ #include "BenchTimer.h"
+ 
+-using namespace std;
+ using namespace Eigen;
+ 
+ #include <boost/preprocessor/repetition/enum_params.hpp>
+diff --git a/gtsam/3rdparty/Eigen/bench/spbench/spbenchsolver.h b/gtsam/3rdparty/Eigen/bench/spbench/spbenchsolver.h
+index 19c719c04..e1ccddc59 100644
+--- a/gtsam/3rdparty/Eigen/bench/spbench/spbenchsolver.h
++++ b/gtsam/3rdparty/Eigen/bench/spbench/spbenchsolver.h
+@@ -73,7 +73,6 @@
+ #define EIGEN_CG_PRECOND  180
+ 
+ using namespace Eigen;
+-using namespace std; 
+ 
+ 
+ // Global variables for input parameters
+@@ -311,7 +310,7 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+   //UMFPACK
+   #ifdef EIGEN_UMFPACK_SUPPORT
+   {
+-    cout << "Solving with UMFPACK LU ... \n"; 
++    std::cout << "Solving with UMFPACK LU ... \n";
+     UmfPackLU<SpMat> solver;
+     call_directsolver(solver, EIGEN_UMFPACK, A, b, refX,statFile);
+   }
+@@ -319,7 +318,7 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+     //SuperLU
+   #ifdef EIGEN_SUPERLU_SUPPORT
+   {
+-    cout << "\nSolving with SUPERLU ... \n"; 
++    std::cout << "\nSolving with SUPERLU ... \n";
+     SuperLU<SpMat> solver;
+     call_directsolver(solver, EIGEN_SUPERLU, A, b, refX,statFile);
+   }
+@@ -328,7 +327,7 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+    // PaStix LU
+   #ifdef EIGEN_PASTIX_SUPPORT
+   {
+-    cout << "\nSolving with PASTIX LU ... \n"; 
++    std::cout << "\nSolving with PASTIX LU ... \n";
+     PastixLU<SpMat> solver;
+     call_directsolver(solver, EIGEN_PASTIX, A, b, refX,statFile) ;
+   }
+@@ -337,20 +336,20 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+    //PARDISO LU
+   #ifdef EIGEN_PARDISO_SUPPORT
+   {
+-    cout << "\nSolving with PARDISO LU ... \n"; 
++    std::cout << "\nSolving with PARDISO LU ... \n";
+     PardisoLU<SpMat>  solver;
+     call_directsolver(solver, EIGEN_PARDISO, A, b, refX,statFile);
+   }
+   #endif
+ 
+   // Eigen SparseLU METIS
+-  cout << "\n Solving with Sparse LU AND COLAMD ... \n";
++  std::cout << "\n Solving with Sparse LU AND COLAMD ... \n";
+   SparseLU<SpMat, COLAMDOrdering<int> >   solver;
+   call_directsolver(solver, EIGEN_SPARSELU_COLAMD, A, b, refX, statFile);
+   // Eigen SparseLU METIS
+   #ifdef EIGEN_METIS_SUPPORT
+   {
+-    cout << "\n Solving with Sparse LU AND METIS ... \n";
++    std::cout << "\n Solving with Sparse LU AND METIS ... \n";
+     SparseLU<SpMat, MetisOrdering<int> >   solver;
+     call_directsolver(solver, EIGEN_SPARSELU_METIS, A, b, refX, statFile);
+   }
+@@ -358,13 +357,13 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+ 
+   //BiCGSTAB
+   {
+-    cout << "\nSolving with BiCGSTAB ... \n"; 
++    std::cout << "\nSolving with BiCGSTAB ... \n";
+     BiCGSTAB<SpMat> solver;
+     call_itersolver(solver, EIGEN_BICGSTAB, A, b, refX,statFile);
+   }
+   //BiCGSTAB+ILUT
+   {
+-    cout << "\nSolving with BiCGSTAB and ILUT ... \n"; 
++    std::cout << "\nSolving with BiCGSTAB and ILUT ... \n";
+     BiCGSTAB<SpMat, IncompleteLUT<Scalar> > solver;
+     call_itersolver(solver, EIGEN_BICGSTAB_ILUT, A, b, refX,statFile);
+   }
+@@ -372,13 +371,13 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+ 
+   //GMRES
+ //   {
+-//     cout << "\nSolving with GMRES ... \n"; 
++//     std::cout << "\nSolving with GMRES ... \n";
+ //     GMRES<SpMat> solver;
+ //     call_itersolver(solver, EIGEN_GMRES, A, b, refX,statFile);
+ //   }
+   //GMRES+ILUT
+   {
+-    cout << "\nSolving with GMRES and ILUT ... \n"; 
++    std::cout << "\nSolving with GMRES and ILUT ... \n";
+     GMRES<SpMat, IncompleteLUT<Scalar> > solver;
+     call_itersolver(solver, EIGEN_GMRES_ILUT, A, b, refX,statFile);
+   }
+@@ -388,7 +387,7 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+   {
+     // Internal Cholesky
+     {
+-      cout << "\nSolving with Simplicial LDLT ... \n"; 
++      std::cout << "\nSolving with Simplicial LDLT ... \n";
+       SimplicialLDLT<SpMat, Lower> solver;
+       call_directsolver(solver, EIGEN_SIMPLICIAL_LDLT, A, b, refX,statFile);
+     }
+@@ -396,7 +395,7 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+     // CHOLMOD
+     #ifdef EIGEN_CHOLMOD_SUPPORT
+     {
+-      cout << "\nSolving with CHOLMOD LDLT ... \n"; 
++      std::cout << "\nSolving with CHOLMOD LDLT ... \n";
+       CholmodDecomposition<SpMat, Lower> solver;
+       solver.setMode(CholmodLDLt);
+        call_directsolver(solver,EIGEN_CHOLMOD_LDLT, A, b, refX,statFile);
+@@ -406,7 +405,7 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+     //PASTIX LLT
+     #ifdef EIGEN_PASTIX_SUPPORT
+     {
+-      cout << "\nSolving with PASTIX LDLT ... \n"; 
++      std::cout << "\nSolving with PASTIX LDLT ... \n";
+       PastixLDLT<SpMat, Lower> solver;
+       call_directsolver(solver,EIGEN_PASTIX_LDLT, A, b, refX,statFile);
+     }
+@@ -415,7 +414,7 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+     //PARDISO LLT
+     #ifdef EIGEN_PARDISO_SUPPORT
+     {
+-      cout << "\nSolving with PARDISO LDLT ... \n"; 
++      std::cout << "\nSolving with PARDISO LDLT ... \n";
+       PardisoLDLT<SpMat, Lower> solver;
+       call_directsolver(solver,EIGEN_PARDISO_LDLT, A, b, refX,statFile);
+     }
+@@ -428,7 +427,7 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+ 
+     //Internal Sparse Cholesky
+     {
+-      cout << "\nSolving with SIMPLICIAL LLT ... \n"; 
++      std::cout << "\nSolving with SIMPLICIAL LLT ... \n";
+       SimplicialLLT<SpMat, Lower> solver;
+       call_directsolver(solver,EIGEN_SIMPLICIAL_LLT, A, b, refX,statFile);
+     }
+@@ -437,12 +436,12 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+     #ifdef EIGEN_CHOLMOD_SUPPORT
+     {
+       // CholMOD SuperNodal LLT
+-      cout << "\nSolving with CHOLMOD LLT (Supernodal)... \n"; 
++      std::cout << "\nSolving with CHOLMOD LLT (Supernodal)... \n";
+       CholmodDecomposition<SpMat, Lower> solver;
+       solver.setMode(CholmodSupernodalLLt);
+        call_directsolver(solver,EIGEN_CHOLMOD_SUPERNODAL_LLT, A, b, refX,statFile);
+       // CholMod Simplicial LLT
+-      cout << "\nSolving with CHOLMOD LLT (Simplicial) ... \n"; 
++      std::cout << "\nSolving with CHOLMOD LLT (Simplicial) ... \n";
+       solver.setMode(CholmodSimplicialLLt);
+       call_directsolver(solver,EIGEN_CHOLMOD_SIMPLICIAL_LLT, A, b, refX,statFile);
+     }
+@@ -451,7 +450,7 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+     //PASTIX LLT
+     #ifdef EIGEN_PASTIX_SUPPORT
+     {
+-      cout << "\nSolving with PASTIX LLT ... \n"; 
++      std::cout << "\nSolving with PASTIX LLT ... \n";
+       PastixLLT<SpMat, Lower> solver;
+       call_directsolver(solver,EIGEN_PASTIX_LLT, A, b, refX,statFile);
+     }
+@@ -460,7 +459,7 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+     //PARDISO LLT
+     #ifdef EIGEN_PARDISO_SUPPORT
+     {
+-      cout << "\nSolving with PARDISO LLT ... \n"; 
++      std::cout << "\nSolving with PARDISO LLT ... \n";
+       PardisoLLT<SpMat, Lower> solver;
+       call_directsolver(solver,EIGEN_PARDISO_LLT, A, b, refX,statFile);
+     }
+@@ -468,13 +467,13 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+ 
+     // Internal CG
+     {
+-      cout << "\nSolving with CG ... \n"; 
++      std::cout << "\nSolving with CG ... \n";
+       ConjugateGradient<SpMat, Lower> solver;
+       call_itersolver(solver,EIGEN_CG, A, b, refX,statFile);
+     }
+     //CG+IdentityPreconditioner
+ //     {
+-//       cout << "\nSolving with CG and IdentityPreconditioner ... \n"; 
++//       std::cout << "\nSolving with CG and IdentityPreconditioner ... \n";
+ //       ConjugateGradient<SpMat, Lower, IdentityPreconditioner> solver;
+ //       call_itersolver(solver,EIGEN_CG_PRECOND, A, b, refX,statFile);
+ //     }
+@@ -487,7 +486,7 @@ void SelectSolvers(const SparseMatrix<Scalar>&A, unsigned int sym, Matrix<Scalar
+  * and optionally in the provided html file
+  */
+ template <typename Scalar>
+-void Browse_Matrices(const string folder, bool statFileExists, std::string& statFile, int maxiters, double tol)
++void Browse_Matrices(const std::string folder, bool statFileExists, std::string& statFile, int maxiters, double tol)
+ {
+   MaximumIters = maxiters; // Maximum number of iterations, global variable
+   RelErr = tol;  //Relative residual error  as stopping criterion for iterative solvers
+@@ -540,7 +539,7 @@ void Browse_Matrices(const string folder, bool statFileExists, std::string& stat
+   }
+ }
+ 
+-bool get_options(int argc, char **args, string option, string* value=0)
++bool get_options(int argc, char **args, std::string option, std::string* value=0)
+ {
+   int idx = 1, found=false;
+   while (idx<argc && !found){
+diff --git a/gtsam/geometry/SOn-inl.h b/gtsam/geometry/SOn-inl.h
+index 0d7f3e108..e1cbe6381 100644
+--- a/gtsam/geometry/SOn-inl.h
++++ b/gtsam/geometry/SOn-inl.h
+@@ -22,8 +22,6 @@
+ 
+ #include <iostream>
+ 
+-using namespace std;
+-
+ namespace gtsam {
+ 
+ // Implementation for N>5 just uses dynamic version
+@@ -115,7 +113,7 @@ typename SO<N>::VectorN2 SO<N>::vec(
+ 
+ template <int N>
+ void SO<N>::print(const std::string& s) const {
+-    cout << s << matrix_ << endl;
++    std::cout << s << matrix_ << std::endl;
+ }
+ 
+ }  // namespace gtsam
+diff --git a/gtsam/navigation/tests/imuFactorTesting.h b/gtsam/navigation/tests/imuFactorTesting.h
+index 5aa83e87e..e02fbfa49 100644
+--- a/gtsam/navigation/tests/imuFactorTesting.h
++++ b/gtsam/navigation/tests/imuFactorTesting.h
+@@ -20,7 +20,6 @@
+ #include <gtsam/navigation/ImuBias.h>
+ #include <gtsam/inference/Symbol.h>
+ 
+-using namespace std;
+ using namespace gtsam;
+ 
+ // Convenience for named keys
+@@ -54,13 +53,13 @@ struct ImuMeasurement {
+ };
+ 
+ template <typename PIM>
+-void integrateMeasurements(const vector<ImuMeasurement>& measurements,
++void integrateMeasurements(const std::vector<ImuMeasurement>& measurements,
+                            PIM* pim) {
+   for (const auto& m : measurements)
+     pim->integrateMeasurement(m.acc, m.gyro, m.dt);
+ }
+ 
+-struct SomeMeasurements : vector<ImuMeasurement> {
++struct SomeMeasurements : std::vector<ImuMeasurement> {
+   SomeMeasurements() {
+     reserve(102);
+     const double dt = 0.01, pi100 = M_PI / 100;
+diff --git a/gtsam/slam/KarcherMeanFactor-inl.h b/gtsam/slam/KarcherMeanFactor-inl.h
+index f10cc7e42..c0ca6855b 100644
+--- a/gtsam/slam/KarcherMeanFactor-inl.h
++++ b/gtsam/slam/KarcherMeanFactor-inl.h
+@@ -21,12 +21,10 @@
+ #include <gtsam/nonlinear/NonlinearFactorGraph.h>
+ #include <gtsam/slam/KarcherMeanFactor.h>
+ 
+-using namespace std;
+-
+ namespace gtsam {
+ 
+ template <class T, class ALLOC>
+-T FindKarcherMeanImpl(const vector<T, ALLOC>& rotations) {
++T FindKarcherMeanImpl(const std::vector<T, ALLOC>& rotations) {
+   // Cost function C(R) = \sum PriorFactor(R_i)::error(R)
+   // No closed form solution.
+   NonlinearFactorGraph graph;
+diff --git a/gtsam/slam/tests/smartFactorScenarios.h b/gtsam/slam/tests/smartFactorScenarios.h
+index 4abc59305..b2c1c62f5 100644
+--- a/gtsam/slam/tests/smartFactorScenarios.h
++++ b/gtsam/slam/tests/smartFactorScenarios.h
+@@ -23,7 +23,6 @@
+ #include <gtsam/geometry/Cal3_S2.h>
+ #include <gtsam/geometry/Cal3Bundler.h>
+ 
+-using namespace std;
+ using namespace gtsam;
+ 
+ // three landmarks ~5 meters infront of camera
+diff --git a/gtsam_unstable/linear/LP.h b/gtsam_unstable/linear/LP.h
+index fc00c2240..ac15cf0d5 100644
+--- a/gtsam_unstable/linear/LP.h
++++ b/gtsam_unstable/linear/LP.h
+@@ -26,8 +26,6 @@
+ 
+ namespace gtsam {
+ 
+-using namespace std;
+-
+ /// Mapping between variable's key and its corresponding dimensionality
+ using KeyDimMap = std::map<Key, size_t>;
+ /*
+@@ -64,7 +62,7 @@ public:
+   }
+ 
+   /// print
+-  void print(const string& s = "") const {
++  void print(const std::string& s = "") const {
+     std::cout << s << std::endl;
+     cost.print("Linear cost: ");
+     equalities.print("Linear equality factors: ");
+diff --git a/gtsam_unstable/linear/LPInitSolver.cpp b/gtsam_unstable/linear/LPInitSolver.cpp
+index 8c3df3132..ac9dc9139 100644
+--- a/gtsam_unstable/linear/LPInitSolver.cpp
++++ b/gtsam_unstable/linear/LPInitSolver.cpp
+@@ -21,6 +21,8 @@
+ #include <gtsam_unstable/linear/LPSolver.h>
+ #include <gtsam_unstable/linear/InfeasibleOrUnboundedProblem.h>
+ 
++using namespace std;
++
+ namespace gtsam {
+ 
+ /******************************************************************************/
+diff --git a/timing/timeSFMBAL.h b/timing/timeSFMBAL.h
+index 548c4de70..123a243eb 100644
+--- a/timing/timeSFMBAL.h
++++ b/timing/timeSFMBAL.h
+@@ -28,7 +28,6 @@
+ #include <string>
+ #include <vector>
+ 
+-using namespace std;
+ using namespace gtsam;
+ using symbol_shorthand::C;
+ using symbol_shorthand::K;
+@@ -41,10 +40,10 @@ static SharedNoiseModel gNoiseModel = noiseModel::Unit::Create(2);
+ SfmData preamble(int argc, char* argv[]) {
+   // primitive argument parsing:
+   if (argc > 2) {
+-    if (strcmp(argv[1], "--colamd"))
++    if (std::strcmp(argv[1], "--colamd"))
+       gUseSchur = false;
+     else
+-      throw runtime_error("Usage: timeSFMBALxxx [--colamd] [BALfile]");
++      throw std::runtime_error("Usage: timeSFMBALxxx [--colamd] [BALfile]");
+   }
+ 
+   // Load BAL file
+@@ -55,7 +54,7 @@ SfmData preamble(int argc, char* argv[]) {
+   else
+     filename = findExampleDataFile("dubrovnik-16-22106-pre");
+   bool success = readBAL(filename, db);
+-  if (!success) throw runtime_error("Could not access file!");
++  if (!success) throw std::runtime_error("Could not access file!");
+   return db;
+ }
+ 
+diff --git a/wrap/matlab.h b/wrap/matlab.h
+index 1af00bd00..076e8c8b2 100644
+--- a/wrap/matlab.h
++++ b/wrap/matlab.h
+@@ -42,7 +42,6 @@ extern "C" {
+ #include <set>
+ #include <streambuf>
+ 
+-using namespace std;
+ using namespace boost; // not usual, but for conciseness of generated code
+ 
+ // start GTSAM Specifics /////////////////////////////////////////////////
+@@ -110,7 +109,7 @@ protected:
+ //*****************************************************************************
+ 
+ void checkArguments(const string& name, int nargout, int nargin, int expected) {
+-  stringstream err;
++  std::stringstream err;
+   err << name << " expects " << expected << " arguments, not " << nargin;
+   if (nargin!=expected)
+     error(err.str().c_str());
+@@ -231,10 +230,10 @@ T unwrap(const mxArray* array) {
+ // expects a character array
+ // Warning: relies on mxChar==char
+ template<>
+-string unwrap<string>(const mxArray* array) {
++string unwrap<std::string>(const mxArray* array) {
+   char *data = mxArrayToString(array);
+   if (data==NULL) error("unwrap<string>: not a character array");
+-  string str(data);
++  std::string str(data);
+   mxFree(data);
+   return str;
+ }

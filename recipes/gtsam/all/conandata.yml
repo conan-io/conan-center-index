@@ -51,3 +51,6 @@ patches:
     - patch_file: "patches/4.0.3-0005-fix_iOSSimulator.patch"
       patch_description: "Turn off using system() function for iOS and iOSSimulator"
       patch_type: "HxGN-CV-DT"
+    - patch_file: "patches/4.0.3-0006-gtsam_std_in_header_files.patch"
+      patch_description: "Not use using namespace std in headers because it causes compilation error with c++17 on Windows."
+      patch_type: "HxGN-CV-DT"
