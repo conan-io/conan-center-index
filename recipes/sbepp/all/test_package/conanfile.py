@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
+from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 import os
 
 
