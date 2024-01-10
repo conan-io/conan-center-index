@@ -22,7 +22,7 @@ class ZserioConanFile(ConanFile):
         "fPIC": [True, False]
     }
     default_options = {
-        "fPIC": False
+        "fPIC": True
     }
 
     @property
