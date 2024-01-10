@@ -470,6 +470,12 @@ class GdalConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "alg", "makefile.vc"),
                                   "$(GEOS_CFLAGS)", "$(GEOS_CFLAGS) /DHAVE_OPENCL")
 
+        # Workaround for a NMakeDeps define quoting issue:
+        # https://github.com/conan-io/conan/issues/13603
+        replace_in_file(self, os.path.join(self.generators_folder, "conannmakedeps.bat"),
+                        r'/DSQLITE_API#\"__declspec(dllimport)\"',
+                        "/DSQLITE_API#__declspec(dllimport)", strict=False)
+
         with chdir(self, self.source_folder):
             self.run(f"nmake -f makefile.vc {' '.join(self._nmake_args)}")
 
