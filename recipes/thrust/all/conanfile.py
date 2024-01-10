@@ -77,3 +77,5 @@ class ThrustConan(ConanFile):
         self.cpp_info.defines = [f"THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_{dev}"]
         # Since CUB and Thrust are provided separately, their versions are not guaranteed to match
         self.cpp_info.defines += ["THRUST_IGNORE_CUB_VERSION_CHECK=1"]
+
+        # TODO: apply https://github.com/NVIDIA/cccl/blob/main/thrust/thrust/cmake/thrust-config.cmake
