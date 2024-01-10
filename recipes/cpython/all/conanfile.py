@@ -735,6 +735,7 @@ class CPythonConan(ConanFile):
 
         self.cpp_info.components["_python_copy"].set_property("pkg_config_name", f"python{py_version.major}")
         self.cpp_info.components["_python_copy"].requires = ["python"]
+        self.cpp_info.components["_python_copy"].includedirs = []
         self.cpp_info.components["_python_copy"].libdirs = []
 
         # embed component: "Embed Python into an application"
@@ -747,6 +748,7 @@ class CPythonConan(ConanFile):
         self.cpp_info.components["embed"].requires = ["python"]
 
         self.cpp_info.components["_embed_copy"].requires = ["embed"]
+        self.cpp_info.components["_embed_copy"].includedirs = []
         self.cpp_info.components["_embed_copy"].set_property(
             "pkg_config_name", f"python{py_version.major}-embed"
         )
@@ -780,6 +782,7 @@ class CPythonConan(ConanFile):
                 self.cpp_info.components["_hidden"].requires.append("xz_utils::xz_utils")
             if self.options.get_safe("with_tkinter"):
                 self.cpp_info.components["_hidden"].requires.append("tk::tk")
+            self.cpp_info.components["_hidden"].includedirs = []
             self.cpp_info.components["_hidden"].libdirs = []
 
         if self.options.env_vars:
