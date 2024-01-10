@@ -2,24 +2,24 @@ sources:
   "13.2.0":
     url:
       - "https://mirrors.dotsrc.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz"
-      - "https://mirror.kumi.systems/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz"
+      - "https://ftpmirror.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz"
       - "https://gcc.gnu.org/ftp/gcc/releases/gcc-13.2.0/gcc-13.2.0.tar.xz"
     sha256: "e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da"
   "12.3.0":
     url:
       - "https://mirrors.dotsrc.org/gnu/gcc/gcc-12.3.0/gcc-12.3.0.tar.xz"
-      - "https://mirror.kumi.systems/gnu/gcc/gcc-12.3.0/gcc-12.3.0.tar.xz"
+      - "https://ftpmirror.gnu.org/gnu/gcc/gcc-12.3.0/gcc-12.3.0.tar.xz"
       - "https://gcc.gnu.org/ftp/gcc/releases/gcc-12.3.0/gcc-12.3.0.tar.xz"
     sha256: "949a5d4f99e786421a93b532b22ffab5578de7321369975b91aec97adfda8c3b"
   "11.4.0":
     url:
       - "https://mirrors.dotsrc.org/gnu/gcc/gcc-11.4.0/gcc-11.4.0.tar.xz"
-      - "https://mirror.kumi.systems/gnu/gcc/gcc-11.4.0/gcc-11.4.0.tar.xz"
+      - "https://ftpmirror.gnu.org/gnu/gcc/gcc-11.4.0/gcc-11.4.0.tar.xz"
       - "https://gcc.gnu.org/ftp/gcc/releases/gcc-11.4.0/gcc-11.4.0.tar.xz"
     sha256: "3f2db222b007e8a4a23cd5ba56726ef08e8b1f1eb2055ee72c1402cea73a8dd9"
   "10.5.0":
     url:
       - "https://mirrors.dotsrc.org/gnu/gcc/gcc-10.5.0/gcc-10.5.0.tar.xz"
-      - "https://mirror.kumi.systems/gnu/gcc/gcc-10.5.0/gcc-10.5.0.tar.xz"
+      - "https://ftpmirror.gnu.org/gnu/gcc/gcc-10.5.0/gcc-10.5.0.tar.xz"
       - "https://gcc.gnu.org/ftp/gcc/releases/gcc-10.5.0/gcc-10.5.0.tar.xz"
     sha256: "25109543fdf46f397c347b5d8b7a2c7e5694a5a51cce4b9c6e1ea8a71ca307c1"
