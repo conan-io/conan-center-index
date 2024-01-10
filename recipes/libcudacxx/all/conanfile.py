@@ -74,7 +74,7 @@ class LibcudacxxConan(ConanFile):
              src=os.path.join(self.source_folder, "lib", "cmake", "libcudacxx"),
              dst=os.path.join(self.package_folder, "lib", "cmake"))
         rename(self, os.path.join(self.package_folder, "lib", "cmake", "libcudacxx-config.cmake"),
-                     os.path.join(self.package_folder, "lib", "cmake", "conan-libcudacxx-official-config.cmake"))
+                     os.path.join(self.package_folder, "lib", "cmake", "libcudacxx-config-official.cmake"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
@@ -91,7 +91,7 @@ class LibcudacxxConan(ConanFile):
         # The CMake module ensures that the include dir is exported as a non-SYSTEM include in CMake
         # https://github.com/NVIDIA/cccl/blob/v2.2.0/libcudacxx/lib/cmake/libcudacxx/libcudacxx-config.cmake#L11-L29
         self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
-        module_path = os.path.join("lib", "cmake", "conan-libcudacxx-official-config.cmake")
+        module_path = os.path.join("lib", "cmake", "libcudacxx-config-official.cmake")
         self.cpp_info.set_property("cmake_build_modules", [module_path])
         self.cpp_info.build_modules["cmake_find_package"] = [module_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [module_path]
