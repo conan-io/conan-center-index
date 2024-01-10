@@ -352,19 +352,19 @@ class DCMTKConan(ConanFile):
                 # https://github.com/DCMTK/dcmtk/blob/DCMTK-3.6.8/config/include/dcmtk/config/osconfig.h.in#L1489
                 self.cpp_info.components[target_lib].cxxflags.append("/Zc:__cplusplus")
 
+        system_libs = []
         if self.settings.os == "Windows":
-            windows_libs = ["iphlpapi", "ws2_32", "netapi32", "wsock32"]
-            self.cpp_info.components["ofstd"].system_libs.extend(windows_libs)
-            if Version(self.version) >= "3.6.8":
-                self.cpp_info.components["oficonv"].system_libs.extend(windows_libs)
+            system_libs = ["iphlpapi", "ws2_32", "netapi32", "wsock32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["ofstd"].system_libs.append("m")
+            system_libs = ["m", "nsl"]
             if self.options.with_multithreading:
-                self.cpp_info.components["ofstd"].system_libs.append("pthread")
+                system_libs.append("pthread")
             if Version(self.version) >= "3.6.8":
-                if self.options.with_multithreading:
-                    self.cpp_info.components["oficonv"].system_libs.append("pthread")
-                self.cpp_info.components["oficonv"].system_libs.append("rt")
+                system_libs.append("rt")
+        if Version(self.version) >= "3.6.8":
+            self.cpp_info.components["oficonv"].system_libs = system_libs
+        else:
+            self.cpp_info.components["ofstd"].system_libs = system_libs
 
         if self.options.default_dict == "external":
             dcmdictpath = os.path.join(self._dcm_datadictionary_path, "dcmtk", "dicom.dic")
