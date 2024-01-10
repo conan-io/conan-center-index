@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, move_folder_contents, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
@@ -53,18 +53,21 @@ class ThrustConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        if Version(self.version) >= "2.0":
+            tmpdir = os.path.join(self.export_sources_folder, "tmp")
+            get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=tmpdir)
+            move_folder_contents(self, os.path.join(tmpdir, "thrust"), self.source_folder)
+            rmdir(self, tmpdir)
+        else:
+            get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        source_folder = self.source_folder
-        if Version(self.version) >= "2.2.0":
-            source_folder = os.path.join(self.source_folder, "thrust")
         copy(self, "LICENSE",
-             src=source_folder,
+             src=self.source_folder,
              dst=os.path.join(self.package_folder, "licenses"))
         for pattern in ["*.h", "*.inl"]:
             copy(self, pattern,
-                 src=os.path.join(source_folder, "thrust"),
+                 src=os.path.join(self.source_folder, "thrust"),
                  dst=os.path.join(self.package_folder, "include", "thrust"))
 
     def package_info(self):
