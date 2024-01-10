@@ -1,0 +1,26 @@
+--- lib/cmake/libcudacxx/libcudacxx-config.cmake
++++ lib/cmake/libcudacxx/libcudacxx-config.cmake
+@@ -33,12 +33,7 @@
+ #
+ 
+ _libcudacxx_declare_interface_alias(libcudacxx::libcudacxx _libcudacxx_libcudacxx)
+-# Pull in the include dir detected by libcudacxx-config-version.cmake
+-set(_libcudacxx_INCLUDE_DIR "${_libcudacxx_VERSION_INCLUDE_DIR}"
+-  CACHE INTERNAL "Location of libcudacxx headers."
+-)
+-unset(_libcudacxx_VERSION_INCLUDE_DIR CACHE) # Clear tmp variable from cache
+-target_include_directories(_libcudacxx_libcudacxx INTERFACE "${_libcudacxx_INCLUDE_DIR}")
++target_include_directories(_libcudacxx_libcudacxx INTERFACE "${${CMAKE_FIND_PACKAGE_NAME}_INCLUDE_DIR}")
+ 
+ #
+ # Standardize version info
+@@ -50,9 +45,3 @@
+ set(LIBCUDACXX_VERSION_PATCH ${${CMAKE_FIND_PACKAGE_NAME}_VERSION_PATCH} CACHE INTERNAL "")
+ set(LIBCUDACXX_VERSION_TWEAK ${${CMAKE_FIND_PACKAGE_NAME}_VERSION_TWEAK} CACHE INTERNAL "")
+ set(LIBCUDACXX_VERSION_COUNT ${${CMAKE_FIND_PACKAGE_NAME}_VERSION_COUNT} CACHE INTERNAL "")
+-
+-include(FindPackageHandleStandardArgs)
+-if (NOT libcudacxx_CONFIG)
+-  set(libcudacxx_CONFIG "${CMAKE_CURRENT_LIST_FILE}")
+-endif()
+-find_package_handle_standard_args(libcudacxx CONFIG_MODE)
