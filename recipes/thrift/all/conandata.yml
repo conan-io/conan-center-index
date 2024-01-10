@@ -1,4 +1,7 @@
 sources:
+  "0.19.0":
+    url: "http://archive.apache.org/dist/thrift/0.19.0/thrift-0.19.0.tar.gz"
+    sha256: "d49c896c2724a78701e05cfccf6cf70b5db312d82a17efe951b441d300ccf275"
   "0.18.1":
     url: "http://archive.apache.org/dist/thrift/0.18.1/thrift-0.18.1.tar.gz"
     sha256: "04c6f10e5d788ca78e13ee2ef0d2152c7b070c0af55483d6b942e29cff296726"
@@ -8,16 +11,14 @@ sources:
   "0.16.0":
     url: "http://archive.apache.org/dist/thrift/0.16.0/thrift-0.16.0.tar.gz"
     sha256: "f460b5c1ca30d8918ff95ea3eb6291b3951cf518553566088f3f2be8981f6209"
-  "0.15.0":
-    url: "http://archive.apache.org/dist/thrift/0.15.0/thrift-0.15.0.tar.gz"
-    sha256: "d5883566d161f8f6ddd4e21f3a9e3e6b8272799d054820f1c25b11e86718f86b"
-  "0.14.2":
-    url: "http://archive.apache.org/dist/thrift/0.14.2/thrift-0.14.2.tar.gz"
-    sha256: "4191bfc0b7490e20cc69f9f4dc6e991fbb612d4551aa9eef1dbf7f4c47ce554d"
-  "0.14.1":
-    url: "http://archive.apache.org/dist/thrift/0.14.1/thrift-0.14.1.tar.gz"
-    sha256: "13da5e1cd9c8a3bb89778c0337cc57eb0c29b08f3090b41cf6ab78594b410ca5"
 patches:
+  "0.19.0":
+    - patch_file: "patches/cmake-0.16.0.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"
+    - patch_file: "patches/0.18.1-0002-include-stddef.patch"
+      patch_description: "include cstddef"
+      patch_type: "portability"
   "0.18.1":
     - patch_file: "patches/cmake-0.16.0.patch"
       patch_description: "use cci packages"
@@ -31,17 +32,5 @@ patches:
       patch_type: "conan"
   "0.16.0":
     - patch_file: "patches/cmake-0.16.0.patch"
-      patch_description: "use cci packages"
-      patch_type: "conan"
-  "0.15.0":
-    - patch_file: "patches/cmake-0.15.0.patch"
-      patch_description: "use cci packages"
-      patch_type: "conan"
-  "0.14.2":
-    - patch_file: "patches/cmake-0.14.1.patch"
-      patch_description: "use cci packages"
-      patch_type: "conan"
-  "0.14.1":
-    - patch_file: "patches/cmake-0.14.1.patch"
       patch_description: "use cci packages"
       patch_type: "conan"

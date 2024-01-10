@@ -3,7 +3,6 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -67,7 +66,7 @@ class ThriftConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.82.0", transitive_headers=True)
+        self.requires("boost/1.83.0", transitive_headers=True)
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_zlib:
@@ -75,11 +74,11 @@ class ThriftConan(ConanFile):
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
         if self.options.with_qt5:
-            self.requires("qt/5.15.9")
+            self.requires("qt/5.15.11")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
-            self.tool_requires("winflexbison/2.5.24")
+            self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("flex/2.6.4")
             self.tool_requires("bison/3.8.2")
@@ -176,8 +175,7 @@ class ThriftConan(ConanFile):
         self.cpp_info.components["libthrift"].libs = [f"thrift{libsuffix}"]
         if self.settings.os == "Windows":
             self.cpp_info.components["libthrift"].defines.append("NOMINMAX")
-            if Version(self.version) >= "0.15.0":
-                self.cpp_info.components["libthrift"].system_libs.append("shlwapi")
+            self.cpp_info.components["libthrift"].system_libs.append("shlwapi")
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libthrift"].system_libs.extend(["m", "pthread"])
         self.cpp_info.components["libthrift"].requires.append("boost::headers")
