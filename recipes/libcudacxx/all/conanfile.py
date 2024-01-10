@@ -14,10 +14,10 @@ class LibcudacxxConan(ConanFile):
     name = "libcudacxx"
     description = ("libcu++, the NVIDIA C++ Standard Library, is the C++ Standard Library for your entire system."
                    " It provides a heterogeneous implementation of the C++ Standard Library that can be used in and between CPU and GPU code.")
-    license = "BSD 3-Clause"
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://nvidia.github.io/libcudacxx/"
-    topics = ("standard-library", "libcxx", "cuda", "gpu", "nvidia", "nvidia-hpc-sdk", "header-only")
+    topics = ("cuda", "standard-library", "libcxx", "gpu", "nvidia", "nvidia-hpc-sdk", "header-only")
 
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
