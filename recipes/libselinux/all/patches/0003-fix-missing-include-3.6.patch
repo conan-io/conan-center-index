@@ -1,0 +1,10 @@
+--- src/selinux_internal.c
++++ src/selinux_internal.c
+@@ -1,6 +5,7 @@
+ #include "selinux_internal.h"
+ 
+ #include <errno.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <stdint.h>
+ 

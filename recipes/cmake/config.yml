@@ -1,4 +1,8 @@
 versions:
+  "3.28.1":
+    folder: "binary"
+  "3.27.9":
+    folder: "binary"
   "3.27.7":
     folder: "binary"
   "3.27.6":
@@ -6,6 +10,8 @@ versions:
   "3.27.5":
     folder: "binary"
   "3.27.4":
+    folder: "binary"
+  "3.26.6":
     folder: "binary"
   "3.26.5":
     folder: "binary"
