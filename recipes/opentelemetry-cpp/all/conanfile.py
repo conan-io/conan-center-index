@@ -119,21 +119,21 @@ class OpenTelemetryCppConan(ConanFile):
            self.options.with_otlp_http or
            self.options.with_etw
         ):
-           self.requires("nlohmann_json/3.11.3")
-           self.requires("openssl/[>=1.1 <4]")
+            self.requires("nlohmann_json/3.11.3")
+            self.requires("openssl/[>=1.1 <4]")
 
         if (self.options.with_zipkin or
            self.options.with_elasticsearch or
            self.options.with_otlp_http
         ):
-           self.requires("libcurl/[>=7.78.0 <9]")
+            self.requires("libcurl/[>=7.78.0 <9]")
 
         if self.options.with_prometheus:
             self.requires("prometheus-cpp/1.1.0")
 
         if self.options.get_safe("with_jaeger"):
             self.requires("thrift/0.18.1")
-            self.requires("boost/1.83.0")
+            self.requires("boost/1.82.0")
 
     @property
     def _required_boost_components(self):
