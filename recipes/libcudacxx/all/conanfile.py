@@ -21,6 +21,8 @@ class LibcudacxxConan(ConanFile):
 
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
+    short_paths = True
 
     @property
     def _min_cppstd(self):
@@ -84,4 +86,7 @@ class LibcudacxxConan(ConanFile):
         # The CMake module ensures that the include dir is exported as a non-SYSTEM include in CMake
         # https://github.com/NVIDIA/cccl/blob/v2.2.0/libcudacxx/lib/cmake/libcudacxx/libcudacxx-config.cmake#L11-L29
         self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
-        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "conan-libcudacxx-official-config.cmake")])
+        module_path = os.path.join("lib", "cmake", "conan-libcudacxx-official-config.cmake")
+        self.cpp_info.set_property("cmake_build_modules", [module_path])
+        self.cpp_info.build_modules["cmake_find_package"] = [module_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [module_path]
