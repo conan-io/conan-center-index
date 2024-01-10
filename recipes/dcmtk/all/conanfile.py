@@ -3,7 +3,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -115,6 +115,8 @@ class DCMTKConan(ConanFile):
         del self.info.options.external_dictionary
 
     def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
         if hasattr(self, "settings_build") and cross_building(self) and self.settings.os == "Macos":
             # FIXME: Probable issue with flags, build includes header 'mmintrin.h'
             raise ConanInvalidConfiguration("Cross building on Macos is not supported (yet)")
@@ -344,6 +346,11 @@ class DCMTKConan(ConanFile):
             # TODO: to remove in conan v2 once cmake_find_package* generators removed
             self.cpp_info.components[target_lib].build_modules["cmake_find_package"] = [self._module_file_rel_path]
             self.cpp_info.components[target_lib].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+
+            if is_msvc(self):
+                # Required for the __cplusplus check at
+                # https://github.com/DCMTK/dcmtk/blob/DCMTK-3.6.8/config/include/dcmtk/config/osconfig.h.in#L1489
+                self.cpp_info.components[target_lib].cxxflags.append("/Zc:__cplusplus")
 
         if self.settings.os == "Windows":
             windows_libs = ["iphlpapi", "ws2_32", "netapi32", "wsock32"]
