@@ -115,10 +115,9 @@ class DCMTKConan(ConanFile):
         del self.info.options.external_dictionary
 
     def validate(self):
-        if hasattr(self, "settings_build") and cross_building(self) and \
-           self.settings.os == "Macos" and self.settings.arch == "armv8":
+        if hasattr(self, "settings_build") and cross_building(self) and self.settings.os == "Macos":
             # FIXME: Probable issue with flags, build includes header 'mmintrin.h'
-            raise ConanInvalidConfiguration("Cross building to Macos M1 is not supported (yet)")
+            raise ConanInvalidConfiguration("Cross building on Macos is not supported (yet)")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
