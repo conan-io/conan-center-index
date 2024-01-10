@@ -24,7 +24,7 @@ class GccConan(ConanFile):
     homepage = "https://gcc.gnu.org"
     topics = ("gcc", "gnu", "compiler", "c", "c++")
 
-    package_type = "application"
+    package_type = "library"
     settings = "os", "compiler", "arch", "build_type"
 
     def configure(self):
