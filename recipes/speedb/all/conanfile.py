@@ -112,7 +112,7 @@ class SpeedbConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         # to avoid wrong CPU detection, modify not to use "-march=native" in apple-clang
-        if cross_building(self) and os.settings.compiler == "apple-clang":
+        if cross_building(self) and self.settings.compiler == "apple-clang":
             replace_in_file(self,
                 os.path.join(self.source_folder, "CMakeLists.txt"),
                 """elseif(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64" AND NOT HAS_ARMV8_CRC)""",
