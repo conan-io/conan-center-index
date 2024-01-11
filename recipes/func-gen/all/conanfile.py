@@ -8,7 +8,7 @@ from conan.tools.files import copy
 from conan.tools.scm import Git, Version
 
 
-class FuncgenConan(ConanFile):
+class FuncGenConan(ConanFile):
     name = "func-gen"
 
     # Optional metadata
