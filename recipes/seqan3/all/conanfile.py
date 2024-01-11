@@ -28,7 +28,9 @@ class Seqan3Conan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        return {"gcc": "10"}
+        if Version(self.version) < "3.3.0":
+            return {"gcc": "10"}
+        return {"gcc": "11"}
 
     def layout(self):
         basic_layout(self, src_folder="src")
