@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/2.7.0-0001-use-cci.patch"
       patch_description: "use cci's package"
       patch_type: "conan"
+    - patch_file: "patches/2.7.0-0002-fix-install.patch"
+      patch_description: "disable static lib installation on shared build"
+      patch_type: "conan"

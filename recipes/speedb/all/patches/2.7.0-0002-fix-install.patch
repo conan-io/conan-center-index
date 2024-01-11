@@ -1,0 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2291b8d..28b932f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1308,7 +1308,7 @@ if(NOT WIN32 OR ROCKSDB_INSTALL_ON_WINDOWS)
+   endforeach()
+ 
+   install(DIRECTORY "${PROJECT_SOURCE_DIR}/cmake/modules" COMPONENT devel DESTINATION ${package_config_destination})
+-
++  if(NOT ROCKSDB_BUILD_SHARED)
+   install(
+     TARGETS ${ROCKSDB_STATIC_LIB}
+     EXPORT SpeedbTargets
+@@ -1316,7 +1316,7 @@ if(NOT WIN32 OR ROCKSDB_INSTALL_ON_WINDOWS)
+     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+     INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+   )
+-
++  endif()
+   if(ROCKSDB_BUILD_SHARED)
+     install(
+       TARGETS ${ROCKSDB_SHARED_LIB}
