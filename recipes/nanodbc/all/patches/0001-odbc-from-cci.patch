@@ -9,18 +9,19 @@
    # Try to find unixODBC first via odbc_config program.
    find_program(ODBC_CONFIG odbc_config
      PATHS $ENV{ODBC_PATH}/bin /usr/bin /usr/local/bin)
-@@ -171,8 +171,8 @@
+@@ -171,8 +171,9 @@
  ## find ODBC libraries to link
  ########################################
  if(UNIX)
 -  set(ODBC_LIBRARIES ${ODBCLIB})
 -  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${ODBC_LINK_FLAGS}")
-+  set(ODBC_LIBRARIES CONAN_PKG::odbc)
++  find_package(ODBC REQUIRED CONFIG)
++  set(ODBC_LIBRARIES ODBC::ODBC)
 +  #set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${ODBC_LINK_FLAGS}")
  elseif(MSVC OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
    set(ODBC_LIBRARIES odbc32.lib odbccp32.lib Ws2_32.lib)
  elseif(MINGW)
-@@ -188,7 +188,7 @@
+@@ -188,7 +189,7 @@
    find_package(Boost COMPONENTS locale REQUIRED)
    if(Boost_FOUND)
      include_directories(${Boost_INCLUDE_DIRS})

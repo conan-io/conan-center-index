@@ -19,7 +19,7 @@ class ProtobufConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/protocolbuffers/protobuf"
     license = "BSD-3-Clause"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -48,18 +48,12 @@ class ProtobufConan(ConanFile):
     def _is_clang_x86(self):
         return self.settings.compiler == "clang" and self.settings.arch == "x86"
 
-    @property
-    def _can_disable_rtti(self):
-        return Version(self.version) >= "3.15.4"
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._can_disable_rtti:
-            del self.options.with_rtti
 
     def configure(self):
         if self.options.shared:
@@ -70,7 +64,7 @@ class ProtobufConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
@@ -79,7 +73,7 @@ class ProtobufConan(ConanFile):
         check_min_vs(self, "190")
 
         if self.settings.compiler == "clang":
-            if Version(self.version) >= "3.15.4" and Version(self.settings.compiler.version) < "4":
+            if Version(self.settings.compiler.version) < "4":
                 raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 4")
 
     def source(self):
@@ -97,10 +91,8 @@ class ProtobufConan(ConanFile):
         tc.cache_variables["protobuf_BUILD_PROTOC_BINARIES"] = self.settings.os != "tvOS"
         if not self.options.debug_suffix:
             tc.cache_variables["protobuf_DEBUG_POSTFIX"] = ""
-        if Version(self.version) >= "3.14.0":
-            tc.cache_variables["protobuf_BUILD_LIBPROTOC"] = self.settings.os != "tvOS"
-        if self._can_disable_rtti:
-            tc.cache_variables["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
+        tc.cache_variables["protobuf_BUILD_LIBPROTOC"] = self.settings.os != "tvOS"
+        tc.cache_variables["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
         if is_msvc(self) or self._is_clang_cl:
             runtime = msvc_runtime_flag(self)
             if not runtime:
@@ -132,20 +124,33 @@ class ProtobufConan(ConanFile):
         protoc_filename = "protoc" + exe_ext
         module_folder_depth = len(os.path.normpath(self._cmake_install_base_path).split(os.path.sep))
         protoc_rel_path = "{}bin/{}".format("".join(["../"] * module_folder_depth), protoc_filename)
-        protoc_target = textwrap.dedent("""\
+        protoc_target = textwrap.dedent(f"""\
             if(NOT TARGET protobuf::protoc)
+                # Locate protoc executable
+                ## Workaround for legacy "cmake" generator in case of cross-build
                 if(CMAKE_CROSSCOMPILING)
-                    find_program(PROTOC_PROGRAM protoc PATHS ENV PATH NO_DEFAULT_PATH)
+                    find_program(PROTOC_PROGRAM NAMES protoc PATHS ENV PATH NO_DEFAULT_PATH)
                 endif()
+                ## And here this will work fine with "CMakeToolchain" (for native & cross-build)
+                ## and legacy "cmake" generator in case of native build
+                if(NOT PROTOC_PROGRAM)
+                    find_program(PROTOC_PROGRAM NAMES protoc)
+                endif()
+                ## Last resort: we search in package folder directly
                 if(NOT PROTOC_PROGRAM)
                     set(PROTOC_PROGRAM \"${{CMAKE_CURRENT_LIST_DIR}}/{protoc_rel_path}\")
                 endif()
                 get_filename_component(PROTOC_PROGRAM \"${{PROTOC_PROGRAM}}\" ABSOLUTE)
+
+                # Give opportunity to users to provide an external protoc executable
+                # (this is a feature of official FindProtobuf.cmake)
                 set(Protobuf_PROTOC_EXECUTABLE ${{PROTOC_PROGRAM}} CACHE FILEPATH \"The protoc compiler\")
+
+                # Create executable imported target protobuf::protoc
                 add_executable(protobuf::protoc IMPORTED)
                 set_property(TARGET protobuf::protoc PROPERTY IMPORTED_LOCATION ${{Protobuf_PROTOC_EXECUTABLE}})
             endif()
-        """.format(protoc_rel_path=protoc_rel_path))
+        """)
         replace_in_file(self,
             protobuf_config_cmake,
             "include(\"${CMAKE_CURRENT_LIST_DIR}/protobuf-targets.cmake\")",

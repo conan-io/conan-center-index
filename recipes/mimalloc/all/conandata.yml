@@ -1,4 +1,7 @@
 sources:
+  "2.1.2":
+    url: "https://github.com/microsoft/mimalloc/archive/v2.1.2.tar.gz"
+    sha256: "2b1bff6f717f9725c70bf8d79e4786da13de8a270059e4ba0bdd262ae7be46eb"
   "2.0.9":
     url: "https://github.com/microsoft/mimalloc/archive/v2.0.9.tar.gz"
     sha256: "4a29edae32a914a706715e2ac8e7e4109e25353212edeed0888f4e3e15db5850"
@@ -17,6 +20,9 @@ sources:
   "2.0.2":
     url: "https://github.com/microsoft/mimalloc/archive/v2.0.2.tar.gz"
     sha256: "c81a5f443f72373e3105172d6a935e29b0dabd13ba387c080bc444586cbe3021"
+  "1.8.2":
+    url: "https://github.com/microsoft/mimalloc/archive/v1.8.2.tar.gz"
+    sha256: "4058d53d6ceb75862f32c30a6ee686c3cbb5e965b2c324b828ca454f7fe064f9"
   "1.7.9":
     url: "https://github.com/microsoft/mimalloc/archive/v1.7.9.tar.gz"
     sha256: "45e05be518363d32b2cdcce1a1fac3580895ea2e4524e1a3c7e71145cb58659f"
@@ -33,6 +39,13 @@ sources:
     url: "https://github.com/microsoft/mimalloc/archive/v1.6.7.tar.gz"
     sha256: "111b718b496f297f128d842880e72e90e33953cf00b45ba0ccd2167e7340ed17"
 patches:
+  "2.1.2":
+    - patch_file: "patches/2.1.2-0001-change-install-paths.patch"
+      patch_description: "fix install paths"
+      patch_type: "conan"
+    - patch_file: "patches/2.1.2-0002-support-older-compiler.patch"
+      patch_description: "fix compilation errors on older compilers"
+      patch_type: "portability"
   "2.0.9":
     - patch_file: "patches/2.0.9-0001-change-install-paths.patch"
       patch_description: "fix install paths"
@@ -62,6 +75,13 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/2.0.2-0002-include-cstddef-to-get-std-size-t.patch"
       patch_description: "include stddef"
+      patch_type: "portability"
+  "1.8.2":
+    - patch_file: "patches/1.8.2-0001-change-install-paths.patch"
+      patch_description: "fix install paths"
+      patch_type: "conan"
+    - patch_file: "patches/1.8.2-0002-support-older-compiler.patch"
+      patch_description: "fix compilation errors on older compilers"
       patch_type: "portability"
   "1.7.9":
     - patch_file: "patches/1.7.9-0001-change-install-paths.patch"

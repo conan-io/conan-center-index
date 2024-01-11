@@ -20,6 +20,7 @@ class AtkConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.atk.org"
     license = "LGPL-2.1-or-later"
+    deprecated = "at-spi2-core"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -43,14 +44,12 @@ class AtkConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-        if self.options.shared:
-            self.options["glib"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.75.2")
+        self.requires("glib/2.76.3")
 
     def validate(self):
         if self.options.shared and not self.dependencies["glib"].options.shared:
@@ -63,11 +62,11 @@ class AtkConan(ConanFile):
             raise ConanInvalidConfiguration("this specific configuration is prevented due to internal c3i limitations")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.1.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
         if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires("glib/2.75.2")
+            self.tool_requires("glib/2.76.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

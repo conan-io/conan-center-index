@@ -1,0 +1,5 @@
+sources:
+  '1.0.0.31':
+    url: 'https://chromium.googlesource.com/webm/libwebm/+archive/libwebm-1.0.0.31.tar.gz'
+  '1.0.0.30':
+    url: 'https://chromium.googlesource.com/webm/libwebm/+archive/libwebm-1.0.0.30.tar.gz'

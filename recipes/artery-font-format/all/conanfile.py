@@ -1,6 +1,8 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.files import get, copy
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 
 class ArteryFontFormatConan(ConanFile):
@@ -10,18 +12,30 @@ class ArteryFontFormatConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Artery Atlas Font format library"
     topics = ("artery", "font", "atlas")
-
+    package_type = "header-library"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def package_id(self):
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        # header only: no build step
+        pass
 
     def package(self):
-        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
-        self.copy("*.h", src=self._source_subfolder, dst="include")
-        self.copy("*.hpp", src=self._source_subfolder, dst="include")
+        copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self,
+            pattern="*.h",
+            dst=os.path.join(self.package_folder, "include"),
+            src=self.source_folder,
+        )
+        copy(
+            self,
+            pattern="*.hpp",
+            dst=os.path.join(self.package_folder, "include"),
+            src=self.source_folder,
+        )

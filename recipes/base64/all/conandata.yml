@@ -1,4 +1,10 @@
 sources:
+  "0.5.2":
+    url: "https://github.com/aklomp/base64/archive/v0.5.2.tar.gz"
+    sha256: "723a0f9f4cf44cf79e97bcc315ec8f85e52eb104c8882942c3f2fba95acc080d"
+  "0.5.1":
+    url: "https://github.com/aklomp/base64/archive/v0.5.1.tar.gz"
+    sha256: "35fd9400ce85ba5fc5455b3f1c8d0078d084ad246bd808315fd01ea8f2876dbf"
   "0.5.0":
     url: "https://github.com/aklomp/base64/archive/v0.5.0.tar.gz"
     sha256: "b21be58a90d31302ba86056db7ef77a481393b9359c505be5337d7d54e8a0559"

@@ -6,5 +6,5 @@ int main() {
   SnifferConfiguration config;
   config.set_filter("port 80");
   config.set_promisc_mode(true);
-  config.set_snap_len(400);
+  config.set_snap_len(50);
 }

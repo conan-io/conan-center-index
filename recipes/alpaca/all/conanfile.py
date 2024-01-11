@@ -7,17 +7,21 @@ from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 import os
 
-
 required_conan_version = ">=1.52.0"
 
 
 class AlpacaConan(ConanFile):
     name = "alpaca"
-    description = "Serialization library written in C++17 - Pack C++ structs into a compact byte-array without any macros or boilerplate code"
+    description = (
+        "Serialization library written in C++17 - "
+        "Pack C++ structs into a compact byte-array without any macros or boilerplate code"
+    )
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/p-ranav/alpaca"
     topics = ("reflection", "checksum", "serialization", "header-only")
+
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -51,7 +55,7 @@ class AlpacaConan(ConanFile):
                 )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)

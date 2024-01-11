@@ -1,9 +1,16 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from contextlib import contextmanager
+from pathlib import Path
+
+from conan import ConanFile
+from conan.tools.microsoft import is_msvc, unix_path, check_min_vs
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, chdir, rename, rm
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.env import VirtualBuildEnv
+from conan.errors import ConanInvalidConfiguration
 import glob
 import os
+from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.57.0"
 
 
 class CunitConan(ConanFile):
@@ -13,7 +20,7 @@ class CunitConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://cunit.sourceforge.net/"
     license = "BSD-3-Clause"
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -30,116 +37,112 @@ class CunitConan(ConanFile):
         "enable_console": True,
         "with_curses": False,
     }
-    exports_sources = "patches/**"
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_curses == "ncurses":
-            self.requires("ncurses/6.2")
+            self.requires("ncurses/6.4")
+
+    def validate(self):
+        if self.options.shared and not self.options.with_curses:
+            # For shared builds we always need to depend on ncurses, since otherwise we get undefined
+            # symbols, like:
+            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `echo'
+            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `wattr_on'
+            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `acs_map'
+            # /usr/bin/ld: package/9333ccd2ec7e28099e1c04b315e2384b012b7a19/lib/libcunit.so: undefined reference to `cbreak'
+            raise ConanInvalidConfiguration("cunit package is built with shared, which requires "
+                                            "cunit:with_curses=ncurses option")
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        self.tool_requires("libtool/2.4.7")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        with chdir(self, self.source_folder):
             for f in glob.glob("*.c"):
                 os.chmod(f, 0o644)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
 
-    @contextmanager
-    def _build_context(self):
-        env = {}
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                env.update({
-                    "AR": "{} lib".format(tools.unix_path(self._user_info_build["automake"].ar_lib)),
-                    "CC": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self._user_info_build["automake"].compile)),
-                    "NM": "dumpbin -symbols",
-                    "OBJDUMP": ":",
-                    "RANLIB": ":",
-                    "STRIP": ":",
-                })
-                with tools.environment_append(env):
-                    yield
-        else:
-            with tools.environment_append(env):
-                yield
+        tc = AutotoolsToolchain(self)
+        if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
+            tc.extra_cflags.append("-FS")
+            tc.extra_cxxflags.append("-FS")
+        tc.configure_args.append("--datarootdir=${prefix}/bin/share")
+        tc.configure_args.append("--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug")
+        tc.configure_args.append("--enable-automated" if self.options.enable_automated else "--disable-automated")
+        tc.configure_args.append("--enable-basic" if self.options.enable_basic else "--disable-basic")
+        tc.configure_args.append("--enable-console" if self.options.enable_console else "--disable-console")
+        tc.configure_args.append("--disable-curses" if not self.options.with_curses else
+                                 "--enable-curses")
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
-        host, build = None, None
-        if self.settings.compiler == "Visual Studio":
-            self._autotools.flags.append("-FS")
-            # MSVC canonical names aren't understood
-            host, build = False, False
-        conf_args = [
-            "--datarootdir={}".format(os.path.join(self.package_folder, "bin", "share").replace("\\", "/")),
-            "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
-            "--enable-automated" if self.options.enable_automated else "--disable-automated",
-            "--enable-basic" if self.options.enable_basic else "--disable-basic",
-            "--enable-console" if self.options.enable_console else "--disable-console",
-            "--enable-curses" if self.options.with_curses != False else "--disable-curses",
-        ]
-        if self.options.shared:
-            conf_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            conf_args.extend(["--disable-shared", "--enable-static"])
-        self._autotools.configure(args=conf_args, host=host, build=build)
-        return self._autotools
+        env = tc.environment()
+
+        if is_msvc(self):
+            automake_info = self.dependencies.build["automake"].conf_info
+            env.append("CC", f'{unix_path(self, automake_info.get("user.automake:compile-wrapper", check_type=str))} cl -nologo')
+            env.append("CXX", f'{unix_path(self, automake_info.get("user.automake:compile-wrapper", check_type=str))} cl -nologo')
+            env.append("AR", f'{unix_path(self, automake_info.get("user.automake:lib-wrapper", check_type=str))} lib')
+            env.define("LD", "link -nologo")
+            env.append("NM", "dumpbin -symbols")
+            env.append("OBJDUMP", ":")
+            env.append("RANLIB", ":")
+            env.append("STRIP", ":")
+        tc.generate(env)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with self._build_context():
-            with tools.chdir(self._source_subfolder):
-                self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
-                autotools = self._configure_autotools()
-                autotools.make()
+        apply_conandata_patches(self)
+
+        # Clean up makefiles from source folder
+        os.unlink(Path(self.source_folder) / "config.status")
+        os.unlink(Path(self.source_folder) / "config.log")
+        os.unlink(Path(self.source_folder) / "Makefile")
+
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            with tools.chdir(self._source_subfolder):
-                autotools = self._configure_autotools()
-                autotools.install()
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            tools.rename(os.path.join(self.package_folder, "lib", "cunit.dll.lib"),
-                         os.path.join(self.package_folder, "lib", "cunit.lib"))
+        autotools = Autotools(self)
+        autotools.install()
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
-        tools.rmdir(os.path.join(self.package_folder, "doc"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if is_msvc(self) and self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "cunit.dll.lib"),
+                   os.path.join(self.package_folder, "lib", "cunit.lib"))
+
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "bin", "share", "man"))
+        rmdir(self, os.path.join(self.package_folder, "doc"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "CUnit"

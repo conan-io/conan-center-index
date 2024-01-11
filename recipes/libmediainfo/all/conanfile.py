@@ -1,11 +1,16 @@
-from conan.tools.files import rename
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import (
+    apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file,
+    rm, rmdir, save
+)
+from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibmediainfoConan(ConanFile):
@@ -13,9 +18,12 @@ class LibmediainfoConan(ConanFile):
     license = ("BSD-2-Clause", "Apache-2.0", "GLPL-2.1+", "GPL-2.0-or-later", "MPL-2.0")
     homepage = "https://mediaarea.net/en/MediaInfo"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "MediaInfo is a convenient unified display of the most relevant technical and tag data for video and audio files"
-    topics = ("libmediainfo", "video", "audio", "metadata", "tag")
-
+    description = (
+        "MediaInfo is a convenient unified display of the most relevant "
+        "technical and tag data for video and audio files"
+    )
+    topics = ("video", "audio", "metadata", "tag")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -26,16 +34,8 @@ class LibmediainfoConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake", "cmake_find_package"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,67 +43,64 @@ class LibmediainfoConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcurl/7.82.0")
-        self.requires("libzen/0.4.38")
+        self.requires("libcurl/[>=7.78.0 <9]")
+        self.requires("libzen/0.4.38", transitive_headers=True, transitive_libs=True)
         self.requires("tinyxml2/9.0.0")
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if not self.options["libzen"].enable_unicode:
+        if not self.dependencies["libzen"].options.enable_unicode:
             raise ConanInvalidConfiguration("This package requires libzen with unicode support")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_ZENLIB"] = False
-        cmake.definitions["BUILD_ZLIB"] = False
-        # Generate a relocatable shared lib on Macos
-        cmake.definitions["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_ZENLIB"] = False
+        tc.variables["BUILD_ZLIB"] = False
+        if Version(self.version) < "22.03":
+            # Generate a relocatable shared lib on Macos
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
-        rename(self, "Findtinyxml2.cmake", "FindTinyXML.cmake")
-        tools.replace_in_file("FindTinyXML.cmake", "tinyxml2_LIBRARIES", "TinyXML_LIBRARIES")
-
-        # TODO: move this to a patch (see how https://github.com/MediaArea/MediaInfoLib/issues/1408 if addressed by upstream)
+        # TODO: move this to a patch (see how https://github.com/MediaArea/MediaInfoLib/issues/1408 is addressed by upstream)
         postfix = ""
         if self.settings.build_type == "Debug":
             if self.settings.os == "Windows":
                 postfix += "d"
-            elif tools.is_apple_os(self.settings.os):
+            elif is_apple_os(self):
                 postfix += "_debug"
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Source", "MediaInfoDLL", "MediaInfoDLL.h"),
-                              "MediaInfo.dll",
-                              "MediaInfo{}.dll".format(postfix))
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Source", "MediaInfoDLL", "MediaInfoDLL.h"),
-                              "libmediainfo.0.dylib",
-                              "libmediainfo{}.0.dylib".format(postfix))
+        mediainfodll_h = os.path.join(self.source_folder, "Source", "MediaInfoDLL", "MediaInfoDLL.h")
+        replace_in_file(self, mediainfodll_h, "MediaInfo.dll", f"MediaInfo{postfix}.dll")
+        replace_in_file(self, mediainfodll_h, "libmediainfo.0.dylib", f"libmediainfo{postfix}.0.dylib")
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "Project", "CMake"))
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("License.html", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "License.html", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
@@ -111,21 +108,20 @@ class LibmediainfoConan(ConanFile):
             {"mediainfo": "MediaInfoLib::MediaInfoLib"}
         )
 
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
+    def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
         for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
+            content += textwrap.dedent(f"""\
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
                 endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
+            """)
+        save(self, module_file, content)
 
     @property
     def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "MediaInfoLib")
@@ -135,9 +131,9 @@ class LibmediainfoConan(ConanFile):
         if self.settings.build_type == "Debug":
             if self.settings.os == "Windows":
                 postfix += "d"
-            elif tools.is_apple_os(self.settings.os):
+            elif is_apple_os(self):
                 postfix += "_debug"
-        self.cpp_info.libs = ["mediainfo" + postfix]
+        self.cpp_info.libs = [f"mediainfo{postfix}"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
 
@@ -146,4 +142,3 @@ class LibmediainfoConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "MediaInfoLib"
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "libmediainfo"

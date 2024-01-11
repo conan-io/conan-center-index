@@ -1,23 +1,38 @@
 import os
-from conans import ConanFile, CMake, tools
+
+from conan import ConanFile
+from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain, CMakeDeps
+from conan.tools.build import can_run
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package_multi"
+    test_type = "explicit"
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ZIP_LONGEST"] = self.dependencies["cppitertools"].options.zip_longest
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def build(self):
         cmake = CMake(self)
-        if self.options["cppitertools"].zip_longest:
-            cmake.definitions["ZIP_LONGEST"] = True
         cmake.configure()
         cmake.build()
 
-    def test(self):
-        if not tools.cross_building(self.settings):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+    def layout(self):
+        cmake_layout(self)
 
-            if self.options["cppitertools"].zip_longest:
-                bin_path = os.path.join("bin", "test_zip_longest")
-                self.run(bin_path, run_environment=True)
+    def test(self):
+        if can_run(self):
+            cmd = os.path.join(self.cpp.build.bindir, "test_package")
+            self.run(cmd, env="conanrun")
+            # sense if it was built because we don't have access to:
+            # self.dependencies["cppitertools"].options.zip_longest
+            cmd = os.path.join(self.cpp.build.bindir, "test_zip_longest")
+            if os.path.exists(cmd):
+                self.run(cmd, env="conanrun")

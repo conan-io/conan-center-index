@@ -1,0 +1,10 @@
+sources:
+  "v2.0-rc1":
+    url: "https://github.com/leducp/KickCAT/archive/refs/tags/v2.0-rc1.zip"
+    sha256: "3feec08fd2718d286a041cb83266479840f7739c1203b4450375ea1f59f234c8"
+  "v2-alpha4":
+    url: "https://github.com/leducp/KickCAT/archive/refs/tags/v2-alpha4.zip"
+    sha256: "483a374f77808cb35823652eb37c5ab864a3f12a1c3a957d3315c319ca0ec528"
+  "v2-alpha3":
+    url: "https://github.com/leducp/KickCAT/archive/refs/tags/v2-alpha3.zip"
+    sha256: "dadd8518c3232162b7455fdcd837578120ece5a42c3bc2701147a68cbee60da4"

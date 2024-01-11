@@ -1,9 +1,14 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, replace_in_file, rmdir, collect_libs
+from conan.tools.build import cross_building
+from conan.tools.scm import Version
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.errors import ConanInvalidConfiguration
 import os
 import functools
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class OpenblasConan(ConanFile):
@@ -28,73 +33,104 @@ class OpenblasConan(ConanFile):
         "use_thread": True,
         "dynamic_arch": False,
     }
-    generators = "cmake"
     short_paths = True
+    package_type = "library"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
+    def _fortran_compiler(self):
+        comp_exe = self.conf.get("tools.build:compiler_executables")
+        if comp_exe and 'fortran' in comp_exe:
+            return comp_exe["fortran"]
+        return None
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "0.3.21":
+            # INFO: When no Fortran compiler is available, OpenBLAS builds LAPACK from an f2c-converted copy of LAPACK unless the NO_LAPACK option is specified
+            self.options.build_lapack = True
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
+        if Version(self.version) < "0.3.24" and self.settings.arch == "armv8":
+            # OpenBLAS fails to detect the appropriate target architecture for armv8 for versions < 0.3.24, as it matches the 32 bit variant instead of 64.
+            # This was fixed in https://github.com/OpenMathLib/OpenBLAS/pull/4142, which was introduced in 0.3.24.
+            # This would be a reasonably trivial hotfix to backport.
+            raise ConanInvalidConfiguration("armv8 builds are not currently supported for versions lower than 0.3.24. Contributions to support this are welcome.")
+
+        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def source(self):
-        tools.get(
+        get(self,
             **self.conan_data["sources"][self.version],
             strip_root=True,
-            destination=self._source_subfolder
+            destination=self.source_folder
         )
+
+        if Version(self.version) <= "0.3.15":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "utils.cmake"),
+                            "set(obj_defines ${defines_in})", "set(obj_defines ${defines_in})\r\n\r\n" +
+                            "list(FIND obj_defines \"RC\" def_idx)\r\n" + "if (${def_idx} GREATER -1) \r\n\t" +
+                            "list (REMOVE_ITEM obj_defines \"RC\")\r\n\t" + "list(APPEND obj_defines  \"RC=RC\")\r\n" +
+                            "endif ()\r\n" + "list(FIND obj_defines \"CR\" def_idx)\r\n" +
+                            "if (${def_idx} GREATER -1) \r\n\t" + "list (REMOVE_ITEM obj_defines \"CR\")\r\n\t" +
+                            "list(APPEND obj_defines  \"CR=CR\")\r\n" + "endif ()")
 
     @functools.lru_cache(1)
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.configure()
+        return cmake
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+
+        tc.cache_variables["NOFORTRAN"] = not self.options.build_lapack
+        # This checks explicit user-specified fortran compiler
         if self.options.build_lapack:
-            self.output.warn("Building with lapack support requires a Fortran compiler.")
-        cmake.definitions["NOFORTRAN"] = not self.options.build_lapack
-        cmake.definitions["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
-        cmake.definitions["DYNAMIC_ARCH"] = self.options.dynamic_arch
-        cmake.definitions["USE_THREAD"] = self.options.use_thread
+            if not self._fortran_compiler:
+                if Version(self.version) < "0.3.21":
+                    self.output.warning(
+                        "Building with LAPACK support requires a Fortran compiler.")
+                else:
+                    tc.cache_variables["C_LAPACK"] = True
+                    tc.cache_variables["NOFORTRAN"] = True
+                    self.output.info(
+                        "Building LAPACK without Fortran compiler")
+
+        tc.cache_variables["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
+        tc.cache_variables["DYNAMIC_ARCH"] = self.options.dynamic_arch
+        tc.cache_variables["USE_THREAD"] = self.options.use_thread
 
         # Required for safe concurrent calls to OpenBLAS routines
-        cmake.definitions["USE_LOCKING"] = not self.options.use_thread
+        tc.cache_variables["USE_LOCKING"] = not self.options.use_thread
 
-        cmake.definitions[
-            "MSVC_STATIC_CRT"
-        ] = False  # don't, may lie to consumer, /MD or /MT is managed by conan
+        # don't, may lie to consumer, /MD or /MT is managed by conan
+        tc.cache_variables["MSVC_STATIC_CRT"] = False
 
         # This is a workaround to add the libm dependency on linux,
         # which is required to successfully compile on older gcc versions.
-        cmake.definitions["ANDROID"] = self.settings.os in ["Linux", "Android"]
+        tc.cache_variables["ANDROID"] = self.settings.os in ["Linux", "Android"]
 
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        tc.generate()
 
     def build(self):
-        if tools.Version(self.version) >= "0.3.12":
-            search = """message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")"""
-            replace = (
-                """message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")"""
-            )
-        else:
-            search = "enable_language(Fortran)"
-            replace = """include(CheckLanguage)
+        if Version(self.version) < "0.3.21":
+            if Version(self.version) >= "0.3.12":
+                search = """message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")"""
+                replace = (
+                    """message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")"""
+                )
+            else:
+                search = "enable_language(Fortran)"
+                replace = """include(CheckLanguage)
 check_language(Fortran)
 if(CMAKE_Fortran_COMPILER)
   enable_language(Fortran)
@@ -104,20 +140,23 @@ else()
   set (NO_LAPACK 1)
 endif()"""
 
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "cmake", "f_check.cmake"),
-            search,
-            replace,
-        )
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, self.source_folder, "cmake", "f_check.cmake"),
+                search,
+                replace,
+            )
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         # CMake config file:
@@ -127,17 +166,19 @@ endif()"""
         self.cpp_info.set_property("cmake_file_name", "OpenBLAS")
         self.cpp_info.set_property("cmake_target_name", "OpenBLAS::OpenBLAS")
         self.cpp_info.set_property("pkg_config_name", "openblas")
-        cmake_component_name = "pthread" if self.options.use_thread else "serial" # TODO: ow to model this in CMakeDeps?
+        cmake_component_name = "pthread" if self.options.use_thread else "serial"  # TODO: how to model this in CMakeDeps?
+        self.cpp_info.components["openblas_component"].set_property(
+            "cmake_target_name", "OpenBLAS::" + cmake_component_name)  # 'pthread' causes issues without namespace
         self.cpp_info.components["openblas_component"].set_property("pkg_config_name", "openblas")
         self.cpp_info.components["openblas_component"].includedirs.append(
             os.path.join("include", "openblas")
         )
-        self.cpp_info.components["openblas_component"].libs = tools.collect_libs(self)
+        self.cpp_info.components["openblas_component"].libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["openblas_component"].system_libs.append("m")
             if self.options.use_thread:
                 self.cpp_info.components["openblas_component"].system_libs.append("pthread")
-            if self.options.build_lapack:
+            if self.options.build_lapack and self._fortran_compiler:
                 self.cpp_info.components["openblas_component"].system_libs.append("gfortran")
 
         self.output.info(

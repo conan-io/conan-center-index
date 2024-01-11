@@ -39,10 +39,10 @@ index 0cb7a9a..d9016a0 100644
  target_link_libraries(gcs2cbt google-cloud-cpp::bigtable
                        google-cloud-cpp::storage google-cloud-cpp::grpc_utils)
 diff --git a/external/googleapis/CMakeLists.txt b/external/googleapis/CMakeLists.txt
-index 28bf016..c281ce8 100644
+index ad2bd4b..cd1eb3a 100644
 --- a/external/googleapis/CMakeLists.txt
 +++ b/external/googleapis/CMakeLists.txt
-@@ -103,8 +103,6 @@ if (PROTO_INCLUDE_DIR)
+@@ -147,8 +147,6 @@ if (PROTO_INCLUDE_DIR)
      list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
  endif ()
  

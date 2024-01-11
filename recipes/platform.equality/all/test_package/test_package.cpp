@@ -1,3 +1,10 @@
+// Workaround for missing includes in platform.equality
+#include <concepts>
+#include <ranges>
+#include <string>
+#include <unordered_map>
+#include <utility>
+
 #include <Platform.Equality.h>
 
 #include <any>
