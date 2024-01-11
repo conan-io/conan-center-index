@@ -1,15 +1,17 @@
+import os
+import re
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, rename
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, \
+    rename
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag
 from conan.tools.scm import Version
-import os
-import re
 
 required_conan_version = ">=1.57.0"
 
@@ -85,7 +87,6 @@ class LibVPXConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-
         tc = AutotoolsToolchain(self)
 
         if is_apple_os(self) and self.settings.get_safe("compiler.libcxx") == "libc++":
@@ -100,56 +101,16 @@ class LibVPXConan(ConanFile):
             "--enable-vp9-highbitdepth",
             "--as=yasm",
         ])
-
         # Note for MSVC: release libs are always built, we just avoid keeping the release lib
         # Note2: Can't use --enable-debug_libs (to help install on Windows),
         #     the makefile's install step fails as it wants to install a library that doesn't exist.
         #     Instead, we will copy the desired library manually in the package step.
         if self.settings.build_type == "Debug":
             tc.configure_args.extend([
-                # "--enable-debug_libs",
-                "--enable-debug",
+                "--enable-debug"
             ])
-
         if is_msvc(self) and is_msvc_static_runtime(self):
             tc.configure_args.append("--enable-static-msvcrt")
-
-        arch = {'x86': 'x86',
-                'x86_64': 'x86_64',
-                'armv7': 'armv7',
-                'armv8': 'arm64',
-                'mips': 'mips32',
-                'mips64': 'mips64',
-                'sparc': 'sparc'}.get(str(self.settings.arch))
-        if str(self.settings.compiler) == "Visual Studio":
-            vc_version = self.settings.compiler.version
-            compiler = f"vs{vc_version}"
-        elif is_msvc(self):
-            vc_version = str(self.settings.compiler.version)
-            vc_version = {"170": "11", "180": "12", "190": "14", "191": "15", "192": "16", "193": "17"}[vc_version]
-            compiler = f"vs{vc_version}"
-        elif self.settings.compiler in ["gcc", "clang", "apple-clang"]:
-            compiler = 'gcc'
-
-        host_os = str(self.settings.os)
-        if host_os == 'Windows':
-            os_name = 'win32' if self.settings.arch == 'x86' else 'win64'
-        elif is_apple_os(self):
-            if self.settings.arch in ["x86", "x86_64"]:
-                os_name = 'darwin11'
-            elif self.settings.arch == "armv8" and self.settings.os == "Macos":
-                os_name = 'darwin20'
-            else:
-                # Unrecognized toolchain 'arm64-darwin11-gcc', see list of toolchains in ./configure --help
-                os_name = 'darwin'
-        elif host_os == 'Linux':
-            os_name = 'linux'
-        elif host_os == 'Solaris':
-            os_name = 'solaris'
-        elif host_os == 'Android':
-            os_name = 'android'
-        target = f"{arch}-{os_name}-{compiler}"
-        tc.configure_args.append(f"--target={target}")
         if str(self.settings.arch) in ["x86", "x86_64"]:
             for name in self._arch_options:
                 if not self.options.get_safe(name):
