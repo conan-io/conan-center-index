@@ -20,7 +20,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["LIBMEDIAINFO_SHARED"] = self.dependencies["libmediainfo"].options.shared
+        tc.preprocessor_definitions["LIBMEDIAINFO_SHARED"] = ""
         tc.generate()
 
     def build(self):
