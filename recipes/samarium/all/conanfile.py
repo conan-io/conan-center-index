@@ -2,7 +2,7 @@ from os import path
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
-from conan.tools.files import patch, copy, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
@@ -17,7 +17,7 @@ class SamariumConan(ConanFile):
     license = "MIT"
     topics = ("cpp20", "physics", "2d", "simulation")
     generators = "CMakeDeps", "CMakeToolchain"
-    requires = "fmt/9.0.0", "sfml/2.5.1", "range-v3/0.12.0", "stb/cci.20210910", "tl-expected/20190710"
+    requires = "fmt/10.2.1", "sfml/2.6.1", "range-v3/0.12.0", "stb/cci.20230920", "tl-expected/20190710"
 
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [
@@ -34,8 +34,7 @@ class SamariumConan(ConanFile):
         }
 
     def source(self):
-        get(self, **self.conan_data["sources"]
-            [str(self.version)], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def configure(self):
         if self.options.shared:
@@ -64,13 +63,10 @@ class SamariumConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def build(self):
-        for patch_ in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **patch_)
-
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder="src")
         cmake.build()
