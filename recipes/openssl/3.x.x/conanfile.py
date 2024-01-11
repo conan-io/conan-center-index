@@ -384,9 +384,7 @@ class OpenSSLConan(ConanFile):
 
         args.append("no-fips" if self.options.get_safe("no_fips", True) else "enable-fips")
         args.append("no-md2" if self.options.get_safe("no_md2", True) else "enable-md2")
-
-        if self.options.tls_security_level != None:
-            args.append("-DOPENSSL_TLS_SECURITY_LEVEL=%s" % str(self.options.tls_security_level))
+        args.append("-DOPENSSL_TLS_SECURITY_LEVEL=%s" % str(self.options.tls_security_level))
 
         if self.settings.os == "Neutrino":
             args.append("no-asm -lsocket -latomic")
