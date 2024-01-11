@@ -18,6 +18,7 @@ class AafConan(ConanFile):
     )
     topics = ("multimedia", "crossplatform")
     license = "AAFSDKPSL-2.0"
+    package_type = "static-library"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -37,7 +38,7 @@ class AafConan(ConanFile):
         self.requires("expat/2.5.0")
         self.requires("libjpeg/9e")
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.requires("libuuid/1.0.3")
+            self.requires("util-linux-libuuid/2.39")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -84,9 +85,12 @@ class AafConan(ConanFile):
     def package_info(self):
         if self.settings.os == "Windows":
             suffix = "D" if self.settings.build_type == "Debug" else ""
-            self.cpp_info.libs = [f"AAF{suffix}", f"AAFIID{suffix}", "AAFCOAPI"]
+            self.cpp_info.libs = [f"AAF{suffix}", f"AAFIID{suffix}"]
+            # The static library loads a DLL at runtime, on Windows it needs to be able
+            # to find it in PATH, see https://aaf.sourceforge.net/AAFProjectFAQ.html
+            self.runenv_info.prepend_path("PATH", os.path.join(self.package_folder, "bin"))
         else:
-            self.cpp_info.libs = ["aaflib", "aafiid", "com-api"]
+            self.cpp_info.libs = ["aaflib", "aafiid"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["dl"]
         elif is_apple_os(self):

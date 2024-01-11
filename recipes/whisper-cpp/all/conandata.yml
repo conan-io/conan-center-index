@@ -1,0 +1,15 @@
+sources:
+  "1.5.2":
+    url: "https://github.com/ggerganov/whisper.cpp/archive/refs/tags/v1.5.2.tar.gz"
+    sha256: "be9c4d5d4b5f28f02e36f28e602b7d2dcfd734dd1c834ddae91ae8db601e951f"
+  "1.4.3":
+    url: "https://github.com/ggerganov/whisper.cpp/archive/refs/tags/v1.4.3.tar.gz"
+    sha256: "5f11c0542639bfb0b3c9d1b033d10ccd69ca26e739aec9366766617bc58a6e7c"
+  "1.2.1":
+    url: "https://github.com/ggerganov/whisper.cpp/archive/refs/tags/v1.2.1.tar.gz"
+    sha256: "69d47fc2ba982c42bd5bade4b7c827d5b3ed74b9c59323991c45a9f0f24eb6ed"
+patches:
+  "1.2.1":
+    - patch_file: "patches/1.2.1-0001-find_package_openblas.patch"
+      patch_description: "Fix OpenBlas cmake target name"
+      patch_type: "conan"

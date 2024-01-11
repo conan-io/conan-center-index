@@ -1,4 +1,7 @@
 sources:
+  "23.5.26":
+    url: "https://github.com/google/flatbuffers/archive/v23.5.26.tar.gz"
+    sha256: "1cce06b17cddd896b6d73cc047e36a254fb8df4d7ea18a46acf16c4c0cd3f3f3"
   "23.3.3":
     url: "https://github.com/google/flatbuffers/archive/v23.3.3.tar.gz"
     sha256: "8aff985da30aaab37edf8e5b02fda33ed4cbdd962699a8e2af98fdef306f4e4d"

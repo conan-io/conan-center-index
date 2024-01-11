@@ -1,4 +1,38 @@
 sources:
+  "17.0.6":
+    openmp:
+      url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/openmp-17.0.6.src.tar.xz"
+      sha256: "74334cbb4dc8b73a768448a7561d5a3540404940b2267b1fb9813a6464b320de"
+    cmake:
+      url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/cmake-17.0.6.src.tar.xz"
+      sha256: "807f069c54dc20cb47b21c1f6acafdd9c649f3ae015609040d6182cab01140f4"
+  "17.0.4":
+    openmp:
+      url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.4/openmp-17.0.4.src.tar.xz"
+      sha256: "535cbcca075430cb2d4e54a8062cb9646938170aeb72d359f13183f2a31b701a"
+    cmake:
+      url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.4/cmake-17.0.4.src.tar.xz"
+      sha256: "1a5cbe4a1fcda56ecdd80f42c3437060a28c97ec31de1748f6ba6aa84948fb0f"
+  "16.0.6":
+    openmp:
+      url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/openmp-16.0.6.src.tar.xz"
+      sha256: "a2536f06373774f2829d892b72eea5f97bab20e69b26b03042d947f992eb8e38"
+    cmake:
+      url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/cmake-16.0.6.src.tar.xz"
+      sha256: "39d342a4161095d2f28fb1253e4585978ac50521117da666e2b1f6f28b62f514"
+  "15.0.7":
+    openmp:
+      url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.7/openmp-15.0.7.src.tar.xz"
+      sha256: "3f168d38e7a37b928dcb94b33ce947f75d81eef6fa6a4f9d16b6dc5511c07358"
+    cmake:
+      url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.7/cmake-15.0.7.src.tar.xz"
+      sha256: "8986f29b634fdaa9862eedda78513969fe9788301c9f2d938f4c10a3e7a3e7ea"
+  "14.0.6":
+    url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.6/openmp-14.0.6.src.tar.xz"
+    sha256: "4f731ff202add030d9d68d4c6daabd91d3aeed9812e6a5b4968815cfdff0eb1f"
+  "13.0.1":
+    url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.1/openmp-13.0.1.src.tar.xz"
+    sha256: "6b79261371616c31fea18cd3ee1797c79ee38bcaf8417676d4fa366a24c96b4f"
   "12.0.1":
     url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.1/openmp-12.0.1.src.tar.xz"
     sha256: "60fe79440eaa9ebf583a6ea7f81501310388c02754dbe7dc210776014d06b091"
@@ -15,22 +49,46 @@ sources:
     url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/openmp-8.0.1.src.tar.xz"
     sha256: "3e85dd3cad41117b7c89a41de72f2e6aa756ea7b4ef63bb10dcddf8561a7722c"
 patches:
+  "17.0.4":
+    - patch_file: "patches/17/0001-disable-build-testing.patch"
+      patch_description: "Disable building of tools, gdb-plugin, tests and docs"
+      patch_type: "conan"
+  "16.0.6":
+    - patch_file: "patches/16/0001-disable-build-testing.patch"
+      patch_description: "Disable building of tools, gdb-plugin, tests and docs"
+      patch_type: "conan"
+  "15.0.7":
+    - patch_file: "patches/15/0001-disable-build-testing.patch"
+      patch_description: "Disable building of tools, gdb-plugin, tests and docs"
+      patch_type: "conan"
+  "14.0.6":
+    - patch_file: "patches/14/0001-disable-build-testing.patch"
+      patch_description: "Disable building of tools, gdb-plugin, tests and docs"
+      patch_type: "conan"
+  "13.0.1":
+    - patch_file: "patches/13/0001-disable-build-testing.patch"
+      patch_description: "Disable building of tools, gdb-plugin, tests and docs"
+      patch_type: "conan"
   "12.0.1":
-    - patch_file: "patches/0001-disable-build-testing_12.0.1.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-disable-omp-target_12.0.1.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/12/0001-disable-build-testing.patch"
+      patch_description: "Disable building of tools, gdb-plugin, tests and docs"
+      patch_type: "conan"
   "11.1.0":
-    - patch_file: "patches/0001-disable-build-testing_11.1.0.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0003-fix-armv8-build_11.1.0.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/11/0001-disable-build-testing.patch"
+      patch_description: "Disable building of tools, gdb-plugin, tests and docs"
+      patch_type: "conan"
+    - patch_file: "patches/11/0002-fix-armv8-build.patch"
+      patch_description: "Fix build issues on armv8 architecture"
+      patch_type: "portability"
   "10.0.0":
-    - patch_file: "patches/0001-disable-build-testing_10.0.0.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/10/0001-disable-build-testing.patch"
+      patch_description: "Disable building of tools, gdb-plugin, tests and docs"
+      patch_type: "conan"
   "9.0.1":
-    - patch_file: "patches/0001-disable-build-testing.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/8/0001-disable-build-testing.patch"
+      patch_description: "Disable building of tools, gdb-plugin, tests and docs"
+      patch_type: "conan"
   "8.0.1":
-    - patch_file: "patches/0001-disable-build-testing.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/8/0001-disable-build-testing.patch"
+      patch_description: "Disable building of tools, gdb-plugin, tests and docs"
+      patch_type: "conan"

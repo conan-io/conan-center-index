@@ -1,0 +1,20 @@
+diff --git a/cmake/HandleEigen.cmake b/cmake/HandleEigen.cmake
+--- a/cmake/HandleEigen.cmake
++++ b/cmake/HandleEigen.cmake
+@@ -59,6 +59,8 @@
+ endif()
+ 
+ # Detect Eigen version:
++set(GTSAM_EIGEN_VERSION "${Eigen3_VERSION_STRING}")
++if (FALSE)
+ set(EIGEN_VER_H "${GTSAM_EIGEN_INCLUDE_FOR_BUILD}/Eigen/src/Core/util/Macros.h")
+ if (EXISTS ${EIGEN_VER_H})
+     file(READ "${EIGEN_VER_H}" STR_EIGEN_VERSION)
+@@ -80,6 +82,7 @@
+ else()
+     message(WARNING "Cannot determine Eigen version, missing file: `${EIGEN_VER_H}`")
+ endif ()
++endif()
+ 
+ if (MSVC)
+     if (BUILD_SHARED_LIBS)

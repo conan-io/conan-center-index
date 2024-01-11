@@ -124,18 +124,11 @@ don't listen to `cpp_info`'s ``.names``, ``.filenames`` or ``.build_modules`` at
 There is a new way of setting the `cpp_info` information with these
 generators using the ``set_property(property_name, value)`` method.
 
-All the information in the recipes, already set with the current model, should be
-translated to the new model. These two models **will live together in recipes** to make
-recipes compatible **with both new and current generators** for some time.
+Both of these two models **will live together in recipes** to make
+recipes compatible for both 1.x and 2.0 users. Deprecated feilds are not to be removed at this time.
 
-We will cover some cases of porting all the information set with the current model to the
-new one. To read more about the properties available for each generator and how the
-properties model work, please check the [Conan documentation](https://docs.conan.io/1/migrating_to_2.0/properties.html).
-
-> **Note**: Please, remember that the **new** ``set_property`` and the **current** attributes
-> model are *completely independent since Conan 1.43*. Setting ``set_property`` in recipes will
-> not affect current CMake 1.X generators (``cmake``, ``cmake_multi``, ``cmake_find_package`` and
-> ``cmake_find_package_multi``) at all.
+To understand the impact of these and the relation between different generates, refer to the 
+[migrating properties](https://docs.conan.io/1/migrating_to_2.0/properties.html) documentation.
 
 ### Translating .names information to cmake_target_name, cmake_module_target_name and cmake_file_name
 
@@ -147,62 +140,8 @@ As for `filenames`, refer to [this section](https://docs.conan.io/1/migrating_to
 
 ### Translating .build_modules to cmake_build_modules
 
-The declared `.build_modules` come from the original package that declares useful CMake functions, variables
-etc. We need to use the property `cmake_build_modules` to declare a list of cmake files instead of using `cpp_info.build_modules`:
-
-```python
-class PyBind11Conan(ConanFile):
-    name = "pybind11"
-    ...
-
-    def package_info(self):
-        ...
-        for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-            self.cpp_info.components["main"].build_modules[generator].append(os.path.join("lib", "cmake", "pybind11", "pybind11Common.cmake"))
-        ...
-
-```
-
-To translate this information to the new model we declare the `cmake_build_modules` property in the `root cpp_info` object:
-
-```python
-class PyBind11Conan(ConanFile):
-    name = "pybind11"
-    ...
-
-    def package_info(self):
-        ...
-        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "pybind11", "pybind11Common.cmake")])
-        ...
-
-```
+The variation of `build_modules` is covered by the [Conan documentation](https://docs.conan.io/1/migrating_to_2.0/properties.html#translating-build-modules-to-cmake-build-modules).
 
 ### PkgConfigDeps
 
-The current [pkg_config](https://docs.conan.io/1/reference/generators/pkg_config.html)
-generator suports the new ``set_property`` model for most of the properties. Then, the current
-model can be translated to the new one without having to leave the old attributes in the
-recipes. Let's see an example:
-
-```python
-class AprConan(ConanFile):
-    name = "apr"
-    ...
-    def package_info(self):
-        self.cpp_info.names["pkg_config"] = "apr-1"
-    ...
-```
-
-In this case, you can remove the ``.names`` attribute and just leave:
-
-```python
-class AprConan(ConanFile):
-    name = "apr"
-    ...
-    def package_info(self):
-        self.cpp_info.set_property("pkg_config_name",  "apr-1")
-    ...
-```
-
-For more information about properties supported by ``PkgConfigDeps`` generator, please check the [Conan
-documentation](https://docs.conan.io/1/reference/conanfile/tools/gnu/pkgconfigdeps.html#properties).
+For migrating, `names` used with `pkg_config`, see [Conan documentation](https://docs.conan.io/1/migrating_to_2.0/properties.html#migration-from-names-to-pkg-config-name)

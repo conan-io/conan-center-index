@@ -1,0 +1,24 @@
+diff --git a/lib/cpp/src/thrift/numeric_cast.h b/lib/cpp/src/thrift/numeric_cast.h
+index d7063db..8775121 100644
+--- a/lib/cpp/src/thrift/numeric_cast.h
++++ b/lib/cpp/src/thrift/numeric_cast.h
+@@ -22,6 +22,7 @@
+ 
+ #include <limits>
+ #include <stdexcept>
++#include <typeinfo>
+ 
+ #if defined(_MSC_VER)
+ // avoid compiler warnings and errors in MSVC if max is defined as a macro
+diff --git a/lib/cpp/src/thrift/transport/TBufferTransports.h b/lib/cpp/src/thrift/transport/TBufferTransports.h
+index f72d8f6..f745b8c 100644
+--- a/lib/cpp/src/thrift/transport/TBufferTransports.h
++++ b/lib/cpp/src/thrift/transport/TBufferTransports.h
+@@ -22,6 +22,7 @@
+ 
+ #include <cstdlib>
+ #include <cstring>
++#include <cstddef>
+ #include <limits>
+ 
+ #include <thrift/transport/TTransport.h>

@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.5)
-project(netlink_example)
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES C)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(libnl REQUIRED CONFIG)
 
-add_executable(show_links show_links.c)
-target_link_libraries(show_links ${CONAN_LIBS})
+add_executable(${PROJECT_NAME} ${PROJECT_NAME}.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE libnl::nl libnl::nl-route libnl::nl-genl libnl::nl-nf libnl::nl-cli libnl::nl-idiag)

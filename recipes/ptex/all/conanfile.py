@@ -1,7 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 import os
+
+from conan.tools.gnu import PkgConfigDeps
 
 required_conan_version = ">=1.53.0"
 
@@ -40,7 +43,7 @@ class PtexConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -54,8 +57,15 @@ class PtexConan(ConanFile):
         cd = CMakeDeps(self)
         cd.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # disable subdirs
+        save(self, os.path.join(self.source_folder, "src", "utils", "CMakeLists.txt"), "")
+        save(self, os.path.join(self.source_folder, "src", "tests", "CMakeLists.txt"), "")
+        save(self, os.path.join(self.source_folder, "src", "doc", "CMakeLists.txt"), "")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

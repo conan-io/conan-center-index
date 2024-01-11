@@ -18,6 +18,7 @@ class CzmqConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zeromq/czmq"
     topics = ("zmq", "libzmq", "message-queue", "asynchronous")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -62,17 +63,17 @@ class CzmqConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zeromq/4.3.4")
+        self.requires("zeromq/4.3.5", transitive_headers=True)
         if self.options.get_safe("with_libmicrohttpd"):
             self.requires("libmicrohttpd/0.9.75")
         if self.options.get_safe("with_libcurl"):
-            self.requires("libcurl/7.87.0")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.get_safe("with_libuuid"):
-            self.requires("libuuid/1.0.3")
+            self.requires("util-linux-libuuid/2.39.2")
         if self.options.get_safe("with_systemd"):
-            self.requires("libsystemd/252.4")
+            self.requires("libsystemd/253.10")
 
     def validate(self):
         if is_apple_os(self) and self.options.shared and self.settings.build_type == "Debug":

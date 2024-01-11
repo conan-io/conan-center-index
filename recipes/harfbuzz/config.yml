@@ -1,19 +1,17 @@
 versions:
-  "7.3.0":
+  "8.3.0":
     folder: all
-  "7.1.0":
+  "8.2.2":
+    folder: all
+  "8.2.1":
+    folder: all
+  "8.1.1":
+    folder: all
+  "8.0.1":
+    folder: all
+  "7.3.0":
     folder: all
   "6.0.0":
     folder: all
-  "5.3.1":
-    folder: all
-  "5.3.0":
-    folder: all
-  "5.2.0":
-    folder: all
   "5.1.0":
-    folder: all
-  "4.4.1":
-    folder: all
-  "3.2.0":
     folder: all

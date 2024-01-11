@@ -7,7 +7,7 @@ import os
 # It will become the standard on Conan 2.x
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def requirements(self):
@@ -19,8 +19,8 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["open62541_NODESET_DIR"] = self.deps_user_info["ua-nodeset"].nodeset_dir.replace(
-            "\\", "/")  # ua-nodeset path needs to be sanitized for windows systems
+        tc.variables["open62541_NODESET_DIR"] = self.dependencies["ua-nodeset"].conf_info.get(
+            "user.ua-nodeset:nodeset_dir").replace("\\", "/")  # sanitize path for windows systems
         tc.variables["open62541_TOOLS_DIR"] = self.dependencies["open62541"].conf_info.get(
             "user.open62541:tools_dir")
         tc.generate()

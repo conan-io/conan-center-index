@@ -6,8 +6,6 @@
 #include <mongocxx/uri.hpp>
 
 // Compilation check
-#include <mongoc.h>
-#include <bson.h>
 #include <bsoncxx/json.hpp>
 
 int main() {

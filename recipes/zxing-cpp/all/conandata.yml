@@ -1,4 +1,10 @@
 sources:
+  "2.2.1":
+    url: "https://github.com/zxing-cpp/zxing-cpp/archive/v2.2.1.tar.gz"
+    sha256: "02078ae15f19f9d423a441f205b1d1bee32349ddda7467e2c84e8f08876f8635"
+  "2.1.0":
+    url: "https://github.com/zxing-cpp/zxing-cpp/archive/v2.1.0.tar.gz"
+    sha256: "6d54e403592ec7a143791c6526c1baafddf4c0897bb49b1af72b70a0f0c4a3fe"
   "2.0.0":
     url: "https://github.com/zxing-cpp/zxing-cpp/archive/v2.0.0.tar.gz"
     sha256: "12b76b7005c30d34265fc20356d340da179b0b4d43d2c1b35bcca86776069f76"

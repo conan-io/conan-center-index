@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 44063629..c18c86db 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -215,7 +215,7 @@ if(BUILD_YAML_CONFIG)
+     find_package(yaml-cpp QUIET)
+     if(yaml-cpp_FOUND)
+     message(STATUS "yaml-cpp found")
+-    target_link_libraries(${PROJECT_NAME} PUBLIC ${YAML_CPP_LIBRARIES})
++    target_link_libraries(${PROJECT_NAME} PUBLIC yaml-cpp)
+     target_compile_definitions(${PROJECT_NAME} PUBLIC HAS_YAML_CPP)
+     else()
+     message(STATUS "yaml-cpp not used")

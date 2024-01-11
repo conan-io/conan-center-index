@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, rm, rmdir
@@ -12,16 +12,18 @@ from conan.tools.scm import Version
 import os
 import glob
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
 
 class AravisConan(ConanFile):
     name = "aravis"
+    description = "A vision library for genicam based cameras."
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AravisProject/aravis"
-    description = "A vision library for genicam based cameras."
     topics = ("usb", "camera")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -31,6 +33,7 @@ class AravisConan(ConanFile):
         "gst_plugin": [True, False],
         "tools": [True, False],
         "introspection": [True, False],
+        "gv_n_buffers": ["ANY"],
     }
     default_options = {
         "shared": False,
@@ -40,6 +43,7 @@ class AravisConan(ConanFile):
         "gst_plugin": False,
         "tools": True,
         "introspection": False,
+        "gv_n_buffers": 16,
     }
 
     def export_sources(self):
@@ -48,8 +52,12 @@ class AravisConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.packet_socket
+        # https://github.com/AravisProject/aravis/commit/b4211e5e0266d0226e936818b3faefd6d0daaa3a#diff-f28598af2e23aa5d2bc7c72e022ae2c56a33802eb970afffaeca1e40607f97fe
+        if Version(self.version) < "0.8.21":
+            del self.options.gv_n_buffers
+
 
     def configure(self):
         if self.options.shared:
@@ -63,13 +71,15 @@ class AravisConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.75.2")
-        self.requires("libxml2/2.10.3")
-        self.requires("zlib/1.2.13")
+        # glib-object.h and gio/gio.h are used in several public headers
+        self.requires("glib/2.78.1", transitive_headers=True)
+        self.requires("libxml2/2.12.3")
+        self.requires("zlib/[>=1.2.11 <2]")
+
         if self.options.usb:
             self.requires("libusb/1.0.26")
         if self.options.gst_plugin:
-            self.requires("gstreamer/1.19.2")
+            self.requires("gstreamer/1.22.3")
             self.requires("gst-plugins-base/1.19.2")
 
     def validate(self):
@@ -77,18 +87,27 @@ class AravisConan(ConanFile):
             raise ConanInvalidConfiguration("Static runtime is not supported on Windows due to GLib issues")
         if self.options.shared and not self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration("Shared Aravis cannot link to static GLib")
-        if self.settings.os == "Macos" and self.dependencies["glib"].options.shared:
+        if is_apple_os(self) and self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration(
                 "macOS builds are disabled when glib is shared until "
                 "conan-io/conan#7324 gets merged to fix macOS SIP issue #8443"
             )
 
+        if self.options.get_safe("gv_n_buffers"):
+            try:
+                gv_n_buffers_val = int(str(self.options.gv_n_buffers))
+                if gv_n_buffers_val < 1:
+                    raise ConanInvalidConfiguration(
+                        f"gv_n_buffers_val must be greater than 1 Provided: {gv_n_buffers_val}")
+            except ValueError as e:
+                raise ConanInvalidConfiguration("gv_n_buffers_val must be an integer.") from e
+
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
-        if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires("glib/2.75.2")
+        #windows build: meson/1.2.1 works, meson/1.2.2 breaks for some reason!
+        self.tool_requires("meson/1.3.1")
+        self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self.options.introspection:
             self.tool_requires("gobject-introspection/1.72.0")
 
@@ -110,6 +129,11 @@ class AravisConan(ConanFile):
         tc.project_options["viewer"] = "disabled"
         tc.project_options["tests"] = False
         tc.project_options["documentation"] = "disabled"
+
+        if  self.options.get_safe("gv_n_buffers"):
+            tc.project_options["gv-n-buffers"] = int(str(self.options.gv_n_buffers))
+
+        tc.project_options["fast-heartbeat"] = False
         if self.settings.get_safe("compiler.runtime"):
             tc.project_options["b_vscrt"] = msvc_runtime_flag(self).lower()
         tc.generate()

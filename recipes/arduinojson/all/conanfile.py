@@ -13,7 +13,7 @@ class ArduinojsonConan(ConanFile):
     name = "arduinojson"
     description = "C++ JSON library for IoT. Simple and efficient."
     homepage = "https://github.com/bblanchon/ArduinoJson"
-    topics = ("json", "arduino", "iot", "embedded", "esp8266")
+    topics = ("json", "msgpack", "message-pack", "arduino", "iot", "embedded", "esp8266")
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
