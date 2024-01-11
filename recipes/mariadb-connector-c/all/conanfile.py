@@ -114,7 +114,10 @@ class MariadbConnectorcConan(ConanFile):
         replace_in_file(self, root_cmake, "${CURL_LIBRARIES}", "CURL::libcurl")
         plugins_io_cmake = os.path.join(self.source_folder, "plugins", "io", "CMakeLists.txt")
         replace_in_file(self, plugins_io_cmake, "${CURL_LIBRARIES}", "CURL::libcurl")
-        replace_in_file(self, root_cmake, " -WX", "", strict=False)
+        if Version(self.version) >= "3.3.6":
+            replace_in_file(self, root_cmake, "${WARNING_AS_ERROR}", "")
+        elif Version(self.version) >= "3.1.18":
+            replace_in_file(self, root_cmake, " -WX", "")
         if Version(self.version) >= "3.3":
             replace_in_file(self, root_cmake,
                             "INCLUDE(${CC_SOURCE_DIR}/cmake/FindZStd.cmake)",
