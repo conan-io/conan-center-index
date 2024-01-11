@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir, save
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -45,7 +46,10 @@ class AwsChecksums(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.8.2")
+        if Version(self.version) < "0.1.17":
+            self.requires("aws-c-common/0.8.2")
+        else:
+            self.requires("aws-c-common/0.9.6", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

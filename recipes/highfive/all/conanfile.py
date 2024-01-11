@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir, save
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -15,34 +16,39 @@ class HighFiveConan(ConanFile):
     topics = ("hdf5", "hdf", "data")
     homepage = "https://github.com/BlueBrain/HighFive"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_boost": [True, False],
         "with_eigen": [True, False],
         "with_xtensor": [True, False],
         "with_opencv": [True, False],
+        "with_static_hdf5": [True, False],
     }
     default_options = {
         "with_boost": True,
         "with_eigen": True,
         "with_xtensor": True,
         "with_opencv": False,
+        "with_static_hdf5": False,
     }
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("hdf5/1.14.0")
+        if Version(self.version) < "2.5.1":
+            self.requires("hdf5/1.14.1")
+        else:
+            self.requires("hdf5/1.14.3")
         if self.options.with_boost:
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.83.0")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.with_xtensor:
-            self.requires("xtensor/0.24.3")
+            self.requires("xtensor/0.24.7")
         if self.options.with_opencv:
-            self.requires("opencv/4.5.5")
+            self.requires("opencv/4.8.1")
 
     def package_id(self):
         self.info.clear()
@@ -52,8 +58,7 @@ class HighFiveConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -65,6 +70,7 @@ class HighFiveConan(ConanFile):
         tc.variables["HIGHFIVE_EXAMPLES"] = False
         tc.variables["HIGHFIVE_BUILD_DOCS"] = False
         tc.variables["HIGHFIVE_USE_INSTALL_DEPS"] = False
+        tc.variables["HIGHFIVE_STATIC_HDF5"] = self.options.with_static_hdf5
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -121,7 +127,6 @@ class HighFiveConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "HighFive")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
         self.cpp_info.requires = ["hdf5::hdf5"]
         if self.options.with_boost:
             self.cpp_info.requires.append("boost::headers")

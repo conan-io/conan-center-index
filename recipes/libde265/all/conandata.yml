@@ -1,4 +1,10 @@
 sources:
+  "1.0.15":
+    url: "https://github.com/strukturag/libde265/releases/download/v1.0.15/libde265-1.0.15.tar.gz"
+    sha256: "00251986c29d34d3af7117ed05874950c875dd9292d016be29d3b3762666511d"
+  "1.0.12":
+    url: "https://github.com/strukturag/libde265/releases/download/v1.0.12/libde265-1.0.12.tar.gz"
+    sha256: "62185ea2182e68cf68bba20cc6eb4c287407b509cf0a827d7ddb75614db77b5c"
   "1.0.11":
     url: "https://github.com/strukturag/libde265/releases/download/v1.0.11/libde265-1.0.11.tar.gz"
     sha256: "2f8f12cabbdb15e53532b7c1eb964d4e15d444db1be802505e6ac97a25035bab"

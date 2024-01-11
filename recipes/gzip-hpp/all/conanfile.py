@@ -16,6 +16,7 @@ class GzipHppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mapbox/gzip-hpp"
     topics = ("gzip", "zlib", "compression", "decompression", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -27,7 +28,7 @@ class GzipHppConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13", transitive_headers=True)
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def package_id(self):
         self.info.clear()
@@ -37,7 +38,7 @@ class GzipHppConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

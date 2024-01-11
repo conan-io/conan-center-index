@@ -1,4 +1,13 @@
 sources:
+  "cci.20231129":
+    url: "https://github.com/pytorch/cpuinfo/archive/9d809924011af8ff49dadbda1499dc5193f1659c.tar.gz"
+    sha256: "0d769b7e3cc7d16205f4cc8988f869910db19f2d274db005c1ed74e961936d34"
+  "cci.20230118":
+    url: "https://github.com/pytorch/cpuinfo/archive/3dc310302210c1891ffcfb12ae67b11a3ad3a150.tar.gz"
+    sha256: "f2f4df6d2b01036f36c5e372954e536881cdd59f5c2461c67aa0a92c6d755c61"
+  "cci.20220618":
+    url: "https://github.com/pytorch/cpuinfo/archive/082deffc80ce517f81dc2f3aebe6ba671fcd09c9.tar.gz"
+    sha256: "4379348ec3127b37e854a0a66f85ea1d3c606e5f3a6dce235dc9c69ce663c026"
   "cci.20220228":
     url: "https://github.com/pytorch/cpuinfo/archive/6288930068efc8dff4f3c0b95f062fc5ddceba04.tar.gz"
     sha256: "9e9e937b3569320d23d8b1c8c26ed3603affe55c3e4a3e49622e8a2c6d6e1696"

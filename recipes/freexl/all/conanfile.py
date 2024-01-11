@@ -6,6 +6,7 @@ from conan.tools.files import apply_conandata_patches, chdir, copy, export_conan
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, NMakeDeps, NMakeToolchain
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.55.0"
@@ -16,10 +17,10 @@ class FreexlConan(ConanFile):
     description = "FreeXL is an open source library to extract valid data " \
                   "from within an Excel (.xls) spreadsheet."
     license = ["MPL-1.0", "GPL-2.0-only", "LGPL-2.1-only"]
-    topics = ("excel", "xls")
-    homepage = "https://www.gaia-gis.it/fossil/freexl/index"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "https://www.gaia-gis.it/fossil/freexl/index"
+    topics = ("excel", "xls")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -52,6 +53,9 @@ class FreexlConan(ConanFile):
 
     def requirements(self):
         self.requires("libiconv/1.17")
+        if Version(self.version) >= "2.0.0":
+            self.requires("expat/2.5.0")
+            self.requires("minizip/1.2.13")
 
     def build_requirements(self):
         if not is_msvc(self):

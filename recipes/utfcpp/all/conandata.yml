@@ -1,4 +1,19 @@
 sources:
+  "4.0.4":
+    url: "https://github.com/nemtrif/utfcpp/archive/v4.0.4.tar.gz"
+    sha256: "7c8a403d0c575d52473c8644cd9eb46c6ba028d2549bc3e0cdc2d45f5cfd78a0"
+  "4.0.1":
+    url: "https://github.com/nemtrif/utfcpp/archive/v4.0.1.tar.gz"
+    sha256: "9014342a716258da00b97bf8c201a2edc4d72d2025cd8d62f0650ac627038f95"
+  "4.0.0":
+    url: "https://github.com/nemtrif/utfcpp/archive/v4.0.0.tar.gz"
+    sha256: "ac44d9652aa2ee64d405c1705718f26b385337a9b8cf20bf2b2aac6435a16c1e"
+  "3.2.5":
+    url: "https://github.com/nemtrif/utfcpp/archive/v3.2.5.tar.gz"
+    sha256: "14fd1b3c466814cb4c40771b7f207b61d2c7a0aa6a5e620ca05c00df27f25afd"
+  "3.2.4":
+    url: "https://github.com/nemtrif/utfcpp/archive/refs/tags/v3.2.4.tar.gz"
+    sha256: "fde21a4c519eed25f095a1cd8490167409cc70d7b5e9c38756142e588ccb7c7e"
   "3.2.3":
     url: "https://github.com/nemtrif/utfcpp/archive/v3.2.3.tar.gz"
     sha256: "3ba9b0dbbff08767bdffe8f03b10e596ca351228862722e4c9d4d126d2865250"

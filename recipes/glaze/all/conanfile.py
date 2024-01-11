@@ -25,10 +25,10 @@ class GlazeConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "12",
-            "clang": "12" if Version(self.version) > "1.0.0" else "13",
+            "Visual Studio": "17",
+            "msvc": "193",
+            "gcc": "10" if Version(self.version) < "1.9.0" else "11",
+            "clang": "12",
             "apple-clang": "13.1",
         }
 
@@ -38,23 +38,12 @@ class GlazeConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def requirements(self):
-        if Version(self.version) < "0.2.4":
-            self.requires("fmt/10.0.0")
-            self.requires("frozen/1.1.1")
-            self.requires("nanorange/cci.20200706")
-        if Version(self.version) < "0.2.3":
-            self.requires("fast_float/5.2.0")
-        if "0.1.5" <= Version(self.version) < "0.2.3":
-            self.requires("dragonbox/1.1.3")
-
     def package_id(self):
         self.info.clear()
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
@@ -68,11 +57,10 @@ class GlazeConan(ConanFile):
         apply_conandata_patches(self)
 
     def package(self):
-        copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(
             self,
             pattern="*.hpp",
-            excludes="glaze/frozen/*.hpp" if Version(self.version) < "0.2.4" else "",
             dst=os.path.join(self.package_folder, "include"),
             src=os.path.join(self.source_folder, "include"),
         )
