@@ -156,6 +156,9 @@ class OpenH264Conan(ConanFile):
         elif self.settings.compiler in ("apple-clang",):
             if self.settings.arch in ("armv8",):
                 tc.extra_ldflags.append("-arch arm64")
+        if not is_msvc(self):
+            tc.cache_variables["CMAKE_CXX_FLAGS"] = tc.cache_variables.get("CMAKE_CXX_FLAGS", "") + tc.variables.get("CMAKE_CXX_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
+            tc.cache_variables["CMAKE_C_FLAGS"] = tc.cache_variables.get("CMAKE_C_FLAGS", "") + tc.variables.get("CMAKE_C_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
         tc.generate()
 
     def build(self):

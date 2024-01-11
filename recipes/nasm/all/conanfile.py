@@ -75,6 +75,8 @@ class NASMConan(ConanFile):
                 tc.extra_cflags.append("-m32")
             elif self.settings.arch == "x86_64":
                 tc.extra_cflags.append("-m64")
+            tc.extra_cxxflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
+            tc.extra_cflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
             tc.generate()
 
     def build(self):

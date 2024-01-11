@@ -119,6 +119,10 @@ class LibjpegTurboConan(ConanFile):
             tc.variables["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
         if Version(self.version) <= "2.1.0":
             tc.variables["CMAKE_MACOSX_BUNDLE"] = False # avoid configuration error if building for iOS/tvOS/watchOS
+
+        if not is_msvc(self) and not self.options.shared:
+            tc.cache_variables["CMAKE_CXX_FLAGS"] = tc.cache_variables.get("CMAKE_CXX_FLAGS", "") + tc.variables.get("CMAKE_CXX_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
+            tc.cache_variables["CMAKE_C_FLAGS"] = tc.cache_variables.get("CMAKE_C_FLAGS", "") + tc.variables.get("CMAKE_C_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
         tc.generate()
 
     def _patch_sources(self):

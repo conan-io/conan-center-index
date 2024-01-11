@@ -76,6 +76,12 @@ class LibwebpConan(ConanFile):
         if self.options.shared and is_msvc(self):
             # Building a dll (see fix-dll-export patch)
             tc.preprocessor_definitions["WEBP_DLL"] = 1
+
+        if not self.options.shared:
+                # For static build we don't want to export any symbols. By defining WEBP_EXTERN we make sure that it will not be set to define 
+                # WEBP_EXTERN extern __attribute__ ((visibility ("default"))). see: /libwebp/src/webp/types.h in opencv. 
+                tc.cache_variables["CMAKE_CXX_FLAGS"] = tc.cache_variables.get("CMAKE_CXX_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden -DWEBP_EXTERN=extern"
+                tc.cache_variables["CMAKE_C_FLAGS"] = tc.cache_variables.get("CMAKE_C_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden -DWEBP_EXTERN=extern"
         tc.generate()
 
     def build(self):

@@ -122,6 +122,11 @@ class LibpngConan(ConanFile):
             tc.variables["PNG_EXECUTABLES"] = False
 
         tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
+
+        if not is_msvc(self):
+            tc.cache_variables["CMAKE_CXX_FLAGS"] = tc.cache_variables.get("CMAKE_CXX_FLAGS", "") + tc.variables.get("CMAKE_CXX_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
+            tc.cache_variables["CMAKE_C_FLAGS"] = tc.cache_variables.get("CMAKE_C_FLAGS", "") + tc.variables.get("CMAKE_C_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
+
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()

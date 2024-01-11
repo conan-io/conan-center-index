@@ -80,6 +80,8 @@ class LiunwindConan(ConanFile):
             "--disable-tests",
             "--disable-documentation",
         ])
+        tc.extra_cxxflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
+        tc.extra_cflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
         tc.generate()
 
         tc = AutotoolsDeps(self)

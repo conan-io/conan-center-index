@@ -4,6 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, load, save
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 import textwrap
 
@@ -149,6 +150,9 @@ class Sqlite3Conan(ConanFile):
             tc.variables["MAX_BLOB_SIZE"] = self.options.max_blob_size
         tc.variables["DISABLE_DEFAULT_VFS"] = not self.options.enable_default_vfs
         tc.variables["ENABLE_DBPAGE_VTAB"] = self.options.enable_dbpage_vtab
+        if not is_msvc(self):
+            tc.cache_variables["CMAKE_CXX_FLAGS"] = tc.cache_variables.get("CMAKE_CXX_FLAGS", "") + tc.variables.get("CMAKE_CXX_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
+            tc.cache_variables["CMAKE_C_FLAGS"] = tc.cache_variables.get("CMAKE_C_FLAGS", "") + tc.variables.get("CMAKE_C_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
         tc.generate()
 
     def build(self):

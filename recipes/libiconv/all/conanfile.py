@@ -118,6 +118,9 @@ class LibiconvConan(ConanFile):
             env.define("RANLIB", ":")
             env.define("NM", "dumpbin -symbols")
             env.define("win32_target", "_WIN32_WINNT_VISTA")
+        else: 
+            tc.extra_cxxflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
+            tc.extra_cflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
         tc.generate(env)
 
     def _apply_resource_patch(self):

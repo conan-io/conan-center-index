@@ -158,6 +158,9 @@ class LibX264Conan(ConanFile):
         if extra_ldflags:
             args["--extra-ldflags"] = " ".join(extra_ldflags)
         tc.update_configure_args(args)
+        if not is_msvc(self): 
+            tc.extra_cxxflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
+            tc.extra_cflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
         tc.generate()
 
     def build(self):

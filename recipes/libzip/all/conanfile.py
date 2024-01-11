@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
 required_conan_version = ">=1.54.0"
@@ -100,6 +101,11 @@ class LibZipConan(ConanFile):
         tc.variables["ENABLE_MBEDTLS"] = self.options.crypto == "mbedtls"
         tc.variables["ENABLE_OPENSSL"] = self.options.crypto == "openssl"
         tc.variables["ENABLE_WINDOWS_CRYPTO"] = self.options.crypto == "win32"
+
+        if not is_msvc(self):
+            tc.cache_variables["CMAKE_CXX_FLAGS"] = tc.cache_variables.get("CMAKE_CXX_FLAGS", "") + tc.variables.get("CMAKE_CXX_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
+            tc.cache_variables["CMAKE_C_FLAGS"] = tc.cache_variables.get("CMAKE_C_FLAGS", "") + tc.variables.get("CMAKE_C_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
+
         tc.generate()
 
         deps = CMakeDeps(self)

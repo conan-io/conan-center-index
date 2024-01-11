@@ -6,6 +6,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, load, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 import re
 

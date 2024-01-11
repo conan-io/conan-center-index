@@ -75,7 +75,7 @@ class Libx265Conan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def generate(self):
+    def generata(self):
         env = VirtualBuildEnv(self)
         env.generate()
         tc = CMakeToolchain(self)
@@ -95,6 +95,11 @@ class Libx265Conan(ConanFile):
             tc.variables["PLATFORM_LIBS"] = "dl"
         if "arm" in self.settings.arch:
             tc.variables["CROSS_COMPILE_ARM"] = cross_building(self)
+
+        if not is_msvc(self):
+            tc.cache_variables["CMAKE_CXX_FLAGS"] = tc.cache_variables.get("CMAKE_CXX_FLAGS", "") + tc.variables.get("CMAKE_CXX_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
+            tc.cache_variables["CMAKE_C_FLAGS"] = tc.cache_variables.get("CMAKE_C_FLAGS", "") + tc.variables.get("CMAKE_C_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

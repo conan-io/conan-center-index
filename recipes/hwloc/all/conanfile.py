@@ -4,6 +4,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -44,6 +45,7 @@ class HwlocConan(ConanFile):
             basic_layout(self, src_folder="src")
 
     def generate(self):
+
         if self.settings.os == "Windows":
             deps = CMakeDeps(self)
             deps.generate()
@@ -56,6 +58,9 @@ class HwlocConan(ConanFile):
             tc.cache_variables["HWLOC_WITH_CUDA"] = 'OFF'
             tc.cache_variables["HWLOC_BUILD_SHARED_LIBS"] = True
             tc.cache_variables["HWLOC_WITH_LIBXML2"] = self.options.with_libxml2
+            if not is_msvc(self):
+                tc.cache_variables["CMAKE_CXX_FLAGS"] = tc.cache_variables.get("CMAKE_CXX_FLAGS", "") + tc.variables.get("CMAKE_CXX_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
+                tc.cache_variables["CMAKE_C_FLAGS"] = tc.cache_variables.get("CMAKE_C_FLAGS", "") + tc.variables.get("CMAKE_C_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
             tc.generate()
         else:
             deps = PkgConfigDeps(self)
@@ -65,6 +70,8 @@ class HwlocConan(ConanFile):
                 tc.configure_args.extend(["--disable-libxml2"])
             tc.configure_args.extend(["--disable-io", "--disable-cairo"])
             tc.configure_args.extend(["--enable-shared", "--disable-static"])
+            tc.extra_cxxflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
+            tc.extra_cflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
             tc.generate()
 
     def build(self):

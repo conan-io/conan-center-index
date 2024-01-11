@@ -165,6 +165,9 @@ class OpenSSLConan(ConanFile):
             tc.extra_ldflags = [f"-isysroot {XCRun(self).sdk_path}"]
         env = tc.environment()
         env.define("PERL", self._perl)
+        if not is_msvc(self):
+            tc.extra_cxxflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
+            tc.extra_cflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
         tc.generate(env)
         gen_info = {}
         gen_info["CFLAGS"] = tc.cflags

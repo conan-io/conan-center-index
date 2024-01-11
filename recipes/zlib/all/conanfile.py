@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, load, replace_in_file, save
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -60,6 +61,10 @@ class ZlibConan(ConanFile):
         # Correct for misuse of "${CMAKE_INSTALL_PREFIX}/" in CMakeLists.txt
         tc.variables["INSTALL_LIB_DIR"] = "lib"
         tc.variables["INSTALL_INC_DIR"] = "include"
+        # we can hide symbols only in static lib becasue zlib is not exporting api symbols for other configuration than msvc
+        if not is_msvc(self) and not self.options.shared:
+            tc.cache_variables["CMAKE_CXX_FLAGS"] = tc.cache_variables.get("CMAKE_CXX_FLAGS", "") + tc.variables.get("CMAKE_CXX_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
+            tc.cache_variables["CMAKE_C_FLAGS"] = tc.cache_variables.get("CMAKE_C_FLAGS", "") + tc.variables.get("CMAKE_C_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
         tc.generate()
 
     def _patch_sources(self):

@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, save
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 import textwrap
 
@@ -55,6 +56,10 @@ class Bzip2Conan(ConanFile):
         tc.variables["BZ2_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["BZ2_VERSION_MAJOR"] = Version(self.version).major
         tc.variables["BZ2_VERSION_STRING"] = self.version
+
+        if not is_msvc(self):
+            tc.cache_variables["CMAKE_CXX_FLAGS"] = tc.cache_variables.get("CMAKE_CXX_FLAGS", "") + tc.variables.get("CMAKE_CXX_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
+            tc.cache_variables["CMAKE_C_FLAGS"] = tc.cache_variables.get("CMAKE_C_FLAGS", "") + tc.variables.get("CMAKE_C_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
         tc.generate()
 
     def build(self):

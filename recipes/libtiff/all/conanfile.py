@@ -121,6 +121,10 @@ class LibtiffConan(ConanFile):
             deps.set_property("xz_utils", "cmake_target_name", "liblzma::liblzma")
             deps.set_property("libdeflate", "cmake_file_name", "Deflate")
             deps.set_property("libdeflate", "cmake_target_name", "Deflate::Deflate")
+
+        if not is_msvc(self):
+            tc.cache_variables["CMAKE_CXX_FLAGS"] = tc.cache_variables.get("CMAKE_CXX_FLAGS", "") + tc.variables.get("CMAKE_CXX_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
+            tc.cache_variables["CMAKE_C_FLAGS"] = tc.cache_variables.get("CMAKE_C_FLAGS", "") + tc.variables.get("CMAKE_C_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
         deps.generate()
 
     def _patch_sources(self):

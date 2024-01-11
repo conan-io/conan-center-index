@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import collect_libs, copy, get, rmdir, save
+from conan.tools.microsoft import is_msvc
 import os
 import textwrap
 
@@ -58,6 +59,10 @@ class GflagsConan(ConanFile):
         tc.variables["REGISTER_BUILD_DIR"] = False
         tc.variables["REGISTER_INSTALL_PREFIX"] = False
         tc.variables["GFLAGS_NAMESPACE"] = self.options.namespace
+
+        if not is_msvc(self):
+            tc.cache_variables["CMAKE_CXX_FLAGS"] = tc.cache_variables.get("CMAKE_CXX_FLAGS", "") + tc.variables.get("CMAKE_CXX_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
+            tc.cache_variables["CMAKE_C_FLAGS"] = tc.cache_variables.get("CMAKE_C_FLAGS", "") + tc.variables.get("CMAKE_C_FLAGS", "") + " -fvisibility=hidden -fvisibility-inlines-hidden"
         tc.generate()
 
     def build(self):

@@ -61,6 +61,9 @@ class YASMConan(ConanFile):
             "--disable-rpath",
             "--disable-nls",
         ])
+
+        tc.extra_cxxflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
+        tc.extra_cflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
         tc.generate()
 
     def _generate_cmake(self):
