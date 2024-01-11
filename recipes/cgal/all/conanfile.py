@@ -2,7 +2,7 @@ import os
 import textwrap
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, replace_in_file, rmdir, rm, copy, save, export_conandata_patches, patch
+from conan.tools.files import get, replace_in_file, rmdir, rm, copy, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -62,8 +62,7 @@ class CgalConan(ConanFile):
     def _patch_sources(self):
         replace_in_file(self,  os.path.join(self.source_folder, "CMakeLists.txt"),
                         "if(NOT PROJECT_NAME)", "if(1)", strict=False)
-        for it in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **it, strip=2)
+        apply_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
