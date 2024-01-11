@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
-from conan.tools.build import check_min_cppstd
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
@@ -109,8 +109,18 @@ class SpeedbConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # to avoid wrong CPU detection, modify not to use "-march=native" in apple-clang
+        if cross_building(self) and os.settings.compiler == "apple-clang":
+            replace_in_file(self,
+                os.path.join(self.source_folder, "CMakeLists.txt"),
+                """elseif(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64" AND NOT HAS_ARMV8_CRC)""",
+                "elseif(FALSE)"
+            )
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
