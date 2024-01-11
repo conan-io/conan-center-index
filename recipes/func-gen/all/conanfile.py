@@ -7,6 +7,8 @@ from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import copy
 from conan.tools.scm import Git, Version
 
+required_conan_version = ">=2.0"
+
 
 class FuncGenConan(ConanFile):
     name = "func-gen"
