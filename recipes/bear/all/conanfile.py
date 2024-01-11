@@ -40,7 +40,7 @@ class BearConan(ConanFile):
     def requirements(self):
         self.requires("grpc/1.54.3")
         if Version(self.version) >= "3.1":
-            self.requires("fmt/10.1.1")
+            self.requires("fmt/10.2.0")
             self.requires("spdlog/1.12.0")
         else:
             self.requires("fmt/8.1.1")
