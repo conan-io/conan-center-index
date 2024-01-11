@@ -314,8 +314,8 @@ class ArmadilloConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "armadillo")
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "Armadillo")
-        self.cpp_info.set_property("cmake_target_name", "armadillo::armadillo")
-        self.cpp_info.set_property("cmake_target_aliases", ["armadillo", "Armadillo::Armadillo"])
+        self.cpp_info.set_property("cmake_target_name", "Armadillo::Armadillo")
+        self.cpp_info.set_property("cmake_target_aliases", ["Armadillo", "armadillo", "armadillo::armadillo", "Armadillo::armadillo"])
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
 
         # Remove when cmake_find_package and pkg_config generators are no
