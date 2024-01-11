@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
 find_package(MediaInfoLib REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE mediainfo)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
 
 option(LIBMEDIAINFO_SHARED "Is libmediainfo a shared library?")
 if(LIBMEDIAINFO_SHARED)
