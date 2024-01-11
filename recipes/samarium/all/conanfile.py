@@ -50,8 +50,7 @@ class SamariumConan(ConanFile):
 
         compiler = str(self.settings.compiler)
         if compiler not in self._compilers_minimum_version:
-            self.output.warn(
-                "Unknown compiler, assuming it supports at least C++20")
+            self.output.warning("Unknown compiler, assuming it supports at least C++20")
             return
 
         version = Version(self.settings.compiler.version)
