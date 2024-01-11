@@ -1,7 +1,10 @@
+from conan import ConanFile
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
-import functools
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.apple import is_apple_os
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.errors import ConanInvalidConfiguration
+
 import os
 
 required_conan_version = ">=1.45.0"
@@ -41,22 +44,19 @@ class LibGit2Conan(ConanFile):
         "with_ntlmclient": True,
         "with_regex": "builtin",
     }
-    generators = "cmake", "cmake_find_package"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    # exports_sources = 'patches/**/*', 'conandata.yml', 'CMakeLists.txt'
+    # generators = "cmake", "cmake_find_package"
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        # copy(self, "CMakeLists.txt.in", src=self.recipe_folder, dst=self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if not tools.is_apple_os(self.settings.os):
+        if not is_apple_os(self):
             del self.options.with_iconv
 
         if self.settings.os == "Windows":
@@ -72,20 +72,21 @@ class LibGit2Conan(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        self.requires("zlib/1.2.12")
+        self.requires("zlib/1.2.13")
         self.requires("http_parser/2.9.4")
         if self.options.with_libssh2:
-            self.requires("libssh2/1.10.0")
+            self.requires("libssh2/1.11.0")
         if self._need_openssl:
-            self.requires("openssl/1.1.1o")
+            self.requires("openssl/1.1.1u")
         if self._need_mbedtls:
-            self.requires("mbedtls/3.1.0")
-        if self.options.get_safe("with_iconv"):
-            self.requires("libiconv/1.16")
+            self.requires("mbedtls/3.5.0")
+            # self.requires("mbedtls/3.1.0")
+        # if self.options.get_safe("with_iconv"):
+        #     self.requires("libiconv/1.16")
         if self.options.with_regex == "pcre":
             self.requires("pcre/8.45")
-        elif self.options.with_regex == "pcre2":
-            self.requires("pcre2/10.40")
+        # elif self.options.with_regex == "pcre2":
+        #     self.requires("pcre2/10.40")
 
     @property
     def _need_openssl(self):
@@ -97,7 +98,7 @@ class LibGit2Conan(ConanFile):
 
     def validate(self):
         if self.options.with_https == "security":
-            if not tools.is_apple_os(self.settings.os):
+            if not is_apple_os(self):
                 raise ConanInvalidConfiguration("security is only valid for Apple products")
         elif self.options.with_https == "winhttp":
             if self.settings.os != "Windows":
@@ -115,8 +116,7 @@ class LibGit2Conan(ConanFile):
             raise ConanInvalidConfiguration("regcomp_l isn't supported on {}".format(self.settings.os))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     _cmake_https = {
         "openssl": "OpenSSL",
@@ -135,42 +135,42 @@ class LibGit2Conan(ConanFile):
         "win32": "Win32",
     }
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["THREADSAFE"] = self.options.threadsafe
-        cmake.definitions["USE_SSH"] = self.options.with_libssh2
+    def generate(self):
 
-        cmake.definitions["USE_ICONV"] = self.options.get_safe("with_iconv", False)
+        tc = CMakeToolchain(self)
+        tc.variables["THREADSAFE"] = self.options.threadsafe
+        tc.variables["USE_SSH"] = self.options.with_libssh2
 
-        cmake.definitions["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
-        cmake.definitions["USE_SHA1"] = self._cmake_sha1[str(self.options.with_sha1)]
+        tc.variables["USE_ICONV"] = self.options.get_safe("with_iconv", False)
 
-        if tools.Version(self.version) >= "1.4.0":
-            cmake.definitions["BUILD_TESTS"] = False
-        cmake.definitions["BUILD_CLAR"] = False
-        cmake.definitions["BUILD_EXAMPLES"] = False
-        cmake.definitions["USE_HTTP_PARSER"] = "system"
+        tc.variables["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
+        tc.variables["USE_SHA1"] = self._cmake_sha1[str(self.options.with_sha1)]
 
-        cmake.definitions["REGEX_BACKEND"] = self.options.with_regex
+        if self.version >= "1.4.0":
+            tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_CLAR"] = False
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["USE_HTTP_PARSER"] = "system"
+
+        tc.variables["REGEX_BACKEND"] = self.options.with_regex
 
         if is_msvc(self):
-            cmake.definitions["STATIC_CRT"] = is_msvc_static_runtime(self)
-
-        cmake.configure()
-        return cmake
+            tc.variables["STATIC_CRT"] = is_msvc_static_runtime(self)
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libgit2")
