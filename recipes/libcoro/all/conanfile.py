@@ -74,7 +74,7 @@ class LibcoroConan(ConanFile):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
         if self.settings.compiler != "gcc":
-            raise ConanInvalidConfiguration("gcc is the only compiler supported by libcoro.")
+            raise ConanInvalidConfiguration(f"The Conan recipe {self.ref} only supports GCC for now. Contributions are welcome!")
 
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
