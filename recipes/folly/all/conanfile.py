@@ -89,6 +89,14 @@ class FollyConan(ConanFile):
     def _required_boost_components(self):
         return ["context", "filesystem", "program_options", "regex", "system", "thread"]
 
+    @property
+    def _required_boost_conan_components(self):
+        return [f"boost::{comp}" for comp in self._required_boost_components]
+    
+    @property
+    def _required_boost_cmake_targets(self):
+        return [f"Boost::{comp}" for comp in self._required_boost_components]
+    
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
@@ -237,24 +245,13 @@ class FollyConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "folly")
-        self.cpp_info.set_property("cmake_target_name", "Folly::folly")
+        self.cpp_info.set_property("cmake_target_name", "folly::folly")
         self.cpp_info.set_property("pkg_config_name", "libfolly")
 
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["libfolly"].libs = [
-                "folly_exception_counter",
-                "folly_exception_tracer",
-                "folly_exception_tracer_base",
-            ]
-        self.cpp_info.components["libfolly"].libs += [
-            "folly_test_util",
-            "follybenchmark",
-            "folly"
-        ]
-
-        self.cpp_info.components["libfolly"].requires = [
-            "boost::context", "boost::filesystem", "boost::program_options", "boost::regex", "boost::system", "boost::thread",
-            "bzip2::bzip2",
+        self.cpp_info.components["libfolly"].set_property("cmake_target_name", "Folly::folly")
+        self.cpp_info.components["libfolly"].set_property("pkg_config_name", "libfolly")
+        self.cpp_info.components["libfolly"].libs = ["folly"]
+        self.cpp_info.components["libfolly"].requires = ["fmt::fmt"] + self._required_boost_conan_components + [
             "double-conversion::double-conversion",
             "gflags::gflags",
             "glog::glog",
@@ -272,19 +269,14 @@ class FollyConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libfolly"].requires.extend(["libiberty::libiberty", "libunwind::libunwind"])
             self.cpp_info.components["libfolly"].system_libs.extend(["pthread", "dl", "rt"])
-
-        self.cpp_info.components["libfolly"].requires.append("fmt::fmt")
-        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libfolly"].defines.extend(["FOLLY_HAVE_ELF", "FOLLY_HAVE_DWARF"])
-
         elif self.settings.os == "Windows":
             self.cpp_info.components["libfolly"].system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
 
         if str(self.settings.compiler.libcxx) == "libstdc++" or (
             self.settings.compiler == "apple-clang" and
             Version(self.settings.compiler.version.value) == "9.0" and
-            self.settings.compiler.libcxx == "libc++"
-        ):
+            self.settings.compiler.libcxx == "libc++"):
             self.cpp_info.components["libfolly"].system_libs.append("atomic")
 
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "11.0":
@@ -295,24 +287,6 @@ class FollyConan(ConanFile):
 
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "9":
             self.cpp_info.components["libfolly"].system_libs.append("stdc++fs" if self.settings.compiler.libcxx in ["libstdc++", "libstdc++11"] else "c++fs")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "folly"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "folly"
-        self.cpp_info.names["cmake_find_package"] = "Folly"
-        self.cpp_info.names["cmake_find_package_multi"] = "Folly"
-        self.cpp_info.names["pkg_config"] = "libfolly"
-        self.cpp_info.components["libfolly"].names["cmake_find_package"] = "folly"
-        self.cpp_info.components["libfolly"].names["cmake_find_package_multi"] = "folly"
-
-        self.cpp_info.components["libfolly"].set_property("cmake_target_name", "Folly::folly")
-        self.cpp_info.components["libfolly"].set_property("pkg_config_name", "libfolly")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-        self.cpp_info.components["follybenchmark"].names["cmake_find_package"] = "follybenchmark"
-        self.cpp_info.components["follybenchmark"].names["cmake_find_package_multi"] = "follybenchmark"
-        self.cpp_info.components["folly_test_util"].names["cmake_find_package"] = "folly_test_util"
-        self.cpp_info.components["folly_test_util"].names["cmake_find_package_multi"] = "folly_test_util"
 
         self.cpp_info.components["follybenchmark"].set_property("cmake_target_name", "Folly::follybenchmark")
         self.cpp_info.components["follybenchmark"].set_property("pkg_config_name", "libfollybenchmark")
@@ -325,14 +299,6 @@ class FollyConan(ConanFile):
         self.cpp_info.components["folly_test_util"].requires = ["libfolly"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-            self.cpp_info.components["folly_exception_tracer_base"].names["cmake_find_package"] = "folly_exception_tracer_base"
-            self.cpp_info.components["folly_exception_tracer_base"].names["cmake_find_package_multi"] = "folly_exception_tracer_base"
-            self.cpp_info.components["folly_exception_tracer"].names["cmake_find_package"] = "folly_exception_tracer"
-            self.cpp_info.components["folly_exception_tracer"].names["cmake_find_package_multi"] = "folly_exception_tracer"
-            self.cpp_info.components["folly_exception_counter"].names["cmake_find_package"] = "folly_exception_counter"
-            self.cpp_info.components["folly_exception_counter"].names["cmake_find_package_multi"] = "folly_exception_counter"
-
             self.cpp_info.components["folly_exception_tracer_base"].set_property("cmake_target_name", "Folly::folly_exception_tracer_base")
             self.cpp_info.components["folly_exception_tracer_base"].set_property("pkg_config_name", "libfolly_exception_tracer_base")
             self.cpp_info.components["folly_exception_tracer_base"].libs = ["folly_exception_tracer_base"]
@@ -347,3 +313,27 @@ class FollyConan(ConanFile):
             self.cpp_info.components["folly_exception_counter"].set_property("pkg_config_name", "libfolly_exception_counter")
             self.cpp_info.components["folly_exception_counter"].libs = ["folly_exception_counter"]
             self.cpp_info.components["folly_exception_counter"].requires = ["folly_exception_tracer"]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "folly"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "folly"
+        self.cpp_info.names["cmake_find_package"] = "Folly"
+        self.cpp_info.names["cmake_find_package_multi"] = "Folly"
+        self.cpp_info.names["pkg_config"] = "libfolly"
+        self.cpp_info.components["libfolly"].names["cmake_find_package"] = "folly"
+        self.cpp_info.components["libfolly"].names["cmake_find_package_multi"] = "folly"
+
+        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
+        self.cpp_info.components["follybenchmark"].names["cmake_find_package"] = "follybenchmark"
+        self.cpp_info.components["follybenchmark"].names["cmake_find_package_multi"] = "follybenchmark"
+        self.cpp_info.components["folly_test_util"].names["cmake_find_package"] = "folly_test_util"
+        self.cpp_info.components["folly_test_util"].names["cmake_find_package_multi"] = "folly_test_util"
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
+            self.cpp_info.components["folly_exception_tracer_base"].names["cmake_find_package"] = "folly_exception_tracer_base"
+            self.cpp_info.components["folly_exception_tracer_base"].names["cmake_find_package_multi"] = "folly_exception_tracer_base"
+            self.cpp_info.components["folly_exception_tracer"].names["cmake_find_package"] = "folly_exception_tracer"
+            self.cpp_info.components["folly_exception_tracer"].names["cmake_find_package_multi"] = "folly_exception_tracer"
+            self.cpp_info.components["folly_exception_counter"].names["cmake_find_package"] = "folly_exception_counter"
+            self.cpp_info.components["folly_exception_counter"].names["cmake_find_package_multi"] = "folly_exception_counter"
