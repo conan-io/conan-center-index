@@ -43,7 +43,7 @@ class CmakePython3Abi(object):
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps"
+    generators = "CMakeDeps", "VCVars"
     test_type = "explicit"
 
     def requirements(self):
@@ -228,7 +228,7 @@ class TestPackageConan(ConanFile):
                 # FIXME: find out why cpython on apple does not allow to use modules linked against a static python
             else:
                 if self._supports_modules:
-                    os.environ["PYTHONPATH"] = self.build_folder
+                    os.environ["PYTHONPATH"] = os.path.join(self.build_folder, self.cpp.build.libdirs[0])
                     self.output.info("Testing module (spam) using cmake built module")
                     self._test_module("spam", True)
 
