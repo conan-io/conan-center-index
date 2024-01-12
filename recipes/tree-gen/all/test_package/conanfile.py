@@ -14,7 +14,7 @@ class TreeGenTestConan(ConanFile):
 
     def test(self):
         output_files_folder = os.path.dirname(__file__)
-        tree_file_path = os.path.abspath("./directory.tree")
+        tree_file_path = os.path.join(output_files_folder, "directory.tree")
         actual_header_file_path = os.path.join(output_files_folder, "directory.actual.hpp")
         actual_source_file_path = os.path.join(output_files_folder, "directory.actual.cpp")
         actual_python_file_path = os.path.join(output_files_folder, "directory.actual.py")
