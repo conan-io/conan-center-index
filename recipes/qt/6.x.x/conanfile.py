@@ -627,7 +627,6 @@ class QtConan(ConanFile):
                   strip_root=True, destination=destination)
 
         # patching in source method because of no_copy_source attribute
-
         apply_conandata_patches(self)
         for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
             replace_in_file(self, os.path.join(self.source_folder, "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
