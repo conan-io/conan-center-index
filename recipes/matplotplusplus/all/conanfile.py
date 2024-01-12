@@ -86,6 +86,8 @@ class MatplotplusplusCppConan(ConanFile):
         tc.variables["MATPLOTPP_BUILD_TESTS"] = False
         tc.variables["MATPLOTPP_BUILD_INSTALLER"] = True
         tc.variables["MATPLOTPP_BUILD_PACKAGE"] = False
+        tc.variables["MATPLOTPP_BUILD_WITH_SANITIZERS"] = False
+        tc.variables["MATPLOTPP_BUILD_WITH_PEDANTIC_WARNINGS"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         deps = CMakeDeps(self)
