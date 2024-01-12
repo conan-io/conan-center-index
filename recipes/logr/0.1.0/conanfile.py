@@ -48,7 +48,7 @@ class LogrConan(ConanFile):
     def requirements(self):
         self.requires("fmt/10.2.1")
         if self.options.backend == "spdlog":
-            self.requires("spdlog/1.12.0")
+            self.requires("spdlog/1.13.0")
         elif self.options.backend == "glog":
             self.requires("glog/0.6.0")
         elif self.options.backend in ["log4cplus", "log4cplus-unicode"]:
