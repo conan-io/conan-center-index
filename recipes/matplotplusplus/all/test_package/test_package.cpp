@@ -5,6 +5,8 @@
 
 int main() {
     using namespace matplot;
+    auto fig = figure(true);
+
     auto [X, Y] = meshgrid(iota(-8, .5, +8));
     auto Z = transform(X, Y, [](double x, double y) {
         double eps = std::nextafter(0.0, 1.0);
@@ -13,6 +15,6 @@ int main() {
     });
     mesh(X, Y, Z);
 
-    save("test.png");
+    fig->save("test.png");
     return 0;
 }
