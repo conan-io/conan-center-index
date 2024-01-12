@@ -4,10 +4,10 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.files import copy
-from conan.tools.scm import Git, Version
+from conan.tools.files import copy, get
+from conan.tools.scm import Version
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=1.53.0"
 
 
 class TreeGenConan(ConanFile):
@@ -65,14 +65,7 @@ class TreeGenConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        git = Git(self)
-        git.clone(url="https://github.com/QuTech-Delft/tree-gen.git", target=".")
-
-        # This is temporarily pointing to conan_package branch head
-        # git.checkout("aea8ea124714581c385184de477041002439e4e9")
-
-        # This is pointing to develop head
-        git.checkout("d2deae17d2e8deab75da2ef9f4bc46ee9f5ec9a3")
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         deps = CMakeDeps(self)
