@@ -23,12 +23,10 @@ class FuncGenConan(ConanFile):
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
         "asan_enabled": [True, False]
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
         "asan_enabled": False
     }
@@ -39,10 +37,6 @@ class FuncGenConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
