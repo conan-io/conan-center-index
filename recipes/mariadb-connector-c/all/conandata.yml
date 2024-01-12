@@ -16,10 +16,16 @@ sources:
     sha256: "3e6f6c399493fe90efdc21a3fe70c30434b7480e8195642a959f1dd7a0fa5b0f"
 patches:
   "3.3.8":
+    - patch_file: "patches/3.3.8-0001-fix-install-and-static-or-shared.patch"
+      patch_description: "fix install path, separate static/shared build"
+      patch_type: "conan"
     - patch_file: "patches/3.1.11-0004-include-mysqld_error-header.patch"
       patch_description: "always include mysqld_error.h"
       patch_type: "portability"
   "3.3.3":
+    - patch_file: "patches/3.3.3-0001-fix-install-and-static-or-shared.patch"
+      patch_description: "fix install path, separate static/shared build"
+      patch_type: "conan"
     - patch_file: "patches/3.1.11-0003-include-order-windows-winsock2.patch"
       patch_description: "fix include order for windows winsock2"
       patch_type: "portability"

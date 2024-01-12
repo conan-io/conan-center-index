@@ -122,11 +122,6 @@ class MariadbConnectorcConan(ConanFile):
             replace_in_file(self, root_cmake,
                             "INCLUDE(${CC_SOURCE_DIR}/cmake/FindZStd.cmake)",
                             "find_package(ZSTD REQUIRED CONFIG)")
-            replace_in_file(self, libmariadb_cmake,
-                            "DESTINATION ${INSTALL_LIBDIR}",
-                            "RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib")
-            replace_in_file(self, libmariadb_cmake, " NAMELINK_SKIP", "")
-            replace_in_file(self, libmariadb_cmake, " NAMELINK_ONLY", "")
 
     def build(self):
         self._patch_sources()
@@ -142,12 +137,6 @@ class MariadbConnectorcConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "symbols"))
         rmdir(self, os.path.join(self.package_folder, "man"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        if self.options.shared:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
-        else:
-            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
-            rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libmariadb")
