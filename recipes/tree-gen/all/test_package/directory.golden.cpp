@@ -2,7 +2,7 @@
  * Implementation for classes representing a Windows directory tree.
  */
 
-#include "directory.hpp"
+#include "directory.actual.hpp"
 
 namespace directory {
 

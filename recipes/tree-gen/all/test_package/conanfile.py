@@ -3,26 +3,18 @@ import os
 
 from conan import ConanFile
 # from conan.tools.build import cross_building
-from conan.tools.cmake import cmake_layout, CMake
 
 
 class TreeGenTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "VirtualBuildEnv"
     test_type = "explicit"
 
-    def requirements(self):
-        self.requires(self.tested_reference_str)
-
-    def layout(self):
-        cmake_layout(self)
-
-    def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def test_tree_gen_executable(self):
+        tree_file_path = os.path.abspath("./directory.tree")
         actual_header_file_path = os.path.abspath("./directory.actual.hpp")
         actual_source_file_path = os.path.abspath("./directory.actual.cpp")
         actual_python_file_path = os.path.abspath("./directory.actual.py")
@@ -30,7 +22,11 @@ class TreeGenTestConan(ConanFile):
         golden_source_file_path = os.path.abspath("./directory.golden.cpp")
         golden_python_file_path = os.path.abspath("./directory.golden.py")
 
-        self.run("tree-gen {} {} {}}".format(actual_header_file_path, actual_source_file_path, actual_python_file_path))
+        self.run("tree-gen {} {} {} {}".format(
+            tree_file_path,
+            actual_header_file_path,
+            actual_source_file_path,
+            actual_python_file_path))
 
         header_cmp_result = filecmp.cmp(actual_header_file_path, golden_header_file_path, shallow=False)
         source_cmp_result = filecmp.cmp(actual_source_file_path, golden_source_file_path, shallow=False)

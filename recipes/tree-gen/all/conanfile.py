@@ -7,6 +7,8 @@ from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import copy
 from conan.tools.scm import Git, Version
 
+required_conan_version = ">=2.0"
+
 
 class TreeGenConan(ConanFile):
     name = "tree-gen"
@@ -60,16 +62,7 @@ class TreeGenConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        self.folders.source = "."
-        self.folders.build = os.path.join("build", str(self.settings.build_type))
-        self.folders.generators = os.path.join(self.folders.build, "generators")
-
-        self.cpp.package.libs = ["tree-gen"]
-        self.cpp.package.includedirs = ["include"]
-        self.cpp.package.libdirs = ["lib"]
-
-        self.cpp.source.includedirs = ["include"]
-        self.cpp.build.libdirs = ["."]
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         git = Git(self)
