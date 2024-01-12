@@ -12,9 +12,6 @@ class TestPackage(ConanFile):
     options = {
         "shared": [True, False]
     }
-    default_options = {
-        "shared": False
-    }
 
     def layout(self):
         cmake_layout(self)
