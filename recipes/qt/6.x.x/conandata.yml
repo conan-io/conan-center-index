@@ -78,6 +78,7 @@ patches:
       "patch_description": "Use absolute path in the generated header files to avoid relative path longer than 250 characters (not supported on by msvc compiler)"
       "patch_file": "patches/fix-long-path-on-windows_6.6.1.patch"
       "patch_type": "bugfix"
+      "patch_source": "https://code.qt.io/cgit/qt/qtbase.git/commit/?id=b4246a5c28472de3c4b6a85a3daf4a1d578894ab"
   "6.6.0":
     - "base_path": "qtwebengine"
       "patch_description": "Workaround for too long .rps file name"
@@ -93,6 +94,7 @@ patches:
       "patch_description": "Use absolute path in the generated header files to avoid relative path longer than 250 characters (not supported on by msvc compiler)"
       "patch_file": "patches/fix-long-path-on-windows_6.6.0.patch"
       "patch_type": "bugfix"
+      "patch_source": "https://code.qt.io/cgit/qt/qtbase.git/commit/?id=b4246a5c28472de3c4b6a85a3daf4a1d578894ab"
   "6.5.3":
     - "base_path": "qtwebengine"
       "patch_description": "Workaround for too long .rps file name"
@@ -108,6 +110,7 @@ patches:
       "patch_description": "Use absolute path in the generated header files to avoid relative path longer than 250 characters (not supported on by msvc compiler)"
       "patch_file": "patches/fix-long-path-on-windows_6.5.3.patch"
       "patch_type": "bugfix"
+      "patch_source": "https://code.qt.io/cgit/qt/qtbase.git/commit/?id=b4246a5c28472de3c4b6a85a3daf4a1d578894ab"
   "6.4.2":
     - base_path: "qtbase/cmake"
       patch_description: "Fix pri helpers"
