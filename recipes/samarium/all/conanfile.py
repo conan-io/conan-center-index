@@ -18,8 +18,6 @@ class SamariumConan(ConanFile):
     topics = ("cpp20", "physics", "2d", "simulation")
     package_type = "library"
     generators = "CMakeDeps", "CMakeToolchain"
-    requires = "fmt/10.2.1", "sfml/2.6.1", "range-v3/0.12.0", "stb/cci.20230920", "tl-expected/20190710"
-
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [
         True, False]}
@@ -44,6 +42,13 @@ class SamariumConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
+        self.requires("range-v3/0.12.0", transitive_headers=True)
+        self.requires("sfml/2.6.1", transitive_headers=True, transitive_libs=True)
+        self.requires("stb/cci.20230920", transitive_headers=True)
+        self.requires("tl-expected/1.1.0", transitive_headers=True)
 
     def validate(self):
         if self.version == "1.0.0" and self.settings.os == "Macos":
