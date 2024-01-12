@@ -75,6 +75,9 @@ class LibjxlConan(ConanFile):
         tc.variables["JPEGXL_FORCE_SYSTEM_HWY"] = True
         tc.variables["JPEGXL_FORCE_SYSTEM_LCMS2"] = True
         tc.variables["JPEGXL_ENABLE_TOOLS"] = False
+        if Version(self.version) >= "0.9.1":
+            tc.variables["JPEGXL_ENABLE_JPEGLI"] = False
+            tc.variables["JPEGXL_ENABLE_JPEGLI_LIBJPEG"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

@@ -1,17 +1,17 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 12c3330..7036ee3 100644
+index 2429f94..371ebb8 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -301,7 +301,7 @@ include(GNUInstallDirs)
+@@ -354,7 +354,7 @@ include(GNUInstallDirs)
  # Separately build/configure testing frameworks and other third_party libraries
  # to allow disabling tests in those libraries.
  include(third_party/testing.cmake)
 -add_subdirectory(third_party)
-+# add_subdirectory(third_party)
++#add_subdirectory(third_party)
  # Copy the JXL license file to the output build directory.
  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/LICENSE"
                 ${PROJECT_BINARY_DIR}/LICENSE.jpeg-xl COPYONLY)
-@@ -438,7 +438,7 @@ if (JPEGXL_ENABLE_PLUGINS)
+@@ -491,7 +491,7 @@ if (JPEGXL_ENABLE_PLUGINS)
  endif ()
  
  # Binary tools
