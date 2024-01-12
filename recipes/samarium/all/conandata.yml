@@ -6,6 +6,11 @@ sources:
     sha256: 3748ad1095805338d0d54ca7b60a155520188970946b247d56cc9b5eeb397358
     url: https://github.com/strangeQuark1041/samarium/archive/refs/tags/v1.0.1.tar.gz
 patches:
+  "1.0.1":
+    - patch_file: "patches/1.0.1-fix-stb-image.patch"
+      patch_description: "implement stb_image__*"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/strangeQuark1041/samarium/commit/05f43f3902c86e6ae0ae5169772b5551878f4de0"
   "1.0.0":
     - patch_file: "patches/1.0.0-updated-cmake.patch"
       patch_description: "Use find_package for CMakeDeps"

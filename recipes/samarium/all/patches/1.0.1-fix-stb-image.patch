@@ -1,0 +1,14 @@
+diff --git a/src/samarium/util/file.cpp b/src/samarium/util/file.cpp
+--- a/src/samarium/util/file.cpp
++++ b/src/samarium/util/file.cpp
+@@ -12,6 +12,10 @@
+ #include <string>     // for string
+
+ #include "fpng/fpng.hpp"
++#define STB_IMAGE_IMPLEMENTATION
++#define STB_IMAGE_WRITE_IMPLEMENTATION
++#include "stb.h"
++#include "stb_image.h"
+ #include "stb_image_write.h"
+ 
+ #include "../core/types.hpp"     // for u8
