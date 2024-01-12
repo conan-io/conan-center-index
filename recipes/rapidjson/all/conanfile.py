@@ -14,7 +14,7 @@ class RapidjsonConan(ConanFile):
     homepage = "http://rapidjson.org"
     license = "MIT"
     package_type = "header-library"
-    package_id_embed_mode = "minor"
+    package_id_embed_mode = "minor_mode"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -22,12 +22,26 @@ class RapidjsonConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True,
-                    destination=self.source_folder)
+        get(
+            self,
+            **self.conan_data["sources"][self.version],
+            strip_root=True,
+            destination=self.source_folder
+        )
 
     def package(self):
-        copy(self, pattern="license.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, pattern="*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        copy(
+            self,
+            pattern="license.txt",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
+        copy(
+            self,
+            pattern="*",
+            src=os.path.join(self.source_folder, "include"),
+            dst=os.path.join(self.package_folder, "include"),
+        )
 
     def package_id(self):
         self.info.clear()
