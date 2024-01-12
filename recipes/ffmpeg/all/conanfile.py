@@ -619,6 +619,10 @@ class FFMpegConan(ConanFile):
         if tc.ldflags:
             args.append("--extra-ldflags={}".format(" ".join(tc.ldflags)))
         tc.configure_args.extend(args)
+
+        if not is_msvc(self):
+            tc.extra_cxxflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
+            tc.extra_cflags.extend(["-fvisibility=hidden", "-fvisibility-inlines-hidden"])
         tc.generate()
 
         if is_msvc(self):
