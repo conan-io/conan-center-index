@@ -1,4 +1,13 @@
 sources:
+  "2.4.4":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.4.4.tar.gz"
+    sha256: "03995edbfe6047d047bcd3c5bb4824c3644927437bb60a95f8a3a9c7096ae981"
+  "2.4.3":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.4.3.tar.gz"
+    sha256: "b899a290c09ab073341d8924ebbd43694226d9122e0e174264d3a3770814bb15"
+  "2.4.2":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.4.2.tar.gz"
+    sha256: "76f3228dd9afa2661fe9326b51e5ec8dc29e364f99fb0f94704792610d543fa2"
   "2.4.1":
     url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.4.1.tar.gz"
     sha256: "61a439206e1ed2e68702c9811e3055d0adfda5945fb098ea7bfe8906c33d7b49"
