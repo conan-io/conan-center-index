@@ -4,10 +4,10 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy
 from conan.tools.scm import Git, Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class FuncGenConan(ConanFile):
@@ -48,7 +48,9 @@ class FuncGenConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        git = Git(self)
+        git.clone(url="https://github.com/QuTech-Delft/func-gen.git", target=".")
+        git.checkout("5e5a99e542e0144df927c99667aec423e8382f12")
 
     def generate(self):
         deps = CMakeDeps(self)
