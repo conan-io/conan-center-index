@@ -16,6 +16,7 @@ class SamariumConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index/"
     license = "MIT"
     topics = ("cpp20", "physics", "2d", "simulation")
+    package_type = "library"
     generators = "CMakeDeps", "CMakeToolchain"
     requires = "fmt/10.2.1", "sfml/2.6.1", "range-v3/0.12.0", "stb/cci.20230920", "tl-expected/20190710"
 
