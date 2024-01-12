@@ -84,6 +84,50 @@ class LibVPXConan(ConanFile):
     def _install_tmp_folder(self):
         return "tmp_install"
 
+    @property
+    def _target_name(self):
+        arch = {'x86': 'x86',
+                'x86_64': 'x86_64',
+                'armv7': 'armv7',
+                'armv8': 'arm64',
+                'mips': 'mips32',
+                'mips64': 'mips64',
+                'sparc': 'sparc'}.get(str(self.settings.arch))
+        compiler = str(self.settings.compiler)
+        os_name = str(self.settings.os)
+        if str(self.settings.compiler) == "Visual Studio":
+            vc_version = self.settings.compiler.version
+            compiler = f"vs{vc_version}"
+        elif is_msvc(self):
+            vc_version = str(self.settings.compiler.version)
+            vc_version = {"170": "11", "180": "12", "190": "14", "191": "15", "192": "16", "193": "17"}[vc_version]
+            compiler = f"vs{vc_version}"
+        elif self.settings.compiler in ["gcc", "clang", "apple-clang"]:
+            compiler = 'gcc'
+
+        host_os = str(self.settings.os)
+        if host_os == 'Windows':
+            os_name = 'win32' if self.settings.arch == 'x86' else 'win64'
+        elif is_apple_os(self):
+            # Solves cross-building for iOS
+            # Issue related: https://github.com/conan-io/conan-center-index/issues/20513
+            if self.settings.os == "iOS":
+                os_name = 'iphonesimulator'
+            elif self.settings.arch in ["x86", "x86_64"]:
+                os_name = 'darwin11'
+            elif self.settings.arch == "armv8" and self.settings.os == "Macos":
+                os_name = 'darwin20'
+            else:
+                # Unrecognized toolchain 'arm64-darwin11-gcc', see list of toolchains in ./configure --help
+                os_name = 'darwin'
+        elif host_os == 'Linux':
+            os_name = 'linux'
+        elif host_os == 'Solaris':
+            os_name = 'solaris'
+        elif host_os == 'Android':
+            os_name = 'android'
+        return f"{arch}-{os_name}-{compiler}"
+
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -121,6 +165,8 @@ class LibVPXConan(ConanFile):
             # must be a subfolder of prefix" libvpx src/build/make/configure.sh:683
             "--prefix": f"/{self._install_tmp_folder}",
             "--libdir": f"/{self._install_tmp_folder}/lib",
+            # Needed to let libvpx use the correct toolchain for the target platform
+            "--target": self._target_name,
             # several options must not be injected as custom configure doesn't like them
             "--host": None,
             "--build": None,
