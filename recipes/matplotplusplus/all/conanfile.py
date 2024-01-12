@@ -45,6 +45,9 @@ class MatplotplusplusCppConan(ConanFile):
             "apple-clang": "10",
         }
 
+    def export_sources(self):
+        copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -78,6 +81,7 @@ class MatplotplusplusCppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_PROJECT_Matplot++_INCLUDE"] = "conan_deps.cmake"
         tc.variables["MATPLOTPP_BUILD_EXAMPLES"] = False
         tc.variables["MATPLOTPP_BUILD_TESTS"] = False
         tc.variables["MATPLOTPP_BUILD_INSTALLER"] = True
@@ -91,9 +95,7 @@ class MatplotplusplusCppConan(ConanFile):
 
     def _patch_sources(self):
         rmdir(self, os.path.join(self.source_folder, "source", "3rd_party"))
-        save(self, os.path.join(self.source_folder, "source", "3rd_party", "CMakeLists.txt"),
-             "find_package(CImg REQUIRED CONFIG GLOBAL)\n"
-             "find_package(nodesoup REQUIRED CONFIG GLOBAL)\n")
+        save(self, os.path.join(self.source_folder, "source", "3rd_party", "CMakeLists.txt"), "")
 
     def build(self):
         self._patch_sources()
