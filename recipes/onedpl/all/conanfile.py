@@ -19,6 +19,8 @@ class OneDplConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/oneapi-src/oneDPL"
     topics = ("stl", "parallelism")
+
+    package_type = "header-library"
     settings = "os", "arch", "build_type", "compiler"
     options = {
         "backend": ["tbb", "serial"],
@@ -46,6 +48,9 @@ class OneDplConan(ConanFile):
             "msvc": "192",
         }
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.backend == "tbb":
             self.requires("onetbb/2021.10.0")
@@ -62,9 +67,6 @@ class OneDplConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -76,9 +78,7 @@ class OneDplConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ParallelSTL")
         self.cpp_info.set_property("cmake_target_name", "pstl::ParallelSTL")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "ParallelSTL"
@@ -88,5 +88,7 @@ class OneDplConan(ConanFile):
         self.cpp_info.components["_onedpl"].names["cmake_find_package"] = "ParallelSTL"
         self.cpp_info.components["_onedpl"].names["cmake_find_package_multi"] = "ParallelSTL"
         self.cpp_info.components["_onedpl"].set_property("cmake_target_name", "pstl::ParallelSTL")
+        self.cpp_info.components["_onedpl"].bindirs = []
+        self.cpp_info.components["_onedpl"].libdirs = []
         if self.options.backend == "tbb":
             self.cpp_info.components["_onedpl"].requires = ["onetbb::onetbb"]
