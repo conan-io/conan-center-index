@@ -64,26 +64,23 @@ class PhysXConan(ConanFile):
 
         if self.settings.os == "Macos":
             if self.settings.arch not in ["x86", "x86_64"]:
-                raise ConanInvalidConfiguration("{} only supports x86 and x86_64 on macOS".format(self.name))
+                raise ConanInvalidConfiguration(f"{self.name} only supports x86 and x86_64 on macOS")
 
             if valid_min_cppstd(self, 17):
-                raise ConanInvalidConfiguration("{} is not supported with C++ 17. Contributions are welcome.".format(self.name))
+                raise ConanInvalidConfiguration(f"{self.name} is not supported with C++ 17. Contributions are welcome.")
 
         build_type = self.settings.build_type
         if build_type not in ["Debug", "RelWithDebInfo", "Release"]:
             raise ConanInvalidConfiguration("Current build_type is not supported")
 
         if self.settings.os == "Windows" and not is_msvc(self):
-            raise ConanInvalidConfiguration("{} only supports Visual Studio on Windows".format(self.name))
+            raise ConanInvalidConfiguration(f"{self.name} only supports Visual Studio on Windows")
 
         if is_msvc(self):
             allowed_runtimes = ["MDd", "MTd"] if build_type == "Debug" else ["MD", "MT"]
             if msvc_runtime_flag(self) not in allowed_runtimes:
                 raise ConanInvalidConfiguration(
-                    "Visual Studio runtime {0} is required for {1} build type".format(
-                        " or ".join(allowed_runtimes),
-                        build_type,
-                    )
+                    f"Visual Studio runtime {' or '.join(allowed_runtimes)} is required for {build_type} build type"
                 )
 
     def source(self):
@@ -185,8 +182,7 @@ class PhysXConan(ConanFile):
         ):
             target, _ = os.path.splitext(os.path.basename(cmake_file))
             replace_in_file(self, os.path.join(physx_source_cmake_dir, cmake_file),
-                                  "SET_TARGET_PROPERTIES({} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)".format(target),
-                                  "")
+                            f"SET_TARGET_PROPERTIES({target} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)", "")
 
         # No error for compiler warnings
         replace_in_file(self, os.path.join(physx_source_cmake_dir, "windows", "CMakeLists.txt"),
