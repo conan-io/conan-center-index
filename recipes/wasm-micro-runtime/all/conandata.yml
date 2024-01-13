@@ -1,4 +1,7 @@
 sources:
+  "1.3.1":
+    url: "https://github.com/bytecodealliance/wasm-micro-runtime/archive/refs/tags/WAMR-1.3.1.tar.gz"
+    sha256: "a78d400f20c79cf2356ef760bde78e6a9f3bfb596cb4d24d9e4916187709985d"
   "1.2.3":
     url: "https://github.com/bytecodealliance/wasm-micro-runtime/archive/refs/tags/WAMR-1.2.3.tar.gz"
     sha256: "85057f788630dc1b8c371f5443cc192627175003a8ea63c491beaff29a338346"
@@ -6,11 +9,15 @@ sources:
     url: "https://github.com/bytecodealliance/wasm-micro-runtime/archive/refs/tags/WAMR-1.2.2.tar.gz"
     sha256: "d328fc1e19c54cfdb4248b861de54b62977b9b85c0a40eaaeb9cd9b628c0c788"
 patches:
+  "1.3.1":
+    - patch_file: "patches/1.3.1-0001-fix-cmake.patch"
+      patch_description: "Separate static and shared build, fix MSVC incompatibility"
+      patch_type: "conan"
   "1.2.3":
     - patch_file: "patches/1.2.3-0001-fix-cmake.patch"
-      patch_description: "separate static and shasred build"
+      patch_description: "Separate static and shared build, fix MSVC incompatibility"
       patch_type: "conan"
   "1.2.2":
     - patch_file: "patches/1.2.2-0001-fix-cmake.patch"
-      patch_description: "separate static and shasred build"
+      patch_description: "Separate static and shared build, fix MSVC incompatibility"
       patch_type: "conan"
