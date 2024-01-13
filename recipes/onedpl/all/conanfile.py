@@ -29,7 +29,7 @@ class OneDplConan(ConanFile):
 
     def requirements(self):
         if self.options.backend == "tbb":
-            self.requires("onetbb/2020.3")
+            self.requires("onetbb/2021.10.0")
 
     def package_id(self):
         self.info.clear()
@@ -45,16 +45,11 @@ class OneDplConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        version_major = int(str(Version(self.version).major)[0:4])
         copy(self, "*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
-        if version_major < 2021:
-            copy(self, "*", src=os.path.join(self.source_folder, "stdlib"), dst=os.path.join(self.package_folder, "include"))
-            copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        else:
-            copy(self, "LICENSE.txt", src=os.path.join(self.source_folder, "licensing"), dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.txt", src=os.path.join(self.source_folder, "licensing"), dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ParallelSTL")
