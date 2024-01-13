@@ -58,15 +58,13 @@ class MathterConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        copy(self, "*.hpp",
-             dst=os.path.join(self.package_folder, "include", "Mathter"),
-             src=os.path.join(self.source_folder, "Mathter"))
-        copy(self, "*.natvis",
-             dst=os.path.join(self.package_folder, "include", "Mathter"),
-             src=os.path.join(self.source_folder, "Mathter"))
-        copy(self, "LICENCE",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=self.source_folder)
+        if self.version == "1.0.0":
+            include_dir = os.path.join(self.source_folder, "Mathter")
+        else:
+            include_dir = os.path.join(self.source_folder, "include", "Mathter")
+        copy(self, "*.hpp", include_dir, os.path.join(self.package_folder, "include", "Mathter"))
+        copy(self, "*.natvis", include_dir, os.path.join(self.package_folder, "include", "Mathter"))
+        copy(self, "LICENCE", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
