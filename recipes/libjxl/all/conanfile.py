@@ -60,6 +60,10 @@ class LibjxlConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def build_requirements(self):
+        if Version(self.version) >= "0.9.1":
+            self.tool_requires("cmake/[>=3.16 <4]")
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
@@ -113,20 +117,26 @@ class LibjxlConan(ConanFile):
                                                     "highway::highway",
                                                     "lcms::lcms"]
         # jxl_dec
-        # in shared build, install jxl only.
-        # https://github.com/libjxl/libjxl/blob/v0.5.0/lib/jxl.cmake#L544-L546
-        if not self.options.shared:
-            self.cpp_info.components["jxl_dec"].set_property("pkg_config_name", "libjxl_dec")
-            self.cpp_info.components["jxl_dec"].libs = [self._lib_name("jxl_dec")]
-            self.cpp_info.components["jxl_dec"].requires = ["brotli::brotli",
-                                                            "highway::highway",
-                                                            "lcms::lcms"]
+        if Version(self.version) < "0.9.0":
+            # in shared build, install jxl only.
+            # https://github.com/libjxl/libjxl/blob/v0.5.0/lib/jxl.cmake#L544-L546
+            if not self.options.shared:
+                self.cpp_info.components["jxl_dec"].set_property("pkg_config_name", "libjxl_dec")
+                self.cpp_info.components["jxl_dec"].libs = [self._lib_name("jxl_dec")]
+                self.cpp_info.components["jxl_dec"].requires = ["brotli::brotli",
+                                                                "highway::highway",
+                                                                "lcms::lcms"]
 
         # jxl_threads
         self.cpp_info.components["jxl_threads"].set_property("pkg_config_name", "libjxl_threads")
         self.cpp_info.components["jxl_threads"].libs = [self._lib_name("jxl_threads")]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["jxl_threads"].system_libs = ["pthread"]
+
+        # jxl_cms
+        if Version(self.version) >= "0.9.0":
+            self.cpp_info.components["jxl_cms"].set_property("pkg_config_name", "libjxl_cms")
+            self.cpp_info.components["jxl_cms"].libs = [self._lib_name("jxl_cms")]
 
         if not self.options.shared and stdcpp_library(self):
             self.cpp_info.components["jxl"].system_libs.append(stdcpp_library(self))
