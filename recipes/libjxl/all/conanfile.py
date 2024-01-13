@@ -87,6 +87,10 @@ class LibjxlConan(ConanFile):
         # Skip the buggy custom FindAtomic and force the use of atomic library directly for libstdc++
         tc.variables["ATOMICS_FOUND"] = True
         tc.variables["ATOMICS_LIBRARIES"] = "atomic" if self._atomic_required else ""
+        if Version(self.version) >= "0.8":
+            # TODO: add support for jpegli JPEG encoder library
+            tc.variables["JPEGXL_ENABLE_JPEGLI"] = False
+            tc.variables["JPEGXL_ENABLE_JPEGLI_LIBJPEG"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -131,31 +135,42 @@ class LibjxlConan(ConanFile):
         return name
 
     def package_info(self):
+        libcxx = stdcpp_library(self)
+
         # jxl
         self.cpp_info.components["jxl"].set_property("pkg_config_name", "libjxl")
         self.cpp_info.components["jxl"].libs = [self._lib_name("jxl")]
         self.cpp_info.components["jxl"].requires = ["brotli::brotli", "highway::highway", "lcms::lcms"]
-        if stdcpp_library(self):
-            self.cpp_info.components["jxl"].system_libs.append(stdcpp_library(self))
         if self._atomic_required:
             self.cpp_info.components["jxl"].system_libs.append("atomic")
         if not self.options.shared:
             self.cpp_info.components["jxl"].defines.append("JXL_STATIC_DEFINE")
+        if libcxx:
+            self.cpp_info.components["jxl"].system_libs.append(libcxx)
+
+        # jxl_cms
+        if Version(self.version) >= "0.9.0":
+            self.cpp_info.components["jxl_cms"].set_property("pkg_config_name", "libjxl_cms")
+            self.cpp_info.components["jxl_cms"].libs = [self._lib_name("jxl_cms")]
+            self.cpp_info.components["jxl_cms"].requires = ["jxl", "lcms::lcms", "highway::highway"]
+            if libcxx:
+                self.cpp_info.components["jxl_cms"].system_libs.append(libcxx)
 
         # jxl_dec
-        if not self.options.shared:
-            self.cpp_info.components["jxl_dec"].set_property("pkg_config_name", "libjxl_dec")
-            self.cpp_info.components["jxl_dec"].libs = [self._lib_name("jxl_dec")]
-            self.cpp_info.components["jxl_dec"].requires = ["brotli::brotli", "highway::highway", "lcms::lcms"]
-            if stdcpp_library(self):
-                self.cpp_info.components["jxl_dec"].system_libs.append(stdcpp_library(self))
+        if Version(self.version) < "0.9.0":
+            if not self.options.shared:
+                self.cpp_info.components["jxl_dec"].set_property("pkg_config_name", "libjxl_dec")
+                self.cpp_info.components["jxl_dec"].libs = [self._lib_name("jxl_dec")]
+                self.cpp_info.components["jxl_dec"].requires = ["brotli::brotli", "highway::highway", "lcms::lcms"]
+                if libcxx:
+                    self.cpp_info.components["jxl_dec"].system_libs.append(libcxx)
 
         # jxl_threads
         self.cpp_info.components["jxl_threads"].set_property("pkg_config_name", "libjxl_threads")
         self.cpp_info.components["jxl_threads"].libs = [self._lib_name("jxl_threads")]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["jxl_threads"].system_libs = ["pthread"]
-        if stdcpp_library(self):
-            self.cpp_info.components["jxl_threads"].system_libs.append(stdcpp_library(self))
         if not self.options.shared:
             self.cpp_info.components["jxl_threads"].defines.append("JXL_THREADS_STATIC_DEFINE")
+        if libcxx:
+            self.cpp_info.components["jxl_threads"].system_libs.append(libcxx)
