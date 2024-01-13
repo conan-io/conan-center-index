@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.scm import Version
 
 import os
@@ -87,12 +87,22 @@ class OsmanipConan(ConanFile):
         else:
             tc.variables["OSMANIP_TESTS"] = False
             tc.variables["FORMAT"] = False
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
+    def _patch_sources(self):
+        if Version(self.version) >= "4.5.0":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            " STATIC ", " ")
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "    DESTINATION lib\n",
+                            "    RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib\n")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
