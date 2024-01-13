@@ -1,0 +1,69 @@
+From 8b2cceb71f65f6aa6bdb3ffa63a63400214d5f1b Mon Sep 17 00:00:00 2001
+From: Samuel Dowling <samuel.dowling@protonmail.com>
+Date: Sat, 13 Jan 2024 19:57:49 +1030
+Subject: [PATCH] Add ability to specify timezone database location via
+ environment variable
+
+This adds the ability for a user to populate the TZDATA environment
+variable to specify the location in which to look for the timezone
+database, which allows for a runtime query of this location. Without
+this, date currently only supports compile time determination of the
+database location.
+
+This facilitates the ability to:
+* Use a timezone database provided by a package manager
+* Keep the timezone database up to date without re-compilation
+* Be flexible about where the timezone database is stored
+
+Closes #788
+---
+ src/tz.cpp | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/src/tz.cpp b/src/tz.cpp
+index 26babbd..6d010b8 100644
+--- a/src/tz.cpp
++++ b/src/tz.cpp
+@@ -81,6 +81,9 @@
+ #  endif  // __MINGW32__
+ 
+ #  include <windows.h>
++#  if !defined(S_ISDIR) && defined(S_IFMT) && defined(_S_IFDIR)
++#    define S_ISDIR(m) (((m) & S_IFMT) == _S_IFDIR)
++#  endif
+ #endif  // _WIN32
+ 
+ #include "date/tz_private.h"
+@@ -299,6 +302,14 @@ access_install()
+     #undef STRINGIZE
+ #endif  // !INSTALL
+ 
++    {
++        static char* tz_local_env = getenv("TZDATA");
++        if (tz_local_env != nullptr) {
++            static std::string tz_local_env_s = tz_local_env;
++            return tz_local_env_s;
++        }
++    }
++
+     return install;
+ }
+ 
+@@ -353,6 +364,14 @@ discover_tz_dir()
+     CONSTDATA auto tz_dir_default = "/usr/share/zoneinfo";
+     CONSTDATA auto tz_dir_buildroot = "/usr/share/zoneinfo/uclibc";
+ 
++    {
++        static char* tz_local_env = getenv("TZDATA");
++        if (tz_local_env != nullptr) {
++            static std::string tz_local_env_s = tz_local_env;
++            return tz_local_env_s;
++        }
++    }
++
+     // Check special path which is valid for buildroot with uclibc builds
+     if(stat(tz_dir_buildroot, &sb) == 0 && S_ISDIR(sb.st_mode))
+         return tz_dir_buildroot;
+-- 
+2.43.0.windows.1
+
