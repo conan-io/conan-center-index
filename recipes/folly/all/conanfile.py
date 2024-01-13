@@ -83,7 +83,7 @@ class FollyConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/1.7.2")
-            self.requires("fmt/10.1.1", transitive_headers=True, transitive_libs=True)
+        self.requires("fmt/10.1.1", transitive_headers=True, transitive_libs=True)
 
     @property
     def _required_boost_components(self):
@@ -258,6 +258,7 @@ class FollyConan(ConanFile):
             "libevent::libevent",
             "lz4::lz4",
             "openssl::openssl",
+            "bzip2::bzip2",
             "snappy::snappy",
             "zlib::zlib",
             "zstd::zstd",
