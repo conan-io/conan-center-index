@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.scm import Version
 import os
 
@@ -91,6 +91,12 @@ class KtxConan(ConanFile):
             os.remove(os.path.join(basisu_dir, "encoder", "lodepng.h"))
         ## zstd
         rmdir(self, os.path.join(basisu_dir, "zstd"))
+        # Disable -Werror (newer versions have it disabled by default)
+        if self.version == "4.2.1":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "-Werror", "")
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "/WX", "")
 
     def build(self):
         self._patch_sources()
