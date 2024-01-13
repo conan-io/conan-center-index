@@ -86,7 +86,6 @@ class LibjxlConan(ConanFile):
         # Allow non-cache_variables to be used
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         # Skip the buggy custom FindAtomic and force the use of atomic library directly for libstdc++
-        tc.variables["ATOMICS_FOUND"] = True
         tc.variables["ATOMICS_LIBRARIES"] = "atomic" if self._atomic_required else ""
         if Version(self.version) >= "0.8":
             # TODO: add support for jpegli JPEG encoder library
@@ -109,6 +108,8 @@ class LibjxlConan(ConanFile):
         save(self, os.path.join(self.source_folder, "tools", "CMakeLists.txt"), "")
         save(self, os.path.join(self.source_folder, "lib", "jxl_extras.cmake"), "")
         save(self, os.path.join(self.source_folder, "third_party", "CMakeLists.txt"), "")
+        # FindAtomics.cmake values are set by CMakeToolchain instead
+        save(self, os.path.join(self.source_folder, "cmake", "FindAtomics.cmake"), "")
 
         if Version(self.version) < "0.7":
             replace_in_file(self, os.path.join(self.source_folder, "lib", "jxl.cmake"),
