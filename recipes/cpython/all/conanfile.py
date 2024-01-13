@@ -614,6 +614,10 @@ class CPythonConan(ConanFile):
                 self._msvc_package_layout()
             rm(self, "vcruntime*", os.path.join(self.package_folder, "bin"), recursive=True)
         else:
+            if (os.path.isfile(os.path.join(self.package_folder, "lib"))):
+                # FIXME not sure where this file comes from
+                self.output.info(f"{os.path.join(self.package_folder, 'lib')} exists, but it shouldn't.")
+                rm(self, "lib", self.package_folder)
             autotools = Autotools(self)
             # FIXME: Autotools.install() always adds DESTDIR, we don't want this argument.
             # Use .make() directly instead
