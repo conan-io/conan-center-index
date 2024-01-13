@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.53"
 
 
 class CImgConan(ConanFile):
@@ -104,7 +104,7 @@ class CImgConan(ConanFile):
             # ("enable_lapack", "cimg_use_lapack"),
             # ("enable_board", "cimg_use_board"),
         ]:
-            if getattr(self.options, option):
+            if self.options.get_safe(option):
                 defines.append(define)
 
         if not self.options.get_safe("enable_display"):
