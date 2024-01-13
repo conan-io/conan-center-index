@@ -217,6 +217,49 @@ class CImgConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.defines = self._cimg_defines
 
+        # List specific requirements to avoid overlinking
+        # Based on https://github.com/GreycLab/CImg/blob/v.3.3.3/examples/Makefile#L166-L310
+        requires = []
+        if self.options.enable_fftw:
+            requires.append("fftw::fftw")
+        if self.options.enable_jpeg:
+            requires.append("libjpeg::libjpeg")
+        if self.options.enable_openexr:
+            requires.append("openexr::openexr_openexr")
+            requires.append("imath::imath_lib")
+        if self.options.enable_png:
+            requires.append("libpng::libpng")
+        if self.options.enable_tiff:
+            requires.append("libtiff::libtiff")
+        if self.options.enable_opencv:
+            requires.append("opencv::opencv_core")
+            requires.append("opencv::opencv_highgui")
+            if Version(self.dependencies["opencv"].ref.version) >= "4.0":
+                requires.append("opencv::opencv_videoio")
+        if self.options.enable_ffmpeg:
+            requires.append("ffmpeg::avcodec")
+            requires.append("ffmpeg::avformat")
+            requires.append("ffmpeg::swscale")
+        if self.options.enable_magick:
+            requires.append("imagemagick::Magick++")
+        if self.options.enable_display and self.settings.os in ["Linux", "FreeBSD"]:
+            requires.append("xorg::x11")
+            if self.options.enable_xrandr:
+                requires.append("xorg::xrandr")
+            if self.options.enable_xshm:
+                requires.append("xorg::xext")
+        if self.options.enable_openmp and self.settings.compiler in ["clang", "apple-clang"]:
+            requires.append("llvm-openmp::llvm-openmp")
+        if self.options.enable_heif:
+            requires.append("libheif::libheif")
+        if self.options.enable_zlib:
+            requires.append("zlib::zlib")
+        if self.options.enable_curl:
+            requires.append("libcurl::libcurl")
+        if self.options.enable_tinyexr:
+            requires.append("tinyexr::tinyexr")
+        self.cpp_info.requires = requires
+
         if self.settings.os == "Windows" and self.options.enable_display:
             self.cpp_info.system_libs.append("gdi32")
 
