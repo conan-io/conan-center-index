@@ -133,7 +133,7 @@ class EmbreeConan(ConanFile):
 
     def requirements(self):
         if self.options.with_tbb:
-            self.requires("onetbb/2021.7.0")
+            self.requires("onetbb/2021.10.0")
 
     def validate(self):
         if not (self._has_sse_avx or (self._embree_has_neon_support and self._has_neon)):
@@ -222,6 +222,7 @@ class EmbreeConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.command", os.path.join(self.package_folder))
         rm(self, "*.cmake", os.path.join(self.package_folder))
+        rm(self, "embree-vars.*", self.package_folder)
 
         if self.settings.os == "Windows" and self.options.shared:
             for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
@@ -257,7 +258,8 @@ class EmbreeConan(ConanFile):
         def _lib_exists(name):
             return bool(glob.glob(os.path.join(self.package_folder, "lib", f"*{name}.*")))
 
-        self.cpp_info.libs = ["embree3"]
+        major_version = Version(self.version).major
+        self.cpp_info.libs = [f"embree{major_version}"]
         if not self.options.shared:
             self.cpp_info.libs.extend(["sys", "math", "simd", "lexers", "tasking"])
             simd_libs = ["embree_sse42", "embree_avx", "embree_avx2"]
