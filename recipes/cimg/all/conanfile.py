@@ -50,7 +50,7 @@ class CImgConan(ConanFile):
     def _cimg_defines(self):
         defines = []
         for option, define in [
-            ("enable_fftw", "cimg_use_fftw"),
+            ("enable_fftw", "cimg_use_fftw3"),
             ("enable_jpeg", "cimg_use_jpeg"),
             ("enable_openexr", "cimg_use_openexr"),
             ("enable_png", "cimg_use_png"),
