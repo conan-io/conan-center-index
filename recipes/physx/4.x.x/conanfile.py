@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import load, get, apply_conandata_patches, export_conandata_patches, rmdir, copy, replace_in_file, save
 from conan.tools.build import valid_min_cppstd
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
@@ -139,9 +139,6 @@ class PhysXConan(ConanFile):
             tc.cache_variables["PX_GENERATE_GPU_PROJECTS"] = False
 
         tc.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def build(self):
         self._patch_sources()
