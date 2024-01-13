@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rename, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -18,6 +19,7 @@ class SAILConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "thread_safe": [True, False],
+        "with_openmp": [True, False],
         "with_highest_priority_codecs": [True, False],
         "with_high_priority_codecs": [True, False],
         "with_medium_priority_codecs": [True, False],
@@ -36,6 +38,7 @@ class SAILConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "thread_safe": True,
+        "with_openmp": True,
         "with_highest_priority_codecs": True,
         "with_high_priority_codecs": True,
         "with_medium_priority_codecs": True,
@@ -64,13 +67,14 @@ class SAILConan(ConanFile):
         "with_lowest_priority_codecs": "Enable codecs: WAL, XBM",
     }
 
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
+        if Version(self.version) < "0.9.1":
+            del self.options.with_openmp
 
     def configure(self):
         if self.options.shared:
@@ -82,6 +86,8 @@ class SAILConan(ConanFile):
             self.requires("libjpeg/9e")
             self.requires("libpng/1.6.40")
             self.requires("libtiff/4.6.0")
+        if self.options.with_high_priority:
+            self.requires("nanosvg/cci.20210904")
         if self.options.with_medium_priority_codecs:
             self.requires("libavif/1.0.2")
             self.requires("jasper/4.0.0")
@@ -131,10 +137,10 @@ class SAILConan(ConanFile):
         tc.variables["SAIL_BUILD_APPS"]     = False
         tc.variables["SAIL_BUILD_EXAMPLES"] = False
         tc.variables["SAIL_COMBINE_CODECS"] = True
+        tc.variables["SAIL_ENABLE_OPENMP"]  = self.options.openmp
         tc.variables["SAIL_ONLY_CODECS"]    = ";".join(only_codecs)
-        # SVG requires resvg which is not in Conan yet
         # JPEGXL needs porting to Conan2
-        tc.variables["SAIL_DISABLE_CODECS"] = "svg;jpegxl"
+        tc.variables["SAIL_DISABLE_CODECS"] = "jpegxl"
         tc.variables["SAIL_INSTALL_PDB"]    = False
         tc.variables["SAIL_THREAD_SAFE"]    = self.options.thread_safe
         # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
