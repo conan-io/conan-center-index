@@ -58,7 +58,7 @@ class Dav1dConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.1.0")
+        self.tool_requires("meson/1.2.1")
         if self.options.assembly:
             self.tool_requires("nasm/2.15.05")
 

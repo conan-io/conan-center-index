@@ -3,6 +3,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, collect_libs
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -80,12 +81,14 @@ class Libssh2Conan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.crypto_backend == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         elif self.options.crypto_backend == "mbedtls":
-            # libssh2/<=1.10.0 doesn't support mbedtls/3.x.x
-            self.requires("mbedtls/2.25.0")
+            if Version(self.version) >= "1.11":
+                self.requires("mbedtls/3.5.0")
+            else:
+                self.requires("mbedtls/2.28.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

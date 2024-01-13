@@ -1,0 +1,11 @@
+--- a/gst/meson.build	2023-10-03 14:55:30.481822400 -0700
++++ b/gst/meson.build	2023-10-03 14:56:40.939480100 -0700
+@@ -17,7 +17,7 @@
+ 
+ gst_plugin_filename = 'gstaravis.@0@'.format (aravis_api_version)
+ 
+-gst_plugin = shared_library (gst_plugin_filename,
++gst_plugin = library (gst_plugin_filename,
+ 			     gst_sources, gst_headers,
+ 			     name_suffix: [],
+ 			     link_with: aravis_library,

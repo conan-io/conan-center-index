@@ -1,19 +1,22 @@
-import functools
 import os
 
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibXpmConan(ConanFile):
     name = "libxpm"
     description = "X Pixmap (XPM) image file format library"
+    license = "MIT-open-group"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.freedesktop.org/xorg/lib/libxpm"
-    topics = "xpm"
-    license = "MIT-open-group"
+    topics = ("xpm",)
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -23,18 +26,15 @@ class LibXpmConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    generators = "cmake"
-    exports_sources = "CMakeLists.txt", "windows/*"
     no_copy_source = True
 
-    def validate(self):
-        if self.settings.os not in ("Windows", "Linux", "FreeBSD"):
-            raise ConanInvalidConfiguration(
-                "libXpm is supported only on Windows, Linux and FreeBSD"
-            )
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+    def export_sources(self):
+        copy(self, "CMakeLists.txt",
+             src=self.recipe_folder,
+             dst=os.path.join(self.export_sources_folder, "src"))
+        copy(self, "*",
+             src=os.path.join(self.recipe_folder, "windows"),
+             dst=os.path.join(self.export_sources_folder, "src", "windows"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,28 +42,43 @@ class LibXpmConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.settings.os != "Windows":
             self.requires("xorg/system")
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["CONAN_libXpm_VERSION"] = self.version
-        cmake.configure()
-        return cmake
+    def validate(self):
+        if self.settings.os not in ("Windows", "Linux", "FreeBSD"):
+            raise ConanInvalidConfiguration("libXpm is supported only on Windows, Linux and FreeBSD")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CONAN_libXpm_VERSION"] = self.version
+        tc.generate()
 
     def build(self):
-        self._configure_cmake().build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        self.copy("COPYING", "licenses")
-        self.copy("COPYRIGHT", "licenses")
-        self._configure_cmake().install()
+        copy(self, "COPYING",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        copy(self, "COPYRIGHT",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["Xpm"]

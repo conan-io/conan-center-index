@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, replace_in_file, get, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -41,11 +41,11 @@ class OpenTDFConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "17" if Version(self.version) < "1.1.5" else "15",
-            "msvc": "193" if Version(self.version) < "1.1.5" else "191",
-            "gcc": "7.5.0",
+            "Visual Studio": "15",
+            "msvc": "191",
+            "gcc": "7.5",
             "clang": "12",
-            "apple-clang": "12.0.0",
+            "apple-clang": "12",
         }
 
     def config_options(self):
@@ -64,21 +64,16 @@ class OpenTDFConan(ConanFile):
         if Version(self.version) >= "1.5.0":
             self.requires("openssl/[>=3.1 <4]")
         else:
-            self.requires("openssl/1.1.1u")
+            self.requires("openssl/1.1.1w")
         # Uses magic_enum for 1.4.0 and newer
         if Version(self.version) >= "1.4.0":
             self.requires("magic_enum/0.8.2")
         self.requires("ms-gsl/2.1.0")
-        self.requires("nlohmann_json/3.11.1")
+        self.requires("nlohmann_json/3.11.3")
         self.requires("jwt-cpp/0.4.0")
-        self.requires("zlib/1.2.13")
-        # Use newer boost+libxml2 after 1.3.6
-        if Version(self.version) <= "1.3.6":
-            self.requires("boost/1.79.0")
-            self.requires("libxml2/2.9.14")
-        else:
-            self.requires("boost/1.82.0")
-            self.requires("libxml2/2.11.4")
+        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("boost/1.83.0")
+        self.requires("libxml2/2.11.6")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -98,7 +93,7 @@ class OpenTDFConan(ConanFile):
         # Disallow MT and MTd
         if is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f"{self.name} can not be built with MT or MTd at this time")
-        
+
         if self.options.shared and self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.name} does not currently support shared library on Windows")
 
@@ -160,7 +155,8 @@ class OpenTDFConan(ConanFile):
         ]
         if Version(self.version) >= "1.4.0":
             self.cpp_info.components["libopentdf"].requires.append("magic_enum::magic_enum")
-        if Version(self.version) < "1.1.0":
-            self.cpp_info.components["libopentdf"].requires.append("libarchive::libarchive")
         if Version(self.version) >= "1.4.0":
             self.cpp_info.components["libopentdf"].requires.append("magic_enum::magic_enum")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
