@@ -17,7 +17,7 @@ class TestPackageConan(ConanFile):
         self.options["cimg"].enable_heif = True
         self.options["cimg"].enable_jpeg = True
         self.options["cimg"].enable_magick = False # Not yet Conan 2.0 compatible
-        self.options["cimg"].enable_opencv = False # ffmpeg linking fails when enabled
+        self.options["cimg"].enable_opencv = False # OpenCV v3 Requires OpenEXR v2
         self.options["cimg"].enable_openexr = True
         self.options["cimg"].enable_openmp = True
         self.options["cimg"].enable_png = True

@@ -137,6 +137,10 @@ class CImgConan(ConanFile):
         if Version(self.version) < "2.9.7":
             del self.options.enable_heif
 
+    def configure(self):
+        # Required component in OpenCV 4.x for cv::VideoCapture and cv::VideoWriter
+        self.options["opencv"].videoio = True
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -153,12 +157,10 @@ class CImgConan(ConanFile):
         if self.options.enable_tiff:
             self.requires("libtiff/4.6.0")
         if self.options.enable_ffmpeg:
-            if self.options.enable_opencv:
-                self.requires("ffmpeg/4.4.4")
-            else:
-                self.requires("ffmpeg/6.1")
+            self.requires("ffmpeg/6.1")
         if self.options.enable_opencv:
-            self.requires("opencv/4.8.1")
+            # FIXME: OpenCV 4.x fails to link ffmpeg libraries correctly
+            self.requires("opencv/3.4.20")
         if self.options.enable_magick:
             self.requires("imagemagick/7.0.11-14")
         if self.options.enable_display and self.settings.os in ["Linux", "FreeBSD"]:
@@ -192,6 +194,10 @@ class CImgConan(ConanFile):
                 # The miniz dependency of TinyEXR conflicts with ZLib
                 # error: conflicting declaration ‘typedef void* const voidpc’
                 raise ConanInvalidConfiguration("TinyEXR and ZLib cannot be enabled simultaneously due to conflicting typedefs")
+
+        if self.options.enable_opencv and Version(self.dependencies["opencv"].ref.version) >= "4.0":
+            if not self.dependencies["opencv"].options.videoio:
+                raise ConanInvalidConfiguration("OpenCV must be built with videoio=True")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
