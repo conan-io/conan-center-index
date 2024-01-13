@@ -5,6 +5,7 @@ from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 
 import os
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
 
@@ -56,6 +57,10 @@ class LibjxlConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+        # libjxl>=0.9.1 requires std::atom whitch is not provided by libc++
+        if Version(self.version) >= "0.9.1" and \
+            self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++":
+                raise ConanInvalidConfiguration(f"{self.ref} does not support clang with libc++")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
