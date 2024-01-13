@@ -165,7 +165,7 @@ class CImgConan(ConanFile):
             self.requires("opencv/3.4.20")
         if self.options.enable_magick:
             self.requires("imagemagick/7.0.11-14")
-        if self.options.enable_display and self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.enable_display:
             self.requires("xorg/system")
         if self.options.enable_openmp and self.settings.compiler in ["clang", "apple-clang"]:
             self.requires("llvm-openmp/17.0.6")
@@ -186,7 +186,7 @@ class CImgConan(ConanFile):
             check_min_cppstd(self, "11")
 
         if not self.options.get_safe("enable_display"):
-            if self.options.enable_xrandr or self.options.enable_xshm:
+            if self.options.get_safe("enable_xrandr") or self.options.get_safe("enable_xshm"):
                 raise ConanInvalidConfiguration("X11 options enable_xrandr and enable_xshm require enable_display=True")
 
         if self.options.enable_tinyexr:
@@ -248,7 +248,7 @@ class CImgConan(ConanFile):
             requires.append("ffmpeg::swscale")
         if self.options.enable_magick:
             requires.append("imagemagick::Magick++")
-        if self.options.enable_display and self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.enable_display:
             requires.append("xorg::x11")
             if self.options.enable_xrandr:
                 requires.append("xorg::xrandr")
