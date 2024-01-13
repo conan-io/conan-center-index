@@ -422,6 +422,9 @@ class CPythonConan(ConanFile):
         discarded = {
             "python_uwp",
             "pythonw_uwp",
+            "_freeze_importlib",
+            "sqlite3",
+            "bdist_wininst",
         }
         if not self.options.with_bz2:
             discarded.add("bz2")
@@ -432,10 +435,8 @@ class CPythonConan(ConanFile):
         if self._is_py2:
             # Python 2 Visual Studio projects NOT to build
             discarded = discarded.union({
-                "bdist_wininst",
                 "libeay",
                 "ssleay",
-                "sqlite3",
                 "tcl",
                 "tk",
                 "tix",
@@ -444,10 +445,8 @@ class CPythonConan(ConanFile):
                 discarded.add("_bsddb")
         elif self._is_py3:
             discarded = discarded.union({
-                "bdist_wininst",
                 "liblzma",
                 "openssl",
-                "sqlite3",
                 "xxlimited",
             })
             if not self.options.with_lzma:
