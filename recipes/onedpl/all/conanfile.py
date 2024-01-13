@@ -62,11 +62,16 @@ class OneDplConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
+
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+
+        if self.settings.get_safe("compiler.libcxx") == "libstdc++":
+            # https://stackoverflow.com/a/67924408/2997179
+            raise ConanInvalidConfiguration("libstdc++ is not supported")
 
         if "2021.7" <= Version(self.version) < "2022" and is_msvc(self):
             raise ConanInvalidConfiguration(f"MSVC is not supported for {self.version} due to "
