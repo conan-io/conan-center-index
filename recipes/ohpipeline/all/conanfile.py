@@ -44,7 +44,7 @@ class OhPipelineConan(ConanFile):
 
     def requirements(self):
         self.requires("ohnet/1.36.5182", transitive_headers=True, transitive_libs=True)
-        self.requires("libressl/3.5.3")
+        self.requires("openssl/3.2.0")
         self.requires("libmad/0.15.1b")
         self.requires("alac/cci.20121212")
         self.requires("libfdk_aac/2.0.2")
