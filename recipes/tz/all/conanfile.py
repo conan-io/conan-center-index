@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.files import get, copy, rmdir, replace_in_file, download
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.53.0"
@@ -43,7 +43,19 @@ class TzConan(ConanFile):
                     self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(
+            self,
+            url=self.conan_data["sources"][self.version]["url"],
+            sha256=self.conan_data["sources"][self.version]["sha256"],
+            strip_root=True
+        )
+        if not self.options.with_binary_db:
+            download(
+                self,
+                url=self.conan_data["sources"][self.version]["windows_zones_url"],
+                filename="windowsZones.xml",
+                sha256=self.conan_data["sources"][self.version]["windows_zones_sha256"],
+            )
 
     def generate(self):
         tc = AutotoolsToolchain(self)
@@ -98,6 +110,7 @@ class TzConan(ConanFile):
                 "zishrink.awk",
                 "zone.tab",
                 "zone1970.tab",
+                "windowsZones.xml",
             ]
             for data in tzdata:
                 copy(self, data, dst=os.path.join(self.package_folder, "res", "tzdata"), src=self.source_folder)

@@ -2,3 +2,5 @@ sources:
   "2023c":
     url: "https://github.com/eggert/tz/archive/refs/tags/2023c.tar.gz"
     sha256: "9aa20ef838183e58f09acca92098cf6aa6d8e229aecf24e098c3af2a38e596f8"
+    windows_zones_url: "https://raw.githubusercontent.com/unicode-org/cldr/fd8ca965e03ca3cf07a0487678e0a1e002646ec0/common/supplemental/windowsZones.xml"
+    windows_zones_sha256: "e5720d0d82a0a62687184bf0d9472f3cf0f7ef8b930ad40f3ae7386d8cb57213"
