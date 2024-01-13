@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, cmake_layout, CMake
-from conan.tools.files import copy, get, rmdir, rm, save
+from conan.tools.files import copy, get, rmdir, rm, save, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -60,11 +60,11 @@ class MatplotplusplusCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cimg/3.3.2")
+        self.requires("cimg/3.3.3")
         self.requires("nodesoup/cci.20200905")
         self.requires("opengl/system")
         self.requires("glfw/3.3.8")
-        # TODO: unvendor glad/0.1.36
+        self.requires("glad/0.1.36")
         # Matplot++ also requires gnuplot to run, which is not available on CCI
 
     def validate(self):
@@ -93,12 +93,18 @@ class MatplotplusplusCppConan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("cimg", "cmake_target_name", "cimg")
         deps.set_property("nodesoup", "cmake_target_name", "nodesoup")
+        deps.set_property("glad", "cmake_file_name", "GLAD")
         deps.generate()
 
     def _patch_sources(self):
         rmdir(self, os.path.join(self.source_folder, "source", "3rd_party"))
         save(self, os.path.join(self.source_folder, "source", "3rd_party", "CMakeLists.txt"), "")
-
+        if Version(self.version) <= "1.2.0":
+            replace_in_file(self, os.path.join(self.source_folder, "source", "matplot", "CMakeLists.txt"),
+                            "find_package(GLAD QUIET)", "find_package(GLAD REQUIRED CONFIG)")
+        else:
+            replace_in_file(self, os.path.join(self.source_folder, "source", "matplot", "CMakeLists.txt"),
+                            "find_package(glad CONFIG)", "find_package(GLAD REQUIRED CONFIG)")
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
