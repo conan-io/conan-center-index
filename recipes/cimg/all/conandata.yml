@@ -17,6 +17,3 @@ sources:
   "2.9.9":
     url: "https://cimg.eu/files/CImg_2.9.9.zip"
     sha256: "c94412f26800ea318fa79410c58da1cf3df71771d07e515c39b16ee743f68e92"
-  "2.8.3":
-    url: "https://cimg.eu/files/CImg_2.8.3.zip"
-    sha256: "8d92e4cc271568c5aeca6e6b1f28f620fcf161ef99ce9d070ed1905d92caec4c"

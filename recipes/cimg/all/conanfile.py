@@ -134,8 +134,6 @@ class CImgConan(ConanFile):
         if self.settings.os not in ["Linux", "FreeBSD", "Windows"]:
             # Must support either X11 or GDI32
             del self.options.enable_display
-        if Version(self.version) < "2.9.7":
-            del self.options.enable_heif
 
     def configure(self):
         # Required component in OpenCV 4.x for cv::VideoCapture and cv::VideoWriter
