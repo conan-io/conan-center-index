@@ -31,7 +31,8 @@ class OsmanipConan(ConanFile):
     }
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        if Version(self.version) < "4.5.0":
+            copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
         export_conandata_patches(self)
 
     def config_options(self):
@@ -82,8 +83,8 @@ class OsmanipConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["OSMANIP_VERSION"] = str(self.version)
-        tc.variables["OSMANIP_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        if Version(self.version) < "4.5.0":
+            tc.variables["OSMANIP_VERSION"] = str(self.version)
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -92,7 +93,7 @@ class OsmanipConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        cmake.configure()
         cmake.build()
 
     def package(self):
