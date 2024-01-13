@@ -1,0 +1,97 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -1,6 +1,6 @@
++cmake_minimum_required(VERSION 3.15)
+ project(basisu)
+ 
+-cmake_minimum_required(VERSION 3.0)
+ option(STATIC "static linking" FALSE)
+ option(SAN "sanitize" FALSE)
+ 
+@@ -27,10 +27,10 @@
+ message("Initial OPENCL=${OPENCL}")
+ message("Initial SAN=${SAN}")
+ 
+-if (NOT MSVC)
++if (WITH_OPENCL)
+ 	# With MSVC builds we use the Khronos lib/include files in the project's "OpenCL" directory, to completely avoid requiring fiddly to install vendor SDK's.
+ 	# Otherwise we use the system's (if any).
+-	find_package( OpenCL )
++	find_package( OpenCL REQUIRED )
+ 	message(STATUS "OpenCL found: ${OPENCL_FOUND}")
+ 	message(STATUS "OpenCL includes: ${OpenCL_INCLUDE_DIRS}")
+ 	message(STATUS "OpenCL libraries: ${OpenCL_LIBRARIES}")
+@@ -72,8 +72,7 @@
+       set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined")
+    endif()
+ 
+-   set(CMAKE_CXX_FLAGS -std=c++11)
+-   set(GCC_COMPILE_FLAGS "-fvisibility=hidden -fPIC -fno-strict-aliasing -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-value -Wno-unused-parameter -Wno-unused-variable")
++   set(GCC_COMPILE_FLAGS "-fno-strict-aliasing -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64")
+ 
+    if (NOT BUILD_X64)
+ 	  set(GCC_COMPILE_FLAGS "${GCC_COMPILE_FLAGS} -m32")
+@@ -123,8 +122,9 @@
+ 	endif()
+ endif()
+ 
+-set(BASISU_SRC_LIST ${COMMON_SRC_LIST} 
+-	basisu_tool.cpp
++set(BASISU_SRC_LIST ${COMMON_SRC_LIST} transcoder/basisu_transcoder.cpp)
++if (ENABLE_ENCODER)
++set(BASISU_SRC_LIST ${BASISU_SRC_LIST}
+ 	encoder/basisu_backend.cpp
+ 	encoder/basisu_basis_file.cpp
+ 	encoder/basisu_comp.cpp
+@@ -142,11 +142,7 @@
+ 	encoder/basisu_kernels_sse.cpp
+ 	encoder/basisu_opencl.cpp
+ 	encoder/pvpngreader.cpp
+-	transcoder/basisu_transcoder.cpp
+ 	)
+-
+-if (ZSTD)
+-	set(BASISU_SRC_LIST ${BASISU_SRC_LIST} zstd/zstd.c)
+ endif()
+ 
+ if (APPLE)
+@@ -157,22 +153,24 @@
+ 
+ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${BIN_DIRECTORY})
+ 
+-add_executable(basisu ${BASISU_SRC_LIST})
++add_library(basisu ${BASISU_SRC_LIST})
+ 
+ if (ZSTD)
+ 	target_compile_definitions(basisu PRIVATE BASISD_SUPPORT_KTX2_ZSTD=1)
++	find_package(zstd REQUIRED)
++	target_link_libraries(basisu zstd::libzstd)
+ else()
+ 	target_compile_definitions(basisu PRIVATE BASISD_SUPPORT_KTX2_ZSTD=0)
+ endif()
+ 
+-if (NOT MSVC)
++if (TRUE)
+ 	# For Non-Windows builds, let cmake try and find the system OpenCL headers/libs for us.
+-	if (OPENCL_FOUND)
++	if (WITH_OPENCL)
+ 		set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -DBASISU_SUPPORT_OPENCL=1")
+ 		set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DBASISU_SUPPORT_OPENCL=1")	
+ 		
+ 		target_include_directories( basisu PRIVATE ${OpenCL_INCLUDE_DIRS} )
+-		set(BASISU_EXTRA_LIBS ${OpenCL_LIBRARIES})
++		target_link_libraries(basisu ${OpenCL_LIBRARIES})
+ 	endif()
+ 
+ else()
+@@ -196,7 +194,9 @@
+    target_link_libraries(basisu m pthread ${BASISU_EXTRA_LIBS})
+ endif()
+ 
+-if (NOT EMSCRIPTEN)
++install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
++
++if (FALSE)
+ 	install(TARGETS basisu DESTINATION bin)
+ 	
+ 	if (UNIX)
