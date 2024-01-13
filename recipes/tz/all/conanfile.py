@@ -17,6 +17,7 @@ class TzConan(ConanFile):
     settings = "os", "build_type", "arch", "compiler"
     options = {"with_binary_db": [True, False]}
     default_options = {"with_binary_db": False}
+    package_type = "application" # This is not an application, but application has the correct traits to provide a runtime dependency on data
 
     @property
     def _settings_build(self):
