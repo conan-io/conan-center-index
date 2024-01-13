@@ -11,7 +11,6 @@ class TestPackageConan(ConanFile):
 
     def configure(self):
         self.options["cimg"].enable_curl = True
-        self.options["cimg"].enable_display = True
         self.options["cimg"].enable_ffmpeg = True
         self.options["cimg"].enable_fftw = True
         self.options["cimg"].enable_heif = True
@@ -23,9 +22,12 @@ class TestPackageConan(ConanFile):
         self.options["cimg"].enable_png = True
         self.options["cimg"].enable_tiff = True
         self.options["cimg"].enable_tinyexr = False # Conflicts with OpenEXR and ZLib
-        self.options["cimg"].enable_xrandr = True
-        self.options["cimg"].enable_xshm = True
         self.options["cimg"].enable_zlib = True
+        if self.settings.os in ["Linux", "FreeBSD", "Windows"]:
+            self.options["cimg"].enable_display = True
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.options["cimg"].enable_xrandr = True
+            self.options["cimg"].enable_xshm = True
 
     def layout(self):
         cmake_layout(self)
