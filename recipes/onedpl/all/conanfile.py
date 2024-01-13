@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
@@ -66,6 +67,10 @@ class OneDplConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+
+        if "2021.7" <= Version(self.version) < "2022" and is_msvc(self):
+            raise ConanInvalidConfiguration(f"MSVC is not supported for {self.version} due to "
+                                            "std::unary_function and std::binary_function being used")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
