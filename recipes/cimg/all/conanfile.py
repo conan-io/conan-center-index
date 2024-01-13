@@ -74,6 +74,10 @@ class CImgConan(ConanFile):
             # use the X-Window framework (X11)
             defines.append("cimg_display=1")
 
+        if self.options.enable_fftw:
+            if not self.dependencies["fftw"].options.threads:
+                defines.append("cimg_use_fftw3_singlethread")
+
         return defines
 
     def config_options(self):
