@@ -44,8 +44,8 @@ class OneDplConan(ConanFile):
             "gcc": "7",
             "clang": "6",
             "apple-clang": "10",
-            "Visual Studio": "16",
-            "msvc": "192",
+            "Visual Studio": "15",
+            "msvc": "191",
         }
 
     def layout(self):
