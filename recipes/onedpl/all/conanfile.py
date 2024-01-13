@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
@@ -27,6 +28,24 @@ class OneDplConan(ConanFile):
     }
     no_copy_source = True
 
+    @property
+    def _min_cppstd(self):
+        if Version(self.version) < "2021.7.0":
+            return 11
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        if Version(self.version) < "2021.7.0":
+            return {}
+        return {
+            "gcc": "7",
+            "clang": "6",
+            "apple-clang": "10",
+            "Visual Studio": "16",
+            "msvc": "192",
+        }
+
     def requirements(self):
         if self.options.backend == "tbb":
             self.requires("onetbb/2021.10.0")
@@ -35,11 +54,13 @@ class OneDplConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            if Version(self.version) >= "2021.7.0":
-                check_min_cppstd(self, 17)
-            else:
-                check_min_cppstd(self, 11)
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def layout(self):
         basic_layout(self, src_folder="src")
