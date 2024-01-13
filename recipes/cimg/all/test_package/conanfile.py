@@ -10,17 +10,22 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def configure(self):
+        self.options["cimg"].enable_curl = True
+        self.options["cimg"].enable_display = True
+        self.options["cimg"].enable_ffmpeg = True
         self.options["cimg"].enable_fftw = True
+        self.options["cimg"].enable_heif = True
         self.options["cimg"].enable_jpeg = True
+        self.options["cimg"].enable_magick = False # Not yet Conan 2.0 compatible
+        self.options["cimg"].enable_opencv = False # ffmpeg linking fails when enabled
         self.options["cimg"].enable_openexr = True
+        self.options["cimg"].enable_openmp = True
         self.options["cimg"].enable_png = True
         self.options["cimg"].enable_tiff = True
-        self.options["cimg"].enable_ffmpeg = True
-        self.options["cimg"].enable_opencv = False # ffmpeg linking fails when enabled
-        self.options["cimg"].enable_magick = False # Not yet Conan 2.0 compatible
-        self.options["cimg"].enable_display = True
+        self.options["cimg"].enable_tinyexr = False # Conflicts with OpenEXR and ZLib
         self.options["cimg"].enable_xrandr = True
         self.options["cimg"].enable_xshm = True
+        self.options["cimg"].enable_zlib = True
 
     def layout(self):
         cmake_layout(self)
