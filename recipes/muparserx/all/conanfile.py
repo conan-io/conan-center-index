@@ -11,9 +11,10 @@ class MuparserxConan(ConanFile):
     description = "A C++ Library for Parsing Expressions with Strings, Complex Numbers, Vectors, Matrices and more"
     license = "BSD-2-Clause"
     topics = ("math", "parser")
-    homepage = "https://beltoforion.de/article.php?a=muparserx"
+    homepage = "https://beltoforion.de/en/muparserx"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,8 +37,7 @@ class MuparserxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
