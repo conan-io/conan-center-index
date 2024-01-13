@@ -44,18 +44,8 @@ class TzConan(ConanFile):
                     self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(
-            self,
-            url=self.conan_data["sources"][self.version]["url"],
-            sha256=self.conan_data["sources"][self.version]["sha256"],
-            strip_root=True
-        )
-        download(
-            self,
-            url=self.conan_data["sources"][self.version]["windows_zones_url"],
-            filename="windowsZones.xml",
-            sha256=self.conan_data["sources"][self.version]["windows_zones_sha256"],
-        )
+        get(self, **self.conan_data["sources"][self.version]["sources"], strip_root=True)
+        download(self, **self.conan_data["sources"][self.version]["windows_zones"], filename="windowsZones.xml")
 
     def generate(self):
         tc = AutotoolsToolchain(self)
