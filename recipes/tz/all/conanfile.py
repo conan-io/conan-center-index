@@ -50,13 +50,12 @@ class TzConan(ConanFile):
             sha256=self.conan_data["sources"][self.version]["sha256"],
             strip_root=True
         )
-        if not self.options.with_binary_db:
-            download(
-                self,
-                url=self.conan_data["sources"][self.version]["windows_zones_url"],
-                filename="windowsZones.xml",
-                sha256=self.conan_data["sources"][self.version]["windows_zones_sha256"],
-            )
+        download(
+            self,
+            url=self.conan_data["sources"][self.version]["windows_zones_url"],
+            filename="windowsZones.xml",
+            sha256=self.conan_data["sources"][self.version]["windows_zones_sha256"],
+        )
 
     def generate(self):
         tc = AutotoolsToolchain(self)
