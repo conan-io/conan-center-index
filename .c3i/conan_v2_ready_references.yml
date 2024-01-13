@@ -141,6 +141,7 @@ required_for_references:
 - cargs
 - cassandra-cpp-driver
 - catch2
+- cc65
 - ccache
 - cccl
 - ccfits
@@ -752,6 +753,7 @@ required_for_references:
 - libuuid
 - libuv
 - libuvc
+- libva
 - libvault
 - libverto
 - libvips
@@ -1121,6 +1123,7 @@ required_for_references:
 - redboltz-mqtt_cpp
 - redis-plus-plus
 - refl-cpp
+- reflect-cpp
 - replxx
 - resource_pool
 - restbed

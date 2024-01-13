@@ -28,14 +28,6 @@
      # Detect the build type from the $FLAVOR environment variable
      # Default to optimized Release builds when unspecified.
      if ("$ENV{FLAVOR}" MATCHES "debug")
-@@ -116,7 +121,4 @@ endif ()
- include_directories(src/ptex)
- 
- add_subdirectory(src/ptex)
--add_subdirectory(src/utils)
--add_subdirectory(src/tests)
--add_subdirectory(src/doc)
- add_subdirectory(src/build)
 --- a/src/ptex/CMakeLists.txt
 +++ b/src/ptex/CMakeLists.txt
 @@ -21,6 +21,7 @@ if(PTEX_BUILD_STATIC_LIBS)
