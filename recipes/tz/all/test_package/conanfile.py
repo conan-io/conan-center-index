@@ -43,5 +43,5 @@ class TzTestConan(ConanFile):
                 self.run(f"zdump {os.path.join(self.tzdata, 'America', 'Los_Angeles')}", env="conanrun")
             else:
                 self.output.info("Test that source tzdb is readable")
-                cmd = "python -c 'import os; tzdata = os.environ[\"TZDATA\"]; f=open(os.path.join(tzdata, \"factory\"), \"r\"); s = f.read(); f.close(); print(s)'"
+                cmd = "python -c \"import os; tzdata = os.environ['TZDATA']; f=open(os.path.join(tzdata, 'factory'), 'r'); s = f.read(); f.close(); print(s)\""
                 self.run(cmd, env="conanrun")
