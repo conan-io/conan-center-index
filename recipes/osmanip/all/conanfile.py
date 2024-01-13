@@ -84,6 +84,9 @@ class OsmanipConan(ConanFile):
         tc = CMakeToolchain(self)
         if Version(self.version) < "4.5.0":
             tc.variables["OSMANIP_VERSION"] = str(self.version)
+        else:
+            tc.variables["OSMANIP_TESTS"] = False
+            tc.variables["FORMAT"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
