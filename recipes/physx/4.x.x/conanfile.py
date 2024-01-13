@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import load, get, apply_conandata_patches, export_conandata_patches, rmdir, copy, replace_in_file, save
 from conan.tools.build import valid_min_cppstd
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
@@ -18,6 +18,7 @@ class PhysXConan(ConanFile):
     homepage = "https://github.com/NVIDIAGameWorks/PhysX"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "compiler", "arch", "build_type"
     options = {
         "shared": [True, False],
@@ -35,8 +36,7 @@ class PhysXConan(ConanFile):
     }
 
     short_paths = True
-
-    generators = "CMakeDeps"
+    no_copy_source = True
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -65,7 +65,7 @@ class PhysXConan(ConanFile):
         if self.settings.os == "Macos":
             if self.settings.arch not in ["x86", "x86_64"]:
                 raise ConanInvalidConfiguration("{} only supports x86 and x86_64 on macOS".format(self.name))
-            
+
             if valid_min_cppstd(self, 17):
                 raise ConanInvalidConfiguration("{} is not supported with C++ 17. Contributions are welcome.".format(self.name))
 
@@ -139,6 +139,9 @@ class PhysXConan(ConanFile):
             tc.cache_variables["PX_GENERATE_GPU_PROJECTS"] = False
 
         tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         self._patch_sources()
@@ -263,7 +266,7 @@ class PhysXConan(ConanFile):
                 "pattern": "PhysXDevice*.dll",
                 "vc_ver": {"180": "vc120", "190": "vc140", "191": "vc141"}.get(str(compiler_version), "vc142")
             }]
-            
+
             package_dst_bin_dir = os.path.join(self.package_folder, "bin")
 
             for dll_info in dll_info_list:
