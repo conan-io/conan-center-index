@@ -56,6 +56,21 @@ class MatplotplusplusCppConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+        self.options["cimg"].enable_curl = False
+        self.options["cimg"].enable_display = False
+        self.options["cimg"].enable_ffmpeg = False
+        self.options["cimg"].enable_fftw = False
+        self.options["cimg"].enable_heif = True
+        self.options["cimg"].enable_jpeg = "libjpeg"
+        self.options["cimg"].enable_magick = False
+        self.options["cimg"].enable_opencv = False
+        self.options["cimg"].enable_openexr = False
+        self.options["cimg"].enable_openmp = True
+        self.options["cimg"].enable_png = True
+        self.options["cimg"].enable_tiff = True
+        self.options["cimg"].enable_tinyexr = False
+        self.options["cimg"].enable_zlib = False
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
