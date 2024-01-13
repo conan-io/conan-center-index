@@ -56,8 +56,9 @@ class LibjxlConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def build_requirements(self):
-        if Version(self.version) >= "0.9":
-            self.tool_requires("cmake/[>=3.16 <4]")
+        # Require newer CMake, which allows INCLUDE_DIRECTORIES to be set on INTERFACE targets
+        # Also, v0.9+ require CMake 3.16
+        self.tool_requires("cmake/[>=3.19 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
