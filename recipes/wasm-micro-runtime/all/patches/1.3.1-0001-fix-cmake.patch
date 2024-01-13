@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 1c87994..2f02058 100644
+index 1c87994..1eeae7d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -109,10 +109,10 @@ set (WAMR_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -15,7 +15,7 @@ index 1c87994..2f02058 100644
  
  if (WAMR_BUILD_TARGET MATCHES "X86_.*" OR WAMR_BUILD_TARGET STREQUAL "AMD_64")
    if (NOT (CMAKE_C_COMPILER MATCHES ".*clang.*" OR CMAKE_C_COMPILER_ID MATCHES ".*Clang"))
-@@ -129,23 +129,31 @@ endif ()
+@@ -129,23 +129,32 @@ endif ()
  #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,-z,noexecstack,-z,relro,-z,now")
  
  include (${SHARED_DIR}/utils/uncommon/shared_uncommon.cmake)
@@ -43,15 +43,16 @@ index 1c87994..2f02058 100644
  target_include_directories(iwasm_shared INTERFACE ${WAMR_ROOT_DIR}/core/iwasm/include)
 -target_link_libraries (iwasm_shared INTERFACE ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS} -lm -ldl -lpthread)
 +target_link_libraries (iwasm_shared INTERFACE ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS})
-+if(NOT WIN32)
++if(NOT MSVC)
 +  target_link_libraries (iwasm_shared INTERFACE -lm -ldl -lpthread)
-+else()
++endif()
++if(WIN32)
 +  target_link_libraries (iwasm_shared PUBLIC ntdll)
 +endif()
  if (WAMR_BUILD_WASM_CACHE EQUAL 1)
    target_link_libraries(iwasm_shared INTERFACE boringssl_crypto)
  endif ()
-@@ -155,7 +163,7 @@ if (MINGW)
+@@ -155,7 +164,7 @@ if (MINGW)
  endif ()
  
  install (TARGETS iwasm_shared LIBRARY DESTINATION lib)
