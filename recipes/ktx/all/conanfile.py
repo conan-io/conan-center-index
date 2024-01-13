@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -53,7 +54,10 @@ class KtxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("lodepng/cci.20230410")
+        if Version(self.version) < "4.2.0":
+            # Newer versions use modified lodepng
+            # https://github.com/KhronosGroup/KTX-Software/blob/v4.2.1/tools/imageio/png.imageio/lodepng.h#L26-L32
+            self.requires("lodepng/cci.20230410")
         self.requires("zstd/1.5.5")
 
     def validate(self):
@@ -73,6 +77,7 @@ class KtxConan(ConanFile):
         tc.variables["BASISU_SUPPORT_SSE"] = self.options.get_safe("sse", False)
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("zstd", "cmake_target_name", "zstd::libzstd")
         deps.generate()
 
     def _patch_sources(self):
@@ -80,9 +85,10 @@ class KtxConan(ConanFile):
         # Unvendor several libs (we rely on patch files to link those libs)
         # It's worth noting that vendored jpeg-compressor can't be replaced by CCI equivalent
         basisu_dir = os.path.join(self.source_folder, "lib", "basisu")
-        ## lodepng (the patch file 0002-lodepng-no-export-symbols is important, in order to not try to export lodepng symbols)
-        os.remove(os.path.join(basisu_dir, "encoder", "lodepng.cpp"))
-        os.remove(os.path.join(basisu_dir, "encoder", "lodepng.h"))
+        if Version(self.version) < "4.1.0":
+            ## lodepng (the patch file 0002-lodepng-no-export-symbols is important, in order to not try to export lodepng symbols)
+            os.remove(os.path.join(basisu_dir, "encoder", "lodepng.cpp"))
+            os.remove(os.path.join(basisu_dir, "encoder", "lodepng.h"))
         ## zstd
         rmdir(self, os.path.join(basisu_dir, "zstd"))
 
@@ -125,6 +131,8 @@ class KtxConan(ConanFile):
         self.cpp_info.components["libktx"].names["cmake_find_package"] = "ktx"
         self.cpp_info.components["libktx"].names["cmake_find_package_multi"] = "ktx"
         self.cpp_info.components["libktx"].set_property("cmake_target_name", "KTX::ktx")
-        self.cpp_info.components["libktx"].requires = ["lodepng::lodepng", "zstd::zstd"]
+        self.cpp_info.components["libktx"].requires = ["zstd::zstd"]
+        if Version(self.version) < "4.2.0":
+            self.cpp_info.components["libktx"].requires.append("lodepng::lodepng")
         if self.options.tools:
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
