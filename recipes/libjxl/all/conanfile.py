@@ -92,6 +92,9 @@ class LibjxlConan(ConanFile):
             # TODO: add support for jpegli JPEG encoder library
             tc.variables["JPEGXL_ENABLE_JPEGLI"] = False
             tc.variables["JPEGXL_ENABLE_JPEGLI_LIBJPEG"] = False
+        # Fix --exclude-libs detection on apple-clang
+        # https://github.com/libjxl/libjxl/blob/v0.9.1/lib/jxl.cmake#L212-L217
+        tc.variables["LINKER_SUPPORT_EXCLUDE_LIBS"] = self.settings.compiler in ["gcc", "clang"]
         tc.generate()
 
         deps = CMakeDeps(self)
