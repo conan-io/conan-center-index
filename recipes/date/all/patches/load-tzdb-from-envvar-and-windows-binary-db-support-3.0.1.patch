@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 012512a..26f4b37 100644
+index a18b782..849b070 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -127,7 +127,7 @@ if( BUILD_TZ_LIB )
@@ -29,7 +29,7 @@ index 4921068..03c0042 100644
  #  if __cplusplus >= 201703
  #    define HAS_DEDUCTION_GUIDES 1
 diff --git a/src/tz.cpp b/src/tz.cpp
-index 26babbd..cbfde5b 100644
+index 26babbd..c8fe99b 100644
 --- a/src/tz.cpp
 +++ b/src/tz.cpp
 @@ -81,6 +81,10 @@
@@ -159,7 +159,7 @@ index 26babbd..cbfde5b 100644
 +    auto name = get_tz_dir() + (folder_delimiter + name_);
 +    // Some platforms will open the inf stream in text mode. Specify binary
 +    // to avoid confusion.
-+    std::ifstream inf(name, std::ios::in | std::ios::binary);
++    std::ifstream inf(name);
      if (!inf.is_open())
          throw std::runtime_error{"Unable to open " + name};
      inf.exceptions(std::ios::failbit | std::ios::badbit);
@@ -236,18 +236,17 @@ index 26babbd..cbfde5b 100644
  locate_zone(const std::string& tz_name)
  #endif
  {
--    return get_tzdb().locate_zone(tz_name);
-+    return get_tzdb().locate_zone(
 +#if WIN32 && USE_OS_TZDB
 +    // When USE_OS_TZDB=ON, the tz_name needs to be a valid path.
 +    // For timezone labeling consistency in Windows, switch "/" to "\".
 +    // This will allow for tz_name to have consistent naming regardless of
 +    // if USE_OS_TZDB is ON.
-+    std::regex_replace(tz_name, std::regex("\\/"), "\\")
++    std::string tz_name_sanitized(tz_name);
++    std::replace(tz_name_sanitized.begin(), tz_name_sanitized.end(), '/', '\\');
++    return get_tzdb().locate_zone(tz_name_sanitized);
 +#else
-+    tz_name
+     return get_tzdb().locate_zone(tz_name);
 +#endif
-+    );
  }
  
  #if USE_OS_TZDB

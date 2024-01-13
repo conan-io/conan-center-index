@@ -339,18 +339,17 @@ index f4a819b..0cde872 100644
  locate_zone(const std::string& tz_name)
  #endif
  {
--    return get_tzdb().locate_zone(tz_name);
-+    return get_tzdb().locate_zone(
 +#if WIN32 && USE_OS_TZDB
 +    // When USE_OS_TZDB=ON, the tz_name needs to be a valid path.
 +    // For timezone labeling consistency in Windows, switch "/" to "\".
 +    // This will allow for tz_name to have consistent naming regardless of
 +    // if USE_OS_TZDB is ON.
-+    std::regex_replace(tz_name, std::regex("\\/"), "\\")
++    std::string tz_name_sanitized(tz_name);
++    std::replace(tz_name_sanitized.begin(), tz_name_sanitized.end(), '/', '\\');
++    return get_tzdb().locate_zone(tz_name_sanitized);
 +#else
-+    tz_name
+     return get_tzdb().locate_zone(tz_name);
 +#endif
-+    );
  }
  
  #if USE_OS_TZDB
