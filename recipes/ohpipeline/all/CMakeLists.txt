@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.23)
 project(ohPipeline CXX)
 
 find_package(ohnet REQUIRED COMPONENTS ohNetCore ohNetProxies TestFramework)
-find_package(LibreSSL REQUIRED CONFIG)
+find_package(OpenSSL REQUIRED CONFIG)
 find_package(libmad REQUIRED CONFIG)
 find_package(alac REQUIRED CONFIG)
 find_package(fdk-aac REQUIRED CONFIG)
@@ -152,7 +152,7 @@ add_library(ohPipeline
     OpenHome/SocketHttp.cpp
     OpenHome/SocketSsl.cpp
 )
-target_link_libraries(ohPipeline PRIVATE libressl::libressl ohNetCore ohNet)
+target_link_libraries(ohPipeline PRIVATE openssl::openssl ohNetCore ohNet)
 target_include_directories(ohPipeline PRIVATE ${PROJECT_SOURCE_DIR})
 set(ohPipeline_HEADERS
     OpenHome/Media/Pipeline/VolumeRamper.h
@@ -324,7 +324,7 @@ set(OHMEDIAPLAYER_HEADERS
     OpenHome/Av/OhMetadata.h
 )
 add_library(ohMediaPlayer ${OHMEDIAPLAYER_SOURCES})
-target_link_libraries(ohMediaPlayer PRIVATE libressl::libressl ohNet ohPipeline)
+target_link_libraries(ohMediaPlayer PRIVATE openssl::openssl ohNet ohPipeline)
 target_include_directories(ohMediaPlayer PRIVATE ${PROJECT_SOURCE_DIR})
 target_include_directories(ohMediaPlayer PUBLIC
   "${CMAKE_BINARY_DIR}"
@@ -395,7 +395,7 @@ add_library(SourcePlaylist
     OpenHome/Av/Playlist/PinInvokerUpnpServer.cpp
     Generated/CpUpnpOrgContentDirectory1.cpp
 )
-target_link_libraries(SourcePlaylist PRIVATE ohNet ohMediaPlayer Podcast libressl::libressl)
+target_link_libraries(SourcePlaylist PRIVATE ohNet ohMediaPlayer Podcast openssl::openssl)
 target_include_directories(SourcePlaylist PRIVATE ${PROJECT_SOURCE_DIR})
 set(SOURCE_PLAYLIST_HEADERS
     OpenHome/Av/Playlist/ProviderPlaylist.h
@@ -541,7 +541,7 @@ add_library(SourceRaop
     OpenHome/Av/Raop/UdpServer.cpp
     OpenHome/Av/Raop/CodecRaopApple.cpp
 )
-target_link_libraries(SourceRaop PRIVATE LibreSSL::Crypto ohNet ohMediaPlayer alac::alac)
+target_link_libraries(SourceRaop PRIVATE OpenSSL::Crypto ohNet ohMediaPlayer alac::alac)
 target_include_directories(SourceRaop PRIVATE ${PROJECT_SOURCE_DIR})
 set(SOURCE_RAOP_HEADERS
     OpenHome/Av/Raop/Raop.h
@@ -1024,7 +1024,7 @@ target_link_libraries(ConfigUiTestUtils PUBLIC
   ConfigUi
   WebAppFramework
   ohNet
-  libressl::libressl
+  openssl::openssl
 )
 target_sources(ConfigUiTestUtils PUBLIC FILE_SET HEADERS FILES "${CONFIGUITESTUTILS_HEADERS}")
 target_compile_features(ConfigUiTestUtils PUBLIC cxx_std_11)
