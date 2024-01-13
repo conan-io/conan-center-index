@@ -3,9 +3,9 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.errors import ConanInvalidConfiguration
 
 import os
-from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
 
