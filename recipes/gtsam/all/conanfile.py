@@ -74,7 +74,7 @@ class GtsamConan(ConanFile):
         "with_TBB": True,
         "with_eigen_MKL": False,
         "with_eigen_MKL_OPENMP": False,
-        "with_vendored_metis": False,
+        "with_vendored_metis": True,
 
         # < v4.1 only
         "build_wrap": False,
