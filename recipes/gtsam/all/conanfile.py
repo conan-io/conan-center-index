@@ -25,7 +25,6 @@ class GtsamConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "allow_deprecated": [True, False],
-        "allow_deprecated_since_V4": [True, False, "deprecated"],
         "build_type_postfixes": [True, False],
         "build_unstable": [True, False],
         "build_with_march_native": [True, False],
@@ -55,7 +54,6 @@ class GtsamConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "allow_deprecated": True,
-        "allow_deprecated_since_V4": "deprecated",
         "build_type_postfixes": True,
         "build_unstable": True,
         "build_with_march_native": False,
@@ -130,9 +128,6 @@ class GtsamConan(ConanFile):
             self.options.rm_safe("fPIC")
         if self.options.with_TBB:
             self.options["onetbb"].tbbmalloc = True
-        if self.options.allow_deprecated_since_V4 != "deprecated":
-            self.output.warn("'allow_deprecated_since_V4' option is deprecated. Use 'allow_deprecated' instead.")
-
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -198,11 +193,6 @@ class GtsamConan(ConanFile):
                 else "https://github.com/borglab/gtsam/issues/1541"
             )
 
-        if self.options.allow_deprecated_since_V4 != "deprecated":
-            self.output.warn(
-                "'allow_deprecated_since_V4' option is deprecated. Use 'allow_deprecated' instead."
-            )
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -224,8 +214,6 @@ class GtsamConan(ConanFile):
         tc.variables["GTSAM_BUILD_PYTHON"] = False
         tc.variables["GTSAM_INSTALL_MATLAB_TOOLBOX"] = self.options.install_matlab_toolbox
         tc.variables["GTSAM_ALLOW_DEPRECATED_SINCE_V4"] = self.options.allow_deprecated
-        if self.options.allow_deprecated_since_V4 != "deprecated":
-            tc.variables["GTSAM_ALLOW_DEPRECATED_SINCE_V4"] = self.options.allow_deprecated_since_V4
         tc.variables["GTSAM_ALLOW_DEPRECATED_SINCE_V41"] = self.options.allow_deprecated
         tc.variables["GTSAM_ALLOW_DEPRECATED_SINCE_V42"] = self.options.allow_deprecated
         tc.variables["GTSAM_SUPPORT_NESTED_DISSECTION"] = self.options.support_nested_dissection
