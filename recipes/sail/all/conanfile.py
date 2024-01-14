@@ -101,7 +101,8 @@ class SAILConan(ConanFile):
         tc.variables["SAIL_BUILD_APPS"]     = False
         tc.variables["SAIL_BUILD_EXAMPLES"] = False
         tc.variables["SAIL_COMBINE_CODECS"] = True
-        tc.variables["SAIL_ENABLE_OPENMP"]  = self.options.openmp
+        if Version(self.version) >= "0.9.1":
+            tc.variables["SAIL_ENABLE_OPENMP"] = self.options.openmp
         tc.variables["SAIL_ONLY_CODECS"]    = ";".join(only_codecs)
         # JPEGXL needs porting to Conan2
         tc.variables["SAIL_DISABLE_CODECS"] = "jpegxl"
