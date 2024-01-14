@@ -258,7 +258,10 @@ class TkConan(ConanFile):
             tk_suffix = ""
         self.cpp_info.libs = [f"tk{lib_infix}{tk_suffix}", f"tkstub{lib_infix}"]
         if self.settings.os == "Macos":
-            self.cpp_info.frameworks = ["CoreFoundation", "Cocoa", "Carbon", "IOKit", "Quartz"]
+            self.cpp_info.frameworks = ["CoreFoundation", "Cocoa", "Carbon", "IOKit"]
+            if Version(self.version) >= "8.6.13":
+                self.cpp_info.frameworks += ["Quartz", "UniformTypeIdentifiers"]
+                self.cpp_info.exelinkflags = ["-ObjC"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = [
                 "netapi32",
