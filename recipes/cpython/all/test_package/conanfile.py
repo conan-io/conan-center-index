@@ -10,7 +10,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import mkdir
 from conan.tools.gnu import AutotoolsDeps
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, VCVars
 from conan.tools.scm import Version
 
 conan2 = conan_version >= Version("2.0.0")
@@ -43,7 +43,7 @@ class CmakePython3Abi(object):
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VCVars"
+    generators = "CMakeDeps"
     test_type = "explicit"
 
     def requirements(self):
@@ -124,6 +124,13 @@ class TestPackageConan(ConanFile):
         if not is_msvc(self) and self._py_version < "3.8":
             tc.cache_variables[f"Python{py_major}_FIND_ABI"] = self._cmake_abi.cmake_arg
         tc.generate()
+
+        try:
+            # CMakeToolchain might generate VCVars, but we need it
+            # unconditionally for the setuptools build.
+            VCVars(self).generate()
+        except ConanException:
+            pass
 
         # The build also needs access to the run environment to run the python executable
         VirtualRunEnv(self).generate(scope="run")
