@@ -279,18 +279,26 @@ class GtsamConan(ConanFile):
             handle_allocators_path = os.path.join(self.source_folder, "cmake", "HandleAllocators.cmake")
             if Version(self.version) < "4.1":
                 handle_allocators_path = os.path.join(self.source_folder, "CMakeLists.txt")
-            replace_in_file(
-                self,
-                handle_allocators_path,
-                "if(GOOGLE",
-                "find_package(gperftools REQUIRED)\nset(GOOGLE_PERFTOOLS_FOUND TRUE)\nif(GOOGLE",
-            )
-            replace_in_file(
-                self,
-                handle_allocators_path,
-                'GTSAM_ADDITIONAL_LIBRARIES "tcmalloc"',
-                'GTSAM_ADDITIONAL_LIBRARIES "gperftools::gperftools"',
-            )
+            replace_in_file(self, handle_allocators_path,
+                            "if(GOOGLE",
+                            ("find_package(gperftools REQUIRED)\n"
+                             "set(GOOGLE_PERFTOOLS_FOUND TRUE)\n"
+                             "if(GOOGLE"))
+            replace_in_file(self, handle_allocators_path,
+                            'GTSAM_ADDITIONAL_LIBRARIES "tcmalloc"',
+                            'GTSAM_ADDITIONAL_LIBRARIES "gperftools::gperftools"')
+
+        # Ensure a newer CMake standard is used for non-cache_variables support and other policies
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        if Version(self.version) >= "4.2":
+            replace_in_file(self, cmakelists,
+                            "cmake_minimum_required(VERSION 3.0)",
+                            "cmake_minimum_required(VERSION 3.15)")
+        else:
+            # Also fix the cmake_minimum_required() and project() order
+            replace_in_file(self, cmakelists,
+                            "project(GTSAM CXX C)\ncmake_minimum_required(VERSION 3.0)",
+                            "cmake_minimum_required(VERSION 3.15)\nproject(GTSAM CXX C)")
 
     def build(self):
         self._patch_sources()
