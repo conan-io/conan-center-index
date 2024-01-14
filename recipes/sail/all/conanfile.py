@@ -102,8 +102,7 @@ class SAILConan(ConanFile):
         tc.variables["SAIL_BUILD_APPS"]     = False
         tc.variables["SAIL_BUILD_EXAMPLES"] = False
         tc.variables["SAIL_COMBINE_CODECS"] = True
-        if Version(self.version) >= "0.9.1":
-            tc.variables["SAIL_ENABLE_OPENMP"] = self.options.openmp
+        tc.variables["SAIL_ENABLE_OPENMP"]  = self.options.get_safe("openmp") == True
         tc.variables["SAIL_ONLY_CODECS"]    = ";".join(only_codecs)
         # JPEGXL needs porting to Conan2
         # SVG with nanosvg is supported in >= 0.9.1
@@ -193,7 +192,7 @@ class SAILConan(ConanFile):
         self.cpp_info.components["sail-manip"].libs = ["sail-manip"]
         self.cpp_info.components["sail-manip"].requires = ["sail-common"]
 
-        if not self.options.shared and self.options.openmp:
+        if not self.options.shared and self.options.get_safe("openmp"):
             if is_msvc(self):
                 openmp_flags = ["-openmp"]
             elif self.settings.compiler in ("gcc", "clang"):
