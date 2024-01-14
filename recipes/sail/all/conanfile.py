@@ -65,10 +65,10 @@ class SAILConan(ConanFile):
             self.requires("libpng/1.6.40")
             self.requires("libtiff/4.6.0")
         if self.options.with_high_priority_codecs:
-            self.requires("nanosvg/cci.20210904")
+            self.requires("nanosvg/cci.20231025")
         if self.options.with_medium_priority_codecs:
-            self.requires("libavif/1.0.2")
-            self.requires("jasper/4.0.0")
+            self.requires("libavif/1.0.3")
+            self.requires("jasper/4.1.1")
             # TODO Re-enable JPEG XL after merging either of the following:
             #   - https://github.com/conan-io/conan-center-index/pull/13898
             #   - https://github.com/conan-io/conan-center-index/pull/18812
