@@ -64,7 +64,7 @@ class SAILConan(ConanFile):
             self.requires("libjpeg/9e")
             self.requires("libpng/1.6.40")
             self.requires("libtiff/4.6.0")
-        if self.options.with_high_priority:
+        if self.options.with_high_priority_codecs:
             self.requires("nanosvg/cci.20210904")
         if self.options.with_medium_priority_codecs:
             self.requires("libavif/1.0.2")
