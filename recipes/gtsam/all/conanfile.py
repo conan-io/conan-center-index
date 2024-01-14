@@ -43,6 +43,7 @@ class GtsamConan(ConanFile):
         "with_TBB": [True, False],
         "with_eigen_MKL": [True, False],
         "with_eigen_MKL_OPENMP": [True, False],
+        "with_vendored_metis": [True, False],
 
         # Removed since v4.1
         "build_wrap": [True, False],
@@ -72,6 +73,7 @@ class GtsamConan(ConanFile):
         "with_TBB": True,
         "with_eigen_MKL": False,
         "with_eigen_MKL_OPENMP": False,
+        "with_vendored_metis": False,
 
         # < v4.1 only
         "build_wrap": False,
@@ -101,6 +103,7 @@ class GtsamConan(ConanFile):
         "with_TBB": "Use Intel Threaded Building Blocks (TBB)",
         "with_eigen_MKL": "Eigen will use Intel MKL if available",
         "with_eigen_MKL_OPENMP": "Eigen, when using Intel MKL, will also use OpenMP for multithreading if available",
+        "with_vendored_metis": "Use Metis vendored with GTSAM, instead of the Conan version, for nested dissection",
 
         # < v4.1 only
         "build_wrap": "Build Matlab/Cython wrap utility (necessary for Matlab/Cython interface)",
@@ -128,22 +131,27 @@ class GtsamConan(ConanFile):
             self.options.rm_safe("fPIC")
         if self.options.with_TBB:
             self.options["onetbb"].tbbmalloc = True
+        # GTSAM expects 32-bit integers for Metis
+        self.options["metis"].with_64bit_types = False
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def package_id(self):
+        if not self.info.options.support_nested_dissection:
+            del self.info.options.with_vendored_metis
 
     def requirements(self):
         self.requires("boost/1.83.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.with_TBB:
-            self.requires("onetbb/2021.10.0", transitive_headers=True)
+            self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
         if self.options.default_allocator == "tcmalloc":
             self.requires("gperftools/2.14.0")
-        # TODO: add use_vendored_metis=False option
-        # if self.options.support_nested_dissection and not self.options.use_vendored_metis:
-        #     # Used in a public header here:
-        #     # https://github.com/borglab/gtsam/blob/4.2a9/gtsam_unstable/partition/FindSeparator-inl.h#L23-L27
-        #     self.requires("metis/5.2.1", transitive_headers=True)
+        if self.options.support_nested_dissection and not self.options.with_vendored_metis:
+            # Used in a public header here:
+            # https://github.com/borglab/gtsam/blob/4.2.0/gtsam_unstable/partition/FindSeparator-inl.h#L23-L27
+            self.requires("metis/5.2.1", transitive_headers=True, transitive_libs=True)
 
     @property
     def _required_boost_components(self):
@@ -232,7 +240,7 @@ class GtsamConan(ConanFile):
         # https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleEigen.cmake#L3
         tc.variables["GTSAM_USE_SYSTEM_EIGEN"] = True
         # https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleMetis.cmake#L11
-        tc.variables["GTSAM_USE_SYSTEM_METIS"] = False
+        tc.variables["GTSAM_USE_SYSTEM_METIS"] = not self.options.with_vendored_metis
         # https://github.com/borglab/gtsam/blob/4.2.0/gtsam/3rdparty/CMakeLists.txt#L76
         tc.variables["GTSAM_INSTALL_GEOGRAPHICLIB"] = False
         # https://github.com/borglab/gtsam/blob/4.2.0/matlab/CMakeLists.txt#L14-L15
@@ -296,6 +304,12 @@ class GtsamConan(ConanFile):
                             "project(GTSAM CXX C)\ncmake_minimum_required(VERSION 3.0)",
                             "cmake_minimum_required(VERSION 3.15)\nproject(GTSAM CXX C)")
 
+        # Fix HandleMetis.cmake incompatibility with Metis from Conan
+        if self.options.support_nested_dissection and not self.options.with_vendored_metis:
+            save(self, os.path.join(self.source_folder, "cmake", "HandleMetis.cmake"),
+                 "find_package(metis REQUIRED CONFIG)\n"
+                 "add_library(metis-gtsam-if ALIAS metis::metis)\n")
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
@@ -337,6 +351,8 @@ class GtsamConan(ConanFile):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
+        # GTSAM uses targets without a namespace prefix:
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/example_cmake_find_gtsam/CMakeLists.txt
         self.cpp_info.set_property("cmake_file_name", "GTSAM")
 
         gtsam = self.cpp_info.components["libgtsam"]
@@ -348,8 +364,6 @@ class GtsamConan(ConanFile):
             gtsam.requires.append("onetbb::onetbb")
         if self.options.default_allocator == "tcmalloc":
             gtsam.requires.append("gperftools::gperftools")
-        if self.options.support_nested_dissection:
-            gtsam.requires.append("libmetis-gtsam")
         if self.settings.os == "Windows":
             gtsam.system_libs = ["dbghelp"]
 
@@ -360,13 +374,18 @@ class GtsamConan(ConanFile):
             gtsam_unstable.requires = ["libgtsam"]
 
         if self.options.support_nested_dissection:
-            metis = self.cpp_info.components["libmetis-gtsam"]
-            metis.set_property("cmake_target_name", "metis-gtsam")
-            if Version(self.version) >= "4.1":
-                metis.libs = ["metis-gtsam"]
+            if self.options.with_vendored_metis:
+                metis = self.cpp_info.components["libmetis-gtsam"]
+                metis.set_property("cmake_target_name", "metis-gtsam")
+                metis.set_property("pkg_config_name", "metis-gtsam")
+                metis.names["pkg_config"] = "metis-gtsam"
+                if Version(self.version) >= "4.1":
+                    metis.libs = ["metis-gtsam"]
+                else:
+                    metis.libs = ["metis"]
+                gtsam.requires.append("libmetis-gtsam")
             else:
-                metis.libs = ["metis"]
-            metis.names["pkg_config"] = "metis-gtsam"
+                gtsam.requires.append("metis::metis")
 
         if self.options.install_cppunitlite:
             cppunitlite = self.cpp_info.components["gtsam_CppUnitLite"]
