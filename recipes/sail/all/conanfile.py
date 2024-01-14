@@ -30,7 +30,7 @@ class SAILConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "thread_safe": True,
-        "openmp": False,
+        "openmp": True,
         "with_highest_priority_codecs": True,
         "with_high_priority_codecs": True,
         "with_medium_priority_codecs": True,
@@ -192,6 +192,18 @@ class SAILConan(ConanFile):
         self.cpp_info.components["sail-manip"].names["cmake_find_package_multi"] = "SailManip"
         self.cpp_info.components["sail-manip"].libs = ["sail-manip"]
         self.cpp_info.components["sail-manip"].requires = ["sail-common"]
+
+        if not self.options.shared and self.options.openmp:
+            if is_msvc(self):
+                openmp_flags = ["-openmp"]
+            elif self.settings.compiler in ("gcc", "clang"):
+                openmp_flags = ["-fopenmp"]
+            elif self.settings.compiler == "apple-clang":
+                openmp_flags = ["-Xpreprocessor", "-fopenmp"]
+            else:
+                openmp_flags = []
+            self.cpp_info.components["sail-manip"].exelinkflags = openmp_flags
+            self.cpp_info.components["sail-manip"].sharedlinkflags = openmp_flags
 
         self.cpp_info.components["sail-c++"].set_property("cmake_target_name", "SAIL::SailC++")
         self.cpp_info.components["sail-c++"].set_property("pkg_config_name", "libsail-c++")
