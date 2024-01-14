@@ -105,6 +105,8 @@ class SAILConan(ConanFile):
         del self.info.options.with_png
         del self.info.options.with_tiff
         del self.info.options.with_webp
+        if Version(self.version) < "0.9.1":
+            del self.info.options.with_openmp
 
     def validate(self):
         for option_name in ["with_avif", "with_gif", "with_jpeg2000", "with_jpeg", "with_png", "with_tiff", "with_webp"]:
