@@ -3,7 +3,7 @@ import re
 import textwrap
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir, unzip
@@ -489,7 +489,13 @@ class CPythonConan(ConanFile):
             self._msvc_build()
         else:
             autotools = Autotools(self)
-            autotools.configure()
+            # For debugging configure errors
+            try:
+                autotools.configure()
+            except ConanException:
+                with open(os.path.join(self.build_folder, "config.log"), 'r') as f:
+                    self.output.info(f.read())
+                raise
             autotools.make()
 
     @property
