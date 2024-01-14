@@ -75,10 +75,6 @@ class SAILConan(ConanFile):
             # self.requires("libjxl/0.6.1")
             self.requires("libwebp/1.3.2")
 
-    def package_id(self):
-        if Version(self.version) < "0.9.1":
-            del self.info.options.with_openmp
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
