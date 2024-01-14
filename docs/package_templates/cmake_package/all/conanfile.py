@@ -3,8 +3,8 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
@@ -90,42 +90,47 @@ class PackageConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
-    # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
+    # if a tool other than the compiler or CMake newer than 3.15 is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
-        self.tool_requires("tool/x.y.z")
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
+        # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are set automatically as tc.variables when self.options.shared or self.options.fPIC exist
+        # Note that tc.variables require either cmake_minimum_required() >= 3.13 or the CMP0077 policy set to NEW to work correctly.
         tc = CMakeToolchain(self)
         # Boolean values are preferred instead of "ON"/"OFF"
-        tc.variables["PACKAGE_CUSTOM_DEFINITION"] = True
+        tc.variables["PACKAGE_BUILD_TESTS"] = False
         if is_msvc(self):
-            # don't use self.settings.compiler.runtime
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        # deps_cpp_info, deps_env_info and deps_user_info are no longer used
         if self.dependencies["dependency"].options.foobar:
-            tc.variables["DEPENDENCY_LIBPATH"] = self.dependencies["dependency"].cpp_info.libdirs
-        # cache_variables should be used sparingly, example setting cmake policies
+            tc.variables["DEPENDENCY_LIBPATH"] = self.dependencies["dependency"].cpp_info.libdir.replace("\\", "/")
+        # cache_variables should be used sparingly, for example to set CMake policies
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
-        # In case there are dependencies listed on requirements, CMakeDeps should be used
-        tc = CMakeDeps(self)
-        tc.generate()
-        # In case there are dependencies listed on build_requirements, VirtualBuildEnv should be used
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
+
+        # In case there are dependencies listed under requirements, CMakeDeps should be used
+        deps = CMakeDeps(self)
+        # You can override the CMake package and target names if they don't match the names used in the project
+        deps.set_property("fontconfig", "cmake_file_name", "Fontconfig")
+        deps.set_property("fontconfig", "cmake_target_name", "Fontconfig::Fontconfig")
+        deps.generate()
+
+        # In case there are dependencies listed under build_requirements, VirtualBuildEnv should be used
+        VirtualBuildEnv(self).generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
         # remove bundled xxhash
-        rm(self, "whateer.*", os.path.join(self.source_folder, "lib"))
+        rm(self, "whatever.*", os.path.join(self.source_folder, "lib"))
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "...", "")
+        # disable subdirectories by truncating their CMakeLists.txt
+        save(self, os.path.join(self.source_folder, "tests", "CMakeLists.txt"), "")
 
     def build(self):
-        self._patch_sources()  # It can be apply_conandata_patches(self) only in case no more patches are needed
+        self._patch_sources()  # It can be just apply_conandata_patches(self) if no more patches are needed
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -139,9 +144,7 @@ class PackageConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.libs = ["package_lib"]
@@ -161,6 +164,18 @@ class PackageConan(ConanFile):
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
             self.cpp_info.system_libs.append("dl")
+
+        # To export additional CMake variables, such as upper-case variables otherwise set by the project's *-config.cmake,
+        # you can copy or save a .cmake file under <prefix>/lib/cmake/ with content like
+        #     set(XYZ_VERSION ${${CMAKE_FIND_PACKAGE_NAME}_VERSION})
+        #     set(XYZ_INCLUDE_DIRS ${${CMAKE_FIND_PACKAGE_NAME}_INCLUDE_DIRS})
+        #     ...
+        # and set the following fields:
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
+        cmake_module = os.path.join("lib", "cmake", "conan-official-variables.cmake")
+        self.cpp_info.set_property("cmake_build_modules", [cmake_module])
+        self.cpp_info.build_modules["cmake_find_package"] = [cmake_module]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [cmake_module]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "PACKAGE"
