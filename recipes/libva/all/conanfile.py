@@ -63,7 +63,7 @@ class PackageConan(ConanFile):
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
         if self.options.get_safe("with_drm"):
-            self.requires("libdrm/2.4.114")
+            self.requires("libdrm/2.4.119")
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0")
         if self.options.get_safe("with_glx"):
@@ -78,9 +78,9 @@ class PackageConan(ConanFile):
     def build_requirements(self):
         if self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/1.22.0")
-        self.tool_requires("meson/1.2.3")
+        self.tool_requires("meson/1.3.1")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
