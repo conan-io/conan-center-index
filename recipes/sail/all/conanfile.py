@@ -30,7 +30,7 @@ class SAILConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "thread_safe": True,
-        "openmp": True,
+        "openmp": False,
         "with_highest_priority_codecs": True,
         "with_high_priority_codecs": True,
         "with_medium_priority_codecs": True,
