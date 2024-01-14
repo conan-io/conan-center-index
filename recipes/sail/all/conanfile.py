@@ -58,16 +58,15 @@ class SAILConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    def build_requirements(self):
-        if self.options.with_high_priority_codecs:
-            self.tool_requires("nanosvg/cci.20231025")
-
     def requirements(self):
         if self.options.with_highest_priority_codecs:
             self.requires("giflib/5.2.1")
             self.requires("libjpeg/9e")
             self.requires("libpng/1.6.40")
             self.requires("libtiff/4.6.0")
+        if self.options.with_high_priority_codecs:
+            if Version(self.version) >= "0.9.1":
+                self.requires("nanosvg/cci.20231025")
         if self.options.with_medium_priority_codecs:
             self.requires("libavif/1.0.3")
             self.requires("jasper/4.1.1")
