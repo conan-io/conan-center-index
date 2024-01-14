@@ -121,6 +121,10 @@ class FollyConan(ConanFile):
         if self.settings.compiler == "clang" and self.options.shared:
             raise ConanInvalidConfiguration(f"Folly {self.version} could not be built by clang as a shared library")
 
+        glog = self.dependencies["glog"]
+        if self.options.shared and not glog.options.shared:
+            raise ConanInvalidConfiguration(f"If Folly is built as shared lib, glog must be a shared lib too.")
+        
         boost = self.dependencies["boost"]
         if boost.options.header_only:
             raise ConanInvalidConfiguration("Folly could not be built with a header only Boost")
