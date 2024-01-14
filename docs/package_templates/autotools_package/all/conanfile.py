@@ -143,6 +143,8 @@ class PackageConan(ConanFile):
         tc = PkgConfigDeps(self)
         tc.generate()
         # generate dependencies for autotools
+        # some recipes might require a workaround for MSVC:
+        # https://github.com/conan-io/conan-center-index/blob/00ce907b910d0d772f1c73bb699971c141c423c1/recipes/xapian-core/all/conanfile.py#L106-L135
         tc = AutotoolsDeps(self)
         tc.generate()
 
