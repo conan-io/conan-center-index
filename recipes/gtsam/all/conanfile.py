@@ -147,7 +147,7 @@ class GtsamConan(ConanFile):
 
     @property
     def _required_boost_components(self):
-        # Based on https://github.com/borglab/gtsam/blob/4.2a9/cmake/HandleBoost.cmake#L26
+        # Based on https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleBoost.cmake#L26
         return [
             "chrono",
             "date_time",
@@ -176,10 +176,7 @@ class GtsamConan(ConanFile):
                 if not self.dependencies["onetbb"].options.tbbmalloc:
                     raise ConanInvalidConfiguration("GTSAM with TBB requires onetbb/*:tbbmalloc=True")
             elif self.options.default_allocator != "tcmalloc":
-                raise ConanInvalidConfiguration(
-                    "with_TBB option cannot be used with"
-                    f" default_allocator={self.options.default_allocator}"
-                )
+                raise ConanInvalidConfiguration(f"with_TBB option cannot be used with default_allocator={self.options.default_allocator}")
         elif self.options.default_allocator == "TBB":
             raise ConanInvalidConfiguration("default_allocator=TBB requires with_TBB=True")
 
@@ -198,8 +195,7 @@ class GtsamConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
-        # https://github.com/borglab/gtsam/blob/4.2a9/cmake/HandleGeneralOptions.cmake
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleGeneralOptions.cmake
         tc.variables["GTSAM_BUILD_UNSTABLE"] = self.options.build_unstable
         tc.variables["GTSAM_UNSTABLE_BUILD_PYTHON"] = False
         tc.variables["GTSAM_UNSTABLE_INSTALL_MATLAB_TOOLBOX"] = self.options.install_matlab_toolbox
@@ -222,30 +218,30 @@ class GtsamConan(ConanFile):
         if Version(self.version) >= "4.1":
             tc.variables["GTSAM_SLOW_BUT_CORRECT_BETWEENFACTOR"] = self.options.slow_but_correct_betweenfactor
         tc.variables["GTSAM_BUILD_WITH_CCACHE"] = False
-        # https://github.com/borglab/gtsam/blob/4.2a9/cmake/HandleAllocators.cmake
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleAllocators.cmake
         if self.options.default_allocator is not None:
             tc.variables["GTSAM_DEFAULT_ALLOCATOR"] = self.options.default_allocator
-        # https://github.com/borglab/gtsam/blob/4.2a9/cmake/GtsamBuildTypes.cmake#L59
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/GtsamBuildTypes.cmake#L59
         tc.variables["GTSAM_BUILD_TYPE_POSTFIXES"] = self.options.build_type_postfixes
-        # https://github.com/borglab/gtsam/blob/4.2a9/cmake/GtsamBuildTypes.cmake#L193
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/GtsamBuildTypes.cmake#L193
         tc.variables["GTSAM_BUILD_WITH_MARCH_NATIVE"] = self.options.build_with_march_native
-        # https://github.com/borglab/gtsam/blob/4.2a9/cmake/HandleBoost.cmake#L36
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleBoost.cmake#L36
         tc.variables["GTSAM_DISABLE_NEW_TIMERS"] = self.options.disable_new_timers
-        # https://github.com/borglab/gtsam/blob/4.2a9/CppUnitLite/CMakeLists.txt#L13
+        # https://github.com/borglab/gtsam/blob/4.2.0/CppUnitLite/CMakeLists.txt#L13
         tc.variables["GTSAM_INSTALL_CPPUNITLITE"] = self.options.install_cppunitlite
-        # https://github.com/borglab/gtsam/blob/4.2a9/cmake/HandleEigen.cmake#L3
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleEigen.cmake#L3
         tc.variables["GTSAM_USE_SYSTEM_EIGEN"] = True
-        # https://github.com/borglab/gtsam/blob/4.2a9/cmake/HandleMetis.cmake#L11
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleMetis.cmake#L11
         tc.variables["GTSAM_USE_SYSTEM_METIS"] = False
-        # https://github.com/borglab/gtsam/blob/4.2a9/gtsam/3rdparty/CMakeLists.txt#L76
+        # https://github.com/borglab/gtsam/blob/4.2.0/gtsam/3rdparty/CMakeLists.txt#L76
         tc.variables["GTSAM_INSTALL_GEOGRAPHICLIB"] = False
-        # https://github.com/borglab/gtsam/blob/4.2a9/matlab/CMakeLists.txt#L14-L15
+        # https://github.com/borglab/gtsam/blob/4.2.0/matlab/CMakeLists.txt#L14-L15
         tc.variables["GTSAM_MEX_BUILD_STATIC_MODULE"] = False
-        # https://github.com/borglab/gtsam/blob/4.2a9/cmake/GtsamTesting.cmake#L89-L91
+        # https://github.com/borglab/gtsam/blob/4.2.0/cmake/GtsamTesting.cmake#L89-L91
         tc.variables["GTSAM_BUILD_TESTS"] = False
         tc.variables["GTSAM_BUILD_EXAMPLES_ALWAYS"] = False
         tc.variables["GTSAM_BUILD_TIMING_ALWAYS"] = False
-        # https://github.com/borglab/gtsam/blob/4.2a9/doc/CMakeLists.txt
+        # https://github.com/borglab/gtsam/blob/4.2.0/doc/CMakeLists.txt
         tc.variables["GTSAM_BUILD_DOCS"] = False
         tc.variables["GTSAM_BUILD_DOC_HTML"] = False
         tc.variables["GTSAM_BUILD_DOC_LATEX"] = False
