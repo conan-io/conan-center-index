@@ -54,7 +54,6 @@ class PackageConan(ConanFile):
         }
 
     # no exports_sources attribute, but export_sources(self) method instead
-    # this allows finer grain exportation of patches per version
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -70,11 +69,12 @@ class PackageConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # prefer self.requires method instead of requires attribute
+        # Prefer self.requires method instead of requires attribute
+        # Set transitive_headers=True (which usually also requires transitive_libs=True) if
+        # the dependency is used in any of the packaged header files.
         self.requires("dependency/0.8.1")
 
     def validate(self):
@@ -86,7 +86,7 @@ class PackageConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        # in case it does not work in another configuration, it should validated here too
+        # in case it does not work in another configuration, it should be validated here too
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 

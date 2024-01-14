@@ -62,7 +62,6 @@ class PackageConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     # no exports_sources attribute, but export_sources(self) method instead
-    # this allows finer grain exportation of patches per version
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -78,11 +77,12 @@ class PackageConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # prefer self.requires method instead of requires attribute
+        # Prefer self.requires method instead of requires attribute
+        # Set transitive_headers=True (which usually also requires transitive_libs=True) if
+        # the dependency is used in any of the packaged header files.
         self.requires("dependency/0.8.1")
         if self.options.with_foobar:
             self.requires("foobar/0.1.0")
@@ -99,7 +99,7 @@ class PackageConan(ConanFile):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
-    # if another tool than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
+    # if a tool other than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         # only if we have to call autoreconf
         self.tool_requires("libtool/2.4.7")
@@ -120,14 +120,12 @@ class PackageConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        # inject tool_requires env vars in build scope (not needed if there is no tool_requires)
-        env = VirtualBuildEnv(self)
-        env.generate()
-        # inject requires env vars in build scope
+        # inject tool_requires env vars into the build scope (not needed if there are no tool_requires)
+        VirtualBuildEnv(self).generate()
+        # inject required env vars into the build scope
         # it's required in case of native build when there is AutotoolsDeps & at least one dependency which might be shared, because configure tries to run a test executable
         if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
+            VirtualRunEnv(self).generate(scope="build")
         # --fpic is automatically managed when 'fPIC'option is declared
         # --enable/disable-shared is automatically managed when 'shared' option is declared
         tc = AutotoolsToolchain(self)
@@ -145,8 +143,8 @@ class PackageConan(ConanFile):
         # generate dependencies for autotools
         # some recipes might require a workaround for MSVC:
         # https://github.com/conan-io/conan-center-index/blob/00ce907b910d0d772f1c73bb699971c141c423c1/recipes/xapian-core/all/conanfile.py#L106-L135
-        tc = AutotoolsDeps(self)
-        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
         # If Visual Studio is supported
         if is_msvc(self):

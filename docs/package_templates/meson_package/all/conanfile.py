@@ -59,7 +59,6 @@ class PackageConan(ConanFile):
         }
 
     # no exports_sources attribute, but export_sources(self) method instead
-    # this allows finer grain exportation of patches per version
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -75,11 +74,12 @@ class PackageConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # prefer self.requires method instead of requires attribute
+        # Prefer self.requires method instead of requires attribute
+        # Set transitive_headers=True (which usually also requires transitive_libs=True) if
+        # the dependency is used in any of the packaged header files.
         self.requires("dependency/0.8.1")
 
     def validate(self):
@@ -122,12 +122,11 @@ class PackageConan(ConanFile):
         # Meson project options may vary their types
         tc.project_options["tests"] = False
         tc.generate()
-        # In case there are dependencies listed on requirements, PkgConfigDeps should be used
-        tc = PkgConfigDeps(self)
-        tc.generate()
-        # In case there are dependencies listed on build_requirements, VirtualBuildEnv should be used
-        tc = VirtualBuildEnv(self)
-        tc.generate()
+        # In case there are dependencies listed under requirements, PkgConfigDeps should be used
+        deps = PkgConfigDeps(self)
+        deps.generate()
+        # In case there are dependencies listed under build_requirements, VirtualBuildEnv should be used
+        VirtualBuildEnv(self).generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)

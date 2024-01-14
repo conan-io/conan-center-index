@@ -37,7 +37,7 @@ class PackageConan(ConanFile):
     def source(self):
         pass
 
-    # download the source here, than copy to package folder
+    # download the source here, then copy to package folder
     def build(self):
         get(
             self,
