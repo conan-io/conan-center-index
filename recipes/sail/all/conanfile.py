@@ -106,7 +106,11 @@ class SAILConan(ConanFile):
             tc.variables["SAIL_ENABLE_OPENMP"] = self.options.openmp
         tc.variables["SAIL_ONLY_CODECS"]    = ";".join(only_codecs)
         # JPEGXL needs porting to Conan2
-        tc.variables["SAIL_DISABLE_CODECS"] = "jpegxl"
+        # SVG with nanosvg is supported in >= 0.9.1
+        if Version(self.version) >= "0.9.1":
+            tc.variables["SAIL_DISABLE_CODECS"] = "jpegxl"
+        else:
+            tc.variables["SAIL_DISABLE_CODECS"] = "jpegxl;svg"
         tc.variables["SAIL_INSTALL_PDB"]    = False
         tc.variables["SAIL_THREAD_SAFE"]    = self.options.thread_safe
         # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
