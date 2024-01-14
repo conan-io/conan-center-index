@@ -107,22 +107,22 @@ class IXWebSocketConan(ConanFile):
         # Allow shared
         if Version(self.version) < "11.1.4":
             replace_in_file(self, cmakelists, "add_library( ixwebsocket STATIC", "add_library( ixwebsocket")
+        # Fix DLL installation
         if Version(self.version) < "9.8.5":
-            replace_in_file(self, cmakelists,
-                                  "ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib",
-                                  "ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin")
+            pattern = "ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib"
         elif Version(self.version) < "11.4.3":
-            replace_in_file(self, cmakelists,
-                                  "ARCHIVE DESTINATION lib",
-                                  "ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin")
+            pattern = "ARCHIVE DESTINATION lib"
         else:
-            replace_in_file(self, cmakelists,
-                                  "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}",
-                                  "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION bin")
+            pattern = "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}"
+        replace_in_file(self, cmakelists, pattern, "ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin")
         # INFO: IXWebSocketHttpHeaders.cpp consumes WSAEINVAL but there is no winsock2.h included
-        replace_in_file(self, os.path.join(self.source_folder, "ixwebsocket", "IXWebSocketHttpHeaders.cpp"), '#include "IXSocket.h"', '#include "IXNetSystem.h"\n#include "IXSocket.h"')
+        replace_in_file(self, os.path.join(self.source_folder, "ixwebsocket", "IXWebSocketHttpHeaders.cpp"),
+                        '#include "IXSocket.h"',
+                        '#include "IXNetSystem.h"\n#include "IXSocket.h"')
         # INFO: IXHttpClient.cpp consumes WSAEINVAL but there is no winsock2.h included
-        replace_in_file(self, os.path.join(self.source_folder, "ixwebsocket", "IXHttpClient.h"), '#include "IXSocket.h"', '#include "IXNetSystem.h"\n#include "IXSocket.h"')
+        replace_in_file(self, os.path.join(self.source_folder, "ixwebsocket", "IXHttpClient.h"),
+                        '#include "IXSocket.h"',
+                        '#include "IXNetSystem.h"\n#include "IXSocket.h"')
 
     def build(self):
         self._patch_sources()
