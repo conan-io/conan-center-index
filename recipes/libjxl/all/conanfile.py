@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
-from conan.tools.build import check_min_cppstd, stdcpp_library
+from conan.tools.build import check_min_cppstd, stdcpp_library, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.errors import ConanInvalidConfiguration
@@ -62,6 +62,9 @@ class LibjxlConan(ConanFile):
         if Version(self.version) >= "0.9.1" and \
             self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++":
                 raise ConanInvalidConfiguration(f"{self.ref} does not support clang with libc++")
+        if Version(self.version) >= "0.9.1" and \
+            self.settings.compiler == "apple-clang" and cross_building(self):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support apple-clang cross build")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
