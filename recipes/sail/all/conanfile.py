@@ -19,7 +19,7 @@ class SAILConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "thread_safe": [True, False],
-        "with_openmp": [True, False],
+        "openmp": [True, False],
         "with_highest_priority_codecs": [True, False],
         "with_high_priority_codecs": [True, False],
         "with_medium_priority_codecs": [True, False],
@@ -30,7 +30,7 @@ class SAILConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "thread_safe": True,
-        "with_openmp": True,
+        "openmp": True,
         "with_highest_priority_codecs": True,
         "with_high_priority_codecs": True,
         "with_medium_priority_codecs": True,
@@ -52,7 +52,7 @@ class SAILConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
         if Version(self.version) < "0.9.1":
-            del self.options.with_openmp
+            del self.options.openmp
 
     def configure(self):
         if self.options.shared:
@@ -102,7 +102,7 @@ class SAILConan(ConanFile):
         tc.variables["SAIL_BUILD_EXAMPLES"] = False
         tc.variables["SAIL_COMBINE_CODECS"] = True
         if Version(self.version) >= "0.9.1":
-            tc.variables["SAIL_ENABLE_OPENMP"] = self.options.with_openmp
+            tc.variables["SAIL_ENABLE_OPENMP"] = self.options.openmp
         tc.variables["SAIL_ONLY_CODECS"]    = ";".join(only_codecs)
         # JPEGXL needs porting to Conan2
         tc.variables["SAIL_DISABLE_CODECS"] = "jpegxl"
