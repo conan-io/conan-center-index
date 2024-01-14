@@ -52,7 +52,8 @@ class LibjxlConan(ConanFile):
             self.requires("highway/0.12.2")
         else:
             self.requires("highway/1.0.7")
-        self.requires("lcms/2.14")
+        if Version(self.version) < "0.9.0":
+            self.requires("lcms/2.14")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
