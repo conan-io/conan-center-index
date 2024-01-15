@@ -8,6 +8,7 @@ install(TARGETS gici rtklib vikit_common svo fast
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
 )
+install(TARGETS gici_main RUNTIME DESTINATION bin)
 install(DIRECTORY src/include/ DESTINATION include)
 install(DIRECTORY src/third_party/fast/include/ DESTINATION include/gici/third_party)
 install(DIRECTORY src/third_party/rtklib/include/ DESTINATION include/gici/third_party)
