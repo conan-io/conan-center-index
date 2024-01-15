@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -43,9 +43,6 @@ class BeautyConan(ConanFile):
             "msvc": "192",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -84,8 +81,7 @@ class BeautyConan(ConanFile):
             raise ConanInvalidConfiguration("shared is not supported on Visual Studio")
 
     def build_requirements(self):
-        if Version(self.version) > "1.0.0":
-            self.tool_requires("cmake/[>=3.21 <4]")
+        self.tool_requires("cmake/[>=3.21 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -99,7 +95,6 @@ class BeautyConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build(target="beauty")
