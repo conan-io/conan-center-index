@@ -130,7 +130,7 @@ class PackageConan(ConanFile):
         # it's required in case of native build when there is AutotoolsDeps & at least one dependency which might be shared, because configure tries to run a test executable
         if not cross_building(self):
             VirtualRunEnv(self).generate(scope="build")
-        # --fpic is automatically managed when 'fPIC'option is declared
+        # --fpic is automatically managed when 'fPIC' option is declared
         # --enable/disable-shared is automatically managed when 'shared' option is declared
         tc = AutotoolsToolchain(self)
         # autotools usually uses 'yes' and 'no' to enable/disable options

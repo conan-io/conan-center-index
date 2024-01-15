@@ -97,7 +97,7 @@ class PackageConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        # in case it does not work in another configuration, it should validated here too
+        # in case it does not work in another configuration, it should be validated here too
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
@@ -137,7 +137,7 @@ class PackageConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         # remove bundled xxhash
-        rm(self, "whateer.*", os.path.join(self.source_folder, "lib"))
+        rm(self, "whatever.*", os.path.join(self.source_folder, "lib"))
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "...", "")
 
     def build(self):

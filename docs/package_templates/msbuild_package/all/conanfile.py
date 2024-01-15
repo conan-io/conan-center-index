@@ -62,7 +62,7 @@ class PackageConan(ConanFile):
         self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
-        # in case it does not work in another configuration, it should validated here too
+        # in case it does not work in another configuration, it should be validated here too
         if not is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.ref} can be built only by Visual Studio and msvc.")
 
