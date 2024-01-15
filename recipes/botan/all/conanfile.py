@@ -1,10 +1,9 @@
-import glob
 import os
 import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os, XCRun
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name, XCRun
 from conan.tools.build import build_jobs, check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
@@ -84,6 +83,8 @@ class BotanConan(ConanFile):
         "system_cert_bundle": None,
         "module_policy": None,
     }
+
+    _extra_cxxflags = None
 
     @property
     def _is_x86(self):
