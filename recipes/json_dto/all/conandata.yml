@@ -1,4 +1,7 @@
 sources:
+  "0.3.2":
+    url: "https://github.com/Stiffstream/json_dto/archive/refs/tags/v.0.3.2.tar.gz"
+    sha256: "425d31c06c4e7f82d6414969fcdeaccb95ab44063c08296984ea0703de445744"
   "0.3.1":
     url: "https://github.com/Stiffstream/json_dto/archive/refs/tags/v.0.3.1.tar.gz"
     sha256: "515a2d1510d3d8f8b240eb2149f44aeb47a70d26a7071609cca45c0ee198d1d1"
