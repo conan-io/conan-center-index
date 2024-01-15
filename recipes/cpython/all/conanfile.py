@@ -294,6 +294,32 @@ class CPythonConan(ConanFile):
         else:
             self._generate_autotools()
 
+    def _patch_msvc_projects(self):
+        def _project(name: str):
+            return os.path.join(self.source_folder, "PCBuild", f"{name}.vcxproj")
+        
+        items_to_remove = [
+            ("_bz2", r'.*Include=\"\$\(bz2Dir\).*'),
+        ]
+        for project, remove_pattern in items_to_remove:
+            content = ""
+            with open(_project(project), 'r', encoding="utf_8") as f:
+                content = f.read()
+            
+            content = re.sub(remove_pattern, "", content)
+
+            with open(_project(project), 'w', encoding="utf_8") as f:
+                f.write(content)
+
+        # Inject Conan .props files where needed.
+        # Project name, dependency name
+        injected_props = [
+            ("_bz2", "bzip2"),
+        ]
+        search = '<Import Project="python.props" />'
+        for name, dep in injected_props:
+            replace_in_file(self, _project(name), search, search + f'<Import Project="{self.generators_folder}/conan_{dep}.props" />')
+
     def _patch_sources(self):
         apply_conandata_patches(self)
         setup_py = os.path.join(self.source_folder, "setup.py")
@@ -373,7 +399,7 @@ class CPythonConan(ConanFile):
             # Option suffix, base file name, conan props suffix
             ("sqlite3", "_sqlite3", "sqlite3"),
             ("tkinter", "_tkinter", "tk"),
-            ("bz2", "_bz2", "bzip2"),
+            #("bz2", "_bz2", "bzip2"),
             ("lzma", "_lzma", "xz_utils"),
         ]
         for opt, fname, propname in deps:
@@ -398,6 +424,9 @@ class CPythonConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "PCbuild", f"{project}.vcxproj"),
                             '<Import Project="python.props" />',
                             f'<Import Project="python.props" /><Import Project="{self.generators_folder}/conan_zlib.props" />')
+
+        if is_msvc(self) and self._is_py3:
+            self._patch_msvc_projects()
 
     @property
     def _solution_projects(self):
