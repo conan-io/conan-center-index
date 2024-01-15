@@ -62,7 +62,7 @@ class SAILConan(ConanFile):
             self.requires("libtiff/4.6.0")
         if self.options.with_high_priority_codecs:
             if Version(self.version) >= "0.9.1":
-                self.requires("nanosvg/cci.20231025", headers=True)
+                self.requires("nanosvg/cci.20231025")
         if self.options.with_medium_priority_codecs:
             self.requires("libavif/1.0.3")
             self.requires("jasper/4.1.1")
@@ -164,6 +164,7 @@ class SAILConan(ConanFile):
             self.cpp_info.components["sail-codecs"].requires.append("libjpeg::libjpeg")
             self.cpp_info.components["sail-codecs"].requires.append("libpng::libpng")
             self.cpp_info.components["sail-codecs"].requires.append("libtiff::libtiff")
+            self.cpp_info.components["sail-codecs"].requires.append("nanosvg::nanosvg")
         if self.options.with_medium_priority_codecs:
             self.cpp_info.components["sail-codecs"].requires.append("libavif::libavif")
             self.cpp_info.components["sail-codecs"].requires.append("jasper::jasper")
