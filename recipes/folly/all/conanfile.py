@@ -233,6 +233,7 @@ class FollyConan(ConanFile):
         apply_conandata_patches(self)
         folly_deps = os.path.join(self.source_folder, "CMake", "folly-deps.cmake")
         replace_in_file(self, folly_deps, " MODULE", " ")
+        replace_in_file(self, folly_deps, "${Boost_LIBRARIES}", f"{' '.join(self._required_boost_cmake_targets)}")
         replace_in_file(self, folly_deps, "OpenSSL 1.1.1", "OpenSSL")
         # Disable example
         save(self, os.path.join(self.source_folder, "folly", "logging", "example", "CMakeLists.txt"), "")
