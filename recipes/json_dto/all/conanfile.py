@@ -55,7 +55,7 @@ class JsonDtoConan(ConanFile):
         # several gcc doesn't allow "this" in noexcept clauses due to bug. https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100752
         if Version(self.version) >= "0.3.2" and \
             self.settings.compiler == "gcc" and \
-            (Version(self.version) < "9.0" or Version(self.version).major == 11):
+            (Version(self.settings.compiler.version) < "9.0" or Version(self.settings.compiler.version).major == 11):
             raise ConanInvalidConfiguration(f"{self.ref} requires gcc 9, 10 or 12 later")
 
     def source(self):
