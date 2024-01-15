@@ -173,6 +173,8 @@ class LLVMOpenMpConan(ConanFile):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
+        # Match FindOpenMP.cmake module provided by CMake
+        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "OpenMP")
         self.cpp_info.set_property("cmake_target_name", "OpenMP::OpenMP")
         self.cpp_info.set_property("cmake_target_aliases", ["OpenMP::OpenMP_C", "OpenMP::OpenMP_CXX"])

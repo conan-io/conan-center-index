@@ -21,5 +21,6 @@ int main()
         printf("There are probably missing compiler flags.\n");
         return 1;
     }
+    printf("OpenMP year-month version: %d", _OPENMP);
     return 0;
 }
