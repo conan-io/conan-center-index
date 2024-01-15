@@ -76,9 +76,9 @@ class OsmanipConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if Version(self.version) >= "4.5.0" and self.settings.get_safe("compiler.libcxx") == "libstdc++":
+        if Version(self.version) >= "4.4.0" and self.settings.get_safe("compiler.libcxx") == "libstdc++":
             # test_package segfaults with libstdc++ for some reason
-            raise ConanInvalidConfiguration("osmanip >= 4.5.0 doesn't support libstdc++")
+            raise ConanInvalidConfiguration("osmanip >= 4.4.0 doesn't support libstdc++")
 
         if is_msvc(self):
             raise ConanInvalidConfiguration("MSVC is not yet supported by osmanip recipe. Contributions are welcome.")
