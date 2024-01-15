@@ -22,8 +22,8 @@ diff --git a/cmake/FindWrapOpenGL.cmake b/cmake/FindWrapOpenGL.cmake
 index 3e6abaf4dda..7295a159caf 100644
 --- a/cmake/FindWrapOpenGL.cmake
 +++ b/cmake/FindWrapOpenGL.cmake
-@@ -17,14 +17,18 @@ if (OpenGL_FOUND)
- 
+@@ -14,14 +14,18 @@
+
      add_library(WrapOpenGL::WrapOpenGL INTERFACE IMPORTED)
      if(APPLE)
 +        # CMake 3.27 and older:
