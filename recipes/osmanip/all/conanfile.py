@@ -46,7 +46,6 @@ class OsmanipConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.83.0")
         # https://github.com/JustWhit3/osmanip/commit/43c8bd8d018fcb3bce6443f7388e042d5457d4fb
         if Version(self.version) < "4.6.0":
             # osmanip/progressbar/progress_bar.hpp includes arsenalgear/constants.hpp
