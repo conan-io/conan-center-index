@@ -294,16 +294,9 @@ class GtsamConan(ConanFile):
                             'GTSAM_ADDITIONAL_LIBRARIES "gperftools::gperftools"')
 
         # Ensure a newer CMake standard is used for non-cache_variables support and other policies
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        if Version(self.version) >= "4.1":
-            replace_in_file(self, cmakelists,
-                            "cmake_minimum_required(VERSION 3.0)",
-                            "cmake_minimum_required(VERSION 3.15)")
-        else:
-            # Also fix the cmake_minimum_required() and project() order
-            replace_in_file(self, cmakelists,
-                            "project(GTSAM CXX C)\ncmake_minimum_required(VERSION 3.0)",
-                            "cmake_minimum_required(VERSION 3.15)\nproject(GTSAM CXX C)")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "cmake_minimum_required(VERSION 3.0)",
+                        "cmake_minimum_required(VERSION 3.15)")
 
         # Fix HandleMetis.cmake incompatibility with Metis from Conan
         if self.options.support_nested_dissection and not self.options.with_vendored_metis:
