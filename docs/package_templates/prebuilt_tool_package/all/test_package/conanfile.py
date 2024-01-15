@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.build import can_run
 
 
-# It will become the standard on Conan 2.x
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "VirtualBuildEnv"
