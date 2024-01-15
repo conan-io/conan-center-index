@@ -1,0 +1,14 @@
+--- shared/CMakeLists.txt	2023-08-28 13:14:13.868202500 +0200
++++ shared/CMakeLists.txt	2023-08-28 13:14:42.827596800 +0200
+@@ -8,11 +8,6 @@
+ set(CMAKE_BUILD_TYPE Release)
+
+ if((${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC))
+-  set(MYFLAGS "/O2 /WX- /MT")
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MYFLAGS}")
+-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${MYFLAGS}")
+-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MYFLAGS}")
+-  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${MYFLAGS}")
+   include(CheckSymbolExists)
+   check_symbol_exists(snprintf "stdio.h" HAVE_SNPRINTF)
+   if(NOT HAVE_SNPRINTF)

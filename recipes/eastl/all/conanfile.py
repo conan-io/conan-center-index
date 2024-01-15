@@ -1,20 +1,36 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import (
+    apply_conandata_patches,
+    copy,
+    export_conandata_patches,
+    get,
+    replace_in_file,
+    rmdir,
+)
+from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.52.0"
 
 
 class EastlConan(ConanFile):
     name = "eastl"
-    description = "EASTL stands for Electronic Arts Standard Template Library. " \
-                  "It is an extensive and robust implementation that has an " \
-                  "emphasis on high performance."
+    description = (
+        "EASTL stands for Electronic Arts Standard Template Library. "
+        "It is an extensive and robust implementation that has an "
+        "emphasis on high performance."
+    )
     topics = ("eastl", "stl", "high-performance")
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/electronicarts/EASTL"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,34 +41,22 @@ class EastlConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake"
-    _cmake = None
-
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 14
 
     @property
-    def _minimum_compilers_version(self):
+    def _compilers_minimum_version(self):
         return {
             "Visual Studio": "14",
-            "gcc": "5",
+            "msvc": "190",
+            "gcc": "5" if Version(self.version) < "3.21.12" else "6",
             "clang": "3.2",
             "apple-clang": "4.3",
         }
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -60,57 +64,81 @@ class EastlConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("eabase/2.09.06")
+        self.requires("eabase/2.09.12", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
-
-        mininum_compiler_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if mininum_compiler_version and tools.Version(self.settings.compiler.version) < mininum_compiler_version:
-            raise ConanInvalidConfiguration("Compiler is too old for c++ {}".format(self._minimum_cpp_standard))
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+        
+        if is_msvc(self) and check_min_vs(self, "193", raise_invalid=False) and Version(self.version) < "3.21.12":
+            raise ConanInvalidConfiguration(f"{self.ref} is not compatible with Visual Studio 2022, please use version >= 3.21.12")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["EASTL_BUILD_BENCHMARK"] = False
-        self._cmake.definitions["EASTL_BUILD_TESTS"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["EASTL_BUILD_BENCHMARK"] = False
+        tc.variables["EASTL_BUILD_TESTS"] = False
+        tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        tc.generate()
+        CMakeDeps(self).generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        tools.replace_path_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                   "include(CommonCppFlags)",
-                                   "")
+        apply_conandata_patches(self)
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "CMakeLists.txt"),
+            "include(CommonCppFlags)",
+            "",
+        )
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("3RDPARTYLICENSES.TXT", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(
+            self,
+            "LICENSE",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
+        copy(
+            self,
+            "3RDPARTYLICENSES.TXT",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
+        cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "doc"))
 
     def package_info(self):
         self.cpp_info.libs = ["EASTL"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["m", "pthread"])
         if self.options.shared:
             self.cpp_info.defines.append("EA_DLL")
 
-        # Do not use these names in set_property, it was a mistake, eastl doesn't export its target
+        self.cpp_info.set_property("cmake_file_name", "EASTL")
+        self.cpp_info.set_property("cmake_target_name", "EASTL::EASTL")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "EASTL"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "EASTL"
         self.cpp_info.names["cmake_find_package"] = "EASTL"
         self.cpp_info.names["cmake_find_package_multi"] = "EASTL"

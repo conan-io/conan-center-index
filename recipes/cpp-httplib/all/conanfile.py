@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.50.0"
@@ -29,17 +28,13 @@ class CpphttplibConan(ConanFile):
     }
     no_copy_source = True
 
-    def config_options(self):
-        if Version(self.version) < "0.7.2":
-            del self.options.with_brotli
-
     def requirements(self):
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
-        if self.options.get_safe("with_brotli"):
-            self.requires("brotli/1.0.9")
+            self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.with_brotli:
+            self.requires("brotli/1.1.0")
 
     def package_id(self):
         self.info.clear()
@@ -71,7 +66,7 @@ class CpphttplibConan(ConanFile):
             self.cpp_info.defines.append("CPPHTTPLIB_OPENSSL_SUPPORT")
         if self.options.with_zlib:
             self.cpp_info.defines.append("CPPHTTPLIB_ZLIB_SUPPORT")
-        if self.options.get_safe("with_brotli"):
+        if self.options.with_brotli:
             self.cpp_info.defines.append("CPPHTTPLIB_BROTLI_SUPPORT")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]

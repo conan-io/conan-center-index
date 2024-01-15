@@ -1,0 +1,9 @@
+[
+	project("lngs-test"),
+	namespace("lngs::test"),
+	version("0.1"),
+	serial(1)
+] strings {
+	[help("Hello world string"), id(1001)]
+	MESSAGE = "Hello, world!";
+}

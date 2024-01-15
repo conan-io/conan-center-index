@@ -1,4 +1,5 @@
 #include <keychain/keychain.h>
+#include <iostream>
 
 using namespace keychain;
 
@@ -13,5 +14,7 @@ void never_called(Error &error) {
 
 int main() {
   Error error;
+
+  std::cout << "Keychain Conan test_package\n";
   return error.type == ErrorType::NoError ? 0 : 1;
 }

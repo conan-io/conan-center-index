@@ -1,0 +1,4 @@
+sources:
+  "1.2":
+    url: "https://github.com/nanomsg/nanomsg/archive/refs/tags/1.2.tar.gz"
+    sha256: "6ef7282e833df6a364f3617692ef21e59d5c4878acea4f2d7d36e21c8858de67"

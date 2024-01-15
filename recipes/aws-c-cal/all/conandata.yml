@@ -1,4 +1,10 @@
 sources:
+  "0.6.9":
+    url: "https://github.com/awslabs/aws-c-cal/archive/v0.6.9.tar.gz"
+    sha256: "46defd807034ca9d873cc1459bc60f0bb4662029f7120db1af464421907fb480"
+  "0.6.1":
+    url: "https://github.com/awslabs/aws-c-cal/archive/v0.6.1.tar.gz"
+    sha256: "52df95150a8548ac35a0e4b6f59fbdebff27e4124c0b7e5eaa969ed3ba62fc82"
   "0.5.20":
     url: "https://github.com/awslabs/aws-c-cal/archive/v0.5.20.tar.gz"
     sha256: "acc352359bd06f8597415c366cf4ec4f00d0b0da92d637039a73323dd55b6cd0"
@@ -14,10 +20,17 @@ sources:
   "0.5.12":
     url: "https://github.com/awslabs/aws-c-cal/archive/v0.5.12.tar.gz"
     sha256: "350c29a288d5d498bd6574fca659cffc9453bf62691fbde5788399716c2bd132"
-  "0.5.11":
-    url: "https://github.com/awslabs/aws-c-cal/archive/v0.5.11.tar.gz"
-    sha256: "ef46e121b2231a0b19afce8af4b32d77501df4d470e926990918456636cd83c0"
 patches:
+  "0.6.9":
+    - patch_file: "patches/0002-apple-corefoundation-0.6.9.patch"
+      patch_description: "Link to CoreFoundation on Apple"
+      patch_type: "backport"
+      patch_source: "https://github.com/awslabs/aws-c-cal/pull/126"
+  "0.6.1":
+    - patch_file: "patches/0002-apple-corefoundation-0.6.1.patch"
+      patch_description: "Link to CoreFoundation on Apple"
+      patch_type: "backport"
+      patch_source: "https://github.com/awslabs/aws-c-cal/pull/126"
   "0.5.20":
     - patch_file: "patches/0002-apple-corefoundation-0.5.13.patch"
       patch_description: "Link to CoreFoundation on Apple"
@@ -39,12 +52,6 @@ patches:
       patch_type: "backport"
       patch_source: "https://github.com/awslabs/aws-c-cal/pull/126"
   "0.5.12":
-    - patch_file: "patches/0001-use-openssl-cmake-imported-target.patch"
-    - patch_file: "patches/0002-apple-corefoundation-0.5.11.patch"
-      patch_description: "Link to CoreFoundation on Apple"
-      patch_type: "backport"
-      patch_source: "https://github.com/awslabs/aws-c-cal/pull/126"
-  "0.5.11":
     - patch_file: "patches/0001-use-openssl-cmake-imported-target.patch"
     - patch_file: "patches/0002-apple-corefoundation-0.5.11.patch"
       patch_description: "Link to CoreFoundation on Apple"

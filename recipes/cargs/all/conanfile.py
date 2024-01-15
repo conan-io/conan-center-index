@@ -1,34 +1,37 @@
 import os
-from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
+
+required_conan_version = ">=1.53.0"
 
 
 class CargsConan(ConanFile):
     name = "cargs"
-    description = "A lightweight getopt replacement that works on Linux, " \
-                  "Windows and macOS. Command line argument parser library" \
-                  " for C/C++. Can be used to parse argv and argc parameters."
-    url = "https://github.com/conan-io/conan-center-index"
+    description = (
+        "A lightweight getopt replacement that works on Linux, "
+        "Windows and macOS. Command line argument parser library"
+        " for C/C++. Can be used to parse argv and argc parameters."
+    )
     license = "MIT"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://likle.github.io/cargs/"
     topics = ("cargs", "cross-platform", "windows", "macos", "osx", "linux",
               "getopt", "getopt-long", "command-line-parser", "command-line",
               "arguments", "argument-parser")
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {'shared': False, 'fPIC': True}
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -36,33 +39,48 @@ class CargsConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared and self.settings.os == "Windows"
-        cmake.configure(build_folder=self._build_subfolder)
+        cmake.configure()
         cmake.build(target="cargs")
 
     def package(self):
-        include_dir = os.path.join(self._source_subfolder, 'include')
-        lib_dir = os.path.join(self._build_subfolder, "lib")
-        bin_dir = os.path.join(self._build_subfolder, "bin")
-
-        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
-        self.copy("cargs.h", dst="include", src=include_dir)
-        self.copy(pattern="*.a", dst="lib", src=lib_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=lib_dir, keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", src=lib_dir, keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", src=lib_dir, keep_path=False,
-                  symlinks=True)
-        self.copy(pattern="*.dll", dst="bin", src=bin_dir, keep_path=False)
+        copy(self, "LICENSE.md",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        copy(self, "cargs.h",
+             dst=os.path.join(self.package_folder, "include"),
+             src=os.path.join(self.source_folder, "include"))
+        for pattern in ["*.a", "*.so*", "*.dylib", "*.lib"]:
+            copy(self, pattern,
+                 dst=os.path.join(self.package_folder, "lib"),
+                 src=self.build_folder,
+                 keep_path=False)
+        copy(self, "*.dll",
+             dst=os.path.join(self.package_folder, "bin"),
+             src=self.build_folder,
+             keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["cargs"]

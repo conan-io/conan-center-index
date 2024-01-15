@@ -1,15 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import can_run
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
 
 
 class LibsecretConan(ConanFile):
@@ -54,7 +53,7 @@ class LibsecretConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.76.0", transitive_headers=True, transitive_libs=True, run=can_run(self))
+        self.requires("glib/2.78.1", transitive_headers=True, transitive_libs=True)
         if self._use_gcrypt:
             self.requires("libgcrypt/1.8.4")
 
@@ -65,11 +64,17 @@ class LibsecretConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.2.3")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
-        if not can_run(self):
-            self.tool_requires("glib/2.76.0")
+            self.tool_requires("pkgconf/2.0.3")
+        self.tool_requires("glib/<host_version>")
+
+        if self.settings.os == "Macos":
+            # Avoid using gettext from homebrew which may be linked against
+            # a different/incompatible libiconv than the one being exposed
+            # in the runtime environment (DYLD_LIBRARY_PATH)
+            # See https://github.com/conan-io/conan-center-index/pull/17502#issuecomment-1542492466
+            self.tool_requires("gettext/0.21")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -77,9 +82,6 @@ class LibsecretConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if can_run(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
         tc = MesonToolchain(self)
         tc.project_options["introspection"] = "false"
         tc.project_options["manpage"] = "false"
@@ -104,7 +106,7 @@ class LibsecretConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libsecret-1")
-        self.cpp_info.requires = ["glib::glib-2.0", "glib::gobject-2.0"]
+        self.cpp_info.requires = ["glib::glib-2.0", "glib::gobject-2.0", "glib::gio-2.0"]
         if self._use_gcrypt:
             self.cpp_info.requires.append("libgcrypt::libgcrypt")
         self.cpp_info.includedirs = [os.path.join("include", "libsecret-1")]

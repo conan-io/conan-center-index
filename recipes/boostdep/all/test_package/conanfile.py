@@ -1,17 +1,20 @@
-from conans import ConanFile, tools
-import os
+from conan import ConanFile
+from conan.tools.env import Environment
+from conan.tools.files import mkdir, save
 
 
-class DefaultNameConan(ConanFile):
-    settings = "os", "compiler", "arch", "build_type"
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "VirtualBuildEnv"
+    test_type = "explicit"
 
-    def build(self):
-        pass
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        if tools.cross_building(self.settings):
-            return
-        tools.mkdir("libs")
-        tools.save("Jamroot", "")
-        with tools.environment_append({"BOOST_ROOT": self.build_folder}):
-            self.run("boostdep --list-modules", run_environment=True)
+        mkdir(self, "libs")
+        save(self, "Jamroot", "")
+        env = Environment()
+        env.define("BOOST_ROOT", self.build_folder)
+        with env.vars(self).apply():
+            self.run("boostdep --list-modules")

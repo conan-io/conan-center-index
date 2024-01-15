@@ -1,4 +1,7 @@
 sources:
+  "0.18":
+    url: "https://github.com/NixOS/patchelf/releases/download/0.18.0/patchelf-0.18.0.tar.bz2"
+    sha256: "1952b2a782ba576279c211ee942e341748fdb44997f704dd53def46cd055470b"
   "0.13":
     url: "https://github.com/NixOS/patchelf/archive/0.13.tar.gz"
     sha256: "60c6aeadb673de9cc1838b630c81f61e31c501de324ef7f1e8094a2431197d09"

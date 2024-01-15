@@ -26,12 +26,12 @@ endif()
 
 if (${GDAL_USE_CRYPTOPP})
     find_package(cryptopp REQUIRED)
-    add_library(CRYPTOPP::CRYPTOPP ALIAS cryptopp::cryptopp-static)
+    add_library(CRYPTOPP::CRYPTOPP ALIAS ${TARGET_FOR_CRYPTOPP})
 endif()
 
 if (${GDAL_USE_DEFLATE})
     find_package(libdeflate REQUIRED)
-    add_library(Deflate::Deflate ALIAS libdeflate::libdeflate)
+    add_library(Deflate::Deflate ALIAS ${TARGET_FOR_DEFLATE})
 endif()
 
 if (${GDAL_USE_LZ4})

@@ -1,7 +1,11 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.files import get, copy, apply_conandata_patches, export_conandata_patches
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.33.0"
+
+required_conan_version = ">=1.53.0"
 
 
 class MsdfAtlasGenConan(ConanFile):
@@ -12,60 +16,54 @@ class MsdfAtlasGenConan(ConanFile):
     description = "MSDF font atlas generator"
     topics = ("msdf-atlas-gen", "msdf", "font", "atlas")
     settings = "os", "arch", "compiler", "build_type"
-
-    generators = "cmake", "cmake_find_package_multi"
-    exports_sources = ["CMakeLists.txt"]
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    package_type = "application"
 
     def requirements(self):
         self.requires("artery-font-format/1.0")
         self.requires("msdfgen/1.9.1")
+        self.requires("lodepng/cci.20200615")
 
-    def validate(self):
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate_build(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
 
     def package_id(self):
         del self.info.settings.compiler
+        del self.info.settings.build_type
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
-    def _patch_sources(self):
-        cmakelists = os.path.join(
-            self._source_subfolder, "CMakeLists.txt")
-
-        tools.replace_in_file(cmakelists,
-                              "add_subdirectory(msdfgen)", "")
-        tools.save_append(cmakelists,
-                          "install(TARGETS msdf-atlas-gen-standalone DESTINATION bin)")
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["MSDF_ATLAS_GEN_BUILD_STANDALONE"] = True
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["MSDF_ATLAS_GEN_BUILD_STANDALONE"] = True
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
+        self.cpp_info.includedirs = []
 
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        # TODO: Legacy, to be removed on Conan 2.0
+        bin_folder = os.path.join(self.package_folder, "bin")
+        self.env_info.PATH.append(bin_folder)

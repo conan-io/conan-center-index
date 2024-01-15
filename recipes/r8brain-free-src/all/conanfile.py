@@ -15,6 +15,7 @@ class R8brainFreeSrcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/avaneev/r8brain-free-src"
     topics = ("audio", "sample-rate", "conversion", "audio-processing", "resampler")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -78,7 +79,7 @@ class R8brainFreeSrcConan(ConanFile):
         self.cpp_info.libs = ["r8brain"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["pthread", "m",])
 
         if self.options.fft == "pffft":
             self.cpp_info.defines.append("R8B_PFFFT")

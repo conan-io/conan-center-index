@@ -129,7 +129,7 @@ class OpenH264Conan(ConanFile):
                 libcxx = str(self.settings.compiler.libcxx)
                 stl_lib = f'$(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/$(APP_ABI)/lib{"c++_static.a" if libcxx == "c++_static" else "c++_shared.so"}' \
                           + "$(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/$(APP_ABI)/libc++abi.a"
-                ndk_home = os.environ["ANDROID_NDK_HOME"]
+                ndk_home = self.conf.get("tools.android:ndk_path")
                 args.extend([
                     f"NDKLEVEL={self.settings.os.api_level}",
                     f"STL_LIB={stl_lib}",

@@ -140,7 +140,7 @@ When a package needs other packages those can be include with the `requirements(
 
 ```python
     def requirements(self):
-        self.require("fmt/9.0.0")
+        self.requires("fmt/9.0.0")
 ```
 
 For more information see the [Dependencies](dependencies.md) documentation.

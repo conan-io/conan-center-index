@@ -2,7 +2,6 @@ from conans import ConanFile, CMake
 from conan.tools.build import cross_building
 import os
 
-
 # legacy validation with Conan 1.x
 class TestPackageV1Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
@@ -12,9 +11,6 @@ class TestPackageV1Conan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-
-    def imports(self):
-        self.copy("*.dll", dst="bin", src="lib")
 
     def test(self):
         if not cross_building(self):

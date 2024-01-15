@@ -1,79 +1,93 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.53.0"
 
 class SvgwriteConan(ConanFile):
     name = "svgwrite"
+    description = "a streaming svg library"
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.com/dvd0101/svgwrite"
-    description = "SVGWrite - a streaming svg library"
-    topics = ("svg", "stream", "vector", "image")
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    exports_sources = ("CMakeLists.txt", "patches/*")
-    requires = "span-lite/0.7.0", "fmt/6.1.2"
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
+    topics = ("svg", "writer", "stream", "vector", "image")
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 17
 
     @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "10",
+            "Visual Studio": "16",
+            "msvc": "192",
+        }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        compiler = str(self.settings.compiler)
-        compiler_version = tools.Version(self.settings.compiler.version)
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("span-lite/0.10.3", transitive_headers=True)
+        self.requires("fmt/10.2.0")
+
+    def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "17")
-
-        minimal_version = {
-            "Visual Studio": "16",
-            "gcc": "7.3",
-            "clang": "6",
-            "apple-clang": "10.0"
-        }
-
-        if compiler not in minimal_version:
-            self.output.warn("{} recipe lacks information about the {} compiler"
-                             " standard version support".format(self.name, compiler))
-        elif compiler_version < minimal_version.get(compiler):
-            raise ConanInvalidConfiguration("%s requires a compiler that supports"
-                                            " at least C++17. %s %s is not"
-                                            " supported." % (self.name, compiler, compiler_version))
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = self.name + "-v" + self.version
-        os.rename(extracted_folder, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["svgwrite"]

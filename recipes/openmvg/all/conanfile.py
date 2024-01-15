@@ -30,6 +30,7 @@ class Openmvgconan(ConanFile):
         "with_openmp": [True, False],
         "with_avx": [False, "avx", "avx2"],
         "programs": [True, False],
+        "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"]
     }
     default_options = {
         "shared": False,
@@ -37,6 +38,7 @@ class Openmvgconan(ConanFile):
         "with_openmp": False,
         "with_avx": False,
         "programs": True,
+        "with_jpeg": "libjpeg"
     }
 
     short_paths = True
@@ -66,9 +68,14 @@ class Openmvgconan(ConanFile):
         self.requires("coin-utils/2.11.6")
         self.requires("eigen/3.4.0", transitive_headers=True)
         self.requires("flann/1.9.2", transitive_headers=True, transitive_libs=True)
-        self.requires("libjpeg/9e")
-        self.requires("libpng/1.6.39")
-        self.requires("libtiff/4.5.0")
+        if self.options.with_jpeg == "libjpeg":
+            self.requires("libjpeg/9e")
+        elif self.options.with_jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/3.0.0")
+        elif self.options.with_jpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.1")
+        self.requires("libpng/1.6.40")
+        self.requires("libtiff/4.5.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -108,6 +115,12 @@ class Openmvgconan(ConanFile):
         # see https://github.com/conan-io/conan/issues/10281
         if Version(self.dependencies["ceres-solver"].ref.version) >= "2.0.0" and not valid_min_cppstd(self, "14"):
             tc.variables["CMAKE_CXX_STANDARD"] = "14"
+
+        if self.settings.os == "Linux":
+            # Workaround for: https://github.com/conan-io/conan/issues/13560
+            libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
+            tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
+        
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -131,6 +144,14 @@ class Openmvgconan(ConanFile):
 
     @property
     def _openmvg_components(self):
+        def jpeg():
+            if self.options.with_jpeg == "libjpeg":
+                return ["libjpeg::libjpeg"]
+            elif self.options.with_jpeg == "libjpeg-turbo":
+                return ["libjpeg-turbo::jpeg"]
+            elif self.options.with_jpeg == "mozjpeg":
+                return ["mozjpeg::libjpeg"]
+
         return {
             "openmvg_camera": {
                 "target": "openMVG_camera",
@@ -162,7 +183,7 @@ class Openmvgconan(ConanFile):
             "openmvg_image": {
                 "target": "openMVG_image",
                 "libs": ["openMVG_image"],
-                "requires": ["openmvg_numeric", "libjpeg::libjpeg", "libpng::libpng", "libtiff::libtiff"],
+                "requires": ["openmvg_numeric", "libpng::libpng", "libtiff::libtiff"] + jpeg(),
             },
             "openmvg_linearprogramming": {
                 "target": "openMVG_linearProgramming",

@@ -1,5 +1,4 @@
 import os
-import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -77,8 +76,6 @@ class GrpcConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
             self.options["protobuf"].shared = True
-            self.options["googleapis"].shared = True
-            self.options["grpc-proto"].shared = True
 
             if cross_building(self):
                 self.options["grpc"].shared = True
@@ -88,17 +85,18 @@ class GrpcConan(ConanFile):
 
     def requirements(self):
         # abseil is public. See https://github.com/conan-io/conan-center-index/pull/17284#issuecomment-1526082638
-        if is_msvc(self) and Version(self.version) < "1.47":
-            self.requires("abseil/20211102.0", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) < "1.47":
+            if is_msvc(self):
+                self.requires("abseil/20211102.0", transitive_headers=True, transitive_libs=True)
+            else:
+                self.requires("abseil/20220623.1", transitive_headers=True, transitive_libs=True)
         else:
-            self.requires("abseil/20220623.0", transitive_headers=True, transitive_libs=True)
-        self.requires("c-ares/1.19.0")
+            self.requires("abseil/20230125.3", transitive_headers=True, transitive_libs=True)
+        self.requires("c-ares/1.19.1")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("re2/20230301")
-        self.requires("zlib/1.2.13")
-        self.requires("protobuf/3.21.9", transitive_headers=True, transitive_libs=True, run=can_run(self))
-        self.requires("googleapis/cci.20230501")
-        self.requires("grpc-proto/cci.20220627")
+        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True, run=can_run(self))
 
     def package_id(self):
         del self.info.options.secure
@@ -115,15 +113,15 @@ class GrpcConan(ConanFile):
             check_min_cppstd(self, self._cxxstd_required)
 
         if self.options.shared and \
-           (not self.dependencies["protobuf"].options.shared or not self.dependencies["googleapis"].options.shared or not self.dependencies["grpc-proto"].options.shared):
+           (not self.dependencies["protobuf"].options.shared):
             raise ConanInvalidConfiguration(
-                "If built as shared, protobuf, googleapis and grpc-proto must be shared as well. "
-                "Please, use `protobuf:shared=True` and `googleapis:shared=True` and `grpc-proto:shared=True`",
+                "If built as shared protobuf must be shared as well. "
+                "Please, use `protobuf:shared=True`.",
             )
 
     def build_requirements(self):
         if not can_run(self):
-            self.tool_requires("protobuf/3.21.9")
+            self.tool_requires("protobuf/3.21.12")
         if cross_building(self):
             # when cross compiling we need pre compiled grpc plugins for protoc
             self.tool_requires(f"grpc/{self.version}")
@@ -149,7 +147,7 @@ class GrpcConan(ConanFile):
 
         tc.cache_variables["gRPC_BUILD_CODEGEN"] = self.options.codegen
         tc.cache_variables["gRPC_BUILD_CSHARP_EXT"] = self.options.csharp_ext
-        tc.cache_variables["gRPC_BUILD_TESTS"] = False
+        tc.cache_variables["gRPC_BUILD_TESTS"] = "OFF"
 
         # We need the generated cmake/ files (bc they depend on the list of targets, which is dynamic)
         tc.cache_variables["gRPC_INSTALL"] = True
@@ -189,16 +187,6 @@ class GrpcConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-
-        # Clean existing proto files, they will be taken from requirements
-        shutil.rmtree(os.path.join(self.source_folder, "src", "proto", "grpc"))
-
-        if Version(self.version) >= "1.47":
-            # Take googleapis from requirement instead of vendored/hardcoded version
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                "if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googleapis)",
-                "if (FALSE)  # Do not download, it is provided by Conan"
-            )
 
         # On macOS if all the following are true:
         # - protoc from protobuf has shared library dependencies
@@ -323,6 +311,7 @@ class GrpcConan(ConanFile):
                     "abseil::absl_status", "abseil::absl_str_format",
                     "abseil::absl_strings", "abseil::absl_synchronization",
                     "abseil::absl_time", "abseil::absl_optional",
+                    "abseil::absl_flags",
                 ],
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
             },
@@ -388,12 +377,12 @@ class GrpcConan(ConanFile):
             components.update({
                 "grpc++_reflection": {
                     "lib": "grpc++_reflection",
-                    "requires": ["grpc++", "protobuf::libprotobuf", "grpc-proto::grpc-proto", "googleapis::googleapis"],
+                    "requires": ["grpc++", "protobuf::libprotobuf"],
                     "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
                 },
                 "grpcpp_channelz": {
                     "lib": "grpcpp_channelz",
-                    "requires": ["grpc++", "protobuf::libprotobuf", "grpc-proto::grpc-proto", "googleapis::googleapis"],
+                    "requires": ["grpc++", "protobuf::libprotobuf"],
                     "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
                 },
             })
