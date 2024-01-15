@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file, save
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 
 import os
 
@@ -78,6 +79,9 @@ class OsmanipConan(ConanFile):
         if Version(self.version) >= "4.5.0" and self.settings.get_safe("compiler.libcxx") == "libstdc++":
             # test_package segfaults with libstdc++ for some reason
             raise ConanInvalidConfiguration("osmanip >= 4.5.0 doesn't support libstdc++")
+
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("MSVC is not yet supported by osmanip recipe. Contributions are welcome.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
