@@ -78,13 +78,13 @@ class canteraRecipe(ConanFile):
 
         sundials_info = self.dependencies["sundials"].cpp_info
 
-        opitons = {
+        options = {
             "libdirname": "lib",
             "python_package": "none",
             "f90_interface": "n",
-            "googletest": "none",
             "versioned_shared_library": "yes",
             "prefix": self.package_folder,
+            "googletest": "none",
             "system_fmt": 'y',
             "system_yamlcpp": 'y',
             "system_eigen": 'y',
@@ -97,15 +97,17 @@ class canteraRecipe(ConanFile):
         }
 
         if self.settings.os == "Windows":
-            opitons["toolchain"] = "msvc"
+            options["toolchain"] = "msvc"
 
         if self.settings.build_type == "Debug":
-            opitons["optimize"] = "no"
+            options["debug"] = "yes"
+            options["optimize"] = "no"
         else:
-            opitons["debug"] = "no"
+            options["debug"] = "no"
+            options["optimize"] = "yes"
 
         escape_str = lambda x: f'"{x}"'
-        scons_args = ' '.join([f"{key}={escape_str(option)}" for key, option in opitons.items()])
+        scons_args = ' '.join([f"{key}={escape_str(option)}" for key, option in options.items()])
         save(self, os.path.join(self.source_folder, "scons_args"), scons_args)
 
     def build(self):
