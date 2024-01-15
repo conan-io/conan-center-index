@@ -263,6 +263,12 @@ class ImageMagicConan(ConanFile):
         tc.variables["ZSTD_DELEGATE"] = self.options.with_zstd
 
         tc.variables["HAVE_LIBRAW_LIBRAW_H"] = True
+
+        if self.options.with_openmp and self.settings.compiler in ["clang", "apple-clang"]:
+            # Fails with _OPENMP redefinition error if module from CMakeDeps is used
+            tc.variables["OpenMP_C_INCLUDE_DIR"] = self.dependencies["llvm-openmp"].cpp_info.includedir
+            tc.variables["OpenMP_CXX_INCLUDE_DIR"] = self.dependencies["llvm-openmp"].cpp_info.includedir
+
         tc.generate()
 
         # TODO: fix this bug in the libheif recipe
@@ -317,6 +323,7 @@ class ImageMagicConan(ConanFile):
         for dep, cmake_name in cmake_names.items():
             deps.set_property(dep, "cmake_file_name", cmake_name)
             deps.set_property(dep, "cmake_target_name", f"{cmake_name}::{cmake_name}")
+        deps.set_property("llvm-openmp", "cmake_find_mode", "none")
         deps.generate()
 
     def _patch_sources(self):
