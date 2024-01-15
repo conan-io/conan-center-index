@@ -112,7 +112,9 @@ class LibjxlConan(ConanFile):
         save(self, os.path.join(self.source_folder, "cmake", "FindAtomics.cmake"), "")
 
         # Allow fPIC to be set by Conan
-        for cmake_file in ["jxl.cmake", "jxl_threads.cmake", "jxl_cms.cmake"]:
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)", "")
+        for cmake_file in ["jxl.cmake", "jxl_threads.cmake", "jxl_cms.cmake", "jpegli.cmake"]:
             path = os.path.join(self.source_folder, "lib", cmake_file)
             if os.path.exists(path):
                 replace_in_file(self, path, "POSITION_INDEPENDENT_CODE ON", "POSITION_INDEPENDENT_CODE ${CMAKE_POSITION_INDEPENDENT_CODE}")
