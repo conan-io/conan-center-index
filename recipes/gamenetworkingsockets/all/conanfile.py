@@ -70,8 +70,6 @@ class GameNetworkingSocketsConan(ConanFile):
         venv.generate(scope="build")
 
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_STATIC_LIB"] = not self.options.shared
-        tc.variables["BUILD_SHARED_LIB"] = self.options.shared
         tc.variables["GAMENETWORKINGSOCKETS_BUILD_EXAMPLES"] = False
         tc.variables["GAMENETWORKINGSOCKETS_BUILD_TESTS"] = False
         tc.variables["Protobuf_USE_STATIC_LIBS"] = not self.dependencies["protobuf"].options.shared
