@@ -142,6 +142,10 @@ class G2oConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+        if self.settings.os == "Windows" and self.options.shared:
+            # Build fails with "unresolved external symbol "public: __cdecl g2o::internal::LoggerInterface::LoggerInterface(void)"
+            raise ConanInvalidConfiguration("g2o does not currently support shared libraries on Windows")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
