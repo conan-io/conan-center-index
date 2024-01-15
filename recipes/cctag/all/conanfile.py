@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -18,6 +19,7 @@ class CCTagConan(ConanFile):
     homepage = "https://github.com/alicevision/CCTag"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -51,10 +53,14 @@ class CCTagConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.80.0")
-        self.requires("eigen/3.4.0")
-        self.requires("onetbb/2020.3")
-        self.requires("opencv/4.5.5")
+        # boost/1.81+ fails with "multiple definition of `boost::phoenix::placeholders::uarg1'", etc.
+        self.requires("boost/1.80.0", transitive_headers=True, transitive_libs=True)
+        self.requires("eigen/3.4.0", transitive_headers=True)
+        if Version(self.version) >= "1.0.3":
+            self.requires("onetbb/2021.10.0")
+        else:
+            self.requires("onetbb/2020.3.3")
+        self.requires("opencv/4.8.1", transitive_headers=True, transitive_libs=True)
 
     @property
     def _required_boost_components(self):
@@ -64,24 +70,22 @@ class CCTagConan(ConanFile):
         ]
 
     def validate(self):
-        miss_boost_required_comp = \
-            any(getattr(self.dependencies["boost"].options,
-                        f"without_{boost_comp}",
-                        True) for boost_comp in self._required_boost_components)
+        miss_boost_required_comp = any(
+            self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
+            for boost_comp in self._required_boost_components
+        )
         if self.dependencies["boost"].options.header_only or miss_boost_required_comp:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires non header-only boost with these components: "
                 f"{', '.join(self._required_boost_components)}",
             )
 
-        if self.settings.compiler == "Visual Studio" and not self.options.shared and \
-           is_msvc_static_runtime(self) and self.dependencies["onetbb"].options.shared:
+        if is_msvc_static_runtime(self) and not self.options.shared and self.dependencies["onetbb"].options.shared:
             raise ConanInvalidConfiguration("this specific configuration is prevented due to internal c3i limitations")
 
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 14)
 
-        # FIXME: add cuda support
         if self.options.with_cuda:
             raise ConanInvalidConfiguration("CUDA not supported yet")
 
@@ -139,11 +143,22 @@ class CCTagConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "pthread"])
         self.cpp_info.requires = [
-            "boost::atomic", "boost::chrono", "boost::date_time", "boost::exception",
-            "boost::filesystem", "boost::serialization", "boost::system",
-            "boost::thread", "boost::timer", "boost::math_c99", "eigen::eigen",
-            "onetbb::onetbb", "opencv::opencv_core", "opencv::opencv_videoio",
-            "opencv::opencv_imgproc", "opencv::opencv_imgcodecs",
+            "boost::atomic",
+            "boost::chrono",
+            "boost::date_time",
+            "boost::exception",
+            "boost::filesystem",
+            "boost::math_c99",
+            "boost::serialization",
+            "boost::system",
+            "boost::thread",
+            "boost::timer",
+            "eigen::eigen",
+            "onetbb::onetbb",
+            "opencv::opencv_core",
+            "opencv::opencv_imgcodecs",
+            "opencv::opencv_imgproc",
+            "opencv::opencv_videoio",
         ]
         if self.settings.os == "Windows":
             self.cpp_info.requires.append("boost::stacktrace_windbg")
