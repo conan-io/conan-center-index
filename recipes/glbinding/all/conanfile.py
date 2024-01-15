@@ -74,8 +74,6 @@ class GlbindingConan(ConanFile):
         replace_in_file(self, compile_options, "/GL", "")
         # Don't populate rpath
         replace_in_file(self, cmakelists, "if(NOT SYSTEM_DIR_INSTALL)", "if(0)")
-        # Do not copy AUTHORS, VERSION, etc
-        replace_in_file(self, cmakelists, "install(FILES ", "# install(FILES ")
 
     def build(self):
         self._patch_sources()
