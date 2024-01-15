@@ -5,6 +5,7 @@ from conan.tools.build import cross_building, stdcpp_library, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir, save, rm, replace_in_file
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -23,10 +24,20 @@ class LibjxlConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "avx512": [True, False],
+        "avx512_spr": [True, False],
+        "avx512_zen4": [True, False],
+        "force_neon": [True, False],
+        "with_tcmalloc": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "avx512": False,
+        "avx512_spr": False,
+        "avx512_zen4": False,
+        "force_neon": False,
+        "with_tcmalloc": False,
     }
 
     def export_sources(self):
@@ -35,6 +46,12 @@ class LibjxlConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch not in ["x86", "x86_64"] or Version(self.version) < "0.9":
+            del self.options.avx512
+            del self.options.avx512_spr
+            del self.options.avx512_zen4
+        if not str(self.settings.arch).startswith("arm"):
+            del self.options.force_neon
 
     def configure(self):
         if self.options.shared:
@@ -50,6 +67,8 @@ class LibjxlConan(ConanFile):
         else:
             self.requires("highway/0.12.2")
         self.requires("lcms/2.16")
+        if self.options.with_tcmalloc:
+            self.requires("gperftools/2.13.0")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -70,17 +89,27 @@ class LibjxlConan(ConanFile):
         tc.variables["CMAKE_PROJECT_LIBJXL_INCLUDE"] = "conan_deps.cmake"
         tc.variables["BUILD_TESTING"] = False
         tc.variables["JPEGXL_STATIC"] = not self.options.shared  # applies to tools only
+        tc.variables["JPEGXL_BUNDLE_LIBPNG"] = False
         tc.variables["JPEGXL_ENABLE_BENCHMARK"] = False
+        tc.variables["JPEGXL_ENABLE_DOXYGEN"] = False
         tc.variables["JPEGXL_ENABLE_EXAMPLES"] = False
+        tc.variables["JPEGXL_ENABLE_JNI"] = False
         tc.variables["JPEGXL_ENABLE_MANPAGES"] = False
-        tc.variables["JPEGXL_ENABLE_SJPEG"] = False
         tc.variables["JPEGXL_ENABLE_OPENEXR"] = False
+        tc.variables["JPEGXL_ENABLE_PLUGINS"] = False
+        tc.variables["JPEGXL_ENABLE_SJPEG"] = False
         tc.variables["JPEGXL_ENABLE_SKCMS"] = False
-        tc.variables["JPEGXL_ENABLE_TCMALLOC"] = False
+        tc.variables["JPEGXL_ENABLE_TCMALLOC"] = self.options.with_tcmalloc
+        tc.variables["JPEGXL_ENABLE_VIEWERS"] = False
         tc.variables["JPEGXL_FORCE_SYSTEM_BROTLI"] = True
-        tc.variables["JPEGXL_FORCE_SYSTEM_LCMS2"] = True
-        tc.variables["JPEGXL_FORCE_SYSTEM_HWY"] = True
         tc.variables["JPEGXL_FORCE_SYSTEM_GTEST"] = True
+        tc.variables["JPEGXL_FORCE_SYSTEM_HWY"] = True
+        tc.variables["JPEGXL_FORCE_SYSTEM_LCMS2"] = True
+        tc.variables["JPEGXL_WARNINGS_AS_ERRORS"] = False
+        tc.variables["JPEGXL_ENABLE_AVX512"] = self.options.get_safe("avx512", False)
+        tc.variables["JPEGXL_ENABLE_AVX512_SPR"] = self.options.get_safe("avx512_spr", False)
+        tc.variables["JPEGXL_ENABLE_AVX512_ZEN4"] = self.options.get_safe("avx512_zen4", False)
+        tc.variables["JPEGXL_FORCE_NEON"] = self.options.get_safe("force_neon", False)
         if cross_building(self):
             tc.variables["CMAKE_SYSTEM_PROCESSOR"] = str(self.settings.arch)
         # Allow non-cache_variables to be used
@@ -88,7 +117,7 @@ class LibjxlConan(ConanFile):
         # Skip the buggy custom FindAtomic and force the use of atomic library directly for libstdc++
         tc.variables["ATOMICS_LIBRARIES"] = "atomic" if self._atomic_required else ""
         if Version(self.version) >= "0.8":
-            # TODO: add support for jpegli JPEG encoder library
+            # TODO: add support for the jpegli JPEG encoder library
             tc.variables["JPEGXL_ENABLE_JPEGLI"] = False
             tc.variables["JPEGXL_ENABLE_JPEGLI_LIBJPEG"] = False
         tc.generate()
@@ -97,6 +126,10 @@ class LibjxlConan(ConanFile):
         deps.set_property("brotli", "cmake_file_name", "Brotli")
         deps.set_property("highway", "cmake_file_name", "HWY")
         deps.set_property("lcms", "cmake_file_name", "LCMS2")
+        deps.generate()
+
+        # For tcmalloc
+        deps = PkgConfigDeps(self)
         deps.generate()
 
     @property
@@ -117,7 +150,8 @@ class LibjxlConan(ConanFile):
         for cmake_file in ["jxl.cmake", "jxl_threads.cmake", "jxl_cms.cmake", "jpegli.cmake"]:
             path = os.path.join(self.source_folder, "lib", cmake_file)
             if os.path.exists(path):
-                replace_in_file(self, path, "POSITION_INDEPENDENT_CODE ON", "POSITION_INDEPENDENT_CODE ${CMAKE_POSITION_INDEPENDENT_CODE}")
+                fpic = "ON" if self.options.get_safe("fPIC", True) else "OFF"
+                replace_in_file(self, path, "POSITION_INDEPENDENT_CODE ON", f"POSITION_INDEPENDENT_CODE {fpic}")
 
         if Version(self.version) < "0.7":
             replace_in_file(self, os.path.join(self.source_folder, "lib", "jxl.cmake"),
@@ -154,6 +188,8 @@ class LibjxlConan(ConanFile):
         self.cpp_info.components["jxl"].set_property("pkg_config_name", "libjxl")
         self.cpp_info.components["jxl"].libs = [self._lib_name("jxl")]
         self.cpp_info.components["jxl"].requires = ["brotli::brotli", "highway::highway", "lcms::lcms"]
+        if self.options.with_tcmalloc:
+            self.cpp_info.components["jxl"].requires.append("gperftools::tcmalloc_minimal")
         if self._atomic_required:
             self.cpp_info.components["jxl"].system_libs.append("atomic")
         if not self.options.shared:
