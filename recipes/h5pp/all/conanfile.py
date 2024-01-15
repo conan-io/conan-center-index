@@ -69,13 +69,13 @@ class H5ppConan(ConanFile):
             del self.options.with_quadmath
 
     def requirements(self):
-        self.requires("hdf5/[>=1.10.0 <1.15]", transitive_headers=True, transitive_libs=True)
+        self.requires("hdf5/1.14.3", transitive_headers=True, transitive_libs=True)
         if Version(self.version) < "1.10.0" or self.options.get_safe('with_eigen'):
             self.requires("eigen/3.4.0", transitive_headers=True)
         if Version(self.version) < "1.10.0" or self.options.get_safe('with_spdlog'):
-            self.requires("spdlog/[>=1.11.0 <1.14]", transitive_headers=True, transitive_libs=True)
+            self.requires("spdlog/1.13.0", transitive_headers=True, transitive_libs=True)
         if Version(self.version) >= "1.10.0" and self.options.with_zlib:
-            self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True, transitive_libs=True)
+            self.requires("zlib/1.3", transitive_headers=True, transitive_libs=True)
 
     def layout(self):
         basic_layout(self,src_folder="src")
