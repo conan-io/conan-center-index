@@ -231,8 +231,6 @@ class BotanConan(ConanFile):
     def _cxxflags(self):
         global_cxxflags = " ".join(self.conf.get("tools.build:cxxflags", default=[], check_type=list))
         env_cxxflags = VirtualBuildEnv(self).vars().get("CXXFLAGS")
-        if env_cxxflags is None:
-            env_cxxflags = os.getenv("CXXFLAGS", "")
         cxxflags = f"{env_cxxflags} {global_cxxflags}".strip()
         return cxxflags if len(cxxflags) > 0 else None
 
@@ -260,12 +258,7 @@ class BotanConan(ConanFile):
         with chdir(self, self.source_folder):
             # Note: this will fail to properly consider the package_folder if a "conan build" followed by a "conan export-pkg" is executed
             self.run(self._make_install_cmd)
-        if is_apple_os(self):
-            # fix rpath to make installed library relocatable (CCI KB-H077)
-            with chdir(self, os.path.join(self.package_folder, "lib")):
-                for dylib in glob.glob("*.dylib"):
-                    if not os.path.islink(dylib):
-                        self.run(f"install_name_tool -id @rpath/{os.path.basename(dylib)} {dylib}")
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         major_version = Version(self.version).major
