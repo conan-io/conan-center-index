@@ -1,8 +1,3 @@
---- PCbuild/pcbuild.sln
-+++ PCbuild/pcbuild.sln
-@@ -58,2 +58,0 @@
--Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sqlite3", "sqlite3.vcxproj", "{A1A295E5-463C-437F-81CA-1F32367685DA}"
--EndProject
 --- PCbuild/python.vcxproj
 +++ PCbuild/python.vcxproj
 @@ -120,1 +120,1 @@
