@@ -54,6 +54,9 @@ class PackageConan(ConanFile):
         # Set transitive_headers=True (which usually also requires transitive_libs=True) if
         # the dependency is used in any of the packaged header files.
         self.requires("dependency/0.8.1")
+        # A small number of dependencies on CCI are allowed to use version ranges.
+        # See https://github.com/conan-io/conan-center-index/blob/master/docs/adding_packages/dependencies.md#version-ranges
+        self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         # in case it does not work in another configuration, it should validated here too

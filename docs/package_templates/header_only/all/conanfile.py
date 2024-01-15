@@ -52,6 +52,9 @@ class PackageConan(ConanFile):
         # Prefer self.requires method instead of requires attribute
         # Direct dependencies of header only libs are always transitive since they are included in public headers
         self.requires("dependency/0.8.1")
+        # A small number of dependencies on CCI are allowed to use version ranges.
+        # See https://github.com/conan-io/conan-center-index/blob/master/docs/adding_packages/dependencies.md#version-ranges
+        self.requires("openssl/[>=1.1 <4]")
 
     # same package ID for any package
     def package_id(self):
