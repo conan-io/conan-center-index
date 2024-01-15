@@ -295,7 +295,7 @@ class GtsamConan(ConanFile):
 
         # Ensure a newer CMake standard is used for non-cache_variables support and other policies
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        if Version(self.version) >= "4.2":
+        if Version(self.version) >= "4.1":
             replace_in_file(self, cmakelists,
                             "cmake_minimum_required(VERSION 3.0)",
                             "cmake_minimum_required(VERSION 3.15)")
