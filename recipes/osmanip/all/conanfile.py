@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.files import copy, get, rmdir, replace_in_file, save
 from conan.tools.scm import Version
 
 import os
@@ -103,6 +103,8 @@ class OsmanipConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "    DESTINATION lib\n",
                             "    RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib\n")
+        save(self, os.path.join(self.source_folder, "examples", "CMakeLists.txt"), "")
+        save(self, os.path.join(self.source_folder, "deps", "doctest", "CMakeLists.txt"), "")
 
     def build(self):
         self._patch_sources()
