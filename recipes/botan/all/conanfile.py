@@ -231,7 +231,7 @@ class BotanConan(ConanFile):
     @property
     def _cxxflags(self):
         global_cxxflags = " ".join(self.conf.get("tools.build:cxxflags", default=[], check_type=list))
-        env_cxxflags = VirtualBuildEnv(self).vars().get("CXXFLAGS")
+        env_cxxflags = VirtualBuildEnv(self).vars().get("CXXFLAGS", default="")
         cxxflags = f"{env_cxxflags} {global_cxxflags}".strip()
         return cxxflags if len(cxxflags) > 0 else None
 
