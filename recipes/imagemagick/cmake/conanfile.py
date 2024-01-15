@@ -424,7 +424,7 @@ class ImageMagicConan(ConanFile):
         if self.options.with_zstd:
             core_requires.append("zstd::zstd")
         if self.options.get_safe("with_x11"):
-            core_requires.append("xorg::xorg")
+            core_requires.append("xorg::x11")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["MagickCore"].system_libs.append("pthread")
