@@ -25,13 +25,13 @@ bool BlobInfo_Equal(const uint32* infoArr, uint32 nDim, uint32 nCols, uint32 nRo
 
 // Sample 1: float image, 1 band, with some pixels set to invalid / void, maxZError = 0.1
 void sample1() {
-  const int h = 512;
-  const int w = 512;
+#define H 512
+#define W 512
 
-  float zImg[w * h];
-  Byte maskByteImg[w * h];
-  for (int k = 0, i = 0; i < h; ++i) {
-    for (int j = 0; j < w; ++j, ++k) {
+  float zImg[W * H];
+  Byte maskByteImg[W * H];
+  for (int k = 0, i = 0; i < H; ++i) {
+    for (int j = 0; j < W; ++j, ++k) {
       zImg[k] = sqrt((float)(i * i + j * j));    // smooth surface
       zImg[k] += rand() % 20;    // add some small amplitude noise
 
@@ -53,7 +53,7 @@ void sample1() {
   uint32 numBytesWritten = 0;
 
   lerc_status hr = lerc_computeCompressedSize((void*)zImg,    // raw image data, row by row, band by band
-    (uint32)dt_float, 1, w, h, 1,
+    (uint32)dt_float, 1, W, H, 1,
 #ifdef LERC_VER3_LATER
     1,
 #endif
@@ -68,7 +68,7 @@ void sample1() {
   Byte pLercBlob[1000000];
 
   hr = lerc_encode((void*)zImg,    // raw image data, row by row, band by band
-    (uint32)dt_float, 1, w, h, 1,
+    (uint32)dt_float, 1, W, H, 1,
 #ifdef LERC_VER3_LATER
     1,
 #endif
@@ -81,7 +81,7 @@ void sample1() {
   if (hr)
     printf("lerc_encode(...) failed\n");
 
-  double ratio = w * h * (0.125 + sizeof(float)) / numBytesBlob;
+  double ratio = W * H * (0.125 + sizeof(float)) / numBytesBlob;
   printf("sample 1 compression ratio = %lf", ratio);
 
 
@@ -95,18 +95,18 @@ void sample1() {
 
   BlobInfo_Print(infoArr);
 
-  if (!BlobInfo_Equal(infoArr, 1, w, h, 1, (uint32)dt_float))
+  if (!BlobInfo_Equal(infoArr, 1, W, H, 1, (uint32)dt_float))
     printf("got wrong lerc info");
 
   // new empty data storage
-  float zImg3[w * h];
+  float zImg3[W * H];
 
-  Byte maskByteImg3[w * h];
+  Byte maskByteImg3[W * H];
 
 #ifdef LERC_VER3_LATER
-  hr = lerc_decode(pLercBlob, numBytesBlob, 1, maskByteImg3, 1, w, h, 1, (uint32)dt_float, (void*)zImg3);
+  hr = lerc_decode(pLercBlob, numBytesBlob, 1, maskByteImg3, 1, W, H, 1, (uint32)dt_float, (void*)zImg3);
 #else
-  hr = lerc_decode(pLercBlob, numBytesBlob, maskByteImg3, 1, w, h, 1, (uint32)dt_float, (void*)zImg3);
+  hr = lerc_decode(pLercBlob, numBytesBlob, maskByteImg3, 1, W, H, 1, (uint32)dt_float, (void*)zImg3);
 #endif
   if (hr)
     printf("lerc_decode(...) failed");
@@ -114,9 +114,9 @@ void sample1() {
   // compare to orig
 
   double maxDelta = 0;
-  for (int k = 0, i = 0; i < h; i++)
+  for (int k = 0, i = 0; i < H; i++)
   {
-    for (int j = 0; j < w; j++, k++)
+    for (int j = 0; j < W; j++, k++)
     {
       if (maskByteImg3[k] != maskByteImg[k])
         printf("Error in main: decoded valid bytes differ from encoded valid bytes\n");
