@@ -76,16 +76,19 @@ class LLVMOpenMpConan(ConanFile):
     def validate(self):
         if is_msvc(self):
             raise ConanInvalidConfiguration("llvm-openmp is not compatible with MSVC")
-        if self.settings.compiler not in ["apple-clang", "clang", "gcc", "intel-cc"]:
+
+        if not self._openmp_flags():
             raise ConanInvalidConfiguration(
                 f"{self.settings.compiler} is not supported by this recipe. Contributions are welcome!"
             )
+
         if self._version_major >= 17:
             if self.settings.compiler.cppstd:
                 check_min_cppstd(self, 17)
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if minimum_version and Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not support.")
+
         if is_apple_os(self) and self.settings.arch == "armv8":
             if self._version_major <= 10:
                 raise ConanInvalidConfiguration("ARM v8 not supported")
@@ -172,6 +175,22 @@ class LLVMOpenMpConan(ConanFile):
     def _module_file_rel_path(self):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
+    def _openmp_flags(self):
+        # Based on https://github.com/Kitware/CMake/blob/v3.28.1/Modules/FindOpenMP.cmake#L104-L135
+        if self.settings.compiler == "clang":
+            return ["-fopenmp=libomp"]
+        elif self.settings.compiler == "apple-clang":
+            return ["-Xclang", "-fopenmp"]
+        elif self.settings.compiler == "gcc":
+            return ["-fopenmp"]
+        elif self.settings.compiler == "intel-cc":
+            return ["-Qopenmp"]
+        elif self.settings.compiler == "sun-cc":
+            return ["-xopenmp"]
+        elif is_msvc(self):
+            return ["-openmp"]
+        return None
+
     def package_info(self):
         # Match FindOpenMP.cmake module provided by CMake
         self.cpp_info.set_property("cmake_find_mode", "both")
@@ -179,13 +198,12 @@ class LLVMOpenMpConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "OpenMP::OpenMP")
         self.cpp_info.set_property("cmake_target_aliases", ["OpenMP::OpenMP_C", "OpenMP::OpenMP_CXX"])
 
-        if self.settings.compiler in ("clang", "apple-clang"):
-            self.cpp_info.cxxflags = ["-Xpreprocessor", "-fopenmp"]
-        elif self.settings.compiler == "gcc":
-            self.cpp_info.cxxflags = ["-fopenmp"]
-        elif self.settings.compiler == "intel-cc":
-            self.cpp_info.cxxflags = ["/Qopenmp"] if self.settings.os == "Windows" else ["-Qopenmp"]
-        self.cpp_info.cflags = self.cpp_info.cxxflags
+        openmp_flags = self._openmp_flags()
+        self.cpp_info.cflags = openmp_flags
+        self.cpp_info.cxxflags = openmp_flags
+        self.cpp_info.sharedlinkflags = openmp_flags
+        self.cpp_info.exelinkflags = openmp_flags
+
         self.cpp_info.libs = ["omp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "m", "pthread", "rt"]
