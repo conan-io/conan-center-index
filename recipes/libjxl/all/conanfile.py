@@ -141,7 +141,7 @@ class LibjxlConan(ConanFile):
             rm(self, "*-static.lib", os.path.join(self.package_folder, "lib"))
 
     def _lib_name(self, name):
-        if not self.options.shared and self.settings.os == "Windows":
+        if Version(self.version) < "0.9" and not self.options.shared and self.settings.os == "Windows":
             return name + "-static"
         return name
 
