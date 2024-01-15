@@ -29,13 +29,6 @@ class canteraRecipe(ConanFile):
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
 
-    # Define config variables
-    scons_extra_inc_dirs = []
-    scons_extra_lib_dirs = []
-    scons_sundials_include = ""
-    scons_sundials_libdir = ""
-    scons_boost_inc_dir = ""
-
     @property
     def _minimum_cpp_standard(self):
         return 17
@@ -92,6 +85,10 @@ class canteraRecipe(ConanFile):
             "googletest": "none",
             "versioned_shared_library": "yes",
             "prefix": self.package_folder,
+            "system_fmt": 'y',
+            "system_yamlcpp": 'y',
+            "system_eigen": 'y',
+            "system_sundials": 'y',
             "extra_inc_dirs": os.pathsep.join(include_paths),
             "extra_lib_dirs": os.pathsep.join(lib_paths),
             "boost_inc_dir": self.dependencies["boost"].cpp_info.includedirs[0],
