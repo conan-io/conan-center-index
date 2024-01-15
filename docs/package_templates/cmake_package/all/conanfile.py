@@ -72,10 +72,13 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # Prefer self.requires method instead of requires attribute
-        # Set transitive_headers=True (which usually also requires transitive_libs=True) if
-        # the dependency is used in any of the packaged header files.
+        # Prefer self.requires method instead of requires attribute.
+        # Set transitive_headers=True (which usually also requires transitive_libs=True)
+        # if the dependency is used in any of the packaged header files.
         self.requires("dependency/0.8.1")
+        if self.options.with_foobar:
+            # used in foo/baz.hpp:34
+            self.requires("foobar/0.1.0", transitive_headers=True, transitive_libs=True)
         # A small number of dependencies on CCI are allowed to use version ranges.
         # See https://github.com/conan-io/conan-center-index/blob/master/docs/adding_packages/dependencies.md#version-ranges
         self.requires("openssl/[>=1.1 <4]")
