@@ -62,7 +62,7 @@ class SAILConan(ConanFile):
             self.requires("libtiff/4.6.0")
         if self.options.with_high_priority_codecs:
             if Version(self.version) >= "0.9.1":
-                self.requires("nanosvg/cci.20231025")
+                self.tool_requires("nanosvg/cci.20231025")
         if self.options.with_medium_priority_codecs:
             self.requires("libavif/1.0.3")
             self.requires("jasper/4.1.1")
