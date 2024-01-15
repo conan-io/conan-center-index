@@ -31,17 +31,28 @@ class VkBootstrapConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "14"
+        if Version(self.version) >= "1.3.270":
+            return 17
+        return 14
 
     @property
     def _compilers_minimum_version(self):
-        return {
-            "gcc": "5",
-            "Visual Studio": "15",
-            "msvc": "191",
-            "clang": "3.7" if stdcpp_library(self) == "stdc++" else "6",
-            "apple-clang": "10",
-        }
+        if Version(self.version) >= "1.3.270":
+            return {
+                "gcc": "7",
+                "Visual Studio": "15",
+                "msvc": "191",
+                "clang": "6",
+                "apple-clang": "11",
+            }
+        else:
+            return {
+                "gcc": "5",
+                "Visual Studio": "15",
+                "msvc": "191",
+                "clang": "3.7" if stdcpp_library(self) == "stdc++" else "6",
+                "apple-clang": "10",
+            }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -57,21 +68,24 @@ class VkBootstrapConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    @property
+    def _headers_version(self):
+        return {}.get(self.version, f"{self.version}.0")
+
     def requirements(self):
-        if Version(self.version) < "0.7":
-            self.requires("vulkan-headers/1.3.236.0", transitive_headers=True)
-        else:
+        if Version(self.version) >= "1.3":
+            self.requires(f"vulkan-headers/{self._headers_version}", transitive_headers=True)
+        elif Version(self.version) >= "0.7":
             self.requires("vulkan-headers/1.3.239.0", transitive_headers=True)
+        else:
+            self.requires("vulkan-headers/1.3.236.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
         def loose_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
+            return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
@@ -90,8 +104,8 @@ class VkBootstrapConan(ConanFile):
         tc.variables["VK_BOOTSTRAP_TEST"] = False
         vulkan_headers = self.dependencies["vulkan-headers"]
         includedirs = ";".join(
-            [os.path.join(vulkan_headers.package_folder, includedir).replace("\\", "/")
-             for includedir in vulkan_headers.cpp_info.includedirs],
+            os.path.join(vulkan_headers.package_folder, includedir).replace("\\", "/")
+            for includedir in vulkan_headers.cpp_info.includedirs
         )
         if Version(self.version) < "0.3.0":
             tc.variables["Vulkan_INCLUDE_DIR"] = includedirs
