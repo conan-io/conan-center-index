@@ -74,7 +74,7 @@ class GtsamConan(ConanFile):
         "with_TBB": True,
         "with_eigen_MKL": False,
         "with_eigen_MKL_OPENMP": False,
-        "with_vendored_metis": True,
+        "with_vendored_metis": True,  # Cannot be disabled in C3I due to a non-default option value
 
         # < v4.1 only
         "build_wrap": False,
@@ -146,7 +146,10 @@ class GtsamConan(ConanFile):
         self.requires("boost/1.83.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.with_TBB:
-            self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
+            if Version(self.version) >= "4.1":
+                self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
+            else:
+                self.requires("onetbb/2020.3.3", transitive_headers=True, transitive_libs=True)
         if self.options.default_allocator == "tcmalloc":
             self.requires("gperftools/2.14.0")
         if self.options.support_nested_dissection and not self.options.with_vendored_metis:
@@ -266,6 +269,11 @@ class GtsamConan(ConanFile):
 
         tc.variables["Boost_USE_STATIC_LIBS"] = not self.dependencies["boost"].options.shared
         tc.variables["Boost_NO_SYSTEM_PATHS"] = True
+
+        if Version(self.version) < "4.1":
+            # Fix "The practice of declaring the Bind placeholders (_1, _2, ...) in the global namespace is deprecated"
+            tc.preprocessor_definitions["BOOST_BIND_GLOBAL_PLACEHOLDERS"] = ""
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -360,6 +368,9 @@ class GtsamConan(ConanFile):
             gtsam.requires.append("gperftools::gperftools")
         if self.settings.os == "Windows":
             gtsam.system_libs = ["dbghelp"]
+        if Version(self.version) < "4.1":
+            # Fix "The practice of declaring the Bind placeholders (_1, _2, ...) in the global namespace is deprecated"
+            gtsam.defines.append("BOOST_BIND_GLOBAL_PLACEHOLDERS")
 
         if self.options.build_unstable:
             gtsam_unstable = self.cpp_info.components["libgtsam_unstable"]
@@ -373,10 +384,7 @@ class GtsamConan(ConanFile):
                 metis.set_property("cmake_target_name", "metis-gtsam")
                 metis.set_property("pkg_config_name", "metis-gtsam")
                 metis.names["pkg_config"] = "metis-gtsam"
-                if Version(self.version) >= "4.1":
-                    metis.libs = ["metis-gtsam"]
-                else:
-                    metis.libs = ["metis"]
+                metis.libs = ["metis-gtsam"]
                 gtsam.requires.append("libmetis-gtsam")
             else:
                 gtsam.requires.append("metis::metis")
