@@ -9,9 +9,6 @@ class TestPackage(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
-    options = {
-        "shared": [True, False]
-    }
 
     def layout(self):
         cmake_layout(self)
