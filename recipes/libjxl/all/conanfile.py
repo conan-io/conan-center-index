@@ -52,6 +52,9 @@ class LibjxlConan(ConanFile):
             del self.options.avx512_zen4
         if not str(self.settings.arch).startswith("arm"):
             del self.options.force_neon
+        # https://github.com/libjxl/libjxl/blob/v0.9.1/CMakeLists.txt#L52-L59
+        if self.settings.os in ["Linux", "FreeBSD"] and self.settings.arch == "x86_64":
+            self.options.with_tcmalloc = True
 
     def configure(self):
         if self.options.shared:
