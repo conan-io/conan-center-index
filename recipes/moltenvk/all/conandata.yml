@@ -1,13 +1,13 @@
 sources:
+  "1.2.7":
+    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.2.7.tar.gz"
+    sha256: "3166edcfdca886b4be1a24a3c140f11f9a9e8e49878ea999e3580dfbf9fe4bec"
   "1.2.2":
     url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.2.2.tar.gz"
     sha256: "8065a10c2d70b561f48475dedb118e643176527b162d6e439fa127270c2a07dd"
   "1.2.1":
     url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.2.1.tar.gz"
     sha256: "4742df8f35473c5a737f2b120ae06aa6b9e8a7a3753b88932e501b06b1d17ea8"
-  "1.2.0":
-    url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.2.0.tar.gz"
-    sha256: "6e7af2dad0530b2b404480dbe437ca4670c6615cc2ec6cf6a20ed04d9d75e0bd"
   "1.1.11":
     url: "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.1.11.tar.gz"
     sha256: "938ea0ba13c6538b0ee505ab391a3020f206ab9d29c869f20dd19318a4ee8997"
@@ -18,15 +18,6 @@ patches:
       patch_type: "portability"
       patch_source: "https://github.com/KhronosGroup/MoltenVK/issues/2156"
   "1.2.1":
-    - patch_file: "patches/1.2.2-0001-MVKSmallVector-Make-iterator-const-correct.patch"
-      patch_description: "Fix build errors in Xcode 15.3 beta"
-      patch_type: "portability"
-      patch_source: "https://github.com/KhronosGroup/MoltenVK/issues/2156"
-  "1.2.0":
-    - patch_file: "patches/1.2.0-0001-fix-version-number-icd-json.patch"
-      patch_description: "Fix api_version in MoltenVK_icd.json"
-      patch_type: "portability"
-      patch_source: "https://github.com/KhronosGroup/MoltenVK/pull/1747"
     - patch_file: "patches/1.2.2-0001-MVKSmallVector-Make-iterator-const-correct.patch"
       patch_description: "Fix build errors in Xcode 15.3 beta"
       patch_type: "portability"
