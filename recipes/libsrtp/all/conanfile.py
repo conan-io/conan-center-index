@@ -54,10 +54,10 @@ class LibsrtpRecipe(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
 
         if self.options.with_nss:
-            self.requires("nss3")
+            self.requires("nss/[>=3.93 <4]")
 
         if self.options.with_mbedtls:
-            self.requires("mbedtls")
+            self.requires("mbedtls/[>=3.5.1 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
