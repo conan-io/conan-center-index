@@ -260,7 +260,7 @@ class GdalConan(ConanFile):
         if self.options.with_odbc:
             self.requires("odbc/2.3.11")
         if self.options.with_opencl:
-            self.requires("opencl-icd-loader/2023.04.17")
+            self.requires("opencl-icd-loader/2023.12.14")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.0")
         if self.options.with_openssl:
@@ -294,7 +294,7 @@ class GdalConan(ConanFile):
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
         if self.options.with_xerces:
-            self.requires("xerces-c/3.2.4")
+            self.requires("xerces-c/3.2.5")
         if self.options.with_xml2:
             self.requires("libxml2/2.12.3")
         if self.options.with_zstd:
