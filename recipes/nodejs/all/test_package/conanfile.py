@@ -17,5 +17,6 @@ class TestPackageConan(ConanFile):
         self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        if not os.path.isfile(self.dependencies[self.tested_reference_str].cpp_info.bindir):
+        binary_name = "node.exe" if self.settings.os == "Windows" else "node"
+        if not os.path.isfile(os.path.join(self.dependencies[self.tested_reference_str].cpp_info.bindir, binary_name)):
             raise ConanException("node not found in package")
