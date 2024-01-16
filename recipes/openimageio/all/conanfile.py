@@ -268,7 +268,7 @@ class OpenImageIOConan(ConanFile):
             "tsl-robin-map::tsl-robin-map",
             "libsquish::libsquish",
             "fmt::fmt",
-            "Imath::Imath",
+            "imath::imath",
             "openexr::openexr",
         ]
 
