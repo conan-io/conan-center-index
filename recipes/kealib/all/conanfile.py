@@ -62,12 +62,13 @@ class KealibConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["HDF5_USE_STATIC_LIBRARIES"] = not self.dependencies["hdf5"].options.shared
-        tc.cache_variables["HDF5_PREFER_PARALLEL"] = self.dependencies["hdf5"].options.parallel
-        tc.cache_variables["HDF5_THREADSAFE"] = self.dependencies["hdf5"].options.get_safe("threadsafe", False)
-        tc.cache_variables["LIBKEA_WITH_GDAL"] = False
+        tc.variables["HDF5_USE_STATIC_LIBRARIES"] = not self.dependencies["hdf5"].options.shared
+        tc.variables["HDF5_PREFER_PARALLEL"] = self.dependencies["hdf5"].options.parallel
+        tc.variables["HDF5_THREADSAFE"] = self.dependencies["hdf5"].options.get_safe("threadsafe", False)
+        tc.variables["LIBKEA_WITH_GDAL"] = False
         # INFO: kealib uses C++11 but does not configure in cmake: https://github.com/ubarsc/kealib/pull/48
         tc.variables["CMAKE_CXX_STANDARD"] = self.settings.get_safe("compiler.cppstd", self._min_cppstd)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         tc = CMakeDeps(self)
