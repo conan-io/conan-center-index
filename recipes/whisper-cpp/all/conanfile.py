@@ -19,16 +19,40 @@ class WhisperCppConan(ConanFile):
     homepage = "https://github.com/ggerganov/whisper.cpp"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "sanitize_thread": [True, False],
-               "sanitize_address": [True, False], "sanitize_undefined": [True, False],
-               "no_avx": [True, False], "no_avx2": [True, False], "no_fma": [True, False], "no_f16c": [True, False],
-               "no_accelerate": [True, False], "metal": [True, False], "metal_ndebug": [True, False], 
-               "with_coreml": [True, False], "coreml_allow_fallback": [True, False], "with_blas": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "sanitize_thread": False,
-                       "sanitize_address": False, "sanitize_undefined": False,
-                       "no_avx": False, "no_avx2": False, "no_fma": False, "no_f16c": False,
-                       "no_accelerate": False, "metal": False, "metal_ndebug": False, 
-                       "with_coreml": False, "coreml_allow_fallback": False, "with_blas": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "sanitize_thread": [True, False],
+        "sanitize_address": [True, False],
+        "sanitize_undefined": [True, False],
+        "no_avx": [True, False],
+        "no_avx2": [True, False],
+        "no_fma": [True, False],
+        "no_f16c": [True, False],
+        "no_accelerate": [True, False],
+        "metal": [True, False],
+        "metal_ndebug": [True, False],
+        "with_coreml": [True, False],
+        "coreml_allow_fallback": [True, False],
+        "with_blas": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "sanitize_thread": False,
+        "sanitize_address": False,
+        "sanitize_undefined": False,
+        "no_avx": False,
+        "no_avx2": False,
+        "no_fma": False,
+        "no_f16c": False,
+        "no_accelerate": False,
+        "metal": False,
+        "metal_ndebug": False,
+        "with_coreml": False,
+        "coreml_allow_fallback": False,
+        "with_blas": False,
+    }
     package_type = "library"
 
     @property
@@ -82,7 +106,7 @@ class WhisperCppConan(ConanFile):
     def requirements(self):
         if not is_apple_os(self):
             if self.options.with_blas:
-                self.requires("openblas/0.3.20")
+                self.requires("openblas/0.3.24")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -95,6 +119,7 @@ class WhisperCppConan(ConanFile):
 
     def generate(self):
         deps = CMakeDeps(self)
+        deps.set_property("openblas", "cmake_file_name", "BLAS")
         deps.generate()
 
         tc = CMakeToolchain(self)
