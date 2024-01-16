@@ -52,6 +52,17 @@ diff --git a/cmake/helpers/CheckDependentLibraries.cmake b/cmake/helpers/CheckDe
      message(FATAL_ERROR "Configured to use GDAL_USE_LIBKML, but not found")
    endif ()
  endif ()
+@@ -540,8 +540,8 @@
+ gdal_check_package(MRSID "MrSID raster SDK" CAN_DISABLE)
+ gdal_check_package(Armadillo "C++ library for linear algebra (used for TPS transformation)" CAN_DISABLE)
+ if (ARMADILLO_FOUND)
+-  # On Conda, the armadillo package has no dependency on lapack, but the later is required for successful linking. So
+-  # try to build & link a test program using Armadillo.
++  # On Conda, the armadillo package has no dependency on lapack, but the later is required for successful linking. So try to build & link a test program using Armadillo.
++  include(CMakePushCheckState)
+   cmake_push_check_state(RESET)
+   set(CMAKE_REQUIRED_INCLUDES "${ARMADILLO_INCLUDE_DIRS}")
+   set(CMAKE_REQUIRED_LIBRARIES "${ARMADILLO_LIBRARIES}")
 @@ -646,7 +646,7 @@
  gdal_check_package(HEIF "HEIF >= 1.1" CAN_DISABLE)
  
