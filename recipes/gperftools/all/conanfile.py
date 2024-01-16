@@ -184,12 +184,7 @@ class GperftoolsConan(ConanFile):
         autotools.make()
 
     def package(self):
-        copy(
-            self,
-            pattern="COPYING",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
-        )
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
 
@@ -200,6 +195,7 @@ class GperftoolsConan(ConanFile):
 
     def _add_component(self, lib):
         self.cpp_info.components[lib].libs = [lib]
+        self.cpp_info.components[lib].set_property("pkg_config_name", f"lib{lib}")
 
     def package_info(self):
         self._add_component("tcmalloc_minimal")
@@ -217,6 +213,8 @@ class GperftoolsConan(ConanFile):
         for component in self.cpp_info.components.values():
             if self.settings.os in ["Linux", "FreeBSD"]:
                 component.system_libs.extend(["pthread", "m"])
+                component.cflags.append("-pthread")
+                component.cxxflags.append("-pthread")
             if self.options.get_safe("enable_libunwind"):
                 component.requires.append("libunwind::libunwind")
 
