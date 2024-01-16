@@ -1,4 +1,4 @@
 sources:
-  "cci.20210113":
-    url: "https://github.com/andreasbuhr/cppcoro/archive/7cc9433436fe8f2482138019cfaafce8e1d7a896.zip"
-    sha256: "5edc72bb19616ae5b794c7d83f9a5d4973f32c966f1966ab81779d3a38b36a2c"
+  "cci.20230629":
+    url: "https://github.com/andreasbuhr/cppcoro/archive/a3082f56ba135a659f7386b00ff797ba441207ba.zip"
+    sha256: "8c3283dd7587cdd18b871b290fda9394f262110140685e6de3760ede3b505736"

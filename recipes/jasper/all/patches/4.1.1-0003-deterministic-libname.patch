@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 86eb065..9c2da51 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -276,7 +276,7 @@ endif()
+ # If a multiconfiguration generator is used, ensure that various output
+ # files are not placed in subdirectories (such as Debug and Release)
+ # as this will cause the CTest test suite to fail.
+-if(JAS_MULTICONFIGURATION_GENERATOR)
++if(0)
+ 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY .)
+ 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY .)
+ 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY .)
