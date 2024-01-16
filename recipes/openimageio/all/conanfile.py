@@ -83,8 +83,8 @@ class OpenImageIOConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("boost/1.83.0")
         self.requires("libtiff/4.6.0")
-        self.requires("openexr/3.2.1")
         self.requires("imath/3.1.9", transitive_headers=True)
+        self.requires("openexr/3.2.1")
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
@@ -243,6 +243,7 @@ class OpenImageIOConan(ConanFile):
             "boost::thread",
             "boost::system",
             "boost::regex",
+            "Imath::Imath",
             "openexr::openexr",
         ]
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -263,11 +264,12 @@ class OpenImageIOConan(ConanFile):
             "boost::container",
             "boost::regex",
             "libtiff::libtiff",
-            "openexr::openexr",
             "pugixml::pugixml",
             "tsl-robin-map::tsl-robin-map",
             "libsquish::libsquish",
             "fmt::fmt",
+            "Imath::Imath",
+            "openexr::openexr",
         ]
 
         if self.options.with_libjpeg == "libjpeg":
