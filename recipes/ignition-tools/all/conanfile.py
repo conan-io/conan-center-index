@@ -45,16 +45,17 @@ class IgnitionToolsConan(ConanFile):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warning(
-                f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support."
+        if min_version and Version(self.settings.compiler.version) < min_version:
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires c++17 support. "
+                f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it."
             )
-        else:
-            if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.name} requires c++17 support. "
-                    f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it."
-                )
+
+    def build_requirements(self):
+        # FIXME: Ruby is required as a transitive dependency for the `ign` Ruby script
+        # FIXME: The ign script has additional Ruby dependencies
+        # self.tool_requires("ruby/3.1.0")
+        pass
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -95,6 +96,7 @@ class IgnitionToolsConan(ConanFile):
 
         # Generate ign.rb
         ign_rb_content = load(self, os.path.join(self.source_folder, "src", "ign.in"))
+        # FIXME: this is not relocatable
         ign_rb_content = ign_rb_content.replace("@CMAKE_INSTALL_PREFIX@", self.package_folder.replace("\\", "/"))
         ign_rb_content = ign_rb_content.replace("@ENV_PATH_DELIMITER@", os.pathsep)
         suffix = ".rb" if self.settings.os == "Windows" else ""
@@ -112,21 +114,11 @@ class IgnitionToolsConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
 
-        version_major = Version(self.version).major
-        pkg_name = f"ignition-tools{version_major}"
-        self.cpp_info.set_property("cmake_file_name", pkg_name)
-        self.cpp_info.set_property("cmake_target_name", f"{pkg_name}::{pkg_name}")
+        # The package builds an ignition-tools-backward wrapper library,
+        # but it's only meant to be used as a runtime dependency of the ign script
 
-        component = self.cpp_info.components["libignition-tools"]
-        component.includedirs = []
-        component.libs = ["ignition-tools-backward"]
-        component.requires = ["backward-cpp::backward-cpp"]
-        component.set_property("cmake_target_name", pkg_name)
-        component.set_property("pkg_config_name", pkg_name)
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = pkg_name
-        self.cpp_info.names["cmake_find_package_multi"] = pkg_name
-        component.names["cmake_find_package"] = pkg_name
-        component.names["cmake_find_package_multi"] = pkg_name
+        # TODO: Legacy, to be removed on Conan 2.0
+        bin_folder = os.path.join(self.package_folder, "bin")
+        self.env_info.PATH.append(bin_folder)
