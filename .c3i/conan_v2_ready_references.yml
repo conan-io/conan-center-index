@@ -20,6 +20,7 @@ required_for_references:
 - alpaca
 - amgcl
 - amqp-cpp
+- andreasbuhr-cppcoro
 - android-ndk
 - angelscript
 - antlr4-cppruntime
@@ -630,6 +631,7 @@ required_for_references:
 - libelfin
 - libenvpp
 - libepoxy
+- libest
 - libev
 - libevdev
 - libevent
@@ -755,6 +757,7 @@ required_for_references:
 - libuvc
 - libva
 - libvault
+- libvdpau
 - libverto
 - libvips
 - libvpx
@@ -874,6 +877,7 @@ required_for_references:
 - mp-units
 - mpark-variant
 - mpc
+- mpdecimal
 - mpfr
 - mpg123
 - mpmcqueue
@@ -1465,6 +1469,7 @@ required_for_references:
 - zopfli
 - zpp_bits
 - zpp_throwing
+- zserio
 - zstd
 - zstr
 - zug
