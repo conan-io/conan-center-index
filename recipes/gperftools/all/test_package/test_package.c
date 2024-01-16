@@ -1,12 +1,12 @@
 #include <gperftools/tcmalloc.h>
 
-#include <cassert>
-#include <cstdlib>
-#include <iostream>
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 int main() {
     void *p = tc_malloc(100);
     tc_free(p);
-    std::cout << TC_VERSION_STRING << std::endl;
+    puts(TC_VERSION_STRING);
     return p == 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
