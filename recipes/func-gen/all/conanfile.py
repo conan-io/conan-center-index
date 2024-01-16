@@ -21,6 +21,7 @@ class FuncGenConan(ConanFile):
     topics = "code generation"
 
     # Binary configuration
+    package_type = "application"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "fPIC": [True, False],
