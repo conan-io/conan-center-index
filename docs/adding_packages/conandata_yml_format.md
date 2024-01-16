@@ -127,7 +127,7 @@ Usually, `url` has a [https](https://tools.ietf.org/html/rfc2660) scheme, but ot
 
 [sha256](https://tools.ietf.org/html/rfc6234) is a preferred method to specify hash sum for the released sources. It allows to check the integrity of sources downloaded.
 You may use an [online service](https://hash.online-convert.com/sha256-generator) to compute `sha256` sum for the given `url`.
-Also, you may use [sha256sum](https://linux.die.net/man/1/sha256sum) command ([windows](http://www.labtestproject.com/files/win/sha256sum/sha256sum.exe)).
+Also, you may use [sha256sum](https://linux.die.net/man/1/sha256sum) command ([windows](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-filehash?view=powershell-7.4) you can use PowerShell).
 
 ## patches
 
