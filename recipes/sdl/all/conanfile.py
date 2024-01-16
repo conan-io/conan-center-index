@@ -165,7 +165,7 @@ class SDLConan(ConanFile):
 
     def validate(self):
         # SDL>=2.0.18 requires xcode 12 or higher because it uses CoreHaptics.
-        if Version(self.version) >= "2.0.18" and is_apple_os(self) and Version(self.settings.compiler.version) < "12":
+        if is_apple_os(self) and Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("{}/{} requires xcode 12 or higher".format(self.name, self.version))
 
         if self.settings.os == "Linux":
@@ -220,7 +220,7 @@ class SDLConan(ConanFile):
                         '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
 
         # Ensure to find wayland-scanner from wayland recipe in build requirements (or requirements if 1 profile)
-        if self.options.get_safe("wayland") and Version(self.version) >= "2.0.18":
+        if self.options.get_safe("wayland"):
             replace_in_file(self,
                 os.path.join(self.source_folder, "cmake", "sdlchecks.cmake"),
                 "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
