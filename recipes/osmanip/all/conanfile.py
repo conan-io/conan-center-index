@@ -2,8 +2,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.files import copy, get, rmdir, replace_in_file, save
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 
 import os
 
@@ -46,12 +47,10 @@ class OsmanipConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.83.0")
-        # osmanip/progressbar/progress_bar.hpp includes arsenalgear/constants.hpp
-        if Version(self.version) < "4.2.0":
-            self.requires("arsenalgear/1.2.2", transitive_headers=True)
-        else:
-            self.requires("arsenalgear/2.0.1", transitive_headers=True)
+        # https://github.com/JustWhit3/osmanip/commit/43c8bd8d018fcb3bce6443f7388e042d5457d4fb
+        if Version(self.version) < "4.6.0":
+            # osmanip/progressbar/progress_bar.hpp includes arsenalgear/constants.hpp
+            self.requires("arsenalgear/2.1.0", transitive_headers=True)
 
     @property
     def _min_cppstd(self):
@@ -77,9 +76,12 @@ class OsmanipConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if Version(self.version) >= "4.5.0" and self.settings.get_safe("compiler.libcxx") == "libstdc++":
+        if Version(self.version) >= "4.4.0" and self.settings.get_safe("compiler.libcxx") == "libstdc++":
             # test_package segfaults with libstdc++ for some reason
-            raise ConanInvalidConfiguration("osmanip >= 4.5.0 doesn't support libstdc++")
+            raise ConanInvalidConfiguration("osmanip >= 4.4.0 doesn't support libstdc++")
+
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("MSVC is not yet supported by osmanip recipe. Contributions are welcome.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -104,6 +106,8 @@ class OsmanipConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "    DESTINATION lib\n",
                             "    RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib\n")
+        save(self, os.path.join(self.source_folder, "examples", "CMakeLists.txt"), "")
+        save(self, os.path.join(self.source_folder, "deps", "doctest", "CMakeLists.txt"), "")
 
     def build(self):
         self._patch_sources()
