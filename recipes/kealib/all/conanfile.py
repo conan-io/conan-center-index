@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
@@ -67,7 +67,8 @@ class KealibConan(ConanFile):
         tc.variables["HDF5_THREADSAFE"] = self.dependencies["hdf5"].options.get_safe("threadsafe", False)
         tc.variables["LIBKEA_WITH_GDAL"] = False
         # INFO: kealib uses C++11 but does not configure in cmake: https://github.com/ubarsc/kealib/pull/48
-        tc.variables["CMAKE_CXX_STANDARD"] = self.settings.get_safe("compiler.cppstd", self._min_cppstd)
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
