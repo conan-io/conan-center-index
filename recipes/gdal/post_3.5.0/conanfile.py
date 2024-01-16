@@ -92,7 +92,7 @@ class GdalConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "tools": False,
-        "with_armadillo": False,
+        "with_armadillo": True,
         "with_arrow": True,
         "with_basisu": False,
         "with_blosc": False,
