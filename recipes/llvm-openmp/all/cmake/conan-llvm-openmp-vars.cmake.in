@@ -1,0 +1,128 @@
+# Loosely based on https://github.com/Kitware/CMake/blob/69b562c/Modules/FindOpenMP.cmake
+
+set(OpenMP_C_FLAGS "@OpenMP_FLAGS@")
+set(OpenMP_C_INCLUDE_DIR "${OpenMP_INCLUDE_DIR}")
+set(OpenMP_C_INCLUDE_DIRS "${OpenMP_INCLUDE_DIRS}")
+set(OpenMP_C_LIB_NAMES "@OpenMP_LIB_NAMES@")
+set(OpenMP_C_LIBRARIES "${OpenMP_LIBRARIES}")
+set(OpenMP_C_DEFINITIONS "${OpenMP_DEFINITIONS}")
+
+set(OpenMP_CXX_FLAGS "@OpenMP_FLAGS@")
+set(OpenMP_CXX_INCLUDE_DIR "${OpenMP_INCLUDE_DIR}")
+set(OpenMP_CXX_INCLUDE_DIRS "${OpenMP_INCLUDE_DIRS}")
+set(OpenMP_CXX_LIB_NAMES "@OpenMP_LIB_NAMES@")
+set(OpenMP_CXX_LIBRARIES "${OpenMP_LIBRARIES}")
+set(OpenMP_CXX_DEFINITIONS "${OpenMP_DEFINITIONS}")
+
+set(OpenMP_omp_LIBRARY "${OpenMP_LIBRARIES}")
+
+set(OpenMP_FOUND FALSE)
+set(OPENMP_FOUND FALSE)
+set(OPENMP_FOUND FALSE)
+set(OpenMP_C_FOUND FALSE)
+set(OpenMP_CXX_FOUND FALSE)
+set(OpenMP_Fortran_FOUND FALSE)
+
+# Determine OpenMP specification date and version
+function(_openmp_get_spec_date)
+  set(SRC_FILE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindOpenMP/ompver.c")
+  set(BIN_FILE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindOpenMP/ompver.bin")
+  file(WRITE "${SRC_FILE}" "
+    #include <stdio.h>
+    #include <omp.h>
+    #define STRINGIFY(x) #x
+    #define TO_STRING(x) STRINGIFY(x)
+    const char ompver_str[] = \"INFO:OpenMP-date[\" TO_STRING(_OPENMP) \"]\";
+    int main(void)
+    {
+      puts(ompver_str);
+      return 0;
+    }
+  ")
+  try_compile(OpenMP_SPECTEST
+    SOURCES "${SRC_FILE}"
+    LOG_DESCRIPTION "Detecting OpenMP version"
+    CMAKE_FLAGS
+      "-DCOMPILE_DEFINITIONS:STRING=${OpenMP_C_FLAGS}"
+      "-DINCLUDE_DIRECTORIES:STRING=${OpenMP_INCLUDE_DIR}"
+      "-DLINK_DIRECTORIES:STRING=${OpenMP_INCLUDE_DIR}/../lib"
+      "-DLINK_LIBRARIES:STRING=${OpenMP_C_LIB_NAMES}"
+    COPY_FILE "${BIN_FILE}"
+  )
+  file(STRINGS ${BIN_FILE} specstr LIMIT_COUNT 1 REGEX "INFO:OpenMP-date")
+  if(specstr MATCHES ".*INFO:OpenMP-date\\[0*([^]]*)\\].*")
+    set(OpenMP_SPEC_DATE ${CMAKE_MATCH_1} PARENT_SCOPE)
+  else()
+    if(OpenMP_FIND_REQUIRED)
+        message(FATAL_ERROR "Failed to detect OpenMP specification date")
+    elseif(NOT OpenMP_FIND_QUIETLY)
+        message(SEND_ERROR "Failed to detect OpenMP specification date")
+    endif()
+    return()
+  endif()
+endfunction()
+
+function(_openmp_set_version_by_spec_date)
+  set(OpenMP_SPEC_DATE_MAP
+    "202111=5.2"
+    "202011=5.1"
+    "201811=5.0"
+    "201511=4.5"
+    "201307=4.0"
+    "201107=3.1"
+    "200805=3.0"
+    "200505=2.5"
+    "200203=2.0"
+    "200011=2.0"
+    "199911=1.1"
+  )
+  if(OpenMP_SPEC_DATE_MAP MATCHES "${OpenMP_SPEC_DATE}=([0-9]+)\\.([0-9]+)")
+    set(major "${CMAKE_MATCH_1}")
+    set(minor "${CMAKE_MATCH_2}")
+  else()
+    if(OpenMP_FIND_REQUIRED)
+        message(FATAL_ERROR "Failed to detect OpenMP specification version")
+    elseif(NOT OpenMP_FIND_QUIETLY)
+        message(SEND_ERROR "Failed to detect OpenMP specification version")
+    endif()
+    return()
+  endif()
+  set(OpenMP_VERSION_MAJOR "${major}" PARENT_SCOPE)
+  set(OpenMP_VERSION_MINOR "${minor}" PARENT_SCOPE)
+  set(OpenMP_VERSION "${major}.${minor}" PARENT_SCOPE)
+endfunction()
+
+_openmp_get_spec_date()
+_openmp_set_version_by_spec_date()
+
+set(OpenMP_C_FOUND TRUE)
+set(OpenMP_C_SPEC_DATE "${OpenMP_SPEC_DATE}")
+set(OpenMP_C_VERSION_MAJOR "${OpenMP_VERSION_MAJOR}")
+set(OpenMP_C_VERSION_MINOR "${OpenMP_VERSION_MINOR}")
+set(OpenMP_C_VERSION "${OpenMP_VERSION}")
+
+set(OpenMP_CXX_FOUND TRUE)
+set(OpenMP_CXX_SPEC_DATE "${OpenMP_SPEC_DATE}")
+set(OpenMP_CXX_VERSION_MAJOR "${OpenMP_VERSION_MAJOR}")
+set(OpenMP_CXX_VERSION_MINOR "${OpenMP_VERSION_MINOR}")
+set(OpenMP_CXX_VERSION "${OpenMP_VERSION}")
+
+# Check specification version against the requested min version, validate components
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(OpenMP
+  VERSION_VAR OpenMP_C_VERSION
+  REQUIRED_VARS
+    OpenMP_C_FLAGS
+    OpenMP_C_LIB_NAMES
+    OpenMP_C_SPEC_DATE
+    OpenMP_C_VERSION
+    OpenMP_CXX_FLAGS
+    OpenMP_CXX_LIB_NAMES
+    OpenMP_CXX_SPEC_DATE
+    OpenMP_CXX_VERSION
+  HANDLE_COMPONENTS
+)
+
+set(OPENMP_FOUND ${OpenMP_FOUND})
+set(OpenMP_C_FOUND ${OpenMP_FOUND})
+set(OpenMP_CXX_FOUND ${OpenMP_FOUND})

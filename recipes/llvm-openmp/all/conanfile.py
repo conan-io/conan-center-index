@@ -7,7 +7,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, save, move_folder_contents, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, save, move_folder_contents, rmdir, load, save
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -57,6 +57,7 @@ class LLVMOpenMpConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "*.cmake.in", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -77,7 +78,7 @@ class LLVMOpenMpConan(ConanFile):
         if is_msvc(self):
             raise ConanInvalidConfiguration("llvm-openmp is not compatible with MSVC")
 
-        if not self._openmp_flags():
+        if not self._openmp_flags:
             raise ConanInvalidConfiguration(
                 f"{self.settings.compiler} is not supported by this recipe. Contributions are welcome!"
             )
@@ -143,6 +144,37 @@ class LLVMOpenMpConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", "openmp", "conan-llvm-openmp-vars.cmake")
+
+    @property
+    def _conan1_targets_module_file_rel_path(self):
+        return os.path.join("lib", "cmake", "openmp", f"conan-official-{self.name}-targets.cmake")
+
+    @property
+    def _openmp_flags(self):
+        # Based on https://github.com/Kitware/CMake/blob/v3.28.1/Modules/FindOpenMP.cmake#L104-L135
+        if self.settings.compiler == "clang":
+            return ["-fopenmp=libomp"]
+        elif self.settings.compiler == "apple-clang":
+            return ["-Xclang", "-fopenmp"]
+        elif self.settings.compiler == "gcc":
+            return ["-fopenmp"]
+        elif self.settings.compiler == "intel-cc":
+            return ["-Qopenmp"]
+        elif self.settings.compiler == "sun-cc":
+            return ["-xopenmp"]
+        elif is_msvc(self):
+            return ["-openmp"]
+        return None
+
+    @property
+    def _system_libs(self):
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            return ["m", "dl", "pthread", "rt"]
+        return []
+
     def package(self):
         copy(self, "LICENSE.txt",
             src=self.source_folder,
@@ -151,9 +183,14 @@ class LLVMOpenMpConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
+        cmake_module = load(self, os.path.join(self.export_sources_folder, "cmake", "conan-llvm-openmp-vars.cmake.in"))
+        cmake_module = cmake_module.replace("@OpenMP_FLAGS@", " ".join(self._openmp_flags))
+        cmake_module = cmake_module.replace("@OpenMP_LIB_NAMES@", ";".join(["omp"] + self._system_libs))
+        save(self, os.path.join(self.package_folder, self._module_file_rel_path), cmake_module)
+
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
+            os.path.join(self.package_folder, self._conan1_targets_module_file_rel_path),
             {
                 "OpenMP::OpenMP_C": "OpenMP::OpenMP",
                 "OpenMP::OpenMP_CXX": "OpenMP::OpenMP",
@@ -171,26 +208,6 @@ class LLVMOpenMpConan(ConanFile):
             """)
         save(self, module_file, content)
 
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
-    def _openmp_flags(self):
-        # Based on https://github.com/Kitware/CMake/blob/v3.28.1/Modules/FindOpenMP.cmake#L104-L135
-        if self.settings.compiler == "clang":
-            return ["-fopenmp=libomp"]
-        elif self.settings.compiler == "apple-clang":
-            return ["-Xclang", "-fopenmp"]
-        elif self.settings.compiler == "gcc":
-            return ["-fopenmp"]
-        elif self.settings.compiler == "intel-cc":
-            return ["-Qopenmp"]
-        elif self.settings.compiler == "sun-cc":
-            return ["-xopenmp"]
-        elif is_msvc(self):
-            return ["-openmp"]
-        return None
-
     def package_info(self):
         # Match FindOpenMP.cmake module provided by CMake
         self.cpp_info.set_property("cmake_find_mode", "both")
@@ -198,19 +215,17 @@ class LLVMOpenMpConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "OpenMP::OpenMP")
         self.cpp_info.set_property("cmake_target_aliases", ["OpenMP::OpenMP_C", "OpenMP::OpenMP_CXX"])
 
-        openmp_flags = self._openmp_flags()
-        self.cpp_info.cflags = openmp_flags
-        self.cpp_info.cxxflags = openmp_flags
-        self.cpp_info.sharedlinkflags = openmp_flags
-        self.cpp_info.exelinkflags = openmp_flags
-
         self.cpp_info.libs = ["omp"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["dl", "m", "pthread", "rt"]
+        self.cpp_info.system_libs = self._system_libs
+        self.cpp_info.cflags = self._openmp_flags
+        self.cpp_info.cxxflags = self._openmp_flags
+
+        self.cpp_info.builddirs.append(os.path.join(self.package_folder, "lib", "cmake", "openmp"))
+        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "OpenMP"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenMP"
         self.cpp_info.builddirs.append(os.path.join(self.package_folder, "lib", "cmake"))
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path, self._conan1_targets_module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path, self._conan1_targets_module_file_rel_path]
