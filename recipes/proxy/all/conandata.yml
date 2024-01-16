@@ -1,4 +1,4 @@
 sources:
-  "2.1.0":
-    url: "https://github.com/microsoft/proxy/archive/refs/tags/2.1.0.tar.gz"
-    sha256: "b22c4cf24d67c00a393463ced9587f6cbb40175cb3ccd6346605cad0698da105"
+  "2.1.1":
+    url: "https://github.com/microsoft/proxy/archive/refs/tags/2.1.1.tar.gz"
+    sha256: "6508f4927cf07de2e01341edca47c1ef0ebb1da4bda0da7fc0f5399d99c12e9b"
