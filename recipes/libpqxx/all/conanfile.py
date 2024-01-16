@@ -30,7 +30,12 @@ class LibpqxxConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14 if Version(self.version) < "7.0" else "17"
+        if Version(self.version) < "7.0":
+            return 14
+        elif Version(self.version) < "7.8.0":
+            return 17
+        else:
+            return 20
 
     @property
     def _compilers_minimum_version(self):
