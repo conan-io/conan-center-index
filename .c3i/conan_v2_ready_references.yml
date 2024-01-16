@@ -20,6 +20,7 @@ required_for_references:
 - alpaca
 - amgcl
 - amqp-cpp
+- andreasbuhr-cppcoro
 - android-ndk
 - angelscript
 - antlr4-cppruntime
@@ -47,6 +48,7 @@ required_for_references:
 - asio
 - asio-grpc
 - asmjit
+- asn1c
 - assimp
 - astc-codec
 - astro-informatics-so3
@@ -140,6 +142,7 @@ required_for_references:
 - cargs
 - cassandra-cpp-driver
 - catch2
+- cc65
 - ccache
 - cccl
 - ccfits
@@ -172,6 +175,7 @@ required_for_references:
 - cli11
 - clickhouse-cpp
 - clipboard_lite
+- clipp
 - clipper
 - clipper2
 - clove-unit
@@ -193,9 +197,11 @@ required_for_references:
 - console_bridge
 - continuable
 - coost
+- copypp
 - corrade
 - cose-c
 - cotila
+- coz
 - cpp-httplib
 - cpp-ipc
 - cpp-jwt
@@ -203,6 +209,7 @@ required_for_references:
 - cpp-optparse
 - cpp-peglib
 - cpp-sort
+- cpp-validator
 - cpp_project_framework
 - cppbenchmark
 - cppcheck
@@ -250,6 +257,7 @@ required_for_references:
 - cwalk
 - cxxopts
 - cyclonedds
+- cyclonedds-cxx
 - cyrus-sasl
 - czmq
 - dacap-clip
@@ -267,15 +275,18 @@ required_for_references:
 - debug_assert
 - decimal_for_cpp
 - deco
+- dependencies
 - detools
 - dfp
 - di
 - dice-template-library
 - dime
+- directshowbaseclasses
 - directx-headers
 - dirent
 - discount
 - djinni-generator
+- djinni-support-lib
 - dlib
 - dlpack
 - docopt.cpp
@@ -364,6 +375,7 @@ required_for_references:
 - flatbush
 - flecs
 - flex
+- flint
 - fltk
 - fmi1
 - fmi2
@@ -493,6 +505,7 @@ required_for_references:
 - iconfontcppheaders
 - icu
 - id3v2lib
+- ignition-cmake
 - iir1
 - im95able-rea
 - imagl
@@ -515,6 +528,7 @@ required_for_references:
 - iowow
 - iqa
 - irrxml
+- isa-l
 - iso8601lib
 - itk
 - itlib
@@ -524,6 +538,7 @@ required_for_references:
 - jasper
 - jbig
 - jeaiii-itoa
+- jerryscript
 - jfalcou-eve
 - jinja2cpp
 - joltphysics
@@ -534,6 +549,7 @@ required_for_references:
 - jsmn
 - json-c
 - json-schema-validator
+- json_dto
 - jsoncons
 - jsoncpp
 - jsonnet
@@ -612,8 +628,10 @@ required_for_references:
 - libdxfrw
 - libe57format
 - libelf
+- libelfin
 - libenvpp
 - libepoxy
+- libest
 - libev
 - libevdev
 - libevent
@@ -621,6 +639,8 @@ required_for_references:
 - libfdk_aac
 - libffi
 - libfreenect
+- libfreenect2
+- libftdi
 - libfuse
 - libgcrypt
 - libgd
@@ -637,6 +657,7 @@ required_for_references:
 - libhydrogen
 - libiberty
 - libiconv
+- libid3tag
 - libinterpolate
 - libipt
 - libjpeg
@@ -734,7 +755,9 @@ required_for_references:
 - libuuid
 - libuv
 - libuvc
+- libva
 - libvault
+- libvdpau
 - libverto
 - libvips
 - libvpx
@@ -758,11 +781,13 @@ required_for_references:
 - libzip
 - libzippp
 - lief
+- lightgbm
 - lightpcapng
 - linmath.h
 - linux-headers-generic
 - linux-syscall-support
 - litehtml
+- lksctp-tools
 - llhttp
 - llvm-openmp
 - lmdb
@@ -852,6 +877,7 @@ required_for_references:
 - mp-units
 - mpark-variant
 - mpc
+- mpdecimal
 - mpfr
 - mpg123
 - mpmcqueue
@@ -878,6 +904,7 @@ required_for_references:
 - nanosvg
 - nas
 - nasm
+- ncurses
 - neargye-semver
 - netcdf
 - nettle
@@ -986,6 +1013,7 @@ required_for_references:
 - pcl
 - pcre
 - pcre2
+- pdcurses
 - pdf-writer
 - pdfgen
 - pdfium
@@ -993,6 +1021,7 @@ required_for_references:
 - perf
 - perfetto
 - perlinnoise
+- pexports
 - pffft
 - pfr
 - pgm-index
@@ -1032,6 +1061,7 @@ required_for_references:
 - poshlib
 - pprint
 - pranav-csv2
+- premake
 - pretty-name
 - procxx-boost-ext-simd
 - proj
@@ -1097,6 +1127,7 @@ required_for_references:
 - redboltz-mqtt_cpp
 - redis-plus-plus
 - refl-cpp
+- reflect-cpp
 - replxx
 - resource_pool
 - restbed
@@ -1216,6 +1247,7 @@ required_for_references:
 - stx
 - subunit
 - sundials
+- suyash-ulid
 - svector
 - svgpp
 - svgwrite
@@ -1231,6 +1263,7 @@ required_for_references:
 - taocpp-sequences
 - taocpp-taopq
 - taocpp-tuple
+- tar
 - taskflow
 - taywee-args
 - tcb-span
@@ -1239,6 +1272,7 @@ required_for_references:
 - tcp-wrappers
 - tcsbank-uconfig
 - tcsbank-uri-template
+- teemo
 - tensorflow-lite
 - tensorpipe
 - termcap
@@ -1258,6 +1292,7 @@ required_for_references:
 - tiny-dnn
 - tiny-regex-c
 - tiny-utf8
+- tinyalsa
 - tinycbor
 - tinycthread
 - tinycthreadpool
@@ -1356,6 +1391,7 @@ required_for_references:
 - vulkan-memory-allocator
 - vulkan-validationlayers
 - vvenc
+- waf
 - wasm-micro-runtime
 - wasmedge
 - wasmer
@@ -1433,6 +1469,7 @@ required_for_references:
 - zopfli
 - zpp_bits
 - zpp_throwing
+- zserio
 - zstd
 - zstr
 - zug
