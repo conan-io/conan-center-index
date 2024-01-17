@@ -315,7 +315,16 @@ class CPythonConan(ConanFile):
         # Project name, dependency name
         injected_props = [
             ("_bz2" if self._is_py3 else "bz2", "bzip2"),
+            ("_elementtree", "expat"),
         ]
+        if not self._use_vendored_libffi:
+            injected_props += [
+                ("_ctypes", "libffi"),
+            ]
+        if self._is_py3:
+            injected_props += [
+                ("_decimal", "mpdecimal"),
+            ]
         search = '<Import Project="python.props" />' if self._is_py3 else '<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />'
         for name, dep in injected_props:
             replace_in_file(self, _project(name), search, search + f'<Import Project="{self.generators_folder}/conan_{dep}.props" />')

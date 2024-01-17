@@ -16,15 +16,6 @@
 +  </Target>-->
 --- PCbuild/_ctypes.vcxproj
 +++ PCbuild/_ctypes.vcxproj
-@@ -71,7 +71,7 @@
-     <RootNamespace>_ctypes</RootNamespace>
-     <Keyword>Win32Proj</Keyword>
-   </PropertyGroup>
--  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="CONAN_REPLACE_HERE/conan_libffi.props" />
-   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-   <PropertyGroup Label="Configuration">
-     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -86,7 +86,7 @@
    <ImportGroup Label="PropertySheets">
      <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -45,15 +36,6 @@
        <AdditionalOptions>/EXPORT:DllGetClassObject,PRIVATE /EXPORT:DllCanUnloadNow,PRIVATE %(AdditionalOptions)</AdditionalOptions>
 --- PCbuild/_decimal.vcxproj
 +++ PCbuild/_decimal.vcxproj
-@@ -71,7 +71,7 @@
-     <RootNamespace>_decimal</RootNamespace>
-     <Keyword>Win32Proj</Keyword>
-   </PropertyGroup>
--  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="CONAN_REPLACE_HERE/conan_mpdecimal.props" />
-   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-   <PropertyGroup Label="Configuration">
-     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -98,11 +98,11 @@
        <PreprocessorDefinitions Condition="'$(Platform)'=='ARM'">CONFIG_32;ANSI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
        <PreprocessorDefinitions Condition="'$(Platform)'=='ARM64'">CONFIG_64;ANSI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -245,15 +227,6 @@
      <ResourceCompile Include="..\PC\python_nt.rc" />
 --- PCbuild/_elementtree.vcxproj
 +++ PCbuild/_elementtree.vcxproj
-@@ -71,7 +71,7 @@
-     <RootNamespace>_elementtree</RootNamespace>
-     <Keyword>Win32Proj</Keyword>
-   </PropertyGroup>
--  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="CONAN_REPLACE_HERE/conan_expat.props" />
-   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-   <PropertyGroup Label="Configuration">
-     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -93,12 +93,12 @@
    </PropertyGroup>
    <ItemDefinitionGroup>
