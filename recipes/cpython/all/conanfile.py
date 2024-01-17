@@ -302,33 +302,31 @@ class CPythonConan(ConanFile):
         content = re.sub(pattern, replacement, content)
         save(self, filename, content)
 
-    def _inject_conan_props_file(self, project_basename, dep_name):
-        search = '<Import Project="python.props" />' if self._is_py3 else '<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />'
-        replace_in_file(self,
-                        self._msvc_project_path(project_basename),
-                        search,
-                        search + f'<Import Project="{self.generators_folder}/conan_{dep_name}.props" />')
+    def _inject_conan_props_file(self, project_basename, dep_name, condition=True):
+        if condition:
+            search = '<Import Project="python.props" />' if self._is_py3 else '<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />'
+            replace_in_file(self,
+                            self._msvc_project_path(project_basename),
+                            search,
+                            search + f'<Import Project="{self.generators_folder}/conan_{dep_name}.props" />')
 
     def _patch_msvc_projects(self):
         self._regex_replace_in_file(self._msvc_project_path("_bz2" if self._is_py3 else "bz2"), r'.*Include=\"\$\(bz2Dir\).*', "")
         
-        self._inject_conan_props_file("_bz2" if self._is_py3 else "bz2", "bzip2")
-        self._inject_conan_props_file("_elementtree", "expat")
-        self._inject_conan_props_file("pyexpat", "expat")
-        self._inject_conan_props_file("_hashlib", "openssl")
-        self._inject_conan_props_file("_ssl", "openssl")
-        self._inject_conan_props_file("_sqlite3", "sqlite3")
-        self._inject_conan_props_file("_tkinter", "tk")
+        self._inject_conan_props_file("_bz2" if self._is_py3 else "bz2", "bzip2", self.options.get_safe("with_bz2"))
+        self._inject_conan_props_file("_elementtree", "expat", self._supports_modules)
+        self._inject_conan_props_file("pyexpat", "expat", self._supports_modules)
+        self._inject_conan_props_file("_hashlib", "openssl", self._supports_modules)
+        self._inject_conan_props_file("_ssl", "openssl", self._supports_modules)
+        self._inject_conan_props_file("_sqlite3", "sqlite3", self.options.get_safe("with_sqlite3"))
+        self._inject_conan_props_file("_tkinter", "tk", self.options.get_safe("with_tkinter"))
         self._inject_conan_props_file("pythoncore", "zlib")
         self._inject_conan_props_file("python", "zlib")
         self._inject_conan_props_file("pythonw", "zlib")
-        if not self._use_vendored_libffi:
-            self._inject_conan_props_file("_ctypes", "libffi")
-        if self._is_py3:
-            self._inject_conan_props_file("_decimal", "mpdecimal")
-            self._inject_conan_props_file("_lzma", "xz_utils")
-        else:
-            self._inject_conan_props_file("_bsddb", "libdb")
+        self._inject_conan_props_file("_ctypes", "libffi", self._with_libffi)
+        self._inject_conan_props_file("_decimal", "mpdecimal", self._is_py3 and self._supports_modules)
+        self._inject_conan_props_file("_lzma", "xz_utils", self.options.get_safe("with_lzma"))
+        self._inject_conan_props_file("_bsddb", "libdb", self.options.get_safe("with_bsddb"))
 
     def _patch_sources(self):
         apply_conandata_patches(self)
