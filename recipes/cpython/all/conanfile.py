@@ -318,6 +318,7 @@ class CPythonConan(ConanFile):
             ("_elementtree", "expat"),
             ("pyexpat", "expat"),
             ("_hashlib", "openssl"),
+            ("_sqlite3", "sqlite3"),
         ]
         if not self._use_vendored_libffi:
             injected_props += [

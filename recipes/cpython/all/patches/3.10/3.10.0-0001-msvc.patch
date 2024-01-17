@@ -113,9 +113,6 @@
    <ImportGroup Label="ExtensionTargets">
 --- PCbuild/_sqlite3.vcxproj
 +++ PCbuild/_sqlite3.vcxproj
-@@ -74,1 +74,1 @@
--  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="CONAN_REPLACE_HERE/conan_sqlite3.props" />
 @@ -129,4 +129,4 @@
 -    <ProjectReference Include="sqlite3.vcxproj">
 +    <!--<ProjectReference Include="sqlite3.vcxproj">
