@@ -67,28 +67,8 @@
    </ItemGroup>
    <ItemGroup>
      <ClCompile Include="..\PC\dl_nt.c" />
---- PCbuild/_hashlib.vcxproj
-+++ PCbuild/_hashlib.vcxproj
-@@ -86,7 +86,7 @@
-   <ImportGroup Label="PropertySheets">
-     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-     <Import Project="pyproject.props" />
--    <Import Project="openssl.props" />
-+    <!--<Import Project="openssl.props" />-->
-   </ImportGroup>
-   <PropertyGroup Label="UserMacros" />
-   <PropertyGroup>
 --- PCbuild/_ssl.vcxproj
 +++ PCbuild/_ssl.vcxproj
-@@ -86,7 +86,7 @@
-   <ImportGroup Label="PropertySheets">
-     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-     <Import Project="pyproject.props" />
--    <Import Project="openssl.props" />
-+    <!--<Import Project="openssl.props" />-->
-   </ImportGroup>
-   <PropertyGroup Label="UserMacros" />
-   <PropertyGroup>
 @@ -99,9 +99,9 @@
    </ItemDefinitionGroup>
    <ItemGroup>

@@ -316,6 +316,9 @@ class CPythonConan(ConanFile):
             replace_in_file(self, self._msvc_project_path("_ctypes"), '<Import Project="libffi.props" />', "")
             replace_in_file(self, self._msvc_project_path("_ctypes"), "FFI_BUILDING;", "")
         
+        replace_in_file(self, self._msvc_project_path("_hashlib"), '<Import Project="openssl.props" />', "")
+        replace_in_file(self, self._msvc_project_path("_ssl"), '<Import Project="openssl.props" />', "")
+        
         # For mpdecimal, we need to remove all headers and all c files *except* the main module file, _decimal.c
         self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\.*\.h.*', "")
         self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\libmpdec\\.*\.c.*', "")
