@@ -321,6 +321,7 @@ class CPythonConan(ConanFile):
             ("_ssl", "openssl"),
             ("_sqlite3", "sqlite3"),
             ("_tkinter", "tk"),
+            ("pythoncore", "zlib"),
         ]
         if not self._use_vendored_libffi:
             injected_props += [

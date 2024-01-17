@@ -182,15 +182,6 @@
      <ResourceCompile Include="..\PC\python_nt.rc" />
 --- PCbuild/pythoncore.vcxproj
 +++ PCbuild/pythoncore.vcxproj
-@@ -38,7 +38,7 @@
-     <ProjectGuid>{CF7AC3D1-E2DF-41D2-BEA6-1E2556CDEA26}</ProjectGuid>
-     <RootNamespace>pythoncore</RootNamespace>
-   </PropertyGroup>
--  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="CONAN_REPLACE_HERE/conan_zlib.props" />
-   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-   <PropertyGroup Label="Configuration">
-     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -215,7 +215,7 @@
      <ClInclude Include="..\Python\wordcode_helpers.h" />
    </ItemGroup>

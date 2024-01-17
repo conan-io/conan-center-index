@@ -122,9 +122,6 @@
 +    </ProjectReference>-->
 --- PCbuild/pythoncore.vcxproj
 +++ PCbuild/pythoncore.vcxproj
-@@ -73,1 +73,1 @@
--  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="CONAN_REPLACE_HERE/conan_zlib.props" />
 @@ -302,7 +302,7 @@
      <ClInclude Include="..\Python\wordcode_helpers.h" />
    </ItemGroup>
