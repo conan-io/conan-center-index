@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, save, load, chdir, rename, rmdir
+from conan.tools.files import get, save, load, chdir, rename, rmdir, replace_in_file
 from conan.tools.layout import basic_layout
 
 class canteraRecipe(ConanFile):
@@ -54,6 +54,10 @@ class canteraRecipe(ConanFile):
         else:
             self.output.warn(f"{self.ref} requires C++{self._minimum_cpp_standard}. Your compiler is unknown. Assuming it supports C++{self._minimum_cpp_standard}")
 
+        # Disable debug packages
+        if self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+
     def requirements(self):
         self.requires("boost/1.83.0", headers=True, libs=False)
         self.requires("fmt/10.1.1", transitive_headers=True)
@@ -102,6 +106,9 @@ class canteraRecipe(ConanFile):
         if self.settings.build_type == "Debug":
             options["debug"] = "yes"
             options["optimize"] = "no"
+            # debug libs of fmt and yaml-cpp have different names but cantera does not know about this.
+            replace_in_file(self, os.path.join(self.source_folder, "SConstruct"), 'env["external_libs"].append("fmt")', 'env["external_libs"].append("fmtd")')
+            replace_in_file(self, os.path.join(self.source_folder, "SConstruct"), 'env["external_libs"].append("yaml-cpp")', 'env["external_libs"].append("yaml-cppd")')
         else:
             options["debug"] = "no"
             options["optimize"] = "yes"
