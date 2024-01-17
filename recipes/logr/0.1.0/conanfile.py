@@ -52,7 +52,7 @@ class LogrConan(ConanFile):
         elif self.options.backend == "glog":
             self.requires("glog/0.6.0")
         elif self.options.backend in ["log4cplus", "log4cplus-unicode"]:
-            self.requires("log4cplus/2.1.0")
+            self.requires("log4cplus/2.1.1")
 
     def package_id(self):
         self.info.clear()
