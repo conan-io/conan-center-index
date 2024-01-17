@@ -320,6 +320,7 @@ class CPythonConan(ConanFile):
             ("_hashlib", "openssl"),
             ("_ssl", "openssl"),
             ("_sqlite3", "sqlite3"),
+            ("_tkinter", "tk"),
         ]
         if not self._use_vendored_libffi:
             injected_props += [
