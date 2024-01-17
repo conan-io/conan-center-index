@@ -54,7 +54,7 @@ class libdecorConan(ConanFile):
             self.requires("dbus/1.15.8")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
-        self.requires("pango/1.50.10")
+        self.requires("pango/1.51.0")
         self.requires("wayland/1.22.0")
         self.requires("wayland-protocols/1.32")
 
@@ -99,8 +99,6 @@ class libdecorConan(ConanFile):
         tc.generate()
         pkg_config_deps = PkgConfigDeps(self)
         pkg_config_deps.generate()
-        # Work around a bug in the pango package for which fixes have not been merged in yet.
-        shutil.copy2(os.path.join(self.generators_folder, "pango-pangocairo.pc"), os.path.join(self.generators_folder, "pangocairo.pc"))
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
 
