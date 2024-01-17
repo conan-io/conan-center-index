@@ -125,33 +125,6 @@
      <ProjectReference Include="_socket.vcxproj">
        <Project>{86937f53-c189-40ef-8ce8-8759d8e7d480}</Project>
        <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
---- PCbuild/bz2.vcxproj
-+++ PCbuild/bz2.vcxproj
-@@ -47,7 +47,7 @@
-     <CharacterSet>NotSet</CharacterSet>
-   </PropertyGroup>
-   <PropertyGroup Label="Configuration" />
--  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><Import Project="CONAN_REPLACE_HERE/conan_bzip2.props" />
-   <PropertyGroup>
-     <TargetExt>.pyd</TargetExt>
-   </PropertyGroup>
-@@ -72,13 +72,13 @@
-   </ItemDefinitionGroup>
-   <ItemGroup>
-     <ClCompile Include="..\Modules\bz2module.c" />
--    <ClCompile Include="$(bz2Dir)\blocksort.c" />
-+    <!--<ClCompile Include="$(bz2Dir)\blocksort.c" />
-     <ClCompile Include="$(bz2Dir)\bzlib.c" />
-     <ClCompile Include="$(bz2Dir)\compress.c" />
-     <ClCompile Include="$(bz2Dir)\crctable.c" />
-     <ClCompile Include="$(bz2Dir)\decompress.c" />
-     <ClCompile Include="$(bz2Dir)\huffman.c" />
--    <ClCompile Include="$(bz2Dir)\randtable.c" />
-+    <ClCompile Include="$(bz2Dir)\randtable.c" />-->
-   </ItemGroup>
-   <ItemGroup>
-     <ClInclude Include="$(bz2Dir)\bzlib.h" />
 --- PCbuild/_elementtree.vcxproj
 +++ PCbuild/_elementtree.vcxproj
 @@ -45,7 +45,7 @@

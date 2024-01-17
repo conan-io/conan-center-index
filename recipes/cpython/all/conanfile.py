@@ -299,7 +299,7 @@ class CPythonConan(ConanFile):
             return os.path.join(self.source_folder, "PCBuild", f"{name}.vcxproj")
         
         items_to_remove = [
-            ("_bz2", r'.*Include=\"\$\(bz2Dir\).*'),
+            ("_bz2" if self._is_py3 else "bz2", r'.*Include=\"\$\(bz2Dir\).*'),
         ]
         for project, remove_pattern in items_to_remove:
             content = ""
@@ -314,9 +314,9 @@ class CPythonConan(ConanFile):
         # Inject Conan .props files where needed.
         # Project name, dependency name
         injected_props = [
-            ("_bz2", "bzip2"),
+            ("_bz2" if self._is_py3 else "bz2", "bzip2"),
         ]
-        search = '<Import Project="python.props" />'
+        search = '<Import Project="python.props" />' if self._is_py3 else '<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />'
         for name, dep in injected_props:
             replace_in_file(self, _project(name), search, search + f'<Import Project="{self.generators_folder}/conan_{dep}.props" />')
 
@@ -425,7 +425,7 @@ class CPythonConan(ConanFile):
                             '<Import Project="python.props" />',
                             f'<Import Project="python.props" /><Import Project="{self.generators_folder}/conan_zlib.props" />')
 
-        if is_msvc(self) and self._is_py3:
+        if is_msvc(self):
             self._patch_msvc_projects()
 
     @property
