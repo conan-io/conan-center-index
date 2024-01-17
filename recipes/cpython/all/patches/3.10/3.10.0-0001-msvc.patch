@@ -85,15 +85,6 @@
      <ResourceCompile Include="..\PC\python_nt.rc" />
 --- PCbuild/_lzma.vcxproj
 +++ PCbuild/_lzma.vcxproj
-@@ -71,7 +71,7 @@
-     <RootNamespace>lzma</RootNamespace>
-     <Keyword>Win32Proj</Keyword>
-   </PropertyGroup>
--  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="CONAN_REPLACE_HERE/conan_xz_utils.props" />
-   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-   <PropertyGroup Label="Configuration">
-     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -94,10 +94,10 @@
    <ItemDefinitionGroup>
      <ClCompile>

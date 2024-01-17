@@ -326,6 +326,7 @@ class CPythonConan(ConanFile):
         if self._is_py3:
             injected_props += [
                 ("_decimal", "mpdecimal"),
+                ("_lzma", "xz_utils"),
             ]
         else:
             injected_props += [
