@@ -262,15 +262,6 @@
      <ResourceCompile Include="..\PC\python_nt.rc" />
 --- PCbuild/pyexpat.vcxproj
 +++ PCbuild/pyexpat.vcxproj
-@@ -71,7 +71,7 @@
-     <ProjectGuid>{D06B6426-4762-44CC-8BAD-D79052507F2F}</ProjectGuid>
-     <RootNamespace>pyexpat</RootNamespace>
-   </PropertyGroup>
--  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="CONAN_REPLACE_HERE/conan_expat.props" />
-   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-   <PropertyGroup Label="Configuration">
-     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -90,19 +90,19 @@
    <PropertyGroup Label="UserMacros" />
    <ItemDefinitionGroup>
