@@ -288,6 +288,12 @@ class GtsamConan(ConanFile):
             replace_in_file(self, gtsam_build_types_cmake, "/MD ", f"/{msvc_runtime_flag(self)} ")
             replace_in_file(self, gtsam_build_types_cmake, "/MDd ", f"/{msvc_runtime_flag(self)} ")
 
+        # Ensure a newer CMake standard is used for non-cache_variables support and other policies
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "cmake_minimum_required(VERSION 3.0)",
+                        "cmake_minimum_required(VERSION 3.15)")
+
+        # Fix tcmalloc / gperftools handling
         if self.options.default_allocator == "tcmalloc":
             handle_allocators_path = os.path.join(self.source_folder, "cmake", "HandleAllocators.cmake")
             if Version(self.version) < "4.1":
@@ -300,17 +306,22 @@ class GtsamConan(ConanFile):
             replace_in_file(self, handle_allocators_path,
                             'GTSAM_ADDITIONAL_LIBRARIES "tcmalloc"',
                             'GTSAM_ADDITIONAL_LIBRARIES "gperftools::gperftools"')
-
-        # Ensure a newer CMake standard is used for non-cache_variables support and other policies
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "cmake_minimum_required(VERSION 3.0)",
-                        "cmake_minimum_required(VERSION 3.15)")
-
         # Fix HandleMetis.cmake incompatibility with Metis from Conan
         if self.options.support_nested_dissection and not self.options.with_vendored_metis:
             save(self, os.path.join(self.source_folder, "cmake", "HandleMetis.cmake"),
                  "find_package(metis REQUIRED CONFIG)\n"
                  "add_library(metis-gtsam-if ALIAS metis::metis)\n")
+
+        # Fix TBB handling
+        handle_tbb_path = os.path.join(self.source_folder, "cmake", "HandleTBB.cmake")
+        if Version(self.version) < "4.1":
+            handle_tbb_path = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, handle_tbb_path, "find_package(TBB 4.4 ", "find_package(TBB ")
+        if Version(self.version) < "4.2.1":
+            replace_in_file(self, handle_tbb_path,
+                            "list(APPEND GTSAM_ADDITIONAL_LIBRARIES tbb tbbmalloc)",
+                            "list(APPEND GTSAM_ADDITIONAL_LIBRARIES TBB::tbb TBB::tbbmalloc)")
+
 
     def build(self):
         self._patch_sources()
