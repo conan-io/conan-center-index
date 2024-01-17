@@ -72,21 +72,6 @@
    </ItemGroup>
    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
    <ImportGroup Label="ExtensionTargets">
---- PCbuild/_sqlite3.vcxproj
-+++ PCbuild/_sqlite3.vcxproj
-@@ -95,10 +95,10 @@
-       <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>
-       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-     </ProjectReference>
--    <ProjectReference Include="sqlite3.vcxproj">
-+    <!--<ProjectReference Include="sqlite3.vcxproj">
-       <Project>{a1a295e5-463c-437f-81ca-1f32367685da}</Project>
-       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
--    </ProjectReference>
-+    </ProjectReference>-->
-   </ItemGroup>
-   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-   <ImportGroup Label="ExtensionTargets">
 --- PCbuild/openssl.vcxproj
 +++ PCbuild/openssl.vcxproj
 @@ -74,6 +74,6 @@ nmake

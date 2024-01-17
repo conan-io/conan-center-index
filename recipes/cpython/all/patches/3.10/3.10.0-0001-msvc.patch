@@ -42,15 +42,6 @@
    </ItemGroup>
    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
    <ImportGroup Label="ExtensionTargets">
---- PCbuild/_sqlite3.vcxproj
-+++ PCbuild/_sqlite3.vcxproj
-@@ -129,4 +129,4 @@
--    <ProjectReference Include="sqlite3.vcxproj">
-+    <!--<ProjectReference Include="sqlite3.vcxproj">
-       <Project>{a1a295e5-463c-437f-81ca-1f32367685da}</Project>
-       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
--    </ProjectReference>
-+    </ProjectReference>-->
 --- PCbuild/pythoncore.vcxproj
 +++ PCbuild/pythoncore.vcxproj
 @@ -302,7 +302,7 @@
