@@ -294,20 +294,17 @@ class CPythonConan(ConanFile):
         else:
             self._generate_autotools()
 
+    def _regex_replace_in_file(self, filename, pattern, replacement):
+        content = load(self, filename)
+        content = re.sub(pattern, replacement, content)
+        save(self, filename, content)
+
     def _patch_msvc_projects(self):
         def _project(name: str):
             return os.path.join(self.source_folder, "PCBuild", f"{name}.vcxproj")
         
-        items_to_remove = [
-            ("_bz2" if self._is_py3 else "bz2", r'.*Include=\"\$\(bz2Dir\).*'),
-        ]
-        for project, remove_pattern in items_to_remove:
-            content = load(self, _project(project))
-            
-            content = re.sub(remove_pattern, "", content)
-
-            save(self, _project(project), content)
-
+        self._regex_replace_in_file(_project("_bz2" if self._is_py3 else "bz2"), r'.*Include=\"\$\(bz2Dir\).*', "")
+        
         # Inject Conan .props files where needed.
         # Project name, dependency name
         injected_props = [
