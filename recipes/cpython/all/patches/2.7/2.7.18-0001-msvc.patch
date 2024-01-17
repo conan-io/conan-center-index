@@ -20,15 +20,6 @@
      <ProjectReference Include="pythoncore.vcxproj">
 --- PCbuild/_hashlib.vcxproj
 +++ PCbuild/_hashlib.vcxproj
-@@ -45,7 +45,7 @@
-     <ConfigurationType>DynamicLibrary</ConfigurationType>
-     <CharacterSet>NotSet</CharacterSet>
-   </PropertyGroup>
--  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><Import Project="CONAN_REPLACE_HERE/conan_openssl.props" />
-   <PropertyGroup>
-     <TargetExt>.pyd</TargetExt>
-   </PropertyGroup>
 @@ -64,7 +64,7 @@
        <AdditionalIncludeDirectories>$(opensslIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
      </ClCompile>

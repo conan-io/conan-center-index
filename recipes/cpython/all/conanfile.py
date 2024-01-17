@@ -317,6 +317,7 @@ class CPythonConan(ConanFile):
             ("_bz2" if self._is_py3 else "bz2", "bzip2"),
             ("_elementtree", "expat"),
             ("pyexpat", "expat"),
+            ("_hashlib", "openssl"),
         ]
         if not self._use_vendored_libffi:
             injected_props += [

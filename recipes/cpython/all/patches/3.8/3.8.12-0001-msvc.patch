@@ -192,15 +192,6 @@
      <ClCompile Include="..\PC\dl_nt.c" />
 --- PCbuild/_hashlib.vcxproj
 +++ PCbuild/_hashlib.vcxproj
-@@ -71,7 +71,7 @@
-     <RootNamespace>_hashlib</RootNamespace>
-     <Keyword>Win32Proj</Keyword>
-   </PropertyGroup>
--  <Import Project="python.props" />
-+  <Import Project="python.props" /><Import Project="CONAN_REPLACE_HERE/conan_openssl.props" />
-   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-   <PropertyGroup Label="Configuration">
-     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -86,7 +86,7 @@
    <ImportGroup Label="PropertySheets">
      <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
