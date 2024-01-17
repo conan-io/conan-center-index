@@ -316,6 +316,15 @@ class CPythonConan(ConanFile):
             replace_in_file(self, self._msvc_project_path("_ctypes"), '<Import Project="libffi.props" />', "")
             replace_in_file(self, self._msvc_project_path("_ctypes"), "FFI_BUILDING;", "")
         
+        # For mpdecimal, we need to remove all headers and all c files *except* the main module file, _decimal.c
+        self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\.*\.h.*', "")
+        self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\libmpdec\\.*\.c.*', "")
+        # There is also an assembly file with a complicated build step as part of the mpdecimal build
+        replace_in_file(self, self._msvc_project_path("_decimal"), "<CustomBuild", "<!--<CustomBuild")
+        replace_in_file(self, self._msvc_project_path("_decimal"), "</CustomBuild>", "</CustomBuild>-->")
+        # Remove extra include directory
+        replace_in_file(self, self._msvc_project_path("_decimal"), "..\Modules\_decimal\libmpdec;", "")
+
         self._inject_conan_props_file("_bz2" if self._is_py3 else "bz2", "bzip2", self.options.get_safe("with_bz2"))
         self._inject_conan_props_file("_elementtree", "expat", self._supports_modules)
         self._inject_conan_props_file("pyexpat", "expat", self._supports_modules)
