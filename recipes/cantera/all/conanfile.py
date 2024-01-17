@@ -56,7 +56,7 @@ class canteraRecipe(ConanFile):
 
         # Disable debug packages
         if self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+            raise ConanInvalidConfiguration(f"{self.ref} recipe does not support debug build type. Contributions are welcome.")
 
     def requirements(self):
         self.requires("boost/1.83.0", headers=True, libs=False)
@@ -104,9 +104,10 @@ class canteraRecipe(ConanFile):
             options["toolchain"] = "msvc"
 
         if self.settings.build_type == "Debug":
+            # Will never be called since debug build will raise InvalidConfiguration error. Just to keep some ideas for the future.
             options["debug"] = "yes"
             options["optimize"] = "no"
-            # debug libs of fmt and yaml-cpp have different names but cantera does not know about this.
+            # Debug libs of fmt and yaml-cpp have different names but cantera does not know about this.
             replace_in_file(self, os.path.join(self.source_folder, "SConstruct"), 'env["external_libs"].append("fmt")', 'env["external_libs"].append("fmtd")')
             replace_in_file(self, os.path.join(self.source_folder, "SConstruct"), 'env["external_libs"].append("yaml-cpp")', 'env["external_libs"].append("yaml-cppd")')
         else:
