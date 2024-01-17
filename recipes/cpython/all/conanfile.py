@@ -294,47 +294,41 @@ class CPythonConan(ConanFile):
         else:
             self._generate_autotools()
 
+    def _msvc_project_path(self, name):
+        return os.path.join(self.source_folder, "PCBuild", f"{name}.vcxproj")
+
     def _regex_replace_in_file(self, filename, pattern, replacement):
         content = load(self, filename)
         content = re.sub(pattern, replacement, content)
         save(self, filename, content)
 
-    def _patch_msvc_projects(self):
-        def _project(name: str):
-            return os.path.join(self.source_folder, "PCBuild", f"{name}.vcxproj")
-        
-        self._regex_replace_in_file(_project("_bz2" if self._is_py3 else "bz2"), r'.*Include=\"\$\(bz2Dir\).*', "")
-        
-        # Inject Conan .props files where needed.
-        # Project name, dependency name
-        injected_props = [
-            ("_bz2" if self._is_py3 else "bz2", "bzip2"),
-            ("_elementtree", "expat"),
-            ("pyexpat", "expat"),
-            ("_hashlib", "openssl"),
-            ("_ssl", "openssl"),
-            ("_sqlite3", "sqlite3"),
-            ("_tkinter", "tk"),
-            ("pythoncore", "zlib"),
-            ("python", "zlib"),
-            ("pythonw", "zlib"),
-        ]
-        if not self._use_vendored_libffi:
-            injected_props += [
-                ("_ctypes", "libffi"),
-            ]
-        if self._is_py3:
-            injected_props += [
-                ("_decimal", "mpdecimal"),
-                ("_lzma", "xz_utils"),
-            ]
-        else:
-            injected_props += [
-                ("_bsddb", "libdb"),
-            ]
+    def _inject_conan_props_file(self, project_basename, dep_name):
         search = '<Import Project="python.props" />' if self._is_py3 else '<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />'
-        for name, dep in injected_props:
-            replace_in_file(self, _project(name), search, search + f'<Import Project="{self.generators_folder}/conan_{dep}.props" />')
+        replace_in_file(self,
+                        self._msvc_project_path(project_basename),
+                        search,
+                        search + f'<Import Project="{self.generators_folder}/conan_{dep_name}.props" />')
+
+    def _patch_msvc_projects(self):
+        self._regex_replace_in_file(self._msvc_project_path("_bz2" if self._is_py3 else "bz2"), r'.*Include=\"\$\(bz2Dir\).*', "")
+        
+        self._inject_conan_props_file("_bz2" if self._is_py3 else "bz2", "bzip2")
+        self._inject_conan_props_file("_elementtree", "expat")
+        self._inject_conan_props_file("pyexpat", "expat")
+        self._inject_conan_props_file("_hashlib", "openssl")
+        self._inject_conan_props_file("_ssl", "openssl")
+        self._inject_conan_props_file("_sqlite3", "sqlite3")
+        self._inject_conan_props_file("_tkinter", "tk")
+        self._inject_conan_props_file("pythoncore", "zlib")
+        self._inject_conan_props_file("python", "zlib")
+        self._inject_conan_props_file("pythonw", "zlib")
+        if not self._use_vendored_libffi:
+            self._inject_conan_props_file("_ctypes", "libffi")
+        if self._is_py3:
+            self._inject_conan_props_file("_decimal", "mpdecimal")
+            self._inject_conan_props_file("_lzma", "xz_utils")
+        else:
+            self._inject_conan_props_file("_bsddb", "libdb")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
