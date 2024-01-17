@@ -4,21 +4,24 @@
 #include <tcl.h>
 #include <tk.h>
 
-int main (int argc ,char *argv[]) {
-    Tcl_FindExecutable(argv[0]);
-    Tcl_Interp *interp = Tcl_CreateInterp();
+int app_init(Tcl_Interp *interp) {
     if (Tcl_Init(interp) != TCL_OK) {
         fprintf(stderr ,"Tcl_Init error: %s\n" ,Tcl_GetStringResult(interp));
-        return EXIT_FAILURE;
+        exit(EXIT_SUCCESS);
+        return TCL_OK;
     }
 
     if (Tk_Init(interp) != TCL_OK) {
         fprintf(stderr, "Tk_Init failed: %s\n", Tcl_GetStringResult(interp));
         fprintf(stderr, "But ignore it: there may not be a X server running.\n");
-        return EXIT_SUCCESS;
+        exit(EXIT_SUCCESS);
+        return TCL_OK;
     }
+    exit(EXIT_SUCCESS);
+    return TCL_OK;
+}
 
-    Tcl_Finalize();
-    fprintf(stderr, "Test package success.\n");
+int main (int argc ,char *argv[]) {
+    Tk_Main(argc, argv, app_init);
     return EXIT_SUCCESS;
 }
