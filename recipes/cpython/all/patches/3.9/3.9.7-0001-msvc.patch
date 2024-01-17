@@ -14,26 +14,6 @@
 @@ -151,1 +151,1 @@
 -  </Target>
 +  </Target>-->
---- PCbuild/_ctypes.vcxproj
-+++ PCbuild/_ctypes.vcxproj
-@@ -86,7 +86,7 @@
-   <ImportGroup Label="PropertySheets">
-     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-     <Import Project="pyproject.props" />
--    <Import Project="libffi.props" />
-+    <!--<Import Project="libffi.props" />-->
-   </ImportGroup>
-   <PropertyGroup Label="UserMacros" />
-   <PropertyGroup>
-@@ -94,7 +94,7 @@
-   </PropertyGroup>
-   <ItemDefinitionGroup>
-     <ClCompile>
--      <PreprocessorDefinitions>FFI_BUILDING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
-     </ClCompile>
-     <Link>
-       <AdditionalOptions>/EXPORT:DllGetClassObject,PRIVATE /EXPORT:DllCanUnloadNow,PRIVATE %(AdditionalOptions)</AdditionalOptions>
 --- PCbuild/_decimal.vcxproj
 +++ PCbuild/_decimal.vcxproj
 @@ -98,11 +98,11 @@
