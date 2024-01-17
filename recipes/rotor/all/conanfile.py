@@ -111,6 +111,8 @@ class RotorConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["core"].libs = ["rotor"]
         self.cpp_info.components["core"].requires = ["boost::date_time", "boost::system", "boost::regex"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["core"].system_libs.append("m")
 
         if not self.options.multithreading:
             self.cpp_info.components["core"].defines.append("BUILD_THREAD_UNSAFE")
