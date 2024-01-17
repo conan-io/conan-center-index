@@ -322,6 +322,8 @@ class CPythonConan(ConanFile):
             ("_sqlite3", "sqlite3"),
             ("_tkinter", "tk"),
             ("pythoncore", "zlib"),
+            ("python", "zlib"),
+            ("pythonw", "zlib"),
         ]
         if not self._use_vendored_libffi:
             injected_props += [
@@ -414,36 +416,12 @@ class CPythonConan(ConanFile):
                 "<ItemDefinitionGroup>",
                 "<ItemDefinitionGroup><ClCompile><PreprocessorDefinitions>Py_NO_ENABLE_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile>")
 
-        # Don't import projects that we aren't pulling
-        deps = [
-            # Option suffix, base file name, conan props suffix
-            ("sqlite3", "_sqlite3", "sqlite3"),
-            ("tkinter", "_tkinter", "tk"),
-            #("bz2", "_bz2", "bzip2"),
-            ("lzma", "_lzma", "xz_utils"),
-        ]
-        for opt, fname, propname in deps:
-            full_file = os.path.join(self.source_folder, "PCbuild", f"{fname}.vcxproj")
-            if not self.options.get_safe(f"with_{opt}", default=True):
-                replace_in_file(self, full_file, f'<Import Project="CONAN_REPLACE_HERE/conan_{propname}.props" />', "")
-
-        # Fix props path for dependencies we are pulling
-        PCBuild = os.path.join(self.source_folder, "PCbuild")
-        for filename in os.listdir(PCBuild):
-            if filename.endswith(".vcxproj"):
-                replace_in_file(self, os.path.join(PCBuild, filename), "CONAN_REPLACE_HERE", self.generators_folder, strict=False)
-
         conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
         replace_in_file(
             self, os.path.join(self.source_folder, "PCbuild", "pythoncore.vcxproj"),
             '<Import Project="python.props" />',
             f'<Import Project="{conantoolchain_props}" /><Import Project="python.props" />',
         )
-
-        for project in ["python", "pythonw"]:
-            replace_in_file(self, os.path.join(self.source_folder, "PCbuild", f"{project}.vcxproj"),
-                            '<Import Project="python.props" />',
-                            f'<Import Project="python.props" /><Import Project="{self.generators_folder}/conan_zlib.props" />')
 
         if is_msvc(self):
             self._patch_msvc_projects()
