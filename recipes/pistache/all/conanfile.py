@@ -157,7 +157,9 @@ class PistacheConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libpistache")
 
         self.cpp_info.components["libpistache"].libs = collect_libs(self)
-        self.cpp_info.components["libpistache"].requires = ["rapidjson::rapidjson", "date::date"]
+        self.cpp_info.components["libpistache"].requires = ["rapidjson::rapidjson"]
+        if self.version != "cci.20201127":
+            self.cpp_info.components["libpistache"].requires.append("date::date")
         if self.options.with_ssl:
             self.cpp_info.components["libpistache"].requires.append("openssl::openssl")
             self.cpp_info.components["libpistache"].defines = ["PISTACHE_USE_SSL=1"]
