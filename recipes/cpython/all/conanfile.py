@@ -6,7 +6,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir, unzip
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, mkdir, replace_in_file, rm, rmdir, save, unzip
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuildDeps, MSBuildToolchain, MSBuild, is_msvc, is_msvc_static_runtime, msvc_runtime_flag, msvs_toolset
@@ -302,14 +302,11 @@ class CPythonConan(ConanFile):
             ("_bz2" if self._is_py3 else "bz2", r'.*Include=\"\$\(bz2Dir\).*'),
         ]
         for project, remove_pattern in items_to_remove:
-            content = ""
-            with open(_project(project), 'r', encoding="utf_8") as f:
-                content = f.read()
+            content = load(self, _project(project))
             
             content = re.sub(remove_pattern, "", content)
 
-            with open(_project(project), 'w', encoding="utf_8") as f:
-                f.write(content)
+            save(self, _project(project), content)
 
         # Inject Conan .props files where needed.
         # Project name, dependency name
