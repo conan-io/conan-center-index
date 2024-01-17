@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
 import os
@@ -124,10 +124,7 @@ class ProtobufConan(ConanFile):
         tc.cache_variables["protobuf_BUILD_LIBPROTOC"] = self.settings.os != "tvOS"
         tc.cache_variables["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
         if is_msvc(self) or self._is_clang_cl:
-            runtime = msvc_runtime_flag(self)
-            if not runtime:
-                runtime = self.settings.get_safe("compiler.runtime")
-            tc.cache_variables["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in runtime
+            tc.cache_variables["protobuf_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         if is_apple_os(self) and self.options.shared:
             # Workaround against SIP on macOS for consumers while invoking protoc when protobuf lib is shared
             tc.variables["CMAKE_INSTALL_RPATH"] = "@loader_path/../lib"
