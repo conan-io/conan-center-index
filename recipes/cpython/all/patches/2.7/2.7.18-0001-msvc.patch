@@ -1,14 +1,5 @@
 --- PCbuild/_bsddb.vcxproj
 +++ PCbuild/_bsddb.vcxproj
-@@ -46,7 +46,7 @@
-     <CharacterSet>NotSet</CharacterSet>
-   </PropertyGroup>
-   <PropertyGroup Label="Configuration" />
--  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><Import Project="CONAN_REPLACE_HERE/conan_libdb.props" />
-   <PropertyGroup>
-     <TargetExt>.pyd</TargetExt>
-   </PropertyGroup>
 @@ -75,7 +75,7 @@
    </ItemGroup>
    <ItemGroup>
