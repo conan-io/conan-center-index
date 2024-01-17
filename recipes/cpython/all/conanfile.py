@@ -329,6 +329,9 @@ class CPythonConan(ConanFile):
                         '<ProjectReference Include="sqlite3.vcxproj">',
                         '<ProjectReference Include="sqlite3.vcxproj" Condition="False">')
 
+        replace_in_file(self, self._msvc_project_path("_lzma"),
+                        '<ProjectReference Include="liblzma.vcxproj">',
+                        '<ProjectReference Include="liblzma.vcxproj" Condition="False">')
 
         self._inject_conan_props_file("_bz2" if self._is_py3 else "bz2", "bzip2", self.options.get_safe("with_bz2"))
         self._inject_conan_props_file("_elementtree", "expat", self._supports_modules)

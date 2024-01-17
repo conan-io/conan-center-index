@@ -29,19 +29,6 @@
      </Link>
    </ItemDefinitionGroup>
    <ItemGroup>
-@@ -111,10 +111,10 @@
-       <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>
-       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-     </ProjectReference>
--    <ProjectReference Include="liblzma.vcxproj">
-+    <!--<ProjectReference Include="liblzma.vcxproj">
-       <Project>{12728250-16eC-4dc6-94d7-e21dd88947f8}</Project>
-       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
--    </ProjectReference>
-+    </ProjectReference>-->
-   </ItemGroup>
-   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-   <ImportGroup Label="ExtensionTargets">
 --- PCbuild/pythoncore.vcxproj
 +++ PCbuild/pythoncore.vcxproj
 @@ -295,7 +295,7 @@
