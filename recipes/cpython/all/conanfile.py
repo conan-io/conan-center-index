@@ -312,6 +312,9 @@ class CPythonConan(ConanFile):
 
     def _patch_msvc_projects(self):
         self._regex_replace_in_file(self._msvc_project_path("_bz2" if self._is_py3 else "bz2"), r'.*Include=\"\$\(bz2Dir\).*', "")
+        if self._with_libffi:
+            replace_in_file(self, self._msvc_project_path("_ctypes"), '<Import Project="libffi.props" />', "")
+            replace_in_file(self, self._msvc_project_path("_ctypes"), "FFI_BUILDING;", "")
         
         self._inject_conan_props_file("_bz2" if self._is_py3 else "bz2", "bzip2", self.options.get_safe("with_bz2"))
         self._inject_conan_props_file("_elementtree", "expat", self._supports_modules)
