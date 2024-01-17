@@ -67,16 +67,20 @@ class LLVMOpenMpConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         if self.options.build_libomptarget and self._version_major >= 13:
             self.requires(f"llvm-core/{self.version}")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def validate(self):
-        if is_msvc(self):
-            raise ConanInvalidConfiguration("llvm-openmp is not compatible with MSVC")
+        if self.settings.os == "Windows":
+            if not self.options.shared:
+                raise ConanInvalidConfiguration("llvm-openmp can only be built as shared on Windows")
+            if self._version_major < 17:
+                #  fatal error LNK1181: cannot open input file 'build\runtime\src\omp.dll.lib'
+                raise ConanInvalidConfiguration(f"{self.ref} build is broken on MSVC for versions < 17")
 
         if not self._openmp_flags:
             raise ConanInvalidConfiguration(
@@ -100,6 +104,8 @@ class LLVMOpenMpConan(ConanFile):
     def build_requirements(self):
         if self._version_major >= 17:
             self.tool_requires("cmake/[>=3.20 <4]")
+        if is_msvc(self):
+            self.tool_requires("strawberryperl/5.32.1.1")
 
     def source(self):
         if self._version_major >= 15:
@@ -125,18 +131,38 @@ class LLVMOpenMpConan(ConanFile):
         tc.variables["OPENMP_STANDALONE_BUILD"] = True
         tc.variables["LIBOMP_ENABLE_SHARED"] = self.options.shared
         tc.variables["OPENMP_ENABLE_LIBOMPTARGET"] = self.options.build_libomptarget
-        # Do not buidl OpenMP Tools Interface (OMPT)
+        # Do not build OpenMP Tools Interface (OMPT)
         tc.variables["LIBOMP_OMPT_SUPPORT"] = False
+        tc.variables["LIBOMP_INSTALL_ALIASES"] = False
+        # The library file incorrectly includes a "lib" prefix on Windows otherwise
+        if self.settings.os == "Windows":
+            tc.variables["LIBOMP_LIB_NAME"] = "omp"
         tc.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        if self._version_major < 17:
+            # Fix CMake version and policies not being propagated in linker tests
+            replace_in_file(self, os.path.join(self.source_folder, "runtime", "cmake", "LibompCheckLinkerFlag.cmake"),
+                            "cmake_minimum_required(",
+                            "cmake_minimum_required(VERSION 3.15) #")
+            # Ensure sufficient CMake policy version is used for tc.variables
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "cmake_minimum_required(",
+                            "cmake_minimum_required(VERSION 3.15) #")
+        # Disable tests
         replace_in_file(self, os.path.join(self.source_folder, "runtime", "CMakeLists.txt"),
                         "add_subdirectory(test)", "")
+        # v12 can be built without LLVM includes
         if self._version_major == 12:
-            # v12 can be built without LLVM includes
             replace_in_file(self, os.path.join(self.source_folder, "libomptarget", "CMakeLists.txt"),
                             "if (NOT LIBOMPTARGET_LLVM_INCLUDE_DIRS)", "if (FALSE)")
+        # TODO: looks like a bug, should ask upstream
+        # The built import lib is named "libomp.dll.lib" otherwise, which also causes install() to fail
+        if self._version_major >= 14:
+            replace_in_file(self, os.path.join(self.source_folder, "runtime", "src", "CMakeLists.txt"),
+                            "set(LIBOMP_GENERATED_IMP_LIB_FILENAME ${LIBOMP_LIB_FILE}${CMAKE_STATIC_LIBRARY_SUFFIX})",
+                            "set(LIBOMP_GENERATED_IMP_LIB_FILENAME ${LIBOMP_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX})")
 
     def build(self):
         self._patch_sources()
@@ -166,7 +192,7 @@ class LLVMOpenMpConan(ConanFile):
         elif self.settings.compiler == "sun-cc":
             return ["-xopenmp"]
         elif is_msvc(self):
-            return ["-openmp"]
+            return ["-openmp:llvm"]
         return None
 
     @property
@@ -176,9 +202,7 @@ class LLVMOpenMpConan(ConanFile):
         return []
 
     def package(self):
-        copy(self, "LICENSE.txt",
-            src=self.source_folder,
-            dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
