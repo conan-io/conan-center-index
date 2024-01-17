@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.53.0"
@@ -41,6 +42,8 @@ class AsmjitConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
+        if self.version == "cci.20210306" and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.arch}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -51,6 +54,9 @@ class AsmjitConan(ConanFile):
         tc.variables["ASMJIT_STATIC"] = not self.options.shared
         if self.version == "cci.20210306":
             tc.variables["ASMJIT_BUILD_X86"] = self.settings.arch in ["x86", "x86_64"]
+        else:
+            tc.variables["ASMJIT_NO_X86"] = self.settings.arch not in ["x86", "x86_64"]
+            tc.variables["ASMJIT_NO_AARCH64"] = self.settings.arch not in ["armv8", "armv8_32", "armv8.3"]
         tc.variables["ASMJIT_TEST"] = False
         tc.variables["ASMJIT_NO_NATVIS"] = True
         tc.generate()
