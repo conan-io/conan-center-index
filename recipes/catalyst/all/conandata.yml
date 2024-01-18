@@ -1,0 +1,4 @@
+sources:
+  "2.0.0-rc4":
+    url: "https://gitlab.kitware.com/api/v4/projects/5912/packages/generic/catalyst/v2.0.0-rc4/catalyst-v2.0.0-rc4.tar.gz"
+    sha256: "cb491e4ccd344156cc2494f65b9f38885598c16d12e1016c36e2ee0bc3640863"
