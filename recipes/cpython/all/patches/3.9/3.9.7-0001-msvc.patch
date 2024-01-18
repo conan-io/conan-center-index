@@ -81,41 +81,6 @@
    </ItemGroup>
    <ItemGroup>
      <ResourceCompile Include="..\PC\python_nt.rc" />
---- PCbuild/_elementtree.vcxproj
-+++ PCbuild/_elementtree.vcxproj
-@@ -93,12 +93,12 @@
-   </PropertyGroup>
-   <ItemDefinitionGroup>
-     <ClCompile>
--      <AdditionalIncludeDirectories>..\Modules\expat;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
--      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_PYEXPAT_CAPI;XML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_PYEXPAT_CAPI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-     </ClCompile>
-   </ItemDefinitionGroup>
-   <ItemGroup>
--    <ClInclude Include="..\Modules\expat\ascii.h" />
-+    <!--<ClInclude Include="..\Modules\expat\ascii.h" />
-     <ClInclude Include="..\Modules\expat\asciitab.h" />
-     <ClInclude Include="..\Modules\expat\expat.h" />
-     <ClInclude Include="..\Modules\expat\expat_config.h" />
-@@ -112,13 +112,13 @@
-     <ClInclude Include="..\Modules\expat\utf8tab.h" />
-     <ClInclude Include="..\Modules\expat\winconfig.h" />
-     <ClInclude Include="..\Modules\expat\xmlrole.h" />
--    <ClInclude Include="..\Modules\expat\xmltok.h" />
-+    <ClInclude Include="..\Modules\expat\xmltok.h" />-->
-   </ItemGroup>
-   <ItemGroup>
-     <ClCompile Include="..\Modules\_elementtree.c" />
--    <ClCompile Include="..\Modules\expat\xmlparse.c" />
-+    <!--<ClCompile Include="..\Modules\expat\xmlparse.c" />
-     <ClCompile Include="..\Modules\expat\xmlrole.c" />
--    <ClCompile Include="..\Modules\expat\xmltok.c" />
-+    <ClCompile Include="..\Modules\expat\xmltok.c" />-->
-   </ItemGroup>
-   <ItemGroup>
-     <ResourceCompile Include="..\PC\python_nt.rc" />
 --- PCbuild/_tkinter.vcxproj
 +++ PCbuild/_tkinter.vcxproj
 @@ -93,12 +93,12 @@

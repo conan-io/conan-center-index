@@ -74,44 +74,6 @@
      <ProjectReference Include="_socket.vcxproj">
        <Project>{86937f53-c189-40ef-8ce8-8759d8e7d480}</Project>
        <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
---- PCbuild/_elementtree.vcxproj
-+++ PCbuild/_elementtree.vcxproj
-@@ -61,15 +61,15 @@
-   </PropertyGroup>
-   <ItemDefinitionGroup>
-     <ClCompile>
--      <AdditionalIncludeDirectories>..\Modules\expat;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
--      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_PYEXPAT_CAPI;XML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_PYEXPAT_CAPI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-     </ClCompile>
-     <Link>
-       <BaseAddress>0x1D100000</BaseAddress>
-     </Link>
-   </ItemDefinitionGroup>
-   <ItemGroup>
--    <ClInclude Include="..\Modules\expat\ascii.h" />
-+    <!--<ClInclude Include="..\Modules\expat\ascii.h" />
-     <ClInclude Include="..\Modules\expat\asciitab.h" />
-     <ClInclude Include="..\Modules\expat\expat.h" />
-     <ClInclude Include="..\Modules\expat\expat_config.h" />
-@@ -83,13 +83,13 @@
-     <ClInclude Include="..\Modules\expat\utf8tab.h" />
-     <ClInclude Include="..\Modules\expat\winconfig.h" />
-     <ClInclude Include="..\Modules\expat\xmlrole.h" />
--    <ClInclude Include="..\Modules\expat\xmltok.h" />
-+    <ClInclude Include="..\Modules\expat\xmltok.h" />-->
-   </ItemGroup>
-   <ItemGroup>
-     <ClCompile Include="..\Modules\_elementtree.c" />
--    <ClCompile Include="..\Modules\expat\xmlparse.c" />
-+    <!--<ClCompile Include="..\Modules\expat\xmlparse.c" />
-     <ClCompile Include="..\Modules\expat\xmlrole.c" />
--    <ClCompile Include="..\Modules\expat\xmltok.c" />
-+    <ClCompile Include="..\Modules\expat\xmltok.c" />-->
-   </ItemGroup>
-   <ItemGroup>
-     <ProjectReference Include="pythoncore.vcxproj">
 --- PCbuild/_tkinter.vcxproj
 +++ PCbuild/_tkinter.vcxproj
 @@ -61,11 +61,11 @@

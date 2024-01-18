@@ -14,36 +14,6 @@
 @@ -112,1 +112,1 @@
 -  </Target>
 +  </Target>-->
---- PCbuild/_elementtree.vcxproj
-+++ PCbuild/_elementtree.vcxproj
-@@ -65,8 +65,8 @@
--      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_PYEXPAT_CAPI;XML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_PYEXPAT_CAPI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-     </ClCompile>
-   </ItemDefinitionGroup>
-   <ItemGroup>
--    <ClInclude Include="..\Modules\expat\ascii.h" />
-+    <!--<ClInclude Include="..\Modules\expat\ascii.h" />
-     <ClInclude Include="..\Modules\expat\asciitab.h" />
-     <ClInclude Include="..\Modules\expat\expat.h" />
-     <ClInclude Include="..\Modules\expat\expat_config.h" />
-@@ -80,13 +80,13 @@
-     <ClInclude Include="..\Modules\expat\utf8tab.h" />
-     <ClInclude Include="..\Modules\expat\winconfig.h" />
-     <ClInclude Include="..\Modules\expat\xmlrole.h" />
--    <ClInclude Include="..\Modules\expat\xmltok.h" />
-+    <ClInclude Include="..\Modules\expat\xmltok.h" />-->
-   </ItemGroup>
-   <ItemGroup>
-     <ClCompile Include="..\Modules\_elementtree.c" />
--    <ClCompile Include="..\Modules\expat\xmlparse.c" />
-+    <!--<ClCompile Include="..\Modules\expat\xmlparse.c" />
-     <ClCompile Include="..\Modules\expat\xmlrole.c" />
--    <ClCompile Include="..\Modules\expat\xmltok.c" />
-+    <ClCompile Include="..\Modules\expat\xmltok.c" />-->
-   </ItemGroup>
-   <ItemGroup>
-     <ResourceCompile Include="..\PC\python_nt.rc" />
 --- PCbuild/_lzma.vcxproj
 +++ PCbuild/_lzma.vcxproj
 @@ -62,10 +62,10 @@
