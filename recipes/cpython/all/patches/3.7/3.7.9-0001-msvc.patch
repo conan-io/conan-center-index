@@ -78,34 +78,6 @@
    <Target Name="SignFiles" AfterTargets="Build" Condition="$(_SignCommand) != ''">
      <ItemGroup>
        <FilesToSign Include="$(opensslOutDir)\lib*.dll" />
---- PCbuild/pyexpat.vcxproj
-+++ PCbuild/pyexpat.vcxproj
-@@ -58,19 +58,19 @@
-   <PropertyGroup Label="UserMacros" />
-   <ItemDefinitionGroup>
-     <ClCompile>
--      <AdditionalIncludeDirectories>$(PySourcePath)Modules\expat;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
--      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;PYEXPAT_EXPORTS;HAVE_EXPAT_H;XML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-     </ClCompile>
-   </ItemDefinitionGroup>
-   <ItemGroup>
--    <ClInclude Include="..\Modules\expat\xmlrole.h" />
--    <ClInclude Include="..\Modules\expat\xmltok.h" />
-+    <!--<ClInclude Include="..\Modules\expat\xmlrole.h" />
-+    <ClInclude Include="..\Modules\expat\xmltok.h" />-->
-   </ItemGroup>
-   <ItemGroup>
-     <ClCompile Include="..\Modules\pyexpat.c" />
--    <ClCompile Include="..\Modules\expat\xmlparse.c" />
-+    <!--<ClCompile Include="..\Modules\expat\xmlparse.c" />
-     <ClCompile Include="..\Modules\expat\xmlrole.c" />
--    <ClCompile Include="..\Modules\expat\xmltok.c" />
-+    <ClCompile Include="..\Modules\expat\xmltok.c" />-->
-   </ItemGroup>
-   <ItemGroup>
-     <ResourceCompile Include="..\PC\python_nt.rc" />
 --- PCbuild/pythoncore.vcxproj
 +++ PCbuild/pythoncore.vcxproj
 @@ -215,7 +215,7 @@
