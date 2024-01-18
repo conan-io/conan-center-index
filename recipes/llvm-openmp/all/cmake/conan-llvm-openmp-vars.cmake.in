@@ -1,4 +1,4 @@
-# Loosely based on https://github.com/Kitware/CMake/blob/69b562c/Modules/FindOpenMP.cmake
+# Loosely based on https://github.com/Kitware/CMake/blob/v3.28.1/Modules/FindOpenMP.cmake
 
 # For Conan v1 compatibility
 foreach(_suffix RELEASE DEBUG RELWITHDEBINFO MINSIZEREL)
@@ -32,8 +32,9 @@ set(OpenMP_Fortran_FOUND FALSE)
 
 # Determine OpenMP specification date and version
 function(_openmp_get_spec_date)
-  set(SRC_FILE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindOpenMP/ompver.c")
-  set(BIN_FILE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindOpenMP/ompver.bin")
+  set(BUILD_DIR "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindOpenMP")
+  set(SRC_FILE "${BUILD_DIR}/ompver.c")
+  set(BIN_FILE "${BUILD_DIR}/ompver.bin")
   file(WRITE "${SRC_FILE}" "
     #include <stdio.h>
     #include <omp.h>
@@ -46,14 +47,12 @@ function(_openmp_get_spec_date)
       return 0;
     }
   ")
-  try_compile(OpenMP_SPECTEST
+  try_compile(OpenMP_SPECTEST ${BUILD_DIR}
     SOURCES "${SRC_FILE}"
-    LOG_DESCRIPTION "Detecting OpenMP version"
-    CMAKE_FLAGS
-      "-DCOMPILE_DEFINITIONS:STRING=${OpenMP_C_FLAGS}"
-      "-DINCLUDE_DIRECTORIES:STRING=${OpenMP_C_INCLUDE_DIR}"
-      "-DLINK_DIRECTORIES:STRING=${OpenMP_C_INCLUDE_DIR}/../lib"
-      "-DLINK_LIBRARIES:STRING=${OpenMP_C_LIB_NAMES}"
+    LINK_LIBRARIES OpenMP::OpenMP_C
+    # Not sure why it fails to build without passing the flags as defines.
+    # The official .cmake module does the same, though.
+    COMPILE_DEFINITIONS "${OpenMP_C_FLAGS}"
     COPY_FILE "${BIN_FILE}"
   )
   if(NOT OpenMP_SPECTEST)
