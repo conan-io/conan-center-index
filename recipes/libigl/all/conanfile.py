@@ -105,8 +105,7 @@ class LibiglConan(ConanFile):
 
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_libigl_INCLUDE"] = "conan_deps.cmake"
-        tc.variables["LIBIGL_INSTALL"] = True
-        tc.variables["LIBIGL_EXPORT_TARGETS"] = True
+        tc.variables[""] = True
         tc.variables["LIBIGL_USE_STATIC_LIBRARY"] = not self.options.header_only
         tc.variables["LIBIGL_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0048"] = "NEW"
@@ -117,21 +116,40 @@ class LibiglConan(ConanFile):
         tc.variables["LIBIGL_BUILD_TESTS"] = False
         tc.variables["LIBIGL_BUILD_PYTHON"] = False
 
-        tc.variables["LIBIGL_WITH_CGAL"] = False
-        tc.variables["LIBIGL_WITH_COMISO"] = False
-        tc.variables["LIBIGL_WITH_CORK"] = False
-        tc.variables["LIBIGL_WITH_EMBREE"] = False
-        tc.variables["LIBIGL_WITH_MATLAB"] = False
-        tc.variables["LIBIGL_WITH_MOSEK"] = False
-        tc.variables["LIBIGL_WITH_OPENGL"] = False
-        tc.variables["LIBIGL_WITH_OPENGL_GLFW"] = False
-        tc.variables["LIBIGL_WITH_OPENGL_GLFW_IMGUI"] = False
-        tc.variables["LIBIGL_WITH_PNG"] = False
-        tc.variables["LIBIGL_WITH_TETGEN"] = False
-        tc.variables["LIBIGL_WITH_TRIANGLE"] = False
-        tc.variables["LIBIGL_WITH_XML"] = False
-        tc.variables["LIBIGL_WITH_PYTHON"] = False
-        tc.variables["LIBIGL_WITH_PREDICATES"] = False
+        if Version(self.version) >= "2.4.0":
+            tc.variables["LIBIGL_EMBREE"] = False
+            tc.variables["LIBIGL_GLFW"] = False
+            tc.variables["LIBIGL_IMGUI"] = False
+            tc.variables["LIBIGL_OPENGL"] = False
+            tc.variables["LIBIGL_STB"] = False
+            tc.variables["LIBIGL_PREDICATES"] = False
+            tc.variables["LIBIGL_SPECTRA"] = False
+            tc.variables["LIBIGL_XML"] = False
+            tc.variables["LIBIGL_COPYLEFT_CORE"] = False
+            tc.variables["LIBIGL_COPYLEFT_CGAL"] = False
+            tc.variables["LIBIGL_COPYLEFT_COMISO"] = False
+            tc.variables["LIBIGL_COPYLEFT_TETGEN"] = False
+            tc.variables["LIBIGL_RESTRICTED_MATLAB"] = False
+            tc.variables["LIBIGL_RESTRICTED_MOSEK"] = False
+            tc.variables["LIBIGL_RESTRICTED_TRIANGLE"] = False
+            tc.variables["LIBIGL_GLFW_TESTS"] = False
+        else:
+            tc.variables["LIBIGL_EXPORT_TARGETS"] = True
+            tc.variables["LIBIGL_WITH_EMBREE"] = False
+            tc.variables["LIBIGL_WITH_OPENGL_GLFW"] = False
+            tc.variables["LIBIGL_WITH_OPENGL_GLFW_IMGUI"] = False
+            tc.variables["LIBIGL_WITH_OPENGL"] = False
+            tc.variables["LIBIGL_WITH_PNG"] = False
+            tc.variables["LIBIGL_WITH_PREDICATES"] = False
+            tc.variables["LIBIGL_WITH_XML"] = False
+            tc.variables["LIBIGL_WITH_CGAL"] = False
+            tc.variables["LIBIGL_WITH_COMISO"] = False
+            tc.variables["LIBIGL_WITH_CORK"] = False
+            tc.variables["LIBIGL_WITH_TETGEN"] = False
+            tc.variables["LIBIGL_WITH_MATLAB"] = False
+            tc.variables["LIBIGL_WITH_MOSEK"] = False
+            tc.variables["LIBIGL_WITH_TRIANGLE"] = False
+            tc.variables["LIBIGL_WITH_PYTHON"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
