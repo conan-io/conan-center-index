@@ -53,7 +53,7 @@ class SentryNativeConan(ConanFile):
     def _min_cppstd(self):
         if is_msvc(self):
             return "17"
-        if self.options.get_safe("backend") == "breakpad" and Version(self.version) >= "0.5.4":
+        if self.options.get_safe("backend") == "breakpad":
             return 17
         return "14"
 
@@ -90,7 +90,6 @@ class SentryNativeConan(ConanFile):
 
         # Configure default backend
         if self.settings.os == "Windows" or self.settings.os == "Macos":  # Don't use tools.is_apple_os(os) here
-            # FIXME: for self.version < 0.4: default backend is "breakpad" when building with MSVC for Windows xp; else: backend=none
             self.options.backend = "crashpad"
         elif self.settings.os in ("FreeBSD", "Linux"):
             self.options.backend = "breakpad"
