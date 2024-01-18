@@ -163,8 +163,10 @@ class PistacheConan(ConanFile):
         if self.options.with_ssl:
             self.cpp_info.components["libpistache"].requires.append("openssl::openssl")
             self.cpp_info.components["libpistache"].defines = ["PISTACHE_USE_SSL=1"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libpistache"].system_libs = ["pthread"]
+            if self.version != "cci.20201127":
+                self.cpp_info.components["libpistache"].system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "Pistache"
