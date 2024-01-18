@@ -1,8 +1,9 @@
 import os
 
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir, save
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -20,15 +21,19 @@ class LibversionConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "build_tools": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "build_tools": False,
     }
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            # Requires getopt.h and unistd.h
+            del self.options.build_tools
 
     def configure(self):
         if self.options.shared:
@@ -49,6 +54,9 @@ class LibversionConan(ConanFile):
     def _patch_sources(self):
         # Disable tests
         save(self, os.path.join(self.source_folder, "tests", "CMakeLists.txt"), "")
+        # Disable tools
+        if not self.options.get_safe("build_tools"):
+            save(self, os.path.join(self.source_folder, "utils", "CMakeLists.txt"), "")
         # Install only the appropriate target
         target = "libversion" if self.options.shared else "libversion_static"
         replace_in_file(self, os.path.join(self.source_folder, "libversion", "CMakeLists.txt"),
@@ -74,6 +82,10 @@ class LibversionConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "libversion::libversion")
         self.cpp_info.set_property("pkg_config_name", "libversion")
 
-        self.cpp_info.libs = ["version"]
+        if is_msvc(self) and self.options.shared:
+            self.cpp_info.libs = ["libversion"]
+        else:
+            self.cpp_info.libs = ["version"]
+
         if not self.options.shared:
             self.cpp_info.defines.append("LIBVERSION_STATIC_DEFINE")
