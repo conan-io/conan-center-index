@@ -95,8 +95,6 @@ class LLVMOpenMpConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not support.")
 
         if is_apple_os(self) and self.settings.arch == "armv8":
-            if self._version_major <= 10:
-                raise ConanInvalidConfiguration("ARM v8 not supported")
             if self._version_major >= 12 and self.settings.build_type == "Debug":
                 # All versions except for v11 crash with a segfault for the simple test_package.cpp test
                 # Might be related to https://github.com/llvm/llvm-project/issues/49923
