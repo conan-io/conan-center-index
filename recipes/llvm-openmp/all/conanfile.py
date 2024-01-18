@@ -201,6 +201,8 @@ class LLVMOpenMpConan(ConanFile):
     def _system_libs(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
             return ["m", "dl", "pthread", "rt"]
+        if self.settings.os == "Windows":
+            return ["psapi"]
         return []
 
     def package(self):
