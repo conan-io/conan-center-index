@@ -134,6 +134,7 @@ class LLVMOpenMpConan(ConanFile):
         tc.variables["OPENMP_ENABLE_LIBOMPTARGET"] = self.options.build_libomptarget
         # Do not build OpenMP Tools Interface (OMPT)
         tc.variables["LIBOMP_OMPT_SUPPORT"] = False
+        # Should not be needed and causes the library to be copied on Windows due to lack of symlink support
         tc.variables["LIBOMP_INSTALL_ALIASES"] = False
         # The library file incorrectly includes a "lib" prefix on Windows otherwise
         if self.settings.os == "Windows":
