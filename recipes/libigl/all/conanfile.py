@@ -170,7 +170,8 @@ class LibiglConan(ConanFile):
             cmake.build()
         except ConanException:
             # Workaround for C3I running out of memory during build
-            cmake.build(cli_args=["-j1"])
+            self.conf.define("tools.build:jobs", 1)
+            cmake.build()
 
     def package(self):
         cmake = CMake(self)
