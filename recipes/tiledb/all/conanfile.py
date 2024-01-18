@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir, replace_in_file, rm
 from conan.tools.gnu import PkgConfigDeps
@@ -275,3 +275,5 @@ class TileDBConan(ConanFile):
         self.cpp_info.libs = ["tiledb"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
+        if stdcpp_library(self):
+            self.cpp_info.system_libs.append(stdcpp_library(self))
