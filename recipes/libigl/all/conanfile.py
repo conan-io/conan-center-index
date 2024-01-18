@@ -79,14 +79,18 @@ class LibiglConan(ConanFile):
             self.info.clear()
 
     def validate(self):
-        if "arm" in self.settings.arch or "x86" is self.settings.arch:
+        if "arm" in self.settings.arch or self.settings.arch == "x86":
             raise ConanInvalidConfiguration(f"Not available for arm. Requested arch: {self.settings.arch}")
         if is_msvc_static_runtime(self) and not self.options.header_only:
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
+
+        def loose_lt_semver(v1, v2):
+            return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))
+
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if min_version and Version(self.settings.compiler.version) < min_version:
+        if min_version and loose_lt_semver(self.settings.compiler.version, min_version):
             raise ConanInvalidConfiguration(
                 f"{self.name} requires C++{self._minimum_cpp_standard} support. The current compiler"
                 f" {self.settings.compiler} {self.settings.compiler.version} does not support it."
