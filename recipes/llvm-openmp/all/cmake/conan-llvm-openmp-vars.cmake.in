@@ -1,20 +1,27 @@
 # Loosely based on https://github.com/Kitware/CMake/blob/69b562c/Modules/FindOpenMP.cmake
 
+# For Conan v1 compatibility
+foreach(_suffix RELEASE DEBUG RELWITHDEBINFO MINSIZEREL)
+    if(DEFINED OpenMP_OpenMP_INCLUDE_DIRS_${_suffix})
+      set(_v1_suffix _${_suffix})
+    endif()
+endforeach()
+
 set(OpenMP_C_FLAGS "@OpenMP_FLAGS@")
-set(OpenMP_C_INCLUDE_DIR "${OpenMP_INCLUDE_DIR}")
-set(OpenMP_C_INCLUDE_DIRS "${OpenMP_INCLUDE_DIRS}")
+set(OpenMP_C_INCLUDE_DIR "${OpenMP_INCLUDE_DIR${_v1_suffix}}")
+set(OpenMP_C_INCLUDE_DIRS "${OpenMP_INCLUDE_DIRS${_v1_suffix}}")
 set(OpenMP_C_LIB_NAMES "@OpenMP_LIB_NAMES@")
-set(OpenMP_C_LIBRARIES "${OpenMP_LIBRARIES}")
-set(OpenMP_C_DEFINITIONS "${OpenMP_DEFINITIONS}")
+set(OpenMP_C_LIBRARIES "${OpenMP_LIBRARIES${_v1_suffix}}")
+set(OpenMP_C_DEFINITIONS "${OpenMP_DEFINITIONS${_v1_suffix}}")
 
-set(OpenMP_CXX_FLAGS "@OpenMP_FLAGS@")
-set(OpenMP_CXX_INCLUDE_DIR "${OpenMP_INCLUDE_DIR}")
-set(OpenMP_CXX_INCLUDE_DIRS "${OpenMP_INCLUDE_DIRS}")
-set(OpenMP_CXX_LIB_NAMES "@OpenMP_LIB_NAMES@")
-set(OpenMP_CXX_LIBRARIES "${OpenMP_LIBRARIES}")
-set(OpenMP_CXX_DEFINITIONS "${OpenMP_DEFINITIONS}")
+set(OpenMP_CXX_FLAGS "${OpenMP_C_FLAGS}")
+set(OpenMP_CXX_INCLUDE_DIR "${OpenMP_C_INCLUDE_DIR}")
+set(OpenMP_CXX_INCLUDE_DIRS "${OpenMP_C_INCLUDE_DIRS}")
+set(OpenMP_CXX_LIB_NAMES "${OpenMP_C_LIB_NAMES}")
+set(OpenMP_CXX_LIBRARIES "${OpenMP_C_LIBRARIES}")
+set(OpenMP_CXX_DEFINITIONS "${OpenMP_C_DEFINITIONS}")
 
-set(OpenMP_omp_LIBRARY "${OpenMP_LIBRARIES}")
+set(OpenMP_omp_LIBRARY "${OpenMP_C_LIBRARIES}")
 
 set(OpenMP_FOUND FALSE)
 set(OPENMP_FOUND FALSE)
@@ -44,19 +51,27 @@ function(_openmp_get_spec_date)
     LOG_DESCRIPTION "Detecting OpenMP version"
     CMAKE_FLAGS
       "-DCOMPILE_DEFINITIONS:STRING=${OpenMP_C_FLAGS}"
-      "-DINCLUDE_DIRECTORIES:STRING=${OpenMP_INCLUDE_DIR}"
-      "-DLINK_DIRECTORIES:STRING=${OpenMP_INCLUDE_DIR}/../lib"
+      "-DINCLUDE_DIRECTORIES:STRING=${OpenMP_C_INCLUDE_DIR}"
+      "-DLINK_DIRECTORIES:STRING=${OpenMP_C_INCLUDE_DIR}/../lib"
       "-DLINK_LIBRARIES:STRING=${OpenMP_C_LIB_NAMES}"
     COPY_FILE "${BIN_FILE}"
   )
+  if(NOT OpenMP_SPECTEST)
+    if(OpenMP_FIND_REQUIRED)
+      message(FATAL_ERROR "Failed to build OpenMP test executable for specification date detection")
+    elseif(NOT OpenMP_FIND_QUIETLY)
+      message(SEND_ERROR "Failed to build OpenMP test executable for specification date detection")
+    endif()
+    return()
+  endif()
   file(STRINGS ${BIN_FILE} specstr LIMIT_COUNT 1 REGEX "INFO:OpenMP-date")
   if(specstr MATCHES ".*INFO:OpenMP-date\\[0*([^]]*)\\].*")
     set(OpenMP_SPEC_DATE ${CMAKE_MATCH_1} PARENT_SCOPE)
   else()
     if(OpenMP_FIND_REQUIRED)
-        message(FATAL_ERROR "Failed to detect OpenMP specification date")
+      message(FATAL_ERROR "Failed to detect OpenMP specification date")
     elseif(NOT OpenMP_FIND_QUIETLY)
-        message(SEND_ERROR "Failed to detect OpenMP specification date")
+      message(SEND_ERROR "Failed to detect OpenMP specification date")
     endif()
     return()
   endif()
@@ -81,9 +96,9 @@ function(_openmp_set_version_by_spec_date)
     set(minor "${CMAKE_MATCH_2}")
   else()
     if(OpenMP_FIND_REQUIRED)
-        message(FATAL_ERROR "Failed to detect OpenMP specification version")
+      message(FATAL_ERROR "Failed to detect OpenMP specification version")
     elseif(NOT OpenMP_FIND_QUIETLY)
-        message(SEND_ERROR "Failed to detect OpenMP specification version")
+      message(SEND_ERROR "Failed to detect OpenMP specification version")
     endif()
     return()
   endif()
