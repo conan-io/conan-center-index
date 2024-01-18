@@ -85,7 +85,7 @@ class LibiglConan(ConanFile):
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
 
         if self.version == "2.3.0" and conan_version.major == 1 and self.settings.build_type == "Debug":
-            raise ConanException("Debug build disabled for Conan 1.x due to excessive memory use in ConanCenter CI")
+            raise ConanInvalidConfiguration("Debug build disabled for Conan 1.x due to excessive memory use in ConanCenter CI")
 
         def loose_lt_semver(v1, v2):
             return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))
