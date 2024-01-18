@@ -8,7 +8,11 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        if self.settings.arch in ["x86", "x86_64"]:
+            arch_defs = {"USE_X86": 1}
+        if self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
+            arch_defs = {"USE_AARCH64": 1}
+        cmake.configure(defs=arch_defs)
         cmake.build()
 
     def test(self):
