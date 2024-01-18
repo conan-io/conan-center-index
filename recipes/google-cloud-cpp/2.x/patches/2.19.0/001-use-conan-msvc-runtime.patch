@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 236c6e1..f961398 100644
+index aebfc6b1..f1c4f196 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -68,7 +68,6 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+@@ -53,7 +53,6 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
  endif ()
  
  list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -11,10 +11,10 @@ index 236c6e1..f961398 100644
  option(GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK
         "If enabled, check that the user has defined OPENSSL_ROOT_DIR on macOS"
 diff --git a/cmake/GoogleCloudCppCommon.cmake b/cmake/GoogleCloudCppCommon.cmake
-index 057fe6b..dbffd7b 100644
+index b487a1bc..880c98fe 100644
 --- a/cmake/GoogleCloudCppCommon.cmake
 +++ b/cmake/GoogleCloudCppCommon.cmake
-@@ -21,9 +21,6 @@ get_filename_component(GOOGLE_CLOUD_CPP_SUBPROJECT
+@@ -17,9 +17,6 @@
  # Get the destination directories based on the GNU recommendations.
  include(GNUInstallDirs)
  
@@ -25,26 +25,26 @@ index 057fe6b..dbffd7b 100644
  include(EnableWerror)
  
 diff --git a/examples/CMakeLists.txt b/examples/CMakeLists.txt
-index 0cb7a9a..d9016a0 100644
+index ce44aafe..cdaba904 100644
 --- a/examples/CMakeLists.txt
 +++ b/examples/CMakeLists.txt
-@@ -14,9 +14,6 @@
- # limitations under the License.
- # ~~~
+@@ -20,9 +20,6 @@ if (NOT GOOGLE_CLOUD_CPP_ENABLE_EXAMPLES)
+     return()
+ endif ()
  
 -# Pick the right MSVC runtime libraries.
 -include(SelectMSVCRuntime)
 -
- add_executable(gcs2cbt gcs2cbt.cc)
- target_link_libraries(gcs2cbt google-cloud-cpp::bigtable
-                       google-cloud-cpp::storage google-cloud-cpp::grpc_utils)
+ if (bigtable IN_LIST GOOGLE_CLOUD_CPP_ENABLE AND storage IN_LIST
+                                                  GOOGLE_CLOUD_CPP_ENABLE)
+     add_executable(gcs2cbt gcs2cbt.cc)
 diff --git a/external/googleapis/CMakeLists.txt b/external/googleapis/CMakeLists.txt
-index ad2bd4b..cd1eb3a 100644
+index c3df633c..6a85dfe8 100644
 --- a/external/googleapis/CMakeLists.txt
 +++ b/external/googleapis/CMakeLists.txt
-@@ -147,8 +147,6 @@ if (PROTO_INCLUDE_DIR)
-     list(INSERT PROTOBUF_IMPORT_DIRS 0 "${PROTO_INCLUDE_DIR}")
- endif ()
+@@ -163,8 +163,6 @@ externalproject_add(
+ 
+ google_cloud_cpp_find_proto_include_dir(PROTO_INCLUDE_DIR)
  
 -include(SelectMSVCRuntime)
 -
