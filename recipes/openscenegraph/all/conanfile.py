@@ -299,6 +299,7 @@ class OpenSceneGraphConanFile(ConanFile):
         # The main component that depends on all non-plugin components
         # https://github.com/openscenegraph/OpenSceneGraph/blob/master/packaging/pkgconfig/openscenegraph.pc.in
         openscenegraph = self.cpp_info.components["openscenegraph"]
+        openscenegraph.libdirs.append(os.path.join("lib", f"osgPlugins-{self.version}"))
         openscenegraph.set_property("pkg_config_name", "openscenegraph")
         # Unofficial CMake target
         openscenegraph.set_property("cmake_target_name", "OpenSceneGraph::OpenSceneGraph")
