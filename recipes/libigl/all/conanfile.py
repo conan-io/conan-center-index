@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -49,7 +49,7 @@ class LibiglConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -104,32 +104,34 @@ class LibiglConan(ConanFile):
         env.generate()
 
         tc = CMakeToolchain(self)
-        tc.cache_variables["LIBIGL_INSTALL"] = True
-        tc.cache_variables["LIBIGL_EXPORT_TARGETS"] = True
-        tc.cache_variables["LIBIGL_USE_STATIC_LIBRARY"] = not self.options.header_only
-        tc.cache_variables["LIBIGL_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+        tc.variables["CMAKE_PROJECT_libigl_INCLUDE"] = "conan_deps.cmake"
+        tc.variables["LIBIGL_INSTALL"] = True
+        tc.variables["LIBIGL_EXPORT_TARGETS"] = True
+        tc.variables["LIBIGL_USE_STATIC_LIBRARY"] = not self.options.header_only
+        tc.variables["LIBIGL_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0048"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         # All these dependencies are needed to build the examples or the tests
-        tc.cache_variables["LIBIGL_BUILD_TUTORIALS"] = False
-        tc.cache_variables["LIBIGL_BUILD_TESTS"] = False
-        tc.cache_variables["LIBIGL_BUILD_PYTHON"] = False
+        tc.variables["LIBIGL_BUILD_TUTORIALS"] = False
+        tc.variables["LIBIGL_BUILD_TESTS"] = False
+        tc.variables["LIBIGL_BUILD_PYTHON"] = False
 
-        tc.cache_variables["LIBIGL_WITH_CGAL"] = False
-        tc.cache_variables["LIBIGL_WITH_COMISO"] = False
-        tc.cache_variables["LIBIGL_WITH_CORK"] = False
-        tc.cache_variables["LIBIGL_WITH_EMBREE"] = False
-        tc.cache_variables["LIBIGL_WITH_MATLAB"] = False
-        tc.cache_variables["LIBIGL_WITH_MOSEK"] = False
-        tc.cache_variables["LIBIGL_WITH_OPENGL"] = False
-        tc.cache_variables["LIBIGL_WITH_OPENGL_GLFW"] = False
-        tc.cache_variables["LIBIGL_WITH_OPENGL_GLFW_IMGUI"] = False
-        tc.cache_variables["LIBIGL_WITH_PNG"] = False
-        tc.cache_variables["LIBIGL_WITH_TETGEN"] = False
-        tc.cache_variables["LIBIGL_WITH_TRIANGLE"] = False
-        tc.cache_variables["LIBIGL_WITH_XML"] = False
-        tc.cache_variables["LIBIGL_WITH_PYTHON"] = False
-        tc.cache_variables["LIBIGL_WITH_PREDICATES"] = False
+        tc.variables["LIBIGL_WITH_CGAL"] = False
+        tc.variables["LIBIGL_WITH_COMISO"] = False
+        tc.variables["LIBIGL_WITH_CORK"] = False
+        tc.variables["LIBIGL_WITH_EMBREE"] = False
+        tc.variables["LIBIGL_WITH_MATLAB"] = False
+        tc.variables["LIBIGL_WITH_MOSEK"] = False
+        tc.variables["LIBIGL_WITH_OPENGL"] = False
+        tc.variables["LIBIGL_WITH_OPENGL_GLFW"] = False
+        tc.variables["LIBIGL_WITH_OPENGL_GLFW_IMGUI"] = False
+        tc.variables["LIBIGL_WITH_PNG"] = False
+        tc.variables["LIBIGL_WITH_TETGEN"] = False
+        tc.variables["LIBIGL_WITH_TRIANGLE"] = False
+        tc.variables["LIBIGL_WITH_XML"] = False
+        tc.variables["LIBIGL_WITH_PYTHON"] = False
+        tc.variables["LIBIGL_WITH_PREDICATES"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -145,10 +147,10 @@ class LibiglConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.source_path.parent)
+        cmake.configure()
         try:
             cmake.build()
-        except Exception:
+        except ConanException:
             # Workaround for C3I running out of memory during build
             cmake.build(cli_args=["-j1"])
 
