@@ -85,7 +85,7 @@ configurations:
               compiler.version: ["5", "7", "9"]
               build_type: ["Release"]
   - id: linux-gcc11
-    hrname: "Linux, GCC-legacy"
+    hrname: "Linux, GCC11"
     content:
       - os: ["Linux"]
         arch: ["x86_64"]
