@@ -49,10 +49,13 @@ function(_openmp_get_spec_date)
   ")
   try_compile(OpenMP_SPECTEST ${BUILD_DIR}
     SOURCES "${SRC_FILE}"
-    LINK_LIBRARIES OpenMP::OpenMP_C
     # Not sure why it fails to build without passing the flags as defines.
     # The official .cmake module does the same, though.
     COMPILE_DEFINITIONS "${OpenMP_C_FLAGS}"
+    LINK_LIBRARIES ${OpenMP_C_LIB_NAMES}
+    CMAKE_FLAGS
+      "-DINCLUDE_DIRECTORIES:STRING=${OpenMP_C_INCLUDE_DIR}"
+      "-DLINK_DIRECTORIES:STRING=${OpenMP_C_INCLUDE_DIR}/../lib"
     COPY_FILE "${BIN_FILE}"
   )
   if(NOT OpenMP_SPECTEST)
