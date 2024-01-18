@@ -238,20 +238,23 @@ class LLVMOpenMpConan(ConanFile):
         # Match FindOpenMP.cmake module provided by CMake
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "OpenMP")
-        self.cpp_info.set_property("cmake_target_name", "OpenMP::OpenMP")
-        self.cpp_info.set_property("cmake_target_aliases", ["OpenMP::OpenMP_C", "OpenMP::OpenMP_CXX"])
 
-        self.cpp_info.libs = ["omp"]
-        self.cpp_info.system_libs = self._system_libs
-        self.cpp_info.cflags = self._openmp_flags
-        self.cpp_info.cxxflags = self._openmp_flags
+        omp = self.cpp_info.components["omp"]
+        omp.set_property("cmake_target_name", "OpenMP::OpenMP")
+        omp.set_property("cmake_target_aliases", ["OpenMP::OpenMP_C", "OpenMP::OpenMP_CXX"])
+        omp.libs = ["omp"]
+        omp.system_libs = self._system_libs
+        omp.cflags = self._openmp_flags
+        omp.cxxflags = self._openmp_flags
 
-        self.cpp_info.builddirs.append(os.path.join(self.package_folder, "lib", "cmake", "openmp"))
+        omp.builddirs.append(os.path.join(self.package_folder, "lib", "cmake", "openmp"))
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "OpenMP"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenMP"
-        self.cpp_info.builddirs.append(os.path.join(self.package_folder, "lib", "cmake"))
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path, self._conan1_targets_module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path, self._conan1_targets_module_file_rel_path]
+        omp.names["cmake_find_package"] = "OpenMP"
+        omp.names["cmake_find_package_multi"] = "OpenMP"
+        omp.builddirs.append(os.path.join(self.package_folder, "lib", "cmake"))
+        omp.build_modules["cmake_find_package"] = [self._module_file_rel_path, self._conan1_targets_module_file_rel_path]
+        omp.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path, self._conan1_targets_module_file_rel_path]
