@@ -72,7 +72,7 @@ class LLVMOpenMpConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.build_libomptarget and self._version_major >= 13:
+        if self.options.get_safe("build_libomptarget") and self._version_major >= 13:
             self.requires(f"llvm-core/{self.version}")
 
     def validate(self):
@@ -130,7 +130,7 @@ class LLVMOpenMpConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["OPENMP_STANDALONE_BUILD"] = True
         tc.variables["LIBOMP_ENABLE_SHARED"] = self.options.shared
-        tc.variables["OPENMP_ENABLE_LIBOMPTARGET"] = self.options.build_libomptarget
+        tc.variables["OPENMP_ENABLE_LIBOMPTARGET"] = self.options.get_safe("build_libomptarget", False)
         # Do not build OpenMP Tools Interface (OMPT)
         tc.variables["LIBOMP_OMPT_SUPPORT"] = False
         # Should not be needed and causes the library to be copied on Windows due to lack of symlink support
