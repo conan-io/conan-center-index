@@ -1,18 +1,26 @@
 sources:
-  "3.3.2":
-    url: "https://github.com/microsoft/LightGBM/archive/refs/tags/v3.3.2.tar.gz"
-    sha256: "d7c0f842e94165578d5a0c046ca942838d1574149f98c84400ce511239d17b9f"
+  "4.2.0":
+    url: "https://github.com/microsoft/LightGBM/archive/refs/tags/v4.2.0.tar.gz"
+    sha256: "4b2df6e3c5fa345a2fac6cefff65dd08cbe2fa4717cd8335c2a58c1a0c7c6b02"
+  "4.1.0":
+    url: "https://github.com/microsoft/LightGBM/archive/refs/tags/v4.1.0.tar.gz"
+    sha256: "eb896dc21c7afec95d10327777f6e77163b5bcd35f6ce5d152e6feefbe3328a5"
   "3.3.5":
     url: "https://github.com/microsoft/LightGBM/archive/refs/tags/v3.3.5.tar.gz"
     sha256: "16fb9e299ced37be5ac69dd510e7323337e623019c9c578628c43b285f764be7"
-patches:
   "3.3.2":
-    - patch_file: "patches/0001-fix-includes.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-fix-openmp-clang.patch"
-      base_path: "source_subfolder"
+    url: "https://github.com/microsoft/LightGBM/archive/refs/tags/v3.3.2.tar.gz"
+    sha256: "d7c0f842e94165578d5a0c046ca942838d1574149f98c84400ce511239d17b9f"
+patches:
+  "4.1.0":
+    - patch_file: "patches/4.1.0-0001-fix-openmp-clang.patch"
+      patch_type: "portability"
+      patch_description: "Fix OpenMP support for Clang"
   "3.3.5":
-    - patch_file: "patches/0001-fix-includes.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0003-fix-openmp-clang.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/3.3.5-0001-fix-openmp-clang.patch"
+      patch_type: "portability"
+      patch_description: "Fix OpenMP support for Clang"
+  "3.3.2":
+    - patch_file: "patches/3.3.2-0001-fix-openmp-clang.patch"
+      patch_type: "portability"
+      patch_description: "Fix OpenMP support for Clang"

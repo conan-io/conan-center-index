@@ -31,28 +31,29 @@ class LunaSVGConan(ConanFile):
     @property
     def _min_cppstd(self):
         if Version(self.version) <= "2.3.2":
-            return 14
-        else:
-            return 17
+            return "14"
+        if Version(self.version) <= "2.3.8":
+            return "17"
+        return "11"
 
     @property
     def _compilers_minimum_version(self):
-        if self._min_cppstd == 14:
-            return {
+        return {
+            "14": {
                 "gcc": "5",
                 "clang": "3.5",
                 "apple-clang": "10",
                 "Visual Studio": "15",
                 "msvc": "191",
-            }
-        else:
-            return {
+            },
+            "17": {
                 "gcc": "7.1",
                 "clang": "7",
                 "apple-clang": "12.0",
                 "Visual Studio": "16",
                 "msvc": "192",
-            }
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)

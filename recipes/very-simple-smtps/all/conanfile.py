@@ -55,13 +55,8 @@ class VerySimpleSmtpsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        required_packages = [
-            "libcurl/8.0.1",
-            "doctest/2.4.11",
-        ]
-
-        for package in required_packages:
-            self.requires(package)
+        self.requires("doctest/2.4.11")
+        self.requires("libcurl/[>=7.78.0 <9]")
 
     def validate(self):
         if self.settings.os != "Linux":
@@ -83,9 +78,9 @@ class VerySimpleSmtpsConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.0")
+        self.tool_requires("meson/1.2.3")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -108,7 +103,7 @@ class VerySimpleSmtpsConan(ConanFile):
         copy(self, pattern="include/*.hpp", dst=os.path.join(self.package_folder, ""), src=self.source_folder)
         meson = Meson(self)
         meson.install()
-        
+
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
