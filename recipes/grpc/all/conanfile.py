@@ -97,7 +97,8 @@ class GrpcConan(ConanFile):
         self.requires("re2/20230301")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True, run=can_run(self))
-        self.requires("libsystemd/255")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.requires("libsystemd/255")
 
     def package_id(self):
         del self.info.options.secure
@@ -281,7 +282,12 @@ class GrpcConan(ConanFile):
         return os.path.join("lib", "cmake", "conan_trick")
 
     @property
+    def _libsystemd():
+        return "libsystemd::libsystemd" if self.settings.os in ["Linux", "FreeBSD"] else ""
+
+    @property
     def _grpc_components(self):
+
         def libm():
             return ["m"] if self.settings.os in ["Linux", "FreeBSD"] else []
 
@@ -312,7 +318,7 @@ class GrpcConan(ConanFile):
                     "abseil::absl_status", "abseil::absl_str_format",
                     "abseil::absl_strings", "abseil::absl_synchronization",
                     "abseil::absl_time", "abseil::absl_optional",
-                    "abseil::absl_flags", "libsystemd::libsystemd"
+                    "abseil::absl_flags", libsystemd()
                 ],
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
             },
