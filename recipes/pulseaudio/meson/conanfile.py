@@ -60,8 +60,6 @@ class PulseAudioConan(ConanFile):
     def requirements(self):
         self.requires("libiconv/1.17")
         self.requires("libsndfile/1.2.2")
-        self.requires("libcap/2.69")
-        self.requires("libtool/2.4.7")
         if self.options.with_alsa:
             self.requires("libalsa/1.2.10")
         if self.options.with_glib:
@@ -131,7 +129,7 @@ class PulseAudioConan(ConanFile):
         self.cpp_info.components["pulse"].set_property("pkg_config_name", "libpulse")
         self.cpp_info.components["pulse"].libs = ["pulse", f"pulsecommon-{self.version}"]
         self.cpp_info.components["pulse"].libdirs.append(os.path.join("lib", "pulseaudio"))
-        self.cpp_info.components["pulse"].requires = ["libiconv::libiconv", "libsndfile::libsndfile", "libcap::libcap", "libtool::libtool"]
+        self.cpp_info.components["pulse"].requires = ["libiconv::libiconv", "libsndfile::libsndfile"]
         if self.options.with_alsa:
             self.cpp_info.components["pulse"].requires.append("libalsa::libalsa")
         if self.options.get_safe("with_fftw"):
