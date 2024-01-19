@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
@@ -126,6 +127,7 @@ class LibIdn(ConanFile):
         os.unlink(os.path.join(self.package_folder, "lib", "libidn2.la"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
 
         if is_msvc(self) and self.options.shared:
             os.rename(os.path.join(self.package_folder, "lib", "idn2.dll.lib"),
