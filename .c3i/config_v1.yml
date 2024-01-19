@@ -74,15 +74,25 @@ tasks:
 
 # Profile configurations to build packages
 configurations:
-  - id: linux-gcc
-    hrname: "Linux, GCC"
+  - id: linux-gcc-legacy
+    hrname: "Linux, GCC-legacy"
     content:
       - os: ["Linux"]
         arch: ["x86_64"]
         compiler:
           - "gcc":
               compiler.libcxx: [ "libstdc++11" ]
-              compiler.version: ["5", "7", "9", "10", "11"]
+              compiler.version: ["5", "7", "9"]
+              build_type: ["Release"]
+  - id: linux-gcc11
+    hrname: "Linux, GCC11"
+    content:
+      - os: ["Linux"]
+        arch: ["x86_64"]
+        compiler:
+          - "gcc":
+              compiler.libcxx: [ "libstdc++11" ]
+              compiler.version: ["11"]
               build_type: ["Release", "Debug"]
   - id: linux-clang
     hrname: "Linux, Clang"
@@ -92,21 +102,8 @@ configurations:
         compiler:
           - "clang":
               compiler.libcxx: ["libstdc++", "libc++"]
-              compiler.version: ["12", "13"]
-              build_type: ["Release", "Debug"]
-  - id: macos-clang
-    hrname: "macOS, Clang"
-    build_profile:
-      os: "Macos"
-      arch: "armv8"
-    content:
-      - os: [ "Macos" ]
-        arch: [ "x86_64" ]
-        compiler:
-          - "apple-clang":
-              compiler.version: [ "13.0" ]
-              compiler.libcxx: [ "libc++" ]
-              build_type: [ "Release", "Debug" ]
+              compiler.version: ["13"]
+              build_type: ["Release"]
   - id: macos-m1-clang
     hrname: "macOS, Clang (M1/arm64)"
     content:
