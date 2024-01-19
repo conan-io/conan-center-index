@@ -82,7 +82,7 @@ class PulseAudioConan(ConanFile):
         if self.options.get_safe("with_fftw"):
             if not self.dependencies["fftw"].options.precision_single:
                 raise ConanInvalidConfiguration(
-                    f"Pulse audio uses fftw single precision. "
+                     "Pulse audio uses fftw single precision. "
                      "Either set option -o fftw/*:precision_single=True or -o pulseaudio/*:with_fftw=False"
                 )
 
@@ -104,14 +104,14 @@ class PulseAudioConan(ConanFile):
 
         tc = MesonToolchain(self)
         tc.project_options['udevrulesdir']="${prefix}/bin/udev/rules.d"
-        tc.project_options['systemduserunitdir'] = f"{os.path.join(self.build_folder, 'ignore')}"
-        for lib in ["alsa", "x11", "openssl", "dbus", "glib","fftw"]:
+        tc.project_options['systemduserunitdir'] = os.path.join(self.build_folder, 'ignore')
+        for lib in ["alsa", "x11", "openssl", "dbus", "glib", "fftw"]:
             tc.project_options[lib] = "enabled" if self.options.get_safe(f"with_{lib}") else "disabled"
         tc.project_options['database'] = 'simple'
-        tc.project_options['tests'] = 'false'
-        tc.project_options['man'] = 'false'
-        tc.project_options['doxygen'] = 'false'
-            
+        tc.project_options['tests'] = False
+        tc.project_options['man'] = False
+        tc.project_options['doxygen'] = False
+        tc.project_options["daemon"] = False
         tc.generate()
         pkg = PkgConfigDeps(self)
         pkg.generate()
