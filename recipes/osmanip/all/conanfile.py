@@ -2,8 +2,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.files import copy, get, rmdir, replace_in_file, save
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 
 import os
 
@@ -31,8 +32,8 @@ class OsmanipConan(ConanFile):
     }
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
-        export_conandata_patches(self)
+        if Version(self.version) < "4.5.0":
+            copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -46,12 +47,10 @@ class OsmanipConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.83.0")
-        # osmanip/progressbar/progress_bar.hpp includes arsenalgear/constants.hpp
-        if Version(self.version) < "4.2.0":
-            self.requires("arsenalgear/1.2.2", transitive_headers=True)
-        else:
-            self.requires("arsenalgear/2.0.1", transitive_headers=True)
+        # https://github.com/JustWhit3/osmanip/commit/43c8bd8d018fcb3bce6443f7388e042d5457d4fb
+        if Version(self.version) < "4.6.0":
+            # osmanip/progressbar/progress_bar.hpp includes arsenalgear/constants.hpp
+            self.requires("arsenalgear/2.1.1", transitive_headers=True)
 
     @property
     def _min_cppstd(self):
@@ -77,28 +76,50 @@ class OsmanipConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+        if Version(self.version) >= "4.4.0" and self.settings.get_safe("compiler.libcxx") == "libstdc++":
+            # test_package segfaults with libstdc++ for some reason
+            raise ConanInvalidConfiguration("osmanip >= 4.4.0 doesn't support libstdc++")
+
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("MSVC is not yet supported by osmanip recipe. Contributions are welcome.")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["OSMANIP_VERSION"] = str(self.version)
-        tc.variables["OSMANIP_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        if Version(self.version) < "4.5.0":
+            tc.variables["OSMANIP_VERSION"] = str(self.version)
+        else:
+            tc.variables["OSMANIP_TESTS"] = False
+            tc.variables["FORMAT"] = False
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
+    def _patch_sources(self):
+        if Version(self.version) >= "4.5.0":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            " STATIC ", " ")
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "    DESTINATION lib\n",
+                            "    RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib\n")
+        save(self, os.path.join(self.source_folder, "examples", "CMakeLists.txt"), "")
+        save(self, os.path.join(self.source_folder, "deps", "doctest", "CMakeLists.txt"), "")
+
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        cmake.configure()
         cmake.build()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["osmanip"]
