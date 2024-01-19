@@ -69,7 +69,7 @@ class LibVPXConan(ConanFile):
             raise ConanInvalidConfiguration(f"Unsupported compiler {self.settings.compiler}")
         if self.settings.os == "Macos" and self.settings.arch == "armv8" and Version(self.version) < "1.10.0":
             raise ConanInvalidConfiguration("M1 only supported since 1.10, please upgrade")
-        if self.settings.os == "iOS" and (self.settings.os.sdk != "iphonesimulator" or self.settings.arch not in ["x86_64", "x86"]):
+        if self.settings.os == "iOS" and (self.settings.os.sdk != "iphonesimulator" and self.settings.arch in ["x86_64", "x86"]):
             raise ConanInvalidConfiguration("iOS target platform only supports 'iphonesimulator' SDK option and x86/x86_64 architectures")
 
     def build_requirements(self):
@@ -91,6 +91,7 @@ class LibVPXConan(ConanFile):
         arch = {'x86': 'x86',
                 'x86_64': 'x86_64',
                 'armv7': 'armv7',
+                'armv7s': 'armv7s',
                 'armv8': 'arm64',
                 'mips': 'mips32',
                 'mips64': 'mips64',
@@ -106,21 +107,18 @@ class LibVPXConan(ConanFile):
             compiler = f"vs{vc_version}"
         elif self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             compiler = 'gcc'
-
         host_os = str(self.settings.os)
         if host_os == 'Windows':
             os_name = 'win32' if self.settings.arch == 'x86' else 'win64'
         elif is_apple_os(self):
-            # Solves cross-building for iOS
-            # Issue related: https://github.com/conan-io/conan-center-index/issues/20513
-            if self.settings.os == "iOS":
-                os_name = 'iphonesimulator'
-            elif self.settings.arch in ["x86", "x86_64"]:
-                os_name = 'darwin11'
-            elif self.settings.arch == "armv8" and self.settings.os == "Macos":
-                os_name = 'darwin20'
+            if self.settings.arch in ["x86", "x86_64"]:
+                if self.settings.os == "Macos":
+                    os_name = f'darwin11'
+                else:
+                    os_name = 'iphonesimulator'
+            elif self.settings.arch == "armv8":
+                os_name = 'darwin21'
             else:
-                # Unrecognized toolchain 'arm64-darwin11-gcc', see list of toolchains in ./configure --help
                 os_name = 'darwin'
         elif host_os == 'Linux':
             os_name = 'linux'
