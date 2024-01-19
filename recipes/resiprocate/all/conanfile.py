@@ -35,7 +35,7 @@ class ResiprocateConan(ConanFile):
         "fPIC": True,
         "with_ssl": True,
         "with_postgresql": True,
-        "with_mysql": True,
+        "with_mysql": False,
     }
 
     def config_options(self):
@@ -44,7 +44,7 @@ class ResiprocateConan(ConanFile):
 
     def configure(self):
         if self.settings.os == "Windows" or is_apple_os(self):
-            # FIXME: Visual Studio project & Mac support seems available in resiprocate
+            # FIXME: unreleased versions of resiprocate use CMake and should support Windows and macOS
             raise ConanInvalidConfiguration(f"reSIProcate recipe does not currently support {self.settings.os}.")
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -54,8 +54,7 @@ class ResiprocateConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            # self.requires("openssl/1.1.1w")  # OpenSSL 3.x is not supported
-            self.requires("openssl/[>=1.1 <4]")
+            self.requires("openssl/1.1.1w")  # OpenSSL 3.x is not supported
         if self.options.with_postgresql:
             self.requires("libpq/15.4")
         if self.options.with_mysql:
