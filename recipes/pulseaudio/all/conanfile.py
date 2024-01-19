@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 import os
 
@@ -116,8 +116,6 @@ class PulseAudioConan(ConanFile):
         # TODO: to remove when automatically handled by AutotoolsToolchain
         tc.configure_args.append("--libexecdir=${prefix}/bin")
         tc.generate()
-        deps = AutotoolsDeps(self)
-        deps.generate()
         pkg = PkgConfigDeps(self)
         pkg.generate()
 
