@@ -64,7 +64,7 @@ class PulseAudioConan(ConanFile):
         if self.options.with_alsa:
             self.requires("libalsa/1.2.10")
         if self.options.with_glib:
-            self.requires("glib/2.78.1")
+            self.requires("glib/2.78.3")
         if self.options.get_safe("with_fftw"):
             self.requires("fftw/3.3.10")
         if self.options.with_x11:
@@ -89,7 +89,7 @@ class PulseAudioConan(ConanFile):
         self.tool_requires("gettext/0.21")
         self.tool_requires("libtool/2.4.7")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
