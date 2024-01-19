@@ -19,11 +19,9 @@ class PulseAudioConan(ConanFile):
     homepage = "http://pulseaudio.org/"
     license = "LGPL-2.1"
 
-    package_type = "library"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
         "with_glib": [True, False],
         "with_fftw": [True, False],
         "with_x11": [True, False],
@@ -31,8 +29,6 @@ class PulseAudioConan(ConanFile):
         "with_dbus": [True, False],
     }
     default_options = {
-        "shared": False,
-        "fPIC": True,
         "with_glib": False,
         "with_fftw": False,
         "with_x11": True,
@@ -41,14 +37,10 @@ class PulseAudioConan(ConanFile):
     }
 
     def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
         if self.settings.os not in ['Linux', 'FreeBSD']:
             del self.options.with_x11
 
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
         if not self.options.with_dbus:
