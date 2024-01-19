@@ -108,4 +108,5 @@ class XorgConan(ConanFile):
     def package_id(self):
         libraries = self._libraries(self.info.settings.os == "Linux")
         self.info.clear()
-        self.info.conf.define("user.xorg:libs", str(libraries))
+        if conan_version.major >= 2:
+            self.info.conf.define("user.xorg:libs", str(libraries))
