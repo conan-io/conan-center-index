@@ -24,7 +24,6 @@ class PulseAudioConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_alsa": [True, False],
         "with_glib": [True, False],
         "with_fftw": [True, False],
         "with_x11": [True, False],
@@ -34,7 +33,6 @@ class PulseAudioConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_alsa": True,
         "with_glib": False,
         "with_fftw": False,
         "with_x11": True,
@@ -62,8 +60,6 @@ class PulseAudioConan(ConanFile):
     def requirements(self):
         self.requires("libiconv/1.17")
         self.requires("libsndfile/1.2.2")
-        if self.options.with_alsa:
-            self.requires("libalsa/1.2.10")
         if self.options.with_glib:
             self.requires("glib/2.78.1")
         if self.options.get_safe("with_fftw"):
@@ -101,7 +97,7 @@ class PulseAudioConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options['udevrulesdir']="${prefix}/bin/udev/rules.d"
         tc.project_options['systemduserunitdir'] = os.path.join(self.build_folder, 'ignore')
-        for lib in ["alsa", "x11", "openssl", "dbus", "glib", "fftw"]:
+        for lib in ["x11", "openssl", "dbus", "glib", "fftw"]:
             tc.project_options[lib] = "enabled" if self.options.get_safe(f"with_{lib}") else "disabled"
         tc.project_options['database'] = 'simple'
         tc.project_options['tests'] = False
@@ -132,8 +128,6 @@ class PulseAudioConan(ConanFile):
         self.cpp_info.components["pulse"].libs = ["pulse", f"pulsecommon-{self.version}"]
         self.cpp_info.components["pulse"].libdirs.append(os.path.join("lib", "pulseaudio"))
         self.cpp_info.components["pulse"].requires = ["libiconv::libiconv", "libsndfile::libsndfile"]
-        if self.options.with_alsa:
-            self.cpp_info.components["pulse"].requires.append("libalsa::libalsa")
         if self.options.get_safe("with_fftw"):
             self.cpp_info.components["pulse"].requires.append("fftw::fftw")
         if self.options.get_safe("with_x11"):
