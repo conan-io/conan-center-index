@@ -4,7 +4,8 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.files import copy, get, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.52.0"
 
@@ -30,6 +31,11 @@ class LibunifexConan(ConanFile):
 
     @property
     def _minimum_standard(self):
+        if is_msvc(self):
+            # Otherwise a forward declaration `extern const _schedule::_fn schedule;`
+            # conflicts with the implementation `inline constexpr _schedule::_fn schedule {};`
+            # https://github.com/facebookexperimental/libunifex/issues/591
+            return 20
         return 17
 
     @property
@@ -42,12 +48,14 @@ class LibunifexConan(ConanFile):
             "msvc": "193",
         }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if not self.settings.os == "Linux":
             del self.options.with_liburing
-
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -89,6 +97,7 @@ class LibunifexConan(ConanFile):
         cmake.build()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         # Ensure liburing from the system is not used and that uuper-case variables are generated
         required = "REQUIRED" if self.settings.os == "Linux" else ""
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "unifex_flags.cmake"),
