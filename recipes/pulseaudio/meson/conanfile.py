@@ -45,6 +45,8 @@ class PulseAudioConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os not in ['Linux', 'FreeBSD']:
+            del self.options.with_x11
 
     def configure(self):
         if self.options.shared:
@@ -66,7 +68,7 @@ class PulseAudioConan(ConanFile):
             self.requires("glib/2.78.1")
         if self.options.get_safe("with_fftw"):
             self.requires("fftw/3.3.10")
-        if self.options.with_x11:
+        if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
@@ -134,7 +136,7 @@ class PulseAudioConan(ConanFile):
             self.cpp_info.components["pulse"].requires.append("libalsa::libalsa")
         if self.options.get_safe("with_fftw"):
             self.cpp_info.components["pulse"].requires.append("fftw::fftw")
-        if self.options.with_x11:
+        if self.options.get_safe("with_x11"):
             self.cpp_info.components["pulse"].requires.append("xorg::xorg")
         if self.options.with_openssl:
             self.cpp_info.components["pulse"].requires.append("openssl::openssl")
