@@ -20,9 +20,6 @@ class XorgConan(ConanFile):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
 
-    def package_id(self):
-        self.info.clear()
-
     def system_requirements(self):
         apt = package_manager.Apt(self)
         apt.install(["libx11-dev", "libx11-xcb-dev", "libfontenc-dev", "libice-dev", "libsm-dev", "libxau-dev", "libxaw7-dev",
@@ -71,20 +68,26 @@ class XorgConan(ConanFile):
                            "libXScrnSaver", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
                            "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util", "xcb-util-cursor"], update=True, check=True)
 
+
+    def _libraries(self, is_linux: bool):
+        # Need to pass is_linux since we use this function in two places where the check for
+        # Linux has to be done differently 
+        return ["x11", "x11-xcb", "fontenc", "ice", "sm", "xau", "xaw7",
+                "xcomposite", "xcursor", "xdamage", "xdmcp", "xext", "xfixes", "xi",
+                "xinerama", "xkbfile", "xmu", "xmuu", "xpm", "xrandr", "xrender", "xres",
+                "xscrnsaver", "xt", "xtst", "xv", "xxf86vm",
+                "xcb-xkb", "xcb-icccm", "xcb-image", "xcb-keysyms", "xcb-randr", "xcb-render",
+                "xcb-renderutil", "xcb-shape", "xcb-shm", "xcb-sync", "xcb-xfixes",
+                "xcb-xinerama", "xcb", "xcb-atom", "xcb-aux", "xcb-event", "xcb-util",
+                "xcb-dri3", "xcb-cursor"] + (["uuid"] if is_linux else [])
+
     def package_info(self):
         if conan_version.major >= 2:
             self.cpp_info.bindirs = []
             self.cpp_info.includedirs = []
             self.cpp_info.libdirs = []
 
-        for name in ["x11", "x11-xcb", "fontenc", "ice", "sm", "xau", "xaw7",
-                     "xcomposite", "xcursor", "xdamage", "xdmcp", "xext", "xfixes", "xi",
-                     "xinerama", "xkbfile", "xmu", "xmuu", "xpm", "xrandr", "xrender", "xres",
-                     "xscrnsaver", "xt", "xtst", "xv", "xxf86vm",
-                     "xcb-xkb", "xcb-icccm", "xcb-image", "xcb-keysyms", "xcb-randr", "xcb-render",
-                     "xcb-renderutil", "xcb-shape", "xcb-shm", "xcb-sync", "xcb-xfixes",
-                     "xcb-xinerama", "xcb", "xcb-atom", "xcb-aux", "xcb-event", "xcb-util",
-                     "xcb-dri3", "xcb-cursor"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
+        for name in self._libraries(self.settings.os == "Linux"):
             pkg_config = PkgConfig(self, name)
             pkg_config.fill_cpp_info(
                 self.cpp_info.components[name], is_system=self.settings.os != "FreeBSD")
@@ -101,3 +104,8 @@ class XorgConan(ConanFile):
 
         if self.settings.os == "Linux":
             self.cpp_info.components["sm"].requires.append("uuid")
+
+    def package_id(self):
+        libraries = self._libraries(self.info.settings.os == "Linux")
+        self.info.clear()
+        self.info.conf.define("user.xorg:libs", str(libraries))
