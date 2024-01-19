@@ -60,10 +60,7 @@ class TzConan(ConanFile):
         if self.options.with_binary_db:
             self._patch_sources()
             autotools = Autotools(self)
-            ldlibs = ""
-            if self.settings.os == "Macos":
-                ldlibs = "-lintl"
-            autotools.make(args=["-C", self.source_folder.replace("\\", "/"), f"LDLIBS={ldlibs}"])
+            autotools.make(args=["-C", self.source_folder.replace("\\", "/")])
 
     def package(self):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
