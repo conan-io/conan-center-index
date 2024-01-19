@@ -50,6 +50,7 @@ class PulseAudioConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("libgettext/0.22")
         self.requires("libiconv/1.17")
         self.requires("libsndfile/1.2.2")
         if self.options.with_glib:
@@ -72,7 +73,6 @@ class PulseAudioConan(ConanFile):
                 )
 
     def build_requirements(self):
-        self.tool_requires("gettext/0.21")
         self.tool_requires("meson/1.3.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
@@ -120,7 +120,7 @@ class PulseAudioConan(ConanFile):
         self.cpp_info.components["pulse"].set_property("pkg_config_name", "libpulse")
         self.cpp_info.components["pulse"].libs = ["pulse", f"pulsecommon-{self.version}"]
         self.cpp_info.components["pulse"].libdirs.append(os.path.join("lib", "pulseaudio"))
-        self.cpp_info.components["pulse"].requires = ["libiconv::libiconv", "libsndfile::libsndfile"]
+        self.cpp_info.components["pulse"].requires = ["libiconv::libiconv", "libsndfile::libsndfile", "libgettext::libgettext"]
         if self.options.get_safe("with_fftw"):
             self.cpp_info.components["pulse"].requires.append("fftw::fftw")
         if self.options.get_safe("with_x11"):
