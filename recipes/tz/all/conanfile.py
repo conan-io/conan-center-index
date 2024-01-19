@@ -76,6 +76,10 @@ class TzConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "usr", "lib"))
         else:
             tzdata = [
+                # This file listing is drawn from the source distribution of the tz database at
+                # https://data.iana.org/time-zones/releases/tzdata2023c.tar.gz. It includes only data
+                # files, and excludes project documentation such as CONTRIBUTING, NEWS, README,
+                # SECURITY, theory.html.
                 "africa",
                 "antarctica",
                 "asia",
@@ -92,7 +96,6 @@ class TzConan(ConanFile):
                 "leap-seconds.list",
                 "leapseconds",
                 "leapseconds.awk",
-                "NEWS",
                 "northamerica",
                 "southamerica",
                 "version",
@@ -100,6 +103,9 @@ class TzConan(ConanFile):
                 "zishrink.awk",
                 "zone.tab",
                 "zone1970.tab",
+                # This file is maintained by CLDR and is required to provide a conversion between
+                # windows time zone names and the IANA time zone names. This enables the IANA tzdb
+                # to be used on windows. For more information, see https://cldr.unicode.org/index
                 "windowsZones.xml",
             ]
             for data in tzdata:
