@@ -22,26 +22,25 @@ else()
     message(FATAL_ERROR "SOURCES line not found in Makefile")
 endif()
 
-add_library(${PROJECT_NAME} ${SOURCE_FILES})
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${CMAKE_PROJECT_NAME}")
+add_library(rhash ${SOURCE_FILES})
 
 if(USE_OPENSSL)
     find_package(OpenSSL REQUIRED)
-    target_link_libraries(${PROJECT_NAME} OpenSSL::Crypto)
-    target_compile_definitions(${PROJECT_NAME} PUBLIC USE_OPENSSL)
+    target_link_libraries(rhash OpenSSL::Crypto)
+    target_compile_definitions(rhash PUBLIC USE_OPENSSL)
 endif()
 
 if(MSVC)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_DEPRECATE)
+    target_compile_definitions(rhash PRIVATE _CRT_SECURE_NO_DEPRECATE)
 endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
+set_target_properties(rhash PROPERTIES
                       COMPILE_DEFINITIONS IN_RHASH
                       DEFINE_SYMBOL RHASH_EXPORTS
                       VERSION ${RHASH_VERSION}
                       SOVERSION ${RHASH_VERSION_MAJOR})
 
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS rhash
        RUNTIME DESTINATION bin
        LIBRARY DESTINATION lib
        ARCHIVE DESTINATION lib)
