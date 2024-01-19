@@ -70,7 +70,7 @@ class LibVPXConan(ConanFile):
         if self.settings.os == "Macos" and self.settings.arch == "armv8" and Version(self.version) < "1.10.0":
             raise ConanInvalidConfiguration("M1 only supported since 1.10, please upgrade")
         if self.settings.os == "iOS" and (self.settings.os.sdk != "iphonesimulator" and self.settings.arch in ["x86_64", "x86"]):
-            raise ConanInvalidConfiguration("iOS target platform only supports 'iphonesimulator' SDK option and x86/x86_64 architectures")
+            raise ConanInvalidConfiguration("iOS platform with x86/x86_64 architectures only supports 'iphonesimulator' SDK option")
 
     def build_requirements(self):
         self.tool_requires("yasm/1.3.0")
