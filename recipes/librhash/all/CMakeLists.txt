@@ -38,8 +38,6 @@ endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES
                       COMPILE_DEFINITIONS IN_RHASH
                       DEFINE_SYMBOL RHASH_EXPORTS
-                      PREFIX ""
-                      IMPORT_PREFIX ""
                       VERSION ${RHASH_VERSION}
                       SOVERSION ${RHASH_VERSION_MAJOR})
 
