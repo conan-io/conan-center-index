@@ -94,6 +94,7 @@ class QxmppConan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["WITH_GSTREAMER"] = self.options.with_gstreamer
         tc.variables["BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
