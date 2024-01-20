@@ -46,11 +46,17 @@ class SleefConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "shared sleef not supported on Windows, it produces runtime errors"
             )
-        if cross_building(self) and self.settings.compiler == "apple-clang":
-            # Fails with "No rule to make target `/bin/mkrename'"
-            # https://github.com/shibatch/sleef/issues/308
-            raise ConanInvalidConfiguration("sleef does not support cross-building with apple-clang")
-
+        if self.settings.compiler == "apple-clang":
+            if cross_building(self):
+                # Fails with "No rule to make target `/bin/mkrename'"
+                # https://github.com/shibatch/sleef/issues/308
+                raise ConanInvalidConfiguration(f"{self.ref} does not support cross-building with apple-clang")
+            if self.settings.arch == "armv8":
+                # clang: error: the clang compiler does not support '-march=armv7-a'
+                # clang: warning: argument unused during compilation: '-mfpu=vfpv4' [-Wunused-command-line-argument]
+                # clang: warning: argument unused during compilation: '-arch arm64' [-Wunused-command-line-argument]
+                # clang: warning: argument unused during compilation: '-mmacosx-version-min=11.0' [-Wunused-command-line-argument]
+                raise ConanInvalidConfiguration(f"armv8 is not supported for {self.ref}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
