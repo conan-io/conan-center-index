@@ -100,6 +100,8 @@ class ScnlibConan(ConanFile):
             )
         if Version(self.version) >= "2.0.0" and self.options.header_only:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support header only mode.")
+        if Version(self.version) >= "2.0.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "11":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc 11.x due to std::regex_constants::multiline is not defined.")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
