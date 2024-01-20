@@ -37,7 +37,7 @@ class CoinClpConan(ConanFile):
         "intsize": 32,
         "precision": "double",
         "with_lapack": True,
-        "with_mumps": True,
+        "with_mumps": False,  # TODO: enable after merging https://github.com/conan-io/conan-center-index/pull/22466
         "build_sipopt": True,
     }
 
