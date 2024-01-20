@@ -43,7 +43,8 @@ class ScnlibConan(ConanFile):
             "17": {
                 "gcc": "8",
                 "clang": "7",
-                "apple-clang": "12",
+                # scn/2.0.0 requires std::regex_constants::multiline
+                "apple-clang": "14",
                 "Visual Studio": "16",
                 "msvc": "192",
             },
