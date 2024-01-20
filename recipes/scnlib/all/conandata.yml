@@ -1,4 +1,7 @@
 sources:
+  "2.0.0":
+    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "2a35356a3a7485fdf97f28cfbea52db077cf4e7bab0a5a0fc3b04e89630334cd"
   "1.1.3":
     url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v1.1.3.tar.gz"
     sha256: "32ca1baed2da5d86aa03273c87580ef32e95925697d252138507ec0545d86ab2"

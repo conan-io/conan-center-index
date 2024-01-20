@@ -5,6 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.errors import ConanInvalidConfiguration
 
 import os
 
@@ -32,7 +33,19 @@ class ScnlibConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return "17" if Version(self.version) >= "2.0.0" else "11"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "17": {
+                "gcc": "8",
+                "clang": "7",
+                "apple-clang": "12",
+                "Visual Studio": "16",
+                "msvc": "192",
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -40,15 +53,18 @@ class ScnlibConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "2.0":
+            del self.options.header_only
 
     def configure(self):
         if self.options.header_only or self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.options.header_only:
+        if self.options.get_safe("header_only"):
             del self.options.shared
+            self.package_type = "header-library"
 
     def layout(self):
-        if self.options.header_only:
+        if self.options.get_safe("header_only"):
             basic_layout(self, src_folder="src")
         else:
             cmake_layout(self, src_folder="src")
@@ -56,15 +72,22 @@ class ScnlibConan(ConanFile):
     def requirements(self):
         if Version(self.version) >= "1.0":
             self.requires("fast_float/6.0.0")
+        if Version(self.version) >= "2.0":
+            self.requires("simdutf/4.0.5")
+
+    def package_id(self):
+        if self.info.options.get_safe("header_only"):
+            self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 192 if Version(self.version) >= "1.0" else 191)
-
-    def package_id(self):
-        if self.info.options.header_only:
-            self.info.clear()
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -80,8 +103,11 @@ class ScnlibConan(ConanFile):
         tc.variables["SCN_DOCS"] = False
         tc.variables["SCN_INSTALL"] = True
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        if Version(self.version) >= "1.0":
+        if "1.0" <= Version(self.version) < "2.0":
             tc.variables["SCN_USE_BUNDLED_FAST_FLOAT"] = False
+        elif "2.0" <= Version(self.version):
+            tc.variables["SCN_USE_EXTERNAL_SIMDUTF"] = True
+            tc.variables["SCN_USE_EXTERNAL_FAST_FLOAT"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -117,17 +143,19 @@ class ScnlibConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "include", "scn", "detail", "deps", "CMakeFiles"))
 
     def package_info(self):
-        target = "scn-header-only" if self.options.header_only else "scn"
+        target = "scn-header-only" if self.options.get_safe("header_only") else "scn"
         self.cpp_info.set_property("cmake_file_name", "scn")
         self.cpp_info.set_property("cmake_target_name", f"scn::{target}")
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        if self.options.header_only:
+        if self.options.get_safe("header_only"):
             self.cpp_info.components["_scnlib"].defines = ["SCN_HEADER_ONLY=1"]
         else:
             self.cpp_info.components["_scnlib"].defines = ["SCN_HEADER_ONLY=0"]
             self.cpp_info.components["_scnlib"].libs = ["scn"]
         if Version(self.version) >= "1.0":
             self.cpp_info.components["_scnlib"].requires = ["fast_float::fast_float"]
+        if Version(self.version) >= "2.0":
+            self.cpp_info.components["_scnlib"].requires.append("simdutf::simdutf")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_scnlib"].system_libs.append("m")
