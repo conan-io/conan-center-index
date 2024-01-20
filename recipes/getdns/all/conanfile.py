@@ -1,10 +1,10 @@
 import os
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm, replace_in_file, load
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm, load
 from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
@@ -16,7 +16,7 @@ class GetDnsConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://getdnsapi.net/"
-    topics = ("asynchronous", "event")
+    topics = ("dns", "asynchronous", "event")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -38,7 +38,7 @@ class GetDnsConan(ConanFile):
         "with_libev": "auto",
         "with_libevent": True,
         "with_libuv": True,
-        "with_libidn2": False,  # FIXME: re-enable once libidn2 has been migrated
+        "with_libidn2": True,
     }
 
     def export_sources(self):
@@ -48,8 +48,11 @@ class GetDnsConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        self.options.stub_only = self.settings.os != "Windows"
-        # FIXME: uncomment the next line when libunbound is available
+        # FIXME: remove once libidn2 has been migrated
+        # https://github.com/conan-io/conan-center-index/pull/18642
+        self.options.with_libidn2 = conan_version.major == 1
+        # FIXME: uncomment once libunbound is available
+        # self.options.stub_only = self.settings.os != "Windows"
         self.options.with_libev = True  # self.settings.os == "Windows"
 
     def configure(self):
@@ -101,6 +104,7 @@ class GetDnsConan(ConanFile):
         # Force use of internal strptime when cross-compiling
         tc.variables["FORCE_COMPAT_STRPTIME"] = True
         tc.variables["BUILD_TESTING"] = False
+        # To fix OpenSSL try_compile() checks
         # https://github.com/conan-io/conan/issues/12180
         tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
         tc.generate()
