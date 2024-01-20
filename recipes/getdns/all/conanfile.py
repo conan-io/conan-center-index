@@ -101,6 +101,8 @@ class GetDnsConan(ConanFile):
         # Force use of internal strptime when cross-compiling
         tc.variables["FORCE_COMPAT_STRPTIME"] = True
         tc.variables["BUILD_TESTING"] = False
+        # https://github.com/conan-io/conan/issues/12180
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -121,9 +123,6 @@ class GetDnsConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         rm(self, "Find*.cmake", os.path.join(self.source_folder, "cmake", "modules"))
-        # Workaround for check_function_exists() compilation tests
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "${OPENSSL_LIBRARIES}", "${OPENSSL_LIBRARIES} ssl crypto")
 
     def build(self):
         self._patch_sources()

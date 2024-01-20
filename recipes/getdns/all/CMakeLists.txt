@@ -11,6 +11,7 @@ macro(custom_find_package name)
     string(TOUPPER ${name} name_upper)
     set(${name_upper}_FOUND TRUE)
     set(${name_upper}_INCLUDE_DIR ${${name}_INCLUDE_DIR})
+    set(${name_upper}_LIBRARIES ${${name}_LIBRARIES})
 endmacro()
 
 custom_find_package(OpenSSL)
