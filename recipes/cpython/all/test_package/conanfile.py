@@ -1,19 +1,17 @@
 import os
-import shutil
 from io import StringIO
 
 from conan import ConanFile, conan_version
 from conan.errors import ConanException
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building
+from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import mkdir
 from conan.tools.gnu import AutotoolsDeps
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, VCVars
 from conan.tools.scm import Version
 
-conan2 = conan_version >= Version("2.0.0")
+conan2 = conan_version.major >= 2
 
 class CmakePython3Abi(object):
     def __init__(self, debug, pymalloc, unicode):
@@ -143,33 +141,19 @@ class TestPackageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-        if not cross_building(self, skip_x64_x86=True):
-            if self._supports_modules:
-                modsrcfolder = "py2" if self._py_version.major == 2 else "py3"
-                mkdir(self, os.path.join(self.build_folder, modsrcfolder))
-                for fn in os.listdir(os.path.join(self.source_folder, modsrcfolder)):
-                    shutil.copy(
-                        os.path.join(self.source_folder, modsrcfolder, fn),
-                        os.path.join(self.build_folder, modsrcfolder, fn),
-                    )
-                shutil.copy(
-                    os.path.join(self.source_folder, "setup.py"),
-                    os.path.join(self.build_folder, "setup.py"),
-                )
-                os.environ["DISTUTILS_USE_SDK"] = "1"
-                os.environ["MSSdk"] = "1"
-                setup_args = [
-                    f"{self.source_folder}/setup.py",
-                    # "conan",
-                    # "--install-folder", self.build_folder,
-                    "build",
-                    "--build-base", self.build_folder,
-                    "--build-platlib", os.path.join(self.build_folder, "lib_setuptools"),
-                ]
-                if self.settings.build_type == "Debug":
-                    setup_args.append("--debug")
-                args = " ".join(f'"{a}"' for a in setup_args)
-                self.run(f"{self._python} {args}")
+        if can_run(self) and self._supports_modules:
+            os.environ["DISTUTILS_USE_SDK"] = "1"
+            os.environ["MSSdk"] = "1"
+            setup_args = [
+                os.path.join(self.source_folder, "setup.py"),
+                "build",
+                "--build-base", self.build_folder,
+                "--build-platlib", os.path.join(self.build_folder, "lib_setuptools"),
+            ]
+            if self.settings.build_type == "Debug":
+                setup_args.append("--debug")
+            args = " ".join(f'"{a}"' for a in setup_args)
+            self.run(f"{self._python} {args}")
 
     def _test_module(self, module, should_work):
         try:
@@ -194,7 +178,7 @@ class TestPackageConan(ConanFile):
                 return False
 
     def test(self):
-        if not cross_building(self, skip_x64_x86=True):
+        if can_run(self):
             self.run(f"{self._python} --version", env="conanrun")
 
             self.run(f"{self._python} -c \"print('hello world')\"", env="conanrun")
