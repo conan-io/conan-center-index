@@ -1,8 +1,9 @@
-import os
+import platform
 
 from conan import ConanFile
+from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout
-from conans.errors import ConanException
+from conan.tools.scm import Version
 
 
 class TestPackageConan(ConanFile):
@@ -17,6 +18,10 @@ class TestPackageConan(ConanFile):
         self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        binary_name = "node.exe" if self.settings.os == "Windows" else "node"
-        if not os.path.isfile(os.path.join(self.dependencies[self.tested_reference_str].cpp_info.bindir, binary_name)):
-            raise ConanException("node not found in package")
+        if can_run(self):
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                libc_version = Version(platform.libc_ver()[1])
+                if libc_version < "2.29":
+                    self.output.warning(f"System libc version {libc_version} < 2.29, skipping test_package")
+                    return
+            self.run("node --version")
