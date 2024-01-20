@@ -7,7 +7,8 @@ sources:
     sha256: "eecbc94311c78012d059ebc0fae86ea5ef6eecb13303e6e82b3753c1b3409e98"
 patches:
   "5.1.0":
-    - patch_file: "patches/0003-msvc-minizip.patch"
+    - patch_file: "patches/5.1.0/0002-nmake-honor-flags.patch"
+    - patch_file: "patches/5.0.1/0003-msvc-minizip.patch"
   "5.0.1":
-    - patch_file: "patches/0002-nmake-honor-flags.patch"
-    - patch_file: "patches/0003-msvc-minizip.patch"
+    - patch_file: "patches/5.0.1/0002-nmake-honor-flags.patch"
+    - patch_file: "patches/5.0.1/0003-msvc-minizip.patch"
