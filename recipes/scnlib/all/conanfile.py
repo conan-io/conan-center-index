@@ -24,11 +24,13 @@ class ScnlibConan(ConanFile):
         "header_only": [True, False],
         "shared": [True, False],
         "fPIC": [True, False],
+        "regex_backend": ["None", "std", "boost", "boost_icu", "re2"],
     }
     default_options = {
         "header_only": False,
         "shared": False,
         "fPIC": True,
+        "regex_backend": "std",
     }
 
     @property
@@ -55,9 +57,11 @@ class ScnlibConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) >= "2.0":
             del self.options.header_only
+        else:
+            del self.options.regex_backend
 
     def configure(self):
-        if self.options.header_only or self.options.shared:
+        if self.options.get_safe("header_only") or self.options.shared:
             self.options.rm_safe("fPIC")
         if self.options.get_safe("header_only"):
             del self.options.shared
@@ -74,6 +78,10 @@ class ScnlibConan(ConanFile):
             self.requires("fast_float/6.0.0")
         if Version(self.version) >= "2.0":
             self.requires("simdutf/4.0.5")
+        if self.options.get_safe("regex_backend") in ["boost", "boost_icu"]:
+            self.requires("boost/1.83.0")
+        elif self.options.get_safe("regex_backend") == "re2":
+            self.requires("re2/20231101")
 
     def package_id(self):
         if self.info.options.get_safe("header_only"):
@@ -88,12 +96,17 @@ class ScnlibConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        if self.options.get_safe("regex_backend") == "boost_icu" and \
+            not self.dependencies["boost"].options.get_safe("i18n_backend_icu"):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} with regex_backend=Boost_icu option requires boost::i18n_backend_icu to be enabled."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        if self.options.header_only:
+        if self.options.get_safe("header_only"):
             return
 
         tc = CMakeToolchain(self)
@@ -108,6 +121,12 @@ class ScnlibConan(ConanFile):
         elif "2.0" <= Version(self.version):
             tc.variables["SCN_USE_EXTERNAL_SIMDUTF"] = True
             tc.variables["SCN_USE_EXTERNAL_FAST_FLOAT"] = True
+            tc.variables["SCN_BENCHMARKS_BUILDTIME"] = False
+            tc.variables["SCN_BENCHMARKS_BINARYSIZE"] = False
+            tc.variables["SCN_DISABLE_REGEX"] = self.options.regex_backend is None
+            if self.options.regex_backend is not None:
+                tc.variables["SCN_REGEX_BACKEND"] = self.options.regex_backend
+                tc.variables["SCN_USE_EXTERNAL_REGEX_BACKEND"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -115,14 +134,14 @@ class ScnlibConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        if not self.options.header_only:
+        if not self.options.get_safe("header_only"):
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        if self.options.header_only:
+        if self.options.get_safe("header_only"):
             copy(self, "*", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
             src_folder = os.path.join(self.source_folder, "src")
             if Version(self.version) >= "1.0":
@@ -153,9 +172,13 @@ class ScnlibConan(ConanFile):
             self.cpp_info.components["_scnlib"].defines = ["SCN_HEADER_ONLY=0"]
             self.cpp_info.components["_scnlib"].libs = ["scn"]
         if Version(self.version) >= "1.0":
-            self.cpp_info.components["_scnlib"].requires = ["fast_float::fast_float"]
+            self.cpp_info.components["_scnlib"].requires.append("fast_float::fast_float")
         if Version(self.version) >= "2.0":
             self.cpp_info.components["_scnlib"].requires.append("simdutf::simdutf")
+            if self.options.get_safe("regex_backend") in ["boost", "boost_icu"]:
+                self.cpp_info.components["_scnlib"].requires.append("boost::regex")
+            elif self.options.get_safe("regex_backend") == "re2":
+                self.cpp_info.components["_scnlib"].requires.append("re2::re2")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_scnlib"].system_libs.append("m")
