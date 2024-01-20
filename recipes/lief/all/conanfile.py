@@ -83,13 +83,13 @@ class LiefConan(ConanFile):
         if Version(self.version) < "0.12.2":
             self.requires("rang/3.2")
         else:
-            self.requires("utfcpp/3.2.4")
+            self.requires("utfcpp/4.0.4")
             # lief doesn't supprot spdlog/1.11.0 with fmt/9.x yet.
             self.requires("spdlog/1.10.0")
             self.requires("boost/1.83.0", transitive_headers=True)
             self.requires("tcb-span/cci.20220616", transitive_headers=True)
         if self.options.with_json:
-            self.requires("nlohmann_json/3.11.2")
+            self.requires("nlohmann_json/3.11.3")
         if self.options.with_frozen:
             self.requires("frozen/1.1.1")
 
