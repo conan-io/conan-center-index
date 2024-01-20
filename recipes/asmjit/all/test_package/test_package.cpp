@@ -1,6 +1,11 @@
 #include <asmjit/asmjit.h>
+#if defined(USE_X86)
 #include <asmjit/x86.h>
+#endif
+
+#if defined(USE_AARCH64)
 #include <asmjit/a64.h>
+#endif
 
 #include <stdio.h>
 
