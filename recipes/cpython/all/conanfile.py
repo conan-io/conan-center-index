@@ -217,10 +217,6 @@ class CPythonConan(ConanFile):
                 if self.dependencies["mpdecimal"].ref.version < Version("2.5.0"):
                     raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
 
-        if self._with_libffi:
-            if self.dependencies["libffi"].ref.version >= "3.3" and is_msvc(self) and "d" in msvc_runtime_flag(self):
-                raise ConanInvalidConfiguration("libffi versions >= 3.3 cause 'read access violations' when using a debug runtime (MTd/MDd)")
-
         if is_apple_os(self) and self.settings.arch == "armv8" and Version(self.version) < "3.8.0":
             raise ConanInvalidConfiguration("cpython 3.7 and older does not support Apple ARM CPUs")
 

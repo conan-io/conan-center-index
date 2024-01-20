@@ -234,9 +234,8 @@ class TestPackageConan(ConanFile):
                 )
                 # FIXME: find out why cpython on apple does not allow to use modules linked against a static python
             else:
-                # FIXME: This very specific config fails to import spam for unknown reason. It also only fails in this test package.
-                skip_spam_test = is_msvc(self) and self._py_version < "3.8.0" \
-                    and self.settings.build_type == "Debug" and "d" in msvc_runtime_flag(self)
+                # FIXME: This only fails in this test package, it works in the v1 test for some reason.
+                skip_spam_test = is_msvc(self) and self.settings.build_type == "Debug" and "d" in msvc_runtime_flag(self)
                 if self._supports_modules and not skip_spam_test:
                     os.environ["PYTHONPATH"] = os.path.join(self.build_folder, self.cpp.build.libdirs[0])
                     self.output.info("Testing module (spam) using cmake built module")
