@@ -208,7 +208,6 @@ class PopplerConan(ConanFile):
         tc.variables["ENABLE_ZLIB_UNCOMPRESS"] = self.options.with_zlib
         tc.variables["EXTRA_WARN"] = False
         tc.variables["FONT_CONFIGURATION"] = self.options.fontconfiguration
-        tc.variables["FONT_CONFIGURATION"] = self.options.fontconfiguration
         tc.variables["POPPLER_DATADIR"] = self.dependencies["poppler-data"].conf_info.get("user.poppler-data:datadir").replace("\\", "/")
         tc.variables["RUN_GPERF_IF_PRESENT"] = False
         tc.variables["USE_FLOAT"] = self.options.float
