@@ -108,6 +108,9 @@ class LibunifexConan(ConanFile):
                         f"find_package(LIBURING {required} CONFIG NO_DEFAULT_PATH PATHS ${{CMAKE_PREFIX_PATH}})")
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "unifex_env.cmake"), "-Werror", "")
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "unifex_env.cmake"), "/WX", "")
+        # Allow cppstd to be overridden
+        replace_in_file(self, os.path.join(self.source_folder, "source", "CMakeLists.txt"),
+                        "target_compile_features(unifex PUBLIC cxx_std_17)", "")
 
     def package(self):
         copy(self, "LICENSE.txt",
