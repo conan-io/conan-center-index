@@ -62,7 +62,11 @@ class LibProtobufMutatorConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) >= "1.2" and not self.version.startswith("cci."):
+            # Requires v3.22+
+            self.requires("protobuf/3.25.2", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler in ["gcc", "clang", "intel-cc"] and self.settings.compiler.libcxx != "libstdc++11":
