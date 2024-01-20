@@ -236,6 +236,10 @@ class PopplerConan(ConanFile):
         else:
             tc.preprocessor_definitions["POPPLER_STATIC"] = ""
 
+        # To ensure check_cxx_source_compiles() checks work correctly
+        # https://github.com/conan-io/conan/issues/12180
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
+
         tc.generate()
 
         deps = CMakeDeps(self)
