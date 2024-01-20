@@ -158,6 +158,8 @@ class GetDnsConan(ConanFile):
             self.cpp_info.components["libgetdns"].requires.append("libidn2::libidn2")
         if self.options.tls == "gnutls":
             self.cpp_info.components["libgetdns"].requires.extend(["nettle::nettle", "gnutls::gnutls"])
+        if self.settings.os == "Windows":
+            self.cpp_info.components["libgetdns"].system_libs.extend(["ws2_32", "crypt32", "gdi32", "iphlpapi", "psapi", "userenv"])
 
         if self.options.with_libevent:
             self.cpp_info.components["dns_ext_event"].libs = ["getdns_ext_event" + libsuffix]
