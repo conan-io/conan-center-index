@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
@@ -82,9 +82,12 @@ class LibunifexConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_TESTING"] = False
-        tc.cache_variables["UNIFEX_BUILD_EXAMPLES"] = False
-        tc.cache_variables["UNIFEX_NO_LIBURING"] = not self.options.get_safe("with_liburing", False)
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["UNIFEX_BUILD_EXAMPLES"] = False
+        tc.variables["UNIFEX_NO_LIBURING"] = not self.options.get_safe("with_liburing", False)
+        if not valid_min_cppstd(self, self._minimum_standard):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._minimum_standard
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("liburing", "cmake_file_name", "LIBURING")
