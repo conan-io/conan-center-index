@@ -3,6 +3,8 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
@@ -64,6 +66,9 @@ class ResiprocateConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        if not cross_building(self):
+            venv = VirtualRunEnv(self)
+            venv.generate(scope="build")
         tc = AutotoolsToolchain(self)
         # These options do not support yes/no
         if self.options.with_ssl:
