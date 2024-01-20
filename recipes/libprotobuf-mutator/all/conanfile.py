@@ -5,11 +5,12 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
 
 class LibProtobufMutatorConan(ConanFile):
@@ -77,10 +78,17 @@ class LibProtobufMutatorConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+    def build_requirements(self):
+        if Version(self.version) >= "1.2" and not self.version.startswith("cci."):
+            self.tool_requires("cmake/[>=3.24 <4]")
+        self.tool_requires("protobuf/<host_version>")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
+
         tc = CMakeToolchain(self)
         tc.variables["LIB_PROTO_MUTATOR_TESTING"] = "OFF"
         tc.variables["LIB_PROTO_MUTATOR_DOWNLOAD_PROTOBUF"] = "OFF"
@@ -93,8 +101,8 @@ class LibProtobufMutatorConan(ConanFile):
             tc.preprocessor_definitions["_WIN32_WINNT"] = "0x0600"
         tc.generate()
 
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         replace_in_file(

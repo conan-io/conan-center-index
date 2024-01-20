@@ -6,7 +6,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv", "VirtualBuildEnv"
     test_type = "explicit"
 
     def requirements(self):
@@ -14,6 +14,9 @@ class TestPackageConan(ConanFile):
 
     def layout(self):
         cmake_layout(self)
+
+    def build_requirements(self):
+        self.tool_requires("protobuf/3.21.12")
 
     def build(self):
         cmake = CMake(self)
