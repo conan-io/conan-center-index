@@ -90,17 +90,17 @@ class GetDnsConan(ConanFile):
 
         tc = CMakeToolchain(self)
         tc.variables["OPENSSL_USE_STATIC_LIBS"] = not self.dependencies["openssl"].options.shared
-        tc.cache_variables["ENABLE_SHARED"] = self.options.shared
-        tc.cache_variables["ENABLE_STATIC"] = not self.options.shared
-        tc.cache_variables["ENABLE_STUB_ONLY"] = self.options.stub_only
-        tc.cache_variables["BUILD_LIBEV"] = self.options.with_libev
-        tc.cache_variables["BUILD_LIBEVENT2"] = self.options.with_libevent
-        tc.cache_variables["BUILD_LIBUV"] = self.options.with_libuv
-        tc.cache_variables["USE_LIBIDN2"] = self.options.with_libidn2
-        tc.cache_variables["USE_GNUTLS"] = self.options.tls == "gnutls"
+        tc.variables["ENABLE_SHARED"] = self.options.shared
+        tc.variables["ENABLE_STATIC"] = not self.options.shared
+        tc.variables["ENABLE_STUB_ONLY"] = self.options.stub_only
+        tc.variables["BUILD_LIBEV"] = self.options.with_libev
+        tc.variables["BUILD_LIBEVENT2"] = self.options.with_libevent
+        tc.variables["BUILD_LIBUV"] = self.options.with_libuv
+        tc.variables["USE_LIBIDN2"] = self.options.with_libidn2
+        tc.variables["USE_GNUTLS"] = self.options.tls == "gnutls"
         # Force use of internal strptime when cross-compiling
-        tc.cache_variables["FORCE_COMPAT_STRPTIME"] = True
-        tc.cache_variables["BUILD_TESTING"] = False
+        tc.variables["FORCE_COMPAT_STRPTIME"] = True
+        tc.variables["BUILD_TESTING"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
