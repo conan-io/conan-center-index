@@ -109,19 +109,19 @@ class PopplerConan(ConanFile):
     def requirements(self):
         self.requires("poppler-data/0.4.11", transitive_headers=True, transitive_libs=True)
         # https://gitlab.freedesktop.org/poppler/poppler/-/blob/poppler-22.04.0/splash/SplashFTFont.h#L30
-        self.requires("freetype/2.13.0", transitive_headers=True, transitive_libs=True)
+        self.requires("freetype/2.13.2", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_libiconv"):
             self.requires("libiconv/1.17")
         if self.options.fontconfiguration == "fontconfig":
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/2.15.0")
         if self.options.with_cairo:
             self.requires("cairo/1.18.0")
         if self.options.get_safe("with_glib"):
-            self.requires("glib/2.78.1")
+            self.requires("glib/2.78.3")
         if self.options.get_safe("with_gobject_introspection"):
             self.requires("gobject-introspection/1.72.0")
         if self.options.with_qt:
-            self.requires("qt/6.6.0")
+            self.requires("qt/6.6.1")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/4.7.0")
         if self.options.with_openjpeg:
@@ -159,7 +159,7 @@ class PopplerConan(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self.options.get_safe("with_glib"):
             self.tool_requires("glib/<host_version>")
         self.tool_requires("cmake/[>=3.16 <4]")
