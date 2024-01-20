@@ -64,9 +64,9 @@ class PackageConan(ConanFile):
         "with_highs": False,
         "with_hpipm": False,
         "with_hsl": False,
-        "with_ipopt": True,
+        "with_ipopt": False,  # TODO: enable after merging https://github.com/conan-io/conan-center-index/pull/22467
         "with_lapack": True,
-        "with_mumps": True,
+        "with_mumps": False,  # TODO: enable after merging https://github.com/conan-io/conan-center-index/pull/22466
         "with_opencl": False,
         "with_openmp": True,
         "with_osqp": True,
