@@ -46,10 +46,10 @@ class SleefConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "shared sleef not supported on Windows, it produces runtime errors"
             )
-        if cross_building(self) and self.settings.arch == "armv8":
+        if cross_building(self) and self.settings.compiler == "apple-clang":
             # Fails with "No rule to make target `/bin/mkrename'"
             # https://github.com/shibatch/sleef/issues/308
-            raise ConanInvalidConfiguration("sleef does not support cross-building to armv8")
+            raise ConanInvalidConfiguration("sleef does not support cross-building with apple-clang")
 
 
     def source(self):
