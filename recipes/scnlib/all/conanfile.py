@@ -55,9 +55,7 @@ class ScnlibConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) >= "2.0":
-            del self.options.header_only
-        else:
+        if Version(self.version) < "2.0":
             del self.options.regex_backend
 
     def configure(self):
@@ -74,8 +72,7 @@ class ScnlibConan(ConanFile):
             cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "1.0":
-            self.requires("fast_float/6.0.0")
+        self.requires("fast_float/6.0.0")
         if Version(self.version) >= "2.0":
             self.requires("simdutf/4.0.5")
         if self.options.get_safe("regex_backend") in ["boost", "boost_icu"]:
@@ -101,6 +98,8 @@ class ScnlibConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} with regex_backend=Boost_icu option requires boost::i18n_backend_icu to be enabled."
             )
+        if Version(self.version) >= "2.0.0" and self.options.header_only:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support header only mode.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -116,9 +115,9 @@ class ScnlibConan(ConanFile):
         tc.variables["SCN_DOCS"] = False
         tc.variables["SCN_INSTALL"] = True
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        if "1.0" <= Version(self.version) < "2.0":
+        if Version(self.version) < "2.0":
             tc.variables["SCN_USE_BUNDLED_FAST_FLOAT"] = False
-        elif "2.0" <= Version(self.version):
+        else:
             tc.variables["SCN_USE_EXTERNAL_SIMDUTF"] = True
             tc.variables["SCN_USE_EXTERNAL_FAST_FLOAT"] = True
             tc.variables["SCN_BENCHMARKS_BUILDTIME"] = False
@@ -156,10 +155,9 @@ class ScnlibConan(ConanFile):
             cmake.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
             rmdir(self, os.path.join(self.package_folder, "share"))
-        if Version(self.version) >= "1.0":
-            rm(self, "*.cmake", os.path.join(self.package_folder, "include", "scn", "detail"))
-            rmdir(self, os.path.join(self.package_folder, "include", "scn", "detail", "CMakeFiles"))
-            rmdir(self, os.path.join(self.package_folder, "include", "scn", "detail", "deps", "CMakeFiles"))
+        rm(self, "*.cmake", os.path.join(self.package_folder, "include", "scn", "detail"))
+        rmdir(self, os.path.join(self.package_folder, "include", "scn", "detail", "CMakeFiles"))
+        rmdir(self, os.path.join(self.package_folder, "include", "scn", "detail", "deps", "CMakeFiles"))
 
     def package_info(self):
         target = "scn-header-only" if self.options.get_safe("header_only") else "scn"
@@ -171,8 +169,7 @@ class ScnlibConan(ConanFile):
         else:
             self.cpp_info.components["_scnlib"].defines = ["SCN_HEADER_ONLY=0"]
             self.cpp_info.components["_scnlib"].libs = ["scn"]
-        if Version(self.version) >= "1.0":
-            self.cpp_info.components["_scnlib"].requires.append("fast_float::fast_float")
+        self.cpp_info.components["_scnlib"].requires.append("fast_float::fast_float")
         if Version(self.version) >= "2.0":
             self.cpp_info.components["_scnlib"].requires.append("simdutf::simdutf")
             if self.options.get_safe("regex_backend") in ["boost", "boost_icu"]:
