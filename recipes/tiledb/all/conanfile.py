@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir, replace_in_file, rm
+from conan.tools.files import get, copy, rmdir, replace_in_file, rm, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 
@@ -32,15 +32,12 @@ class TileDBConan(ConanFile):
         "hdfs": [True, False],
         "serialization": [True, False],
         "webp": [True, False],
-        "crc32": [True, False],
         "tools": [True, False],
         "remove_deprecations": [True, False],
         "verbose": [True, False],
         "stats": [True, False],
         "experimental_features": [True, False],
     }
-    # Defaults are based on
-    # https://github.com/TileDB-Inc/TileDB/blob/2.16.3/bootstrap#L89-L117
     default_options = {
         "shared": False,
         "fPIC": True,
@@ -51,7 +48,6 @@ class TileDBConan(ConanFile):
         "hdfs": False,
         "serialization": False,
         "webp": True,
-        "crc32": False,
         "tools": False,
         "remove_deprecations": False,
         "verbose": False,
@@ -66,7 +62,6 @@ class TileDBConan(ConanFile):
         "hdfs": "Support HDFS",
         "serialization": "Enable TileDB Cloud support by building with support for query serialization.",
         "webp": "Support WebP compression",
-        "crc32": "Support CRC32",
         "tools": "Build tiledb command-line tool",
         "remove_deprecations": "Do not build deprecated APIs",
         "verbose": "Print TileDB errors with verbosity",
@@ -118,24 +113,21 @@ class TileDBConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         self.requires("libmagic/5.45")
         if self.options.azure:
-            # TODO: add azure-storage-blobs-cpp to CCI
-            self.requires("azure-storage-blobs-cpp/12.6.1")
-            if self.settings.os == "Windows":
-                self.requires("wil/1.0.231216.1")
+            self.requires("azure-storage-cpp/12.6.1")
         if self.options.gcs:
             self.requires("google-cloud-cpp/2.19.0")
+        if self.options.hdfs:
+            # Not available on CCI yet
+            self.requires("libhdfs/x.y.z")
         if self.options.serialization:
+            self.requires("capnproto/1.0.1")
             self.requires("libcurl/[>=7.78.0 <9]")
-            # Exactly v0.8.0 is required
-            self.requires("capnproto/0.8.0")
         if self.options.s3:
-            self.requires("aws-sdk-cpp/1.9.234")
+            self.requires("aws-sdk-cpp/1.11.160")
         if self.options.tools:
             self.requires("clipp/1.2.3")
         if self.options.webp:
             self.requires("libwebp/1.3.2")
-        if self.options.crc32:
-            self.requires("crc32c/1.1.2")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -156,7 +148,7 @@ class TileDBConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # https://github.com/TileDB-Inc/TileDB/blob/2.16.3/cmake/Options/BuildOptions.cmake
+        # https://github.com/TileDB-Inc/TileDB/blob/2.19.0/cmake/Options/BuildOptions.cmake
         tc.cache_variables["TILEDB_S3"] = self.options.s3
         tc.cache_variables["TILEDB_AZURE"] = self.options.azure
         tc.cache_variables["TILEDB_GCS"] = self.options.gcs
@@ -166,7 +158,6 @@ class TileDBConan(ConanFile):
         tc.cache_variables["TILEDB_STATIC"] = not self.options.shared
         tc.cache_variables["TILEDB_TOOLS"] = self.options.tools
         tc.cache_variables["TILEDB_SERIALIZATION"] = self.options.serialization
-        tc.cache_variables["TILEDB_CRC32"] = self.options.crc32
         tc.cache_variables["TILEDB_WEBP"] = self.options.webp
         tc.cache_variables["TILEDB_EXPERIMENTAL_FEATURES"] = self.options.experimental_features
         tc.cache_variables["TILEDB_REMOVE_DEPRECATIONS"] = self.options.remove_deprecations
@@ -177,39 +168,36 @@ class TileDBConan(ConanFile):
         tc.cache_variables["TILEDB_TESTS"] = False
         tc.cache_variables["SANITIZER"] = False
         tc.cache_variables["TILEDB_SUPERBUILD"] = False
-        tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["TILEDB_VCPKG"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
         conan_to_cmake_name = {
             "aws-sdk-cpp": "AWSSDK",
-            "azure-core-cpp": "AzureCore",
-            "azure-storage-blobs-cpp": "AzureStorageBlobs",
-            "azure-storage-common-cpp": "AzureStorageCommon",
-            "bzip2": "Bzip2",
-            "capnproto": "Capnp",
-            "clipp": "Clipp",
-            "crc32c": "crc32c",
-            "google-cloud-cpp": "GCSSDK",
-            "libcurl": "Curl",
-            "libmagic": "Magic",
-            "libwebp": "Webp",
-            "lz4": "LZ4",
-            "magic": "Magic",
+            "azure-storage-cpp": "azure-storage-blobs-cpp",
+            "bzip2": "BZip2_EP",
+            "capnproto": "CapnProto",
+            "clipp": "clipp",
+            "google-cloud-cpp": "google_cloud_cpp_storage",
+            "libcurl": "CURL",
+            "libmagic": "libmagic",
+            "libwebp": "WebP",
+            "libxml2": "LibXml2",
+            "lz4": "lz4",
             "openssl": "OpenSSL",
-            "spdlog": "Spdlog",
-            "wil": "WIL",
-            "zlib": "Zlib",
-            "zstd": "Zstd",
+            "spdlog": "spdlog",
+            "zlib": "ZLIB",
+            "zstd": "zstd",
         }
         for conan_name, cmake_name in conan_to_cmake_name.items():
-            deps.set_property(conan_name, "cmake_find_mode", "config")
             deps.set_property(conan_name, "cmake_file_name", cmake_name)
 
         renamed_targets = {
+            "azure-storage-cpp":         "Azure::azure-storage-blobs",
             "bzip2":                     "Bzip2::Bzip2",
-            "clipp":                     "Clipp::Clipp",
-            "google-cloud-cpp::storage": "storage_client",
+            "clipp":                     "clipp::clipp",
+            "google-cloud-cpp::storage": "google-cloud-cpp::storage",
             "libmagic":                  "libmagic",
             "libwebp::webp":             "WebP::webp",
             "libwebp::webpdecoder":      "WebP::webpdecoder",
@@ -229,16 +217,16 @@ class TileDBConan(ConanFile):
 
     def _patch_sources(self):
         # Disable examples
-        # Re-add external includes, which otherwise used to get added via cmake/Modules/Find*_EP.cmake modules
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "add_subdirectory(examples)",
-                        "include_directories(external/include)")
-        # Replace ExternalProject packages with Conan versions,
-        # e.g. find_package(Bzip2_EP REQUIRED) with find_package(Bzip2 REQUIRED CONFIG)
-        for path in self.source_path.rglob("CMakeLists.txt"):
-            replace_in_file(self, path, "_EP REQUIRED", " REQUIRED CONFIG", strict=False)
-        # Remove all _EP modules, just in case
-        rm(self, "*_EP.cmake", os.path.join(self.source_path, "cmake", "Modules"))
+                        "add_subdirectory(examples)", "")
+        # Don't actually run vcpkg
+        save(self, os.path.join(self.source_folder, "cmake", "Options", "TileDBToolchain.cmake"), "")
+        # No such target defined in CCI
+        if self.options.serialization:
+            capnproto_bindir = self.dependencies['capnproto'].cpp_info.bindir
+            replace_in_file(self, os.path.join(self.source_folder, "tiledb", "CMakeLists.txt"),
+                            "set(CAPNP_PLUGIN_DIR $<TARGET_FILE_DIR:CapnProto::capnp_tool>)",
+                            f'set(CAPNP_PLUGIN_DIR "{capnproto_bindir}")')
 
     def build(self):
         self._patch_sources()
@@ -247,15 +235,15 @@ class TileDBConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        # Plain cmake.install() does not work. Needs to be run from the tiledb subdirectory.
-        self.run(f"cmake --install {self.build_path / 'tiledb'}")
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
         # tools are not installed by CMake
         if self.options.tools:
             suffix = ".exe" if self.settings.os == "Windows" else ""
             copy(self, f"tiledb{suffix}",
+                 src=os.path.join(self.build_folder, "tools"),
                  dst=os.path.join(self.package_folder, "bin"),
-                 src=os.path.join(self.build_folder, "tiledb", "tools"),
                  keep_path=False)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
