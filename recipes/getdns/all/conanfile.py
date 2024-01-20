@@ -1,10 +1,10 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm, replace_in_file, load
 from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
@@ -128,7 +128,12 @@ class GetDnsConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.source_path.parent)
+        try:
+            cmake.configure(build_script_folder=self.source_path.parent)
+        except ConanException:
+            log = load(self, os.path.join(self.build_folder, "CMakeFiles/CMakeConfigureLog.yaml"))
+            self.output.error(log)
+            raise
         cmake.build()
 
     def package(self):
