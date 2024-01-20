@@ -1,0 +1,22 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 41a672e8..93370b5e 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -170,10 +170,10 @@ if (MSVC)
+     set_target_properties(exiv2lib PROPERTIES LINK_FLAGS "/ignore:4099")
+ endif()
+ 
+-set_target_properties( exiv2lib_int PROPERTIES
+-    POSITION_INDEPENDENT_CODE ON
+-    COMPILE_DEFINITIONS exiv2lib_EXPORTS
+-)
++
++
++
++
+ 
+ # NOTE: Cannot use target_link_libraries on OBJECT libraries with old versions of CMake
+ target_include_directories(exiv2lib_int PRIVATE ${ZLIB_INCLUDE_DIR})
+-- 
+2.33.0.windows.1
+

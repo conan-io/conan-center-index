@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, replace_in_file
 import os
 
 required_conan_version = ">=1.53.0"
@@ -52,7 +52,14 @@ class Chipmunk2DConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
+    def _patch_sources(self):
+        # The finite-math-only optimization has no effect and can cause linking errors
+        # when linked against glibc >= 2.31
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "-ffast-math", "-ffast-math -fno-finite-math-only")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

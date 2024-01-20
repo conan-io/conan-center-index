@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import can_run
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -10,7 +9,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
 
 
 class LibvipsConan(ConanFile):
@@ -117,11 +116,11 @@ class LibvipsConan(ConanFile):
 
     def requirements(self):
         self.requires("expat/2.5.0")
-        self.requires("glib/2.76.1", transitive_headers=True, transitive_libs=True, run=can_run(self))
+        self.requires("glib/2.78.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_cfitsio:
-            self.requires("cfitsio/4.1.0")
+            self.requires("cfitsio/4.2.0")
         if self.options.with_cgif:
-            self.requires("cgif/0.3.0")
+            self.requires("cgif/0.3.2")
         if self.options.with_exif:
             self.requires("libexif/0.6.24")
         if self.options.with_fftw:
@@ -129,13 +128,13 @@ class LibvipsConan(ConanFile):
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.14.2")
         if self.options.with_heif:
-            self.requires("libheif/1.13.0")
+            self.requires("libheif/1.16.2")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.5")
+            self.requires("libjpeg-turbo/3.0.0")
         elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.1")
+            self.requires("mozjpeg/4.1.3")
         if self.options.with_jpeg_xl:
             self.requires("libjxl/0.6.1")
         if self.options.with_lcms:
@@ -145,7 +144,7 @@ class LibvipsConan(ConanFile):
         if self.options.with_matio:
             self.requires("matio/1.5.23")
         if self.options.with_openexr:
-            self.requires("openexr/3.1.5")
+            self.requires("openexr/3.1.9")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.0")
         if self.options.with_pangocairo:
@@ -153,17 +152,17 @@ class LibvipsConan(ConanFile):
         if self.options.with_pdfium:
             self.requires("pdfium/cci.20210730")
         if self.options.with_png == "libpng":
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
         elif self.options.with_png == "libspng":
-            self.requires("libspng/0.7.3")
+            self.requires("libspng/0.7.4")
         if self.options.with_poppler:
             self.requires("poppler/21.07.0")
         if self.options.with_tiff:
-            self.requires("libtiff/4.4.0")
+            self.requires("libtiff/4.6.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.3.0")
+            self.requires("libwebp/1.3.2")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.options.vapi and not self.options.introspection:
@@ -200,13 +199,19 @@ class LibvipsConan(ConanFile):
             raise ConanInvalidConfiguration("librsvg recipe not available in conancenter yet")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.1")
+        self.tool_requires("meson/1.2.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
         if self.options.introspection:
             self.tool_requires("gobject-introspection/1.72.0")
-        if not can_run(self):
-            self.tool_requires("glib/2.76.1")
+        self.tool_requires("glib/<host_version>")
+
+        if self.settings.os == "Macos":
+            # Avoid using gettext from homebrew which may be linked against
+            # a different/incompatible libiconv than the one being exposed
+            # in the runtime environment (DYLD_LIBRARY_PATH)
+            # See https://github.com/conan-io/conan-center-index/pull/17502#issuecomment-1542492466
+            self.tool_requires("gettext/0.21")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -214,9 +219,6 @@ class LibvipsConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if can_run(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
 
         tc = MesonToolchain(self)
         true_false = lambda v: "true" if v else "false"

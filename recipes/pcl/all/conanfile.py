@@ -384,7 +384,7 @@ class PclConan(ConanFile):
         if self._is_enabled("opencv"):
             self.requires("opencv/4.5.5", transitive_headers=True)
         if self._is_enabled("zlib"):
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         # TODO:
         # self.requires("vtk/9.x.x", transitive_headers=True)
         # self.requires("openni/x.x.x", transitive_headers=True)

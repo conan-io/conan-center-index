@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -114,6 +115,7 @@ class PupnpConan(ConanFile):
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.la", self.package_folder, recursive=True)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libupnp")

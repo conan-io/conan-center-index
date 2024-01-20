@@ -2,9 +2,8 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
 from conan.tools.microsoft import is_msvc, check_min_vs
 
 required_conan_version = ">=1.53.0"
@@ -59,10 +58,19 @@ class Nmslib(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["WITHOUT_TESTS"] = True
+        # Relocatable shared libs on macOS
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # The finite-math-only optimization has no effect and can cause linking errors
+        # when linked against glibc >= 2.31
+        replace_in_file(self, os.path.join(self.source_folder, "similarity_search", "CMakeLists.txt"),
+                        "-Ofast", "-Ofast -fno-finite-math-only")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "similarity_search"))
         cmake.build()
@@ -73,7 +81,6 @@ class Nmslib(ConanFile):
              src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["NonMetricSpaceLib"]

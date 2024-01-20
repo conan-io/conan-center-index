@@ -22,6 +22,7 @@ This file is intended to provide all the commands you need to run in order to be
     * [Yamlschema](#yamlschema)
   * [Testing the different `test__package`](#testing-the-different-test__package)
   * [Testing more environments](#testing-more-environments)
+      * [Docker build images used by ConanCenterIndex](#docker-build-images-used-by-conancenterindex)
   * [Using Conan 2.0](#using-conan-20)
     * [Installing Conan 2.0 beta](#installing-conan-20-beta)
     * [Trying it out](#trying-it-out)<!-- endToc -->
@@ -42,7 +43,7 @@ This file is intended to provide all the commands you need to run in order to be
 
 ### Installing the ConanCenter Hooks
 
-> **Warning**: This is not yet supported with Conan 2.0
+> **Warning**: This is not yet supported with Conan 2.0. Please, follow the instructions below only in case you are using Conan 1.0.
 
 The system will use the [conan-center hooks](https://github.com/conan-io/hooks) to perform some quality checks. You can install the hooks by running:
 
