@@ -62,10 +62,10 @@ class QxmppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/6.6.0", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/6.6.1", transitive_headers=True, transitive_libs=True)
         if self.options.with_gstreamer:
             self.requires("gstreamer/1.22.3")
-            self.requires("glib/2.78.1")
+            self.requires("glib/2.78.3")
 
     def validate(self):
         if self.settings.compiler.cppstd:
