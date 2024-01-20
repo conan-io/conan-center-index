@@ -19,7 +19,7 @@ class CoinCbcConan(ConanFile):
     license = ("EPL-2.0",)
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/coin-or/Cbc"
-    topics = ("clp", "simplex", "solver", "linear", "programming")
+    topics = ("cbc", "branch-and-cut", "solver", "linear", "programming")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
