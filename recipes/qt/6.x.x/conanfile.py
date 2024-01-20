@@ -1445,7 +1445,7 @@ class QtConan(ConanFile):
                 else:
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/corelib/CMakeLists.txt#L969-L972
                     self.cpp_info.components["qtCore"].frameworks.append("MobileCoreServices")
-                if not self.settings.os ["iOS", "tvOS"]:
+                if self.settings.os not in ["iOS", "tvOS"]:
                     self.cpp_info.components["qtNetwork"].frameworks.append("CoreServices")
                     self.cpp_info.components["qtNetwork"].frameworks.append("SystemConfiguration")
                 else:
