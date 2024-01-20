@@ -7,6 +7,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -30,6 +31,24 @@ class LibProtobufMutatorConan(ConanFile):
         "fPIC": True,
     }
 
+    @property
+    def _min_cppstd(self):
+        if Version(self.version) < "1.2" or self.version == "cci.20210831":
+            return 11
+        return 14
+
+    @property
+    def _minimum_compilers_version(self):
+        if self._min_cppstd == 11:
+            return {}
+        return {
+            "gcc": "5",
+            "Visual Studio": "15",
+            "msvc": "191",
+            "clang": "5",
+            "apple-clang": "10",
+        }
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -49,8 +68,14 @@ class LibProtobufMutatorConan(ConanFile):
             raise ConanInvalidConfiguration("Requires compiler.libcxx=libstdc++11")
         if is_apple_os(self):
             raise ConanInvalidConfiguration(f"libprotobuf-mutator does not support {self.settings.os}")
+
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
