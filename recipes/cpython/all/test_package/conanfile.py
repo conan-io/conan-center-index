@@ -8,7 +8,7 @@ from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv
 from conan.tools.gnu import AutotoolsDeps
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag, VCVars
+from conan.tools.microsoft import is_msvc, VCVars
 from conan.tools.scm import Version
 
 conan2 = conan_version.major >= 2
@@ -218,9 +218,7 @@ class TestPackageConan(ConanFile):
                 )
                 # FIXME: find out why cpython on apple does not allow to use modules linked against a static python
             else:
-                # FIXME: This only fails in this test package, it works in the v1 test for some reason.
-                skip_spam_test = is_msvc(self) and self.settings.build_type == "Debug" and "d" in msvc_runtime_flag(self)
-                if self._supports_modules and not skip_spam_test:
+                if self._supports_modules:
                     os.environ["PYTHONPATH"] = os.path.join(self.build_folder, self.cpp.build.libdirs[0])
                     self.output.info("Testing module (spam) using cmake built module")
                     self._test_module("spam", True)
