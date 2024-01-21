@@ -114,4 +114,5 @@ class LibisalConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "libisal")
         self.cpp_info.libs = collect_libs(self)
