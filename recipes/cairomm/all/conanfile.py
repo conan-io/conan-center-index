@@ -4,7 +4,7 @@ import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rename, replace_in_file, rm, rmdir
@@ -139,6 +139,8 @@ class CairommConan(ConanFile):
 
         for dir_to_remove in ["pkgconfig", f"cairomm-{self._abi_version}"]:
             rmdir(self, os.path.join(self.package_folder, "lib", dir_to_remove))
+
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         name = f"cairomm-{self._abi_version}"
