@@ -59,15 +59,13 @@ index 5f46c90..9756ab5 100644
    Threads::Threads
    ${ATOMICS_LIBRARIES}
  )
- 
--if (JPEGXL_ENABLE_TRANSCODE_JPEG OR JPEGXL_ENABLE_BOXES)
--list(APPEND JPEGXL_DEC_INTERNAL_LIBS brotlidec brotlicommon)
--endif()
 -
-+#if (JPEGXL_ENABLE_TRANSCODE_JPEG OR JPEGXL_ENABLE_BOXES)
-+#list(APPEND JPEGXL_DEC_INTERNAL_LIBS brotlidec brotlicommon)
-+#endif()
 +find_package(brotli REQUIRED CONFIG)
+ if (JPEGXL_ENABLE_TRANSCODE_JPEG OR JPEGXL_ENABLE_BOXES)
+-list(APPEND JPEGXL_DEC_INTERNAL_LIBS brotlidec brotlicommon)
++list(APPEND JPEGXL_DEC_INTERNAL_LIBS brotli::brotli)
+ endif()
+ 
  set(JPEGXL_INTERNAL_LIBS
    ${JPEGXL_DEC_INTERNAL_LIBS}
 -  brotlienc
