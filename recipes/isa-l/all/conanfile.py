@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, collect_libs, copy, get, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -102,6 +103,7 @@ class LibisalConan(ConanFile):
                  dst=os.path.join(self.package_folder, "lib"),
                  src=self.source_folder,
                  keep_path=False)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
