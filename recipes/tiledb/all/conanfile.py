@@ -176,12 +176,12 @@ class TileDBConan(ConanFile):
         conan_to_cmake_name = {
             "aws-sdk-cpp": "AWSSDK",
             "azure-storage-cpp": "azure-storage-blobs-cpp",
-            "bzip2": "BZip2_EP",
+            "bzip2": "BZip2",
             "capnproto": "CapnProto",
             "clipp": "clipp",
             "google-cloud-cpp": "google_cloud_cpp_storage",
             "libcurl": "CURL",
-            "libmagic": "Magic_EP",
+            "libmagic": "unofficial-libmagic",
             "libwebp": "WebP",
             "libxml2": "LibXml2",
             "lz4": "lz4",
@@ -195,10 +195,10 @@ class TileDBConan(ConanFile):
 
         renamed_targets = {
             "azure-storage-cpp":         "Azure::azure-storage-blobs",
-            "bzip2":                     "Bzip2::Bzip2",
+            "bzip2":                     "BZip2::BZip2",
             "clipp":                     "clipp::clipp",
             "google-cloud-cpp::storage": "google-cloud-cpp::storage",
-            "libmagic":                  "libmagic",
+            "libmagic":                  "unofficial::libmagic::libmagic",
             "libwebp::webp":             "WebP::webp",
             "libwebp::webpdecoder":      "WebP::webpdecoder",
             "libwebp::webpdemux":        "WebP::webpdemux",
@@ -219,6 +219,8 @@ class TileDBConan(ConanFile):
         # Disable examples
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "add_subdirectory(examples)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "add_subdirectory(experimental/experimental_examples)", "")
         # Don't actually run vcpkg
         save(self, os.path.join(self.source_folder, "cmake", "Options", "TileDBToolchain.cmake"), "")
         # No such target defined in CCI
