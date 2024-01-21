@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.apple import XCRun, to_apple_arch
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, chdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, chdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -101,7 +101,7 @@ class PbcConan(ConanFile):
             env = Environment()
             env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in gmp_info.includedirs] + [f"-D{d}" for d in gmp_info.defines])
             env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in (gmp_info.libs + gmp_info.system_libs)])
-            env.append("LDFLAGS", [f"-LIBPATH:{unix_path(self, p)}" for p in gmp_info.libdirs] + gmp_info.sharedlinkflags + gmp_info.exelinkflags)
+            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in gmp_info.libdirs] + gmp_info.sharedlinkflags + gmp_info.exelinkflags)
             env.append("CFLAGS", gmp_info.cflags)
             env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
 
@@ -116,11 +116,28 @@ class PbcConan(ConanFile):
             env.define("NM", "dumpbin -symbols")
             env.vars(self).save_script("conanbuild_msvc")
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        configure = os.path.join(self.source_folder, "configure")
+        # The check for bison/yacc is overly strict and fails for winflexbison
+        replace_in_file(self, configure,
+                        'if test "x$YACC" != "xbison -y"; then',
+                        "if false; then")
+        if is_msvc(self):
+            # Skip -lm check
+            replace_in_file(self, configure,
+                            'if test "x$ac_cv_lib_m_pow" = xyes; then :',
+                            "if true; then :")
+            replace_in_file(self, configure, 'LIBS="-lm $LIBS"', "")
+
+    def build(self):
+        self._patch_sources()
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
             autotools.configure()
+            if is_msvc(self):
+                # Drop GCC/Clang flags
+                replace_in_file(self, "Makefile", "CFLAGS = ", "CFLAGS = # ")
             autotools.make()
 
     def package(self):
