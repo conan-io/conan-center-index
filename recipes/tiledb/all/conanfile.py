@@ -76,7 +76,7 @@ class TileDBConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "8",
+            "gcc": "10",
             "clang": "10",
             "apple-clang": "10",
             "msvc": "192",
