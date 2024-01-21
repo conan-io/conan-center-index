@@ -69,6 +69,7 @@ class NetSnmpConan(ConanFile):
         else:
             self.tool_requires("gnu-config/cci.20210814")
             self.tool_requires("autoconf/2.71")
+            self.tool_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
