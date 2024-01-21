@@ -181,7 +181,7 @@ class TileDBConan(ConanFile):
             "clipp": "clipp",
             "google-cloud-cpp": "google_cloud_cpp_storage",
             "libcurl": "CURL",
-            "libmagic": "libmagic",
+            "libmagic": "Magic_EP",
             "libwebp": "WebP",
             "libxml2": "LibXml2",
             "lz4": "lz4",
