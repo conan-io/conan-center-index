@@ -69,12 +69,10 @@ if(BUILD_MODULE)
     )
     set_property(TARGET spam PROPERTY PREFIX "")
     if(MSVC)
-        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-            set(SUFFIX "_d.pyd")
-        else()
-            set(SUFFIX ".pyd")
-        endif()
-        set_property(TARGET spam PROPERTY SUFFIX "${SUFFIX}")
+        set_target_properties(spam PROPERTIES 
+            DEBUG_POSTFIX "_d"
+            SUFFIX ".pyd"
+        )
     endif()
 
     option(USE_FINDPYTHON_X "Use new-style FindPythonX module")
