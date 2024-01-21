@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.tools.microsoft import check_min_vs
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -40,13 +39,17 @@ class ScnlibConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
+            "11": {
+                "Visual Studio": "16",
+                "msvc": "192",
+            },
             "17": {
                 "gcc": "8",
                 "clang": "7",
                 # scn/2.0.0 requires std::regex_constants::multiline
                 "apple-clang": "14",
-                "Visual Studio": "16",
-                "msvc": "192",
+                "Visual Studio": "17",
+                "msvc": "193",
             },
         }.get(self._min_cppstd, {})
 
@@ -88,7 +91,6 @@ class ScnlibConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        check_min_vs(self, 192 if Version(self.version) >= "1.0" else 191)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
