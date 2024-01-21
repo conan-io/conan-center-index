@@ -1,0 +1,32 @@
+diff --git a/a/CMakeLists.txt b/b/CMakeLists.txt
+index 1e63372..36b4e64 100644
+--- a/a/CMakeLists.txt
++++ b/b/CMakeLists.txt
+@@ -466,9 +466,9 @@ if(LIEF_INSTALL)
+ 
+   # Installation
+   # ======================
+-
++  include(GNUInstallDirs)
++  if(0)
+   if(UNIX)
+-    include(GNUInstallDirs)
+     set(CMAKE_INSTALL_LIBDIR "lib")
+   else()
+     if(WIN32)
+@@ -482,13 +482,13 @@ if(LIEF_INSTALL)
+         message(FATAL_ERROR "System not UNIX nor WIN32 - not implemented yet")
+       endif()
+   endif()
+-
++  endif()
+   install(
+     TARGETS LIB_LIEF lief_spdlog
+     EXPORT LIEFExport
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-    RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT libraries
+     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ 
+   install(

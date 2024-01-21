@@ -83,7 +83,8 @@ class LiefConan(ConanFile):
         if Version(self.version) < "0.12.2":
             self.requires("rang/3.2")
         else:
-            self.requires("utfcpp/4.0.4")
+            # lief doesn't supprot utfcpp/4.x.x yet.
+            self.requires("utfcpp/3.2.5")
             # lief doesn't supprot spdlog/1.11.0 with fmt/9.x yet.
             self.requires("spdlog/1.10.0")
             self.requires("boost/1.83.0", transitive_headers=True)
@@ -92,6 +93,8 @@ class LiefConan(ConanFile):
             self.requires("nlohmann_json/3.11.3")
         if self.options.with_frozen:
             self.requires("frozen/1.1.1")
+        if Version(self.version) >= "0.14.0":
+            self.requires("tl-expected/1.1.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -146,6 +149,8 @@ class LiefConan(ConanFile):
             tc.variables["LIEF_INSTALL"] = True
             tc.variables["LIEF_EXTERNAL_SPAN_DIR"] = self.dependencies["tcb-span"].cpp_info.includedirs[0].replace("\\", "/")
             tc.variables["LIEF_EXTERNAL_LEAF_DIR"] = self.dependencies["boost"].cpp_info.includedirs[0].replace("\\", "/")
+        if Version(self.version) >= "0.14.0":
+            tc.variables["LIEF_OPT_EXTERNAL_EXPECTED"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
