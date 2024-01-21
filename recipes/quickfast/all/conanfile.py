@@ -80,10 +80,3 @@ class QuickfastConan(ConanFile):
 
         if not self.options.shared:
             self.cpp_info.defines.append("QUICKFAST_HAS_DLL=0")
-
-        self.cpp_info.requires = [
-            "boost::headers",
-            "boost::thread",
-            "boost::date_time",
-            "xerces-c::xerces-c"
-        ]
