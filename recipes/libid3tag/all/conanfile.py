@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -112,6 +113,7 @@ class LibId3TagConan(ConanFile):
                 autotools = Autotools(self)
                 autotools.install()
             rm(self, "*.la", self.package_folder, recursive=True)
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
         if is_msvc(self):
