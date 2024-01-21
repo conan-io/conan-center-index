@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, collect_libs, copy, get, replace_in_file
+from conan.tools.files import chdir, copy, get, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, NMakeToolchain
@@ -115,4 +115,8 @@ class LibisalConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libisal")
-        self.cpp_info.libs = collect_libs(self)
+        if is_msvc(self):
+            suffix = "" if self.options.shared else "_static"
+            self.cpp_info.libs = [f"isa-l{suffix}"]
+        else:
+            self.cpp_info.libs = ["isal"]
