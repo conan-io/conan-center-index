@@ -314,7 +314,7 @@ class PopplerConan(ConanFile):
         if self.options.splash:
             self.cpp_info.components["libpoppler-splash"].libs = []
             self.cpp_info.components["libpoppler-splash"].set_property("pkg_config_name", "poppler-splash")
-            self.cpp_info.components["libpoppler-splash"].requires = ["libpoppler", "boost::boost"]  # FIXME: should be boost::headers, see https://github.com/conan-io/conan-center-index/pull/2097
+            self.cpp_info.components["libpoppler-splash"].requires = ["libpoppler", "boost::headers"]
 
         if self.options.with_cairo:
             self.cpp_info.components["libpoppler-cairo"].libs = []
