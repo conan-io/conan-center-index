@@ -75,10 +75,11 @@ class TileDBConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
+        # https://github.com/TileDB-Inc/TileDB/blob/0da5c1a84d23c76eaa80c82e87990c1084c6aed2/doc/dev/BUILD.md#prerequisites
         return {
             "gcc": "10",
             "clang": "10",
-            "apple-clang": "10",
+            "apple-clang": "14",
             "msvc": "192",
             "Visual Studio": "16",
         }
