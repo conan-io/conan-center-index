@@ -135,12 +135,12 @@ class PopplerConan(ConanFile):
         if self.options.with_png:
             self.requires("libpng/1.6.40")
         if self.options.with_tiff:
-            self.requires("libtiff/4.6.0", force=True)
+            self.requires("libtiff/4.6.0")
         if self.options.splash:
             self.requires("boost/1.83.0")
         if self.options.with_libcurl:
             # https://gitlab.freedesktop.org/poppler/poppler/-/blob/poppler-23.11.0/poppler/CurlCachedFile.h#L18
-            self.requires("libcurl/[>=7.78 <9]", transitive_headers=True, transitive_libs=True)
+            self.requires("libcurl/[>=7.78 <9]", transitive_headers=True)
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
