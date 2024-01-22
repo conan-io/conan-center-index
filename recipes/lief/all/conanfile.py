@@ -50,7 +50,10 @@ class LiefConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "14" if self.options.with_frozen else "11"
+        if Version(self.version) < "0.14.0":
+            return "14" if self.options.with_frozen else "11"
+        else:
+            return "17"
 
     @property
     def _compilers_minimum_version(self):
@@ -61,6 +64,13 @@ class LiefConan(ConanFile):
                 "apple-clang": "10",
                 "Visual Studio": "15",
                 "msvc": "191",
+            },
+            "17": {
+                "gcc": "8",
+                "clang": "7",
+                "apple-clang": "12",
+                "Visual Studio": "16",
+                "msvc": "192",
             },
         }.get(self._min_cppstd, {})
 
