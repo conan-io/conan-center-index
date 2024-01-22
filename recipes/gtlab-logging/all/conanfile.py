@@ -1,5 +1,6 @@
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools import files
+from conan.tools.build import check_min_cppstd
 from conan import ConanFile
 import os
 
@@ -18,11 +19,21 @@ class GTLabLoggingConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_qt": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_qt": False
     }
+
+    def requirements(self):
+        if self.options.with_qt:
+            self.requires("qt/[>=5.0.0]")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, "14")
 
     def generate(self):
         CMakeToolchain(self).generate()
@@ -62,3 +73,6 @@ class GTLabLoggingConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "GTlabLogging")
         self.cpp_info.set_property("cmake_target_name", "GTlab::Logging")
+
+        if self.options.with_qt:
+            self.cpp_info.defines = ['GT_LOG_USE_QT_BINDINGS']
