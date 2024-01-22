@@ -461,6 +461,10 @@ class BoostConan(ConanFile):
         if self.options.without_fiber:
             self.options.rm_safe("numa")
 
+        # FIXME: Compilation errors on msvc shared build for boost.fiber https://github.com/boostorg/fiber/issues/314
+        if Version(self.version) >= "1.84.0" and is_msvc(self) and self._shared:
+            self.options.without_fiber = True
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
