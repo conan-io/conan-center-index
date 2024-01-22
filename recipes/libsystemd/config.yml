@@ -1,4 +1,6 @@
 versions:
+  "255.2":
+    folder: all
   "255":
     folder: all
   "253.14":
