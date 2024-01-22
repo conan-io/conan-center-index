@@ -2,8 +2,9 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
 
 required_conan_version = ">=1.53.0"
 
@@ -24,17 +25,19 @@ class KcovConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("libiberty/9.1.0")
         self.requires("libcurl/[>=7.78 <9]")
-        self.requires("libelf/0.8.13")
-        self.requires("elfutils/0.190")
-        self.requires("libdwarf/0.8.0")
+        self.requires("openssl/[>=1.1 <4]")
+        if is_apple_os(self):
+            self.requires("libdwarf/0.8.0")
+        else:
+            self.requires("elfutils/0.190")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -49,31 +52,32 @@ class KcovConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_PROJECT_kcov_INCLUDE"] = "conan_deps.cmake"
         tc.generate()
         deps = CMakeDeps(self)
+        # Match Find*.cmake module names used by the project
+        deps.set_property("libbfd", "cmake_file_name", "Bfd")
         deps.set_property("libdwarf", "cmake_file_name", "Dwarfutils")
-        deps.set_property("elfutils", "cmake_file_name", "Elfutils")
+        deps.set_property("elfutils", "cmake_file_name", "ElfUtils")
+        deps.set_property("libcrpcut", "cmake_file_name", "LibCRPCUT")
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # Disable project Find*.cmake modules just in case
         rm(self, "Find*.cmake", os.path.join(self.source_folder, "cmake"))
-        src_cmakelists = os.path.join(self.source_folder, "src", "CMakeLists.txt")
-        # Optional dependency, not available on CCI
-        replace_in_file(self, src_cmakelists, "find_package (Bfd)", "")
-        # Fix LibElf and ElfUtils capitalization
-        replace_in_file(self, src_cmakelists, "find_package (LibElf)", "find_package (LIBELF REQUIRED CONFIG)")
-        replace_in_file(self, src_cmakelists, "ElfUtils", "Elfutils", strict=False)
-        replace_in_file(self, src_cmakelists, "${LIBELF_LIBRARIES}", "${LIBELF_LIBRARIES} ${Elfutils_LIBRARIES}")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
+        copy(self, "COPYING*", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
-        copy(self, "COPYING*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
     def package_info(self):
         self.cpp_info.includedirs = []
