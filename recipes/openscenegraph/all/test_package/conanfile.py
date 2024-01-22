@@ -21,10 +21,15 @@ class TestPackageConan(ConanFile):
         for key, value in self.dependencies["openscenegraph"].options.items():
             if key.startswith("with_"):
                 tc.preprocessor_definitions[key.upper()] = 1 if str(value) != "False" else 0
+        #OSG always builds the bmp plugin
+        tc.preprocessor_definitions["WITH_BMP"] = 1
         if is_apple_os(self):
             tc.preprocessor_definitions["WITH_GIF"] = 0
             tc.preprocessor_definitions["WITH_JPEG"] = 0
             tc.preprocessor_definitions["WITH_PNG"] = 0
+            # OSG builds the imageio plugin on apple platforms
+            tc.preprocessor_definitions["WITH_IMAGEIO"] = 1
+
         tc.generate()
 
     def build(self):
