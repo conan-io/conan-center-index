@@ -4,6 +4,10 @@
 #include <osgDB/ReaderWriter>
 #include <osgDB/Registry>
 
+#ifndef WITH_IMAGEIO
+#define WITH_IMAGEIO 0
+#endif
+
 #ifdef OSG_LIBRARY_STATIC
 #	if WITH_BMP == 1
 USE_OSGPLUGIN ( bmp )
