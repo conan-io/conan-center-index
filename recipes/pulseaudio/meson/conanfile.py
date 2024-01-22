@@ -65,6 +65,9 @@ class PulseAudioConan(ConanFile):
             self.requires("dbus/1.15.8")
 
     def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("pulseaudio supports only linux currently")
+
         if self.options.get_safe("with_fftw"):
             if not self.dependencies["fftw"].options.precision_single:
                 raise ConanInvalidConfiguration(
