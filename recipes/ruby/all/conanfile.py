@@ -255,3 +255,4 @@ class RubyConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Ruby"
         binpath = os.path.join(self.package_folder, "bin")
         self.env_info.PATH.append(binpath)
+        self.runenv_info.prepend_path("PATH", os.path.join(self.package_folder, "bin"))
