@@ -97,7 +97,7 @@ class GrpcConan(ConanFile):
         self.requires("re2/20230301")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True, run=can_run(self))
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52":
             self.requires("libsystemd/255")
 
     def package_id(self):
