@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, save, load, chdir, rename, rmdir, replace_in_file
+from conan.tools.files import get, save, load, chdir, rename, rmdir, replace_in_file, rm
 from conan.tools.layout import basic_layout
 
 class canteraRecipe(ConanFile):
@@ -126,8 +126,15 @@ class canteraRecipe(ConanFile):
     def package(self):
         with chdir(self, self.source_folder):
             self.run(f'scons install -Y "{self.source_folder}"')
-            rename(self, os.path.join(self.package_folder,"doc"), os.path.join(self.package_folder,"license"))
-            rmdir(self, os.path.join(self.package_folder,"samples"))
+
+            doc_dir = os.path.join(self.package_folder,"doc") if self.settings.os == "Windows" else os.path.join(self.package_folder,"share","cantera","doc")
+            rename(self, doc_dir, os.path.join(self.package_folder,"licenses"))
+
+            if self.settings.os == "Windows":
+                rmdir(self, os.path.join(self.package_folder,"samples"))
+            else:
+                rmdir(self, os.path.join(self.package_folder,"share"))
+                rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
 
     def package_info(self):
@@ -135,6 +142,6 @@ class canteraRecipe(ConanFile):
         self.cpp_info.resdirs = ["data"]
 
         if self.options.shared:
-            self.cpp_info.libdirs = ["bin"] if self.settings.os == "Windows" else ["share"]
+            self.cpp_info.libdirs = ["bin"] if self.settings.os == "Windows" else ["lib"]
         else:
             self.cpp_info.libdirs = ["lib"]
