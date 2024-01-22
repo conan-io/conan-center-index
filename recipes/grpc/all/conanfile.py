@@ -284,8 +284,8 @@ class GrpcConan(ConanFile):
     @property
     def _grpc_components(self):
 
-        def _libsystemd():
-            return "libsystemd::libsystemd" if self.settings.os in ["Linux", "FreeBSD"] else ""
+        def libsystemd():
+            return ["libsystemd::libsystemd"] if self.settings.os in ["Linux", "FreeBSD"] else []
 
         def libm():
             return ["m"] if self.settings.os in ["Linux", "FreeBSD"] else []
@@ -317,8 +317,8 @@ class GrpcConan(ConanFile):
                     "abseil::absl_status", "abseil::absl_str_format",
                     "abseil::absl_strings", "abseil::absl_synchronization",
                     "abseil::absl_time", "abseil::absl_optional",
-                    "abseil::absl_flags", _libsystemd()
-                ],
+                    "abseil::absl_flags"
+                ] + libsystemd(),
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
             },
             "_grpc": {
