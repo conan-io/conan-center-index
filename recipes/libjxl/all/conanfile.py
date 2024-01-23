@@ -6,6 +6,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir, save, rm, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -123,6 +124,10 @@ class LibjxlConan(ConanFile):
             # TODO: add support for the jpegli JPEG encoder library
             tc.variables["JPEGXL_ENABLE_JPEGLI"] = False
             tc.variables["JPEGXL_ENABLE_JPEGLI_LIBJPEG"] = False
+        # TODO: can hopefully be removed in newer versions
+        # https://github.com/libjxl/libjxl/issues/3159
+        if Version(self.version) >= "0.9" and self.settings.build_type == "Debug" and is_msvc(self):
+            tc.preprocessor_definitions["JXL_DEBUG_V_LEVEL"] = 1
         tc.generate()
 
         deps = CMakeDeps(self)
