@@ -20,6 +20,7 @@ required_for_references:
 - alpaca
 - amgcl
 - amqp-cpp
+- andreasbuhr-cppcoro
 - android-ndk
 - angelscript
 - antlr4-cppruntime
@@ -141,6 +142,7 @@ required_for_references:
 - cargs
 - cassandra-cpp-driver
 - catch2
+- cc65
 - ccache
 - cccl
 - ccfits
@@ -195,9 +197,11 @@ required_for_references:
 - console_bridge
 - continuable
 - coost
+- copypp
 - corrade
 - cose-c
 - cotila
+- coz
 - cpp-httplib
 - cpp-ipc
 - cpp-jwt
@@ -272,6 +276,7 @@ required_for_references:
 - decimal_for_cpp
 - deco
 - dependencies
+- depot_tools
 - detools
 - dfp
 - di
@@ -369,8 +374,10 @@ required_for_references:
 - flann
 - flatbuffers
 - flatbush
+- flatcc
 - flecs
 - flex
+- flint
 - fltk
 - fmi1
 - fmi2
@@ -404,6 +411,7 @@ required_for_references:
 - fxdiv
 - g3log
 - gainput
+- gamenetworkingsockets
 - gamma
 - gcem
 - gdbm
@@ -417,6 +425,7 @@ required_for_references:
 - geotrans
 - getopt-for-visual-studio
 - gettext
+- gf-complete
 - gflags
 - gfortran
 - ghc-filesystem
@@ -441,6 +450,7 @@ required_for_references:
 - gm2calc
 - gmp
 - gnu-config
+- gnulib
 - gnutls
 - godot_headers
 - googleapis
@@ -490,6 +500,7 @@ required_for_references:
 - hlslpp
 - homog2d
 - http_parser
+- huffman
 - hunspell
 - hwdata
 - hwloc
@@ -533,6 +544,7 @@ required_for_references:
 - jasper
 - jbig
 - jeaiii-itoa
+- jemalloc
 - jerryscript
 - jfalcou-eve
 - jinja2cpp
@@ -567,6 +579,7 @@ required_for_references:
 - ktx
 - kuba-zip
 - lager
+- laslib
 - laszip
 - lazycsv
 - lcms
@@ -626,6 +639,7 @@ required_for_references:
 - libelfin
 - libenvpp
 - libepoxy
+- libest
 - libev
 - libevdev
 - libevent
@@ -651,6 +665,7 @@ required_for_references:
 - libhydrogen
 - libiberty
 - libiconv
+- libid3tag
 - libinterpolate
 - libipt
 - libjpeg
@@ -748,7 +763,10 @@ required_for_references:
 - libuuid
 - libuv
 - libuvc
+- libva
 - libvault
+- libvdpau
+- libversion
 - libverto
 - libvips
 - libvpx
@@ -778,6 +796,7 @@ required_for_references:
 - linux-headers-generic
 - linux-syscall-support
 - litehtml
+- lksctp-tools
 - llhttp
 - llvm-openmp
 - lmdb
@@ -844,6 +863,7 @@ required_for_references:
 - mikktspace
 - mimalloc
 - mingw-builds
+- mingw-w64
 - miniaudio
 - minimp3
 - minisat
@@ -867,6 +887,7 @@ required_for_references:
 - mp-units
 - mpark-variant
 - mpc
+- mpdecimal
 - mpfr
 - mpg123
 - mpmcqueue
@@ -984,6 +1005,7 @@ required_for_references:
 - opus
 - opusfile
 - orcania
+- osmanip
 - osqp
 - out_ptr
 - outcome
@@ -1116,6 +1138,7 @@ required_for_references:
 - redboltz-mqtt_cpp
 - redis-plus-plus
 - refl-cpp
+- reflect-cpp
 - replxx
 - resource_pool
 - restbed
@@ -1307,6 +1330,7 @@ required_for_references:
 - tng
 - toml11
 - tomlplusplus
+- tqdm-cpp
 - tracy
 - transwarp
 - trantor
@@ -1457,6 +1481,7 @@ required_for_references:
 - zopfli
 - zpp_bits
 - zpp_throwing
+- zserio
 - zstd
 - zstr
 - zug

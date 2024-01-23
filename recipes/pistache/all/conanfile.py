@@ -16,12 +16,12 @@ required_conan_version = ">=1.53.0"
 
 class PistacheConan(ConanFile):
     name = "pistache"
-    license = "Apache-2.0"
-    homepage = "https://github.com/pistacheio/pistache"
-    url = "https://github.com/conan-io/conan-center-index"
-    topics = ("http", "rest", "framework", "networking")
     description = "Pistache is a modern and elegant HTTP and REST framework for C++"
-
+    license = "Apache-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/pistacheio/pistache"
+    topics = ("http", "rest", "framework", "networking")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -33,6 +33,17 @@ class PistacheConan(ConanFile):
         "fPIC": True,
         "with_ssl": False,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "clang": "6",
+        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -52,37 +63,32 @@ class PistacheConan(ConanFile):
             basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("rapidjson/cci.20220822")
+        self.requires("rapidjson/cci.20230929")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
         if self.version != "cci.20201127":
             self.requires("date/3.0.1")
 
     def validate(self):
-        compilers = {
-            "gcc": "7",
-            "clang": "6",
-        }
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} is only support on Linux.")
 
-        if self.settings.compiler == "clang":
-            raise ConanInvalidConfiguration("Clang support is broken. See pistacheio/pistache#835.")
+        if self.settings.compiler == "clang" and self.version in ["cci.20201127", "0.0.5"]:
+            raise ConanInvalidConfiguration(f"{self.ref}'s clang support is broken. See pistacheio/pistache#835.")
 
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 17)
-        minimum_compiler = compilers.get(str(self.settings.compiler))
-        if minimum_compiler:
-            if Version(self.settings.compiler.version) < minimum_compiler:
-                raise ConanInvalidConfiguration(f"{self.ref} requires c++17, which your compiler does not support.")
-        else:
-            self.output.warn(f"{self.ref} requires c++17, but this compiler is unknown to this recipe. Assuming your compiler supports c++17.")
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def build_requirements(self):
         if self.version != "cci.20201127":
-            self.tool_requires("meson/1.0.0")
+            self.tool_requires("meson/1.3.1")
             if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-                self.tool_requires("pkgconf/1.9.3")
+                self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -116,8 +122,8 @@ class PistacheConan(ConanFile):
         apply_conandata_patches(self)
         if self.version != "cci.20201127":
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
-                                    "dependency('RapidJSON', fallback: ['rapidjson', 'rapidjson_dep']),",
-                                    "dependency('rapidjson', fallback: ['rapidjson', 'rapidjson_dep']),")
+                                    "dependency('RapidJSON', fallback: ['rapidjson', 'rapidjson_dep'])",
+                                    "dependency('rapidjson', fallback: ['rapidjson', 'rapidjson_dep'])")
 
         if self.version == "cci.20201127":
             cmake = CMake(self)
@@ -152,11 +158,15 @@ class PistacheConan(ConanFile):
 
         self.cpp_info.components["libpistache"].libs = collect_libs(self)
         self.cpp_info.components["libpistache"].requires = ["rapidjson::rapidjson"]
+        if self.version != "cci.20201127":
+            self.cpp_info.components["libpistache"].requires.append("date::date")
         if self.options.with_ssl:
             self.cpp_info.components["libpistache"].requires.append("openssl::openssl")
             self.cpp_info.components["libpistache"].defines = ["PISTACHE_USE_SSL=1"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libpistache"].system_libs = ["pthread"]
+            if self.version != "cci.20201127":
+                self.cpp_info.components["libpistache"].system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "Pistache"

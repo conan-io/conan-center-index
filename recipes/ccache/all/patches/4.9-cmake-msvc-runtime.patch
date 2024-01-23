@@ -1,0 +1,11 @@
+--- cmake/StaticLinkSupport.cmake
++++ cmake/StaticLinkSupport.cmake
+@@ -18,7 +18,7 @@
+ if(WIN32)
+   # Link MSVC runtime statically.
+   if(MSVC)
+-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
++
+   # Link MINGW runtime statically.
+   else()
+     if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang)\$")
