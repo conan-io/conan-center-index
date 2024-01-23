@@ -47,8 +47,13 @@ class KcovConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("kcov can not be built on windows.")
-        if Version(self.version) < 42 and is_apple_os(self):
-            raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.os}.")
+        if is_apple_os(self):
+            if Version(self.version) < 42:
+                # MachO support was added in v42
+                raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.os}.")
+            if self.settings.arch == "armv8":
+                # https://github.com/SimonKagstrom/kcov/blob/v42/cmake/TargetArch.cmake
+                raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.arch}.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
