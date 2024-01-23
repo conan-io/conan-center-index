@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os, to_apple_arch
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name, to_apple_arch
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
@@ -230,6 +230,7 @@ class RubyConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, pattern="*.pdb", folder=os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
 
         # install the enc/*.a / ext/*.a libraries
         if not self.options.shared and self.options.with_static_linked_ext:
