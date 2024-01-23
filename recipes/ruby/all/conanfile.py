@@ -93,13 +93,16 @@ class RubyConan(ConanFile):
         if is_msvc(self):
             # conan libffi will not allow linking right now with MSVC
             del self.options.with_libffi
+            # conan LibYAML will not link properly right now with MSVC, so using built-in Psych provided libYAML
+            del self.options.with_libyaml
+
     def requirements(self):
         self.requires("zlib/1.2.12")
 
         if self.options.with_openssl:
             self.requires("openssl/1.1.1q")
 
-        if self.options.with_libyaml:
+        if self.options.get_safe("with_libyaml"):
             self.requires("libyaml/0.2.5")
 
         if self.options.get_safe("with_libffi"):
