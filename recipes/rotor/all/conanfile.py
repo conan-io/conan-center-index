@@ -10,14 +10,12 @@ required_conan_version = ">=1.52.0"
 
 class RotorConan(ConanFile):
     name = "rotor"
+    description = "Event loop friendly C++ actor micro-framework, supervisable"
     license = "MIT"
     homepage = "https://github.com/basiliscos/cpp-rotor"
     url = "https://github.com/conan-io/conan-center-index"
-    description = (
-        "Event loop friendly C++ actor micro-framework, supervisable"
-    )
     topics = ("concurrency", "actor-framework", "actors", "actor-model", "erlang", "supervising", "supervisor")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -25,6 +23,7 @@ class RotorConan(ConanFile):
         "enable_asio": [True, False],
         "enable_thread": [True, False],
         "multithreading": [True, False],  # enables multithreading support
+        "enable_ev": [True, False],
     }
     default_options = {
         "fPIC": True,
@@ -32,6 +31,7 @@ class RotorConan(ConanFile):
         "enable_asio": False,
         "enable_thread": False,
         "multithreading": True,
+        "enable_ev": False,
     }
 
     def export_sources(self):
@@ -40,16 +40,17 @@ class RotorConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "0.26":
+            del self.options.enable_ev
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         self.requires("boost/1.83.0", transitive_headers=True)
+        if self.options.get_safe("enable_ev", False):
+            self.requires("libev/4.33")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -60,6 +61,8 @@ class RotorConan(ConanFile):
         tc.variables["BUILD_THREAD"] = self.options.enable_thread
         tc.variables["BUILD_THREAD_UNSAFE"] = not self.options.multithreading
         tc.variables["BUILD_TESTING"] = False
+        if Version(self.version) >= "0.26":
+            tc.variables["BUILD_EV"] = self.options.enable_ev
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -120,3 +123,7 @@ class RotorConan(ConanFile):
         if self.options.enable_thread:
             self.cpp_info.components["thread"].libs = ["rotor_thread"]
             self.cpp_info.components["thread"].requires = ["core"]
+
+        if self.options.get_safe("enable_ev", False):
+            self.cpp_info.components["ev"].libs = ["rotor_ev"]
+            self.cpp_info.components["ev"].requires = ["core", "libev::libev"]
