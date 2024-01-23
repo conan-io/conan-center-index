@@ -26,6 +26,7 @@ class SDLMixerConan(ConanFile):
         "cmd": [True, False],
         "wav": [True, False],
         "flac": [True, False],
+        "gme": [True, False],
         "minimp3": [True, False],
         "mpg123": [True, False],
         "opus": [True, False],
@@ -34,6 +35,8 @@ class SDLMixerConan(ConanFile):
         "nativemidi": [True, False],
         "tinymidi": [True, False],
         "vorbis": [False, "vorbisfile", "tremor", "stb"],
+        "wavpack": [True, False],
+        "xmp": [False, "libxmp", "libxmp-lite"],
     }
     default_options = {
         "shared": False,
@@ -41,7 +44,8 @@ class SDLMixerConan(ConanFile):
         "cmd": False,
         "wav": True,
         "flac": True,
-        "minimp3": True,
+        "gme": False,
+        "minimp3": False,
         "mpg123": True,
         "opus": True,
         "modplug": True,
@@ -49,6 +53,8 @@ class SDLMixerConan(ConanFile):
         "nativemidi": True,
         "tinymidi": True,
         "vorbis": "stb",
+        "wavpack": False,
+        "xmp": False
     }
 
     def config_options(self):
@@ -74,6 +80,9 @@ class SDLMixerConan(ConanFile):
         self.requires("sdl/2.28.5", transitive_headers=True, transitive_libs=True)
         if self.options.flac:
             self.requires("flac/1.4.2")
+        elif self.options.gme:
+            # TODO: not available on CCI
+            self.requires("gme/x.y.z")
         if self.options.mpg123:
             self.requires("mpg123/1.31.2")
         if self.options.minimp3:
@@ -89,6 +98,12 @@ class SDLMixerConan(ConanFile):
             self.requires("opusfile/0.12")
         if self.options.modplug:
             self.requires("libmodplug/0.8.9.0")
+        if self.options.xmp == "libxmp":
+            # TODO: not available on CCI
+            self.requires("libxmp/x.y.z")
+        elif self.options.xmp == "libxmp-lite":
+            # TODO: not available on CCI
+            self.requires("libxmp-lite/x.y.z")
         if self.options.fluidsynth:
             # TODO: not available on CCI
             self.requires("fluidsynth/2.2")
@@ -97,6 +112,9 @@ class SDLMixerConan(ConanFile):
         # https://github.com/libsdl-org/SDL_mixer/blob/release-2.6.3/CMakeLists.txt#L148-L162
         if self.options.vorbis or self.options.flac or self.options.opus:
             self.requires("ogg/1.3.5")
+        if self.options.wavpack:
+            # TODO: not available on CCI
+            self.requires("wavpack/x.y.z")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
@@ -118,8 +136,13 @@ class SDLMixerConan(ConanFile):
         tc.variables["SDL2MIXER_WAVE"] = self.options.wav
         # FLAC
         tc.variables["SDL2MIXER_FLAC"] = self.options.flac
+        # GME
+        tc.variables["SDL2MIXER_GME"] = self.options.gme
         # MOD
-        tc.variables["SDL2MIXER_MOD"] = self.options.modplug
+        tc.variables["SDL2MIXER_MOD"] = self.options.modplug or bool(self.options.xmp)
+        tc.variables["SDL2MIXER_MOD_MODPLUG"] = self.options.modplug
+        tc.variables["SDL2MIXER_MOD_XMP"] = self.options.xmp == "libxmp"
+        tc.variables["SDL2MIXER_MOD_XMP_LITE"] = self.options.xmp == "libxmp-lite"
         # MP3
         tc.variables["SDL2MIXER_MP3"] = self.options.mpg123 or self.options.minimp3
         tc.variables["SDL2MIXER_MP3_MPG123"] = self.options.mpg123
@@ -140,10 +163,13 @@ class SDLMixerConan(ConanFile):
             tc.variables["SDL2MIXER_VORBIS"] = "TREMOR"
         else:
             tc.variables["SDL2MIXER_VORBIS"] = False
+        # WavPack
+        tc.variables["SDL2MIXER_WAVPACK"] = self.options.wavpack
 
         # TODO: add support for dynamic loading of dependencies
         tc.variables["SDL2MIXER_DEPS_SHARED"] = False
         tc.variables["SDL2MIXER_FLAC_LIBFLAC_SHARED"] = False
+        tc.variables["SDL2MIXER_GME_SHARED"] = False
         tc.variables["SDL2MIXER_MIDI_FLUIDSYNTH_SHARED"] = False
         tc.variables["SDL2MIXER_MIDI_TIMIDITY_SHARED"] = False
         tc.variables["SDL2MIXER_MOD_MODPLUG_SHARED"] = False
@@ -154,25 +180,32 @@ class SDLMixerConan(ConanFile):
         tc.variables["SDL2MIXER_SNDFILE_SHARED"] = False
         tc.variables["SDL2MIXER_VORBIS_TREMOR_SHARED"] = False
         tc.variables["SDL2MIXER_VORBIS_VORBISFILE_SHARED"] = False
+        tc.variables["SDL2MIXER_WAVPACK_SHARED"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.set_property("flac", "cmake_file_name", "FLAC")
-        deps.set_property("flac", "cmake_target_name", "FLAC")
+        deps.set_property("flac", "cmake_target_name", "FLAC::FLAC")
         deps.set_property("fluidsynth", "cmake_file_name", "FluidSynth")
-        deps.set_property("fluidsynth", "cmake_target_name", "FluidSynth::FluidSynth")
+        deps.set_property("fluidsynth", "cmake_target_name", "FluidSynth::libfluidsynth")
+        deps.set_property("gme", "cmake_file_name", "gme")
+        deps.set_property("gme", "cmake_target_name", "gme::gme")
         deps.set_property("libxmp", "cmake_file_name", "libxmp")
         deps.set_property("libxmp", "cmake_target_name", "libxmp::libxmp")
+        deps.set_property("libxmp-lite", "cmake_file_name", "libxmp-lite")
+        deps.set_property("libxmp-lite", "cmake_target_name", "libxmp-lite::libxmp-lite")
         deps.set_property("libmodplug", "cmake_file_name", "modplug")
         deps.set_property("libmodplug", "cmake_target_name", "modplug::modplug")
-        deps.set_property("mpg123", "cmake_file_name", "MPG123")
-        deps.set_property("mpg123", "cmake_target_name", "MPG123::mpg123")
-        deps.set_property("opusfile", "cmake_file_name", "opusfile")
-        deps.set_property("opusfile", "cmake_target_name", "opusfile::opusfile")
+        deps.set_property("mpg123", "cmake_file_name", "mpg123")
+        deps.set_property("mpg123", "cmake_target_name", "MPG123::libmpg123")
+        deps.set_property("opusfile", "cmake_file_name", "OpusFile")
+        deps.set_property("opusfile", "cmake_target_name", "OpusFile::opusfile")
         deps.set_property("tremor", "cmake_file_name", "tremor")
         deps.set_property("tremor", "cmake_target_name", "tremor::tremor")
-        deps.set_property("vorbis", "cmake_file_name", "vorbisfile")
-        deps.set_property("vorbis::vorbisfile", "cmake_target_name", "vorbisfile::vorbisfile")
+        deps.set_property("vorbis", "cmake_file_name", "Vorbis")
+        deps.set_property("vorbis::vorbisfile", "cmake_target_name", "Vorbis::vorbisfile")
+        deps.set_property("wavpack", "cmake_file_name", "wavpack")
+        deps.set_property("wavpack", "cmake_target_name", "WavPack::WavPack")
 
         deps.generate()
 
