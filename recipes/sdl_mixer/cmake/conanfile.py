@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.57.0"
@@ -199,7 +200,10 @@ class SDLMixerConan(ConanFile):
         # https://github.com/libsdl-org/SDL_mixer/blob/release-2.6.3/CMakeLists.txt#L828
         self.cpp_info.set_property("pkg_config_name", "SDL2_mixer")
 
-        self.cpp_info.libs = ["SDL2_mixer"]
+        if is_msvc(self) and not self.options.shared:
+            self.cpp_info.libs = ["SDL2_mixer-static"]
+        else:
+            self.cpp_info.libs = ["SDL2_mixer"]
         self.cpp_info.includedirs.append(os.path.join("include", "SDL2"))
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
