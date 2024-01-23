@@ -82,6 +82,10 @@ class LiquidDspConan(ConanFile):
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
+        if is_msvc(self) and not self.options.shared:
+            # Only managed to get it building locally with static libgcc, which adds GPL license restrictions.
+            # __getreent and fprintf were not found in CI.
+            raise ConanInvalidConfiguration("Static builds are not supported on MSVC.")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
