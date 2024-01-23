@@ -26,8 +26,8 @@ class SDLMixerConan(ConanFile):
         "cmd": [True, False],
         "wav": [True, False],
         "flac": [True, False],
+        "minimp3": [True, False],
         "mpg123": [True, False],
-        "drmp3": [True, False],
         "opus": [True, False],
         "modplug": [True, False],
         "fluidsynth": [True, False],
@@ -41,8 +41,8 @@ class SDLMixerConan(ConanFile):
         "cmd": False,
         "wav": True,
         "flac": True,
+        "minimp3": True,
         "mpg123": True,
-        "drmp3": True,
         "opus": True,
         "modplug": True,
         "fluidsynth": False,
@@ -76,8 +76,8 @@ class SDLMixerConan(ConanFile):
             self.requires("flac/1.4.2")
         if self.options.mpg123:
             self.requires("mpg123/1.31.2")
-        if self.options.drmp3:
-            self.requires("drmp3/0.6.34")
+        if self.options.minimp3:
+            self.requires("minimp3/cci.20211201")
         if self.options.vorbis == "stb":
             self.requires("stb/cci.20230920")
         elif self.options.vorbis == "vorbisfile":
@@ -121,9 +121,9 @@ class SDLMixerConan(ConanFile):
         # MOD
         tc.variables["SDL2MIXER_MOD"] = self.options.modplug
         # MP3
-        tc.variables["SDL2MIXER_MP3"] = self.options.mpg123 or self.options.drmp3
+        tc.variables["SDL2MIXER_MP3"] = self.options.mpg123 or self.options.minimp3
         tc.variables["SDL2MIXER_MP3_MPG123"] = self.options.mpg123
-        tc.variables["SDL2MIXER_MP3_DRMP3"] = self.options.drmp3
+        tc.variables["SDL2MIXER_MP3_MINIMP3"] = self.options.minimp3
         # MIDI
         tc.variables["SDL2MIXER_MIDI"] = self.options.get_safe("nativemidi", False) or self.options.get_safe("tinymidi", False) or self.options.fluidsynth
         tc.variables["SDL2MIXER_MIDI_FLUIDSYNTH"] = self.options.fluidsynth
