@@ -155,6 +155,7 @@ class SentryNativeConan(ConanFile):
         VirtualBuildEnv(self).generate()
         tc = CMakeToolchain(self)
         tc.variables["SENTRY_BACKEND"] = self.options.backend
+        # See https://github.com/getsentry/sentry-native/pull/928
         if Version(self.version) < "0.7.0" and self.options.backend == "crashpad":
             tc.variables["SENTRY_CRASHPAD_SYSTEM"] = self.options.with_crashpad == "google"
         if self.options.backend == "breakpad":
