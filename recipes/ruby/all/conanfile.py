@@ -6,7 +6,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, PkgConfigDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, unix_path, VCVars
+from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime, msvc_runtime_flag, unix_path, VCVars
 from conan.tools.scm import Version
 
 import glob
@@ -60,10 +60,10 @@ class RubyConan(ConanFile):
 
     @property
     def _msvc_optflag(self):
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "14":
-            return "-O2b2xg-"
-        else:
+        if check_min_vs(self, "190", raise_invalid=False):
             return "-O2sy-"
+        else:  # MSVC < 14
+            return "-O2b2xg-"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -90,6 +90,9 @@ class RubyConan(ConanFile):
             # readline isn't supported on Windows
             del self.options.with_readline
 
+        if is_msvc(self):
+            # conan libffi will not allow linking right now with MSVC
+            del self.options.with_libffi
     def requirements(self):
         self.requires("zlib/1.2.12")
 
@@ -99,7 +102,7 @@ class RubyConan(ConanFile):
         if self.options.with_libyaml:
             self.requires("libyaml/0.2.5")
 
-        if self.options.with_libffi:
+        if self.options.get_safe("with_libffi"):
             self.requires("libffi/3.4.2")
 
         if self.options.get_safe("with_readline"):
@@ -163,6 +166,9 @@ class RubyConan(ConanFile):
         if is_msvc(self):
             # this is marked as TODO in https://github.com/conan-io/conan/blob/01f4aecbfe1a49f71f00af8f1b96b9f0174c3aad/conan/tools/gnu/autotoolstoolchain.py#L23
             tc.build_type_flags.append(f"-{msvc_runtime_flag(self)}")
+
+            if Version(self.version) < "3.2.0":
+                tc.configure_args.append("--enable-bundled-libffi")
             # https://github.com/conan-io/conan/issues/10338
             # remove after conan 1.45
             if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
