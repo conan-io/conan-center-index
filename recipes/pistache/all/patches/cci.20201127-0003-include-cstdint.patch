@@ -1,0 +1,13 @@
+diff --git a/include/pistache/flags.h b/include/pistache/flags.h
+index 2538773..fcd0252 100644
+--- a/include/pistache/flags.h
++++ b/include/pistache/flags.h
+@@ -5,7 +5,7 @@
+ */
+ 
+ #pragma once
+-
++#include <cstdint>
+ #include <climits>
+ #include <iostream>
+ #include <type_traits>
