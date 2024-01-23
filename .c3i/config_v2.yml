@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 2.0.12
+  version: 2.0.16
   backup_sources:
     upload_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
     download_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
@@ -123,7 +123,7 @@ cppstd:
   apple-clang:
     "13": ["17", "gnu17", "20", "gnu20"]
   gcc:
-    "11": ["17", "gnu17", "20", "gnu20"]
+    "11": ["17", "gnu17", "20", "gnu20", "23", "gnu23"]
   msvc:
     "192": ["14", "17", "20"]
     "193": ["14", "17", "20"]
