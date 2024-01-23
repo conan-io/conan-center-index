@@ -11,6 +11,7 @@ from conan.tools.scm import Version
 
 import glob
 import os
+import shutil
 
 required_conan_version = ">=1.53"
 
@@ -210,7 +211,8 @@ class RubyConan(ConanFile):
         autotools.configure(build_script_folder=build_script_folder)
         if is_msvc(self):
             self.run("nmake incs")
-            self.run("nmake extract-extlibs")
+            if shutil.which("ruby"):
+                self.run("nmake extract-extlibs")
             self.run("nmake")
         else:
             autotools.make()
