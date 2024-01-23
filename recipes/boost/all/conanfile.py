@@ -401,6 +401,10 @@ class BoostConan(ConanFile):
                 elif Version(self.settings.compiler.version) < min_compiler_version:
                     disable_cobalt()
 
+            # FIXME: Compilation errors on msvc shared build for boost.fiber https://github.com/boostorg/fiber/issues/314
+            if is_msvc(self):
+                self.options.without_fiber = True
+
     @property
     def _configure_options(self):
         return self._dependencies["configure_options"]
@@ -461,10 +465,6 @@ class BoostConan(ConanFile):
         if self.options.without_fiber:
             self.options.rm_safe("numa")
 
-        # FIXME: Compilation errors on msvc shared build for boost.fiber https://github.com/boostorg/fiber/issues/314
-        if Version(self.version) >= "1.84.0" and is_msvc(self) and self._shared:
-            self.options.without_fiber = True
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -501,7 +501,7 @@ class BoostConan(ConanFile):
         if is_msvc(self) and self._shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
 
-        # FIXME: In 1.84.0, there are compilation errors on msvc shared build for boost.fiber.
+        # FIXME: In 1.84.0, there are compilation errors on msvc shared build for boost.fiber. https://github.com/boostorg/fiber/issues/314
         if Version(self.version) >= "1.84.0" and is_msvc(self) and self._shared and not self.options.without_fiber:
             raise ConanInvalidConfiguration("Boost.fiber can not be built as shared library on MSVC.")
 
