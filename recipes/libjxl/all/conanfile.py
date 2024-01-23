@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, stdcpp_library, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -77,6 +78,9 @@ class LibjxlConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
+        if self.version == "0.6.1" and is_msvc(self) and self.settings.build_type == "Debug":
+            # Fails with a missing DLL error in test_package
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Debug builds with MSVC")
 
     def build_requirements(self):
         # Require newer CMake, which allows INCLUDE_DIRECTORIES to be set on INTERFACE targets
