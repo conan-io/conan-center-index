@@ -2,9 +2,10 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.scons import SConsDeps
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, save, load, chdir, rename, rmdir, replace_in_file, rm
+from conan.tools.files import get, save, load, chdir, rename, rmdir, replace_in_file
 from conan.tools.layout import basic_layout
 
 class canteraRecipe(ConanFile):
@@ -17,6 +18,7 @@ class canteraRecipe(ConanFile):
     default_options = {
         "shared": False
     }
+    generators = "SConsDeps"
 
     
     # Metadata
@@ -117,6 +119,15 @@ class canteraRecipe(ConanFile):
         escape_str = lambda x: f'"{x}"'
         scons_args = ' '.join([f"{key}={escape_str(option)}" for key, option in options.items()])
         save(self, os.path.join(self.source_folder, "scons_args"), scons_args)
+
+        tc = SConsDeps(self)
+        tc.generate()
+
+        # Modify scons file to load conandeps:
+        replace_in_file(self, os.path.join(self.source_folder, "SConstruct"), "SConscript('build/ext/SConscript')", "SConscript('build/ext/SConscript')\n"
+                        "info = SConscript('./SConscript_conandeps')\n"
+                        "flags = info['conandeps']\n"
+                        "env.MergeFlags(flags)")
 
     def build(self):
         with chdir(self, self.source_folder):
