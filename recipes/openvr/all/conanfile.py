@@ -122,4 +122,4 @@ class OpenvrConan(ConanFile):
             self.cpp_info.system_libs.append("dl")
 
         if is_apple_os(self):
-            self.cpp_info.frameworks.append("Foundation")
+            self.cpp_info.frameworks.extend(["Foundation", "CoreFoundation"])
