@@ -159,8 +159,12 @@ class RubyConan(ConanFile):
                 opt_dirs.append(root_path)
 
         if opt_dirs:
-            sep = ";" if self.settings.os == "Windows" else ":"
-            tc.configure_args.append(f'--with-opt-dir="{sep.join(opt_dirs)}"')
+            if self.settings.os == "Windows":
+                sep = ";"
+                tc.configure_args.append(f'--with-opt-dir="{sep.join(opt_dirs)}"')
+            else:
+                sep = ":"
+                tc.configure_args.append(f'--with-opt-dir={sep.join(opt_dirs)}')
 
         if cross_building(self) and is_apple_os(self):
             apple_arch = to_apple_arch(self)
