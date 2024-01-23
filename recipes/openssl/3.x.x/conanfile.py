@@ -6,6 +6,7 @@ from conan.tools.files import apply_conandata_patches, chdir, copy, export_conan
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
+from conan.tools.scm import Version
 
 import fnmatch
 import os
@@ -85,11 +86,13 @@ class OpenSSLConan(ConanFile):
         "no_whirlpool": [True, False],
         "no_zlib": [True, False],
         "openssldir": [None, "ANY"],
+        "tls_security_level": [0, 1, 2, 3, 4, 5],
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
     default_options["no_md2"] = True
     default_options["openssldir"] = None
+    default_options["tls_security_level"] = 1
 
     @property
     def _is_clang_cl(self):
@@ -109,6 +112,8 @@ class OpenSSLConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
+        self.options.tls_security_level = 1 if Version(self.version) < "3.2" else 2
+
         if self.settings.os != "Windows":
             self.options.rm_safe("capieng_dialog")
             self.options.rm_safe("enable_capieng")
@@ -379,6 +384,7 @@ class OpenSSLConan(ConanFile):
 
         args.append("no-fips" if self.options.get_safe("no_fips", True) else "enable-fips")
         args.append("no-md2" if self.options.get_safe("no_md2", True) else "enable-md2")
+        args.append("-DOPENSSL_TLS_SECURITY_LEVEL=%s" % str(self.options.tls_security_level))
 
         if self.settings.os == "Neutrino":
             args.append("no-asm -lsocket -latomic")
@@ -403,7 +409,7 @@ class OpenSSLConan(ConanFile):
             ])
 
         for option_name in self.default_options.keys():
-            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2"):
+            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "tls_security_level", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2"):
                 self.output.info(f"Activated option: {option_name}")
                 args.append(option_name.replace("_", "-"))
         return args
