@@ -1,4 +1,7 @@
 sources:
+  "20240116.0":
+    url: "https://github.com/abseil/abseil-cpp/archive/20240116.0.tar.gz"
+    sha256: "338420448b140f0dfd1a1ea3c3ce71b3bc172071f24f4d9a57d59b45037da440"
   "20230802.1":
     url: "https://github.com/abseil/abseil-cpp/archive/20230802.1.tar.gz"
     sha256: "987ce98f02eefbaf930d6e38ab16aa05737234d7afbab2d5c4ea7adbe50c28ed"
@@ -24,6 +27,11 @@ sources:
     url: "https://github.com/abseil/abseil-cpp/archive/20211102.0.tar.gz"
     sha256: "dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4"
 patches:
+  "20240116.0":
+    - patch_file: "patches/0003-absl-string-libm-20240116.patch"
+      patch_description: "link libm to absl string"
+      patch_type: "portability"
+      patch_source: "https://github.com/abseil/abseil-cpp/issues/1100"
   "20230802.1":
     - patch_file: "patches/0003-absl-string-libm-20230802.patch"
       patch_description: "link libm to absl string"
