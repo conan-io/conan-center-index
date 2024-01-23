@@ -48,6 +48,7 @@ class OpenSceneGraphConanFile(ConanFile):
         "with_png": [True, False],
         "with_tiff": [True, False],
         "with_zlib": [True, False],
+        "with_avfoundation": [True, False],
         "opengl_profile": ["gl1", "gl2", "gl3", "glCore", "gles1", "gles2", "gles3", "gles2+gles3"],
     }
     default_options = {
@@ -77,6 +78,7 @@ class OpenSceneGraphConanFile(ConanFile):
         "with_tiff": True,
         "with_zlib": True,
         "opengl_profile": "gl2",
+        "with_avfoundation": True,
     }
 
     def export_sources(self):
@@ -100,6 +102,8 @@ class OpenSceneGraphConanFile(ConanFile):
 
             # imageio supports tiff files so the tiff plugin isn't needed on Apple platforms
             self.options.with_tiff = False
+        else:
+            del self.options.with_avfoundation
 
     def configure(self):
         if self.options.shared:
@@ -223,6 +227,9 @@ class OpenSceneGraphConanFile(ConanFile):
         tc.variables["OSG_WITH_PNG"] = self.options.get_safe("with_png", False)
         tc.variables["OSG_WITH_TIFF"] = self.options.with_tiff
 
+        if (self.options.get_safe("with_avfoundation")):
+            tc.variables["OSG_WITH_AV_FOUNDATION"] = True
+
         if self.settings.os == "Windows":
             # osg has optional quicktime support on Windows
             tc.variables["CMAKE_DISABLE_FIND_PACKAGE_QuickTime"] = True
@@ -245,8 +252,6 @@ class OpenSceneGraphConanFile(ConanFile):
             os.unlink(os.path.join(self.source_folder, "CMakeModules", f"Find{package}.cmake"))
         for path in self.source_path.joinpath("src", "osgPlugins").rglob("CMakeLists.txt"):
             content = path.read_text()
-            # Correct usage of *_LIBRARY variables to *_LIBRARIES
-            content = content.replace("_LIBRARY", "_LIBRARIES")
             # Allow explicit control of plugins via OSG_WITH_* variables
             # e.g. replace IF(FFMPEG_FOUND) with IF(OSG_WITH_FFMPEG)
             content = re.sub(r"\b([A-Z]+)_FOUND\b", r"OSG_WITH_\1", content)
@@ -258,7 +263,7 @@ class OpenSceneGraphConanFile(ConanFile):
                          r'FILE(TO_CMAKE_PATH "\${CMAKE_\1_OUTPUT_DIRECTORY}/\${RELATIVE_OUTDIR}" TMPVAR)',
                          content)
         path.write_text(content)
-        apply_conandata_patches(self)
+        #apply_conandata_patches(self)
 
         # Not sure why, but CMake fails to find the EXPAT::EXPAT target created by Conan when Fontconfig is found as a module.
         replace_in_file(self, os.path.join(self.source_folder, "src", "osgText", "CMakeLists.txt"),
@@ -560,10 +565,7 @@ class OpenSceneGraphConanFile(ConanFile):
         if is_apple_os(self):
             setup_plugin("imageio").frameworks = ["Accelerate"]
 
-        if (
-                (self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version) >= "10.8") or
-                (self.settings.os == "iOS" and self.settings.os.version and Version(self.settings.os.version) >= "6.0")
-        ):
+        if (self.options.get_safe("with_avfoundation")):
             plugin = setup_plugin("avfoundation")
             plugin.requires.append("osgViewer")
             plugin.frameworks = ["AVFoundation", "Cocoa", "CoreVideo", "CoreMedia", "QuartzCore"]
