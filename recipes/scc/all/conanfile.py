@@ -47,11 +47,11 @@ class SystemcComponentsConan(ConanFile):
         # https://github.com/Minres/SystemC-Components/blob/2023.06/src/sysc/scc/perf_estimator.h#L20
         self.requires("boost/1.83.0", transitive_headers=True, transitive_libs=True)
         # https://github.com/Minres/SystemC-Components/blob/2023.06/src/sysc/scc/trace/vcd_trace.hh#L28
-        self.requires("fmt/10.1.1", transitive_headers=True, transitive_libs=True)
+        self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
         # https://github.com/Minres/SystemC-Components/blob/2023.06/src/common/util/lz4_streambuf.h#L13
         self.requires("lz4/1.9.4", transitive_headers=True, transitive_libs=True)
         self.requires("rapidjson/cci.20220822")
-        self.requires("spdlog/1.12.0")
+        self.requires("spdlog/1.13.0")
         # https://github.com/Minres/SystemC-Components/blob/2023.06/src/sysc/tlm/scc/lwtr/tlm2_lwtr.h
         self.requires("systemc-cci/1.0.0", transitive_headers=True, transitive_libs=True)
         self.requires("systemc/2.3.4", transitive_headers=True, transitive_libs=True)
