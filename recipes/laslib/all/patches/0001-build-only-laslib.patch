@@ -1,0 +1,24 @@
+diff --git a/LASlib/src/CMakeLists.txt b/LASlib/src/CMakeLists.txt
+index 1b170bf..6a114eb 100644
+--- a/LASlib/src/CMakeLists.txt
++++ b/LASlib/src/CMakeLists.txt
+@@ -101,15 +101,7 @@ endif()
+ 
+ install(FILES ${LAS_INCLUDES} DESTINATION include/LASlib)
+ 
+-if (MSVC)
+-	foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+-		install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../lib/${OUTPUTCONFIG} DESTINATION lib/LASlib)
+-	endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+-else()
+-	install(TARGETS LASlib EXPORT laslib-targets
+-		ARCHIVE DESTINATION lib/LASlib
+-		LIBRARY DESTINATION lib/LASlib
+-		RUNTIME DESTINATION lib/LASlib)
+-	install(EXPORT laslib-targets DESTINATION lib/cmake/LASlib)
+-	install(FILES ${CMAKE_SOURCE_DIR}/LASlib/src/laslib-config.cmake DESTINATION lib/cmake/LASlib)
+-endif(MSVC)
++install(TARGETS LASlib EXPORT laslib-targets
++	ARCHIVE DESTINATION lib/LASlib
++	LIBRARY DESTINATION lib/LASlib
++	RUNTIME DESTINATION lib/LASlib)
