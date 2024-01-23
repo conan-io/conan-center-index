@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -38,7 +38,7 @@ class GetDnsConan(ConanFile):
         "with_libev": "auto",
         "with_libevent": True,
         "with_libuv": True,
-        "with_libidn2": True,
+        "with_libidn2": False,  # FIXME: enable once libidn2 has been migrated https://github.com/conan-io/conan-center-index/pull/18642
     }
 
     def export_sources(self):
@@ -48,12 +48,10 @@ class GetDnsConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        # FIXME: remove once libidn2 has been migrated
-        # https://github.com/conan-io/conan-center-index/pull/18642
-        self.options.with_libidn2 = conan_version.major == 1
+        self.options.with_libev = True
         # FIXME: uncomment once libunbound is available
         # self.options.stub_only = self.settings.os != "Windows"
-        self.options.with_libev = True  # self.settings.os == "Windows"
+        # self.options.with_libev = self.settings.os == "Windows"
 
     def configure(self):
         if self.options.shared:
@@ -77,7 +75,7 @@ class GetDnsConan(ConanFile):
         if self.options.tls == "gnutls":
             self.requires("gnutls/3.7.8")
             self.requires("nettle/3.8.1")
-            raise ConanInvalidConfiguration("gnutls on CCI does not build required libdane component")
+            raise ConanInvalidConfiguration("gnutls on CCI does not build the required libdane component")
         if not self.options.stub_only:
             # FIXME: missing libunbound recipe
             raise ConanInvalidConfiguration("libunbound is not (yet) available on cci")
