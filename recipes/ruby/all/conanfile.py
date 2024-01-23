@@ -217,7 +217,7 @@ class RubyConan(ConanFile):
 
         autotools = Autotools(self)
         if is_msvc(self):
-            self.run("nmake install-nodoc")
+            self.run(f"nmake install-nodoc DESTDIR={self.package_folder}")
         elif cross_building(self):
             autotools.make(target="install-local", args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
             autotools.make(target="install-arch", args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
