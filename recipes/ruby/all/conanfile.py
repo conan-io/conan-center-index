@@ -157,7 +157,7 @@ class RubyConan(ConanFile):
 
         if opt_dirs:
             sep = ";" if self.settings.os == "Windows" else ":"
-            tc.configure_args.append(f"--with-opt-dir={sep.join(opt_dirs)}")
+            tc.configure_args.append(f'--with-opt-dir="{sep.join(opt_dirs)}"')
 
         if cross_building(self) and is_apple_os(self):
             apple_arch = to_apple_arch(self)
@@ -166,15 +166,15 @@ class RubyConan(ConanFile):
         if is_msvc(self):
             # this is marked as TODO in https://github.com/conan-io/conan/blob/01f4aecbfe1a49f71f00af8f1b96b9f0174c3aad/conan/tools/gnu/autotoolstoolchain.py#L23
             tc.build_type_flags.append(f"-{msvc_runtime_flag(self)}")
-
-            if Version(self.version) < "3.2.0":
-                tc.configure_args.append("--enable-bundled-libffi")
             # https://github.com/conan-io/conan/issues/10338
             # remove after conan 1.45
             if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
                 tc.ldflags.append("-debug")
             tc.build_type_flags = [f if f != "-O2" else self._msvc_optflag for f in tc.build_type_flags]
 
+            tc.configure_args.append("--without-ext=+,dbm,gdbm,readline")
+            if Version(self.version) < "3.2.0":
+                tc.configure_args.append("--enable-bundled-libffi")
         tc.generate()
 
         if is_msvc(self):
@@ -193,21 +193,29 @@ class RubyConan(ConanFile):
 
         build_script_folder = self.source_folder
         if is_msvc(self):
-            self.conf["tools.gnu:make_program"] = "nmake"
+            # self.conf["tools.gnu:make_program"] = "nmake"
+            # self.conf_info.define("tools.gnu:make_program", "nmake")
             build_script_folder = os.path.join(build_script_folder, "win32")
 
             if "TMP" in os.environ:  # workaround for TMP in CCI containing both forward and back slashes
                 os.environ["TMP"] = os.environ["TMP"].replace("/", "\\")
 
         autotools.configure(build_script_folder=build_script_folder)
-        autotools.make()
+        if is_msvc(self):
+            self.run("nmake incs")
+            self.run("nmake extract-extlibs")
+            self.run("nmake")
+        else:
+            autotools.make()
 
     def package(self):
         for file in ["COPYING", "BSDL"]:
             copy(self, pattern=file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         autotools = Autotools(self)
-        if cross_building(self):
+        if is_msvc(self):
+            self.run("nmake install-nodoc")
+        elif cross_building(self):
             autotools.make(target="install-local", args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
             autotools.make(target="install-arch", args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
         else:
