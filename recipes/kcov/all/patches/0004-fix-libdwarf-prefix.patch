@@ -1,0 +1,18 @@
+FIXME: update libdwarf instead
+
+--- src/parsers/macho-parser.cc
++++ src/parsers/macho-parser.cc
+@@ -6,11 +6,11 @@
+  */
+ #include <capabilities.hh>
+ #include <configuration.hh>
+-#include <dwarf.h>
++#include <libdwarf/dwarf.h>
+ #include <fcntl.h>
+ #include <file-parser.hh>
+ #include <filter.hh>
+-#include <libdwarf.h>
++#include <libdwarf/libdwarf.h>
+ #include <mach-o/fat.h>
+ #include <mach-o/loader.h>
+ #include <map>

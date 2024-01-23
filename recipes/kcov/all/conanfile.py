@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -46,6 +47,8 @@ class KcovConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("kcov can not be built on windows.")
+        if Version(self.version) < 42 and is_apple_os(self):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.os}.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

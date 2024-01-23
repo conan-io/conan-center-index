@@ -1,0 +1,10 @@
+--- src/engines/mach-engine.cc
++++ src/engines/mach-engine.cc
+@@ -30,6 +30,7 @@
+ #include <unistd.h>
+ #include <unordered_map>
+ #include <utils.hh>
++#include <assert.h>
+ 
+ using namespace kcov;
+ extern char** environ;

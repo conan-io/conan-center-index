@@ -9,6 +9,13 @@ sources:
     url: "https://github.com/SimonKagstrom/kcov/archive/38.tar.gz"
     sha256: "b37af60d81a9b1e3b140f9473bdcb7975af12040feb24cc666f9bb2bb0be68b4"
 patches:
+  "42":
+    - patch_file: "patches/0003-fix-missing-include.patch"
+      patch_description: "Add a missing #include <assert.h>"
+      patch_type: "bugfix"
+    - patch_file: "patches/0004-fix-libdwarf-prefix.patch"
+      patch_description: "Adjust libdwarf include to match CCI includedirs"
+      patch_type: "conan"
   "38":
     - patch_file: "patches/0001-fix-SOLIB-path.patch"
     - patch_file: "patches/0002-fix-missing-libssl-dependency.patch"
