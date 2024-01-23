@@ -60,10 +60,25 @@ class SystemcComponentsConan(ConanFile):
         self.requires("yaml-cpp/0.8.0")
 
     def validate(self):
+        if is_apple_os(self):
+            raise ConanInvalidConfiguration(f"{self.name} is not supported on {self.settings.os}.")
+        if is_msvc(self):
+            # Fails with
+            #   src\sysc\tlm\scc\tlm_mm.h(116,114): error C2259: 'tlm::scc::tlm_gp_mm_t<16,false>': cannot instantiate abstract class
+            #     (compiling source file '../../../src/src/sysc/tlm/scc/lwtr/tlm2_lwtr.cpp')
+            #     src\sysc\tlm\scc\tlm_mm.h(116,48):
+            #     see declaration of 'tlm::scc::tlm_gp_mm_t<16,false>'
+            #     src\sysc\tlm\scc\tlm_mm.h(116,114):
+            #     due to following members:
+            #     src\sysc\tlm\scc\tlm_mm.h(116,114):
+            #     'void tlm::tlm_extension<tlm::scc::tlm_gp_mm>::copy_from(const tlm::tlm_extension_base &)': is abstract
+            #     systemc-2.3.4\p\include\tlm_core\tlm_2\tlm_generic_payload\tlm_gp.h(78,18):
+            #     see declaration of 'tlm::tlm_extension<tlm::scc::tlm_gp_mm>::copy_from'
+            # and
+            #   src\sysc\tlm\scc\tlm_mm.h(31,20): error C2061: syntax error: identifier '__attribute__'
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on MSVC.")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if is_apple_os(self):
-            raise ConanInvalidConfiguration(f"{self.name} is not suppported on {self.settings.os}.")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("GCC < version 7 is not supported")
 
@@ -75,17 +90,16 @@ class SystemcComponentsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["SC_WITH_PHASE_CALLBACKS"] = self.options.enable_phase_callbacks
-        tc.variables["SC_WITH_PHASE_CALLBACK_TRACING"] = self.options.enable_phase_callbacks_tracing
-        tc.variables["BUILD_SCC_DOCUMENTATION"] = False
-        tc.variables["SCC_LIB_ONLY"] = True
-        tc.variables["ENABLE_CONAN"] = False
+        tc.cache_variables["SC_WITH_PHASE_CALLBACKS"] = self.options.enable_phase_callbacks
+        tc.cache_variables["SC_WITH_PHASE_CALLBACK_TRACING"] = self.options.enable_phase_callbacks_tracing
+        tc.cache_variables["BUILD_SCC_DOCUMENTATION"] = False
+        tc.cache_variables["SCC_LIB_ONLY"] = True
+        tc.cache_variables["ENABLE_CONAN"] = False
         if self.settings.os == "Windows":
-            tc.variables["SCC_LIMIT_TRACE_TYPE_LIST"] = True
-        if not is_msvc(self):
-            # Used at https://github.com/Minres/SystemC-Components/blob/2023.06/src/common/util/pool_allocator.h#L110
-            # but is not set anywhere
-            tc.preprocessor_definitions["_GLIBCXX_USE_NOEXCEPT"] = "noexcept"
+            tc.cache_variables["SCC_LIMIT_TRACE_TYPE_LIST"] = True
+        # Used at https://github.com/Minres/SystemC-Components/blob/2023.06/src/common/util/pool_allocator.h#L110
+        # but is not set anywhere
+        tc.preprocessor_definitions["_GLIBCXX_USE_NOEXCEPT"] = "noexcept"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -104,6 +118,10 @@ class SystemcComponentsConan(ConanFile):
             lwtr_h = os.path.join(self.source_folder, "third_party", "lwtr4sc", "src", "lwtr", "lwtr.h")
             replace_in_file(self, lwtr_h, "VAL_CONV(int64_t);", "")
             replace_in_file(self, lwtr_h, "VAL_CONV(uint64_t);", "")
+            # Drop a non-portable malloc_trim(0) call, which does not appear to be essential
+            # https://github.com/Minres/SystemC-Components/blob/2023.06/src/sysc/scc/perf_estimator.cpp#L86
+            replace_in_file(self, os.path.join(self.source_folder, "src", "sysc", "scc", "perf_estimator.cpp"),
+                            "malloc_trim(0);", "")
 
     def build(self):
         self._patch_sources()
