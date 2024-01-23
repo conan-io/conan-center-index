@@ -11,8 +11,8 @@ sources:
 patches:
   "42":
     - patch_file: "patches/0003-fix-missing-include.patch"
-      patch_description: "Add a missing #include <assert.h>"
-      patch_type: "bugfix"
+      patch_description: "Add a missing includes on macOS"
+      patch_type: "backport"
     - patch_file: "patches/0004-fix-libdwarf-prefix.patch"
       patch_description: "Adjust libdwarf include to match CCI includedirs"
       patch_type: "conan"
