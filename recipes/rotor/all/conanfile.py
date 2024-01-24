@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
 
 class RotorConan(ConanFile):
     name = "rotor"
@@ -33,6 +33,20 @@ class RotorConan(ConanFile):
         "multithreading": True,
         "enable_ev": False,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "12",
+        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -68,26 +82,11 @@ class RotorConan(ConanFile):
         tc.generate()
 
     def validate(self):
-        minimal_cpp_standard = "17"
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, minimal_cpp_standard)
-        minimal_version = {
-            "gcc": "7",
-            "clang": "6",
-            "apple-clang": "10",
-            "Visual Studio": "15"
-        }
-        compiler = str(self.settings.compiler)
-        if compiler not in minimal_version:
-            self.output.warn(
-                f"{self.ref} recipe lacks information about the {compiler} compiler standard version support")
-            self.output.warn(
-                f"{self.ref} requires a compiler that supports at least C++{minimal_cpp_standard}")
-            return
-
-        compiler_version = Version(self.settings.compiler.version)
-        if compiler_version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports at least C++{minimal_cpp_standard}")
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
 
         if self.options.shared and Version(self.version) < "0.23":
             raise ConanInvalidConfiguration("shared option is available from v0.23")
