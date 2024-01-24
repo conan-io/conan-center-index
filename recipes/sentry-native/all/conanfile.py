@@ -55,6 +55,8 @@ class SentryNativeConan(ConanFile):
             return "17"
         if self.options.get_safe("backend") == "breakpad":
             return 17
+        if self.options.get_safe("backend") == "crashpad" and Version(self.version) >= "0.7.0":
+            return 17
         return "14"
 
     @property
