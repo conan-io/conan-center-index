@@ -41,9 +41,10 @@ class Opene57Conan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
+            "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "8",
-            "clang": "8",
+            "gcc": "7",
+            "clang": "6",
             "apple-clang": "10",
         }
 
@@ -94,6 +95,8 @@ class Opene57Conan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_TOOLS"] = self.options.with_tools
         tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_DOCS"] = self.options.with_docs
+
         if is_msvc(self):
             tc.variables["BUILD_WITH_MT"] = is_msvc_static_runtime(self)
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
