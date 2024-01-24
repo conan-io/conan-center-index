@@ -134,7 +134,9 @@ class RmluiConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, pattern="*LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder, excludes=("Samples/*", "Tests/*"))
+        copy(self, "*LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"), excludes=("Samples/*", "Tests/*"))
+        if Version(self.version) < 4:
+            copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "RmlUi"))
