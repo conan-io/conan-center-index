@@ -132,6 +132,9 @@ class SDLMixerConan(ConanFile):
         tc.variables["SDL2MIXER_VENDORED"] = False
         tc.variables["SDL2MIXER_SAMPLES"] = False
         tc.variables["SDL2MIXER_CMD"] = self.options.cmd
+        if self.version == "2.8.0":
+            # The debug postfix will be removed in an upcoming release
+            tc.variables["SDL2MIXER_DEBUG_POSTFIX"] = ""
         # WAVE
         tc.variables["SDL2MIXER_WAVE"] = self.options.wav
         # FLAC
