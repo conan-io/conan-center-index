@@ -54,4 +54,4 @@ class TweenersppConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         if is_msvc(self):
-            self.cpp_info.defines = ["_USE_MATH_DEFINITIONS"]
+            self.cpp_info.defines = ["_USE_MATH_DEFINES"]
