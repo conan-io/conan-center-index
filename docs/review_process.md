@@ -82,8 +82,8 @@ At least 2 approving reviews are required, and at least one of them has to be fr
 So, it might be 1 official + 1 community, or 2 official, but it couldn't be just 2 community reviews.
 Approvals are only counted if they are associated with the latest commit in the PR, while "Change requested" ones (from the Conan team) will persist even if there are new commits. Don't hesitate to dismiss old reviews if the issues have already been addressed.
 
-There is a second rule for any pull request labelled as [`Bump version`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+version%22)
-or [`Bump dependencies`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+dependencies%22+). They require only 1 approving review from an official reviewer. This is because these PRs are usually very simple and don't require much review. Community reviewers are not required, but are still welcome to review these PRs.
+Pull requests labelled as [`Bump version`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+version%22)
+or [`Bump dependencies`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+dependencies%22+) require **just 1 approving review from an official reviewer**. Community reviewers are not required but are still welcome.
 
 ### Reviews from others
 
