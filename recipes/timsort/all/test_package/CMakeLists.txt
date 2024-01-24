@@ -5,4 +5,11 @@ find_package(gfx-timsort REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE gfx::timsort)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+
+if(gfx-timesort_VERSION VERSION_LESS "2.0.0")
+  target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_98)
+elseif(gfx-timesort_VERSION VERSION_LESS "3.0.0")
+  target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+else()
+  target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+endif()
