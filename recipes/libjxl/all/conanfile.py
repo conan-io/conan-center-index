@@ -213,7 +213,9 @@ class LibjxlConan(ConanFile):
         if Version(self.version) >= "0.9.0":
             self.cpp_info.components["jxl_cms"].set_property("pkg_config_name", "libjxl_cms")
             self.cpp_info.components["jxl_cms"].libs = [self._lib_name("jxl_cms")]
-            self.cpp_info.components["jxl_cms"].requires = ["jxl", "lcms::lcms", "highway::highway"]
+            self.cpp_info.components["jxl_cms"].requires = ["lcms::lcms", "highway::highway"]
+            if not self.options.shared:
+                self.cpp_info.components["jxl"].defines.append("JXL_CMS_STATIC_DEFINE")
             if libcxx:
                 self.cpp_info.components["jxl_cms"].system_libs.append(libcxx)
 
