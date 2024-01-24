@@ -263,7 +263,7 @@ class OpenSceneGraphConanFile(ConanFile):
                          r'FILE(TO_CMAKE_PATH "\${CMAKE_\1_OUTPUT_DIRECTORY}/\${RELATIVE_OUTDIR}" TMPVAR)',
                          content)
         path.write_text(content)
-        #apply_conandata_patches(self)
+        apply_conandata_patches(self)
 
         # Not sure why, but CMake fails to find the EXPAT::EXPAT target created by Conan when Fontconfig is found as a module.
         replace_in_file(self, os.path.join(self.source_folder, "src", "osgText", "CMakeLists.txt"),
