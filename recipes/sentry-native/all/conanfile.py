@@ -83,9 +83,7 @@ class SentryNativeConan(ConanFile):
         # Configure default transport
         if self.settings.os == "Windows":
             self.options.transport = "winhttp"
-        elif self.settings.os in ("FreeBSD", "Linux") or self.settings.os == "Macos":  # Don't use tools.is_apple_os(os) here
-            self.options.transport = "curl"
-        else:
+        elif self.settings.os == "Android":
             self.options.transport = "none"
 
         # Configure default backend
@@ -116,8 +114,6 @@ class SentryNativeConan(ConanFile):
                 self.requires("crashpad/cci.20220219")
             else:
                 self.requires("zlib/[>=1.2.11 <2]")
-                if self.settings.os in ("Linux", "FreeBSD"):
-                    self.requires("libcurl/[>=7.78.0 <9]")
                 if self.options.get_safe("crashpad_with_tls"):
                     self.requires("openssl/[>=1.1 <4]")
         elif self.options.backend == "breakpad":
@@ -245,8 +241,6 @@ class SentryNativeConan(ConanFile):
             self.cpp_info.components["crashpad_util"].requires = ["crashpad_compat", "crashpad_mini_chromium", "zlib::zlib"]
             if self.settings.os in ("Linux", "FreeBSD"):
                 self.cpp_info.components["crashpad_util"].system_libs.extend(["pthread", "rt"])
-                # Requires libcurl https://github.com/getsentry/crashpad/blob/2237d97ee2c38c930c07001e660be57324f69a37/util/CMakeLists.txt#L256
-                self.cpp_info.components["crashpad_util"].requires.extend(["libcurl::libcurl"])
             elif self.settings.os == "Windows":
                 self.cpp_info.components["crashpad_util"].system_libs.append("winhttp")
             elif self.settings.os == "Macos":
