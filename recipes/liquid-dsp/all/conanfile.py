@@ -1,4 +1,5 @@
 import os
+import re
 from io import StringIO
 
 from conan import ConanFile
@@ -138,16 +139,20 @@ class LiquidDspConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             with chdir(self, self.source_folder):
                 stdout = StringIO()
-                self.run("dumpbin -EXPORTS libliquid.dll", stdout)
+                self.run("dumpbin -dump -EXPORTS libliquid.dll", stdout)
                 lines = stdout.getvalue().splitlines()
                 with open("libliquid.def", "w", encoding="ascii") as f:
                     f.write("EXPORTS\n")
-                    for line in lines[19:]:
-                        tokens = line.split()
-                        if len(tokens) > 3:
-                            f.write(tokens[3] + "\n")
-                arch = "X86" if self.settings.arch == "x86" else "X64"
-                self.run(f"lib /def:libliquid.def /out:libliquid.lib /machine:{arch}")
+                    for line in lines:
+                        # ordinal hint RVA name
+                        # e.g. '         32   1F 00001410 agc_crcf_unlock'
+                        m = re.fullmatch(r"\d+\s+[0-9A-F]+\s+[0-9A-F]+\s+(\w+)", line.strip())
+                        if m:
+                            symbol = m.group(1)
+                            if not symbol.startswith("__"):
+                                f.write(symbol + "\n")
+                machine = "X86" if self.settings.arch == "x86" else "X64"
+                self.run(f"lib /def:libliquid.def /out:libliquid.lib /machine:{machine}")
 
     def _rename_libraries(self):
         with chdir(self, self.source_folder):
