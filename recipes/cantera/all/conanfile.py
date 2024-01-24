@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.scons import SConsDeps
+from conan.tools.env import Environment
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, save, load, chdir, rename, rmdir, replace_in_file
@@ -18,8 +18,6 @@ class canteraRecipe(ConanFile):
     default_options = {
         "shared": False
     }
-    generators = "SConsDeps"
-
     
     # Metadata
     description = "Cantera is an open-source collection of object-oriented software tools for problems involving chemical kinetics, thermodynamics, and transport processes."
@@ -120,14 +118,13 @@ class canteraRecipe(ConanFile):
         scons_args = ' '.join([f"{key}={escape_str(option)}" for key, option in options.items()])
         save(self, os.path.join(self.source_folder, "scons_args"), scons_args)
 
-        tc = SConsDeps(self)
-        tc.generate()
-
-        # Modify scons file to load conandeps:
-        replace_in_file(self, os.path.join(self.source_folder, "SConstruct"), "SConscript('build/ext/SConscript')", "SConscript('build/ext/SConscript')\n"
-                        "info = SConscript('./SConscript_conandeps')\n"
-                        "flags = info['conandeps']\n"
-                        "env.MergeFlags(flags)")
+        # To fix c compiler checks in SConstruct file
+        compiler = str(self.settings.compiler)
+        cc_compiler = {"msvc": "cl", "intel-cc": "icx"}.get(compiler, compiler) # Map conans compiler names to canteras compiler names
+        env = Environment()
+        env.define("CC", cc_compiler)
+        envvars = env.vars(self)
+        envvars.save_script("conan_compiler_envvars")
 
     def build(self):
         with chdir(self, self.source_folder):
