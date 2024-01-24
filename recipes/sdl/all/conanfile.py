@@ -183,13 +183,6 @@ class SDLConan(ConanFile):
             del self.info.options.sdl2main
 
     def build_requirements(self):
-        if self.settings.os == "Macos" and cross_building(self):
-            # Workaround for CMake bug with error message:
-            # Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
-            # set. This could be because you are using a Mac OS X version less than 10.5
-            # or because CMake's platform configuration is corrupt.
-            # FIXME: Remove once CMake on macOS/M1 CI runners is upgraded.
-            self.tool_requires("cmake/3.28.1")
         if self.settings.os == "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         if hasattr(self, "settings_build") and self.options.get_safe("wayland"):
