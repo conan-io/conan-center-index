@@ -8,7 +8,7 @@ from conan.tools.files import copy, export_conandata_patches, get, replace_in_fi
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.5"
 
 
 class Opene57Conan(ConanFile):
@@ -25,11 +25,13 @@ class Opene57Conan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_tools": [True, False],
+        "with_docs":  [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_tools": False,
+        "with_docs":  False
     }
 
     @property
@@ -39,10 +41,9 @@ class Opene57Conan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "7",
-            "clang": "6",
+            "gcc": "8",
+            "clang": "8",
             "apple-clang": "10",
         }
 
@@ -65,8 +66,13 @@ class Opene57Conan(ConanFile):
     def requirements(self):
         if self.options.with_tools:
             self.requires("boost/1.83.0")
+
+        if self.options.with_docs:
+            self.requires("doxygen/1.9.4")
+
         if self.settings.os != "Windows":
-            self.requires("icu/73.2")
+            self.requires("icu/74.1")
+
         self.requires("xerces-c/3.2.4")
 
     def validate(self):
@@ -127,6 +133,8 @@ class Opene57Conan(ConanFile):
 
         self.cpp_info.defines.append(f"E57_REFIMPL_REVISION_ID={self.name}-{self.version}")
         self.cpp_info.defines.append("XERCES_STATIC_LIBRARY")
+        self.cpp_info.defines.append("CRCPP_INCLUDE_ESOTERIC_CRC_DEFINITIONS")
+        self.cpp_info.defines.append("CRCPP_USE_CPP11")
 
         # TODO: to remove in conan v2
         if self.options.with_tools:
