@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, replace_in_file, rm, rmdir, copy
 from conan.tools.microsoft import is_msvc
-from conan.tools.build import cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment
