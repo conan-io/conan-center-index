@@ -1,5 +1,5 @@
 sources:
   # Newer versions at the top
-  "0.1.2":
-    url: "https://github.com/QuTech-Delft/func-gen/archive/refs/tags/0.1.2.tar.gz"
-    sha256: "52defea36d738abe6728a1824831978c16a7f06af5996a1e317be7f5c9fc1742"
+  "0.1.3":
+    url: "https://github.com/QuTech-Delft/func-gen/archive/refs/tags/0.1.3.tar.gz"
+    sha256: "153da00596a071d2c85c3970c21489147c744d950381f2fc3ed38d5e2b3347d8"
