@@ -265,7 +265,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
         if self.options.with_freetype:
-            self.requires("freetype/2.13.0")
+            self.requires("freetype/2.13.2")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.0")
         if self.options.with_openh264:
@@ -283,11 +283,11 @@ class FFMpegConan(ConanFile):
         if self.options.with_libx265:
             self.requires("libx265/3.4")
         if self.options.with_libvpx:
-            self.requires("libvpx/1.11.0")
+            self.requires("libvpx/1.13.1")
         if self.options.with_libmp3lame:
             self.requires("libmp3lame/3.100")
         if self.options.with_libfdk_aac:
-            self.requires("libfdk_aac/2.0.2")
+            self.requires("libfdk_aac/2.0.3")
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.2")
         if self.options.with_ssl == "openssl":
@@ -324,7 +324,7 @@ class FFMpegConan(ConanFile):
         if self.settings.arch in ("x86", "x86_64"):
             self.tool_requires("yasm/1.3.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
