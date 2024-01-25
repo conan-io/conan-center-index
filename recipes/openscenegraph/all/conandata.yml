@@ -4,6 +4,7 @@ sources:
     sha256: "aea196550f02974d6d09291c5d83b51ca6a03b3767e234a8c0e21322927d1e12"
 patches:
   3.6.5:
+    - patch_file: patches/0001-fix-to_cmake_path-usage.patch  
     - patch_file: patches/0005-use-JPEG-target-for-plugin.patch
     - patch_file: patches/0006-Declare-result-as-LONG-for-Mingw-build.patch
     - patch_file: patches/0007-fix-msvc-with-std-c++17.patch
@@ -18,3 +19,6 @@ patches:
     - patch_file: patches/0010-replace-ptr-fun-in-obj-plugin.patch
       patch_type: portability
       patch_source: https://github.com/openscenegraph/OpenSceneGraph/pull/1246
+    - patch_file: patches/0011-remove-deprecated-register.patch
+      patch_type: portability
+      patch_source: [https://github.com/openscenegraph/OpenSceneGraph/pull/1296, https://github.com/openscenegraph/OpenSceneGraph/pull/951]

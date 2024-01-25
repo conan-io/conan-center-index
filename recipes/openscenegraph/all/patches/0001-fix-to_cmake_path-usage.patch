@@ -1,0 +1,31 @@
+From bfdb151022c98b065a839a4fbf2995ef9340f6ae Mon Sep 17 00:00:00 2001
+From: "R. Andrew Ohana" <rao@esi-group.com>
+Date: Mon, 21 Sep 2020 10:37:10 -0700
+Subject: [PATCH 1/5] fix to_cmake_path usage
+
+---
+ CMakeModules/OsgMacroUtils.cmake | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/CMakeModules/OsgMacroUtils.cmake b/CMakeModules/OsgMacroUtils.cmake
+index dcc1fe37d..c0c2da4e1 100644
+--- a/CMakeModules/OsgMacroUtils.cmake
++++ b/CMakeModules/OsgMacroUtils.cmake
+@@ -174,11 +174,11 @@ MACRO(SET_OUTPUT_DIR_PROPERTY_260 TARGET_TARGETNAME RELATIVE_OUTDIR)
+         # Using the output directory properties
+ 
+         # Global properties (All generators but VS & Xcode)
+-        FILE(TO_CMAKE_PATH TMPVAR "CMAKE_ARCHIVE_OUTPUT_DIRECTORY/${RELATIVE_OUTDIR}")
++        FILE(TO_CMAKE_PATH "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${RELATIVE_OUTDIR}" TMPVAR)
+         SET_TARGET_PROPERTIES(${TARGET_TARGETNAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${TMPVAR}")
+-        FILE(TO_CMAKE_PATH TMPVAR "CMAKE_RUNTIME_OUTPUT_DIRECTORY/${RELATIVE_OUTDIR}")
++        FILE(TO_CMAKE_PATH "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${RELATIVE_OUTDIR}" TMPVAR)
+         SET_TARGET_PROPERTIES(${TARGET_TARGETNAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${TMPVAR}")
+-        FILE(TO_CMAKE_PATH TMPVAR "CMAKE_LIBRARY_OUTPUT_DIRECTORY/${RELATIVE_OUTDIR}")
++        FILE(TO_CMAKE_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${RELATIVE_OUTDIR}" TMPVAR)
+         SET_TARGET_PROPERTIES(${TARGET_TARGETNAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${TMPVAR}")
+ 
+         # Per-configuration property (VS, Xcode)
+-- 
+2.21.0.windows.1
+
