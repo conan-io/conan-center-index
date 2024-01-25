@@ -207,9 +207,9 @@ class ProtobufConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "protobuf_full_package") # unofficial, but required to avoid side effects (libprotobuf component "steals" the default global pkg_config name)
 
         build_modules = [
-            os.path.join(self._cmake_install_base_path, "protobuf-generate.cmake"),
-            os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
             os.path.join(self._cmake_install_base_path, "protobuf-options.cmake"),
+            os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
+            os.path.join(self._cmake_install_base_path, "protobuf-generate.cmake"),
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
