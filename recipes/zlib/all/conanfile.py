@@ -60,6 +60,7 @@ class ZlibConan(ConanFile):
         # Correct for misuse of "${CMAKE_INSTALL_PREFIX}/" in CMakeLists.txt
         tc.variables["INSTALL_LIB_DIR"] = "lib"
         tc.variables["INSTALL_INC_DIR"] = "include"
+        tc.variables["ZLIB_BUILD_EXAMPLES"] = False
         tc.generate()
 
     def _patch_sources(self):
