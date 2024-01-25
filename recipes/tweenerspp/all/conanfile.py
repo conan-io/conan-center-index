@@ -55,3 +55,6 @@ class TweenersppConan(ConanFile):
         self.cpp_info.libdirs = []
         if is_msvc(self):
             self.cpp_info.defines = ["_USE_MATH_DEFINES"]
+        self.cpp_info.set_property("cmake_file_name", "tweeners")
+        self.cpp_info.set_property("cmake_target_name", "tweeners::tweeners")
+        self.cpp_info.set_property("cmake_target_aliases", ["tweeners"])
