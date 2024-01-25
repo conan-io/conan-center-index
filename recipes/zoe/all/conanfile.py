@@ -46,7 +46,7 @@ class ZoeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcurl/8.2.1")
+        self.requires("libcurl/[>=8.21 <9]")
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
 
     def validate(self):
