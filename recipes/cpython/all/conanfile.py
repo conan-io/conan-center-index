@@ -267,10 +267,7 @@ class CPythonConan(ConanFile):
                 "--with-tcltk-includes={}".format(" ".join(tcltk_includes)),
                 "--with-tcltk-libs={}".format(" ".join(tcltk_libs)),
             ]
-        if self.settings.os in ("Linux", "FreeBSD"):
-            # Building _testembed fails due to missing pthread/rt symbols
-            tc.ldflags.append("-lpthread")
-        tc.ldflags.append('-Wl,--as-needed')
+        tc.extra_ldflags.append('-Wl,--as-needed')
 
         tc.generate()
 
