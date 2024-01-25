@@ -256,13 +256,6 @@ class OpenSceneGraphConanFile(ConanFile):
             # e.g. replace IF(FFMPEG_FOUND) with IF(OSG_WITH_FFMPEG)
             content = re.sub(r"\b([A-Z]+)_FOUND\b", r"OSG_WITH_\1", content)
             path.write_text(content)
-        # Fix file(to_cmake_path ...) usage
-        path = self.source_path.joinpath("CMakeModules", "OsgMacroUtils.cmake")
-        content = path.read_text()
-        content = re.sub(r'FILE\(TO_CMAKE_PATH TMPVAR "CMAKE_(\w+)_OUTPUT_DIRECTORY/\$\{RELATIVE_OUTDIR}"\)',
-                         r'FILE(TO_CMAKE_PATH "\${CMAKE_\1_OUTPUT_DIRECTORY}/\${RELATIVE_OUTDIR}" TMPVAR)',
-                         content)
-        path.write_text(content)
         apply_conandata_patches(self)
 
         # Not sure why, but CMake fails to find the EXPAT::EXPAT target created by Conan when Fontconfig is found as a module.

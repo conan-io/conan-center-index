@@ -22,3 +22,6 @@ patches:
       base_path: source_subfolder
       patch_type: portability
       patch_source: https://github.com/openscenegraph/OpenSceneGraph/pull/1246
+    - patch_file: patches/0011-remove-deprecated-register.patch
+      patch_type: portability
+      patch_source: [https://github.com/openscenegraph/OpenSceneGraph/pull/1296, https://github.com/openscenegraph/OpenSceneGraph/pull/951]
