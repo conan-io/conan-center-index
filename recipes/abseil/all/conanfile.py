@@ -49,6 +49,9 @@ class AbseilConan(ConanFile):
             },
         }.get(self._min_cppstd, {})
 
+    def build_requirements(self):
+        self.tool_requires("cmake/3.27.9")
+
     def export_sources(self):
         copy(self, "abi_trick/*", self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
