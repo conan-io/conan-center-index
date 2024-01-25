@@ -62,7 +62,7 @@ class PopplerConan(ConanFile):
         "with_png": True,
         "with_nss": False,
         "with_tiff": True,
-        "with_libcurl": True,
+        "with_libcurl": False,
         "with_zlib": True,
         "float": False,
     }
