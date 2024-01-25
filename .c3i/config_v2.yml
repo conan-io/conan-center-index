@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 2.0.12
+  version: 2.0.16
   backup_sources:
     upload_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
     download_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
