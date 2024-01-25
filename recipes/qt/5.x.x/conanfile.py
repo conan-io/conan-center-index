@@ -360,9 +360,9 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
             self.requires("freetype/2.13.2")
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/2.15.0")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/74.1")
+            self.requires("icu/74.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
             self.requires("harfbuzz/8.3.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
@@ -373,7 +373,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.40")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.44.2")
+            self.requires("sqlite3/3.45.0")
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.1.0")
         if self.options.with_pq:
@@ -400,7 +400,7 @@ class QtConan(ConanFile):
                 self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.93")
-            self.requires("libdrm/2.4.114")
+            self.requires("libdrm/2.4.119")
             self.requires("egl/system")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
@@ -413,7 +413,7 @@ class QtConan(ConanFile):
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_atspi"):
-            self.requires("at-spi2-core/2.50.0")
+            self.requires("at-spi2-core/2.51.0")
         if self.options.get_safe("with_md4c", False):
             self.requires("md4c/0.4.8")
 
@@ -1341,7 +1341,7 @@ Examples = bin/datadir/examples""")
             _create_plugin("Scene2DPlugin", "scene2d", "renderplugins", [])
 
             _create_module("3DAnimation", ["3DRender", "3DCore", "Gui"])
-            _create_module("3DInput", ["3DCore", "Gamepad", "Gui"])
+            _create_module("3DInput", ["3DCore", "Gui"] + (["Gamepad"] if self.options.qtgamepad else []))
             _create_module("3DLogic", ["3DCore", "Gui"])
             _create_module("3DExtras", ["3DRender", "3DInput", "3DLogic", "3DCore", "Gui"])
             _create_module("3DQuick", ["3DCore", "Quick", "Gui", "Qml"])

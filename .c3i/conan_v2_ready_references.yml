@@ -276,6 +276,7 @@ required_for_references:
 - decimal_for_cpp
 - deco
 - dependencies
+- depot_tools
 - detools
 - dfp
 - di
@@ -373,6 +374,7 @@ required_for_references:
 - flann
 - flatbuffers
 - flatbush
+- flatcc
 - flecs
 - flex
 - flint
@@ -409,6 +411,7 @@ required_for_references:
 - fxdiv
 - g3log
 - gainput
+- gamenetworkingsockets
 - gamma
 - gcem
 - gdbm
@@ -422,6 +425,7 @@ required_for_references:
 - geotrans
 - getopt-for-visual-studio
 - gettext
+- gf-complete
 - gflags
 - gfortran
 - ghc-filesystem
@@ -446,6 +450,7 @@ required_for_references:
 - gm2calc
 - gmp
 - gnu-config
+- gnulib
 - gnutls
 - godot_headers
 - googleapis
@@ -495,6 +500,7 @@ required_for_references:
 - hlslpp
 - homog2d
 - http_parser
+- huffman
 - hunspell
 - hwdata
 - hwloc
@@ -538,6 +544,7 @@ required_for_references:
 - jasper
 - jbig
 - jeaiii-itoa
+- jemalloc
 - jerryscript
 - jfalcou-eve
 - jinja2cpp
@@ -572,6 +579,7 @@ required_for_references:
 - ktx
 - kuba-zip
 - lager
+- laslib
 - laszip
 - lazycsv
 - lcms
@@ -758,6 +766,7 @@ required_for_references:
 - libva
 - libvault
 - libvdpau
+- libversion
 - libverto
 - libvips
 - libvpx
@@ -854,6 +863,7 @@ required_for_references:
 - mikktspace
 - mimalloc
 - mingw-builds
+- mingw-w64
 - miniaudio
 - minimp3
 - minisat
@@ -995,6 +1005,7 @@ required_for_references:
 - opus
 - opusfile
 - orcania
+- osmanip
 - osqp
 - out_ptr
 - outcome
@@ -1319,6 +1330,7 @@ required_for_references:
 - tng
 - toml11
 - tomlplusplus
+- tqdm-cpp
 - tracy
 - transwarp
 - trantor
