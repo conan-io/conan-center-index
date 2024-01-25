@@ -595,7 +595,7 @@ class QtConan(ConanFile):
             }
         if Version(self.version) >= "6.5.0":
             cpp_std_map[23] = "FEATURE_cxx2b"
-        
+
         for std,feature in cpp_std_map.items():
             tc.variables[feature] = "ON" if int(current_cpp_std) >= std else "OFF"
 
@@ -790,10 +790,15 @@ class QtConan(ConanFile):
         os.remove(os.path.join(self.package_folder, "bin", "qt-cmake-private-install.cmake"))
 
         for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
-            module = os.path.join(self.package_folder, "lib", "cmake", m, f"{m}Macros.cmake")
-            helper_modules = glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake"))
-            if not os.path.isfile(module) and not helper_modules:
-                rmdir(self, os.path.join(self.package_folder, "lib", "cmake", m))
+            if os.path.isfile(os.path.join(self.package_folder, "lib", "cmake", m, f"{m}Macros.cmake")):
+                continue
+            if glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake")):
+                continue
+            if m.endswith("Tools"):
+                if os.path.isfile(os.path.join(self.package_folder, "lib", "cmake", m, f"{m[:-5]}Macros.cmake")):
+                    continue
+
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake", m))
 
         extension = ""
         if self.settings.os == "Windows":
@@ -1366,17 +1371,24 @@ class QtConan(ConanFile):
             if component_name == "qt":
                 component_name = "qtCore"
 
-            module = os.path.join("lib", "cmake", m, f"{m}Macros.cmake")
-            if os.path.isfile(module):
-                _add_build_module(component_name, module)
+            if component_name in self.cpp_info.components:
+                module = os.path.join("lib", "cmake", m, f"{m}Macros.cmake")
+                if os.path.isfile(module):
+                    _add_build_module(component_name, module)
 
-            module = os.path.join("lib", "cmake", m, f"{m}ConfigExtras.cmake")
-            if os.path.isfile(module):
-                _add_build_module(component_name, module)
+                module = os.path.join("lib", "cmake", m, f"{m}ConfigExtras.cmake")
+                if os.path.isfile(module):
+                    _add_build_module(component_name, module)
 
-            for helper_modules in glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake")):
-                _add_build_module(component_name, helper_modules)
-            self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
+                for helper_modules in glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake")):
+                    _add_build_module(component_name, helper_modules)
+                self.cpp_info.components[component_name].builddirs.append(os.path.join("lib", "cmake", m))
+
+            elif component_name.endswith("Tools") and component_name[:-5] in self.cpp_info.components:
+                module = os.path.join("lib", "cmake", f"{m}", f"{m[:-5]}Macros.cmake")
+                if os.path.isfile(module):
+                    _add_build_module(component_name[:-5], module)
+                self.cpp_info.components[component_name[:-5]].builddirs.append(os.path.join("lib", "cmake", m))
 
         objects_dirs = glob.glob(os.path.join(self.package_folder, "lib", "objects-*/"))
         for object_dir in objects_dirs:
