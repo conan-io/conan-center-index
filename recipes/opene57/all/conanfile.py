@@ -66,7 +66,7 @@ class Opene57Conan(ConanFile):
 
     def requirements(self):
         if self.options.with_tools:
-            self.requires("boost/1.83.0")
+            self.requires("boost/1.84.0")
 
         if self.options.with_docs:
             self.requires("doxygen/1.9.4")
