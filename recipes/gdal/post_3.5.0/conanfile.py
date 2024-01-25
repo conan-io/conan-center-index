@@ -92,7 +92,7 @@ class GdalConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "tools": False,
-        "with_armadillo": True,
+        "with_armadillo": False,
         "with_arrow": True,
         "with_basisu": False,
         "with_blosc": False,
@@ -445,6 +445,9 @@ class GdalConan(ConanFile):
         tc.variables["Parquet_FOUND"] = self.options.with_arrow and self.dependencies["arrow"].options.parquet
         tc.variables["ArrowDataset_FOUND"] = self.options.with_arrow and self.dependencies["arrow"].options.dataset_modules
 
+        # General workaround for try_compile() tests in the project
+        # https://github.com/conan-io/conan/issues/12180
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
         # https://github.com/OSGeo/gdal/blob/v3.8.1/cmake/modules/packages/FindSQLite3.cmake
         if self.options.with_sqlite3:
             tc.variables["SQLite3_HAS_COLUMN_METADATA"] = self.dependencies["sqlite3"].options.enable_column_metadata
