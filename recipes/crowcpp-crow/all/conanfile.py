@@ -120,9 +120,6 @@ class CrowConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Crow")
         self.cpp_info.set_property("cmake_target_name", "Crow::Crow")
 
-        if Version(self.version) == "0.2":
-            self.cpp_info.requires.append("openssl::ssl")
-
         if Version(self.version) >= "1.0":
             if self.options.with_ssl:
                 self.cpp_info.defines.append("CROW_ENABLE_SSL")
@@ -130,8 +127,3 @@ class CrowConan(ConanFile):
             if self.options.with_compression:
                 self.cpp_info.defines.append("CROW_ENABLE_COMPRESSION")
                 self.cpp_info.requires.append("zlib::zlib")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Crow"
-        self.cpp_info.names["cmake_find_package_multi"] = "Crow"
-
