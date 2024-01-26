@@ -267,7 +267,8 @@ class CPythonConan(ConanFile):
                 "--with-tcltk-includes={}".format(" ".join(tcltk_includes)),
                 "--with-tcltk-libs={}".format(" ".join(tcltk_libs)),
             ]
-        tc.extra_ldflags.append('-Wl,--as-needed')
+        if not is_apple_os(self):
+            tc.extra_ldflags.append('-Wl,--as-needed')
 
         tc.generate()
 
