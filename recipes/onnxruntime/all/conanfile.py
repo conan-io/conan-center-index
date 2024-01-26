@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv
@@ -27,11 +27,13 @@ class OnnxRuntimeConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_xnnpack": [True, False],
+        "with_cuda": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_xnnpack": False,
+        "with_cuda": False,
     }
     short_paths = True
 
@@ -135,6 +137,7 @@ class OnnxRuntimeConan(ConanFile):
         tc.variables["onnxruntime_USE_FULL_PROTOBUF"] = not self.dependencies["protobuf"].options.lite
         tc.variables["onnxruntime_USE_XNNPACK"] = self.options.with_xnnpack
 
+        tc.variables["onnxruntime_USE_CUDA"] = self.options.with_cuda
         tc.variables["onnxruntime_BUILD_UNIT_TESTS"] = False
         tc.variables["onnxruntime_RUN_ONNX_TESTS"] = False
         tc.variables["onnxruntime_GENERATE_TEST_REPORTS"] = False
@@ -236,7 +239,14 @@ class OnnxRuntimeConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        pkg_config_dir = os.path.join(self.package_folder, "lib", "pkgconfig")
+        
+        # move the shared providers dll in the bin dir
+        lib_dir = os.path.join(self.package_folder, "lib")
+        bin_dir = os.path.join(self.package_folder, "bin")
+        copy(self, "*.dll", src=lib_dir, dst=bin_dir)
+        rm(self, "*.dll", lib_dir)
+        
+        pkg_config_dir = os.path.join(lib_dir, "pkgconfig")
         rmdir(self, pkg_config_dir)
 
     def package_info(self):
