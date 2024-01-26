@@ -20,36 +20,9 @@ sources:
   "1.9.9":
     url: "https://github.com/stephenberry/glaze/archive/v1.9.9.tar.gz"
     sha256: "7e2605046742a89ec455887a5a0d6b3188ed5c14ea309c5eb9814848c26bedca"
-  "1.9.8.1":
-    url: "https://github.com/stephenberry/glaze/archive/v1.9.8.1.tar.gz"
-    sha256: "f1dd8d93440096d186695814848c9cd350a9ec5b0e114e933579ef2467a35558"
   "1.9.5":
     url: "https://github.com/stephenberry/glaze/archive/v1.9.5.tar.gz"
     sha256: "3800fa7283a1d4e5bd2c746fe9e268d2f8af76d3a75be7318b2084f38f529c7f"
   "1.8.5":
     url: "https://github.com/stephenberry/glaze/archive/v1.8.5.tar.gz"
     sha256: "5d876eed5689f1947ea4eafd9f13a4e0b527611a6b1857c79a5d598a856287b4"
-  "1.8.4":
-    url: "https://github.com/stephenberry/glaze/archive/v1.8.4.tar.gz"
-    sha256: "794f68d74264ebd4d26c9e1b2a9098134622751a089a45ed5a97d90e58b7d9e6"
-  "1.8.3":
-    url: "https://github.com/stephenberry/glaze/archive/v1.8.3.tar.gz"
-    sha256: "3f0f6f9393daf29cef2772fadf46d9f22669899ee8f025f17889a22c84d2c6e8"
-  "1.8.2":
-    url: "https://github.com/stephenberry/glaze/archive/v1.8.2.tar.gz"
-    sha256: "dddc7b9c87739e0266a6a868316e692975651e9e77684cfb7d3a6a4be32c95fc"
-  "1.8.1":
-    url: "https://github.com/stephenberry/glaze/archive/v1.8.1.tar.gz"
-    sha256: "ea804976d55a27e6df49390c3ec8600daea0c72780ea7094d79d1edcbe525fcd"
-  "1.7.0":
-    url: "https://github.com/stephenberry/glaze/archive/v1.7.0.tar.gz"
-    sha256: "e8ccb925cf45f8974ba8d9af56c29eed12dd5fd9253c02015a6780b7c861e4df"
-  "1.6.1":
-    url: "https://github.com/stephenberry/glaze/archive/v1.6.1.tar.gz"
-    sha256: "c52c0f66d98d829ae1f2b859abddc84132ad49aea4c76f3286970fbab1489c10"
-patches:
-  "1.9.8.1":
-    - patch_file: "patches/1.9.8.1-0001-fix-msvc-bug.patch"
-      patch_description: "workaround MSVC compilation error for some versions"
-      patch_type: "portability"
-      patch_source: "https://github.com/stephenberry/glaze/pull/653"
