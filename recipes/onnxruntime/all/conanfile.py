@@ -110,6 +110,10 @@ class OnnxRuntimeConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires minimum compiler version {minimum_version}."
             )
+        if not self.dependencies["onnx"].options.disable_static_registration:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires onnx compiled with `-o onnx:disable_static_registration=True`."
+            )
 
     def validate_build(self):
         if self.version >= Version("1.15.0") and self.options.shared and sys.version_info[:2] < (3, 8):
