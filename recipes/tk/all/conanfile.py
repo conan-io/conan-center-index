@@ -275,6 +275,16 @@ class TkConan(ConanFile):
                 "ole32",
                 "oleaut32",
             ]
+        elif self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.requires = [
+                "tcl::tcl",
+                "fontconfig::fontconfig",
+                "xorg::x11",
+                "xorg::xcb",
+                "xorg::xrender",
+                "xorg::xau",
+                "xorg::xdmcp",
+            ]
 
         tk_library = os.path.join(
             self.package_folder,
