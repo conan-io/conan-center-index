@@ -261,6 +261,8 @@ class OpenSceneGraphConanFile(ConanFile):
         # Not sure why, but CMake fails to find the EXPAT::EXPAT target created by Conan when Fontconfig is found as a module.
         replace_in_file(self, os.path.join(self.source_folder, "src", "osgText", "CMakeLists.txt"),
                         "find_package(Fontconfig MODULE)", "find_package(Fontconfig CONFIG REQUIRED)")
+        replace_in_file(self, os.path.join(self.source_folder, "src", "osgPlugins", "freetype", "CMakeLists.txt"),
+                        "SET(TARGET_EXTERNAL_LIBRARIES ${FREETYPE_LIBRARIES} )", "SET(TARGET_EXTERNAL_LIBRARIES Freetype::Freetype)")
 
     def build(self):
         self._patch_sources()
