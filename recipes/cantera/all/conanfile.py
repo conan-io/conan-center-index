@@ -2,7 +2,6 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import Environment
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, save, load, chdir, rename, rmdir, replace_in_file
@@ -114,17 +113,15 @@ class canteraRecipe(ConanFile):
             options["debug"] = "no"
             options["optimize"] = "yes"
 
+        # To fix c compiler checks in SConstruct file (Since cxx compiler is not checked we do not have to modify the default)
+        compiler = str(self.settings.compiler)
+        cc_compiler = {"msvc": "cl", "intel-cc": "icx"}.get(compiler, compiler) # Map conans compiler names to canteras compiler names
+        options["CC"] = cc_compiler
+
+        # Write args file
         escape_str = lambda x: f'"{x}"'
         scons_args = ' '.join([f"{key}={escape_str(option)}" for key, option in options.items()])
         save(self, os.path.join(self.source_folder, "scons_args"), scons_args)
-
-        # To fix c compiler checks in SConstruct file
-        compiler = str(self.settings.compiler)
-        cc_compiler = {"msvc": "cl", "intel-cc": "icx"}.get(compiler, compiler) # Map conans compiler names to canteras compiler names
-        env = Environment()
-        env.define("CC", cc_compiler)
-        envvars = env.vars(self)
-        envvars.save_script("conan_compiler_envvars")
 
     def build(self):
         with chdir(self, self.source_folder):
