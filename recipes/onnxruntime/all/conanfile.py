@@ -87,13 +87,13 @@ class OnnxRuntimeConan(ConanFile):
         self.requires("protobuf/3.21.12")
         self.requires("date/3.0.1")
         self.requires("re2/20230901")
-        self.requires(f"onnx/{self._onnx_version}")
+        self.requires(f"onnx/{self._onnx_version}", transitive_headers=True)
         self.requires("flatbuffers/1.12.0")
-        self.requires("boost/1.83.0", headers=True, libs=False, run=False)  # for mp11, header only, no need for libraries to link/run
+        self.requires("boost/1.83.0", headers=True, libs=False, run=False, transitive_headers=True)  # for mp11, header only, no need for libraries to link/run
         self.requires("safeint/3.0.28")
         self.requires("nlohmann_json/3.11.3")
         self.requires("eigen/3.4.0")
-        self.requires("ms-gsl/4.0.0")
+        self.requires("ms-gsl/4.0.0", transitive_headers=True)
         self.requires("cpuinfo/cci.20220618")
         if self.settings.os != "Windows":
             self.requires("nsync/1.26.0")
