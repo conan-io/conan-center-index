@@ -208,6 +208,7 @@ class TkConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "win", "makefile.vc"), "@type << > ", '@type <<')
         if is_msvc(self):
             self._build_nmake()
         else:
