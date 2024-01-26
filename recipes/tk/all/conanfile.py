@@ -136,6 +136,8 @@ class TkConan(ConanFile):
                         "_ATL_XP_TARGETING",
                     ]
                 )
+            if not is_apple_os(self):
+                tc.extra_ldflags.append("-Wl,--as-needed")
             tc.generate()
 
             if self.settings.os == "Linux":
