@@ -43,8 +43,6 @@ class CrowConan(ConanFile):
             self.requires("boost/1.83.0")
         else:
             self.requires("asio/1.29.0", transitive_headers=True)
-        if self.version == "0.2":
-            self.requires("openssl/[>=1.1 <4]")
         if Version(self.version) >= "1.0":
             if self.options.with_ssl:
                 self.requires("openssl/[>=1.1 <3]")
