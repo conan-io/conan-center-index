@@ -1,4 +1,7 @@
 sources:
+  "255.2":
+    url: "https://github.com/systemd/systemd-stable/archive/v255.2.tar.gz"
+    sha256: "ba7354a742dc9a8bb7dbeaa40cbf7cf2ca84f506d5b7ae5ab8d14c8eecb7aca0"
   "255":
     url: "https://github.com/systemd/systemd-stable/archive/v255.tar.gz"
     sha256: "a3eb766ee96eb9f4cc25c2a6c933f3299e1b7ae22e72507dade0a5c86d92534f"
@@ -30,6 +33,10 @@ sources:
     url: "https://github.com/systemd/systemd-stable/archive/v246.16.tar.gz"
     sha256: "b69f9940d65870f090269a28f1047a633d4b80d0001e091d53a031dd40a822d2"
 patches:
+  "255.2":
+    - patch_file: "patches/251.15/0001-Remove-dependency-from-coreutils.patch"
+      patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
+      patch_type: "conan"
   "255":
     - patch_file: "patches/251.15/0001-Remove-dependency-from-coreutils.patch"
       patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
