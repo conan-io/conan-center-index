@@ -40,7 +40,7 @@ class SentryNativeConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "backend": "crashpad",  # overwritten in config_options
+        "backend": "inproc",  # overwritten in config_options
         "transport": "curl",  # overwritten in config_options
         "qt": False,
         "with_crashpad": "sentry",
@@ -84,16 +84,17 @@ class SentryNativeConan(ConanFile):
 
         # Configure default transport
         if self.settings.os == "Windows":
+            self.options.backend = "crashpad"
             self.options.transport = "winhttp"
         elif self.settings.os == "Android":
             self.options.transport = "none"
 
         # Configure default backend
         # See https://github.com/getsentry/sentry-native/pull/927
-        if self.settings.os in ("FreeBSD", "Linux") and Version(self.version) < "0.7.0":
-            self.options.backend = "breakpad"
-        elif self.settings.os == "Android":
-            self.options.backend = "inproc"
+        if self.settings.os == "Macos":
+            self.options.backend = "crashpad"
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.options.backend = "breakpad" if Version(self.version) < "0.7.0" else "crashpad"
         if self.settings.os not in ("Linux", "Android") or self.options.backend != "crashpad" or self.options.with_crashpad != "sentry":
             del self.options.crashpad_with_tls
 
