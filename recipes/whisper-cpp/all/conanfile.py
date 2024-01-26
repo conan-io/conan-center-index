@@ -53,7 +53,7 @@ class WhisperCppConan(ConanFile):
         "with_coreml": False,
         "coreml_allow_fallback": False,
         "with_blas": False,
-        "with_openvino": True,
+        "with_openvino": False,
     }
     package_type = "library"
 
