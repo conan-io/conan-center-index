@@ -66,6 +66,7 @@ class TkConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
+        self.tool_requires("automake/1.16.5")
         if not is_msvc(self):
             if (
                 self._settings_build.os == "Windows"
