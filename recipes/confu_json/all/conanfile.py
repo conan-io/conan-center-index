@@ -19,7 +19,7 @@ class ConfuJson(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain",
+    generators = "CMakeDeps", "CMakeToolchain"
     no_copy_source = True
 
     @property
@@ -44,11 +44,11 @@ class ConfuJson(ConanFile):
         }.get(self._min_cppstd, {})
 
     def layout(self):
-        cmake_layout(self, src_folder=self.name+"-"+str(self.version))
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("boost/1.84.0")
-        self.requires("magic_enum/0.9.5")
+        self.requires("magic_enum/[>=0.9.5 <10]")
 
     def package_id(self):
         self.info.clear()
