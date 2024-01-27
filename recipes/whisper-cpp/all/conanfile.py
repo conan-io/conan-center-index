@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
 
@@ -19,16 +19,40 @@ class WhisperCppConan(ConanFile):
     homepage = "https://github.com/ggerganov/whisper.cpp"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "sanitize_thread": [True, False],
-               "sanitize_address": [True, False], "sanitize_undefined": [True, False],
-               "no_avx": [True, False], "no_avx2": [True, False], "no_fma": [True, False], "no_f16c": [True, False],
-               "no_accelerate": [True, False], "with_coreml": [True, False], "coreml_allow_fallback": [True, False],
-               "with_blas": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "sanitize_thread": False,
-                       "sanitize_address": False, "sanitize_undefined": False,
-                       "no_avx": False, "no_avx2": False, "no_fma": False, "no_f16c": False,
-                       "no_accelerate": False, "with_coreml": False, "coreml_allow_fallback": False,
-                       "with_blas": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "sanitize_thread": [True, False],
+        "sanitize_address": [True, False],
+        "sanitize_undefined": [True, False],
+        "no_avx": [True, False],
+        "no_avx2": [True, False],
+        "no_fma": [True, False],
+        "no_f16c": [True, False],
+        "no_accelerate": [True, False],
+        "metal": [True, False],
+        "metal_ndebug": [True, False],
+        "with_coreml": [True, False],
+        "coreml_allow_fallback": [True, False],
+        "with_blas": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "sanitize_thread": False,
+        "sanitize_address": False,
+        "sanitize_undefined": False,
+        "no_avx": False,
+        "no_avx2": False,
+        "no_fma": False,
+        "no_f16c": False,
+        "no_accelerate": False,
+        "metal": False,
+        "metal_ndebug": False,
+        "with_coreml": False,
+        "coreml_allow_fallback": False,
+        "with_blas": False,
+    }
     package_type = "library"
 
     @property
@@ -58,6 +82,10 @@ class WhisperCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        if Version(self.version) < "1.4.3":
+            del self.options.metal
+            del self.options.metal_ndebug
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -78,7 +106,7 @@ class WhisperCppConan(ConanFile):
     def requirements(self):
         if not is_apple_os(self):
             if self.options.with_blas:
-                self.requires("openblas/0.3.20")
+                self.requires("openblas/0.3.24")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -91,6 +119,7 @@ class WhisperCppConan(ConanFile):
 
     def generate(self):
         deps = CMakeDeps(self)
+        deps.set_property("openblas", "cmake_file_name", "BLAS")
         deps.generate()
 
         tc = CMakeToolchain(self)
@@ -117,6 +146,10 @@ class WhisperCppConan(ConanFile):
         if is_apple_os(self):
             if self.options.no_accelerate:
                 tc.variables["WHISPER_NO_ACCELERATE"] = True
+            if not self.options.get_safe("metal"):
+                tc.variables["WHISPER_METAL"] = False
+            if self.options.get_safe("metal_ndebug"):
+                tc.variables["WHISPER_METAL_NDEBUG"] = True
             if self.options.with_coreml:
                 tc.variables["WHISPER_COREML"] = True
                 if self.options.coreml_allow_fallback:

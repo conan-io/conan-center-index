@@ -36,7 +36,7 @@ class RestinioConan(ConanFile):
 
     def requirements(self):
         self.requires("llhttp/9.1.3")
-        self.requires("fmt/10.1.1")
+        self.requires("fmt/10.2.1")
         self.requires("expected-lite/0.6.3")
 
         if self.options.asio == "standalone":
@@ -67,7 +67,7 @@ class RestinioConan(ConanFile):
             "gcc": "9",
             "clang": "10",
             "apple-clang": "11",
-            "Visual Studio": "17",
+            "Visual Studio": "15",
             "msvc": "191"
         }
 

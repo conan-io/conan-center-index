@@ -1,0 +1,12 @@
+diff --git a/include/commata/typing_aid.hpp b/include/commata/typing_aid.hpp
+index adf9c6e..c1365d4 100644
+--- a/include/commata/typing_aid.hpp
++++ b/include/commata/typing_aid.hpp
+@@ -10,6 +10,7 @@
+ #include <iterator>
+ #include <string>
+ #include <type_traits>
++#include <optional>
+ 
+ namespace commata::detail {
+ 
