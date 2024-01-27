@@ -1102,12 +1102,14 @@ class BoostConan(ConanFile):
 
         flags.append(f"toolset={self._toolset}")
 
-        if self.settings.get_safe("compiler.cppstd"):
-            cppstd_flag = AutotoolsToolchain(self).cppstd
-            flags.append(f"cxxflags={cppstd_flag}")
+        safe_cppstd = self.settings.get_safe("compiler.cppstd")
+        if safe_cppstd:
+            cppstd_version = safe_cppstd.replace("gnu", "")
+            flags.append(f"cxxstd={cppstd_version}")
+            if "gnu" in safe_cppstd:
+                flags.append(f"cxxstd-dialect=gnu")
         elif self._has_cppstd_11_supported:
-            prefix = "/" if is_msvc(self) else "-"
-            flags.append(f"cxxflags={prefix}std=c++11")
+            flags.append(f"cxxstd=11")
 
         # LDFLAGS
         link_flags = []
