@@ -163,11 +163,12 @@ class BoostConan(ConanFile):
 
     @property
     def _min_compiler_version_default_cxx11(self):
-        # Minimum compiler version having c++ standard >= 11
+        """ Minimum compiler version having c++ standard >= 11
+        """
         return {
             "gcc": 6,
             "clang": 6,
-            "apple-clang": 14,
+            "apple-clang": 99,  # still uses C++98 by default. XCode does not reflect apple-clang
             "Visual Studio": 14,  # guess
             "msvc": 190,  # guess
         }.get(str(self.settings.compiler))
@@ -177,8 +178,7 @@ class BoostConan(ConanFile):
         return {
             "gcc": 99,
             "clang": 99,
-            # As of the end of 2023, only apple-clang >=14 use C++20 as their default C++ version.
-            "apple-clang": 14,
+            "apple-clang": 99,
             "Visual Studio": 99,
             "msvc": 999,
         }.get(str(self.settings.compiler))
