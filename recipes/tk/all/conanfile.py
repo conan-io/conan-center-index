@@ -263,6 +263,7 @@ class TkConan(ConanFile):
             if Version(self.version) >= "8.6.13":
                 self.cpp_info.frameworks += ["QuartzCore", "UniformTypeIdentifiers"]
                 self.cpp_info.exelinkflags = ["-ObjC"]
+                self.cpp_info.sharedlinkflags = ["-ObjC"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = [
                 "netapi32",
