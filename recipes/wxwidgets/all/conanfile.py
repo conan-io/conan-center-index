@@ -171,6 +171,9 @@ class PackageConan(ConanFile):
             if self.options.opengl:
                 self.requires('opengl/system')
 
+            if self.options.png == 'libpng':
+                self.requires('libpng/1.6.37')
+
     def validate(self):
         # validate the minimum cpp standard supported. For C++ projects only
         if self.settings.compiler.cppstd:
@@ -184,6 +187,8 @@ class PackageConan(ConanFile):
     # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         self.tool_requires("ninja/1.11.1")
+        self.tool_requires("mawk/1.3.4-20230404")
+        Apt(self).install(["gawk"])
 
     def source(self):
         strip_root = (sys.platform != "win32")
@@ -433,8 +438,14 @@ class PackageConan(ConanFile):
             variables['wxUSE_LIBMSPACK'] = 'OFF'
             variables['wxUSE_LIBGNOMEVFS'] = 'OFF'
 
+        if self.settings.os == "Windows":
+            # unable to locate conan package for libpng on Windows, thus use builtin.
+            variables['wxUSE_LIBPNG'] = 'builtin' if self.options.png != 'off' else 'OFF'
+        else:
+            # encounter link error when using builtin on Linux, thus use libpng package.
+            variables['wxUSE_LIBPNG'] = 'sys' if self.options.png != 'off' else 'OFF'
+
         # always use builtin for packages do not support conan v2 on required version
-        variables['wxUSE_LIBPNG'] = 'builtin' if self.options.png != 'off' else 'OFF'
         variables['wxUSE_LIBJPEG'] = 'builtin' if self.options.jpeg != 'off' else 'OFF'
         variables['wxUSE_LIBTIFF'] = 'builtin' if self.options.tiff != 'off' else 'OFF'
         variables['wxUSE_ZLIB'] = 'builtin' if self.options.zlib != 'off' else 'OFF'
