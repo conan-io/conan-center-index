@@ -55,7 +55,7 @@ class ConfuJson(ConanFile):
 
     def validate(self):
         if self.settings.compiler == "apple-clang":
-            raise ConanInvalidConfiguration("apple-clang is not supported. Pull request welcome")
+            raise ConanInvalidConfiguration("apple-clang is not supported. Pull request welcome.")
 
         if self.settings.compiler == "gcc" and Version(self.version) < "1.0.0":
             raise ConanInvalidConfiguration("gcc is only supported in versions greater than or equal 1.0.0.")
