@@ -1107,9 +1107,9 @@ class BoostConan(ConanFile):
             cppstd_version = safe_cppstd.replace("gnu", "")
             flags.append(f"cxxstd={cppstd_version}")
             if "gnu" in safe_cppstd:
-                flags.append(f"cxxstd-dialect=gnu")
+                flags.append("cxxstd-dialect=gnu")
         elif self._has_cppstd_11_supported:
-            flags.append(f"cxxstd=11")
+            flags.append("cxxstd=11")
 
         # LDFLAGS
         link_flags = []
