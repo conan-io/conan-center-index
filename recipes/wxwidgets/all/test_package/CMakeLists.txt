@@ -12,4 +12,5 @@ endif()
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 # don't link to ${CONAN_LIBS} or CONAN_PKG::package
+
 target_link_libraries(${PROJECT_NAME} ${wxwidgets_LIBRARIES})

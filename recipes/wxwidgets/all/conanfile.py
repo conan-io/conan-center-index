@@ -1,12 +1,14 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.files import export_conandata_patches, get, copy, rm
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.system.package_manager import Apt
+from glob import glob
 import os
+from pathlib import Path
+import sys
 
 
 required_conan_version = ">=1.53.0"
@@ -100,7 +102,7 @@ class PackageConan(ConanFile):
         "richtext": True,
         "sockets": True,
         "stc": True,
-        "webview": True,
+        "webview": False,
         "xml": True,
         "xrc": True,
         "cairo": True,
@@ -135,6 +137,9 @@ class PackageConan(ConanFile):
             del self.options.cairo
 
     def configure(self):
+        if self.settings.os == 'Linux':
+            self.options["gtk/*"].version = 2
+
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
@@ -143,26 +148,20 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def system_requirements(self):
-        if self.settings.os == 'Linux' and tools.os_info.is_linux:
-            if tools.os_info.with_apt:
-                installer = tools.SystemPackageTool()
-                packages = []
-                # TODO : GTK3
-                # packages.append('libgtk-3-dev')
-                if self.options.secretstore:
-                    packages.append('libsecret-1-dev')
-                if self.options.webview:
-                    packages.extend(['libsoup2.4-dev',
-                                     'libwebkitgtk-dev'])
-                # TODO : GTK3
-                #                    'libwebkitgtk-3.0-dev'])
-                if self.options.mediactrl:
-                    packages.extend(['libgstreamer0.10-dev',
-                                     'libgstreamer-plugins-base0.10-dev'])
-                if self.options.cairo:
-                    packages.append('libcairo2-dev')
-                for package in packages:
-                    installer.install(package)
+        packages = []
+        if self.options.secretstore:
+            packages.append('libsecret-1-dev')
+        if self.options.webview:
+            packages.extend(['libsoup2.4-dev',
+                             'libwebkitgtk-dev'])
+        if self.options.mediactrl:
+            packages.extend(['libgstreamer0.10-dev',
+                             'libgstreamer-plugins-base0.10-dev'])
+        if self.options.get_safe('cairo'):
+            packages.append('libcairo2-dev')
+
+        if packages:
+            Apt(self).install(packages)
 
     def requirements(self):
         # prefer self.requires method instead of requires attribute
@@ -187,7 +186,8 @@ class PackageConan(ConanFile):
         self.tool_requires("ninja/1.11.1")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        strip_root = (sys.platform != "win32")
+        get(self, **self.conan_data["sources"][self.version][sys.platform], strip_root=strip_root)
 
     def generate(self):
         tc = CMakeToolchain(self, generator="Ninja")
@@ -216,10 +216,10 @@ class PackageConan(ConanFile):
         debug = 'd' if use_debug_suffix else ''
 
         if self.settings.os == 'Linux':
-            prefix = 'wx_'
+            prefix = 'libwx_'
             toolkit = 'gtk2'
             version = ''
-            suffix = version_suffix_major_minor
+            suffix = version_suffix_major_minor + ".a"
         elif self.settings.os == 'Macos':
             prefix = 'wx_'
             toolkit = 'osx_cocoa'
@@ -244,8 +244,9 @@ class PackageConan(ConanFile):
 
         libs = []
         if not self.options.shared:
+            regex_prefix = '' if self.settings.os == "Windows" else 'lib'
             regex_suffix = '{debug}' if self.settings.os == "Windows" else '{suffix}'
-            libs.append('wxregex{unicode}' + regex_suffix)
+            libs.append(regex_prefix + 'wxregex{unicode}' + regex_suffix)
         libs.append('{prefix}base{version}{unicode}{debug}{suffix}')
         libs.append(library_pattern('core'))
         libs.append(library_pattern('adv'))
@@ -271,8 +272,9 @@ class PackageConan(ConanFile):
             libs.append(library_pattern('richtext'))
         if self.options.stc:
             if not self.options.shared:
+                scintilla_prefix = '' if self.settings.os == "Windows" else 'lib'
                 scintilla_suffix = '{debug}' if self.settings.os == "Windows" else '{suffix}'
-                libs.append('wxscintilla' + scintilla_suffix)
+                libs.append(scintilla_prefix + 'wxscintilla' + scintilla_suffix)
             libs.append(library_pattern('stc'))
         if self.options.webview:
             libs.append(library_pattern('webview'))
@@ -419,7 +421,9 @@ class PackageConan(ConanFile):
             variables['wxBUILD_MSVC_MULTIPROC'] = True
         if self.settings.os == 'Linux':
             # TODO : GTK3
-            # cmake.definitions['wxBUILD_TOOLKIT'] = 'gtk3'
+            variables['wxBUILD_TOOLKIT'] = 'gtk2'
+            variables['WXGTK3'] = 0
+            variables['WXGTK2'] = 1
             variables['wxUSE_CAIRO'] = self.options.cairo
         # Disable some optional libraries that will otherwise lead to non-deterministic builds
         if self.settings.os != "Windows":
@@ -459,6 +463,7 @@ class PackageConan(ConanFile):
         variables['wxUSE_URL'] = self.options.protocol
         variables['wxUSE_PROTOCOL'] = self.options.protocol
         variables['wxUSE_FS_INET'] = self.options.fs_inet
+        variables['wxUSE_REGEX'] = 'builtin' if self.options.regex else 'OFF'
 
         for item in str(self.options.custom_enables).split(","):
             if len(item) > 0:
@@ -476,14 +481,31 @@ class PackageConan(ConanFile):
         copy(self, pattern="LICENSE", dst="licenses", src=os.path.join(self.source_folder, "docs"))
         cmake = self._configure_cmake()
         cmake.install(build_type=build_type)
-        # copy setup.h
-        copy(self, pattern='*setup.h', dst=os.path.join('include', 'wx'), src=os.path.join("build_subfolder", 'lib'),
-             keep_path=False)
 
         if self.settings.os == 'Windows':
             # copy wxrc.exe
-            copy(self, pattern='*', dst='bin', src=os.path.join("build_subfolder", 'bin'), keep_path=False)
+            copy(
+                self, 
+                pattern='*', 
+                dst=os.path.join(self.package_folder, 'bin'), 
+                src=os.path.join(self.build_folder, 'bin'), 
+                keep_path=False
+            )
         else:
+            # copy setup.h
+            src_path = os.path.join(self.build_folder, 'lib')
+            found = glob(os.path.join(src_path, "**", "setup.h"), recursive=True)
+            if not found:
+                raise ConanException(f"Missing setup.h in {src_path}")
+            
+            copy(
+                self, 
+                pattern='*setup.h', 
+                dst=os.path.join(self.package_folder, 'include', 'wx'), 
+                src=Path(found[0]).parent,
+                keep_path=False
+            )
+
             # make relative symlink
             bin_dir = os.path.join(self.package_folder, 'bin')
             for x in os.listdir(bin_dir):
