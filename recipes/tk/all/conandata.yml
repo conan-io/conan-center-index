@@ -1,16 +1,13 @@
 sources:
   "8.6.13":
-    url: "https://prdownloads.sourceforge.net/tcl/tk8.6.13-src.tar.gz"
-    sha256: "2e65fa069a23365440a3c56c556b8673b5e32a283800d8d9b257e3f584ce0675"
+    url: "https://prdownloads.sourceforge.net/tcl/tk8.6.12-src.tar.gz"
+    sha256: "12395c1f3fcb6bed2938689f797ea3cdf41ed5cb6c4766eec8ac949560310630"
   "8.6.10":
     url: "https://prdownloads.sourceforge.net/tcl/tk8.6.10-src.tar.gz"
     sha256: "63df418a859d0a463347f95ded5cd88a3dd3aaa1ceecaeee362194bc30f3e386"
 
 patches:
   "8.6.13":
-    - patch_file: "patches/8.6.13/0002-Add-windows-conan-compatibility.patch"
-      patch_description: "Add windows conan compatibility"
-      patch_type: "conan"
     - patch_file: "patches/8.6.10/0003-Patch-tkConfig.sh.patch"
       patch_description: "Remove TK_BUILD_* and TK_SRC_DIR from tkConfig.sh for portability"
       patch_type: "portability"
