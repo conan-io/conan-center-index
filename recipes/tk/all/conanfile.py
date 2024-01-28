@@ -114,7 +114,7 @@ class TkConan(ConanFile):
                 f"--enable-symbols={yes_no(self.settings.build_type == 'Debug')}"
             )
             tc.configure_args.append(
-                f"--enable-64bit={yes_no(self.settings.arch == 'x86_64')}"
+                f"--enable-64bit={yes_no(self.settings.arch in ('x86_64', 'armv8'))}"
             )
             tc.configure_args.append(f"--enable-aqua={yes_no(is_apple_os(self))}")
             tc.configure_args.append(
