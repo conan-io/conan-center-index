@@ -166,6 +166,8 @@ class SDLImageConan(ConanFile):
             tc.variables["SDL2IMAGE_XV"] = self.options.xv
             tc.variables["SDL2IMAGE_BACKEND_WIC"] = self.options.get_safe("wic")
             tc.variables["SDL2IMAGE_BACKEND_IMAGEIO"] = self.options.get_safe("imageio")
+        if not is_apple_os(self):
+            tc.extra_sharedlinkflags.append('-Wl,--as-needed')
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
