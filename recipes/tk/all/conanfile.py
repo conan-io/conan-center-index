@@ -276,7 +276,7 @@ class TkConan(ConanFile):
                 "ole32",
                 "oleaut32",
             ]
-        elif self.settings.os in ("Linux", "FreeBSD"):
+        elif self.settings.os == "Linux":
             self.cpp_info.requires = [
                 "tcl::tcl",
                 "fontconfig::fontconfig",
