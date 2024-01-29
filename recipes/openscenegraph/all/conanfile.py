@@ -252,6 +252,8 @@ class OpenSceneGraphConanFile(ConanFile):
             os.unlink(os.path.join(self.source_folder, "CMakeModules", f"Find{package}.cmake"))
         for path in self.source_path.joinpath("src", "osgPlugins").rglob("CMakeLists.txt"):
             content = path.read_text()
+            # Correct usage of *_LIBRARY variables to *_LIBRARIES
+            content = content.replace("_LIBRARY", "_LIBRARIES")
             # Allow explicit control of plugins via OSG_WITH_* variables
             # e.g. replace IF(FFMPEG_FOUND) with IF(OSG_WITH_FFMPEG)
             content = re.sub(r"\b([A-Z]+)_FOUND\b", r"OSG_WITH_\1", content)
