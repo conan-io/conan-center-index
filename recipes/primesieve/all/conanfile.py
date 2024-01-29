@@ -44,9 +44,6 @@ class PackageConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def requirements(self):
-        pass
-
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
