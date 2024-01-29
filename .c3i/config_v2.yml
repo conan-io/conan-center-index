@@ -29,6 +29,7 @@ tasks:
   automatic_merge:
     reviews_required_total: 1000  # AutomaticMerge shouldn't run with this file, but just in case
     reviews_required_team: 1000  # AutomaticMerge shouldn't run with this file, but just in case
+    reviews_required_bump: 1000  # AutomaticMerge shouldn't run with this file, but just in case
   access_request:
       request_issue_url: https://github.com/conan-io/conan-center-index/issues/4
       max_inactivity_days: 0
