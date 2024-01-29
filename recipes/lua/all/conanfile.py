@@ -1,7 +1,8 @@
 import os
 
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, load, save, export_conandata_patches, apply_conandata_patches, collect_libs
 from conan.tools.apple import fix_apple_shared_install_name
 
@@ -22,11 +23,15 @@ class LuaConan(ConanFile):
         "shared": [False, True],
         "fPIC": [True, False],
         "compile_as_cpp": [True, False],
+        "with_tools": [True, False],
+        "with_readline": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "compile_as_cpp": False,
+        "with_tools": False,
+        "with_readline": False,
     }
 
     def export_sources(self):
@@ -47,15 +52,26 @@ class LuaConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        if self.options.with_tools and self.options.with_readline:
+            self.requires("readline/8.2")
+
+    def validate(self):
+        if not self.options.with_tools and self.options.with_readline:
+            raise ConanInvalidConfiguration(f"{self.ref} requires readline only with with_tools=True")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["LUA_SRC_DIR"] = self.source_folder.replace("\\", "/")
-        tc.variables["SKIP_INSTALL_TOOLS"] = True
         tc.variables["COMPILE_AS_CPP"] = self.options.compile_as_cpp
+        tc.variables["SKIP_INSTALL_TOOLS"] = not self.options.with_tools
+        tc.variables["WITH_READLINE"] = self.options.with_readline
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
