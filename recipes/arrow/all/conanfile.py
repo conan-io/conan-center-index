@@ -237,7 +237,7 @@ class ArrowConan(ConanFile):
             opts.with_protobuf = opts.gandiva or opts.with_flight_rpc or opts.with_orc or opts.substrait
         if opts.with_re2 == "auto":
             opts.with_re2 = opts.gandiva or opts.parquet or (
-                    Version(self) >= "7.0.0" and (opts.compute or opts.dataset_modules))
+                    Version(self.version) >= "7.0.0" and (opts.compute or opts.dataset_modules))
         if opts.with_utf8proc == "auto":
             opts.with_utf8proc = opts.compute or opts.gandiva
         if Version(self.version) >= "7.0.0" and opts.encryption:
