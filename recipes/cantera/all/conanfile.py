@@ -115,7 +115,7 @@ class canteraRecipe(ConanFile):
 
         # To fix c compiler checks in SConstruct file (Since cxx compiler is not checked we do not have to modify the default)
         compiler = str(self.settings.compiler)
-        cc_compiler = {"msvc": "cl", "intel-cc": "icx"}.get(compiler, compiler) # Map conans compiler names to canteras compiler names
+        cc_compiler = {"msvc": "cl", "intel-cc": "icx", "apple-clang": "clang"}.get(compiler, compiler) # Map conans compiler names to canteras compiler names
         options["CC"] = cc_compiler
 
         # Write args file
