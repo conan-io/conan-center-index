@@ -1,4 +1,7 @@
 sources:
+  "2.13.0":
+    url: "https://github.com/Blosc/c-blosc2/archive/v2.13.0.tar.gz"
+    sha256: "d886798ff0a63948a4076f2ed60f0dc18be3aa1299ac1aff2cf705419cbe1bea"
   "2.12.0":
     url: "https://github.com/Blosc/c-blosc2/archive/v2.12.0.tar.gz"
     sha256: "b8fa07ab0627c19fb652e08a5ada197eb0939b75e97e2fb76bbee145eaedc6e9"
@@ -33,6 +36,10 @@ sources:
     url: "https://github.com/Blosc/c-blosc2/archive/v2.4.3.tar.gz"
     sha256: "d4aa5e0794598794f20ab950e973d44f0d0d9c133ea1a5a07cb200fa54d2e036"
 patches:
+  "2.13.0":
+    - patch_file: "patches/2.11.1-0001-fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
   "2.12.0":
     - patch_file: "patches/2.11.1-0001-fix-cmake.patch"
       patch_description: "use cci package"

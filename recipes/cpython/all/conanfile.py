@@ -217,10 +217,6 @@ class CPythonConan(ConanFile):
                 if self.dependencies["mpdecimal"].ref.version < Version("2.5.0"):
                     raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
 
-        if self._with_libffi:
-            if self.dependencies["libffi"].ref.version >= "3.3" and is_msvc(self) and "d" in msvc_runtime_flag(self):
-                raise ConanInvalidConfiguration("libffi versions >= 3.3 cause 'read access violations' when using a debug runtime (MTd/MDd)")
-
         if is_apple_os(self) and self.settings.arch == "armv8" and Version(self.version) < "3.8.0":
             raise ConanInvalidConfiguration("cpython 3.7 and older does not support Apple ARM CPUs")
 
@@ -271,9 +267,8 @@ class CPythonConan(ConanFile):
                 "--with-tcltk-includes={}".format(" ".join(tcltk_includes)),
                 "--with-tcltk-libs={}".format(" ".join(tcltk_libs)),
             ]
-        if self.settings.os in ("Linux", "FreeBSD"):
-            # Building _testembed fails due to missing pthread/rt symbols
-            tc.ldflags.append("-lpthread")
+        if not is_apple_os(self):
+            tc.extra_ldflags.append('-Wl,--as-needed')
 
         tc.generate()
 
@@ -537,11 +532,10 @@ class CPythonConan(ConanFile):
         self.output.info(f"Building {len(projects)} Visual Studio projects: {projects}")
 
         sln = os.path.join(self.source_folder, "PCbuild", "pcbuild.sln")
-        if Version(self.version) > "3.8.0":
+        if Version(self.version) >= "3.9.0":
             msbuild.build(sln, targets=projects)
         else:
-            # In these versions, solution files do not pick up the toolset automatically.
-            # All of these versions are EOL, so a hacky solution is fine for now.
+            # FIXME: In these versions, solution files do not pick up the toolset automatically.
             cmd = msbuild.command(sln, targets=projects)
             self.run(f"{cmd} /p:PlatformToolset={msvs_toolset(self)}")
 

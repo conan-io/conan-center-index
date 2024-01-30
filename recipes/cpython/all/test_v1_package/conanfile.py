@@ -141,7 +141,7 @@ class TestPackageConan(ConanFile):
 
     def _test_module(self, module, should_work):
         try:
-            self.run("{} {}/test_package.py -b {} -t {} ".format(
+            self.run("{} {}/../test_package/test_package.py -b {} -t {} ".format(
                 self.deps_user_info["cpython"].python, self.source_folder, self.build_folder, module), run_environment=True)
             works = True
         except ConanException as e:

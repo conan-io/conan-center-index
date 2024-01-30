@@ -60,10 +60,10 @@ class Nghttp2Conan(ConanFile):
         if self.options.with_app or self.options.get_safe("with_asio"):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_app:
-            self.requires("c-ares/1.22.0")
+            self.requires("c-ares/1.25.0")
             self.requires("libev/4.33")
             self.requires("libevent/2.1.12")
-            self.requires("libxml2/2.12.3")
+            self.requires("libxml2/2.12.4")
             self.requires("zlib/[>=1.2.11 <2]")
             if self.options.with_jemalloc:
                 self.requires("jemalloc/5.3.0")
