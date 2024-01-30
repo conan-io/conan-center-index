@@ -1,11 +1,3 @@
---- PCbuild/python.vcxproj
-+++ PCbuild/python.vcxproj
-@@ -85,1 +85,1 @@
--  <Target Name="ValidateUcrtbase" AfterTargets="AfterBuild" Condition="$(Configuration) != 'PGInstrument'">
-+  <!--<Target Name="ValidateUcrtbase" AfterTargets="AfterBuild" Condition="$(Configuration) != 'PGInstrument'">
-@@ -93,1 +93,1 @@
--  </Target>
-+  </Target>-->
 --- PCbuild/_freeze_importlib.vcxproj
 +++ PCbuild/_freeze_importlib.vcxproj
 @@ -110,1 +110,1 @@
