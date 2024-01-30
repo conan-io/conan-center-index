@@ -339,7 +339,7 @@ class CPythonConan(ConanFile):
         replace_in_file(self, self._msvc_project_path("pyexpat"),
                         "<AdditionalIncludeDirectories>$(PySourcePath)Modules\expat;",
                         "<AdditionalIncludeDirectories>")
-        replace_in_file(self, self._msvc_project_path("pyexpat"), "HAVE_EXPAT_H;" if self._ispy3 else "" + "XML_STATIC;", "")
+        replace_in_file(self, self._msvc_project_path("pyexpat"), "HAVE_EXPAT_H;" if self._is_py3 else "" + "XML_STATIC;", "")
         self._regex_replace_in_file(self._msvc_project_path("pyexpat"), r'.*Include=\"\.\.\\Modules\\expat\\.*" />', "")
 
         replace_in_file(self, self._msvc_project_path("_elementtree"),
@@ -347,6 +347,9 @@ class CPythonConan(ConanFile):
                         "<AdditionalIncludeDirectories>")
         replace_in_file(self, self._msvc_project_path("_elementtree"), "XML_STATIC;", "")
         self._regex_replace_in_file(self._msvc_project_path("_elementtree"), r'.*Include=\"\.\.\\Modules\\expat\\.*" />', "")
+
+        if self._is_py3:
+            self._regex_replace_in_file(self._msvc_project_path("pythoncore"), r'.*Include=\"\$\(zlibDir\).*', "")
 
         self._inject_conan_props_file("_bz2" if self._is_py3 else "bz2", "bzip2", self.options.get_safe("with_bz2"))
         self._inject_conan_props_file("_elementtree", "expat", self._supports_modules)
