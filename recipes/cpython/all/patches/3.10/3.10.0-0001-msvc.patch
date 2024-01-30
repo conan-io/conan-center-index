@@ -29,44 +29,6 @@
      </Link>
    </ItemDefinitionGroup>
    <ItemGroup>
---- PCbuild/pythoncore.vcxproj
-+++ PCbuild/pythoncore.vcxproj
-@@ -302,7 +302,7 @@
-     <ClInclude Include="..\Python\wordcode_helpers.h" />
-   </ItemGroup>
-   <ItemGroup Condition="$(IncludeExternals)">
--    <ClInclude Include="$(zlibDir)\crc32.h" />
-+    <!--<ClInclude Include="$(zlibDir)\crc32.h" />
-     <ClInclude Include="$(zlibDir)\deflate.h" />
-     <ClInclude Include="$(zlibDir)\inffast.h" />
-     <ClInclude Include="$(zlibDir)\inffixed.h" />
-@@ -312,7 +312,7 @@
-     <ClInclude Include="$(zlibDir)\zconf.h" />
-     <ClInclude Include="$(zlibDir)\zconf.in.h" />
-     <ClInclude Include="$(zlibDir)\zlib.h" />
--    <ClInclude Include="$(zlibDir)\zutil.h" />
-+    <ClInclude Include="$(zlibDir)\zutil.h" />-->
-   </ItemGroup>
-   <ItemGroup>
-     <ClCompile Include="..\Modules\_abc.c" />
-@@ -496,7 +496,7 @@
-   </ItemGroup>
-   <ItemGroup Condition="$(IncludeExternals)">
-     <ClCompile Include="..\Modules\zlibmodule.c" />
--    <ClCompile Include="$(zlibDir)\adler32.c" />
-+    <!--<ClCompile Include="$(zlibDir)\adler32.c" />
-     <ClCompile Include="$(zlibDir)\compress.c" />
-     <ClCompile Include="$(zlibDir)\crc32.c" />
-     <ClCompile Include="$(zlibDir)\deflate.c" />
-@@ -506,7 +506,7 @@
-     <ClCompile Include="$(zlibDir)\inftrees.c" />
-     <ClCompile Include="$(zlibDir)\trees.c" />
-     <ClCompile Include="$(zlibDir)\uncompr.c" />
--    <ClCompile Include="$(zlibDir)\zutil.c" />
-+    <ClCompile Include="$(zlibDir)\zutil.c" />-->
-   </ItemGroup>
-   <ItemGroup>
-     <ClCompile Include="..\PC\dl_nt.c" />
 --- PCbuild/_ssl.vcxproj
 +++ PCbuild/_ssl.vcxproj
 @@ -99,9 +99,9 @@
