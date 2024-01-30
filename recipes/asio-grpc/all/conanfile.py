@@ -87,7 +87,7 @@ class AsioGrpcConan(ConanFile):
                 f" C++{self._min_cppstd}."
             )
         if Version(self.version) == "2.7.0" and self.settings.compiler == "gcc" and compiler_version.major == "11" and \
-            compiler_version.minor < "3":
+            compiler_version < "11.3":
             raise ConanInvalidConfiguration(f"{self.ref} does not support gcc 11.0-11.2")
 
     def source(self):
