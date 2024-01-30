@@ -348,6 +348,12 @@ class CPythonConan(ConanFile):
         self._regex_replace_in_file(self._msvc_project_path("_elementtree"), r'.*Include=\"\.\.\\Modules\\expat\\.*" />', "")
 
         if self._is_py3:
+            if Version(self.version) >= "3.9":
+                # deflate.c has warning 4244 disabled, need special patching else it breaks the regex below
+                # Add an extra space to avoid being picked up by the regex
+                replace_in_file(self, self._msvc_project_path("pythoncore"),
+                                r'<ClCompile Include="$(zlibDir)\deflate.c">',
+                                r'<ClCompile Include= "$(zlibDir)\deflate.c" Condition="False">')
             self._regex_replace_in_file(self._msvc_project_path("pythoncore"), r'.*Include=\"\$\(zlibDir\).*', "")
 
         replace_in_file(self, self._msvc_project_path("_tkinter"), "<AdditionalIncludeDirectories>$(tcltkDir)include;", "<AdditionalIncludeDirectories>")

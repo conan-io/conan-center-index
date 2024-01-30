@@ -2,9 +2,9 @@ sources:
   "3.10.0":
     url: "https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz"
     sha256: "c4e0cbad57c90690cb813fb4663ef670b4d0f587d8171e2c42bd4c9245bd2758"
-  "3.9.7":
-    url: "https://www.python.org/ftp/python/3.9.7/Python-3.9.7.tgz"
-    sha256: "a838d3f9360d157040142b715db34f0218e535333696a5569dc6f854604eb9d1"
+  "3.9.18":
+    url: "https://www.python.org/ftp/python/3.9.18/Python-3.9.18.tgz"
+    sha256: "504ce8cfd59addc04c22f590377c6be454ae7406cb1ebf6f5a350149225a9354"
   "3.8.18":
     url: "https://www.python.org/ftp/python/3.8.18/Python-3.8.18.tgz"
     sha256: "7c5df68bab1be81a52dea0cc2e2705ea00553b67107a301188383d7b57320b16"
@@ -19,7 +19,7 @@ patches:
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
     - patch_file: "patches/3.10/3.10.0-0003-_ctypes-ffi.patch"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
-  "3.9.7":
+  "3.9.18":
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
     - patch_file: "patches/3.9/3.9.7-0003-_ctypes-ffi.patch"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
