@@ -1,0 +1,55 @@
+# This workflow warns and then closes issues and PRs that have had no activity for a specified amount of time.
+#
+# You can adjust the behavior by modifying this file.
+# For more information, see:
+# https://github.com/actions/stale
+name: Mark stale issues and pull requests
+
+on:
+  schedule:
+  - cron: '34 6 * * *'
+
+jobs:
+  stale:
+
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+    - uses: actions/stale@v9
+      with:
+        # Idle number of days before marking issues/PRs stale
+        days-before-stale: 30
+
+        # Idle number of days before closing stale issues/PRs
+        days-before-close: 30
+
+        # Only issues/PRs with ALL these labels are checked
+        only-labels:
+
+        # Labels on PRs exempted from stale
+        exempt-pr-labels: blocked,infrastructure
+
+        # Exempt all issues/PRs with milestones from stale
+        exempt-all-milestones: false
+
+        # Exempt all issues/PRs with assignees from stale
+        exempt-all-assignees: false
+
+        # Label to apply on staled PRs
+        stale-pr-label: 'stale'
+
+        # Comment on the staled PRs
+        stale-pr-message: >
+            This pull request has been automatically marked as stale because it has not had
+            recent activity. It will be closed if no further activity occurs. Thank you
+            for your contributions.
+
+        # Comment on the staled PRs while closed
+        close-pr-message: >
+            This pull request has been automatically closed because it has not had
+            recent activity. Thank you for your contributions.
+
+        # Max number of operations per run
+        operations-per-run: 30
