@@ -439,6 +439,11 @@ class CPythonConan(ConanFile):
             else:
                 replace_in_file(self, setup_py, "self.detect_tkinter_darwin(inc_dirs, lib_dirs)", "False")
 
+        if self._is_py3:
+            replace_in_file(self, os.path.join(self.source_folder, "Makefile.pre.in"),
+                            "$(RUNSHARED) CC='$(CC)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)'",
+                            "$(RUNSHARED) CC='$(CC) $(CONFIGURE_CFLAGS) $(CONFIGURE_CPPFLAGS)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)'")
+
         # Enable static MSVC cpython
         if not self.options.shared:
             replace_in_file(self, os.path.join(self.source_folder, "PCbuild", "pythoncore.vcxproj"),
