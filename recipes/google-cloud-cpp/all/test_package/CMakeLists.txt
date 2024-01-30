@@ -1,14 +1,8 @@
-cmake_minimum_required(VERSION 3.5)
-project(google-cloud-cpp-storage-quickstart CXX C)
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+find_package(google-cloud-cpp REQUIRED CONFIG)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-find_package(google-cloud-cpp REQUIRED)
-
-# Once the packages are found, define the targets.
-add_executable(storage storage.cpp)
-target_link_libraries(storage google-cloud-cpp::storage)
+add_executable(${PROJECT_NAME} storage.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE google-cloud-cpp::storage)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
