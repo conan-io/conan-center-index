@@ -43,34 +43,3 @@
    </ItemGroup>
    <ItemGroup>
      <ResourceCompile Include="..\PC\python_nt.rc" />
---- PCbuild/_tkinter.vcxproj
-+++ PCbuild/_tkinter.vcxproj
-@@ -93,12 +93,12 @@
-   </PropertyGroup>
-   <ItemDefinitionGroup>
-     <ClCompile>
--      <AdditionalIncludeDirectories>$(tcltkDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-       <PreprocessorDefinitions>WITH_APPINIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
--      <PreprocessorDefinitions Condition="'$(BuildForRelease)' != 'true'">Py_TCLTK_DIR="$(tcltkDir.TrimEnd('\').Replace('\', '\\'))";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-+      <!--<PreprocessorDefinitions Condition="'$(BuildForRelease)' != 'true'">Py_TCLTK_DIR="$(tcltkDir.TrimEnd('\').Replace('\', '\\'))";%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
-     </ClCompile>
-     <Link>
--      <AdditionalDependencies>$(tcltkLib);%(AdditionalDependencies)</AdditionalDependencies>
-+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-     </Link>
-   </ItemDefinitionGroup>
-   <ItemGroup>
-@@ -108,10 +108,10 @@
-   <ItemGroup>
-     <ResourceCompile Include="..\PC\python_nt.rc" />
-   </ItemGroup>
--  <ItemGroup>
-+  <!--<ItemGroup>
-     <_TclTkDLL Include="$(tcltkdir)\bin\$(tclDllName)" />
-     <_TclTkDLL Include="$(tcltkdir)\bin\$(tkDllName)" />
--  </ItemGroup>
-+  </ItemGroup>-->
-   <ItemGroup>
-     <ProjectReference Include="pythoncore.vcxproj">
-       <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>

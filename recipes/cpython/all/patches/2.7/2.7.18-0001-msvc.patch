@@ -76,20 +76,6 @@
        <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 --- PCbuild/_tkinter.vcxproj
 +++ PCbuild/_tkinter.vcxproj
-@@ -61,11 +61,11 @@
-   </PropertyGroup>
-   <ItemDefinitionGroup>
-     <ClCompile>
--      <AdditionalIncludeDirectories>$(tcltkDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-       <PreprocessorDefinitions>WITH_APPINIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-     </ClCompile>
-     <Link>
--      <AdditionalDependencies>$(tcltkLib);%(AdditionalDependencies)</AdditionalDependencies>
-+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-     </Link>
-   </ItemDefinitionGroup>
-   <ItemGroup>
 @@ -77,12 +77,12 @@
        <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>
        <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

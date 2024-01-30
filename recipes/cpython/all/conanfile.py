@@ -351,6 +351,14 @@ class CPythonConan(ConanFile):
         if self._is_py3:
             self._regex_replace_in_file(self._msvc_project_path("pythoncore"), r'.*Include=\"\$\(zlibDir\).*', "")
 
+        replace_in_file(self, self._msvc_project_path("_tkinter"), "<AdditionalIncludeDirectories>$(tcltkDir)include;", "<AdditionalIncludeDirectories>")
+        replace_in_file(self, self._msvc_project_path("_tkinter"), "<AdditionalDependencies>$(tcltkLib);", "<AdditionalDependencies>")
+        if self._is_py3:
+            replace_in_file(self, self._msvc_project_path("_tkinter"),
+                            "<PreprocessorDefinitions Condition=\"'$(BuildForRelease)' != 'true'\">",
+                            "<PreprocessorDefinitions Condition='False'>")
+            self._regex_replace_in_file(self._msvc_project_path("_tkinter"), r'.*Include=\"\$\(tcltkdir\).*', "")
+
         self._inject_conan_props_file("_bz2" if self._is_py3 else "bz2", "bzip2", self.options.get_safe("with_bz2"))
         self._inject_conan_props_file("_elementtree", "expat", self._supports_modules)
         self._inject_conan_props_file("pyexpat", "expat", self._supports_modules)
