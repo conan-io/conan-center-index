@@ -5,9 +5,9 @@ sources:
   "3.9.7":
     url: "https://www.python.org/ftp/python/3.9.7/Python-3.9.7.tgz"
     sha256: "a838d3f9360d157040142b715db34f0218e535333696a5569dc6f854604eb9d1"
-  "3.8.12":
-    url: "https://www.python.org/ftp/python/3.8.12/Python-3.8.12.tgz"
-    sha256: "316aa33f3b7707d041e73f246efedb297a70898c4b91f127f66dc8d80c596f1a"
+  "3.8.18":
+    url: "https://www.python.org/ftp/python/3.8.18/Python-3.8.18.tgz"
+    sha256: "7c5df68bab1be81a52dea0cc2e2705ea00553b67107a301188383d7b57320b16"
   "3.7.12":
     url: "https://www.python.org/ftp/python/3.7.12/Python-3.7.12.tgz"
     sha256: "33b4daaf831be19219659466d12645f87ecec6eb21d4d9f9711018a7b66cce46"
@@ -23,7 +23,7 @@ patches:
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
     - patch_file: "patches/3.9/3.9.7-0003-_ctypes-ffi.patch"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
-  "3.8.12":
+  "3.8.18":
     - patch_file: "patches/3.8/3.8.12-0002-_ctypes-ffi.patch"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
   "3.7.12":
