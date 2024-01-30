@@ -11,7 +11,7 @@ required_conan_version = ">=1.52.0"
 class MapboxWagyuConan(ConanFile):
     name = "mapbox-wagyu"
     description = "A general library for geometry operations of union, intersections, difference, and xor"
-    license = "BSD-2-Clause"
+    license = "LicenseRef-mapbox-wagyu"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mapbox/wagyu/"
     topics = ("geometry", "clipping", "header-only")
