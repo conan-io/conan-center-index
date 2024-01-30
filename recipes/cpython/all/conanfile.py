@@ -204,6 +204,8 @@ class CPythonConan(ConanFile):
             if str(self.settings.arch) not in self._msvc_archs:
                 raise ConanInvalidConfiguration("Visual Studio does not support this architecture")
             if not self.options.shared and Version(self.version) >= "3.10":
+                # Static CPython on Windows is only loosely supported, see https://github.com/python/cpython/issues/110234
+                # 3.10 fails during the test, 3.11 fails during the build (missing symbol that seems to be DLL specific: PyWin_DLLhModule)
                 raise ConanInvalidConfiguration("Static msvc build disabled (>=3.10) due to \"AttributeError: module 'sys' has no attribute 'winver'\"")
 
         if self.options.get_safe("with_curses", False) and not self.dependencies["ncurses"].options.with_widec:
@@ -305,114 +307,11 @@ class CPythonConan(ConanFile):
                             search,
                             search + f'<Import Project="{self.generators_folder}/conan_{dep_name}.props" />')
 
-    def _patch_msvc_projects(self):
-        self._regex_replace_in_file(self._msvc_project_path("_bz2" if self._is_py3 else "bz2"), r'.*Include=\"\$\(bz2Dir\).*', "")
-        if self._with_libffi:
-            replace_in_file(self, self._msvc_project_path("_ctypes"), '<Import Project="libffi.props" />', "")
-            replace_in_file(self, self._msvc_project_path("_ctypes"), "FFI_BUILDING;", "")
-        
-        if self._is_py3:
-            replace_in_file(self, self._msvc_project_path("_hashlib"), '<Import Project="openssl.props" />', "")
-            replace_in_file(self, self._msvc_project_path("_ssl"), '<Import Project="openssl.props" />', "")
-        
-            # For mpdecimal, we need to remove all headers and all c files *except* the main module file, _decimal.c
-            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\.*\.h.*', "")
-            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\libmpdec\\.*\.c.*', "")
-            # There is also an assembly file with a complicated build step as part of the mpdecimal build
-            replace_in_file(self, self._msvc_project_path("_decimal"), "<CustomBuild", "<!--<CustomBuild")
-            replace_in_file(self, self._msvc_project_path("_decimal"), "</CustomBuild>", "</CustomBuild>-->")
-            # Remove extra include directory
-            replace_in_file(self, self._msvc_project_path("_decimal"), "..\Modules\_decimal\libmpdec;", "")
-
-        replace_in_file(self, self._msvc_project_path("_sqlite3"),
-                        '<ProjectReference Include="sqlite3.vcxproj">',
-                        '<ProjectReference Include="sqlite3.vcxproj" Condition="False">')
-
-        if self._is_py3:
-            replace_in_file(self, self._msvc_project_path("_lzma"), "<PreprocessorDefinitions>", "<PreprocessorDefinitions>$(ConanPreprocessorDefinitions);")
-            replace_in_file(self, self._msvc_project_path("_lzma"), "<AdditionalDependencies>$(OutDir)liblzma$(PyDebugExt).lib;", "<AdditionalDependencies>")
-            replace_in_file(self, self._msvc_project_path("_lzma"),
-                            '<ProjectReference Include="liblzma.vcxproj">',
-                            '<ProjectReference Include="liblzma.vcxproj" Condition="False">')
-
-        replace_in_file(self, self._msvc_project_path("pyexpat"),
-                        "<AdditionalIncludeDirectories>$(PySourcePath)Modules\expat;",
-                        "<AdditionalIncludeDirectories>")
-        replace_in_file(self, self._msvc_project_path("pyexpat"), "HAVE_EXPAT_H;" if self._is_py3 else "" + "XML_STATIC;", "")
-        self._regex_replace_in_file(self._msvc_project_path("pyexpat"), r'.*Include=\"\.\.\\Modules\\expat\\.*" />', "")
-
-        replace_in_file(self, self._msvc_project_path("_elementtree"),
-                        "<AdditionalIncludeDirectories>..\Modules\expat;",
-                        "<AdditionalIncludeDirectories>")
-        replace_in_file(self, self._msvc_project_path("_elementtree"), "XML_STATIC;", "")
-        self._regex_replace_in_file(self._msvc_project_path("_elementtree"), r'.*Include=\"\.\.\\Modules\\expat\\.*" />', "")
-
-        if self._is_py3:
-            if Version(self.version) >= "3.9":
-                # deflate.c has warning 4244 disabled, need special patching else it breaks the regex below
-                # Add an extra space to avoid being picked up by the regex
-                replace_in_file(self, self._msvc_project_path("pythoncore"),
-                                r'<ClCompile Include="$(zlibDir)\deflate.c">',
-                                r'<ClCompile Include= "$(zlibDir)\deflate.c" Condition="False">')
-            self._regex_replace_in_file(self._msvc_project_path("pythoncore"), r'.*Include=\"\$\(zlibDir\).*', "")
-
-        replace_in_file(self, self._msvc_project_path("_tkinter"), "<AdditionalIncludeDirectories>$(tcltkDir)include;", "<AdditionalIncludeDirectories>")
-        replace_in_file(self, self._msvc_project_path("_tkinter"), "<AdditionalDependencies>$(tcltkLib);", "<AdditionalDependencies>")
-        if self._is_py3:
-            replace_in_file(self, self._msvc_project_path("_tkinter"),
-                            "<PreprocessorDefinitions Condition=\"'$(BuildForRelease)' != 'true'\">",
-                            "<PreprocessorDefinitions Condition='False'>")
-            self._regex_replace_in_file(self._msvc_project_path("_tkinter"), r'.*Include=\"\$\(tcltkdir\).*', "")
-
-        if self._is_py3:
-            # Disable "ValidateUcrtbase" target
-            replace_in_file(self, self._msvc_project_path("python"), "$(Configuration) != 'PGInstrument'", "False")
-
-            replace_in_file(self, self._msvc_project_path("_freeze_importlib"), 
-                            "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"$(Configuration) == 'Debug' or $(Configuration) == 'Release'\"",
-                            "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"False\"")
-
-            replace_in_file(self, self._msvc_project_path("_ssl"),
-                            r'<ClCompile Include="$(opensslIncludeDir)\applink.c">',
-                            r'<ClCompile Include="$(opensslIncludeDir)\applink.c" Condition="False">')
-
-        self._inject_conan_props_file("_bz2" if self._is_py3 else "bz2", "bzip2", self.options.get_safe("with_bz2"))
-        self._inject_conan_props_file("_elementtree", "expat", self._supports_modules)
-        self._inject_conan_props_file("pyexpat", "expat", self._supports_modules)
-        self._inject_conan_props_file("_hashlib", "openssl", self._supports_modules)
-        self._inject_conan_props_file("_ssl", "openssl", self._supports_modules)
-        self._inject_conan_props_file("_sqlite3", "sqlite3", self.options.get_safe("with_sqlite3"))
-        self._inject_conan_props_file("_tkinter", "tk", self.options.get_safe("with_tkinter"))
-        self._inject_conan_props_file("pythoncore", "zlib")
-        self._inject_conan_props_file("python", "zlib")
-        self._inject_conan_props_file("pythonw", "zlib")
-        self._inject_conan_props_file("_ctypes", "libffi", self._with_libffi)
-        self._inject_conan_props_file("_decimal", "mpdecimal", self._is_py3 and self._supports_modules)
-        self._inject_conan_props_file("_lzma", "xz_utils", self.options.get_safe("with_lzma"))
-        self._inject_conan_props_file("_bsddb", "libdb", self.options.get_safe("with_bsddb"))
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
+    def _patch_setup_py(self):
         setup_py = os.path.join(self.source_folder, "setup.py")
         if self._is_py3 and Version(self.version) < "3.10":
             replace_in_file(self, setup_py, ":libmpdec.so.2", "mpdec")
-        if is_msvc(self):
-            runtime_library = {
-                "MT": "MultiThreaded",
-                "MTd": "MultiThreadedDebug",
-                "MD": "MultiThreadedDLL",
-                "MDd": "MultiThreadedDebugDLL",
-            }[msvc_runtime_flag(self)]
-            self.output.info("Patching runtime")
-            replace_in_file(self, os.path.join(self.source_folder, "PCbuild", "pyproject.props"),
-                            "MultiThreadedDLL", runtime_library)
-            replace_in_file(self, os.path.join(self.source_folder, "PCbuild", "pyproject.props"),
-                            "MultiThreadedDebugDLL", runtime_library)
-
-        # Remove vendored packages
-        rmdir(self, os.path.join(self.source_folder, "Modules", "_decimal", "libmpdec"))
-        rmdir(self, os.path.join(self.source_folder, "Modules", "expat"))
-
+        
         if self.options.get_safe("with_curses", False):
             # FIXME: this will link to ALL libraries of ncurses. Only need to link to ncurses(w) (+ eventually tinfo)
             ncurses_info = self.dependencies["ncurses"].cpp_info.aggregated_components()
@@ -443,6 +342,115 @@ class CPythonConan(ConanFile):
                 replace_in_file(self, setup_py, "if (MACOS and self.detect_tkinter_darwin())", "if (False)")
             else:
                 replace_in_file(self, setup_py, "self.detect_tkinter_darwin(inc_dirs, lib_dirs)", "False")
+
+    def _patch_msvc_projects(self):
+        self._regex_replace_in_file(self._msvc_project_path("_bz2" if self._is_py3 else "bz2"), r'.*Include=\"\$\(bz2Dir\).*', "")
+        if self._with_libffi:
+            replace_in_file(self, self._msvc_project_path("_ctypes"), '<Import Project="libffi.props" />', "")
+            if Version(self.version) < "3.11":
+                replace_in_file(self, self._msvc_project_path("_ctypes"), "FFI_BUILDING;", "")
+        
+        if self._is_py3:
+            replace_in_file(self, self._msvc_project_path("_hashlib"), '<Import Project="openssl.props" />', "")
+            replace_in_file(self, self._msvc_project_path("_ssl"), '<Import Project="openssl.props" />', "")
+        
+            # For mpdecimal, we need to remove all headers and all c files *except* the main module file, _decimal.c
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\.*\.h.*', "")
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\libmpdec\\.*\.c.*', "")
+            # There is also an assembly file with a complicated build step as part of the mpdecimal build
+            replace_in_file(self, self._msvc_project_path("_decimal"), "<CustomBuild", "<!--<CustomBuild")
+            replace_in_file(self, self._msvc_project_path("_decimal"), "</CustomBuild>", "</CustomBuild>-->")
+            # Remove extra include directory
+            replace_in_file(self, self._msvc_project_path("_decimal"), "..\Modules\_decimal\libmpdec;", "")
+
+        replace_in_file(self, self._msvc_project_path("_sqlite3"),
+                        '<ProjectReference Include="sqlite3.vcxproj">',
+                        '<ProjectReference Include="sqlite3.vcxproj" Condition="False">')
+
+        if self._is_py3:
+            replace_in_file(self, self._msvc_project_path("_lzma"), "<PreprocessorDefinitions>", "<PreprocessorDefinitions>$(ConanPreprocessorDefinitions);")
+            replace_in_file(self, self._msvc_project_path("_lzma"), "<AdditionalDependencies>$(OutDir)liblzma$(PyDebugExt).lib;", "<AdditionalDependencies>")
+            replace_in_file(self, self._msvc_project_path("_lzma"),
+                            '<ProjectReference Include="liblzma.vcxproj">',
+                            '<ProjectReference Include="liblzma.vcxproj" Condition="False">')
+
+        replace_in_file(self, self._msvc_project_path("pyexpat"),
+                        "<AdditionalIncludeDirectories>$(PySourcePath)Modules\expat;",
+                        "<AdditionalIncludeDirectories>")
+        replace_in_file(self, self._msvc_project_path("pyexpat"), ("HAVE_EXPAT_H;" if self._is_py3 and Version(self.version) < "3.11" else "") + "XML_STATIC;", "")
+        self._regex_replace_in_file(self._msvc_project_path("pyexpat"), r'.*Include=\"\.\.\\Modules\\expat\\.*" />', "")
+
+        replace_in_file(self, self._msvc_project_path("_elementtree"),
+                        "<AdditionalIncludeDirectories>..\Modules\expat;",
+                        "<AdditionalIncludeDirectories>")
+        replace_in_file(self, self._msvc_project_path("_elementtree"), "XML_STATIC;", "")
+        self._regex_replace_in_file(self._msvc_project_path("_elementtree"), r'.*Include=\"\.\.\\Modules\\expat\\.*" />', "")
+
+        if self._is_py3:
+            if Version(self.version) >= "3.9":
+                # deflate.c has warning 4244 disabled, need special patching else it breaks the regex below
+                # Add an extra space to avoid being picked up by the regex
+                replace_in_file(self, self._msvc_project_path("pythoncore"),
+                                r'<ClCompile Include="$(zlibDir)\deflate.c">',
+                                r'<ClCompile Include= "$(zlibDir)\deflate.c" Condition="False">')
+            self._regex_replace_in_file(self._msvc_project_path("pythoncore"), r'.*Include=\"\$\(zlibDir\).*', "")
+
+        replace_in_file(self, self._msvc_project_path("_tkinter"), "<AdditionalIncludeDirectories>$(tcltkDir)include;", "<AdditionalIncludeDirectories>")
+        replace_in_file(self, self._msvc_project_path("_tkinter"), "<AdditionalDependencies>$(tcltkLib);", "<AdditionalDependencies>")
+        if self._is_py3:
+            replace_in_file(self, self._msvc_project_path("_tkinter"),
+                            "<PreprocessorDefinitions Condition=\"'$(BuildForRelease)' != 'true'\">",
+                            "<PreprocessorDefinitions Condition='False'>")
+            self._regex_replace_in_file(self._msvc_project_path("_tkinter"), r'.*Include=\"\$\(tcltkdir\).*', "")
+
+        if self._is_py3:
+            # Disable "ValidateUcrtbase" target
+            replace_in_file(self, self._msvc_project_path("python"), "$(Configuration) != 'PGInstrument'", "False")
+
+            if Version(self.version) < "3.11":
+                replace_in_file(self, self._msvc_project_path("_freeze_importlib"), 
+                                "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"$(Configuration) == 'Debug' or $(Configuration) == 'Release'\"",
+                                "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"False\"")
+
+            replace_in_file(self, self._msvc_project_path("_ssl"),
+                            r'<ClCompile Include="$(opensslIncludeDir)\applink.c">',
+                            r'<ClCompile Include="$(opensslIncludeDir)\applink.c" Condition="False">')
+
+        self._inject_conan_props_file("_bz2" if self._is_py3 else "bz2", "bzip2", self.options.get_safe("with_bz2"))
+        self._inject_conan_props_file("_elementtree", "expat", self._supports_modules)
+        self._inject_conan_props_file("pyexpat", "expat", self._supports_modules)
+        self._inject_conan_props_file("_hashlib", "openssl", self._supports_modules)
+        self._inject_conan_props_file("_ssl", "openssl", self._supports_modules)
+        self._inject_conan_props_file("_sqlite3", "sqlite3", self.options.get_safe("with_sqlite3"))
+        self._inject_conan_props_file("_tkinter", "tk", self.options.get_safe("with_tkinter"))
+        self._inject_conan_props_file("pythoncore", "zlib")
+        self._inject_conan_props_file("python", "zlib")
+        self._inject_conan_props_file("pythonw", "zlib")
+        self._inject_conan_props_file("_ctypes", "libffi", self._with_libffi)
+        self._inject_conan_props_file("_decimal", "mpdecimal", self._is_py3 and self._supports_modules)
+        self._inject_conan_props_file("_lzma", "xz_utils", self.options.get_safe("with_lzma"))
+        self._inject_conan_props_file("_bsddb", "libdb", self.options.get_safe("with_bsddb"))
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        if Version(self.version) < "3.11":
+            self._patch_setup_py()
+        if is_msvc(self):
+            runtime_library = {
+                "MT": "MultiThreaded",
+                "MTd": "MultiThreadedDebug",
+                "MD": "MultiThreadedDLL",
+                "MDd": "MultiThreadedDebugDLL",
+            }[msvc_runtime_flag(self)]
+            self.output.info("Patching runtime")
+            replace_in_file(self, os.path.join(self.source_folder, "PCbuild", "pyproject.props"),
+                            "MultiThreadedDLL", runtime_library)
+            replace_in_file(self, os.path.join(self.source_folder, "PCbuild", "pyproject.props"),
+                            "MultiThreadedDebugDLL", runtime_library)
+
+        # Remove vendored packages
+        rmdir(self, os.path.join(self.source_folder, "Modules", "_decimal", "libmpdec"))
+        rmdir(self, os.path.join(self.source_folder, "Modules", "expat"))
 
         if self._is_py3:
             replace_in_file(self, os.path.join(self.source_folder, "Makefile.pre.in"),
