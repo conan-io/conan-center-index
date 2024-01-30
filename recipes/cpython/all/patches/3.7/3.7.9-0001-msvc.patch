@@ -17,17 +17,3 @@
    <Target Name="SignFiles" AfterTargets="Build" Condition="$(_SignCommand) != ''">
      <ItemGroup>
        <FilesToSign Include="$(opensslOutDir)\lib*.dll" />
---- PCbuild/_ssl.vcxproj
-+++ PCbuild/_ssl.vcxproj
-@@ -67,9 +67,9 @@
-   </ItemDefinitionGroup>
-   <ItemGroup>
-     <ClCompile Include="..\Modules\_ssl.c" />
--    <ClCompile Include="$(opensslIncludeDir)\applink.c">
-+    <!--<ClCompile Include="$(opensslIncludeDir)\applink.c">
-       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;$(PreprocessorDefinitions)</PreprocessorDefinitions>
--    </ClCompile>
-+    </ClCompile>-->
-   </ItemGroup>
-   <ItemGroup>
-     <ResourceCompile Include="..\PC\python_nt.rc" />

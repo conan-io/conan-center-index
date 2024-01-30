@@ -366,6 +366,10 @@ class CPythonConan(ConanFile):
                             "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"$(Configuration) == 'Debug' or $(Configuration) == 'Release'\"",
                             "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"False\"")
 
+            replace_in_file(self, self._msvc_project_path("_ssl"),
+                            r'<ClCompile Include="$(opensslIncludeDir)\applink.c">',
+                            r'<ClCompile Include="$(opensslIncludeDir)\applink.c" Condition="False">')
+
         self._inject_conan_props_file("_bz2" if self._is_py3 else "bz2", "bzip2", self.options.get_safe("with_bz2"))
         self._inject_conan_props_file("_elementtree", "expat", self._supports_modules)
         self._inject_conan_props_file("pyexpat", "expat", self._supports_modules)
