@@ -452,7 +452,7 @@ class CPythonConan(ConanFile):
         rmdir(self, os.path.join(self.source_folder, "Modules", "_decimal", "libmpdec"))
         rmdir(self, os.path.join(self.source_folder, "Modules", "expat"))
 
-        if self._is_py3:
+        if self._is_py3 and Version(self.version) < "3.12":
             replace_in_file(self, os.path.join(self.source_folder, "Makefile.pre.in"),
                             "$(RUNSHARED) CC='$(CC)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)'",
                             "$(RUNSHARED) CC='$(CC) $(CONFIGURE_CFLAGS) $(CONFIGURE_CPPFLAGS)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)'")

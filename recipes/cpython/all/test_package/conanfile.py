@@ -76,6 +76,12 @@ class TestPackageConan(ConanFile):
             return Version(self.deps_cpp_info["cpython"].version)
 
     @property
+    def _test_setuptools(self):
+        # TODO Should we still try to test this?
+        # https://github.com/python/cpython/pull/101039
+        return can_run(self) and self._supports_modules and self._py_version < "3.12"
+
+    @property
     def _pymalloc(self):
         if conan2:
             return bool(self.dependencies["cpython"].options.get_safe("pymalloc", False))
@@ -133,15 +139,17 @@ class TestPackageConan(ConanFile):
         # The build also needs access to the run environment to run the python executable
         VirtualRunEnv(self).generate(scope="run")
         VirtualRunEnv(self).generate(scope="build")
-        # Just for the distutils build
-        AutotoolsDeps(self).generate(scope="build")
+
+        if self._test_setuptools:
+            # Just for the distutils build
+            AutotoolsDeps(self).generate(scope="build")
 
     def build(self):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
-        if can_run(self) and self._supports_modules:
+        if self._test_setuptools:
             os.environ["DISTUTILS_USE_SDK"] = "1"
             os.environ["MSSdk"] = "1"
             setup_args = [
@@ -223,9 +231,10 @@ class TestPackageConan(ConanFile):
                     self.output.info("Testing module (spam) using cmake built module")
                     self._test_module("spam", True)
 
-                    os.environ["PYTHONPATH"] = os.path.join(self.build_folder, "lib_setuptools")
-                    self.output.info("Testing module (spam) using setup.py built module")
-                    self._test_module("spam", True)
+                    if self._test_setuptools:
+                        os.environ["PYTHONPATH"] = os.path.join(self.build_folder, "lib_setuptools")
+                        self.output.info("Testing module (spam) using setup.py built module")
+                        self._test_module("spam", True)
 
                     del os.environ["PYTHONPATH"]
 

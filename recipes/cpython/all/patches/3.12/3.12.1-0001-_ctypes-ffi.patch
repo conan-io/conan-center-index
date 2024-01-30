@@ -1,0 +1,37 @@
+diff --git a/Modules/_ctypes/cfield.c b/Modules/_ctypes/cfield.c
+index 128506a9ee..ee9ade67b8 100644
+--- a/Modules/_ctypes/cfield.c
++++ b/Modules/_ctypes/cfield.c
+@@ -1448,7 +1448,11 @@ P_get(void *ptr, Py_ssize_t size)
+     return PyLong_FromVoidPtr(*(void **)ptr);
+ }
+ 
+-static struct fielddesc formattable[] = {
++#define FORMATTABLE_SIZE 30
++static struct fielddesc formattable[FORMATTABLE_SIZE];
++
++static void formattable_init(void) {
++struct fielddesc my_formattable[] = {
+     { 's', s_set, s_get, NULL},
+     { 'b', b_set, b_get, NULL},
+     { 'B', B_set, B_get, NULL},
+@@ -1485,6 +1489,11 @@ static struct fielddesc formattable[] = {
+     { 'O', O_set, O_get, NULL},
+     { 0, NULL, NULL, NULL},
+ };
++    size_t nb = 1;
++    for (struct fielddesc *pos = my_formattable; pos->code; ++pos, ++nb);
++    if (FORMATTABLE_SIZE < nb) abort();
++    memcpy(formattable, my_formattable, nb * sizeof(struct fielddesc));
++}
+ 
+ /*
+   Ideas: Implement VARIANT in this table, using 'V' code.
+@@ -1572,6 +1581,7 @@ _ctypes_get_fielddesc(const char *fmt)
+ 
+     if (!initialized) {
+         initialized = 1;
++        formattable_init();
+         _ctypes_init_fielddesc();
+     }
+ 

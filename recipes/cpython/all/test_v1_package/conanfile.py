@@ -39,6 +39,12 @@ class TestPackageConan(ConanFile):
         return re.match(r"^([0-9.]+)", self.deps_cpp_info["cpython"].version).group(1)
 
     @property
+    def _test_setuptools(self):
+        # TODO Should we still try to test this?
+        # https://github.com/python/cpython/pull/101039
+        return not tools.cross_building(self, skip_x64_x86=True) and self._supports_modules and self._py_version < tools.Version("3.12")
+
+    @property
     def _pymalloc(self):
         return bool("pymalloc" in self.options["cpython"] and self.options["cpython"].pymalloc)
 
@@ -113,7 +119,7 @@ class TestPackageConan(ConanFile):
             cmake.configure()
         cmake.build()
 
-        if not tools.cross_building(self, skip_x64_x86=True):
+        if self._test_setuptools:
             if self._supports_modules:
                 with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
                     modsrcfolder = "py2" if tools.Version(self.deps_cpp_info["cpython"].version).major < "3" else "py3"
@@ -195,10 +201,11 @@ class TestPackageConan(ConanFile):
                     with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib")]}):
                         self.output.info("Testing module (spam) using cmake built module")
                         self._test_module("spam", True)
-
-                    with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib_setuptools")]}):
-                        self.output.info("Testing module (spam) using setup.py built module")
-                        self._test_module("spam", True)
+                    
+                    if self._test_setuptools:
+                        with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib_setuptools")]}):
+                            self.output.info("Testing module (spam) using setup.py built module")
+                            self._test_module("spam", True)
 
             # MSVC builds need PYTHONHOME set. Linux and Mac don't require it to be set if tested after building,
             # but if the package is relocated then it needs to be set.
