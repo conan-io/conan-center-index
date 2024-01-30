@@ -332,6 +332,9 @@ class CPythonConan(ConanFile):
                         '<ProjectReference Include="sqlite3.vcxproj">',
                         '<ProjectReference Include="sqlite3.vcxproj" Condition="False">')
 
+        if self._is_py3:
+            replace_in_file(self, self._msvc_project_path("_lzma"), "<PreprocessorDefinitions>", "<PreprocessorDefinitions>$(ConanPreprocessorDefinitions);")
+            replace_in_file(self, self._msvc_project_path("_lzma"), "<AdditionalDependencies>$(OutDir)liblzma$(PyDebugExt).lib;", "<AdditionalDependencies>")
         replace_in_file(self, self._msvc_project_path("_lzma"),
                         '<ProjectReference Include="liblzma.vcxproj">',
                         '<ProjectReference Include="liblzma.vcxproj" Condition="False">')

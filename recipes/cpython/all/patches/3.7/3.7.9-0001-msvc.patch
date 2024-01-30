@@ -14,21 +14,6 @@
 @@ -112,1 +112,1 @@
 -  </Target>
 +  </Target>-->
---- PCbuild/_lzma.vcxproj
-+++ PCbuild/_lzma.vcxproj
-@@ -62,10 +62,10 @@
-   <ItemDefinitionGroup>
-     <ClCompile>
-       <AdditionalIncludeDirectories>$(lzmaDir)src/liblzma/api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
--      <PreprocessorDefinitions>WIN32;_FILE_OFFSET_BITS=64;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;LZMA_API_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-+      <PreprocessorDefinitions>$(ConanPreprocessorDefinitions);WIN32;_FILE_OFFSET_BITS=64;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;LZMA_API_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-     </ClCompile>
-     <Link>
--      <AdditionalDependencies>$(OutDir)liblzma$(PyDebugExt).lib;%(AdditionalDependencies)</AdditionalDependencies>
-+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-     </Link>
-   </ItemDefinitionGroup>
-   <ItemGroup>
 --- PCbuild/openssl.vcxproj
 +++ PCbuild/openssl.vcxproj
 @@ -74,6 +74,6 @@ nmake
