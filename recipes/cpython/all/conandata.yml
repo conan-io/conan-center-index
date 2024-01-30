@@ -8,9 +8,9 @@ sources:
   "3.8.18":
     url: "https://www.python.org/ftp/python/3.8.18/Python-3.8.18.tgz"
     sha256: "7c5df68bab1be81a52dea0cc2e2705ea00553b67107a301188383d7b57320b16"
-  "3.7.12":
-    url: "https://www.python.org/ftp/python/3.7.12/Python-3.7.12.tgz"
-    sha256: "33b4daaf831be19219659466d12645f87ecec6eb21d4d9f9711018a7b66cce46"
+  "3.7.17":
+    url: "https://www.python.org/ftp/python/3.7.17/Python-3.7.17.tgz"
+    sha256: "fd50161bc2a04f4c22a0971ff0f3856d98b4bf294f89740a9f06b520aae63b49"
   "2.7.18":
     url: "https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz"
     sha256: "da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814"
@@ -29,7 +29,7 @@ patches:
     - patch_file: "patches/3.8/3.8.12-0002-_ctypes-ffi.patch"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
     - patch_file: "patches/3.x-0002-remove-module-deps.patch"
-  "3.7.12":
+  "3.7.17":
     - patch_file: "patches/3.7/3.7.9-0001-msvc.patch"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
     - patch_file: "patches/3.x-0002-remove-module-deps.patch"
