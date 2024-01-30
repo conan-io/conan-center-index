@@ -14,9 +14,13 @@ PY3 = sys.version_info[0] == 3
 if PY2:
     subdir = "py2"
     from distutils.core import setup, Extension
+    use_2to3 = True
 elif PY3:
     subdir = "py3"
-    from setuptools import setup, Extension
+    from setuptools import setup, Extension, __version__ as setuptools_version
+    import pkg_resources
+    # use_2to3 is deprecated in this version
+    use_2to3 = pkg_resources.parse_version(setuptools_version) < pkg_resources.parse_version("46.2.0")
 else:
     raise Exception
 
@@ -25,7 +29,7 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 setup(
     name="test_package",
     version="1.0",
-    use_2to3=True,
+    use_2to3=use_2to3,
     ext_modules=[
         Extension("spam", [os.path.join(script_dir, subdir, "test_module.c")]),
     ],
