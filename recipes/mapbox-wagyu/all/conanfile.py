@@ -37,7 +37,6 @@ class MapboxWagyuConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.84.0", transitive_headers=True)
         self.requires("mapbox-geometry/2.0.3", transitive_headers=True)
 
     def package_id(self):
