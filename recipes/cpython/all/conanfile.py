@@ -434,6 +434,11 @@ class CPythonConan(ConanFile):
                 replace_in_file(self, setup_py, "lib_dirs = []", f"lib_dirs = {openssl.libdirs + zlib.libdirs}")
                 replace_in_file(self, setup_py, "libraries = ['ssl', 'crypto'],", f"libraries = {openssl.libs + zlib.libs}, #")
 
+            if Version(self.version) >= "3.8":
+                replace_in_file(self, setup_py, "if (MACOS and self.detect_tkinter_darwin())", "if (False)")
+            else:
+                replace_in_file(self, setup_py, "self.detect_tkinter_darwin(inc_dirs, lib_dirs)", "False")
+
         # Enable static MSVC cpython
         if not self.options.shared:
             replace_in_file(self, os.path.join(self.source_folder, "PCbuild", "pythoncore.vcxproj"),
