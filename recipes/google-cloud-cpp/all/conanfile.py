@@ -105,7 +105,7 @@ class GoogleCloudCppConan(ConanFile):
     def _patch_sources(self):
         if Version(self.version) < "1.33.0":
             # Do not override CMAKE_CXX_STANDARD if provided
-            replace_in_file(os.path.join(self.source_folder, "CMakeLists.txt"),
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                 textwrap.dedent("""\
                     set(CMAKE_CXX_STANDARD
                         11
