@@ -470,11 +470,10 @@ class CPythonConan(ConanFile):
         self.output.info(f"Building {len(projects)} Visual Studio projects: {projects}")
 
         sln = os.path.join(self.source_folder, "PCbuild", "pcbuild.sln")
-        if Version(self.version) > "3.8.0":
+        if Version(self.version) >= "3.9.0":
             msbuild.build(sln, targets=projects)
         else:
-            # In these versions, solution files do not pick up the toolset automatically.
-            # All of these versions are EOL, so a hacky solution is fine for now.
+            # FIXME: In these versions, solution files do not pick up the toolset automatically.
             cmd = msbuild.command(sln, targets=projects)
             self.run(f"{cmd} /p:PlatformToolset={msvs_toolset(self)}")
 
