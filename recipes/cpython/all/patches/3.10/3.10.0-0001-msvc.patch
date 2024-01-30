@@ -1,11 +1,3 @@
---- PCbuild/_freeze_importlib.vcxproj
-+++ PCbuild/_freeze_importlib.vcxproj
-@@ -151,1 +151,1 @@
--  <Target Name="RebuildImportLib" AfterTargets="AfterBuild" Condition="$(Configuration) == 'Debug' or $(Configuration) == 'Release'"
-+  <!--<Target Name="RebuildImportLib" AfterTargets="AfterBuild" Condition="$(Configuration) == 'Debug' or $(Configuration) == 'Release'"
-@@ -153,1 +153,1 @@
--  </Target>
-+  </Target>-->
 --- PCbuild/_ssl.vcxproj
 +++ PCbuild/_ssl.vcxproj
 @@ -99,9 +99,9 @@

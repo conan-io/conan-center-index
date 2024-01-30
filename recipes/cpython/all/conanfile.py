@@ -357,9 +357,14 @@ class CPythonConan(ConanFile):
                             "<PreprocessorDefinitions Condition='False'>")
             self._regex_replace_in_file(self._msvc_project_path("_tkinter"), r'.*Include=\"\$\(tcltkdir\).*', "")
 
-        replace_in_file(self, self._msvc_project_path("python"),
-                        "<Target Name=\"ValidateUcrtbase\" AfterTargets=\"AfterBuild\" Condition=\"$(Configuration) != 'PGInstrument' and $(Platform) != 'ARM' and $(Platform) != 'ARM64'\">", 
-                        "<Target Name=\"ValidateUcrtbase\" AfterTargets=\"AfterBuild\" Condition=\"False\">")
+        if self._is_py3:
+            replace_in_file(self, self._msvc_project_path("python"),
+                            "<Target Name=\"ValidateUcrtbase\" AfterTargets=\"AfterBuild\" Condition=\"$(Configuration) != 'PGInstrument' and $(Platform) != 'ARM' and $(Platform) != 'ARM64'\">", 
+                            "<Target Name=\"ValidateUcrtbase\" AfterTargets=\"AfterBuild\" Condition=\"False\">")
+    
+            replace_in_file(self, self._msvc_project_path("_freeze_importlib"), 
+                            "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"$(Configuration) == 'Debug' or $(Configuration) == 'Release'\"",
+                            "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"False\"")
 
         self._inject_conan_props_file("_bz2" if self._is_py3 else "bz2", "bzip2", self.options.get_safe("with_bz2"))
         self._inject_conan_props_file("_elementtree", "expat", self._supports_modules)
