@@ -311,17 +311,18 @@ class CPythonConan(ConanFile):
             replace_in_file(self, self._msvc_project_path("_ctypes"), '<Import Project="libffi.props" />', "")
             replace_in_file(self, self._msvc_project_path("_ctypes"), "FFI_BUILDING;", "")
         
-        replace_in_file(self, self._msvc_project_path("_hashlib"), '<Import Project="openssl.props" />', "")
-        replace_in_file(self, self._msvc_project_path("_ssl"), '<Import Project="openssl.props" />', "")
+        if self._is_py3:
+            replace_in_file(self, self._msvc_project_path("_hashlib"), '<Import Project="openssl.props" />', "")
+            replace_in_file(self, self._msvc_project_path("_ssl"), '<Import Project="openssl.props" />', "")
         
-        # For mpdecimal, we need to remove all headers and all c files *except* the main module file, _decimal.c
-        self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\.*\.h.*', "")
-        self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\libmpdec\\.*\.c.*', "")
-        # There is also an assembly file with a complicated build step as part of the mpdecimal build
-        replace_in_file(self, self._msvc_project_path("_decimal"), "<CustomBuild", "<!--<CustomBuild")
-        replace_in_file(self, self._msvc_project_path("_decimal"), "</CustomBuild>", "</CustomBuild>-->")
-        # Remove extra include directory
-        replace_in_file(self, self._msvc_project_path("_decimal"), "..\Modules\_decimal\libmpdec;", "")
+            # For mpdecimal, we need to remove all headers and all c files *except* the main module file, _decimal.c
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\.*\.h.*', "")
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\libmpdec\\.*\.c.*', "")
+            # There is also an assembly file with a complicated build step as part of the mpdecimal build
+            replace_in_file(self, self._msvc_project_path("_decimal"), "<CustomBuild", "<!--<CustomBuild")
+            replace_in_file(self, self._msvc_project_path("_decimal"), "</CustomBuild>", "</CustomBuild>-->")
+            # Remove extra include directory
+            replace_in_file(self, self._msvc_project_path("_decimal"), "..\Modules\_decimal\libmpdec;", "")
 
         replace_in_file(self, self._msvc_project_path("_sqlite3"),
                         '<ProjectReference Include="sqlite3.vcxproj">',
@@ -330,9 +331,9 @@ class CPythonConan(ConanFile):
         if self._is_py3:
             replace_in_file(self, self._msvc_project_path("_lzma"), "<PreprocessorDefinitions>", "<PreprocessorDefinitions>$(ConanPreprocessorDefinitions);")
             replace_in_file(self, self._msvc_project_path("_lzma"), "<AdditionalDependencies>$(OutDir)liblzma$(PyDebugExt).lib;", "<AdditionalDependencies>")
-        replace_in_file(self, self._msvc_project_path("_lzma"),
-                        '<ProjectReference Include="liblzma.vcxproj">',
-                        '<ProjectReference Include="liblzma.vcxproj" Condition="False">')
+            replace_in_file(self, self._msvc_project_path("_lzma"),
+                            '<ProjectReference Include="liblzma.vcxproj">',
+                            '<ProjectReference Include="liblzma.vcxproj" Condition="False">')
 
         replace_in_file(self, self._msvc_project_path("pyexpat"),
                         "<AdditionalIncludeDirectories>$(PySourcePath)Modules\expat;",
@@ -361,7 +362,7 @@ class CPythonConan(ConanFile):
             replace_in_file(self, self._msvc_project_path("python"),
                             "<Target Name=\"ValidateUcrtbase\" AfterTargets=\"AfterBuild\" Condition=\"$(Configuration) != 'PGInstrument' and $(Platform) != 'ARM' and $(Platform) != 'ARM64'\">", 
                             "<Target Name=\"ValidateUcrtbase\" AfterTargets=\"AfterBuild\" Condition=\"False\">")
-    
+
             replace_in_file(self, self._msvc_project_path("_freeze_importlib"), 
                             "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"$(Configuration) == 'Debug' or $(Configuration) == 'Release'\"",
                             "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"False\"")
