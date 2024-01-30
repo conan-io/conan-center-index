@@ -19,16 +19,20 @@ patches:
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
     - patch_file: "patches/3.10/3.10.0-0003-_ctypes-ffi.patch"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
+    - patch_file: "patches/3.x-0002-remove-module-deps.patch"
   "3.9.18":
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
     - patch_file: "patches/3.9/3.9.7-0003-_ctypes-ffi.patch"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
+    - patch_file: "patches/3.x-0002-remove-module-deps.patch"
   "3.8.18":
     - patch_file: "patches/3.8/3.8.12-0002-_ctypes-ffi.patch"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
+    - patch_file: "patches/3.x-0002-remove-module-deps.patch"
   "3.7.12":
     - patch_file: "patches/3.7/3.7.9-0001-msvc.patch"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
+    - patch_file: "patches/3.x-0002-remove-module-deps.patch"
   "2.7.18":
     - patch_file: "patches/2.7/2.7.18-0001-msvc.patch"
     - patch_file: "patches/2.7/2.7.18-0002-add-support-msvc-14.patch"
