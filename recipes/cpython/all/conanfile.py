@@ -365,9 +365,8 @@ class CPythonConan(ConanFile):
             self._regex_replace_in_file(self._msvc_project_path("_tkinter"), r'.*Include=\"\$\(tcltkdir\).*', "")
 
         if self._is_py3:
-            replace_in_file(self, self._msvc_project_path("python"),
-                            "<Target Name=\"ValidateUcrtbase\" AfterTargets=\"AfterBuild\" Condition=\"$(Configuration) != 'PGInstrument' and $(Platform) != 'ARM' and $(Platform) != 'ARM64'\">", 
-                            "<Target Name=\"ValidateUcrtbase\" AfterTargets=\"AfterBuild\" Condition=\"False\">")
+            # Disable "ValidateUcrtbase" target
+            replace_in_file(self, self._msvc_project_path("python"), "$(Configuration) != 'PGInstrument'", "False")
 
             replace_in_file(self, self._msvc_project_path("_freeze_importlib"), 
                             "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"$(Configuration) == 'Debug' or $(Configuration) == 'Release'\"",
