@@ -83,7 +83,7 @@ class GtkConan(ConanFile):
 
     def requirements(self):
         # INFO: https://gitlab.gnome.org/GNOME/gtk/-/blob/4.10.0/gdk/gdktypes.h?ref_type=tags#L34-38
-        self.requires("glib/2.78.1", transitive_headers=True, transitive_libs=True, force=True)  # FIXME: bump gdk-pixbuf deps
+        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         # INFO: https://gitlab.gnome.org/GNOME/gtk/-/blob/4.10.0/gdk/gdkpixbuf.h?ref_type=tags#L32-33
         # Note: gdkpixbuf.h is deprecated in newer versions
         self.requires("gdk-pixbuf/2.42.10", transitive_headers=True, transitive_libs=True)
@@ -97,26 +97,27 @@ class GtkConan(ConanFile):
             self.requires("libtiff/4.6.0")
             self.requires("libjpeg/9e")
             if Version(self.version) >= "4.13.2":
-                self.requires("libdrm/2.4.114")
+                self.requires("libdrm/2.4.120")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self._gtk4 or self.options.with_wayland:
                 self.requires("xkbcommon/1.6.0")
             if self.options.with_wayland:
                 self.requires("wayland/1.22.0")
-                self.requires("wayland-protocols/1.32")
+                self.requires("wayland-protocols/1.33")
             if self.options.with_x11:
                 # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.10.0/gdk/x11/gdkx11display.h#L35-36
                 self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
         if self._gtk3:
             # https://gitlab.gnome.org/GNOME/gtk/-/blob/3.24.37/gtk/gtkwidget.h?ref_type=tags#L36
-            self.requires("at-spi2-core/2.50.0", transitive_headers=True, transitive_libs=True)
+            self.requires("at-spi2-core/2.51.0", transitive_headers=True, transitive_libs=True)
         self.requires("libepoxy/1.5.10")
         if self.options.with_pango:
             self.requires("pango/1.51.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/6.0")
+            self.requires("ffmpeg/6.1")
         if self.options.with_gstreamer:
-            self.requires("gstreamer/1.22.3")
+            self.requires("gstreamer/1.22.6")
+        self.requires("fontconfig/2.15.0", override=True)
 
     def validate(self):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
@@ -135,9 +136,9 @@ class GtkConan(ConanFile):
         self.tool_requires("meson/1.4.0")
         self.tool_requires("glib/<host_version>")
         if self._gtk4:
-            self.tool_requires("libxml2/2.12.6")  # for xmllint
+            self.tool_requires("libxml2/[>=2.12.5 <3]")  # for xmllint
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.2.0")
         if self._gtk4:
             self.tool_requires("sassc/3.6.2")
 
