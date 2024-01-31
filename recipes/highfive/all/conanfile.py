@@ -23,12 +23,14 @@ class HighFiveConan(ConanFile):
         "with_eigen": [True, False],
         "with_xtensor": [True, False],
         "with_opencv": [True, False],
+        "with_static_hdf5": ["deprecated", True, False],
     }
     default_options = {
         "with_boost": True,
         "with_eigen": True,
         "with_xtensor": True,
         "with_opencv": False,
+        "with_static_hdf5": "deprecated",
     }
 
     def layout(self):
@@ -55,6 +57,8 @@ class HighFiveConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
+        if self.options.with_static_hdf5 != "deprecated":
+            self.output.warn("The option 'with_static_hdf5' is deprecated. Use '-o hdf5/*:shared=True/False' instead.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
