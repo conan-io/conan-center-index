@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools.build import cross_building
+import glob
 import os
 
 class TestPackageConan(ConanFile):
@@ -23,5 +24,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
+            bin_path = 'test_package'
+            if self.settings.os == "Windows":
+                bin_path = glob.glob('**/test_package.exe')[0]
             self.run(bin_path)
