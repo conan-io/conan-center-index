@@ -22,8 +22,8 @@ class BotanConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/randombit/botan"
     license = "BSD-2-Clause"
-    description = "Botan is a cryptography library written in C++11."
-    topics = ("cryptography", "crypto", "c++11", "tls")
+    description = "Botan is a cryptography library written in modern C++."
+    topics = ("cryptography", "crypto", "c++11", "c++20", "tls")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
