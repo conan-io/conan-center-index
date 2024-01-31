@@ -58,7 +58,7 @@ class HighFiveConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
         if self.options.with_static_hdf5 != "deprecated":
-            self.output.warn("The option 'with_static_hdf5' is deprecated. Use '-o hdf5/*:shared=True/False' instead.")
+            self.output.warning("The option 'with_static_hdf5' is deprecated. Use '-o hdf5/*:shared=True/False' instead.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
