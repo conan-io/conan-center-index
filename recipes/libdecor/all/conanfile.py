@@ -49,7 +49,7 @@ class libdecorConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cairo/1.18.0 ")
+        self.requires("cairo/1.18.0")
         if self.options.get_safe("with_dbus"):
             self.requires("dbus/1.15.8")
         if self.options.get_safe("with_gtk"):
