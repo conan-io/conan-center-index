@@ -29,6 +29,7 @@ tasks:
   automatic_merge:
     reviews_required_total: 2  # Reviews that a PR needs so it can be merged
     reviews_required_team: 1  # Reviews from the Conan team that a PR needs so it can be merged
+    reviews_required_bump: 1  # Total reviews required for a bump PR to be merged
     branches:  # PRs from automations that have these as base-branches will be merged automatically
       - "conan-io:action-doc-toc"
     # Requirements to merge a given pull-request:
