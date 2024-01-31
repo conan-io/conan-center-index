@@ -67,7 +67,7 @@ patches:
     - patch_file: "patches/253.6/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
       patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
       patch_type: "conan"
-    - patch_file: "patches/251.15/0001-Remove-dependency-from-coreutils.patch"
+    - patch_file: "patches/251.18/0001-Remove-dependency-from-coreutils.patch"
       patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
       patch_type: "conan"
     - patch_file: "patches/253.3/0002-meson-use-c_args-in-generator-scripts.patch"
