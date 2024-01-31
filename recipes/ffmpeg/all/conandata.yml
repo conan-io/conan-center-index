@@ -80,3 +80,28 @@ patches:
       patch_description: "Compatibility with vulkan >= 1.3.239"
       patch_type: "portability"
       patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/eb0455d64690eed0068e5cb202f72ecdf899837c"
+  "4.4.4":
+    - patch_file: "patches/4.4-0001-fix-aom_codec_av1_dx_algo.patch"
+      patch_description: "Compatibility with shared libaom"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/d92fdc714496d43234733c315894abe0beeb3529"
+  "4.4.3":
+    - patch_file: "patches/4.4-0001-fix-aom_codec_av1_dx_algo.patch"
+      patch_description: "Compatibility with shared libaom"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/d92fdc714496d43234733c315894abe0beeb3529"
+  "4.4":
+    - patch_file: "patches/4.4-0001-fix-aom_codec_av1_dx_algo.patch"
+      patch_description: "Compatibility with shared libaom"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/d92fdc714496d43234733c315894abe0beeb3529"
+  "4.3.2":
+    - patch_file: "patches/4.2-0001-fix-aom_codec_av1_dx_algo.patch"
+      patch_description: "Compatibility with shared libaom"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/d92fdc714496d43234733c315894abe0beeb3529"
+  "4.2.1":
+    - patch_file: "patches/4.2-0001-fix-aom_codec_av1_dx_algo.patch"
+      patch_description: "Compatibility with shared libaom"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/d92fdc714496d43234733c315894abe0beeb3529"
