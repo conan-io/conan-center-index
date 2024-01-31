@@ -47,7 +47,7 @@ class GoogleCloudCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("abseil/20230802.1")
+        self.requires("abseil/20230125.3")
         self.requires("crc32c/1.1.2")
         self.requires("grpc/1.54.3")
         self.requires("libcurl/[>=7.78.0 <9]")
