@@ -24,7 +24,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not cross_building(self):
-            bin_path = 'test_package'
+            bin_path = './test_package'
             if self.settings.os == "Windows":
                 bin_path = glob.glob('**/test_package.exe')[0]
             self.run(bin_path)
