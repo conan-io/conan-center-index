@@ -1,4 +1,7 @@
 sources:
+  "2023.12.14":
+    url: "https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2023.12.14.tar.gz"
+    sha256: "9106700634e79cfa0935ebd67197f64689ced24c42da702acf18fa8435bd8a82"
   "2023.04.17":
     url: "https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2023.04.17.tar.gz"
     sha256: "179243843c620ef6f78b52937aaaa0a742c6ff415f9aaefe3c20225ee283b357"
@@ -11,3 +14,21 @@ sources:
   "2022.05.18":
     url: "https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2022.05.18.tar.gz"
     sha256: "d29affd740c5037b4499790613f5af0718ffc88c325e793b73cb35b7592fc0f7"
+  "2022.01.04":
+    url: "https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2.0.16.tar.gz"
+    sha256: "869456032e60787eed9fceaeaf6c6cb4452bc0ff97e0f5a271510145a1c8f4d4"
+  "2021.06.30":
+    url: "https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2.0.15.tar.gz"
+    sha256: "0175806508abc699586fc9a9387e01eb37bf812ca534e3b493ff3091ec2a9246"
+  "2021.04.29":
+    url: "https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2.0.14.tar.gz"
+    sha256: "c8821a7638e57a2c4052631c941af720b581edda634db6ab0b59924c958d69b6"
+  "2020.12.18":
+    url: "https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2.0.13.tar.gz"
+    sha256: "8ff0d0cd94d728edd30c876db546bf13e370ee7863629b4b9b5e2ef8e130d23c"
+  "2020.06.16":
+    url: "https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2.0.12.tar.gz"
+    sha256: "20b28709ce74d3602f1a946d78a2024c1f6b0ef51358b9686612669897a58719"
+  "2020.03.13":
+    url: "https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2.0.11.tar.gz"
+    sha256: "ffc2ca08cf4ae90ee55f14ea3735ccc388f454f4422b69498b2e9b93a1d45181"

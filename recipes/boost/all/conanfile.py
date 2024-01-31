@@ -29,6 +29,7 @@ required_conan_version = ">=1.53.0"
 CONFIGURE_OPTIONS = (
     "atomic",
     "chrono",
+    "cobalt",
     "container",
     "context",
     "contract",
@@ -163,14 +164,23 @@ class BoostConan(ConanFile):
     @property
     def _min_compiler_version_default_cxx11(self):
         # Minimum compiler version having c++ standard >= 11
-        if self.settings.compiler == "apple-clang":
-            # For now, assume apple-clang will enable c++11 in the distant future
-            return 99
         return {
             "gcc": 6,
             "clang": 6,
+            "apple-clang": 14,
             "Visual Studio": 14,  # guess
             "msvc": 190,  # guess
+        }.get(str(self.settings.compiler))
+
+    @property
+    def _min_compiler_version_default_cxx20(self):
+        return {
+            "gcc": 99,
+            "clang": 99,
+            # As of the end of 2023, only apple-clang >=14 use C++20 as their default C++ version.
+            "apple-clang": 14,
+            "Visual Studio": 99,
+            "msvc": 999,
         }.get(str(self.settings.compiler))
 
     @property
@@ -369,6 +379,32 @@ class BoostConan(ConanFile):
                 elif Version(self.settings.compiler.version) < min_compiler_version:
                     disable_locale()
 
+        if Version(self.version) >= "1.84.0":
+            # Starting from 1.84.0, Boost.Cobalt requires a c++20 capable compiler
+            # ==> disable it by default for older compilers or c++ standards
+
+            def disable_cobalt():
+                super_modules = self._all_super_modules("cobalt")
+                for smod in super_modules:
+                    try:
+                        setattr(self.options, f"without_{smod}", True)
+                    except ConanException:
+                        pass
+
+            if self.settings.compiler.get_safe("cppstd"):
+                if not valid_min_cppstd(self, 20):
+                    disable_cobalt()
+            else:
+                min_compiler_version = self._min_compiler_version_default_cxx20
+                if min_compiler_version is None:
+                    self.output.warning("Assuming the compiler supports c++20 by default")
+                elif Version(self.settings.compiler.version) < min_compiler_version:
+                    disable_cobalt()
+
+            # FIXME: Compilation errors on msvc shared build for boost.fiber https://github.com/boostorg/fiber/issues/314
+            if is_msvc(self):
+                self.options.without_fiber = True
+
     @property
     def _configure_options(self):
         return self._dependencies["configure_options"]
@@ -441,6 +477,14 @@ class BoostConan(ConanFile):
             libraries.append("wave")
         if Version(self.version) >= "1.81.0":
             libraries.append("locale")
+        if Version(self.version) >= "1.84.0":
+            libraries.append("atomic")
+            libraries.append("filesystem")
+            libraries.append("log")
+            libraries.append("random")
+            libraries.append("stacktrace")
+            libraries.append("test")
+            libraries.append("thread")
         libraries.sort()
         return filter(lambda library: f"without_{library}" in self.options, libraries)
 
@@ -456,6 +500,10 @@ class BoostConan(ConanFile):
 
         if is_msvc(self) and self._shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
+
+        # FIXME: In 1.84.0, there are compilation errors on msvc shared build for boost.fiber. https://github.com/boostorg/fiber/issues/314
+        if Version(self.version) >= "1.84.0" and is_msvc(self) and self._shared and not self.options.without_fiber:
+            raise ConanInvalidConfiguration("Boost.fiber can not be built as shared library on MSVC.")
 
         if not self.options.without_locale and self.options.i18n_backend_iconv == "off" and \
            not self.options.i18n_backend_icu and not self._is_windows_platform:
@@ -531,18 +579,18 @@ class BoostConan(ConanFile):
 
     def requirements(self):
         if self._with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self._with_bzip2:
             self.requires("bzip2/1.0.8")
         if self._with_lzma:
-            self.requires("xz_utils/5.4.2")
+            self.requires("xz_utils/5.4.4")
         if self._with_zstd:
             self.requires("zstd/1.5.5")
         if self._with_stacktrace_backtrace:
             self.requires("libbacktrace/cci.20210118", transitive_headers=True, transitive_libs=True)
 
         if self._with_icu:
-            self.requires("icu/72.1")
+            self.requires("icu/73.2")
         if self._with_iconv:
             self.requires("libiconv/1.17")
 
@@ -561,7 +609,7 @@ class BoostConan(ConanFile):
 
     def build_requirements(self):
         if not self.options.header_only:
-            self.tool_requires("b2/4.9.6")
+            self.tool_requires("b2/4.10.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -1444,6 +1492,7 @@ class BoostConan(ConanFile):
         # - Use '_libboost' component to attach extra system_libs, ...
 
         self.cpp_info.components["headers"].libs = []
+        self.cpp_info.components["headers"].libdirs = []
         self.cpp_info.components["headers"].set_property("cmake_target_name", "Boost::headers")
         self.cpp_info.components["headers"].names["cmake_find_package"] = "headers"
         self.cpp_info.components["headers"].names["cmake_find_package_multi"] = "headers"
@@ -1490,6 +1539,8 @@ class BoostConan(ConanFile):
         self.cpp_info.components["_boost_cmake"].set_property("cmake_target_name", "Boost::boost")
         self.cpp_info.components["_boost_cmake"].names["cmake_find_package"] = "boost"
         self.cpp_info.components["_boost_cmake"].names["cmake_find_package_multi"] = "boost"
+        if self.options.header_only:
+            self.cpp_info.components["_boost_cmake"].libdirs = []
 
         if not self.options.header_only:
             self.cpp_info.components["_libboost"].requires = ["headers"]

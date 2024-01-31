@@ -92,7 +92,7 @@ class LibpngConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if Version(self.version) < "1.6" and self.settings.arch == "armv8" and is_apple_os(self):
@@ -118,7 +118,10 @@ class LibpngConan(ConanFile):
             tc.variables["PNG_INTEL_SSE"] = self._neon_msa_sse_vsx_mapping[str(self.options.sse)]
         if self._has_vsx_support:
             tc.variables["PNG_POWERPC_VSX"] = self._neon_msa_sse_vsx_mapping[str(self.options.vsx)]
-        if Version(self.version) >= "1.6.38":
+        if Version(self.version) >= "1.6.41":
+            tc.variables["PNG_FRAMEWORK"] = False  # changed from False to True by default in PNG 1.6.41
+            tc.variables["PNG_TOOLS"] = False
+        elif Version(self.version) >= "1.6.38":
             tc.variables["PNG_EXECUTABLES"] = False
 
         tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False

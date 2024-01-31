@@ -5,29 +5,31 @@ from conan.tools.files import get, copy, rmdir, replace_in_file, export_conandat
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 class TrantorConan(ConanFile):
     name = "trantor"
     description = "a non-blocking I/O tcp network lib based on c++14/17"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/an-tao/trantor"
     topics = ("tcp-server", "asynchronous-programming", "non-blocking-io")
-    license = "BSD-3-Clause"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
         "with_c_ares": [True, False],
+        "with_spdlog": [True, False],
     }
     default_options = {
         "fPIC": True,
         "shared": False,
         "with_c_ares": True,
+        "with_spdlog": False,
+        "spdlog/*:header_only": True,
     }
 
     @property
@@ -38,7 +40,7 @@ class TrantorConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "5",
-            "Visual Studio": "15.0",
+            "Visual Studio": "15",
             "msvc": "191",
             "clang": "5",
             "apple-clang": "10",
@@ -50,6 +52,9 @@ class TrantorConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.5.15":
+            del self.options.with_spdlog
+            del self.default_options["spdlog/*:header_only"]
 
     def configure(self):
         if self.options.shared:
@@ -61,34 +66,37 @@ class TrantorConan(ConanFile):
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.19.0")
+            self.requires("c-ares/1.25.0")
+        if self.options.get_safe("with_spdlog"):
+            self.requires("spdlog/1.13.0")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version:
-            if Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
-        else:
-            self.output.warn(f"{self.ref} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
+        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
         # TODO: Compilation succeeds, but execution of test_package fails on Visual Studio with MDd
         if is_msvc(self) and self.options.shared and "MDd" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration(f"{self.ref} does not support the MDd runtime on Visual Studio.")
+
+        if self.options.get_safe("with_spdlog") and not self.dependencies["spdlog"].options.header_only:
+            raise ConanInvalidConfiguration(f"{self.ref} requires header_only spdlog.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) < "1.5.6":
-            tc.variables["BUILD_TRANTOR_SHARED"] = self.options.shared
-        else:
-            # Trantor's CMakeLists.txt has BUILD_SHARED_LIBS option.
-            tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
+        # TODO: support other tls providers
+        if Version(self.version) >= "1.5.12":
+            tc.variables["TRANTOR_USE_TLS"] = "openssl"
         tc.variables["BUILD_C-ARES"] = self.options.with_c_ares
+        tc.variables["USE_SPDLOG"] = self.options.get_safe("with_spdlog")
         tc.generate()
 
         tc = CMakeDeps(self)

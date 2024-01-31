@@ -25,12 +25,14 @@ class H5ppConan(ConanFile):
     options = {
         "with_eigen": [True, False],
         "with_spdlog": [True, False],
-        "with_zlib" : [True, False], 
+        "with_zlib" : [True, False],
+        "with_quadmath": [True, False]
     }
     default_options = {
         "with_eigen": True,
         "with_spdlog": True,
         "with_zlib" : True,
+        "with_quadmath": False
     }
 
     @property
@@ -62,15 +64,18 @@ class H5ppConan(ConanFile):
             del self.options.with_zlib
         else:
             self.options["hdf5"].with_zlib = self.options.with_zlib
+        if Version(self.version) < "1.11.1" or self.settings.compiler != "gcc":
+            # h5pp only supports quadmath with GNU compilers
+            del self.options.with_quadmath
 
     def requirements(self):
-        self.requires("hdf5/1.14.0", transitive_headers=True, transitive_libs=True)
+        self.requires("hdf5/1.14.3", transitive_headers=True, transitive_libs=True)
         if Version(self.version) < "1.10.0" or self.options.get_safe('with_eigen'):
             self.requires("eigen/3.4.0", transitive_headers=True)
         if Version(self.version) < "1.10.0" or self.options.get_safe('with_spdlog'):
-            self.requires("spdlog/1.11.0", transitive_headers=True, transitive_libs=True)
+            self.requires("spdlog/1.13.0", transitive_headers=True, transitive_libs=True)
         if Version(self.version) >= "1.10.0" and self.options.with_zlib:
-            self.requires("zlib/1.2.13", transitive_headers=True, transitive_libs=True)
+            self.requires("zlib/1.3", transitive_headers=True, transitive_libs=True)
 
     def layout(self):
         basic_layout(self,src_folder="src")
@@ -118,20 +123,23 @@ class H5ppConan(ConanFile):
         self.cpp_info.components["h5pp_flags"].bindirs = []
         self.cpp_info.components["h5pp_flags"].libdirs = []
 
-        if Version(self.version) >= "1.10.0":
-            if self.options.with_eigen:
+        if Version(self.version) < "1.10.0":
+            self.cpp_info.components["h5pp_deps"].requires.append("eigen::eigen")
+            self.cpp_info.components["h5pp_deps"].requires.append("spdlog::spdlog")
+        else:
+            if self.options.get_safe("with_eigen"):
                 self.cpp_info.components["h5pp_deps"].requires.append("eigen::eigen")
                 self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_EIGEN3")
-            if self.options.with_spdlog:
+            if self.options.get_safe("with_spdlog"):
                 self.cpp_info.components["h5pp_deps"].requires.append("spdlog::spdlog")
                 self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_SPDLOG")
                 self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_FMT")
-            if self.options.with_zlib:
+            if self.options.get_safe("with_zlib"):
                 self.cpp_info.components["h5pp_deps"].requires.append("zlib::zlib")
-
-        else:
-            self.cpp_info.components["h5pp_deps"].requires.append("eigen::eigen")
-            self.cpp_info.components["h5pp_deps"].requires.append("spdlog::spdlog")
+            if self.options.get_safe("with_quadmath"):
+                self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_FLOAT128")
+                self.cpp_info.components["h5pp_flags"].defines.append("H5PP_USE_QUADMATH")
+                self.cpp_info.system_libs.append('quadmath')
 
         if (self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9") or \
            (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") in ["libstdc++", "libstdc++11"]):

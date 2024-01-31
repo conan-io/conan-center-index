@@ -58,7 +58,7 @@ class ArmadilloConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "use_blas": "openblas",
-        "use_lapack": False,
+        "use_lapack": "openblas",
         "use_hdf5": True,
         "use_superlu": False,
         "use_extern_rng": False,
@@ -102,11 +102,6 @@ class ArmadilloConan(ConanFile):
             self.options.rm_safe("fPIC")
 
         if self.options.use_blas == "openblas":
-            # Note that if you're relying on this to build LAPACK, you _must_ have
-            # a fortran compiler installed. If you don't, OpenBLAS will build successfully but
-            # without LAPACK support, which isn't obvious.
-            # This can be achieved by setting the FC environment variable or the conf tools.build:compiler_executables={"fortran": "/path/to/fortran"}
-            # in your conan profile.
             self.options["openblas"].build_lapack = (
                 self.options.use_lapack == "openblas"
             )
@@ -174,6 +169,9 @@ class ArmadilloConan(ConanFile):
                 "The wrapper requires the use of an external RNG. Set use_extern_rng=True and try again."
             )
 
+        if not self.options.shared and self.options.use_wrapper:
+            raise ConanInvalidConfiguration("Building the armadillo run-time wrapper library requires armadillo/*:shared=True")
+
     def requirements(self):
         # Optional requirements
         # TODO: "atlas/3.10.3" # Pending https://github.com/conan-io/conan-center-index/issues/6757
@@ -186,10 +184,12 @@ class ArmadilloConan(ConanFile):
         # See https://gitlab.com/conradsnicta/armadillo-code/-/issues/227 for more information.
         if self.options.use_hdf5 and Version(self.version) < "12":
             # Use the conan dependency if the system lib isn't being used
-            self.requires("hdf5/1.14.0")
+            # Libraries not required to be propagated transitively when the armadillo run-time wrapper is used
+            self.requires("hdf5/1.14.3", transitive_headers=True, transitive_libs=not self.options.use_wrapper)
 
         if self.options.use_blas == "openblas":
-            self.requires("openblas/0.3.20")
+            # Libraries not required to be propagated transitively when the armadillo run-time wrapper is used
+            self.requires("openblas/0.3.25", transitive_libs=not self.options.use_wrapper)
         if (
             self.options.use_blas == "intel_mkl"
             and self.options.use_lapack == "intel_mkl"

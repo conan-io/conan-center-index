@@ -50,7 +50,7 @@ class SeadexGenesisConan(ConanFile):
 
     def requirements(self):
         # Exposes headers and symbols: https://github.com/SeadexGmbH/genesis/blob/master/genesis/source/version.cpp
-        self.requires("fmt/10.0.0", transitive_headers=True, transitive_libs=True)
+        self.requires("fmt/10.1.0", transitive_headers=True, transitive_libs=True)
         self.requires("seadex-essentials/2.1.3", transitive_headers=True, transitive_libs=True)
 
     def source(self):

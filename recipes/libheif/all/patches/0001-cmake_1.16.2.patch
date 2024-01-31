@@ -1,0 +1,60 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index de15948..589eab5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -41,7 +41,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
+ 
+ set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+ 
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
++# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ 
+ # Create the compile command database for clang by default
+ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+@@ -54,7 +54,7 @@ if (has_potentially_evaluated_expression)
+   add_definitions(-Wno-error=potentially-evaluated-expression)
+ endif()
+ 
+-LIST (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
++# LIST (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
+ 
+ option(ENABLE_PLUGIN_LOADING "Support loading of plugins" ON)
+ set(PLUGIN_DIRECTORY "${CMAKE_INSTALL_FULL_LIBDIR}/libheif" CACHE STRING "Plugin install directory")
+@@ -74,9 +74,9 @@
+         find_package(${packageName})
+     endif ()
+
+-    if (${variableName}_FOUND AND WITH_${variableName}_PLUGIN AND PLUGIN_LOADING_SUPPORTED_AND_ENABLED)
++    if (${packageName}_FOUND AND WITH_${packageName}_PLUGIN AND PLUGIN_LOADING_SUPPORTED_AND_ENABLED)
+         set(msg "found (plugin)")
+-    elseif (${variableName}_FOUND)
++    elseif (${packageName}_FOUND)
+         set(msg "found (built-in)")
+     elseif (WITH_${variableName})
+         set(msg "not found")
+@@ -88,11 +88,11 @@ macro(plugin_option variableName packageName displayName displayType defaultPlug
+     unset(msg)
+ endmacro()
+ 
+-plugin_option(LIBDE265 LIBDE265 "libde265" "HEIC decoder" OFF)
+-plugin_option(X265 X265 "x265" "HEIC encoder" OFF)
+-plugin_option(DAV1D DAV1D "Dav1d" "AVIF decoder" OFF)
+-plugin_option(AOM_ENCODER AOM "aom" "AVIF encoder" OFF)
+-plugin_option(AOM_DECODER AOM "aom" "AVIF decoder" OFF)
++plugin_option(LIBDE265 libde265 "libde265" "HEIC decoder" OFF)
++plugin_option(X265 libx265 "x265" "HEIC encoder" OFF)
++plugin_option(DAV1D dav1d "Dav1d" "AVIF decoder" OFF)
++plugin_option(AOM_ENCODER libaom-av1 "aom" "AVIF encoder" OFF)
++plugin_option(AOM_DECODER libaom-av1 "aom" "AVIF decoder" OFF)
+ plugin_option(SvtEnc SvtEnc "Svt-av1" "AVIF encoder" ON)
+ plugin_option(RAV1E RAV1E "Rav1e" "AVIF encoder" ON)
+ 
+@@ -219,7 +219,7 @@ if (WITH_GDK_PIXBUF)
+   add_subdirectory (gdk-pixbuf)
+ endif()
+ 
+-add_subdirectory (gnome)
++#add_subdirectory (gnome)
+ 
+ 
+ # --- packaging (source code)

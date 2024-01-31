@@ -1,17 +1,24 @@
 import os
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+
+required_conan_version = ">=1.53.0"
 
 
 class LibCoapConan(ConanFile):
     name = "libcoap"
+    description = "A CoAP (RFC 7252) implementation in C"
     license = "BSD-2-Clause"
-    homepage = "https://github.com/obgm/libcoap"
     url = "https://github.com/conan-io/conan-center-index"
-    description = """A CoAP (RFC 7252) implementation in C"""
-    topics = ("coap")
-    exports_sources = "CMakeLists.txt"
-    settings = "os", "compiler", "build_type", "arch"
+    homepage = "https://github.com/obgm/libcoap"
+    topics = "coap"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -24,88 +31,93 @@ class LibCoapConan(ConanFile):
         "with_epoll": False,
         "dtls_backend": "openssl",
     }
-    generators = "cmake", "cmake_find_package"
-
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def requirements(self):
-        if self.options.dtls_backend == "openssl":
-            self.requires("openssl/1.1.1q")
-        elif self.options.dtls_backend == "mbedtls":
-            self.requires("mbedtls/2.25.0")
-        elif self.options.dtls_backend == "gnutls":
-            raise ConanInvalidConfiguration("gnu tls not available yet")
-        elif self.options.dtls_backend == "tinydtls":
-            raise ConanInvalidConfiguration("tinydtls not available yet")
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os in ("Windows", "Macos"):
-            raise ConanInvalidConfiguration("Platform is currently not supported")
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        if self.options.dtls_backend == "openssl":
+            self.requires("openssl/[>=1.1 <4]")
+        elif self.options.dtls_backend == "mbedtls":
+            self.requires("mbedtls/3.2.1")
+
+    def validate(self):
+        if self.settings.os == "Windows" or is_apple_os(self):
+            raise ConanInvalidConfiguration("Platform is currently not supported")
+
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
+        if self.options.dtls_backend in ["gnutls", "tinydtls"]:
+            raise ConanInvalidConfiguration(f"{self.options.dtls_backend} not available yet")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["WITH_EPOLL"] = self.options.with_epoll
-        self._cmake.definitions["ENABLE_DTLS"] = self.options.dtls_backend != None
-        self._cmake.definitions["DTLS_BACKEND"] = self.options.dtls_backend
-
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["WITH_EPOLL"] = self.options.with_epoll
+        tc.variables["ENABLE_DTLS"] = self.options.dtls_backend is not None
+        tc.variables["DTLS_BACKEND"] = self.options.dtls_backend
         if self.version != "cci.20200424":
-            self._cmake.definitions["ENABLE_DOCS"] = False
-            self._cmake.definitions["ENABLE_EXAMPLES"] = False
+            tc.variables["ENABLE_DOCS"] = False
+            tc.variables["ENABLE_EXAMPLES"] = False
+        tc.generate()
 
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        library_name = ""
-        pkgconfig_name = ""
         if self.version == "cci.20200424":
             library_name = "coap"
-            pkgconfig_name = "libcoap-2"
+            cmake_target_name = "coap"
+            pkgconfig_filename = "libcoap-2"
         else:
             library_name = "coap-3"
-            pkgconfig_name = "libcoap-3"
+            cmake_target_name = "coap-3"
+            pkgconfig_filename = "libcoap-3"
 
-        self.cpp_info.components["coap"].names["cmake_find_package"] = "coap"
-        self.cpp_info.components["coap"].names["cmake_find_package_multi"] = "coap"
-        pkgconfig_filename = "{}{}".format(pkgconfig_name, "-{}".format(self.options.dtls_backend) if self.options.dtls_backend else "")
-        self.cpp_info.components["coap"].names["pkg_config"] = pkgconfig_filename
+        if self.options.dtls_backend:
+            pkgconfig_filename += f"-{self.options.dtls_backend}"
+
+        self.cpp_info.set_property("cmake_file_name", "libcoap")
+        self.cpp_info.set_property("cmake_target_name", f"libcoap::{cmake_target_name}")
+        if cmake_target_name != "coap":
+            # Old target, still provided to not break users
+            self.cpp_info.set_property("cmake_target_aliases", ["libcoap::coap"])
+        self.cpp_info.set_property("pkg_config_name", pkgconfig_filename)
+
+        # TODO: back to global scope once legacy generators support removed
         self.cpp_info.components["coap"].libs = [library_name]
-
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["coap"].system_libs = ["pthread"]
             if self.options.dtls_backend == "openssl":
                 self.cpp_info.components["coap"].requires = ["openssl::openssl"]
             elif self.options.dtls_backend == "mbedtls":
                 self.cpp_info.components["coap"].requires = ["mbedtls::mbedtls"]
+
+        # TODO: to remove once legacy generators support removed
+        self.cpp_info.components["coap"].names["cmake_find_package"] = cmake_target_name
+        self.cpp_info.components["coap"].names["cmake_find_package_multi"] = cmake_target_name
+        self.cpp_info.components["coap"].set_property("cmake_target_name", f"libcoap::{cmake_target_name}")
+        self.cpp_info.components["coap"].set_property("pkg_config_name", pkgconfig_filename)

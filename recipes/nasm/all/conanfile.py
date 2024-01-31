@@ -17,13 +17,27 @@ class NASMConan(ConanFile):
     homepage = "http://www.nasm.us"
     description = "The Netwide Assembler, NASM, is an 80x86 and x86-64 assembler"
     license = "BSD-2-Clause"
-    topics = ("nasm", "installer", "assembler")
+    topics = ("asm", "installer", "assembler",)
 
     settings = "os", "arch", "compiler", "build_type"
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _nasm(self):
+        suffix = "w.exe" if is_msvc(self) else ""
+        return os.path.join(self.package_folder, "bin", f"nasm{suffix}")
+
+    @property
+    def _ndisasm(self):
+        suffix = "w.exe" if is_msvc(self) else ""
+        return os.path.join(self.package_folder, "bin", f"ndisasm{suffix}")
+
+    def _chmod_plus_x(self, filename):
+        if os.name == "posix":
+            os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -69,19 +83,20 @@ class NASMConan(ConanFile):
             with chdir(self, self.source_folder):
                 self.run(f'nmake /f {os.path.join("Mkfiles", "msvc.mak")}')
         else:
-            autotools = Autotools(self)
-            autotools.configure()
+            with chdir(self, self.source_folder):
+                autotools = Autotools(self)
+                autotools.configure()
 
-            # GCC9 - "pure" attribute on function returning "void"
-            replace_in_file(self, "Makefile", "-Werror=attributes", "")
+                # GCC9 - "pure" attribute on function returning "void"
+                replace_in_file(self, "Makefile", "-Werror=attributes", "")
 
-            # Need "-arch" flag for the linker when cross-compiling.
-            # FIXME: Revisit after https://github.com/conan-io/conan/issues/9069, using new Autotools integration
-            # TODO it is time to revisit, not sure what to do here though...
-            if str(self.version).startswith("2.13"):
-                replace_in_file(self, "Makefile", "$(CC) $(LDFLAGS) -o", "$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o")
-                replace_in_file(self, "Makefile", "$(INSTALLROOT)", "$(DESTDIR)")
-            autotools.make()
+                # Need "-arch" flag for the linker when cross-compiling.
+                # FIXME: Revisit after https://github.com/conan-io/conan/issues/9069, using new Autotools integration
+                # TODO it is time to revisit, not sure what to do here though...
+                if str(self.version).startswith("2.13"):
+                    replace_in_file(self, "Makefile", "$(CC) $(LDFLAGS) -o", "$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o")
+                    replace_in_file(self, "Makefile", "$(INSTALLROOT)", "$(DESTDIR)")
+                autotools.make()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
@@ -91,13 +106,25 @@ class NASMConan(ConanFile):
                 shutil.copy2("nasm.exe", "nasmw.exe")
                 shutil.copy2("ndisasm.exe", "ndisasmw.exe")
         else:
-            autotools = Autotools(self)
-            autotools.install()
+            with chdir(self, self.source_folder):
+                autotools = Autotools(self)
+                autotools.install()
             rmdir(self, os.path.join(self.package_folder, "share"))
+        self._chmod_plus_x(self._nasm)
+        self._chmod_plus_x(self._ndisasm)
 
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
 
+        compiler_executables = {"asm": self._nasm}
+        self.conf_info.update("tools.build:compiler_executables", compiler_executables)
+        self.buildenv_info.define_path("NASM", self._nasm)
+        self.buildenv_info.define_path("NDISASM", self._ndisasm)
+        self.buildenv_info.define_path("AS", self._nasm)
+
         # TODO: Legacy, to be removed on Conan 2.0
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        self.env_info.NASM = self._nasm
+        self.env_info.NDISASM = self._ndisasm
+        self.env_info.AS = self._nasm

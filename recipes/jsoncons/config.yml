@@ -1,4 +1,14 @@
 versions:
+  "0.173.2":
+    folder: "all"
+  "0.173.0":
+    folder: "all"
+  "0.172.1":
+    folder: "all"
+  "0.172.0":
+    folder: "all"
+  "0.171.1":
+    folder: "all"
   "0.171.0":
     folder: "all"
   "0.170.2":

@@ -1,43 +1,87 @@
- CMakeLists.txt     |  4 ---
- src/CMakeLists.txt | 84 ++++++++++++++++++++++++++++++++++++------------------
- 2 files changed, 57 insertions(+), 31 deletions(-)
-
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c6150948b..669eb086e 100644
+index c615094..b10d9c9 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1,6 +1,3 @@
--cmake_minimum_required(VERSION 2.8.12)
--project(cassandra C CXX)
--
- set(CASS_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
- set(CASS_SRC_DIR "${CASS_ROOT_DIR}/src")
- set(CASS_INCLUDE_DIR "${CASS_ROOT_DIR}/include")
-@@ -81,7 +78,6 @@ endif()
- # Dependencies
- #------------------------
+@@ -164,7 +164,7 @@ endif()
+ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR
+    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+   # Enable C++11 support to use std::atomic
+-  if(CASS_USE_STD_ATOMIC)
++  if(1)
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+   endif()
  
--include(Dependencies)
- include(ClangFormat)
+diff --git a/cmake/Dependencies.cmake b/cmake/Dependencies.cmake
+index 9052472..3f65adb 100644
+--- a/cmake/Dependencies.cmake
++++ b/cmake/Dependencies.cmake
+@@ -21,28 +21,28 @@ if(NOT LIBUV_ROOT_DIR)
+ endif()
  
- #------------------------
+ # Ensure libuv was found
+-find_package(Libuv "1.0.0")
+-if(WIN32 AND NOT LIBUV_FOUND)
++find_package(libuv "1.0.0")
++if(WIN32 AND NOT libuv_FOUND)
+   message(STATUS "Unable to Locate libuv: Third party build step will be performed")
+   include(ExternalProject-libuv)
+-elseif(NOT LIBUV_FOUND)
++elseif(NOT libuv_FOUND)
+   message(FATAL_ERROR "Unable to Locate libuv: libuv v1.0.0+ is required")
+ endif()
+ 
+-if(LIBUV_VERSION VERSION_LESS "1.0")
+-  message(FATAL_ERROR "Libuv version ${LIBUV_VERSION} is not "
++if(libuv_VERSION VERSION_LESS "1.0")
++  message(FATAL_ERROR "libuv version ${libuv_VERSION} is not "
+     " supported. Please updgrade to libuv version 1.0 or greater in order to "
+     "utilize the driver.")
+ endif()
+ 
+-if(LIBUV_VERSION VERSION_LESS "1.6")
+-  message(WARNING "Libuv version ${LIBUV_VERSION} does not support custom "
++if(libuv_VERSION VERSION_LESS "1.6")
++  message(WARNING "libuv version ${libuv_VERSION} does not support custom "
+     "memory allocators (version 1.6 or greater required)")
+ endif()
+ 
+ # Assign libuv include and libraries
+-set(CASS_INCLUDES ${CASS_INCLUDES} ${LIBUV_INCLUDE_DIRS})
+-set(CASS_LIBS ${CASS_LIBS} ${LIBUV_LIBRARIES})
++set(CASS_INCLUDES ${CASS_INCLUDES} ${libuv_INCLUDE_DIRS})
++set(CASS_LIBS ${CASS_LIBS} ${libuv_LIBRARIES})
+ 
+ # libuv and gtests require thread library
+ if(NOT WIN32)
+@@ -192,3 +192,20 @@ if(CASS_USE_BOOST_ATOMIC)
+   endif()
+ endif()
+ 
++#------------------------
++# RapidJSON
++#------------------------
++find_package(RapidJSON REQUIRED CONFIG)
++set(CASS_LIBS ${CASS_LIBS} rapidjson)
++
++#------------------------
++# http_parser
++#------------------------
++find_package(http_parser REQUIRED CONFIG)
++set(CASS_LIBS ${CASS_LIBS} http_parser::http_parser)
++
++#------------------------
++# minizip
++#------------------------
++find_package(minizip REQUIRED CONFIG)
++set(CASS_LIBS ${CASS_LIBS} minizip::minizip)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 06b84b759..7e81b2a06 100644
+index 06b84b7..41b23f2 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -1,6 +1,50 @@
+@@ -1,6 +1,41 @@
  include(CheckSymbolExists)
  include(CheckCXXSourceCompiles)
  
-+#------------------------
-+# Windows libraries
-+#------------------------
-+
-+if(WIN32)
-+  # Assign additional library requirements for Windows
-+  set(CASS_LIBS iphlpapi psapi wsock32 crypt32 ws2_32 userenv version)
-+endif()
-+
 +#------------------------
 +# Libuv
 +#------------------------
@@ -76,7 +120,7 @@ index 06b84b759..7e81b2a06 100644
  file(GLOB SOURCES *.cpp *.hpp)
  
  if(APPLE)
-@@ -38,18 +82,14 @@ endif()
+@@ -38,18 +73,14 @@ endif()
  
  add_subdirectory(third_party/curl)
  add_subdirectory(third_party/hdr_histogram)
@@ -90,16 +134,17 @@ index 06b84b759..7e81b2a06 100644
 -  third_party/http-parser
 -  third_party/minizip
 -  third_party/mt19937_64
+-  third_party/rapidjson/rapidjson
+-  third_party/sparsehash/src)
 +  third_party/curl # FIXME: Use conan package
 +  third_party/hdr_histogram # FIXME: Use conan package
 +  third_party/mt19937_64 # FIXME: Use conan package
-+  third_party/sparsehash/src) # FIXME: Use conan package
-   third_party/rapidjson/rapidjson
--  third_party/sparsehash/src)
++  third_party/sparsehash/src # FIXME: Use conan package
++)
  
  list(APPEND INCLUDE_DIRS ${CASS_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
  
-@@ -69,12 +109,6 @@ if(WIN32)
+@@ -69,12 +100,6 @@ if(WIN32)
    endif()
  endif()
  
@@ -112,40 +157,27 @@ index 06b84b759..7e81b2a06 100644
  #------------------------------
  # Build configured header
  #------------------------------
-@@ -130,11 +164,11 @@ if(CASS_BUILD_SHARED)
-   add_library(cassandra SHARED 
+@@ -131,8 +156,7 @@ if(CASS_BUILD_SHARED)
      ${SOURCES}
      $<TARGET_OBJECTS:curl_hostcheck>
--    $<TARGET_OBJECTS:hdr_histogram>
+     $<TARGET_OBJECTS:hdr_histogram>
 -    $<TARGET_OBJECTS:http-parser>
 -    $<TARGET_OBJECTS:minizip>)
-+    $<TARGET_OBJECTS:hdr_histogram>)
++  )
    target_link_libraries(cassandra ${CASS_LIBS})
--  target_include_directories(cassandra PRIVATE ${INCLUDE_DIRS} ${CASS_INCLUDES})
-+  target_include_directories(cassandra PRIVATE ${INCLUDE_DIRS})
-+  
-+  conan_target_link_libraries(cassandra)
+   target_include_directories(cassandra PRIVATE ${INCLUDE_DIRS} ${CASS_INCLUDES})
  
-   set_target_properties(cassandra PROPERTIES OUTPUT_NAME cassandra)
-   set_target_properties(cassandra PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
-@@ -167,11 +201,12 @@ if(CASS_BUILD_STATIC)
-   add_library(cassandra_static STATIC
+@@ -168,8 +192,7 @@ if(CASS_BUILD_STATIC)
      ${SOURCES}
      $<TARGET_OBJECTS:curl_hostcheck_static>
--    $<TARGET_OBJECTS:hdr_histogram_static>
+     $<TARGET_OBJECTS:hdr_histogram_static>
 -    $<TARGET_OBJECTS:http-parser_static>
 -    $<TARGET_OBJECTS:minizip_static>)
-+    $<TARGET_OBJECTS:hdr_histogram_static>)
-+
++  )
    target_link_libraries(cassandra_static ${CASS_LIBS})
--  target_include_directories(cassandra_static PRIVATE ${INCLUDE_DIRS} ${CASS_INCLUDES})
-+  target_include_directories(cassandra_static PRIVATE ${INCLUDE_DIRS})
-+  
-+  conan_target_link_libraries(cassandra_static)
+   target_include_directories(cassandra_static PRIVATE ${INCLUDE_DIRS} ${CASS_INCLUDES})
  
-   set_target_properties(cassandra_static PROPERTIES OUTPUT_NAME cassandra_static)
-   set_target_properties(cassandra_static PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
-@@ -274,11 +309,6 @@ if(CASS_BUILD_SHARED)
+@@ -274,11 +297,6 @@ if(CASS_BUILD_SHARED)
        endif()
      endif()
    endif()

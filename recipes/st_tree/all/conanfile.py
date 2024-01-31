@@ -1,42 +1,36 @@
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, copy
 import os
 
-from conans.errors import ConanInvalidConfiguration
-from conans import ConanFile, CMake, tools
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.52.0"
 
 class STTreeConan(ConanFile):
     name = "st_tree"
+    description = "A fast and flexible c++ template class for tree data structures"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "A fast and flexible c++ template class for tree data structures"
-    topics = ("stl", "container", "data-structures")
     homepage = "https://github.com/erikerlandson/st_tree"
+    topics = ("stl", "container", "data-structures", "tree", "header-only")
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def package_id(self):
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
-
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder)
-        return cmake
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy("LICENSE", "licenses", self._source_subfolder)
-
-        cmake = self._configure_cmake()
-        cmake.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
-
-    def package_id(self):
-        self.info.header_only()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "st_tree"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "st_tree"
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

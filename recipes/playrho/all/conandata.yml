@@ -1,9 +1,10 @@
 sources:
+  "1.1.2":
+    url: "https://github.com/louis-langholtz/PlayRho/archive/refs/tags/v1.1.2.tar.gz"
+    sha256: "b8e61eace48607c545a495c742479fb58e7ea34b8dfe7f874a14b8414135cccc"
   "1.1.0":
     url: "https://github.com/louis-langholtz/PlayRho/archive/refs/tags/v1.1.0.tar.gz"
     sha256: "45c0337440387a85a97a4b7907b79f780233bf2062635471b71a32245b0c0158"
-
 patches:
   "1.1.0":
     - patch_file: "patches/1.1.0-0001-fix-target-name.patch"
-      base_path: "source_subfolder"

@@ -1,4 +1,8 @@
 versions:
+  "v13":
+    folder: all
+  "v12":
+    folder: all
   "v11":
     folder: all
   "v10":

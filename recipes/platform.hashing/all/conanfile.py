@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
@@ -47,8 +47,10 @@ class PlatformInterfacesConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "0.5.0":
-            self.requires("cpu_features/0.8.0", transitive_headers=True)
+        if Version(self.version) >= "0.5.6":
+            self.requires("cpuinfo/cci.20220228", transitive_headers=True)
+        elif Version(self.version) >= "0.5.0":
+            self.requires("cpu_features/0.9.0", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()
