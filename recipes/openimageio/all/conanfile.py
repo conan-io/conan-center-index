@@ -19,7 +19,7 @@ class OpenImageIOConan(ConanFile):
         "professional, large-scale animation and visual effects work for film."
     )
     topics = ("vfx", "image", "picture")
-    license = "Apache-2.0"
+    license = "Apache-2.0", "BSD-3-Clause"
     homepage = "http://www.openimageio.org/"
     url = "https://github.com/conan-io/conan-center-index"
 
