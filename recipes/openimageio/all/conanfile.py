@@ -213,6 +213,9 @@ class OpenImageIOConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
+        if self.settings.os == "Windows":
+            for vc_file in ("concrt", "msvcp", "vcruntime"):
+                rm(self, f"{vc_file}*.dll", os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
