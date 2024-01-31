@@ -104,6 +104,7 @@ class BoostConan(ConanFile):
         "i18n_backend_icu": [True, False],
         "visibility": ["global", "protected", "hidden"],
         "addr2line_location": ["ANY"],
+        "with_stacktrace_addr2line" : [True, False],
         "with_stacktrace_backtrace": [True, False],
         "buildid": [None, "ANY"],
         "python_buildid": [None, "ANY"],
@@ -143,6 +144,7 @@ class BoostConan(ConanFile):
         "i18n_backend_icu": False,
         "visibility": "hidden",
         "addr2line_location": "/usr/bin/addr2line",
+        "with_stacktrace_addr2line": True,
         "with_stacktrace_backtrace": True,
         "buildid": None,
         "python_buildid": None,
@@ -419,6 +421,8 @@ class BoostConan(ConanFile):
 
     @property
     def _stacktrace_addr2line_available(self):
+        if not self.options.with_stacktrace_addr2line:
+            return False
         if (self._is_apple_embedded_platform or self.settings.get_safe("os.subsystem") == "catalyst"):
              # sandboxed environment - cannot launch external processes (like addr2line), system() function is forbidden
             return False
