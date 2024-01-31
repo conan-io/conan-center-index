@@ -179,8 +179,9 @@ class BotanConan(ConanFile):
 
     def validate(self):
         if self.options.with_boost:
-            miss_boost_required_comp = any(getattr(self.options['boost'], 'without_{}'.format(boost_comp), True) for boost_comp in self._required_boost_components)
-            if self.options['boost'].header_only or self.options['boost'].shared or self.options['boost'].magic_autolink or miss_boost_required_comp:
+            boost_opts = self.dependencies['boost'].options
+            miss_boost_required_comp = any(getattr(boost_opts, 'without_{}'.format(boost_comp), True) for boost_comp in self._required_boost_components)
+            if boost_opts.header_only or boost_opts.shared or boost_opts.magic_autolink or miss_boost_required_comp:
                 raise ConanInvalidConfiguration(
                     f"{self.name} requires non-header-only static boost, "
                     f"without magic_autolink, and with these components: {', '.join(self._required_boost_components)}")
