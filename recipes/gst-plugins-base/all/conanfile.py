@@ -85,11 +85,11 @@ class GStPluginsBaseConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.76.3", transitive_headers=True)
+        self.requires("glib/2.78.3", transitive_headers=True)
         self.requires(f"gstreamer/{self.version}", transitive_headers=True)
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/1.3")
         if self.options.get_safe("with_libalsa"):
-            self.requires("libalsa/1.2.7.2")
+            self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_xorg"):
             self.requires("xorg/system")
         if self.options.with_gl:
@@ -100,8 +100,8 @@ class GStPluginsBaseConan(ConanFile):
             if self.options.get_safe("with_egl"):
                 self.requires("egl/system")
             if self.options.get_safe("with_wayland"):
-                self.requires("wayland/1.21.0")
-                self.requires("wayland-protocols/1.31")
+                self.requires("wayland/1.22.0")
+                self.requires("wayland-protocols/1.33")
             if self.options.with_graphene:
                 self.requires("graphene/1.10.8")
             if self.options.with_libpng:
@@ -109,17 +109,17 @@ class GStPluginsBaseConan(ConanFile):
             if self.options.with_libjpeg == "libjpeg":
                 self.requires("libjpeg/9e")
             elif self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/2.1.5")
+                self.requires("libjpeg-turbo/3.0.1")
         if self.options.with_ogg:
             self.requires("ogg/1.3.5")
         if self.options.with_opus:
-            self.requires("opus/1.3.1")
+            self.requires("opus/1.4")
         if self.options.with_theora:
             self.requires("theora/1.1.1")
         if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
         if self.options.with_pango:
-            self.requires("pango/1.50.10")
+            self.requires("pango/1.51.0")
 
     def validate(self):
         gstreamer_version = Version(self.dependencies.direct_host["gstreamer"].ref.version)
@@ -140,16 +140,16 @@ class GStPluginsBaseConan(ConanFile):
             raise ConanInvalidConfiguration("OpenGL support with Wayland requires 'with_egl' turned on!")
 
     def build_requirements(self):
-        self.tool_requires("glib/2.76.3")
-        self.tool_requires("meson/1.1.1")
+        self.tool_requires("glib/<host_version>")
+        self.tool_requires("meson/1.3.1")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
         if self.options.get_safe("with_wayland"):
-            self.tool_requires("wayland/1.21.0")
+            self.tool_requires("wayland/<host_version>")
         if self.settings.os == 'Windows':
-            self.tool_requires("winflexbison/2.5.24")
+            self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
