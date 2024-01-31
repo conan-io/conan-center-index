@@ -243,7 +243,7 @@ class OpenImageIOConan(ConanFile):
             "boost::thread",
             "boost::system",
             "boost::regex",
-            "Imath::Imath",
+            "imath::imath",
             "openexr::openexr",
         ]
         if self.settings.os in ["Linux", "FreeBSD"]:
