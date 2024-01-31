@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.54.0"
 
 
 class HighFiveConan(ConanFile):
@@ -23,14 +23,12 @@ class HighFiveConan(ConanFile):
         "with_eigen": [True, False],
         "with_xtensor": [True, False],
         "with_opencv": [True, False],
-        "with_static_hdf5": [True, False],
     }
     default_options = {
         "with_boost": True,
         "with_eigen": True,
         "with_xtensor": True,
         "with_opencv": False,
-        "with_static_hdf5": False,
     }
 
     def layout(self):
@@ -51,6 +49,7 @@ class HighFiveConan(ConanFile):
             self.requires("opencv/4.8.1")
 
     def package_id(self):
+        # INFO: We only set different compiler definitions. The package content is the same.
         self.info.clear()
 
     def validate(self):
@@ -62,15 +61,14 @@ class HighFiveConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["USE_BOOST"] = self.options.with_boost
-        tc.variables["USE_EIGEN"] = self.options.with_eigen
-        tc.variables["USE_XTENSOR"] = self.options.with_xtensor
-        tc.variables["USE_OPENCV"] = self.options.with_opencv
+        tc.cache_variables["USE_BOOST"] = self.options.with_boost
+        tc.cache_variables["USE_EIGEN"] = self.options.with_eigen
+        tc.cache_variables["USE_XTENSOR"] = self.options.with_xtensor
+        tc.cache_variables["USE_OPENCV"] = self.options.with_opencv
         tc.variables["HIGHFIVE_UNIT_TESTS"] = False
         tc.variables["HIGHFIVE_EXAMPLES"] = False
         tc.variables["HIGHFIVE_BUILD_DOCS"] = False
         tc.variables["HIGHFIVE_USE_INSTALL_DEPS"] = False
-        tc.variables["HIGHFIVE_STATIC_HDF5"] = self.options.with_static_hdf5
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -130,12 +128,16 @@ class HighFiveConan(ConanFile):
         self.cpp_info.requires = ["hdf5::hdf5"]
         if self.options.with_boost:
             self.cpp_info.requires.append("boost::headers")
+            self.cpp_info.defines.append("H5_USE_BOOST")
         if self.options.with_eigen:
             self.cpp_info.requires.append("eigen::eigen")
+            self.cpp_info.defines.append("H5_USE_EIGEN")
         if self.options.with_xtensor:
             self.cpp_info.requires.append("xtensor::xtensor")
+            self.cpp_info.defines.append("H5_USE_XTENSOR")
         if self.options.with_opencv:
             self.cpp_info.requires.append("opencv::opencv")
+            self.cpp_info.defines.append("H5_USE_OPENCV")
 
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.names["cmake_find_package"] = "HighFive"
