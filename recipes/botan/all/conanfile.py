@@ -52,6 +52,7 @@ class BotanConan(ConanFile):
         "with_armv8crypto": [True, False],
         "with_powercrypto": [True, False],
         "enable_modules": [None, "ANY"],
+        "disable_modules": [None, "ANY"],
         "system_cert_bundle": [None, "ANY"],
         "module_policy": [None, "bsi", "modern", "nist"],
     }
@@ -80,6 +81,7 @@ class BotanConan(ConanFile):
         "with_armv8crypto": True,
         "with_powercrypto": True,
         "enable_modules": None,
+        "disable_modules": None,
         "system_cert_bundle": None,
         "module_policy": None,
     }
@@ -346,6 +348,9 @@ class BotanConan(ConanFile):
         if self.options.enable_modules:
             build_flags.append('--minimized-build')
             build_flags.append('--enable-modules={}'.format(self.options.enable_modules))
+
+        if self.options.disable_modules:
+            build_flags.append('--disable-modules={}'.format(self.options.disable_modules))
 
         if self.options.amalgamation:
             build_flags.append('--amalgamation')
