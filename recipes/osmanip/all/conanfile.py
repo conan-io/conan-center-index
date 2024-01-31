@@ -50,7 +50,7 @@ class OsmanipConan(ConanFile):
         # https://github.com/JustWhit3/osmanip/commit/43c8bd8d018fcb3bce6443f7388e042d5457d4fb
         if Version(self.version) < "4.6.0":
             # osmanip/progressbar/progress_bar.hpp includes arsenalgear/constants.hpp
-            self.requires("arsenalgear/2.1.0", transitive_headers=True)
+            self.requires("arsenalgear/2.1.1", transitive_headers=True)
 
     @property
     def _min_cppstd(self):
