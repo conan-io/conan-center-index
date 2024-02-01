@@ -1,0 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7cc5bda..74ca127 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -27,7 +27,7 @@ else()
+ 
+     if (BEAUTY_ENABLE_OPENSSL)
+         find_package(OpenSSL REQUIRED)
+-        add_library(openssl::openssl ALIAS OpenSSL::SSL)
++#        add_library(openssl::openssl ALIAS OpenSSL::SSL)
+     endif()
+ endif()
+ 
+@@ -38,7 +38,7 @@ endif()
+ 
+ # Beauty
+ add_subdirectory(src)
+-add_subdirectory(examples)
++#add_subdirectory(examples)
+ 
+ if (NOT CONAN_IN_LOCAL_CACHE)
+   include(CTest)

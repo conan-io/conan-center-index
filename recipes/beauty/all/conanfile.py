@@ -23,24 +23,35 @@ class BeautyConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_openssl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_openssl": True,
     }
 
     @property
     def _min_cppstd(self):
-        return "20"
+        return "20" if Version(self.version) < "1.0.3" else "17"
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "8",
-            "clang": "11",
-            "Visual Studio": "16",
-            "msvc": "192",
-        }
+            "17": {
+                "gcc": "8",
+                "clang": "7",
+                "apple-clang": "12",
+                "Visual Studio": "16",
+                "msvc": "192",
+            },
+            "20": {
+                "gcc": "8",
+                "clang": "11",
+                "Visual Studio": "16",
+                "msvc": "192",
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -48,6 +59,8 @@ class BeautyConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.0.3":
+            del self.options.with_openssl
 
     def configure(self):
         if self.options.shared:
@@ -57,11 +70,16 @@ class BeautyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # beauty public headers include some boost headers.
-        # For example beauty/application.hpp includes boost/asio.hpp
-        self.requires("boost/1.79.0", transitive_headers=True)
-        # dependency of asio in boost, exposed in boost/asio/ssl/detail/openssl_types.hpp
-        self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) < "1.0.3":
+            # beauty public headers include some boost headers.
+            # For example beauty/application.hpp includes boost/asio.hpp
+            self.requires("boost/1.80.0", transitive_headers=True)
+            # dependency of asio in boost, exposed in boost/asio/ssl/detail/openssl_types.hpp
+            self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("boost/1.84.0", transitive_headers=True)
+            if self.options.with_openssl:
+                self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -87,6 +105,10 @@ class BeautyConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) >= "1.0.3":
+            tc.variables["CONAN"] = False
+            tc.variables["CONAN_IN_LOCAL_CACHE"] = False
+            tc.variables["BEAUTY_ENABLE_OPENSSL"] = self.options.with_openssl
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -107,6 +129,11 @@ class BeautyConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "beauty")
         self.cpp_info.set_property("cmake_target_name", "beauty::beauty")
         self.cpp_info.libs = ["beauty"]
-        self.cpp_info.requires = ["boost::headers", "openssl::openssl"]
+        if Version(self.version) >= "1.0.3":
+            self.cpp_info.requires = ["boost::headers"]
+            if self.options.with_openssl:
+                self.cpp_info.requires.append("openssl::openssl")
+        else:
+            self.cpp_info.requires = ["boost::headers", "openssl::openssl"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]

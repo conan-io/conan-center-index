@@ -2,6 +2,6 @@
 
 int main()
 {
-    // Create a server
-    beauty::server server;
+    // Create a client
+    beauty::client client;
 }
