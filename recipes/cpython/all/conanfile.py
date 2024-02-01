@@ -222,6 +222,9 @@ class CPythonConan(ConanFile):
         if is_apple_os(self) and self.settings.arch == "armv8" and Version(self.version) < "3.8.0":
             raise ConanInvalidConfiguration("cpython 3.7 and older does not support Apple ARM CPUs")
 
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == 9:
+            raise ConanInvalidConfiguration("FIXME: GCC 9 produces an internal compiler error locally, and a link error in CCI")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
