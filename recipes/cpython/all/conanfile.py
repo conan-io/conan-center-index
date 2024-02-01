@@ -7,7 +7,7 @@ from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, mkdir, replace_in_file, rm, rmdir, save, unzip
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuildDeps, MSBuildToolchain, MSBuild, is_msvc, is_msvc_static_runtime, msvc_runtime_flag, msvs_toolset
 from conan.tools.scm import Version
@@ -253,7 +253,7 @@ class CPythonConan(ConanFile):
             tc.configure_args.append("--with-icc")
         if os.environ.get("CC") or self.settings.compiler != "gcc":
             tc.configure_args.append("--without-gcc")
-        if self.options.with_tkinter:
+        if self.options.with_tkinter and Version(self.version) < "3.11":
             tcltk_includes = []
             tcltk_libs = []
             # FIXME: collect using some conan util (https://github.com/conan-io/conan/issues/7656)
@@ -276,6 +276,9 @@ class CPythonConan(ConanFile):
 
         deps = AutotoolsDeps(self)
         deps.generate()
+        if Version(self.version) >= "3.11":
+            pkgdeps = PkgConfigDeps(self)
+            pkgdeps.generate()
 
     def generate(self):
         VirtualRunEnv(self).generate(scope="build")
@@ -435,6 +438,10 @@ class CPythonConan(ConanFile):
         apply_conandata_patches(self)
         if Version(self.version) < "3.11":
             self._patch_setup_py()
+        else:
+            replace_in_file(self, os.path.join(self.source_folder, "configure"), 
+                            'OPENSSL_LIBS="-lssl -lcrypto"',
+                            'OPENSSL_LIBS="-lssl -lcrypto -lz"')
         if is_msvc(self):
             runtime_library = {
                 "MT": "MultiThreaded",
