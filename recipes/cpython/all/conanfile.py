@@ -325,7 +325,12 @@ class CPythonConan(ConanFile):
         if self._supports_modules:
             openssl = self.dependencies["openssl"].cpp_info.aggregated_components()
             zlib = self.dependencies["zlib"].cpp_info.aggregated_components()
-            if self._is_py3:
+            if self._is_py2:
+                replace_in_file(self, setup_py, "'/usr/local/ssl/include',", f"{(openssl.includedirs + zlib.includedirs)[1:-2]}") 
+                replace_in_file(self, setup_py, "'/usr/contrib/ssl/include/'", "")
+                replace_in_file(self, setup_py, "lib_dirs = []", f"lib_dirs = {openssl.libdirs + zlib.libdirs}")
+                replace_in_file(self, setup_py, "libraries = ['ssl', 'crypto'],", f"libraries = {openssl.libs + zlib.libs}, #")
+            elif Version(self.version) < "3.11":
                 replace_in_file(self, setup_py,
                                 "openssl_includes = ",
                                 f"openssl_includes = {openssl.includedirs + zlib.includedirs} #")
@@ -335,16 +340,11 @@ class CPythonConan(ConanFile):
                 replace_in_file(self, setup_py,
                                 "openssl_libs = ",
                                 f"openssl_libs = {openssl.libs + zlib.libs} #")
-            else:
-                replace_in_file(self, setup_py, "'/usr/local/ssl/include',", f"{(openssl.includedirs + zlib.includedirs)[1:-2]}") 
-                replace_in_file(self, setup_py, "'/usr/contrib/ssl/include/'", "")
-                replace_in_file(self, setup_py, "lib_dirs = []", f"lib_dirs = {openssl.libdirs + zlib.libdirs}")
-                replace_in_file(self, setup_py, "libraries = ['ssl', 'crypto'],", f"libraries = {openssl.libs + zlib.libs}, #")
 
-            if Version(self.version) >= "3.8":
-                replace_in_file(self, setup_py, "if (MACOS and self.detect_tkinter_darwin())", "if (False)")
-            else:
+            if Version(self.version) < "3.8":
                 replace_in_file(self, setup_py, "self.detect_tkinter_darwin(inc_dirs, lib_dirs)", "False")
+            elif Version(self.version) < "3.11":
+                replace_in_file(self, setup_py, "if (MACOS and self.detect_tkinter_darwin())", "if (False)")
 
     def _patch_msvc_projects(self):
         self._regex_replace_in_file(self._msvc_project_path("_bz2" if self._is_py3 else "bz2"), r'.*Include=\"\$\(bz2Dir\).*', "")
@@ -436,9 +436,12 @@ class CPythonConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if Version(self.version) < "3.11":
+        # <=3.10 requires a lot of manual injection of dependencies through setup.py
+        # 3.12 removes setup.py completely, and uses pkgconfig dependencies
+        # 3.11 is an in awkward transition state where some dependencies use pkgconfig, and others use setup.py
+        if Version(self.version) < "3.12":
             self._patch_setup_py()
-        else:
+        if Version(self.version) >= "3.11":
             replace_in_file(self, os.path.join(self.source_folder, "configure"), 
                             'OPENSSL_LIBS="-lssl -lcrypto"',
                             'OPENSSL_LIBS="-lssl -lcrypto -lz"')
