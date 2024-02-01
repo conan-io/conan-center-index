@@ -120,30 +120,29 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
         if self._test_setuptools:
-            if self._supports_modules:
-                with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                    modsrcfolder = "py2" if tools.Version(self.deps_cpp_info["cpython"].version).major < "3" else "py3"
-                    tools.mkdir(os.path.join(self.build_folder, modsrcfolder))
-                    for fn in os.listdir(os.path.join(self.source_folder, modsrcfolder)):
-                        shutil.copy(os.path.join(self.source_folder, modsrcfolder, fn), os.path.join(self.build_folder, modsrcfolder, fn))
-                    shutil.copy(os.path.join(self.source_folder, "setup.py"), os.path.join(self.build_folder, "setup.py"))
-                    env = {
-                        "DISTUTILS_USE_SDK": "1",
-                        "MSSdk": "1"
-                    }
-                    env.update(**AutoToolsBuildEnvironment(self).vars)
-                    with tools.environment_append(env):
-                        setup_args = [
-                            "{}/setup.py".format(self.source_folder),
-                            # "conan",
-                            # "--install-folder", self.build_folder,
-                            "build",
-                            "--build-base", self.build_folder,
-                            "--build-platlib", os.path.join(self.build_folder, "lib_setuptools"),
-                        ]
-                        if self.settings.build_type == "Debug":
-                            setup_args.append("--debug")
-                        self.run("{} {}".format(self.deps_user_info["cpython"].python, " ".join("\"{}\"".format(a) for a in setup_args)), run_environment=True)
+            with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+                modsrcfolder = "py2" if tools.Version(self.deps_cpp_info["cpython"].version).major < "3" else "py3"
+                tools.mkdir(os.path.join(self.build_folder, modsrcfolder))
+                for fn in os.listdir(os.path.join(self.source_folder, modsrcfolder)):
+                    shutil.copy(os.path.join(self.source_folder, modsrcfolder, fn), os.path.join(self.build_folder, modsrcfolder, fn))
+                shutil.copy(os.path.join(self.source_folder, "setup.py"), os.path.join(self.build_folder, "setup.py"))
+                env = {
+                    "DISTUTILS_USE_SDK": "1",
+                    "MSSdk": "1"
+                }
+                env.update(**AutoToolsBuildEnvironment(self).vars)
+                with tools.environment_append(env):
+                    setup_args = [
+                        "{}/setup.py".format(self.source_folder),
+                        # "conan",
+                        # "--install-folder", self.build_folder,
+                        "build",
+                        "--build-base", self.build_folder,
+                        "--build-platlib", os.path.join(self.build_folder, "lib_setuptools"),
+                    ]
+                    if self.settings.build_type == "Debug":
+                        setup_args.append("--debug")
+                    self.run("{} {}".format(self.deps_user_info["cpython"].python, " ".join("\"{}\"".format(a) for a in setup_args)), run_environment=True)
 
     def _test_module(self, module, should_work):
         try:
