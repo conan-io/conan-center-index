@@ -117,8 +117,10 @@ class AsyncSimpleConan(ConanFile):
                     dst=os.path.join(self.package_folder, "lib"),
                     src=os.path.join(self.build_folder, "async_simple")
                 )
-                rename(self, os.path.join(self.package_folder, "lib", "libasync_simple_static.a"),
-                    os.path.join(self.package_folder, "lib", "libasync_simple.a"))
+                libTarget = os.path.join(self.package_folder, "lib", "libasync_simple.a")
+                if not os.path.isfile(libTarget):
+                    rename(self, os.path.join(self.package_folder, "lib", "libasync_simple_static.a"),
+                        libTarget)
 
         copy(self, pattern="*.h",
             dst=os.path.join(self.package_folder, "include/async_simple"),
