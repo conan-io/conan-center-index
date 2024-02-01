@@ -727,14 +727,24 @@ class CPythonConan(ConanFile):
                 self._msvc_package_layout()
             rm(self, "vcruntime*", os.path.join(self.package_folder, "bin"), recursive=True)
         else:
-            if (os.path.isfile(os.path.join(self.package_folder, "lib"))):
-                # FIXME not sure where this file comes from
-                self.output.info(f"{os.path.join(self.package_folder, 'lib')} exists, but it shouldn't.")
-                rm(self, "lib", self.package_folder)
-            autotools = Autotools(self)
-            # FIXME: Autotools.install() always adds DESTDIR, we don't want this argument.
-            # Use .make() directly instead
-            autotools.make(target="altinstall")
+            # FIXME: C3I sometimes has a `lib` folder in the package folder, only on MacOS.
+            # Shot in the dark attempt: If it fails, remove the entire package folder and try again
+            try:
+                autotools = Autotools(self)
+                # FIXME: Autotools.install() always adds DESTDIR, we don't want this argument.
+                # Use .make() directly instead
+                autotools.make(target="altinstall")
+            except:
+                if (os.path.isfile(os.path.join(self.package_folder, "lib"))):
+                    # FIXME not sure where this file comes from
+                    self.output.info(f"{os.path.join(self.package_folder, 'lib')} exists, but it shouldn't.")
+                    rmdir(self, self.package_folder)
+                    mkdir(self, self.package_folder)
+                
+                copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+                autotools = Autotools(self)
+                autotools.make(target="altinstall")
+                    
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
 
