@@ -1,0 +1,446 @@
+Fixes build failures after removal of NOMINMAX, see https://github.com/open-telemetry/opentelemetry-cpp/pull/2475
+
+From 78e34e7ccce323a830a2628333ac1a661e3b68cf Mon Sep 17 00:00:00 2001
+From: Mats Taraldsvik <mats.taraldsvik@gmail.com>
+Date: Wed, 3 Jan 2024 21:32:37 +0100
+Subject: [PATCH 1/3] fix std::chrono::microseconds::max
+
+---
+ docs/cpp-ostream-exporter-design.md                           | 2 +-
+ .../exporters/elasticsearch/es_log_record_exporter.h          | 4 ++--
+ .../include/opentelemetry/exporters/otlp/otlp_grpc_exporter.h | 4 ++--
+ .../exporters/otlp/otlp_grpc_log_record_exporter.h            | 4 ++--
+ .../include/opentelemetry/exporters/otlp/otlp_http_exporter.h | 4 ++--
+ .../exporters/otlp/otlp_http_log_record_exporter.h            | 4 ++--
+ .../opentelemetry/sdk/logs/batch_log_record_processor.h       | 4 ++--
+ .../opentelemetry/sdk/logs/multi_log_record_processor.h       | 4 ++--
+ sdk/include/opentelemetry/sdk/trace/batch_span_processor.h    | 4 ++--
+ 9 files changed, 17 insertions(+), 17 deletions(-)
+
+diff --git a/docs/cpp-ostream-exporter-design.md b/docs/cpp-ostream-exporter-design.md
+index 7deb369ab3..50085e126e 100644
+--- a/docs/cpp-ostream-exporter-design.md
++++ b/docs/cpp-ostream-exporter-design.md
+@@ -154,7 +154,7 @@ public:
+         return sdktrace::ExportResult::kSuccess;
+     }
+ 
+-    bool Shutdown(std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept
++    bool Shutdown(std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept
+     {
+         isShutdown = true;
+         return true;
+diff --git a/exporters/elasticsearch/include/opentelemetry/exporters/elasticsearch/es_log_record_exporter.h b/exporters/elasticsearch/include/opentelemetry/exporters/elasticsearch/es_log_record_exporter.h
+index 8579c99138..9550da6385 100644
+--- a/exporters/elasticsearch/include/opentelemetry/exporters/elasticsearch/es_log_record_exporter.h
++++ b/exporters/elasticsearch/include/opentelemetry/exporters/elasticsearch/es_log_record_exporter.h
+@@ -100,14 +100,14 @@ class ElasticsearchLogRecordExporter final : public opentelemetry::sdk::logs::Lo
+    * @return return true when all data are exported, and false when timeout
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+   /**
+    * Shutdown this exporter.
+    * @param timeout The maximum time to wait for the shutdown method to return
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+ private:
+   // Stores if this exporter had its Shutdown() method called
+diff --git a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_exporter.h b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_exporter.h
+index 7aff1e24a5..01f77ec5c7 100644
+--- a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_exporter.h
++++ b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_exporter.h
+@@ -58,7 +58,7 @@ class OtlpGrpcExporter final : public opentelemetry::sdk::trace::SpanExporter
+    * @return return true when all data are exported, and false when timeout
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+   /**
+    * Shut down the exporter.
+@@ -67,7 +67,7 @@ class OtlpGrpcExporter final : public opentelemetry::sdk::trace::SpanExporter
+    * @return return the status of this operation
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+ private:
+   // The configuration options associated with this exporter.
+diff --git a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_log_record_exporter.h b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_log_record_exporter.h
+index 29333703b1..8dc2aed2b4 100644
+--- a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_log_record_exporter.h
++++ b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_log_record_exporter.h
+@@ -60,14 +60,14 @@ class OtlpGrpcLogRecordExporter : public opentelemetry::sdk::logs::LogRecordExpo
+    * @return return true when all data are exported, and false when timeout
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+   /**
+    * Shutdown this exporter.
+    * @param timeout The maximum time to wait for the shutdown method to return.
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+ private:
+   // Configuration options for the exporter
+diff --git a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_exporter.h b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_exporter.h
+index 1adbbc70b9..58eb7ab61c 100644
+--- a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_exporter.h
++++ b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_exporter.h
+@@ -59,7 +59,7 @@ class OPENTELEMETRY_EXPORT OtlpHttpExporter final : public opentelemetry::sdk::t
+    * @return return true when all data are exported, and false when timeout
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+   /**
+    * Shut down the exporter.
+@@ -68,7 +68,7 @@ class OPENTELEMETRY_EXPORT OtlpHttpExporter final : public opentelemetry::sdk::t
+    * @return return the status of this operation
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+ private:
+   // The configuration options associated with this exporter.
+diff --git a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_log_record_exporter.h b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_log_record_exporter.h
+index 4393345dfd..b7fc0857fb 100644
+--- a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_log_record_exporter.h
++++ b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_log_record_exporter.h
+@@ -58,14 +58,14 @@ class OtlpHttpLogRecordExporter final : public opentelemetry::sdk::logs::LogReco
+    * @return return true when all data are exported, and false when timeout
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+   /**
+    * Shutdown this exporter.
+    * @param timeout The maximum time to wait for the shutdown method to return
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+ private:
+   // Configuration options for the exporter
+diff --git a/sdk/include/opentelemetry/sdk/logs/batch_log_record_processor.h b/sdk/include/opentelemetry/sdk/logs/batch_log_record_processor.h
+index e93ebf3d6b..a19aa8736c 100644
+--- a/sdk/include/opentelemetry/sdk/logs/batch_log_record_processor.h
++++ b/sdk/include/opentelemetry/sdk/logs/batch_log_record_processor.h
+@@ -72,7 +72,7 @@ class BatchLogRecordProcessor : public LogRecordProcessor
+    * NOTE: Timeout functionality not supported yet.
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+   /**
+    * Shuts down the processor and does any cleanup required. Completely drains the buffer/queue of
+@@ -82,7 +82,7 @@ class BatchLogRecordProcessor : public LogRecordProcessor
+    * NOTE: Timeout functionality not supported yet.
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+   /**
+    * Class destructor which invokes the Shutdown() method.
+diff --git a/sdk/include/opentelemetry/sdk/logs/multi_log_record_processor.h b/sdk/include/opentelemetry/sdk/logs/multi_log_record_processor.h
+index 335da7f668..05f032773b 100644
+--- a/sdk/include/opentelemetry/sdk/logs/multi_log_record_processor.h
++++ b/sdk/include/opentelemetry/sdk/logs/multi_log_record_processor.h
+@@ -45,7 +45,7 @@ class MultiLogRecordProcessor : public LogRecordProcessor
+    * @return a result code indicating whether it succeeded, failed or timed out
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+   /**
+    * Shuts down the processor and does any cleanup required.
+@@ -55,7 +55,7 @@ class MultiLogRecordProcessor : public LogRecordProcessor
+    * @return true if the shutdown succeeded, false otherwise
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+ private:
+   std::vector<std::unique_ptr<LogRecordProcessor>> processors_;
+diff --git a/sdk/include/opentelemetry/sdk/trace/batch_span_processor.h b/sdk/include/opentelemetry/sdk/trace/batch_span_processor.h
+index a748b06361..8edcb5937a 100644
+--- a/sdk/include/opentelemetry/sdk/trace/batch_span_processor.h
++++ b/sdk/include/opentelemetry/sdk/trace/batch_span_processor.h
+@@ -69,7 +69,7 @@ class BatchSpanProcessor : public SpanProcessor
+    * NOTE: Timeout functionality not supported yet.
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+   /**
+    * Shuts down the processor and does any cleanup required. Completely drains the buffer/queue of
+@@ -79,7 +79,7 @@ class BatchSpanProcessor : public SpanProcessor
+    * NOTE: Timeout functionality not supported yet.
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = std::chrono::microseconds::max()) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
+ 
+   /**
+    * Class destructor which invokes the Shutdown() method. The Shutdown() method is supposed to be
+
+From 4cbff84d65eabb615cab3037c2dac2401e65a8ec Mon Sep 17 00:00:00 2001
+From: Mats Taraldsvik <mats.taraldsvik@gmail.com>
+Date: Wed, 3 Jan 2024 21:32:38 +0100
+Subject: [PATCH 2/3] temp
+
+---
+ docs/cpp-ostream-exporter-design.md                           | 2 +-
+ .../exporters/elasticsearch/es_log_record_exporter.h          | 4 ++--
+ .../include/opentelemetry/exporters/otlp/otlp_grpc_exporter.h | 4 ++--
+ .../exporters/otlp/otlp_grpc_log_record_exporter.h            | 4 ++--
+ .../include/opentelemetry/exporters/otlp/otlp_http_exporter.h | 4 ++--
+ .../exporters/otlp/otlp_http_log_record_exporter.h            | 4 ++--
+ .../opentelemetry/sdk/logs/batch_log_record_processor.h       | 4 ++--
+ .../opentelemetry/sdk/logs/multi_log_record_processor.h       | 4 ++--
+ sdk/include/opentelemetry/sdk/trace/batch_span_processor.h    | 4 ++--
+ 9 files changed, 17 insertions(+), 17 deletions(-)
+
+diff --git a/docs/cpp-ostream-exporter-design.md b/docs/cpp-ostream-exporter-design.md
+index 50085e126e..6da8bdd032 100644
+--- a/docs/cpp-ostream-exporter-design.md
++++ b/docs/cpp-ostream-exporter-design.md
+@@ -154,7 +154,7 @@ public:
+         return sdktrace::ExportResult::kSuccess;
+     }
+ 
+-    bool Shutdown(std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept
++    bool Shutdown(std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept
+     {
+         isShutdown = true;
+         return true;
+diff --git a/exporters/elasticsearch/include/opentelemetry/exporters/elasticsearch/es_log_record_exporter.h b/exporters/elasticsearch/include/opentelemetry/exporters/elasticsearch/es_log_record_exporter.h
+index 9550da6385..b72ff4f917 100644
+--- a/exporters/elasticsearch/include/opentelemetry/exporters/elasticsearch/es_log_record_exporter.h
++++ b/exporters/elasticsearch/include/opentelemetry/exporters/elasticsearch/es_log_record_exporter.h
+@@ -100,14 +100,14 @@ class ElasticsearchLogRecordExporter final : public opentelemetry::sdk::logs::Lo
+    * @return return true when all data are exported, and false when timeout
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+   /**
+    * Shutdown this exporter.
+    * @param timeout The maximum time to wait for the shutdown method to return
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+ private:
+   // Stores if this exporter had its Shutdown() method called
+diff --git a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_exporter.h b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_exporter.h
+index 01f77ec5c7..870e5a043a 100644
+--- a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_exporter.h
++++ b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_exporter.h
+@@ -58,7 +58,7 @@ class OtlpGrpcExporter final : public opentelemetry::sdk::trace::SpanExporter
+    * @return return true when all data are exported, and false when timeout
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+   /**
+    * Shut down the exporter.
+@@ -67,7 +67,7 @@ class OtlpGrpcExporter final : public opentelemetry::sdk::trace::SpanExporter
+    * @return return the status of this operation
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+ private:
+   // The configuration options associated with this exporter.
+diff --git a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_log_record_exporter.h b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_log_record_exporter.h
+index 8dc2aed2b4..f1cd96888c 100644
+--- a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_log_record_exporter.h
++++ b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_grpc_log_record_exporter.h
+@@ -60,14 +60,14 @@ class OtlpGrpcLogRecordExporter : public opentelemetry::sdk::logs::LogRecordExpo
+    * @return return true when all data are exported, and false when timeout
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+   /**
+    * Shutdown this exporter.
+    * @param timeout The maximum time to wait for the shutdown method to return.
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+ private:
+   // Configuration options for the exporter
+diff --git a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_exporter.h b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_exporter.h
+index 58eb7ab61c..b5faf1a9b8 100644
+--- a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_exporter.h
++++ b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_exporter.h
+@@ -59,7 +59,7 @@ class OPENTELEMETRY_EXPORT OtlpHttpExporter final : public opentelemetry::sdk::t
+    * @return return true when all data are exported, and false when timeout
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+   /**
+    * Shut down the exporter.
+@@ -68,7 +68,7 @@ class OPENTELEMETRY_EXPORT OtlpHttpExporter final : public opentelemetry::sdk::t
+    * @return return the status of this operation
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+ private:
+   // The configuration options associated with this exporter.
+diff --git a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_log_record_exporter.h b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_log_record_exporter.h
+index b7fc0857fb..f481fdab0b 100644
+--- a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_log_record_exporter.h
++++ b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_log_record_exporter.h
+@@ -58,14 +58,14 @@ class OtlpHttpLogRecordExporter final : public opentelemetry::sdk::logs::LogReco
+    * @return return true when all data are exported, and false when timeout
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+   /**
+    * Shutdown this exporter.
+    * @param timeout The maximum time to wait for the shutdown method to return
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+ private:
+   // Configuration options for the exporter
+diff --git a/sdk/include/opentelemetry/sdk/logs/batch_log_record_processor.h b/sdk/include/opentelemetry/sdk/logs/batch_log_record_processor.h
+index a19aa8736c..d6a44df142 100644
+--- a/sdk/include/opentelemetry/sdk/logs/batch_log_record_processor.h
++++ b/sdk/include/opentelemetry/sdk/logs/batch_log_record_processor.h
+@@ -72,7 +72,7 @@ class BatchLogRecordProcessor : public LogRecordProcessor
+    * NOTE: Timeout functionality not supported yet.
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+   /**
+    * Shuts down the processor and does any cleanup required. Completely drains the buffer/queue of
+@@ -82,7 +82,7 @@ class BatchLogRecordProcessor : public LogRecordProcessor
+    * NOTE: Timeout functionality not supported yet.
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+   /**
+    * Class destructor which invokes the Shutdown() method.
+diff --git a/sdk/include/opentelemetry/sdk/logs/multi_log_record_processor.h b/sdk/include/opentelemetry/sdk/logs/multi_log_record_processor.h
+index 05f032773b..8ca5cffcca 100644
+--- a/sdk/include/opentelemetry/sdk/logs/multi_log_record_processor.h
++++ b/sdk/include/opentelemetry/sdk/logs/multi_log_record_processor.h
+@@ -45,7 +45,7 @@ class MultiLogRecordProcessor : public LogRecordProcessor
+    * @return a result code indicating whether it succeeded, failed or timed out
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+   /**
+    * Shuts down the processor and does any cleanup required.
+@@ -55,7 +55,7 @@ class MultiLogRecordProcessor : public LogRecordProcessor
+    * @return true if the shutdown succeeded, false otherwise
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+ private:
+   std::vector<std::unique_ptr<LogRecordProcessor>> processors_;
+diff --git a/sdk/include/opentelemetry/sdk/trace/batch_span_processor.h b/sdk/include/opentelemetry/sdk/trace/batch_span_processor.h
+index 8edcb5937a..afbf4486b0 100644
+--- a/sdk/include/opentelemetry/sdk/trace/batch_span_processor.h
++++ b/sdk/include/opentelemetry/sdk/trace/batch_span_processor.h
+@@ -69,7 +69,7 @@ class BatchSpanProcessor : public SpanProcessor
+    * NOTE: Timeout functionality not supported yet.
+    */
+   bool ForceFlush(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+   /**
+    * Shuts down the processor and does any cleanup required. Completely drains the buffer/queue of
+@@ -79,7 +79,7 @@ class BatchSpanProcessor : public SpanProcessor
+    * NOTE: Timeout functionality not supported yet.
+    */
+   bool Shutdown(
+-      std::chrono::microseconds timeout = (std::chrono::microseconds::max())) noexcept override;
++      std::chrono::microseconds timeout = (std::chrono::microseconds::max)()) noexcept override;
+ 
+   /**
+    * Class destructor which invokes the Shutdown() method. The Shutdown() method is supposed to be
+
+From f02636d8d0becb4e1d8e6f5e8965ba48fd76f77f Mon Sep 17 00:00:00 2001
+From: Mats Taraldsvik <mats.taraldsvik@gmail.com>
+Date: Wed, 3 Jan 2024 21:32:38 +0100
+Subject: [PATCH 3/3] temp
+
+---
+ exporters/elasticsearch/src/es_log_record_exporter.cc | 2 +-
+ exporters/otlp/src/otlp_http_client.cc                | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/exporters/elasticsearch/src/es_log_record_exporter.cc b/exporters/elasticsearch/src/es_log_record_exporter.cc
+index c90072e4e4..e167faf3d9 100644
+--- a/exporters/elasticsearch/src/es_log_record_exporter.cc
++++ b/exporters/elasticsearch/src/es_log_record_exporter.cc
+@@ -430,7 +430,7 @@ bool ElasticsearchLogRecordExporter::ForceFlush(
+       std::chrono::duration_cast<std::chrono::steady_clock::duration>(timeout);
+   if (timeout_steady <= std::chrono::steady_clock::duration::zero())
+   {
+-    timeout_steady = std::chrono::steady_clock::duration::max();
++    timeout_steady = (std::chrono::steady_clock::duration::max)();
+   }
+ 
+   std::unique_lock<std::mutex> lk_cv(synchronization_data_->force_flush_cv_m);
+diff --git a/exporters/otlp/src/otlp_http_client.cc b/exporters/otlp/src/otlp_http_client.cc
+index 9c57a9bd83..7814199ef2 100644
+--- a/exporters/otlp/src/otlp_http_client.cc
++++ b/exporters/otlp/src/otlp_http_client.cc
+@@ -782,7 +782,7 @@ bool OtlpHttpClient::ForceFlush(std::chrono::microseconds timeout) noexcept
+       std::chrono::duration_cast<std::chrono::steady_clock::duration>(timeout);
+   if (timeout_steady <= std::chrono::steady_clock::duration::zero())
+   {
+-    timeout_steady = std::chrono::steady_clock::duration::max();
++    timeout_steady = (std::chrono::steady_clock::duration::max)();
+   }
+ 
+   while (timeout_steady > std::chrono::steady_clock::duration::zero())

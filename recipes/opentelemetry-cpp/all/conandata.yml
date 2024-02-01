@@ -1,4 +1,7 @@
 sources:
+  "1.13.0":
+    url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/v1.13.0.tar.gz"
+    sha256: "7735cc56507149686e6019e06f588317099d4522480be5f38a2a09ec69af1706"
   "1.12.0":
     url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/v1.12.0.tar.gz"
     sha256: "09c208a21fb1159d114a3ea15dc1bcc5dee28eb39907ba72a6012d2c7b7564a0"
@@ -11,3 +14,9 @@ sources:
   "1.7.0":
     url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/v1.7.0.tar.gz"
     sha256: "2ad0911cdc94fe84a93334773bef4789a38bd1f01e39560cabd4a5c267e823c3"
+patches:
+  "1.13.0":
+    - patch_file: "patches/2475.patch"
+      patch_description: "Fix build w/ MSVC"
+      patch_type: "backport"
+      patch_source: "https://github.com/open-telemetry/opentelemetry-cpp/pull/2475"
