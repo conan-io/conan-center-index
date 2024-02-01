@@ -1,4 +1,4 @@
-#include "Recast.h"
+#include "recastnavigation/Recast.h"
 
 int main() {
     rcSqrt(2);
