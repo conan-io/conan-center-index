@@ -239,9 +239,9 @@ class OpenImageIOConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "OpenImageIO"
 
         # OpenImageIO::OpenImageIO_Util
-        OpenImageIOUtil = self._add_component("OpenImageIO_Util")
-        OpenImageIOUtil.libs = ["OpenImageIO_Util"]
-        OpenImageIOUtil.requires = [
+        open_image_io_util = self._add_component("OpenImageIO_Util")
+        open_image_io_util.libs = ["OpenImageIO_Util"]
+        open_image_io_util.requires = [
             "boost::filesystem",
             "boost::thread",
             "boost::system",
@@ -250,16 +250,16 @@ class OpenImageIOConan(ConanFile):
             "openexr::openexr",
         ]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            OpenImageIOUtil.system_libs.extend(
+            open_image_io_util.system_libs.extend(
                 ["dl", "m", "pthread"]
             )
         if self.options.with_tbb:
-            OpenImageIOUtil.requires.append("onetbb::onetbb")
+            open_image_io_util.requires.append("onetbb::onetbb")
 
         # OpenImageIO::OpenImageIO
-        OpenImageIO = self._add_component("OpenImageIO")
-        OpenImageIO.libs = ["OpenImageIO"]
-        OpenImageIO.requires = [
+        open_image_io = self._add_component("OpenImageIO")
+        open_image_io.libs = ["OpenImageIO"]
+        open_image_io.requires = [
             "openimageio_openimageio_util",
             "zlib::zlib",
             "boost::thread",
@@ -276,41 +276,41 @@ class OpenImageIOConan(ConanFile):
         ]
 
         if self.options.with_libjpeg == "libjpeg":
-            OpenImageIO.requires.append("libjpeg::libjpeg")
+            open_image_io.requires.append("libjpeg::libjpeg")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            OpenImageIO.requires.append(
+            open_image_io.requires.append(
                 "libjpeg-turbo::libjpeg-turbo"
             )
         if self.options.with_libpng:
-            OpenImageIO.requires.append("libpng::libpng")
+            open_image_io.requires.append("libpng::libpng")
         if self.options.with_freetype:
-            OpenImageIO.requires.append("freetype::freetype")
+            open_image_io.requires.append("freetype::freetype")
         if self.options.with_hdf5:
-            OpenImageIO.requires.append("hdf5::hdf5")
+            open_image_io.requires.append("hdf5::hdf5")
         if self.options.with_opencolorio:
-            OpenImageIO.requires.append("opencolorio::opencolorio")
+            open_image_io.requires.append("opencolorio::opencolorio")
         if self.options.with_opencv:
-            OpenImageIO.requires.append("opencv::opencv")
+            open_image_io.requires.append("opencv::opencv")
         if self.options.with_dicom:
-            OpenImageIO.requires.append("dcmtk::dcmtk")
+            open_image_io.requires.append("dcmtk::dcmtk")
         if self.options.with_ffmpeg:
-            OpenImageIO.requires.append("ffmpeg::ffmpeg")
+            open_image_io.requires.append("ffmpeg::ffmpeg")
         if self.options.with_giflib:
-            OpenImageIO.requires.append("giflib::giflib")
+            open_image_io.requires.append("giflib::giflib")
         if self.options.with_libheif:
-            OpenImageIO.requires.append("libheif::libheif")
+            open_image_io.requires.append("libheif::libheif")
         if self.options.with_raw:
-            OpenImageIO.requires.append("libraw::libraw")
+            open_image_io.requires.append("libraw::libraw")
         if self.options.with_openjpeg:
-            OpenImageIO.requires.append("openjpeg::openjpeg")
+            open_image_io.requires.append("openjpeg::openjpeg")
         if self.options.with_openvdb:
-            OpenImageIO.requires.append("openvdb::openvdb")
+            open_image_io.requires.append("openvdb::openvdb")
         if self.options.with_ptex:
-            OpenImageIO.requires.append("ptex::ptex")
+            open_image_io.requires.append("ptex::ptex")
         if self.options.with_libwebp:
-            OpenImageIO.requires.append("libwebp::libwebp")
+            open_image_io.requires.append("libwebp::libwebp")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            OpenImageIO.system_libs.extend(["dl", "m", "pthread"])
+            open_image_io.system_libs.extend(["dl", "m", "pthread"])
 
         if not self.options.shared:
-            OpenImageIO.defines.append("OIIO_STATIC_DEFINE")
+            open_image_io.defines.append("OIIO_STATIC_DEFINE")
