@@ -19,14 +19,13 @@ class LlamaCppConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
-        "with_blas": [True, False],
+        "fPIC": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
-        "with_blas": False,
+        "fPIC": True
     }
+ 
     package_type = "library"
 
     @property
