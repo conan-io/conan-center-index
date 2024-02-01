@@ -34,9 +34,6 @@ class EventppConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def build(self):
-        apply_conandata_patches(self)
-
     def package(self):
         copy(self, pattern="license", 
              dst=os.path.join(self.package_folder, "licenses"), 
