@@ -3,7 +3,8 @@
 # You can adjust the behavior by modifying this file.
 # For more information, see:
 # https://github.com/actions/stale
-name: Mark stale issues and pull requests
+name: Mark stale pull requests
+
 
 on:
   schedule:
@@ -11,34 +12,41 @@ on:
 
 jobs:
   stale:
+    if: github.repository == 'conan-io/conan-center-index'
 
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
+      pull-requests: read
+      issues: write
+
 
     steps:
     - uses: actions/stale@v9
       with:
-        # Idle number of days before marking issues/PRs stale
-        days-before-stale: 30
+        # Do not make issues as stale
+        days-before-issue-stale: -1
+        # Number of days before stale PRs are closed
+        days-before-pr-stale: 30
 
-        # Idle number of days before closing stale issues/PRs
-        days-before-close: 30
 
-        # Only issues/PRs with ALL these labels are checked
-        only-labels:
+        # Do not close issues automatically
+        days-before-issue-close: -1
+        # Idle number of days before closing stale PRs
+        days-before-pr-close: 30
+
 
         # Labels on PRs exempted from stale
         exempt-pr-labels: blocked,infrastructure
 
-        # Exempt all issues/PRs with milestones from stale
-        exempt-all-milestones: false
-
-        # Exempt all issues/PRs with assignees from stale
-        exempt-all-assignees: false
-
         # Label to apply on staled PRs
         stale-pr-label: 'stale'
+        # Label to be removed when updating a PR
+        labels-to-remove-when-unstale: 'stale'
+
+        # Skip issues when having stale state
+        remove-issue-stale-when-updated: false
+        ignore-issue-updates: true
+
 
         # Comment on the staled PRs
         stale-pr-message: >
