@@ -237,7 +237,7 @@ class BotanConan(ConanFile):
         global_cxxflags = " ".join(self.conf.get("tools.build:cxxflags", default=[], check_type=list))
         env_cxxflags = VirtualBuildEnv(self).vars().get("CXXFLAGS", default="")
         cxxflags = f"{env_cxxflags} {global_cxxflags}".strip()
-        return cxxflags if len(cxxflags) > 0 else None
+        return cxxflags if len(cxxflags) > 1 else None
 
     def generate(self):
         if is_msvc(self):
@@ -448,8 +448,8 @@ class BotanConan(ConanFile):
             build_flags.append(f"--msvc-runtime={msvc_runtime_flag(self)}")
 
         if self._is_glibc_older_than_2_25_on_linux and Version(self.version) >= '3.0':
-            # Botan 3.0+ requires glibc >= 2.25, but CCI's CI Linux images are
-            # currently older than that. Remove as soon as CCI updates!
+            # INFO: Botan 3.0+ requires glibc >= 2.25. Disable features to make it backward compatible
+            # FIXME: CCI Docker images are running Ubuntu 16.04. Remove it after supporting later version.
             self.output.warning("Disabling usage of getentropy(), getrandom(), and explicit_bzero() due to old glibc version")
             build_flags.append('--without-os-features=getentropy,getrandom,explicit_bzero')
 
@@ -522,7 +522,7 @@ class BotanConan(ConanFile):
 
     @property
     def _is_glibc_older_than_2_25_on_linux(self):
-        # glibc below 2.25 lacks support for certain syscalls that botan assumes
+        # FIXME: glibc below 2.25 lacks support for certain syscalls that botan assumes
         # to be present. Once CCI updated their CI images and provides a newer
         # glibc, we can (and should) remove this workaround.
         #
