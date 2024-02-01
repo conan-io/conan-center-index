@@ -42,10 +42,10 @@ Co-authored-by: Bo Andreson <mail@boanderson.me>
  4 files changed, 6 insertions(+), 30 deletions(-)
 
 diff --git a/configure b/configure
-index d83a402..d55440c 100755
+index d733a59..c13ad3d 100755
 --- a/configure
 +++ b/configure
-@@ -13239,7 +13239,7 @@ done
+@@ -13237,7 +13237,7 @@ done
    # defines OPENSSL_VERSION_NUMBER to claim version 2.0.0, even though it
    # doesn't have these OpenSSL 1.1.0 functions. So check for individual
    # functions.
@@ -55,7 +55,7 @@ index d83a402..d55440c 100755
    as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
  ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
 diff --git a/configure.ac b/configure.ac
-index 570dace..2bc752c 100644
+index 44868ba..77e59a2 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -1347,7 +1347,7 @@ if test "$with_ssl" = openssl ; then
@@ -68,10 +68,10 @@ index 570dace..2bc752c 100644
    # thread-safety. In 1.1.0, it's no longer required, and CRYPTO_lock()
    # function was removed.
 diff --git a/src/backend/libpq/be-secure-openssl.c b/src/backend/libpq/be-secure-openssl.c
-index f5c5ed2..aed8a75 100644
+index 8f9b81c..9abee50 100644
 --- a/src/backend/libpq/be-secure-openssl.c
 +++ b/src/backend/libpq/be-secure-openssl.c
-@@ -839,11 +839,6 @@ be_tls_write(Port *port, void *ptr, size_t len, int *waitfor)
+@@ -830,11 +830,6 @@ be_tls_write(Port *port, void *ptr, size_t len, int *waitfor)
   * to retry; do we need to adopt their logic for that?
   */
  
@@ -83,7 +83,7 @@ index f5c5ed2..aed8a75 100644
  static BIO_METHOD *my_bio_methods = NULL;
  
  static int
-@@ -853,7 +848,7 @@ my_sock_read(BIO *h, char *buf, int size)
+@@ -844,7 +839,7 @@ my_sock_read(BIO *h, char *buf, int size)
  
  	if (buf != NULL)
  	{
@@ -92,7 +92,7 @@ index f5c5ed2..aed8a75 100644
  		BIO_clear_retry_flags(h);
  		if (res <= 0)
  		{
-@@ -873,7 +868,7 @@ my_sock_write(BIO *h, const char *buf, int size)
+@@ -864,7 +859,7 @@ my_sock_write(BIO *h, const char *buf, int size)
  {
  	int			res = 0;
  
@@ -101,7 +101,7 @@ index f5c5ed2..aed8a75 100644
  	BIO_clear_retry_flags(h);
  	if (res <= 0)
  	{
-@@ -949,7 +944,7 @@ my_SSL_set_fd(Port *port, int fd)
+@@ -940,7 +935,7 @@ my_SSL_set_fd(Port *port, int fd)
  		SSLerr(SSL_F_SSL_SET_FD, ERR_R_BUF_LIB);
  		goto err;
  	}
