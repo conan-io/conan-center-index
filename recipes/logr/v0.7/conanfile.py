@@ -20,6 +20,7 @@ class LogrConan(ConanFile):
     homepage = "https://github.com/ngrodzitski/logr"
     topics = ("logger", "development", "util", "utils")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "header-library"
     options = {
         "backend": ["spdlog", "glog", "log4cplus", "boostlog", None],
     }
