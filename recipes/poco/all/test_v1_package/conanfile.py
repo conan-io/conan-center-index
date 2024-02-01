@@ -16,8 +16,8 @@ class TestPackageConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["TEST_CRYPTO"] = self.options["poco"].enable_crypto
         cmake.definitions["TEST_UTIL"] = self.options["poco"].enable_util
-        cmake.definitions["TEST_NET"] = self.options["poco"].enable_net
-        cmake.definitions["TEST_NETSSL"] = self._poco_option("enable_netssl", False) or self._poco_option("enable_netssl_win", False)
+        cmake.definitions["TEST_NET"] = False
+        cmake.definitions["TEST_NETSSL"] = False
         cmake.definitions["TEST_SQLITE"] = self.options["poco"].enable_data_sqlite
         cmake.definitions["TEST_ENCODINGS"] = self._poco_option("enable_encodings", False)
         cmake.definitions["TEST_JWT"] = self._poco_option("enable_jwt", False)
