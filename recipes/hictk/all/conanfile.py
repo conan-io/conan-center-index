@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.50.0"
 
@@ -40,7 +41,6 @@ class HictkConan(ConanFile):
 
     def requirements(self):
         self.requires("bshoshany-thread-pool/4.0.1", transitive_headers=True)
-        self.requires("concurrentqueue/1.0.4", transitive_headers=True)
         self.requires("fast_float/6.1.0", transitive_headers=True)
         if self.options.with_eigen:
             self.requires("eigen/3.4.0", transitive_headers=True)
@@ -49,10 +49,16 @@ class HictkConan(ConanFile):
         self.requires("highfive/2.9.0", transitive_headers=True)
         self.requires("libdeflate/1.19", transitive_headers=True)
         self.requires("parallel-hashmap/1.3.11", transitive_headers=True)  # Note: v1.3.11 is more recent than v1.37
-        self.requires("readerwriterqueue/1.0.6", transitive_headers=True)
         self.requires("span-lite/0.10.3", transitive_headers=True)
         self.requires("spdlog/1.13.0", transitive_headers=True)
         self.requires("zstd/1.5.5", transitive_headers=True)
+
+        if Version(self.version) < "0.0.7":
+            self.requires("xxhash/0.8.2", transitive_headers=True)
+
+        if Version(self.version) > "0.0.7":
+            self.requires("readerwriterqueue/1.0.6", transitive_headers=True)
+            self.requires("concurrentqueue/1.0.4", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()
