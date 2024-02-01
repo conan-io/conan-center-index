@@ -1,5 +1,6 @@
 import os
 import shutil
+import platform
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -446,6 +447,12 @@ class BotanConan(ConanFile):
         if is_msvc(self):
             build_flags.append(f"--msvc-runtime={msvc_runtime_flag(self)}")
 
+        if self._is_glibc_older_than_2_25_on_linux and Version(self.version) >= '3.0':
+            # Botan 3.0+ requires glibc >= 2.25, but CCI's CI Linux images are
+            # currently older than that. Remove as soon as CCI updates!
+            self.output.warning("Disabling usage of getentropy(), getrandom(), and explicit_bzero() due to old glibc version")
+            build_flags.append('--without-os-features=getentropy,getrandom,explicit_bzero')
+
         build_flags.append('--without-pkg-config')
 
         call_python = 'python' if self.settings.os == 'Windows' else ''
@@ -511,4 +518,20 @@ class BotanConan(ConanFile):
             self.settings.os == 'Linux' and
             self.settings.compiler == 'clang' and
             self.settings.compiler.libcxx == 'libc++'
+        )
+
+    @property
+    def _is_glibc_older_than_2_25_on_linux(self):
+        # glibc below 2.25 lacks support for certain syscalls that botan assumes
+        # to be present. Once CCI updated their CI images and provides a newer
+        # glibc, we can (and should) remove this workaround.
+        #
+        # https://github.com/conan-io/conan-center-index/pull/18079#issuecomment-1919206949
+        # https://github.com/conan-io/conan-center-index/pull/18079#issuecomment-1919486839
+
+        libver = platform.libc_ver()
+        return (
+            self.settings.os == 'Linux' and
+            libver[0] == 'glibc' and
+            Version(libver[1]) < '2.25'
         )
