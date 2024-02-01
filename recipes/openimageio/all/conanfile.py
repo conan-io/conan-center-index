@@ -94,10 +94,8 @@ class OpenImageIOConan(ConanFile):
         self.requires("tsl-robin-map/1.2.1")
         if Version(self.version) >= "2.4.17.0":
             self.requires("fmt/10.1.1", transitive_headers=True)
-        elif Version(self.version) >= "2.4.7.0":
-            self.requires("fmt/9.1.0", transitive_headers=True)
         else:
-            self.requires("fmt/8.1.1", transitive_headers=True)
+            self.requires("fmt/9.1.0", transitive_headers=True)
 
         # Optional libraries
         if self.options.with_libpng:
@@ -115,10 +113,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_dicom:
             self.requires("dcmtk/3.6.7")
         if self.options.with_ffmpeg:
-            if Version(self.version) >= "2.4.7.0":
-                self.requires("ffmpeg/6.0.1")
-            else:
-                self.requires("ffmpeg/4.4.4")
+            self.requires("ffmpeg/6.0.1")
         # TODO: Field3D dependency
         if self.options.with_giflib:
             self.requires("giflib/5.2.1")
