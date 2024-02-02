@@ -81,52 +81,52 @@ class OpenImageIOConan(ConanFile):
     def requirements(self):
         # Required libraries
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("boost/1.83.0")
+        self.requires("boost/1.84.0")
         self.requires("libtiff/4.6.0")
         self.requires("imath/3.1.9", transitive_headers=True)
         self.requires("openexr/3.2.1")
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
-        self.requires("pugixml/1.13")
+            self.requires("libjpeg-turbo/3.0.2")
+        self.requires("pugixml/1.14")
         self.requires("libsquish/1.15")
         self.requires("tsl-robin-map/1.2.1")
         if Version(self.version) >= "2.4.17.0":
-            self.requires("fmt/10.1.1", transitive_headers=True)
+            self.requires("fmt/10.2.1", transitive_headers=True)
         else:
             self.requires("fmt/9.1.0", transitive_headers=True)
 
         # Optional libraries
         if self.options.with_libpng:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/1.6.42")
         if self.options.with_freetype:
             self.requires("freetype/2.13.2")
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.1")
+            self.requires("hdf5/1.14.3")
         if self.options.with_opencolorio:
             self.requires("opencolorio/2.3.1")
         if self.options.with_opencv:
-            self.requires("opencv/4.5.5")
+            self.requires("opencv/4.8.1")
         if self.options.with_tbb:
             self.requires("onetbb/2021.10.0")
         if self.options.with_dicom:
             self.requires("dcmtk/3.6.7")
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/6.0.1")
+            self.requires("ffmpeg/6.1")
         # TODO: Field3D dependency
         if self.options.with_giflib:
             self.requires("giflib/5.2.1")
         if self.options.with_libheif:
             self.requires("libheif/1.16.2")
         if self.options.with_raw:
-            self.requires("libraw/0.21.1")
+            self.requires("libraw/0.21.2")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.0")
         if self.options.with_openvdb:
             self.requires("openvdb/8.0.1")
         if self.options.with_ptex:
-            self.requires("ptex/2.4.0")
+            self.requires("ptex/2.4.2")
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.2")
         # TODO: R3DSDK dependency
