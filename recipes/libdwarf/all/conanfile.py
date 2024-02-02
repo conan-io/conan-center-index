@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rename
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -20,11 +21,13 @@ class LibdwarfConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_dwarfgen": [True, False],
+        "with_dwarfdump": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_dwarfgen": False,
+        "with_dwarfdump": False,
     }
 
     def export_sources(self):
@@ -50,6 +53,8 @@ class LibdwarfConan(ConanFile):
         if self.options.with_dwarfgen or self.version == "20191104":
             self.requires("libelf/0.8.13")
         self.requires("zlib/[>=1.2.11 <2]")
+        if self.version != "20191104" and Version(self.version) >= Version("0.9.0"):
+            self.requires("zstd/[>=1.3.5]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -60,6 +65,7 @@ class LibdwarfConan(ConanFile):
         tc.variables["BUILD_NON_SHARED"] = not self.options.shared
         tc.variables["BUILD_SHARED"] = self.options.shared
         tc.variables["BUILD_DWARFGEN"] = self.options.with_dwarfgen
+        tc.variables["BUILD_DWARFDUMP"] = self.options.with_dwarfdump
         tc.variables["BUILD_DWARFEXAMPLE"] = False
         if cross_building(self):
             tc.variables["HAVE_UNUSED_ATTRIBUTE_EXITCODE"] = "0"
