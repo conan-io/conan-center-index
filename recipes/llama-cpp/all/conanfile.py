@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
@@ -22,11 +22,13 @@ class LlamaCppConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
+        "native": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
+        "native": True
     }
  
     package_type = "library"
@@ -44,6 +46,8 @@ class LlamaCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if hasattr(self, "settings_build") and cross_building(self):
+            self.options.native = False
 
     def configure(self):
         if self.options.shared:
@@ -72,9 +76,8 @@ class LlamaCppConan(ConanFile):
         tc.variables["LLAMA_STANDALONE"] = False
         tc.variables["LLAMA_BUILD_TESTS"] = False
         tc.variables["LLAMA_BUILD_EXAMPLES"] = False
-
-        if self.options.shared:
-            tc.variables["BUILD_SHARED_LIBS"] = True
+        tc.variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
+        tc.variables["LLAMA_NATIVE"] = bool(self.options.native)
 
         tc.generate()
 
