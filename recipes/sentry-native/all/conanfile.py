@@ -51,13 +51,7 @@ class SentryNativeConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        if is_msvc(self):
-            return "17"
-        if self.options.get_safe("backend") == "breakpad":
-            return 17
-        if self.options.get_safe("backend") == "crashpad" and Version(self.version) >= "0.7.0":
-            return 17
-        return "14"
+        return "17"
 
     @property
     def _minimum_compilers_version(self):
