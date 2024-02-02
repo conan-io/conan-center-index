@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7ba5fb7..48c2699 100644
+index 7ba5fb7..36ab3a0 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -91,17 +91,17 @@ endif ()
@@ -31,7 +31,13 @@ index 7ba5fb7..48c2699 100644
  # optionally, opencl
  # OpenCL disabled as its code is not up-to-date with API
  set(USE_OPEN_CL FALSE CACHE BOOL "Set to TRUE to look for OpenCL")
-@@ -151,9 +151,9 @@ else ()
+@@ -146,14 +146,14 @@ if (SHARED_LIBS)
+ else ()
+ 	add_library(${LIB_NAME} STATIC ${NABO_SRC})
+ 	if (NOT MSVC)
+-		target_compile_options(${LIB_NAME} PRIVATE -fPIC)
++#		target_compile_options(${LIB_NAME} PRIVATE -fPIC)
+ 	endif()
  	install(TARGETS ${LIB_NAME} ARCHIVE DESTINATION lib)
  endif ()
  set_target_properties(${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
