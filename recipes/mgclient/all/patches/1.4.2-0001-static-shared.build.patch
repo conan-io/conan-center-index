@@ -36,7 +36,7 @@ index e905e85..85a6b0a 100644
 +    install(TARGETS mgclient-shared
 +            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 +            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-+            RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
++            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 +    endif()
      install(DIRECTORY
              "${PROJECT_SOURCE_DIR}/include/"
