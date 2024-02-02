@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f444af27..d7f8d168 100644
+index f444af27..b4124c19 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -189,6 +189,12 @@ if (ZLIB_FOUND AND ZSTD_FOUND )
@@ -7,9 +7,9 @@ index f444af27..d7f8d168 100644
  endif()
  
 +if(TARGET zstd::libzstd_shared)
-+  add_library(ZSTD::ZSTD ALIAS zstd::libzstd_shared)
++  set(ZSTD_LIB zstd::libzstd_shared)
 +else()
-+  add_library(ZSTD::ZSTD ALIAS zstd::libzstd_static)
++  set(ZSTD_LIB zstd::libzstd_static)
 +endif()
 +
  message(STATUS "CMAKE_SIZEOF_VOID_P ... " ${CMAKE_SIZEOF_VOID_P} )
@@ -32,8 +32,12 @@ diff --git a/src/lib/libdwarf/CMakeLists.txt b/src/lib/libdwarf/CMakeLists.txt
 index 4ad5c4fb..65305211 100644
 --- a/src/lib/libdwarf/CMakeLists.txt
 +++ b/src/lib/libdwarf/CMakeLists.txt
-@@ -111,7 +111,6 @@ if(ZLIB_FOUND AND ZSTD_FOUND)
-   target_link_libraries(dwarf PRIVATE  ZLIB::ZLIB ZSTD::ZSTD ) 
+@@ -108,10 +108,9 @@ target_include_directories(dwarf PUBLIC
+     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+   )
+ if(ZLIB_FOUND AND ZSTD_FOUND)
+-  target_link_libraries(dwarf PRIVATE  ZLIB::ZLIB ZSTD::ZSTD ) 
++  target_link_libraries(dwarf PRIVATE  ZLIB::ZLIB ${ZSTD_LIB} ) 
  endif()
  
 -set(SUFFIX $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>:64>)
