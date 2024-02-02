@@ -28,10 +28,16 @@ patches:
     - patch_file: "patches/15/001-mingw-build-static-libraries.patch"
       patch_description: "port MinGW: Enable building static libraries in MinGW."
       patch_type: "portability"
+    - patch_file: "patches/15/0001-Use-BIO_-get-set-_app_data-instead-of-BIO_-get-se.patch"
+      patch_description: "Fix libpq w/ openssl >=3.2.x"
+      patch_type: "backport"
   "15.3":
     - patch_file: "patches/15/001-mingw-build-static-libraries.patch"
       patch_description: "port MinGW: Enable building static libraries in MinGW."
       patch_type: "portability"
+    - patch_file: "patches/15/0001-Use-BIO_-get-set-_app_data-instead-of-BIO_-get-se.patch"
+      patch_description: "Fix libpq w/ openssl >=3.2.x"
+      patch_type: "backport"
   "14.9":
     - patch_file: "patches/13/002-mingw-build-static-libraries.patch"
       patch_description: "port MinGW: Enable building static libraries in MinGW."
