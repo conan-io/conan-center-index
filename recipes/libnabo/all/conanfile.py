@@ -27,6 +27,7 @@ class LibnaboConan(ConanFile):
         "fPIC": True,
         "with_openmp": False,
     }
+    short_paths = True
 
     @property
     def _min_cppstd(self):
