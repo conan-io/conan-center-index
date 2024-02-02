@@ -66,6 +66,7 @@ class LibnaboConan(ConanFile):
             tc.variables["LIBNABO_BUILD_EXAMPLES"] = False
             tc.variables["LIBNABO_BUILD_TESTS"] = False
             tc.variables["LIBNABO_BUILD_PYTHON"] = False
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
