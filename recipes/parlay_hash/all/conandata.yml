@@ -1,0 +1,7 @@
+sources:
+  "0.0.2":
+    url: "https://github.com/cmuparlay/parlayhash/archive/refs/tags/v0.0.2.tar.gz"
+    sha256: "763bb240ae9db6950d1071e25d53ccf502697e7b7bbd292a918d1a566a779ec8"
+  "0.0.1":
+    url: "https://github.com/cmuparlay/parlayhash/archive/refs/tags/v0.0.1.tar.gz"
+    sha256: "93c4a1690ddc4ced446c1993267f77af2145a78b1a3a3b1a9bfc69d649214ff4"
