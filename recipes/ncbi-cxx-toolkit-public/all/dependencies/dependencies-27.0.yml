@@ -175,7 +175,7 @@ libraries:
             ]
   web:      ["xsoap_server", "xsoap",
              "ncbi_web",
-                "xcgi_redirect","xcgi","xhtml", "xfcgi"
+                "xcgi_redirect","xcgi","xhtml"
             ]
 #----------------------------------------------------------------------------
 requirements:
