@@ -141,6 +141,7 @@ required_for_references:
 - cargs
 - cassandra-cpp-driver
 - catch2
+- cc65
 - ccache
 - cccl
 - ccfits
@@ -195,9 +196,11 @@ required_for_references:
 - console_bridge
 - continuable
 - coost
+- copypp
 - corrade
 - cose-c
 - cotila
+- coz
 - cpp-httplib
 - cpp-ipc
 - cpp-jwt
@@ -371,6 +374,7 @@ required_for_references:
 - flatbush
 - flecs
 - flex
+- flint
 - fltk
 - fmi1
 - fmi2
@@ -651,6 +655,7 @@ required_for_references:
 - libhydrogen
 - libiberty
 - libiconv
+- libid3tag
 - libinterpolate
 - libipt
 - libjpeg
@@ -748,6 +753,7 @@ required_for_references:
 - libuuid
 - libuv
 - libuvc
+- libva
 - libvault
 - libverto
 - libvips
@@ -778,6 +784,7 @@ required_for_references:
 - linux-headers-generic
 - linux-syscall-support
 - litehtml
+- lksctp-tools
 - llhttp
 - llvm-openmp
 - lmdb
@@ -1116,6 +1123,7 @@ required_for_references:
 - redboltz-mqtt_cpp
 - redis-plus-plus
 - refl-cpp
+- reflect-cpp
 - replxx
 - resource_pool
 - restbed
