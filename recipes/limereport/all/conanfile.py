@@ -47,7 +47,7 @@ class LimereportConan(ConanFile):
     def build_requirements(self):
         self.requires("libpng/[>=1.6 <1.7]")
         if self.options.with_zint:
-            self.build_requires("zint/2.10.0")
+            self.tool_requires("zint/2.10.0")
 
     def requirements(self):
         self.requires("qt/6.4.2")
@@ -68,7 +68,7 @@ class LimereportConan(ConanFile):
         tc.cache_variables["LIMEREPORT_STATIC"] = not self.options.shared
         if is_msvc(self):
             tc.variables["WINDOWS_BUILD"] = True
-        qt_major = Version(self.deps_cpp_info["qt"].version).major
+        qt_major = Version(self.dependencies["qt"].ref.version).major
         if qt_major == 6: 
             tc.cache_variables["USE_QT6"] = True
         tc.cache_variables["ENABLE_ZINT"] = self.options.with_zint
@@ -91,5 +91,5 @@ class LimereportConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        qt_major = Version(self.deps_cpp_info["qt"].version).major
+        qt_major = Version(self.dependencies["qt"].ref.version).major
         self.cpp_info.libs = ["limereport-qt{}".format(qt_major)]
