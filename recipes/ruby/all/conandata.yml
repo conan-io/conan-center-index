@@ -16,3 +16,7 @@ patches:
     - patch_file: "patches/0004-windows-cflags.patch"
       patch_description: "Define cflags properly on windows"
       patch_type: "portability"
+    - patch_file: "patches/0005-backport-add-with-gmp-dir-3.1.0.patch"
+      patch_description: "backport add --with-gmp-dir which was added only in 3.2.0"
+      patch_type: "backport"
+      patch_source: "https://github.com/ruby/ruby/commit/f512df73986c74e2f4bd65ca642879a0618da213"
