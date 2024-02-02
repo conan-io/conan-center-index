@@ -117,6 +117,8 @@ class OpenTelemetryCppConan(ConanFile):
             self.options.rm_safe("fPIC")
         if Version(self.version) >= "1.10":
             del self.options.with_jaeger
+        if Version(self.version) >= "1.11.0":
+            self.options.rm_safe("with_logs_preview")
 
     def configure(self):
         if self.options.shared:
@@ -253,7 +255,8 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_JAEGER"] = self.options.get_safe("with_jaeger", False)
         tc.cache_variables["WITH_NO_GETENV"] = self.options.with_no_getenv
         tc.cache_variables["WITH_ETW"] = self.options.with_etw
-        tc.cache_variables["WITH_LOGS_PREVIEW"] = self.options.with_logs_preview
+        if Version(self.version) < "1.11.0":
+            tc.cache_variables["WITH_LOGS_PREVIEW"] = self.options.with_logs_preview
         tc.cache_variables["WITH_ASYNC_EXPORT_PREVIEW"] = self.options.with_async_export_preview
         tc.cache_variables["WITH_METRICS_EXEMPLAR_PREVIEW"] = self.options.with_metrics_exemplar_preview
         tc.cache_variables["OPENTELEMETRY_INSTALL"] = True
@@ -337,17 +340,17 @@ class OpenTelemetryCppConan(ConanFile):
                 libraries.append("opentelemetry_exporter_otlp_grpc_metrics")
                 if Version(self.version) >= "1.7.0":
                     libraries.append("opentelemetry_exporter_otlp_grpc_client")
-                if self.options.with_logs_preview:
+                if Version(self.version) >= "1.11" or self.options.with_logs_preview:
                     libraries.append("opentelemetry_exporter_otlp_grpc_log")
             if self.options.with_otlp_http:
                 libraries.append("opentelemetry_exporter_otlp_http")
                 libraries.append("opentelemetry_exporter_otlp_http_client")
                 libraries.append("opentelemetry_exporter_otlp_http_metric")
-                if self.options.with_logs_preview:
+                if Version(self.version) >= "1.11" or self.options.with_logs_preview:
                     libraries.append("opentelemetry_exporter_otlp_http_log")
         if self.options.with_prometheus:
             libraries.append("opentelemetry_exporter_prometheus")
-        if self.options.with_elasticsearch and self.options.with_logs_preview:
+        if self.options.with_elasticsearch and (Version(self.version) >= "1.11" or self.options.with_logs_preview):
             libraries.append("opentelemetry_exporter_elasticsearch_logs")
         if self.options.with_zipkin:
             libraries.append("opentelemetry_exporter_zipkin_trace")
@@ -355,7 +358,7 @@ class OpenTelemetryCppConan(ConanFile):
             libraries.append("opentelemetry_exporter_jaeger_trace")
         libraries.append("opentelemetry_metrics")
         libraries.append("opentelemetry_exporter_ostream_metrics")
-        if self.options.with_logs_preview:
+        if Version(self.version) >= "1.11" or self.options.with_logs_preview:
             libraries.extend([
                 "opentelemetry_logs",
                 "opentelemetry_exporter_ostream_logs",
@@ -386,7 +389,7 @@ class OpenTelemetryCppConan(ConanFile):
 
         self.cpp_info.components["opentelemetry_exporter_in_memory"].libs = []
 
-        if self.options.with_logs_preview:
+        if Version(self.version) >= "1.11" or self.options.with_logs_preview:
             self.cpp_info.components["opentelemetry_logs"].requires.extend([
                 "opentelemetry_resources",
                 "opentelemetry_common",
@@ -451,7 +454,7 @@ class OpenTelemetryCppConan(ConanFile):
                     "opentelemetry_exporter_otlp_grpc_client"
                 ])
 
-            if self.options.with_logs_preview:
+            if Version(self.version) >= "1.11" or  self.options.with_logs_preview:
                 self.cpp_info.components["opentelemetry_exporter_otlp_grpc_log"].requires.extend([
                     "opentelemetry_otlp_recordable",
                     "opentelemetry_exporter_otlp_grpc_client",
@@ -481,7 +484,7 @@ class OpenTelemetryCppConan(ConanFile):
                 "opentelemetry_exporter_otlp_http_client"
             ])
 
-            if self.options.with_logs_preview:
+            if Version(self.version) >= "1.11" or self.options.with_logs_preview:
                 self.cpp_info.components["opentelemetry_exporter_otlp_http_log"].requires.extend([
                     "opentelemetry_otlp_recordable",
                     "opentelemetry_exporter_otlp_http_client",
