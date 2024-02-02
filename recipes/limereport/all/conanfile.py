@@ -1,7 +1,7 @@
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy, get
+from conan.tools.build import check_min_cppstd
 from conan import ConanFile
-from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.apple import fix_apple_shared_install_name
@@ -16,6 +16,7 @@ class LimereportConan(ConanFile):
     topics = ("limereport", "pdf", "report","qt")
     license = "LGPL-3.0", "GPL-3.0"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -28,24 +29,29 @@ class LimereportConan(ConanFile):
         "with_zint": False,
     }
 
+    @property
+    def _min_cppstd(self):
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "8",
+            "clang": "8",
+            "apple-clang": "9.1",
+        }
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "15",
-            "gcc": "8",
-            "clang": "8",
-            "apple-clang": "8"
-        }
-
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.requires("libpng/[>=1.6 <1.7]")
+        self.requires("libpng/1.6.40")
         if self.options.with_zint:
             self.tool_requires("zint/2.10.0")
 
@@ -53,11 +59,20 @@ class LimereportConan(ConanFile):
         self.requires("qt/6.4.2")
 
     def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )    
         if Version(self.dependencies["qt"].ref.version) < "6.0.0":
             if not (self.dependencies["qt"].options.qtquickcontrols and self.dependencies["qt"].options.qtquickcontrols2):
-                raise ConanInvalidConfiguration(f"{self.ref} requires qt quickcontrols and quickcontrols2")
+                raise ConanInvalidConfiguration(f"{self.ref} requires qt:quickcontrols=True and qt:quickcontrols2=True")
+            elif not (self.dependencies["qt"].options.qtdeclarative):
+                raise ConanInvalidConfiguration(f"{self.ref} requires qt:qtdeclarative=True")
         if not (self.dependencies["qt"].options.qtsvg and self.dependencies["qt"].options.qttools):
-            raise ConanInvalidConfiguration(f"{self.ref} requires qt svg and tools")
+            raise ConanInvalidConfiguration(f"{self.ref} requires qt:qtsvg=True and qt:qttools=True")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
