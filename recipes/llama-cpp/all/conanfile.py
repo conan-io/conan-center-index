@@ -1,10 +1,13 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
+
 
 required_conan_version = ">=1.53.0"
 
@@ -32,6 +35,12 @@ class LlamaCppConan(ConanFile):
     def _min_cppstd(self):
         return "11"
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "8"
+        }
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,6 +52,11 @@ class LlamaCppConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.get_safe("compiler.version")) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires {str(self.settings.compiler)}>={minimum_version}."
+            )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
