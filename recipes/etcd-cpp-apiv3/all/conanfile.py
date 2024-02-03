@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import export_conandata_patches, get, load, copy
+from conan.tools.files import export_conandata_patches, get, load, copy, collect_libs
 import os
 
 required_conan_version = ">=1.53.0"
@@ -67,10 +67,5 @@ class EtcdCppApiv3Conan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_file_name", "etcd-cpp-apiv3")
-        self.cpp_info.set_property("cmake_target_name", "etcd-cpp-apiv3::etcd-cpp-apiv3")
-        self.cpp_info.set_property("pkg_config_name", "etcd-cpp-apiv3")
+        self.cpp_info.libs = collect_libs(self)
 
-        self.cpp_info.names["cmake_find_package"] = "etcd-cpp-apiv3"
-        self.cpp_info.names["cmake_find_package_multi"] = "etcd-cpp-apiv3"
