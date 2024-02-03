@@ -1,4 +1,4 @@
-#include <parlay_hash/unordered_map.h>
+#include <parlay/unordered_map.h>
 
 #include <iostream>
 
