@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import export_conandata_patches, get, load, copy
 import os
 
@@ -52,6 +52,9 @@ class EtcdCppApiv3Conan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["gRPC_VERSION"] = self.dependencies["grpc"].ref.version
         tc.generate()
+
+        cmake_deps = CMakeDeps(self)
+        cmake_deps.generate()
 
     def build(self):
         cmake = CMake(self)
