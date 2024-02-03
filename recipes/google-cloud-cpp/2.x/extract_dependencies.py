@@ -41,17 +41,12 @@ _PROTO_DEPS_REPLACED_TARGETS = {
     "cloud_osconfig_v1_osconfig_protos": "osconfig_protos",
     "devtools_source_v1_source_protos": "devtools_source_v1_source_context_protos",
     "cloud_documentai_v1_documentai_protos": "documentai_protos",
+    "iam_v2_policy_protos": "iam_v2_protos",
 }
 
 # A few *.deps files use ad-hoc naming.
 _PROTO_DEPS_REPLACED_NAMES = {
     "common": "cloud_common_common",
-    "bigquery": "cloud_bigquery",
-    "dialogflow": "cloud_dialogflow_v2",
-    "logging_type": "logging_type_type",
-    "texttospeech": "cloud_texttospeech",
-    "speech": "cloud_speech",
-    "trace": "devtools_cloudtrace_v2_trace",
 }
 
 # A few *.deps files are not used.
@@ -90,7 +85,6 @@ _PROTO_BASE_COMPONENTS = {
     "type_expr_protos",
     "api_routing_protos",
     "api_usage_protos",
-    "logging_type_type_protos",
     "type_calendar_period_protos",
     "rpc_code_protos",
     "api_system_parameter_protos",
@@ -109,6 +103,8 @@ _PROTO_BASE_COMPONENTS = {
     "api_field_behavior_protos",
     "api_context_protos",
     "api_logging_protos",
+    "iam_credentials_v1_common_protos",
+    "iam_credentials_v1_iamcredentials_protos",
 }
 
 # A list of experimental components used when `google-cloud-cpp` does not
@@ -116,106 +112,6 @@ _PROTO_BASE_COMPONENTS = {
 _DEFAULT_EXPERIMENTAL_COMPONENTS = {
     "apikeys",
     "pubsublite",
-}
-
-# A list of components used when `google-cloud-cpp` does not provide an
-# easy-to-use list.
-_DEFAULT_COMPONENTS = {
-    "accessapproval",
-    "accesscontextmanager",
-    "apigateway",
-    "apigeeconnect",
-    "appengine",
-    "artifactregistry",
-    "asset",
-    "assuredworkloads",
-    "automl",
-    "baremetalsolution",
-    "batch",
-    "beyondcorp",
-    "bigquery",
-    "bigtable",
-    "billing",
-    "binaryauthorization",
-    "certificatemanager",
-    "channel",
-    "cloudbuild",
-    "composer",
-    "connectors",
-    "contactcenterinsights",
-    "container",
-    "containeranalysis",
-    "datacatalog",
-    "datamigration",
-    "dataplex",
-    "dataproc",
-    "datastream",
-    "debugger",
-    "deploy",
-    "dialogflow_cx",
-    "dialogflow_es",
-    "dlp",
-    "documentai",
-    "edgecontainer",
-    "eventarc",
-    "filestore",
-    "functions",
-    "gameservices",
-    "gkehub",
-    "iam",
-    "iap",
-    "ids",
-    "iot",
-    "kms",
-    "language",
-    "logging",
-    "managedidentities",
-    "memcache",
-    "monitoring",
-    "networkconnectivity",
-    "networkmanagement",
-    "notebooks",
-    "optimization",
-    "orgpolicy",
-    "osconfig",
-    "oslogin",
-    "policytroubleshooter",
-    "privateca",
-    "profiler",
-    "pubsub",
-    "recommender",
-    "redis",
-    "resourcemanager",
-    "resourcesettings",
-    "retail",
-    "run",
-    "scheduler",
-    "secretmanager",
-    "securitycenter",
-    "servicecontrol",
-    "servicedirectory",
-    "servicemanagement",
-    "serviceusage",
-    "shell",
-    "spanner",
-    "speech",
-    "storage",
-    "storagetransfer",
-    "talent",
-    "tasks",
-    "texttospeech",
-    "tpu",
-    "trace",
-    "translate",
-    "video",
-    "videointelligence",
-    "vision",
-    "vmmigration",
-    "vmwareengine",
-    "vpcaccess",
-    "webrisk",
-    "websecurityscanner",
-    "workflows",
 }
 
 # `google-cloud-cpp` managems these dependencies using CMake code.
@@ -256,12 +152,24 @@ _HARD_CODED_DEPENDENCIES = {
         "api_system_parameter_protos",
         "api_usage_protos",
     ],
-    "devtools_cloudtrace_v2_tracing_protos": [
-        "devtools_cloudtrace_v2_trace_protos",
-        "devtools_cloudtrace_v2_trace_protos",
+    "iam_v1_options_protos": ["api_annotations_protos"],
+    "iam_v1_policy_protos": ["api_annotations_protos", "type_expr_protos"],
+    "iam_v1_iam_policy_protos": [
+        "api_annotations_protos",
         "api_client_protos",
         "api_field_behavior_protos",
-        "rpc_status_protos",
+        "api_resource_protos",
+        "iam_v1_options_protos",
+        "iam_v1_policy_protos",
+    ],
+    "iam_credentials_v1_common_protos": [
+        "api_field_behavior_protos",
+        "api_resource_protos",
+    ],
+    "iam_credentials_v1_iamcredentials_protos": [
+        "api_annotations_protos",
+        "api_client_protos",
+        "iam_credentials_v1_common_protos",
     ],
 }
 
@@ -271,7 +179,7 @@ def _components(source_folder):
     # Use the hard-coded list because the `google-cloud-cpp` does not provide
     # an easy way to get all the components.
     if not os.path.exists(libraries):
-        return _DEFAULT_COMPONENTS
+        raise Exception("Missing 'libraries.bzl' file")
     # The `libraries.bzl` file is a Starlark file that simply defines some
     # variables listing all GA, experimental, and "transition", components.
     # We want both the GA and transition components, the latter are components
@@ -334,6 +242,7 @@ def main():
     proto_components = _PROTO_BASE_COMPONENTS.copy()
     files = sorted(glob.glob(os.path.join(deps_folder, "*.deps")))
     experimental = set(_experimental_components(source_folder))
+    components = set(_components(source_folder))
     for filename in files:
         component = os.path.basename(filename).replace(".deps", "")
         component = _PROTO_DEPS_REPLACED_NAMES.get(component, component)
@@ -341,6 +250,9 @@ def main():
             # Experimental components have an associated *_protos, component.
             # The Conan package only compiles the GA components, so we need
             # to skip these.
+            continue
+        if component == "compute":
+            # `compute` does not use gRPC or the `*.deps` files.
             continue
         component = component + "_protos"
         deps = _generate_proto_requires(filename)
@@ -352,12 +264,21 @@ def main():
         proto_components.add(component)
         proto_components.update(deps)
         print(f'    "{component}": {sorted(deps)},')
+    print(f'    "compute_internal_protos": ["protobuf::libprotobuf"],')
+    print(f'    "cloud_extended_operations_protos": ["protobuf::libprotobuf"],')
+    proto_components.add("compute_internal_protos")
+    proto_components.add("cloud_extended_operations_protos")
+    for component in sorted(components):
+        if not component.startswith("compute_"):
+            continue
+        proto_components.add(component + "_protos")
+        print(f'    "{component}_protos": ["compute_internal_protos", "cloud_extended_operations_protos", "protobuf::libprotobuf"],')
     print("}")
     proto_components = proto_components - _PROTO_DEPS_COMMON_REQUIRES
     names = ['"%s"' % c for c in proto_components]
     joined = ",\n    ".join(sorted(names))
     print(f"\nPROTO_COMPONENTS = {{\n    {joined}\n}}")
-    names = ['"%s"' % c for c in _components(source_folder)]
+    names = ['"%s"' % c for c in components]
     joined = ",\n    ".join(sorted(names))
     print(f"\nCOMPONENTS = {{\n    {joined}\n}}")
 

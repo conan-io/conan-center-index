@@ -1,15 +1,17 @@
+import os
+import re
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, rename
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, \
+    rename
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag
 from conan.tools.scm import Version
-import os
-import re
 
 required_conan_version = ">=1.57.0"
 
@@ -53,19 +55,22 @@ class LibVPXConan(ConanFile):
                 delattr(self.options, name)
 
     def configure(self):
-        if self.options.shared:
+        if self.settings.os == "Windows":
+            del self.options.shared
+            self.package_type = "static-library"
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Windows shared builds are not supported")
         if str(self.settings.compiler) not in ["Visual Studio", "msvc", "gcc", "clang", "apple-clang"]:
             raise ConanInvalidConfiguration(f"Unsupported compiler {self.settings.compiler}")
         if self.settings.os == "Macos" and self.settings.arch == "armv8" and Version(self.version) < "1.10.0":
             raise ConanInvalidConfiguration("M1 only supported since 1.10, please upgrade")
+        if self.settings.os == "iOS" and (self.settings.os.sdk != "iphonesimulator" and self.settings.arch in ["x86_64", "x86"]):
+            raise ConanInvalidConfiguration("iOS platform with x86/x86_64 architectures only supports 'iphonesimulator' SDK option")
 
     def build_requirements(self):
         self.tool_requires("yasm/1.3.0")
@@ -81,10 +86,51 @@ class LibVPXConan(ConanFile):
     def _install_tmp_folder(self):
         return "tmp_install"
 
+    @property
+    def _target_name(self):
+        arch = {'x86': 'x86',
+                'x86_64': 'x86_64',
+                'armv7': 'armv7',
+                'armv7s': 'armv7s',
+                'armv8': 'arm64',
+                'mips': 'mips32',
+                'mips64': 'mips64',
+                'sparc': 'sparc'}.get(str(self.settings.arch))
+        compiler = str(self.settings.compiler)
+        os_name = str(self.settings.os)
+        if str(self.settings.compiler) == "Visual Studio":
+            vc_version = self.settings.compiler.version
+            compiler = f"vs{vc_version}"
+        elif is_msvc(self):
+            vc_version = str(self.settings.compiler.version)
+            vc_version = {"170": "11", "180": "12", "190": "14", "191": "15", "192": "16", "193": "17"}[vc_version]
+            compiler = f"vs{vc_version}"
+        elif self.settings.compiler in ["gcc", "clang", "apple-clang"]:
+            compiler = 'gcc'
+        host_os = str(self.settings.os)
+        if host_os == 'Windows':
+            os_name = 'win32' if self.settings.arch == 'x86' else 'win64'
+        elif is_apple_os(self):
+            if self.settings.arch in ["x86", "x86_64"]:
+                if self.settings.os == "Macos":
+                    os_name = f'darwin11'
+                else:
+                    os_name = 'iphonesimulator'
+            elif self.settings.arch == "armv8":
+                os_name = 'darwin21'
+            else:
+                os_name = 'darwin'
+        elif host_os == 'Linux':
+            os_name = 'linux'
+        elif host_os == 'Solaris':
+            os_name = 'solaris'
+        elif host_os == 'Android':
+            os_name = 'android'
+        return f"{arch}-{os_name}-{compiler}"
+
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-
         tc = AutotoolsToolchain(self)
 
         if is_apple_os(self) and self.settings.get_safe("compiler.libcxx") == "libc++":
@@ -99,56 +145,16 @@ class LibVPXConan(ConanFile):
             "--enable-vp9-highbitdepth",
             "--as=yasm",
         ])
-
         # Note for MSVC: release libs are always built, we just avoid keeping the release lib
         # Note2: Can't use --enable-debug_libs (to help install on Windows),
         #     the makefile's install step fails as it wants to install a library that doesn't exist.
         #     Instead, we will copy the desired library manually in the package step.
         if self.settings.build_type == "Debug":
             tc.configure_args.extend([
-                # "--enable-debug_libs",
-                "--enable-debug",
+                "--enable-debug"
             ])
-
         if is_msvc(self) and is_msvc_static_runtime(self):
             tc.configure_args.append("--enable-static-msvcrt")
-
-        arch = {'x86': 'x86',
-                'x86_64': 'x86_64',
-                'armv7': 'armv7',
-                'armv8': 'arm64',
-                'mips': 'mips32',
-                'mips64': 'mips64',
-                'sparc': 'sparc'}.get(str(self.settings.arch))
-        if str(self.settings.compiler) == "Visual Studio":
-            vc_version = self.settings.compiler.version
-            compiler = f"vs{vc_version}"
-        elif is_msvc(self):
-            vc_version = str(self.settings.compiler.version)
-            vc_version = {"170": "11", "180": "12", "190": "14", "191": "15", "192": "16", "193": "17"}[vc_version]
-            compiler = f"vs{vc_version}"
-        elif self.settings.compiler in ["gcc", "clang", "apple-clang"]:
-            compiler = 'gcc'
-
-        host_os = str(self.settings.os)
-        if host_os == 'Windows':
-            os_name = 'win32' if self.settings.arch == 'x86' else 'win64'
-        elif is_apple_os(self):
-            if self.settings.arch in ["x86", "x86_64"]:
-                os_name = 'darwin11'
-            elif self.settings.arch == "armv8" and self.settings.os == "Macos":
-                os_name = 'darwin20'
-            else:
-                # Unrecognized toolchain 'arm64-darwin11-gcc', see list of toolchains in ./configure --help
-                os_name = 'darwin'
-        elif host_os == 'Linux':
-            os_name = 'linux'
-        elif host_os == 'Solaris':
-            os_name = 'solaris'
-        elif host_os == 'Android':
-            os_name = 'android'
-        target = f"{arch}-{os_name}-{compiler}"
-        tc.configure_args.append(f"--target={target}")
         if str(self.settings.arch) in ["x86", "x86_64"]:
             for name in self._arch_options:
                 if not self.options.get_safe(name):
@@ -159,6 +165,8 @@ class LibVPXConan(ConanFile):
             # must be a subfolder of prefix" libvpx src/build/make/configure.sh:683
             "--prefix": f"/{self._install_tmp_folder}",
             "--libdir": f"/{self._install_tmp_folder}/lib",
+            # Needed to let libvpx use the correct toolchain for the target platform
+            "--target": self._target_name,
             # several options must not be injected as custom configure doesn't like them
             "--host": None,
             "--build": None,
@@ -255,7 +263,7 @@ class LibVPXConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "vpx")
         self.cpp_info.libs = [self._lib_name]
-        if not self.options.shared:
+        if not self.options.get_safe("shared"):
             libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)

@@ -6,6 +6,12 @@ import os
 
 required_conan_version = ">=1.54.0"
 
+SINGLE = 'single'
+DOUBLE = 'double'
+LONGDOUBLE = 'longdouble'
+QUAD = 'quad'
+ALL = [SINGLE, DOUBLE, LONGDOUBLE, QUAD]
+
 
 class FFTWConan(ConanFile):
     name = "fftw"
@@ -20,7 +26,11 @@ class FFTWConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "precision": ["double", "single", "longdouble"],
+        "precision": ALL + ['deprecated'],
+        'precision_single': [True, False],
+        'precision_double': [True, False],
+        'precision_longdouble': [True, False],
+        'precision_quad': [True, False],
         "openmp": [True, False],
         "threads": [True, False],
         "combinedthreads": [True, False],
@@ -29,12 +39,17 @@ class FFTWConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "precision": "double",
+        "precision": 'deprecated',
+        'precision_single': True,
+        'precision_double': True,
+        'precision_longdouble': True,
+        'precision_quad': False,
         "openmp": False,
         "threads": False,
         "combinedthreads": False,
         "simd": False,
     }
+    _current_precision = None
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -50,6 +65,8 @@ class FFTWConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         if not self.options.threads:
             del self.options.combinedthreads
+        if self.options.precision != "deprecated":
+            self.output.warning("precision options is deprecated! use dedicated options 'precision_single', 'precision_double', 'precision_longdouble' and 'precision_quad' instead")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -70,64 +87,94 @@ class FFTWConan(ConanFile):
         tc.variables["ENABLE_OPENMP"] = self.options.openmp
         tc.variables["ENABLE_THREADS"] = self.options.threads
         tc.variables["WITH_COMBINED_THREADS"] = self.options.get_safe("combinedthreads", False)
-        tc.variables["ENABLE_FLOAT"] = self.options.precision == "single"
-        tc.variables["ENABLE_LONG_DOUBLE"] = self.options.precision == "longdouble"
         tc.variables["ENABLE_SSE"] = self.options.simd == "sse"
         tc.variables["ENABLE_SSE2"] = self.options.simd == "sse2"
         tc.variables["ENABLE_AVX"] = self.options.simd == "avx"
         tc.variables["ENABLE_AVX2"] = self.options.simd == "avx2"
         tc.generate()
 
+    @property
+    def build_folder(self):
+        bf = super().build_folder
+        return os.path.join(bf, self._current_precision) if self._current_precision else bf
+
+    @property
+    def _all_precisions(self):
+        return [p for p in ALL if self.options.get_safe(f"precision_{p}")]
+
     def build(self):
+        def on_off(value):
+            return "ON" if value else 'OFF'
+
         apply_conandata_patches(self)
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        for self._current_precision in self._all_precisions:
+            cmake = CMake(self)
+            variables = {
+                "ENABLE_FLOAT": on_off(self._current_precision == SINGLE),
+                "ENABLE_LONG_DOUBLE": on_off(self._current_precision == LONGDOUBLE),
+                "ENABLE_QUAD_PRECISION": on_off(self._current_precision == QUAD)
+            }
+            cmake.configure(variables=variables)
+            cmake.build()
+
+        # Potentially avoid side effects due to build_folder property tweak.
+        self._current_precision = None
 
     def package(self):
         copy(self, "COPYRIGHT", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        cmake = CMake(self)
-        cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        for self._current_precision in self._all_precisions:
+            cmake = CMake(self)
+            cmake.install()
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+
+        # Potentially avoid side effects due to build_folder property tweak.
+        self._current_precision = None
 
     def package_info(self):
-        prec_suffix = self._prec_suffix[str(self.options.precision)]
-        cmake_config_name = "FFTW3" + prec_suffix
-        cmake_namespace = "FFTW3"
-        cmake_target_name = "fftw3" + prec_suffix
-        pkgconfig_name = "fftw3" + prec_suffix
-        lib_name = "fftw3" + prec_suffix
+        cmake_config_name = cmake_namespace = "FFTW3"
 
         self.cpp_info.set_property("cmake_file_name", cmake_config_name)
-        self.cpp_info.set_property("cmake_target_name", f"{cmake_namespace}::{cmake_target_name}")
-        self.cpp_info.set_property("pkg_config_name", pkgconfig_name)
-
-        # TODO: back to global scope in conan v2 once cmake_find_package_* & pkg_config generators removed
-        if self.options.openmp:
-            self.cpp_info.components["fftwlib"].libs.append(lib_name + "_omp")
-        if self.options.threads and not self.options.combinedthreads:
-            self.cpp_info.components["fftwlib"].libs.append(lib_name + "_threads")
-        self.cpp_info.components["fftwlib"].libs.append(lib_name)
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["fftwlib"].system_libs.append("m")
-            if self.options.threads:
-                self.cpp_info.components["fftwlib"].system_libs.append("pthread")
 
         # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = cmake_config_name
         self.cpp_info.filenames["cmake_find_package_multi"] = cmake_config_name
         self.cpp_info.names["cmake_find_package"] = cmake_namespace
         self.cpp_info.names["cmake_find_package_multi"] = cmake_namespace
-        self.cpp_info.components["fftwlib"].names["cmake_find_package"] = cmake_target_name
-        self.cpp_info.components["fftwlib"].names["cmake_find_package_multi"] = cmake_target_name
-        self.cpp_info.components["fftwlib"].set_property("cmake_target_name", f"{cmake_namespace}::{cmake_target_name}")
-        self.cpp_info.components["fftwlib"].set_property("pkg_config_name", pkgconfig_name)
+
+        for precision in self._all_precisions:
+            prec_suffix = self._prec_suffix[precision]
+            cmake_target_name = pkgconfig_name = lib_name = "fftw3" + prec_suffix
+            component_name = f"fftwlib_{precision}"
+            component = self.cpp_info.components[component_name]
+
+            # TODO: back to global scope in conan v2 once cmake_find_package_* & pkg_config generators removed
+            if self.options.openmp:
+                component.libs.append(lib_name + "_omp")
+            if self.options.threads and not self.options.combinedthreads:
+                component.libs.append(lib_name + "_threads")
+            self.cpp_info.components[component_name].libs.append(lib_name)
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                component.system_libs.append("m")
+                if precision == QUAD:
+                    component.system_libs.extend(['quadmath'])
+                if self.options.threads:
+                    component.system_libs.append("pthread")
+            self.cpp_info.components[component_name].includedirs.append(os.path.join(self.package_folder, "include"))
+
+            component.names["cmake_find_package"] = cmake_target_name
+            component.names["cmake_find_package_multi"] = cmake_target_name
+            component.set_property("cmake_target_name", f"{cmake_namespace}::{cmake_target_name}")
+            component.set_property("pkg_config_name", pkgconfig_name)
+
+    def package_id(self):
+        del self.info.options.precision
 
     @property
     def _prec_suffix(self):
         return {
             "double": "",
             "single": "f",
-            "longdouble": "l"
+            "longdouble": "l",
+            'quad': 'q'
         }

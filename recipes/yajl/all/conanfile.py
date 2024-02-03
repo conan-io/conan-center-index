@@ -1,7 +1,6 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, rmdir, rename
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 import os
 
 required_conan_version = ">=1.53.0"
@@ -25,6 +24,9 @@ class YAJLConan(ConanFile):
         "fPIC": True,
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -46,6 +48,7 @@ class YAJLConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -54,16 +57,18 @@ class YAJLConan(ConanFile):
         copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-
         rmdir(self, os.path.join(self.package_folder, "share"))
-
-        # We need to move the dll from lib to bin in order for it to be found later
-        if self.settings.os == "Windows":
-            rename(self, os.path.join(self.package_folder, "lib", "yajl.dll"), os.path.join(self.package_folder, "bin", "yajl.dll"))
-        fix_apple_shared_install_name(self)
+        # Keep either shared or static lib depending on shared option
+        if self.options.shared:
+            rm(self, "*yajl_s.*", os.path.join(self.package_folder, "lib"))
+        else:
+            rm(self, "*yajl.*", os.path.join(self.package_folder, "bin"))
+            rm(self, "*yajl.*", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["yajl"] if self.options.shared else ["yajl_s"]
+        if self.options.shared:
+            self.cpp_info.defines.append("YAJL_SHARED")
 
         # https://github.com/lloyd/yajl/blob/5e3a7856e643b4d6410ddc3f84bc2f38174f2872/src/CMakeLists.txt#L64
         self.cpp_info.set_property("pkg_config_name", "yajl")

@@ -13,7 +13,7 @@ class ArduinojsonConan(ConanFile):
     name = "arduinojson"
     description = "C++ JSON library for IoT. Simple and efficient."
     homepage = "https://github.com/bblanchon/ArduinoJson"
-    topics = ("json", "arduino", "iot", "embedded", "esp8266")
+    topics = ("json", "msgpack", "message-pack", "arduino", "iot", "embedded", "esp8266")
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
@@ -35,7 +35,7 @@ class ArduinojsonConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
-        has_arduinojson_root=Version(self.version) < "6.18.2"
+        has_arduinojson_root = not ("6.18.2" <= Version(self.version) < "7.0")
         get(self, **self.conan_data["sources"][self.version], strip_root=has_arduinojson_root)
 
     def build(self):

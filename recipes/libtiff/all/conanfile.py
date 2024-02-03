@@ -65,15 +65,15 @@ class LibtiffConan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.libdeflate:
-            self.requires("libdeflate/1.18")
+            self.requires("libdeflate/1.19")
         if self.options.lzma:
-            self.requires("xz_utils/5.4.4")
+            self.requires("xz_utils/5.4.5")
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/3.0.2")
         elif self.options.jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.3")
+            self.requires("mozjpeg/4.1.5")
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.zstd:
