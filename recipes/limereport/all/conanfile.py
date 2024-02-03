@@ -51,7 +51,7 @@ class LimereportConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.requires("libpng/1.6.40")
+        self.requires("libpng/1.6.42")
         if self.options.with_zint:
             self.tool_requires("zint/2.10.0")
 
