@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rm, rmdir
+from conan.tools.files import get, copy, rename, rm, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.scm import Version
 import os
@@ -86,6 +86,8 @@ class PackageConan(ConanFile):
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        if is_msvc(self) and self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "primesieve.dll.lib"), os.path.join(self.package_folder, "lib", "primesieve.lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["primesieve"]
