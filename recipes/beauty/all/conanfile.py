@@ -59,7 +59,7 @@ class BeautyConan(ConanFile):
     def requirements(self):
         # beauty public headers include some boost headers.
         # For example beauty/application.hpp includes boost/asio.hpp
-        self.requires("boost/1.84.0", transitive_headers=True)
+        self.requires("boost/1.83.0", transitive_headers=True)
         # dependency of asio in boost, exposed in boost/asio/ssl/detail/openssl_types.hpp
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
 
