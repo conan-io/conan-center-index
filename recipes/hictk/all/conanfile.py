@@ -53,7 +53,7 @@ class HictkConan(ConanFile):
         self.requires("spdlog/1.13.0", transitive_headers=True)
         self.requires("zstd/1.5.5", transitive_headers=True)
 
-        if Version(self.version) < "0.0.7":
+        if Version(self.version) == "0.0.3":
             self.requires("xxhash/0.8.2", transitive_headers=True)
 
         if Version(self.version) > "0.0.7":
