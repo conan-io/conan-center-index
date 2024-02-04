@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import export_conandata_patches, get, load, copy, collect_libs
 import os
@@ -42,7 +43,11 @@ class EtcdCppApiv3Conan(ConanFile):
         self.requires("protobuf/3.21.12")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("grpc/1.54.3")
-        self.requires("cpprestsdk/2.10.19") # add condition about BUILD_ETCD_CORE_ONLY
+        self.requires("cpprestsdk/2.10.19")
+
+    def validate(self):
+        if self.dependencies["grpc"].options.shared:
+            raise ConanInvalidConfiguration("grpc must be built as a static library")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
