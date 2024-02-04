@@ -64,6 +64,7 @@ class PackageConan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_TESTS"] = False
         tc.variables["WITH_MULTIARCH"] = self.options.with_multiarch
+        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         if is_msvc(self):
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
             tc.variables["WITH_MSVC_CRT_STATIC"] = self.options.with_msvc_crt_static
@@ -90,6 +91,10 @@ class PackageConan(ConanFile):
         self.cpp_info.libs = ["primesieve"]
         self.cpp_info.set_property("cmake_file_name", "primesieve")
         self.cpp_info.set_property("cmake_target_name", "primesieve::primesieve")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread"]
+
+        # Conan 1.x only
         self.cpp_info.filenames["cmake_find_package"] = "primesieve"
         self.cpp_info.filenames["cmake_find_package_multi"] = "primesieve"
         self.cpp_info.names["cmake_find_package"] = "primesieve"
