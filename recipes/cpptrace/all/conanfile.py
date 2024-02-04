@@ -43,7 +43,10 @@ class CpptraceConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libdwarf/0.8.0")
+        if Version(self.version) >= Version("0.4.0"):
+            self.requires("libdwarf/[>=0.8.0 <20191104]") # TODO: 0.9.1
+        else:
+            self.requires("libdwarf/[>=0.8.0 <20191104]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
