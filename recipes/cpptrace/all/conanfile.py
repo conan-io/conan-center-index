@@ -63,6 +63,8 @@ class CpptraceConan(ConanFile):
         tc = CMakeToolchain(self)
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        if Version(self.version) >= Version("0.4.0"):
+            tc.variables["CPPTRACE_USE_EXTERNAL_ZSTD"] = True
         if Version(self.version) >= Version("0.3.0"):
             tc.variables["CPPTRACE_USE_EXTERNAL_LIBDWARF"] = True
             tc.variables["CPPTRACE_CONAN"] = True
