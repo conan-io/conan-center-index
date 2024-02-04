@@ -1,8 +1,22 @@
 sources:
+  "0.1.8":
+    url: "https://github.com/libusb/libusb-compat-0.1/releases/download/v0.1.8/libusb-compat-0.1.8.tar.gz"
+    sha256: "d199c173fd3cd9d27c7f4bb6608befc7eb761984e6664da7d9d4386ff66fe6fc"
   "0.1.7":
     url: "https://github.com/libusb/libusb-compat-0.1/releases/download/v0.1.7/libusb-compat-0.1.7.tar.gz"
     sha256: "0679ce38aa02498c1eea9c13398a0d2356883d574632a59c1e25274ed4925cf8"
 patches:
+  "0.1.8":
+    - patch_file: "patches/0.1.7-0001-fix-autoconf-msvc-mingw.patch"
+      patch_description: "support msvc/mingw, disable Werror"
+      patch_type: "portability"
+    - patch_file: "patches/0.1.8-0002-fix-msvc-linkage-and-fix-msvc-vararg-macros.patch"
+      patch_description: "export symbols for MSVC"
+      patch_type: "portability"
   "0.1.7":
-    - patch_file: "patches/0001-fix-autoconf-msvc-mingw.patch"
-    - patch_file: "patches/0002-fix-msvc-linkage-and-fix-msvc-vararg-macros.patch"
+    - patch_file: "patches/0.1.7-0001-fix-autoconf-msvc-mingw.patch"
+      patch_description: "support msvc/mingw, disable Werror"
+      patch_type: "portability"
+    - patch_file: "patches/0.1.8-0002-fix-msvc-linkage-and-fix-msvc-vararg-macros.patch"
+      patch_description: "export symbols for MSVC"
+      patch_type: "portability"
