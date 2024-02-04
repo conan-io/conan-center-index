@@ -13,12 +13,11 @@ required_conan_version = ">=1.53.0"
 
 class BeautyConan(ConanFile):
     name = "beauty"
-    homepage = "https://github.com/dfleury2/beauty"
     description = "HTTP Server above Boost.Beast"
-    topics = ("http", "server", "boost.beast")
-    url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/dfleury2/beauty"
+    topics = ("http", "server", "boost.beast")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -60,7 +59,7 @@ class BeautyConan(ConanFile):
     def requirements(self):
         # beauty public headers include some boost headers.
         # For example beauty/application.hpp includes boost/asio.hpp
-        self.requires("boost/1.83.0", transitive_headers=True)
+        self.requires("boost/1.84.0", transitive_headers=True)
         # dependency of asio in boost, exposed in boost/asio/ssl/detail/openssl_types.hpp
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
 
