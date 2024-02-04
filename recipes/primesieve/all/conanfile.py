@@ -1,8 +1,10 @@
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.files import get, copy, rm, rmdir
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import get, copy, rm, rmdir
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
+from conan.tools.scm import Version
 import os
 
 
@@ -28,6 +30,7 @@ class PackageConan(ConanFile):
         "with_multiarch": True,
         "with_msvc_crt_static": False,
     }
+    package_type = "library"
 
     @property
     def _min_cppstd(self):
@@ -45,11 +48,14 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
+        
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "5":
+            raise ConanInvalidConfiguration("GCC<=5 is currently not supported. Contributions with fixes are welcome.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
