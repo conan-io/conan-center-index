@@ -94,7 +94,7 @@ class PackageConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "primesieve")
         self.cpp_info.set_property("cmake_target_name", "primesieve::primesieve")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread", "m"]
 
         # Conan 1.x only
         self.cpp_info.filenames["cmake_find_package"] = "primesieve"
