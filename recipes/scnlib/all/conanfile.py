@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 
 import os
@@ -34,23 +35,28 @@ class ScnlibConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17" if Version(self.version) >= "2.0.0" else "11"
+        if Version(self.version) < "2.0.0":
+            return "11"
+        else:
+            # scn/2.0.0 has complation error on MSVC c++17
+            # we have to use versions which support c++20
+            # https://github.com/eliaskosunen/scnlib/issues/97
+            # https://github.com/conan-io/conan-center-index/pull/22455#issuecomment-1924444193
+            return "20" if is_msvc(self) else "17"
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "11": {
-                "Visual Studio": "16",
-                "msvc": "192",
-            },
             "17": {
                 "gcc": "8",
                 "clang": "7",
                 # scn/2.0.0 requires std::regex_constants::multiline
                 "apple-clang": "14",
+            },
+            "20": {
                 "Visual Studio": "17",
                 "msvc": "193",
-            },
+            }
         }.get(self._min_cppstd, {})
 
     def export_sources(self):
