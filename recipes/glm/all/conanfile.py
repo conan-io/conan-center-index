@@ -25,7 +25,7 @@ class GlmConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=Version(self._get_semver()) < "1.0.0")
 
     def build(self):
         pass
@@ -34,14 +34,19 @@ class GlmConan(ConanFile):
         glm_version = self.version if self.version.startswith("cci") else Version(self._get_semver())
         if glm_version == "0.9.8" or (glm_version == "0.9.9" and self._get_tweak_number() < 6):
             save(self, os.path.join(self.package_folder, "licenses", "copying.txt"), self._get_license())
-        else:
+        elif glm_version < "1.0.0":
             copy(self, "copying.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        for headers in ("*.hpp", "*.inl", "*.h"):
+        else:
+            copy(self, "copying.txt", src=os.path.join(self.source_folder, "glm"), dst=os.path.join(self.package_folder, "licenses"))
+        for headers in ("*.hpp", "*.inl", "*.h", "*.cppm"):
             copy(self, headers, src=os.path.join(self.source_folder, "glm"),
                                 dst=os.path.join(self.package_folder, "include", "glm"))
 
     def _get_semver(self):
-        return self.version.rsplit(".", 1)[0]
+        if self.version >= Version("1.0.0"):
+            return self.version
+        else:
+            return self.version.rsplit(".", 1)[0]
 
     def _get_tweak_number(self):
         return int(self.version.rsplit(".", 1)[-1])
