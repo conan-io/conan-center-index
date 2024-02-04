@@ -17,6 +17,6 @@ patches:
     - patch_file: "patches/0.1.7-0001-fix-autoconf-msvc-mingw.patch"
       patch_description: "support msvc/mingw, disable Werror"
       patch_type: "portability"
-    - patch_file: "patches/0.1.8-0002-fix-msvc-linkage-and-fix-msvc-vararg-macros.patch"
+    - patch_file: "patches/0.1.7-0002-fix-msvc-linkage-and-fix-msvc-vararg-macros.patch"
       patch_description: "export symbols for MSVC"
       patch_type: "portability"
