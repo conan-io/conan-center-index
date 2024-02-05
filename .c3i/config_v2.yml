@@ -23,6 +23,7 @@ artifactory:
 github:
   reviewers: "reviewers.yml"
   authorized_users: "authorized_users.yml"
+  waitlist_users: "waitlist_users.yml"
 
 # Things related to Jenkins jobs:
 tasks:
