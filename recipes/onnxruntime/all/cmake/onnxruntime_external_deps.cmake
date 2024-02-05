@@ -30,7 +30,10 @@ find_package(nlohmann_json REQUIRED CONFIG)
 list(APPEND onnxruntime_EXTERNAL_LIBRARIES nlohmann_json::nlohmann_json)
 
 find_package(cpuinfo REQUIRED CONFIG)
-list(APPEND onnxruntime_EXTERNAL_LIBRARIES cpuinfo::cpuinfo cpuinfo::clog)
+list(APPEND onnxruntime_EXTERNAL_LIBRARIES cpuinfo::cpuinfo)
+if (TARGET cpuinfo::clog)
+  list(APPEND onnxruntime_EXTERNAL_LIBRARIES cpuinfo::clog)
+endif()
 set(CPUINFO_SUPPORTED ${cpuinfo_FOUND})
 # Add a dummy targets for onnxruntime CMakelists.txt to depend on
 add_library(clog INTERFACE)
