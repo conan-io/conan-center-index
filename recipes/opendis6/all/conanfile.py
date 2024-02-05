@@ -11,9 +11,9 @@ required_conan_version = ">=1.53.0"
 
 class OpenDis6Conan(ConanFile):
     name = "opendis6"
-    description = "Modern C++ implementation of IEEE 1278.1-1997"
+    description = "Modern C++ implementation of IEEE 1278.1a-1998"
     topics = ("library", "protocol", "dis")
-    url = "https://github.com/crhowell3/opendis6"
+    url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-2-Clause"
     settings = "os", "arch", "compiler", "build_type"
     options = {
