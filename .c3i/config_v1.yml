@@ -56,6 +56,8 @@ tasks:
     write_comments: true
     detailed_status_checks: true
     update_labels: true
+    build_bump_deps_pr: false
+    description_bump_deps_pr: ":vertical_traffic_light: Thank for your Bump dependencies PR. The build service will be triggered soon by a Conan team member."
     wait_for_multibranch:  # CCI jobs should wait for other multibranch job for that same PR
       job_name: "prod-v2/cci"  # e.g. "cci-v2/cci" -> this means waiting for cci-v2/cci/PR-<number>
       timeout_seconds: 600  # Maximum time to wait for the multibranch job
