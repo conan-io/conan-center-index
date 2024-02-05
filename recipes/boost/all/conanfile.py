@@ -166,7 +166,7 @@ class BoostConan(ConanFile):
         """ Minimum compiler version having c++ standard >= 11
         """
         return {
-            "gcc": 6,
+            "gcc": 5,
             "clang": 6,
             "apple-clang": 99,  # still uses C++98 by default. XCode does not reflect apple-clang
             "Visual Studio": 14,  # guess
