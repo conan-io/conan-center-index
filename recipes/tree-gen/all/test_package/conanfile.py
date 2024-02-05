@@ -28,13 +28,13 @@ class TreeGenTestConan(ConanFile):
         source_cmp_result = filecmp.cmp(actual_source_file_path, golden_source_file_path, shallow=False)
         python_cmp_result = filecmp.cmp(actual_python_file_path, golden_python_file_path, shallow=False)
         if not header_cmp_result:
-            print(f"Error: header files '{actual_header_file_path}' and '{golden_header_file_path}' differ")
+            self.output.error(f"Error: header files '{actual_header_file_path}' and '{golden_header_file_path}' differ")
             return False
         if not source_cmp_result:
-            print(f"Error: source files '{actual_source_file_path}' and '{golden_source_file_path}' differ")
+            self.output.error(f"Error: source files '{actual_source_file_path}' and '{golden_source_file_path}' differ")
             return False
         if not python_cmp_result:
-            print(f"Error: python files '{actual_python_file_path}' and '{golden_python_file_path}' differ")
+            self.output.error(f"Error: python files '{actual_python_file_path}' and '{golden_python_file_path}' differ")
             return False
-        print(f"Success: output header, source, and python files at '{output_files_folder}' are OK")
+        self.output.error(f"Success: output header, source, and python files at '{output_files_folder}' are OK")
         return True
