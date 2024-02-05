@@ -73,5 +73,5 @@ class EtcdCppApiv3Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["etcd-cpp-api"]
 
