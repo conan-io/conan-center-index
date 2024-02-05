@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import export_conandata_patches, get, load, copy, collect_libs
+from conan.tools.files import export_conandata_patches, get, load, copy, collect_libs, rmdir
 import os
 
 required_conan_version = ">=1.53.0"
@@ -43,7 +43,7 @@ class EtcdCppApiv3Conan(ConanFile):
         self.requires("protobuf/3.21.12")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("grpc/1.54.3")
-        self.requires("cpprestsdk/2.10.19")
+        self.requires("cpprestsdk/2.10.19", transitive_headers=True)
 
     def validate(self):
         if self.dependencies["grpc"].options.shared:
@@ -70,6 +70,7 @@ class EtcdCppApiv3Conan(ConanFile):
         copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
