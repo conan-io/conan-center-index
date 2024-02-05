@@ -82,7 +82,7 @@ class ScnlibConan(ConanFile):
             cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fast_float/6.0.0")
+        self.requires("fast_float/6.1.0")
         if Version(self.version) >= "2.0":
             self.requires("simdutf/4.0.5")
         if self.options.get_safe("regex_backend") in ["boost", "boost_icu"]:
