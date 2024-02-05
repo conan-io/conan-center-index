@@ -1,0 +1,37 @@
+From 0b9371dcc5d26b2721482a7c0f89eb154dbe364f Mon Sep 17 00:00:00 2001
+From: Tom Tan <Tom.Tan@microsoft.com>
+Date: Wed, 13 Dec 2023 12:37:55 -0800
+Subject: [PATCH] [BUILD] Fix removing of NOMINMAX on Windows (#2449)
+
+---
+ CHANGELOG.md                         | 3 +++
+ api/include/opentelemetry/std/span.h | 2 +-
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 6ba0da393c..e305d85948 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -15,6 +15,9 @@ Increment the:
+ 
+ ## [Unreleased]
+ 
++* [BUILD] Fix removing of NOMINMAX on Windows
++  [#2449](https://github.com/open-telemetry/opentelemetry-cpp/pull/2449)
++
+ ## [1.13.0] 2023-12-06
+ 
+ * [BUILD] Remove WITH_REMOVE_METER_PREVIEW, use WITH_ABI_VERSION_2 instead
+diff --git a/api/include/opentelemetry/std/span.h b/api/include/opentelemetry/std/span.h
+index 2a3dc12a84..1160d54fbe 100644
+--- a/api/include/opentelemetry/std/span.h
++++ b/api/include/opentelemetry/std/span.h
+@@ -60,7 +60,7 @@ OPENTELEMETRY_END_NAMESPACE
+ OPENTELEMETRY_BEGIN_NAMESPACE
+ namespace nostd
+ {
+-constexpr std::size_t dynamic_extent = (std::numeric_limits<std::size_t>::max());
++constexpr std::size_t dynamic_extent = (std::numeric_limits<std::size_t>::max)();
+ 
+ template <class ElementType, std::size_t Extent = nostd::dynamic_extent>
+ using span = std::span<ElementType, Extent>;
