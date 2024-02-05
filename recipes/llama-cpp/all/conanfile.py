@@ -106,9 +106,9 @@ class LlamaCppConan(ConanFile):
         self.cpp_info.components["llama"].libdirs = ["lib"]
 
         if is_apple_os(self):
-            self.cpp_info.components["llama"].frameworks.extend(["Foundation", "Accelerate", "Metal"])
+            self.cpp_info.frameworks.extend(["Foundation", "Accelerate", "Metal"])
         elif self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.components["llama"].system_libs.extend(["dl", "m", "pthread"])
+            self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
 
         self.cpp_info.components["common"].requires.append("llama")
         self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
