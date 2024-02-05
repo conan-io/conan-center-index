@@ -64,7 +64,7 @@ class TaglibConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         if Version(self.version) >= 2:
-            self.requires("utfcpp/4.0.1")
+            self.requires("utfcpp/4.0.4")
 
     def validate(self):
         if Version(self.version) >= 2:
