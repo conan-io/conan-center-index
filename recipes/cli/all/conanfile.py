@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps
 from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 import os
 
 class CLIConan(ConanFile):
@@ -17,14 +18,31 @@ class CLIConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "14"
+        return 14
+
+    # in case the project requires C++14/17/20/... the minimum compiler version should be listed
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "7",
+            "clang": "6",
+            "apple-clang": "10",
+        }
 
     def package_id(self):
         self.info.clear()
 
     def validate(self):
+        # validate the minimum cpp standard supported. Only for C++ projects
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
