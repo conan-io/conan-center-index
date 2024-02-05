@@ -32,7 +32,7 @@ class LogrConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/10.1.1")
+        self.requires("fmt/[>=9.1]")
 
         if self.options.backend == "spdlog":
             self.requires("spdlog/1.12.0")
