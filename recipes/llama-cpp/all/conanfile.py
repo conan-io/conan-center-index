@@ -23,12 +23,10 @@ class LlamaCppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "native": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "native": True
     }
  
     package_type = "library"
@@ -46,8 +44,6 @@ class LlamaCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if hasattr(self, "settings_build") and cross_building(self):
-            self.options.native = False
 
     def configure(self):
         if self.options.shared:
@@ -77,8 +73,8 @@ class LlamaCppConan(ConanFile):
         tc.variables["LLAMA_BUILD_TESTS"] = False
         tc.variables["LLAMA_BUILD_EXAMPLES"] = False
         tc.variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
-        tc.variables["LLAMA_NATIVE"] = bool(self.options.native)
-
+        if hasattr(self, "settings_build") and cross_building(self):
+            tc.variables["LLAMA_NATIVE"] = False
         tc.generate()
 
     def build(self):
