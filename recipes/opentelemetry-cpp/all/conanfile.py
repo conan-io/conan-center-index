@@ -273,7 +273,7 @@ class OpenTelemetryCppConan(ConanFile):
 
         protos_cmake_path = os.path.join(self.source_folder, "cmake", "opentelemetry-proto.cmake")
         if (self.options.with_otlp_http or self.options.with_otlp_grpc) and Version(self.version) < "1.8":
-            protos_path = self.dependencies.build["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root").replace("\\", "/")
+            protos_path = self._proto_root
             replace_in_file(self, protos_cmake_path,
                             "if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto/.git)",
                             "if(1)")
@@ -515,3 +515,4 @@ class OpenTelemetryCppConan(ConanFile):
                 "nlohmann_json::nlohmann_json",
             )
 
+        self.conf_info.define("user.opentelemetry-cpp:min_cpp", self._min_cppstd)
