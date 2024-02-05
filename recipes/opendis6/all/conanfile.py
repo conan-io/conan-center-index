@@ -11,10 +11,12 @@ required_conan_version = ">=1.53.0"
 
 class OpenDis6Conan(ConanFile):
     name = "opendis6"
+    homepage = "https://github.com/crhowell3/opendis6"
     description = "Modern C++ implementation of IEEE 1278.1a-1998"
     topics = ("library", "protocol", "dis")
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-2-Clause"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -24,9 +26,17 @@ class OpenDis6Conan(ConanFile):
         "shared": False,
         "fPIC": True
     }
+
+    @property
+    def _min_cppstd(self):
+        return 17
     
     def export_sources(self):
         export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -37,21 +47,12 @@ class OpenDis6Conan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    def validate(self):
-        if self.info.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, 11)
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
