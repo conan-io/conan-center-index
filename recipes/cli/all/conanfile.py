@@ -29,7 +29,7 @@ class CLIConan(ConanFile):
             "clang": "6",
             "Visual Studio": "16",
             "msvc": "192",
-            "apple-clang": "12",
+            "apple-clang": "14",
         }
 
     def package_id(self):
