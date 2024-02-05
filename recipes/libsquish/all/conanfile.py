@@ -64,8 +64,8 @@ class LibsquishConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_SQUISH_WITH_OPENMP"] = self.options.openmp
-        tc.variables["BUILD_SQUISH_WITH_SSE2"] = self.options.get_safe("sse2_intrinsics")
-        tc.variables["BUILD_SQUISH_WITH_ALTIVEC"] = self.options.get_safe("altivec_intrinsics")
+        tc.variables["BUILD_SQUISH_WITH_SSE2"] = self.options.get_safe("sse2_intrinsics") or False
+        tc.variables["BUILD_SQUISH_WITH_ALTIVEC"] = self.options.get_safe("altivec_intrinsics") or False
         tc.variables["BUILD_SQUISH_EXTRA"] = False
         tc.generate()
 
@@ -81,6 +81,6 @@ class LibsquishConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["squish"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
