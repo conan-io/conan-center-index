@@ -64,6 +64,7 @@ class QtConan(ConanFile):
         "with_gssapi": [True, False],
         "with_md4c": [True, False],
         "with_x11": [True, False],
+        "with_egl": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -107,6 +108,7 @@ class QtConan(ConanFile):
         "with_gssapi": False,
         "with_md4c": True,
         "with_x11": True,
+        "with_egl": False,
 
         "gui": True,
         "widgets": True,
@@ -165,6 +167,7 @@ class QtConan(ConanFile):
             self.options.with_glib = False
             del self.options.with_libalsa
             del self.options.with_x11
+            del self.options.with_egl
 
         if self.settings.os == "Windows":
             self.options.opengl = "dynamic"
@@ -198,6 +201,7 @@ class QtConan(ConanFile):
             del self.options.with_libpng
             del self.options.with_md4c
             self.options.rm_safe("with_x11")
+            self.options.rm_safe("with_egl")
 
         if not self.options.get_safe("qtmultimedia"):
             self.options.rm_safe("with_libalsa")
@@ -354,6 +358,8 @@ class QtConan(ConanFile):
             self.requires("xkbcommon/1.5.0")
         if self.options.get_safe("with_x11", False):
             self.requires("xorg/system")
+        if self.options.get_safe("with_egl"):
+            self.requires("egl/system")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
@@ -415,6 +421,10 @@ class QtConan(ConanFile):
         tc.set_property("wayland::wayland-server", "cmake_target_name", "Wayland::Server")
         tc.set_property("wayland::wayland-cursor", "cmake_target_name", "Wayland::Cursor")
         tc.set_property("wayland::wayland-egl", "cmake_target_name", "Wayland::Egl")
+
+        # override https://github.com/qt/qtbase/blob/dev/cmake/3rdparty/extra-cmake-modules/find-modules/FindEGL.cmake
+        tc.set_property("egl", "cmake_file_name", "EGL")
+        tc.set_property("egl::egl", "cmake_target_name", "EGL::EGL")
         tc.generate()
 
         for f in glob.glob("*.cmake"):
@@ -510,7 +520,8 @@ class QtConan(ConanFile):
                               ("with_zstd", "zstd"),
                               ("with_vulkan", "vulkan"),
                               ("with_brotli", "brotli"),
-                              ("with_gssapi", "gssapi")]:
+                              ("with_gssapi", "gssapi"),
+                              ("with_egl", "egl")]:
             tc.variables[f"FEATURE_{conf_arg}"] = ("ON" if self.options.get_safe(opt, False) else "OFF")
 
 
@@ -1021,6 +1032,8 @@ class QtConan(ConanFile):
                     gui_reqs.append("xkbcommon::xkbcommon")
                 if self.options.get_safe("with_x11", False):
                     gui_reqs.append("xorg::xorg")
+                if self.options.get_safe("with_egl"):
+                    gui_reqs.append("egl::egl")
             if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
