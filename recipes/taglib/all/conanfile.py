@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import stdcpp_library, check_min_cppstd, valid_min_cppstd
+from conan.tools.build import stdcpp_library, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime
@@ -31,10 +31,6 @@ class TaglibConan(ConanFile):
         "fPIC": True,
         "bindings": True,
     }
-
-    @property
-    def _is_v2(self):
-        return self.version.startswith("2.")
 
     @property
     def _min_cppstd(self):
@@ -67,11 +63,11 @@ class TaglibConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
-        if self._is_v2:
+        if Version(self.version) >= 2:
             self.requires("utfcpp/4.0.1")
 
     def validate(self):
-        if self._is_v2:
+        if Version(self.version) >= 2:
             if self.settings.compiler.cppstd:
                 check_min_cppstd(self, self._min_cppstd)
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -125,7 +121,7 @@ class TaglibConan(ConanFile):
         self.cpp_info.components["tag"].includedirs.append(os.path.join("include", "taglib"))
         self.cpp_info.components["tag"].libs = ["tag"]
         self.cpp_info.components["tag"].requires = ["zlib::zlib"]
-        if self._is_v2:
+        if Version(self.version) >= 2:
             self.cpp_info.components["tag"].requires.append("utfcpp::utfcpp")
         if not self.options.shared:
             self.cpp_info.components["tag"].defines.append("TAGLIB_STATIC")
