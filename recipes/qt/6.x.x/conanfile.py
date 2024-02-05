@@ -376,6 +376,7 @@ class QtConan(ConanFile):
             self.requires("nss/3.93")
             self.requires("libdrm/2.4.119")
         if self.options.get_safe("with_gstreamer", False):
+            self.requires("gstreamer/1.19.2")
             self.requires("gst-plugins-base/1.19.2")
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
@@ -425,6 +426,10 @@ class QtConan(ConanFile):
         # override https://github.com/qt/qtbase/blob/dev/cmake/3rdparty/extra-cmake-modules/find-modules/FindEGL.cmake
         tc.set_property("egl", "cmake_file_name", "EGL")
         tc.set_property("egl::egl", "cmake_target_name", "EGL::EGL")
+
+        # don't override https://github.com/qt/qtmultimedia/blob/dev/cmake/FindGStreamer.cmake
+        tc.set_property("gstreamer", "cmake_file_name", "gstreamer_conan")
+
         tc.generate()
 
         for f in glob.glob("*.cmake"):
@@ -521,7 +526,8 @@ class QtConan(ConanFile):
                               ("with_vulkan", "vulkan"),
                               ("with_brotli", "brotli"),
                               ("with_gssapi", "gssapi"),
-                              ("with_egl", "egl")]:
+                              ("with_egl", "egl"),
+                              ("with_gstreamer", "gstreamer")]:
             tc.variables[f"FEATURE_{conf_arg}"] = ("ON" if self.options.get_safe(opt, False) else "OFF")
 
 
@@ -1248,7 +1254,9 @@ class QtConan(ConanFile):
             if self.options.qtdeclarative and qt_quick_enabled:
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
             if self.options.with_gstreamer:
-                _create_plugin("QGstreamerMediaPlugin", "gstreamermediaplugin", "multimedia", ["gst-plugins-base::gst-plugins-base"])
+                _create_plugin("QGstreamerMediaPlugin", "gstreamermediaplugin", "multimedia", [
+                    "gstreamer::gstreamer",
+                    "gst-plugins-base::gst-plugins-base"])
 
         if self.options.get_safe("qtpositioning"):
             _create_module("Positioning", [])
