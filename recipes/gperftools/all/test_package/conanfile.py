@@ -25,7 +25,8 @@ class TestPackageConan(ConanFile):
         bin_path = os.path.join(self.cpp.build.bindir, executable)
         if conan_version.major >= "2.0.15":
             stderr = io.StringIO()
-            self.run(bin_path, env="conanrun", stderr=stderr)
+            kwargs = dict(stderr=stderr)
+            self.run(bin_path, env="conanrun",  **kwargs)
             stderr = stderr.getvalue()
             self.output.info(stderr)
             assert "MALLOC: " in stderr, "MALLOCSTATS was not successfully enabled"
