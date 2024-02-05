@@ -17,6 +17,10 @@ sources:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.2.1.tar.gz"
     sha256: "3184f404c61b6b8ba6fe7c64fc40d1c3d6d87df59bcacf1845d846101bc22f9a"
 patches:
+  "0.4.0":
+    - patch_file: "patches/0.4.0/0001-cpptrace.patch"
+      patch_type: "conan"
+      patch_description: "..."
   "0.3.0":
     - patch_file: "patches/0.3.0/0001-cpptrace_export.patch"
       patch_type: "bugfix"
