@@ -43,7 +43,7 @@ class EtcdCppApiv3Conan(ConanFile):
         self.requires("protobuf/3.21.12")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("grpc/1.54.3")
-        self.requires("cpprestsdk/2.10.19", transitive_headers=True)
+        self.requires("cpprestsdk/2.10.19", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.dependencies["grpc"].options.shared:
