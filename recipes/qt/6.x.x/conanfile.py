@@ -425,10 +425,12 @@ class QtConan(ConanFile):
 
         # override https://github.com/qt/qtbase/blob/dev/cmake/3rdparty/extra-cmake-modules/find-modules/FindEGL.cmake
         tc.set_property("egl", "cmake_file_name", "EGL")
+        tc.set_property("egl", "cmake_find_mode", "module")
         tc.set_property("egl::egl", "cmake_target_name", "EGL::EGL")
 
         # don't override https://github.com/qt/qtmultimedia/blob/dev/cmake/FindGStreamer.cmake
         tc.set_property("gstreamer", "cmake_file_name", "gstreamer_conan")
+        tc.set_property("gstreamer", "cmake_find_mode", "module")
 
         tc.generate()
 
