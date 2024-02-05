@@ -21,5 +21,8 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
+            os.environ["MALLOCSTATS"] = "1"
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package_indirect")
+            self.run(bin_path, env="conanrun")
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package_direct")
             self.run(bin_path, env="conanrun")
