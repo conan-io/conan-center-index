@@ -64,6 +64,9 @@ class OpenDis6Conan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def build_requirements(self):
+        tool_requires("cmake/[>=3.22 <4]")
+    
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
