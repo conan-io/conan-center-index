@@ -62,7 +62,7 @@ class PodofoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("freetype/2.13.0")
+        self.requires("freetype/2.13.2")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os != "Windows":
             self.requires("fontconfig/2.14.2")
@@ -75,7 +75,7 @@ class PodofoConan(ConanFile):
         if self.options.with_tiff:
             self.requires("libtiff/4.6.0")
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/1.6.42")
         if self.options.with_unistring:
             self.requires("libunistring/0.9.10")
 
