@@ -3,14 +3,13 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, replace_in_file, rm, rmdir, copy
 from conan.tools.microsoft import is_msvc
-from conan.tools.build import cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class SDLConan(ConanFile):
@@ -95,9 +94,6 @@ class SDLConan(ConanFile):
         env = Environment()
         env.define_path("LIBRARY_PATH", os.pathsep.join(lib_paths))
 
-        # FIXME: remove and raise required_conan_version to 1.55 once it's on c3i
-        env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
-
         env = env.vars(self, scope="build")
         env.save_script("sdl_env")
 
@@ -161,11 +157,11 @@ class SDLConan(ConanFile):
                 self.requires("xkbcommon/1.6.0")
                 self.requires("egl/system")
             if self.options.libunwind:
-                self.requires("libunwind/1.7.2")
+                self.requires("libunwind/1.8.0")
 
     def validate(self):
         # SDL>=2.0.18 requires xcode 12 or higher because it uses CoreHaptics.
-        if Version(self.version) >= "2.0.18" and is_apple_os(self) and Version(self.settings.compiler.version) < "12":
+        if is_apple_os(self) and Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("{}/{} requires xcode 12 or higher".format(self.name, self.version))
 
         if self.settings.os == "Linux":
@@ -183,13 +179,7 @@ class SDLConan(ConanFile):
             del self.info.options.sdl2main
 
     def build_requirements(self):
-        if self.settings.os == "Macos" and cross_building(self):
-            # Workaround for CMake bug with error message:
-            # Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
-            # set. This could be because you are using a Mac OS X version less than 10.5
-            # or because CMake's platform configuration is corrupt.
-            # FIXME: Remove once CMake on macOS/M1 CI runners is upgraded.
-            self.tool_requires("cmake/3.27.9")
+        self.tool_requires("cmake/[>3.27 <4]")
         if self.settings.os == "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         if hasattr(self, "settings_build") and self.options.get_safe("wayland"):
@@ -220,7 +210,7 @@ class SDLConan(ConanFile):
                         '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
 
         # Ensure to find wayland-scanner from wayland recipe in build requirements (or requirements if 1 profile)
-        if self.options.get_safe("wayland") and Version(self.version) >= "2.0.18":
+        if self.options.get_safe("wayland"):
             replace_in_file(self,
                 os.path.join(self.source_folder, "cmake", "sdlchecks.cmake"),
                 "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
