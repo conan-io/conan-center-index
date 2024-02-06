@@ -129,7 +129,7 @@ class OpenblasConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        
+
         if Version(self.version) < "0.3.21":
             if Version(self.version) >= "0.3.12":
                 search = """message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")"""
