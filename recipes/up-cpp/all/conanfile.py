@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 
 class UpCpp(ConanFile):
     name = "up-cpp"
@@ -13,8 +14,6 @@ class UpCpp(ConanFile):
     options = {"shared": [True, False], "fPIC": [False, False]}
     default_options = {"shared": True, "fPIC": False}
 
-    # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "CMakeLists.txt", "conaninfo/*", "include/*" ,"src/*" , "test/*"
     requires = [
         "spdlog/1.13.0",
         "fmt/10.2.1",
@@ -24,7 +23,8 @@ class UpCpp(ConanFile):
 
     def source(self):
         self.run("git clone https://github.com/eclipse-uprotocol/up-core-api.git")
-
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        
     def requirements(self):
         self.requires("protobuf/3.21.12")
        # self.requires("gtest/1.14.0")
