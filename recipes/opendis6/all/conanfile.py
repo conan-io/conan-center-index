@@ -36,9 +36,9 @@ class OpenDis6Conan(ConanFile):
         return {
             "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "7",
+            "gcc": "8.5",
             "clang": "6",
-            "apple-clang": "10",
+            "apple-clang": "14",
         }
 
     def export_sources(self):
