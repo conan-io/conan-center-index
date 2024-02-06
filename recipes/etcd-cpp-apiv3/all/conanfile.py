@@ -48,6 +48,8 @@ class EtcdCppApiv3Conan(ConanFile):
     def validate(self):
         if self.dependencies["grpc"].options.shared:
             raise ConanInvalidConfiguration("grpc must be built as a static library")
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("Recipe is not MasOs ready yet")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
