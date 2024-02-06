@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, to_apple_arch, XCRun
-from conan.tools.build import build_jobs, check_min_cppstd, cross_building, valid_min_cppstd
+from conan.tools.build import build_jobs, check_min_cppstd, cross_building, valid_min_cppstd, supported_cppstd
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches, chdir, collect_libs, copy, export_conandata_patches,
@@ -163,11 +163,12 @@ class BoostConan(ConanFile):
 
     @property
     def _min_compiler_version_default_cxx11(self):
-        # Minimum compiler version having c++ standard >= 11
+        """ Minimum compiler version having c++ standard >= 11
+        """
         return {
             "gcc": 6,
             "clang": 6,
-            "apple-clang": 14,
+            "apple-clang": 99,  # still uses C++98 by default. XCode does not reflect apple-clang
             "Visual Studio": 14,  # guess
             "msvc": 190,  # guess
         }.get(str(self.settings.compiler))
@@ -177,11 +178,18 @@ class BoostConan(ConanFile):
         return {
             "gcc": 99,
             "clang": 99,
-            # As of the end of 2023, only apple-clang >=14 use C++20 as their default C++ version.
-            "apple-clang": 14,
+            "apple-clang": 99,
             "Visual Studio": 99,
             "msvc": 999,
         }.get(str(self.settings.compiler))
+
+    def _has_cppstd_11_supported(self):
+        cppstd = self.settings.compiler.get_safe("cppstd")
+        if cppstd:
+            return valid_min_cppstd(self, 11)
+        compiler_version = self._min_compiler_version_default_cxx11
+        if compiler_version:
+            return (Version(self.settings.compiler.version) >= compiler_version) or "11" in supported_cppstd(self)
 
     @property
     def _min_compiler_version_nowide(self):
@@ -286,7 +294,7 @@ class BoostConan(ConanFile):
         else:
             version_cxx11_standard_json = self._min_compiler_version_default_cxx11
             if version_cxx11_standard_json:
-                if Version(self.settings.compiler.version) < version_cxx11_standard_json:
+                if not self._has_cppstd_11_supported:
                     self.options.without_fiber = True
                     self.options.without_json = True
                     self.options.without_nowide = True
@@ -332,7 +340,7 @@ class BoostConan(ConanFile):
                 min_compiler_version = self._min_compiler_version_default_cxx11
                 if min_compiler_version is None:
                     self.output.warning("Assuming the compiler supports c++11 by default")
-                elif Version(self.settings.compiler.version) < min_compiler_version:
+                elif not self._has_cppstd_11_supported:
                     disable_math()
 
         if Version(self.version) >= "1.79.0":
@@ -354,7 +362,7 @@ class BoostConan(ConanFile):
                 min_compiler_version = self._min_compiler_version_default_cxx11
                 if min_compiler_version is None:
                     self.output.warning("Assuming the compiler supports c++11 by default")
-                elif Version(self.settings.compiler.version) < min_compiler_version:
+                elif not self._has_cppstd_11_supported:
                     disable_wave()
 
         if Version(self.version) >= "1.81.0":
@@ -376,7 +384,7 @@ class BoostConan(ConanFile):
                 min_compiler_version = self._min_compiler_version_default_cxx11
                 if min_compiler_version is None:
                     self.output.warning("Assuming the compiler supports c++11 by default")
-                elif Version(self.settings.compiler.version) < min_compiler_version:
+                elif not self._has_cppstd_11_supported:
                     disable_locale()
 
         if Version(self.version) >= "1.84.0":
@@ -532,8 +540,7 @@ class BoostConan(ConanFile):
             if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, 11)
             else:
-                version_cxx11_standard = self._min_compiler_version_default_cxx11
-                if version_cxx11_standard and Version(self.settings.compiler.version) < version_cxx11_standard:
+                if not self._has_cppstd_11_supported:
                     raise ConanInvalidConfiguration(
                         f"Boost.{{{','.join(self._cxx11_boost_libraries)}}} requires a c++11 compiler "
                         "(please set compiler.cppstd or use a newer compiler)"
@@ -1095,9 +1102,14 @@ class BoostConan(ConanFile):
 
         flags.append(f"toolset={self._toolset}")
 
-        if self.settings.get_safe("compiler.cppstd"):
-            cppstd_flag = AutotoolsToolchain(self).cppstd
-            flags.append(f"cxxflags={cppstd_flag}")
+        safe_cppstd = self.settings.get_safe("compiler.cppstd")
+        if safe_cppstd:
+            cppstd_version = safe_cppstd.replace("gnu", "")
+            flags.append(f"cxxstd={cppstd_version}")
+            if "gnu" in safe_cppstd:
+                flags.append("cxxstd-dialect=gnu")
+        elif self._has_cppstd_11_supported:
+            flags.append("cxxstd=11")
 
         # LDFLAGS
         link_flags = []

@@ -219,6 +219,7 @@ required_for_references:
 - cppdap
 - cppfront
 - cppitertools
+- cppkafka
 - cpprestsdk
 - cpptoml
 - cpptrace
@@ -345,6 +346,7 @@ required_for_references:
 - eternal
 - ethash
 - etl
+- eventpp
 - evmc
 - exiv2
 - expat
@@ -379,6 +381,7 @@ required_for_references:
 - flex
 - flint
 - fltk
+- flux
 - fmi1
 - fmi2
 - fmi3
@@ -452,6 +455,7 @@ required_for_references:
 - gnu-config
 - gnulib
 - gnutls
+- godot-cpp
 - godot_headers
 - googleapis
 - gperf
@@ -1011,8 +1015,10 @@ required_for_references:
 - outcome
 - ozz-animation
 - p-ranav-glob
+- p7zip
 - paho-mqtt-c
 - paho-mqtt-cpp
+- pango
 - panzi-portable-endian
 - parallel-hashmap
 - parg
@@ -1042,6 +1048,7 @@ required_for_references:
 - picojson
 - picosha2
 - pipes
+- pistache
 - pixman
 - pkgconf
 - platform.converters
@@ -1165,6 +1172,7 @@ required_for_references:
 - safeint
 - sail
 - samurai
+- sassc
 - sbepp
 - sbp
 - scdoc
@@ -1237,6 +1245,7 @@ required_for_references:
 - sqlpp11
 - sqlpp11-connector-sqlite3
 - squirrel
+- srt
 - ssht
 - ssp
 - st_tree
@@ -1349,6 +1358,7 @@ required_for_references:
 - tsl-sparse-map
 - tuplet
 - turtle
+- tweenerspp
 - tweetnacl
 - twitch-native-ipc
 - twitchtv-libsoundtrackutil
