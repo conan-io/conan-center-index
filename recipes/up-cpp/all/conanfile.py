@@ -11,7 +11,7 @@ class UpCpp(ConanFile):
     topics = ("utransport sdk", "transport")
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [False, False]}
+    options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": True, "fPIC": True}
 
     requires = [
