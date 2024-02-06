@@ -1,12 +1,8 @@
-from conan import ConanFile, tools
-from conans import ConanFile, CMake
-
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-import shutil
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 
 class UpCpp(ConanFile):
     name = "up-cpp"
-    version = "0.1"
     package_type = "library"
     license = "Apache-2.0 license"
     url = "https://github.com/MelamudMichael/up-cpp"
@@ -28,6 +24,9 @@ class UpCpp(ConanFile):
 
     def source(self):
         self.run("git clone https://github.com/eclipse-uprotocol/up-core-api.git")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("protobuf/3.21.12")
