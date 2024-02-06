@@ -62,6 +62,10 @@ patches:
     - patch_file: "patches/1.15.1-0002-cuda-gsl.patch"
       patch_description: "CMake: fix GSL and cuda"
       patch_type: "conan"
+    - patch_file: "patches/1.15.1-0002-fix-attention-15983.patch"
+      patch_description: "Fix attention.cc"
+      patch_source: "https://github.com/microsoft/onnxruntime/pull/15983"
+      patch_type: "backport"
   "1.14.1":
     - patch_file: "patches/1.14.1-0001-cmake-dependencies.patch"
       patch_description: "CMake: ensure conan dependencies are used (upstreamed future versions)"
