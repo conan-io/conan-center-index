@@ -71,14 +71,14 @@ class CLIConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        self.cpp_info.set_property("cmake_file_name", "CLI")
-        self.cpp_info.set_property("cmake_target_name", "CLI::CLI")
-        self.cpp_info.set_property("pkg_config_name", "CLI")
+        self.cpp_info.set_property("cmake_file_name", "cli")
+        self.cpp_info.set_property("cmake_target_name", "cli::cli")
+        self.cpp_info.set_property("pkg_config_name", "cli")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
         
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "CLI"
-        self.cpp_info.names["cmake_find_package_multi"] = "CLI"
-        self.cpp_info.names["pkg_config"] = "CLI"
+        self.cpp_info.names["cmake_find_package"] = "cli"
+        self.cpp_info.names["cmake_find_package_multi"] = "cli"
+        self.cpp_info.names["pkg_config"] = "cli"
