@@ -1,8 +1,10 @@
 #include <cstdlib>
+#include <iostream>
 //#include <up-cpp/uri/serializer/LongUriSerializer.h>
 
 // using namespace uprotocol::v1;
 // using namespace uprotocol::uri;
+using namespace std;
 
 int main(void) {
 
