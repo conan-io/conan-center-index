@@ -12,7 +12,7 @@ class UpCpp(ConanFile):
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [False, False]}
-    default_options = {"shared": True, "fPIC": False}
+    default_options = {"shared": True, "fPIC": True}
 
     requires = [
         "spdlog/1.13.0",
@@ -34,7 +34,7 @@ class UpCpp(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = True
+      #  tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = True
         tc.generate()
 
     def build(self):
