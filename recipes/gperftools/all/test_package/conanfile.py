@@ -23,7 +23,7 @@ class TestPackageConan(ConanFile):
 
     def _test(self, executable):
         bin_path = os.path.join(self.cpp.build.bindir, executable)
-        if conan_version.major >= "2.0.15":
+        if conan_version >= "2.0.15":
             stderr = io.StringIO()
             kwargs = {"stderr".strip(): stderr}
             self.run(bin_path, env="conanrun",  **kwargs)
