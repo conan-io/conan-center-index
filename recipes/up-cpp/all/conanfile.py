@@ -27,10 +27,9 @@ class UpCpp(ConanFile):
 
     def requirements(self):
         self.requires("protobuf/3.21.12")
-        self.requires("gtest/1.14.0")
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        cmake_layout(self, src_folder=".")
 
     def generate(self):
         tc = CMakeToolchain(self)
