@@ -5,3 +5,5 @@ find_package(CLI CONFIG REQUIRED)
 
 add_executable(example example.cpp)
 target_link_libraries(example CLI::CLI)
+
+target_compile_features(example PRIVATE cxx_std_14)

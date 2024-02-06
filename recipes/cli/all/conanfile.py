@@ -12,7 +12,7 @@ class CLIConan(ConanFile):
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/daniele77/cli"
-    topics = "cli-interface", "cpp14", "no-dependencies", "cli", "header-only"
+    topics = "cli-interface", "cpp14", "no-dependencies", "header-only"
     package_type = "header-library"
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
@@ -75,6 +75,9 @@ class CLIConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "CLI::CLI")
         self.cpp_info.set_property("pkg_config_name", "CLI")
 
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
+        
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "CLI"
         self.cpp_info.names["cmake_find_package_multi"] = "CLI"
