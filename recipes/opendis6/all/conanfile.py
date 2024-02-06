@@ -2,10 +2,10 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.layout import basic_layout
+from conan.tools.files import copy, export_conandata_patches, get, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
 
@@ -29,8 +29,18 @@ class OpenDis6Conan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17
-    
+        return "17"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "15",
+            "msvc": "191",
+            "gcc": "7",
+            "clang": "6",
+            "apple-clang": "10",
+        }
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -40,8 +50,8 @@ class OpenDis6Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_EXAMPLES"] = "FALSE"
-        tc.cache_variables["BUILD_TESTS"] = "FALSE"
+        tc.cache_variables["BUILD_EXAMPLES"] = False
+        tc.cache_variables["BUILD_TESTS"] = False
         tc.generate()
 
     def layout(self):
@@ -54,8 +64,14 @@ class OpenDis6Conan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
+
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -70,19 +86,7 @@ class OpenDis6Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_module_file_name", "OpenDIS")
-        self.cpp_info.set_property("cmake_file_name", "OpenDIS")
-
-        # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["OpenDIS6"].libs = ["OpenDIS6"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "OpenDIS"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenDIS"
-        self.cpp_info.names["cmake_find_package"] = "OpenDIS"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenDIS"
-        self.cpp_info.components["OpenDIS6"].names["cmake_find_package"] = "OpenDIS6"
-        self.cpp_info.components["OpenDIS6"].names["cmake_find_package_multi"] = "OpenDIS6"
-        self.cpp_info.components["OpenDIS6"].set_property("cmake_target_name", "OpenDIS::OpenDIS6")
-        self.cpp_info.components["OpenDIS6"].set_property("cmake_target_aliases", ["OpenDIS::DIS6","OpenDIS6"])
+        self.cpp_info.set_property("cmake_file_name", "OpenDIS")
+        self.cpp_info.set_property("cmake_target_name", "OpenDIS::OpenDIS6")
+        self.cpp_info.set_property("cmake_target_aliases", ["OpenDIS::DIS6","OpenDIS6"])
