@@ -25,15 +25,12 @@ class UpCpp(ConanFile):
     def source(self):
         self.run("git clone https://github.com/eclipse-uprotocol/up-core-api.git")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def requirements(self):
         self.requires("protobuf/3.21.12")
         self.requires("gtest/1.14.0")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
