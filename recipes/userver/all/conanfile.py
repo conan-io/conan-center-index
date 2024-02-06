@@ -41,12 +41,12 @@ class UserverConan(ConanFile):
         'lto': True,
         'with_jemalloc': False, # Disabled dy default due to jemalloc recipe does not support Conan v2
         'with_mongodb': False, # Disabled by default due to https://github.com/conan-io/conan-center-index/pull/20712#issuecomment-1781385911
-        'with_postgresql': True,
+        'with_postgresql': False,
         'with_postgresql_extra': False, # Disabled dy default due to https://github.com/conan-io/conan-center-index/pull/16074
-        'with_redis': True,
-        'with_grpc': True,
-        'with_clickhouse': True,
-        'with_rabbitmq': True,
+        'with_redis': False,
+        'with_grpc': False,
+        'with_clickhouse': False,
+        'with_rabbitmq': False,
         'with_utest': True,
         'with_testsuite': False,
         'namespace': 'userver',
