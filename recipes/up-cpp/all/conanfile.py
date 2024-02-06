@@ -34,6 +34,7 @@ class UpCpp(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = True
         tc.generate()
 
     def build(self):
