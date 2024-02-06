@@ -6,18 +6,14 @@ class UpCpp(ConanFile):
     name = "up-cpp"
     package_type = "library"
     license = "Apache-2.0 license"
-    url = "https://github.com/MelamudMichael/up-cpp"
+    homepage = "https://github.com/eclipse-uprotocol"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "This module contains the data model structures as well as core functionality for building uProtocol"
     topics = ("utransport sdk", "transport")
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": True, "fPIC": True}
-
-    requires = [
-        "spdlog/1.13.0",
-        "fmt/10.2.1",
-        "gtest/1.14.0"]
 
     generators = "CMakeDeps"
 
@@ -27,7 +23,9 @@ class UpCpp(ConanFile):
         
     def requirements(self):
         self.requires("protobuf/3.21.12")
-       # self.requires("gtest/1.14.0")
+        self.requires("gtest/1.14.0")
+        self.requires("spdlog/1.13.0")
+        self.requires("fmt/10.2.1")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
