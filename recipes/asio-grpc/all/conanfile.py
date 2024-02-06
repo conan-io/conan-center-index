@@ -56,7 +56,7 @@ class AsioGrpcConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} 'recycling_allocator' cannot be used in combination with the 'unifex' backend.")
 
     def requirements(self):
-        self.requires("grpc/1.50.1")
+        self.requires("grpc/1.54.3")
         if self._local_allocator_option == "boost_container" or self.options.backend == "boost":
             self.requires("boost/1.83.0")
         if self.options.backend == "asio":
@@ -74,6 +74,7 @@ class AsioGrpcConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+        compiler_version = Version(self.settings.compiler.version)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
             if Version(self.settings.compiler.version) < minimum_version:
@@ -85,9 +86,9 @@ class AsioGrpcConan(ConanFile):
                 f"{self.name} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports"
                 f" C++{self._min_cppstd}."
             )
-        if Version(self.version) == "2.7.0" and \
-            self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "11":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support gcc 11.")
+        if Version(self.version) == "2.7.0" and self.settings.compiler == "gcc" and compiler_version.major == "11" and \
+            compiler_version < "11.3":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support gcc 11.0-11.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

@@ -136,6 +136,8 @@ class TkConan(ConanFile):
                         "_ATL_XP_TARGETING",
                     ]
                 )
+            if not is_apple_os(self):
+                tc.extra_ldflags.append("-Wl,--as-needed")
             tc.generate()
 
             if self.settings.os == "Linux":
@@ -272,6 +274,16 @@ class TkConan(ConanFile):
                 "uuid",
                 "ole32",
                 "oleaut32",
+            ]
+        elif self.settings.os == "Linux":
+            self.cpp_info.requires = [
+                "tcl::tcl",
+                "fontconfig::fontconfig",
+                "xorg::x11",
+                "xorg::xcb",
+                "xorg::xrender",
+                "xorg::xau",
+                "xorg::xdmcp",
             ]
 
         tk_library = os.path.join(
