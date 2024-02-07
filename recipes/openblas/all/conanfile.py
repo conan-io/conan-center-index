@@ -191,7 +191,7 @@ endif()"""
                 self.cpp_info.components["openblas_component"].system_libs.append("gfortran")
 
         self.output.info(
-            f"Setting OpenBLAS_HOME environment variable: {}".format(self.package_folder)
+            f"Setting OpenBLAS_HOME environment variable: {self.package_folder}"
         )
         self.env_info.OpenBLAS_HOME = self.package_folder
 
