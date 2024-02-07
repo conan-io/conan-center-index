@@ -22,10 +22,16 @@ class LogrConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     package_type = "header-library"
     options = {
-        "backend": ["spdlog", "glog", "log4cplus", "boostlog", None],
+        "with_spdlog_backend": [True, False],
+        "with_glog_backend": [True, False],
+        "with_log4cplus_backend": [True, False],
+        "with_boostlog_backend": [True, False],
     }
     default_options = {
-        "backend": "spdlog",
+        "with_spdlog_backend": True,
+        "with_glog_backend": False,
+        "with_log4cplus_backend": False,
+        "with_boostlog_backend": False,
     }
 
     def layout(self):
@@ -34,13 +40,16 @@ class LogrConan(ConanFile):
     def requirements(self):
         self.requires("fmt/10.2.1")
 
-        if self.options.backend == "spdlog":
+        if self.options.with_spdlog_backend:
             self.requires("spdlog/1.12.0")
-        elif self.options.backend == "glog":
+
+        if self.options.with_glog_backend:
             self.requires("glog/0.6.0")
-        elif self.options.backend == "log4cplus":
+
+        if self.options.with_log4cplus_backend:
             self.requires("log4cplus/2.1.0")
-        elif self.options.backend == "boostlog":
+
+        if self.options.with_boostlog_backend:
             self.requires("boost/1.83.0")
 
     def package_id(self):
@@ -74,9 +83,17 @@ class LogrConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*.*pp", src=os.path.join(self.source_folder, "logr", "include"), dst=os.path.join(self.package_folder, "include"))
 
-        for back in ["spdlog", "glog", "log4cplus", "boostlog"]:
-            if self.options.backend != back:
-                rm(self, f"include/logr/{back}_backend.hpp", self.package_folder)
+        if not self.options.with_spdlog_backend:
+            rm(self, f"include/logr/spdlog_backend.hpp", self.package_folder)
+
+        if not self.options.with_glog_backend:
+            rm(self, f"include/logr/glog_backend.hpp", self.package_folder)
+
+        if not self.options.with_log4cplus_backend:
+            rm(self, f"include/logr/log4cplus_backend.hpp", self.package_folder)
+
+        if not self.options.with_boostlog_backend:
+            rm(self, f"include/logr/boostlog_backend.hpp", self.package_folder)
 
     def package_info(self):
         self.cpp_info.bindirs = []
@@ -90,25 +107,28 @@ class LogrConan(ConanFile):
         self.cpp_info.components["logr_base"].includedirs = ["include"]
         self.cpp_info.components["logr_base"].requires = ["fmt::fmt"]
 
-        if self.options.backend == "spdlog":
+        if self.options.with_spdlog_backend:
             self.cpp_info.components["logr_spdlog"].includedirs = []
             self.cpp_info.components["logr_spdlog"].requires = [
                 "logr_base",
                 "spdlog::spdlog",
             ]
-        elif self.options.backend == "glog":
+
+        if self.options.with_glog_backend:
             self.cpp_info.components["logr_glog"].includedirs = []
             self.cpp_info.components["logr_glog"].requires = [
                 "logr_base",
                 "glog::glog",
             ]
-        elif self.options.backend == "log4cplus":
+
+        if self.options.with_log4cplus_backend:
             self.cpp_info.components["logr_log4cplus"].includedirs = []
             self.cpp_info.components["logr_log4cplus"].requires = [
                 "logr_base",
                 "log4cplus::log4cplus",
             ]
-        elif self.options.backend == "boostlog":
+
+        if self.options.with_boostlog_backend:
             self.cpp_info.components["logr_boostlog"].includedirs = []
             self.cpp_info.components["logr_boostlog"].requires = [
                 "logr_base",
