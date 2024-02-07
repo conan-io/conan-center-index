@@ -64,6 +64,8 @@ class OpenblasConan(ConanFile):
 
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             self.output.warning("Cross-building has only been tested for x86_64 to armv8. Proceed with caution.")
+        if Version(self.version) < "0.3.12" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("armv8 builds are not supported for versions less than 0.3.12")
 
     def export_sources(self):
         export_conandata_patches(self)
