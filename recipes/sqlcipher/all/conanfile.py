@@ -114,7 +114,7 @@ class SqlcipherConan(ConanFile):
         env.define("OPTS", f'-I{crypto_dep.includedir} -DSQLITE_HAS_CODEC')
         env.define("NO_TCL", "1")
         env.define("USE_AMALGAMATION", "1")
-        env.define("OPT_FEATURE_FLAGS", "-DSQLCIPHER_CRYPTO_OPENSSL")
+        env.define("OPT_FEATURE_FLAGS", "-DSQLCIPHER_CRYPTO_OPENSSL -DSQLITE_ENABLE_COLUMN_METADATA")
         env.define("SQLITE_TEMP_STORE", self._temp_store_nmake_value)
         env.define("TCLSH_CMD", self.dependencies.build['tcl'].runenv_info.vars(self)['TCLSH'])
 
