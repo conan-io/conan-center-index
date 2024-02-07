@@ -16,6 +16,10 @@ patches:
     - patch_file: "patches/0002-0.9.0-cmake-add-install+use-find_package.patch"
       patch_description: "improve installation, use cci package"
       patch_type: "conan"
+    - patch_file: "patches/0006-0.9.0-remove-glib-types.patch"
+      patch_description: "remove glib types, use char and size_t instead."
+      patch_type: "portability"
+      patch_source: "https://github.com/vstakhov/libucl/pull/283"
   "0.8.2":
     - patch_file: "patches/0001-0.8.1-shared-win32.patch"
       patch_description: "fix UCL_EXTERN definition for shared build on win32"
