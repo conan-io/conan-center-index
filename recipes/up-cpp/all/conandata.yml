@@ -1,4 +1,4 @@
 sources:
-  "0.1.9":
-    url: "https://github.com/MelamudMichael/up-cpp/archive/refs/tags/0.1.9.tar.gz"
-    sha256: "42ed2b0107398133aeef93d1fedb84662c5d3ce8f450a0c593d4c0ae3bb37844"
+  "0.2.3":
+    url: "https://github.com/MelamudMichael/up-cpp/archive/refs/tags/0.2.3.tar.gz"
+    sha256: "57c12593215e4b9e7a848a55bf4c61a9558aed6e60c262de1cc1c6648f95a9b3"
