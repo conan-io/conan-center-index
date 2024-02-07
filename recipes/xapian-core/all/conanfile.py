@@ -54,7 +54,7 @@ class XapianCoreConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os != "Windows":
             self.requires("util-linux-libuuid/2.39")
 

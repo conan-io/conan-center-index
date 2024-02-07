@@ -45,9 +45,6 @@ class AdaConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if Version(self.version) <= "2.0.0":
-            self.options.rm_safe("shared")
-            self.package_type = "static-library"
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
@@ -55,7 +52,7 @@ class AdaConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -77,8 +74,7 @@ class AdaConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
-        if Version(self.version) >= "2.4.2":
-            tc.variables["ADA_TOOLS"] = False
+        tc.variables["ADA_TOOLS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -86,7 +82,8 @@ class AdaConan(ConanFile):
 
     def _patch_sources(self):
         # solve APPLE RELOCATABLE SHARED LIBS (KB-H077)
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ada-flags.cmake"), "set(CMAKE_MACOSX_RPATH OFF)", "")
+        if Version(self.version) < "2.6.10":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "ada-flags.cmake"), "set(CMAKE_MACOSX_RPATH OFF)", "")
 
     def build(self):
         self._patch_sources()

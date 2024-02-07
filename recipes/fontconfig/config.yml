@@ -1,4 +1,6 @@
 versions:
+  "2.15.0":
+    folder: meson
   "2.14.2":
     folder: meson
   "2.13.93":

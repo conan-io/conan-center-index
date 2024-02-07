@@ -47,9 +47,9 @@ class KModConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_xz:
-            self.requires("xz_utils/5.4.2")
+            self.requires("xz_utils/5.4.4")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
 
@@ -59,7 +59,7 @@ class KModConan(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir, save
+from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.scm import Version
 
 import os
@@ -30,6 +30,9 @@ class AwsCAuth(ConanFile):
         "fPIC": True,
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -44,19 +47,26 @@ class AwsCAuth(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
-        self.requires("aws-c-cal/0.5.13")
-        if Version(self.version) < "0.6.17":
-            self.requires("aws-c-io/0.10.20", transitive_headers=True)
-            self.requires("aws-c-http/0.6.13", transitive_headers=True)
+        if Version(self.version) <= "0.6.17":
+            self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-cal/0.5.13")
+            if Version(self.version) < "0.6.17":
+                self.requires("aws-c-io/0.10.20", transitive_headers=True, transitive_libs=True)
+                self.requires("aws-c-http/0.6.13", transitive_headers=True)
+            else:
+                self.requires("aws-c-io/0.13.4", transitive_headers=True, transitive_libs=True)
+                self.requires("aws-c-http/0.6.22", transitive_headers=True)
+            if Version(self.version) >= "0.6.5":
+                self.requires("aws-c-sdkutils/0.1.3", transitive_headers=True)
         else:
-            self.requires("aws-c-io/0.13.4", transitive_headers=True)
-            self.requires("aws-c-http/0.6.22", transitive_headers=True)
-        if Version(self.version) >= "0.6.5":
-            self.requires("aws-c-sdkutils/0.1.3", transitive_headers=True)
+            self.requires("aws-c-common/0.9.6", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-cal/0.6.9")
+            self.requires("aws-c-io/0.13.32", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-http/0.7.14", transitive_headers=True)
+            self.requires("aws-c-sdkutils/0.1.12", transitive_headers=True)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -67,6 +77,7 @@ class AwsCAuth(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

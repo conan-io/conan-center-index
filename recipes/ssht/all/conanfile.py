@@ -33,7 +33,7 @@ class SshtConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fftw/3.3.9")
+        self.requires("fftw/3.3.10")
 
     def validate(self):
         if is_msvc(self):

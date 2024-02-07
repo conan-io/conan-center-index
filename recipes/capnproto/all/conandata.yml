@@ -1,4 +1,7 @@
 sources:
+  "1.0.1":
+    url: "https://github.com/capnproto/capnproto/archive/v1.0.1.tar.gz"
+    sha256: "5bdb16f6b389a9e29b04214b9bae1759e8b7fe2b45049d7e3f1f286ba050a200"
   "1.0.0":
     url: "https://github.com/capnproto/capnproto/archive/v1.0.0.tar.gz"
     sha256: "bcd44dde78055313a7786cb6ab020cbef19b9045b53857f90cce101c9453f715"
@@ -24,6 +27,10 @@ sources:
     url: "https://github.com/capnproto/capnproto/archive/v0.7.0.tar.gz"
     sha256: "76c7114a3d142ad08b7208b3964a26e72a6320ee81331d3f0b87569fc9c47a28"
 patches:
+  "1.0.1":
+    - patch_file: "patches/0015-disable-tests-for-1.0.0.patch"
+      patch_description: "disable test build"
+      patch_type: "conan"
   "1.0.0":
     - patch_file: "patches/0015-disable-tests-for-1.0.0.patch"
       patch_description: "disable test build"

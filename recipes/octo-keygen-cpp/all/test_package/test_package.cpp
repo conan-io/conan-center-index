@@ -13,7 +13,6 @@
 #include "octo-keygen-cpp/openssl/ssl-keypair.hpp"
 #include "octo-keygen-cpp/openssl/ssl-keypair-certificate-chain.hpp"
 #include "octo-keygen-cpp/openssl/ssl-keypair-certificate.hpp"
-#include <octo-logger-cpp/manager.hpp>
 #include <iostream>
 #include <fstream>
 
@@ -87,16 +86,6 @@ constexpr auto TARGET_CERT = "-----BEGIN CERTIFICATE-----\n"
 
 int main(int argc, char** argv)
 {
-    octo::logger::Logger logger("PSKeygen");
-    std::shared_ptr<octo::logger::ManagerConfig> config =
-        std::make_shared<octo::logger::ManagerConfig>();
-    octo::logger::SinkConfig console_writer_sink("Console", octo::logger::SinkConfig::SinkType::CONSOLE_SINK);
-    config->add_sink(console_writer_sink);
-    octo::logger::Manager::instance()
-        .editable_channel("PSKeygen")
-        .set_log_level(octo::logger::Log::LogLevel::DEBUG);
-    octo::logger::Manager::instance().configure(config);
-
     auto ca = octo::keygen::ssl::SSLKeypairCertificateChain::load_certificate_chain(
         std::make_unique<octo::encryption::SecureString>(ROOTCA)
     );
@@ -106,18 +95,11 @@ int main(int argc, char** argv)
     auto chain = octo::keygen::ssl::SSLKeypairCertificateChain::load_certificate_chain(
         std::make_unique<octo::encryption::SecureString>(SUBCA)
     );
-    logger.info() << "IS CA = " << ca->is_any_ca();
-    logger.info() << "IS VALID CERT = " << ca->is_valid_chain(target.get(),
-                                                              chain.get());
 
     octo::keygen::KeygenPtr ssl_key_gen = std::make_shared<octo::keygen::ssl::SSLKeygen>();
     octo::keygen::KeygenOptions ssl_opts;
     octo::keygen::KeypairPtr ssl_key_pair = ssl_key_gen->generate_keypair(ssl_opts);
-    logger.info() << "\n" << ssl_key_pair->private_key();
-    logger.info() << "\n" << ssl_key_pair->public_key();
 
     octo::keygen::KeygenOptions ssl_sign_opts;
     octo::keygen::KeypairCertificatePtr ssl_cert = ssl_key_gen->sign_key_pair(ssl_key_pair, ssl_sign_opts);
-    logger.info() << "\n" << ssl_cert->certificate();
-    logger.info() << "\n" << ssl_cert->pretty_print_certificate_info();
 }

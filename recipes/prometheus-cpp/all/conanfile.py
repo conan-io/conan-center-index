@@ -17,7 +17,7 @@ class PrometheusCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jupp0r/prometheus-cpp"
     topics = ("metrics", "prometheus", "networking")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -66,9 +66,9 @@ class PrometheusCppConan(ConanFile):
         if self.options.with_pull:
             self.requires("civetweb/1.16")
         if self.options.with_push:
-            self.requires("libcurl/8.0.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.get_safe("with_compression"):
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
