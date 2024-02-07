@@ -90,3 +90,6 @@ class OpenDis6Conan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "OpenDIS")
         self.cpp_info.set_property("cmake_target_name", "OpenDIS::OpenDIS6")
         self.cpp_info.set_property("cmake_target_aliases", ["OpenDIS::DIS6","OpenDIS6"])
+        
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
