@@ -13,14 +13,24 @@ class UpCpp(ConanFile):
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    conan_version = self.conan_version
-    major_version = int(conan_version.split('.')[0])
-    if major_version == 1:
-        default_options = {"shared": False, "fPIC": True}
-    else:
-        default_options = {"shared": True, "fPIC": True}
+    #default_options = {"shared": True, "fPIC": True}
 
     generators = "CMakeDeps"
+
+    conan_version = None
+
+    def set_version_options(self):
+        self.conan_version = self.version.split('.')[0]
+        if self.conan_version == "1":
+            self.default_options = {"shared": False, "fPIC": True}
+        else:
+            self.default_options = {"shared": True, "fPIC": True}
+
+    def set_default_options(self):
+        self.set_version_options()
+
+    def configure(self):
+        self.set_version_options()
 
     def source(self):
         self.run("git clone https://github.com/eclipse-uprotocol/up-core-api.git")
