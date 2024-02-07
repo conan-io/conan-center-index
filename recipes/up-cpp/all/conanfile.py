@@ -14,11 +14,11 @@ class UpCpp(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     conan_version = self.conan_version
-        major_version = int(conan_version.split('.')[0])
-        if major_version == 1:
-            default_options = {"shared": False, "fPIC": True}
-        else:
-            default_options = {"shared": True, "fPIC": True}
+    major_version = int(conan_version.split('.')[0])
+    if major_version == 1:
+        default_options = {"shared": False, "fPIC": True}
+    else:
+        default_options = {"shared": True, "fPIC": True}
 
     generators = "CMakeDeps"
 
