@@ -1,4 +1,7 @@
 sources:
+  "2.3.9":
+    url: "https://github.com/sammycage/lunasvg/archive/v2.3.9.tar.gz"
+    sha256: "088bc9fd1191a004552c65bdcc260989b83da441b0bdaa965e79d984feba88fa"
   "2.3.8":
     url: "https://github.com/sammycage/lunasvg/archive/v2.3.8.tar.gz"
     sha256: "54d697e271a5aca36f9999d546b1b346e98a8183140027330f69a3eb0c184194"
@@ -15,6 +18,14 @@ sources:
     url: "https://github.com/sammycage/lunasvg/archive/refs/tags/v2.3.1.tar.gz"
     sha256: "6492bf0f51982f5382f83f1a42f247bb1bbcbaef4a15963bbd53073cd4944a25"
 patches:
+  "2.3.9":
+    - patch_file: "patches/2.3.9-0001-fix-cmake.patch"
+      patch_description: "use external plutovg and fix installation path for conan"
+      patch_type: "conan"
+    - patch_file: "patches/2.3.9-0002-rename-inner-selector.patch"
+      patch_description: "rename inner selector to subselector"
+      patch_type: "portability"
+      patch_source: "https://github.com/sammycage/lunasvg/pull/147"
   "2.3.8":
     - patch_file: "patches/2.3.5-0001-fix-cmake.patch"
       patch_description: "use external plutovg and fix installation path for conan"

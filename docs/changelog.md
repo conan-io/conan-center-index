@@ -1,5 +1,14 @@
 # Changelog
 
+### 24-January-2024 - 12:13 CET
+
+- [feature] Update Conan 1.x branch to version 1.62.0
+- [feature] Update Conan 2.x branch to version 2.0.16
+- [feature] Require review from maintainers for Bump version and Bump requirements
+- [fix] Show header-only option in the build CI summary table
+- [fix] Use build/host profile conf also in test package
+- [fix] Use only string to handle Github labels
+
 ### 05-December-2023 - 16:23 CET
 
 - [fix] Use the correct profile to test a tool_require.
