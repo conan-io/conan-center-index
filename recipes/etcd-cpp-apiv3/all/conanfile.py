@@ -68,7 +68,7 @@ class EtcdCppApiv3Conan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["gRPC_VERSION"] = self.dependencies["grpc"].ref.version
         tc.variables["ETCD_CMAKE_CXX_STANDARD"] = self.settings.compiler.get_safe("cppstd", "11")
-        tc.variables["OpenSSL_DIR"] = self.dependencies["openssl"].package_folder
+        tc.variables["OpenSSL_DIR"] = self.dependencies["openssl"].package_folder.replace('\\', '/')
         tc.generate()
 
         cmake_deps = CMakeDeps(self)
