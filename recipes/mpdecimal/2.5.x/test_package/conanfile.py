@@ -1,11 +1,11 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.build import can_run, build_jobs
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "VirtualRunEnv", "CMakeDeps"
+    generators = "VirtualRunEnv", "CMakeToolchain", "CMakeDeps"
     test_type = "explicit"
 
     def layout(self):
@@ -13,11 +13,6 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["MPDECIMAL_CXX"] = self.dependencies["mpdecimal"].options.cxx
-        tc.generate()
 
     def build(self):
         cmake = CMake(self)
