@@ -346,6 +346,7 @@ required_for_references:
 - eternal
 - ethash
 - etl
+- eventpp
 - evmc
 - exiv2
 - expat
@@ -454,6 +455,7 @@ required_for_references:
 - gnu-config
 - gnulib
 - gnutls
+- godot-cpp
 - godot_headers
 - googleapis
 - gperf
@@ -1013,8 +1015,10 @@ required_for_references:
 - outcome
 - ozz-animation
 - p-ranav-glob
+- p7zip
 - paho-mqtt-c
 - paho-mqtt-cpp
+- pango
 - panzi-portable-endian
 - parallel-hashmap
 - parg
