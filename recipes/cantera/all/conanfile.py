@@ -6,7 +6,6 @@ from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, save, load, chdir, rename, rmdir, replace_in_file
 from conan.tools.layout import basic_layout
-from conan.tools.scons import SConsDeps
 
 class canteraRecipe(ConanFile):
     name = "cantera"
@@ -42,6 +41,21 @@ class canteraRecipe(ConanFile):
             "clang": "7",
             "apple-clang": "11.0",
         }
+    
+    @property
+    def _is_linux_clang_llvm(self):
+        return (
+            self.info.settings.get_safe('os') == 'Linux' and
+            self.info.settings.get_safe('compiler') == 'clang' and
+            self.info.settings.get_safe('compiler.libcxx') == 'libc++'
+        )
+    
+    @property
+    def _is_linux_gnu_pre11(self):
+        return (
+            self.info.settings.get_safe('os') == 'Linux' and
+            self.info.settings.get_safe('compiler.libcxx') == 'libstdc++'
+        )
 
     def validate(self):
         if self.info.settings.get_safe("compiler.cppstd"):
@@ -114,8 +128,12 @@ class canteraRecipe(ConanFile):
             options["debug"] = "no"
             options["optimize"] = "yes"
 
-        if self.info.settings.get_safe("compiler.libcxx") in ["libc++", "libstdc++"]:
+        if self._is_linux_gnu_pre11:
             replace_in_file(self, os.path.join(self.source_folder, "SConstruct"), "env['CPPDEFINES'] = {}", "env['CPPDEFINES'] = {'_GLIBCXX_USE_CXX11_ABI' : 0}")
+
+        if self._is_linux_clang_llvm:
+            options["cxx_flags"] = "-std=c++17 -stdlib=libc++"
+            options["no_debug_linker_flags"] = "-stdlib=libc++"
 
         # To fix c compiler checks in SConstruct file (Since cxx compiler is not checked we do not have to modify the default)
         compiler = str(self.settings.compiler)
