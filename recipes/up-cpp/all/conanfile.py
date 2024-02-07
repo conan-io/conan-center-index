@@ -44,13 +44,13 @@ class UpCpp(ConanFile):
     # def set_default_options(self):
     #     self.set_version_options()
 
-    # def configure(self):
+    #    def configure(self):
     #     self.set_version_options()
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            
+
     def source(self):
         self.run("git clone https://github.com/eclipse-uprotocol/up-core-api.git")
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
