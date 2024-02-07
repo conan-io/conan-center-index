@@ -23,15 +23,15 @@ class UpCpp(ConanFile):
     }
 
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
     }
 
-    def config_options(self):
-        self.conan_version = self.version.split('.')[0]
-        if self.conan_version == "1":
-            self.options.fPIC = True
-            self.options.shared = False
+    # def config_options(self):
+    #     self.conan_version = self.version.split('.')[0]
+    #     if self.conan_version == "1":
+    #         self.options.fPIC = True
+    #         self.options.shared = False
 
     # def set_version_options(self):
     #     self.conan_version = self.version.split('.')[0]
