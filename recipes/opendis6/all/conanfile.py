@@ -89,7 +89,7 @@ class OpenDis6Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.components["OpenDIS6"].libs = ["OpenDIS6"]
+        self.cpp_info.libs = ["OpenDIS6"]
         self.cpp_info.set_property("cmake_file_name", "OpenDIS")
         self.cpp_info.set_property("cmake_target_name", "OpenDIS::OpenDIS6")
         self.cpp_info.set_property("cmake_target_aliases", ["OpenDIS::DIS6","OpenDIS6"])
