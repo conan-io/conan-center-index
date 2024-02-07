@@ -14,23 +14,37 @@ class UpCpp(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     #default_options = {"shared": True, "fPIC": True}
-
+    conan_version = None
     generators = "CMakeDeps"
 
-    conan_version = None
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
 
-    def set_version_options(self):
+    default_options = {
+        "shared": True,
+        "fPIC": True,
+    }
+
+    def config_options(self):
         self.conan_version = self.version.split('.')[0]
         if self.conan_version == "1":
-            self.default_options = {"shared": False, "fPIC": True}
-        else:
-            self.default_options = {"shared": True, "fPIC": True}
+            self.options.fPIC = True
+            self.options.shared = False
 
-    def set_default_options(self):
-        self.set_version_options()
+    # def set_version_options(self):
+    #     self.conan_version = self.version.split('.')[0]
+    #     if self.conan_version == "1":
+    #         self.default_options = {"shared": False, "fPIC": True}
+    #     else:
+    #         self.default_options = {"shared": True, "fPIC": True}
 
-    def configure(self):
-        self.set_version_options()
+    # def set_default_options(self):
+    #     self.set_version_options()
+
+    # def configure(self):
+    #     self.set_version_options()
 
     def source(self):
         self.run("git clone https://github.com/eclipse-uprotocol/up-core-api.git")
