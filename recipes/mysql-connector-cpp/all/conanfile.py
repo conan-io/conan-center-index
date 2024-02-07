@@ -1,17 +1,24 @@
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake
-from conan.tools.files import get
+from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
+from conan.tools.files import get, replace_in_file, rm
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library
+from conan.tools.env import VirtualBuildEnv
+import os
+
+
+requird_conan_version = ">=1.54.0"
+
 
 class MysqlConnectorCPPRecipe(ConanFile):
     name = "mysql-connector-cpp"
     license = "GPL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://dev.mysql.com/doc/connector-cpp/8.0"
-    description = "A Conan package for MySQL Connector/C++ with OpenSSL, Boost, and libmysqlclient"
-    topics = ("mysql", "connector", "cpp", "openssl", "boost", "libmysqlclient", "jdbc", "static")
+    homepage = "https://dev.mysql.com/doc/connector-cpp/8.1/en/"
+    description = "A MySQL database connector for C++ applications that connect to MySQL servers"
+    topics = ("mysql", "connector", "libmysqlclient", "jdbc")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -29,35 +36,32 @@ class MysqlConnectorCPPRecipe(ConanFile):
             "clang": "6",
         }
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def build_requirements(self):
+        self.tool_requires("protobuf/3.21.12")
+
     def requirements(self):
-        self.requires("boost/1.82.0")
-        # build faiils on mac with openssl 3x
-        if self.settings.os == "Macos":
-            self.requires("openssl/[>=1.1.1. <3]")
-        else:
-            self.requires("openssl/[>=1.1.1 <4]")
+        self.requires("zlib/1.2.13")
+        self.requires("lz4/1.9.4")
+        self.requires("zstd/1.5.5")
+        self.requires("protobuf/3.21.12")
+        self.requires("boost/1.83.0")
+        self.requires("openssl/[>=1.1.1 <4]")
         self.requires("libmysqlclient/8.0.31")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
 
-    def validate_build(self):
-        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. Contributions are welcomed.")
-
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-
-        def loose_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration(f"{self.ref} requires {self.settings.compiler} {minimum_version} or newer")
+        check_min_vs(self, 192)
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
 
         # I dont have a windows computer to test it
         if self.settings.os == "Windows":
@@ -81,18 +85,47 @@ class MysqlConnectorCPPRecipe(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def _package_folder_dep(self, dep):
+        return self.dependencies[dep].package_folder.replace("\\", "/")
+
+    def _include_folder_dep(self, dep):
+        return self.dependencies[dep].cpp_info.includedirs[0].replace("\\", "/")
+
+    def _lib_folder_dep(self, dep):
+        return self.dependencies[dep].cpp_info.libdirs[0].replace("\\", "/")
+
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate(scope="build")
+        tc = CMakeDeps(self)
+        tc.generate()
         tc = CMakeToolchain(self)
-        tc.cache_variables["WITH_JDBC"] = "ON"
-        tc.cache_variables["WITHOUT_SERVER"] = "ON"
-        if not self.options.shared:
-            tc.cache_variables["BUILD_STATIC"] = "ON"
-        tc.cache_variables["MYSQL_LIB_DIR"] = self.dependencies["libmysqlclient"].cpp_info.aggregated_components().libdirs[0].replace("\\", "/")
-        tc.cache_variables["MYSQL_INCLUDE_DIR"] = self.dependencies["libmysqlclient"].cpp_info.aggregated_components().includedirs[0].replace("\\", "/")
-        tc.cache_variables["WITH_SSL"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
+        tc.variables["WITH_JDBC"] = True
+        tc.variables["WITHOUT_SERVER"] = True
+        # INFO: mysql-connector-cpp caches all option values. Need to use cache_variables
+        tc.cache_variables["BUILD_STATIC"] = not self.options.shared
+        tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+        # INFO: mysql-connector-cpp doesn't use find package for cmake. Need to pass manually folder paths
+        tc.variables["MYSQL_LIB_DIR"] = self._lib_folder_dep("libmysqlclient")
+        tc.variables["MYSQL_INCLUDE_DIR"] = self._include_folder_dep("libmysqlclient")
+        tc.variables["Boost_INCLUDE_DIRS"] = self._include_folder_dep("boost")
+        tc.variables["Boost_LIB_DIRS"] = self._lib_folder_dep("boost")
+        # INFO: Some dependencies can be found in mysql-connector-cpp source folder. Need to set to use Conan package
+        tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
+        tc.cache_variables["WITH_BOOST"] = self._package_folder_dep("boost")
+        tc.cache_variables["WITH_ZLIB"] = self._package_folder_dep("zlib")
+        tc.cache_variables["WITH_LZ4"] = self._package_folder_dep("lz4")
+        tc.cache_variables["WITH_ZSTD"] = self._package_folder_dep("zstd")
+        tc.cache_variables["WITH_PROTOBUF"] = self._package_folder_dep("protobuf")
         tc.generate()
 
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindProtobuf.cmake"), "LIBRARY protobuf-lite pb_libprotobuf-lite", "")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"), "ext::protobuf-lite", "ext::protobuf")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "core", "CMakeLists.txt"), "ext::protobuf-lite", "ext::protobuf")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -100,17 +133,21 @@ class MysqlConnectorCPPRecipe(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+        rm(self, "INFO_SRC", self.package_folder)
+        rm(self, "INFO_BIN", self.package_folder)
 
     def package_info(self):
-        self.cpp_info.libdirs = ["lib","lib64"]
+        self.cpp_info.libdirs = ["lib64", "lib"]
+
         if not self.options.shared:
-            self.cpp_info.libs = ["mysqlcppconn-static", "mysqlcppconn8-static"]
+            self.cpp_info.libs = ["mysqlcppconn8-static"]
             stdcpplib = stdcpp_library(self)
             if stdcpplib:
                 self.cpp_info.system_libs.append(stdcpplib)
-            if self.settings.os in ["Linux", "FreeBSD", "Macos"]:
-                self.cpp_info.system_libs.extend(["m", "resolv"])
         else:
             self.cpp_info.libs = ["mysqlcppconn", "mysqlcppconn8"]
-        self.cpp_info.names["cmake_find_package"] = "mysql-connector-cpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "mysql-connector-cpp"
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m", "resolv"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["ws2_32"]
