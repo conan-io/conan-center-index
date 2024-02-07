@@ -1,0 +1,14 @@
+sources:
+  "1.2.8":
+    url: "https://github.com/batterycenter/embed/archive/refs/tags/v1.2.8.tar.gz"
+    sha256: "ee9a7fe04c0d6e6f244bc635003ef0d0cda386fa46ce1dd3b5ad470425a6fb52"
+patches:
+  "1.2.8":
+    - patch_file: "patches/0001-disable-examples.patch"
+      patch_description: "disable building examples"
+      patch_type: "conan"
+      patch_source: "https://github.com/batterycenter/embed/issues/2"
+    - patch_file: "patches/0002-include-cstdint.patch"
+      patch_description: "include cstdint for gcc 13 later"
+      patch_type: "portability"
+      patch_source: "https://github.com/batterycenter/embed/pull/1"

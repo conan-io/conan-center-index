@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 623bf14..8dab2d7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -153,6 +153,7 @@ set(EMBED_HEADER_FILE [=[
+ #include <stdexcept>
+ #include <sstream>
+ #include <functional>
++#include <cstdint>
+
+ #ifndef __cpp_constexpr_dynamic_alloc
+ #   error "battery::embed requires C++20"
