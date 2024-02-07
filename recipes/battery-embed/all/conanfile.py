@@ -14,7 +14,7 @@ class BatteryEmbedConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/batterycenter/embed"
     topics = ("embed")
-    package_type = "application"
+    package_type = "build-scripts"
     settings = "os", "arch", "compiler", "build_type"
 
     @property
@@ -65,5 +65,6 @@ class BatteryEmbedConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.bindirs = []
         self.cpp_info.includedirs = []
+        self.cpp_info.set_property("cmake_find_mode", "none")
 
         self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "battery-embed", "CMakeLists.txt")])
