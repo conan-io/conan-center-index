@@ -70,7 +70,7 @@ class Nghttp2Conan(ConanFile):
         if self.options.with_hpack:
             self.requires("jansson/2.14")
         if self.options.get_safe("with_asio"):
-            self.requires("boost/1.83.0")
+            self.requires("boost/1.84.0")
 
     def validate(self):
         if self.options.get_safe("with_asio") and is_msvc(self):

@@ -199,6 +199,8 @@ class LibcurlConan(ConanFile):
             openssl = self.dependencies["openssl"]
             if self.options.with_ntlm and openssl.options.no_des:
                 raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
+        if self.options.with_ssl == "wolfssl" and not self.dependencies["wolfssl"].options.with_curl:
+            raise ConanInvalidConfiguration("option with_ssl=wolfssl requires wolfssl:with_curl=True")
 
     def build_requirements(self):
         if self._is_using_cmake_build:
