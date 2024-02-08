@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import (
@@ -242,6 +242,8 @@ class TkConan(ConanFile):
             # This can only be modified after build since the value being replaced is a result
             # of variable substitution in tkConfig.sh.in
             replace_in_file(self, tkConfigShPath, "//", "${TK_ROOT}/")
+        
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         tk_version = Version(self.version)
