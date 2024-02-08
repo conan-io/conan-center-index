@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, chdir, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, chdir, collect_libs, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, NMakeToolchain, NMakeDeps
@@ -25,10 +25,12 @@ class TclConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_sqlite": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_sqlite": True,
     }
 
     @property
@@ -55,6 +57,8 @@ class TclConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.with_sqlite:
+            self.requires("sqlite3/3.45.0")
 
     def validate(self):
         if self.settings.os not in ("FreeBSD", "Linux", "Macos", "Windows"):
@@ -90,6 +94,8 @@ class TclConan(ConanFile):
                 "--enable-symbols={}".format(yes_no(self.settings.build_type == "Debug")),
                 "--enable-64bit={}".format(yes_no(self.settings.arch == "x86_64")),
             ])
+            if self.options.with_sqlite:
+                tc.configure_args.append("--with-system-sqlite")
             tc.generate()
 
             deps = AutotoolsDeps(self)
@@ -97,6 +103,25 @@ class TclConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+
+        # Un-vendor sqlite
+        # The folder has the sqlite version number in it, so need to find it dynamically
+        for folder in os.listdir(os.path.join(self.source_folder, "pkgs")):
+            if self.options.with_sqlite:
+                # tdbcsqlite is the wrapper package for tcl, don't modify it
+                if "sqlite" in folder and "tdbc" not in folder:
+                    rm(self, "*.c", os.path.join(self.source_folder, "pkgs", folder, "compat"), recursive=True)
+                    rm(self, "*.h", os.path.join(self.source_folder, "pkgs", folder, "compat"), recursive=True)
+
+                    if Version(self.version) < "8.6.13":
+                        # Don't override SQLITE_API, causes link errors
+                        replace_in_file(self, os.path.join(self.source_folder, "pkgs", folder, "Makefile.in"), "-DSQLITE_API=MODULE_SCOPE", "")
+                    break
+            else:
+                # Remove all folders referencing sqlite
+                if "sqlite" in folder:
+                    rmdir(self, os.path.join(self.source_folder, "pkgs", folder))
+
 
         if is_apple_os(self) and self.settings.arch not in ("x86", "x86_64"):
             macos_configure = os.path.join(self.source_folder, "macosx", "configure")
