@@ -1,10 +1,10 @@
 sources:
-  "3.12.1":
-    url: "https://www.python.org/ftp/python/3.12.1/Python-3.12.1.tgz"
-    sha256: "d01ec6a33bc10009b09c17da95cc2759af5a580a7316b3a446eb4190e13f97b2"
-  "3.11.7":
-    url: "https://www.python.org/ftp/python/3.11.7/Python-3.11.7.tgz"
-    sha256: "068c05f82262e57641bd93458dfa883128858f5f4997aad7a36fd25b13b29209"
+  "3.12.2":
+    url: "https://www.python.org/ftp/python/3.12.2/Python-3.12.2.tgz"
+    sha256: "a7c4f6a9dc423d8c328003254ab0c9338b83037bd787d680826a5bf84308116e"
+  "3.11.8":
+    url: "https://www.python.org/ftp/python/3.11.8/Python-3.11.8.tgz"
+    sha256: "d3019a613b9e8761d260d9ebe3bd4df63976de30464e5c0189566e1ae3f61889"
   "3.10.13":
     url: "https://www.python.org/ftp/python/3.10.13/Python-3.10.13.tgz"
     sha256: "698ec55234c1363bd813b460ed53b0f108877c7a133d48bde9a50a1eb57b7e65"
@@ -21,12 +21,12 @@ sources:
     url: "https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz"
     sha256: "da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814"
 patches:
-  "3.12.1":
+  "3.12.2":
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
     - patch_file: "patches/3.12/3.12.1-0001-_ctypes-ffi.patch"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
     - patch_file: "patches/3.12/3.12.1-0002-remove-module-deps.patch"
-  "3.11.7":
+  "3.11.8":
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
     - patch_file: "patches/3.11/3.11.7-0001-_ctypes-ffi.patch"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
