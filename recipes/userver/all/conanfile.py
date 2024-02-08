@@ -47,7 +47,7 @@ class UserverConan(ConanFile):
         'with_grpc': False,
         'with_clickhouse': False,
         'with_rabbitmq': False,
-        'with_utest': True,
+        'with_utest': False,
         'with_testsuite': False,
         'namespace': 'userver',
         'namespace_begin': 'namespace userver {',
