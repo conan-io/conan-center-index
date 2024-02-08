@@ -151,7 +151,7 @@ class PocoConan(ConanFile):
             self.requires("pcre2/10.42")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.enable_xml:
-            self.requires("expat/2.5.0")
+            self.requires("expat/2.5.0", transitive_headers=True)
         if self.options.enable_data_sqlite:
             self.requires("sqlite3/3.45.0")
         if self.options.enable_apacheconnector:
