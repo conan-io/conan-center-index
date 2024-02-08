@@ -77,7 +77,6 @@ class TclConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not is_msvc(self):
             self.win_bash = True
-            self.build_requires("autoconf/2.71")
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
@@ -126,9 +125,10 @@ class TclConan(ConanFile):
                     rm(self, "*.c", os.path.join(self.source_folder, "pkgs", folder, "compat"), recursive=True)
                     rm(self, "*.h", os.path.join(self.source_folder, "pkgs", folder, "compat"), recursive=True)
 
+                    # Don't override SQLITE_* variables, causes link errors
                     if Version(self.version) < "8.6.13":
-                        # Don't override SQLITE_API, causes link errors
                         replace_in_file(self, os.path.join(self.source_folder, "pkgs", folder, "Makefile.in"), "-DSQLITE_API=MODULE_SCOPE", "")
+                    replace_in_file(self, os.path.join(self.source_folder, "pkgs", folder, "Makefile.in"), "-DSQLITE_EXTERN=", "")
                     break
             else:
                 # Remove all folders referencing sqlite
