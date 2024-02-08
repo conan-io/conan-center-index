@@ -77,6 +77,7 @@ class TclConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not is_msvc(self):
             self.win_bash = True
+            self.build_requires("autoconf/2.71")
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
