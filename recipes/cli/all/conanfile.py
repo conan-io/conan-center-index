@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps
+from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
 from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -15,13 +15,14 @@ class CLIConan(ConanFile):
     topics = "cli-interface", "cpp14", "no-dependencies", "header-only"
     package_type = "header-library"
     settings = "os", "compiler", "build_type", "arch"
+    options = {"with_asio": [None, "boost", "standalone"]}
+    default_options = {"with_asio": None}
     no_copy_source = True
 
     @property
     def _min_cppstd(self):
         return 14
 
-    # in case the project requires C++14/17/20/... the minimum compiler version should be listed
     @property
     def _compilers_minimum_version(self):
         return {
@@ -32,11 +33,24 @@ class CLIConan(ConanFile):
             "apple-clang": "14",
         }
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        if self.options.with_asio == "boost":
+            self.requires("boost/1.84.0", transitive_headers=True, transitive_libs=True)
+        elif self.options.with_asio == "standalone":
+            self.requires("asio/1.29.0", transitive_headers=True, transitive_libs=True)
+
     def package_id(self):
-        self.info.clear()
+        # INFO: The options does not affect the package content, it's always the same.
+        # On the other hand, dependencies are included or not depending on the options.
+        # The CLI has no define or other way to include headers, is always the same,
+        # the user should know what should be included.
+        self.info.settings.clear()
+        self.info.options.clear()
 
     def validate(self):
-        # validate the minimum cpp standard supported. Only for C++ projects
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -52,6 +66,8 @@ class CLIConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
+        tc.variables["CLI_UseBoostAsio"] = self.options.with_asio == "boost"
+        tc.variables["CLI_UseStandaloneAsio"] = self.options.with_asio == "standalone"
         tc.generate()
 
     def build(self):
@@ -71,14 +87,5 @@ class CLIConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        self.cpp_info.set_property("cmake_file_name", "cli")
-        self.cpp_info.set_property("cmake_target_name", "cli::cli")
-        self.cpp_info.set_property("pkg_config_name", "cli")
-
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-        
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "cli"
-        self.cpp_info.names["cmake_find_package_multi"] = "cli"
-        self.cpp_info.names["pkg_config"] = "cli"
