@@ -106,6 +106,8 @@ class TclConan(ConanFile):
             ])
             if self.options.with_sqlite:
                 tc.configure_args.append("--with-system-sqlite")
+            if not is_apple_os(self):
+                tc.extra_ldflags.append('-Wl,--as-needed')
             tc.generate()
 
             deps = AutotoolsDeps(self)
