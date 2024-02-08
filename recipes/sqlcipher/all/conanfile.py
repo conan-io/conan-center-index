@@ -20,7 +20,7 @@ class SqlcipherConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.zetetic.net/sqlcipher/"
-    topics = ("database", "encryption", "SQLite")
+    topics = ("database", "encryption", "sqlite")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
