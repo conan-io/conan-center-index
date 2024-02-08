@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -43,6 +43,10 @@ class SVTAV1Conan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        if self.settings.arch in ("x86", "x86_64"):
+            self.requires("cpuinfo/cci.20231129")
+
     def build_requirements(self):
         if Version(self.version) >= "1.3.0":
             self.tool_requires("cmake/[>=3.16 <4]")
@@ -63,8 +67,21 @@ class SVTAV1Conan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+            "add_subdirectory(third_party/cpuinfo)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "Source", "Lib", "Decoder", "CMakeLists.txt"), 
+            "target_link_libraries(SvtAv1Dec PRIVATE cpuinfo_public)", 
+            """find_package(cpuinfo REQUIRED)
+               target_link_libraries(SvtAv1Dec PRIVATE cpuinfo::cpuinfo)""")
+        replace_in_file(self, os.path.join(self.source_folder, "Source", "Lib", "Encoder", "CMakeLists.txt"),
+            "target_link_libraries(SvtAv1Enc PRIVATE cpuinfo_public)", 
+            """find_package(cpuinfo REQUIRED)
+               target_link_libraries(SvtAv1Enc PRIVATE cpuinfo::cpuinfo)""")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -82,11 +99,15 @@ class SVTAV1Conan(ConanFile):
             self.cpp_info.components["encoder"].libs = ["SvtAv1Enc"]
             self.cpp_info.components["encoder"].includedirs = ["include/svt-av1"]
             self.cpp_info.components["encoder"].set_property("pkg_config_name", "SvtAv1Enc")
+            if self.settings.arch in ("x86", "x86_64"):
+                self.cpp_info.components["encoder"].requires = ["cpuinfo::cpuinfo"]
             if self.settings.os in ("FreeBSD", "Linux"):
                 self.cpp_info.components["encoder"].system_libs = ["pthread", "dl", "m"]
         if self.options.build_decoder:
             self.cpp_info.components["decoder"].libs = ["SvtAv1Dec"]
             self.cpp_info.components["decoder"].includedirs = ["include/svt-av1"]
             self.cpp_info.components["decoder"].set_property("pkg_config_name", "SvtAv1Dec")
+            if self.settings.arch in ("x86", "x86_64"):
+                self.cpp_info.components["decoder"].requires = ["cpuinfo::cpuinfo"]
             if self.settings.os in ("FreeBSD", "Linux"):
                 self.cpp_info.components["encoder"].system_libs = ["pthread", "dl", "m"]
