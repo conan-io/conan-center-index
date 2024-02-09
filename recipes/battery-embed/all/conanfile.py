@@ -65,6 +65,5 @@ class BatteryEmbedConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.bindirs = []
         self.cpp_info.includedirs = []
-        self.cpp_info.set_property("cmake_find_mode", "none")
 
         self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "battery-embed", "CMakeLists.txt")])
