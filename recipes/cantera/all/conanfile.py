@@ -43,17 +43,17 @@ class canteraRecipe(ConanFile):
         }
     
     @property
-    def _is_linux_clang_llvm(self):
-        return (
-            self.info.settings.get_safe('os') == 'Linux' and
-            self.info.settings.get_safe('compiler') == 'clang' and
-            self.info.settings.get_safe('compiler.libcxx') == 'libc++'
-        )
+    def _is_msvc(self):
+        return self.info.settings.get_safe('compiler') in ["msvc", "Visual Studio"]
     
     @property
-    def _is_linux_gnu_pre11(self):
+    def _is_clang(self):
+        return self.info.settings.get_safe('compiler') == 'clang'
+    
+    @property
+    def _is_gnu_pre11_stdlib(self):
         return (
-            self.info.settings.get_safe('os') == 'Linux' and
+            not self._is_msvc and
             self.info.settings.get_safe('compiler.libcxx') == 'libstdc++'
         )
 
@@ -128,17 +128,18 @@ class canteraRecipe(ConanFile):
             options["debug"] = "no"
             options["optimize"] = "yes"
 
-        if self._is_linux_gnu_pre11:
-            replace_in_file(self, os.path.join(self.source_folder, "SConstruct"), "env['CPPDEFINES'] = {}", "env['CPPDEFINES'] = {'_GLIBCXX_USE_CXX11_ABI' : 0}")
-
-        if self._is_linux_clang_llvm:
-            options["cxx_flags"] = "-std=c++17 -stdlib=libc++"
-            options["no_debug_linker_flags"] = "-stdlib=libc++"
-
         # To fix c compiler checks in SConstruct file (Since cxx compiler is not checked we do not have to modify the default)
         compiler = str(self.settings.compiler)
-        cc_compiler = {"msvc": "cl", "intel-cc": "icx", "apple-clang": "clang"}.get(compiler, compiler) # Map conans compiler names to canteras compiler names
+        cc_compiler = {"msvc": "cl", "Visual Studio": "cl", "intel-cc": "icx", "apple-clang": "clang"}.get(compiler, compiler) # Map conans compiler names to canteras compiler names
         options["CC"] = cc_compiler
+
+        # Set flags depending on the selected standard library
+        if self._is_clang:
+            options["cxx_flags"] = f"-std=c++17 -stdlib={self.info.settings.get_safe('compiler.libcxx')}"
+            options["no_debug_linker_flags"] = f"-stdlib={self.info.settings.get_safe('compiler.libcxx')}"
+
+        if self._is_gnu_pre11_stdlib:
+            replace_in_file(self, os.path.join(self.source_folder, "SConstruct"), "env['CPPDEFINES'] = {}", "env['CPPDEFINES'] = {'_GLIBCXX_USE_CXX11_ABI' : 0}")
 
         # Write args file
         escape_str = lambda x: f'"{x}"'
