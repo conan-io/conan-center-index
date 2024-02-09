@@ -1,8 +1,16 @@
 #include <InfluxDBFactory.h>
+#include <InfluxDBException.h>
+#include <iostream>
 
 int main()
 {
-    auto influxdb = influxdb::InfluxDBFactory::Get("http://localhost:8086?db=test");
-    influxdb->addGlobalTag("test", "value");
+    try {
+        auto influxdb = influxdb::InfluxDBFactory::Get("xyz://foobar");
+    }
+    catch(influxdb::InfluxDBException& e) {
+
+    }
+
+    std::cout << "Influxdb-cxx test package successful\n";
     return 0;
 }
