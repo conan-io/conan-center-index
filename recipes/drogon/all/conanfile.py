@@ -34,6 +34,7 @@ class DrogonConan(ConanFile):
         "with_mysql": [True, False],
         "with_sqlite": [True, False],
         "with_redis": [True, False],
+        "with_spdlog": [True, False],
     }
     default_options = {
         "shared": False,
@@ -49,6 +50,7 @@ class DrogonConan(ConanFile):
         "with_mysql": False,
         "with_sqlite": False,
         "with_redis": False,
+        "with_spdlog": False,
     }
 
     def export_sources(self):
@@ -59,6 +61,8 @@ class DrogonConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) < "1.8.4":
             del self.options.with_yaml_cpp
+        if Version(self.version) < "1.9.2":
+            del self.options.with_spdlog
 
     def configure(self):
         if self.options.shared:
@@ -70,6 +74,7 @@ class DrogonConan(ConanFile):
             del self.options.with_mysql
             del self.options.with_sqlite
             del self.options.with_redis
+            self.options.rm_safe("with_spdlog")
         elif not self.options.with_postgres:
             del self.options.with_postgres_batch
 
@@ -130,6 +135,8 @@ class DrogonConan(ConanFile):
             self.requires("sqlite3/3.45.0")
         if self.options.get_safe("with_redis"):
             self.requires("hiredis/1.2.0")
+        if self.options.get_safe("with_spdlog"):
+            self.requires("spdlog/1.13.0")
         if self.options.get_safe("with_yaml_cpp", False):
             self.requires("yaml-cpp/0.8.0")
 
@@ -154,6 +161,8 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)
         tc.variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
         tc.variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
+        if Version(self.version) > "1.9.1":
+            tc.variables["USE_SPDLOG"] = self.options.get_safe("with_spdlog", False)
         if is_msvc(self):
             tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
         if Version(self.version) >= "1.8.4":
