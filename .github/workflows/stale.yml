@@ -62,4 +62,4 @@ jobs:
             recent activity. Thank you for your contributions.
 
         # Max number of operations per run
-        operations-per-run: 100
+        operations-per-run: 30
