@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 #if STRINGZILLA_API >= 3
+#include <array>
 #include <cstdint>
 #include <vector>
 #include "stringzilla/stringzilla.hpp"
