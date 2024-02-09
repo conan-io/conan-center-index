@@ -142,7 +142,7 @@ class CPythonConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         if self._supports_modules:
             self.requires("openssl/[>=1.1 <4]")
-            self.requires("expat/2.5.0")
+            self.requires("expat/2.6.0")
             if self._with_libffi:
                 self.requires("libffi/3.4.4")
             if Version(self.version) < "3.8":
@@ -165,7 +165,7 @@ class CPythonConan(ConanFile):
             # TODO: Add nis when available.
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.44.2")
+            self.requires("sqlite3/3.45.0")
         if self.options.get_safe("with_tkinter"):
             self.requires("tk/8.6.10")
         if self.options.get_safe("with_curses", False):
