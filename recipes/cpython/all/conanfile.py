@@ -71,6 +71,7 @@ class CPythonConan(ConanFile):
         # options that don't change package id
         "env_vars": True,
     }
+    short_paths = True
 
     @property
     def _supports_modules(self):
