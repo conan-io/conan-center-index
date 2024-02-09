@@ -48,7 +48,8 @@ class FontconfigConan(ConanFile):
 
     def requirements(self):
         self.requires("freetype/2.13.2")
-        self.requires("expat/2.6.0")
+        # Expat >2.5.0 does not work for versions <2.13.93, which are exactly the versions this recipe serves.
+        self.requires("expat/2.5.0")
         if self.settings.os == "Linux":
             self.requires("util-linux-libuuid/2.39.2")
 
