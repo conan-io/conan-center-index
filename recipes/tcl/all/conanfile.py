@@ -56,12 +56,16 @@ class TclConan(ConanFile):
         self.folders.build = "."
 
         # In order for fix_apple_shared_install_name to work, it needs to know the package layout precisely.
-        # Unfortunately this has to be defined here, before we ever fetch the sources, so we have to do this maually.
+        # Unfortunately this has to be defined here, before we ever fetch the sources, so we have to do this manually.
         extra_folders = {
-            "8.6.13": ["itcl4.2.3", "sqlite3.40.0",   "tdbc1.1.5", "tdbcpostgres1.1.5", "thread2.8.8", "tdbcmysql1.1.5", "tdbcodbc1.1.5"],
-            "8.6.11": ["itcl4.2.1", "sqlite3.34.0",   "tdbc1.1.2", "tdbcpostgres1.1.2", "thread2.8.6", "tdbcmysql1.1.2", "tdbcodbc1.1.2"],
-            "8.6.10": ["itcl4.2.0", "sqlite3.30.1.2", "tdbc1.1.1", "tdbcpostgres1.1.1", "thread2.8.5", "tdbcmysql1.1.1", "tdbcodbc1.1.1"],
+            "8.6.13": ["itcl4.2.3", "tdbc1.1.5", "tdbcpostgres1.1.5", "thread2.8.8", "tdbcmysql1.1.5", "tdbcodbc1.1.5"],
+            "8.6.11": ["itcl4.2.1", "tdbc1.1.2", "tdbcpostgres1.1.2", "thread2.8.6", "tdbcmysql1.1.2", "tdbcodbc1.1.2"],
+            "8.6.10": ["itcl4.2.0", "tdbc1.1.1", "tdbcpostgres1.1.1", "thread2.8.5", "tdbcmysql1.1.1", "tdbcodbc1.1.1"],
         }
+        if self.options.with_sqlite:
+            extra_folders["8.6.13"].append("sqlite3.40.0")
+            extra_folders["8.6.11"].append("sqlite3.34.0")
+            extra_folders["8.6.10"].append("sqlite3.30.1.2")
 
         self.cpp.package.libdirs.extend(os.path.join("lib", folder) for folder in extra_folders[self.version])
 
