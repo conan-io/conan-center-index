@@ -31,7 +31,9 @@ class OpenSSLConan(ConanFile):
         "386": [True, False],
         "capieng_dialog": [True, False],
         "enable_capieng": [True, False],
+        "enable_trace": [True, False],
         "no_aria": [True, False],
+        "no_apps": [True, False],
         "no_autoload_config": [True, False],
         "no_asm": [True, False],
         "no_async": [True, False],
@@ -385,6 +387,9 @@ class OpenSSLConan(ConanFile):
         args.append("no-fips" if self.options.get_safe("no_fips", True) else "enable-fips")
         args.append("no-md2" if self.options.get_safe("no_md2", True) else "enable-md2")
         args.append("-DOPENSSL_TLS_SECURITY_LEVEL=%s" % str(self.options.tls_security_level))
+
+        if self.options.get_safe("enable_trace"):
+            args.append("enable-trace")
 
         if self.settings.os == "Neutrino":
             args.append("no-asm -lsocket -latomic")
