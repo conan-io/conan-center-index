@@ -704,7 +704,6 @@ class CPythonConan(ConanFile):
         # FIXME: conan components Python::Interpreter component, need a target type
         # self.cpp_info.names["cmake_find_package"] = "Python"
         # self.cpp_info.names["cmake_find_package_multi"] = "Python"
-        # FIXME: conan components need to generate multiple .pc files (python2, python-27)
 
         py_version = Version(self.version)
         # python component: "Build a C extension for Python"
@@ -732,12 +731,10 @@ class CPythonConan(ConanFile):
         self.cpp_info.components["python"].set_property(
             "pkg_config_name", f"python-{py_version.major}.{py_version.minor}"
         )
+        self.cpp_info.components["python"].set_property(
+            "pkg_config_aliases", f"python{py_version.major}"
+        )
         self.cpp_info.components["python"].libdirs = []
-
-        self.cpp_info.components["_python_copy"].set_property("pkg_config_name", f"python{py_version.major}")
-        self.cpp_info.components["_python_copy"].requires = ["python"]
-        self.cpp_info.components["_python_copy"].includedirs = []
-        self.cpp_info.components["_python_copy"].libdirs = []
 
         # embed component: "Embed Python into an application"
         self.cpp_info.components["embed"].libs = [self._lib_name]
@@ -746,14 +743,10 @@ class CPythonConan(ConanFile):
         self.cpp_info.components["embed"].set_property(
             "pkg_config_name", f"python-{py_version.major}.{py_version.minor}-embed"
         )
-        self.cpp_info.components["embed"].requires = ["python"]
-
-        self.cpp_info.components["_embed_copy"].requires = ["embed"]
-        self.cpp_info.components["_embed_copy"].includedirs = []
-        self.cpp_info.components["_embed_copy"].set_property(
-            "pkg_config_name", f"python{py_version.major}-embed"
+        self.cpp_info.components["embed"].set_property(
+            "pkg_config_aliases", f"python{py_version.major}-embed"
         )
-        self.cpp_info.components["_embed_copy"].libdirs = []
+        self.cpp_info.components["embed"].requires = ["python"]
 
         if self._supports_modules:
             # hidden components: the C extensions of python are built as dynamically loaded shared libraries.
