@@ -778,7 +778,7 @@ class CPythonConan(ConanFile):
                 self.cpp_info.components["_hidden"].requires.append("tk::tk")
             self.cpp_info.components["_hidden"].includedirs = []
             self.cpp_info.components["_hidden"].libdirs = []
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["_hidden"].system_libs.append("nsl")
 
         if self.options.env_vars:
