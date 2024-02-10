@@ -244,10 +244,11 @@ class CPythonConan(ConanFile):
             tc.configure_args += [
                 "--with-system-libmpdec",
                 "--with-openssl={}".format(self.dependencies["openssl"].package_folder),
-                "--enable-loadable-sqlite-extensions={}".format(
-                    yes_no(not self.dependencies["sqlite3"].options.omit_load_extension)
-                ),
             ]
+        if self.options.get_safe("with_sqlite3"):
+            tc.configure_args.append("--enable-loadable-sqlite-extensions={}".format(
+                yes_no(not self.dependencies["sqlite3"].options.omit_load_extension)
+            ))
         if self.settings.compiler == "intel-cc":
             tc.configure_args.append("--with-icc")
         if os.environ.get("CC") or self.settings.compiler != "gcc":
