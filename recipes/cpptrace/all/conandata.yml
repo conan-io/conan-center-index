@@ -2,8 +2,8 @@ sources:
   # Newer versions at the top
   "0.4.0":
     url:
-      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.4.0-rc2.tar.gz"
-    sha256: "d981d9882116f76a73bb96dd3d39a45ffcbad9683847cd784a74bbe3ea1f33e8"
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: "eef368f5bed2d85c976ea90b325e4c9bfc1b9618cbbfa15bf088adc8fa98ff89"
   "0.3.1":
     url:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.3.1.tar.gz"
