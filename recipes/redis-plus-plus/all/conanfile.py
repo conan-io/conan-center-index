@@ -33,7 +33,7 @@ class RedisPlusPlusConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "11" if Version(self.version) < "1.3.0" else "17"
+        return "11"
 
     @property
     def _compilers_minimum_version(self):
