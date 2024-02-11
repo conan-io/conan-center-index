@@ -7,6 +7,7 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -73,7 +74,10 @@ class ThorvgConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = MesonToolchain(self)
+        if is_msvc(self):
+            tc = MesonToolchain(self, backend="vs")
+        else:
+            tc = MesonToolchain(self)
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
