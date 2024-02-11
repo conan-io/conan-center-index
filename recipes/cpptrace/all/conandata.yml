@@ -2,8 +2,8 @@ sources:
   # Newer versions at the top
   "0.4.0":
     url:
-      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.4.0-rc1.tar.gz"
-    sha256: "4801292e9e48d7a7eb57d8188847cdc84aef48c68588cc2b2387729312e4389b"
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.4.0-rc2.tar.gz"
+    sha256: "d981d9882116f76a73bb96dd3d39a45ffcbad9683847cd784a74bbe3ea1f33e8"
   "0.3.1":
     url:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.3.1.tar.gz"
@@ -17,10 +17,6 @@ sources:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.2.1.tar.gz"
     sha256: "3184f404c61b6b8ba6fe7c64fc40d1c3d6d87df59bcacf1845d846101bc22f9a"
 patches:
-  "0.4.0":
-    - patch_file: "patches/0.4.0/0001-cpptrace.patch"
-      patch_type: "conan"
-      patch_description: "..."
   "0.3.0":
     - patch_file: "patches/0.3.0/0001-cpptrace_export.patch"
       patch_type: "bugfix"
