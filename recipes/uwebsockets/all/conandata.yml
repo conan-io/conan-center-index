@@ -1,7 +1,7 @@
 sources:
-  "20.59.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v20.59.0.tar.gz"
-    sha256: "2a45c181b9707bb05409c943366c2dd181a2d4af06c84e281840734cda5ee374"
+  "20.60.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.60.0.tar.gz"
+    sha256: "eb72223768f93d40038181653ee5b59a53736448a6ff4e8924fd56b2fcdc00db"
   "20.58.0":
     url: "https://github.com/uNetworking/uWebSockets/archive/v20.58.0.tar.gz"
     sha256: "f71ca310cc5c39b12f56db1cf85727ee4d0f03fdf019a9e14ef4ba08addc6077"
