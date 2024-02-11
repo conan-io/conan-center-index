@@ -99,7 +99,7 @@ class GrpcConan(ConanFile):
         self.requires("c-ares/1.19.1")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
-        self.requires("re2/20230301")
+        self.requires("re2/20231101")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52":
             self.requires("libsystemd/255")
