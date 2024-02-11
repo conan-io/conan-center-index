@@ -85,7 +85,7 @@ class FollyConan(ConanFile):
         self.requires("zlib/1.2.12")
         self.requires("zstd/1.5.2")
         if not is_msvc(self):
-            self.requires("libdwarf/20191104")
+            self.requires("libdwarf/0.9.1")
         self.requires("libsodium/1.0.18")
         self.requires("xz_utils/5.2.5")
         # FIXME: Causing compilation issues on clang: self.requires("jemalloc/5.2.1")
