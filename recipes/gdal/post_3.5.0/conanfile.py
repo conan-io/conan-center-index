@@ -317,7 +317,7 @@ class GdalConan(ConanFile):
 
     def validate(self):
         for option in ["crypto", "zlib", "proj", "libtiff"]:
-            self.options.get_safe(f"with_{option}") != "deprecated":
+            if self.options.get_safe(f"with_{option}") != "deprecated":
                 self.output.warning(f"{self.ref}:with_{option} option is deprecated. The {option} dependecy is always enabled now.")
         if self.options.with_pcre and self.options.with_pcre2:
             raise ConanInvalidConfiguration("Enable either pcre or pcre2, not both")
