@@ -53,6 +53,10 @@ class PoptConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
+    def requirements(self):
+        if self.settings.os == "Neutrino":
+            self.requires("libiconv/[>=1.15]")
+
     def build_requirements(self):
         self.tool_requires("gnu-config/cci.20210814")
         if self._settings_build.os == "Windows":
