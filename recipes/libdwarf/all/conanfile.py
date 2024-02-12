@@ -10,7 +10,7 @@ required_conan_version = ">=1.53.0"
 class LibdwarfConan(ConanFile):
     name = "libdwarf"
     description = "A library and a set of command-line tools for reading and writing DWARF2"
-    license = ("LGPL-2.1-only", "BSD-2-Clause-Views")
+    license = ("LGPL-2.1-only", "BSD-2-Clause-Views", "GPL-2.0-only")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.prevanders.net/dwarf.html"
     topics = ("debug", "dwarf", "dwarf2", "elf")
@@ -44,7 +44,9 @@ class LibdwarfConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
         if not self.options.with_dwarfgen:
-            self.license = "LGPL-2.1-only"
+            self.license = (l for l in self.license if l != "BSD-2-Clause-Views")
+        if not self.options.with_dwarfdump:
+            self.license = (l for l in self.license if l != "GPL-2.0-only")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -87,6 +89,9 @@ class LibdwarfConan(ConanFile):
         if self.options.with_dwarfgen:
             copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, "src", "bin", "dwarfgen"))
             rename(self, os.path.join(self.package_folder, "licenses", "COPYING"), os.path.join(self.package_folder, "licenses", "COPYING-dwarfgen"))
+        if self.options.with_dwarfdump:
+            copy(self, pattern="GPL.txt", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, "src", "bin", "dwarfdump"))
+            rename(self, os.path.join(self.package_folder, "licenses", "GPL.txt"), os.path.join(self.package_folder, "licenses", "COPYING-dwarfdump"))
         copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
         cmake = CMake(self)
