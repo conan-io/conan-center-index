@@ -2,4 +2,5 @@
 
 int main() {
 	FcInit();
+	return 0;
 }
