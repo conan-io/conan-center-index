@@ -486,8 +486,6 @@ class GdalConan(ConanFile):
         tc.variables["_ICONV_SECOND_ARGUMENT_IS_NOT_CONST"] = True
         tc.generate()
 
-        jsonc = self.dependencies["json-c"]
-        jsonc.cpp_info.includedirs.append(os.path.join(jsonc.package_folder, "include", "json-c"))
 
         deps = CMakeDeps(self)
         # https://gdal.org/development/building_from_source.html#cmake-package-dependent-options
