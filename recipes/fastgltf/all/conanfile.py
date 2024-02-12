@@ -91,7 +91,8 @@ class fastgltf(ConanFile):
             tc.variables["FASTGLTF_DISABLE_CUSTOM_MEMORY_POOL"] = True
         if self.options.get_safe("use_64bit_float"):
             tc.variables["FASTGLTF_USE_64BIT_FLOAT"] = True
-        tc.variables["FASTGLTF_COMPILE_AS_CPP20"] = "20" in str(self.settings.compiler.get_safe("cppstd"))
+        if Version(self.version) >= "0.7.0":
+            tc.variables["FASTGLTF_COMPILE_AS_CPP20"] = "20" in str(self.settings.compiler.get_safe("cppstd"))
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
