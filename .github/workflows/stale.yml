@@ -34,6 +34,8 @@ jobs:
         # Idle number of days before closing stale PRs
         days-before-pr-close: 30
 
+        # process older PRs first
+        ascending: true
 
         # Labels on PRs exempted from stale
         exempt-pr-labels: blocked,infrastructure
