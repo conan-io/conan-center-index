@@ -5,14 +5,14 @@ from conan.tools.layout import basic_layout
 import os
 
 
-required_conan_version = ">=2.0.0"
+required_conan_version = ">=1.62.0"
 
 
 class SflConan(ConanFile):
     name = "sfl"
     description = "A header-only C++11 library that offers several new containers"
     license = "Zlib"
-    url = "https://github.com/slavenf/sfl-library"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/slavenf/sfl-library"
     topics = ("containers", "header-only")
     package_type = "header-library"
@@ -24,7 +24,7 @@ class SflConan(ConanFile):
         return 11
 
     def layout(self):
-        basic_layout(self, src_folder="include")
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
