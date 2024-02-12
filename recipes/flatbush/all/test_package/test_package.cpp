@@ -24,8 +24,7 @@ SOFTWARE.
 
 #include "flatbush.h"
 
-int main(int argc, char** argv)
-{
+int main() {
   flatbush::FlatbushBuilder<int> wBuilder;
   wBuilder.add({ 0, 0, 0, 0 });
   auto wIndex = wBuilder.finish();

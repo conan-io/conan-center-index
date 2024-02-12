@@ -1,0 +1,68 @@
+From 9d7cc3d43f1a619a84049d6786054f31d6d1ab86 Mon Sep 17 00:00:00 2001
+From: Kris Jusiak <kris@jusiak.net>
+Date: Sun, 21 May 2023 10:55:42 -0500
+Subject: [PATCH] :arrow_up: 1.1.8
+
+---
+ CMakeLists.txt        | 2 +-
+ Makefile              | 2 +-
+ include/boost/sml.hpp | 6 +++---
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 12fa670..dee81c1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -177,7 +177,7 @@ configure_package_config_file(
+ 
+ write_basic_package_version_file(
+     ${CMAKE_CURRENT_BINARY_DIR}/smlConfigVersion.cmake
+-    VERSION 1.1.6
++    VERSION 1.1.8
+     COMPATIBILITY SameMajorVersion
+ )
+ 
+diff --git a/Makefile b/Makefile
+index b00c9ee..8046400 100644
+--- a/Makefile
++++ b/Makefile
+@@ -26,7 +26,7 @@ DRMEMORY:=drmemory -light -batch -exit_code_if_errors 1 --
+ GCOV:=-fprofile-arcs -ftest-coverage
+ CLANG_FORMAT?=clang-format
+ CLANG_TIDY?=clang-tidy
+-PYTHON?=python2
++PYTHON?=python3
+ MKDOCS?=mkdocs
+ MKDOCS_THEME?=boost-modern
+ MKDOCS_SITE?=site
+diff --git a/include/boost/sml.hpp b/include/boost/sml.hpp
+index 8143249..2a5dac9 100644
+--- a/include/boost/sml.hpp
++++ b/include/boost/sml.hpp
+@@ -9,12 +9,12 @@
+ #if (__cplusplus < 201305L && _MSC_VER < 1900)
+ #error "[Boost::ext].SML requires C++14 support (Clang-3.4+, GCC-5.1+, MSVC-2015+)"
+ #else
+-#define BOOST_SML_VERSION 1'1'6
++#define BOOST_SML_VERSION 1'1'8
+ #define BOOST_SML_NAMESPACE_BEGIN \
+   namespace boost {               \
+   inline namespace ext {          \
+   namespace sml {                 \
+-  inline namespace v1_1_6 {
++  inline namespace v1_1_8 {
+ #define BOOST_SML_NAMESPACE_END \
+   }                             \
+   }                             \
+@@ -422,7 +422,7 @@ struct pool : pool_type<Ts>... {
+ template <>
+ struct pool<> {
+   using boost_di_inject__ = type_list<>;
+-  constexpr pool() = default;
++  pool() = default;
+   template <class... Ts>
+   constexpr explicit pool(Ts &&...) {}
+   __BOOST_SML_ZERO_SIZE_ARRAY(byte);
+-- 
+2.40.1
+

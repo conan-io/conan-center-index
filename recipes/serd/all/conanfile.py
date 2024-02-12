@@ -5,9 +5,10 @@ from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class SerdConan(ConanFile):
@@ -18,6 +19,7 @@ class SerdConan(ConanFile):
     topics = "linked-data", "semantic-web", "rdf", "turtle", "trig", "ntriples", "nquads"
     license = "ISC"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -34,39 +36,27 @@ class SerdConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-
-    def build_requirements(self):
-        self.tool_requires("meson/0.63.1")
-        self.tool_requires("pkgconf/1.7.4")
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        self.tool_requires("meson/1.2.2")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         tc = MesonToolchain(self)
         tc.project_options["docs"] = "disabled"
         tc.project_options["tests"] = "disabled"
         tc.project_options["tools"] = "disabled"
-        # TODO: fixed in conan 1.51.0?
-        tc.project_options["bindir"] = "bin"
-        tc.project_options["libdir"] = "lib"
         tc.generate()
-
-        env = VirtualBuildEnv(self)
-        env.generate(scope="build")
 
     def build(self):
         meson = Meson(self)
@@ -85,7 +75,7 @@ class SerdConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "serd-0")
         libname = "serd"
-        if not (is_msvc(self) and self.options.shared):
+        if (not (is_msvc(self) and self.options.shared)) or (Version(self.version) >= "0.32.0" and is_msvc(self)):
             libname += "-0"
         self.cpp_info.libs = [libname]
         self.cpp_info.includedirs = [os.path.join("include", "serd-0")]
@@ -95,10 +85,10 @@ class SerdConan(ConanFile):
             self.cpp_info.system_libs.append("m")
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
-    """remove lib prefix & change extension to .lib"""
+    """remove lib prefix & change extension to .lib in case of cl like compiler"""
     from conan.tools.files import rename
     import glob
-    if not is_msvc(conanfile):
+    if not conanfile.settings.get_safe("compiler.runtime"):
         return
     libdirs = getattr(conanfile.cpp.package, "libdirs")
     for libdir in libdirs:

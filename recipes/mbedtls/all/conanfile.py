@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 import os
 
@@ -19,6 +20,7 @@ class MBedTLSConan(ConanFile):
     homepage = "https://tls.mbed.org"
     license = "Apache-2.0"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -30,8 +32,6 @@ class MBedTLSConan(ConanFile):
         "fPIC": True,
         "with_zlib": True,
     }
-
-    exports_sources = "CMakeLists.txt"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,24 +51,26 @@ class MBedTLSConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if self.info.settings.os == "Windows" and self.info.options.shared:
+        if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared build on Windows")
 
-        if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "5":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             # The command line flags set are not supported on older versions of gcc
             raise ConanInvalidConfiguration(
-                f"{self.ref} does not support {self.info.settings.compiler}-{self.info.settings.compiler.version}"
+                f"{self.ref} does not support {self.settings.compiler}-{self.settings.compiler.version}"
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root = True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if self.options.shared:
+            tc.preprocessor_definitions["X509_BUILD_SHARED"] = "1"
+            tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["USE_SHARED_MBEDTLS_LIBRARY"] = self.options.shared
         tc.variables["USE_STATIC_MBEDTLS_LIBRARY"] = not self.options.shared
         if Version(self.version) < "3.0.0":
@@ -79,6 +81,13 @@ class MBedTLSConan(ConanFile):
         if Version(self.version) < "3.0.0":
             # relocatable shared libs on macOS
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if is_msvc(self):
+            if check_min_vs(self, 190, raise_invalid=False):
+                tc.preprocessor_definitions["MBEDTLS_PLATFORM_SNPRINTF_MACRO"] = "snprintf"
+            else:
+                tc.preprocessor_definitions["MBEDTLS_PLATFORM_SNPRINTF_MACRO"] = "MBEDTLS_PLATFORM_STD_SNPRINTF"
+        tc.generate()
+        tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
@@ -90,6 +99,7 @@ class MBedTLSConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):

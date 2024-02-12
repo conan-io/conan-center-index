@@ -1,4 +1,16 @@
 sources:
+  "5.0.0":
+    url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v5.0.0.tar.gz"
+    sha256: "a2991cb222c944aee14397965d9f6b050245da849d8c5da7c72d112de2786b5b"
+  "4.1.1":
+    url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v4.1.1.tar.gz"
+    sha256: "9009d093e48b3189487d67fc3e375a57c7b354c0e43fc554ad31bec74a4bc2dd"
+  "4.1.0":
+    url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v4.1.0.tar.gz"
+    sha256: "6f03f5917b44c9bc12335ad891a93813bbb6e738e0bd0c44f97bcc6077c45980"
+  "4.0.0":
+    url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v4.0.0.tar.gz"
+    sha256: "7276e4117429ebf8e34ea371c3ea4e66eb99e0f234cb4c5c85fca17174a53dfa"
   "3.0.0":
     url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v3.0.0.tar.gz"
     sha256: "a8f2539ab95caafb21b0c534e8dfb0aeea4e658688797bb9e5539729d9258cc1"
@@ -6,11 +18,27 @@ sources:
     url: "https://github.com/ArthurSonzogni/FTXUI/archive/refs/tags/v2.0.0.tar.gz"
     sha256: "d891695ef22176f0c09f8261a37af9ad5b262dd670a81e6b83661a23abc2c54f"
 patches:
+  "4.1.1":
+    - patch_file: "patches/4.1.1-0002-install-dll.patch"
+      patch_description: "add runtime destionation for windows shared build"
+      patch_type: "conan"
+  "4.1.0":
+    - patch_file: "patches/4.0.0-0002-install-dll.patch"
+      patch_description: "add runtime destionation for windows shared build"
+      patch_type: "conan"
+  "4.0.0":
+    - patch_file: "patches/4.0.0-0002-install-dll.patch"
+      patch_description: "add runtime destionation for windows shared build"
+      patch_type: "conan"
   "3.0.0":
-    - patch_file: "patches/0002-install-dll.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/2.0.0-0002-install-dll.patch"
+      patch_description: "add runtime destionation for windows shared build"
+      patch_type: "conan"
   "2.0.0":
-    - patch_file: "patches/0001-lib-prefix.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-install-dll.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/2.0.0-0001-lib-prefix.patch"
+      patch_description: "correct the order of cmake min and project"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/ArthurSonzogni/FTXUI/pull/340"
+    - patch_file: "patches/2.0.0-0002-install-dll.patch"
+      patch_description: "add runtime destionation for windows shared build"
+      patch_type: "conan"

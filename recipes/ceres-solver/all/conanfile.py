@@ -1,13 +1,19 @@
-from conan.tools.microsoft import msvc_runtime_flag
-from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
-import functools
 import os
+import textwrap
 
-required_conan_version = ">=1.43.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd, stdcpp_library
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.54.0"
 
 
-class ceressolverConan(ConanFile):
+class CeressolverConan(ConanFile):
     name = "ceres-solver"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
@@ -16,14 +22,15 @@ class ceressolverConan(ConanFile):
         "Ceres Solver is an open source C++ library for modeling "
         "and solving large, complicated optimization problems"
     )
-    topics = ("optimization","non-linear least squares")
+    topics = ("optimization", "non-linear least squares")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "use_glog":  [True, False], #TODO Set to true once gflags with nothreads=False binaries are available. Using MINILOG has a big performance drawback.
-        "use_gflags": [True, False],
+        "use_gflags": [True, False, "deprecated"],
         "use_custom_blas": [True, False],
         "use_eigen_sparse": [True, False],
         "use_TBB": [True, False],
@@ -35,7 +42,7 @@ class ceressolverConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "use_glog": False,
-        "use_gflags": False,
+        "use_gflags": "deprecated",
         "use_custom_blas": True,
         "use_eigen_sparse": True,
         "use_TBB": False,
@@ -44,145 +51,189 @@ class ceressolverConan(ConanFile):
         "use_schur_specializations": True,
     }
 
-    generators = "cmake"
+    @property
+    def _min_cppstd(self):
+        if Version(self.version) >= "2.2.0":
+            return "17"
+        if Version(self.version) >= "2.0.0":
+            return "14"
+        return "98"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _is_msvc(self):
-        return str(self.settings.compiler) in ["Visual Studio", "msvc"]
+    def _compilers_minimum_version(self):
+        return {
+            "14": {
+                "apple-clang": "5",
+                "clang": "5",
+                "gcc": "5",
+                "msvc": "190",
+                "Visual Studio": "14",
+            },
+            "17": {
+                "apple-clang": "10",
+                "clang": "7",
+                "gcc": "8",
+                "msvc": "191",
+                "Visual Studio": "15",
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) >= "2.0":
+        if Version(self.version) >= "2.0":
+            del self.options.use_TBB
             del self.options.use_CXX11_threads
             del self.options.use_CXX11
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        if self.options.use_gflags:
-            self.options["gflags"].nothreads = False
+            self.options.rm_safe("fPIC")
+        if self.options.use_gflags != "deprecated":
+            self.output.warning("use_gflags option is deprecated")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("eigen/3.4.0")
+        self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.use_glog:
-            self.requires("glog/0.5.0")
-        if self.options.use_gflags:
-            self.requires("gflags/2.2.2")
-        if self.options.use_TBB:
+            self.requires("glog/0.6.0", transitive_headers=True, transitive_libs=True)
+        if self.options.get_safe("use_TBB"):
             self.requires("onetbb/2020.3")
 
-    def _check_cxx14_supported(self):
-        min_compiler_version = {
-            "gcc": "5",
-            "Visual Studio": "14",
-            "clang": "5",
-            "apple-clang": "5",
-        }.get(str(self.settings.compiler))
-        if not min_compiler_version:
-            self.output.warn("Unknown compiler. Presuming it supports c++14.")
-        elif tools.Version(self.settings.compiler.version) < min_compiler_version:
-            raise ConanInvalidConfiguration("Current compiler version does not support c++14")
+    def package_id(self):
+        del self.info.options.use_gflags
 
     def validate(self):
-        if self.settings.build_type == "Debug" and self.options.use_glog:
-            raise ConanInvalidConfiguration("Ceres-solver only links against the release version of glog")
-        if self.options.use_glog and not self.options.use_gflags: #At this stage we can't check the value of self.options["glog"].with_gflags so we asume it is true because is the default value
-            raise ConanInvalidConfiguration("To depend on glog built with gflags (Default behavior) set use_gflags=True, otherwise Ceres may fail to link due to missing gflags symbols.")
-        if self.options.use_gflags and self.options["gflags"].nothreads:
-            raise ConanInvalidConfiguration("Ceres-solver requires options gflags:nothreads=False") # This could use a source as to why
-        if tools.Version(self.version) >= "2.0":
-            # 1.x uses ceres-solver specific FindXXX.cmake modules
-            self.generators.append("cmake_find_package")
-            if self.settings.compiler.get_safe("cppstd"):
-                tools.check_min_cppstd(self, 14)
-            self._check_cxx14_supported()
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
+            )
+
+    def build_requirements(self):
+        if Version(self.version) >= "2.2.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination = self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)       #You can check what these flags do in http://ceres-solver.org/installation.html
-        cmake.definitions["LIB_SUFFIX"] = ""
-        cmake.definitions["GFLAGS"] = self.options.use_gflags
-        cmake.definitions["BUILD_EXAMPLES"] = False           #Requires gflags
-        cmake.definitions["BUILD_TESTING"] = False            #Requires gflags
-        cmake.definitions["BUILD_DOCUMENTATION"] = False      #Requires python modules Sphinx and sphinx-rtd-theme
-        cmake.definitions["CUSTOM_BLAS"] = self.options.use_custom_blas
-        cmake.definitions["GLOG_PREFER_EXPORTED_GLOG_CMAKE_CONFIGURATION"] = False      #Set to false to Force CMake to use the conan-generated dependencies
-        cmake.definitions["EIGENSPARSE"] = self.options.use_eigen_sparse
-        cmake.definitions["SUITESPARSE"] = False  #Optional. Not supported right now because SuiteSparse is not part of conan-index
-        cmake.definitions["LAPACK"] = False       #Optional. Not supported right now because LAPACK is not part of conan-index
-        cmake.definitions["CXSPARSE"] = False     #Optional. Not supported right now because CXSSPARSE is not part of conan-index
-        cmake.definitions["MINIGLOG"] = not self.options.use_glog
-        if not self.options.use_TBB:
-            cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_TBB"] = True
-        if tools.Version(self.version) < "2.0":
-            cmake.definitions["TBB"] = self.options.use_TBB
-            cmake.definitions["OPENMP"] = False
-            cmake.definitions["EIGEN_PREFER_EXPORTED_EIGEN_CMAKE_CONFIGURATION"] = False    #Set to false to Force CMake to use the conan-generated dependencies
-            cmake.definitions["GFLAGS_PREFER_EXPORTED_GFLAGS_CMAKE_CONFIGURATION"] = False  #Set to false to Force CMake to use the conan-generated dependencies
-            cmake.definitions["CXX11_THREADS"] = self.options.use_CXX11_threads
-            cmake.definitions["CXX11"] = self.options.use_CXX11
-        cmake.definitions["SCHUR_SPECIALIZATIONS"] = self.options.use_schur_specializations
-        if self._is_msvc:
-            cmake.definitions["MSVC_USE_STATIC_CRT"] = "MT" in msvc_runtime_flag(self)
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["MINIGLOG"] = not self.options.use_glog
+        tc.variables["GFLAGS"] = False # useless for the lib itself, gflags is not a direct dependency
+        tc.variables["SUITESPARSE"] = False
+        tc.variables["LAPACK"] = False
+        tc.variables["SCHUR_SPECIALIZATIONS"] = self.options.use_schur_specializations
+        tc.variables["CUSTOM_BLAS"] = self.options.use_custom_blas
+        tc.variables["EIGENSPARSE"] = self.options.use_eigen_sparse
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["BUILD_DOCUMENTATION"] = False
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_BENCHMARKS"] = False
+
+        ceres_version = Version(self.version)
+        if ceres_version >= "2.2.0":
+            tc.variables["USE_CUDA"] = False
+        elif ceres_version >= "2.1.0":
+            tc.variables["CUDA"] = False
+        if ceres_version >= "2.2.0":
+            tc.variables["EIGENMETIS"] = False
+        if ceres_version >= "2.0.0":
+            tc.variables["PROVIDE_UNINSTALL_TARGET"] = False
+            if is_apple_os(self):
+                tc.variables["ACCELERATESPARSE"] = True
+        if ceres_version < "2.2.0":
+            tc.variables["CXSPARSE"] = False
+            if is_msvc(self):
+                tc.variables["MSVC_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
+        if ceres_version < "2.1.0":
+            tc.variables["LIB_SUFFIX"] = ""
+        if ceres_version < "2.0.0":
+            tc.variables["CXX11"] = self.options.use_CXX11
+            tc.variables["OPENMP"] = False
+            tc.variables["TBB"] = self.options.use_TBB
+            tc.variables["CXX11_THREADS"] = self.options.use_CXX11_threads
+        # IOS_DEPLOYMENT_TARGET variable was added to iOS.cmake file in 1.12.0 version
+        if self.settings.os == "iOS":
+            tc.variables["IOS_DEPLOYMENT_TARGET"] = self.settings.os.version
+        tc.generate()
+
+        CMakeDeps(self).generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "CMake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "CMake"))
+        self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_variables_file_rel_path))
+
+    def _create_cmake_module_variables(self, module_file):
+        # Define several variables of upstream CMake config file which are not
+        # defined out of the box by CMakeDeps.
+        # See https://github.com/ceres-solver/ceres-solver/blob/master/cmake/CeresConfig.cmake.in
+        content = textwrap.dedent(f"""\
+            set(CERES_FOUND TRUE)
+            set(CERES_VERSION {self.version})
+            if(NOT DEFINED CERES_LIBRARIES)
+                set(CERES_LIBRARIES Ceres::ceres)
+            endif()
+        """)
+        save(self, module_file, content)
+
+    @property
+    def _module_variables_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Ceres")
         self.cpp_info.set_property("cmake_target_name", "Ceres::ceres")
+        # see https://github.com/ceres-solver/ceres-solver/blob/2.2.0/cmake/CeresConfig.cmake.in#L334-L340
+        self.cpp_info.set_property("cmake_target_aliases", ["ceres"])
+        self.cpp_info.set_property("cmake_build_modules", [self._module_variables_file_rel_path])
 
         libsuffix = ""
         if self.settings.build_type == "Debug":
             libsuffix = "-debug"
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["ceres"].libs = ["ceres{}".format(libsuffix)]
-        self.cpp_info.components["ceres"].includedirs = ["include", os.path.join("include","ceres")]
+        self.cpp_info.components["ceres"].libs = [f"ceres{libsuffix}"]
+        self.cpp_info.components["ceres"].includedirs.append(os.path.join("include", "ceres"))
         if not self.options.use_glog:
-            self.cpp_info.components["ceres"].includedirs.append(os.path.join("include","ceres", "internal", "miniglog"))
+            self.cpp_info.components["ceres"].includedirs.append(os.path.join("include", "ceres", "internal", "miniglog"))
         if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["ceres"].system_libs.append("m")
             if self.options.get_safe("use_CXX11_threads", True):
                 self.cpp_info.components["ceres"].system_libs.append("pthread")
-        elif tools.is_apple_os(self.settings.os):
-            if tools.Version(self.version) >= "2":
-                self.cpp_info.components["ceres"].frameworks = ["Accelerate"]
+        elif is_apple_os(self):
+            if Version(self.version) >= "2":
+                self.cpp_info.components["ceres"].frameworks.append("Accelerate")
         self.cpp_info.components["ceres"].requires = ["eigen::eigen"]
         if self.options.use_glog:
             self.cpp_info.components["ceres"].requires.append("glog::glog")
-        if self.options.use_gflags:
-            self.cpp_info.components["ceres"].requires.append("gflags::gflags")
-        if self.options.use_TBB:
+        if self.options.get_safe("use_TBB"):
             self.cpp_info.components["ceres"].requires.append("onetbb::onetbb")
-        libcxx = tools.stdcpp_library(self)
-        if libcxx:
-            self.cpp_info.components["ceres"].system_libs.append(libcxx)
+        if not self.options.shared:
+            libcxx = stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.components["ceres"].system_libs.append(libcxx)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Ceres"
         self.cpp_info.names["cmake_find_package_multi"] = "Ceres"
+        self.cpp_info.components["ceres"].build_modules["cmake_find_package"] = [self._module_variables_file_rel_path]
+        self.cpp_info.components["ceres"].build_modules["cmake_find_package_multi"] = [self._module_variables_file_rel_path]
+        self.cpp_info.components["ceres"].set_property("cmake_target_name", "Ceres::ceres")

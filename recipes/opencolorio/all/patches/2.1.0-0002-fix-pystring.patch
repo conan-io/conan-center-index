@@ -1,0 +1,117 @@
+diff --git a/src/OpenColorIO/Context.cpp b/src/OpenColorIO/Context.cpp
+index 26fdcbee..9ddb4522 100644
+--- a/src/OpenColorIO/Context.cpp
++++ b/src/OpenColorIO/Context.cpp
+@@ -14,7 +14,7 @@
+ #include "Mutex.h"
+ #include "PathUtils.h"
+ #include "PrivateTypes.h"
+-#include "pystring/pystring.h"
++#include "pystring.h"
+ #include "utils/StringUtils.h"
+ 
+ 
+diff --git a/src/OpenColorIO/OCIOYaml.cpp b/src/OpenColorIO/OCIOYaml.cpp
+index 67cafdf1..744fb817 100644
+--- a/src/OpenColorIO/OCIOYaml.cpp
++++ b/src/OpenColorIO/OCIOYaml.cpp
+@@ -19,7 +19,7 @@
+ #include "ParseUtils.h"
+ #include "PathUtils.h"
+ #include "Platform.h"
+-#include "pystring/pystring.h"
++#include "pystring.h"
+ #include "utils/StringUtils.h"
+ #include "ViewingRules.h"
+ #include "yaml-cpp/yaml.h"
+diff --git a/src/OpenColorIO/Op.cpp b/src/OpenColorIO/Op.cpp
+index ebbba040..08db0f68 100755
+--- a/src/OpenColorIO/Op.cpp
++++ b/src/OpenColorIO/Op.cpp
+@@ -20,7 +20,7 @@
+ #include "ops/lut1d/Lut1DOp.h"
+ #include "ops/lut3d/Lut3DOp.h"
+ #include "ops/range/RangeOp.h"
+-#include "pystring/pystring.h"
++#include "pystring.h"
+ 
+ namespace OCIO_NAMESPACE
+ {
+diff --git a/src/OpenColorIO/PathUtils.cpp b/src/OpenColorIO/PathUtils.cpp
+index 7ed5e9e8..e71d03d9 100644
+--- a/src/OpenColorIO/PathUtils.cpp
++++ b/src/OpenColorIO/PathUtils.cpp
+@@ -10,7 +10,7 @@
+ 
+ #include "Mutex.h"
+ #include "PathUtils.h"
+-#include "pystring/pystring.h"
++#include "pystring.h"
+ #include "utils/StringUtils.h"
+ 
+ #if !defined(_WIN32)
+diff --git a/src/OpenColorIO/fileformats/FileFormatCTF.cpp b/src/OpenColorIO/fileformats/FileFormatCTF.cpp
+index 89c13066..648aabc0 100644
+--- a/src/OpenColorIO/fileformats/FileFormatCTF.cpp
++++ b/src/OpenColorIO/fileformats/FileFormatCTF.cpp
+@@ -22,7 +22,7 @@
+ #include "OpBuilders.h"
+ #include "ops/noop/NoOps.h"
+ #include "Platform.h"
+-#include "pystring/pystring.h"
++#include "pystring.h"
+ #include "TransformBuilder.h"
+ #include "transforms/FileTransform.h"
+ #include "utils/StringUtils.h"
+diff --git a/src/OpenColorIO/fileformats/FileFormatDiscreet1DL.cpp b/src/OpenColorIO/fileformats/FileFormatDiscreet1DL.cpp
+index a52bc728..bd827f06 100755
+--- a/src/OpenColorIO/fileformats/FileFormatDiscreet1DL.cpp
++++ b/src/OpenColorIO/fileformats/FileFormatDiscreet1DL.cpp
+@@ -16,7 +16,7 @@
+ #include "ops/lut1d/Lut1DOp.h"
+ #include "ops/lut3d/Lut3DOp.h"
+ #include "ParseUtils.h"
+-#include "pystring/pystring.h"
++#include "pystring.h"
+ #include "Platform.h"
+ #include "transforms/FileTransform.h"
+ #include "utils/StringUtils.h"
+diff --git a/src/OpenColorIO/fileformats/FileFormatICC.cpp b/src/OpenColorIO/fileformats/FileFormatICC.cpp
+index df86206e..b6983cf6 100755
+--- a/src/OpenColorIO/fileformats/FileFormatICC.cpp
++++ b/src/OpenColorIO/fileformats/FileFormatICC.cpp
+@@ -12,7 +12,7 @@
+ #include "ops/gamma/GammaOp.h"
+ #include "ops/lut1d/Lut1DOp.h"
+ #include "ops/matrix/MatrixOp.h"
+-#include "pystring/pystring.h"
++#include "pystring.h"
+ #include "transforms/FileTransform.h"
+ 
+ 
+diff --git a/src/OpenColorIO/fileformats/FileFormatIridasLook.cpp b/src/OpenColorIO/fileformats/FileFormatIridasLook.cpp
+index 0f83f5b3..d6ee59de 100755
+--- a/src/OpenColorIO/fileformats/FileFormatIridasLook.cpp
++++ b/src/OpenColorIO/fileformats/FileFormatIridasLook.cpp
+@@ -13,7 +13,7 @@
+ #include "ops/lut3d/Lut3DOp.h"
+ #include "ParseUtils.h"
+ #include "Platform.h"
+-#include "pystring/pystring.h"
++#include "pystring.h"
+ #include "transforms/FileTransform.h"
+ #include "utils/StringUtils.h"
+ 
+diff --git a/src/OpenColorIO/transforms/FileTransform.cpp b/src/OpenColorIO/transforms/FileTransform.cpp
+index 4f6ea887..97621959 100755
+--- a/src/OpenColorIO/transforms/FileTransform.cpp
++++ b/src/OpenColorIO/transforms/FileTransform.cpp
+@@ -17,7 +17,7 @@
+ #include "ops/noop/NoOps.h"
+ #include "PathUtils.h"
+ #include "Platform.h"
+-#include "pystring/pystring.h"
++#include "pystring.h"
+ #include "utils/StringUtils.h"
+ 
+ 

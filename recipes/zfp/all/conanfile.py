@@ -54,9 +54,9 @@ class ZfpConan(ConanFile):
 
     def validate(self):
         if self.options.with_cuda:
-            self.output.warn("Conan package for CUDA is not available, this package will be used from system.")
+            self.output.warning("Conan package for CUDA is not available, this package will be used from system.")
         if self.options.with_openmp:
-            self.output.warn("Conan package for OpenMP is not available, this package will be used from system.")
+            self.output.warning("Conan package for OpenMP is not available, this package will be used from system.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

@@ -1,7 +1,13 @@
-import glob
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+
+
+required_conan_version = ">=1.50.0"
 
 
 class NamedTypeConan(ConanFile):
@@ -11,53 +17,61 @@ class NamedTypeConan(ConanFile):
     homepage = "https://github.com/joboccara/NamedType"
     description = "Implementation of strong types in C++"
     topics = ("strong types", "header-only")
-    settings = "compiler"
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("NamedType-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
-
-    @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 14
 
     @property
-    def _minimum_compilers_version(self):
+    def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
+            "msvc": "191",
             "gcc": "5",
             "clang": "3.4",
             "apple-clang": "5.1",
         }
 
-    def configure(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
-        else:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
-
-    def package(self):
-        if self.version == "20190324":
-            self.copy("*.hpp", dst=os.path.join("include", "NamedType"), src=self._source_subfolder)
-        else:
-            self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, 'include'))
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-
-    def package_info(self):
-        if self.version == "20190324":
-            self.cpp_info.includedirs.append(os.path.join("include", "NamedType"))
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def package(self):
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        if self.version == "20190324":
+            copy(
+                self,
+                pattern="*.hpp",
+                dst=os.path.join(self.package_folder, "include", "NamedType"),
+                src=self.source_folder,
+            )
+        else:
+            copy(
+                self,
+                pattern="*.hpp",
+                dst=os.path.join(self.package_folder, "include"),
+                src=os.path.join(self.source_folder, "include"),
+            )
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+        if self.version == "20190324":
+            self.cpp_info.includedirs.append(os.path.join("include", "NamedType"))

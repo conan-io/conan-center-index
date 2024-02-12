@@ -13,7 +13,7 @@ required_conan_version = ">=1.57.0"
 
 class XorgCfFilesConan(ConanFile):
     name = "xorg-cf-files"
-    package_type = "build-scripts"
+    # package_type = "build-scripts" # see https://github.com/conan-io/conan/issues/13431
     description = "Imake configuration files & templates"
     topics = ("imake", "xorg", "template", "configuration", "obsolete")
     license = "MIT"
@@ -48,10 +48,13 @@ class XorgCfFilesConan(ConanFile):
     def validate(self):
         if is_apple_os(self):
             raise ConanInvalidConfiguration(f"{self.ref} does not support Apple operating systems.")
+        if self.settings.compiler == "clang":
+            # See https://github.com/conan-io/conan-center-index/pull/16267#issuecomment-1469824504
+            raise ConanInvalidConfiguration("Recipe cannot be built with clang")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):

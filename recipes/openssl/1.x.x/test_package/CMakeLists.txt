@@ -19,7 +19,7 @@ set(_custom_vars
     OPENSSL_VERSION
 )
 foreach(_custom_var ${_custom_vars})
-    if(DEFINED _custom_var)
+    if(DEFINED ${_custom_var})
         message(STATUS "${_custom_var}: ${${_custom_var}}")
     else()
         message(FATAL_ERROR "${_custom_var} not defined")

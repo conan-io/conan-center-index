@@ -20,6 +20,7 @@ class Aaplusconan(ConanFile):
     homepage = "http://www.naughter.com/aa.html"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -59,23 +60,23 @@ class Aaplusconan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        compiler_version = Version(self.info.settings.compiler.version)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        compiler_version = Version(self.settings.compiler.version)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
 
-        if self.info.settings.compiler == "clang" and (compiler_version >= "10" and compiler_version < "12"):
+        if self.settings.compiler == "clang" and (compiler_version >= "10" and compiler_version < "12"):
             raise ConanInvalidConfiguration(
                 "AA+ cannot handle clang 10 and 11 due to filesystem being under experimental namespace"
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version])
 
     def generate(self):
         tc = CMakeToolchain(self)

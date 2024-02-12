@@ -1,0 +1,15 @@
+diff --git a/gzguts.h b/gzguts.h
+index f937504..c4654b5 100644
+--- a/gzguts.h
++++ b/gzguts.h
+@@ -25,6 +25,10 @@
+ #  include <limits.h>
+ #endif
+ 
++#ifdef __APPLE__
++#include <unistd.h>
++#endif
++
+ #ifndef _POSIX_SOURCE
+ #  define _POSIX_SOURCE
+ #endif

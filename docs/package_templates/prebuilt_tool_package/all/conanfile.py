@@ -1,7 +1,7 @@
 from conan import ConanFile
-from conan.tools.files import get, copy
-from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, get
+from conan.tools.scm import Version
 import os
 
 
@@ -16,6 +16,7 @@ class PackageConan(ConanFile):
     homepage = "https://github.com/project/package"
     # no "conan"  and project name in topics. Use "pre-built" for tooling packages
     topics = ("topic1", "topic2", "topic3", "pre-built")
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"  # even for pre-built executables
 
     # not needed but supress warning message from conan commands
@@ -47,9 +48,9 @@ class PackageConan(ConanFile):
     # copy all needed files to the package folder
     def package(self):
         # a license file is always mandatory
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, pattern="*.exe", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder)
-        copy(self, pattern="foo", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.exe", self.source_folder, os.path.join(self.package_folder, "bin"))
+        copy(self, "foo", self.source_folder, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         # folders not used for pre-built binaries

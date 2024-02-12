@@ -1,72 +1,80 @@
-from conan import ConanFile
-from conans import AutoToolsBuildEnvironment
-from conan.tools.files import get, rmdir, rm, copy, rename
-from conan.tools.scm import Version
-from conan.tools.build import check_min_cppstd
-from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.50.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, rmdir, rm, copy, rename, replace_in_file
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.53.0"
+
 
 class UvmSystemC(ConanFile):
     name = "accellera-uvm-systemc"
-    description = """Universal Verification Methodology for SystemC"""
-    homepage = "https://systemc.org/about/systemc-verification/uvm-systemc-faq"
-    url = "https://github.com/conan-io/conan-center-index"
+    description = "Universal Verification Methodology for SystemC"
     license = "Apache-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://systemc.org/overview/uvm-systemc-faq"
     topics = ("systemc", "verification", "tlm", "uvm")
-    settings = "os", "compiler", "build_type", "arch"
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
-        "fPIC": [True, False],
         "shared": [True, False],
+        "fPIC": [True, False],
     }
     default_options = {
-        "fPIC": True,
         "shared": False,
+        "fPIC": True,
     }
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def build_requirements(self):
-        self.tool_requires("cmake/3.24.0")
-        self.tool_requires("systemc/2.3.3")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-            
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("systemc/2.3.4", transitive_headers=True, transitive_libs=True)
+
     def validate(self):
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("Macos build not supported")
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows build not yet supported")
+        if self.settings.os == "Windows" or is_apple_os(self):
+            raise ConanInvalidConfiguration(f"{self.settings.os} build not supported")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("GCC < version 7 is not supported")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        systemc_root = self.dependencies["systemc"].package_folder
+        tc.configure_args.append(f"--with-systemc={systemc_root}")
+        tc.generate()
 
     def build(self):
-        autotools = AutoToolsBuildEnvironment(self)
-        args = [f"--with-systemc={self.deps_cpp_info['systemc'].rootpath}"]
-        if self.options.shared:
-            args.extend(["--enable-shared", "--disable-static"])
-        else:
-            args.extend(["--enable-static", "--disable-shared"])
-        autotools.configure(configure_dir=self._source_subfolder, args=args)
+        autotools = Autotools(self)
+        autotools.configure()
+        # Replace lib-linux64/ with lib/ for the systemc dependency
+        replace_in_file(self, os.path.join(self.build_folder, "src", "uvmsc", "Makefile"),
+                        "-linux64", "")
         autotools.make()
 
     def package(self):
-        copy(self, "LICENSE", src=os.path.join(self.build_folder, self._source_subfolder), dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "NOTICE", src=os.path.join(self.build_folder, self._source_subfolder), dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "COPYING", src=os.path.join(self.build_folder, self._source_subfolder), dst=os.path.join(self.package_folder, "licenses"))
-        autotools = AutoToolsBuildEnvironment(self)
+        for license in ["LICENSE", "NOTICE", "COPYING"]:
+            copy(self, license,
+                 src=self.source_folder,
+                 dst=os.path.join(self.package_folder, "licenses"))
+
+        autotools = Autotools(self)
         autotools.install()
+
         rmdir(self, os.path.join(self.package_folder, "docs"))
         rmdir(self, os.path.join(self.package_folder, "examples"))
         rm(self, "AUTHORS", self.package_folder)
@@ -78,7 +86,9 @@ class UvmSystemC(ConanFile):
         rm(self, "RELEASENOTES", self.package_folder)
         rm(self, "README", self.package_folder)
         rm(self, "INSTALL", self.package_folder)
-        rename(self, os.path.join(self.package_folder, "lib-linux64"), os.path.join(self.package_folder, "lib"))
+        rename(self,
+               os.path.join(self.package_folder, "lib-linux64"),
+               os.path.join(self.package_folder, "lib"))
         rm(self, "libuvm-systemc.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 

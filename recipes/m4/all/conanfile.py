@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -41,8 +42,7 @@ class M4Conan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -63,11 +63,23 @@ class M4Conan(ConanFile):
             ])
             if self.settings.build_type in ("Debug", "RelWithDebInfo"):
                 tc.extra_ldflags.append("-PDB")
-        elif self.settings.compiler == "clang":
-            if Version(self.version) < "1.4.19":
-                tc.extra_cflags.extend([
-                    "-rtlib=compiler-rt",
-                    "-Wno-unused-command-line-argument",
+        elif self.settings.compiler == "clang" and Version(self.version) < "1.4.19":
+            tc.extra_cflags.extend([
+                "-rtlib=compiler-rt",
+                "-Wno-unused-command-line-argument",
+            ])
+        if cross_building(self) and is_msvc(self):
+            triplet_arch_windows = {"x86_64": "x86_64", "x86": "i686", "armv8": "aarch64"}
+            
+            host_arch = triplet_arch_windows.get(str(self.settings.arch))
+            build_arch = triplet_arch_windows.get(str(self._settings_build.arch))
+
+            if host_arch and build_arch:
+                host = f"{host_arch}-w64-mingw32"
+                build = f"{build_arch}-w64-mingw32"
+                tc.configure_args.extend([
+                    f"--host={host}",
+                    f"--build={build}",
                 ])
         if self.settings.os == "Windows":
             tc.configure_args.append("ac_cv_func__set_invalid_parameter_handler=yes")
@@ -119,7 +131,5 @@ class M4Conan(ConanFile):
         self.buildenv_info.define_path("M4", m4_bin)
 
         # TODO: to remove in conan v2
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.PATH.append(bin_path)
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
         self.env_info.M4 = m4_bin

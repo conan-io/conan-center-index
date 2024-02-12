@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -52,49 +53,54 @@ class PulseAudioConan(ConanFile):
         if not self.options.with_dbus:
             del self.options.with_fftw
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         self.requires("libiconv/1.17")
-        self.requires("libsndfile/1.0.31")
-        self.requires("libcap/2.65")
+        self.requires("libsndfile/1.2.2")
+        self.requires("libcap/2.69")
         self.requires("libtool/2.4.7")
         if self.options.with_alsa:
-            self.requires("libalsa/1.2.7.2")
+            self.requires("libalsa/1.2.10")
         if self.options.with_glib:
-            self.requires("glib/2.73.3")
+            self.requires("glib/2.78.3")
         if self.options.get_safe("with_fftw"):
-            self.requires("fftw/3.3.9")
+            self.requires("fftw/3.3.10")
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_dbus:
-            self.requires("dbus/1.12.20")
+            self.requires("dbus/1.15.8")
 
     def validate(self):
-        if self.info.settings.os != "Linux":
+        if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("pulseaudio supports only linux currently")
 
         if self.options.get_safe("with_fftw"):
-            fftw_precision = self.dependencies["fftw"].options.precision
-            if fftw_precision != "single":
+            if not self.dependencies["fftw"].options.precision_single:
                 raise ConanInvalidConfiguration(
-                    f"Pulse audio cannot use fftw {fftw_precision} precision. "
-                    "Either set option fftw:precision=single or pulseaudio:with_fftw=False"
+                    f"Pulse audio uses fftw single precision. "
+                     "Either set option -o fftw/*:precision_single=True or -o pulseaudio/*:with_fftw=False"
                 )
 
     def build_requirements(self):
         self.tool_requires("gettext/0.21")
         self.tool_requires("libtool/2.4.7")
-        self.tool_requires("pkgconf/1.7.4")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
@@ -102,11 +108,11 @@ class PulseAudioConan(ConanFile):
             f"--enable-static={yes_no(not self.options.shared)}",
             f"--enable-glib2={yes_no(self.options.with_glib)}",
             f"--with-fftw={yes_no(self.options.get_safe('with_fftw'))}",
-            f"--with-udev-rules-dir={os.path.join(self.package_folder, 'bin', 'udev', 'rules.d')}",
+            "--with-udev-rules-dir=${prefix}/bin/udev/rules.d",
             f"--with-systemduserunitdir={os.path.join(self.build_folder, 'ignore')}",
         ])
         for lib in ["alsa", "x11", "openssl", "dbus"]:
-            tc.configure_args.append(f"--enable-{lib}={yes_no(getattr(self.options, 'with_' + lib))}")
+            tc.configure_args.append(f"--enable-{lib}={yes_no(getattr(self.options, f'with_{lib}'))}")
         # TODO: to remove when automatically handled by AutotoolsToolchain
         tc.configure_args.append("--libexecdir=${prefix}/bin")
         tc.generate()
@@ -114,8 +120,6 @@ class PulseAudioConan(ConanFile):
         deps.generate()
         pkg = PkgConfigDeps(self)
         pkg.generate()
-        env = VirtualBuildEnv(self)
-        env.generate()
 
     def build(self):
         autotools = Autotools(self)
@@ -142,7 +146,7 @@ class PulseAudioConan(ConanFile):
         if self.options.get_safe("with_fftw"):
             self.cpp_info.components["pulse"].requires.append("fftw::fftw")
         if self.options.with_x11:
-            self.cpp_info.components["pulse"].requires.append("xorg::xorg")
+            self.cpp_info.components["pulse"].requires.extend(["xorg::x11", "xorg::x11-xcb"])
         if self.options.with_openssl:
             self.cpp_info.components["pulse"].requires.append("openssl::openssl")
         if self.options.with_dbus:

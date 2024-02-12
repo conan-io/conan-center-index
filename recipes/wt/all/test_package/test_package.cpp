@@ -1,23 +1,9 @@
 #include <cstdlib>
 #include <iostream>
-#include <Wt/WLength.h>
-#include <Wt/WServer.h>
+#include <Wt/WEnvironment.h>
 
-#ifdef WITH_DBO
-
-#include <Wt/Dbo/Dbo.h>
-
-#endif
-
-
-int main(int argc, char** argv)
-{
-    Wt::WLength l("10px");
-#ifdef WITH_DBO
-    Wt::Dbo::Session session;
-#endif
-
-    Wt::WServer server(argc, argv, WTHTTP_CONFIGURATION);
+int main(void) {
+    std::cout << "WT Library version: " << Wt::WEnvironment::libraryVersion() << std::endl;
 
     return EXIT_SUCCESS;
 }

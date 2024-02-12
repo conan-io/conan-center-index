@@ -1,39 +1,9 @@
 versions:
+  "3.13.0":
+    folder: 3.x.x
+  "3.12.2":
+    folder: 3.x.x
   "3.11.1":
     folder: 3.x.x
-  "3.11.0":
-    folder: 3.x.x
   "3.10.3":
-    folder: 3.x.x
-  "3.10.1":
-    folder: 3.x.x
-  "3.10.0":
-    folder: 3.x.x
-  "3.9.0":
-    folder: 3.x.x
-  "3.8.1":
-    folder: 3.x.x
-  "3.8.0":
-    folder: 3.x.x
-  "3.7.1":
-    folder: 3.x.x
-  "3.7.0":
-    folder: 3.x.x
-  "3.6.0":
-    folder: 3.x.x
-  "3.5.2":
-    folder: 3.x.x
-  "3.5.1":
-    folder: 3.x.x
-  "3.5.0":
-    folder: 3.x.x
-  "3.4.0":
-    folder: 3.x.x
-  "3.3.2":
-    folder: 3.x.x
-  "3.3.1":
-    folder: 3.x.x
-  "3.3.0":
-    folder: 3.x.x
-  "3.2.2":
     folder: 3.x.x

@@ -1,0 +1,7 @@
+sources:
+  "2.22":
+    url: "https://www.musicpd.org/download/libmpdclient/2/libmpdclient-2.22.tar.xz"
+    sha256: "eac15b82b5ba5ed0648af580221eb74657394f7fe768e966d9e9ebb27435429f"
+  "2.20":
+    url: "https://www.musicpd.org/download/libmpdclient/2/libmpdclient-2.20.tar.xz"
+    sha256: "18793f68e939c3301e34d8fcadea1f7daa24143941263cecadb80126194e277d"

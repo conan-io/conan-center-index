@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -16,6 +17,7 @@ class MariadbConnectorcConan(ConanFile):
     homepage = "https://mariadb.com/kb/en/mariadb-connector-c"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -53,23 +55,25 @@ class MariadbConnectorcConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_iconv"):
             self.requires("libiconv/1.17")
         if self.options.with_curl:
-            self.requires("libcurl/7.85.0")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
+        if Version(self.version) >= "3.3":
+            # INFO: https://mariadb.com/kb/en/mariadb-connector-c-330-release-notes
+            self.requires("zstd/1.5.5")
 
     def validate(self):
-        if self.info.settings.os != "Windows" and self.info.options.with_ssl == "schannel":
+        if self.settings.os != "Windows" and self.options.with_ssl == "schannel":
             raise ConanInvalidConfiguration("schannel only supported on Windows")
-        if self.info.options.with_ssl == "gnutls":
+        if self.options.with_ssl == "gnutls":
             raise ConanInvalidConfiguration("gnutls not yet available in CCI")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -92,6 +96,8 @@ class MariadbConnectorcConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
+        if Version(self.version) >= "3.3":
+            deps.set_property("zstd", "cmake_file_name", "ZSTD")
         deps.generate()
 
     def _patch_sources(self):
@@ -135,9 +141,7 @@ class MariadbConnectorcConan(ConanFile):
                 self.cpp_info.system_libs.append("secur32")
 
         plugin_dir = os.path.join(self.package_folder, "lib", "plugin").replace("\\", "/")
-        self.output.info(f"Prepending to MARIADB_PLUGIN_DIR runtime environment variable: {plugin_dir}")
         self.runenv_info.prepend_path("MARIADB_PLUGIN_DIR", plugin_dir)
 
-        # TODO: to remove in conan v2?
-        self.cpp_info.names["pkg_config"] = "libmariadb"
+        # TODO: to remove in conan v2
         self.env_info.MARIADB_PLUGIN_DIR.append(plugin_dir)

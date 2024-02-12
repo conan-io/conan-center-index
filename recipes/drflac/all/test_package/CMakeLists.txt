@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.8)
 project(test_package LANGUAGES C)
 
 find_package(drflac CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} drflac::drflac)
-set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 99)
+target_link_libraries(${PROJECT_NAME} PRIVATE drflac::drflac)
+target_compile_features(${PROJECT_NAME} PRIVATE c_std_99)

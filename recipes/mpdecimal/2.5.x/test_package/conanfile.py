@@ -1,19 +1,24 @@
-import os
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.build import can_run, build_jobs
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+    generators = "VirtualRunEnv", "CMakeToolchain", "CMakeDeps"
+    test_type = "explicit"
+
+    def layout(self):
+        cmake_layout(self)
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["MPDECIMAL_CXX"] = self.options["mpdecimal"].cxx
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            self.run("{} 13 100".format(os.path.join("bin", "test_package")), run_environment=True)
-            if self.options["mpdecimal"].cxx:
-                self.run("{} 13 100".format(os.path.join("bin", "test_package_cpp")), run_environment=True)
+        if can_run(self):
+            self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {build_jobs(self)}", env="conanrun")

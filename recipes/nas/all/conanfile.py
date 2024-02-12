@@ -2,7 +2,8 @@ from conan import ConanFile
 
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
-from conan.tools.files import chdir, get, download, export_conandata_patches, apply_conandata_patches, rm, copy
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import chdir, get, export_conandata_patches, apply_conandata_patches, rm, copy, load, save
 from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
 import os
 
@@ -16,7 +17,7 @@ class NasRecipe(ConanFile):
     topics = ("audio", "sound")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.radscan.com/nas.html"
-    license = "Unlicense"
+    license = "DocumentRef-wave.h:LicenseRef-MIT-advertising"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -42,6 +43,9 @@ class NasRecipe(ConanFile):
     def validate(self):
         if self.settings.os not in ("FreeBSD", "Linux"):
             raise ConanInvalidConfiguration("Recipe supports Linux only")
+        if self.settings.compiler == "clang":
+            # See https://github.com/conan-io/conan-center-index/pull/16267#issuecomment-1469824504
+            raise ConanInvalidConfiguration("Recipe cannot be built with clang")
 
     def requirements(self):
         self.requires("xorg/system")
@@ -53,11 +57,10 @@ class NasRecipe(ConanFile):
         self.tool_requires("xorg-cf-files/1.0.7")
         self.tool_requires("xorg-makedepend/1.0.6")
         self.tool_requires("xorg-gccmakedep/1.0.3")
+        self.tool_requires("gnu-config/cci.20210814")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0],  strip_root=True)
-        # This library does not come with a License file by itself, package it from an external source
-        download(self, filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     @property
     def _user_info_build(self):
@@ -70,9 +73,12 @@ class NasRecipe(ConanFile):
         deps = AutotoolsDeps(self)
         deps.generate()
 
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
+
     @property
     def _imake_irulesrc(self):
-        return self._user_info_build["xorg-cf-files"].CONFIG_PATH
+        return self.conf.get("user.xorg-cf-files:config-path")
 
     @property
     def _imake_defines(self):
@@ -85,14 +91,30 @@ class NasRecipe(ConanFile):
     def build(self):
         apply_conandata_patches(self)
 
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            if gnu_config:
+                config_folder = os.path.join(self.source_folder, "config")
+                copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=config_folder)
+
         with chdir(self, self.source_folder):
-            self.run("imake -DUseInstalled -I{} {}".format(self._imake_irulesrc, self._imake_defines), run_environment=True)
+            self.run("imake -DUseInstalled -I{} {}".format(self._imake_irulesrc, self._imake_defines), env="conanbuild")
             autotools = Autotools(self)
             # j1 avoids some errors while trying to run this target
             autotools.make(target="World", args=["-j1"] + self._imake_make_args)
 
+    def _extract_license(self):
+        header = "Copyright 1995"
+        footer = "Translation:  You can do whatever you want with this software!"
+        nas_audio = load(self, os.path.join(self.source_folder, "README"))
+        begin = nas_audio.find(header)
+        end = nas_audio.find(footer, begin)
+        return nas_audio[begin:end]
+
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
 
         tmp_install = os.path.join(self.build_folder, "prefix")
         self.output.warning(tmp_install)

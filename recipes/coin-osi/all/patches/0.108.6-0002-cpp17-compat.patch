@@ -1,0 +1,28 @@
+--- a/Osi/src/OsiCommonTest/OsiSolverInterfaceTest.cpp
++++ b/Osi/src/OsiCommonTest/OsiSolverInterfaceTest.cpp
+@@ -1317,8 +1317,9 @@ bool test16SebastianNowozin(OsiSolverInterface *si)
+   int rows_to_delete_arr[] = { 0 };
+   si->deleteRows(1, rows_to_delete_arr);
+ 
+-  std::transform(objective, objective + 4, objective,
+-    std::bind2nd(std::plus< double >(), 0.15));
++  for (int i = 0; i < 4; ++i) {
++    objective[i] += 0.15;
++  }
+   si->setObjective(objective);
+   si->resolve();
+   OSIUNITTEST_ASSERT_ERROR(si->isProvenOptimal(), return false, *si, "test16SebastianNowozin second resolve");
+--- a/Osi/test/OsiTestSolverInterface.cpp
++++ b/Osi/test/OsiTestSolverInterface.cpp
+@@ -464,8 +464,9 @@ OsiTestSolverInterface::resolve()
+   // Set the dual starting point
+   VOL_dvector& dsol = volprob_.dsol;
+   dsol.allocate(dsize);
+-  std::transform(rowprice_, rowprice_+dsize, dsol.v,
+-		 std::bind2nd(std::multiplies<double>(), objsense_));
++  for (int i = 0; i < dsize; ++i) {
++    dsol.v[i] = rowprice_[i] * objsense_;
++  }
+ 
+   // adjust the dual vector (if necessary) to be sure it's feasible
+   double * dv = dsol.v;

@@ -10,7 +10,7 @@ from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.54.0"
 
 
 class NettleConan(ConanFile):
@@ -20,6 +20,7 @@ class NettleConan(ConanFile):
     topics = ("crypto", "low-level-cryptographic", "cryptographic")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -49,30 +50,21 @@ class NettleConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.public_key:
-            self.requires("gmp/6.2.1")
+            self.requires("gmp/6.3.0")
 
     def validate(self):
         if is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.ref} cannot be built using '{self.info.settings.compiler}'")
-        if Version(self.version) < "3.6" and self.info.options.get_safe("fat") and self.info.settings.arch == "x86_64":
+            raise ConanInvalidConfiguration(f"{self.ref} cannot be built with Visual Studio")
+        if Version(self.version) < "3.6" and self.options.get_safe("fat") and self.settings.arch == "x86_64":
             raise ConanInvalidConfiguration("fat support is broken on this nettle release (due to a missing x86_64/sha_ni/sha1-compress.asm source)")
 
     @property
@@ -83,13 +75,18 @@ class NettleConan(ConanFile):
         self.tool_requires("libtool/2.4.7")
         if self._settings_build.os == "Windows":
             self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=bool):
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             "--enable-public-key" if self.options.public_key else "--disable-public-key",
@@ -100,11 +97,6 @@ class NettleConan(ConanFile):
         tc.generate()
         tc = AutotoolsDeps(self)
         tc.generate()
-        env = VirtualBuildEnv(self)
-        env.generate()
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
 
     def _patch_sources(self):
         makefile_in = os.path.join(self.source_folder, "Makefile.in")
@@ -121,19 +113,21 @@ class NettleConan(ConanFile):
         self._patch_sources()
         autotools = Autotools(self)
         autotools.autoreconf()
+        autotools.configure()
         # srcdir in unix path causes some troubles in asm files on Windows
         if self._settings_build.os == "Windows":
-            replace_in_file(self, os.path.join(self.build_folder, "config.m4"),
-                                  unix_path(self, os.path.join(self.build_folder, self.source_folder)),
-                                  os.path.join(self.build_folder, self.source_folder).replace("\\", "/"))
-        autotools.configure()
+            replace_in_file(
+                self,
+                os.path.join(self.build_folder, "config.m4"),
+                unix_path(self, self.source_folder),
+                self.source_folder.replace("\\", "/"),
+            )
         autotools.make()
 
     def package(self):
         copy(self, pattern="COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)

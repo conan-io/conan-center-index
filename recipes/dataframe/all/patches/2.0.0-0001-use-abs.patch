@@ -1,0 +1,37 @@
+diff --git b/cmake-add_runtime_destination.patch b/cmake-add_runtime_destination.patch
+new file mode 100644
+index 0000000..e69de29
+diff --git a/include/DataFrame/Utils/Utils.h b/include/DataFrame/Utils/Utils.h
+index 9f1f1f9..3bb3fde 100644
+--- a/include/DataFrame/Utils/Utils.h
++++ b/include/DataFrame/Utils/Utils.h
+@@ -234,17 +234,29 @@ template<>
+ inline auto
+ abs__<long long>(const long long &val)  { return (std::llabs(val)); }
+ 
++#ifdef __GNUC__
++template<>
++inline auto
++abs__<float>(const float &val)  { return (std::abs(val)); }
++#else
+ template<>
+ inline auto
+ abs__<float>(const float &val)  { return (std::fabsf(val)); }
++#endif
+ 
+ template<>
+ inline auto
+ abs__<double>(const double &val)  { return (std::fabs(val)); }
+ 
++#ifdef __GNUC__
++template<>
++inline auto
++abs__<long double>(const long double &val)  { return (std::abs(val)); }
++#else
+ template<>
+ inline auto
+ abs__<long double>(const long double &val)  { return (std::fabsl(val)); }
++#endif
+ 
+ // ----------------------------------------------------------------------------
+ 

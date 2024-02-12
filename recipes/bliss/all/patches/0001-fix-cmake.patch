@@ -1,6 +1,6 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -14,17 +14,11 @@ if (MSVC)
+@@ -14,17 +14,12 @@ if (MSVC)
      add_compile_options(/permissive-)
  else()
      # Warnings, optimization, no assertions
@@ -15,7 +15,8 @@
 -  else()
 -    add_compile_options(-DBLISS_USE_GMP -I${GMP_INCLUDE_DIR})
 -  endif()
-+  link_libraries(${CONAN_LIBS})
++  find_package(gmp REQUIRED CONFIG)
++  link_libraries(gmp::gmp)
 +  add_definitions(-DBLISS_USE_GMP)
  endif(USE_GMP)
  

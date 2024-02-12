@@ -17,7 +17,8 @@ class Sol2Conan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ThePhD/sol2"
-    topics = ("lua", "c++", "bindings", "scripting")
+    topics = ("lua", "c++", "bindings", "scripting", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -66,7 +67,7 @@ class Sol2Conan(ConanFile):
                 # v2.x.x & v3.0.x supports up to Lua 5.3
                 self.requires("lua/5.3.6")
             else:
-                self.requires("lua/5.4.4")
+                self.requires("lua/5.4.6")
         elif self.options.with_lua == "luajit":
             self.requires("luajit/2.1.0-beta3")
 

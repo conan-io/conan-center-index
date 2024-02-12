@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index db6eb04..b319d33 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,8 +9,8 @@ set(CubicInterpolation_VERSION ${CubicInterpolation_VERSION_MAJOR}.${CubicInterp
+ 
+ set(CMAKE_CXX_STANDARD 14)
+ 
+-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+-conan_basic_setup(TARGETS)
++find_package(Eigen3 REQUIRED)
++find_package(Boost COMPONENTS filesystem serialization REQUIRED)
+ 
+ add_subdirectory(src)
+ 

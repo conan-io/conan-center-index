@@ -1,4 +1,13 @@
 sources:
+  "6.5.9":
+    url: "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.5.9.tar.gz"
+    sha256: "3c269612220746ba87dc9063bec2afcb2df04b4fdaa9f7e1f67751284966cf37"
+  "5.19.9":
+    url: "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.19.9.tar.gz"
+    sha256: "1f01b0ee846547737793103f23cc46a382e4694e7728e8cb8c48ea51a2bb7a8d"
+  "5.15.128":
+    url: "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.128.tar.gz"
+    sha256: "4ce1331bb3877bc92581ec5faff76d63d19e7b1fa174acdda1f5cba4a8f2abf7"
   "5.14.9":
     url: "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.14.9.tar.gz"
     sha256: "b5cd37e6d193c8f6a98e41ce6f9d97260d178e0a3cfc43d7ff684f67c6c25f29"

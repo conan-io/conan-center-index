@@ -20,11 +20,11 @@ disable=fixme,
 
 enable=conan-bad-name,
        conan-missing-name,
-       conan-import-conanfile
+       conan-import-conanfile,
+       conan-forced-version
 
 [REPORTS]
 evaluation=max(0, 0 if fatal else 10.0 - ((float(5 * error) / statement) * 10))
 output-format=text
 reports=no
 score=no
-

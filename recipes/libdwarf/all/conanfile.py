@@ -14,6 +14,7 @@ class LibdwarfConan(ConanFile):
     homepage = "https://www.prevanders.net/dwarf.html"
     topics = ("debug", "dwarf", "dwarf2", "elf")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -46,8 +47,9 @@ class LibdwarfConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libelf/0.8.13")
-        self.requires("zlib/1.2.13")
+        if self.options.with_dwarfgen or self.version == "20191104":
+            self.requires("libelf/0.8.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -103,4 +105,4 @@ class LibdwarfConan(ConanFile):
             self.env_info.PATH.append(bindir)
 
             if self.version != "20191104":
-                self.cpp_info.libs.append = ["dwarfp"]
+                self.cpp_info.libs.append("dwarfp")

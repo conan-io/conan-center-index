@@ -15,6 +15,8 @@ class GFortranConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
     short_paths = True
+    
+    deprecated = "gcc"
 
     def validate(self):
         if self.settings.arch != "x86_64":
@@ -24,7 +26,7 @@ class GFortranConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os == "Windows":
-            self.tool_requires("7zip/19.00")
+            self.tool_requires("7zip/22.01")
 
     def build(self):
         if self.settings.os == "Windows":

@@ -14,6 +14,7 @@ class TslOrderedMapConan(ConanFile):
     topics = ("ordered-map", "structure", "hash map", "hash set")
     homepage = "https://github.com/Tessil/ordered-map"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -28,8 +29,7 @@ class TslOrderedMapConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -43,7 +43,6 @@ class TslOrderedMapConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "tsl::ordered_map")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "tsl-ordered-map"
@@ -55,4 +54,3 @@ class TslOrderedMapConan(ConanFile):
         self.cpp_info.components["ordered_map"].set_property("cmake_target_name", "tsl::ordered_map")
         self.cpp_info.components["ordered_map"].bindirs = []
         self.cpp_info.components["ordered_map"].libdirs = []
-        self.cpp_info.components["ordered_map"].resdirs = []

@@ -1,0 +1,12 @@
+diff --git a/source/cache/filecache.cpp b/source/cache/filecache.cpp
+index 0c22f50..2bfb3a1 100644
+--- a/source/cache/filecache.cpp
++++ b/source/cache/filecache.cpp
+@@ -7,6 +7,7 @@
+ */
+ 
+ #include "cache/filecache.h"
++#include <mutex>
+ 
+ namespace CppCommon {
+ 

@@ -7,7 +7,7 @@ from conan.tools.layout import basic_layout
 import os
 
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibPciAccessConan(ConanFile):
@@ -18,6 +18,7 @@ class LibPciAccessConan(ConanFile):
     homepage = "https://gitlab.freedesktop.org/xorg/lib/libpciaccess"
     license = "MIT", "X11"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -34,15 +35,12 @@ class LibPciAccessConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         def is_supported(settings):
@@ -53,22 +51,19 @@ class LibPciAccessConan(ConanFile):
             raise ConanInvalidConfiguration("Unsupported architecture.")
 
     def build_requirements(self):
-        self.tool_requires("libtool/2.4.6")
-        self.tool_requires("pkgconf/1.7.4")
+        self.tool_requires("libtool/2.4.7")
         self.tool_requires("xorg-macros/1.19.3")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
-        get(self, **self.conan_data["sources"][str(self.version)],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        ms = VirtualBuildEnv(self)
+        ms.generate()
         tc = AutotoolsToolchain(self)
         tc.generate()
-        ms = VirtualBuildEnv(self)
-        ms.generate(scope="build")
 
     def build(self):
         autotools = Autotools(self)

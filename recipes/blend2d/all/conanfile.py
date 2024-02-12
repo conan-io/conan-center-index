@@ -2,10 +2,11 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 from conan.tools.microsoft import check_min_vs
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class Blend2dConan(ConanFile):
@@ -15,14 +16,17 @@ class Blend2dConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://blend2d.com/"
     topics = ("2d-graphics", "rasterization", "asmjit", "jit")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_jit": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_jit": True,
     }
 
     def export_sources(self):
@@ -34,27 +38,26 @@ class Blend2dConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("asmjit/cci.20221111")
+        if self.options.with_jit:
+            self.requires("asmjit/cci.20230325")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
-        # In Visual Studio < 16, there are compilation error. patch is already provided.
-        # https://github.com/blend2d/blend2d/commit/63db360c7eb2c1c3ca9cd92a867dbb23dc95ca7d
-        check_min_vs(self, 192)
+        if Version(self.version) < "0.8":
+            # In Visual Studio < 16, there are compilation error. patch is already provided.
+            # https://github.com/blend2d/blend2d/commit/63db360c7eb2c1c3ca9cd92a867dbb23dc95ca7d
+            check_min_vs(self, 192)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -68,6 +71,7 @@ class Blend2dConan(ConanFile):
             tc.variables["CMAKE_CXX_STANDARD"] = 11
         if not self.options.shared:
             tc.preprocessor_definitions["BL_STATIC"] = "1"
+        tc.variables["BLEND2D_NO_JIT"] = not self.options.with_jit
         tc.generate()
 
         deps = CMakeDeps(self)

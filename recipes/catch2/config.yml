@@ -1,4 +1,14 @@
 versions:
+  "3.5.2":
+    folder: 3.x.x
+  "3.5.1":
+    folder: 3.x.x
+  "3.5.0":
+    folder: 3.x.x
+  "3.4.0":
+    folder: 3.x.x
+  "3.3.2":
+    folder: 3.x.x
   "3.3.1":
     folder: 3.x.x
   "3.3.0":
@@ -11,6 +21,8 @@ versions:
     folder: 3.x.x
   "3.0.1":
     folder: 3.x.x
+  "2.13.10":
+    folder: 2.x.x
   "2.13.9":
     folder: 2.x.x
   "2.13.8":

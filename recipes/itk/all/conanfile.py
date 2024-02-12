@@ -1,20 +1,25 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
+from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import glob
 import os
 import textwrap
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.53.0"
 
 
 class ITKConan(ConanFile):
     name = "itk"
-    topics = ("itk", "scientific", "image", "processing")
-    homepage = "http://www.itk.org/"
-    url = "https://github.com/conan-io/conan-center-index"
+    description = "Open-source, cross-platform toolkit for N-dimensional scientific image processing, segmentation, and registration"
     license = "Apache-2.0"
-    description = "Insight Segmentation and Registration Toolkit"
-
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "http://www.itk.org/"
+    topics = ("medical-imaging", "scientific", "image", "processing")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -26,57 +31,13 @@ class ITKConan(ConanFile):
     }
 
     short_paths = True
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    # TODO: Some packages can be added as optional, but they are not in CCI:
-    # - mkl
-    # - vtk
-    # - opencv
-
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
-    def requirements(self):
-        self.requires("dcmtk/3.6.6")
-        self.requires("double-conversion/3.2.0")
-        self.requires("eigen/3.4.0")
-        self.requires("expat/2.4.8")
-        self.requires("fftw/3.3.9")
-        self.requires("gdcm/3.0.9")
-        self.requires("hdf5/1.12.0")
-        self.requires("icu/71.1") # TODO: to remove? Seems to be a transitivie dependency through dcmtk
-        self.requires("libjpeg/9d")
-        self.requires("libpng/1.6.37")
-        self.requires("libtiff/4.3.0")
-        self.requires("openjpeg/2.4.0")
-        self.requires("onetbb/2020.3")
-        self.requires("zlib/1.2.12")
-
-    @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 11
 
     @property
-    def _minimum_compilers_version(self):
+    def _compilers_minimum_version(self):
         return {
             "Visual Studio": "14",
             "gcc": "4.8.1",
@@ -84,219 +45,232 @@ class ITKConan(ConanFile):
             "apple-clang": "9",
         }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+        copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        # TODO: Some packages can be added as optional, but they are not in CCI:
+        # - mkl
+        # - vtk
+        # - opencv
+        #todo: enable after fixing dcmtk compatibility with openssl on Windows
+        #self.requires("dcmtk/3.6.7")
+        self.requires("double-conversion/3.3.0")
+        self.requires("eigen/3.4.0")
+        self.requires("expat/2.5.0")
+        self.requires("fftw/3.3.10")
+        self.requires("gdcm/3.0.21")
+        self.requires("hdf5/1.14.1")
+        self.requires("libjpeg/9e")
+        self.requires("libpng/1.6.40")
+        self.requires("libtiff/4.5.1")
+        self.requires("openjpeg/2.5.0")
+        self.requires("onetbb/2021.9.0")
+        self.requires("zlib/[>=1.2.11 <2]")
+
     def validate(self):
-        if self.options.shared and not self.options["hdf5"].shared:
+        if self.options.shared and not self.dependencies["hdf5"].options.shared:
             raise ConanInvalidConfiguration("When building a shared itk, hdf5 needs to be shared too (or not linked to by the consumer).\n"
                                             "This is because H5::DataSpace::ALL might get initialized twice, which will cause a H5::DataSpaceIException to be thrown).")
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
-        else:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
-
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        check_min_vs(self, 190)
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+    def generate(self):
+        tc = CMakeToolchain(self)
+        #call find_package on top level
+        tc.cache_variables["CMAKE_PROJECT_ITK_INCLUDE"] = os.path.join(self.source_folder, "conan_cmake_project_include.cmake")
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["BUILD_DOCUMENTATION"] = False
+        tc.variables["ITK_SKIP_PATH_LENGTH_CHECKS"] = True
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["BUILD_DOCUMENTATION"] = False
-        self._cmake.definitions["ITK_SKIP_PATH_LENGTH_CHECKS"] = True
-
-        self._cmake.definitions["ITK_USE_SYSTEM_LIBRARIES"] = True
-        self._cmake.definitions["ITK_USE_SYSTEM_DCMTK"] = True
-        self._cmake.definitions["ITK_USE_SYSTEM_DOUBLECONVERSION"] = True
-        self._cmake.definitions["ITK_USE_SYSTEM_EIGEN"] = True
-        self._cmake.definitions["ITK_USE_SYSTEM_FFTW"] = True
-        self._cmake.definitions["ITK_USE_SYSTEM_GDCM"] = True
-        self._cmake.definitions["ITK_USE_SYSTEM_HDF5"] = True
-        self._cmake.definitions["ITK_USE_SYSTEM_ICU"] = True
-        self._cmake.definitions["ITK_USE_SYSTEM_JPEG"] = True
-        self._cmake.definitions["ITK_USE_SYSTEM_PNG"] = True
-        self._cmake.definitions["ITK_USE_SYSTEM_TIFF"] = True
-        self._cmake.definitions["ITK_USE_SYSTEM_ZLIB"] = True
+        tc.variables["ITK_USE_SYSTEM_LIBRARIES"] = True
+        tc.variables["ITK_USE_SYSTEM_DCMTK"] = True
+        tc.variables["ITK_USE_SYSTEM_DOUBLECONVERSION"] = True
+        tc.variables["ITK_USE_SYSTEM_EIGEN"] = True
+        tc.variables["ITK_USE_SYSTEM_FFTW"] = True
+        tc.variables["ITK_USE_SYSTEM_GDCM"] = True
+        tc.variables["ITK_USE_SYSTEM_HDF5"] = True
+        tc.variables["ITK_USE_SYSTEM_ICU"] = True
+        tc.variables["ITK_USE_SYSTEM_JPEG"] = True
+        tc.variables["ITK_USE_SYSTEM_PNG"] = True
+        tc.variables["ITK_USE_SYSTEM_TIFF"] = True
+        tc.variables["ITK_USE_SYSTEM_ZLIB"] = True
 
         # FIXME: Missing Kwiml recipe
-        self._cmake.definitions["ITK_USE_SYSTEM_KWIML"] = False
+        tc.variables["ITK_USE_SYSTEM_KWIML"] = False
         # FIXME: Missing VXL recipe
-        self._cmake.definitions["ITK_USE_SYSTEM_VXL"] = False
-        self._cmake.definitions["GDCM_USE_SYSTEM_OPENJPEG"] = True
+        tc.variables["ITK_USE_SYSTEM_VXL"] = False
+        tc.variables["GDCM_USE_SYSTEM_OPENJPEG"] = True
 
-        self._cmake.definitions["ITK_BUILD_DEFAULT_MODULES"] = False
-        self._cmake.definitions["Module_ITKDeprecated"] = False
-        self._cmake.definitions["Module_ITKMINC"] = False
-        self._cmake.definitions["Module_ITKIOMINC"] = False
+        tc.variables["ITK_BUILD_DEFAULT_MODULES"] = False
+        tc.variables["Module_ITKDeprecated"] = False
+        tc.variables["Module_ITKMINC"] = False
+        tc.variables["Module_ITKIOMINC"] = False
 
-        self._cmake.definitions["Module_ITKVideoBridgeOpenCV"] = False
+        tc.variables["Module_ITKVideoBridgeOpenCV"] = False
 
-        self._cmake.definitions["Module_ITKDCMTK"] = True
-        self._cmake.definitions["Module_ITKIODCMTK"] = True
-        self._cmake.definitions["Module_ITKIOHDF5"] = True
-        self._cmake.definitions["Module_ITKIOTransformHDF5"] = False
-        self._cmake.definitions["Module_ITKAnisotropicSmoothing"] = True
-        self._cmake.definitions["Module_ITKAntiAlias"] = True
-        self._cmake.definitions["Module_ITKBiasCorrection"] = True
-        self._cmake.definitions["Module_ITKBinaryMathematicalMorphology"] = True
-        self._cmake.definitions["Module_ITKBioCell"] = True
-        self._cmake.definitions["Module_ITKClassifiers"] = True
-        self._cmake.definitions["Module_ITKColormap"] = True
-        self._cmake.definitions["Module_ITKConnectedComponents"] = True
-        self._cmake.definitions["Module_ITKConvolution"] = True
-        self._cmake.definitions["Module_ITKCurvatureFlow"] = True
-        self._cmake.definitions["Module_ITKDeconvolution"] = True
-        self._cmake.definitions["Module_ITKDeformableMesh"] = True
-        self._cmake.definitions["Module_ITKDenoising"] = True
-        self._cmake.definitions["Module_ITKDiffusionTensorImage"] = True
-        self._cmake.definitions["Module_ITKDisplacementField"] = True
-        self._cmake.definitions["Module_ITKDistanceMap"] = True
-        self._cmake.definitions["Module_ITKEigen"] = True
-        self._cmake.definitions["Module_ITKFEM"] = True
-        self._cmake.definitions["Module_ITKFEMRegistration"] = True
-        self._cmake.definitions["Module_ITKFFT"] = True
-        self._cmake.definitions["Module_ITKFastMarching"] = True
-        self._cmake.definitions["Module_ITKGIFTI"] = True
-        self._cmake.definitions["Module_ITKGPUAnisotropicSmoothing"] = True
-        self._cmake.definitions["Module_ITKGPUImageFilterBase"] = True
-        self._cmake.definitions["Module_ITKGPUPDEDeformableRegistration"] = True
-        self._cmake.definitions["Module_ITKGPURegistrationCommon"] = True
-        self._cmake.definitions["Module_ITKGPUSmoothing"] = True
-        self._cmake.definitions["Module_ITKGPUThresholding"] = True
-        self._cmake.definitions["Module_ITKIOCSV"] = True
-        self._cmake.definitions["Module_ITKIOGE"] = True
-        self._cmake.definitions["Module_ITKIOIPL"] = True
-        self._cmake.definitions["Module_ITKIOMesh"] = True
-        self._cmake.definitions["Module_ITKIOPhilipsREC"] = True
-        self._cmake.definitions["Module_ITKIORAW"] = True
-        self._cmake.definitions["Module_ITKIOSiemens"] = True
-        self._cmake.definitions["Module_ITKIOSpatialObjects"] = True
-        self._cmake.definitions["Module_ITKIOTransformBase"] = True
-        self._cmake.definitions["Module_ITKIOTransformInsightLegacy"] = True
-        self._cmake.definitions["Module_ITKIOTransformMatlab"] = True
-        self._cmake.definitions["Module_ITKIOXML"] = True
-        self._cmake.definitions["Module_ITKImageCompare"] = True
-        self._cmake.definitions["Module_ITKImageCompose"] = True
-        self._cmake.definitions["Module_ITKImageFeature"] = True
-        self._cmake.definitions["Module_ITKImageFusion"] = True
-        self._cmake.definitions["Module_ITKImageGradient"] = True
-        self._cmake.definitions["Module_ITKImageGrid"] = True
-        self._cmake.definitions["Module_ITKImageIntensity"] = True
-        self._cmake.definitions["Module_ITKImageLabel"] = True
-        self._cmake.definitions["Module_ITKImageSources"] = True
-        self._cmake.definitions["Module_ITKImageStatistics"] = True
-        self._cmake.definitions["Module_ITKIntegratedTest"] = True
-        self._cmake.definitions["Module_ITKKLMRegionGrowing"] = True
-        self._cmake.definitions["Module_ITKLabelMap"] = True
-        self._cmake.definitions["Module_ITKLabelVoting"] = True
-        self._cmake.definitions["Module_ITKLevelSets"] = True
-        self._cmake.definitions["Module_ITKLevelSetsv4"] = True
-        self._cmake.definitions["Module_ITKMarkovRandomFieldsClassifiers"] = True
-        self._cmake.definitions["Module_ITKMathematicalMorphology"] = True
-        self._cmake.definitions["Module_ITKMetricsv4"] = True
-        self._cmake.definitions["Module_ITKNarrowBand"] = True
-        self._cmake.definitions["Module_ITKNeuralNetworks"] = True
-        self._cmake.definitions["Module_ITKOptimizers"] = True
-        self._cmake.definitions["Module_ITKOptimizersv4"] = True
-        self._cmake.definitions["Module_ITKPDEDeformableRegistration"] = True
-        self._cmake.definitions["Module_ITKPath"] = True
-        self._cmake.definitions["Module_ITKPolynomials"] = True
-        self._cmake.definitions["Module_ITKQuadEdgeMeshFiltering"] = True
-        self._cmake.definitions["Module_ITKRegionGrowing"] = True
-        self._cmake.definitions["Module_ITKRegistrationCommon"] = True
-        self._cmake.definitions["Module_ITKRegistrationMethodsv4"] = True
-        self._cmake.definitions["Module_ITKReview"] = True
-        self._cmake.definitions["Module_ITKSignedDistanceFunction"] = True
-        self._cmake.definitions["Module_ITKSmoothing"] = True
-        self._cmake.definitions["Module_ITKSpatialFunction"] = True
-        self._cmake.definitions["Module_ITKTBB"] = True
-        self._cmake.definitions["Module_ITKThresholding"] = True
-        self._cmake.definitions["Module_ITKVideoCore"] = True
-        self._cmake.definitions["Module_ITKVideoFiltering"] = True
-        self._cmake.definitions["Module_ITKVideoIO"] = False
-        self._cmake.definitions["Module_ITKVoronoi"] = True
-        self._cmake.definitions["Module_ITKWatersheds"] = True
-        self._cmake.definitions["Module_ITKDICOMParser"] = True
+        #todo: enable after fixing dcmtk compatibility with openssl on Windows
+        tc.variables["Module_ITKDCMTK"] = False
+        tc.variables["Module_ITKIODCMTK"] = False
 
-        self._cmake.definitions["Module_ITKVTK"] = False
-        self._cmake.definitions["Module_ITKVtkGlue"] = False
+        tc.variables["Module_ITKIOHDF5"] = True
+        tc.variables["Module_ITKIOTransformHDF5"] = False
+        tc.variables["Module_ITKAnisotropicSmoothing"] = True
+        tc.variables["Module_ITKAntiAlias"] = True
+        tc.variables["Module_ITKBiasCorrection"] = True
+        tc.variables["Module_ITKBinaryMathematicalMorphology"] = True
+        tc.variables["Module_ITKBioCell"] = True
+        tc.variables["Module_ITKClassifiers"] = True
+        tc.variables["Module_ITKColormap"] = True
+        tc.variables["Module_ITKConnectedComponents"] = True
+        tc.variables["Module_ITKConvolution"] = True
+        tc.variables["Module_ITKCurvatureFlow"] = True
+        tc.variables["Module_ITKDeconvolution"] = True
+        tc.variables["Module_ITKDeformableMesh"] = True
+        tc.variables["Module_ITKDenoising"] = True
+        tc.variables["Module_ITKDiffusionTensorImage"] = True
+        tc.variables["Module_ITKDisplacementField"] = True
+        tc.variables["Module_ITKDistanceMap"] = True
+        tc.variables["Module_ITKEigen"] = True
+        tc.variables["Module_ITKFEM"] = True
+        tc.variables["Module_ITKFEMRegistration"] = True
+        tc.variables["Module_ITKFFT"] = True
+        tc.variables["Module_ITKFastMarching"] = True
+        tc.variables["Module_ITKGIFTI"] = True
+        tc.variables["Module_ITKGPUAnisotropicSmoothing"] = True
+        tc.variables["Module_ITKGPUImageFilterBase"] = True
+        tc.variables["Module_ITKGPUPDEDeformableRegistration"] = True
+        tc.variables["Module_ITKGPURegistrationCommon"] = True
+        tc.variables["Module_ITKGPUSmoothing"] = True
+        tc.variables["Module_ITKGPUThresholding"] = True
+        tc.variables["Module_ITKIOCSV"] = True
+        tc.variables["Module_ITKIOGE"] = True
+        tc.variables["Module_ITKIOIPL"] = True
+        tc.variables["Module_ITKIOMesh"] = True
+        tc.variables["Module_ITKIOPhilipsREC"] = True
+        tc.variables["Module_ITKIORAW"] = True
+        tc.variables["Module_ITKIOSiemens"] = True
+        tc.variables["Module_ITKIOSpatialObjects"] = True
+        tc.variables["Module_ITKIOTransformBase"] = True
+        tc.variables["Module_ITKIOTransformInsightLegacy"] = True
+        tc.variables["Module_ITKIOTransformMatlab"] = True
+        tc.variables["Module_ITKIOXML"] = True
+        tc.variables["Module_ITKImageCompare"] = True
+        tc.variables["Module_ITKImageCompose"] = True
+        tc.variables["Module_ITKImageFeature"] = True
+        tc.variables["Module_ITKImageFusion"] = True
+        tc.variables["Module_ITKImageGradient"] = True
+        tc.variables["Module_ITKImageGrid"] = True
+        tc.variables["Module_ITKImageIntensity"] = True
+        tc.variables["Module_ITKImageLabel"] = True
+        tc.variables["Module_ITKImageSources"] = True
+        tc.variables["Module_ITKImageStatistics"] = True
+        tc.variables["Module_ITKIntegratedTest"] = True
+        tc.variables["Module_ITKKLMRegionGrowing"] = True
+        tc.variables["Module_ITKLabelMap"] = True
+        tc.variables["Module_ITKLabelVoting"] = True
+        tc.variables["Module_ITKLevelSets"] = True
+        tc.variables["Module_ITKLevelSetsv4"] = True
+        tc.variables["Module_ITKMarkovRandomFieldsClassifiers"] = True
+        tc.variables["Module_ITKMathematicalMorphology"] = True
+        tc.variables["Module_ITKMetricsv4"] = True
+        tc.variables["Module_ITKNarrowBand"] = True
+        tc.variables["Module_ITKNeuralNetworks"] = True
+        tc.variables["Module_ITKOptimizers"] = True
+        tc.variables["Module_ITKOptimizersv4"] = True
+        tc.variables["Module_ITKPDEDeformableRegistration"] = True
+        tc.variables["Module_ITKPath"] = True
+        tc.variables["Module_ITKPolynomials"] = True
+        tc.variables["Module_ITKQuadEdgeMeshFiltering"] = True
+        tc.variables["Module_ITKRegionGrowing"] = True
+        tc.variables["Module_ITKRegistrationCommon"] = True
+        tc.variables["Module_ITKRegistrationMethodsv4"] = True
+        tc.variables["Module_ITKReview"] = True
+        tc.variables["Module_ITKSignedDistanceFunction"] = True
+        tc.variables["Module_ITKSmoothing"] = True
+        tc.variables["Module_ITKSpatialFunction"] = True
+        tc.variables["Module_ITKTBB"] = True
+        tc.variables["Module_ITKThresholding"] = True
+        tc.variables["Module_ITKVideoCore"] = True
+        tc.variables["Module_ITKVideoFiltering"] = True
+        tc.variables["Module_ITKVideoIO"] = False
+        tc.variables["Module_ITKVoronoi"] = True
+        tc.variables["Module_ITKWatersheds"] = True
+        tc.variables["Module_ITKDICOMParser"] = True
+
+        tc.variables["Module_ITKVTK"] = False
+        tc.variables["Module_ITKVtkGlue"] = False
 
         # Disabled on Linux (link errors)
-        self._cmake.definitions["Module_ITKLevelSetsv4Visualization"] = False
+        tc.variables["Module_ITKLevelSetsv4Visualization"] = False
 
         # Disabled because Vxl vidl is not built anymore
-        self._cmake.definitions["Module_ITKVideoBridgeVXL"] = False
+        tc.variables["Module_ITKVideoBridgeVXL"] = False
 
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+        tc.generate()
+
+        tc = CMakeDeps(self)
+        tc.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        #The CMake policy CMP0091 must be NEW, but is ''
+        replace_in_file(self,
+                        os.path.join(self.source_folder, "Modules", "ThirdParty", "VNL", "src", "vxl", "config", "cmake", "config", "VXLIntrospectionConfig.cmake"),
+                        "-DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}",
+                        "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}")
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
-    def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, self._cmake_module_dir, "Modules"))
-        # Do not remove UseITK.cmake and *.h.in files
-        for cmake_file in glob.glob(os.path.join(self.package_folder, self._cmake_module_dir, "*.cmake")):
-            if os.path.basename(cmake_file) != "UseITK.cmake":
-                os.remove(cmake_file)
-
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {target:"ITK::{}".format(target) for target in self._itk_components.keys()},
-        )
-
-    @staticmethod
-    def _create_cmake_module_alias_targets(module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """.format(alias=alias, aliased=aliased))
-        tools.save(module_file, content)
-
     @property
-    def _module_file_rel_path(self):
-        return os.path.join(self._cmake_module_dir, "conan-official-{}-targets.cmake".format(self.name))
+    def _itk_subdir(self):
+        v = Version(self.version)
+        return f"ITK-{v.major}.{v.minor}"
 
     @property
     def _cmake_module_dir(self):
         return os.path.join("lib", "cmake", self._itk_subdir)
 
     @property
-    def _itk_subdir(self):
-        v = tools.Version(self.version)
-        return "ITK-{}.{}".format(v.major, v.minor)
+    def _module_file_rel_path(self):
+        return os.path.join(self._cmake_module_dir, f"conan-official-{self.name}-targets.cmake")
 
     @property
     def _itk_components(self):
         def libm():
             return ["m"] if self.settings.os in ["Linux", "FreeBSD"] else []
+        def libdl():
+            return ["dl"] if self.settings.os in ["Linux", "FreeBSD"] else []
 
         return {
-            "itksys": {},
+            "itksys": {"system_libs": libdl()},
             "itkvcl": {"system_libs": libm()},
             "itkv3p_netlib": {"system_libs": libm()},
             "itkvnl": {"requires": ["itkvcl"]},
@@ -386,7 +360,8 @@ class ITKConan(ConanFile):
             "ITKIOBMP": {"requires": ["ITKIOImageBase"]},
             "ITKIOBioRad": {"requires": ["ITKIOImageBase"]},
             "ITKIOCSV": {"requires": ["ITKIOImageBase"]},
-            "ITKIODCMTK": {"requires": ["ITKIOImageBase", "dcmtk::dcmtk", "icu::icu"]},
+            #todo: enable after fixing dcmtk compatibility with openssl on Windows
+            #"ITKIODCMTK": {"requires": ["ITKIOImageBase", "dcmtk::dcmtk"]},
             "ITKIOGDCM": {"requires": ["ITKCommon", "ITKIOImageBase", "gdcm::gdcmDICT", "gdcm::gdcmMSFF"]},
             "ITKIOIPL": {"requires": ["ITKIOImageBase"]},
             "ITKIOGE": {"requires": ["ITKIOIPL", "ITKIOImageBase"]},
@@ -477,32 +452,58 @@ class ITKConan(ConanFile):
             "ITKVideoCore": {"requires": ["ITKCommon"]},
         }
 
+    def _create_cmake_module_alias_targets(self):
+        targets = {target:f"ITK::{target}" for target in self._itk_components.keys()}
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent(f"""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """)
+        save(self, os.path.join(self.package_folder, self._module_file_rel_path), content)
+
+    def package(self):
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
+        cmake.install()
+
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, self._cmake_module_dir, "Modules"))
+        # Do not remove UseITK.cmake and *.h.in files
+        for cmake_file in glob.glob(os.path.join(self.package_folder, self._cmake_module_dir, "*.cmake")):
+            if os.path.basename(cmake_file) != "UseITK.cmake":
+                os.remove(cmake_file)
+        self._create_cmake_module_alias_targets()
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ITK")
         self.cpp_info.set_property("cmake_build_modules", [os.path.join(self._cmake_module_dir, "UseITK.cmake")])
 
-        itk_version = tools.Version(self.version)
-        lib_suffix = "-{}.{}".format(itk_version.major, itk_version.minor)
+        itk_version = Version(self.version)
+        lib_suffix = f"-{itk_version.major}.{itk_version.minor}"
 
         for name, values in self._itk_components.items():
             is_header_only = values.get("header_only", False)
             system_libs = values.get("system_libs", [])
             requires = values.get("requires", [])
             self.cpp_info.components[name].set_property("cmake_target_name", name)
+            self.cpp_info.components[name].set_property("cmake_target_aliases", [f"ITK::{name}"])
             self.cpp_info.components[name].builddirs.append(self._cmake_module_dir)
             self.cpp_info.components[name].includedirs.append(os.path.join("include", self._itk_subdir))
             if not is_header_only:
-                self.cpp_info.components[name].libs = ["{}{}".format(name, lib_suffix)]
+                self.cpp_info.components[name].libs = [f"{name}{lib_suffix}"]
             self.cpp_info.components[name].system_libs = system_libs
             self.cpp_info.components[name].requires = requires
 
             # TODO: to remove in conan v2 once cmake_find_package* generators removed
-            self.cpp_info.components[name].names["cmake_find_package"] = name
-            self.cpp_info.components[name].names["cmake_find_package_multi"] = name
-            self.cpp_info.components[name].build_modules.append(os.path.join(self._cmake_module_dir, "UseITK.cmake"))
-            self.cpp_info.components[name].build_modules["cmake_find_package"].append(self._module_file_rel_path)
-            self.cpp_info.components[name].build_modules["cmake_find_package_multi"].append(self._module_file_rel_path)
+            for generator in ["cmake_find_package", "cmake_find_package_multi"]:
+                self.cpp_info.components[name].names[generator] = name
+                self.cpp_info.components[name].build_modules[generator].append(self._module_file_rel_path)
+                self.cpp_info.components[name].build_modules[generator].append(os.path.join(self._cmake_module_dir, "UseITK.cmake"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "ITK"
-        self.cpp_info.names["cmake_find_package_multi"] = "ITK"
+        for generator in ["cmake_find_package", "cmake_find_package_multi"]:
+            self.cpp_info.names[generator] = "ITK"

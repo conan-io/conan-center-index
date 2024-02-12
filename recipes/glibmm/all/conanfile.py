@@ -2,7 +2,7 @@ import os
 import glob
 import shutil
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
@@ -32,10 +32,17 @@ class GlibmmConan(ConanFile):
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
     description = "glibmm is a C++ API for parts of glib that are useful for C++."
-    topics = ["glibmm", "giomm"]
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    topics = ("giomm",)
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
     short_paths = True
 
     @property
@@ -61,21 +68,18 @@ class GlibmmConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if self.options.shared:
-            self.options["glib"].shared = True
+            wildcard = "" if Version(conan_version) < "2.0.0" else "/*"
+            self.options[f"glib{wildcard}"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.75.2")
+        self.requires("glib/2.78.0", transitive_headers=True)
         if self._abi_version == "2.68":
-            self.requires("libsigcpp/3.0.7")
+            self.requires("libsigcpp/3.0.7", transitive_headers=True)
         else:
-            self.requires("libsigcpp/2.10.8")
-
-    def package_id(self):
-        if not self.dependencies["glib"].options.shared:
-            self.info.requires["glib"].full_package_mode()
+            self.requires("libsigcpp/2.10.8", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -93,9 +97,9 @@ class GlibmmConan(ConanFile):
             raise ConanInvalidConfiguration("Linking shared glib with the MSVC static runtime is not supported")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.2.2")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

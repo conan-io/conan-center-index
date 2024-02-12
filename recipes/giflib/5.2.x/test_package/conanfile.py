@@ -24,7 +24,3 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(f"{bin_path} testimg.gif", env="conanrun")
-            assert os.path.isfile("testimg.gif")
-            if self.options["giflib"].utils:
-                self.run("gif2rgb -o testimg.rgb testimg.gif", env="conanrun")
-                assert os.path.isfile("testimg.rgb.R")

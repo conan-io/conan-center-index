@@ -1,4 +1,10 @@
 sources:
+  "1.16.2":
+    url: "https://github.com/sccn/liblsl/archive/refs/tags/v1.16.2.tar.gz"
+    sha256: "923aa4c81c0fef651c325e3c27aa5b96771540ca2a0933d1b327db27c6dac839"
+  "1.16.1":
+    url: "https://github.com/sccn/liblsl/archive/refs/tags/v1.16.1.tar.gz"
+    sha256: "7410620c26f8e86ae431e7476bf685918e180bd676982a7f7a7817299c8707c5"
   "1.16.0":
     url: "https://github.com/sccn/liblsl/archive/refs/tags/v1.16.0.tar.gz"
     sha256: "57d9ab0451d6d1a2068f45e4609c67d52c9c0c76d06c07e625034bea4bc01720"

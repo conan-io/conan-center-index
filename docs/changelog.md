@@ -1,5 +1,143 @@
 # Changelog
 
+### 07-February-2024 - 15:43 CET
+
+- [feature] Add waiting list for new collaborators that are not found in access request issue.
+- [feature] Skip building bump dependencies PRs by default. It will require manual CI trigger.
+
+### 24-January-2024 - 12:13 CET
+
+- [feature] Update Conan 1.x branch to version 1.62.0
+- [feature] Update Conan 2.x branch to version 2.0.16
+- [feature] Require review from maintainers for Bump version and Bump requirements
+- [fix] Show header-only option in the build CI summary table
+- [fix] Use build/host profile conf also in test package
+- [fix] Use only string to handle Github labels
+
+### 05-December-2023 - 16:23 CET
+
+- [fix] Use the correct profile to test a tool_require.
+- [feature] Add armv8 extra flag in profile arch when building in Macos M1.
+- [fix] Prioritization of non-shared builds.
+- [fix] Do not raise an exception in case slack fails.
+- [fix] Remove epochs.
+- [fix] Remove some dead code.
+
+### 26-Oct-2023 - 12:13 CEST
+
+- [feature] Allow X.Y semver for version bumps
+- [feature] Add assert message for parent commit checks on PR checkout
+- [feature] JobRelauncher restarts both Conan v1 and v2 pipelines.
+- [fix] Do not close the report issue of the recipe export check
+
+### 11-Oct-2023 - 12:17 CEST
+
+- [feature] Update Conan 2.x to the version 2.0.12 in the CI
+- [feature] Update Conan 1.x to the version 1.61.0 in the CI
+
+### 06-Oct-2023 - 10:15 CEST
+
+- [feature] Label PRs with version conflict properly
+- [feature] Add motivation message when under maintenance
+- [feature] Wait for sibling job in master right before promote
+- [fix] No longer run Conan v2 export step
+- [fix] Ensure build order follows only static first
+- [fix] Disable quiet period for all jobs except CCI multibranch
+
+### 25-Sep-2023 - 14:33 CEST
+
+- [feature] Label PRs that have missing dependencies.
+- [feature] Remove check regression for Conan v2 pipeline.
+- [feature] Start deprecating epochs support in profile configurations.
+- [fix] Run TapaholesRepo job only once per week.
+- [fix] Run ListPackages job only once per week.
+
+### 01-Sep-2023 - 19:58 CEST
+
+- [fix] Use Unix separators for Windows folder path when creating CI workspace.
+
+### 31-August-2023 - 12:57 CEST
+
+- [feature] Support specific PR number for Automatic Merge.
+- [feature] Use temporary folder for build workspace.
+- [fix] Rename BuildSingleReference folder to bsr to overcome Windows long path.
+- [fix] Remove graph info from logs to avoid long loading.
+- [fix] Remove deprecated search index for Conan Center.
+
+### 17-August-2023 - 11:42 CEST
+
+- [fix] Fix type error when catching generic exceptions in Jenkins
+- [fix] Bump dependencies no longer allow version range
+- [feature] Show recipe revision on the pull-request summary table
+
+### 04-August-2023 - 10:26 CEST
+
+- [feature] Enable Conan 2.0.8
+- [feature] Enable Conan 1.60.2
+- [feature] Update Jenkins server version
+- [hotfix] Better error management when having CI build timeout
+
+### 19-July-2023 - 09:45 CEST
+
+- [fix] Fix message processing if no message is passed.
+- [fix] Fix automatic merge priority to follow the correct PR order.
+- [fix] Waiting for Conan 2.x result after building Conan 1.x.
+- [fix] Bump version should not be tagged when removing old versions.
+- [feature] Improve internal logs to get more information about epochs.
+- [feature] Add an option to disable some jobs.
+- [feature] Disable branch indexing job runs on cci multibranch job.
+- [feature] Enable Conan 2.0.8
+
+### 04-May-2023 - 16:05 CEST
+
+- [bugfix] Fix cppstd issues when selecting the value to use in profiles.
+- [feature] Add support for raising `InvalidConfiguration` in `validate_build()` method in recipes.
+- [feature] Update library requirements for Conan client 2.0.4
+- [feature] Inform users when Conan v2 CI build is mandatory for merging.
+- [feature] Implement different "under maintenance" levels: OFF, MINOR, MAJOR, CRITICAL.
+- [feature] ValidateInfrastrucure: Check Artifactory repos exist.
+- [feature] Move variables to new folder properties approach.
+
+### 12-April-2023 - 16:18 CEST
+
+- [feature] Add ListPackages job the posibility to update a list via PR
+- [feature] Add c3i-conan2-ready label when modifying .c3i/conan_v2_ready_references.yml
+- [hotfix] Use Conan helpers to update Conan Center page
+- [hotfix] Automatic Merge reduces the number of requests for each execution
+
+### 03-April-2023 - 10:26 CEST
+
+- [fix] Remove options usage from build profile.
+- [fix] Fix promotion of recipe/packages when artifacts already exist in target repo.
+- [feature] Make master branch promotion job wait for sibling jobs (to avoid recipe promotion race condition).
+- [feature] Improve request of reviews and remove timeout.
+
+### 24-March-2023 - 12:00 CET
+
+- [feature] Install Conan command extensions for Conan v2
+- [feature] Reduce Github requests number to execute Automatic Merge CI job
+- [hotfix] Improve Promote Package CI job logging for better debug
+
+### 10-March-2023 - 19:55 CET
+
+- [feature] Add priority to pull requests
+- [hotfix] Avoid extra http requests to run automatic merge faster
+
+### 10-March-2023 - 13:15 CET
+
+- [hotfix] No longer update conan_v2_ready_references.yml automatically
+- [bugfix] Validate Green and clean PRs first when executing automatic merge CI job
+
+### 07-March-2023 - 17:05 CET
+
+- [hotfix] Automatic merge skips git conflicts
+- [hotfix] config label for "v2 ready" depends on PR author
+
+### 03-March-2023 - 11:05 CET
+
+- [feature] Update ready_v2_references.yml file automatically
+- [fix] Do not reuse the same build folder to avoid busy files
+
 ### 21-February-2023 - 17:22 CET
 
 - [fix] Fix bug with cppstd entry in configuration files.

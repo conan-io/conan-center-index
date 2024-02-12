@@ -1,8 +1,17 @@
 sources:
+  "0.60.7":
+    url: "https://github.com/coin-or/Cgl/archive/releases/0.60.7.tar.gz"
+    sha256: "93b30a80b5d2880c2e72d5877c64bdeaf4d7c1928b3194ea2f88b1aa4517fb1b"
+  "0.60.6":
+    url: "https://github.com/coin-or/Cgl/archive/refs/tags/releases/0.60.6.tar.gz"
+    sha256: "9e2c51ffad816ab408763d6b931e2a3060482ee4bf1983148969de96d4b2c9ce"
   "0.60.3":
-    url: "https://github.com/coin-or/Cgl/archive/releases/0.60.3.tar.gz"
+    url: "https://github.com/coin-or/Cgl/archive/refs/tags/releases/0.60.3.tar.gz"
     sha256: "cfeeedd68feab7c0ce377eb9c7b61715120478f12c4dd0064b05ad640e20f3fb"
 patches:
+  "0.60.7":
+    - patch_file: "patches/0.60.6-0001-no-pkg-config-check.patch"
+  "0.60.6":
+    - patch_file: "patches/0.60.6-0001-no-pkg-config-check.patch"
   "0.60.3":
-    - patch_file: "patches/0001-no-pkg-config-check.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0.60.3-0001-no-pkg-config-check.patch"

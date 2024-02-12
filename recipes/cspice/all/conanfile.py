@@ -1,10 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, chdir, copy, download, get, load, rename, rmdir, save
+from conan.tools.files import (
+    apply_conandata_patches, chdir, copy, download, export_conandata_patches,
+    get, load, rename, rmdir, save
+)
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class CspiceConan(ConanFile):
@@ -15,6 +18,7 @@ class CspiceConan(ConanFile):
     homepage = "https://naif.jpl.nasa.gov/naif/toolkit.html"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -29,8 +33,7 @@ class CspiceConan(ConanFile):
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,15 +41,12 @@ class CspiceConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         sources_url_per_triplet = self.conan_data["sources"][self.version]
@@ -55,26 +55,23 @@ class CspiceConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"cspice N{self.version} does not support {host_os}",
             )
-        compiler = str(self.info.settings.compiler)
+        compiler = str(self.settings.compiler)
         if compiler not in sources_url_per_triplet[host_os]:
             raise ConanInvalidConfiguration(
                 f"cspice N{self.version} does not support {compiler} on {host_os}",
             )
-        arch = str(self.info.settings.arch)
+        arch = str(self.settings.arch)
         if arch not in sources_url_per_triplet[host_os][compiler]:
             raise ConanInvalidConfiguration(
                 f"cspice N{self.version} does not support {compiler} on {host_os} {arch}",
             )
 
     def _get_os_or_subsystem(self):
-        if self.settings.os == "Windows" and self.settings.os.subsystem != "None":
+        if self.settings.os == "Windows" and self.settings.get_safe("os.subsystem"):
             os_or_subsystem = str(self.settings.os.subsystem)
         else:
             os_or_subsystem = str(self.settings.os)
         return os_or_subsystem
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
 
     def source(self):
         pass
@@ -129,7 +126,6 @@ class CspiceConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
 
+        # TODO: to remove in conan v2
         if self.options.utilities:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH environment variable: {bin_path}")
-            self.env_info.PATH.append(bin_path)
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

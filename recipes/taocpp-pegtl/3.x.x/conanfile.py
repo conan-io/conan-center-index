@@ -1,8 +1,12 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.tools.files import get, copy
+from conan.tools.layout import basic_layout
+from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.50.0"
 
 
 class TaoCPPPEGTLConan(ConanFile):
@@ -22,10 +26,6 @@ class TaoCPPPEGTLConan(ConanFile):
         "boost_filesystem": False,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def requirements(self):
         if self.options.boost_filesystem:
             self.requires("boost/1.78.0")
@@ -41,7 +41,7 @@ class TaoCPPPEGTLConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
+            check_min_cppstd(self, "17")
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -50,29 +50,29 @@ class TaoCPPPEGTLConan(ConanFile):
             return lv1[:min_length] < lv2[:min_length]
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn("{} {} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name, self.version))
-        elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration("{} {} requires C++17, which your compiler does not support.".format(self.name, self.version))
+        if minimum_version and lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not support.")
 
-        compiler_version = tools.Version(self.settings.compiler.version)
+        compiler_version = Version(self.settings.compiler.version)
         if self.version == "3.0.0" and self.settings.compiler == "clang" and \
            compiler_version >= "10" and compiler_version < "12":
-            raise ConanInvalidConfiguration("{} {} doesn't support filesystem experimental".format(self.name, self.version))
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support filesystem experimental")
 
-        if self.options.boost_filesystem and (self.options["boost"].header_only or self.options["boost"].without_filesystem):
-            raise ConanInvalidConfiguration("{} requires non header-only boost with filesystem component".format(self.name))
+        if self.options.boost_filesystem and (self.dependencies["boost"].options.header_only or self.dependencies["boost"].options.without_filesystem):
+            raise ConanInvalidConfiguration("{self.ref} requires non header-only boost with filesystem component")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
-        self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        copy(self, "LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "*", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "pegtl")
@@ -82,7 +82,7 @@ class TaoCPPPEGTLConan(ConanFile):
             self.cpp_info.components["_taocpp-pegtl"].requires.append("boost::filesystem")
             self.cpp_info.components["_taocpp-pegtl"].defines.append("TAO_PEGTL_BOOST_FILESYSTEM")
         else:
-            compiler_version = tools.Version(self.settings.compiler.version)
+            compiler_version = Version(self.settings.compiler.version)
             if self.settings.compiler == "clang" and compiler_version >= "10" and compiler_version < "12":
                 self.cpp_info.components["_taocpp-pegtl"].defines.append("TAO_PEGTL_STD_EXPERIMENTAL_FILESYSTEM")
 

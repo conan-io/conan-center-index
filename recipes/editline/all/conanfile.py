@@ -1,8 +1,14 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualRunEnv
+from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class EditlineConan(ConanFile):
@@ -10,9 +16,10 @@ class EditlineConan(ConanFile):
     description = "Autotool- and libtoolized port of the NetBSD Editline library (libedit)."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://thrysoee.dk/editline/"
-    topics = ("conan", "editline", "libedit", "line", "editing", "history", "tokenization")
+    topics = ("libedit", "line", "editing", "history", "tokenization")
     license = "BSD-3-Clause"
-    settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -24,27 +31,24 @@ class EditlineConan(ConanFile):
         "terminal_db": "termcap",
     }
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.terminal_db == "termcap":
             self.requires("termcap/1.3.1")
         elif self.options.terminal_db == "ncurses":
-            self.requires("ncurses/6.2")
+            self.requires("ncurses/6.4")
 
     def validate(self):
         if self.settings.os == "Windows":
@@ -54,43 +58,33 @@ class EditlineConan(ConanFile):
             raise ConanInvalidConfiguration("tinfo is not (yet) available on CCI")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.libs = []
-
-        configure_args = ["--disable-examples"]
-        if self.options.shared:
-            configure_args.extend(["--disable-static", "--enable-shared"])
-        else:
-            configure_args.extend(["--enable-static", "--disable-shared"])
-
-        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
-        return self._autotools
-
-    def _patch_sources(self):
-        for patchdata in self.conan_data.get("patches",{}).get(self.version, []):
-            tools.patch(**patchdata)
+    def generate(self):
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--disable-examples")
+        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def build(self):
-        self._patch_sources()
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
         autotools.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        os.unlink(os.path.join(self.package_folder, "lib", "libedit.la"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "libedit")
         self.cpp_info.libs = ["edit"]
         self.cpp_info.includedirs.append(os.path.join("include", "editline"))

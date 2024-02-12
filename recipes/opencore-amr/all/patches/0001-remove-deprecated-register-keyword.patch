@@ -1,0 +1,1357 @@
+From 8fa46c7a3092186e922ed27e9b38d79caf178f36 Mon Sep 17 00:00:00 2001
+From: Gregor Jasny <gjasny@googlemail.com>
+Date: Mon, 19 Jun 2023 20:41:15 +0200
+Subject: [PATCH] remove deprecated register keyword
+
+---
+ .../common/include/basic_op_arm_gcc_v5.h      | 62 ++++++------
+ .../common/include/basic_op_c_equivalent.h    | 10 +-
+ .../gsm_amr/amr_nb/common/include/l_add.h     |  8 +-
+ .../gsm_amr/amr_nb/common/include/l_mac.h     |  6 +-
+ .../gsm_amr/amr_nb/common/include/l_msu.h     |  6 +-
+ .../gsm_amr/amr_nb/common/include/l_mult.h    |  6 +-
+ .../gsm_amr/amr_nb/common/include/l_sub.h     |  8 +-
+ .../gsm_amr/amr_nb/common/include/mpy_32.h    | 14 +--
+ .../gsm_amr/amr_nb/common/include/mpy_32_16.h |  6 +-
+ .../gsm_amr/amr_nb/common/include/mult.h      |  6 +-
+ .../gsm_amr/amr_nb/common/include/negate.h    |  2 +-
+ .../gsm_amr/amr_nb/common/include/norm_l.h    |  4 +-
+ .../gsm_amr/amr_nb/common/include/norm_s.h    |  4 +-
+ .../gsm_amr/amr_nb/common/src/az_lsp.cpp      |  8 +-
+ .../audio/gsm_amr/amr_nb/common/src/div_s.cpp |  4 +-
+ .../gsm_amr/amr_nb/common/src/gc_pred.cpp     |  8 +-
+ .../gsm_amr/amr_nb/common/src/gmed_n.cpp      |  6 +-
+ .../audio/gsm_amr/amr_nb/common/src/l_abs.cpp |  2 +-
+ .../gsm_amr/amr_nb/common/src/l_shr_r.cpp     |  2 +-
+ .../gsm_amr/amr_nb/common/src/lsp_az.cpp      |  8 +-
+ .../gsm_amr/amr_nb/common/src/mult_r.cpp      |  2 +-
+ .../gsm_amr/amr_nb/common/src/negate.cpp      |  2 +-
+ .../gsm_amr/amr_nb/common/src/norm_l.cpp      |  4 +-
+ .../gsm_amr/amr_nb/common/src/norm_s.cpp      |  4 +-
+ .../gsm_amr/amr_nb/common/src/pred_lt.cpp     |  6 +-
+ .../gsm_amr/amr_nb/common/src/q_plsf_3.cpp    |  6 +-
+ .../gsm_amr/amr_nb/common/src/residu.cpp      |  2 +-
+ .../audio/gsm_amr/amr_nb/common/src/round.cpp |  2 +-
+ .../audio/gsm_amr/amr_nb/common/src/shr.cpp   |  4 +-
+ .../audio/gsm_amr/amr_nb/common/src/shr_r.cpp |  2 +-
+ .../gsm_amr/amr_nb/common/src/weight_a.cpp    |  2 +-
+ .../audio/gsm_amr/amr_nb/dec/src/d1035pf.cpp  |  2 +-
+ .../audio/gsm_amr/amr_nb/dec/src/d_plsf_5.cpp |  2 +-
+ .../audio/gsm_amr/amr_nb/dec/src/int_lsf.cpp  |  6 +-
+ .../audio/gsm_amr/amr_nb/dec/src/ph_disp.cpp  |  8 +-
+ .../audio/gsm_amr/amr_nb/dec/src/pstfilt.cpp  |  4 +-
+ .../audio/gsm_amr/amr_nb/enc/src/autocorr.cpp |  6 +-
+ .../audio/gsm_amr/amr_nb/enc/src/c2_9pf.cpp   | 24 ++---
+ .../audio/gsm_amr/amr_nb/enc/src/cl_ltp.cpp   |  2 +-
+ .../audio/gsm_amr/amr_nb/enc/src/convolve.cpp |  2 +-
+ .../audio/gsm_amr/amr_nb/enc/src/cor_h.cpp    |  4 +-
+ .../audio/gsm_amr/amr_nb/enc/src/cor_h_x.cpp  |  6 +-
+ .../audio/gsm_amr/amr_nb/enc/src/cor_h_x2.cpp |  6 +-
+ .../audio/gsm_amr/amr_nb/enc/src/dtx_enc.cpp  |  6 +-
+ .../audio/gsm_amr/amr_nb/enc/src/l_negate.cpp |  2 +-
+ .../audio/gsm_amr/amr_nb/enc/src/levinson.cpp | 10 +-
+ .../audio/gsm_amr/amr_nb/enc/src/pitch_ol.cpp |  2 +-
+ .../audio/gsm_amr/amr_nb/enc/src/pre_proc.cpp |  2 +-
+ .../audio/gsm_amr/amr_nb/enc/src/set_sign.cpp |  2 +-
+ .../gsm_amr/amr_wb/dec/src/normalize_amr_wb.h |  4 +-
+ .../amr_wb/dec/src/pvamrwb_math_op.cpp        |  2 +-
+ .../src/pvamrwbdecoder_basic_op_gcc_armv5.h   | 98 +++++++++----------
+ 52 files changed, 208 insertions(+), 208 deletions(-)
+
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/basic_op_arm_gcc_v5.h b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/basic_op_arm_gcc_v5.h
+index 5752171..2c93015 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/basic_op_arm_gcc_v5.h
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/basic_op_arm_gcc_v5.h
+@@ -112,10 +112,10 @@ extern "C"
+         L_sum = 32-bit sum of L_var1 and L_var2 (Word32)
+     */
+ 
+-    static inline Word32 L_add(register Word32 L_var1, register Word32 L_var2, Flag *pOverflow)
++    static inline Word32 L_add(Word32 L_var1, Word32 L_var2, Flag *pOverflow)
+     {
+-        register Word32 ra = L_var1;
+-        register Word32 rb = L_var2;
++        Word32 ra = L_var1;
++        Word32 rb = L_var2;
+         Word32 result;
+ 
+         OSCL_UNUSED_ARG(pOverflow);
+@@ -151,8 +151,8 @@ extern "C"
+     */
+     static inline Word32 L_sub(Word32 L_var1, Word32 L_var2, Flag *pOverflow)
+ {
+-        register Word32 ra = L_var1;
+-        register Word32 rb = L_var2;
++        Word32 ra = L_var1;
++        Word32 rb = L_var2;
+         Word32 result;
+ 
+         OSCL_UNUSED_ARG(pOverflow);
+@@ -190,9 +190,9 @@ extern "C"
+     */
+     static inline Word32 L_mac(Word32 L_var3, Word16 var1, Word16 var2, Flag *pOverflow)
+ {
+-        register Word32 ra = L_var3;
+-        register Word32 rb = var1;
+-        register Word32 rc = var2;
++        Word32 ra = L_var3;
++        Word32 rb = var1;
++        Word32 rc = var2;
+         Word32 result;
+ 
+         OSCL_UNUSED_ARG(pOverflow);
+@@ -234,8 +234,8 @@ extern "C"
+ 
+     static inline Word32 L_mult(Word16 var1, Word16 var2, Flag *pOverflow)
+ {
+-        register Word32 ra = var1;
+-        register Word32 rb = var2;
++        Word32 ra = var1;
++        Word32 rb = var2;
+         Word32 result;
+         Word32 product;
+ 
+@@ -279,9 +279,9 @@ extern "C"
+     */
+     static inline Word32 L_msu(Word32 L_var3, Word16 var1, Word16 var2, Flag *pOverflow)
+ {
+-        register Word32 ra = L_var3;
+-        register Word32 rb = var1;
+-        register Word32 rc = var2;
++        Word32 ra = L_var3;
++        Word32 rb = var1;
++        Word32 rc = var2;
+         Word32 product;
+         Word32 result;
+ 
+@@ -326,13 +326,13 @@ extern "C"
+                                 Word16 L_var2_lo,
+                                 Flag   *pOverflow)
+ {
+-        register Word32 product32;
+-        register Word32 L_sum;
+-        register Word32 L_product, result;
+-        register Word32 ra = L_var1_hi;
+-        register Word32 rb = L_var1_lo;
+-        register Word32 rc = L_var2_hi;
+-        register Word32 rd = L_var2_lo;
++        Word32 product32;
++        Word32 L_sum;
++        Word32 L_product, result;
++        Word32 ra = L_var1_hi;
++        Word32 rb = L_var1_lo;
++        Word32 rc = L_var2_hi;
++        Word32 rd = L_var2_lo;
+ 
+ 
+ 
+@@ -410,9 +410,9 @@ extern "C"
+                                    Flag *pOverflow)
+ {
+ 
+-        register Word32 ra = L_var1_hi;
+-        register Word32 rb = L_var1_lo;
+-        register Word32 rc = var2;
++        Word32 ra = L_var1_hi;
++        Word32 rb = L_var1_lo;
++        Word32 rc = var2;
+         Word32 result, L_product;
+ 
+         OSCL_UNUSED_ARG(pOverflow);
+@@ -470,8 +470,8 @@ extern "C"
+     */
+     static inline Word16 mult(Word16 var1, Word16 var2, Flag *pOverflow)
+ {
+-        register Word32 ra = var1;
+-        register Word32 rb = var2;
++        Word32 ra = var1;
++        Word32 rb = var2;
+         Word32 product;
+         Word32 temp;
+ 
+@@ -494,9 +494,9 @@ extern "C"
+ 
+     static inline Word32 amrnb_fxp_mac_16_by_16bb(Word32 L_var1, Word32 L_var2, Word32 L_var3)
+ {
+-        register Word32 ra = L_var1;
+-        register Word32 rb = L_var2;
+-        register Word32 rc = L_var3;
++        Word32 ra = L_var1;
++        Word32 rb = L_var2;
++        Word32 rc = L_var3;
+         Word32 result;
+ 
+         __asm__ volatile("smlabb %0, %1, %2, %3"
+@@ -508,9 +508,9 @@ extern "C"
+ 
+     static inline Word32 amrnb_fxp_msu_16_by_16bb(Word32 L_var1, Word32 L_var2, Word32 L_var3)
+ {
+-        register Word32 ra = L_var1;
+-        register Word32 rb = L_var2;
+-        register Word32 rc = L_var3;
++        Word32 ra = L_var1;
++        Word32 rb = L_var2;
++        Word32 rc = L_var3;
+         Word32 result;
+ 
+         __asm__ volatile("rsb %0, %1, #0"
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/basic_op_c_equivalent.h b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/basic_op_c_equivalent.h
+index 62072a5..d56ecd0 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/basic_op_c_equivalent.h
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/basic_op_c_equivalent.h
+@@ -109,7 +109,7 @@ extern "C"
+      Returns:
+         L_sum = 32-bit sum of L_var1 and L_var2 (Word32)
+     */
+-    static inline Word32 L_add(register Word32 L_var1, register Word32 L_var2, Flag *pOverflow)
++    static inline Word32 L_add(Word32 L_var1, Word32 L_var2, Flag *pOverflow)
+     {
+         Word32 L_sum;
+ 
+@@ -148,8 +148,8 @@ extern "C"
+      Returns:
+         L_diff = 32-bit difference of L_var1 and L_var2 (Word32)
+     */
+-    static inline Word32 L_sub(register Word32 L_var1, register Word32 L_var2,
+-                               register Flag *pOverflow)
++    static inline Word32 L_sub(Word32 L_var1, Word32 L_var2,
++                               Flag *pOverflow)
+     {
+         Word32 L_diff;
+ 
+@@ -240,7 +240,7 @@ extern "C"
+     */
+     static inline Word32 L_mult(Word16 var1, Word16 var2, Flag *pOverflow)
+     {
+-        register Word32 L_product;
++        Word32 L_product;
+ 
+         L_product = (Word32) var1 * var2;
+ 
+@@ -446,7 +446,7 @@ extern "C"
+     */
+     static inline Word16 mult(Word16 var1, Word16 var2, Flag *pOverflow)
+     {
+-        register Word32 product;
++        Word32 product;
+ 
+         product = ((Word32) var1 * var2) >> 15;
+ 
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_add.h b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_add.h
+index ac72c31..fc849a5 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_add.h
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_add.h
+@@ -88,10 +88,10 @@ extern "C"
+     ; Function Prototype declaration
+     ----------------------------------------------------------------------------*/
+ #if   ((PV_CPU_ARCH_VERSION >=5) && (PV_COMPILER == EPV_ARM_GNUC))/* Instructions for ARM-linux cross-compiler*/
+-    __inline Word32 L_add(register Word32 L_var1, register Word32 L_var2, Flag *pOverflow)
++    __inline Word32 L_add(Word32 L_var1, Word32 L_var2, Flag *pOverflow)
+     {
+-        register Word32 ra = L_var1;
+-        register Word32 rb = L_var2;
++        Word32 ra = L_var1;
++        Word32 rb = L_var2;
+         Word32 result;
+ 
+         OSCL_UNUSED_ARG(pOverflow);
+@@ -107,7 +107,7 @@ extern "C"
+ #else /* C EQUIVALENT */
+ 
+ 
+-    static inline Word32 L_add(register Word32 L_var1, register Word32 L_var2, Flag *pOverflow)
++    static inline Word32 L_add(Word32 L_var1, Word32 L_var2, Flag *pOverflow)
+     {
+         Word32 L_sum;
+ 
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_mac.h b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_mac.h
+index f672428..173e1dd 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_mac.h
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_mac.h
+@@ -90,9 +90,9 @@ extern "C"
+ 
+     static inline Word32 L_mac(Word32 L_var3, Word16 var1, Word16 var2, Flag *pOverflow)
+     {
+-        register Word32 ra = L_var3;
+-        register Word32 rb = var1;
+-        register Word32 rc = var2;
++        Word32 ra = L_var3;
++        Word32 rb = var1;
++        Word32 rc = var2;
+         Word32 result;
+ 
+         OSCL_UNUSED_ARG(pOverflow);
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_msu.h b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_msu.h
+index 86c5735..de07525 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_msu.h
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_msu.h
+@@ -92,9 +92,9 @@ extern "C"
+ 
+     __inline Word32 L_msu(Word32 L_var3, Word16 var1, Word16 var2, Flag *pOverflow)
+     {
+-        register Word32 ra = L_var3;
+-        register Word32 rb = var1;
+-        register Word32 rc = var2;
++        Word32 ra = L_var3;
++        Word32 rb = var1;
++        Word32 rc = var2;
+         Word32 product;
+         Word32 result;
+ 
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_mult.h b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_mult.h
+index 33fedb1..5531509 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_mult.h
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_mult.h
+@@ -91,8 +91,8 @@ extern "C"
+ 
+     __inline Word32 L_mult(Word16 var1, Word16 var2, Flag *pOverflow)
+     {
+-        register Word32 ra = var1;
+-        register Word32 rb = var2;
++        Word32 ra = var1;
++        Word32 rb = var2;
+         Word32 result;
+         Word32 product;
+ 
+@@ -115,7 +115,7 @@ extern "C"
+ 
+     static inline Word32 L_mult(Word16 var1, Word16 var2, Flag *pOverflow)
+     {
+-        register Word32 L_product;
++        Word32 L_product;
+ 
+         L_product = (Word32) var1 * var2;
+ 
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_sub.h b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_sub.h
+index 88d86ca..ef83f1c 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_sub.h
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/l_sub.h
+@@ -93,8 +93,8 @@ extern "C"
+ 
+     __inline Word32 L_sub(Word32 L_var1, Word32 L_var2, Flag *pOverflow)
+     {
+-        register Word32 ra = L_var1;
+-        register Word32 rb = L_var2;
++        Word32 ra = L_var1;
++        Word32 rb = L_var2;
+         Word32 result;
+ 
+         OSCL_UNUSED_ARG(pOverflow);
+@@ -109,8 +109,8 @@ extern "C"
+ 
+ #else /* C EQUIVALENT */
+ 
+-    static inline Word32 L_sub(register Word32 L_var1, register Word32 L_var2,
+-                               register Flag *pOverflow)
++    static inline Word32 L_sub(Word32 L_var1, Word32 L_var2,
++                               Flag *pOverflow)
+     {
+         Word32 L_diff;
+ 
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/mpy_32.h b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/mpy_32.h
+index 8df43c9..83505f4 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/mpy_32.h
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/mpy_32.h
+@@ -96,13 +96,13 @@ extern "C"
+     Word16 L_var2_lo,
+     Flag   *pOverflow)
+     {
+-        register Word32 product32;
+-        register Word32 L_sum;
+-        register Word32 L_product, result;
+-        register Word32 ra = L_var1_hi;
+-        register Word32 rb = L_var1_lo;
+-        register Word32 rc = L_var2_hi;
+-        register Word32 rd = L_var2_lo;
++        Word32 product32;
++        Word32 L_sum;
++        Word32 L_product, result;
++        Word32 ra = L_var1_hi;
++        Word32 rb = L_var1_lo;
++        Word32 rc = L_var2_hi;
++        Word32 rd = L_var2_lo;
+ 
+ 
+ 
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/mpy_32_16.h b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/mpy_32_16.h
+index 3a68e69..4eaa732 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/mpy_32_16.h
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/mpy_32_16.h
+@@ -96,9 +96,9 @@ extern "C"
+     Flag *pOverflow)
+     {
+ 
+-        register Word32 ra = L_var1_hi;
+-        register Word32 rb = L_var1_lo;
+-        register Word32 rc = var2;
++        Word32 ra = L_var1_hi;
++        Word32 rb = L_var1_lo;
++        Word32 rc = var2;
+         Word32 result, L_product;
+ 
+         OSCL_UNUSED_ARG(pOverflow);
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/mult.h b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/mult.h
+index c89a94e..c2ebf9a 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/mult.h
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/mult.h
+@@ -89,8 +89,8 @@ extern "C"
+ 
+     __inline Word16 mult(Word16 var1, Word16 var2, Flag *pOverflow)
+     {
+-        register Word32 ra = var1;
+-        register Word32 rb = var2;
++        Word32 ra = var1;
++        Word32 rb = var2;
+         Word32 product;
+         Word32 temp = 0x7FFF;
+ 
+@@ -120,7 +120,7 @@ extern "C"
+ 
+     static inline Word16 mult(Word16 var1, Word16 var2, Flag *pOverflow)
+     {
+-        register Word32 product;
++        Word32 product;
+ 
+         product = ((Word32) var1 * var2) >> 15;
+ 
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/negate.h b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/negate.h
+index 2b77f77..3ff7347 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/negate.h
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/negate.h
+@@ -86,7 +86,7 @@ extern "C"
+     ; GLOBAL FUNCTION DEFINITIONS
+     ; Function Prototype declaration
+     ----------------------------------------------------------------------------*/
+-    Word16 negate(register Word16 var1);
++    Word16 negate(Word16 var1);
+ 
+     /*----------------------------------------------------------------------------
+     ; END
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/norm_l.h b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/norm_l.h
+index 288b6c7..d3de69f 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/norm_l.h
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/norm_l.h
+@@ -91,8 +91,8 @@ extern "C"
+ #if   ((PV_CPU_ARCH_VERSION >=5) && (PV_COMPILER == EPV_ARM_GNUC))
+     static inline Word16 norm_l(Word32 L_var1)
+     {
+-        register Word32 var_out = 0;
+-        register Word32 ra = L_var1;
++        Word32 var_out = 0;
++        Word32 ra = L_var1;
+         if (L_var1)
+         {
+             ra ^= (ra << 1);
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/norm_s.h b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/norm_s.h
+index 7847f34..e7865f8 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/norm_s.h
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include/norm_s.h
+@@ -91,8 +91,8 @@ extern "C"
+ #if   ((PV_CPU_ARCH_VERSION >=5) && (PV_COMPILER == EPV_ARM_GNUC))
+     static inline Word16 norm_s(Word16 var1)
+     {
+-        register Word32 var_out = 0;
+-        register Word32 ra = var1 << 16;
++        Word32 var_out = 0;
++        Word32 ra = var1 << 16;
+         if (ra)
+         {
+             ra ^= (ra << 1);
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/az_lsp.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/az_lsp.cpp
+index 7711ac9..b3194aa 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/az_lsp.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/az_lsp.cpp
+@@ -489,10 +489,10 @@ void Az_lsp(
+     Flag   *pOverflow   /* (i/o): overflow flag                              */
+ )
+ {
+-    register Word16 i;
+-    register Word16 j;
+-    register Word16 nf;
+-    register Word16 ip;
++    Word16 i;
++    Word16 j;
++    Word16 nf;
++    Word16 ip;
+     Word16 xlow;
+     Word16 ylow;
+     Word16 xhigh;
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/div_s.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/div_s.cpp
+index f60f18b..40667eb 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/div_s.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/div_s.cpp
+@@ -165,13 +165,13 @@ Word16 div_s (Word16 var1, Word16 var2)
+ /*----------------------------------------------------------------------------
+ ; FUNCTION CODE
+ ----------------------------------------------------------------------------*/
+-OSCL_EXPORT_REF Word16 div_s(register Word16 var1, register Word16 var2)
++OSCL_EXPORT_REF Word16 div_s(Word16 var1, Word16 var2)
+ {
+     /*----------------------------------------------------------------------------
+     ; Define all local variables
+     ----------------------------------------------------------------------------*/
+     Word16 var_out = 0;
+-    register Word16 iteration;
++    Word16 iteration;
+     Word32 L_num;
+     Word32 L_denom;
+     Word32 L_denom_by_2;
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/gc_pred.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/gc_pred.cpp
+index 71519e9..198cccc 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/gc_pred.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/gc_pred.cpp
+@@ -445,9 +445,9 @@ OSCL_EXPORT_REF void gc_pred(
+     Flag   *pOverflow
+ )
+ {
+-    register Word16 i;
+-    register Word32 L_temp1, L_temp2;
+-    register Word32 L_tmp;
++    Word16 i;
++    Word32 L_temp1, L_temp2;
++    Word32 L_tmp;
+     Word32 ener_code;
+     Word32 ener;
+     Word16 exp, frac;
+@@ -929,7 +929,7 @@ OSCL_EXPORT_REF void gc_pred_average_limited(
+ )
+ {
+     Word16 av_pred_en;
+-    register Word16 i;
++    Word16 i;
+ 
+     /* do average in MR122 mode (log2() domain) */
+     av_pred_en = 0;
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/gmed_n.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/gmed_n.cpp
+index a723ce4..e15549f 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/gmed_n.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/gmed_n.cpp
+@@ -154,9 +154,9 @@ OSCL_EXPORT_REF Word16 gmed_n(            /* o : the median value    */
+     Word16 n        /* i : number of inputs    */
+ )
+ {
+-    register Word16 i, j, ix = 0;
+-    register Word16 max;
+-    register Word16 medianIndex;
++    Word16 i, j, ix = 0;
++    Word16 max;
++    Word16 medianIndex;
+     Word16  tmp[NMAX];
+     Word16  tmp2[NMAX];
+ 
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/l_abs.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/l_abs.cpp
+index e436006..8f167c3 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/l_abs.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/l_abs.cpp
+@@ -143,7 +143,7 @@ Word32 L_abs (Word32 L_var1)
+ /*----------------------------------------------------------------------------
+ ; FUNCTION CODE
+ ----------------------------------------------------------------------------*/
+-Word32 L_abs(register Word32 L_var1)
++Word32 L_abs(Word32 L_var1)
+ {
+     /*----------------------------------------------------------------------------
+     ; Define all local variables
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/l_shr_r.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/l_shr_r.cpp
+index 0a07135..ec120f0 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/l_shr_r.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/l_shr_r.cpp
+@@ -159,7 +159,7 @@ Word32 L_shr_r (Word32 L_var1, Word16 var2)
+ /*----------------------------------------------------------------------------
+ ; FUNCTION CODE
+ ----------------------------------------------------------------------------*/
+-OSCL_EXPORT_REF Word32 L_shr_r(register Word32 L_var1, register Word16 var2, Flag *pOverflow)
++OSCL_EXPORT_REF Word32 L_shr_r(Word32 L_var1, Word16 var2, Flag *pOverflow)
+ {
+     Word32 result;
+ 
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/lsp_az.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/lsp_az.cpp
+index c41f614..af1a716 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/lsp_az.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/lsp_az.cpp
+@@ -185,8 +185,8 @@ static void Get_lsp_pol(
+     Word32 *f,
+     Flag   *pOverflow)
+ {
+-    register Word16 i;
+-    register Word16 j;
++    Word16 i;
++    Word16 j;
+ 
+     Word16 hi;
+     Word16 lo;
+@@ -332,8 +332,8 @@ OSCL_EXPORT_REF void Lsp_Az(
+     Flag  *pOverflow     /* (o)  : overflow flag                        */
+ )
+ {
+-    register Word16 i;
+-    register Word16 j;
++    Word16 i;
++    Word16 j;
+ 
+     Word32 f1[6];
+     Word32 f2[6];
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/mult_r.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/mult_r.cpp
+index 003afc7..a6b4a62 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/mult_r.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/mult_r.cpp
+@@ -155,7 +155,7 @@ Word16 mult_r (Word16 var1, Word16 var2)
+ OSCL_EXPORT_REF Word16 mult_r(Word16 var1, Word16 var2, Flag *pOverflow)
+ {
+ 
+-    register Word32 L_product_arr;
++    Word32 L_product_arr;
+ 
+     L_product_arr = ((Word32) var1) * var2;              /* product */
+     L_product_arr += (Word32) 0x00004000L;               /* round */
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/negate.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/negate.cpp
+index 3db2458..e16dca0 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/negate.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/negate.cpp
+@@ -128,7 +128,7 @@ Word16 negate (Word16 var1)
+ /*----------------------------------------------------------------------------
+ ; FUNCTION CODE
+ ----------------------------------------------------------------------------*/
+-Word16 negate(register Word16 var1)
++Word16 negate(Word16 var1)
+ {
+     /*----------------------------------------------------------------------------
+     ; Define all local variables
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/norm_l.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/norm_l.cpp
+index dc4ca72..fabbb44 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/norm_l.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/norm_l.cpp
+@@ -153,12 +153,12 @@ Word16 norm_l (Word32 L_var1)
+ ; FUNCTION CODE
+ ----------------------------------------------------------------------------*/
+ #if !((PV_CPU_ARCH_VERSION >=5) && ((PV_COMPILER == EPV_ARM_GNUC) || (PV_COMPILER == EPV_ARM_RVCT)))
+-OSCL_EXPORT_REF Word16 norm_l(register Word32 L_var1)
++OSCL_EXPORT_REF Word16 norm_l(Word32 L_var1)
+ {
+     /*----------------------------------------------------------------------------
+     ; Define all local variables
+     ----------------------------------------------------------------------------*/
+-    register Word16 var_out = 0;
++    Word16 var_out = 0;
+ 
+     /*----------------------------------------------------------------------------
+     ; Function body here
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/norm_s.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/norm_s.cpp
+index 4fdc6d2..66dfb65 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/norm_s.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/norm_s.cpp
+@@ -155,13 +155,13 @@ Word16 norm_s (Word16 var1)
+ ----------------------------------------------------------------------------*/
+ #if !((PV_CPU_ARCH_VERSION >=5) && ((PV_COMPILER == EPV_ARM_GNUC) || (PV_COMPILER == EPV_ARM_RVCT)))
+ 
+-OSCL_EXPORT_REF Word16 norm_s(register Word16 var1)
++OSCL_EXPORT_REF Word16 norm_s(Word16 var1)
+ {
+     /*----------------------------------------------------------------------------
+     ; Define all local variables
+     ----------------------------------------------------------------------------*/
+ 
+-    register Word16 var_out = 0;
++    Word16 var_out = 0;
+ 
+     /*----------------------------------------------------------------------------
+     ; Function body here
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/pred_lt.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/pred_lt.cpp
+index fd51242..abcfddc 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/pred_lt.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/pred_lt.cpp
+@@ -202,9 +202,9 @@ OSCL_EXPORT_REF void Pred_lt_3or6(
+     Flag  *pOverflow  /* output: if set, overflow occurred in this function */
+ )
+ {
+-    register Word16 i;
+-    register Word16 j;
+-    register Word16 k;
++    Word16 i;
++    Word16 j;
++    Word16 k;
+ 
+     Word16 *pX0;
+     Word16 *pX2;
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/q_plsf_3.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/q_plsf_3.cpp
+index 2c5446b..adb3542 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/q_plsf_3.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/q_plsf_3.cpp
+@@ -216,7 +216,7 @@ static Word16 Vq_subvec4( /* o: quantization index,            Q0  */
+     Flag  *pOverflow      /* o : Flag set when overflow occurs     */
+ )
+ {
+-    register Word16 i;
++    Word16 i;
+     Word16 temp;
+     const Word16 *p_dico;
+     Word16 index = 0;
+@@ -510,7 +510,7 @@ static Word16 Vq_subvec3( /* o: quantization index,            Q0  */
+     Flag use_half,        /* i: use every second entry in codebook */
+     Flag  *pOverflow)     /* o : Flag set when overflow occurs     */
+ {
+-    register Word16 i;
++    Word16 i;
+     Word16 temp;
+ 
+     const Word16 *p_dico;
+@@ -884,7 +884,7 @@ OSCL_EXPORT_REF void Q_plsf_3(
+     Flag  *pOverflow    /* o : Flag set when overflow occurs             */
+ )
+ {
+-    register Word16 i, j;
++    Word16 i, j;
+     Word16 lsf1[M];
+     Word16 wf1[M];
+     Word16 lsf_p[M];
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/residu.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/residu.cpp
+index 787e043..3e8393e 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/residu.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/residu.cpp
+@@ -152,7 +152,7 @@ OSCL_EXPORT_REF void Residu(
+ {
+ 
+ 
+-    register Word16 i, j;
++    Word16 i, j;
+     Word32 s1;
+     Word32 s2;
+     Word32 s3;
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/round.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/round.cpp
+index 9fd4abb..b46a44e 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/round.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/round.cpp
+@@ -141,7 +141,7 @@ Word16 pv_round (Word32 L_var1)
+ /*----------------------------------------------------------------------------
+ ; FUNCTION CODE
+ ----------------------------------------------------------------------------*/
+-OSCL_EXPORT_REF Word16 pv_round(register Word32 L_var1, Flag *pOverflow)
++OSCL_EXPORT_REF Word16 pv_round(Word32 L_var1, Flag *pOverflow)
+ {
+     Word16  result;
+ 
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/shr.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/shr.cpp
+index a0fbd35..dabe1a8 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/shr.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/shr.cpp
+@@ -157,9 +157,9 @@ Word16 shr_std (Word16 var1, Word16 var2)
+ /*----------------------------------------------------------------------------
+ ; FUNCTION CODE
+ ----------------------------------------------------------------------------*/
+-OSCL_EXPORT_REF Word16 shr(register Word16 var1, register Word16 var2, Flag *pOverflow)
++OSCL_EXPORT_REF Word16 shr(Word16 var1, Word16 var2, Flag *pOverflow)
+ {
+-    register Word16 result;
++    Word16 result;
+ 
+     if (var2 != 0)
+     {
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/shr_r.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/shr_r.cpp
+index b403885..04ef9e6 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/shr_r.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/shr_r.cpp
+@@ -160,7 +160,7 @@ Word16 shr_r (Word16 var1, Word16 var2)
+ /*----------------------------------------------------------------------------
+ ; FUNCTION CODE
+ ----------------------------------------------------------------------------*/
+-OSCL_EXPORT_REF Word16 shr_r(register Word16 var1, register Word16 var2, Flag *pOverflow)
++OSCL_EXPORT_REF Word16 shr_r(Word16 var1, Word16 var2, Flag *pOverflow)
+ {
+     /*----------------------------------------------------------------------------
+     ; Define all local variables
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/weight_a.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/weight_a.cpp
+index 98382b8..04160d8 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/weight_a.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/weight_a.cpp
+@@ -137,7 +137,7 @@ OSCL_EXPORT_REF void Weight_Ai(
+     Word16 a_exp[]      /* (o)   : Spectral expanded LPC coefficients   */
+ )
+ {
+-    register Word16 i;
++    Word16 i;
+ 
+     *(a_exp) = *(a);
+ 
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/d1035pf.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/d1035pf.cpp
+index d56b922..5f147bd 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/d1035pf.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/d1035pf.cpp
+@@ -177,7 +177,7 @@ void dec_10i40_35bits(
+     const Word16* dgray_ptr /* i : ptr to read-only tbl                       */
+ )
+ {
+-    register Word16 i, j, pos1, pos2;
++    Word16 i, j, pos1, pos2;
+     Word16 sign, tmp;
+ 
+     for (i = 0; i < L_CODE; i++)
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/d_plsf_5.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/d_plsf_5.cpp
+index 8a4e763..9218c4b 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/d_plsf_5.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/d_plsf_5.cpp
+@@ -263,7 +263,7 @@ void D_plsf_5(
+     Flag  *pOverflow    /* o : Flag set when overflow occurs                */
+ )
+ {
+-    register Word16 i;
++    Word16 i;
+     Word16 temp;
+     Word16 sign;
+ 
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/int_lsf.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/int_lsf.cpp
+index e50eb6c..82844a1 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/int_lsf.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/int_lsf.cpp
+@@ -176,9 +176,9 @@ void Int_lsf(
+     Flag  *pOverflow  /* o : flag set if overflow occurs                    */
+ )
+ {
+-    register Word16 i;
+-    register Word16 temp1;
+-    register Word16 temp2;
++    Word16 i;
++    Word16 temp1;
++    Word16 temp2;
+ 
+     if (i_subfr == 0)
+     {
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/ph_disp.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/ph_disp.cpp
+index 22fe3b5..b2d00ff 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/ph_disp.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/ph_disp.cpp
+@@ -147,7 +147,7 @@ int ph_disp_reset (ph_dispState *state)
+ 
+ Word16 ph_disp_reset(ph_dispState *state)
+ {
+-    register Word16 i;
++    Word16 i;
+ 
+     if (state == (ph_dispState *) NULL)
+     {
+@@ -560,15 +560,15 @@ void ph_disp(
+     Flag   *pOverflow       /* i/o     : oveflow indicator                  */
+ )
+ {
+-    register Word16 i, i1;
+-    register Word16 tmp1;
++    Word16 i, i1;
++    Word16 tmp1;
+     Word32 L_temp;
+     Word32 L_temp2;
+     Word16 impNr;           /* indicator for amount of disp./filter used */
+ 
+     Word16 inno_sav[L_SUBFR];
+     Word16 ps_poss[L_SUBFR];
+-    register Word16 nze, nPulse;
++    Word16 nze, nPulse;
+     Word16 ppos;
+     const Word16 *ph_imp;   /* Pointer to phase dispersion filter */
+ 
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/pstfilt.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/pstfilt.cpp
+index 479ded7..2bbb9e1 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/pstfilt.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/pstfilt.cpp
+@@ -376,10 +376,10 @@ void Post_Filter(
+     Word16 Ap4[MP1];            /* bandwidth expanded LP parameters */
+     Word16 *Az;                 /* pointer to Az_4:                 */
+     /*  LPC parameters in each subframe */
+-    register Word16 i_subfr;    /* index for beginning of subframe  */
++    Word16 i_subfr;    /* index for beginning of subframe  */
+     Word16 h[L_H];
+ 
+-    register Word16 i;
++    Word16 i;
+     Word16 temp1;
+     Word16 temp2;
+     Word32 L_tmp;
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/autocorr.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/autocorr.cpp
+index 033c93a..014a124 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/autocorr.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/autocorr.cpp
+@@ -224,9 +224,9 @@ Word16 Autocorr(
+     Flag  *pOverflow       /* (o)    : indicates overflow                 */
+ )
+ {
+-    register Word16 i;
+-    register Word16 j;
+-    register Word16 norm;
++    Word16 i;
++    Word16 j;
++    Word16 norm;
+ 
+     Word16 y[L_WINDOW];
+     Word32 sum;
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/c2_9pf.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/c2_9pf.cpp
+index 052a53f..2bcb7b8 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/c2_9pf.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/c2_9pf.cpp
+@@ -267,7 +267,7 @@ extern "C"
+         Word16 dn_sign[L_CODE];
+         Word16 rr[L_CODE][L_CODE];
+ 
+-        register Word16 i;
++        Word16 i;
+ 
+         Word16 index;
+         Word16 sharp;
+@@ -527,10 +527,10 @@ extern "C"
+         Flag   * pOverflow   /* o : Flag set when overflow occurs      */
+     )
+     {
+-        register Word16 i0;
+-        register Word16 i1;
++        Word16 i0;
++        Word16 i1;
+         Word16 ix = 0; /* initialization only needed to keep gcc silent */
+-        register Word16  track1;
++        Word16  track1;
+         Word16 ipos[NB_PULSE];
+         Word16 psk;
+         Word16 ps0;
+@@ -543,7 +543,7 @@ extern "C"
+         Word32 s;
+         Word32 alp0;
+         Word32 alp1;
+-        register Word16 i;
++        Word16 i;
+         Word32 L_temp;
+         Word16 *p_codvec = &codvec[0];
+ 
+@@ -898,13 +898,13 @@ extern "C"
+         Flag  *pOverflow  /* o : Flag set when overflow occurs              */
+     )
+     {
+-        register Word16 i;
+-        register Word16 j;
+-        register Word16 k;
+-        register Word16 track;
+-        register Word16 first;
+-        register Word16 index;
+-        register Word16 rsign;
++        Word16 i;
++        Word16 j;
++        Word16 k;
++        Word16 track;
++        Word16 first;
++        Word16 index;
++        Word16 rsign;
+         Word16 indx;
+         Word16 _sign[NB_PULSE];
+         Word16 *p0;
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cl_ltp.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cl_ltp.cpp
+index 50eb6b9..2b49af2 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cl_ltp.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cl_ltp.cpp
+@@ -545,7 +545,7 @@ void cl_ltp(
+     Flag   *pOverflow    /* o   : overflow indicator                        */
+ )
+ {
+-    register Word16 i;
++    Word16 i;
+     Word16 index;
+     Word32 L_temp;     /* temporarily variable */
+     Word16 resu3;      /* flag for upsample resolution */
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/convolve.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/convolve.cpp
+index e1471d6..c059532 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/convolve.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/convolve.cpp
+@@ -155,7 +155,7 @@ void Convolve(
+     Word16 L           /* (i)     : vector size                            */
+ )
+ {
+-    register Word16 i, n;
++    Word16 i, n;
+     Word32 s1, s2;
+ 
+ 
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cor_h.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cor_h.cpp
+index 32fbdd1..1b2f3d4 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cor_h.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cor_h.cpp
+@@ -193,8 +193,8 @@ void cor_h(
+     Flag  *pOverflow
+ )
+ {
+-    register Word16 i;
+-    register Word16 dec;
++    Word16 i;
++    Word16 dec;
+ 
+     Word16 h2[L_CODE];
+     Word32 s;
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cor_h_x.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cor_h_x.cpp
+index 7bb54bb..492e4b8 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cor_h_x.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cor_h_x.cpp
+@@ -202,9 +202,9 @@ void cor_h_x(
+     Flag   *pOverflow /* (o): pointer to overflow flag                      */
+ )
+ {
+-    register Word16 i;
+-    register Word16 j;
+-    register Word16 k;
++    Word16 i;
++    Word16 j;
++    Word16 k;
+ 
+     Word32 s;
+     Word32 y32[L_CODE];
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cor_h_x2.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cor_h_x2.cpp
+index 9d72ab3..fc126b2 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cor_h_x2.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/cor_h_x2.cpp
+@@ -194,9 +194,9 @@ void cor_h_x2(
+     Flag *pOverflow
+ )
+ {
+-    register Word16 i;
+-    register Word16 j;
+-    register Word16 k;
++    Word16 i;
++    Word16 j;
++    Word16 k;
+     Word32 s;
+     Word32 y32[L_CODE];
+     Word32 max;
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/dtx_enc.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/dtx_enc.cpp
+index f4f25f9..202ba2d 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/dtx_enc.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/dtx_enc.cpp
+@@ -67,7 +67,7 @@ terms listed above has been obtained from the copyright holder.
+ ; MACROS
+ ; Define module specific macros here
+ ----------------------------------------------------------------------------*/
+-extern Word32 L_add(register Word32 L_var1, register Word32 L_var2, Flag *pOverflow);
++extern Word32 L_add(Word32 L_var1, Word32 L_var2, Flag *pOverflow);
+ 
+ /*----------------------------------------------------------------------------
+ ; DEFINES
+@@ -544,7 +544,7 @@ void dtx_enc(dtx_encState *st,        /* i/o : State struct                  */
+              Flag   *pOverflow        /* i/o : overflow indicator            */
+             )
+ {
+-    register Word16 i, j;
++    Word16 i, j;
+     Word16 temp;
+     Word16 log_en;
+     Word16 lsf[M];
+@@ -800,7 +800,7 @@ void dtx_buffer(dtx_encState *st,   /* i/o : State struct                    */
+                )
+ {
+ 
+-    register Word16 i;
++    Word16 i;
+     Word32 L_frame_en;
+     Word32 L_temp;
+     Word16 log_en_e;
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/l_negate.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/l_negate.cpp
+index 9699095..01b9dca 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/l_negate.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/l_negate.cpp
+@@ -125,7 +125,7 @@ Word32 L_negate (Word32 L_var1)
+ /*----------------------------------------------------------------------------
+ ; FUNCTION CODE
+ ----------------------------------------------------------------------------*/
+-Word32 L_negate(register Word32 L_var1)
++Word32 L_negate(Word32 L_var1)
+ {
+     /*----------------------------------------------------------------------------
+     ; Define all local variables
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/levinson.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/levinson.cpp
+index cbd27d7..c138e5d 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/levinson.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/levinson.cpp
+@@ -573,8 +573,8 @@ Word16 Levinson(
+     Flag   *pOverflow
+ )
+ {
+-    register Word16 i;
+-    register Word16 j;
++    Word16 i;
++    Word16 j;
+     Word16 hi;
+     Word16 lo;
+     Word16 Kh;                    /* reflexion coefficient; hi and lo   */
+@@ -586,9 +586,9 @@ Word16 Levinson(
+     Word16 Al[M + 1];
+     Word16 Anh[M + 1];            /* LPC coef.for next iteration in     */
+     Word16 Anl[M + 1];            /* double prec.                       */
+-    register Word32 t0;           /* temporary variable                 */
+-    register Word32 t1;           /* temporary variable                 */
+-    register Word32 t2;           /* temporary variable                 */
++    Word32 t0;           /* temporary variable                 */
++    Word32 t1;           /* temporary variable                 */
++    Word32 t2;           /* temporary variable                 */
+ 
+     Word16 *p_Rh;
+     Word16 *p_Rl;
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/pitch_ol.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/pitch_ol.cpp
+index d8efa1e..1d0ff1e 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/pitch_ol.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/pitch_ol.cpp
+@@ -303,7 +303,7 @@ static Word16 Lag_max(  /* o   : lag found                               */
+ )
+ #endif
+ {
+-    register Word16 i;
++    Word16 i;
+     Word16 *p;
+     Word32 max;
+     Word32 t0;
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/pre_proc.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/pre_proc.cpp
+index 93d23b5..4108f3f 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/pre_proc.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/pre_proc.cpp
+@@ -436,7 +436,7 @@ void Pre_Process(
+     Word16 signal[], /* input/output signal */
+     Word16 lg)       /* length of signal    */
+ {
+-    register Word16 i;
++    Word16 i;
+     Word16 x_n_2;
+     Word16 x_n_1;
+     Word32 L_tmp;
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/set_sign.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/set_sign.cpp
+index f759901..f25b062 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/set_sign.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/set_sign.cpp
+@@ -194,7 +194,7 @@ void set_sign(Word16 dn[],   /* i/o : correlation between target and h[]    */
+               Word16 n       /* i   : # of maximum correlations in dn2[]    */
+              )
+ {
+-    register Word16 i, j, k;
++    Word16 i, j, k;
+     Word16 val, min;
+     Word16 pos = 0; /* initialization only needed to keep gcc silent */
+ 
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_wb/dec/src/normalize_amr_wb.h b/opencore/codecs_v2/audio/gsm_amr/amr_wb/dec/src/normalize_amr_wb.h
+index 73ccb71..5132d7d 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_wb/dec/src/normalize_amr_wb.h
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_wb/dec/src/normalize_amr_wb.h
+@@ -66,8 +66,8 @@ terms listed above has been obtained from the copyright holder.
+ 
+ __inline int16 normalize_amr_wb(int32 x)
+ {
+-    register int32 y;
+-    register int32 ra = x;
++    int32 y;
++    int32 ra = x;
+ 
+ 
+     asm volatile(
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_wb/dec/src/pvamrwb_math_op.cpp b/opencore/codecs_v2/audio/gsm_amr/amr_wb/dec/src/pvamrwb_math_op.cpp
+index d1ec790..5872512 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_wb/dec/src/pvamrwb_math_op.cpp
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_wb/dec/src/pvamrwb_math_op.cpp
+@@ -205,7 +205,7 @@ int16 div_16by16(int16 var1, int16 var2)
+ {
+ 
+     int16 var_out = 0;
+-    register int16 iteration;
++    int16 iteration;
+     int32 L_num;
+     int32 L_denom;
+     int32 L_denom_by_2;
+diff --git a/opencore/codecs_v2/audio/gsm_amr/amr_wb/dec/src/pvamrwbdecoder_basic_op_gcc_armv5.h b/opencore/codecs_v2/audio/gsm_amr/amr_wb/dec/src/pvamrwbdecoder_basic_op_gcc_armv5.h
+index c2c9f36..e9ddbf1 100644
+--- a/opencore/codecs_v2/audio/gsm_amr/amr_wb/dec/src/pvamrwbdecoder_basic_op_gcc_armv5.h
++++ b/opencore/codecs_v2/audio/gsm_amr/amr_wb/dec/src/pvamrwbdecoder_basic_op_gcc_armv5.h
+@@ -51,10 +51,10 @@ extern "C"
+ 
+     static inline int16 sub_int16(int16 var1, int16 var2)
+     {
+-        register int32 L_var_out;
+-        register int32 L_var_aux;
+-        register int32 ra = (int32)var1;
+-        register int32 rb = (int32)var2;
++        int32 L_var_out;
++        int32 L_var_aux;
++        int32 ra = (int32)var1;
++        int32 rb = (int32)var2;
+ 
+         asm volatile(
+             "mov  %0, %2, lsl #16\n"
+@@ -72,10 +72,10 @@ extern "C"
+ 
+     static inline int16 add_int16(int16 var1, int16 var2)
+ {
+-        register int32 L_var_out;
+-        register int32 L_var_aux;
+-        register int32 ra = (int32)var1;
+-        register int32 rb = (int32)var2;
++        int32 L_var_out;
++        int32 L_var_aux;
++        int32 ra = (int32)var1;
++        int32 rb = (int32)var2;
+ 
+         asm volatile(
+             "mov  %0, %2, lsl #16\n"
+@@ -93,11 +93,11 @@ extern "C"
+ 
+     static inline  int32 mul_32by16(int16 hi, int16 lo, int16 n)
+ {
+-        register int32 H_32;
+-        register int32 L_32;
+-        register int32 ra = (int32)hi;
+-        register int32 rb = (int32)lo;
+-        register int32 rc = (int32)n;
++        int32 H_32;
++        int32 L_32;
++        int32 ra = (int32)hi;
++        int32 rb = (int32)lo;
++        int32 rc = (int32)n;
+ 
+ 
+         asm volatile(
+@@ -117,9 +117,9 @@ extern "C"
+ 
+     static inline int32 sub_int32(int32 L_var1, int32 L_var2)
+ {
+-        register int32 L_var_out;
+-        register int32 ra = L_var1;
+-        register int32 rb = L_var2;
++        int32 L_var_out;
++        int32 ra = L_var1;
++        int32 rb = L_var2;
+ 
+         asm volatile(
+             "qsub %0, %1, %2"
+@@ -132,9 +132,9 @@ extern "C"
+ 
+     static inline int32 add_int32(int32 L_var1, int32 L_var2)
+ {
+-        register int32 L_var_out;
+-        register int32 ra = L_var1;
+-        register int32 rb = L_var2;
++        int32 L_var_out;
++        int32 ra = L_var1;
++        int32 rb = L_var2;
+ 
+         asm volatile(
+             "qadd %0, %1, %2"
+@@ -147,10 +147,10 @@ extern "C"
+ 
+     static inline int32 msu_16by16_from_int32(int32 L_var3, int16 var1, int16 var2)
+ {
+-        register int32 L_var_out;
+-        register int32 ra = (int32)var1;
+-        register int32 rb = (int32)var2;
+-        register int32 rc = L_var3;
++        int32 L_var_out;
++        int32 ra = (int32)var1;
++        int32 rb = (int32)var2;
++        int32 rc = L_var3;
+ 
+         asm volatile(
+             "smulbb %0, %1, %2\n"
+@@ -166,10 +166,10 @@ extern "C"
+ 
+     static inline int32 mac_16by16_to_int32(int32 L_var3, int16 var1, int16 var2)
+ {
+-        register int32 L_var_out;
+-        register int32 ra = (int32)var1;
+-        register int32 rb = (int32)var2;
+-        register int32 rc = L_var3;
++        int32 L_var_out;
++        int32 ra = (int32)var1;
++        int32 rb = (int32)var2;
++        int32 rc = L_var3;
+ 
+         asm volatile(
+             "smulbb %0, %1, %2\n"
+@@ -185,9 +185,9 @@ extern "C"
+ 
+     static inline  int32 mul_16by16_to_int32(int16 var1, int16 var2)
+ {
+-        register int32 L_var_out;
+-        register int32 ra = (int32)var1;
+-        register int32 rb = (int32)var2;
++        int32 L_var_out;
++        int32 ra = (int32)var1;
++        int32 rb = (int32)var2;
+ 
+         asm volatile(
+             "smulbb %0, %1, %2\n"
+@@ -202,9 +202,9 @@ extern "C"
+ 
+     static inline int16 mult_int16(int16 var1, int16 var2)
+ {
+-        register int32 L_var_out;
+-        register int32 ra = (int32)var1;
+-        register int32 rb = (int32)var2;
++        int32 L_var_out;
++        int32 ra = (int32)var1;
++        int32 rb = (int32)var2;
+ 
+         asm volatile(
+             "smulbb %0, %1, %2\n"
+@@ -218,9 +218,9 @@ extern "C"
+ 
+     static inline int16 amr_wb_round(int32 L_var1)
+ {
+-        register int32 L_var_out;
+-        register int32 ra = (int32)L_var1;
+-        register int32 rb = (int32)0x00008000L;
++        int32 L_var_out;
++        int32 ra = (int32)L_var1;
++        int32 rb = (int32)0x00008000L;
+ 
+         asm volatile(
+             "qadd %0, %1, %2\n"
+@@ -233,9 +233,9 @@ extern "C"
+ 
+     static inline int16 amr_wb_shl1_round(int32 L_var1)
+ {
+-        register int32 L_var_out;
+-        register int32 ra = (int32)L_var1;
+-        register int32 rb = (int32)0x00008000L;
++        int32 L_var_out;
++        int32 ra = (int32)L_var1;
++        int32 rb = (int32)0x00008000L;
+ 
+         asm volatile(
+             "qadd %0, %1, %1\n"
+@@ -250,10 +250,10 @@ extern "C"
+ 
+     static inline int32 fxp_mac_16by16(const int16 L_var1, const int16 L_var2, int32 L_add)
+ {
+-        register int32 tmp;
+-        register int32 ra = (int32)L_var1;
+-        register int32 rb = (int32)L_var2;
+-        register int32 rc = (int32)L_add;
++        int32 tmp;
++        int32 ra = (int32)L_var1;
++        int32 rb = (int32)L_var2;
++        int32 rc = (int32)L_add;
+ 
+         asm volatile(
+             "smlabb %0, %1, %2, %3"
+@@ -266,9 +266,9 @@ extern "C"
+ 
+     static inline int32 fxp_mul_16by16bb(int16 L_var1, const int16 L_var2)
+ {
+-        register int32 tmp;
+-        register int32 ra = (int32)L_var1;
+-        register int32 rb = (int32)L_var2;
++        int32 tmp;
++        int32 ra = (int32)L_var1;
++        int32 rb = (int32)L_var2;
+ 
+         asm volatile(
+             "smulbb %0, %1, %2"
+@@ -284,9 +284,9 @@ extern "C"
+ 
+     static inline int32 fxp_mul32_by_16(int32 L_var1, const int32 L_var2)
+ {
+-        register int32 tmp;
+-        register int32 ra = (int32)L_var1;
+-        register int32 rb = (int32)L_var2;
++        int32 tmp;
++        int32 ra = (int32)L_var1;
++        int32 rb = (int32)L_var2;
+ 
+         asm volatile(
+             "smulwb %0, %1, %2"
+-- 
+2.41.0
+

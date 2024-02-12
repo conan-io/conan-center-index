@@ -1,8 +1,15 @@
 sources:
+  "0.0.7":
+    url: "https://github.com/libuvc/libuvc/archive/v0.0.7.tar.gz"
+    sha256: "7c6ba79723ad5d0ccdfbe6cadcfbd03f9f75b701d7ba96631eb1fd929a86ee72"
   "0.0.6":
     url: "https://github.com/libuvc/libuvc/archive/v0.0.6.tar.gz"
     sha256: "42175a53c1c704365fdc782b44233925e40c9344fbb7f942181c1090f06e2873"
 patches:
+  "0.0.7":
+    - patch_file: "patches/0.0.7-0001-fix-cci-packagename.patch"
+      patch_description: "use cci package name"
+      patch_type: "conan"
   "0.0.6":
     - patch_file: "patches/0001-adjust-libusb-libjpeg.patch"
       patch_description: "Robust discovery and injection of libusb & libjpeg"

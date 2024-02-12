@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save
-from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -17,6 +17,7 @@ class JasperConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("toolkit", "coding", "jpeg", "images")
     description = "JasPer Image Processing/Coding Tool Kit"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -49,15 +50,20 @@ class JasperConan(ConanFile):
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
+            self.requires("libjpeg-turbo/3.0.0")
         elif self.options.with_libjpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
 
+    def build_requirements(self):
+        if Version(self.version) >= "4.1.1":
+            self.tool_requires("cmake/[>=3.20 <4]")
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
+
         tc = CMakeToolchain(self)
         if Version(self.version) >= "4.0.0":
             tc.variables["JAS_ENABLE_PIC"] = self.options.get_safe("fPIC", True)
@@ -67,6 +73,7 @@ class JasperConan(ConanFile):
         tc.variables["JAS_ENABLE_SHARED"] = self.options.shared
         tc.variables["JAS_LIBJPEG_REQUIRED"] = "REQUIRED"
         tc.variables["JAS_ENABLE_LIBJPEG"] = bool(self.options.with_libjpeg)
+        tc.variables["JAS_HAVE_JPEGLIB_H"] = True
         if Version(self.version) >= "3.0.0":
             tc.variables["JAS_ENABLE_LIBHEIF"] = False
         tc.variables["JAS_ENABLE_OPENGL"] = False
@@ -74,12 +81,6 @@ class JasperConan(ConanFile):
         if cross_building(self):
             tc.cache_variables["JAS_CROSSCOMPILING"] = True
             tc.cache_variables["JAS_STDC_VERSION"] = "199901L"
-
-        # TODO: Remove after fixing https://github.com/conan-io/conan-center-index/issues/13159
-        # C3I workaround to force CMake to choose the highest version of
-        # the windows SDK available in the system
-        if is_msvc(self) and not self.conf.get("tools.cmake.cmaketoolchain:system_version"):
-            tc.variables["CMAKE_SYSTEM_VERSION"] = "10.0"
 
         tc.generate()
 
@@ -106,17 +107,15 @@ class JasperConan(ConanFile):
 
     # FIXME: Missing CMake alias variables. See https://github.com/conan-io/conan/issues/7691
     def _create_cmake_module_variables(self, module_file):
-        content = textwrap.dedent("""\
+        content = textwrap.dedent(f"""\
             set(JASPER_FOUND TRUE)
             if(DEFINED Jasper_INCLUDE_DIR)
-                set(JASPER_INCLUDE_DIR ${Jasper_INCLUDE_DIR})
+                set(JASPER_INCLUDE_DIR ${{Jasper_INCLUDE_DIR}})
             endif()
             if(DEFINED Jasper_LIBRARIES)
-                set(JASPER_LIBRARIES ${Jasper_LIBRARIES})
+                set(JASPER_LIBRARIES ${{Jasper_LIBRARIES}})
             endif()
-            if(DEFINED Jasper_VERSION)
-                set(JASPER_VERSION_STRING ${Jasper_VERSION})
-            endif()
+            set(JASPER_VERSION_STRING "{self.version}")
         """)
         save(self, module_file, content)
 

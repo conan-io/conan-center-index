@@ -9,7 +9,7 @@ int main(void)
 
     deserializeJson(doc, json);
 
-    const char* sensor = doc["sensor"].as<char*>();
+    const char* sensor = doc["sensor"].as<const char*>();
     int time = doc["time"].as<int>();
     double latitude = doc["data"][0].as<double>();
     double longitude = doc["data"][1].as<double>();

@@ -1,58 +1,31 @@
 sources:
-  "1.3.0":
-    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.3.0.tar.gz"
-    sha256: "64ac4614db292ae8c5aa26de0295bf1623dbb3985054cb656c55e67431def17c"
+  "1.3.2":
+    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.3.2.tar.gz"
+    sha256: "2a499607df669e40258e53d0ade8035ba4ec0175244869d1025d460562aa09b4"
+  "1.3.1":
+    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.3.1.tar.gz"
+    sha256: "b3779627c2dfd31e3d8c4485962c2efe17785ef975e2be5c8c0c9e6cd3c4ef66"
   "1.2.4":
     url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.4.tar.gz"
     sha256: "7bf5a8a28cc69bcfa8cb214f2c3095703c6b73ac5fba4d5480c205331d9494df"
-  "1.2.3":
-    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.3.tar.gz"
-    sha256: "f5d7ab2390b06b8a934a4fc35784291b3885b557780d099bd32f09241f9d83f9"
-  "1.2.2":
-    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.2.tar.gz"
-    sha256: "7656532f837af5f4cec3ff6bafe552c044dc39bf453587bd5b77450802f4aee6"
-  "1.2.1":
-    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.1.tar.gz"
-    sha256: "808b98d2f5b84e9b27fdef6c5372dac769c3bda4502febbfa5031bd3c4d7d018"
-  "1.2.0":
-    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.0.tar.gz"
-    sha256: "2fc8bbde9f97f2ab403c0224fb9ca62b2e6852cbc519e91ceaa7c153ffd88a0c"
   "1.1.0":
     url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.1.0.tar.gz"
     sha256: "98a052268cc4d5ece27f76572a7f50293f439c17a98e67c4ea0c7ed6f50ef043"
-  "1.0.3":
-    url: "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.0.3.tar.gz"
-    sha256: "e20a07865c8697bba00aebccc6f54912d6bc333bb4d604e6b07491c1a226b34f"
 patches:
-  "1.3.0":
-    - patch_file: "patches/1.3.0-0001-fix-cmake.patch"
+  "1.3.2":
+    - patch_file: "patches/1.3.1-0001-fix-cmake.patch"
+      patch_description: "disable PIC, disable prefix library name on MSVC"
+      patch_type: "conan"
+  "1.3.1":
+    - patch_file: "patches/1.3.1-0001-fix-cmake.patch"
       patch_description: "disable PIC, disable prefix library name on MSVC"
       patch_type: "conan"
   "1.2.4":
-    - patch_file: "patches/1.0.3-0001-fix-dll-export.patch"
+    - patch_file: "patches/1.1.0-0001-fix-dll-export.patch"
       patch_description: "define WEBP_EXTERN for windows shared build"
       patch_type: "portability"
-  "1.2.3":
-    - patch_file: "patches/1.0.3-0001-fix-dll-export.patch"
-      patch_description: "define WEBP_EXTERN for windows shared build"
-      patch_type: "portability"
-  "1.2.2":
-    - patch_file: "patches/1.0.3-0001-fix-dll-export.patch"
-      patch_description: "define WEBP_EXTERN for windows shared build"
-      patch_type: "portability"
-  "1.2.1":
-    - patch_file: "patches/1.0.3-0001-fix-dll-export.patch"
-      patch_description: "define WEBP_EXTERN for windows shared build"
-      patch_type: "portability"
-  "1.2.0":
-    - patch_file: "patches/1.0.3-0001-fix-dll-export.patch"
-      patch_description: "define WEBP_EXTERN for windows shared build"
-      patch_type: "portability"
-    - patch_file: "patches/1.2.0-0003-build-libwebpmux.patch"
-      patch_description: "always build libwebpmux"
-      patch_type: "conan"
   "1.1.0":
-    - patch_file: "patches/1.0.3-0001-fix-dll-export.patch"
+    - patch_file: "patches/1.1.0-0001-fix-dll-export.patch"
       patch_description: "define WEBP_EXTERN for windows shared build"
       patch_type: "portability"
     - patch_file: "patches/1.1.0-0002-qnx.patch"
@@ -60,12 +33,5 @@ patches:
       patch_type: "conan"
       patch_source: "https://chromium-review.googlesource.com/c/webm/libwebp/+/2637274"
     - patch_file: "patches/1.1.0-0003-build-libwebpmux.patch"
-      patch_description: "always build libwebpmux"
-      patch_type: "conan"
-  "1.0.3":
-    - patch_file: "patches/1.0.3-0001-fix-dll-export.patch"
-      patch_description: "define WEBP_EXTERN for windows shared build"
-      patch_type: "portability"
-    - patch_file: "patches/1.0.3-0002-build-libwebpmux.patch"
       patch_description: "always build libwebpmux"
       patch_type: "conan"

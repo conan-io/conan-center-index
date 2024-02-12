@@ -4,7 +4,7 @@ from conan.tools.files import copy, get
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.2 <1.51.0 || >=1.51.2"
+required_conan_version = ">=1.53.0"
 
 
 class LibrttopoConan(ConanFile):
@@ -14,10 +14,11 @@ class LibrttopoConan(ConanFile):
         "standard (ISO 13249 aka SQL/MM) topologies."
     )
     license = "GPL-2.0-or-later"
-    topics = ("librttopo", "topology", "geospatial", "gis")
+    topics = ("topology", "geospatial", "gis")
     homepage = "https://git.osgeo.org/gitea/rttopo/librttopo"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,25 +37,18 @@ class LibrttopoConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
-
-    def requirements(self):
-        self.requires("geos/3.11.0")
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        self.requires("geos/3.12.0", transitive_headers=True, transitive_libs=True)
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

@@ -10,3 +10,7 @@ if(quill_VERSION VERSION_GREATER_EQUAL "2.0.0")
 else()
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
 endif()
+
+if(quill_VERSION VERSION_GREATER_EQUAL "3.3.0")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE QUILL_FILE_HANDLERS_API_V3_3)
+endif()

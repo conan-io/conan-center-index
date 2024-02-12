@@ -1,10 +1,4 @@
 sources:
-  "7.6.14":
-    url: "https://github.com/ivmai/libatomic_ops/releases/download/v7.6.14/libatomic_ops-7.6.14.tar.gz"
-    sha256: "390f244d424714735b7050d056567615b3b8f29008a663c262fb548f1802d292"
-patches:
-  "7.6.14":
-    - patch_file: "patches/enable-cmake-7_6_14.patch"
-      patch_description: "Support build with CMake"
-      patch_source: "https://github.com/ivmai/libatomic_ops/blob/044573903530c4a8e8318e20a830d4a0531b2035/CMakeLists.txt"
-      patch_type: "backport"
+  "7.8.2":
+    url: "https://github.com/ivmai/libatomic_ops/releases/download/v7.8.2/libatomic_ops-7.8.2.tar.gz"
+    sha256: "d305207fe207f2b3fb5cb4c019da12b44ce3fcbc593dfd5080d867b1a2419b51"

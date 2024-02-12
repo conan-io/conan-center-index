@@ -1,9 +1,15 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
-import contextlib
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
 class LibGphoto2(ConanFile):
@@ -13,11 +19,9 @@ class LibGphoto2(ConanFile):
     homepage = "http://www.gphoto.org/"
     license = "LGPL-2.1"
     topics = ("gphoto2", "libgphoto2", "libgphoto", "photo")
-    exports_sources = "patches/*"
-    settings = "os", "compiler", "build_type", "arch"
+    package_type = "shared-library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
         "with_libusb": [True, False],
         "with_libcurl": [True, False],
         "with_libxml2": [True, False],
@@ -25,110 +29,103 @@ class LibGphoto2(ConanFile):
         "with_libjpeg": [True, False],
     }
     default_options = {
-        "shared": True,
-        "fPIC": True,
         "with_libusb": True,
         "with_libcurl": True,
         "with_libxml2": True,
         "with_libexif": True,
         "with_libjpeg": True,
     }
-    generators = "pkg_config"
-    _autotools = None
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-    def validate(self):
-        if not self.options.shared:
-            raise ConanInvalidConfiguration("building libgphoto2 as a static library is not supported")
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("libgphoto2 does not support Windows")
-
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.os == "Linux" and not self.options["libtool"].shared:
-            env = {
-                "LIBLTDL": "-lltdl -ldl",
-            }
-            with tools.environment_append(env):
-                yield
-        else:
-            yield
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
-    def build_requirements(self):
-        self.build_requires("pkgconf/1.7.4")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libtool/2.4.6")
+        self.requires("libtool/2.4.7")
         if self.options.with_libusb:
             self.requires("libusb/1.0.26")
         if self.options.with_libcurl:
-            self.requires("libcurl/7.83.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.14")
+            self.requires("libxml2/2.12.3")
         if self.options.with_libexif:
-            self.requires("libexif/0.6.23")
+            self.requires("libexif/0.6.24")
         if self.options.with_libjpeg:
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
+
+    def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("Visual Studio not supported yet")
+
+    def build_requirements(self):
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/2.1.0")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.libs = []
-        yes_no = lambda v: "yes" if v else "no"
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
+        tc = AutotoolsToolchain(self)
         auto_no = lambda v: "auto" if v else "no"
-        args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--with-libcurl={}".format(auto_no(self.options.with_libcurl)),
-            "--with-libexif={}".format(auto_no(self.options.with_libexif)),
-            "--with-libxml-2.0={}".format(auto_no(self.options.with_libxml2)),
+        tc.configure_args.extend([
+            f"--with-libcurl={auto_no(self.options.with_libcurl)}",
+            f"--with-libexif={auto_no(self.options.with_libexif)}",
+            f"--with-libxml-2.0={auto_no(self.options.with_libxml2)}",
             "--disable-nls",
-            "--datadir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
-            "udevscriptdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
-            "utilsdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin"))),
-        ]
+            "--datadir=${prefix}/res",
+            "udevscriptdir=${prefix}/res",
+            "utilsdir=${prefix}/bin",
+        ])
         if not self.options.with_libjpeg:
-            args.append("--without-jpeg")
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+            tc.configure_args.append("--without-jpeg")
+        tc.generate()
+
+        deps = AutotoolsDeps(self)
+        deps.generate()
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def build(self):
-        self._patch_sources()
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
-        tools.remove_files_by_mask(self.package_folder, "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install()
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "libgphoto2")
         self.cpp_info.libs = ["gphoto2", "gphoto2_port"]
-        self.cpp_info.names["pkg_config"] = "libgphoto2"
+        self.cpp_info.includedirs.append(os.path.join("include", "gphoto2"))
+        self.cpp_info.resdirs = ["res"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["m"]
-

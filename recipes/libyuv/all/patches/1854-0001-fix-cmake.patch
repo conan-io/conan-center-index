@@ -10,14 +10,13 @@
  OPTION( TEST "Built unit tests" OFF )
  
  SET ( ly_base_dir	${PROJECT_SOURCE_DIR} )
-@@ -27,15 +27,11 @@ if(MSVC)
+@@ -27,15 +27,10 @@ if(MSVC)
  endif()
  
  # this creates the static library (.a)
 -ADD_LIBRARY				( ${ly_lib_static} STATIC ${ly_source_files} )
 +ADD_LIBRARY				( ${ly_lib_static} ${ly_source_files} )
 +target_compile_features(${ly_lib_static} PUBLIC cxx_std_11)
-+set_target_properties(${ly_lib_static} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
  
  # this creates the shared library (.so)
 -ADD_LIBRARY				( ${ly_lib_shared} SHARED ${ly_source_files} )

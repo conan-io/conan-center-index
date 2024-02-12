@@ -1,4 +1,5 @@
 #include <rapidxml/rapidxml.hpp>
+#include <rapidxml/rapidxml_print.hpp>
 
 #include <cstdio>
 #include <iostream>
@@ -40,6 +41,9 @@ int main(int argc, char **argv)
     }
     std::cout << std::endl;
   }
+
+  std::cout << "Original xml document:" << std::endl;
+  std::cout << doc;
 
   return 0;
 }

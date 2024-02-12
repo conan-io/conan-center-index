@@ -4,10 +4,11 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.microsoft import check_min_vs
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.57.0"
 
 
 class LcmsConan(ConanFile):
@@ -17,7 +18,7 @@ class LcmsConan(ConanFile):
     license = "MIT"
     homepage = "https://github.com/mm2/Little-CMS"
     topics = ("littlecms", "little-cms", "cmm", "icc", "cmm-engine", "color-management-engine")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -45,7 +46,7 @@ class LcmsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.2.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -58,9 +59,7 @@ class LcmsConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        compiler_version = Version(self.settings.compiler.version)
-        if (str(self.settings.compiler) == "Visual Studio" and compiler_version >= "14") or \
-           (str(self.settings.compiler) == "msvc" and compiler_version >= "190"):
+        if check_min_vs(self, "190", raise_invalid=False):
             # since VS2015 vsnprintf is built-in
             path = os.path.join(self.source_folder, "src", "lcms2_internal.h")
             replace_in_file(self, path, "#       define vsnprintf  _vsnprintf", "")
@@ -72,7 +71,8 @@ class LcmsConan(ConanFile):
         meson.build()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        license_file = "LICENSE" if Version(self.version) >= "2.16" else "COPYING"
+        copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
@@ -89,12 +89,11 @@ class LcmsConan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread"])
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
-    """remove lib prefix & change extension to .lib"""
-    from conan.tools.files import rename
-    from conan.tools.microsoft import is_msvc
-    import glob
-    if not is_msvc(conanfile):
+    """remove lib prefix & change extension to .lib in case of cl like compiler"""
+    if not conanfile.settings.get_safe("compiler.runtime"):
         return
+    from conan.tools.files import rename
+    import glob
     libdirs = getattr(conanfile.cpp.package, "libdirs")
     for libdir in libdirs:
         for ext in [".dll.a", ".dll.lib", ".a"]:

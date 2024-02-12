@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.12)
-project(CMinPack-Conan-TestPackage C)
+cmake_minimum_required(VERSION 3.1)
+project(test_package LANGUAGES C)
 
-find_package(CMinpack REQUIRED)
+find_package(CMinpack REQUIRED CONFIG)
 
 # This builds one of the original cminpack examples against
 # both types of the library

@@ -1,0 +1,9 @@
+sources:
+  "cci.20190225":
+    url: "https://github.com/im95able/Rea/archive/064d99897c9dcc547dc38853dcd917ba04a34ef4.tar.gz"
+    sha256: "efcf822116ea22422d2ea5249250cd5d13db54ab65b1a84a3f16c5d7413aed7e"
+patches:
+  "cci.20190225":
+    - patch_file: "patches/0001-include-limits.patch"
+      patch_description: "include limits"
+      patch_type: "portability"

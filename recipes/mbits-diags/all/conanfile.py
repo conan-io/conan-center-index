@@ -51,7 +51,7 @@ class MBitsDiagsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/9.1.0")
+        self.requires("fmt/10.2.1")
         self.requires("mbits-semver/0.1.1")
 
     def validate(self):

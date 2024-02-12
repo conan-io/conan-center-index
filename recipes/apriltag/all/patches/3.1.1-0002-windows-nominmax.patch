@@ -1,0 +1,20 @@
+--- a/common/time_util.h
++++ b/common/time_util.h
+@@ -30,6 +30,7 @@ either expressed or implied, of the Regents of The University of Michigan.
+ #include <stdbool.h>
+ #include <stdint.h>
+ #ifdef _WIN32
++#define NOMINMAX
+ #include <windows.h>
+ typedef long long suseconds_t;
+ #endif
+--- a/common/workerpool.c
++++ b/common/workerpool.c
+@@ -33,6 +33,7 @@ either expressed or implied, of the Regents of The University of Michigan.
+ #include <stdlib.h>
+ #include <inttypes.h>
+ #ifdef _WIN32
++#define NOMINMAX
+ #include <windows.h>
+ #else
+ #include <unistd.h>

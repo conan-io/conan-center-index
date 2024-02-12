@@ -1,0 +1,12 @@
+diff --git a/include/Clipboard_Lite.h b/include/Clipboard_Lite.h
+index 4f98756..b68e0f4 100644
+--- a/include/Clipboard_Lite.h
++++ b/include/Clipboard_Lite.h
+@@ -1,6 +1,7 @@
+ #pragma once
+ #include <functional>
+ #include <memory>
++#include <string>
+ 
+ #if defined(WINDOWS) || defined(WIN32)
+ #if defined(CLIPBOARD_LITE_DLL)

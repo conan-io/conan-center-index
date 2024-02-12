@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanException
-from conan.tools.files import copy, get, load, save
+from conan.tools.files import copy, get, load, save, apply_conandata_patches, export_conandata_patches
 from conan.tools.layout import basic_layout
 import os
 
@@ -14,8 +14,11 @@ class GnuConfigConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("gnu", "config", "autotools", "canonical", "host", "build", "target", "triplet")
     license = "GPL-3.0-or-later", "autoconf-special-exception"
+    package_type = "build-scripts"
     os = "arch", "compiler", "build_type", "arch"
-    no_copy_source = True
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -24,11 +27,10 @@ class GnuConfigConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
-        pass
+        apply_conandata_patches(self)
 
     def _extract_license(self):
         txt_lines = load(self, os.path.join(self.source_folder, "config.guess")).splitlines()

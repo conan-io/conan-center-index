@@ -65,7 +65,10 @@ class LibpqConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            if Version(self.version) < "13.5":
+                self.requires("openssl/1.1.1w")
+            else:
+                self.requires("openssl/[>=1.1 <4]")
 
     def build_requirements(self):
         if is_msvc(self):
@@ -122,7 +125,7 @@ class LibpqConan(ConanFile):
             system_libs = []
             for dep in host_deps:
                 system_libs.extend(dep.cpp_info.aggregated_components().system_libs)
-        
+
             linked_system_libs = ", ".join(["'{}.lib'".format(lib) for lib in system_libs])
             replace_in_file(self,os.path.join(self.source_folder, "src", "tools", "msvc", "Project.pm"),
                                   "libraries             => [],",

@@ -11,32 +11,26 @@ sources:
   "1.5.23":
     url: "https://downloads.sourceforge.net/project/matio/matio/1.5.23/matio-1.5.23.tar.gz"
     sha256: "9f91eae661df46ea53c311a1b2dcff72051095b023c612d7cbfc09406c9f4d6e"
+  "1.5.24":
+    url: "https://downloads.sourceforge.net/project/matio/matio/1.5.24/matio-1.5.24.tar.gz"
+    sha256: "5106ebed5b40d02a2bb968b57bef8876701c566e039e6ebe134bab779c436f7c"
 patches:
   "1.5.18":
     - patch_file: "patches/require-cmake-3.10.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/disable-hdf5-target.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/patch-apple-no-undefined.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/cmake-install-bundle.patch"
-      base_path: "source_subfolder"
   "1.5.19":
     - patch_file: "patches/require-cmake-3.10.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/patch-apple-no-undefined.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/cmake-install-bundle.patch"
-      base_path: "source_subfolder"
   "1.5.21":
     - patch_file: "patches/require-cmake-3.10.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/patch-apple-no-undefined.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/cmake-install-bundle.patch"
-      base_path: "source_subfolder"
   "1.5.23":
     - patch_file: "patches/require-cmake-3.10.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/cmake-install-bundle.patch"
-      base_path: "source_subfolder"
+  "1.5.24":
+    - patch_file: "patches/require-cmake-3.10.patch"
+    - patch_file: "patches/cmake-install-bundle.patch"

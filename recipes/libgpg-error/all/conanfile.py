@@ -1,8 +1,12 @@
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
 import os
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.57.0"
+
 
 class GPGErrorConan(ConanFile):
     name = "libgpg-error"
@@ -12,6 +16,7 @@ class GPGErrorConan(ConanFile):
     description = "Libgpg-error is a small library that originally defined common error values for all GnuPG " \
                   "components."
     license = "GPL-2.0-or-later"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,65 +26,59 @@ class GPGErrorConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    exports_sources = "patches/**"
-    _autotools = None
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("This recipe only support Linux. You can contribute Windows and/or Macos support.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure(self):
-        if self._autotools:
-            return self._autotools
-        host = None
-        args = ["--disable-dependency-tracking",
-                "--disable-nls",
-                "--disable-languages",
-                "--disable-doc",
-                "--disable-tests"]
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.extend([
+            "--disable-dependency-tracking",
+            "--disable-nls",
+            "--disable-languages",
+            "--disable-doc",
+            "--disable-tests",
+        ])
         if self.options.get_safe("fPIC", True):
-            args.append("--with-pic")
-        if self.options.shared:
-            args.extend(["--disable-static", "--enable-shared"])
-        else:
-            args.extend(["--disable-shared", "--enable-static"])
+            tc.configure_args.append("--with-pic")
+        host = None
         if self.settings.os == "Linux" and self.settings.arch == "x86":
             host = "i686-linux-gnu"
-
-        self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.configure(args=args, host=host, configure_dir=self._source_subfolder)
-        return self._autotools
+        tc.update_configure_args({"--host": host})
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-        env_build = self._configure()
-        env_build.make()
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def package(self):
-        env_build = self._configure()
-        env_build.install()
-        self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        copy(self, "COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install()
+        rm(self, "*la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "gpg-error")
         self.cpp_info.libs = ["gpg-error"]
-        self.cpp_info.names["pkg_config"] = "gpg-error"
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]

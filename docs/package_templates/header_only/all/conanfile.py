@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
@@ -21,6 +21,7 @@ class PackageConan(ConanFile):
     # Do not put "conan" nor the project name in topics. Use topics from the upstream listed on GH
     # Keep 'header-only' as topic
     topics = ("topic1", "topic2", "topic3", "header-only")
+    package_type = "header-library"
     # Keep these or explain why it's not required for this particular case
     settings = "os", "arch", "compiler", "build_type"
     # Do not copy sources to build folder for header only projects, unless you need to apply patches
@@ -34,11 +35,11 @@ class PackageConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
+            "apple-clang": "10",
+            "clang": "7",
+            "gcc": "7",
+            "msvc": "191",
             "Visual Studio": "15",
-            "msvc": "14.1",
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "5.1",
         }
 
     # Use the export_sources(self) method instead of the exports_sources attribute.
@@ -84,12 +85,12 @@ class PackageConan(ConanFile):
 
     # Copy all files to the package folder
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(
             self,
-            pattern="*.h",
-            dst=os.path.join(self.package_folder, "include"),
-            src=os.path.join(self.source_folder, "include"),
+            "*.h",
+            os.path.join(self.source_folder, "include"),
+            os.path.join(self.package_folder, "include"),
         )
 
     def package_info(self):

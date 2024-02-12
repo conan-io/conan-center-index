@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class VolkConan(ConanFile):
@@ -22,6 +23,7 @@ class VolkConan(ConanFile):
     )
     topics = ("vulkan", "loader", "extension", "entrypoint", "graphics")
 
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -35,24 +37,17 @@ class VolkConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"vulkan-headers/{self.version}")
+        self.requires(f"vulkan-headers/{self.version}", transitive_headers=True)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -65,7 +60,15 @@ class VolkConan(ConanFile):
     def _patch_sources(self):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         replace_in_file(self, cmakelists, "find_package(Vulkan QUIET)", "find_package(VulkanHeaders REQUIRED)")
-        replace_in_file(self, cmakelists, "Vulkan::Vulkan", "Vulkan::Headers")
+        if Version(self.version) < "1.3.261":
+            replace_in_file(self, cmakelists, "Vulkan::Vulkan", "Vulkan::Headers")
+        else:
+            replace_in_file(
+                self,
+                cmakelists,
+                "if(VULKAN_HEADERS_INSTALL_DIR)",
+                "if(1)\nset(VOLK_INCLUDES ${VulkanHeaders_INCLUDE_DIRS})\nelseif(VULKAN_HEADERS_INSTALL_DIR)",
+            )
 
     def build(self):
         self._patch_sources()

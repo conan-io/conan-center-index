@@ -1,20 +1,24 @@
-from conan import ConanFile
-from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rmdir
-from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
 import os
 
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rmdir
+from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
+
 required_conan_version = ">=1.53.0"
+
 
 class DrogonConan(ConanFile):
     name = "drogon"
     description = "A C++14/17/20 based HTTP web application framework running on Linux/macOS/Unix/Windows"
-    topics = ("http-server", "non-blocking-io", "http-framework", "asynchronous-programming")
     license = "MIT"
-    homepage = "https://github.com/drogonframework/drogon"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/drogonframework/drogon"
+    topics = ("http-server", "non-blocking-io", "http-framework", "asynchronous-programming")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [False, True],
@@ -24,6 +28,7 @@ class DrogonConan(ConanFile):
         "with_orm": [True, False],
         "with_profile": [True, False],
         "with_brotli": [True, False],
+        "with_yaml_cpp": [True, False],
         "with_postgres": [True, False],
         "with_postgres_batch": [True, False],
         "with_mysql": [True, False],
@@ -38,6 +43,7 @@ class DrogonConan(ConanFile):
         "with_orm": True,
         "with_profile": False,
         "with_brotli": False,
+        "with_yaml_cpp": False,
         "with_postgres": False,
         "with_postgres_batch": False,
         "with_mysql": False,
@@ -51,6 +57,8 @@ class DrogonConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.8.4":
+            del self.options.with_yaml_cpp
 
     def configure(self):
         if self.options.shared:
@@ -71,27 +79,26 @@ class DrogonConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        if Version(self.version) < "1.8.2":
-            return {
+        return {
+            "14": {
                 "Visual Studio": "15",
                 "msvc": "191",
                 "gcc": "6",
                 "clang": "5",
                 "apple-clang": "10",
-            }
-        else:       
-            return {
+            },
+            "17": {
                 "Visual Studio": "16",
                 "msvc": "192",
                 "gcc": "8",
                 "clang": "7",
                 "apple-clang": "12",
             }
+        }.get(str(self._min_cppstd), {})
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
         if minimum_version:
             if Version(self.info.settings.compiler.version) < minimum_version:
@@ -99,30 +106,35 @@ class DrogonConan(ConanFile):
         else:
             self.output.warn(f"{self.ref} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
 
+        if self.settings.compiler.get_safe("cppstd") == "14" and not self.options.with_boost:
+            raise ConanInvalidConfiguration(f"{self.ref} requires boost on C++14")
+
     def requirements(self):
-        self.requires("trantor/1.5.8")
-        self.requires("jsoncpp/1.9.5")
-        self.requires("openssl/1.1.1s")
-        self.requires("zlib/1.2.13")
+        self.requires("trantor/1.5.16", transitive_headers=True, transitive_libs=True)
+        self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
+        self.requires("openssl/[>=1.1 <4]")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os == "Linux":
-            self.requires("libuuid/1.0.3")
+            self.requires("util-linux-libuuid/2.39.2")
         if self.options.with_profile:
             self.requires("coz/cci.20210322")
         if self.options.with_boost:
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.83.0", transitive_headers=True)
         if self.options.with_brotli:
-            self.requires("brotli/1.0.9")
+            self.requires("brotli/1.1.0")
         if self.options.get_safe("with_postgres"):
-            self.requires("libpq/14.5")
+            self.requires("libpq/15.4")
         if self.options.get_safe("with_mysql"):
-            self.requires("libmysqlclient/8.0.30")
+            self.requires("libmysqlclient/8.1.0")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.40.0")
+            self.requires("sqlite3/3.45.0")
         if self.options.get_safe("with_redis"):
-            self.requires("hiredis/1.1.0")
+            self.requires("hiredis/1.2.0")
+        if self.options.get_safe("with_yaml_cpp", False):
+            self.requires("yaml-cpp/0.8.0")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -136,11 +148,16 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_DROGON_SHARED"] = self.options.shared
         tc.variables["BUILD_DOC"] = False
         tc.variables["BUILD_BROTLI"] = self.options.with_brotli
+        tc.variables["BUILD_YAML_CONFIG"] = self.options.get_safe("with_yaml_cpp", False)
         tc.variables["BUILD_POSTGRESQL"] = self.options.get_safe("with_postgres", False)
         tc.variables["BUILD_POSTGRESQL_BATCH"] = self.options.get_safe("with_postgres_batch", False)
         tc.variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)
         tc.variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
         tc.variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
+        if is_msvc(self):
+            tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
+        if Version(self.version) >= "1.8.4":
+            tc.variables["USE_SUBMODULE"] = False
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()

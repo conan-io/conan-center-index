@@ -1,3 +1,4 @@
+import glob
 import os
 
 from conan import ConanFile
@@ -25,7 +26,11 @@ class GetTextConan(ConanFile):
     topics = ("gettext", "intl", "libintl", "i18n")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/gettext"
-    license = "GPL-3.0-or-later"
+    # Some parts of the project are GPL-3.0-or-later and some are LGPL-2.1-or-later.
+    # At this time, only libintl is packaged, which is licensed under the LGPL-2.1-or-later.
+    # If you modify this package to include other portions of the library, please configure the license accordingly.
+    # The licensing of the project is documented here: https://www.gnu.org/software/gettext/manual/gettext.html#Licenses
+    license = "LGPL-2.1-or-later"
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -182,7 +187,7 @@ class GetTextConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         autotools = Autotools(self)
-        autotools.configure("gettext-tools")
+        autotools.configure("gettext-runtime")
         autotools.make()
 
     def package(self):
@@ -214,8 +219,6 @@ def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
     if not conanfile.settings.get_safe("compiler.runtime"):
         return
-    from conan.tools.files import rename
-    import glob
     libdirs = getattr(conanfile.cpp.package, "libdirs")
     for libdir in libdirs:
         for ext in [".dll.a", ".dll.lib", ".a"]:
