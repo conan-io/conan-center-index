@@ -34,16 +34,17 @@ class dnetConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        # This is a pure C project
         self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-
         tc.generate()
 
         deps = CMakeDeps(self)
