@@ -17,3 +17,8 @@ patches:
       patch_description: "Fix build with gcc 13 by including cstdint"
       patch_type: "portability"
       patch_source: "https://github.com/facebook/rocksdb/pull/11118"
+  "6.27.3":
+    - patch_file: "patches/6.27.3-0001-add-include-cstdint-for-gcc-13.patch"
+      patch_description: "Fix build with gcc 13 by including cstdint"
+      patch_type: "portability"
+      patch_source: "https://github.com/facebook/rocksdb/pull/11118"

@@ -73,7 +73,7 @@ class FltkConan(ConanFile):
             if self.options.with_gl:
                 self.requires("opengl/system")
                 self.requires("glu/system")
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/2.15.0")
             self.requires("xorg/system")
             if self.options.with_xft:
                 self.requires("libxft/2.3.8")
