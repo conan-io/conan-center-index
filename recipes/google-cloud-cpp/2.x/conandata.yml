@@ -1,0 +1,26 @@
+sources:
+  "2.12.0":
+    url: "https://github.com/googleapis/google-cloud-cpp/archive/refs/tags/v2.12.0.tar.gz"
+    sha256: "8cda870803925c62de8716a765e03eb9d34249977e5cdb7d0d20367e997a55e2"
+  "2.15.1":
+    url: "https://github.com/googleapis/google-cloud-cpp/archive/refs/tags/v2.15.1.tar.gz"
+    sha256: "47a5c6beff48625fa1b65b1ddc575247def80c88d29062c66d463172280d3959"
+  "2.19.0":
+    url: "https://github.com/googleapis/google-cloud-cpp/archive/refs/tags/v2.19.0.tar.gz"
+    sha256: "63f009092afd900cb812050bcecf607e37d762ac911e0bcbf4af9a432da91890"
+patches:
+  "2.12.0":
+    - patch_file: "patches/2.12.0/001-use-conan-msvc-runtime.patch"
+      patch_description: "Let Conan select the MSVC runtime"
+      patch_type: conan
+  "2.15.1":
+    - patch_file: "patches/2.15.1/001-use-conan-msvc-runtime.patch"
+      patch_description: "Let Conan select the MSVC runtime"
+      patch_type: conan
+  "2.19.0":
+    - patch_file: "patches/2.19.0/001-use-conan-msvc-runtime.patch"
+      patch_description: "Let Conan select the MSVC runtime"
+      patch_type: conan
+    - patch_file: "patches/2.19.0/002-add-find-package-threads.patch"
+      patch_description: "Missing find_package() in CMake files"
+      patch_type: conan

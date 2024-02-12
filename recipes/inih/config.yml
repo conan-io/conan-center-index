@@ -1,4 +1,8 @@
 versions:
+  "58":
+    folder: "all"
+  "57":
+    folder: "all"
   "56":
     folder: "all"
   "55":

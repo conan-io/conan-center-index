@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc
-from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 import os
 
@@ -17,6 +17,7 @@ class ArsenalgearConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/JustWhit3/arsenalgear-cpp"
     topics = ("constants", "math", "operators", "stream")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -28,7 +29,7 @@ class ArsenalgearConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 17
 
     @property
@@ -38,11 +39,13 @@ class ArsenalgearConan(ConanFile):
             "msvc": "192",
             "gcc": "8",
             "clang": "7",
-            "apple-clang": "12.0",
+            "apple-clang": "12",
         }
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        export_conandata_patches(self)
+        if Version(self.version) < "2.1.0":
+            copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -57,36 +60,43 @@ class ArsenalgearConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) < "2.0.0":
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.83.0")
             if self.settings.os in ["Linux", "Macos"]:
-                self.requires("exprtk/0.0.1")
+                # exprtk is used in public header of arsenalgear
+                # https://github.com/JustWhit3/arsenalgear-cpp/blob/v1.2.2/include/math.hpp
+                self.requires("exprtk/0.0.2", transitive_headers=True)
 
     def validate(self):
-        # arsenalgear doesn't support Visual Studio(yet).
-        if is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio(yet)")
+        if Version(self.version) < "2.1.0" and is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio.")
 
-        if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ARSENALGEAR_VERSION"] = str(self.version)
-        tc.variables["ARSENALGEAR_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        if Version(self.version) < "2.1.0":
+            tc.variables["ARSENALGEAR_VERSION"] = str(self.version)
+            tc.variables["ARSENALGEAR_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        else:
+            tc.variables["ARSENALGEAR_TESTS"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        if Version(self.version) < "2.1.0":
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        else:
+            cmake.configure()
         cmake.build()
 
     def package(self):
@@ -94,7 +104,11 @@ class ArsenalgearConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "arsenalgear")
+        self.cpp_info.set_property("cmake_target_name", "arsenalgear::arsenalgear")
         self.cpp_info.libs = ["arsenalgear"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:

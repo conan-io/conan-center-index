@@ -1,0 +1,7 @@
+sources:
+  "1.1.0":
+    url: "https://github.com/7bitCoder/7bitConf/archive/refs/tags/v1.1.0.tar.gz"
+    sha256: "07e5bff366d66c276032021c9a9ca5cdb1d8f097b29c032d07ee6ae1a10885a2"
+  "1.0.0":
+    url: "https://github.com/7bitCoder/7bitConf/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "48a02d331f4281c8ff691d55c54abe744228637e9ad3af500daf526f4c77696d"

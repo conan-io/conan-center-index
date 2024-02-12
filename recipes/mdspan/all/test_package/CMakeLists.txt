@@ -13,6 +13,8 @@ endif()
 
 if(MSVC)
   target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+elseif(mdspan_VERSION VERSION_GREATER_EQUAL "0.6.0")
+  target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 else()
   target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
 endif()

@@ -1,22 +1,13 @@
 sources:
-  "2.2.3":
-    url: "https://github.com/ned14/outcome/archive/v2.2.3.tar.gz"
-    sha256: "31cc987d73b2625a70f35083ccff26d1c2634d89304f1ea606a294da36cb2958"
-  "2.2.2":
-    url: "https://github.com/ned14/outcome/archive/v2.2.2.tar.gz"
-    sha256: "fc16bc24f8a7d10dc24b9cc3abd1609f67b29aab2c8da546d123d518e9c29dbb"
-  "2.2.1":
-    url: "https://github.com/ned14/outcome/archive/v2.2.1.tar.gz"
-    sha256: "cf21a9cba8c7d943a6310012626344618923f2ea367ccee6cb499eee8bb97147"
-  "2.2.0":
-    url: "https://github.com/ned14/outcome/archive/v2.2.0.tar.gz"
-    sha256: "eb7a54e74c7ed7e208ab4a610a56e619c82b2797236aee7cff3303a649f24e0e"
+  "2.2.8":
+    url: "https://github.com/ned14/outcome/archive/v2.2.8.tar.gz"
+    sha256: "6ef322867aee454792bd71b61950703dd18608670a69a1780cab81be22f78a1e"
+  "2.2.7":
+    url: "https://github.com/ned14/outcome/archive/v2.2.7.tar.gz"
+    sha256: "553fd03bb9684be19dfa251bfa0064e69e30a95b6b0ba9a62d68f8ec4e31662a"
+  "2.2.4":
+    url: "https://github.com/ned14/outcome/archive/v2.2.4.tar.gz"
+    sha256: "29ad35c1980cf7f75294bb52df678c6a08817228e880fac8454cd6ac390fa1fc"
   "2.1.5":
     url: "https://github.com/ned14/outcome/archive/v2.1.5.tar.gz"
     sha256: "e238e545753e2b00a7eefabeb677c9918c7a5402ad347b67de328089b4e15493"
-  "2.1.4":
-    url: "https://github.com/ned14/outcome/archive/v2.1.4.tar.gz"
-    sha256: "19463d2c9bb0bcdc1c0334b02b344caeb5fc723ab060155c959be8e0b551cf76"
-  "2.1.3":
-    url: "https://github.com/ned14/outcome/archive/v2.1.3.tar.gz"
-    sha256: "45ee2f720bd0965047c35bd0ea719656c9de51c49d13c6a82797fca325b8426a"

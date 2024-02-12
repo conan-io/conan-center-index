@@ -1,56 +1,36 @@
 sources:
+  "0.9.12":
+    url: "https://github.com/awslabs/aws-c-common/archive/v0.9.12.tar.gz"
+    sha256: "10ef8f5629fb6ac24aa4893f3bb9a8480997e96a58c81043e019bf6b149f4332"
+  "0.9.6":
+    url: "https://github.com/awslabs/aws-c-common/archive/v0.9.6.tar.gz"
+    sha256: "5c30cc066a7f05fb8e4728f93aeed0e0e2698197a6df76237ac4e1200977d090"
+  "0.9.3":
+    url: "https://github.com/awslabs/aws-c-common/archive/v0.9.3.tar.gz"
+    sha256: "389eaac7f64d7d5a91ca3decad6810429eb5a65bbba54798b9beffcb4d1d1ed6"
+  "0.9.0":
+    url: "https://github.com/awslabs/aws-c-common/archive/v0.9.0.tar.gz"
+    sha256: "9b62ab1dcece3107810ea4f4511fe8e1e010a83cb0cb502b6ec685ce752a7b0c"
+  "0.8.23":
+    url: "https://github.com/awslabs/aws-c-common/archive/v0.8.23.tar.gz"
+    sha256: "67455d8149c74b1db3e4dd68db47dc7372de02dd78fbc620f9c7f0270d9d6018"
   "0.8.2":
     url: "https://github.com/awslabs/aws-c-common/archive/v0.8.2.tar.gz"
     sha256: "36edc6e486c43bbb34059dde227e872c0d41ab54f0b3609d38f188cfbbc6d1f8"
   "0.7.5":
     url: "https://github.com/awslabs/aws-c-common/archive/v0.7.5.tar.gz"
     sha256: "e34fd3d3d32e3597f572205aaabbe995e162f4015e14c7328987b596bd25812c"
-  "0.7.4":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.7.4.tar.gz"
-    sha256: "e9462a141b5db30006704f537d19b92357a59be38d590272e6118976b0356ccd"
-  "0.7.3":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.7.3.tar.gz"
-    sha256: "e4b80d368668814d9b76989fd2e3cd0fcf0be160bbb8bfeedf1f652e27f9c08c"
-  "0.7.2":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.7.2.tar.gz"
-    sha256: "455aed7447ed58eb7d5d3e8c952ed59f77c71dfed4115883e900f36d95f06dab"
-  "0.7.1":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.7.1.tar.gz"
-    sha256: "75c444a337e446e82d4f71c127118981656234b25cbdfd5913b8de713354fb43"
-  "0.7.0":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.7.0.tar.gz"
-    sha256: "a4e94d2c1d045a27467c9dfae51382f851a5223c3a0ecc15a96d1dba94f85ad6"
   "0.6.20":
     url: "https://github.com/awslabs/aws-c-common/archive/v0.6.20.tar.gz"
     sha256: "6eb0b806c78b36a32eec9bcba8d2833e3973491a29d46fe3d11edc3f8d3e7f73"
-  "0.6.19":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.6.19.tar.gz"
-    sha256: "91cb2b809687be19fce8d6ca03ddc00c78723854ead30dcb58bdc4172cb1796c"
-  "0.6.17":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.6.17.tar.gz"
-    sha256: "441156ecfabb84e41601d7173a7f88267f099899f0ae6091c3b745d9e02211f6"
-  "0.6.15":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.6.15.tar.gz"
-    sha256: "eb3ead3fb7a1f09c046393f776a96a0f50ae5f38c70d462273084280383669f1"
-  "0.6.14":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.6.14.tar.gz"
-    sha256: "1691c9dad5a0d236c2a0e351cc972231b176947e454c61d1c4b3ea4ab42f32e7"
-  "0.6.11":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.6.11.tar.gz"
-    sha256: "86159bd1128eee2813f705c275d319e14d1b77017fab46f6ca5dafcc66edaea9"
-  "0.6.9":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.6.9.tar.gz"
-    sha256: "928a3e36f24d1ee46f9eec360ec5cebfe8b9b8994fe39d4fa74ff51aebb12717"
-  "0.6.8":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.6.8.tar.gz"
-    sha256: "2997e851ed690a614507a43f4c393f45a198614d94da1660ecdf9b5a729535fc"
-  "0.6.7":
-    url: "https://github.com/awslabs/aws-c-common/archive/v0.6.7.tar.gz"
-    sha256: "643b35c62f948367f484f3a436bc37b5799538f47b08aa72deb3818b8bcdc631"
   "0.4.25":
     url: "https://github.com/awslabs/aws-c-common/archive/v0.4.25.tar.gz"
     sha256: "f85a8f74e42bd983a4615654457f8037876bc6b8dbf890e368bb516cbc2e9844"
 patches:
   "0.4.25":
     - patch_file: "patches/0001-disable-fPIC.patch"
+      patch_description: "Don't enable position independent code (will be handled by conan)"
+      patch_type: "conan"
     - patch_file: "patches/0002-no-warnings-as-errors.patch"
+      patch_description: "Don't make all warnings into errors"
+      patch_type: "portability"

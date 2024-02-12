@@ -1,4 +1,13 @@
 sources:
+  "1.8.6":
+    url: "https://github.com/yhirose/cpp-peglib/archive/v1.8.6.tar.gz"
+    sha256: "b2ebdc135a66074a386d377b761b38e050088fba6482575ca3028d0e184ecd91"
+  "1.8.5":
+    url: "https://github.com/yhirose/cpp-peglib/archive/v1.8.5.tar.gz"
+    sha256: "2813f7ffdeb570959b879ce2bf3921bf4f2edc0d9f1568c4429eceadff9ab114"
+  "1.8.4":
+    url: "https://github.com/yhirose/cpp-peglib/archive/v1.8.4.tar.gz"
+    sha256: "002cec65f659180ba90c0b04ee30a349ca18f0732fbe00e7638f1ead44aeb701"
   "1.8.3":
     url: "https://github.com/yhirose/cpp-peglib/archive/v1.8.3.tar.gz"
     sha256: "3de8aeb44a262f9c2478e2a7e7bc2bb9426a2bdd176cf0654ff5a3d291c77b73"
@@ -20,18 +29,3 @@ sources:
   "1.5.0":
     url: "https://github.com/yhirose/cpp-peglib/archive/refs/tags/v1.5.0.tar.gz"
     sha256: "45a02b749556af6ab0abf78c4c1d1afe02f17705b1c51f5820e957616f453b33"
-  "1.4.2":
-    url: "https://github.com/yhirose/cpp-peglib/archive/refs/tags/v1.4.2.tar.gz"
-    sha256: "28a09c1bee50608733a989cd5b62368a767a66f9e1a39654c0342e9698c479ca"
-  "1.4.1":
-    url: "https://github.com/yhirose/cpp-peglib/archive/refs/tags/v1.4.1.tar.gz"
-    sha256: "3784039727f8317cd5e202c5a2d142584bf48a311910643298dc4ba9083424e7"
-  "1.3.10":
-    url: "https://github.com/yhirose/cpp-peglib/archive/refs/tags/v1.3.10.tar.gz"
-    sha256: "9c79abd8a304d163d176918b74d7ab272e6ab1405af2dd699b6b7ae1b5605b09"
-  "1.3.9":
-    url: "https://github.com/yhirose/cpp-peglib/archive/refs/tags/v1.3.9.tar.gz"
-    sha256: "0d14fcbf7ed4409699fff70867c5776a2219e38547de5bf0bf689ba0d58c0d7f"
-  "1.3.8":
-    url: "https://github.com/yhirose/cpp-peglib/archive/refs/tags/v1.3.8.tar.gz"
-    sha256: "6d266806825ec491f1e3d1eb8a2163114f328a691f7c9fbce7bb3edf2f42074c"

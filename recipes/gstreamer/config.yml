@@ -1,13 +1,19 @@
 versions:
-  "1.16.2":
+  "1.22.6":
     folder: all
-  "1.18.0":
+  "1.22.3":
     folder: all
-  "1.18.3":
+  "1.20.6":
     folder: all
-  "1.18.4":
+  "1.19.2":
     folder: all
   "1.19.1":
     folder: all
-  "1.19.2":
+  "1.18.4":
+    folder: all
+  "1.18.3":
+    folder: all
+  "1.18.0":
+    folder: all
+  "1.16.2":
     folder: all

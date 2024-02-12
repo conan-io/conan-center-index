@@ -15,6 +15,7 @@ class WildmidiConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.mindwerks.net/projects/wildmidi"
     topics = ("audio", "midi", "multimedia", "music", "softsynth", "sound", "synth")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -72,10 +73,10 @@ class WildmidiConan(ConanFile):
         if is_msvc(self):
             libname = "libWildMidi"
             if not self.options.shared:
-                libname += "-static" 
+                libname += "-static"
         else:
             libname = "WildMidi"
-            
+
         self.cpp_info.set_property("cmake_file_name", "WildMidi")
         self.cpp_info.set_property("cmake_target_name", "WildMidi::libwildmidi")
         self.cpp_info.set_property("pkg_config_name", "wildmidi")
@@ -92,3 +93,5 @@ class WildmidiConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "WildMidi"
         self.cpp_info.components["libwildmidi"].names["cmake_find_package"] = "libwildmidi"
         self.cpp_info.components["libwildmidi"].names["cmake_find_package_multi"] = "libwildmidi"
+        self.cpp_info.components["libwildmidi"].set_property("cmake_target_name", "WildMidi::libwildmidi")
+        self.cpp_info.components["libwildmidi"].set_property("pkg_config_name", "wildmidi")

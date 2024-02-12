@@ -246,21 +246,21 @@ class GdalConan(ConanFile):
         self.folders.build = self.folders.source
 
     def requirements(self):
-        self.requires("json-c/0.16")
+        self.requires("json-c/0.17")
         self.requires("libgeotiff/1.7.1")
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
-        self.requires("libtiff/4.4.0")
-        self.requires("proj/9.1.1")
+        self.requires("libtiff/4.5.1")
+        self.requires("proj/9.2.1")
         if Version(self.version) >= "3.1.0":
             self.requires("flatbuffers/2.0.5")
         if self.options.get_safe("with_zlib", True):
             self.requires("zlib/1.2.13")
         if self.options.get_safe("with_libdeflate"):
-            self.requires("libdeflate/1.17")
+            self.requires("libdeflate/1.18")
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.5")
         if self.options.get_safe("with_blosc"):
             self.requires("c-blosc/1.21.3")
         if self.options.get_safe("with_lz4"):
@@ -274,7 +274,7 @@ class GdalConan(ConanFile):
         # if self.options.with_pcraster:
         #     self.requires("pcraster-rasterformat/1.3.2")
         if self.options.get_safe("with_png", True):
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
         if self.options.with_dds:
             self.requires("crunch/cci.20190615")
         if self.options.with_gta:
@@ -284,7 +284,7 @@ class GdalConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.4")
+            self.requires("libjpeg-turbo/3.0.0")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
         if self.options.with_charls:
@@ -326,13 +326,13 @@ class GdalConan(ConanFile):
         # if self.options.with_dods_root:
         #     self.requires("libdap/3.20.6")
         if self.options.with_curl:
-            self.requires("libcurl/7.87.0")
+            self.requires("libcurl/8.2.1")
         if self.options.with_xml2:
             self.requires("libxml2/2.10.3")
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.40.1")
+            self.requires("sqlite3/3.42.0")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
@@ -340,7 +340,7 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_pcre2"):
             self.requires("pcre2/10.42")
         if self.options.with_webp:
-            self.requires("libwebp/1.3.0")
+            self.requires("libwebp/1.3.1")
         if self.options.with_geos:
             self.requires("geos/3.11.1")
         # if self.options.with_sfcgal:
@@ -367,11 +367,11 @@ class GdalConan(ConanFile):
         if self.options.with_cryptopp:
             self.requires("cryptopp/8.7.0")
         if self.options.with_crypto:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/1.1.1u")
         # if not self.options.without_lerc:
         #     self.requires("lerc/2.1") # TODO: use conan recipe (not possible yet because lerc API is broken for GDAL)
         if self.options.get_safe("with_exr"):
-            self.requires("openexr/3.1.5")
+            self.requires("openexr/3.1.9")
         if self.options.get_safe("with_heif"):
             self.requires("libheif/1.13.0")
 

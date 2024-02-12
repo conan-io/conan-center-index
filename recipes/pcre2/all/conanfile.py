@@ -16,7 +16,7 @@ class PCRE2Conan(ConanFile):
     description = "Perl Compatible Regular Expressions"
     topics = ("regex", "regexp", "perl")
     license = "BSD-3-Clause"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -65,7 +65,7 @@ class PCRE2Conan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_bzip2"):
             self.requires("bzip2/1.0.8")
 
@@ -76,8 +76,7 @@ class PCRE2Conan(ConanFile):
             raise ConanInvalidConfiguration("build_pcre2_8 must be enabled for the pcre2grep program")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

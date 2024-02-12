@@ -1,4 +1,16 @@
 sources:
+  "1.3.0":
+    url: "https://github.com/foxglove/mcap/archive/releases/cpp/v1.3.0.tar.gz"
+    sha256: "41acf6e85d75556c64407f077e05492d31db1f099e07242ef04364bb2939acf1"
+  "1.2.1":
+    url: "https://github.com/foxglove/mcap/archive/releases/cpp/v1.2.1.tar.gz"
+    sha256: "fdc0c351bbcf8883fec0047ff84fed74da88446859083beb6624a584e2cde669"
+  1.2.0:
+    url: "https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v1.2.0/main.tar.gz"
+    sha256: "11a6badecac2b10e9687e912648a6e9679ef8731e4ab9570346ae9845ae64a65"
+  1.1.0:
+    url: "https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v1.1.0/main.tar.gz"
+    sha256: "1cb2ae9f2e910eeb2e93b3ab722744d1805b9da45764e4fd88703b669413350d"
   1.0.0:
     url: "https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v1.0.0/main.tar.gz"
     sha256: "e36169e46a67a9431f73df335f67488461817bc423f9af63ac0af7f29e0bd696"

@@ -1,0 +1,41 @@
+From a3a443c80431c390cbf8855e9c7b2a95d413cd54 Mon Sep 17 00:00:00 2001
+From: Yuriy Chernyshov <thegeorg@yandex-team.com>
+Date: Thu, 8 Jun 2023 20:26:26 +0200
+Subject: [PATCH] Support re2 == 2023-06-02 (#16257)
+
+### Description
+
+google/re2 [was
+switched](https://github.com/google/re2/commit/49d776b9d29d79b6e2876d5f091d2207d8123dfa)
+to absl::string_view in version 2023-06-02.
+
+As `absl::string_view` is a drop-in replacement for `std::string_view`
+it does not have `as_string()` method.
+This PR ensures the forward compatibility with the newest versions of
+re2 library.
+---
+ onnxruntime/contrib_ops/cpu/tokenizer.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/onnxruntime/contrib_ops/cpu/tokenizer.cc b/onnxruntime/contrib_ops/cpu/tokenizer.cc
+index 45998b6d8310..1787fb9b3c4a 100644
+--- a/onnxruntime/contrib_ops/cpu/tokenizer.cc
++++ b/onnxruntime/contrib_ops/cpu/tokenizer.cc
+@@ -242,7 +242,7 @@ Status Tokenizer::SeparatorExpressionTokenizer(OpKernelContext* ctx,
+                                   token_len, utf8_chars);
+             if (!valid) {
+               return Status(common::ONNXRUNTIME, common::INVALID_ARGUMENT,
+-                            "Match contains invalid utf8 chars: " + submatch.as_string());
++                            "Match contains invalid utf8 chars: " + std::string{submatch});
+             }
+             if (utf8_chars >= size_t(mincharnum_)) {
+               tokens.emplace_back(text.data() + start_pos, token_len);
+@@ -384,7 +384,7 @@ Status Tokenizer::TokenExpression(OpKernelContext* ctx,
+         utf8_chars = 0;
+         if (!utf8_len(reinterpret_cast<const unsigned char*>(submatch.data()), token_len, utf8_chars)) {
+           return Status(common::ONNXRUNTIME, common::INVALID_ARGUMENT,
+-                        "Match contains invalid utf8 chars: " + submatch.as_string());
++                        "Match contains invalid utf8 chars: " + std::string{submatch});
+         }
+         if (utf8_chars >= size_t(mincharnum_)) {
+           row.push_back(submatch);

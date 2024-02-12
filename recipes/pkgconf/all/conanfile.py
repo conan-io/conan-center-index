@@ -7,7 +7,6 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc, unix_path_package_info_legacy
 from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
 
 
 required_conan_version = ">=1.57.0"
@@ -48,15 +47,19 @@ class PkgConfConan(ConanFile):
             self.options.rm_safe("shared")
         elif self.options.shared:
             self.options.rm_safe("fPIC")
-       
+
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def package_id(self):
+        if not self.info.options.enable_lib:
+            del self.info.settings.compiler
+
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.2.2")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -74,7 +77,11 @@ class PkgConfConan(ConanFile):
         env.generate()
 
         tc = MesonToolchain(self)
-        tc.project_options["tests"] = False
+        if Version(self.version) >= "1.9.4":
+            tc.project_options["tests"] = "disabled"
+        else:
+            tc.project_options["tests"] = False
+
         if not self.options.enable_lib:
             tc.project_options["default_library"] = "static"
         tc.generate()
@@ -96,21 +103,17 @@ class PkgConfConan(ConanFile):
             if self.options.enable_lib and not self.options.shared:
                 rename(self, os.path.join(self.package_folder, "lib", "libpkgconf.a"),
                           os.path.join(self.package_folder, "lib", "pkgconf.lib"),)
-        
+
         if not self.options.enable_lib:
             rmdir(self, os.path.join(self.package_folder, "lib"))
             rmdir(self, os.path.join(self.package_folder, "include"))
 
-        
+
         rmdir(self, os.path.join(self.package_folder, "share", "man"))
         rename(self, os.path.join(self.package_folder, "share", "aclocal"),
                   os.path.join(self.package_folder, "bin", "aclocal"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-
-    def package_id(self):
-        if not self.info.options.enable_lib:
-            del self.info.settings.compiler
 
     def package_info(self):
         if self.options.enable_lib:
@@ -125,12 +128,10 @@ class PkgConfConan(ConanFile):
             self.cpp_info.libdirs = []
 
         bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env var: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
         exesuffix = ".exe" if self.settings.os == "Windows" else ""
         pkg_config = os.path.join(bindir, "pkgconf" + exesuffix).replace("\\", "/")
-        self.output.info("Setting PKG_CONFIG env var: {}".format(pkg_config))
         self.buildenv_info.define_path("PKG_CONFIG", pkg_config)
 
         pkgconf_aclocal = os.path.join(self.package_folder, "bin", "aclocal")
@@ -140,10 +141,5 @@ class PkgConfConan(ConanFile):
 
         # TODO: remove in conanv2
         automake_extra_includes = unix_path_package_info_legacy(self, pkgconf_aclocal.replace("\\", "/"))
-        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES env var: {}".format(automake_extra_includes))
         self.env_info.PKG_CONFIG = pkg_config
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_extra_includes)
-
-        # TODO: to remove in conan v2 once pkg_config generator removed
-        if self.options.enable_lib:
-            self.cpp_info.names["pkg_config"] = "libpkgconf"

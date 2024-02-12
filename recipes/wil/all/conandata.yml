@@ -1,4 +1,22 @@
 sources:
+  "1.0.240122.1":
+    url: "https://github.com/microsoft/wil/archive/refs/tags/v1.0.240122.1.tar.gz"
+    sha256: "e599f2843c01b9e4827e46f11d3651180675c8ecdbba8bdae735f533672989d3"
+  "1.0.231216.1":
+    url: "https://github.com/microsoft/wil/archive/refs/tags/v1.0.231216.1.tar.gz"
+    sha256: "4c15ba5e357f19449222b89f6e34d590d9d3f3d67e704a5cc5f4caa74228dd7e"
+  "1.0.231028.1":
+    url: "https://github.com/microsoft/wil/archive/refs/tags/v1.0.231028.1.tar.gz"
+    sha256: "ac18bc7638f32ec2468bbde1f40153204ad9ae9016058720440bc8f5449f48c5"
+  "1.0.230824.2":
+    url: "https://github.com/microsoft/wil/archive/refs/tags/v1.0.230824.2.tar.gz"
+    sha256: "15c6f90653fe91d2ab3c0c010735aee629c80519b4237611344f2e623f06aad2"
+  "1.0.230629.1":
+    url: "https://github.com/microsoft/wil/archive/refs/tags/v1.0.230629.1.tar.gz"
+    sha256: "c0d9ad1f295e181aa28d7c9b219e7d530e6bc4b7533317be50e7eae760c8d63f"
+  "1.0.230411.1":
+    url: "https://github.com/microsoft/wil/archive/refs/tags/v1.0.230411.1.tar.gz"
+    sha256: "03742849f5cb458fcfe8d30ff7afb6ff4bd67fe3aee3768cd6fb1140c59fcfd3"
   "1.0.230202.1":
     url: "https://github.com/microsoft/wil/archive/refs/tags/v1.0.230202.1.tar.gz"
     sha256: "7bf01e9d93fb93f0fe2614492fac4a423b3a97b435015db74f5ac4a0270ebc8a"

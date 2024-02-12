@@ -1,8 +1,12 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.57.0"
+
 
 class LibgpiodConan(ConanFile):
     name = "libgpiod"
@@ -10,7 +14,8 @@ class LibgpiodConan(ConanFile):
     homepage = "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/"
     license = "LGPL-2.1-or-later"
     description = "C library and tools for interacting with the linux GPIO character device"
-    topics = ("gpio", "libgpiod", "libgpiodcxx", "linux")
+    topics = ("gpio", "libgpiodcxx", "linux")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -24,12 +29,6 @@ class LibgpiodConan(ConanFile):
         "enable_bindings_cxx": False,
         "enable_tools": False,
     }
-    
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def validate(self):
         if self.settings.os != "Linux":
@@ -37,51 +36,51 @@ class LibgpiodConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if not self.options.enable_bindings_cxx:
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
+            self.settings.rm_safe("compiler.libcxx")
+            self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("linux-headers-generic/6.5.9")
 
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-        self.build_requires("pkgconf/1.7.4")
-        self.build_requires("autoconf-archive/2021.02.19")
-        self.build_requires("linux-headers-generic/5.13.9")
+        self.build_requires("libtool/2.4.7")
+        self.build_requires("pkgconf/2.0.3")
+        self.build_requires("autoconf-archive/2022.09.03")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-                return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
+    def generate(self):
+        tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
-        args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--enable-bindings-cxx={}".format(yes_no(self.options.enable_bindings_cxx)),
-            "--enable-tools={}".format(yes_no(self.options.enable_tools)),
-        ]
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return self._autotools
+        tc.configure_args.append("--enable-bindings-cxx={}".format(yes_no(self.options.enable_bindings_cxx)))
+        tc.configure_args.append("--enable-tools={}".format(yes_no(self.options.enable_tools)))
+        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def build(self):
-        with tools.chdir(os.path.join(self._source_subfolder)):
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True)
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
         autotools.install()
-        tools.remove_files_by_mask(self.package_folder, "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.components["gpiod"].libs = ["gpiod"]
-        self.cpp_info.components["gpiod"].names["pkg_config"] = "gpiod"
+        self.cpp_info.components["gpiod"].set_property("pkg_config_name", "libgpiod")
         if self.options.enable_bindings_cxx:
             self.cpp_info.components["gpiodcxx"].libs = ["gpiodcxx"]
-            self.cpp_info.components["gpiodcxx"].names["pkg_config"] = "gpiodcxx"
+            self.cpp_info.components["gpiodcxx"].set_property("pkg_config_name", "libgpiodcxx")
             self.cpp_info.components["gpiodcxx"].requires = ["gpiod"]

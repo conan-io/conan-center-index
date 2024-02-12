@@ -1,20 +1,19 @@
 import os
-import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, valid_min_cppstd, check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
 
-class grpcConan(ConanFile):
+class GrpcConan(ConanFile):
     name = "grpc"
     package_type = "library"
     description = "Google's RPC (remote procedure call) library and framework."
@@ -56,9 +55,6 @@ class grpcConan(ConanFile):
 
     short_paths = True
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     @property
     def _grpc_plugin_template(self):
         return "grpc_plugin_template.cmake.in"
@@ -66,6 +62,10 @@ class grpcConan(ConanFile):
     @property
     def _cxxstd_required(self):
         return 14 if Version(self.version) >= "1.47" else 11
+
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
 
     def export_sources(self):
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
@@ -80,60 +80,65 @@ class grpcConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
             self.options["protobuf"].shared = True
-            self.options["googleapis"].shared = True
-            self.options["grpc-proto"].shared = True
 
             if cross_building(self):
                 self.options["grpc"].shared = True
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
-        if is_msvc(self) and Version(self.version) < "1.47":
-            self.requires("abseil/20211102.0", transitive_headers=True)
+        # abseil is public. See https://github.com/conan-io/conan-center-index/pull/17284#issuecomment-1526082638
+        if Version(self.version) < "1.47":
+            if is_msvc(self):
+                self.requires("abseil/20211102.0", transitive_headers=True, transitive_libs=True)
+            else:
+                self.requires("abseil/20220623.1", transitive_headers=True, transitive_libs=True)
         else:
-            self.requires("abseil/20220623.0", transitive_headers=True)
-        self.requires("c-ares/1.18.1")
-        self.requires("openssl/1.1.1t")
-        self.requires("re2/20220601")
-        self.requires("zlib/1.2.13")
-        self.requires("protobuf/3.21.9", transitive_headers=True, transitive_libs=True)
-        self.requires("googleapis/cci.20221108")
-        self.requires("grpc-proto/cci.20220627")
+            self.requires("abseil/20230125.3", transitive_headers=True, transitive_libs=True)
+        self.requires("c-ares/1.19.1")
+        self.requires("openssl/[>=1.1 <4]")
+        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
+        self.requires("re2/20230301")
+        self.requires("zlib/[>=1.2.11 <2]")
+        if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52":
+            self.requires("libsystemd/255")
 
     def package_id(self):
         del self.info.options.secure
-        self.info.requires["protobuf"].full_package_mode()
 
     def validate(self):
         check_min_vs(self, "190")
-        if is_msvc(self) and self.info.options.shared:
+        if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported by Visual Studio")
 
-        if Version(self.version) >= "1.47" and self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) < "6":
+        if Version(self.version) >= "1.47" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("GCC older than 6 is not supported")
 
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._cxxstd_required)
 
-        if self.info.options.shared and \
-           (not self.dependencies["protobuf"].options.shared or not self.dependencies["googleapis"].options.shared or not self.dependencies["grpc-proto"].options.shared):
+        if self.options.shared and not self.dependencies.host["protobuf"].options.shared:
             raise ConanInvalidConfiguration(
-                "If built as shared, protobuf, googleapis and grpc-proto must be shared as well. "
-                "Please, use `protobuf:shared=True` and `googleapis:shared=True` and `grpc-proto:shared=True`",
+                "If built as shared protobuf must be shared as well. "
+                "Please, use `protobuf:shared=True`.",
             )
 
     def build_requirements(self):
-        if hasattr(self, "settings_build"):
-            self.build_requires('protobuf/3.21.9')
+        if not self._is_legacy_one_profile:
+            self.tool_requires("protobuf/<host_version>")
+        if cross_building(self):
             # when cross compiling we need pre compiled grpc plugins for protoc
-            if cross_building(self):
-                self.build_requires('grpc/{}'.format(self.version))
+            self.tool_requires(f"grpc/{self.version}")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-
+        # Set up environment so that we can run grpc-cpp-plugin at build time
+        VirtualBuildEnv(self).generate()
+        if self._is_legacy_one_profile:
+            VirtualRunEnv(self).generate(scope="build")
 
         # This doesn't work yet as one would expect, because the install target builds everything
         # and we need the install target because of the generated CMake files
@@ -147,7 +152,7 @@ class grpcConan(ConanFile):
 
         tc.cache_variables["gRPC_BUILD_CODEGEN"] = self.options.codegen
         tc.cache_variables["gRPC_BUILD_CSHARP_EXT"] = self.options.csharp_ext
-        tc.cache_variables["gRPC_BUILD_TESTS"] = False
+        tc.cache_variables["gRPC_BUILD_TESTS"] = "OFF"
 
         # We need the generated cmake/ files (bc they depend on the list of targets, which is dynamic)
         tc.cache_variables["gRPC_INSTALL"] = True
@@ -185,22 +190,8 @@ class grpcConan(ConanFile):
         cmake_deps = CMakeDeps(self)
         cmake_deps.generate()
 
-        # Set up environment so that we can run grpc-cpp-plugin at build time
-        if hasattr(self, "settings_build"):
-            VirtualBuildEnv(self).generate()
-
     def _patch_sources(self):
         apply_conandata_patches(self)
-
-        # Clean existing proto files, they will be taken from requirements
-        shutil.rmtree(os.path.join(self.source_folder, "src", "proto", "grpc"))
-
-        if Version(self.version) >= "1.47":
-            # Take googleapis from requirement instead of vendored/hardcoded version
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                "if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googleapis)",
-                "if (FALSE)  # Do not download, it is provided by Conan"
-            )
 
         # On macOS if all the following are true:
         # - protoc from protobuf has shared library dependencies
@@ -210,7 +201,7 @@ class grpcConan(ConanFile):
         # This workaround wraps the protoc command to be invoked by CMake with a modified environment
         settings_build = getattr(self, "settings_build", self.settings)
         if settings_build.os == "Macos":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), 
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}",
                             'COMMAND ${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}')
     def build(self):
@@ -295,6 +286,10 @@ class grpcConan(ConanFile):
 
     @property
     def _grpc_components(self):
+
+        def libsystemd():
+            return ["libsystemd::libsystemd"] if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52" else []
+
         def libm():
             return ["m"] if self.settings.os in ["Linux", "FreeBSD"] else []
 
@@ -325,7 +320,8 @@ class grpcConan(ConanFile):
                     "abseil::absl_status", "abseil::absl_str_format",
                     "abseil::absl_strings", "abseil::absl_synchronization",
                     "abseil::absl_time", "abseil::absl_optional",
-                ],
+                    "abseil::absl_flags"
+                ] + libsystemd(),
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
             },
             "_grpc": {
@@ -390,12 +386,12 @@ class grpcConan(ConanFile):
             components.update({
                 "grpc++_reflection": {
                     "lib": "grpc++_reflection",
-                    "requires": ["grpc++", "protobuf::libprotobuf", "grpc-proto::grpc-proto", "googleapis::googleapis"],
+                    "requires": ["grpc++", "protobuf::libprotobuf"],
                     "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
                 },
                 "grpcpp_channelz": {
                     "lib": "grpcpp_channelz",
-                    "requires": ["grpc++", "protobuf::libprotobuf", "grpc-proto::grpc-proto", "googleapis::googleapis"],
+                    "requires": ["grpc++", "protobuf::libprotobuf"],
                     "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
                 },
             })
@@ -407,7 +403,6 @@ class grpcConan(ConanFile):
         self.cpp_info.resdirs = ["res"]
         ssl_roots_file_path = os.path.join(self.package_folder, "res", "grpc", "roots.pem")
         self.runenv_info.define_path("GRPC_DEFAULT_SSL_ROOTS_FILE_PATH", ssl_roots_file_path)
-        self.env_info.GRPC_DEFAULT_SSL_ROOTS_FILE_PATH = ssl_roots_file_path # remove in conan v2?
 
         for component, values in self._grpc_components.items():
             target = values.get("lib")
@@ -433,14 +428,12 @@ class grpcConan(ConanFile):
                 grpc_modules.append(os.path.join(self._module_path, grpc_module_filename))
         self.cpp_info.set_property("cmake_build_modules", grpc_modules)
 
-        if any(self.options.get_safe(plugin_option) for plugin_option in self._grpc_plugins.keys()):
-            bindir = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bindir))
-            self.env_info.PATH.append(bindir)
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        # TODO: to remove once conan v1 not supported anymore
         self.cpp_info.names["cmake_find_package"] = "gRPC"
         self.cpp_info.names["cmake_find_package_multi"] = "gRPC"
+        self.env_info.GRPC_DEFAULT_SSL_ROOTS_FILE_PATH = ssl_roots_file_path
         if grpc_modules:
             self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package"] = grpc_modules
             self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package_multi"] = grpc_modules
+        if any(self.options.get_safe(plugin_option) for plugin_option in self._grpc_plugins.keys()):
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

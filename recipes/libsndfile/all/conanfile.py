@@ -58,12 +58,12 @@ class LibsndfileConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_alsa"):
-            self.requires("libalsa/1.2.7.2")
+            self.requires("libalsa/1.2.10")
         if self.options.with_external_libs:
             self.requires("ogg/1.3.5")
             self.requires("vorbis/1.3.7")
             self.requires("flac/1.4.2")
-            self.requires("opus/1.3.1")
+            self.requires("opus/1.4")
         if self.options.get_safe("with_mpeg", False):
             self.requires("mpg123/1.31.2")
             self.requires("libmp3lame/3.100")
@@ -92,7 +92,8 @@ class LibsndfileConan(ConanFile):
         if is_msvc(self) and Version(self.version) < "1.0.30":
             tc.variables["ENABLE_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.variables["BUILD_REGTEST"] = False
-        if Version(self.version) > "1.11.0":
+        # https://github.com/libsndfile/libsndfile/commit/663a59aa6ea5e24cf5159b8e1c2b0735712ea74e#diff-1e7de1ae2d059d21e1dd75d5812d5a34b0222cef273b7c3a2af62eb747f9d20a
+        if Version(self.version) >= "1.1.0":
             tc.variables["ENABLE_MPEG"] = self.options.with_mpeg
         # Fix iOS/tvOS/watchOS
         tc.variables["CMAKE_MACOSX_BUNDLE"] = False

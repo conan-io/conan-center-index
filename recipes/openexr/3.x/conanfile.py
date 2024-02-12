@@ -12,11 +12,11 @@ class OpenEXRConan(ConanFile):
     name = "openexr"
     description = "OpenEXR is a high dynamic-range (HDR) image file format developed by Industrial Light & " \
                   "Magic for use in computer imaging applications."
-    topics = ("openexr", "hdr", "image", "picture")
     license = "BSD-3-Clause"
-    homepage = "https://github.com/AcademySoftwareFoundation/openexr"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "https://github.com/AcademySoftwareFoundation/openexr"
+    topics = ("openexr", "hdr", "image", "picture")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -26,6 +26,10 @@ class OpenEXRConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 11
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -38,17 +42,17 @@ class OpenEXRConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    def requirements(self):
-        self.requires("zlib/1.2.13")
-        # Note: OpenEXR and Imath are versioned independently.
-        self.requires("imath/3.1.6", transitive_headers=True)
-
-    def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
-
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("zlib/[>=1.2.11 <2]")
+        # Note: OpenEXR and Imath are versioned independently.
+        self.requires("imath/3.1.9", transitive_headers=True)
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -118,6 +122,8 @@ class OpenEXRConan(ConanFile):
         Iex = self._add_component("Iex")
         Iex.libs = [f"Iex{lib_suffix}"]
         Iex.requires = [self._conan_comp("IexConfig")]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            Iex.system_libs = ["m"]
 
         # OpenEXR::IlmThread
         IlmThread = self._add_component("IlmThread")
@@ -126,12 +132,14 @@ class OpenEXRConan(ConanFile):
             self._conan_comp("IlmThreadConfig"), self._conan_comp("Iex"),
         ]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            IlmThread.system_libs = ["pthread"]
+            IlmThread.system_libs = ["pthread", "m"]
 
         # OpenEXR::OpenEXRCore
         OpenEXRCore = self._add_component("OpenEXRCore")
         OpenEXRCore.libs = [f"OpenEXRCore{lib_suffix}"]
         OpenEXRCore.requires = [self._conan_comp("OpenEXRConfig"), "zlib::zlib"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            OpenEXRCore.system_libs = ["m"]
 
         # OpenEXR::OpenEXR
         OpenEXR = self._add_component("OpenEXR")
@@ -140,11 +148,15 @@ class OpenEXRConan(ConanFile):
             self._conan_comp("OpenEXRCore"), self._conan_comp("IlmThread"),
             self._conan_comp("Iex"), "imath::imath",
         ]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            OpenEXR.system_libs = ["m"]
 
         # OpenEXR::OpenEXRUtil
         OpenEXRUtil = self._add_component("OpenEXRUtil")
         OpenEXRUtil.libs = [f"OpenEXRUtil{lib_suffix}"]
         OpenEXRUtil.requires = [self._conan_comp("OpenEXR")]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            OpenEXRUtil.system_libs = ["m"]
 
         # Add tools directory to PATH
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

@@ -8,3 +8,9 @@ sources:
   "0.10.1":
     url: "https://github.com/symengine/symengine/releases/download/v0.10.1/symengine-0.10.1.tar.gz"
     sha256: "9c007c99e9633f5549a55fa7a66ebcbcf9e04092eb55f7bb781c22b9cf0570c4"
+  "0.11.1":
+    url: "https://github.com/symengine/symengine/releases/download/v0.11.1/symengine-0.11.1.tar.gz"
+    sha256: "217b39955dc19f920c6f54c057fdc89e8e155ddee8f0e3c3cacc67b3e3850b64"
+  "0.11.2":
+    url: "https://github.com/symengine/symengine/releases/download/v0.11.2/symengine-0.11.2.tar.gz"
+    sha256: "f6972acd6a65354f6414e69460d2e175729470632bdac05919bc2f7f32e48cbd"

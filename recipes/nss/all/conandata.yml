@@ -1,4 +1,13 @@
 sources:
+  "3.93":
+    url: "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_93_RTM/src/nss-3.93.tar.gz"
+    sha256: "15f54bb72048eb105f8c0e936a04b899e74c3db9a19bbc1e00acee2af9476a8a"
+  "3.92":
+    url: "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_92_RTM/src/nss-3.92.tar.gz"
+    sha256: "3db192d6e882039af02ae7eaf3217ed114bb7ad83414c646772ab8021e24a254"
+  "3.91":
+    url: "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_91_RTM/src/nss-3.91.tar.gz"
+    sha256: "84bd46376df17118c55f6d73d30fd93a0af21296c66e7690471547e5898fc4b3"
   "3.89":
     url: "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_89_RTM/src/nss-3.89.tar.gz"
     sha256: "55c37a3f4da010d0574fb8b39264cb1e7b4ce9e6c2954c1c7ecf9f41ee00bed5"

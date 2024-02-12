@@ -1,4 +1,10 @@
 sources:
+  "3.8.1":
+    url: "https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.8.1.tar.gz"
+    sha256: "0ce8760d43b3b97b43364cd32ee663e5c8b8b4bfd58e7890042eff6ac52db605"
+  "3.8":
+    url: "https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.8.tar.gz"
+    sha256: "6462ee41fa6aa12075f6b9d13f42358091d32963087443a6669d2c94232eea04"
   "3.7.2":
     url: "https://github.com/hanickadot/compile-time-regular-expressions/archive/v3.7.2.tar.gz"
     sha256: "0711a6f97496e010f72adab69839939a9e50ba35ad87779e422ae3ff3b0edfc3"

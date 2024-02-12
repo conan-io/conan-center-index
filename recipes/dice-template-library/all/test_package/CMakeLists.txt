@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+find_package(dice-template-library REQUIRED CONFIG)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
-find_package(dice-template-library REQUIRED)
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE dice-template-library::dice-template-library)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+
+if(dice-template-library_VERSION VERSION_GREATER_EQUAL "1.0.0")
+  target_compile_definitions(${PROJECT_NAME} PRIVATE DICE_TEMPLATE_LIBRARY_1_0_0_LATER)
+endif()

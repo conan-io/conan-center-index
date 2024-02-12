@@ -1,10 +1,8 @@
-cmake_minimum_required(VERSION 3.3.0)
-project(test_package C)
+cmake_minimum_required(VERSION 3.1)
+project(test_package)
 
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(mpfr CONFIG REQUIRED)
-
-add_executable(${PROJECT_NAME} ../test_package/test_package.c)
-target_link_libraries(${PROJECT_NAME} mpfr::mpfr)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../test_package
+                 ${CMAKE_CURRENT_BINARY_DIR}/test_package)

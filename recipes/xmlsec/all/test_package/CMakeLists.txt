@@ -3,5 +3,5 @@ project(test_package LANGUAGES C)
 
 find_package(xmlsec REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} sign1.c)
+add_executable(${PROJECT_NAME} main.c)
 target_link_libraries(${PROJECT_NAME} PRIVATE xmlsec::xmlsec)
