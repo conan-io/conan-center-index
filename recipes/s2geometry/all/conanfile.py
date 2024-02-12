@@ -81,6 +81,7 @@ class S2GeometryConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["GOOGLETEST_ROOT"] = False
         tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_TESTS"] = False
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
