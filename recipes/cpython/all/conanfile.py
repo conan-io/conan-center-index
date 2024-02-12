@@ -666,7 +666,6 @@ class CPythonConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "bin", "tcl"))
 
-        rm(self, "vcruntime.*", install_prefix)
         rm(self, "LICENSE.txt", install_prefix)
         for file in os.listdir(os.path.join(install_prefix, "libs")):
             if not re.match("python.*", file):
