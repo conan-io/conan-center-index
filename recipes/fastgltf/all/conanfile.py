@@ -25,7 +25,6 @@ class fastgltf(ConanFile):
         "enable_small_vector": [True, False],
         "disable_custom_memory_pool": [True, False],
         "use_64bit_float": [True, False],
-        "compile_as_cpp20": [True, False],
     }
     default_options = {
         "shared": False,
@@ -33,7 +32,6 @@ class fastgltf(ConanFile):
         "enable_small_vector": False,
         "disable_custom_memory_pool": False,
         "use_64bit_float": False,
-        "compile_as_cpp20": False,
     }
 
     @property
@@ -93,8 +91,7 @@ class fastgltf(ConanFile):
             tc.variables["FASTGLTF_DISABLE_CUSTOM_MEMORY_POOL"] = True
         if self.options.get_safe("use_64bit_float"):
             tc.variables["FASTGLTF_USE_64BIT_FLOAT"] = True
-        if self.options.get_safe("compile_as_cpp20"):
-            tc.variables["FASTGLTF_COMPILE_AS_CPP20"] = True
+        tc.variables["FASTGLTF_COMPILE_AS_CPP20"] = "20" in str(self.settings.compiler.get_safe("cppstd"))
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -113,3 +110,5 @@ class fastgltf(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["fastgltf"]
+        if "20" in str(self.settings.get_safe("compiler.cppstd")):
+            self.cpp_info.defines.append("FASTGLTF_CPP_20")
