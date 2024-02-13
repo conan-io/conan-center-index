@@ -110,15 +110,11 @@ class TreeGenConan(ConanFile):
             check_min_cppstd(self, self._min_cpp_std)
 
     def package(self):
-        copy(self, "LICENSE.md",
-             src=self.source_folder,
-             dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.cmake",
-             src=os.path.join(self.source_folder, "cmake"),
-             dst=os.path.join(self.package_folder, "cmake"))
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.cmake", src=os.path.join(self.source_folder, "cmake"), dst=self.package_folder)
         cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["tree-gen"]
-        self.cpp_info.set_property("cmake_build_modules", [os.path.join("cmake", "generate_tree.cmake")])
+        self.cpp_info.set_property("cmake_build_modules", ["generate_tree.cmake"])
