@@ -11,6 +11,9 @@ class TreeGenTestConan(ConanFile):
     apply_env = False
     test_type = "explicit"
 
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
+
     def requirements(self):
         self.requires(self.tested_reference_str)
 
