@@ -2,7 +2,7 @@ from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.scm import Version
 import os
 
@@ -70,7 +70,7 @@ class XercesCConan(ConanFile):
 
     def requirements(self):
         if "icu" in (self.options.transcoder, self.options.message_loader):
-            self.requires("icu/74.1")
+            self.requires("icu/74.2")
         if self.options.network_accessor == "curl":
             self.requires("libcurl/[>=7.78.0 <9]")
 
@@ -129,8 +129,14 @@ class XercesCConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # Disable subdirectories
+        for subdir in ["doc", "tests", "samples"]:
+            save(self, os.path.join(self.source_folder, subdir, "CMakeLists.txt"), "")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

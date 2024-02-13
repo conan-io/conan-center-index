@@ -58,6 +58,8 @@ class LibsrtpRecipe(ConanFile):
         if Version(self.version) < "2.4.0":
             # Relocatable shared libs on Macos
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if Version(self.version) >= "2.5.0":
+            tc.cache_variables["BUILD_WITH_WARNINGS"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

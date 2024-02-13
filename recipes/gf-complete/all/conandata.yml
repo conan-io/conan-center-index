@@ -8,4 +8,3 @@ sources:
 patches:
   "cci.20170410":
     - patch_file: "patches/0001-fix-msvc-cci.20170410.patch"
-      base_path: "source_subfolder"
