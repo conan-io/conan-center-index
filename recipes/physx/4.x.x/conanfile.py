@@ -85,6 +85,7 @@ class PhysXConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -138,8 +139,6 @@ class PhysXConan(ConanFile):
         tc.generate()
 
     def build(self):
-        self._patch_sources()
-
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "physx/compiler/public"))
         cmake.build(build_type=self._get_physx_build_type())
