@@ -203,7 +203,7 @@ class OpenCVConan(ConanFile):
         "with_msmf": True,
         "with_msmf_dxva": True,
         # objdetect module options
-        "with_quirc": True,
+        "with_quirc": False,
         # videoio module options
         "with_ffmpeg": True,
         "with_v4l": False,
