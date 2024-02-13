@@ -26,6 +26,7 @@ class NngConan(ConanFile):
         "max_taskq_threads": ["ANY"],
         "max_expire_threads": ["ANY"],
         "max_poller_threads": ["ANY"],
+        "compat": [True, False],
     }
     default_options = {
         "shared": False,
@@ -36,6 +37,7 @@ class NngConan(ConanFile):
         "max_taskq_threads": "16",
         "max_expire_threads": "8",
         "max_poller_threads": "8",
+        "compat": True,
     }
 
     def export_sources(self):
@@ -48,6 +50,8 @@ class NngConan(ConanFile):
             del self.options.max_expire_threads
         if Version(self.version) < "1.7.0":
             del self.options.max_poller_threads
+        if Version(self.version) < "1.7.2":
+            del self.options.compat
 
     def configure(self):
         if self.options.shared:
@@ -63,7 +67,7 @@ class NngConan(ConanFile):
             if Version(self.version) < "1.5.2":
                 self.requires("mbedtls/2.25.0")
             else:
-                self.requires("mbedtls/3.5.1")
+                self.requires("mbedtls/3.5.2")
 
     def validate(self):
         compiler_minimum_version = {
@@ -96,6 +100,8 @@ class NngConan(ConanFile):
             tc.variables["NNG_MAX_EXPIRE_THREADS"] = self.options.max_expire_threads
         if "max_poller_threads" in self.options:
             tc.variables["NNG_MAX_POLLER_THREADS"] = self.options.max_poller_threads
+        if "compat" in self.options:
+            tc.variables["NNG_ENABLE_COMPAT"] = self.options.compat
         tc.generate()
 
     def build(self):
