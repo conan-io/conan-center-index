@@ -10,7 +10,7 @@ import os
 
 required_conan_version = ">=1.53.0"
 
-class PackageConan(ConanFile):
+class PrimesieveConan(ConanFile):
     name = "primesieve"
     description = "Fast prime number generator"
     license = "BSD-2-Clause"
@@ -95,9 +95,3 @@ class PackageConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "primesieve::primesieve")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m"]
-
-        # Conan 1.x only
-        self.cpp_info.filenames["cmake_find_package"] = "primesieve"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "primesieve"
-        self.cpp_info.names["cmake_find_package"] = "primesieve"
-        self.cpp_info.names["cmake_find_package_multi"] = "primesieve"
