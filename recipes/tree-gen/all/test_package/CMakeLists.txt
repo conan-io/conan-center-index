@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(PackageTest CXX)
 
-find_package(tree-gen CONFIG REQUIRED)
+find_package(tree-gen REQUIRED CONFIG)
 
 # Generate the directory classes.
 generate_tree_py(
