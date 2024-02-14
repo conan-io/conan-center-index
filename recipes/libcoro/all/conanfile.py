@@ -39,12 +39,7 @@ class LibcoroConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        if Version(self.version) < "0.10":
-            return {
-                "gcc": "10.2.1",
-            }
-        else:
-            return {
+        return {
                 "gcc": "10.2.1",
                 "clang": "16.0.0",
                 "apple-clang": "13",
