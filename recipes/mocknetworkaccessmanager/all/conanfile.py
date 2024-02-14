@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
-from conan.tools.scm import Version
 import os
 
 
@@ -16,15 +15,13 @@ class MockNetworkAccessManagerConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.com/julrich/MockNetworkAccessManager"
-    topics = ("qt", "mock", "network", "QNetworkAccessManager", "unit test", "test", "header-only")
-    package_type = "library"
+    topics = ("qt", "mock", "network", "QNetworkAccessManager", "unit test", "test")
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
 
@@ -35,10 +32,6 @@ class MockNetworkAccessManagerConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -48,8 +41,6 @@ class MockNetworkAccessManagerConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "17")
-        if self.options.shared:
-            raise ConanInvalidConfiguration("Shared builds are not supported yet")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
