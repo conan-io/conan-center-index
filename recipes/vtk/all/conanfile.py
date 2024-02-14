@@ -588,10 +588,10 @@ class VtkConan(ConanFile):
         return "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
 
     def build_requirements(self):
-        self.tool_requires("sqlite3/3.41.1")
+        self.tool_requires("sqlite3/[>=3.41.1]")
 
     def source(self):
-        if self.options.use_source_from_git:
+        if True: # TODO TODO self.options.use_source_from_git:
             self.run("git clone -b release --single-branch " + self.git_url + " " + self.source_folder)
             # note: we give the branch a name so we don't have detached heads
             # TODO change to standard git and python chdir
@@ -609,26 +609,26 @@ class VtkConan(ConanFile):
         parties = {
                 # LEFT field:  target name for linking, will be used as TARGET::TARGET in package_info()
                 # RIGHT field: package/version to require
-                "cli11":             "cli11/2.3.2",
-                "double-conversion": "double-conversion/3.2.1",
-                "eigen":             "eigen/3.4.0",
-                "expat":             "expat/2.5.0",
-                "exprtk":            "exprtk/0.0.1",   # TODO upgrade to 0.0.2 (there was a problem with first attempt)
-                "fmt":               "fmt/8.1.1",      # VTK 9.1.0 release docs mention a PR - confirmed merged 8.1.0
-                "freetype":          "freetype/2.13.0",
-                "glew":              "glew/2.2.0",
-                "jsoncpp":           "jsoncpp/1.9.4",
-                "libharu":           "libharu/2.4.3",
-                "kissfft":           "kissfft/131.1.0",
-                "lz4":               "lz4/1.9.4",
-                "libpng":            "libpng/1.6.39",
-                "proj":              "proj/9.1.1",
-                "pugixml":           "pugixml/1.13",
-                "sqlite3":           "sqlite3/3.41.1",
-                "utfcpp":            "utfcpp/3.2.3",
-                "xz_utils":          "xz_utils/5.4.2", # note: VTK calls this lzma
-                "zlib":              "zlib/1.2.13",
-                "TIFF":              "libtiff/4.4.0",
+                "cli11":             "cli11/[>=2.3.2]",
+                "double-conversion": "double-conversion/[>=3.2.1]",
+                "eigen":             "eigen/[>=3.4.0]",
+                "expat":             "expat/[>=2.5.0]",
+                "exprtk":            "exprtk/[=0.0.1]",   # TODO upgrade to 0.0.2 (there was a problem with first attempt)
+                "fmt":               "fmt/[=8.1.1]",      # must be 8.1.1 for some reason ... VTK 9.1.0 release docs mention a PR - confirmed merged 8.1.0
+                "freetype":          "freetype/[>=2.13.0]",
+                "glew":              "glew/[>=2.2.0]",
+                "jsoncpp":           "jsoncpp/[>=1.9.4]",
+                "libharu":           "libharu/[>=2.4.3]",
+                "kissfft":           "kissfft/[>=131.1.0]",
+                "lz4":               "lz4/[>=1.9.4]",
+                "libpng":            "libpng/[>=1.6.39]",
+                "proj":              "proj/[>=9.1.1]",
+                "pugixml":           "pugixml/[>=1.13]",
+                "sqlite3":           "sqlite3/[>=3.41.1]",
+                "utfcpp":            "utfcpp/[>=3.2.3]",
+                "xz_utils":          "xz_utils/[>=5.4.2]", # note: VTK calls this lzma
+                "zlib":              "zlib/[>=1.2.13]",
+                "TIFF":              "libtiff/[>=4.4.0]",
                 }
 
         # NOTE: You may NOT be able to just adjust the version numbers in here, without
@@ -637,31 +637,31 @@ class VtkConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             parties["jpeg"] = "libjpeg/9e"
         elif self.options.with_jpeg == "libjpeg-turbo":
-            parties["jpeg"] = "libjpeg-turbo/2.1.5"
+            parties["jpeg"] = "libjpeg-turbo/[>=2.1.5]"
 
         if self._is_module_enabled([self.options.group_enable_StandAlone]):
-            parties["hdf5"]    = "hdf5/1.14.0"
-            parties["theora"]  = "theora/1.1.1"
-            parties["ogg"]     = "ogg/1.3.5"
-            parties["netcdf"]  = "netcdf/4.8.1"
-            parties["libxml2"] = "libxml2/2.11.4"
-            parties["cgns"]    = "cgns/4.3.0"
+            parties["hdf5"]    = "hdf5/[>=1.14.0]"
+            parties["theora"]  = "theora/[>=1.1.1]"
+            parties["ogg"]     = "ogg/[>=1.3.5]"
+            parties["netcdf"]  = "netcdf/[>=4.8.1]"
+            parties["libxml2"] = "libxml2/[>=2.11.4]"
+            parties["cgns"]    = "cgns/[>=4.3.0]"
 
         # unused dependency, mentioned in vtk but not actually used
-        # parties["zfp"]     = "zfp/0.5.5"
+        # parties["zfp"]     = "zfp/[>=0.5.5]"
 
         if self.options.build_all_modules:
-            parties["boost"]  = "boost/1.82.0"
-            parties["odbc"]   = "odbc/2.3.11"
+            parties["boost"]  = "boost/[>=1.82.0]"
+            parties["odbc"]   = "odbc/[>=2.3.11]"
 
         if self._is_module_enabled([self.options.module_enable_RenderingOpenVR]):
-            parties["openvr"] = "openvr/1.16.8"
+            parties["openvr"] = "openvr/[>=1.16.8]"
 
         if self._is_any_Qt_enabled:
             if self.options.qt_version == "5":
-                parties["qt"] = "qt/5.15.9"
+                parties["qt"] = "qt/[>=5.15.9]"
             else:
-                parties["qt"] = "qt/6.5.0"
+                parties["qt"] = "qt/[>=6.5.0]"
 
         return parties
 
