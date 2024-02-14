@@ -211,6 +211,8 @@ class DuckdbConan(ConanFile):
             ]
             if Version(self.version) >= "0.6.0":
                 self.cpp_info.libs.append("duckdb_fsst")
+            if Version(self.version) >= "0.10.0":
+                self.cpp_info.libs.append("duckdb_skiplistlib")
 
             if self.options.with_autocomplete:
                 self.cpp_info.libs.append("autocomplete_extension")
