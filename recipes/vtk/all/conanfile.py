@@ -533,6 +533,9 @@ class VtkConan(ConanFile):
 
             # OpenVR's recipe isn't v2 compatible yet
             "module_enable_RenderingOpenVR":   "NO",
+
+            # No OpenXR recipe yet
+            "module_enable_RenderingOpenXR":   "NO",
         }
 
 
@@ -614,17 +617,17 @@ class VtkConan(ConanFile):
                 "eigen":             "eigen/[>=3.4.0]",
                 "expat":             "expat/[>=2.5.0]",
                 "exprtk":            "exprtk/[=0.0.1]",   # TODO upgrade to 0.0.2 (there was a problem with first attempt)
-                "fmt":               "fmt/[=8.1.1]",      # must be 8.1.1 for some reason ... VTK 9.1.0 release docs mention a PR - confirmed merged 8.1.0
+                "fmt":               "fmt/[=8.1.1]",      # must be 8.1.1 for some reason ... VTK 9.1.0 release docs mention a PR - confirmed merged 8.1.0, will be bumped in future VTK release
                 "freetype":          "freetype/[>=2.13.0]",
                 "glew":              "glew/[>=2.2.0]",
                 "jsoncpp":           "jsoncpp/[>=1.9.4]",
                 "libharu":           "libharu/[>=2.4.3]",
                 "kissfft":           "kissfft/[>=131.1.0]",
                 "lz4":               "lz4/[>=1.9.4]",
-                "libpng":            "libpng/[>=1.6.39]",
+                # TODO uncomment when no longer forcing ... "libpng":            "libpng/[>=1.6.39]",
                 "proj":              "proj/[>=9.1.1]",
                 "pugixml":           "pugixml/[>=1.13]",
-                "sqlite3":           "sqlite3/[>=3.41.1]",
+                # TODO uncomment when no longer forcing ... "sqlite3":           "sqlite3/[>=3.41.1]",
                 "utfcpp":            "utfcpp/[>=3.2.3]",
                 "xz_utils":          "xz_utils/[>=5.4.2]", # note: VTK calls this lzma
                 "zlib":              "zlib/[>=1.2.13]",
@@ -640,7 +643,7 @@ class VtkConan(ConanFile):
             parties["jpeg"] = "libjpeg-turbo/[>=2.1.5]"
 
         if self._is_module_enabled([self.options.group_enable_StandAlone]):
-            parties["hdf5"]    = "hdf5/[>=1.14.0]"
+            # TODO uncomment when no longer forcing ... parties["hdf5"]    = "hdf5/[>=1.14.0]"
             parties["theora"]  = "theora/[>=1.1.1]"
             parties["ogg"]     = "ogg/[>=1.3.5]"
             parties["netcdf"]  = "netcdf/[>=4.8.1]"
@@ -653,6 +656,9 @@ class VtkConan(ConanFile):
         if self.options.build_all_modules:
             parties["boost"]  = "boost/[>=1.82.0]"
             parties["odbc"]   = "odbc/[>=2.3.11]"
+
+        if self._is_module_enabled([self.options.module_enable_nlohmannjson]):
+            parties["nlohmannjson"] = "nlohmann_json/[>=3]"
 
         if self._is_module_enabled([self.options.module_enable_RenderingOpenVR]):
             parties["openvr"] = "openvr/[>=1.16.8]"
@@ -673,8 +679,13 @@ class VtkConan(ConanFile):
                 self.requires("xorg/system")
         for pack in self._third_party().values():
             self.requires(pack)
+
         # TODO unhack this, fix up QT recipe instead?  Avoid openssl conflicts
-        self.requires("openssl/[>=1.1 <4]")
+        # force versions to avoid build conflicts
+        # self.requires("openssl/[>=1.1 <4]")
+        self.requires("libpng/1.6.42", force=True)
+        self.requires("hdf5/1.14.1", force=True)
+        self.requires("sqlite3/3.45.1", force=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
