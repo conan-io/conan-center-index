@@ -23,8 +23,6 @@ class EasyExifConan(ConanFile):
     }
     default_options = {"shared": False, "fPIC": True}
 
-    exports_sources = "CMakeLists.txt"
-
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
@@ -32,6 +30,9 @@ class EasyExifConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     @property
     def _min_cppstd(self):
@@ -42,18 +43,19 @@ class EasyExifConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["EASYEXIF_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.generate()
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
