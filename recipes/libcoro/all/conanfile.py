@@ -106,7 +106,9 @@ class LibcoroConan(ConanFile):
             tc.variables["LIBCORO_FEATURE_THREADING"] = self.options.with_threading
             tc.variables["LIBCORO_FEATURE_SSL"] = self.options.with_ssl
         if Version(self.version) >= "0.11":
+            tc.variables["LIBCORO_RUN_GITCONFIG"] = False
             tc.variables["LIBCORO_BUILD_SHARED_LIBS"] = self.options.shared
+            tc.variables["LIBCORO_FEATURE_TLS"] = self.options.with_ssl
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
