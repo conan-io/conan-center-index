@@ -39,9 +39,18 @@ class LibcoroConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        return {
-            "gcc": "10.2.1",
-        }
+        if Version(self.version) < "0.10":
+            return {
+                "gcc": "10.2.1",
+            }
+        else:
+            return {
+                "gcc": "10.2.1",
+                "clang": "16.0.0",
+                "apple-clang": "13",
+                "Visual Studio": "16",
+                "msvc": "192",
+            }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -71,10 +80,11 @@ class LibcoroConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
-            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
-        if self.settings.compiler != "gcc":
-            raise ConanInvalidConfiguration(f"The Conan recipe {self.ref} only supports GCC for now. Contributions are welcome!")
+        if Version(self.version) < "0.10":
+            if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
+                raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
+            if self.settings.compiler != "gcc":
+                raise ConanInvalidConfiguration(f"The Conan recipe {self.ref} only supports GCC for now. Contributions are welcome!")
 
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
