@@ -144,7 +144,7 @@ class CPythonConan(ConanFile):
         if self._supports_modules:
             self.requires("openssl/[>=1.1 <4]")
             self.requires("expat/2.6.0")
-            if self._with_libffi:
+            if not self._use_vendored_libffi:
                 self.requires("libffi/3.4.4")
             if Version(self.version) < "3.8":
                 self.requires("mpdecimal/2.4.2")
@@ -226,6 +226,8 @@ class CPythonConan(ConanFile):
 
     def _generate_autotools(self):
         tc = AutotoolsToolchain(self, prefix=self.package_folder)
+        # Not necessary, just cleans up the output
+        tc.update_configure_args({"--enable-static": None, "--disable-static": None})
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args += [
             "--with-doc-strings={}".format(yes_no(self.options.docstrings)),
@@ -234,21 +236,21 @@ class CPythonConan(ConanFile):
             "--enable-optimizations={}".format(yes_no(self.options.optimizations)),
             "--with-lto={}".format(yes_no(self.options.lto)),
             "--with-pydebug={}".format(yes_no(self.settings.build_type == "Debug")),
-            "--disable-test-modules",
+            "--with-system-ffi",
         ]
-        if not self._use_vendored_libffi:
-            tc.configure_args += ["--with-system-ffi"]
+        if Version(self.version) >= "3.10":
+            tc.configure_args.append("--disable-test-modules")
         if self._is_py2:
-            tc.configure_args += ["--enable-unicode={}".format(yes_no(self.options.unicode))]
+            tc.configure_args.append("--enable-unicode={}".format(yes_no(self.options.unicode)))
         if self._is_py3:
             tc.configure_args += [
                 "--with-system-libmpdec",
                 "--with-openssl={}".format(self.dependencies["openssl"].package_folder),
             ]
-        if self.options.get_safe("with_sqlite3"):
-            tc.configure_args.append("--enable-loadable-sqlite-extensions={}".format(
-                yes_no(not self.dependencies["sqlite3"].options.omit_load_extension)
-            ))
+            if self.options.get_safe("with_sqlite3"):
+                tc.configure_args.append("--enable-loadable-sqlite-extensions={}".format(
+                    yes_no(not self.dependencies["sqlite3"].options.omit_load_extension)
+                ))
         if self.settings.compiler == "intel-cc":
             tc.configure_args.append("--with-icc")
         if os.environ.get("CC") or self.settings.compiler != "gcc":
