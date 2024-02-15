@@ -233,10 +233,10 @@ class CPythonConan(ConanFile):
             "--with-doc-strings={}".format(yes_no(self.options.docstrings)),
             "--with-pymalloc={}".format(yes_no(self.options.pymalloc)),
             "--with-system-expat",
+            "--with-system-ffi",
             "--enable-optimizations={}".format(yes_no(self.options.optimizations)),
             "--with-lto={}".format(yes_no(self.options.lto)),
             "--with-pydebug={}".format(yes_no(self.settings.build_type == "Debug")),
-            "--with-system-ffi",
         ]
         if Version(self.version) >= "3.10":
             tc.configure_args.append("--disable-test-modules")
