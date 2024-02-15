@@ -13,7 +13,6 @@ class cliTestConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CLI_WITH_ASIO"] = self.dependencies["cli"].options.with_asio
         tc.generate()
 
     def build(self):
@@ -26,5 +25,5 @@ class cliTestConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            cmd = os.path.join(self.cpp.build.bindir, "example")
+            cmd = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(cmd, env="conanrun")
