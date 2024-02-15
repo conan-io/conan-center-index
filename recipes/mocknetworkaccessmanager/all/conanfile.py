@@ -19,9 +19,11 @@ class MockNetworkAccessManagerConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
+        "with_qt": [5, 6],
     }
     default_options = {
         "fPIC": True,
+        "with_qt": 5,
     }
 
     def export_sources(self):
@@ -35,7 +37,10 @@ class MockNetworkAccessManagerConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/5.15.11", transitive_headers=True)
+        if self.options.with_qt == 5:
+            self.requires("qt/5.15.12", transitive_headers=True)
+        else:
+            self.requires("qt/6.6.1" transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -47,6 +52,7 @@ class MockNetworkAccessManagerConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
+        tc.variables["FORCE_QT5"] = self.options.with_qt == 5
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
