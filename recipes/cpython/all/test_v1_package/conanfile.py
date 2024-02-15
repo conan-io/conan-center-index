@@ -4,7 +4,6 @@ from conan.tools.env import VirtualRunEnv
 from io import StringIO
 import os
 import re
-import shutil
 
 
 class CmakePython3Abi(object):
@@ -116,11 +115,6 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self, skip_x64_x86=True):
             if self._supports_modules:
                 with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                    modsrcfolder = "py2" if tools.Version(self.deps_cpp_info["cpython"].version).major < "3" else "py3"
-                    tools.mkdir(os.path.join(self.build_folder, modsrcfolder))
-                    for fn in os.listdir(os.path.join(self.source_folder, modsrcfolder)):
-                        shutil.copy(os.path.join(self.source_folder, modsrcfolder, fn), os.path.join(self.build_folder, modsrcfolder, fn))
-                    shutil.copy(os.path.join(self.source_folder, "setup.py"), os.path.join(self.build_folder, "setup.py"))
                     env = {
                         "DISTUTILS_USE_SDK": "1",
                         "MSSdk": "1"
@@ -128,9 +122,7 @@ class TestPackageConan(ConanFile):
                     env.update(**AutoToolsBuildEnvironment(self).vars)
                     with tools.environment_append(env):
                         setup_args = [
-                            "{}/setup.py".format(self.source_folder),
-                            # "conan",
-                            # "--install-folder", self.build_folder,
+                            os.path.join(self.source_folder, "..", "test_package", "setup.py"),
                             "build",
                             "--build-base", self.build_folder,
                             "--build-platlib", os.path.join(self.build_folder, "lib_setuptools"),

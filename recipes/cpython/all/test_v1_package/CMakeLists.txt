@@ -53,8 +53,10 @@ endif()
 
 option(BUILD_MODULE "Build python module")
 
+set(SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../test_package/py${PY_VERSION_MAJOR}")
+
 if(BUILD_MODULE)
-    add_library(spam MODULE "py${PY_VERSION_MAJOR}/test_module.c")
+    add_library(spam MODULE "${SOURCE_DIR}/test_module.c")
     target_include_directories(spam
         PRIVATE
             ${PYTHON_INCLUDE_DIRS}
@@ -87,14 +89,14 @@ if(BUILD_MODULE)
         endif()
 
         if(PY_VERSION_MAJOR STREQUAL "2")
-            python2_add_library(spam2 "py${PY_VERSION_MAJOR}/test_module.c")
+            python2_add_library(spam2 "${SOURCE_DIR}/test_module.c")
         elseif(PY_VERSION_MAJOR STREQUAL "3")
-            python3_add_library(spam2 "py${PY_VERSION_MAJOR}/test_module.c")
+            python3_add_library(spam2 "${SOURCE_DIR}/test_module.c")
         else()
             message(FATAL_ERROR "Unknown PY_VERSION_MAJOR")
         endif()
     endif()
 endif()
 
-add_executable(${PROJECT_NAME} "py${PY_VERSION_MAJOR}/test_package.c")
+add_executable(${PROJECT_NAME} "${SOURCE_DIR}/test_package.c")
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
