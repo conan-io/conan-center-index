@@ -4,7 +4,7 @@ from conan.tools.files import get, replace_in_file, rm
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library
+from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
 import os
 
