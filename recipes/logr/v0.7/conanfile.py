@@ -53,7 +53,7 @@ class LogrConan(ConanFile):
             self.requires("boost/1.83.0")
 
     def package_id(self):
-        self.info.clear()
+        self.info.settings.clear()
 
     def validate(self):
         minimal_cpp_standard = "17"
