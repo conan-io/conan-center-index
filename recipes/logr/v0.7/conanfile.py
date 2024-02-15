@@ -83,17 +83,18 @@ class LogrConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*.*pp", src=os.path.join(self.source_folder, "logr", "include"), dst=os.path.join(self.package_folder, "include"))
 
+        include_folder = os.path.join(self.package_folder, "include", "logr")
         if not self.options.with_spdlog_backend:
-            rm(self, f"include/logr/spdlog_backend.hpp", self.package_folder)
+            rm(self, "spdlog_backend.hpp", include_folder)
 
         if not self.options.with_glog_backend:
-            rm(self, f"include/logr/glog_backend.hpp", self.package_folder)
+            rm(self, "glog_backend.hpp", include_folder)
 
         if not self.options.with_log4cplus_backend:
-            rm(self, f"include/logr/log4cplus_backend.hpp", self.package_folder)
+            rm(self, "log4cplus_backend.hpp", include_folder)
 
         if not self.options.with_boostlog_backend:
-            rm(self, f"include/logr/boostlog_backend.hpp", self.package_folder)
+            rm(self, "boostlog_backend.hpp", include_folder)
 
     def package_info(self):
         self.cpp_info.bindirs = []
