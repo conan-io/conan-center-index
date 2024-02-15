@@ -31,6 +31,9 @@ patches:
     - patch_file: "patches/0.10.0-0001-fix-cmake.patch"
       patch_description: "install static of shared library, add installation for odbc extention"
       patch_type: "portability"
+    - patch_file: "patches/0.10.0-0002-msvc-bicobj.patch"
+      patch_description: "add /bigobj flag"
+      patch_type: "portability"
   "0.9.2":
     - patch_file: "patches/0.9.2-0001-fix-cmake.patch"
       patch_description: "install static of shared library, add installation for odbc extention"
