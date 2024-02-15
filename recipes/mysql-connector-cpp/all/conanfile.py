@@ -120,9 +120,27 @@ class MysqlConnectorCPPRecipe(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
+       # INFO: Disable internal bootstrap to use Conan CMakeToolchain instead
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "bootstrap()", "")
+        # INFO: Manage fPIC from recipe options
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "enable_pic()", "")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "enable_pic()", "")
+        protobuf = "protobufd" if self.dependencies["protobuf"].settings.build_type == "Debug" else "protobuf"
+        # INFO: Disable protobuf-lite to use Conan protobuf targets instead
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindProtobuf.cmake"), "LIBRARY protobuf-lite pb_libprotobuf-lite", "")
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"), "ext::protobuf-lite", "ext::protobuf")
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "core", "CMakeLists.txt"), "ext::protobuf-lite", "ext::protobuf")
+        # INFO: Fix protobuf library name according to the build type
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindProtobuf.cmake"), "LIBRARY protobuf", f"LIBRARY {protobuf}")
+        # INFO: Disable protobuf-lite to use Conan protobuf targets instead
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"), "ext::protobuf-lite", f"ext::{protobuf}")
+        # INFO: Disable protobuf-lite to use Conan protobuf targets instead
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "core", "CMakeLists.txt"), "ext::protobuf-lite", f"ext::{protobuf}")
+        if self.settings.os == "Windows":
+            # INFO: On Windows, libraries names change
+            zlib = "zdll" if self.dependencies["zlib"].options.shared else "zlib"
+            zstd = "zstd" if self.dependencies["zstd"].options.shared else "zstd_static"
+            replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "add_ext(zlib zlib.h z ext_zlib)", f"add_ext(zlib zlib.h {zlib} ext_zlib)")
+            replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"), "ext::z ext::lz4 ext::zstd", f"ext::{zlib} ext::lz4 ext::{zstd}")
+            replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "add_ext(zstd zstd.h zstd ext_zstd)", f"add_ext(zstd zstd.h {zstd} ext_zstd)")
 
     def build(self):
         self._patch_sources()
@@ -137,17 +155,11 @@ class MysqlConnectorCPPRecipe(ConanFile):
         rm(self, "INFO_BIN", self.package_folder)
 
     def package_info(self):
-        self.cpp_info.libdirs = ["lib64", "lib"]
+        self.cpp_info.libdirs = ["lib64/debug","lib/debug"] if self.settings.build_type == "Debug" else ["lib64", "lib"]
+        suffix = "" if self.options.shared else "-static"
+        self.cpp_info.libs = [f"mysqlcppconn{suffix}", f"mysqlcppconn8{suffix}"]
 
-        if not self.options.shared:
-            self.cpp_info.libs = ["mysqlcppconn8-static"]
-            stdcpplib = stdcpp_library(self)
-            if stdcpplib:
-                self.cpp_info.system_libs.append(stdcpplib)
-        else:
-            self.cpp_info.libs = ["mysqlcppconn", "mysqlcppconn8"]
-
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD", "Macos"]:
             self.cpp_info.system_libs = ["m", "resolv"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
