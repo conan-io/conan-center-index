@@ -49,7 +49,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
         self.requires("protobuf/3.21.12")
         self.requires("boost/1.83.0")
         self.requires("openssl/[>=1.1.1 <4]")
-        self.requires("libmysqlclient/8.0.31")
+        self.requires("libmysqlclient/8.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
@@ -157,6 +157,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
     def package_info(self):
         self.cpp_info.libdirs = ["lib64/debug","lib/debug"] if self.settings.build_type == "Debug" else ["lib64", "lib"]
         suffix = "" if self.options.shared else "-static"
+        # we need mysqlcppconn for JDBC legacy support and mysqlcppconn8 for mysqlx support
         self.cpp_info.libs = [f"mysqlcppconn{suffix}", f"mysqlcppconn8{suffix}"]
 
         if self.settings.os in ["Linux", "FreeBSD", "Macos"]:
