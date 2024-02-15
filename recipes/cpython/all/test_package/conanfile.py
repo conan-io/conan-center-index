@@ -117,7 +117,7 @@ class TestPackageConan(ConanFile):
         tc.cache_variables["PY_VERSION"] = self._clean_py_version
         tc.cache_variables["PY_VERSION_SUFFIX"] = self._cmake_abi.suffix
         tc.cache_variables["PYTHON_EXECUTABLE"] = self._python
-        tc.cache_variables["USE_FINDPYTHON_X".format(py_major)] = self._cmake_try_FindPythonX
+        tc.cache_variables["USE_FINDPYTHON_X"] = self._cmake_try_FindPythonX
         tc.cache_variables[f"Python{py_major}_EXECUTABLE"] = self._python
         tc.cache_variables[f"Python{py_major}_ROOT_DIR"] = self.dependencies["cpython"].package_folder
         tc.cache_variables[f"Python{py_major}_USE_STATIC_LIBS"] = not self.dependencies["cpython"].options.shared
