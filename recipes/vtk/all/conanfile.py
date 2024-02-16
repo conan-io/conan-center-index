@@ -594,7 +594,8 @@ class VtkConan(ConanFile):
         self.tool_requires("sqlite3/[>=3.41.1]")
 
     def source(self):
-        if True: # TODO TODO self.options.use_source_from_git:
+        # NOTE: if using git, have to also use the git submodule thing to get VTKm... the tarball has it.
+        if False: # TODO TODO self.options.use_source_from_git:
             self.run("git clone -b release --single-branch " + self.git_url + " " + self.source_folder)
             # note: we give the branch a name so we don't have detached heads
             # TODO change to standard git and python chdir
@@ -725,6 +726,9 @@ class VtkConan(ConanFile):
         if self.dependencies["kissfft"].options.datatype != "double":
             # kissfft - we want the double format (also known as kiss_fft_scalar)
             raise ConanInvalidConfiguration(f"{self.ref} requires kissfft:datatype=double")
+
+        if self._is_module_enabled([self.options.module_enable_GUISupportQtQuick]) and not self.dependencies["qt"].options.qtdeclaritive:
+            raise ConanInvalidConfiguration(f"{self.ref} has module_enable_GUISupportQtQuick enabled, which requires qt:qtdeclarative=True")
 
 
     def export_sources(self):
