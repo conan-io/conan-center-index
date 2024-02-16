@@ -59,14 +59,12 @@ class LibcoroConan(ConanFile):
         if Version(self.version) < "0.9":
             del self.options.with_ssl
             del self.options.with_threading
-        if Version(self.version) < "0.11":
-            del self.options.shared
         if is_msvc(self) or self.settings.os == "Emscripten":
             self.options.rm_safe("with_networking")
             self.options.rm_safe("with_ssl")
 
     def configure(self):
-        if self.options.get_safe("shared"):
+        if self.options.shared:
             self.options.rm_safe("fPIC")
         if Version(self.version) < "0.11":
             self.package_type = "static-library"
@@ -94,6 +92,9 @@ class LibcoroConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+
+        if Version(self.version) < "0.11" and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} Only supports shared linking for versions >=0.11")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
