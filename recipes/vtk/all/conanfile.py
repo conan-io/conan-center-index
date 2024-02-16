@@ -694,7 +694,7 @@ class VtkConan(ConanFile):
         self.requires("libpng/1.6.42", force=True)  # conflict: libharu (.40) and freetype (.42)
         self.requires("hdf5/1.14.3", force=True)    # conflict: netcdf (.1) and cgns (.0)
         self.requires("sqlite3/3.45.1", force=True) # conflict: qt (3.44.2) and proj (3.44.2)
-        self.requires("libxml2/1.12.3", force=True) # conflict: xkbcommon (1.12.3)
+        self.requires("libxml2/2.12.4", force=True) # conflict: xkbcommon (2.12.3)
 
     def validate(self):
         if self.settings.compiler.cppstd:
