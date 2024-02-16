@@ -59,6 +59,9 @@ class LibcoroConan(ConanFile):
         if Version(self.version) < "0.9":
             del self.options.with_ssl
             del self.options.with_threading
+        if is_msvc(self) or self.settings.os == "Emscripten":
+            self.options.rm_safe("with_networking")
+            self.options.rm_safe("with_ssl")
 
     def configure(self):
         if self.options.shared:
@@ -97,14 +100,14 @@ class LibcoroConan(ConanFile):
         tc.variables["LIBCORO_BUILD_EXAMPLES"] = False
         if Version(self.version) >= "0.8":
             tc.variables["LIBCORO_EXTERNAL_DEPENDENCIES"] = True
-            tc.variables["LIBCORO_FEATURE_NETWORKING"] = self.options.with_networking
+            tc.variables["LIBCORO_FEATURE_NETWORKING"] = self.options.get_safe("with_networking")
         if Version(self.version) >= "0.9":
             tc.variables["LIBCORO_FEATURE_THREADING"] = self.options.with_threading
-            tc.variables["LIBCORO_FEATURE_SSL"] = self.options.with_ssl
+            tc.variables["LIBCORO_FEATURE_SSL"] = self.options.get_safe("with_ssl", False)
         if Version(self.version) >= "0.11":
             tc.variables["LIBCORO_RUN_GITCONFIG"] = False
             tc.variables["LIBCORO_BUILD_SHARED_LIBS"] = self.options.shared
-            tc.variables["LIBCORO_FEATURE_TLS"] = self.options.with_ssl
+            tc.variables["LIBCORO_FEATURE_TLS"] = self.options.get_safe("with_ssl", False)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -132,9 +135,9 @@ class LibcoroConan(ConanFile):
             self.cpp_info.system_libs = ["pthread", "m"]
 
         if Version(self.version) >= "0.9":
-            if self.options.with_networking:
+            if self.options.get_safe("with_networking"):
                 self.cpp_info.defines.append("LIBCORO_FEATURE_NETWORKING")
-            if self.options.with_ssl:
-                self.cpp_info.defines.append("LIBCORO_FEATURE_SSL")
+            if self.options.get_safe("with_ssl"):
+                self.cpp_info.defines.extends(["LIBCORO_FEATURE_SSL", "LIBCORO_FEATURE_TLS"])
             if self.options.with_threading:
                 self.cpp_info.defines.append("LIBCORO_FEATURE_THREADING")
