@@ -8,9 +8,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
 import os
 
-
 requird_conan_version = ">=1.54.0"
-
 
 class MysqlConnectorCPPRecipe(ConanFile):
     name = "mysql-connector-cpp"
@@ -19,9 +17,10 @@ class MysqlConnectorCPPRecipe(ConanFile):
     homepage = "https://dev.mysql.com/doc/connector-cpp/8.1/en/"
     description = "A MySQL database connector for C++ applications that connect to MySQL servers"
     topics = ("mysql", "connector", "libmysqlclient", "jdbc")
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "with_jdbc": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "with_jdbc": True}
 
     @property
     def _min_cppstd(self):
@@ -43,7 +42,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
         self.tool_requires("protobuf/3.21.12")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.10 <2]")
         self.requires("lz4/1.9.4")
         self.requires("zstd/1.5.5")
         self.requires("protobuf/3.21.12")
@@ -100,11 +99,11 @@ class MysqlConnectorCPPRecipe(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
         tc = CMakeToolchain(self)
+        tc.presets_build_environment = env.environment()
         tc.variables["WITH_JDBC"] = True
         tc.variables["WITHOUT_SERVER"] = True
         # INFO: mysql-connector-cpp caches all option values. Need to use cache_variables
         tc.cache_variables["BUILD_STATIC"] = not self.options.shared
-        tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         # INFO: mysql-connector-cpp doesn't use find package for cmake. Need to pass manually folder paths
         tc.variables["MYSQL_LIB_DIR"] = self._lib_folder_dep("libmysqlclient")
         tc.variables["MYSQL_INCLUDE_DIR"] = self._include_folder_dep("libmysqlclient")
@@ -117,6 +116,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
         tc.cache_variables["WITH_LZ4"] = self._package_folder_dep("lz4")
         tc.cache_variables["WITH_ZSTD"] = self._package_folder_dep("zstd")
         tc.cache_variables["WITH_PROTOBUF"] = self._package_folder_dep("protobuf")
+        tc.variables["JDBC_ENABLED"] = True
         tc.generate()
 
     def _patch_sources(self):
@@ -145,6 +145,8 @@ class MysqlConnectorCPPRecipe(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
+        cmake.parallel = True
+        cmake.verbose = True
         cmake.configure()
         cmake.build()
 
@@ -158,7 +160,10 @@ class MysqlConnectorCPPRecipe(ConanFile):
         self.cpp_info.libdirs = ["lib64/debug","lib/debug"] if self.settings.build_type == "Debug" else ["lib64", "lib"]
         suffix = "" if self.options.shared else "-static"
         # we need mysqlcppconn for JDBC legacy support and mysqlcppconn8 for mysqlx support
-        self.cpp_info.libs = [f"mysqlcppconn{suffix}", f"mysqlcppconn8{suffix}"]
+        if self.options.with_jdbc == True:
+            self.cpp_info.libs = [f"mysqlcppconn{suffix}", f"mysqlcppconn8{suffix}"]
+        else:
+            self.cpp_info.libs = [f"mysqlcppconn8{suffix}"]
 
         if self.settings.os in ["Linux", "FreeBSD", "Macos"]:
             self.cpp_info.system_libs = ["m", "resolv"]
