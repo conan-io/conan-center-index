@@ -59,13 +59,17 @@ class LibcoroConan(ConanFile):
         if Version(self.version) < "0.9":
             del self.options.with_ssl
             del self.options.with_threading
+        if Version(self.version) < "0.11":
+            del self.options.shared
         if is_msvc(self) or self.settings.os == "Emscripten":
             self.options.rm_safe("with_networking")
             self.options.rm_safe("with_ssl")
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
+        if Version(self.version) < "0.11":
+            self.package_type = "static-library"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
