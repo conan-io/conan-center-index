@@ -18,7 +18,7 @@ class LogrConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ngrodzitski/logr"
-    topics = ("logger", "development", "util", "utils")
+    topics = ("logger", "development", "util", "utils", "header-only")
     settings = "os", "arch", "compiler", "build_type"
     package_type = "header-library"
     options = {
@@ -41,16 +41,16 @@ class LogrConan(ConanFile):
         self.requires("fmt/10.2.1")
 
         if self.options.with_spdlog_backend:
-            self.requires("spdlog/1.12.0", transitive_headers=True, transitive_libs=True)
+            self.requires("spdlog/1.12.0")
 
         if self.options.with_glog_backend:
-            self.requires("glog/0.6.0", transitive_headers=True, transitive_libs=True)
+            self.requires("glog/0.6.0")
 
         if self.options.with_log4cplus_backend:
-            self.requires("log4cplus/2.1.0", transitive_headers=True, transitive_libs=True)
+            self.requires("log4cplus/2.1.0")
 
         if self.options.with_boostlog_backend:
-            self.requires("boost/1.83.0", transitive_headers=True, transitive_libs=True)
+            self.requires("boost/1.83.0")
 
     def package_id(self):
         self.info.settings.clear()
