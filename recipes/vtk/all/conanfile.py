@@ -625,10 +625,14 @@ class VtkConan(ConanFile):
                 "libharu":           "libharu/[>=2.4.3]",
                 "kissfft":           "kissfft/[>=131.1.0]",
                 "lz4":               "lz4/[>=1.9.4]",
+
                 # TODO uncomment when no longer forcing ... "libpng":            "libpng/[>=1.6.39]",
+
                 "proj":              "proj/[>=9.1.1]",
                 "pugixml":           "pugixml/[>=1.13]",
+
                 # TODO uncomment when no longer forcing ... "sqlite3":           "sqlite3/[>=3.41.1]",
+
                 "utfcpp":            "utfcpp/[>=3.2.3]",
                 "xz_utils":          "xz_utils/[>=5.4.2]", # note: VTK calls this lzma
                 "zlib":              "zlib/[>=1.2.13]",
@@ -645,10 +649,13 @@ class VtkConan(ConanFile):
 
         if self._is_module_enabled([self.options.group_enable_StandAlone]):
             # TODO uncomment when no longer forcing ... parties["hdf5"]    = "hdf5/[>=1.14.0]"
+
             parties["theora"]  = "theora/[>=1.1.1]"
             parties["ogg"]     = "ogg/[>=1.3.5]"
             parties["netcdf"]  = "netcdf/[>=4.8.1]"
-            parties["libxml2"] = "libxml2/[>=2.11.4]"
+
+            # TODO uncomment when no longer forcing ... parties["libxml2"] = "libxml2/[>=2.11.4]"
+
             parties["cgns"]    = "cgns/[>=4.3.0]"
 
         # unused dependency, mentioned in vtk but not actually used
@@ -684,9 +691,10 @@ class VtkConan(ConanFile):
         # TODO unhack this, fix up QT recipe instead?  Avoid openssl conflicts
         # force versions to avoid build conflicts
         # self.requires("openssl/[>=1.1 <4]")
-        self.requires("libpng/1.6.42", force=True)
-        self.requires("hdf5/1.14.1", force=True)
-        self.requires("sqlite3/3.45.1", force=True)
+        self.requires("libpng/1.6.42", force=True)  # conflict: libharu (.40) and freetype (.42)
+        self.requires("hdf5/1.14.3", force=True)    # conflict: netcdf (.1) and cgns (.0)
+        self.requires("sqlite3/3.45.1", force=True) # conflict: qt (3.44.2) and proj (3.44.2)
+        self.requires("libxml2/1.12.3", force=True) # conflict: xkbcommon (1.12.3)
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -1226,7 +1234,6 @@ class VtkConan(ConanFile):
         for implemented in autoinits:
             content = "#if 0\n\n"
             all_impls = autoinits[implemented]
-            is_first = True
             for L in reversed(range(1, len(all_impls)+1)):
                 for subset in itertools.combinations(all_impls, L):
                     print(subset)
