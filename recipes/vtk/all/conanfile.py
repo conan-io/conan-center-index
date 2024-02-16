@@ -538,6 +538,9 @@ class VtkConan(ConanFile):
 
             # No OpenXR recipe yet
             "module_enable_RenderingOpenXR":   "NO",
+
+            # disable Qt Quick support, by default, for now, because Qt recipe (by default) doesn't build declarative
+            "module_enable_GUISupportQtQuick": "NO",
         }
 
 
