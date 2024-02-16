@@ -29,7 +29,7 @@ class OpenDis6Conan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17"
+        return "14"
 
     @property
     def _compilers_minimum_version(self):
