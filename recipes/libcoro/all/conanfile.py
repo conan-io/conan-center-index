@@ -104,6 +104,8 @@ class LibcoroConan(ConanFile):
         if Version(self.version) >= "0.9":
             tc.variables["LIBCORO_FEATURE_THREADING"] = self.options.with_threading
             tc.variables["LIBCORO_FEATURE_SSL"] = self.options.get_safe("with_ssl", False)
+        if Version(self.version) >= "0.10":
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if Version(self.version) >= "0.11":
             tc.variables["LIBCORO_RUN_GITCONFIG"] = False
             tc.variables["LIBCORO_BUILD_SHARED_LIBS"] = self.options.shared
