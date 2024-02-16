@@ -1,4 +1,4 @@
 sources:
-  "cci.20230418":
-    url: "https://github.com/cppfastio/fast_io/archive/95cd3a6516b3b4785d3a82a1fae4a2b935bc35bc.tar.gz"
-    sha256: "5552334d523cb5e3444e683a1434c01f3d9dd9c3bc97db5351e5cdfab23e9f5c"
+  "cci.20240128":
+    url: "https://github.com/cppfastio/fast_io/archive/cfbc2ae2a2c80cad215cfa3ce55839a13eb2ed86.tar.gz"
+    sha256: "b8de7da8cabb8536f36f222cc208be98d68fb32483ee68cc6525a9403a59d785"
