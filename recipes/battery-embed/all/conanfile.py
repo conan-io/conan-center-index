@@ -26,7 +26,6 @@ class BatteryEmbedConan(ConanFile):
         return {
             "gcc": "11",
             "clang": "12",
-            "apple-clang": "13",
             "Visual Studio": "16",
             "msvc": "192",
         }
@@ -35,6 +34,9 @@ class BatteryEmbedConan(ConanFile):
         export_conandata_patches(self)
 
     def validate(self):
+        if self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support apple-clang due to lack of jthread and stop_token.")
+
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
