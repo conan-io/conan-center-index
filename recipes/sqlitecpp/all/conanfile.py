@@ -24,11 +24,13 @@ class SQLiteCppConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "stack_protection": [True, False],
+        "has_codec": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "stack_protection": True,
+        "has_codec": False,
     }
 
     def export_sources(self):
@@ -41,9 +43,14 @@ class SQLiteCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if self.options.has_codec:
+            self.options["sqlcipher"].enable_column_metadata = True
 
     def requirements(self):
-        self.requires("sqlite3/3.45.0")
+        if self.options.has_codec:
+            self.requires("sqlcipher/[>=4.5.6]")
+        else:
+            self.requires("sqlite3/3.45.0")
 
     def validate(self):
         if Version(self.version) >= "3.0.0" and self.info.settings.compiler.get_safe("cppstd"):
@@ -78,6 +85,7 @@ class SQLiteCppConan(ConanFile):
         tc.variables["SQLITECPP_BUILD_EXAMPLES"] = False
         tc.variables["SQLITECPP_BUILD_TESTS"] = False
         tc.variables["SQLITECPP_USE_STACK_PROTECTION"] = self.options.stack_protection
+        tc.variables["SQLITE_HAS_CODEC"] = self.options.has_codec
         tc.generate()
 
         tc = CMakeDeps(self)
