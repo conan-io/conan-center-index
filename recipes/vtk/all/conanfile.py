@@ -616,9 +616,9 @@ class VtkConan(ConanFile):
                 "cli11":             "cli11/[>=2.3.2]",
                 "double-conversion": "double-conversion/[>=3.2.1]",
                 "eigen":             "eigen/[>=3.4.0]",
-                "expat":             "expat/[>=2.5.0]",
+                # TODO uncomment when no longer forcing ... "expat":             "expat/[>=2.5.0]",
                 "exprtk":            "exprtk/[=0.0.1]",   # TODO upgrade to 0.0.2 (there was a problem with first attempt)
-                "fmt":               "fmt/[=8.1.1]",      # must be 8.1.1 for some reason ... VTK 9.1.0 release docs mention a PR - confirmed merged 8.1.0, will be bumped in future VTK release
+                "fmt":               "fmt/[=8.1.1]",      # TODO must be 8.1.1 for some reason ... VTK 9.1.0 release docs mention a PR - confirmed merged 8.1.0, will be bumped in future VTK release
                 "freetype":          "freetype/[>=2.13.0]",
                 "glew":              "glew/[>=2.2.0]",
                 "jsoncpp":           "jsoncpp/[>=1.9.4]",
@@ -695,6 +695,7 @@ class VtkConan(ConanFile):
         self.requires("hdf5/1.14.3", force=True)    # conflict: netcdf (.1) and cgns (.0)
         self.requires("sqlite3/3.45.1", force=True) # conflict: qt (3.44.2) and proj (3.44.2)
         self.requires("libxml2/2.12.4", force=True) # conflict: xkbcommon (2.12.3)
+        self.requires("expat/2.6.0", force=True) # conflict: wayland (2.5.0)
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -737,6 +738,9 @@ class VtkConan(ConanFile):
 
         if self._is_module_enabled([self.options.module_enable_GUISupportQtQuick]) and not self.dependencies["qt"].options.qtdeclaritive:
             raise ConanInvalidConfiguration(f"{self.ref} has module_enable_GUISupportQtQuick enabled, which requires qt:qtdeclarative=True")
+
+        if self.options.smp_enable_TBB:
+            raise ConanInvalidConfiguration(f"{self.ref} has smp_enable_TBB enabled. TODO check modules.json for TBB/OpenTBB dependencies and adjust recipe to suit.")
 
 
     def export_sources(self):
@@ -898,7 +902,7 @@ class VtkConan(ConanFile):
         ##### SMP parallelism ####  Sequential  STDThread  OpenMP  TBB
         # Note that STDThread seems to be available by default
         tc.variables["VTK_SMP_IMPLEMENTATION_TYPE"] = self.options.smp_implementation_type
-        # Change change the mode during runtime, if you enable the backends like so:
+        # Change the mode during runtime, if you enable the backends like so:
         tc.variables["VTK_SMP_ENABLE_Sequential"]   = self.options.smp_enable_Sequential
         tc.variables["VTK_SMP_ENABLE_STDThread"]    = self.options.smp_enable_STDThread
         tc.variables["VTK_SMP_ENABLE_OpenMP"]       = self.options.smp_enable_OpenMP
