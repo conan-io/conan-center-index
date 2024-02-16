@@ -41,3 +41,6 @@ patches:
     - patch_file: "patches/9.2.6-fix-vtkHardwarePicker-nearest.patch"
       patch_type: "conan"
       patch_description: "Fix problems with hardware picker when there are multiple sets of data that could be picked"
+    - patch_file: "patches/9.2.6-fix-kissfft-use-external.patch"
+      patch_type: "conan"
+      patch_description: "Force VTK to use the conan-provided kissfft package"
