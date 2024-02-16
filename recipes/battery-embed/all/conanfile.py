@@ -43,9 +43,6 @@ class BatteryEmbedConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.21 <4]")
-
     def package_id(self):
         del self.info.settings.arch
         del self.info.settings.compiler
@@ -67,3 +64,6 @@ class BatteryEmbedConan(ConanFile):
         self.cpp_info.includedirs = []
 
         self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "battery-embed", "CMakeLists.txt")])
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
