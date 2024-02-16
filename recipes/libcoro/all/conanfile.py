@@ -138,6 +138,6 @@ class LibcoroConan(ConanFile):
             if self.options.get_safe("with_networking"):
                 self.cpp_info.defines.append("LIBCORO_FEATURE_NETWORKING")
             if self.options.get_safe("with_ssl"):
-                self.cpp_info.defines.extends(["LIBCORO_FEATURE_SSL", "LIBCORO_FEATURE_TLS"])
+                self.cpp_info.defines.extend(["LIBCORO_FEATURE_SSL", "LIBCORO_FEATURE_TLS"])
             if self.options.with_threading:
                 self.cpp_info.defines.append("LIBCORO_FEATURE_THREADING")
