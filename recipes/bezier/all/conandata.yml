@@ -1,0 +1,4 @@
+sources:
+  "0.2.1":
+    url: "https://github.com/oysteinmyrmo/bezier/archive/refs/tags/v0.2.1.tar.gz"
+    sha256: "fce93c766f31ec445f6f48d0d1438c128640f0728d29745ca9e5424d9daf944f"

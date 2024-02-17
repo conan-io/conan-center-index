@@ -18,7 +18,7 @@ class CBlosc2Conan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Blosc/c-blosc2"
-    topics = ("c-blosc", "blosc", "compression")
+    topics = ("c-blosc", "blosc", "compression", "cache", "store")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {

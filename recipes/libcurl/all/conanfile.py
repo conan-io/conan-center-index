@@ -174,9 +174,9 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/5.6.3")
+            self.requires("wolfssl/5.6.6")
         if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.58.0")
+            self.requires("libnghttp2/1.59.0")
         if self.options.with_libssh2:
             self.requires("libssh2/1.11.0")
         if self.options.with_zlib:
@@ -186,7 +186,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.22.1")
+            self.requires("c-ares/1.25.0")
         if self.options.get_safe("with_libpsl"):
             self.requires("libpsl/0.21.1")
 
@@ -199,6 +199,8 @@ class LibcurlConan(ConanFile):
             openssl = self.dependencies["openssl"]
             if self.options.with_ntlm and openssl.options.no_des:
                 raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
+        if self.options.with_ssl == "wolfssl" and not self.dependencies["wolfssl"].options.with_curl:
+            raise ConanInvalidConfiguration("option with_ssl=wolfssl requires wolfssl:with_curl=True")
 
     def build_requirements(self):
         if self._is_using_cmake_build:

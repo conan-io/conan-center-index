@@ -1,8 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import functools
 import os
@@ -117,6 +118,10 @@ class OpenvinoConan(ConanFile):
             "msvc": "192",
         }
 
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["openvino"], strip_root=True)
         get(self, **self.conan_data["sources"][self.version]["onednn_cpu"], strip_root=True,
@@ -152,7 +157,7 @@ class OpenvinoConan(ConanFile):
     def build_requirements(self):
         if self._target_arm:
             self.tool_requires("scons/4.3.0")
-        if cross_building(self):
+        if not self._is_legacy_one_profile:
             if self._protobuf_required:
                 self.tool_requires("protobuf/<host_version>")
             if self.options.enable_tf_lite_frontend:
@@ -183,6 +188,12 @@ class OpenvinoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if self._is_legacy_one_profile:
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         deps = CMakeDeps(self)
         deps.generate()
 
@@ -299,6 +310,8 @@ class OpenvinoConan(ConanFile):
             openvino_runtime.system_libs.append("shlwapi")
             if self._preprocessing_available:
                 openvino_runtime.system_libs.extend(["wsock32", "ws2_32"])
+        if Version(self.version) < "2024.0.0":
+            openvino_runtime.includedirs.append(os.path.join("include", "ie"))
 
         # Have to expose all internal libraries for static libraries case
         if not self.options.shared:

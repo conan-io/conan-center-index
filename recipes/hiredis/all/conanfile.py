@@ -56,9 +56,9 @@ class HiredisConan(ConanFile):
         # Since 1.2.0, BUILD_SHARED_LIBS has been defined by option()
         if Version(self.version) >= "1.2.0":
             tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["ENABLE_SSL"] = self.options.with_ssl
-        tc.variables["DISABLE_TESTS"] = True
-        tc.variables["ENABLE_EXAMPLES"] = False
+        tc.cache_variables["ENABLE_SSL"] = self.options.with_ssl
+        tc.cache_variables["DISABLE_TESTS"] = True
+        tc.cache_variables["ENABLE_EXAMPLES"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

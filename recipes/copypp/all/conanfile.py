@@ -24,14 +24,14 @@ class BasicConanfile(ConanFile):
     @property
     def _min_cppstd(self):
         return 20
-    
+
     @property
     def _compilers_minimum_version(self):
         return {
             "apple-clang": "15",
             "clang": "13",
             "gcc": "11",
-            "msvc": "19.3",
+            "msvc": "193",
             "Visual Studio": "17",
         }
 
@@ -44,7 +44,7 @@ class BasicConanfile(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-            
+
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(

@@ -1,4 +1,7 @@
 sources:
+  "1.0.240122.1":
+    url: "https://github.com/microsoft/wil/archive/refs/tags/v1.0.240122.1.tar.gz"
+    sha256: "e599f2843c01b9e4827e46f11d3651180675c8ecdbba8bdae735f533672989d3"
   "1.0.231216.1":
     url: "https://github.com/microsoft/wil/archive/refs/tags/v1.0.231216.1.tar.gz"
     sha256: "4c15ba5e357f19449222b89f6e34d590d9d3f3d67e704a5cc5f4caa74228dd7e"

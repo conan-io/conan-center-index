@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -90,3 +91,6 @@ class LibuclConan(ConanFile):
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["pkg_config"] = "libucl"
+
+        if Version(self.version) >= "0.9.0" and self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")

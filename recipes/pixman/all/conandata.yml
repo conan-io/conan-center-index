@@ -30,6 +30,10 @@ patches:
       patch_description: "backport fix for clang build"
       patch_type: "portability"
       patch_source: "https://gitlab.freedesktop.org/pixman/pixman/-/merge_requests/48"
+    - patch_file: "patches/0003-meson-static-build.patch"
+      patch_description: "backport fix for msvc static build"
+      patch_type: "bugfix"
+      patch_source: "https://gitlab.freedesktop.org/pixman/pixman/-/commit/48d5df1f3772a08a929dcb3b2fe4d7b1853223c9.patch"
   "0.38.4":
     - patch_file: "patches/0002-meson-build.patch"
       patch_description: "backport meson build files from 0.40.0 to fix windows build"

@@ -23,15 +23,17 @@ class DuckdbConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_autocomplete": [True, False],
         "with_icu": [True, False],
         "with_parquet": [True, False],
         "with_tpch": [True, False],
         "with_tpcds": [True, False],
         "with_fts": [True, False],
-        "with_httpfs": [True, False],
         "with_visualizer": [True, False],
+        "with_httpfs": [True, False],
         "with_json": [True, False],
         "with_excel": [True, False],
+        "with_inet": [True, False],
         "with_sqlsmith": [True, False],
         "with_odbc": [True, False],
         "with_query_log": [True, False],
@@ -42,15 +44,17 @@ class DuckdbConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_autocomplete": False,
         "with_icu": False,
         "with_parquet": False,
         "with_tpch": False,
         "with_tpcds": False,
         "with_fts": False,
-        "with_httpfs": False,
         "with_visualizer": False,
+        "with_httpfs": False,
         "with_json": False,
         "with_excel": False,
+        "with_inet": False,
         "with_sqlsmith": False,
         "with_odbc": False,
         "with_query_log": False,
@@ -92,7 +96,7 @@ class DuckdbConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
         # FIXME: drop support MSVC debug shared build
         if Version(self.version) >= "0.9.2" and \
-            is_msvc(self) and self.options.shared and self.settings.build_type == "Debug":
+                is_msvc(self) and self.options.shared and self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC debug shared build")
 
     def source(self):
@@ -104,17 +108,46 @@ class DuckdbConan(ConanFile):
         tc.variables["DUCKDB_MINOR_VERSION"] = Version(self.version).minor
         tc.variables["DUCKDB_PATCH_VERSION"] = Version(self.version).patch
         tc.variables["DUCKDB_DEV_ITERATION"] = 0
-        tc.variables["BUILD_ICU_EXTENSION"] = self.options.with_icu
+
         if "with_parquet" in self.options:
             tc.variables["BUILD_PARQUET_EXTENSION"] = self.options.with_parquet
-        tc.variables["BUILD_TPCH_EXTENSION"] = self.options.with_tpch
-        tc.variables["BUILD_TPCDS_EXTENSION"] = self.options.with_tpcds
-        tc.variables["BUILD_FTS_EXTENSION"] = self.options.with_fts
-        tc.variables["BUILD_HTTPFS_EXTENSION"] = self.options.with_httpfs
-        tc.variables["BUILD_VISUALIZER_EXTENSION"] = self.options.with_visualizer
-        tc.variables["BUILD_JSON_EXTENSION"] = self.options.with_json
-        tc.variables["BUILD_EXCEL_EXTENSION"] = self.options.with_excel
-        tc.variables["BUILD_SQLSMITH_EXTENSION"] = self.options.with_sqlsmith
+
+        if Version(self.version) >= "0.9.0":
+            build_extensions = ""
+            if self.options.with_icu:
+                build_extensions += ";icu"
+            if self.options.with_autocomplete:
+                build_extensions += ";autocomplete"
+            if self.options.with_tpch:
+                build_extensions += ";tpch"
+            if self.options.with_tpcds:
+                build_extensions += ";tpcds"
+            if self.options.with_fts:
+                build_extensions += ";fts"
+            if self.options.with_visualizer:
+                build_extensions += ";visualizer"
+            if self.options.with_httpfs:
+                build_extensions += ";httpfs"
+            if self.options.with_json:
+                build_extensions += ";json"
+            if self.options.with_excel:
+                build_extensions += ";excel"
+            if self.options.with_inet:
+                build_extensions += ";inet"
+            if self.options.with_sqlsmith:
+                build_extensions += ";sqlsmith"
+            tc.variables["BUILD_EXTENSIONS"] = build_extensions
+        else:
+            tc.variables["BUILD_ICU_EXTENSION"] = self.options.with_icu
+            tc.variables["BUILD_TPCH_EXTENSION"] = self.options.with_tpch
+            tc.variables["BUILD_TPCDS_EXTENSION"] = self.options.with_tpcds
+            tc.variables["BUILD_FTS_EXTENSION"] = self.options.with_fts
+            tc.variables["BUILD_HTTPFS_EXTENSION"] = self.options.with_httpfs
+            tc.variables["BUILD_VISUALIZER_EXTENSION"] = self.options.with_visualizer
+            tc.variables["BUILD_JSON_EXTENSION"] = self.options.with_json
+            tc.variables["BUILD_EXCEL_EXTENSION"] = self.options.with_excel
+            tc.variables["BUILD_SQLSMITH_EXTENSION"] = self.options.with_sqlsmith
+
         tc.variables["BUILD_ODBC_DRIVER"] = self.options.with_odbc
         tc.variables["FORCE_QUERY_LOG"] = self.options.with_query_log
         tc.variables["BUILD_SHELL"] = self.options.with_shell
@@ -135,13 +168,13 @@ class DuckdbConan(ConanFile):
         apply_conandata_patches(self)
         if is_msvc(self) and not self.options.shared:
             replace_in_file(self, os.path.join(self.source_folder, "src", "include", "duckdb.h"),
-                "#define DUCKDB_API __declspec(dllimport)",
-                "#define DUCKDB_API"
-            )
+                            "#define DUCKDB_API __declspec(dllimport)",
+                            "#define DUCKDB_API"
+                            )
             replace_in_file(self, os.path.join(self.source_folder, "src", "include", "duckdb", "common", "winapi.hpp"),
-                "#define DUCKDB_API __declspec(dllimport)",
-                "#define DUCKDB_API"
-            )
+                            "#define DUCKDB_API __declspec(dllimport)",
+                            "#define DUCKDB_API"
+                            )
 
         cmake = CMake(self)
         cmake.configure()
@@ -179,6 +212,8 @@ class DuckdbConan(ConanFile):
             if Version(self.version) >= "0.6.0":
                 self.cpp_info.libs.append("duckdb_fsst")
 
+            if self.options.with_autocomplete:
+                self.cpp_info.libs.append("autocomplete_extension")
             if self.options.with_icu:
                 self.cpp_info.libs.append("icu_extension")
             if self.options.get_safe("with_parquet", True):
@@ -189,16 +224,18 @@ class DuckdbConan(ConanFile):
                 self.cpp_info.libs.append("tpcds_extension")
             if self.options.with_fts:
                 self.cpp_info.libs.append("fts_extension")
-            if self.options.with_httpfs:
-                self.cpp_info.libs.append("httpfs_extension")
             if self.options.with_visualizer:
                 self.cpp_info.libs.append("visualizer_extension")
+            if self.options.with_httpfs:
+                self.cpp_info.libs.append("httpfs_extension")
             if Version(self.version) >= "0.6.0" and self.settings.os == "Linux":
                 self.cpp_info.libs.append("jemalloc_extension")
             if self.options.with_json:
                 self.cpp_info.libs.append("json_extension")
             if self.options.with_excel:
                 self.cpp_info.libs.append("excel_extension")
+            if self.options.with_inet:
+                self.cpp_info.libs.append("inet_extension")
             if self.options.with_sqlsmith:
                 self.cpp_info.libs.append("sqlsmith_extension")
 

@@ -98,7 +98,7 @@ class AbseilConan(ConanFile):
         # In case of cross-build, set CMAKE_SYSTEM_PROCESSOR if not set by toolchain or user
         if cross_building(self):
             toolchain_file = os.path.join(self.generators_folder, "conan_toolchain.cmake")
-            cmake_system_processor_block = textwrap.dedent("""\
+            cmake_system_processor_block = textwrap.dedent("""
                 if(NOT CMAKE_SYSTEM_PROCESSOR)
                     set(CMAKE_SYSTEM_PROCESSOR {})
                 endif()

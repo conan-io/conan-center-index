@@ -1,0 +1,20 @@
+diff --git a/configure b/configure
+index a2909ce..9c25987 100755
+--- a/configure
++++ b/configure
+@@ -12732,7 +12732,6 @@ then :
+   printf %s "(cached) " >&6
+ else $as_nop
+   ac_check_lib_save_LIBS=$LIBS
+-LIBS="-lcrypto  $LIBS"
+ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+ 
+@@ -12764,7 +12763,6 @@ if test "x$ac_cv_lib_crypto_HMAC_Init_ex" = xyes
+ then :
+   printf "%s\n" "#define HAVE_LIBCRYPTO 1" >>confdefs.h
+ 
+-  LIBS="-lcrypto $LIBS"
+ 
+ else $as_nop
+   as_fn_error $? "Library crypto not found. Install openssl!\"" "$LINENO" 5
