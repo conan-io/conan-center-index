@@ -1,0 +1,6 @@
+sources:
+  # Newer versions at the top
+  "2.1.1":
+    url:
+      - "https://github.com/conorwilliams/libfork/archive/v2.1.1.tar.gz"
+    sha256: "9ac764c8f3d4878bc4057b80aeab90bb03db3ee9ce5bc5d916815cf5933fefe9"
