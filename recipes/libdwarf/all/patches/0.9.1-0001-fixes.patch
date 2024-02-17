@@ -1,8 +1,18 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 70839abd..04b0f86f 100644
+index 70839abd..972a2b9e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -196,6 +196,12 @@ if (ENABLE_DECOMPRESSION)
+@@ -188,14 +188,20 @@ if (ENABLE_DECOMPRESSION)
+     find_package(ZLIB)
+   endif()
+   if(NOT TARGET ZSTD::ZSTD)
+-    find_package(ZSTD)
++    find_package(zstd)
+   endif()
+-  if (ZLIB_FOUND AND ZSTD_FOUND )
++  if (ZLIB_FOUND AND zstd_FOUND )
+     set(HAVE_ZLIB TRUE)
+     set(HAVE_ZLIB_H TRUE)
      set(HAVE_ZSTD TRUE)
      set(HAVE_ZSTD_H TRUE)
    endif()
@@ -15,17 +25,17 @@ index 70839abd..04b0f86f 100644
  endif ()
  
  message(STATUS "CMAKE_SIZEOF_VOID_P ... " ${CMAKE_SIZEOF_VOID_P} )
- 
- #  DW_FWALLXX are gnu C++ options.
 diff --git a/src/lib/libdwarf/CMakeLists.txt b/src/lib/libdwarf/CMakeLists.txt
-index 7500c9f4..2cb66e72 100644
+index 7500c9f4..ce1461fb 100644
 --- a/src/lib/libdwarf/CMakeLists.txt
 +++ b/src/lib/libdwarf/CMakeLists.txt
-@@ -105,7 +105,7 @@ target_include_directories(dwarf PUBLIC
+@@ -104,8 +104,8 @@ target_include_directories(dwarf PUBLIC
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
    )
- if(ZLIB_FOUND AND ZSTD_FOUND)
+-if(ZLIB_FOUND AND ZSTD_FOUND)
 -  target_link_libraries(dwarf PRIVATE  ZLIB::ZLIB ZSTD::ZSTD ) 
++if(ZLIB_FOUND AND zstd_FOUND)
 +  target_link_libraries(dwarf PRIVATE  ZLIB::ZLIB ${ZSTD_LIB} ) 
  endif()
  set_target_properties(dwarf PROPERTIES PUBLIC_HEADER "libdwarf.h;dwarf.h")
@@ -45,7 +55,6 @@ index 7500c9f4..2cb66e72 100644
  install(FILES cmake/libdwarf-config.cmake DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/libdwarf")
 -install(FILES "${PROJECT_BINARY_DIR}/src/lib/libdwarf/libdwarf.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 +# install(FILES "${PROJECT_BINARY_DIR}/src/lib/libdwarf/libdwarf.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-
 diff --git a/src/lib/libdwarf/libdwarf.h b/src/lib/libdwarf/libdwarf.h
 index 380d2ef7..8c62ee7e 100644
 --- a/src/lib/libdwarf/libdwarf.h

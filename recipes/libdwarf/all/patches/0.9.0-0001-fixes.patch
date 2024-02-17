@@ -1,8 +1,18 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f444af27..b4124c19 100644
+index f444af27..5c9390d1 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -189,6 +189,12 @@ if (ZLIB_FOUND AND ZSTD_FOUND )
+@@ -181,14 +181,20 @@ endif()
+ 
+ # Zlib and ZSTD need to be found otherwise disable it
+ find_package(ZLIB)
+-find_package(ZSTD)
+-if (ZLIB_FOUND AND ZSTD_FOUND ) 
++find_package(zstd)
++if (ZLIB_FOUND AND zstd_FOUND ) 
+   set(HAVE_ZLIB TRUE)
+   set(HAVE_ZLIB_H TRUE)
+   set(HAVE_ZSTD TRUE)
    set(HAVE_ZSTD_H TRUE)
  endif()
  
@@ -29,14 +39,16 @@ index 6d2c328b..bc105813 100644
  endif()
  set(LIBDIR lib${SUFFIX})
 diff --git a/src/lib/libdwarf/CMakeLists.txt b/src/lib/libdwarf/CMakeLists.txt
-index 4ad5c4fb..65305211 100644
+index 4ad5c4fb..052208a1 100644
 --- a/src/lib/libdwarf/CMakeLists.txt
 +++ b/src/lib/libdwarf/CMakeLists.txt
-@@ -108,10 +108,9 @@ target_include_directories(dwarf PUBLIC
+@@ -107,11 +107,10 @@ target_include_directories(dwarf PUBLIC
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
    )
- if(ZLIB_FOUND AND ZSTD_FOUND)
+-if(ZLIB_FOUND AND ZSTD_FOUND)
 -  target_link_libraries(dwarf PRIVATE  ZLIB::ZLIB ZSTD::ZSTD ) 
++if(ZLIB_FOUND AND zstd_FOUND)
 +  target_link_libraries(dwarf PRIVATE  ZLIB::ZLIB ${ZSTD_LIB} ) 
  endif()
  
