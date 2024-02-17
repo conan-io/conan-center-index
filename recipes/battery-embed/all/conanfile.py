@@ -26,6 +26,7 @@ class BatteryEmbedConan(ConanFile):
         return {
             "gcc": "11",
             "clang": "12",
+            "apple-clang": "13",
             "Visual Studio": "16",
             "msvc": "192",
         }
@@ -34,7 +35,7 @@ class BatteryEmbedConan(ConanFile):
         export_conandata_patches(self)
 
     def validate(self):
-        if self.settings.compiler == "apple-clang":
+        if Version(self.version) >= "1.2.0" and self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration(f"{self.ref} does not support apple-clang due to lack of jthread and stop_token.")
 
         if self.settings.compiler.cppstd:
@@ -67,5 +68,5 @@ class BatteryEmbedConan(ConanFile):
 
         self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "battery-embed", "CMakeLists.txt")])
 
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if Version(self.version) >= "1.2.0" and self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
