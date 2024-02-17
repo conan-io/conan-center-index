@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save
 from conan.tools.scm import Version
 import os
 
@@ -66,8 +66,14 @@ class Iir1Conan(ConanFile):
             tc.preprocessor_definitions["IIR1_NO_EXCEPTIONS"] = "1"
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # Disable test and demo subdirs
+        save(self, os.path.join(self.source_folder, "test", "CMakeLists.txt"), "")
+        save(self, os.path.join(self.source_folder, "demo", "CMakeLists.txt"), "")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
