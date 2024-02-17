@@ -11,7 +11,6 @@ int main() {
         std::cout << "MySQL JDBC connector cpp works" << std::endl;
     #else
         using namespace mysqlx::abi2::r0;
-        Session sess("localhost", 33060, "user", "password");
         std::cout << "MySQL xdevapi connector cpp works" << std::endl;
     #endif
     return 0;

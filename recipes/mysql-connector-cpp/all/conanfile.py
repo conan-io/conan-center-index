@@ -116,7 +116,8 @@ class MysqlConnectorCPPRecipe(ConanFile):
         tc.cache_variables["WITH_LZ4"] = self._package_folder_dep("lz4")
         tc.cache_variables["WITH_ZSTD"] = self._package_folder_dep("zstd")
         tc.cache_variables["WITH_PROTOBUF"] = self._package_folder_dep("protobuf")
-        tc.variables["JDBC_ENABLED"] = True
+        if self.options.with_jdbc:
+            tc.variables["JDBC_ENABLED"] = True
         tc.generate()
 
     def _patch_sources(self):

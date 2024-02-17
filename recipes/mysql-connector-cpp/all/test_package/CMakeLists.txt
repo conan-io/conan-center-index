@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(MySQLConnectorCPPTest CXX)
 
-option(JDBC_ENABLED "Enable JDBC support")
-
 find_package(mysql-connector-cpp REQUIRED CONFIG)
 
 add_executable(test_package test_package.cpp)
