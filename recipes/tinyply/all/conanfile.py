@@ -31,7 +31,8 @@ class TinyplyConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        self.options.rm_safe("fPIC")
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
