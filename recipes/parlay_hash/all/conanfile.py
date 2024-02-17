@@ -59,6 +59,8 @@ class PackageConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
 
         self.cpp_info.set_property("cmake_file_name", "parlay_hash")
         self.cpp_info.set_property("cmake_target_name", "parlay_hash::parlay_hash")
