@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <parlay/unordered_map.h>
+#include <hash_nogrow/unordered_map.h>
 
 using K = std::string;
 using V = unsigned long;
