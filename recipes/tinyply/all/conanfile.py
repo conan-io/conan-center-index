@@ -74,3 +74,5 @@ class TinyplyConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "tinyply::tinyply")
         self.cpp_info.set_property("pkg_config_name", "tinyply")
         self.cpp_info.libs = collect_libs(self)
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
