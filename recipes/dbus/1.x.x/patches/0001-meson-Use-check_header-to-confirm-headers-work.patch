@@ -1,0 +1,46 @@
+From e52ccaf7c3abf9d0adccfd001c1417ce08a7f335 Mon Sep 17 00:00:00 2001
+From: Thomas Sondergaard <Thomas.Sondergaard@mi.medical.canon>
+Date: Thu, 4 Jan 2024 17:45:46 +0100
+Subject: [PATCH] meson: Use check_header to confirm headers work
+
+instead of using has_header use check_header to confirm the header
+works. This is necessary to get the meson build to work with Visual
+Studio 2022. It has <stdatomic.h> but it does not actually work when
+compiling a C program. A minimal C program that include <stdatomic.h>
+fails with the following errors:
+
+    C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.38.33130\include\vcruntime_c11_stdatomic.h(36): error C2061: syntax error: identifier 'atomic_bool'
+    C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.38.33130\include\vcruntime_c11_stdatomic.h(36): error C2059: syntax error: ';'
+    C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.38.33130\include\vcruntime_c11_stdatomic.h(37): error C2061: syntax error: identifier 'atomic_char'
+    C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.38.33130\include\vcruntime_c11_stdatomic.h(37): error C2059: syntax error: ';'
+    ...
+    ...
+
+check_header is consistent with CMake's
+
+    check_include_file(stdatomic.h  HAVE_STDATOMIC_H)
+
+which is why the CMake-based build of dbus works with Visual Studio
+2022, while the meson build doesn't.
+
+Fixes #494
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 17b2a837..19b41cd9 100644
+--- a/meson.build
++++ b/meson.build
+@@ -705,7 +705,7 @@ check_headers = [
+ 
+ foreach header : check_headers
+     macro = 'HAVE_' + header.underscorify().to_upper()
+-    config.set(macro, cc.has_header(header, args: compile_args_c) ? 1 : false)
++    config.set(macro, cc.check_header(header, args: compile_args_c) ? 1 : false)
+ endforeach
+ 
+ execinfo = cc.find_library('execinfo', required: false)
+-- 
+2.43.0.windows.1
+

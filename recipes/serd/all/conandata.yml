@@ -1,4 +1,7 @@
 sources:
+  "0.32.0":
+    url: "https://gitlab.com/drobilla/serd/-/archive/v0.32.0/serd-v0.32.0.tar.gz"
+    sha256: "355bc7c7fe366e5d4ce32641e4f55d35f8226169ac2d9a2824b1443ab7c03ec8"
   "0.30.16":
     url: "https://gitlab.com/drobilla/serd/-/archive/v0.30.16/serd-v0.30.16.tar.gz"
     sha256: "c139e02af039e277fb1b7deb2a687477bf6ec46cd6348bbb1232c2727a1dd744"
