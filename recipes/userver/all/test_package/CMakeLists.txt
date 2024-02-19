@@ -11,10 +11,10 @@ add_library(${PROJECT_NAME}_objs OBJECT
     hello.hpp
     hello.cpp
 )
-target_link_libraries(${PROJECT_NAME}_objs PUBLIC userver::core)
+target_link_libraries(${PROJECT_NAME}_objs PUBLIC userver::core userver::universal)
 
 add_executable(${PROJECT_NAME}_core test_core.cpp)
-target_link_libraries(${PROJECT_NAME}_core ${PROJECT_NAME}_objs userver::core)
+target_link_libraries(${PROJECT_NAME}_core ${PROJECT_NAME}_objs)
 
 
 if (TARGET userver::utest)
@@ -61,6 +61,8 @@ if (TARGET userver::clickhouse)
 endif()
 
 add_executable(${PROJECT_NAME}_universal test_universal.cpp)
-target_link_libraries(${PROJECT_NAME}_universal ${PROJECT_NAME}_objs userver::universal)
+target_link_libraries(${PROJECT_NAME}_universal ${PROJECT_NAME}_objs userver::core userver::universal)
 
+if (${USERVER_FEATURE_TESTSUITE})
 add_subdirectory(hello_service)
+endif()

@@ -197,9 +197,6 @@ class UserverConan(ConanFile):
             'USERVER_FEATURE_RABBITMQ'
         ] = self.options.with_rabbitmq
         tool_ch.variables['USERVER_FEATURE_UTEST'] = self.options.with_utest
-        tool_ch.variables[
-            'USERVER_FEATURE_TESTSUITE'
-        ] = self.options.with_utest
         tool_ch.variables['USERVER_FEATURE_TESTSUITE'] = self.options.with_testsuite
 
         tool_ch.generate()
@@ -214,14 +211,14 @@ class UserverConan(ConanFile):
     @property
     def _userver_root(self):
         return os.path.join(self.package_folder, 'lib')
-    
+
     @property
     def _cmake_subfolder(self):
         return os.path.join(self.package_folder, 'lib', 'cmake')
 
     def package(self):
         copy(
-            self, 
+            self,
             "LICENSE",
             src=self.source_folder,
             dst=os.path.join(self.package_folder,"licenses")
@@ -442,7 +439,7 @@ class UserverConan(ConanFile):
                 if self.options.with_clickhouse
                 else []
             )
-        
+
         def abseil():
             return (
                 ['abseil::abseil']
@@ -456,8 +453,7 @@ class UserverConan(ConanFile):
                 'target': 'core',
                 'lib': 'core',
                 'requires': (
-                    ['core-internal', 'universal']
-                    + abseil()
+                    abseil()
                     + fmt()
                     + cctz()
                     + boost()
@@ -474,10 +470,7 @@ class UserverConan(ConanFile):
                     + zlib()
                 ),
             },
-        ]
-        userver_components.extend(
-            [
-                {
+            {
                     'target': 'universal',
                     'lib': 'universal',
                     'requires': (
@@ -490,9 +483,8 @@ class UserverConan(ConanFile):
                         + jemalloc()
                         + openssl()
                     ),
-                },
-            ],
-        )
+            },
+        ]
 
         if self.options.with_grpc:
             userver_components.extend(
@@ -620,17 +612,16 @@ class UserverConan(ConanFile):
                     self.cpp_info.components[conan_component].libs.append(
                         get_lib_name('grpc-internal'),
                     )
-                else:
-                    self.cpp_info.components[conan_component].libs = [lib_name]
+                if cmake_component == 'core':
+                    self.cpp_info.components[conan_component].libs.append(
+                        get_lib_name('core-internal'),
+                    )
+                self.cpp_info.components[conan_component].libs = [lib_name]
                 if cmake_component == 'universal':
                     self.cpp_info.components[
                         cmake_component
                     ].includedirs.append(
                         os.path.join('include', 'function_backports'),
-                    )
-                if cmake_component == 'core':
-                    self.cpp_info.components[conan_component].libs.append(
-                        get_lib_name('core-internal'),
                     )
                 if cmake_component not in ['ubench', 'grpc-handlers', 'grpc-handlers-proto', 'api-common-protos']:
                     self.cpp_info.components[
@@ -641,13 +632,13 @@ class UserverConan(ConanFile):
 
                 self.cpp_info.components[conan_component].requires = requires
 
-        self.cpp_info.components['core-internal'].defines.append(
+        self.cpp_info.components['core'].defines.append(
             f'USERVER_NAMESPACE={self.options.namespace}',
         )
-        self.cpp_info.components['core-internal'].defines.append(
+        self.cpp_info.components['core'].defines.append(
             f'USERVER_NAMESPACE_BEGIN={self.options.namespace_begin}',
         )
-        self.cpp_info.components['core-internal'].defines.append(
+        self.cpp_info.components['core'].defines.append(
             f'USERVER_NAMESPACE_END={self.options.namespace_end}',
         )
 
@@ -667,8 +658,12 @@ class UserverConan(ConanFile):
 
         build_modules = [
             os.path.join(self._cmake_subfolder, 'conan_helper.cmake'),
-            os.path.join(self._cmake_subfolder, 'UserverTestsuite.cmake'),
         ]
+
+        if self.options.with_testsuite:
+            build_modules.append(
+                os.path.join(self._cmake_subfolder, 'UserverTestsuite.cmake'),
+            )
 
         if self.options.with_utest:
             build_modules.append(
