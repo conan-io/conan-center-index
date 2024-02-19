@@ -69,15 +69,16 @@ class TestPackageConan(ConanFile):
             )
             self.run(bin_path, env='conanrun')
 
-            bin_path = os.path.join(
-                self.cpp.build.bindirs[0],
-                'hello_service',
-                'runtests-testsuite-conan-samples-hello_service',
-            )
-            command = ' '
-            folder = os.path.join(
-                self.source_folder,
-                'hello_service',
-            )
-            args = [bin_path, '--service-logs-pretty', '-vv', folder]
-            self.run(command.join(args), env='conanrun')
+            if self.dependencies[self.tested_reference_str].options.with_testsuite:
+                bin_path = os.path.join(
+                    self.cpp.build.bindirs[0],
+                    'hello_service',
+                    'runtests-testsuite-conan-samples-hello_service',
+                )
+                command = ' '
+                folder = os.path.join(
+                    self.source_folder,
+                    'hello_service',
+                )
+                args = [bin_path, '--service-logs-pretty', '-vv', folder]
+                self.run(command.join(args), env='conanrun')
