@@ -16,6 +16,7 @@ artifactory:
 github:
   reviewers: "reviewers.yml"
   authorized_users: "authorized_users.yml"
+  waitlist_users: "waitlist_users.yml"
 
 slack:
   credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
