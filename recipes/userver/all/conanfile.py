@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.build import cross_building
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 
