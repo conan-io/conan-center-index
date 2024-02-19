@@ -22,6 +22,10 @@ patches:
       patch_type: "conan"
       patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/a1624238000c794243e20801dc2b35b2f847d492"
       patch_description: "Use new libdwarf header placement"
+    - patch_file: "patches/0.4.0/0002-zstd.patch"
+      patch_type: "conan"
+      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/b7d14bc952111df973268c76133bb8ad99afdeb0"
+      patch_description: "Zstd is handled by libdwarf"
   "0.3.0":
     - patch_file: "patches/0.3.0/0001-cpptrace_export.patch"
       patch_type: "bugfix"
