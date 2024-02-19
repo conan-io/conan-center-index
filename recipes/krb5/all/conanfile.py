@@ -11,7 +11,6 @@ import os
 
 required_conan_version = ">=1.52.0"
 
-
 class Krb5Conan(ConanFile):
     name = "krb5"
     description = "Kerberos is a network authentication protocol. It is designed to provide strong authentication " \
