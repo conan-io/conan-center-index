@@ -41,8 +41,6 @@ class Krb5Conan(ConanFile):
     }
     settings = "os", "arch", "compiler", "build_type"
 
-    exports_sources = "patches/*"
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
