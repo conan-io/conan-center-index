@@ -14,6 +14,7 @@ class XercesCConan(ConanFile):
     description = (
         "Xerces-C++ is a validating XML parser written in a portable subset of C++"
     )
+    version = "3.2.5"
     topics = ("xerces", "XML", "validation", "DOM", "SAX", "SAX2")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://xerces.apache.org/xerces-c/index.html"
@@ -26,6 +27,7 @@ class XercesCConan(ConanFile):
         "fPIC": [True, False],
         # https://xerces.apache.org/xerces-c/build-3.html
         "char_type": ["uint16_t", "char16_t", "wchar_t"],
+        "network": [True, False],
         "network_accessor": ["curl", "socket", "cfurl", "winsock"],
         "transcoder": ["gnuiconv", "iconv", "icu", "macosunicodeconverter", "windows"],
         "message_loader": ["inmemory", "icu", "iconv"],
@@ -35,6 +37,7 @@ class XercesCConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "char_type": "uint16_t",
+        "network": True,
         "network_accessor": "socket",
         "transcoder": "gnuiconv",
         "message_loader": "inmemory",
@@ -117,6 +120,7 @@ class XercesCConan(ConanFile):
         # Because upstream overrides BUILD_SHARED_LIBS as a CACHE variable
         tc.cache_variables["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
         # https://xerces.apache.org/xerces-c/build-3.html
+        tc.variables["network"] =  self.options.network
         tc.variables["network-accessor"] = self.options.network_accessor
         tc.variables["transcoder"] = self.options.transcoder
         tc.variables["message-loader"] = self.options.message_loader
