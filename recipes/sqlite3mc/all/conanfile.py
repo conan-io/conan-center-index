@@ -36,7 +36,6 @@ class sqlite3mc(ConanFile):
         "enable_csv": [True, False],
         "enable_extfunc": [True, False],
         "enable_geopoly": [True, False],
-        "enable_json1": [True, False],
         "enable_rtree": [True, False],
         "enable_uuid": [True, False],
         "use_uri": [True, False],
@@ -82,7 +81,6 @@ class sqlite3mc(ConanFile):
         "enable_csv": True,
         "enable_extfunc": True,
         "enable_geopoly": True,
-        "enable_json1": True,
         "enable_rtree": True,
         "enable_uuid": True,
         "use_uri": True,
@@ -159,7 +157,6 @@ class sqlite3mc(ConanFile):
         tc.variables["SQLITE_ENABLE_CSV"] = self.options.enable_csv
         tc.variables["SQLITE_ENABLE_EXTFUNC"] = self.options.enable_extfunc
         tc.variables["SQLITE_ENABLE_GEOPOLY"] = self.options.enable_geopoly
-        tc.variables["SQLITE_ENABLE_JSON1"] = self.options.enable_json1
         tc.variables["SQLITE_ENABLE_RTREE"] = self.options.enable_rtree
         tc.variables["SQLITE_ENABLE_UUID"] = self.options.enable_uuid
         tc.variables["SQLITE_USE_URI"] = self.options.use_uri
@@ -217,7 +214,7 @@ class sqlite3mc(ConanFile):
             self.cpp_info.libs = ["sqlite3mc"]
         else:
             self.cpp_info.libs = ["sqlite3mc_static"]
-        if self.settings.os in ("Linux", "Macos"):
+        if self.settings.os in ("Linux", "FreeBSD", "Macos"):
             self.cpp_info.system_libs.append("pthread")
             self.cpp_info.system_libs.append("dl")
             self.cpp_info.system_libs.append("m")
