@@ -160,6 +160,9 @@ class UserverConan(ConanFile):
                     f'{self.ref} requires mongo-c-driver with_sasl cyrus',
                 )
 
+        if cross_building(self):
+            raise ConanInvalidConfiguration("Cross building temporarily disabled")
+
     def generate(self):
         apply_conandata_patches(self)
         tool_ch = CMakeToolchain(self)
@@ -201,8 +204,8 @@ class UserverConan(ConanFile):
         tool_ch.variables['USERVER_FEATURE_TESTSUITE'] = self.options.with_testsuite
 
         # Temporarily disable DWCAS when cross
-        if cross_building(self):
-            tool_ch.variables['USERVER_FEATURE_DWCAS'] = False
+        # if cross_building(self):
+        #    tool_ch.variables['USERVER_FEATURE_DWCAS'] = False
         
         tool_ch.generate()
 
