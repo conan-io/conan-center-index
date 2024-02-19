@@ -119,21 +119,21 @@ class OpenTelemetryCppConan(ConanFile):
            self.options.with_otlp_http or
            self.options.with_etw
         ):
-           self.requires("nlohmann_json/3.11.2")
-           self.requires("openssl/[>=1.1 <4]")
+            self.requires("nlohmann_json/3.11.3")
+            self.requires("openssl/[>=1.1 <4]")
 
         if (self.options.with_zipkin or
            self.options.with_elasticsearch or
            self.options.with_otlp_http
         ):
-           self.requires("libcurl/[>=7.78.0 <9]")
+            self.requires("libcurl/[>=7.78.0 <9]")
 
         if self.options.with_prometheus:
             self.requires("prometheus-cpp/1.1.0")
 
         if self.options.get_safe("with_jaeger"):
             self.requires("thrift/0.17.0")
-            self.requires("boost/1.82.0")
+            self.requires("boost/1.84.0")
 
     @property
     def _required_boost_components(self):
@@ -300,8 +300,7 @@ class OpenTelemetryCppConan(ConanFile):
             if self.options.with_otlp_grpc:
                 libraries.append("opentelemetry_exporter_otlp_grpc")
                 libraries.append("opentelemetry_exporter_otlp_grpc_metrics")
-                if Version(self.version) >= "1.7.0":
-                    libraries.append("opentelemetry_exporter_otlp_grpc_client")
+                libraries.append("opentelemetry_exporter_otlp_grpc_client")
                 if self.options.with_logs_preview:
                     libraries.append("opentelemetry_exporter_otlp_grpc_log")
             if self.options.with_otlp_http:
@@ -384,33 +383,26 @@ class OpenTelemetryCppConan(ConanFile):
             ])
 
         if self.options.with_otlp_grpc:
-            if "1.5.0" <= Version(self.version) < "1.7.0":
-                self.cpp_info.components["opentelemetry_exporter_otlp_grpc_metrics"].requires.extend([
-                    "grpc::grpc++",
-                    "opentelemetry_otlp_recordable",
-                ])
-
             if Version(self.version) <= "1.7.0":
                 self.cpp_info.components["opentelemetry_exporter_otlp_grpc"].requires.extend([
                     "grpc::grpc++",
                     "opentelemetry_otlp_recordable",
                 ])
 
-            if Version(self.version) >= "1.7.0":
-                self.cpp_info.components["opentelemetry_exporter_otlp_grpc_client"].requires.extend([
-                    "grpc::grpc++",
-                    "opentelemetry_proto",
-                ])
+            self.cpp_info.components["opentelemetry_exporter_otlp_grpc_client"].requires.extend([
+                "grpc::grpc++",
+                "opentelemetry_proto",
+            ])
 
-                self.cpp_info.components["opentelemetry_exporter_otlp_grpc"].requires.extend([
-                    "opentelemetry_otlp_recordable",
-                    "opentelemetry_exporter_otlp_grpc_client"
-                ])
+            self.cpp_info.components["opentelemetry_exporter_otlp_grpc"].requires.extend([
+                "opentelemetry_otlp_recordable",
+                "opentelemetry_exporter_otlp_grpc_client"
+            ])
 
-                self.cpp_info.components["opentelemetry_exporter_otlp_grpc_metrics"].requires.extend([
-                    "opentelemetry_otlp_recordable",
-                    "opentelemetry_exporter_otlp_grpc_client"
-                ])
+            self.cpp_info.components["opentelemetry_exporter_otlp_grpc_metrics"].requires.extend([
+                "opentelemetry_otlp_recordable",
+                "opentelemetry_exporter_otlp_grpc_client"
+            ])
 
             if self.options.with_logs_preview:
                 self.cpp_info.components["opentelemetry_exporter_otlp_grpc_log"].requires.extend([
