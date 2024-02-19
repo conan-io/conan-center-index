@@ -199,6 +199,10 @@ class UserverConan(ConanFile):
         tool_ch.variables['USERVER_FEATURE_UTEST'] = self.options.with_utest
         tool_ch.variables['USERVER_FEATURE_TESTSUITE'] = self.options.with_testsuite
 
+        # Temporarily disable DWCAS when cross
+        if hasattr(self, "settings_build") and cross_building(self):
+            tool_ch.variables['USERVER_FEATURE_DWCAS'] = False
+        
         tool_ch.generate()
 
         CMakeDeps(self).generate()
