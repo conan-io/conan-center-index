@@ -1,4 +1,10 @@
 sources:
+  "1.5.5":
+    url: "https://github.com/pyomeca/ezc3d/archive/refs/tags/Release_1.5.5.tar.gz"
+    sha256: "93641b100f982d4297a8cee9bb06b2c1facddfca638cde8259e783174a5f68ca"
+  "1.5.4":
+    url: "https://github.com/pyomeca/ezc3d/archive/Release_1.5.4.tar.gz"
+    sha256: "d27a1d8ffc5cebf47b53c2d263a1c4dbb4a6dc2f474c6978b3588bbb143e272f"
   "1.5.0":
     url: "https://github.com/pyomeca/ezc3d/archive/refs/tags/Release_1.5.0.tar.gz"
     sha256: "8387857d989f5bbb62869ec930b417e6d0a303eef9b39e8b0e6b35437d5809ce"

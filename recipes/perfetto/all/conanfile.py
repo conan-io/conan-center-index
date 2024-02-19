@@ -12,11 +12,12 @@ required_conan_version = ">=1.53.0"
 
 class PerfettoConan(ConanFile):
     name = "perfetto"
-    license = "Apache-2.0"
-    homepage = "https://perfetto.dev"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "Performance instrumentation and tracing for Android, Linux and Chrome"
+    license = "Apache-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://perfetto.dev"
     topics = ("linux", "profiling", "tracing")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -28,7 +29,6 @@ class PerfettoConan(ConanFile):
         "fPIC": True,
         "disable_logging": False,
     }
-
     short_paths = True
 
     @property
@@ -78,8 +78,7 @@ class PerfettoConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -107,4 +106,3 @@ class PerfettoConan(ConanFile):
             self.cpp_info.system_libs.append("ws2_32")
         if is_msvc(self):
             self.cpp_info.cxxflags.append("/Zc:__cplusplus")
-

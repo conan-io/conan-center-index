@@ -16,6 +16,7 @@ class UncrustifyConan(ConanFile):
     topics = "beautifier", "command-line"
     homepage = "https://github.com/uncrustify/uncrustify"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
@@ -29,8 +30,7 @@ class UncrustifyConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires GCC >=7")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -65,9 +65,6 @@ class UncrustifyConan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2
-        binpath = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Adding to PATH: {binpath}")
-        self.env_info.PATH.append(binpath)
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

@@ -1,0 +1,6 @@
+module conan {
+  @final
+  struct test_message {
+    sequence<octet> payload;
+  };
+};

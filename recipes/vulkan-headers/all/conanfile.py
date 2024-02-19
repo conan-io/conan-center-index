@@ -14,6 +14,7 @@ class VulkanHeadersConan(ConanFile):
     homepage = "https://github.com/KhronosGroup/Vulkan-Headers"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
+    package_id_embed_mode = "patch_mode"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -30,7 +31,7 @@ class VulkanHeadersConan(ConanFile):
         pass
 
     def package(self):
-        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
         copy(self, "*", src=os.path.join(self.source_folder, "registry"), dst=os.path.join(self.package_folder, "res", "vulkan", "registry"))
 

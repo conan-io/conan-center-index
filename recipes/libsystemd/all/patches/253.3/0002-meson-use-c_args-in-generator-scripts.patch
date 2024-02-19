@@ -1,0 +1,33 @@
+From 7b110183b2607d57d399e977a96cb453aed37265 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Fri, 13 Oct 2023 09:41:00 -0500
+Subject: [PATCH] Revert "Revert "meson: use c_args in generator scripts
+ (#10289)""
+
+This reverts commit 0e3cc902faec4f18d5fa606396f602b08bc94e27.
+
+Fixes #10288.
+I have confirmed that this does now fix cross-compilation.
+It appears that changes upstream in Meson, probably mesonbuild/meson#5263, have made the original MR, #10289, work now.
+
+This needs to be tested to ensure that it doesn't break Travis CI like when it was reverted in #10361.
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index d79263ea8b..87b5a76082 100644
+--- a/meson.build
++++ b/meson.build
+@@ -498,7 +498,7 @@ if cxx_cmd != ''
+         add_project_arguments(cxx.get_supported_arguments(basic_disabled_warnings), language : 'cpp')
+ endif
+ 
+-cpp = ' '.join(cc.cmd_array()) + ' -E'
++cpp = ' '.join(cc.cmd_array() + get_option('c_args')) + ' -E'
+ 
+ has_wstringop_truncation = cc.has_argument('-Wstringop-truncation')
+ 
+-- 
+2.41.0
+

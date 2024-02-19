@@ -83,3 +83,15 @@ index 40154b7..9772073 100644
  );
  
  #if DO_EXPLICIT_CHECKS
+diff --git a/tests/UVServerTransport.h b/libnativeipc/src/UVServerTransport.h
+index 40154b7..9772073 100644
+--- a/libnativeipc/src/UVServerTransport.h
++++ b/libnativeipc/src/UVServerTransport.h
+@@ -7,6 +7,7 @@
+ #include <mutex>
+ #include <thread>
+ #include <unordered_map>
++#include <memory>
+ 
+ namespace Twitch::IPC {
+ class UVServerTransport

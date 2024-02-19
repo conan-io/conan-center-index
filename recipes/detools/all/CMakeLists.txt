@@ -1,9 +1,22 @@
-cmake_minimum_required(VERSION 3.1)
-project(detools C)
+cmake_minimum_required(VERSION 3.15)
+project(detools LANGUAGES C)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
+find_package(heatshrink REQUIRED CONFIG)
+find_package(LibLZMA REQUIRED CONFIG)
 
-add_library(detools source_subfolder/c/detools.c)
-install(TARGETS detools DESTINATION lib)
-install(FILES source_subfolder/c/detools.h DESTINATION include)
+add_library(detools ${DETOOLS_SRC_DIR}/c/detools.c)
+target_link_libraries(detools PRIVATE
+    heatshrink::heatshrink
+    LibLZMA::LibLZMA
+)
+
+include(GNUInstallDirs)
+
+install(
+    TARGETS detools
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+install(
+    FILES ${DETOOLS_SRC_DIR}/c/detools.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)

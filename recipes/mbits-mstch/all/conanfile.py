@@ -33,7 +33,7 @@ class MBitsMstchConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "11",
+            "gcc": "10",
             "clang": "12",
             "msvc": "192",
             "apple-clang": "11.0.3",

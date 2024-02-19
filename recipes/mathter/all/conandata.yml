@@ -1,4 +1,7 @@
 sources:
+  "1.0.1":
+    url: "https://github.com/petiaccja/Mathter/archive/v1.0.1.tar.gz"
+    sha256: "ab90736abfa8774103b53fe2b8962981c5f117dc582b01698c18d66cd2398b8c"
   "1.0.0":
     url: "https://github.com/petiaccja/Mathter/archive/v1.0.0.tar.gz"
     sha256: "c75cca8d8aec627935250908f2c0f9f1839561e7596a4199bcf80e12b0e6c53b"

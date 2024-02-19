@@ -55,7 +55,7 @@ class ReadosmConan(ConanFile):
 
     def requirements(self):
         self.requires("expat/2.5.0")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
         if not is_msvc(self):

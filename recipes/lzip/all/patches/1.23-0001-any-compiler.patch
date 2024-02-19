@@ -1,0 +1,78 @@
+--- configure	2022-01-22 01:11:01.000000000 +0100
++++ configure	2023-08-20 17:51:18.537172800 +0200
+@@ -9,6 +9,7 @@
+ pkgversion=1.23
+ progname=lzip
+ srctrigger=doc/${pkgname}.texi
++extension=
+ 
+ # clear some things potentially inherited from environment.
+ LC_ALL=C
+@@ -23,7 +24,7 @@
+ build=no
+ check=no
+ installdir=
+-CXX=g++
++CXX="${CXX:-g++}"
+ CPPFLAGS=
+ CXXFLAGS='-Wall -W -O2'
+ LDFLAGS=
+@@ -125,6 +126,19 @@
+ 	fi
+ done
+ 
++rm -f dummy*
++cat << EOT > dummy.c
++int main(int argc, char ** argv) {
++    return 0;
++}
++EOT
++
++${CXX} -o dummy dummy.c
++
++if [ -f dummy.exe ] ; then
++  extension=".exe"
++fi
++
+ # Find the source files, if location was not specified.
+ srcdirtext=
+ if [ -z "${srcdir}" ] ; then
+@@ -161,9 +175,9 @@
+     "${srcdir}/testsuite/check.sh" "${srcdir}/testsuite" ${pkgversion} || exit 1
+   fi
+   if [ -n "${installdir}" ] ; then
+-    echo "installing ${progname} in ${installdir}"
++    echo "installing ${progname}${extension} in ${installdir}"
+     [ -d "${installdir}" ] || mkdir -p "${installdir}" || exit 1
+-    cp -fp ${progname} "${installdir}/${progname}" || exit 1
++    cp -fp "${progname}${extension}" "${installdir}/${progname}${extension}" || exit 1
+   fi
+   exit 0
+ fi
+@@ -188,6 +202,7 @@
+ echo "creating Makefile"
+ echo "VPATH = ${srcdir}"
+ echo "prefix = ${prefix}"
++echo "executable extension = ${extension}"
+ echo "exec_prefix = ${exec_prefix}"
+ echo "bindir = ${bindir}"
+ echo "datarootdir = ${datarootdir}"
+@@ -209,6 +224,7 @@
+ pkgname = ${pkgname}
+ pkgversion = ${pkgversion}
+ progname = ${progname}
++extension = ${extension}
+ VPATH = ${srcdir}
+ prefix = ${prefix}
+ exec_prefix = ${exec_prefix}
+--- Makefile.in	2021-10-07 01:01:07.000000000 +0200
++++ Makefile.in	2023-08-20 17:18:35.382705100 +0200
+@@ -64,7 +64,7 @@
+ 
+ install-bin : all
+ 	if [ ! -d "$(DESTDIR)$(bindir)" ] ; then $(INSTALL_DIR) "$(DESTDIR)$(bindir)" ; fi
+-	$(INSTALL_PROGRAM) ./$(progname) "$(DESTDIR)$(bindir)/$(progname)"
++	$(INSTALL_PROGRAM) ./$(progname)$(extension) "$(DESTDIR)$(bindir)/$(progname)$(extension)"
+ 
+ install-bin-strip : all
+ 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install-bin

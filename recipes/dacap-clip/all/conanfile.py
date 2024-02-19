@@ -8,7 +8,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 class DacapClipConan(ConanFile):
     name = "dacap-clip"
@@ -17,6 +17,7 @@ class DacapClipConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/dacap/clip/"
     topics = ("clipboard", "copy", "paste")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -29,8 +30,9 @@ class DacapClipConan(ConanFile):
         "with_png": True,
     }
 
-    def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+    @property
+    def _min_cppstd(self):
+        return 11
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,10 +40,7 @@ class DacapClipConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_png
 
@@ -56,12 +55,12 @@ class DacapClipConan(ConanFile):
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
         if is_msvc(self) and self.info.settings.build_type == "Debug" and self.info.options.shared == True:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC debug shared build (now).")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         toolchain = CMakeToolchain(self)

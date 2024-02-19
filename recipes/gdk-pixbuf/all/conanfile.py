@@ -12,13 +12,13 @@ from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
 
 class GdkPixbufConan(ConanFile):
     name = "gdk-pixbuf"
     description = "toolkit for image loading and pixel buffer manipulation"
-    topics = ("gdk-pixbuf", "image")
+    topics = ("image")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://developer.gnome.org/gdk-pixbuf/"
     license = "LGPL-2.1-or-later"
@@ -63,9 +63,9 @@ class GdkPixbufConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.76.0", transitive_headers=True, transitive_libs=True, run=can_run(self))
+        self.requires("glib/2.77.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_libpng:
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/1.6.40")
         if self.options.with_libtiff:
             self.requires("libtiff/4.4.0")
         if self.options.with_libjpeg == "libjpeg-turbo":
@@ -93,8 +93,7 @@ class GdkPixbufConan(ConanFile):
         self.tool_requires("meson/1.0.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/1.9.3")
-        if not can_run(self):
-            self.tool_requires("glib/2.76.0")
+        self.tool_requires("glib/<host_version>")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
 

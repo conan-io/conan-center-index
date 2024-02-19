@@ -4,7 +4,10 @@ sources:
     sha256: "cf0779e64dd5d20989e97340c04ecccf542fe8d993c96b53e5c465693cb354b7"
 patches:
   "1.2.2-beta":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-binding-temp-object.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0002-read-template-path-from-env.patch"
+    - patch_file: "patches/0001-binding-temp-object.patch"
+    - patch_file: "patches/0002-read-template-path-from-env.patch"
+      patch_description: "Get TEMPLATE_PATHS from envvar instead of hard-coding"
+      patch_type: "conan"
+    - patch_file: "patches/0003-unvendor-qpoases3.patch"
+      patch_description: "Replace vendored qpOASES-3 with Conan version"
+      patch_type: "conan"

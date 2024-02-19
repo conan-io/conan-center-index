@@ -79,7 +79,7 @@ class OpenVDBConan(ConanFile):
         self.requires("onetbb/2020.3")
         self.requires("openexr/2.5.7")  # required for IlmBase::Half
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_exr:
             # Not necessary now. Required for IlmBase::IlmImf
             self.requires("openexr/2.5.7")

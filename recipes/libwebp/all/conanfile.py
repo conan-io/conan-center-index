@@ -55,10 +55,7 @@ class LibwebpConan(ConanFile):
         tc = CMakeToolchain(self)
         # should be an option but it doesn't work yet
         tc.variables["WEBP_ENABLE_SIMD"] = self.options.with_simd
-        if Version(self.version) >= "1.0.0":
-            tc.variables["WEBP_NEAR_LOSSLESS"] = self.options.near_lossless
-        else:
-            tc.variables["WEBP_ENABLE_NEAR_LOSSLESS"] = self.options.near_lossless
+        tc.variables["WEBP_NEAR_LOSSLESS"] = self.options.near_lossless
         tc.variables["WEBP_ENABLE_SWAP_16BIT_CSP"] = self.options.swap_16bit_csp
         # avoid finding system libs
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_GIF"] = True

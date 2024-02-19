@@ -42,15 +42,15 @@ class AwsCIO(ConanFile):
     def requirements(self):
         # the versions of aws-c-common and aws-c-io are tied since aws-c-common/0.6.12 and aws-c-io/0.10.10
         # Please refer https://github.com/conan-io/conan-center-index/issues/7763
-        if Version(self.version) <= "0.10.9":
-            self.requires("aws-c-common/0.6.11", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-cal/0.5.11")
-        else:
+        if Version(self.version) <= "0.13.4":
             self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-cal/0.5.13")
+        else:
+            self.requires("aws-c-common/0.9.6", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-cal/0.6.9", transitive_headers=True, transitive_libs=True)
 
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-            self.requires("s2n/1.3.31")
+            self.requires("s2n/1.3.55")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

@@ -1,0 +1,16 @@
+sources:
+  "1.4.0":
+    url: "https://github.com/ph3at/libenvpp/archive/refs/tags/v1.4.0.tar.gz"
+    sha256: "3f9a4a4b62abc06522de76e3a999cc3cd6b60299dc26b28ccc2183aa614f10cd"
+  "1.3.0":
+    url: "https://github.com/ph3at/libenvpp/archive/refs/tags/v1.3.0.tar.gz"
+    sha256: "9201ae39dc67118ee46b4e60fe2e5d22b046faceae4a4b4eec6ab62bc48875dd"
+patches:
+  "1.4.0":
+    - patch_file: "patches/0001-use-cci-fmt.patch"
+      patch_description: "use cci fmt package, remove static flag from add_library"
+      patch_type: "conan"
+  "1.3.0":
+    - patch_file: "patches/0001-use-cci-fmt.patch"
+      patch_description: "use cci fmt package, remove static flag from add_library"
+      patch_type: "conan"
