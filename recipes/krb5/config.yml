@@ -1,3 +1,8 @@
 versions:
   "1.19.2":
     folder: "all"
+patches:
+  "1.19.2":
+    - patch_file: "patches/0001-disable_ksu_root"
+      patch_description: "Disable ksu install as root user"
+      patch_type: "conan"
