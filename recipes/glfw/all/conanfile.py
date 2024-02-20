@@ -68,7 +68,7 @@ class GlfwConan(ConanFile):
     def requirements(self):
         self.requires("opengl/system")
         if self.options.vulkan_static:
-            self.requires("vulkan-loader/1.3.243.0")
+            self.requires("vulkan-loader/1.3.268.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.get_safe("with_x11", True):
                 self.requires("xorg/system")
@@ -86,7 +86,7 @@ class GlfwConan(ConanFile):
             if self._has_build_profile:
                 self.tool_requires("wayland/<host_version>")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.0.3")
+                self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

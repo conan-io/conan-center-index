@@ -20,6 +20,7 @@ required_for_references:
 - alpaca
 - amgcl
 - amqp-cpp
+- andreasbuhr-cppcoro
 - android-ndk
 - angelscript
 - antlr4-cppruntime
@@ -218,6 +219,7 @@ required_for_references:
 - cppdap
 - cppfront
 - cppitertools
+- cppkafka
 - cpprestsdk
 - cpptoml
 - cpptrace
@@ -275,6 +277,7 @@ required_for_references:
 - decimal_for_cpp
 - deco
 - dependencies
+- depot_tools
 - detools
 - dfp
 - di
@@ -340,9 +343,11 @@ required_for_references:
 - erikzenker-hsm
 - erkir
 - etc2comp
+- etcd-cpp-apiv3
 - eternal
 - ethash
 - etl
+- eventpp
 - evmc
 - exiv2
 - expat
@@ -372,10 +377,12 @@ required_for_references:
 - flann
 - flatbuffers
 - flatbush
+- flatcc
 - flecs
 - flex
 - flint
 - fltk
+- flux
 - fmi1
 - fmi2
 - fmi3
@@ -408,6 +415,7 @@ required_for_references:
 - fxdiv
 - g3log
 - gainput
+- gamenetworkingsockets
 - gamma
 - gcem
 - gdbm
@@ -421,6 +429,7 @@ required_for_references:
 - geotrans
 - getopt-for-visual-studio
 - gettext
+- gf-complete
 - gflags
 - gfortran
 - ghc-filesystem
@@ -445,7 +454,9 @@ required_for_references:
 - gm2calc
 - gmp
 - gnu-config
+- gnulib
 - gnutls
+- godot-cpp
 - godot_headers
 - googleapis
 - gperf
@@ -494,6 +505,7 @@ required_for_references:
 - hlslpp
 - homog2d
 - http_parser
+- huffman
 - hunspell
 - hwdata
 - hwloc
@@ -519,8 +531,10 @@ required_for_references:
 - indicators
 - indirect_value
 - influxdb-cpp
+- influxdb-cxx
 - inih
 - inja
+- intel-ipsec-mb
 - intel-neon2sse
 - intx
 - inversify-cpp
@@ -537,6 +551,7 @@ required_for_references:
 - jasper
 - jbig
 - jeaiii-itoa
+- jemalloc
 - jerryscript
 - jfalcou-eve
 - jinja2cpp
@@ -571,6 +586,7 @@ required_for_references:
 - ktx
 - kuba-zip
 - lager
+- laslib
 - laszip
 - lazycsv
 - lcms
@@ -630,6 +646,7 @@ required_for_references:
 - libelfin
 - libenvpp
 - libepoxy
+- libest
 - libev
 - libevdev
 - libevent
@@ -755,6 +772,8 @@ required_for_references:
 - libuvc
 - libva
 - libvault
+- libvdpau
+- libversion
 - libverto
 - libvips
 - libvpx
@@ -785,6 +804,7 @@ required_for_references:
 - linux-syscall-support
 - litehtml
 - lksctp-tools
+- llama-cpp
 - llhttp
 - llvm-openmp
 - lmdb
@@ -815,6 +835,7 @@ required_for_references:
 - make
 - mapbox-geometry
 - mapbox-variant
+- mapbox-wagyu
 - mariadb-connector-c
 - marisa
 - matchit
@@ -843,6 +864,7 @@ required_for_references:
 - metall
 - metis
 - mfast
+- mgclient
 - mgs
 - microprofile
 - microservice-essentials
@@ -851,6 +873,7 @@ required_for_references:
 - mikktspace
 - mimalloc
 - mingw-builds
+- mingw-w64
 - miniaudio
 - minimp3
 - minisat
@@ -874,6 +897,7 @@ required_for_references:
 - mp-units
 - mpark-variant
 - mpc
+- mpdecimal
 - mpfr
 - mpg123
 - mpmcqueue
@@ -965,6 +989,7 @@ required_for_references:
 - opencore-amr
 - opencv
 - openddl-parser
+- opendis6
 - opene57
 - openexr
 - openfbx
@@ -991,13 +1016,16 @@ required_for_references:
 - opus
 - opusfile
 - orcania
+- osmanip
 - osqp
 - out_ptr
 - outcome
 - ozz-animation
 - p-ranav-glob
+- p7zip
 - paho-mqtt-c
 - paho-mqtt-cpp
+- pango
 - panzi-portable-endian
 - parallel-hashmap
 - parg
@@ -1027,6 +1055,7 @@ required_for_references:
 - picojson
 - picosha2
 - pipes
+- pistache
 - pixman
 - pkgconf
 - platform.converters
@@ -1150,6 +1179,7 @@ required_for_references:
 - safeint
 - sail
 - samurai
+- sassc
 - sbepp
 - sbp
 - scdoc
@@ -1222,6 +1252,7 @@ required_for_references:
 - sqlpp11
 - sqlpp11-connector-sqlite3
 - squirrel
+- srt
 - ssht
 - ssp
 - st_tree
@@ -1315,6 +1346,7 @@ required_for_references:
 - tng
 - toml11
 - tomlplusplus
+- tqdm-cpp
 - tracy
 - transwarp
 - trantor
@@ -1333,6 +1365,7 @@ required_for_references:
 - tsl-sparse-map
 - tuplet
 - turtle
+- tweenerspp
 - tweetnacl
 - twitch-native-ipc
 - twitchtv-libsoundtrackutil
@@ -1465,6 +1498,7 @@ required_for_references:
 - zopfli
 - zpp_bits
 - zpp_throwing
+- zserio
 - zstd
 - zstr
 - zug

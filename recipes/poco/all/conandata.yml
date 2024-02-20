@@ -1,4 +1,7 @@
 sources:
+  "1.13.1":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.13.1-release.tar.gz"
+    sha256: "8accf6c6ebb9ae686e7c8e2390a35beaab08d0ca1abda537cc2d0b7ab9296be5"
   "1.13.0":
     url: "https://github.com/pocoproject/poco/archive/poco-1.13.0-release.tar.gz"
     sha256: "0135160663795901f317215272fadf71f3b526f38daacb2ae8d6b07ad11d319b"
@@ -27,6 +30,13 @@ sources:
     url: "https://github.com/pocoproject/poco/archive/poco-1.11.3-release.tar.gz"
     sha256: "fb5e8e70c7dbc8f3b59ec8560140a267b4eaf06ee519dc21f312d0eb195cba37"
 patches:
+  "1.13.1":
+    - patch_file: patches/1.13.0.patch
+      patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
+      patch_type: "conan"
+    - patch_file: patches/1.13.0-0002-mysql-include.patch
+      patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
   "1.13.0":
     - patch_file: patches/1.13.0.patch
       patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
