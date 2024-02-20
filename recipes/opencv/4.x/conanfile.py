@@ -1535,6 +1535,8 @@ class OpenCVConan(ConanFile):
         tc.variables["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["ENABLE_CCACHE"] = False
 
+        tc.variables["ENABLE_CONFIG_VERIFICATION"] = True
+
         if is_msvc(self):
             tc.variables["BUILD_WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
 
