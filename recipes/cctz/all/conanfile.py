@@ -53,6 +53,7 @@ class CCTZConan(ConanFile):
         tc.variables["BUILD_TOOLS"] = self.options.build_tools
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_TESTING"] = False
+        tc.variables["BUILD_BENCHMARK"] = False
         # For shared msvc
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         # Relocatable shared lib on Macos
