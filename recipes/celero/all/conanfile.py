@@ -14,10 +14,9 @@ class CeleroConan(ConanFile):
     name = "celero"
     description = "C++ Benchmarking Library"
     license = "Apache-2.0"
-    topics = ("benchmark", "benchmark-tests", "measurements", "microbenchmarks")
-    homepage = "https://github.com/DigitalInBlue/Celero"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "https://github.com/DigitalInBlue/Celero"
+    topics = ("benchmark", "benchmark-tests", "measurements", "microbenchmarks")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
