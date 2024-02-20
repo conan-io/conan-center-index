@@ -76,9 +76,11 @@ class OpenEXRConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "add_subdirectory(website/src)",
-                        "#  add_subdirectory(website/src)")
+        if Version(self.version) >= "3.2":
+            # Even with BUILD_WEBSITE, Website target is compiled in 3.2
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "add_subdirectory(website/src)",
+                            "#  add_subdirectory(website/src)")
 
     def build(self):
         self._patch_sources()
