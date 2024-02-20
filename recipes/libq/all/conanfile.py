@@ -4,6 +4,8 @@ from conan import ConanFile
 from conan.tools.cmake import CMake
 from conan.tools.files import collect_libs
 from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.files import get
+from conan.tools.build import check_min_cppstd
 
 required_conan_version = ">=2.0.0"
 
@@ -17,16 +19,19 @@ class libqConan(ConanFile):
     generators = "CMakeDeps", "CMakeToolchain"
     options = {
         "shared"            : [True, False],
-        "qtest"            : [True, False],
-        "cpp17"            : [True, False],
-        "cpp20"            : [True, False]
+        "qtest"            : [True, False]
     }
     default_options = {
         "shared"            : False,
-        "qtest"            : True,
-        "cpp17"            : False,
-        "cpp20"            : False
+        "qtest"            : False
     }
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 17)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def optionBool(self, b):
         if b:
@@ -41,12 +46,6 @@ class libqConan(ConanFile):
 
         cmakeOpts["BUILD_SHARED_LIBS"] = self.optionBool(self.options.shared)
         cmakeOpts["q_BUILD_QTEST"] = self.optionBool(self.options.qtest)
-        if self.options.cpp20:
-            cmakeOpts["CMAKE_CXX_STANDARD"] = 20
-            cmakeOpts["CMAKE_CXX_STANDARD_REQUIRED"] = 20
-        if self.options.cpp17:
-            cmakeOpts["CMAKE_CXX_STANDARD"] = 17
-            cmakeOpts["CMAKE_CXX_STANDARD_REQUIRED"] = 17
 
         return cmakeOpts
 
