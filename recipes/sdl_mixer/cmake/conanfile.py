@@ -5,7 +5,6 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.57.0"
 
@@ -79,7 +78,7 @@ class SDLMixerConan(ConanFile):
     def requirements(self):
         self.requires("sdl/2.28.5", transitive_headers=True, transitive_libs=True)
         if self.options.flac:
-            self.requires("flac/1.4.2")
+            self.requires("flac/1.4.3")
         elif self.options.gme:
             # TODO: not available on CCI
             self.requires("gme/x.y.z")
@@ -125,16 +124,12 @@ class SDLMixerConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-        tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
-        if Version(self.version) <= "2.6.3":
-            tc.cache_variables["SDL2MIXER_DEBUG_POSTFIX"] = ""
+        # Disable debug postfix as it's not relevant to single-configuration Conan builds
+        # and will be removed in v3.0 anyway.
+        tc.variables["SDL2MIXER_DEBUG_POSTFIX"] = ""
         tc.variables["SDL2MIXER_VENDORED"] = False
         tc.variables["SDL2MIXER_SAMPLES"] = False
         tc.variables["SDL2MIXER_CMD"] = self.options.cmd
-        if self.version == "2.8.0":
-            # The debug postfix will be removed in an upcoming release
-            tc.variables["SDL2MIXER_DEBUG_POSTFIX"] = ""
         # WAVE
         tc.variables["SDL2MIXER_WAVE"] = self.options.wav
         # FLAC
