@@ -243,6 +243,7 @@ class BoostConan(ConanFile):
             "msvc": 999,
         }.get(str(self.settings.compiler))
 
+    @property
     def _has_cppstd_11_supported(self):
         cppstd = self.settings.compiler.get_safe("cppstd")
         if cppstd:
