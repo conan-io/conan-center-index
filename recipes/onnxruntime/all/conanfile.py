@@ -81,22 +81,22 @@ class OnnxRuntimeConan(ConanFile):
         }[f"{version.major}.{version.minor}"]
 
     def requirements(self):
-        self.requires("abseil/20230125.3")
+        self.requires("abseil/20230802.1")
         self.requires("protobuf/3.21.12")
         self.requires("date/3.0.1")
-        self.requires("re2/20230801")
+        self.requires("re2/20230901")
         self.requires(f"onnx/{self._onnx_version}")
         self.requires("flatbuffers/1.12.0")
         self.requires("boost/1.83.0", headers=True, libs=False, run=False)  # for mp11, header only, no need for libraries to link/run
         self.requires("safeint/3.0.28")
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("nlohmann_json/3.11.3")
         self.requires("eigen/3.4.0")
         self.requires("ms-gsl/4.0.0")
         self.requires("cpuinfo/cci.20220618")
         if self.settings.os != "Windows":
             self.requires("nsync/1.26.0")
         else:
-            self.requires("wil/1.0.230824.2")
+            self.requires("wil/1.0.231216.1")
         if self.options.with_xnnpack:
             self.requires("xnnpack/cci.20220801")
 
@@ -265,11 +265,34 @@ class OnnxRuntimeConan(ConanFile):
 
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
+        if self.settings.os in ["Linux", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("pthread")
         if is_apple_os(self):
             self.cpp_info.frameworks.append("Foundation")
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("shlwapi")
+
+        # conanv1 doesn't support traits and we only need headers from boost
+        self.cpp_info.requires = [
+            "abseil::abseil",
+            "protobuf::protobuf",
+            "date::date",
+            "re2::re2",
+            "onnx::onnx",
+            "flatbuffers::flatbuffers",
+            "boost::headers",
+            "safeint::safeint",
+            "nlohmann_json::nlohmann_json",
+            "eigen::eigen",
+            "ms-gsl::ms-gsl",
+            "cpuinfo::cpuinfo"
+        ]
+        if self.settings.os != "Windows":
+            self.cpp_info.requires.append("nsync::nsync")
+        else:
+            self.cpp_info.requires.append("wil::wil")
+        if self.options.with_xnnpack:
+            self.cpp_info.requires.append("xnnpack::xnnpack")
 
         # https://github.com/microsoft/onnxruntime/blob/v1.16.0/cmake/CMakeLists.txt#L1759-L1763
         self.cpp_info.set_property("cmake_file_name", "onnxruntime")

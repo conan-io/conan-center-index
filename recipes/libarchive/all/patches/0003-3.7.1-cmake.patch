@@ -56,3 +56,36 @@ index 6849ce40..8d5b6018 100644
    FIND_PACKAGE(OpenSSL)
    IF(OPENSSL_FOUND)
      SET(HAVE_LIBCRYPTO 1)
+diff --git a/libarchive/CMakeLists.txt b/libarchive/CMakeLists.txt
+index f7fdfb68..9d2915ac 100644
+--- a/libarchive/CMakeLists.txt
++++ b/libarchive/CMakeLists.txt
+@@ -251,6 +251,7 @@ IF(BUILD_SHARED_LIBS)
+ ENDIF(BUILD_SHARED_LIBS)
+ 
+ # archive_static is a static library
++if(NOT BUILD_SHARED_LIBS)
+ ADD_LIBRARY(archive_static STATIC ${libarchive_SOURCES} ${include_HEADERS})
+ TARGET_LINK_LIBRARIES(archive_static ${ADDITIONAL_LIBS})
+ SET_TARGET_PROPERTIES(archive_static PROPERTIES COMPILE_DEFINITIONS
+@@ -259,6 +260,7 @@ SET_TARGET_PROPERTIES(archive_static PROPERTIES COMPILE_DEFINITIONS
+ IF(NOT WIN32 OR CYGWIN OR NOT BUILD_SHARED_LIBS)
+   SET_TARGET_PROPERTIES(archive_static PROPERTIES OUTPUT_NAME archive)
+ ENDIF(NOT WIN32 OR CYGWIN OR NOT BUILD_SHARED_LIBS)
++endif()
+ 
+ IF(ENABLE_INSTALL)
+   # How to install the libraries
+@@ -268,10 +270,12 @@ IF(ENABLE_INSTALL)
+             LIBRARY DESTINATION lib
+             ARCHIVE DESTINATION lib)
+   ENDIF(BUILD_SHARED_LIBS)
++  if(NOT BUILD_SHARED_LIBS)
+   INSTALL(TARGETS archive_static
+           RUNTIME DESTINATION bin
+           LIBRARY DESTINATION lib
+           ARCHIVE DESTINATION lib)
++  endif()
+   INSTALL_MAN(${libarchive_MANS})
+   INSTALL(FILES ${include_HEADERS} DESTINATION include)
+ ENDIF()

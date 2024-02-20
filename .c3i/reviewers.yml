@@ -84,3 +84,6 @@ reviewers:
   - user: "davidsanfal"
     type: "team"
     request_reviews: false
+  - user: "juansblanco"
+    type: "team"
+    request_reviews: false

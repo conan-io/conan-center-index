@@ -1,0 +1,20 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4a21163..d24bb87 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -131,10 +131,14 @@ endif()
+ # === Install
+ #
+ # ===============================================
++include(GNUInstallDirs)
+ install(
+   TARGETS stx
+   EXPORT stx
+-  LIBRARY DESTINATION lib)
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
+ install(DIRECTORY include/stx DESTINATION include)
+ 
+ # ===============================================

@@ -1,4 +1,7 @@
 sources:
+  "2.2.8":
+    url: "https://github.com/antony-jr/QArchive/archive/v2.2.8.tar.gz"
+    sha256: "2f231b48b51de5d730f98bffbff34d7791b61ea766429230d81bce82c7ce1bf9"
   "2.2.6":
     url: "https://github.com/antony-jr/QArchive/archive/v2.2.6.tar.gz"
     sha256: "c0cad2bc79eeb4ab4180fd97822a967b8a0e3c594387ccf921733449ee5bd3e6"

@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "avahi-compat-libdns_sd/dns_sd.h"
+#include "dns_sd.h"
 #include "avahi-core/log.h"
 
 

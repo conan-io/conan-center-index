@@ -26,9 +26,9 @@ class GlazeConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "17" if Version(self.version) >= "1.3.3" else "16",
-            "msvc": "193" if Version(self.version) >= "1.3.3" else "192",
-            "gcc": "12",
+            "Visual Studio": "17",
+            "msvc": "193",
+            "gcc": "10" if Version(self.version) < "1.9.0" else "11",
             "clang": "12",
             "apple-clang": "13.1",
         }
@@ -42,7 +42,6 @@ class GlazeConan(ConanFile):
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(

@@ -45,7 +45,7 @@ class PackageConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 17
+        return 14
 
     # in case the project requires C++14/17/20/... the minimum compiler version should be listed
     @property
@@ -98,7 +98,7 @@ class PackageConan(ConanFile):
     # if another tool than the compiler or Meson is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         # CCI policy assumes that Meson may not be installed on consumers machine
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/1.2.3")
         # pkgconf is largely used by Meson, it should be added in build requirement when there are dependencies
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.0.3")

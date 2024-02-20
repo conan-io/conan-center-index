@@ -1,0 +1,41 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 761dbc6..b5ddd74 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -27,13 +27,32 @@ elseif(APPLE)
+ elseif(ANDROID)
+ 	target_compile_definitions(xg PRIVATE GUID_ANDROID)
+ else()
+-	find_package(Libuuid REQUIRED)
+-	if (NOT LIBUUID_FOUND)
++	find_package(libuuid REQUIRED)
++	if (NOT libuuid_FOUND)
+ 		message(FATAL_ERROR
+ 			"You might need to run 'sudo apt-get install uuid-dev' or similar")
+ 	endif()
+-	include_directories(${LIBUUID_INCLUDE_DIR})
+-	target_link_libraries(xg ${LIBUUID_LIBRARY})
++	# include_directories(${LIBUUID_INCLUDE_DIR})
++	target_link_libraries(xg libuuid::libuuid)
+ 	add_definitions(-DGUID_LIBUUID)
+ 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
+ endif()
++
++include(GNUInstallDirs)
++
++set(CROSSGUID_INC_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}")
++set(CROSSGUID_RUNTIME_INSTALL_DIR "${CMAKE_INSTALL_BINDIR}")
++set(CROSSGUID_LIBRARY_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
++set(CROSSGUID_ARCHIVE_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
++set(CROSSGUID_FRAMEWORK_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
++
++# Install target
++install(TARGETS xg EXPORT crossguidTargets
++	RUNTIME       DESTINATION ${CROSSGUID_RUNTIME_INSTALL_DIR}
++	LIBRARY       DESTINATION ${CROSSGUID_LIBRARY_INSTALL_DIR}
++	ARCHIVE       DESTINATION ${CROSSGUID_ARCHIVE_INSTALL_DIR}
++	FRAMEWORK     DESTINATION ${CROSSGUID_FRAMEWORK_INSTALL_DIR})
++
++# Install headers
++install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/Guid.hpp"
++	DESTINATION ${CROSSGUID_INC_INSTALL_DIR})

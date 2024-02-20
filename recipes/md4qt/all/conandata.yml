@@ -1,4 +1,73 @@
 sources:
+  "2.7.3":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.7.3.tar.gz"
+    sha256: "d464cd137a69218f88af1373b198610f1db6971c7aa56c6869219ffb34e6f0dd"
+  "2.7.2":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.7.2.tar.gz"
+    sha256: "2d6b65db799fff944f2ecb8bb411f17687e41e0d5a17a37ad1c4bd22fe997d8b"
+  "2.7.1":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.7.1.tar.gz"
+    sha256: "054cbaa286cfd3ce2d4e5c178b303b80eb23ad5bd54541571d6c9afbd285986e"
+  "2.7.0":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.7.0.tar.gz"
+    sha256: "e5722b586fa6c6d126487056fa47f0d933b94413ac44b79f52573226eca04a07"
+  "2.6.0":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.6.0.tar.gz"
+    sha256: "8884a3b18fd923dd49994190e0b11c1882e409fce59fb6e5ee8e866dd889b8d0"
+  "2.5.2":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.5.2.tar.gz"
+    sha256: "f6af98d2b7c405419b4505bf25eb0363cad3561fa78c34001e8dada082812d76"
+  "2.5.1":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.5.1.tar.gz"
+    sha256: "6f13fc59fbfbc778df932cf328a5720989e59e5b06278731bd852d07472b5520"
+  "2.5.0":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.5.0.tar.gz"
+    sha256: "5965552f15d37475f37f644feaee62a89225312e1c82e813b7a119943d82c808"
+  "2.4.4":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.4.4.tar.gz"
+    sha256: "03995edbfe6047d047bcd3c5bb4824c3644927437bb60a95f8a3a9c7096ae981"
+  "2.4.3":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.4.3.tar.gz"
+    sha256: "b899a290c09ab073341d8924ebbd43694226d9122e0e174264d3a3770814bb15"
+  "2.4.2":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.4.2.tar.gz"
+    sha256: "76f3228dd9afa2661fe9326b51e5ec8dc29e364f99fb0f94704792610d543fa2"
+  "2.4.1":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.4.1.tar.gz"
+    sha256: "61a439206e1ed2e68702c9811e3055d0adfda5945fb098ea7bfe8906c33d7b49"
+  "2.4.0":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.4.0.tar.gz"
+    sha256: "a53c6fb33cfef23f91cc6e967b538cd1940bb765041a0c1c4ac3aa20bf0b5c7c"
+  "2.3.9":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.3.9.tar.gz"
+    sha256: "0ff833b179e01866296a8b2e36b09c19936c2e4434d9e542be389d8104809523"
+  "2.3.4":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.3.4.tar.gz"
+    sha256: "7f356658316da4f4eaf7bde43dd43027a602c49640d297357b12e22a1a842a68"
+  "2.3.3":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.3.3.tar.gz"
+    sha256: "89584d77d7e338d858e2198b20cd091cc713aef74880ef1fccc6c1e9d8b74acd"
+  "2.3.2":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.3.2.tar.gz"
+    sha256: "0a89854d639a3710ab89611333fd1a1047cd5edc87ba767fbefdc37e701ae671"
+  "2.3.1":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.3.1.tar.gz"
+    sha256: "7126ecc34f9808943b76b05106ebd42ef01b7b812416efc2382de68a13804d01"
+  "2.3.0":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.3.0.tar.gz"
+    sha256: "e8a37c80f1823bbac9cbfd6bbd662ee14e8ff0ac9e97966aa34cb2d0eed18e72"
+  "2.2.3":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.2.3.tar.gz"
+    sha256: "31f6de553700b25e4ed8517bcde24bd43b18c3fda1260f968aa5c393a7491783"
+  "2.2.2":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.2.2.tar.gz"
+    sha256: "4d5a0f7ed250cbcb8a3a1f4244f8413ed854e538406c571e83ebccf709cff49e"
+  "2.2.1":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.2.1.tar.gz"
+    sha256: "1e774a01d866c2738e1ec897ebb58057bf0eb7d7895aed48904907a77934c459"
+  "2.2.0":
+    url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.2.0.tar.gz"
+    sha256: "3c9228e658e8a613fbd098daf815d3884c8da404238723ff4d68065e5fedd5d7"
   "2.1.1":
     url: "https://github.com/igormironchik/md4qt/archive/refs/tags/2.1.1.tar.gz"
     sha256: "76f4cb2919cae393ef52788a63853aa52e429f8ff218f5eff9d38f4ebb4b3b1e"
