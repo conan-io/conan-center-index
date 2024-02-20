@@ -1,41 +1,34 @@
-from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.microsoft import is_msvc
+
+required_conan_version = ">=1.53.0"
 
 
 class SrtConan(ConanFile):
     name = "srt"
-    homepage = "https://github.com/Haivision/srt"
-    description = "Secure Reliable Transport (SRT) is an open source transport technology that optimizes streaming performance across unpredictable networks, such as the Internet."
-    topics = ("conan", "srt", "ip", "transport")
-    url = "https://github.com/conan-io/conan-center-index"
+    description = (
+        "Secure Reliable Transport (SRT) is an open source transport technology that optimizes streaming"
+        " performance across unpredictable networks, such as the Internet."
+    )
     license = "MPL-2.0"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    short_paths = True
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/Haivision/srt"
+    topics = ("ip", "transport")
 
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    @property
-    def _has_stdcxx_sync(self):
-        return tools.Version(self.version) >= "1.4.2"
-
-    @property
-    def _has_posix_threads(self):
-        return not (self.settings.os == "Windows" and (self.settings.compiler == "Visual Studio" or \
-               (self.settings.compiler == "gcc" and self.settings.compiler.get_safe("threads") == "win32")))
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,61 +36,59 @@ class SrtConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/1.1.1q")
-        if not self._has_posix_threads and not self._has_stdcxx_sync:
-            self.requires("pthreads4w/3.0.0")
+        self.requires("openssl/[>=1.1 <4]")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set (CMAKE_MODULE_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/scripts\")",
-                              "list(APPEND CMAKE_MODULE_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/scripts\")")
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_APPS"] = False
-        self._cmake.definitions["ENABLE_LOGGING"] = False
-        self._cmake.definitions["ENABLE_SHARED"] = self.options.shared
-        self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
-        if self._has_stdcxx_sync:
-            self._cmake.definitions["ENABLE_STDCXX_SYNC"] = True
-        self._cmake.definitions["ENABLE_ENCRYPTION"] = True
-        self._cmake.definitions["USE_OPENSSL_PC"] = False
-        if self.settings.compiler == "Visual Studio":
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ENABLE_APPS"] = False
+        tc.variables["ENABLE_LOGGING"] = False
+        tc.variables["ENABLE_SHARED"] = self.options.shared
+        tc.variables["ENABLE_STATIC"] = not self.options.shared
+        tc.variables["ENABLE_STDCXX_SYNC"] = True
+        tc.variables["ENABLE_ENCRYPTION"] = True
+        tc.variables["USE_OPENSSL_PC"] = False
+        if is_msvc(self):
             # required to avoid warnings when srt shared, even if openssl shared,
             # otherwise upstream CMakeLists would add /DELAYLOAD:libeay32.dll to link flags
-            self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = True
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+            tc.variables["OPENSSL_USE_STATIC_LIBS"] = True
+        tc.generate()
+
+        tc = CMakeDeps(self)
+        tc.generate()
+
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")',
+                        'list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")')
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "srt"
-        suffix = "_static" if self.settings.compiler == "Visual Studio" and not self.options.shared else ""
+        self.cpp_info.set_property("pkg_config_name", "srt")
+        suffix = "_static" if is_msvc(self) and not self.options.shared else ""
         self.cpp_info.libs = ["srt" + suffix]
         if self.options.shared:
             self.cpp_info.defines = ["SRT_DYNAMIC"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]

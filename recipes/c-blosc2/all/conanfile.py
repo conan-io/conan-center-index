@@ -18,7 +18,7 @@ class CBlosc2Conan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Blosc/c-blosc2"
-    topics = ("c-blosc", "blosc", "compression")
+    topics = ("c-blosc", "blosc", "compression", "cache", "store")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -68,7 +68,7 @@ class CBlosc2Conan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_zlib in ["zlib-ng", "zlib-ng-compat"]:
-            self.requires("zlib-ng/2.1.5")
+            self.requires("zlib-ng/2.1.6")
         elif self.options.with_zlib == "zlib":
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
