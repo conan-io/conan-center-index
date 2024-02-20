@@ -17,7 +17,7 @@ patches:
     - patch_file: "patches/0004-2.8.2-missing-include.patch"
       patch_description: "include memory header"
       patch_type: "portability"
-      patch_soiurce: "https://github.com/DigitalInBlue/Celero/pull/160"
+      patch_source: "https://github.com/DigitalInBlue/Celero/pull/160"
     - patch_file: "patches/0005-drop-runtime.patch"
       patch_description: "remove /MT /MD flags"
       patch_type: "conan"
