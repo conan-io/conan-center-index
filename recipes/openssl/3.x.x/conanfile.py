@@ -452,9 +452,8 @@ class OpenSSLConan(ConanFile):
         if self._perlasm_scheme:
             perlasm_scheme = 'perlasm_scheme => "%s",' % self._perlasm_scheme
 
-        defines = " ".join(defines)
-        defines = 'defines => add("%s"),' % defines if defines else ""
-        targets = "my %targets"
+        defines = "\n".join(f"defines => add(\"{d}\")," for d in defines)
+        targets = "my %targets"        
 
         if self._asm_target:
             ancestor = '[ "%s", asm("%s") ]' % (self._ancestor_target, self._asm_target)
