@@ -12,7 +12,7 @@ import os
 class LimereportConan(ConanFile):
     name = "limereport"
     description = "Report generator for Qt Framework"
-    homepage = "https://poppler.freedesktop.org/"
+    homepage = "https://limereport.ru"
     topics = ("limereport", "pdf", "report","qt")
     license = "LGPL-3.0", "GPL-3.0"
     url = "https://github.com/conan-io/conan-center-index"
@@ -92,7 +92,8 @@ class LimereportConan(ConanFile):
         tc.generate()
 
     def configure(self):
-        self.options.rm_safe("fPIC")
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def build(self):
         cmake = CMake(self)
