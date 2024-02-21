@@ -74,25 +74,25 @@ class PdalConan(ConanFile):
 
     def requirements(self):
         self.requires("arbiter/cci.20231005", transitive_headers=True, transitive_libs=True)
-        self.requires("boost/1.83.0")
+        self.requires("boost/1.84.0")
         self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
-        self.requires("gdal/3.8.0", transitive_headers=True, transitive_libs=True)
-        self.requires("json-schema-validator/2.2.0")
+        self.requires("gdal/3.8.3", transitive_headers=True, transitive_libs=True)
+        self.requires("json-schema-validator/2.3.0")
         self.requires("libgeotiff/1.7.1")
-        self.requires("nanoflann/1.5.0", transitive_headers=True, transitive_libs=True)
-        self.requires("nlohmann_json/3.11.2", transitive_headers=True, transitive_libs=True)
-        self.requires("proj/9.3.0", transitive_headers=True, transitive_libs=True)
-        self.requires("utfcpp/4.0.1")
+        self.requires("nanoflann/1.5.2", transitive_headers=True, transitive_libs=True)
+        self.requires("nlohmann_json/3.11.3", transitive_headers=True, transitive_libs=True)
+        self.requires("proj/9.3.1", transitive_headers=True, transitive_libs=True)
+        self.requires("utfcpp/4.0.4")
         if self.options.with_xml:
-            self.requires("libxml2/2.11.5", transitive_headers=True, transitive_libs=True)
+            self.requires("libxml2/2.12.4", transitive_headers=True, transitive_libs=True)
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True, transitive_libs=True)
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.4")
+            self.requires("xz_utils/5.4.5")
         if self.options.get_safe("with_unwind"):
-            self.requires("libunwind/1.7.2")
+            self.requires("libunwind/1.8.0")
         # TODO: unvendor kazhdan (not on CCI, https://github.com/mkazhdan/PoissonRecon)
         # TODO: unvendor lazperf (not on CCI, https://github.com/hobuinc/laz-perf)
         # TODO: unvendor lepcc (not on CCI, https://github.com/Esri/lepcc)
