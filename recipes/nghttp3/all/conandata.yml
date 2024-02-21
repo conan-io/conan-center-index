@@ -16,4 +16,3 @@ patches:
     - patch_file: "patches/1.2.0-0001-disable-always-static-build.patch"
       patch_description: "disable always static build to avoid overwrite lib file on windows"
       patch_type: "conan"
-
