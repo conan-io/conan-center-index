@@ -220,7 +220,7 @@ class PdalConan(ConanFile):
         # Unvendor utfcpp
         rmdir(self, os.path.join(self.source_folder, "vendor", "utfcpp"))
         save(self, os.path.join(self.source_folder, "vendor", "utfcpp", "CMakeLists.txt"), "")
-        #unvendor schema-validator
+        # Unvendor schema-validator
         rmdir(self, os.path.join(self.source_folder, "vendor", "schema-validator"))
         save(self, os.path.join(self.source_folder, "vendor", "schema-validator", "CMakeLists.txt"), "")
         save(self, os.path.join(self.source_folder, "vendor", "schema-validator", "json-schema.hpp"),
