@@ -29,7 +29,7 @@
 +# Compilation options
 +option(BASE64_INSTALL_TARGET "add an install target" ON)
 +option(BASE64_BUILD_TESTS "add test projects" ON)
-+option(BASE64_WITH_OPENMP "use openmp" OFF)
++option(BASE64_WITH_OpenMP "use openmp" OFF)
 +
 +if (_TARGET_ARCH STREQUAL "x86" OR _TARGET_ARCH STREQUAL "x64")
 +    option(BASE64_WITH_FAST_UNALIGNED_ACCESS "vectorization: unaligned access enabled" ON)
@@ -49,7 +49,7 @@
 +
 +###################################################################
 +# OpenMP
-+if(BASE64_WITH_OPENMP)
++if(BASE64_WITH_OpenMP)
 +    find_package(OpenMP)
 +    if (OPENMP_FOUND)
 +        option(BASE64_USE_OpenMP "Utilize OpenMP to parallelize encoding and decoding." ON)
@@ -180,9 +180,9 @@
 +# install target
 +if (BASE64_INSTALL_TARGET)
 +    install(TARGETS base64 EXPORT base64-targets
-+        RUNTIME DESTINATION bin/$<CONFIG>
-+        LIBRARY DESTINATION lib/$<CONFIG>
-+        ARCHIVE DESTINATION lib/$<CONFIG>
++        RUNTIME DESTINATION bin
++        LIBRARY DESTINATION lib
++        ARCHIVE DESTINATION lib
 +        INCLUDES DESTINATION include
 +    )
 +    install(FILES include/libbase64.h DESTINATION include)

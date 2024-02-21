@@ -14,12 +14,12 @@ class FastDoubleParserConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lemire/fast_double_parser"
     license = ("Apache-2.0", "BSL-1.0")
-
+    package_type = "header-library"
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -29,10 +29,13 @@ class FastDoubleParserConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         include_folder = os.path.join(self.source_folder, "include")
         copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=include_folder)
         copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

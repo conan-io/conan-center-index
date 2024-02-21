@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 1.61.0
+  version: 1.62.0
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
@@ -16,6 +16,7 @@ artifactory:
 github:
   reviewers: "reviewers.yml"
   authorized_users: "authorized_users.yml"
+  waitlist_users: "waitlist_users.yml"
 
 slack:
   credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
@@ -29,6 +30,7 @@ tasks:
   automatic_merge:
     reviews_required_total: 2  # Reviews that a PR needs so it can be merged
     reviews_required_team: 1  # Reviews from the Conan team that a PR needs so it can be merged
+    reviews_required_bump: 1  # Total reviews required for a bump PR to be merged
     branches:  # PRs from automations that have these as base-branches will be merged automatically
       - "conan-io:action-doc-toc"
     # Requirements to merge a given pull-request:
@@ -49,11 +51,14 @@ tasks:
       - boost
       - qt
       - llvm
+    parallel_strategy: unlimited
   cci:
     conan_v2_run_export: false
     write_comments: true
     detailed_status_checks: true
     update_labels: true
+    build_bump_deps_pr: false
+    description_bump_deps_pr: ":vertical_traffic_light: Thank for your Bump dependencies PR. The build service will be triggered soon by a Conan team member."
     wait_for_multibranch:  # CCI jobs should wait for other multibranch job for that same PR
       job_name: "prod-v2/cci"  # e.g. "cci-v2/cci" -> this means waiting for cci-v2/cci/PR-<number>
       timeout_seconds: 600  # Maximum time to wait for the multibranch job
@@ -73,19 +78,27 @@ tasks:
 
 # Profile configurations to build packages
 configurations:
-  - id: linux-gcc
-    epochs: [20211221, 20220120, 20230606]
-    hrname: "Linux, GCC"
+  - id: linux-gcc-legacy
+    hrname: "Linux, GCC-legacy"
     content:
       - os: ["Linux"]
         arch: ["x86_64"]
         compiler:
           - "gcc":
               compiler.libcxx: [ "libstdc++11" ]
-              compiler.version: ["5", "7", "9", "10", "11"]
+              compiler.version: ["5", "7", "9"]
+              build_type: ["Release"]
+  - id: linux-gcc11
+    hrname: "Linux, GCC11"
+    content:
+      - os: ["Linux"]
+        arch: ["x86_64"]
+        compiler:
+          - "gcc":
+              compiler.libcxx: [ "libstdc++11" ]
+              compiler.version: ["11"]
               build_type: ["Release", "Debug"]
   - id: linux-clang
-    epochs: [20211221, 20220120, 20230606]
     hrname: "Linux, Clang"
     content:
       - os: ["Linux"]
@@ -93,25 +106,10 @@ configurations:
         compiler:
           - "clang":
               compiler.libcxx: ["libstdc++", "libc++"]
-              compiler.version: ["12", "13"]
-              build_type: ["Release", "Debug"]
-  - id: macos-clang
-    epochs: [20220120, 20230606]
-    hrname: "macOS, Clang"
-    content:
-      - os: [ "Macos" ]
-        arch: [ "x86_64" ]
-        compiler:
-          - "apple-clang":
-              compiler.version: [ "13.0" ]
-              compiler.libcxx: [ "libc++" ]
-              build_type: [ "Release", "Debug" ]
+              compiler.version: ["13"]
+              build_type: ["Release"]
   - id: macos-m1-clang
-    epochs: [20220120, 20230606]
     hrname: "macOS, Clang (M1/arm64)"
-    build_profile:
-      os: "Macos"
-      arch: "x86_64"
     content:
       - os: [ "Macos" ]
         arch: [ "armv8" ]
@@ -121,7 +119,6 @@ configurations:
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release", "Debug" ]
   - id: windows-visual_studio
-    epochs: [0, 20211221, 20220120, 20230606]
     hrname: "Windows, Visual Studio"
     content:
       - os: [ "Windows" ]

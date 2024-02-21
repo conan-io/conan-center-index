@@ -29,6 +29,10 @@ patches:
       patch_description: "link libm to absl string"
       patch_type: "portability"
       patch_source: "https://github.com/abseil/abseil-cpp/issues/1100"
+    - patch_file: "patches/20230802.1-0001-fix-mingw.patch"
+      patch_description: "Fix build with MinGW"
+      patch_type: "portability"
+      patch_source: "https://github.com/abseil/abseil-cpp/commit/2f77684e8dc473a48dbc19167ffe69c40ce8ada4"
   "20230125.3":
     - patch_file: "patches/0003-absl-string-libm.patch"
       patch_description: "link libm to absl string"

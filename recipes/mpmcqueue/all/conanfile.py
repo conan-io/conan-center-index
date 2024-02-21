@@ -13,11 +13,15 @@ class MpmcqueueConan(ConanFile):
     name = "mpmcqueue"
     description = "A bounded multi-producer multi-consumer concurrent queue written in C++11."
     license = "MIT"
-    topics = ("mpmcqueue", "queue", "concurrency")
+    topics = ("queue", "concurrency")
     homepage = "https://github.com/rigtorp/MPMCQueue"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -28,12 +32,8 @@ class MpmcqueueConan(ConanFile):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("gcc < 5 not supported")
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -46,9 +46,7 @@ class MpmcqueueConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "MPMCQueue")
         self.cpp_info.set_property("cmake_target_name", "MPMCQueue::MPMCQueue")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "MPMCQueue"

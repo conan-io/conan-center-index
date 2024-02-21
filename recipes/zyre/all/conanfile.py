@@ -4,7 +4,6 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -46,9 +45,9 @@ class ZyreConan(ConanFile):
 
     def requirements(self):
         self.requires("czmq/4.2.1", transitive_headers=True)
-        self.requires("zeromq/4.3.4")
+        self.requires("zeromq/4.3.5")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("libsystemd/253.6")
+            self.requires("libsystemd/255")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -56,12 +55,13 @@ class ZyreConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_DRAFTS"] = self.options.drafts
-        if Version(self.version) >= "2.0.1":
-            tc.variables["ZYRE_BUILD_SHARED"] = self.options.shared
-            tc.variables["ZYRE_BUILD_STATIC"] = not self.options.shared
+        tc.variables["ZYRE_BUILD_SHARED"] = self.options.shared
+        tc.variables["ZYRE_BUILD_STATIC"] = not self.options.shared
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
         if not self.options.shared:
             tc.preprocessor_definitions["ZYRE_STATIC"] = ""
+        # Relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("zeromq", "cmake_file_name", "LIBZMQ")
@@ -89,13 +89,15 @@ class ZyreConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "zyre")
+        self.cpp_info.set_property("cmake_target_name", "zyre" if self.options.shared else "zyre-static")
         self.cpp_info.set_property("pkg_config_name", "libzyre")
 
         libname = "zyre"
-        if Version(self.version) >= "2.0.1" and is_msvc(self) and not self.options.shared:
+        if is_msvc(self) and not self.options.shared:
             libname = "libzyre"
         self.cpp_info.libs = [libname]
         if self.settings.os in ["Linux", "FreeBSD"]:

@@ -39,7 +39,7 @@ class CppJwtConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("nlohmann_json/3.11.3")
         self.requires("openssl/[>=1.1 <4]")
 
     def package_id(self):
