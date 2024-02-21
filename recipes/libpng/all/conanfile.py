@@ -118,7 +118,10 @@ class LibpngConan(ConanFile):
             tc.variables["PNG_INTEL_SSE"] = self._neon_msa_sse_vsx_mapping[str(self.options.sse)]
         if self._has_vsx_support:
             tc.variables["PNG_POWERPC_VSX"] = self._neon_msa_sse_vsx_mapping[str(self.options.vsx)]
-        if Version(self.version) >= "1.6.38":
+        if Version(self.version) >= "1.6.41":
+            tc.variables["PNG_FRAMEWORK"] = False  # changed from False to True by default in PNG 1.6.41
+            tc.variables["PNG_TOOLS"] = False
+        elif Version(self.version) >= "1.6.38":
             tc.variables["PNG_EXECUTABLES"] = False
 
         tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
