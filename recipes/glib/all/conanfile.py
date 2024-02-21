@@ -81,9 +81,9 @@ class GLibConan(ConanFile):
             self.requires("libiconv/1.17")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.0")
+        self.tool_requires("meson/1.3.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
