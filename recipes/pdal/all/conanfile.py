@@ -73,7 +73,7 @@ class PdalConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("arbiter/cci.20231005", transitive_headers=True, transitive_libs=True)
+        self.requires("arbiter/cci.20231122", transitive_headers=True, transitive_libs=True)
         self.requires("boost/1.84.0")
         self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
         self.requires("gdal/3.8.3", transitive_headers=True, transitive_libs=True)
