@@ -19,7 +19,7 @@ required_conan_version = ">=1.55.0"
 
 class QtConan(ConanFile):
     _submodules = ["qtsvg", "qtdeclarative", "qttools", "qttranslations", "qtdoc",
-                   "qtwayland","qtquickcontrols2", "qtquicktimeline", "qtquick3d", "qtshadertools", "qt5compat",
+                   "qtwayland", "qtquickcontrols2", "qtquicktimeline", "qtquick3d", "qtshadertools", "qt5compat",
                    "qtactiveqt", "qtcharts", "qtdatavis3d", "qtlottie", "qtscxml", "qtvirtualkeyboard",
                    "qt3d", "qtimageformats", "qtnetworkauth", "qtcoap", "qtmqtt", "qtopcua",
                    "qtmultimedia", "qtlocation", "qtsensors", "qtconnectivity", "qtserialbus",
@@ -148,7 +148,6 @@ class QtConan(ConanFile):
                                 "path": str(config.get(section, "path")), "depends": []}
                 if config.has_option(section, "depends"):
                     self._submodules_tree[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
-
 
         return self._submodules_tree
 
@@ -554,7 +553,7 @@ class QtConan(ConanFile):
             tc.variables["FEATURE_framework"] = "OFF"
         elif self.settings.os == "Android":
             tc.variables["CMAKE_ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
-            tc.variables["ANDROID_ABI"] =  {"armv7": "armeabi-v7a",
+            tc.variables["ANDROID_ABI"] = {"armv7": "armeabi-v7a",
                                            "armv8": "arm64-v8a",
                                            "x86": "x86",
                                            "x86_64": "x86_64"}.get(str(self.settings.arch))
@@ -577,7 +576,7 @@ class QtConan(ConanFile):
 
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
-            tc.variables["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
+            tc.variables["BUILD_WITH_PCH"] = "OFF"  # disabling PCH to save disk space
 
         if self.settings.os == "Windows":
             tc.variables["HOST_PERL"] = self.dependencies.build["strawberryperl"].conf_info.get("user.strawberryperl:perl", check_type=str)
@@ -592,11 +591,11 @@ class QtConan(ConanFile):
             14: "FEATURE_cxx14",
             17: "FEATURE_cxx17",
             20: "FEATURE_cxx20"
-            }
+        }
         if Version(self.version) >= "6.5.0":
             cpp_std_map[23] = "FEATURE_cxx2b"
 
-        for std,feature in cpp_std_map.items():
+        for std, feature in cpp_std_map.items():
             tc.variables[feature] = "ON" if int(current_cpp_std) >= std else "OFF"
 
         tc.variables["QT_USE_VCPKG"] = False
@@ -651,7 +650,7 @@ class QtConan(ConanFile):
             # use official variable name https://cmake.org/cmake/help/latest/module/FindFontconfig.html
             replace_in_file(self, os.path.join(self.source_folder, "qtbase", "src", "gui", "configure.cmake"), "FONTCONFIG_FOUND", "Fontconfig_FOUND")
 
-        replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", "QtAutoDetect.cmake") , "qt_auto_detect_vcpkg()", "# qt_auto_detect_vcpkg()")
+        replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", "QtAutoDetect.cmake"), "qt_auto_detect_vcpkg()", "# qt_auto_detect_vcpkg()")
 
     def _xplatform(self):
         if self.settings.os == "Linux":
@@ -753,8 +752,8 @@ class QtConan(ConanFile):
 
     def build(self):
         if self.settings.os == "Macos":
-            save(self, ".qmake.stash" , "")
-            save(self, ".qmake.super" , "")
+            save(self, ".qmake.stash", "")
+            save(self, ".qmake.super", "")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -772,8 +771,8 @@ class QtConan(ConanFile):
 
     def package(self):
         if self.settings.os == "Macos":
-            save(self, ".qmake.stash" , "")
-            save(self, ".qmake.super" , "")
+            save(self, ".qmake.stash", "")
+            save(self, ".qmake.super", "")
         cmake = CMake(self)
         cmake.install()
         copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"),
@@ -1060,7 +1059,7 @@ class QtConan(ConanFile):
                     self.cpp_info.components["qtGui"].system_libs.append("d3d12")
                 if Version(self.version) >= "6.7.0":
                     # https://github.com/qt/qtbase/blob/v6.7.0-beta1/src/gui/CMakeLists.txt#L430
-                   self.cpp_info.components["qtGui"].system_libs.append("uxtheme")
+                    self.cpp_info.components["qtGui"].system_libs.append("uxtheme")
                 if self.settings.compiler == "gcc":
                     self.cpp_info.components["qtGui"].system_libs.append("uuid")
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/direct2d/CMakeLists.txt#L60-L82
@@ -1202,7 +1201,7 @@ class QtConan(ConanFile):
             _create_module("Quick3DRuntimeRender", ["Gui", "Quick", "Quick3DAssetImport", "Quick3DUtils", "ShaderTools"])
             _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
 
-        if (self.options.get_safe("qtquickcontrols2") or self.options.qtdeclarative ) and qt_quick_enabled:
+        if (self.options.get_safe("qtquickcontrols2") or self.options.qtdeclarative) and qt_quick_enabled:
             _create_module("QuickControls2", ["Gui", "Quick"])
             _create_module("QuickTemplates2", ["Gui", "Quick"])
 
