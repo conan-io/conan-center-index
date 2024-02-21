@@ -74,7 +74,6 @@ class PdalConan(ConanFile):
 
     def requirements(self):
         self.requires("arbiter/cci.20231122", transitive_headers=True, transitive_libs=True)
-        self.requires("boost/1.84.0")
         self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
         self.requires("gdal/3.8.3", transitive_headers=True, transitive_libs=True)
         self.requires("json-schema-validator/2.3.0")
@@ -112,10 +111,6 @@ class PdalConan(ConanFile):
         # TODO: add tiledb support
         # TODO: add libexecinfo support
 
-    @property
-    def _required_boost_components(self):
-        return ["filesystem"]
-
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
@@ -128,16 +123,6 @@ class PdalConan(ConanFile):
 
         if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("pdal shared doesn't support MT runtime with Visual Studio")
-
-        miss_boost_required_comp = any(
-            self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
-            for boost_comp in self._required_boost_components
-        )
-        if self.dependencies["boost"].options.header_only or miss_boost_required_comp:
-            raise ConanInvalidConfiguration(
-                f"{self.name} requires non header-only boost with these components: "
-                + ", ".join(self._required_boost_components)
-            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -287,7 +272,6 @@ class PdalConan(ConanFile):
             self.cpp_info.libs.extend(["pdal_kazhdan", "pdal_lepcc"])
         self.cpp_info.requires = [
             "arbiter::arbiter",
-            "boost::filesystem",
             "eigen::eigen",
             "gdal::gdal",
             "json-schema-validator::json-schema-validator",

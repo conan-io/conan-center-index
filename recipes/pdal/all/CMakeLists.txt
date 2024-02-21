@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 project(cmake_wrapper)
 
-find_package(Boost REQUIRED CONFIG COMPONENTS filesystem)
-link_libraries(Boost::boost Boost::filesystem)
-
 find_package(Eigen3 REQUIRED CONFIG)
 link_libraries(Eigen3::Eigen)
 
