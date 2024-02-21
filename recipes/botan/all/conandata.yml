@@ -26,6 +26,9 @@ sources:
   "3.2.0":
     url: "https://github.com/randombit/botan/archive/3.2.0.tar.gz"
     sha256: "95af4935d56973000bb6ff20bb54ae56083f8764d5a2c89826cac26ac6127330"
+  "3.3.0":
+    url: "https://github.com/randombit/botan/archive/3.3.0.tar.gz"
+    sha256: "57fefda7b9ab6f8409329620cdaf26d2d7e962b6a10eb321d331e9ecb796f804"
 patches:
   "2.18.2":
     - patch_file: "patches/fix-amalgamation-build.patch"
