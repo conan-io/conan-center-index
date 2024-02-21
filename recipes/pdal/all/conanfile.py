@@ -110,6 +110,7 @@ class PdalConan(ConanFile):
         # TODO: add openscenegraph support
         # TODO: add teaserpp support (not on CCI, https://github.com/MIT-SPARK/TEASER-plusplus)
         # TODO: add tiledb support
+        # TODO: add libexecinfo support
 
     @property
     def _required_boost_components(self):
@@ -183,7 +184,6 @@ class PdalConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         top_cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        util_cmakelists = os.path.join(self.source_folder, "pdal", "util", "CMakeLists.txt")
 
         # Provide these dependencies via the CMakeLists.txt in the recipe instead
         for cmake_module in [
@@ -230,9 +230,6 @@ class PdalConan(ConanFile):
         # Disabling libxml2 support is only possible via patching
         if not self.options.with_xml:
             replace_in_file(self, top_cmakelists, "include(${PDAL_CMAKE_DIR}/libxml2.cmake)", "")
-        # Disabling libunwind support is only possible via patching
-        if not self.options.get_safe("with_unwind", False):
-            replace_in_file(self, util_cmakelists, "include(${PDAL_CMAKE_DIR}/unwind.cmake)", "")
         # Disable rpath manipulation
         replace_in_file(self, top_cmakelists, "include(${PDAL_CMAKE_DIR}/rpath.cmake)", "")
         # Disable copying of symbols from libpdal_util.dylib to libpdalcpp.dylib
@@ -331,6 +328,8 @@ class PdalConan(ConanFile):
             self.cpp_info.components["pdal_base"].requires.append("zlib::zlib")
         if self.options.with_lzma:
             self.cpp_info.components["pdal_base"].requires.append("xz_utils::xz_utils")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.0":
+            self.cpp_info.components["pdal_base"].system_libs.append("stdc++fs")
 
         # pdal_util
         self.cpp_info.components["pdal_util"].set_property("cmake_target_name", "pdal_util")
