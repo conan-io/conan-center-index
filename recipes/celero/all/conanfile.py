@@ -123,7 +123,7 @@ class CeleroConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["CELERO_STATIC"]
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread", "m"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["powrprof", "psapi"]
 
