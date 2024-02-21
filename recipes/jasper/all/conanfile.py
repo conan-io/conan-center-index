@@ -12,11 +12,11 @@ required_conan_version = ">=1.53.0"
 
 class JasperConan(ConanFile):
     name = "jasper"
-    license = "JasPer-2.0"
-    homepage = "https://jasper-software.github.io/jasper"
-    url = "https://github.com/conan-io/conan-center-index"
-    topics = ("toolkit", "coding", "jpeg", "images")
     description = "JasPer Image Processing/Coding Tool Kit"
+    license = "JasPer-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://jasper-software.github.io/jasper"
+    topics = ("toolkit", "coding", "jpeg", "images")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -50,9 +50,9 @@ class JasperConan(ConanFile):
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/3.0.2")
         elif self.options.with_libjpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.1")
+            self.requires("mozjpeg/4.1.5")
 
     def build_requirements(self):
         if Version(self.version) >= "4.1.1":
@@ -77,11 +77,11 @@ class JasperConan(ConanFile):
         if Version(self.version) >= "3.0.0":
             tc.variables["JAS_ENABLE_LIBHEIF"] = False
         tc.variables["JAS_ENABLE_OPENGL"] = False
-
         if cross_building(self):
             tc.cache_variables["JAS_CROSSCOMPILING"] = True
             tc.cache_variables["JAS_STDC_VERSION"] = "199901L"
-
+        if Version(self.version) >= "4.2.0":
+            tc.variables["JAS_PACKAGING"] = True
         tc.generate()
 
         cmakedeps = CMakeDeps(self)
