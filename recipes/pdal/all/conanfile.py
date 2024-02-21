@@ -37,7 +37,7 @@ class PdalConan(ConanFile):
         "with_unwind": False,
         "with_xml": True,
         "with_zlib": True,
-        "with_lzma": False,
+        "with_lzma": True,
         "with_zstd": True,
     }
 
@@ -109,7 +109,7 @@ class PdalConan(ConanFile):
         # TODO: add openscenegraph support
         # TODO: add teaserpp support (not on CCI, https://github.com/MIT-SPARK/TEASER-plusplus)
         # TODO: add tiledb support
-        # TODO: add libexecinfo support
+        # TODO: add postgresql support
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -157,35 +157,37 @@ class PdalConan(ConanFile):
         tc.variables["WITH_BACKTRACE"] = self.options.get_safe("with_unwind", False)
         tc.variables["WITH_COMPLETION"] = False
         tc.variables["WITH_TESTS"] = False
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_PostgreSQL"] = True
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Libexecinfo"] = True
         tc.generate()
 
         # For the namespace injection in _patch_sources() below
         self.dependencies["nlohmann_json"].cpp_info.includedirs.append(
             os.path.join(self.dependencies["nlohmann_json"].package_folder, "include", "nlohmann")
         )
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
         top_cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
 
-        # Provide these dependencies via the CMakeLists.txt in the recipe instead
+        # Ensure only Conan-generated Find modules are used
+        rm(self, "Find*.cmake", os.path.join(self.source_folder, "cmake", "modules"))
+
         for cmake_module in [
+            # Remove .cmake modules for unvendored dependencies
             "arbiter",
-            "gdal",
-            "geotiff",
-            "libxml2",
-            "lzma",
             "nlohmann",
-            "openssl",
-            "proj,"
             "schema-validator",
             "utfcpp",
-            "zlib",
-            "zstd",
+            # proj.cmake does not use find_package() and is not compatible
+            "proj",
         ]:
-            save(self, os.path.join(self.source_folder, "cmake", f"{cmake_module}.cmake"), "")
+            cmake_module = os.path.join(self.source_folder, "cmake", f"{cmake_module}.cmake")
+            assert os.path.exists(cmake_module), f"{cmake_module} not found"
+            save(self, cmake_module, "")
+
         # Unvendor arbiter
         rmdir(self, os.path.join(self.source_folder, "vendor", "arbiter"))
         save(self, os.path.join(self.source_folder, "vendor", "arbiter", "CMakeLists.txt"), "")
