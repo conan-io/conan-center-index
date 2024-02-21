@@ -149,28 +149,28 @@ class PdalConan(ConanFile):
         tc.variables["PDAL_HAVE_ZLIB"] = self.options.with_zlib
         tc.variables["PDAL_HAVE_LZMA"] = self.options.with_lzma
         # https://github.com/PDAL/PDAL/blob/2.6.0/cmake/options.cmake
-        tc.cache_variables["BUILD_PLUGIN_CPD"] = False
-        tc.cache_variables["BUILD_PLUGIN_DRACO"] = False
-        tc.cache_variables["BUILD_PLUGIN_E57"] = False
-        tc.cache_variables["BUILD_PLUGIN_FBX"] = False
-        tc.cache_variables["BUILD_PLUGIN_HDF"] = False
-        tc.cache_variables["BUILD_PLUGIN_ICEBRIDGE"] = False
-        tc.cache_variables["BUILD_PLUGIN_MATLAB"] = False
-        tc.cache_variables["BUILD_PLUGIN_MBIO"] = False
-        tc.cache_variables["BUILD_PLUGIN_NITF"] = False
-        tc.cache_variables["BUILD_PLUGIN_OPENSCENEGRAPH"] = False
-        tc.cache_variables["BUILD_PLUGIN_PGPOINTCLOUD"] = False
-        tc.cache_variables["BUILD_PLUGIN_RDBLIB"] = False
-        tc.cache_variables["BUILD_PLUGIN_RIVLIB"] = False
-        tc.cache_variables["BUILD_PLUGIN_TEASER"] = False
-        tc.cache_variables["BUILD_PLUGIN_TILEDB"] = False
-        tc.cache_variables["BUILD_PLUGIN_TRAJECTORY"] = False
-        tc.cache_variables["BUILD_TOOLS_NITFWRAP"] = False
-        tc.cache_variables["ENABLE_CTEST"] = False
-        tc.cache_variables["WITH_ABSEIL"] = False
-        tc.cache_variables["WITH_BACKTRACE"] = self.options.get_safe("with_unwind", False)
-        tc.cache_variables["WITH_COMPLETION"] = False
-        tc.cache_variables["WITH_TESTS"] = False
+        tc.variables["BUILD_PLUGIN_CPD"] = False
+        tc.variables["BUILD_PLUGIN_DRACO"] = False
+        tc.variables["BUILD_PLUGIN_E57"] = False
+        tc.variables["BUILD_PLUGIN_FBX"] = False
+        tc.variables["BUILD_PLUGIN_HDF"] = False
+        tc.variables["BUILD_PLUGIN_ICEBRIDGE"] = False
+        tc.variables["BUILD_PLUGIN_MATLAB"] = False
+        tc.variables["BUILD_PLUGIN_MBIO"] = False
+        tc.variables["BUILD_PLUGIN_NITF"] = False
+        tc.variables["BUILD_PLUGIN_OPENSCENEGRAPH"] = False
+        tc.variables["BUILD_PLUGIN_PGPOINTCLOUD"] = False
+        tc.variables["BUILD_PLUGIN_RDBLIB"] = False
+        tc.variables["BUILD_PLUGIN_RIVLIB"] = False
+        tc.variables["BUILD_PLUGIN_TEASER"] = False
+        tc.variables["BUILD_PLUGIN_TILEDB"] = False
+        tc.variables["BUILD_PLUGIN_TRAJECTORY"] = False
+        tc.variables["BUILD_TOOLS_NITFWRAP"] = False
+        tc.variables["ENABLE_CTEST"] = False
+        tc.variables["WITH_ABSEIL"] = False
+        tc.variables["WITH_BACKTRACE"] = self.options.get_safe("with_unwind", False)
+        tc.variables["WITH_COMPLETION"] = False
+        tc.variables["WITH_TESTS"] = False
         tc.generate()
 
         # For the namespace injection in _patch_sources() below
