@@ -227,13 +227,8 @@ class PdalConan(ConanFile):
              "#include <nlohmann/json-schema.hpp>\n")
         replace_in_file(self, top_cmakelists, "${JSON_SCHEMA_LIB_NAME}", "")
 
-        # Disabling libxml2 support is only possible via patching
-        if not self.options.with_xml:
-            replace_in_file(self, top_cmakelists, "include(${PDAL_CMAKE_DIR}/libxml2.cmake)", "")
         # Disable rpath manipulation
         replace_in_file(self, top_cmakelists, "include(${PDAL_CMAKE_DIR}/rpath.cmake)", "")
-        # Disable copying of symbols from libpdal_util.dylib to libpdalcpp.dylib
-        replace_in_file(self, top_cmakelists, "${PDAL_REEXPORT}", "")
 
         # TODO: should be turned into a patch and submitted upstream
         for header in [os.path.join(self.source_folder, "io", "private", "connector", "Connector.hpp"),
@@ -259,27 +254,12 @@ class PdalConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "pdal-config*", os.path.join(self.package_folder, "bin"), recursive=True)
-        self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_vars_file))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_target_file),
-            {"pdalcpp": "PDAL::pdalcpp", "pdal_util": "PDAL::pdal_util"},
+            {"pdalcpp": "PDAL::PDAL"},
         )
-
-    def _create_cmake_module_variables(self, module_file):
-        pdal_version = Version(self.version)
-        content = textwrap.dedent(f"""\
-            set(PDAL_LIBRARIES pdalcpp pdal_util)
-            set(PDAL_VERSION_MAJOR {pdal_version.major})
-            set(PDAL_VERSION_MINOR {pdal_version.minor})
-            set(PDAL_VERSION_PATCH {pdal_version.patch})
-        """)
-        save(self, module_file, content)
-
-    @property
-    def _module_vars_file(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
@@ -299,18 +279,15 @@ class PdalConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "PDAL")
         self.cpp_info.set_property("cmake_target_name", "PDAL::PDAL")
-        self.cpp_info.set_property("cmake_build_modules", [self._module_vars_file])
+        self.cpp_info.set_property("cmake_target_aliases", ["pdalcpp"])
         self.cpp_info.set_property("pkg_config_name", "pdal")
 
-        # pdal_base
-        self.cpp_info.components["pdal_base"].set_property("cmake_target_name", "pdalcpp")
-        self.cpp_info.components["pdal_base"].libs = ["pdalcpp"]
+        self.cpp_info.libs = ["pdalcpp"]
         if not self.options.shared:
-            self.cpp_info.components["pdal_base"].libs.extend(["pdal_kazhdan", "pdal_lepcc"])
-        self.cpp_info.components["pdal_base"].builddirs.append(os.path.join("lib", "cmake"))
-        self.cpp_info.components["pdal_base"].requires = [
-            "pdal_util",
+            self.cpp_info.libs.extend(["pdal_kazhdan", "pdal_lepcc"])
+        self.cpp_info.requires = [
             "arbiter::arbiter",
+            "boost::filesystem",
             "eigen::eigen",
             "gdal::gdal",
             "json-schema-validator::json-schema-validator",
@@ -320,40 +297,24 @@ class PdalConan(ConanFile):
             "proj::proj",
             "utfcpp::utfcpp",
         ]
-        if self.options.with_xml:
-            self.cpp_info.components["pdal_base"].requires.append("libxml2::libxml2")
-        if self.options.with_zstd:
-            self.cpp_info.components["pdal_base"].requires.append("zstd::zstd")
-        if self.options.with_zlib:
-            self.cpp_info.components["pdal_base"].requires.append("zlib::zlib")
-        if self.options.with_lzma:
-            self.cpp_info.components["pdal_base"].requires.append("xz_utils::xz_utils")
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.0":
-            self.cpp_info.components["pdal_base"].system_libs.append("stdc++fs")
-
-        # pdal_util
-        self.cpp_info.components["pdal_util"].set_property("cmake_target_name", "pdal_util")
-        if not self.options.shared:
-            self.cpp_info.components["pdal_util"].libs = ["pdal_util"]
-        self.cpp_info.components["pdal_util"].builddirs.append(os.path.join("lib", "cmake"))
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["pdal_util"].system_libs.extend(["dl", "m", "pthread"])
-        self.cpp_info.components["pdal_util"].requires = [
-            "boost::filesystem",
-            "nlohmann_json::nlohmann_json",
-            "utfcpp::utfcpp",
-        ]
         if self.options.get_safe("with_unwind"):
-            self.cpp_info.components["pdal_util"].requires.append("libunwind::libunwind")
+            self.cpp_info.requires.append("libunwind::libunwind")
+        if self.options.with_xml:
+            self.cpp_info.requires.append("libxml2::libxml2")
+        if self.options.with_zstd:
+            self.cpp_info.requires.append("zstd::zstd")
+        if self.options.with_zlib:
+            self.cpp_info.requires.append("zlib::zlib")
+        if self.options.with_lzma:
+            self.cpp_info.requires.append("xz_utils::xz_utils")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.0":
+            self.cpp_info.system_libs.append("stdc++fs")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "PDAL"
         self.cpp_info.names["cmake_find_package_multi"] = "PDAL"
-        self.cpp_info.components["pdal_base"].names["cmake_find_package"] = "pdalcpp"
-        self.cpp_info.components["pdal_base"].names["cmake_find_package_multi"] = "pdalcpp"
-        self.cpp_info.components["pdal_base"].build_modules["cmake_find_package"] = [
-            self._module_target_file, self._module_vars_file,
-        ]
-        self.cpp_info.components["pdal_base"].build_modules["cmake_find_package_multi"] = [
-            self._module_target_file, self._module_vars_file,
-        ]
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_target_file]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_target_file]
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
