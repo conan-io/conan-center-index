@@ -1,5 +1,6 @@
 from conan import ConanFile
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, rmdir, chdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain,AutotoolsDeps, PkgConfigDeps
@@ -92,6 +93,9 @@ class Krb5Conan(ConanFile):
         else:   
             env = VirtualBuildEnv(self)
             env.generate()
+            if not cross_building(self):
+                env = VirtualRunEnv(self)
+                env.generate(scope="build")
             tc = AutotoolsToolchain(self)
             yes_no = lambda v: "yes" if v else "no"
             tls_impl = {
