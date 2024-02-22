@@ -16,6 +16,7 @@ class QGeoViewConan(ConanFile):
     topics = ("geo", "geospatial", "qt")
     homepage = "https://github.com/AmonRaNet/QGeoView"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -29,7 +30,8 @@ class QGeoViewConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        self.options.rm_safe("fPIC")
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         self.requires("qt/6.5.3")
@@ -63,7 +65,7 @@ class QGeoViewConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        
+
     def package_info(self):
         self.cpp_info.libs = ["qgeoview"]
         self.cpp_info.libdirs = ['lib', os.path.join('lib','static')]  # Directories where libraries can be found
