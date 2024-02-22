@@ -51,6 +51,8 @@ class Krb5Conan(ConanFile):
     def validate(self):
         if is_msvc(self) and not self.options.shared:
             raise ConanInvalidConfiguration("Visual Studio only builds shared libraries")
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("Macos is not supported (yet)")
 
     def config_options(self):
         if self.settings.os == "Windows":
