@@ -1,0 +1,8 @@
+sources:
+  "1.1.3":
+    url: "https://dlm.mariadb.com/3752091/Connectors/cpp/connector-cpp-1.1.3/mariadb-connector-cpp-1.1.3-src.tar.gz"
+    sha256: "8100ea7f49bb25bea70aa5e6eced95f855b1cfce9b03fe1c95162f40722e803e"
+  "1.0.3":
+    url: "https://dlm.mariadb.com/3700669/Connectors/cpp/connector-cpp-1.0.3/mariadb-connector-cpp-1.0.3-src.tar.gz"
+    sha256: "706462facc982f5c9aeacaf8c1613055ec5961b2d121bed9da34cb88f666b068"
+
