@@ -6,7 +6,6 @@ from conan.tools.files import copy, get, rmdir, chdir, replace_in_file, export_c
 from conan.tools.gnu import Autotools, AutotoolsToolchain,AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars, NMakeDeps, NMakeToolchain
-from contextlib import contextmanager
 import glob
 import os
 
@@ -49,6 +48,8 @@ class Krb5Conan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("MSVC is not supported (yet)") # Possible problem with uicc 32-bit executable
         if is_msvc(self) and not self.options.shared:
             raise ConanInvalidConfiguration("Visual Studio only builds shared libraries")
         if self.settings.os == "Macos":
@@ -148,11 +149,6 @@ class Krb5Conan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def _build_autotools(self):
-        #tools.save("skiptests", "")
-
-        # with chdir(self, os.path.join(self.source_folder,"src")):
-        #     replace_in_file(self,"aclocal.m4", "AC_CONFIG_AUX_DIR(", "echo \"Hello world\"\n\nAC_CONFIG_AUX_DIR(")
-        #     self.run("{} -fiv".format(tools.get_env("AUTORECONF")), run_environment=True, win_bash=tools.os_info.is_windows)
         autotools = Autotools(self)
         autotools.configure(os.path.join(self.source_folder,"src"))
         autotools.make()
