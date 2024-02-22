@@ -88,19 +88,19 @@ class CairoConan(ConanFile):
     def requirements(self):
         self.requires("pixman/0.42.2")
         if self.options.with_zlib and self.options.with_png:
-            self.requires("expat/2.5.0")
+            self.requires("expat/[>=2.5.0 <2.7.0]")
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_freetype:
-            self.requires("freetype/2.13.2", transitive_headers=True, transitive_libs=True)
+            self.requires("freetype/[>=2.13.0 <2.14]", transitive_headers=True, transitive_libs=True)
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.14.2", transitive_headers=True, transitive_libs=True)
+            self.requires("fontconfig/[>=2.14.2 <2.15]", transitive_headers=True, transitive_libs=True)
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6.40 <1.7]")
         if self.options.with_glib:
-            self.requires("glib/2.78.1")
+            self.requires("glib/[>=2.76.3 <2.79]")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system", transitive_headers=True, transitive_libs=True)

@@ -84,20 +84,20 @@ class CairoConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_freetype", True):
-            self.requires("freetype/2.13.0")
+            self.requires("freetype/[>=2.13.0 <2.14]")
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/[>=2.14.2 <2.15]",)
         if self.settings.os == "Linux":
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
         if self.options.get_safe("with_glib", True):
-            self.requires("glib/2.76.3")
+            self.requires("glib/[>=2.76.3 <2.79]")
         self.requires("zlib/1.2.13")
         self.requires("pixman/0.40.0")
-        self.requires("libpng/1.6.40")
+        self.requires("libpng/[>=1.6.40 <1.7]")
 
     def package_id(self):
-        if self.options.get_safe("with_glib") and not self.dependencies["glib"].options.shared:
+        if "glib" in self.dependencies and not self.dependencies["glib"].options.shared:
             self.info.requires["glib"].full_package_mode()
 
     def validate(self):
