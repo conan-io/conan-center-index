@@ -268,7 +268,7 @@ class Krb5Conan(ConanFile):
             self.cpp_info.components["gssrpc"].requires = ["mit-krb5-gssapi"]
             self.cpp_info.components["gssrpc"].names["pkg_config"] = "gssrpc"
 
-            self.cpp_info.components["kadm-client"].libs = ["kadm5clnt_mit"]
+            self.cpp_info.components["kadm-client"].libs = ["kadm5clnt"]
             self.cpp_info.components["kadm-client"].requires = ["mit-krb5-gssapi", "gssrpc"]
             self.cpp_info.components["kadm-client"].names["pkg_config"] = "kadm-client"
 
@@ -276,7 +276,7 @@ class Krb5Conan(ConanFile):
             self.cpp_info.components["kdb"].requires = ["mit-krb5-gssapi", "mit-krb5", "gssrpc"]
             self.cpp_info.components["kdb"].names["pkg_config"] = "kdb-client"
 
-            self.cpp_info.components["kadm-server"].libs = ["kadm5srv_mit"]
+            self.cpp_info.components["kadm-server"].libs = ["kadm5srv"]
             self.cpp_info.components["kadm-server"].requires = ["kdb", "mit-krb5-gssapi"]
             self.cpp_info.components["kadm-server"].names["pkg_config"] = "kadm-server"
 
