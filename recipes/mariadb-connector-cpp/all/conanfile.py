@@ -1,11 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
-from conan.tools.files import copy, get, collect_libs, apply_conandata_patches, replace_in_file, rmdir, rm, rename
+from conan.tools.files import get, collect_libs, replace_in_file, rm
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.scm import Git
 import os
 
 requird_conan_version = ">=1.54.0"
@@ -49,23 +48,14 @@ class MariadbConnectorCPPRecipe(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        #self.requires("mariadb-connector-c/3.3.3")
+        self.requires("mariadb-connector-c/3.3.3")
         self.requires("zlib/[>=1.2.10 <2]")
         self.requires("zstd/1.5.5")
-        if self.options.with_curl:
-            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
 
     def source(self):
-        # need to be from git and use submodule because mariadb-connector-cpp throws complaining about mariadb-connector-c submodule
-        git = Git(self)
-        git.clone(url="https://github.com/mariadb-corporation/mariadb-connector-cpp.git", target=".")
-        git.checkout(f"{self.version}")
-        self.run("git submodule update --init --recursive")
-        test_folder = os.path.join(self.source_folder, "test")
-        rmdir(self, test_folder)
-        #get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def validate(self):
         check_min_vs(self, 192)
@@ -102,13 +92,13 @@ class MariadbConnectorCPPRecipe(ConanFile):
         tc.generate()
         tc = CMakeToolchain(self)
         tc.presets_build_environment = env.environment()
+        tc.variables["USE_SYSTEM_INSTALLED_LIB"] = True
         tc.variables["WITH_UNIT_TESTS"] = False
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["MARIADB_LINK_DYNAMIC"] = self.options.shared
+        tc.variables["MARIADB_LINK_DYNAMIC"] = False
         tc.variables["CONC_WITH_UNIT_TESTS"] = False
         tc.variables["WITH_SSL"] = self.options.with_ssl
         tc.variables["WITH_EXTERNAL_ZLIB"] = True
-        tc.variables["WITH_CURL"] = self.options.with_curl
         tc.variables["INSTALL_BINDIR"] = "bin"
         tc.variables["INSTALL_LIBDIR"] = "lib"
         tc.variables["INSTALL_PLUGINDIR"] = os.path.join("lib", "plugin").replace("\\", "/")
@@ -118,25 +108,20 @@ class MariadbConnectorCPPRecipe(ConanFile):
 
     def _patch_sources(self):
         root_cmake = os.path.join(self.source_folder, "CMakeLists.txt")
-        libmariadb_root_cmake = os.path.join(f"{self.source_folder}/libmariadb", "CMakeLists.txt")
-        libmariadb_internal_cmake = os.path.join(f"{self.source_folder}/libmariadb/libmariadb", "CMakeLists.txt")
-        connector_c_cmake = os.path.join(f"{self.source_folder}/cmake", "connector_c.cmake")
-        #libmysqlclient_dir = self._lib_folder_dep("mariadb-connector-c")
-        #replace_in_file(self, connector_c_cmake, "${CMAKE_SOURCE_DIR}/libmariadb/CMakeLists.txt", f"{libmysqlclient_dir}/libmariadb/CMakeLists.txt")
+        libmysqlclient_dir = self._include_folder_dep("mariadb-connector-c")
 
-        # REPLACE OPENSSL IN INTERNAL DEPS
-        replace_in_file(self, libmariadb_root_cmake, "${OPENSSL_SSL_LIBRARY}", "OpenSSL::SSL")
-        replace_in_file(self, libmariadb_root_cmake, "${OPENSSL_CRYPTO_LIBRARY}", "OpenSSL::Crypto")
-        replace_in_file(self, libmariadb_root_cmake, "${SYSTEM_LIBS}", "OpenSSL::SSL OpenSSL::Crypto")
-        replace_in_file(self, libmariadb_root_cmake, "${SSL_LIBRARIES}", "OpenSSL::SSL OpenSSL::Crypto")
+        # we need to inject into mariadb-connector-cpp the headers of conan mariadb-connector-c
+        replace_in_file(self,
+            root_cmake,
+            "INCLUDE(SetValueMacro)",
+            "INCLUDE(SetValueMacro)\n" + f"INCLUDE_DIRECTORIES({libmysqlclient_dir}/mariadb)"
+        )
 
-        # mariadb is using shared lib for unix ignoring the BUILD_SHARED_LIBS=OFF with this we force be static library
+        # mariadbcpp is using shared lib for unix with this we force be static library
+        # this workarround for ld: library 'mariadbclient' not found with conan
         if not self.options.shared:
             replace_in_file(self, root_cmake, "${LIBRARY_NAME} SHARED", "${LIBRARY_NAME} STATIC")
-            replace_in_file(self, libmariadb_internal_cmake, "libmariadb SHARED", "libmariadb STATIC")
 
-        plugins_io_cmake = os.path.join(f"{self.source_folder}/libmariadb", "plugins", "io", "CMakeLists.txt")
-        replace_in_file(self, plugins_io_cmake, "${CURL_LIBRARIES}", "CURL::libcurl")
 
     def build(self):
         self._patch_sources()
@@ -146,13 +131,13 @@ class MariadbConnectorCPPRecipe(ConanFile):
 
     def package(self):
         cmake = CMake(self)
-        # for some reason from conan the install is trying to install libmariadb instead of libmariadbclient this is small workarround
-        rename(self, f"{self.build_folder}/libmariadb/libmariadb/libmariadbclient.a", f"{self.build_folder}/libmariadb/libmariadb/libmariadb.a")
         cmake.install()
         rm(self, "INFO_SRC", self.package_folder)
         rm(self, "INFO_BIN", self.package_folder)
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "libmariadbcpp")
+        self.cpp_info.includedirs.append(os.path.join("include", "mariadb"))
         self.cpp_info.libdirs = ["lib64/debug","lib/debug"] if self.settings.build_type == "Debug" else ["lib64", "lib"]
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD", "Macos"]:
