@@ -1,8 +1,10 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy, get, replace_in_file
-import os
+from conan.tools.files import copy, get
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
+
 
 required_conan_version = ">=1.62.0"
 
@@ -30,8 +32,26 @@ class SimfilRecipe(ConanFile):
 
     exports_sources = "include/*", "src/*"
 
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "10",
+            "clang": "10",
+            "apple-clang": "14",
+        }
+
     def validate(self):
-        check_min_cppstd(self, "20")
+        check_min_cppstd(self, 20)
+
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if not min_version:
+            self.output.warning(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
+        else:
+            if Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.name} requires coroutine TS support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
     def build_requirements(self):
         self.build_requires("cmake/3.28.1")
