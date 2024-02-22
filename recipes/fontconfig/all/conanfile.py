@@ -95,12 +95,6 @@ class FontconfigConan(ConanFile):
         deps.generate()
 
     def _patch_files(self):
-        # fontconfig requires libtool version number, change it for the corresponding freetype one
-        replace_in_file(
-            self, os.path.join(self.generators_folder, "freetype2.pc"),
-            "Version: {}".format(self.dependencies["freetype"].ref.version),
-            "Version: {}".format(self.dependencies["freetype"].conf_info.get("user.freetype:libtool_version")),
-        )
         # disable fc-cache test to enable cross compilation but also builds with shared libraries on MacOS
         replace_in_file(self,
             os.path.join(self.source_folder, "Makefile.in"),
