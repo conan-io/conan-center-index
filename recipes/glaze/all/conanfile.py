@@ -25,13 +25,16 @@ class GlazeConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        return {
+        versions = {
             "Visual Studio": "17",
             "msvc": "193",
-            "gcc": "10" if Version(self.version) < "1.9.0" else "11",
+            "gcc": "10",
             "clang": "12",
             "apple-clang": "13.1",
         }
+        if Version(self.version) >= "1.9.0":
+            versions["gcc"] = "11"
+        return versions
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -40,7 +43,13 @@ class GlazeConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
+        if Version(self.version) >= "2.1.4" and \
+            self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "11.3":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} doesn't support 11.0<=gcc<11.3 due to gcc bug. Please use gcc>=11.3 and set compiler.version.(ex. compiler.version=11.3)",
+            )
+
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
