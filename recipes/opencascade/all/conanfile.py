@@ -9,7 +9,7 @@ from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import (
     apply_conandata_patches, collect_libs, copy, export_conandata_patches, get,
-    load, rename, replace_in_file, rmdir, save
+    load, patch, rename, replace_in_file, rmdir, save
 )
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -39,6 +39,7 @@ class OpenCascadeConan(ConanFile):
         "with_tbb": [True, False],
         "with_opengl": [True, False],
         "extended_debug_messages": [True, False],
+        "patch_GeomFill_CoonsC2Style": [True, False],
     }
     default_options = {
         "shared": False,
@@ -52,6 +53,7 @@ class OpenCascadeConan(ConanFile):
         "with_tbb": False,
         "with_opengl": True,
         "extended_debug_messages": False,
+        "patch_GeomFill_CoonsC2Style": False,
     }
 
     short_paths = True
@@ -80,6 +82,8 @@ class OpenCascadeConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        # copy coons patch patch
+        copy(self, os.path.join("patches", "dlr-feature-coons_c2.patch"), self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -188,6 +192,10 @@ class OpenCascadeConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+
+        if self.options.patch_GeomFill_CoonsC2Style:
+            patch_file = os.path.join(self.export_sources_folder, "patches", "dlr-feature-coons_c2.patch")
+            patch(self, patch_file=patch_file)
 
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         cmakelists_tools = os.path.join(self.source_folder, "tools", "CMakeLists.txt")

@@ -1,0 +1,322 @@
+From f7278d6608f47e0bf0c91c6ea83df016889057ca Mon Sep 17 00:00:00 2001
+From: Martin Siggel <martin.siggel@dlr.de>
+Date: Tue, 25 May 2021 19:13:47 +0200
+Subject: [PATCH] Coons C2 Patch developed for DLR
+
+---
+ src/GeomFill/GeomFill_BSplineCurves.cxx | 92 ++++++++++++++++++++++---
+ src/GeomFill/GeomFill_BSplineCurves.hxx |  2 +-
+ src/GeomFill/GeomFill_Coons.cxx         | 55 ++++++++++-----
+ src/GeomFill/GeomFill_Coons.hxx         |  8 +--
+ src/GeomFill/GeomFill_FillingStyle.hxx  |  3 +-
+ 5 files changed, 129 insertions(+), 31 deletions(-)
+
+diff --git a/src/GeomFill/GeomFill_BSplineCurves.cxx b/src/GeomFill/GeomFill_BSplineCurves.cxx
+index 57c9a01f..a038e40a 100644
+--- a/src/GeomFill/GeomFill_BSplineCurves.cxx
++++ b/src/GeomFill/GeomFill_BSplineCurves.cxx
+@@ -211,7 +211,7 @@ GeomFill_BSplineCurves::GeomFill_BSplineCurves
+    const Handle(Geom_BSplineCurve)& C4, 
+    const GeomFill_FillingStyle Type      )
+ {
+-  Init( C1, C2, C3, C4, Type);
++  Init( C1, C2, C3, C4, Type, Precision::Confusion() );
+ }
+ 
+ 
+@@ -254,12 +254,13 @@ void  GeomFill_BSplineCurves::Init
+    const Handle(Geom_BSplineCurve)& C2, 
+    const Handle(Geom_BSplineCurve)& C3, 
+    const Handle(Geom_BSplineCurve)& C4, 
+-   const GeomFill_FillingStyle Type      )
++   const GeomFill_FillingStyle Type,
++   const Standard_Real Tol,
++   const Standard_Boolean SetSameDistr)
+ {
+   // On ordonne les courbes
+   Handle(Geom_BSplineCurve) CC1, CC2, CC3, CC4;
+   
+-  Standard_Real Tol = Precision::Confusion();
+ #ifndef No_Exception
+   Standard_Boolean IsOK =
+ #endif
+@@ -281,12 +282,79 @@ void  GeomFill_BSplineCurves::Init
+   if ( Deg4 < DegV) CC4->IncreaseDegree(DegV);
+ 
+   // Mise en conformite des distributions de noeuds
+-  Standard_Integer NbUPoles = SetSameDistribution(CC1,CC3);
+-  Standard_Integer NbVPoles = SetSameDistribution(CC2,CC4);
++  Standard_Integer NbUPoles, NbVPoles;
++  if(SetSameDistr)
++  {
++    NbUPoles = SetSameDistribution(CC1,CC3);
++    NbVPoles = SetSameDistribution(CC2,CC4);
++  }
++  else
++  {
++    NbUPoles = CC1->NbPoles();
++    NbVPoles = CC2->NbPoles();
++  }
+ 
+-  if(Type == GeomFill_CoonsStyle) {
+-    if(NbUPoles < 4 || NbVPoles < 4)
+-      throw Standard_ConstructionError("GeomFill_BSplineCurves: invalid filling style");
++  if(Type == GeomFill_CoonsStyle || Type == GeomFill_CoonsC2Style) {
++    //Standard_ConstructionError_Raise_if 
++    //  (NbUPoles < 4 || NbVPoles < 4, " GeomFill_BSplineCurves: invalid filling style");
++    Standard_Integer NbPolesMin = 4;
++    Standard_Integer aCont = 1;
++    if(Type == GeomFill_CoonsC2Style) {
++      NbPolesMin = 6;
++      aCont = 2;
++    }
++    while(NbUPoles < NbPolesMin)
++    {
++      if(CC1->Degree() < CC1->MaxDegree ())
++      {
++        CC1->IncreaseDegree(CC1->Degree() + 1);
++        CC3->IncreaseDegree(CC3->Degree() + 1);
++      }
++      else
++      {
++        Standard_Integer j;
++        Standard_Integer anIndx = 0;
++        Standard_Real aKnt = -RealLast();
++        for(j = CC1->FirstUKnotIndex(); j < CC1->LastUKnotIndex(); ++j)
++        {
++          Standard_Real dt = CC1->Knot(j+1) - CC1->Knot(j);
++          if(dt > aKnt)
++          {
++            aKnt = dt;
++            anIndx = j;
++          }
++        }
++        aKnt = 0.5 * (CC1->Knot(anIndx+1) + CC1->Knot(anIndx));
++        CC1->InsertKnot (aKnt, CC1->Degree() - aCont);
++        CC3->InsertKnot (aKnt, CC3->Degree() - aCont);
++      }
++    }
++    while(NbVPoles < NbPolesMin)
++    {
++      if(CC2->Degree() < CC2->MaxDegree ())
++      {
++        CC2->IncreaseDegree(CC2->Degree() + 1);
++        CC4->IncreaseDegree(CC4->Degree() + 1);
++      }
++      else
++      {
++        Standard_Integer j;
++        Standard_Integer anIndx = 0;
++        Standard_Real aKnt = -RealLast();
++        for(j = CC2->FirstUKnotIndex(); j < CC2->LastUKnotIndex(); ++j)
++        {
++          Standard_Real dt = CC2->Knot(j+1) - CC2->Knot(j);
++          if(dt > aKnt)
++          {
++            aKnt = dt;
++            anIndx = j;
++          }
++        }
++        aKnt = 0.5 * (CC2->Knot(anIndx+1) + CC2->Knot(anIndx));
++        CC2->InsertKnot (aKnt, CC2->Degree() - aCont);
++        CC4->InsertKnot (aKnt, CC4->Degree() - aCont);
++      }
++    }
+   }
+ 
+   TColgp_Array1OfPnt P1(1,NbUPoles);
+@@ -335,6 +403,9 @@ void  GeomFill_BSplineCurves::Init
+       case GeomFill_CoonsStyle   :
+ 	Caro = GeomFill_Coons  ( P1, P4, P3, P2, W1, W4, W3, W2); 
+ 	break;
++      case GeomFill_CoonsC2Style :
++	Caro = GeomFill_Coons  ( P1, P4, P3, P2, W1, W4, W3, W2, Standard_True); 
++	break;
+       case GeomFill_CurvedStyle  :
+ 	Caro = GeomFill_Curved ( P1, P2, P3, P4, W1, W2, W3, W4); 
+ 	break;
+@@ -349,6 +420,9 @@ void  GeomFill_BSplineCurves::Init
+       case GeomFill_CoonsStyle   :
+ 	Caro = GeomFill_Coons  ( P1, P4, P3, P2); 
+ 	break;
++     case GeomFill_CoonsC2Style :
++	Caro = GeomFill_Coons  ( P1, P4, P3, P2, Standard_True); 
++	break;
+       case GeomFill_CurvedStyle  :
+ 	Caro = GeomFill_Curved ( P1, P2, P3, P4); 
+ 	break;
+@@ -426,7 +500,7 @@ void  GeomFill_BSplineCurves::Init
+   Knots( 2) = C2->Knot(C2->LastUKnotIndex());
+   Mults( 1) = Mults( 2) = 2;
+   C4 = new Geom_BSplineCurve( Poles, Knots, Mults, 1);
+-  Init( C1, C2, C3, C4, Type);
++  Init( C1, C2, C3, C4, Type, Precision::Confusion() );
+ }
+ 
+ 
+diff --git a/src/GeomFill/GeomFill_BSplineCurves.hxx b/src/GeomFill/GeomFill_BSplineCurves.hxx
+index e839213e..ff7927f8 100644
+--- a/src/GeomFill/GeomFill_BSplineCurves.hxx
++++ b/src/GeomFill/GeomFill_BSplineCurves.hxx
+@@ -68,7 +68,7 @@ public:
+   Standard_EXPORT GeomFill_BSplineCurves(const Handle(Geom_BSplineCurve)& C1, const Handle(Geom_BSplineCurve)& C2, const GeomFill_FillingStyle Type);
+   
+   //! if the curves cannot be joined
+-  Standard_EXPORT void Init (const Handle(Geom_BSplineCurve)& C1, const Handle(Geom_BSplineCurve)& C2, const Handle(Geom_BSplineCurve)& C3, const Handle(Geom_BSplineCurve)& C4, const GeomFill_FillingStyle Type);
++  Standard_EXPORT void Init (const Handle(Geom_BSplineCurve)& C1, const Handle(Geom_BSplineCurve)& C2, const Handle(Geom_BSplineCurve)& C3, const Handle(Geom_BSplineCurve)& C4, const GeomFill_FillingStyle Type, const Standard_Real Tolerance,const Standard_Boolean SetSameDistr = Standard_True);
+   
+   //! if the curves cannot be joined
+   Standard_EXPORT void Init (const Handle(Geom_BSplineCurve)& C1, const Handle(Geom_BSplineCurve)& C2, const Handle(Geom_BSplineCurve)& C3, const GeomFill_FillingStyle Type);
+diff --git a/src/GeomFill/GeomFill_Coons.cxx b/src/GeomFill/GeomFill_Coons.cxx
+index 58186db1..412fe118 100644
+--- a/src/GeomFill/GeomFill_Coons.cxx
++++ b/src/GeomFill/GeomFill_Coons.cxx
+@@ -38,9 +38,10 @@ GeomFill_Coons::GeomFill_Coons()
+ GeomFill_Coons::GeomFill_Coons(const TColgp_Array1OfPnt& P1, 
+ 			 const TColgp_Array1OfPnt& P2, 
+ 			 const TColgp_Array1OfPnt& P3, 
+-			 const TColgp_Array1OfPnt& P4)
++			 const TColgp_Array1OfPnt& P4, 
++			 const Standard_Boolean isC2)
+ {
+-  Init( P1, P2, P3, P4);
++  Init( P1, P2, P3, P4, isC2);
+ }
+ 
+ 
+@@ -56,9 +57,10 @@ GeomFill_Coons::GeomFill_Coons(const TColgp_Array1OfPnt&   P1,
+ 			 const TColStd_Array1OfReal& W1, 
+ 			 const TColStd_Array1OfReal& W2, 
+ 			 const TColStd_Array1OfReal& W3, 
+-			 const TColStd_Array1OfReal& W4)
++			 const TColStd_Array1OfReal& W4, 
++			 const Standard_Boolean isC2)
+ {
+-  Init( P1, P2, P3, P4, W1, W2, W3, W4);
++  Init( P1, P2, P3, P4, W1, W2, W3, W4, isC2);
+ }
+ 
+ 
+@@ -70,7 +72,8 @@ GeomFill_Coons::GeomFill_Coons(const TColgp_Array1OfPnt&   P1,
+ void  GeomFill_Coons::Init(const TColgp_Array1OfPnt& P1, 
+ 			const TColgp_Array1OfPnt& P2, 
+ 			const TColgp_Array1OfPnt& P3, 
+-			const TColgp_Array1OfPnt& P4)
++			const TColgp_Array1OfPnt& P4, 
++			const Standard_Boolean isC2)
+ {
+   Standard_DomainError_Raise_if
+     ( P1.Length() != P3.Length() || P2.Length() != P4.Length()," ");
+@@ -94,25 +97,45 @@ void  GeomFill_Coons::Init(const TColgp_Array1OfPnt& P1,
+     myPoles->SetValue( NPolU, i, P4(i));
+   }
+ 
++  Standard_Integer aNbCoeff = 4;
++  if(isC2)
++  {
++    aNbCoeff = 6;
++  }
++
+   // Calcul des coefficients multiplicateurs
+-  TColgp_Array1OfPnt Coef ( 1, 4);
+-  TColgp_Array1OfPnt Pole ( 1, 4);
++  TColgp_Array1OfPnt Coef ( 1, aNbCoeff);
++  TColgp_Array1OfPnt Pole ( 1, aNbCoeff);
+   TColgp_Array1OfPnt CoefU( 1, NPolU);
+   TColgp_Array1OfPnt CoefV( 1, NPolV);
+-  Coef( 4) = gp_Pnt(  2., -2., 0.);
+-  Coef( 3) = gp_Pnt( -3.,  3., 0.);
+-  Coef( 2) = gp_Pnt(  0.,  0., 0.);
+-  Coef( 1) = gp_Pnt(  1.,  0., 0.);
++  if(isC2)
++  {
++    //Coefficients of Hermite polynomial of 5 degree
++    Coef( 6) = gp_Pnt(  -6.,   6., 0.);
++    Coef( 5) = gp_Pnt(  15., -15., 0.);
++    Coef( 4) = gp_Pnt( -10.,  10., 0.);
++    Coef( 3) = gp_Pnt(   0.,   0., 0.);
++    Coef( 2) = gp_Pnt(   0.,   0., 0.);
++    Coef( 1) = gp_Pnt(   1.,   0., 0.); 
++  }
++  else
++  {
++    //Coefficients of Hermite polynomial of 3 degree
++    Coef( 4) = gp_Pnt(  2., -2., 0.);
++    Coef( 3) = gp_Pnt( -3.,  3., 0.);
++    Coef( 2) = gp_Pnt(  0.,  0., 0.);
++    Coef( 1) = gp_Pnt(  1.,  0., 0.);
++  }
+   PLib::CoefficientsPoles(Coef, PLib::NoWeights(),
+ 			  Pole, PLib::NoWeights());
+-  if (NPolU > 4) {
++  if (NPolU > aNbCoeff) {
+     BSplCLib::IncreaseDegree(NPolU-1, Pole, BSplCLib::NoWeights(), 
+ 			     CoefU, BSplCLib::NoWeights());
+   }
+   else {
+      CoefU = Pole;
+   }
+-  if (NPolV > 4) {
++  if (NPolV > aNbCoeff) {
+     BSplCLib::IncreaseDegree(NPolV-1, Pole, BSplCLib::NoWeights(), 
+ 			     CoefV, BSplCLib::NoWeights());
+   }
+@@ -164,8 +187,8 @@ void  GeomFill_Coons::Init(const TColgp_Array1OfPnt&   P1,
+ 			   const TColStd_Array1OfReal& W1, 
+ 			   const TColStd_Array1OfReal& W2, 
+ 			   const TColStd_Array1OfReal& W3,
+-			   const TColStd_Array1OfReal& W4
+-                          )
++			   const TColStd_Array1OfReal& W4,
++			   const Standard_Boolean isC2)
+ {
+ 
+   Standard_DomainError_Raise_if
+@@ -175,7 +198,7 @@ void  GeomFill_Coons::Init(const TColgp_Array1OfPnt&   P1,
+       W2.Length() != P2.Length() || 
+       W3.Length() != P3.Length() || 
+       W4.Length() != P4.Length()   , " ");
+-  Init(P1,P2,P3,P4);
++  Init(P1,P2,P3,P4, isC2);
+   IsRational = Standard_True;
+ 
+   Standard_Integer NPolU = W1.Length();
+diff --git a/src/GeomFill/GeomFill_Coons.hxx b/src/GeomFill/GeomFill_Coons.hxx
+index 46d7dc2f..57286522 100644
+--- a/src/GeomFill/GeomFill_Coons.hxx
++++ b/src/GeomFill/GeomFill_Coons.hxx
+@@ -36,13 +36,13 @@ public:
+   
+   Standard_EXPORT GeomFill_Coons();
+   
+-  Standard_EXPORT GeomFill_Coons(const TColgp_Array1OfPnt& P1, const TColgp_Array1OfPnt& P2, const TColgp_Array1OfPnt& P3, const TColgp_Array1OfPnt& P4);
++  Standard_EXPORT GeomFill_Coons(const TColgp_Array1OfPnt& P1, const TColgp_Array1OfPnt& P2, const TColgp_Array1OfPnt& P3, const TColgp_Array1OfPnt& P4, const Standard_Boolean isC2 = Standard_False);
+   
+-  Standard_EXPORT GeomFill_Coons(const TColgp_Array1OfPnt& P1, const TColgp_Array1OfPnt& P2, const TColgp_Array1OfPnt& P3, const TColgp_Array1OfPnt& P4, const TColStd_Array1OfReal& W1, const TColStd_Array1OfReal& W2, const TColStd_Array1OfReal& W3, const TColStd_Array1OfReal& W4);
++  Standard_EXPORT GeomFill_Coons(const TColgp_Array1OfPnt& P1, const TColgp_Array1OfPnt& P2, const TColgp_Array1OfPnt& P3, const TColgp_Array1OfPnt& P4, const TColStd_Array1OfReal& W1, const TColStd_Array1OfReal& W2, const TColStd_Array1OfReal& W3, const TColStd_Array1OfReal& W4,const Standard_Boolean isC2 = Standard_False);
+   
+-  Standard_EXPORT void Init (const TColgp_Array1OfPnt& P1, const TColgp_Array1OfPnt& P2, const TColgp_Array1OfPnt& P3, const TColgp_Array1OfPnt& P4);
++  Standard_EXPORT   void Init (const TColgp_Array1OfPnt& P1, const TColgp_Array1OfPnt& P2, const TColgp_Array1OfPnt& P3, const TColgp_Array1OfPnt& P4, const Standard_Boolean isC2 = Standard_False);
+   
+-  Standard_EXPORT void Init (const TColgp_Array1OfPnt& P1, const TColgp_Array1OfPnt& P2, const TColgp_Array1OfPnt& P3, const TColgp_Array1OfPnt& P4, const TColStd_Array1OfReal& W1, const TColStd_Array1OfReal& W2, const TColStd_Array1OfReal& W3, const TColStd_Array1OfReal& W4);
++  Standard_EXPORT   void Init (const TColgp_Array1OfPnt& P1, const TColgp_Array1OfPnt& P2, const TColgp_Array1OfPnt& P3, const TColgp_Array1OfPnt& P4, const TColStd_Array1OfReal& W1, const TColStd_Array1OfReal& W2, const TColStd_Array1OfReal& W3, const TColStd_Array1OfReal& W4, const Standard_Boolean isC2 = Standard_False);
+ 
+ 
+ 
+diff --git a/src/GeomFill/GeomFill_FillingStyle.hxx b/src/GeomFill/GeomFill_FillingStyle.hxx
+index 23a7a4c9..0d947f92 100644
+--- a/src/GeomFill/GeomFill_FillingStyle.hxx
++++ b/src/GeomFill/GeomFill_FillingStyle.hxx
+@@ -26,7 +26,8 @@ enum GeomFill_FillingStyle
+ {
+ GeomFill_StretchStyle,
+ GeomFill_CoonsStyle,
+-GeomFill_CurvedStyle
++GeomFill_CurvedStyle,
++GeomFill_CoonsC2Style
+ };
+ 
+ #endif // _GeomFill_FillingStyle_HeaderFile
+-- 
+2.31.1.windows.1
+
