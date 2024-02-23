@@ -97,7 +97,7 @@ class CairoConan(ConanFile):
         self.requires("libpng/[>=1.6.40 <1.7]")
 
     def package_id(self):
-        if "glib" in self.dependencies and not self.dependencies["glib"].options.shared:
+        if self.info.options.get_safe("with_glib") and not self.dependencies["glib"].options.shared:
             self.info.requires["glib"].full_package_mode()
 
     def validate(self):
