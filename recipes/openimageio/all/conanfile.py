@@ -99,7 +99,7 @@ class OpenImageIOConan(ConanFile):
 
         # Optional libraries
         if self.options.with_libpng:
-            self.requires("libpng/[>=1.6.40 <2]")
+            self.requires("libpng/1.6.42")
         if self.options.with_freetype:
             self.requires("freetype/2.13.2")
         if self.options.with_hdf5:
@@ -204,7 +204,7 @@ class OpenImageIOConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE*.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
@@ -231,7 +231,6 @@ class OpenImageIOConan(ConanFile):
 
         self.cpp_info.names["cmake_find_package"] = "OpenImageIO"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenImageIO"
-        self.cpp_info.names["pkg_config"] = "OpenImageIO"
 
         # OpenImageIO::OpenImageIO_Util
         open_image_io_util = self._add_component("OpenImageIO_Util")
