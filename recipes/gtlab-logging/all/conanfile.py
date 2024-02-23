@@ -83,6 +83,10 @@ class GTLabLoggingConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
     def source(self):
         files.get(self, **self.conan_data["sources"][self.version],
                   strip_root=True, destination=self.source_folder)
