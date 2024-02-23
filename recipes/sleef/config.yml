@@ -1,5 +1,5 @@
 versions:
-  "cci.20210405":
+  "3.6":
     folder: all
   "3.5.1":
     folder: all
