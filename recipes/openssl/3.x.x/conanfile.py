@@ -33,6 +33,7 @@ class OpenSSLConan(ConanFile):
         "enable_capieng": [True, False],
         "enable_trace": [True, False],
         "no_aria": [True, False],
+        "no_apps": [True, False],
         "no_autoload_config": [True, False],
         "no_asm": [True, False],
         "no_async": [True, False],
