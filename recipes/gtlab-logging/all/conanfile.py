@@ -1,6 +1,7 @@
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools import files
 from conan.tools.build import check_min_cppstd
+from conan.errors import ConanInvalidConfiguration
 from conan import ConanFile
 import os
 
@@ -31,9 +32,45 @@ class GTLabLoggingConan(ConanFile):
         if self.options.with_qt:
             self.requires("qt/[>=5.0.0]")
 
+
+    @property
+    def _min_cppstd(self):
+        return "14"
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "14": {
+                "Visual Studio": "15",
+                "msvc": "191",
+                "gcc": "7.3.1",
+                "clang": "6",
+                "apple-clang": "12",
+            },
+        }.get(self._min_cppstd, {})
+
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "14")
+        """
+        Adapted from the gtest recipe
+
+        Make sure that C++ 14 is available
+        """
+
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        def loose_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        compiler = self.settings.compiler
+        min_version = self._minimum_compilers_version.get(str(compiler))
+        if min_version and loose_lt_semver(str(compiler.version), min_version):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def generate(self):
         CMakeToolchain(self).generate()
