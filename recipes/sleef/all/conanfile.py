@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -52,22 +53,29 @@ class SleefConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-        tc.cache_variables["BUILD_STATIC_TEST_BINS"] = False
-        tc.cache_variables["ENABLE_LTO"] = False
-        tc.cache_variables["BUILD_LIBM"] = True
-        tc.cache_variables["BUILD_DFT"] = False
-        tc.cache_variables["BUILD_QUAD"] = False
-        tc.cache_variables["BUILD_GNUABI_LIBS"] = False
-        tc.cache_variables["BUILD_TESTS"] = False
-        tc.cache_variables["BUILD_INLINE_HEADERS"] = False
-        tc.cache_variables["SLEEF_TEST_ALL_IUT"] = False
-        tc.cache_variables["SLEEF_SHOW_CONFIG"] = True
-        tc.cache_variables["SLEEF_SHOW_ERROR_LOG"] = False
-        tc.cache_variables["ENFORCE_TESTER"] = False
-        tc.cache_variables["ENFORCE_TESTER3"] = False
-        tc.cache_variables["ENABLE_ALTDIV"] = False
-        tc.cache_variables["ENABLE_ALTSQRT"] = False
-        tc.cache_variables["DISABLE_FFTW"] = True
+        if Version(self.version) >= "3.6":
+            tc.cache_variables["SLEEF_BUILD_STATIC_TEST_BINS"] = False
+            tc.cache_variables["SLEEF_BUILD_LIBM"] = True
+            tc.cache_variables["SLEEF_BUILD_DFT"] = False
+            tc.cache_variables["SLEEF_BUILD_QUAD"] = False
+            tc.cache_variables["SLEEF_BUILD_GNUABI_LIBS"] = False
+            tc.cache_variables["SLEEF_BUILD_SCALAR_LIB"] = False
+            tc.cache_variables["SLEEF_BUILD_TESTS"] = False
+            tc.cache_variables["SLEEF_BUILD_INLINE_HEADERS"] = False
+            tc.cache_variables["SLEEF_SHOW_CONFIG"] = True
+            tc.cache_variables["SLEEF_SHOW_ERROR_LOG"] = False
+            tc.cache_variables["SLEEF_ENABLE_ALTDIV"] = False
+            tc.cache_variables["SLEEF_ENABLE_ALTSQRT"] = False
+            tc.cache_variables["SLEEF_DISABLE_FFTW"] = True
+            tc.cache_variables["SLEEF_DISABLE_MPFR"] = True
+            tc.cache_variables["SLEEF_DISABLE_SSL"] = True
+            tc.cache_variables["SLEEF_ENABLE_CUDA"] = False
+            tc.cache_variables["SLEEF_ENABLE_CXX"] = False
+        else:
+            tc.cache_variables["BUILD_DFT"] = False
+            tc.cache_variables["BUILD_GNUABI_LIBS"] = False
+            tc.cache_variables["BUILD_TESTS"] = False
+            tc.cache_variables["DISABLE_FFTW"] = True
         tc.generate()
 
     def build(self):
