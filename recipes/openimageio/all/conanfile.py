@@ -43,7 +43,6 @@ class OpenImageIOConan(ConanFile):
         "with_openvdb": [True, False],
         "with_ptex": [True, False],
         "with_libwebp": [True, False],
-        "build_testing": [True, False],
     }
     default_options = {
         "shared": False,
@@ -64,7 +63,6 @@ class OpenImageIOConan(ConanFile):
         "with_openvdb": False,  # FIXME: broken on M1
         "with_ptex": True,
         "with_libwebp": True,
-        "build_testing": False,
     }
 
     def export_sources(self):
@@ -162,8 +160,8 @@ class OpenImageIOConan(ConanFile):
         tc.variables["USE_EXTERNAL_PUGIXML"] = True
         tc.variables["BUILD_MISSING_FMT"] = False
 
-        # The tests automatically download test images via git which is avoided by the default not to build the tests
-        tc.variables["BUILD_TESTING"] = self.options.build_testing
+        # Conan is normally not used for testing, so fixing this option to not build the tests
+        tc.variables["BUILD_TESTING"] = False
 
         # OIIO CMake files are patched to check USE_* flags to require or not use dependencies
         tc.variables["USE_JPEGTURBO"] = (
