@@ -1,6 +1,6 @@
-from conan import ConanFile
+from conan import ConanFile, tools
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
-from conan.tools.files import get, replace_in_file, rm
+from conan.tools.files import get, replace_in_file, rm, collect_libs, copy, rename
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
@@ -154,18 +154,17 @@ class MysqlConnectorCPPRecipe(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        rename(self, f"{os.path.join(self.package_folder, "licenses")}/LICENSE.txt", "LICENSE")
         rm(self, "INFO_SRC", self.package_folder)
         rm(self, "INFO_BIN", self.package_folder)
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "libmysqlcppconn")
+        self.cpp_info.includedirs.append(os.path.join("include", "mysql"))
+        self.cpp_info.includedirs.append(os.path.join("include", "mysqlx"))
         self.cpp_info.libdirs = ["lib64/debug","lib/debug"] if self.settings.build_type == "Debug" else ["lib64", "lib"]
-        suffix = "" if self.options.shared else "-static"
-        # we need mysqlcppconn for JDBC legacy support and mysqlcppconn8 for mysqlx support
-        if self.options.with_jdbc == True:
-            self.cpp_info.libs = [f"mysqlcppconn{suffix}", f"mysqlcppconn8{suffix}"]
-        else:
-            self.cpp_info.libs = [f"mysqlcppconn8{suffix}"]
-
+        self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD", "Macos"]:
             self.cpp_info.system_libs = ["m", "resolv"]
         elif self.settings.os == "Windows":
