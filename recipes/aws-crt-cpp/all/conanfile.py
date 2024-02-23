@@ -63,13 +63,6 @@ class AwsCrtCpp(ConanFile):
             self.requires("aws-c-io/0.10.20", transitive_headers=True)
             self.requires("aws-c-mqtt/0.7.10", transitive_headers=True)
             self.requires("aws-c-s3/0.1.37")
-        elif Version(self.version) < "0.24.1":
-            self.requires("aws-c-auth/0.6.17", transitive_headers=True)
-            self.requires("aws-c-event-stream/0.2.15")
-            self.requires("aws-c-http/0.6.22", transitive_headers=True)
-            self.requires("aws-c-io/0.13.4", transitive_headers=True)
-            self.requires("aws-c-mqtt/0.7.12", transitive_headers=True)
-            self.requires("aws-c-s3/0.1.49")
         else:
             self.requires("aws-c-auth/0.7.8", transitive_headers=True)
             self.requires("aws-c-event-stream/0.3.1")
