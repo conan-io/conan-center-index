@@ -1,4 +1,7 @@
 sources:
+  "4.12.4":
+    url: "https://github.com/Z3Prover/z3/archive/z3-4.12.4.tar.gz"
+    sha256: "25e9b18d04ee22f1d872dfe0daaf4c39034744525214e34fedd206e25140e96e"
   "4.12.2":
     url: "https://github.com/Z3Prover/z3/archive/refs/tags/z3-4.12.2.tar.gz"
     sha256: "9f58f3710bd2094085951a75791550f547903d75fe7e2fcb373c5f03fc761b8f"

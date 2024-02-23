@@ -46,12 +46,21 @@ class OpenblasConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "0.3.21":
+            # INFO: When no Fortran compiler is available, OpenBLAS builds LAPACK from an f2c-converted copy of LAPACK unless the NO_LAPACK option is specified
+            self.options.build_lapack = True
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
     def validate(self):
+        if Version(self.version) < "0.3.24" and self.settings.arch == "armv8":
+            # OpenBLAS fails to detect the appropriate target architecture for armv8 for versions < 0.3.24, as it matches the 32 bit variant instead of 64.
+            # This was fixed in https://github.com/OpenMathLib/OpenBLAS/pull/4142, which was introduced in 0.3.24.
+            # This would be a reasonably trivial hotfix to backport.
+            raise ConanInvalidConfiguration("armv8 builds are not currently supported for versions lower than 0.3.24. Contributions to support this are welcome.")
+
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
@@ -87,7 +96,7 @@ class OpenblasConan(ConanFile):
         # This checks explicit user-specified fortran compiler
         if self.options.build_lapack:
             if not self._fortran_compiler:
-                if Version(self.version) < "0.3.24":
+                if Version(self.version) < "0.3.21":
                     self.output.warning(
                         "Building with LAPACK support requires a Fortran compiler.")
                 else:
@@ -169,7 +178,7 @@ endif()"""
             self.cpp_info.components["openblas_component"].system_libs.append("m")
             if self.options.use_thread:
                 self.cpp_info.components["openblas_component"].system_libs.append("pthread")
-            if self.options.build_lapack:
+            if self.options.build_lapack and self._fortran_compiler:
                 self.cpp_info.components["openblas_component"].system_libs.append("gfortran")
 
         self.output.info(
