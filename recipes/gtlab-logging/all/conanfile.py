@@ -45,7 +45,7 @@ class GTLabLoggingConan(ConanFile):
                 "msvc": "191",
                 "gcc": "7.3.1",
                 "clang": "6",
-                "apple-clang": "12",
+                "apple-clang": "14",
             },
         }.get(self._min_cppstd, {})
 
