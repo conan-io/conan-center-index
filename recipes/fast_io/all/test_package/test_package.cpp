@@ -2,7 +2,7 @@
 #include "fast_io.h"
 
 int main() {
-	print(4, " " ,4, "\n");
+	fast_io::io::print(4, " " ,4, "\n");
 
 	return 0;
 }
