@@ -73,11 +73,11 @@ class PackageConan(ConanFile):
         self.requires("eigen/3.4.0", transitive_headers=True)
         # Used in ouster/sensor_http.h
         self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
-        self.requires("spdlog/1.12.0")
-        self.requires("fmt/10.1.1")
+        self.requires("spdlog/1.13.0")
+        self.requires("fmt/10.2.1")
         self.requires("libcurl/[>=7.78 <9]")
         # Replaces vendored optional-lite
-        self.requires("optional-lite/3.5.0", transitive_headers=True)
+        self.requires("optional-lite/3.6.0", transitive_headers=True)
 
         if self.options.build_pcap:
             self.requires("libtins/4.5")
@@ -85,7 +85,7 @@ class PackageConan(ConanFile):
         if self.options.build_osf:
             # Used in fb_generated/*.h
             self.requires("flatbuffers/23.5.26", transitive_headers=True)
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/1.6.42")
             self.requires("zlib/[>=1.2.11 <2]", transitive_libs=True)
 
         if self.options.build_viz:
