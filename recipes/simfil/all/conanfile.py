@@ -51,7 +51,7 @@ class SimfilRecipe(ConanFile):
         else:
             if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
-                    f"{self.name} requires coroutine TS support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
+                    f"{self.name} requires Concepts support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
     def build_requirements(self):
         self.build_requires("cmake/3.28.1")
