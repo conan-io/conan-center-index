@@ -51,7 +51,7 @@ class DuckxConan(ConanFile):
         if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         if not self.dependencies["pugixml"].options.header_only:
-            raise ConanInvalidConfiguration(f"{self.ref} requires header_only spdlog.")
+            raise ConanInvalidConfiguration(f"{self.ref} requires header_only pugixml.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
