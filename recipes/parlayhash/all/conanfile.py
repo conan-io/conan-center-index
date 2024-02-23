@@ -6,10 +6,10 @@ from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53"
 
 class PackageConan(ConanFile):
-    name = "parlay_hash"
+    name = "parlayhash"
     description = "A Header-Only Scalable Concurrent Hash Map."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
@@ -62,11 +62,11 @@ class PackageConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
 
-        self.cpp_info.set_property("cmake_file_name", "parlay_hash")
-        self.cpp_info.set_property("cmake_target_name", "parlay_hash::parlay_hash")
+        self.cpp_info.set_property("cmake_file_name", "parlay")
+        self.cpp_info.set_property("cmake_target_name", "parlay::parlay")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "parlay_hash"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "parlay_hash"
-        self.cpp_info.names["cmake_find_package"] = "parlay_hash"
-        self.cpp_info.names["cmake_find_package_multi"] = "parlay_hash"
+        self.cpp_info.filenames["cmake_find_package"] = "parlay"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "parlay"
+        self.cpp_info.names["cmake_find_package"] = "parlay"
+        self.cpp_info.names["cmake_find_package_multi"] = "parlay"
