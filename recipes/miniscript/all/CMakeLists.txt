@@ -56,7 +56,6 @@ endif()
 find_library(LIBM m)
 target_link_libraries(miniscript-cpp PRIVATE $<$<BOOL:${LIBM}>:${LIBM}>)
 
-
 set(MINICMD_HEADERS
 	${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/OstreamSupport.h
 	${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/ShellIntrinsics.h
@@ -81,6 +80,7 @@ add_executable(minicmd
 )
 target_include_directories(minicmd PRIVATE ${MINISCRIPT_SRC_DIR}/MiniScript-cpp/src/editline)
 target_link_libraries(minicmd PRIVATE miniscript-cpp)
+target_compile_features(minicmd PRIVATE cxx_std_11)
 
 include(GNUInstallDirs)
 install(
