@@ -48,7 +48,10 @@ class SQLiteCppConan(ConanFile):
 
     def requirements(self):
         if self.options.has_codec:
-            self.requires("sqlcipher/[>=4.5.6]")
+            if Version(self.version) < "3.3.1":
+                raise ConanInvalidConfiguration("Using SQLCipher with this recipe is only available from version 3.3.1")
+            else:
+                self.requires("sqlcipher/[>=4.5.6]")
         else:
             self.requires("sqlite3/3.45.0")
 
