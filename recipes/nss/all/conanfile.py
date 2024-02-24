@@ -4,7 +4,7 @@ from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, get, chdir, rename, rm
 from conan.tools.build import cross_building
-# from conans import tools
+
 import os
 import glob
 
