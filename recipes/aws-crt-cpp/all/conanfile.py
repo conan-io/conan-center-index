@@ -70,6 +70,7 @@ class AwsCrtCpp(ConanFile):
             self.requires("aws-c-io/0.13.35", transitive_headers=True)
             self.requires("aws-c-mqtt/0.9.10", transitive_headers=True)
             self.requires("aws-c-s3/0.3.24")
+            self.requires("aws-c-sdkutils/0.1.12")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
