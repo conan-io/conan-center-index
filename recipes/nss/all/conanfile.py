@@ -4,7 +4,7 @@ from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, get, chdir, rename, rm
 from conan.tools.build import cross_building
-from conans import tools
+# from conans import tools
 import os
 import glob
 
@@ -31,7 +31,7 @@ class NSSConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        if self.settings.compiler == "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
+        if self.settings.compiler == "msvc" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
         if self.settings.os == "Windows":
             self.build_requires("mozilla-build/3.3")
@@ -55,11 +55,11 @@ class NSSConan(ConanFile):
     def validate(self):
         if not self.options.shared:
             raise ConanInvalidConfiguration("NSS recipe cannot yet build static library. Contributions are welcome.")
-        if not self.options["nspr"].shared:
+        if not self.dependencies["nspr"].options.shared:
             raise ConanInvalidConfiguration("NSS cannot link to static NSPR. Please use option nspr:shared=True")
         if msvc_runtime_flag(self) == "MTd":
             raise ConanInvalidConfiguration("NSS recipes does not support MTd runtime. Contributions are welcome.")
-        if not self.options["sqlite3"].shared:
+        if not self.dependencies["sqlite3"].options.shared:
             raise ConanInvalidConfiguration("NSS cannot link to static sqlite. Please use option sqlite3:shared=True")
         if self.settings.arch in ["armv8", "armv8.3"] and self.settings.os in ["Macos"]:
             raise ConanInvalidConfiguration("Macos ARM64 builds not yet supported. Contributions are welcome.")
