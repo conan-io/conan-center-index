@@ -72,6 +72,8 @@ class PackageConan(ConanFile):
         tc.variables["BUILD_APPS"] = False
         if not self.options.shared:
             tc.preprocessor_definitions["URDFDOM_STATIC"] = "1"
+        # Need to set CMP0077 because CMake policy version is too old (3.5 as of v4.0.0)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         CMakeDeps(self).generate()
 
