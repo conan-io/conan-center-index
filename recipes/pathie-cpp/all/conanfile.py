@@ -48,6 +48,7 @@ class PathieCppConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["CMAKE_BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["PATHIE_BUILD_STREAM_REPLACEMENTS"] = self.options.with_stream_replacement
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
