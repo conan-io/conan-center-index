@@ -36,7 +36,7 @@ class ArrowConan(ConanFile):
         "filesystem_layer":  [True, False],
         "hdfs_bridgs": [True, False],
         "plasma": [True, False, "deprecated"],
-        "simd_level": [None, "default", "sse4_2", "avx2", "avx512", "neon", ],
+        "simd_level": [None, "default", "sse4_2", "avx2", "avx512", "neon"],
         "runtime_simd_level": [None, "sse4_2", "avx2", "avx512", "max"],
         "with_backtrace": [True, False],
         "with_boost": ["auto", True, False],
@@ -147,7 +147,7 @@ class ArrowConan(ConanFile):
         if Version(self.version) < "2.0.0":
             del self.options.simd_level
             del self.options.runtime_simd_level
-        elif Version(self.version) < "6.0.0":
+        elif Version(self.version) < "6.0.0" and self.settings.arch == "x86_64":
             self.options.simd_level = "sse4_2"
         if Version(self.version) < "6.0.0":
             del self.options.with_gcs
@@ -188,8 +188,8 @@ class ArrowConan(ConanFile):
         opts.gandiva = opts.get_safe("gandiva", False)
         opts.hdfs_bridgs = opts.get_safe("hdfs_bridgs", False)
         opts.plasma = opts.get_safe("plasma", False)
-        opts.runtime_simd_level = opts.get_safe("runtime_simd_level", False)
-        opts.simd_level = opts.get_safe("simd_level", False)
+        opts.runtime_simd_level = opts.get_safe("runtime_simd_level", "max")
+        opts.simd_level = opts.get_safe("simd_level", "default")
         opts.substrait = opts.get_safe("substrait", False)
         opts.with_backtrace = opts.get_safe("with_backtrace", False)
         opts.with_brotli = opts.get_safe("with_brotli", False)
