@@ -60,7 +60,6 @@ class CppServer(ConanFile):
         self.requires("asio/1.29.0", transitive_headers=True)
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
         if Version(self.version) < "1.0.2.0":
-            self.requires("fmt/8.1.1", transitive_headers=True)
             self.requires("cppcommon/1.0.2.0", transitive_headers=True)
         else:
             self.requires("cppcommon/1.0.4.0", transitive_headers=True)
@@ -69,10 +68,10 @@ class CppServer(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn(f"{self.ref} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports at least C++17")
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def build_requirements(self):
         if Version(self.version) >= "1.0.2.0":
