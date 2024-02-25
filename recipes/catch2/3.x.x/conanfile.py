@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1.0"
 
 
 class Catch2Conan(ConanFile):
@@ -35,24 +35,11 @@ class Catch2Conan(ConanFile):
         "console_width": "80",
         "no_posix_signals": False,
     }
+    extension_properties = {"compatibility_cppstd": False}
 
     @property
     def _min_cppstd(self):
-        def extract_cpp_version(_cppstd):
-            return str(_cppstd).replace("gnu", "")
-
-        def add_millennium(_cppstd):
-            return "19%s" % _cppstd if _cppstd == "98" else "20%s" % _cppstd
-
-        def remove_millennium(_cppstd):
-            return _cppstd[-2:]
-
-        default_min_cppstd = "14"
-        if self.settings.compiler.get_safe("cppstd"):
-            compiler_cppstd = add_millennium(extract_cpp_version(self.settings.compiler.get_safe("cppstd")))
-            default_min_cppstd = add_millennium(default_min_cppstd)
-            return remove_millennium(max(compiler_cppstd, default_min_cppstd))
-        return default_min_cppstd
+        return "14"
 
     @property
     def _min_console_width(self):
@@ -90,7 +77,6 @@ class Catch2Conan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
