@@ -29,7 +29,8 @@ class GlazeConan(ConanFile):
             "Visual Studio": "17",
             "msvc": "193",
             "gcc": "10",
-            "clang": "12",
+            # glaze >= 2.1.6 uses std::bit_cast which is supported by clang >= 14
+            "clang": "12" if Version(self.version) < "2.1.6" else "14",
             "apple-clang": "13.1",
         }
         if Version(self.version) >= "1.9.0":
