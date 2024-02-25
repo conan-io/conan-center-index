@@ -1,8 +1,10 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import collect_libs, copy, get, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -45,6 +47,17 @@ class ImathConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
+        # Check for unsupported gcc 7 with version 3.1.10
+        compiler = self.settings.compiler
+        compiler_name = str(compiler)
+        is_invalid_gcc = (compiler_name == 'gcc' and Version(compiler.version) < '7')
+        is_version_3_1_10 = (Version(self.version) == '3.1.10')
+        if is_invalid_gcc and is_version_3_1_10:
+            raise ConanInvalidConfiguration(
+                f"Minimum required gcc version: 7 to include infinite in <cmath> with imath 3.1.10."
+            )
+
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -53,7 +66,7 @@ class ImathConan(ConanFile):
         if is_msvc(self) and self.settings.compiler.get_safe("cppstd"):
             # when msvc is working with a C++ standard level higher
             # than the default, we need the __cplusplus macro to be correct
-            tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus"        
+            tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus"
         tc.generate()
 
     def build(self):
