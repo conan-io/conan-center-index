@@ -1,0 +1,13 @@
+diff --git a/src/plugins/tls/k5tls/Makefile.in b/src/plugins/tls/k5tls/Makefile.in
+index 9f2de7d..a67f38f 100644
+--- a/src/plugins/tls/k5tls/Makefile.in
++++ b/src/plugins/tls/k5tls/Makefile.in
+@@ -8,7 +8,7 @@ LIBMAJOR=0
+ LIBMINOR=0
+ RELDIR=../plugins/tls/k5tls
+ SHLIB_EXPDEPS= $(KRB5_DEPLIB) $(SUPPORT_DEPLIB)
+-SHLIB_EXPLIBS= $(KRB5_LIB) $(SUPPORT_LIB) $(TLS_IMPL_LIBS)
++SHLIB_EXPLIBS= $(KRB5_LIB) $(SUPPORT_LIB) $(TLS_IMPL_LIBS) -lz -ldl -lpthread
+ 
+ STLIBOBJS=openssl.o notls.o
+ 

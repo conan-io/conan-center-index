@@ -1,0 +1,22 @@
+--- src/windows/leash/Makefile.in
++++ src/windows/leash/Makefile.in
+@@ -3,7 +3,7 @@
+ 
+ EXE_NAME=leash
+ 
+-SUBDIRS= htmlhelp
++SUBDIRS=
+ 
+ OBJS=   \
+ 	$(OUTPRE)Leash.obj \
+--- src/lib/rpc/Makefile.in
++++ src/lib/rpc/Makefile.in
+@@ -2,7 +2,7 @@
+ BUILDTOP=$(REL)..$(S)..
+ DEFINES = -DGSSAPI_KRB5 -DDEBUG_GSSAPI=0 -DGSSRPC__IMPL
+ 
+-SUBDIRS=unit-test
++#SUBDIRS=unit-test
+ 
+ ##DOSBUILDTOP = ..\..
+ ##DOSLIBNAME=libgssrpc.lib
