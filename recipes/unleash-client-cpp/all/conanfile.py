@@ -74,6 +74,11 @@ class UnleashConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} doesn't support clang with libc++. Use libstdc++ instead."
+            )
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
