@@ -75,7 +75,7 @@ class ThorvgConan(ConanFile):
 
     def generate(self):
         if is_msvc(self):
-            tc = MesonToolchain(self, backend="vs")
+            tc = MesonToolchain(self, backend="vs2022")
         else:
             tc = MesonToolchain(self)
         tc.generate()
