@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, XCRun
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
@@ -73,7 +73,7 @@ class UtilLinuxLibuuidConan(ConanFile):
     def requirements(self):
         if self.settings.os == "Macos":
             # Required because libintl.{a,dylib} is not distributed via libc on Macos
-            self.requires("libgettext/0.21")
+            self.requires("libgettext/0.22")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -86,6 +86,22 @@ class UtilLinuxLibuuidConan(ConanFile):
             tc.extra_defines.append("HAVE_SYS_FILE_H")
         if "x86" in self.settings.arch:
             tc.extra_cflags.append("-mstackrealign")
+
+        # Based on https://github.com/conan-io/conan-center-index/blob/c647b1/recipes/libx264/all/conanfile.py#L94
+        if is_apple_os(self) and self.settings.arch == "armv8":
+            tc.configure_args.append("--host=aarch64-apple-darwin")
+            tc.extra_asflags = ["-arch arm64"]
+            tc.extra_ldflags = ["-arch arm64"]
+            if self.settings.os != "Macos":
+                xcrun = XCRun(self)
+                platform_flags = ["-isysroot", xcrun.sdk_path]
+                apple_min_version_flag = AutotoolsToolchain(self).apple_min_version_flag
+                if apple_min_version_flag:
+                    platform_flags.append(apple_min_version_flag)
+                tc.extra_asflags.extend(platform_flags)
+                tc.extra_cflags.extend(platform_flags)
+                tc.extra_ldflags.extend(platform_flags)
+
         tc.generate()
 
         deps = AutotoolsDeps(self)
@@ -105,6 +121,7 @@ class UtilLinuxLibuuidConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "sbin"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "usr"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):

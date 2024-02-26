@@ -1,95 +1,115 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from contextlib import contextmanager
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
+
+required_conan_version = ">=1.53.0"
 
 
 class Re2CConan(ConanFile):
     name = "re2c"
-    description = "re2c is a free and open-source lexer generator for C, C++ and Go."
-    topics = ("re2c", "lexer", "language", "tokenizer", "flex")
+    description = "re2c is a free and open-source lexer generator for C/C++, Go and Rust."
+    license = "LicenseRef-re2c"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://re2c.org/"
-    license = "Unlicense"
-    settings = "os", "arch", "build_type", "compiler"
+    topics = ("lexer", "language", "tokenizer", "flex")
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    package_type = "application"
+    settings = "os", "arch", "compiler", "build_type"
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+        export_conandata_patches(self)
 
     def configure(self):
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         del self.info.settings.compiler
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
-
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+            self.tool_requires("winflexbison/2.5.24")
+            if is_msvc(self):
+                self.tool_requires("cccl/1.3")
 
-    @contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self):
-                env = {
-                    "CC": "{} -nologo".format(tools.unix_path(os.path.join(self.build_folder, "msvc_cl.sh"))),
-                    "CXX": "{} -nologo".format(tools.unix_path(os.path.join(self.build_folder, "msvc_cl.sh"))),
-                    "LD": "{} -nologo".format(tools.unix_path(os.path.join(self.build_folder, "msvc_cl.sh"))),
-                    "CXXLD": "{} -nologo".format(tools.unix_path(os.path.join(self.build_folder, "msvc_cl.sh"))),
-                    "AR": "lib",
-                }
-                with tools.environment_append(env):
-                    yield
-        else:
-            yield
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self.settings.compiler == "Visual Studio":
-            self._autotools.flags.append("-FS")
-            self._autotools.cxx_flags.append("-EHsc")
-        self._autotools.configure(configure_dir=self._source_subfolder)
-        return self._autotools
+    def generate(self):
+        VirtualBuildEnv(self).generate()
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--disable-benchmarks")
+        env = tc.environment()
+        if is_msvc(self):
+            tc.extra_cxxflags.append("-EHsc")
+            env.define("CC", "cccl -FS")
+            env.define("CXX", "cccl -FS")
+            env.define("LD", "cccl")
+            env.define("CXXLD", "cccl")
+        tc.generate(env)
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        # Don't copy benchmark files, which cause the build to fail on Windows
+        replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                        '"$ac_config_files Makefile ',
+                        '"$ac_config_files Makefile" #',
+                        strict=False)
+        replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                        '"$ac_config_links ',
+                        '"$ac_config_links" #',
+                        strict=False)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with self._build_context():
-            autotools = self._configure_autotools()
+        self._patch_sources()
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.configure()
             autotools.make(args=["V=1"])
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
-        self.copy("NO_WARRANTY", src=self._source_subfolder, dst="licenses", keep_path=False)
-        with self._build_context():
-            autotools = self._configure_autotools()
+        copy(self, "LICENSE",
+             src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses"),
+             keep_path=False)
+        copy(self, "NO_WARRANTY",
+             src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses"),
+             keep_path=False)
+        copy(self, "*.re",
+             src=os.path.join(self.source_folder, "include"),
+             dst=os.path.join(self.package_folder, "include"),
+             keep_path=False)
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
             autotools.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
+        self.cpp_info.includedirs = []
+
+        include_dir = os.path.join(self.package_folder, "include")
+        self.buildenv_info.define("RE2C_STDLIB_DIR", include_dir)
+
+        # TODO: to remove in conan v2
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+        self.env_info.RE2C_STDLIB_DIR = include_dir

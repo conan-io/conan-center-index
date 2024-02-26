@@ -76,7 +76,7 @@ class AprUtilConan(ConanFile):
             basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("apr/1.7.0", transitive_headers=True)
+        self.requires("apr/1.7.4", transitive_headers=True)
         if self.settings.os != "Windows":
             #cmake build doesn't allow injection of iconv yet
             # https://github.com/conan-io/conan-center-index/pull/16142#issuecomment-1494282164
@@ -84,15 +84,15 @@ class AprUtilConan(ConanFile):
             # are pulling it in - discovered in https://github.com/conan-io/conan-center-index/pull/16266
             self.requires("libiconv/1.17", transitive_libs=True)
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_mysql:
-            self.requires("libmysqlclient/8.0.31")
+            self.requires("libmysqlclient/8.1.0")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.41.1")
+            self.requires("sqlite3/3.45.0")
         if self.options.with_expat:
             self.requires("expat/2.5.0")
         if self.options.with_postgresql:
-            self.requires("libpq/14.5")
+            self.requires("libpq/15.4")
 
     def validate(self):
         if not self.options.with_expat:
@@ -210,7 +210,7 @@ class AprUtilConan(ConanFile):
         self.runenv_info.define_path("APR_UTIL_ROOT", self.package_folder)
 
         deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
-        libdirs = [p for dep in deps for p in dep.cpp_info.aggregated_components().includedirs]
+        libdirs = [p for dep in deps for p in dep.cpp_info.aggregated_components().libdirs]
         aprutil_ldflags = " ".join([f"-L{p}" for p in libdirs])
         self.runenv_info.define("APRUTIL_LDFLAGS", aprutil_ldflags)
 

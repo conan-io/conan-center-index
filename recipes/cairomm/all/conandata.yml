@@ -1,15 +1,13 @@
 sources:
-  "1.16.1":
-    url: "https://cairographics.org/releases/cairomm-1.16.1.tar.xz"
-    sha256: "6f6060d8e98dd4b8acfee2295fddbdd38cf487c07c26aad8d1a83bb9bff4a2c6"
-  "1.14.3":
-    url: "https://cairographics.org/releases/cairomm-1.14.3.tar.xz"
-    sha256: "0d37e067c5c4ca7808b7ceddabfe1932c5bd2a750ad64fb321e1213536297e78"
-
-patches:
-  "1.16.1":
-    - patch_file: "patches/enable_static_lib_1_16_1.patch"
-      base_path: "source_subfolder"
-  "1.14.3":
-    - patch_file: "patches/enable_static_lib_1_14_3.patch"
-      base_path: "source_subfolder"
+  "1.18.0":
+    url: "https://cairographics.org/releases/cairomm-1.18.0.tar.xz"
+    sha256: "b81255394e3ea8e8aa887276d22afa8985fc8daef60692eb2407d23049f03cfb"
+  "1.17.1":
+    url: "https://cairographics.org/releases/cairomm-1.17.1.tar.xz"
+    sha256: "343e8463ff7dd4d2c90991d6284a2203431e711026575207fd4c313cd323fdbe"
+  "1.16.2":
+    url: "https://cairographics.org/releases/cairomm-1.16.2.tar.xz"
+    sha256: "6a63bf98a97dda2b0f55e34d1b5f3fb909ef8b70f9b8d382cb1ff3978e7dc13f"
+  "1.14.5":
+    url: "https://cairographics.org/releases/cairomm-1.14.5.tar.xz"
+    sha256: "70136203540c884e89ce1c9edfb6369b9953937f6cd596d97c78c9758a5d48db"

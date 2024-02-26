@@ -1,4 +1,16 @@
 sources:
+  "4.2.0":
+    url: "https://github.com/jasper-software/jasper/releases/download/version-4.2.0/jasper-4.2.0.tar.gz"
+    sha256: "69f0b08a0cc281a06eaf7feed510736854bbff9af89ab1d01b77382ad57ec957"
+  "4.1.2":
+    url: "https://github.com/jasper-software/jasper/releases/download/version-4.1.2/jasper-4.1.2.tar.gz"
+    sha256: "22392e439b87c79aaf8689ec79a286a7147e811c4bee34edf3d0b239798d672b"
+  "4.1.1":
+    url: "https://github.com/jasper-software/jasper/releases/download/version-4.1.1/jasper-4.1.1.tar.gz"
+    sha256: "03ba86823f8798f3f60a5a34e36f3eff9e9cbd76175643a33d4aac7c0390240a"
+  "4.1.0":
+    url: "https://github.com/jasper-software/jasper/releases/download/version-4.1.0/jasper-4.1.0.tar.gz"
+    sha256: "ffe1543d87f7ffc5039d2415afd48c314a7cc0b0c750b4982cd881d6ed4b5743"
   "4.0.0":
     url: "https://github.com/jasper-software/jasper/releases/download/version-4.0.0/jasper-4.0.0.tar.gz"
     sha256: "39514e1b53a5333fcff817e19565371f016ea536c36fd2d13a9c4d8da8f0be0c"
@@ -9,13 +21,38 @@ sources:
     url: "https://github.com/jasper-software/jasper/releases/download/version-2.0.33/jasper-2.0.33.tar.gz"
     sha256: "28d28290cc2eaf70c8756d391ed8bcc8ab809a895b9a67ea6e89da23a611801a"
 patches:
+  "4.2.0":
+    - patch_file: "patches/4.2.0-0003-deterministic-libname.patch"
+      patch_description: "No generator dependent libname"
+      patch_type: "conan"
+  "4.1.2":
+    - patch_file: "patches/4.1.1-0001-skip-rpath.patch"
+      patch_description: "Do not enforce rpath configuration"
+      patch_source: "https://github.com/jasper-software/jasper/pull/347"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.1-0003-deterministic-libname.patch"
+      patch_description: "No generator dependent libname"
+      patch_type: "conan"
+  "4.1.1":
+    - patch_file: "patches/4.1.1-0001-skip-rpath.patch"
+      patch_description: "Do not enforce rpath configuration"
+      patch_source: "https://github.com/jasper-software/jasper/pull/347"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.1-0003-deterministic-libname.patch"
+      patch_description: "No generator dependent libname"
+      patch_type: "conan"
+  "4.1.0":
+    - patch_file: "patches/4.1.0-0001-skip-rpath.patch"
+      patch_description: "Do not enforce rpath configuration"
+      patch_source: "https://github.com/jasper-software/jasper/pull/347"
+      patch_type: "conan"
+    - patch_file: "patches/4.1.0-0003-deterministic-libname.patch"
+      patch_description: "No generator dependent libname"
+      patch_type: "conan"
   "4.0.0":
     - patch_file: "patches/4.0.0-0001-skip-rpath.patch"
       patch_description: "Do not enforce rpath configuration"
       patch_source: "https://github.com/jasper-software/jasper/pull/347"
-      patch_type: "conan"
-    - patch_file: "patches/4.0.0-0002-find-libjpeg.patch"
-      patch_description: "check_c_source_compilers does not work with conan gens. See https://github.com/conan-io/conan/issues/12180"
       patch_type: "conan"
     - patch_file: "patches/4.0.0-0003-deterministic-libname.patch"
       patch_description: "No generator dependent libname"
@@ -25,9 +62,6 @@ patches:
       patch_description: "Do not enforce rpath configuration"
       patch_source: "https://github.com/jasper-software/jasper/pull/347"
       patch_type: "conan"
-    - patch_file: "patches/3.0.6-0002-find-libjpeg.patch"
-      patch_description: "check_c_source_compilers does not work with conan gens. See https://github.com/conan-io/conan/issues/12180"
-      patch_type: "conan"
     - patch_file: "patches/3.0.6-0003-deterministic-libname.patch"
       patch_description: "No generator dependent libname"
       patch_type: "conan"
@@ -35,7 +69,4 @@ patches:
     - patch_file: "patches/2.0.33-0001-skip-rpath.patch"
       patch_description: "Do not enforce rpath configuration"
       patch_source: "https://github.com/jasper-software/jasper/pull/347"
-      patch_type: "conan"
-    - patch_file: "patches/2.0.33-0002-find-libjpeg.patch"
-      patch_description: "check_c_source_compilers does not work with conan gens. See https://github.com/conan-io/conan/issues/12180"
       patch_type: "conan"

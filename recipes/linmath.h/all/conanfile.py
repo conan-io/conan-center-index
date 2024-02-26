@@ -16,18 +16,18 @@ class LinmathConan(ConanFile):
     topics = ("math", "graphics", "linear-algebra", "vector", "matrix", "quaternion")
     homepage = "https://github.com/datenwolf/linmath.h"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-
-    def package_id(self):
-        self.info.clear()
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def package_id(self):
+        self.info.clear()
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

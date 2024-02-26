@@ -1,0 +1,51 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -15,7 +15,6 @@ if (NOT DEFINED CMAKE_C_STANDARD)
+ 	set(CMAKE_C_STANDARD 99)
+ endif()
+ 
+-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS ON)
+ 
+@@ -77,8 +76,8 @@ target_compile_definitions(
+ 	replxx
+ 	PUBLIC
+ 		$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:REPLXX_STATIC>
+-		$<$<BOOL:${BUILD_SHARED_LIBS}>:REPLXX_BUILDING_DLL>
+ 	PRIVATE
++		$<$<BOOL:${BUILD_SHARED_LIBS}>:REPLXX_BUILDING_DLL>
+ 		$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS=1 /ignore:4503>
+ )
+ target_compile_options(
+--- a/include/replxx.h
++++ b/include/replxx.h
+@@ -435,7 +435,7 @@ REPLXX_IMPEXP void replxx_bind_key( Replxx*, int code, key_press_handler_t handl
+  * \param actionName - name of internal action to be invoked on key press.
+  * \return -1 if invalid action name was used, 0 otherwise.
+  */
+-int replxx_bind_key_internal( Replxx*, int code, char const* actionName );
++REPLXX_IMPEXP int replxx_bind_key_internal( Replxx*, int code, char const* actionName );
+ 
+ REPLXX_IMPEXP void replxx_set_preload_buffer( Replxx*, const char* preloadText );
+ 
+@@ -552,7 +552,7 @@ REPLXX_IMPEXP int replxx_history_load( Replxx*, const char* filename );
+ REPLXX_IMPEXP void replxx_history_clear( Replxx* );
+ REPLXX_IMPEXP void replxx_clear_screen( Replxx* );
+ #ifdef __REPLXX_DEBUG__
+-void replxx_debug_dump_print_codes(void);
++REPLXX_IMPEXP void replxx_debug_dump_print_codes(void);
+ #endif
+ /* the following is extension to the original linenoise API */
+ REPLXX_IMPEXP int replxx_install_window_change_handler( Replxx* );
+--- a/include/replxx.hxx
++++ b/include/replxx.hxx
+@@ -242,7 +242,7 @@ public:
+ 		}
+ 	};
+ 	class HistoryScanImpl;
+-	class HistoryScan {
++	class REPLXX_IMPEXP HistoryScan {
+ 	public:
+ 		typedef std::unique_ptr<HistoryScanImpl, void (*)( HistoryScanImpl* )> impl_t;
+ 	private:
