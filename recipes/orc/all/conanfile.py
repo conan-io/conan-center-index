@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir, replace_in_file, mkdir
+from conan.tools.files import copy, get, rmdir, replace_in_file, mkdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
@@ -51,8 +51,14 @@ class OrcRecipe(ConanFile):
     def _is_legacy_one_profile(self):
         return not hasattr(self, "settings_build")
 
+    @property
+    def _should_patch_thirdparty_toolchain(self):
+        return self.version < "2.0.0"
+
     def export_sources(self):
-        export_conandata_patches(self)
+        if self._should_patch_thirdparty_toolchain:
+            copy(self, "ConanThirdpartyToolchain.cmake",
+                 self.recipe_folder, os.path.join(self.export_sources_folder, "src", "cmake_modules"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -123,16 +129,14 @@ class OrcRecipe(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        if self._should_patch_thirdparty_toolchain:
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "ThirdpartyToolchain", "ConanThirdpartyToolchain")
         # Allow shared builds
         replace_in_file(self, os.path.join(self.source_folder, "c++", "src", "CMakeLists.txt"),
                         "add_library (orc STATIC ${SOURCE_FILES})", "add_library (orc ${SOURCE_FILES})")
-        # Apply custom toolchain file for pre-2.0.0 versions
-        if self.version < "2.0.0":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "ThirdpartyToolchain", "ConanThirdpartyToolchain")
 
     def build(self):
-        apply_conandata_patches(self)
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
