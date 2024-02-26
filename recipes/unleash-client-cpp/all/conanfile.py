@@ -74,7 +74,7 @@ class UnleashConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
+        if self.settings.compiler in ["clang", "apple-clang"] and self.settings.compiler.libcxx == "libc++":
             raise ConanInvalidConfiguration(
                 f"{self.ref} doesn't support clang with libc++. Use libstdc++ instead."
             )
