@@ -1,0 +1,14 @@
+--- a/Rendering/OpenGL2/vtkTextureObject.cxx	2023-11-14 07:37:21.000000000 +0800
++++ b/Rendering/OpenGL2/vtkTextureObject.cxx	2024-02-25 07:18:52.091910070 +0800
+@@ -424,6 +424,11 @@
+         target = GL_TEXTURE_BINDING_CUBE_MAP;
+         break;
+ #endif
++#if defined(GL_TEXTURE_2D_ARRAY) && defined(GL_TEXTURE_BINDING_2D_ARRAY)
++      case GL_TEXTURE_2D_ARRAY:
++        target = GL_TEXTURE_BINDING_2D_ARRAY;
++        break;
++#endif
+       default:
+         assert("check: impossible case" && 0);
+         break;
