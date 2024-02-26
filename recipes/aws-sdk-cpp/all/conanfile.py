@@ -341,14 +341,26 @@ class AwsSdkCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.8.2")
-        self.requires("aws-c-event-stream/0.2.7")
-        self.requires("aws-checksums/0.1.13")
+        if Version(self.version) < "1.11":
+            self.requires("aws-c-common/0.8.2")
+            self.requires("aws-c-event-stream/0.2.7")
+            self.requires("aws-checksums/0.1.13")
+        else:
+            self.requires("aws-c-common/0.9.6")
+            self.requires("aws-c-event-stream/0.3.1")
+            self.requires("aws-checksums/0.1.17")
+
         if self._use_aws_crt_cpp:
-            self.requires("aws-c-cal/0.5.13")
-            self.requires("aws-c-http/0.6.13")
-            self.requires("aws-c-io/0.10.20")
-            self.requires("aws-crt-cpp/0.17.23", transitive_headers=True)
+            if Version(self.version) < "1.11":
+                self.requires("aws-c-cal/0.5.13")
+                self.requires("aws-c-http/0.6.13")
+                self.requires("aws-c-io/0.10.20")
+                self.requires("aws-crt-cpp/0.17.23", transitive_headers=True)
+            else:
+                self.requires("aws-c-cal/0.6.9")
+                self.requires("aws-c-http/0.7.14")
+                self.requires("aws-c-io/0.13.35")
+                self.requires("aws-crt-cpp/0.24.1", transitive_headers=True)
         if self.settings.os != "Windows":
             self.requires("openssl/[>=1.1 <4]")
             self.requires("libcurl/[>=7.78.0 <9]")
@@ -373,7 +385,7 @@ class AwsSdkCppConan(ConanFile):
                 "See https://github.com/aws/aws-sdk-cpp/issues/1505"
             )
         if self._use_aws_crt_cpp:
-            if is_msvc(self) and is_msvc_static_runtime(self):
+            if Version(self.version) < "1.11" and is_msvc(self) and is_msvc_static_runtime(self):
                 raise ConanInvalidConfiguration("Static runtime is not working for more recent releases")
         else:
             if self.settings.os == "Macos" and self.settings.arch == "armv8":
@@ -402,12 +414,14 @@ class AwsSdkCppConan(ConanFile):
                 build_only.append(sdk)
         tc.cache_variables["BUILD_ONLY"] = ";".join(build_only)
 
+        tc.cache_variables["AWS_SDK_WARNINGS_ARE_ERRORS"] = False
         tc.cache_variables["ENABLE_UNITY_BUILD"] = True
         tc.cache_variables["ENABLE_TESTING"] = False
         tc.cache_variables["AUTORUN_UNIT_TESTS"] = False
         tc.cache_variables["BUILD_DEPS"] = False
         if self.settings.os != "Windows":
             tc.cache_variables["ENABLE_OPENSSL_ENCRYPTION"] = True
+            tc.cache_variables["USE_OPENSSL"] = True
 
         tc.cache_variables["MINIMIZE_SIZE"] = self.options.min_size
         if is_msvc(self) and not self._use_aws_crt_cpp:
@@ -428,11 +442,12 @@ class AwsSdkCppConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # Disable warnings as errors
-        replace_in_file(
-            self, os.path.join(self.source_folder, "cmake", "compiler_settings.cmake"),
-            'list(APPEND AWS_COMPILER_WARNINGS "-Wall" "-Werror" "-pedantic" "-Wextra")', "",
-        )
+        if Version(self.version) < "1.11":
+            # Disable warnings as errors
+            replace_in_file(
+                self, os.path.join(self.source_folder, "cmake", "compiler_settings.cmake"),
+                'list(APPEND AWS_COMPILER_WARNINGS "-Wall" "-Werror" "-pedantic" "-Wextra")', "",
+            )
 
     def build(self):
         self._patch_sources()
@@ -453,7 +468,7 @@ class AwsSdkCppConan(ConanFile):
             "cmake/sdk_plugin_conf.cmake",
             "toolchains/cmakeProjectConfig.cmake",
             "toolchains/pkg-config.pc.in",
-            "aws-cpp-sdk-core/include/aws/core/VersionConfig.h"
+            f"{'' if Version(self.version) < '1.11' else 'src/'}aws-cpp-sdk-core/include/aws/core/VersionConfig.h"
         ]:
             copy(self, file, src=self.source_folder, dst=os.path.join(self.package_folder, self._res_folder))
             replace_in_file(

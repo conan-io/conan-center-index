@@ -1,4 +1,7 @@
 sources:
+  "1.11.179":
+    url: "https://github.com/aws/aws-sdk-cpp/archive/1.11.179.tar.gz"
+    sha256: "e6751a28cf2c2ef5579ea765e38d1383893cc5b7f1d23913b1ad2ea06bc6133a"
   "1.9.234":
     url: "https://github.com/aws/aws-sdk-cpp/archive/1.9.234.tar.gz"
     sha256: "52e36cf568fe0b2a0fc82a9333c0b31ba843db16670f4ccbb7b9fd142f1b00a5"
@@ -9,6 +12,10 @@ sources:
     url: "https://github.com/aws/aws-sdk-cpp/archive/1.8.130.tar.gz"
     sha256: "5dd09baa28d3f6f4fb03fbba1a4269724d79bcca3d47752cd3e15caf97276bda"
 patches:
+  "1.11.179":
+    - patch_file: patches/1.11.179-0001-disable-sort-links.patch
+    - patch_file: patches/1.9.100-0002-aws-plugin-conf.patch
+    #- patch_file: patches/1.8.130-0004-improve-pulseaudio-detection.patch
   "1.9.234":
     - patch_file: patches/1.9.234-0001-issue-1816.patch
     - patch_file: patches/1.9.234-0002-disable-sort-links.patch
