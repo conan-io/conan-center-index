@@ -1,0 +1,4 @@
+sources:
+  "3.0.0":
+    url: "https://github.com/valgur/velodyne_decoder/archive/refs/tags/v3.0.0.tar.gz"
+    sha256: "bce471232205f9d559464ba8cb99bfb96a2245115e54b744115fe71cd9e42042"
