@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
@@ -91,7 +92,11 @@ class freeglutConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glu/system")
+        if is_apple_os(self) or self.settings.os == "Windows":
+            self.requires("glu/system")
+        else:
+            # FreeGLUT includes glu.h in freeglut_std.h.
+            self.requires("mesa-glu/9.0.3", transitive_headers=True)
         if self._with_libglvnd:
             self.requires("libglvnd/1.7.0")
         else:
@@ -190,7 +195,6 @@ class freeglutConan(ConanFile):
         self.cpp_info.components["freeglut_"].names["cmake_find_package_multi"] = config_target
         self.cpp_info.components["freeglut_"].set_property("cmake_target_name", f"FreeGLUT::{config_target}")
         self.cpp_info.components["freeglut_"].set_property("pkg_config_name", pkg_config)
-        self.cpp_info.components["freeglut_"].requires.append("glu::glu")
         if self._requires_libglvnd_egl:
             self.cpp_info.components["freeglut_"].requires.append("libglvnd::egl")
         if self._requires_libglvnd_gles:
@@ -206,3 +210,7 @@ class freeglutConan(ConanFile):
             self.cpp_info.components["freeglut_"].requires.append("xorg::xorg")
         if self.options.get_safe("with_wayland"):
             self.cpp_info.components["freeglut_"].requires.extend(["wayland::wayland-client", "wayland::wayland-cursor", "wayland::wayland-egl", "xkbcommon::xkbcommon"])
+        if is_apple_os(self) or self.settings.os == "Windows":
+            self.cpp_info.components["freeglut_"].requires.append("glu::glu")
+        else:
+            self.cpp_info.components["freeglut_"].requires.append("mesa-glu::mesa-glu")
