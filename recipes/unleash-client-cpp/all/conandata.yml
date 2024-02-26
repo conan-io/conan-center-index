@@ -10,3 +10,6 @@ patches:
     - patch_file: "patches/0001-no-conan-cmake.patch"
       patch_description: "remove conan cmake module"
       patch_type: "portability"
+    - patch_file: "patches/0002-include-sstream.patch"
+      patch_description: "include sstream"
+      patch_type: "portability"

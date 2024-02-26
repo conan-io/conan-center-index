@@ -1,0 +1,18 @@
+diff --git a/src/strategies/userwithid.cpp b/src/strategies/userwithid.cpp
+index c2f3c7e..4dfbc28 100644
+--- a/src/strategies/userwithid.cpp
++++ b/src/strategies/userwithid.cpp
+@@ -1,5 +1,6 @@
+ #include "unleash/strategies/userwithid.h"
+ #include <iostream>
++#include <sstream>
+ #include <nlohmann/json.hpp>
+ 
+ namespace unleash {
+@@ -19,4 +20,4 @@ bool UserWithId::isEnabled(const Context &context) {
+         return true;
+     return false;
+ }
+-}  // namespace unleash
+\ No newline at end of file
++}  // namespace unleash
