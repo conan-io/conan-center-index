@@ -1,9 +1,8 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, MSBuild, MSBuildToolchain
 import os
 
 
@@ -48,33 +47,42 @@ class SimdConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        if self.settings.compiler == "clang":
-            raise ConanInvalidConfiguration(f"{self.ref} don't support clang. (yet)")
-        if is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.ref} don't support msvc. (yet)")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["SIMD_AVX512"] = self.options.with_avx512
-        tc.variables["SIMD_AVX512VNNI"] = self.options.with_avx512
-        tc.variables["SIMD_AVX512BF16"] = self.options.with_avx512
-        tc.variables["SIMD_TEST"] = False
-        tc.variables["SIMD_SHARED"] = self.options.shared
-        tc.generate()
+        if is_msvc(self):
+            tc = MSBuildToolchain(self)
+            tc.generate()
+        else:
+            tc = CMakeToolchain(self)
+            tc.variables["SIMD_AVX512"] = self.options.with_avx512
+            tc.variables["SIMD_AVX512VNNI"] = self.options.with_avx512
+            tc.variables["SIMD_AVX512BF16"] = self.options.with_avx512
+            tc.variables["SIMD_TEST"] = False
+            tc.variables["SIMD_SHARED"] = self.options.shared
+            tc.generate()
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, "prj", "cmake"))
-        cmake.build()
+        if is_msvc(self):
+            msbuild = MSBuild(self)
+            msbuild.build(os.path.join(self.source_folder, "prj", "vs2022", "Simd.vcxproj"))
+        else:
+            cmake = CMake(self)
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, "prj", "cmake"))
+            cmake.build()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        cmake = CMake(self)
-        cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "share"))
+        if is_msvc(self):
+            copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include", "Simd"), src=os.path.join(self.source_folder, "src", "Simd"), keep_path=True)
+            copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)
+            copy(self, pattern="*.dll", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder, keep_path=False)
+        else:
+            cmake = CMake(self)
+            cmake.install()
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["Simd"]
