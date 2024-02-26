@@ -322,6 +322,15 @@ class VtkConan(ConanFile):
         # HACK_VERSION = "9.2.6"
         self._init_with_version(HACK_VERSION)
 
+
+    def export(self):
+        copy(self, self._vtk_module_json_filename(self.version), src=self.recipe_folder, dst=self.export_folder)
+
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -334,306 +343,16 @@ class VtkConan(ConanFile):
         self.options.update(updated_options, default_overrides)
 
 
-    def _compute_modules_enabled(self, modules_info):
-        # NOTE: the order of items in 'groups' is important for the ModuleSystem enable/disable
-        #  Do not reorder 'groups' !
-
-        # compute the enabled... implemented based on VTK/Documentation/Doxygen/ModuleSystem.md
-        base_modules_enabled = {}
-
-        # TODO implement CONDITION handling
-
-        # first, init with our recipe options for individual modules and groups
-        # print(self.options)
-
-        # print("*** Setting module-enabled based on Groups and build_all_modules ***")
-
-        for mod_with_prefix in modules_info["modules"]:
-            mod = _module_remove_prefix(mod_with_prefix)
-            mod_enabled = self.options.get_safe(f"module_enable_{mod}",None)
-            message = None
-            if mod_enabled == "DEFAULT":
-                message = f"{mod_with_prefix} is DEFAULT"
-                # if module is still default, check its groups
-                for group in modules_info["modules"][mod_with_prefix]["groups"]:
-                    group_enabled = self.options.get_safe(f"group_enable_{group}",None)
-                    message += f", has group {group} ({group_enabled})"
-                    if group_enabled != "DEFAULT":
-                        message += f", setting mod to {group_enabled}"
-                        mod_enabled = group_enabled
-                        break   # take the first non-DEFAULT group setting
-            # STILL 'default'...
-            if mod_enabled == "DEFAULT":
-                # take the result from build_all_modules
-                if self.options.build_all_modules: 
-                    message += ", ALL is WANT, setting to WANT"
-                    mod_enabled = "WANT"
-                else:
-                    message += ", ALL is DONT_WANT, setting to DONT_WANT"
-                    mod_enabled = "DONT_WANT"
-            # we have our answer for this module, it will be YES/NO/WANT/DONT_WANT
-            base_modules_enabled[mod_with_prefix] = mod_enabled
-            # if message: print(message)
-
-        # We now have a lot of YES/NO/WANT/DONT_WANT
-        # We now want to resolve the WANT/DONT_WANT into YES/NO
-
-        # From VTK documentation:
-        # - `WANT`: The module should be built. It will not be built, however, if it
-        #   depends on a `NO` module.
-        # - `DONT_WANT`: The module doesn't need to be built. It will be built if a
-        #   `YES` or `WANT` module depends on it.
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        self.options["libtiff"].jpeg = self.options.with_jpeg
+        # kissfft - we want the double format (also known as kiss_fft_scalar)
+        self.options["kissfft"].datatype = "double"
 
 
-        # use "visited" to know which ones have already had their dependencies checked in depth
-        def recurse_depends_has_NO(visited, mod, last_yes_parent, chain_txt):
-            mod_enabled = base_modules_enabled[mod]
-            if mod_enabled == "NO":
-                if len(last_yes_parent) > 0:
-                    raise RuntimeError(f"Module collision: {chain_txt} has {last_yes_parent}=YES and {mod}=NO")
-                return True
-
-            if mod in visited:
-                return mod_enabled == "NO"
-
-            if mod_enabled == "YES":
-                last_yes_parent = mod
-
-            # check: depends, private_depends.
-            # optional_depends do not influence this computation
-            mod_info = modules_info["modules"][mod]
-            depends = set(mod_info["depends"] + mod_info["private_depends"])    # there can be repeated dependencies
-            any_no = False
-            for dep in depends:
-                # note: always check dependencies to catch NO-YES problems
-                if recurse_depends_has_NO(visited, dep, last_yes_parent, f"{chain_txt} --> {dep}"):
-                    if not any_no:
-                        # print(f"Setting {mod} to NO, due to dependency {dep} (NO)")
-                        any_no = True
-            if any_no:
-                base_modules_enabled[mod] = "NO"
-            visited.add(mod)
-            return any_no
-
-        # print("*** Setting modules to NO if dependencies are NO ***")
-        for mod in base_modules_enabled:
-            recurse_depends_has_NO(set(), mod, "", mod)
-
-        # print("*** For all YES and WANT modules, setting all dependencies to YES ***")
-        # find all modules that are tagged as YES, and tag all dependencies as YES
-        # iterate multiple times rather than building a tree,
-        # tagging those whose dependencies have been visited with YES-DONE
-        mod_todo = set(base_modules_enabled.keys())
-        while len(mod_todo) > 0:
-            mod = mod_todo.pop()
-            if base_modules_enabled[mod] == "WANT":
-                base_modules_enabled[mod] = "YES"
-            if base_modules_enabled[mod] == "YES":
-                mod_info = modules_info["modules"][mod]
-                depends = set(mod_info["depends"] + mod_info["private_depends"])    # there can be repeated dependencies
-                for dep in depends:
-                    dep_enabled = base_modules_enabled[dep]
-                    if dep_enabled == "YES":
-                        pass # already done
-                    elif dep_enabled == "NO":
-                        raise RuntimeError(f"Module collision, {mod} is YES, but dependency {dep} is NO")
-                    else:
-                        self.output.info(f"{mod} is YES, setting {dep} from {dep_enabled} to YES")
-                        base_modules_enabled[dep] = "YES" # will process dependencies in future pass
-                        mod_todo.add(dep)   # re-add to todo list, if not already in there (may have already been checked while it was still a "WANT" or other)
-
-        # print("*** Setting all WANT / DONT_WANT modules to YES / NO ***")
-        # find all modules that are not tagged YES or NO (ie WANT_*) and tag appropriately
-        final_modules_enabled = {}
-        for mod in base_modules_enabled:
-            mod_enabled = base_modules_enabled[mod]
-            if mod_enabled == "WANT":         # if we WANT, then the answer is YES (dependencies dont care)
-                mod_enabled = "YES"
-                self.output.info(f"{mod} set WANT to YES")
-            elif mod_enabled == "DONT_WANT":    # if we dont want, then answer is no (dependencies dont care)
-                mod_enabled = "NO"
-                self.output.info(f"{mod} set DONT_WANT to NO")
-            elif mod_enabled == "YES" or mod_enabled == "NO":
-                self.output.info(f"{mod} Leaving as {mod_enabled}")
-                pass
-            else:
-                raise RuntimeError(f"Unexpected module-enable flag: {mod_enabled}")
-            final_modules_enabled[mod] = (mod_enabled == "YES")
-            if final_modules_enabled[mod]:
-                self.output.info(f"Module enabled: {mod}");
-
-        return final_modules_enabled
-
-
-
-    # Required as VTK adds 'd' to the end of library files on windows
-    @property
-    def _lib_suffix(self):
-        return "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
-
-    def build_requirements(self):
-        self.tool_requires("sqlite3/[>=3.41.1]")
-
-    def source(self):
-        # NOTE: if using git, have to also use the git submodule thing to get VTKm... the tarball has it.
-        if False: # TODO TODO self.options.use_source_from_git:
-            self.run("git clone -b release --single-branch " + self.git_url + " " + self.source_folder)
-            # note: we give the branch a name so we don't have detached heads
-            # TODO change to standard git and python chdir
-            # Version: support targeting a commit hash instead of a version tag, assume version number < 8 chars long
-            # 1.34.67 ... only 7 chars long
-            # anything more, assume a branch name or a hash (or short hash)
-            git_hash = self.version if len(self.version) > 7 else "v" + self.version
-            self.run("cd " + self.source_folder + " && git checkout -b branch-" + git_hash + " " + git_hash)
-        else:
-            get(self, **self.conan_data["sources"][self.version],
-                    strip_root=True,
-                    destination=self.source_folder)
-
-
-    def _third_party(self):
-        if self.version == "9.2.6":
-            parties = {
-                    # LEFT field:  target name for linking, will be used as TARGET::TARGET in package_info()
-                    # RIGHT field: Force the version (for development mode)... package/version to require ... component requirement
-                    # "VTK::module": "conan_package::conan_package",      # if the whole package required
-                    # "VTK::module": "conan_package::package_component",  # if subcomponent required
-                    "cgns":              [False, "cgns/[>=4.3.0]",              "cgns::cgns"    ],
-                    "cli11":             [False, "cli11/[>=2.3.2]",             "cli11::cli11"  ],
-                    "doubleconversion":  [False, "double-conversion/[>=3.2.1]", "double-conversion::double-conversion" ],
-                    "eigen":             [False, "eigen/[>=3.4.0]",             "eigen::eigen"  ],
-                    "expat":             [True,  "expat/[=2.6.0]",              "expat::expat"  ],  # TODO conflict: wayland (2.5.0)
-                    "exprtk":            [True,  "exprtk/[=0.0.1]",             "exprtk::exprtr"],  # TODO upgrade to 0.0.2 (there was a problem with first attempt)
-                    "fmt":               [True,  "fmt/[=8.1.1]",                "fmt::fmt"      ],  # TODO must be 8.1.1 for some reason ... VTK 9.1.0 release docs mention a PR - confirmed merged 8.1.0, will be bumped in future VTK release
-                    "freetype":          [False, "freetype/[>=2.13.0]",         "freetype::freetype" ],
-                    "glew":              [False, "glew/[>=2.2.0]",              "glew::glew"    ],
-                    "hdf5":              [True,  "hdf5/[=1.14.3]",              "hdf5::hdf5"    ],  # TODO conflict: netcdf (.1) and cgns (.0)
-                    "jsoncpp":           [False, "jsoncpp/[>=1.9.4]"            "jsoncpp::jsoncpp"  ],
-                    "libharu":           [False, "libharu/[>=2.4.3]"            "libharu::libharu"  ],
-                    "kissfft":           [False, "kissfft/[>=131.1.0]",         "kissfft::kissfft"  ],
-                    "lz4":               [False, "lz4/[>=1.9.4]",               "lz4::lz4"          ],
-
-                    "png":               [True,  "libpng/[=1.6.42]",            "libpng::libpng"    ],  # TODO conflict: libharu (.40) and freetype (.42)
-                    "libxml2":           [True,  "libxml2/[=2.12.4]",           "libxml2::libxml2"  ],  # TODO conflict: xkbcommon (2.12.3)
-
-                    "netcdf":            [False, "netcdf/[>=4.8.1]",            "netcdf::netcdf"    ],
-                    "nlohmannjson":      [False, "nlohmann_json/[>=3]",         "nlohmann_json::nlohman_json" ],
-
-                    "ogg":               [False, "ogg/[>=1.3.5]",               "ogg::ogg"          ],
-                    "opengl":            [False, "opengl/system",               "opengl::opengl"    ],
-                    "openvr":            [False, "openvr/[>=1.16.8]",           "openvr::openvr"    ],
-
-                    "libproj":           [False, "proj/[>=9.1.1]",              "proj::proj"        ],
-                    "pugixml":           [False, "pugixml/[>=1.13]",            "pugixml::pugixml"  ],
-
-                    "sqlite":            [True,  "sqlite3/[=3.45.1]",           "sqlite3::sqlite3"  ],  # TODO conflict: qt (3.44.2) and proj (3.44.2)
-
-                    "theora":            [False, "theora/[>=1.1.1]",            "theora::theora"    ],
-
-                    "utf8":              [False, "utfcpp/[>=3.2.3]",            "utfcpp::utfcpp"    ],
-                    "lzma":              [False, "xz_utils/[>=5.4.2]",          "xz_utils::xz_utils"], # note: VTK calls this lzma
-                    "zlib":              [False, "zlib/[>=1.2.13]",             "zlib::zlib"        ],
-                    "tiff":              [False, "libtiff/[>=4.4.0]",           "libtiff::libtiff"  ],
-
-                    "xorg-system":       [False, "xorg/system",                 "xorg::xorg"        ],
-
-                    # TODO what module depends on boost?
-                    # "boost":             [False, "boost/[>=1.82.0]"],
-
-                    # TODO what module depends on odbc?
-                    # "odbc":              [False, "odbc/[>=2.3.11]"],
-
-                    # MODULES: zfp, boost and odbc
-                    # parties["zfp"]     = "zfp/[>=0.5.5]"
-                    }
-
-            # NOTE: You may NOT be able to just adjust the version numbers in here, without
-            #   also adjusting the patch, as the versions are also mentioned in ThirdParty/*/CMakeLists.txt
-
-            if self.options.with_jpeg == "libjpeg":
-                parties["jpeg"] = [False, "libjpeg/9e", "libjpeg::libjpeg"]
-            elif self.options.with_jpeg == "libjpeg-turbo":
-                parties["jpeg"] = [False, "libjpeg-turbo/[>=2.1.5]", "libjpeg-turbo::jpeg"]
-
-            if self.options.qt_version == "5":
-                parties["QtOpenGL"] = [False, "qt/[>=5.15.9]", "qt::qtOpenGL"]
-            else:
-                parties["QtOpenGL"] = [False, "qt/[>=6.5.0]", "qt::qtOpenGL"]
-            return parties
-
-
-        if self.version == "9.3.0":
-            parties = {
-                    # LEFT field:  target name for linking, will be used as TARGET::TARGET in package_info()
-                    # RIGHT field: Force the version (for development mode)... package/version to require ... component requirement
-                    # "VTK::module": "conan_package::conan_package",      # if the whole package required
-                    # "VTK::module": "conan_package::package_component",  # if subcomponent required
-                    "cgns":              [False, "cgns/[>=4.3.0]",              "cgns::cgns"    ],
-                    "cli11":             [False, "cli11/[>=2.3.2]",             "cli11::cli11"  ],
-                    "doubleconversion":  [False, "double-conversion/[>=3.2.1]", "double-conversion::double-conversion" ],
-                    "eigen":             [False, "eigen/[>=3.4.0]",             "eigen::eigen"  ],
-                    "expat":             [True,  "expat/[=2.6.0]",              "expat::expat"  ],  # TODO conflict: wayland (2.5.0)
-                    "exprtk":            [True,  "exprtk/[=0.0.1]",             "exprtk::exprtr"],  # TODO upgrade to 0.0.2 (there was a problem with first attempt)
-                    "fast_float":        [False, "fast_float/3.9.0",            "fast_float::fast_float"],
-                    "fmt":               [True,  "fmt/10.2.1",                  "fmt::fmt"      ],
-                    "freetype":          [False, "freetype/[>=2.13.0]",         "freetype::freetype" ],
-                    "glew":              [False, "glew/[>=2.2.0]",              "glew::glew"    ],
-                    "hdf5":              [True,  "hdf5/[=1.14.3]",              "hdf5::hdf5"    ],  # TODO conflict: netcdf (.1) and cgns (.0)
-                    "jsoncpp":           [False, "jsoncpp/[>=1.9.4]",           "jsoncpp::jsoncpp"  ],
-                    "libharu":           [False, "libharu/[>=2.4.3]",           "libharu::libharu"  ],
-                    "kissfft":           [False, "kissfft/[>=131.1.0]",         "kissfft::kissfft"  ],
-                    "lz4":               [False, "lz4/[>=1.9.4]",               "lz4::lz4"          ],
-
-                    "png":               [True,  "libpng/[=1.6.42]",            "libpng::libpng"    ],  # TODO conflict: libharu (.40) and freetype (.42)
-                    "libxml2":           [True,  "libxml2/[=2.12.4]",           "libxml2::libxml2"  ],  # TODO conflict: xkbcommon (2.12.3)
-
-                    "netcdf":            [False, "netcdf/[>=4.8.1]",            "netcdf::netcdf"    ],
-                    "nlohmannjson":      [False, "nlohmann_json/[>=3]",         "nlohmann_json::nlohman_json" ],
-
-                    "ogg":               [False, "ogg/[>=1.3.5]",               "ogg::ogg"          ],
-                    "opengl":            [False, "opengl/system",               "opengl::opengl"    ],
-                    "openvr":            [False, "openvr/[>=1.16.8]",           "openvr::openvr"    ],
-
-                    "libproj":           [False, "proj/[>=9.1.1]",              "proj::proj"        ],
-                    "pugixml":           [False, "pugixml/[>=1.13]",            "pugixml::pugixml"  ],
-
-                    "sqlite":            [True,  "sqlite3/[=3.45.1]",           "sqlite3::sqlite3"  ],  # TODO conflict: qt (3.44.2) and proj (3.44.2)
-
-                    "theora":            [False, "theora/[>=1.1.1]",            "theora::theora"    ],
-
-                    "utf8":              [False, "utfcpp/[>=3.2.3]",            "utfcpp::utfcpp"    ],
-                    "lzma":              [False, "xz_utils/[>=5.4.2]",          "xz_utils::xz_utils"], # note: VTK calls this lzma
-                    "zlib":              [False, "zlib/[>=1.2.13]",             "zlib::zlib"        ],
-                    "tiff":              [False, "libtiff/[>=4.4.0]",           "libtiff::libtiff"  ],
-
-                    "xorg-system":       [False, "xorg/system",                 "xorg::xorg"        ],
-
-                    # TODO what module depends on boost?
-                    # "boost":             [False, "boost/[>=1.82.0]"],
-
-                    # TODO what module depends on odbc?
-                    # "odbc":              [False, "odbc/[>=2.3.11]"],
-
-                    # MODULES: zfp, boost and odbc
-                    # parties["zfp"]     = "zfp/[>=0.5.5]"
-                    }
-
-            # NOTE: You may NOT be able to just adjust the version numbers in here, without
-            #   also adjusting the patch, as the versions are also mentioned in ThirdParty/*/CMakeLists.txt
-
-            if self.options.with_jpeg == "libjpeg":
-                parties["jpeg"] = [False, "libjpeg/9e", "libjpeg::libjpeg"]
-            elif self.options.with_jpeg == "libjpeg-turbo":
-                parties["jpeg"] = [False, "libjpeg-turbo/[>=2.1.5]", "libjpeg-turbo::jpeg"]
-
-            if self.options.qt_version == "5":
-                parties["QtOpenGL"] = [False, "qt/[>=5.15.9]", "qt::qtOpenGL"]
-            else:
-                parties["QtOpenGL"] = [False, "qt/[>=6.5.0]", "qt::qtOpenGL"]
-            return parties
-
-        raise ConanInvalidConfiguration(f"{self.version} not supported by recipe (update _third_party(self))")
-
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
 
     def requirements(self):
@@ -646,6 +365,10 @@ class VtkConan(ConanFile):
                 # NOTE: optionally force to break dependency version clashes until CCI deps have been bumped
                 # TODO: Change to use [replace_requires] for this to work correctly, locally
                 self.requires(requirement[1], force=requirement[0])
+
+
+    # def package_id(self):
+    # not implemented
 
 
     def validate(self):
@@ -696,35 +419,39 @@ class VtkConan(ConanFile):
         if self.options.smp_enable_TBB:
             raise ConanInvalidConfiguration(f"{self.ref} has smp_enable_TBB enabled. TODO check modules.json for TBB/OpenTBB dependencies and adjust recipe to suit.")
 
-    def export(self):
-        copy(self, self._vtk_module_json_filename(self.version), src=self.recipe_folder, dst=self.export_folder)
 
-    def export_sources(self):
-        export_conandata_patches(self)
+    # def validate_build(self):
+    # not implemented
 
-    @property
-    def _min_cppstd(self):
-        return 17
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "9",
-            "Visual Studio": "15.7",
-            "msvc": "191",
-            "clang": "7",
-            "apple-clang": "11",
-        }
+    def build_requirements(self):
+        self.tool_requires("sqlite3/[>=3.41.1]")
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.options["libtiff"].jpeg = self.options.with_jpeg
-        # kissfft - we want the double format (also known as kiss_fft_scalar)
-        self.options["kissfft"].datatype = "double"
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
+    # def build_id(self):
+    # not implemented
+
+
+    # def system_requirements(self):
+    # not implemented
+
+
+    def source(self):
+        # NOTE: if using git, have to also use the git submodule thing to get VTKm... the tarball has it.
+        if False: # TODO TODO self.options.use_source_from_git:
+            self.run("git clone -b release --single-branch " + self.git_url + " " + self.source_folder)
+            # note: we give the branch a name so we don't have detached heads
+            # TODO change to standard git and python chdir
+            # Version: support targeting a commit hash instead of a version tag, assume version number < 8 chars long
+            # 1.34.67 ... only 7 chars long
+            # anything more, assume a branch name or a hash (or short hash)
+            git_hash = self.version if len(self.version) > 7 else "v" + self.version
+            self.run("cd " + self.source_folder + " && git checkout -b branch-" + git_hash + " " + git_hash)
+        else:
+            get(self, **self.conan_data["sources"][self.version],
+                    strip_root=True,
+                    destination=self.source_folder)
+
 
     def generate(self):
         modules_info    = self._load_modules_info(self.version)
@@ -991,6 +718,10 @@ class VtkConan(ConanFile):
         deps.generate()
 
 
+    # def imports(self):
+    # not implemented
+
+
     def build(self):
         apply_conandata_patches(self)
 
@@ -1043,54 +774,9 @@ class VtkConan(ConanFile):
             )
         ###########
 
-
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "vtk", f"conan-official-{self.name}-variables.cmake")
-
-
-    # NOTE: Could load our generated modules-src.json from the recipe folder,
-    #  or it could load the generated modules.json file that was built by VTK and stored in the package folder.
-    def _vtkmods(self, filename):
-        # parse the modules.json file and generate a list of components
-        modfile = load(self, filename)
-        vtkmods = json.loads(modfile)
-
-        def add_missing(fake_module, modules_that_depend_on_it, condition):
-            if fake_module in vtkmods["modules"]:
-                raise ConanException(f"Did not expect to find {fake_module} in modules.json - please investigate and adjust recipe")
-
-            # module_that_depends_on_it requires fake_module as a dependency
-            has_dependency = False
-            for mod in modules_that_depend_on_it:
-                if mod in vtkmods["modules"]:
-                    vtkmods["modules"][mod]["depends"].append(fake_module)
-                    has_dependency = True
-
-            if has_dependency:
-                vtkmods["modules"][fake_module] = {
-                        "library_name": "EXTERNAL_LIB",
-                        "depends": [],
-                        "private_depends": [],
-                        "kit": None,
-                        "condition": condition,
-                        "groups": []
-                        }
-
-        # TODO consider changing these to eg conan_QtOpenGL
-        # GUISupportQt requires Qt6::QtOpenGL as a dependency
-        add_missing("VTK::QtOpenGL",    ["VTK::GUISupportQt"],                     "")
-        add_missing("VTK::xorg-system", ["VTK::RenderingCore"],                    "conan_Linux_FreeBSD")  # my own special condition
-        add_missing("VTK::openvr",      ["VTK::RenderingOpenVR"],                  "")
-        add_missing("VTK::qt",          ["VTK::RenderingQt", "VTK::GUISupportQt"], "")
-
-        # print("MODULES:" + json.dumps(vtkmods,indent=2))
-        return vtkmods
 
 
     def package(self):
@@ -1243,8 +929,6 @@ class VtkConan(ConanFile):
                 # Add any required autoinit definitions for this component
                 autoinit_add_implements_package( comp, vtkmods["modules"][module_name]["implements"] )
 
-
-
         # write those special autoinit header files
         for implemented in autoinits:
             content = "#if 0\n\n"
@@ -1259,7 +943,6 @@ class VtkConan(ConanFile):
                     content += f"#  define {implemented}_AUTOINIT {num}({impls})\n\n"
             content += "#endif\n"
             save(self, os.path.join(self.package_folder, "include", "vtk", "vtk-conan", f"vtk_autoinit_{implemented}.h"), content)
-
 
 
     def package_info(self):
@@ -1426,3 +1109,351 @@ class VtkConan(ConanFile):
         self.cpp_info.components["headers"].set_property("cmake_target_name", "headers")
         self.cpp_info.components["headers"].includedirs = [os.path.join("include", "vtk")]
         self.cpp_info.components["headers"].set_property("cmake_build_modules", vtk_cmake_build_modules)
+
+
+    ######################################################################
+    ##                       SUPPORTING FUNCTIONS                       ##
+    ######################################################################
+
+
+    def _compute_modules_enabled(self, modules_info):
+        # NOTE: the order of items in 'groups' is important for the ModuleSystem enable/disable
+        #  Do not reorder 'groups' !
+
+        # compute the enabled... implemented based on VTK/Documentation/Doxygen/ModuleSystem.md
+        base_modules_enabled = {}
+
+        # TODO implement CONDITION handling
+
+        # first, init with our recipe options for individual modules and groups
+        # print(self.options)
+
+        # print("*** Setting module-enabled based on Groups and build_all_modules ***")
+
+        for mod_with_prefix in modules_info["modules"]:
+            mod = _module_remove_prefix(mod_with_prefix)
+            mod_enabled = self.options.get_safe(f"module_enable_{mod}",None)
+            message = None
+            if mod_enabled == "DEFAULT":
+                message = f"{mod_with_prefix} is DEFAULT"
+                # if module is still default, check its groups
+                for group in modules_info["modules"][mod_with_prefix]["groups"]:
+                    group_enabled = self.options.get_safe(f"group_enable_{group}",None)
+                    message += f", has group {group} ({group_enabled})"
+                    if group_enabled != "DEFAULT":
+                        message += f", setting mod to {group_enabled}"
+                        mod_enabled = group_enabled
+                        break   # take the first non-DEFAULT group setting
+            # STILL 'default'...
+            if mod_enabled == "DEFAULT":
+                # take the result from build_all_modules
+                if self.options.build_all_modules: 
+                    message += ", ALL is WANT, setting to WANT"
+                    mod_enabled = "WANT"
+                else:
+                    message += ", ALL is DONT_WANT, setting to DONT_WANT"
+                    mod_enabled = "DONT_WANT"
+            # we have our answer for this module, it will be YES/NO/WANT/DONT_WANT
+            base_modules_enabled[mod_with_prefix] = mod_enabled
+            # if message: print(message)
+
+        # We now have a lot of YES/NO/WANT/DONT_WANT
+        # We now want to resolve the WANT/DONT_WANT into YES/NO
+
+        # From VTK documentation:
+        # - `WANT`: The module should be built. It will not be built, however, if it
+        #   depends on a `NO` module.
+        # - `DONT_WANT`: The module doesn't need to be built. It will be built if a
+        #   `YES` or `WANT` module depends on it.
+
+
+        # use "visited" to know which ones have already had their dependencies checked in depth
+        def recurse_depends_has_NO(visited, mod, last_yes_parent, chain_txt):
+            mod_enabled = base_modules_enabled[mod]
+            if mod_enabled == "NO":
+                if len(last_yes_parent) > 0:
+                    raise RuntimeError(f"Module collision: {chain_txt} has {last_yes_parent}=YES and {mod}=NO")
+                return True
+
+            if mod in visited:
+                return mod_enabled == "NO"
+
+            if mod_enabled == "YES":
+                last_yes_parent = mod
+
+            # check: depends, private_depends.
+            # optional_depends do not influence this computation
+            mod_info = modules_info["modules"][mod]
+            depends = set(mod_info["depends"] + mod_info["private_depends"])    # there can be repeated dependencies
+            any_no = False
+            for dep in depends:
+                # note: always check dependencies to catch NO-YES problems
+                if recurse_depends_has_NO(visited, dep, last_yes_parent, f"{chain_txt} --> {dep}"):
+                    if not any_no:
+                        # print(f"Setting {mod} to NO, due to dependency {dep} (NO)")
+                        any_no = True
+            if any_no:
+                base_modules_enabled[mod] = "NO"
+            visited.add(mod)
+            return any_no
+
+        # print("*** Setting modules to NO if dependencies are NO ***")
+        for mod in base_modules_enabled:
+            recurse_depends_has_NO(set(), mod, "", mod)
+
+        # print("*** For all YES and WANT modules, setting all dependencies to YES ***")
+        # find all modules that are tagged as YES, and tag all dependencies as YES
+        # iterate multiple times rather than building a tree,
+        # tagging those whose dependencies have been visited with YES-DONE
+        mod_todo = set(base_modules_enabled.keys())
+        while len(mod_todo) > 0:
+            mod = mod_todo.pop()
+            if base_modules_enabled[mod] == "WANT":
+                base_modules_enabled[mod] = "YES"
+            if base_modules_enabled[mod] == "YES":
+                mod_info = modules_info["modules"][mod]
+                depends = set(mod_info["depends"] + mod_info["private_depends"])    # there can be repeated dependencies
+                for dep in depends:
+                    dep_enabled = base_modules_enabled[dep]
+                    if dep_enabled == "YES":
+                        pass # already done
+                    elif dep_enabled == "NO":
+                        raise RuntimeError(f"Module collision, {mod} is YES, but dependency {dep} is NO")
+                    else:
+                        self.output.info(f"{mod} is YES, setting {dep} from {dep_enabled} to YES")
+                        base_modules_enabled[dep] = "YES" # will process dependencies in future pass
+                        mod_todo.add(dep)   # re-add to todo list, if not already in there (may have already been checked while it was still a "WANT" or other)
+
+        # print("*** Setting all WANT / DONT_WANT modules to YES / NO ***")
+        # find all modules that are not tagged YES or NO (ie WANT_*) and tag appropriately
+        final_modules_enabled = {}
+        for mod in base_modules_enabled:
+            mod_enabled = base_modules_enabled[mod]
+            if mod_enabled == "WANT":         # if we WANT, then the answer is YES (dependencies dont care)
+                mod_enabled = "YES"
+                self.output.info(f"{mod} set WANT to YES")
+            elif mod_enabled == "DONT_WANT":    # if we dont want, then answer is no (dependencies dont care)
+                mod_enabled = "NO"
+                self.output.info(f"{mod} set DONT_WANT to NO")
+            elif mod_enabled == "YES" or mod_enabled == "NO":
+                self.output.info(f"{mod} Leaving as {mod_enabled}")
+                pass
+            else:
+                raise RuntimeError(f"Unexpected module-enable flag: {mod_enabled}")
+            final_modules_enabled[mod] = (mod_enabled == "YES")
+            if final_modules_enabled[mod]:
+                self.output.info(f"Module enabled: {mod}");
+
+        return final_modules_enabled
+
+
+
+    # Required as VTK adds 'd' to the end of library files on windows
+    @property
+    def _lib_suffix(self):
+        return "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
+
+
+    def _third_party(self):
+        if self.version == "9.2.6":
+            parties = {
+                    # LEFT field:  target name for linking, will be used as TARGET::TARGET in package_info()
+                    # RIGHT field: Force the version (for development mode)... package/version to require ... component requirement
+                    # "VTK::module": "conan_package::conan_package",      # if the whole package required
+                    # "VTK::module": "conan_package::package_component",  # if subcomponent required
+                    "cgns":              [False, "cgns/[>=4.3.0]",              "cgns::cgns"    ],
+                    "cli11":             [False, "cli11/[>=2.3.2]",             "cli11::cli11"  ],
+                    "doubleconversion":  [False, "double-conversion/[>=3.2.1]", "double-conversion::double-conversion" ],
+                    "eigen":             [False, "eigen/[>=3.4.0]",             "eigen::eigen"  ],
+                    "expat":             [True,  "expat/[=2.6.0]",              "expat::expat"  ],  # TODO conflict: wayland (2.5.0)
+                    "exprtk":            [True,  "exprtk/[=0.0.1]",             "exprtk::exprtr"],  # TODO upgrade to 0.0.2 (there was a problem with first attempt)
+                    "fmt":               [True,  "fmt/[=8.1.1]",                "fmt::fmt"      ],  # TODO must be 8.1.1 for some reason ... VTK 9.1.0 release docs mention a PR - confirmed merged 8.1.0, will be bumped in future VTK release
+                    "freetype":          [False, "freetype/[>=2.13.0]",         "freetype::freetype" ],
+                    "glew":              [False, "glew/[>=2.2.0]",              "glew::glew"    ],
+                    "hdf5":              [True,  "hdf5/[=1.14.3]",              "hdf5::hdf5"    ],  # TODO conflict: netcdf (.1) and cgns (.0)
+                    "jsoncpp":           [False, "jsoncpp/[>=1.9.4]"            "jsoncpp::jsoncpp"  ],
+                    "libharu":           [False, "libharu/[>=2.4.3]"            "libharu::libharu"  ],
+                    "kissfft":           [False, "kissfft/[>=131.1.0]",         "kissfft::kissfft"  ],
+                    "lz4":               [False, "lz4/[>=1.9.4]",               "lz4::lz4"          ],
+
+                    "png":               [True,  "libpng/[=1.6.42]",            "libpng::libpng"    ],  # TODO conflict: libharu (.40) and freetype (.42)
+                    "libxml2":           [True,  "libxml2/[=2.12.4]",           "libxml2::libxml2"  ],  # TODO conflict: xkbcommon (2.12.3)
+
+                    "netcdf":            [False, "netcdf/[>=4.8.1]",            "netcdf::netcdf"    ],
+                    "nlohmannjson":      [False, "nlohmann_json/[>=3]",         "nlohmann_json::nlohman_json" ],
+
+                    "ogg":               [False, "ogg/[>=1.3.5]",               "ogg::ogg"          ],
+                    "opengl":            [False, "opengl/system",               "opengl::opengl"    ],
+                    "openvr":            [False, "openvr/[>=1.16.8]",           "openvr::openvr"    ],
+
+                    "libproj":           [False, "proj/[>=9.1.1]",              "proj::proj"        ],
+                    "pugixml":           [False, "pugixml/[>=1.13]",            "pugixml::pugixml"  ],
+
+                    "sqlite":            [True,  "sqlite3/[=3.45.1]",           "sqlite3::sqlite3"  ],  # TODO conflict: qt (3.44.2) and proj (3.44.2)
+
+                    "theora":            [False, "theora/[>=1.1.1]",            "theora::theora"    ],
+
+                    "utf8":              [False, "utfcpp/[>=3.2.3]",            "utfcpp::utfcpp"    ],
+                    "lzma":              [False, "xz_utils/[>=5.4.2]",          "xz_utils::xz_utils"], # note: VTK calls this lzma
+                    "zlib":              [False, "zlib/[>=1.2.13]",             "zlib::zlib"        ],
+                    "tiff":              [False, "libtiff/[>=4.4.0]",           "libtiff::libtiff"  ],
+
+                    "xorg-system":       [False, "xorg/system",                 "xorg::xorg"        ],
+
+                    # TODO what module depends on boost?
+                    # "boost":             [False, "boost/[>=1.82.0]"],
+
+                    # TODO what module depends on odbc?
+                    # "odbc":              [False, "odbc/[>=2.3.11]"],
+
+                    # MODULES: zfp, boost and odbc
+                    # parties["zfp"]     = "zfp/[>=0.5.5]"
+                    }
+
+            # NOTE: You may NOT be able to just adjust the version numbers in here, without
+            #   also adjusting the patch, as the versions are also mentioned in ThirdParty/*/CMakeLists.txt
+
+            if self.options.with_jpeg == "libjpeg":
+                parties["jpeg"] = [False, "libjpeg/9e", "libjpeg::libjpeg"]
+            elif self.options.with_jpeg == "libjpeg-turbo":
+                parties["jpeg"] = [False, "libjpeg-turbo/[>=2.1.5]", "libjpeg-turbo::jpeg"]
+
+            if self.options.qt_version == "5":
+                parties["QtOpenGL"] = [False, "qt/[>=5.15.9]", "qt::qtOpenGL"]
+            else:
+                parties["QtOpenGL"] = [False, "qt/[>=6.5.0]", "qt::qtOpenGL"]
+            return parties
+
+
+        if self.version == "9.3.0":
+            parties = {
+                    # LEFT field:  target name for linking, will be used as TARGET::TARGET in package_info()
+                    # RIGHT field: Force the version (for development mode)... package/version to require ... component requirement
+                    # "VTK::module": "conan_package::conan_package",      # if the whole package required
+                    # "VTK::module": "conan_package::package_component",  # if subcomponent required
+                    "cgns":              [False, "cgns/[>=4.3.0]",              "cgns::cgns"    ],
+                    "cli11":             [False, "cli11/[>=2.3.2]",             "cli11::cli11"  ],
+                    "doubleconversion":  [False, "double-conversion/[>=3.2.1]", "double-conversion::double-conversion" ],
+                    "eigen":             [False, "eigen/[>=3.4.0]",             "eigen::eigen"  ],
+                    "expat":             [True,  "expat/[=2.6.0]",              "expat::expat"  ],  # TODO conflict: wayland (2.5.0)
+                    "exprtk":            [True,  "exprtk/[=0.0.1]",             "exprtk::exprtr"],  # TODO upgrade to 0.0.2 (there was a problem with first attempt)
+                    "fast_float":        [False, "fast_float/3.9.0",            "fast_float::fast_float"],
+                    "fmt":               [True,  "fmt/10.2.1",                  "fmt::fmt"      ],
+                    "freetype":          [False, "freetype/[>=2.13.0]",         "freetype::freetype" ],
+                    "glew":              [False, "glew/[>=2.2.0]",              "glew::glew"    ],
+                    "hdf5":              [True,  "hdf5/[=1.14.3]",              "hdf5::hdf5"    ],  # TODO conflict: netcdf (.1) and cgns (.0)
+                    "jsoncpp":           [False, "jsoncpp/[>=1.9.4]",           "jsoncpp::jsoncpp"  ],
+                    "libharu":           [False, "libharu/[>=2.4.3]",           "libharu::libharu"  ],
+                    "kissfft":           [False, "kissfft/[>=131.1.0]",         "kissfft::kissfft"  ],
+                    "lz4":               [False, "lz4/[>=1.9.4]",               "lz4::lz4"          ],
+
+                    "png":               [True,  "libpng/[=1.6.42]",            "libpng::libpng"    ],  # TODO conflict: libharu (.40) and freetype (.42)
+                    "libxml2":           [True,  "libxml2/[=2.12.4]",           "libxml2::libxml2"  ],  # TODO conflict: xkbcommon (2.12.3)
+
+                    "netcdf":            [False, "netcdf/[>=4.8.1]",            "netcdf::netcdf"    ],
+                    "nlohmannjson":      [False, "nlohmann_json/[>=3]",         "nlohmann_json::nlohman_json" ],
+
+                    "ogg":               [False, "ogg/[>=1.3.5]",               "ogg::ogg"          ],
+                    "opengl":            [False, "opengl/system",               "opengl::opengl"    ],
+                    "openvr":            [False, "openvr/[>=1.16.8]",           "openvr::openvr"    ],
+
+                    "libproj":           [False, "proj/[>=9.1.1]",              "proj::proj"        ],
+                    "pugixml":           [False, "pugixml/[>=1.13]",            "pugixml::pugixml"  ],
+
+                    "sqlite":            [True,  "sqlite3/[=3.45.1]",           "sqlite3::sqlite3"  ],  # TODO conflict: qt (3.44.2) and proj (3.44.2)
+
+                    "theora":            [False, "theora/[>=1.1.1]",            "theora::theora"    ],
+
+                    "utf8":              [False, "utfcpp/[>=3.2.3]",            "utfcpp::utfcpp"    ],
+                    "lzma":              [False, "xz_utils/[>=5.4.2]",          "xz_utils::xz_utils"], # note: VTK calls this lzma
+                    "zlib":              [False, "zlib/[>=1.2.13]",             "zlib::zlib"        ],
+                    "tiff":              [False, "libtiff/[>=4.4.0]",           "libtiff::libtiff"  ],
+
+                    "xorg-system":       [False, "xorg/system",                 "xorg::xorg"        ],
+
+                    # TODO what module depends on boost?
+                    # "boost":             [False, "boost/[>=1.82.0]"],
+
+                    # TODO what module depends on odbc?
+                    # "odbc":              [False, "odbc/[>=2.3.11]"],
+
+                    # MODULES: zfp, boost and odbc
+                    # parties["zfp"]     = "zfp/[>=0.5.5]"
+                    }
+
+            # NOTE: You may NOT be able to just adjust the version numbers in here, without
+            #   also adjusting the patch, as the versions are also mentioned in ThirdParty/*/CMakeLists.txt
+
+            if self.options.with_jpeg == "libjpeg":
+                parties["jpeg"] = [False, "libjpeg/9e", "libjpeg::libjpeg"]
+            elif self.options.with_jpeg == "libjpeg-turbo":
+                parties["jpeg"] = [False, "libjpeg-turbo/[>=2.1.5]", "libjpeg-turbo::jpeg"]
+
+            if self.options.qt_version == "5":
+                parties["QtOpenGL"] = [False, "qt/[>=5.15.9]", "qt::qtOpenGL"]
+            else:
+                parties["QtOpenGL"] = [False, "qt/[>=6.5.0]", "qt::qtOpenGL"]
+            return parties
+
+        raise ConanInvalidConfiguration(f"{self.version} not supported by recipe (update _third_party(self))")
+
+
+
+    @property
+    def _min_cppstd(self):
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "9",
+            "Visual Studio": "15.7",
+            "msvc": "191",
+            "clang": "7",
+            "apple-clang": "11",
+        }
+
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", "vtk", f"conan-official-{self.name}-variables.cmake")
+
+
+    # NOTE: Could load our generated modules-src.json from the recipe folder,
+    #  or it could load the generated modules.json file that was built by VTK and stored in the package folder.
+    def _vtkmods(self, filename):
+        # parse the modules.json file and generate a list of components
+        modfile = load(self, filename)
+        vtkmods = json.loads(modfile)
+
+        def add_missing(fake_module, modules_that_depend_on_it, condition):
+            if fake_module in vtkmods["modules"]:
+                raise ConanException(f"Did not expect to find {fake_module} in modules.json - please investigate and adjust recipe")
+
+            # module_that_depends_on_it requires fake_module as a dependency
+            has_dependency = False
+            for mod in modules_that_depend_on_it:
+                if mod in vtkmods["modules"]:
+                    vtkmods["modules"][mod]["depends"].append(fake_module)
+                    has_dependency = True
+
+            if has_dependency:
+                vtkmods["modules"][fake_module] = {
+                        "library_name": "EXTERNAL_LIB",
+                        "depends": [],
+                        "private_depends": [],
+                        "kit": None,
+                        "condition": condition,
+                        "groups": []
+                        }
+
+        # TODO consider changing these to eg conan_QtOpenGL
+        # GUISupportQt requires Qt6::QtOpenGL as a dependency
+        add_missing("VTK::QtOpenGL",    ["VTK::GUISupportQt"],                     "")
+        add_missing("VTK::xorg-system", ["VTK::RenderingCore"],                    "conan_Linux_FreeBSD")  # my own special condition
+        add_missing("VTK::openvr",      ["VTK::RenderingOpenVR"],                  "")
+        add_missing("VTK::qt",          ["VTK::RenderingQt", "VTK::GUISupportQt"], "")
+
+        # print("MODULES:" + json.dumps(vtkmods,indent=2))
+        return vtkmods
+
