@@ -58,7 +58,7 @@ class SleefConan(ConanFile):
                 # clang: warning: argument unused during compilation: '-mfpu=vfpv4' [-Wunused-command-line-argument]
                 # clang: warning: argument unused during compilation: '-arch arm64' [-Wunused-command-line-argument]
                 # clang: warning: argument unused during compilation: '-mmacosx-version-min=11.0' [-Wunused-command-line-argument]
-                raise ConanInvalidConfiguration(f"armv8 is not supported for {self.ref}")
+                raise ConanInvalidConfiguration(f"{self.ref} does not support Mac M1. Please, use {self.name} version >=3.6.")
 
     def build_requirements(self):
         if Version(self.version) >= "3.6":
