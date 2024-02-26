@@ -4,6 +4,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -39,7 +40,7 @@ class MiniscriptConan(ConanFile):
             "Visual Studio": "16",
             "msvc": "192",
         }
-    
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -63,6 +64,11 @@ class MiniscriptConan(ConanFile):
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+        # miniscript <= 1.6.2 doesn't declare export symbols with __declspec.
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} doesn't support msvc shared build.(yet)"
             )
 
     def source(self):
