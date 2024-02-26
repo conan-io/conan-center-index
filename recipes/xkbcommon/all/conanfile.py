@@ -75,7 +75,7 @@ class XkbcommonConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} is only compatible with Linux and FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.1")
+        self.tool_requires("meson/1.3.2")
         self.tool_requires("bison/3.8.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.1.0")
@@ -178,3 +178,4 @@ class XkbcommonConan(ConanFile):
         # "steals" the default global pkg_config name)
         self.cpp_info.set_property("pkg_config_name", "xkbcommon_all_do_not_use")
         self.cpp_info.names["pkg_config"] = "xkbcommon_all_do_not_use"
+
