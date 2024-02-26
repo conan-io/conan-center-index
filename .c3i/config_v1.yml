@@ -16,6 +16,7 @@ artifactory:
 github:
   reviewers: "reviewers.yml"
   authorized_users: "authorized_users.yml"
+  waitlist_users: "waitlist_users.yml"
 
 slack:
   credential_success_url: SLACK_SUCCESS_WEBHOOK_URL
@@ -73,7 +74,7 @@ tasks:
   validate_infrastructure:
     macos_executors: 2
     windows_executors: 4
-    open_docs_pull-request: true
+    create_docs_pull-request: true
 
 # Profile configurations to build packages
 configurations:
