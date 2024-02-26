@@ -1,6 +1,4 @@
-# TODO: check validate() still works!
 # TODO: per-vtk-version requirements for each dependency version - currently all in-recipe... interleaved list?  yml?  or as it is?
-# TODO: add ALL possible options in init() from ALL json files, and then delete as approprate in config_options()
 # TODO consider changing fake-modules (introduced for dependency management) from QtOpenGL to eg conan_QtOpenGL
 
 # RECIPE MAINTAINER NOTES:
@@ -20,6 +18,7 @@ from conan.tools.scm import Version
 
 from shutil import which
 
+import glob
 import os
 import textwrap
 
@@ -53,10 +52,6 @@ def _module_remove_prefix(mod):
     if not mod.startswith("VTK::"):
         raise RuntimeError("RECIPE BUG: Expected VTK module to start with VTK::")
     return mod[5:]
-
-
-
-
 
 
 
@@ -190,26 +185,31 @@ class VtkConan(ConanFile):
         }
 
 
-    def _vtk_module_json_filename(self, version):
-        return f"modules-{version}.json";
-
-    def _load_modules_info(self, version):
-        return self._vtkmods(os.path.join(self.recipe_folder, self._vtk_module_json_filename(version)))
+    @property
+    def _this_version_module_json_filename(self):
+        return os.path.join(self.recipe_folder, f"modules-{self.version}.json")
 
 
-    # look for known CONDITIONS from the vtk.module files
-    # If 'default_overrides==None', then do validations and raise errors
-    def _process_module_conditions(self, modules_info, modules_enabled, default_overrides, condition, error_message):
-        for mod in modules_info["modules"]:
-            if condition in modules_info["modules"][mod]["condition"]:
-                if default_overrides is not None:
+    def _override_options_values(self, new_values):
+        overridden = { opt : ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"] for opt in new_values }
+        self.options.update(overridden, new_values)
+
+
+
+    def _process_modules_conditions(self, modules_info):
+        default_overrides = {}
+        # look for known CONDITIONS from the vtk.module files
+        # If 'default_overrides==None', then do validations and raise errors
+        def _check_condition(condition, error_message):
+            for mod in modules_info["modules"]:
+                if condition in modules_info["modules"][mod]["condition"]:
                     mod_no_prefix = _module_remove_prefix(mod)
-                    default_overrides[f"module_enable_{mod_no_prefix}"] = "NO"
-                else:
-                    if modules_enabled[mod]:
+                    # user insisted this module be built? Error.
+                    if self.options.get_safe(f"module_enable_{mod_no_prefix}") == "YES":
                         raise ConanInvalidConfiguration(f"{mod} {error_message}")
+                    # else, we force this option to NO
+                    default_overrides[f"module_enable_{mod_no_prefix}"] = "NO"
 
-    def _process_modules_conditions(self, modules_info, modules_enabled, default_overrides):
         required_option_message = "can only be enabled with {} (module may have been enabled with group_enable_Web or build_all_modules)"
 
         # for our purposes, if wrap_python=False, then VTK::Python is disabled
@@ -220,57 +220,65 @@ class VtkConan(ConanFile):
         modules_info["modules"]["VTK::Python"]["condition"] = "VTK_WRAP_PYTHON"
 
         if not self.options.wrap_python:
-            self._process_module_conditions(modules_info, modules_enabled, default_overrides, "VTK_WRAP_PYTHON", required_option_message.format("wrap_python"))
+            _check_condition("VTK_WRAP_PYTHON", required_option_message.format("wrap_python"))
         if not self.options.use_mpi:
-            self._process_module_conditions(modules_info, modules_enabled, default_overrides, "VTK_USE_MPI", required_option_message.format("use_mpi"))
+            _check_condition("VTK_USE_MPI", required_option_message.format("use_mpi"))
         if not self.options.use_tk:
-            self._process_module_conditions(modules_info, modules_enabled, default_overrides, "VTK_USE_TK", required_option_message.format("use_tk"))
+            _check_condition("VTK_USE_TK", required_option_message.format("use_tk"))
         if not self.options.enable_logging:
-            self._process_module_conditions(modules_info, modules_enabled, default_overrides, "VTK_ENABLE_LOGGING", required_option_message.format("enable_logging"))
+            _check_condition("VTK_ENABLE_LOGGING", required_option_message.format("enable_logging"))
         if self.settings.os == "Windows":
-            self._process_module_conditions(modules_info, modules_enabled, default_overrides, "NOT WIN32", "cannot be enabled on the Windows platform")
+            _check_condition("NOT WIN32", "cannot be enabled on the Windows platform")
         # Note: this is a very simple and dumb test ... the condition could say "NOT MSVC" and it would still match this rule!
         #  But there aren't many conditions and these are just hand-rolled tests to suit.
         if not is_msvc(self):
-            self._process_module_conditions(modules_info, modules_enabled, default_overrides, "NOT WIN32", "can only be enabled with the MSVC compiler")
+            _check_condition("NOT WIN32", "can only be enabled with the MSVC compiler")
         # note: this test is something we added as a condition on some of our 'fake' modules to add conan-package dependencies
         if self.settings.os not in ["Linux", "FreeBSD"]:
-            self._process_module_conditions(modules_info, modules_enabled, default_overrides, "conan_Linux_FreeBSD", "{mod} can only be enabled on the Linux or FreeBSD platform")
-
-
+            _check_condition("conan_Linux_FreeBSD", "{mod} can only be enabled on the Linux or FreeBSD platform")
+        return default_overrides
 
 
     # finish populating options and default_options
-    def _init_with_version(self, version):
-        modules_info = self._load_modules_info(version)
-
-        extra_options = {}
-        extra_defaults = {}
-
-        groups = set()
-        # Add in other modules that have not been added manually
+    # Note: I require the version number to init this recipe's options
+    #    Hopefully it is possible to modify conan and pass this version number
+    #    through somehow.  It is not yet attached to 'self' at this point,
+    #    and is required to be gathered from conan-create --version x.y.z
+    #
+    # So instead, we will populate with ALL possible options from ALL known versions,
+    # and then delete the missing options in config_options()
+    #
+    def _load_options_from_one_module_file(self, mod_filename, groups, modules):
+        modules_info = self._vtkmods(mod_filename)
         for mod_with_prefix in modules_info["modules"]:
-            # print(f"Module {mod_with_prefix}")
             mod = _module_remove_prefix(mod_with_prefix)
-            option_name = f"module_enable_{mod}"
-            extra_options[option_name] = ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"]
-            extra_defaults[option_name] = "DEFAULT"
+            modules.add(mod)
             for group in modules_info["modules"][mod_with_prefix]["groups"]:
-                # print(f"  has group {group}")
                 if not group in groups:
-                    # print(f"     added")
                     groups.add(group)
-                    option_name = f"group_enable_{group}"
-                    extra_options[option_name] = ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"]
-                    extra_defaults[option_name] = "DEFAULT"
+        return groups, modules
+
+    def _load_all_possible_options_from_modules_files(self):
+        groups = set()
+        modules = set()
+        for mod_filename in glob.glob(os.path.join(self.recipe_folder, 'modules-*.json')):
+            self._load_options_from_one_module_file(mod_filename, groups, modules)
+        return groups, modules
+
+
+    def init(self):
+        all_groups, all_modules = self._load_all_possible_options_from_modules_files()
+        module_defaults = { f"module_enable_{mod}" : "DEFAULT" for mod in all_modules }
+        group_defaults = { f"group_enable_{group}" : "DEFAULT" for group in all_groups }
 
         # special overrides for conan, to configure what we want CCI to build by default
+        # TODO many of these could be enabled if the dependencies could be provided by Conan (some already are)
         default_overrides = {
             # The CommonDataModel must ALWAYS be built, otherwise the VTK build will fail
             "module_enable_CommonDataModel":   "YES",
 
-            # TODO Group-enable-web disabled until wrapping_python also enabled by default
-            "group_enable_Web":        "NO",
+            # Group-enable-web disabled since wrapping_python is disabled
+            "group_enable_Web":                "NO",
 
             # these aren't supported yet, need to system-install packages or provide conan packages for each
             "module_enable_IOPDAL":            "NO",
@@ -302,53 +310,68 @@ class VtkConan(ConanFile):
             # MPI doesn't build (for me) so disable by default
             "module_enable_mpi":               "NO",
 
+            # TODO there is likely a better way to do this ...
             # disable Qt Quick support, by default, for now, because Qt recipe (by default) doesn't build declarative
             "module_enable_GUISupportQtQuick": "NO",
         }
 
         # merge the default lists
-        extra_defaults = {**extra_defaults, **default_overrides}
-        self.options.update(extra_options, extra_defaults)
-
-
-    # finish populating options and default_options
-    # Note: I require the version number to init this recipe's options
-    #    Hopefully it is possible to modify conan and pass this version number
-    #    through somehow.  It is not yet attached to 'self' at this point,
-    #    and is required to be gathered from conan-create --version x.y.z
-    def init(self):
-        # TODO load all possible versions, and then remove in config_options()
-        HACK_VERSION = "9.3.0"
-        # HACK_VERSION = "9.2.6"
-        self._init_with_version(HACK_VERSION)
+        extra_defaults = {**module_defaults, **group_defaults, **default_overrides}
+        self._override_options_values(extra_defaults)
 
 
     def export(self):
-        copy(self, self._vtk_module_json_filename(self.version), src=self.recipe_folder, dst=self.export_folder)
+        # copy ALL of the modules-x.y.z.json files, as we need them all in config_options()
+        copy(self, "modules-*.json", src=self.recipe_folder, dst=self.export_folder)
 
 
     def export_sources(self):
         export_conandata_patches(self)
 
 
+    # delete all options due to system OS reasons,
+    # and delete all options that are not part of this version's set of modules/groups
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        modules_info = self._load_modules_info(self.version)
-        default_overrides = {}
-        self._process_modules_conditions(modules_info, None, default_overrides)
-        updated_options = {}
-        for pack in default_overrides.keys():
-            updated_options[pack] = ["DEFAULT", "YES", "NO", "WANT", "DONT_WANT"]
-        self.options.update(updated_options, default_overrides)
+        all_groups, all_modules = self._load_all_possible_options_from_modules_files()
+        this_version_groups = set()
+        this_version_modules = set()
+        self._load_options_from_one_module_file(self._this_version_module_json_filename, this_version_groups, this_version_modules)
+        for group in all_groups:
+            if group not in this_version_groups:
+                self.options.rm_safe(f"group_enable_{group}")
+        for module in all_modules:
+            if module not in this_version_modules:
+                self.options.rm_safe(f"module_enable_{module}")
 
 
+    # The user has now set their options,
+    # it is time resolve the remaining options based on dependencies and conditions.
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
         self.options["libtiff"].jpeg = self.options.with_jpeg
         # kissfft - we want the double format (also known as kiss_fft_scalar)
         self.options["kissfft"].datatype = "double"
+
+        # load our modules info for our particular version
+        modules_info = self._vtkmods(self._this_version_module_json_filename)
+
+        breakpoint()
+
+        # use the CONDITIONS to disable any options not yet set to YES
+        new_option_values = self._process_modules_conditions(modules_info)
+        print(self.options)
+        self._override_options_values(new_option_values)
+
+        # now process the dependencies and compute the final module/group enable/disable
+        final_modules_enabled = self._compute_modules_enabled(modules_info)
+        self._override_options_values(final_modules_enabled)
+
+        # at this point, all of the module/group options should be set to either YES or NO
+        # the options are NOT deleted as it is not always the case that a NO module could not have been YES
 
 
     def layout(self):
@@ -356,14 +379,13 @@ class VtkConan(ConanFile):
 
 
     def requirements(self):
-        modules_info    = self._load_modules_info(self.version)
-        modules_enabled = self._compute_modules_enabled(modules_info)
-
+        print(self.options)
+        breakpoint()
         for target, requirement in self._third_party().items():
-            mod = f"VTK::{target}"
-            if modules_enabled[mod]:
+            if self.options.get_safe(f"module_enable_{target}") == "YES":
                 # NOTE: optionally force to break dependency version clashes until CCI deps have been bumped
                 # TODO: Change to use [replace_requires] for this to work correctly, locally
+                self.output.info(f"Requires: {requirement[1]}")
                 self.requires(requirement[1], force=requirement[0])
 
 
@@ -382,9 +404,6 @@ class VtkConan(ConanFile):
         if not self.options.shared and self.options.enable_kits:
             raise ConanInvalidConfiguration("KITS can only be enabled with shared")
 
-        modules_info    = self._load_modules_info(self.version)
-        modules_enabled = self._compute_modules_enabled(modules_info)
-
         if self.options.wrap_python and not self.options.enable_wrapping:
             raise ConanInvalidConfiguration("wrap_python can only be enabled with enable_wrapping")
         if self.options.wrap_java and not self.options.enable_wrapping:
@@ -396,13 +415,6 @@ class VtkConan(ConanFile):
         if self.options.build_pyi_files and not self.options.wrap_python:
             raise ConanInvalidConfiguration("build_pyi_files can only be enabled with wrap_python")
 
-        self._process_modules_conditions(modules_info, modules_enabled, None)
-
-        # this problem was observed with 9.2.6
-        # Perhaps not a problem in 9.3.0, or with the new recipe?
-        # if self.options.wrap_python and not modules_enabled["VTK::IOExport"]:
-            # raise ConanInvalidConfiguration("wrap_python can only be enabled with module_enable_IOExport enabled, otherwise it has problems compiling")
-
         if "libtiff" in self.dependencies and self.dependencies["libtiff"].options.jpeg != self.info.options.with_jpeg:
             raise ConanInvalidConfiguration(f"{self.ref} requires option value {self.name}:with_jpeg equal to libtiff:jpeg.")
 
@@ -413,7 +425,7 @@ class VtkConan(ConanFile):
             # kissfft - we want the double format (also known as kiss_fft_scalar)
             raise ConanInvalidConfiguration(f"{self.ref} requires kissfft:datatype=double")
 
-        if modules_enabled["VTK::GUISupportQtQuick"] and not self.dependencies["qt"].options.qtdeclaritive:
+        if self.options.get_safe("module_enable_GUISupportQtQuick") == "YES" and not self.dependencies["qt"].options.qtdeclaritive:
             raise ConanInvalidConfiguration(f"{self.ref} has module_enable_GUISupportQtQuick enabled, which requires qt:qtdeclarative=True")
 
         if self.options.smp_enable_TBB:
@@ -454,9 +466,6 @@ class VtkConan(ConanFile):
 
 
     def generate(self):
-        modules_info    = self._load_modules_info(self.version)
-        modules_enabled = self._compute_modules_enabled(modules_info)
-
         tc = CMakeToolchain(self)
 
         # for debugging the conan recipe
@@ -536,7 +545,7 @@ class VtkConan(ConanFile):
         # but the recipe would have to parse netcdf's generated cmake files, and,
         # it would be exported with the wrong case (netCDF_HAS_PARALLEL), so it is easier
         # to just guess here.
-        if modules_enabled["VTK::netcdf"]:
+        if self.options.get_safe("module_enable_netcdf") == "YES":
             tc.variables["NetCDF_HAS_PARALLEL"] = self.dependencies["hdf5"].options.parallel
 
 
@@ -573,18 +582,16 @@ class VtkConan(ConanFile):
 
         # Setup ALL our discovered modules
         # this will generate lots of variables, such as:
-        # tc.variables["VTK_MODULE_ENABLE_VTK_RenderingCore"]     = _yesno(self.options.module_enable_RenderingCore)
-        for mod_with_prefix in modules_enabled:
-            mod = _module_remove_prefix(mod_with_prefix)
-            option_name   = f"module_enable_{mod}"
-            variable_name = f"VTK_MODULE_ENABLE_VTK_{mod}"
-            if modules_enabled[mod_with_prefix]:
-                yesno = "YES"
-            else:
-                yesno = "NO"
-            tc.variables[variable_name] = yesno
-
-        # TODO if true (or all) then system has to install postgres dev package
+        # tc.variables["VTK_MODULE_ENABLE_VTK_RenderingCore"] = "YES" or "NO"
+        this_version_groups = set()
+        this_version_modules = set()
+        self._load_options_from_one_module_file(self._this_version_module_json_filename, this_version_groups, this_version_modules)
+        for mod in this_version_modules:
+            tc.variables[f"VTK_MODULE_ENABLE_VTK_{mod}"] = self.options.get_safe(f"module_enable_{mod}", default="NO")
+        # we set all groups to "NO" - every module is specified
+        # we want ALL modules to be tightly controlled - no surprises
+        for group in this_version_groups:
+            tc.variables[f"VTK_GROUP_ENABLE_VTK_{group}"] = self.options.get_safe(f"group_enable_{group}", default="NO")
 
         ##### SMP parallelism ####  Sequential  STDThread  OpenMP  TBB
         # Note that STDThread seems to be available by default
@@ -962,6 +969,7 @@ class VtkConan(ConanFile):
         # Note that we aren't using cmake_package::cmake_component here, this is for conan so we use conan package names.
         thirds = self._third_party()
 
+        # note: load the modules.json file that was built by VTK
         vtkmods = self._vtkmods(os.path.join(self.package_folder,"lib","conan","modules.json"))
 
         self.output.info("All module keys: {}".format(vtkmods["modules"].keys()))
@@ -1119,11 +1127,11 @@ class VtkConan(ConanFile):
     def _compute_modules_enabled(self, modules_info):
         # NOTE: the order of items in 'groups' is important for the ModuleSystem enable/disable
         #  Do not reorder 'groups' !
+        # ie a module's enable/disable is first determined by its groups, which is listed in order of priority
+        # (the first group has the highest priority, then descending from there)
 
         # compute the enabled... implemented based on VTK/Documentation/Doxygen/ModuleSystem.md
         base_modules_enabled = {}
-
-        # TODO implement CONDITION handling
 
         # first, init with our recipe options for individual modules and groups
         # print(self.options)
@@ -1132,13 +1140,13 @@ class VtkConan(ConanFile):
 
         for mod_with_prefix in modules_info["modules"]:
             mod = _module_remove_prefix(mod_with_prefix)
-            mod_enabled = self.options.get_safe(f"module_enable_{mod}",None)
+            mod_enabled = self.options.get_safe(f"module_enable_{mod}", default="NO")
             message = None
             if mod_enabled == "DEFAULT":
                 message = f"{mod_with_prefix} is DEFAULT"
                 # if module is still default, check its groups
                 for group in modules_info["modules"][mod_with_prefix]["groups"]:
-                    group_enabled = self.options.get_safe(f"group_enable_{group}",None)
+                    group_enabled = self.options.get_safe(f"group_enable_{group}", default="NO")
                     message += f", has group {group} ({group_enabled})"
                     if group_enabled != "DEFAULT":
                         message += f", setting mod to {group_enabled}"
@@ -1227,23 +1235,21 @@ class VtkConan(ConanFile):
         # print("*** Setting all WANT / DONT_WANT modules to YES / NO ***")
         # find all modules that are not tagged YES or NO (ie WANT_*) and tag appropriately
         final_modules_enabled = {}
-        for mod in base_modules_enabled:
-            mod_enabled = base_modules_enabled[mod]
+        for mod_with_prefix in base_modules_enabled:
+            mod = _module_remove_prefix(mod_with_prefix)
+            mod_enabled = base_modules_enabled[mod_with_prefix]
             if mod_enabled == "WANT":         # if we WANT, then the answer is YES (dependencies dont care)
-                mod_enabled = "YES"
-                self.output.info(f"{mod} set WANT to YES")
+                final_modules_enabled[f"module_enable_{mod}"] = "YES"
+                self.output.info(f"{mod_with_prefix} set WANT to YES")
             elif mod_enabled == "DONT_WANT":    # if we dont want, then answer is no (dependencies dont care)
-                mod_enabled = "NO"
-                self.output.info(f"{mod} set DONT_WANT to NO")
+                final_modules_enabled[f"module_enable_{mod}"] = "NO"
+                self.output.info(f"{mod_with_prefix} set DONT_WANT to NO")
             elif mod_enabled == "YES" or mod_enabled == "NO":
-                self.output.info(f"{mod} Leaving as {mod_enabled}")
+                self.output.info(f"{mod_with_prefix} Leaving as {mod_enabled}")
+                final_modules_enabled[f"module_enable_{mod}"] = mod_enabled
                 pass
             else:
                 raise RuntimeError(f"Unexpected module-enable flag: {mod_enabled}")
-            final_modules_enabled[mod] = (mod_enabled == "YES")
-            if final_modules_enabled[mod]:
-                self.output.info(f"Module enabled: {mod}");
-
         return final_modules_enabled
 
 
