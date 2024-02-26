@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, get, rmdir
 from conan.tools.microsoft import is_msvc
 import os
 
@@ -49,7 +49,7 @@ class ImathConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
-        files.apply_conandata_patches(self)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
