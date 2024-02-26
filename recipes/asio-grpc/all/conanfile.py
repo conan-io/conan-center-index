@@ -62,7 +62,7 @@ class AsioGrpcConan(ConanFile):
         if self.options.backend == "asio":
             self.requires("asio/1.29.0")
         if self.options.backend == "unifex":
-            self.requires("libunifex/cci.20220430")
+            self.requires("libunifex/0.4.0")
 
     def package_id(self):
         self.info.clear()
