@@ -1,4 +1,4 @@
 sources:
-  "5.3.131":
-    url: "https://github.com/ermig1979/Simd/archive/refs/tags/v5.3.131.tar.gz"
-    sha256: "d07a6eb6427fbef507d6d2ef1ad7aa225d344afb172b2265f1eeffb7638d297a"
+  "6.0.134":
+    url: "https://github.com/ermig1979/Simd/archive/refs/tags/v6.0.134.tar.gz"
+    sha256: "fddb2073e6b0b17ac6c08e9d7881503618450353e84c364488f53eb6e063a386"
