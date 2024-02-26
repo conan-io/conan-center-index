@@ -48,15 +48,20 @@ class ImathConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def _patch_sources(self):
+        files.apply_conandata_patches(self)
+
     def generate(self):
         tc = CMakeToolchain(self)
         if is_msvc(self) and self.settings.compiler.get_safe("cppstd"):
             # when msvc is working with a C++ standard level higher
             # than the default, we need the __cplusplus macro to be correct
-            tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus"        
+            tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus"
         tc.generate()
 
     def build(self):
+        self._patch_sources()
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
