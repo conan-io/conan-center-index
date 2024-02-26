@@ -51,6 +51,9 @@ class OrcRecipe(ConanFile):
     def _is_legacy_one_profile(self):
         return not hasattr(self, "settings_build")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -62,15 +65,15 @@ class OrcRecipe(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src", build_folder="build")
+
     def requirements(self):
         self.requires("protobuf/3.21.12")
         self.requires("lz4/1.9.4")
         self.requires("snappy/1.1.9")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zstd/1.5.5")
-
-    def layout(self):
-        cmake_layout(self, src_folder="src", build_folder="build")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -88,9 +91,6 @@ class OrcRecipe(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def generate(self):
         VirtualBuildEnv(self).generate()
         VirtualRunEnv(self).generate(scope="build")
@@ -103,16 +103,20 @@ class OrcRecipe(ConanFile):
         tc.variables["BUILD_LIBHDFSPP"] = False
         tc.variables["BUILD_POSITION_INDEPENDENT_LIB"] = bool(self.options.get_safe("fPIC", True))
         tc.variables["INSTALL_VENDORED_LIBS"] = False
-        tc.variables["BUILD_ENABLE_AVX512"] = False
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        tc.cache_variables["HAS_POST_2038"] = self.settings.os != "Windows"
-        tc.cache_variables["HAS_PRE_1970"] = self.settings.os != "Windows"
-        tc.cache_variables["STOP_BUILD_ON_WARNING"] = False
         # AVX512 support is determined by ORC_USER_SIMD_LEVEL env var at runtime, defaults to off
-        tc.cache_variables["BUILD_ENABLE_AVX512"] = self.options.get_safe("build_avx512", False)
-        protoc_path = os.path.join(self.dependencies["protobuf"].package_folder, "bin", "protoc")
-        tc.cache_variables["PROTOBUF_EXECUTABLE"] = protoc_path.replace("\\", "/")
+        tc.variables["BUILD_ENABLE_AVX512"] = self.options.get_safe("build_avx512", False)
+        tc.variables["STOP_BUILD_ON_WARNING"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+
+        # CMake versions less than 3.12 are supported by ORC pre-1.9.0 versions.
+        # Setting policy CMP0077 to NEW to remove unnecessary cache_variables settings.
+        if self.version < "1.9.0":
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+
+        protoc_path = os.path.join(self.dependencies["protobuf"].package_folder, "bin", "protoc")
+        tc.variables["PROTOBUF_EXECUTABLE"] = protoc_path.replace("\\", "/")
+        tc.variables["HAS_POST_2038"] = self.settings.os != "Windows"
+        tc.variables["HAS_PRE_1970"] = self.settings.os != "Windows"
         tc.generate()
 
         deps = CMakeDeps(self)
