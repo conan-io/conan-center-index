@@ -359,11 +359,8 @@ class VtkConan(ConanFile):
         # load our modules info for our particular version
         modules_info = self._vtkmods(self._this_version_module_json_filename)
 
-        breakpoint()
-
         # use the CONDITIONS to disable any options not yet set to YES
         new_option_values = self._process_modules_conditions(modules_info)
-        print(self.options)
         self._override_options_values(new_option_values)
 
         # now process the dependencies and compute the final module/group enable/disable
@@ -379,8 +376,6 @@ class VtkConan(ConanFile):
 
 
     def requirements(self):
-        print(self.options)
-        breakpoint()
         for target, requirement in self._third_party().items():
             if self.options.get_safe(f"module_enable_{target}") == "YES":
                 # NOTE: optionally force to break dependency version clashes until CCI deps have been bumped
