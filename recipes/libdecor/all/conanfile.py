@@ -71,7 +71,7 @@ class libdecorConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires the shared option of wayland to be enabled due to a bug in libdecor")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.1")
+        self.tool_requires("meson/1.3.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         self.tool_requires("wayland/<host_version>")
