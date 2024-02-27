@@ -14,8 +14,9 @@ sources:
 patches:
   "1.11.179":
     - patch_file: patches/1.11.179-0001-disable-sort-links.patch
+    - patch_file: patches/1.11.179-0002-fix-openssl-and-curl-lookup.patch
+    - patch_file: patches/1.11.179-0003-improve-pulseaudio-detection.patch
     - patch_file: patches/1.9.100-0002-aws-plugin-conf.patch
-    #- patch_file: patches/1.8.130-0004-improve-pulseaudio-detection.patch
   "1.9.234":
     - patch_file: patches/1.9.234-0001-issue-1816.patch
     - patch_file: patches/1.9.234-0002-disable-sort-links.patch
