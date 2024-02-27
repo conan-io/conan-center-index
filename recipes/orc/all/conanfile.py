@@ -155,3 +155,5 @@ class OrcRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["orc"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread", "m"]
