@@ -81,3 +81,5 @@ class IdnaConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["ada-idna"]
+        self.cpp_info.set_property("cmake_file_name", "ada-idna")
+        self.cpp_info.set_property("cmake_target_name", "ada-idna")
