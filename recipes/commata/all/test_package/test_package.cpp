@@ -50,7 +50,11 @@ int main(void) {
     std::vector<std::vector<std::string>> field_values;
 
     test_collector<char> collector(field_values);
+#ifdef COMMATA_VERSION_LESS_0_2_7
     commata::parse_csv(&buf, collector);
+#else
+    commata::parse_csv(buf, collector);
+#endif
 
     std::cout << field_values.size() << '\n';
 

@@ -4,6 +4,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
@@ -188,6 +189,9 @@ class CairoConan(ConanFile):
 
         meson = MesonToolchain(self)
         meson.project_options.update(options)
+
+        if cross_building(self):
+            meson.properties["ipc_rmid_deferred_release"] = self.settings.os == "Linux"
 
         if is_apple_os(self) and Version(self.version) < "1.17.6":
             # This was fixed in the meson build from 1.17.6
