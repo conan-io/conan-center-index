@@ -14,7 +14,7 @@ class IdnaConan(ConanFile):
     license = "Apache-2.0", "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ada-url/idna/"
-    topics = ("unicode", "icu", "topic3")
+    topics = ("unicode", "icu")
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
