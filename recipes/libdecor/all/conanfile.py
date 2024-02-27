@@ -88,9 +88,8 @@ class libdecorConan(ConanFile):
         )
 
     def generate(self):
-        feature = (
-            lambda option: "enabled" if self.options.get_safe(option) else "disabled"
-        )
+        def feature(option):
+            return "enabled" if self.options.get_safe(option) else "disabled"
 
         tc = MesonToolchain(self)
         tc.project_options["dbus"] = feature("with_dbus")
