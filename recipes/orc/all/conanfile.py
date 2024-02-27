@@ -105,7 +105,7 @@ class OrcRecipe(ConanFile):
         tc.variables["ORC_PACKAGE_KIND"] = "conan"
         tc.variables["BUILD_JAVA"] = False
         tc.variables["BUILD_CPP_TESTS"] = False
-        tc.variables["BUILD_TOOLS"] = False
+        tc.variables["BUILD_TOOLS"] = self.options.build_tools
         tc.variables["BUILD_LIBHDFSPP"] = False
         tc.variables["BUILD_POSITION_INDEPENDENT_LIB"] = bool(self.options.get_safe("fPIC", True))
         tc.variables["INSTALL_VENDORED_LIBS"] = False
@@ -119,7 +119,7 @@ class OrcRecipe(ConanFile):
         if self.version < "1.9.0":
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
-        protoc_path = os.path.join(self.dependencies["protobuf"].package_folder, "bin", "protoc")
+        protoc_path = os.path.join(self.dependencies["protobuf"].cpp_info.bindir, "protoc")
         tc.variables["PROTOBUF_EXECUTABLE"] = protoc_path.replace("\\", "/")
         tc.variables["HAS_POST_2038"] = self.settings.os != "Windows"
         tc.variables["HAS_PRE_1970"] = self.settings.os != "Windows"
