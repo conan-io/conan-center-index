@@ -126,6 +126,9 @@ class GtsamConan(ConanFile):
             del self.options.wrap_serialization
         else:
             del self.options.slow_but_correct_betweenfactor
+        if self.version == "4.0.3" and is_msvc(self):
+            # error LNK2019: unresolved external symbol METIS_NodeND
+            self.options.support_nested_dissection = False
 
     def configure(self):
         if self.options.shared:
