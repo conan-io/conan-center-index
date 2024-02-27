@@ -1,5 +1,4 @@
 import os
-import shutil
 
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
@@ -37,13 +36,11 @@ class libdecorConan(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-        if self.options.get_safe("with_gtk"):
-            self.options["gtk"].version = "3"
         self.options["pango"].with_cairo = True
 
         # https://gitlab.freedesktop.org/libdecor/libdecor/-/issues/66
         if self.options.get_safe("wayland"):
-            self.options["shared"].version = True
+            self.options["wayland"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -56,7 +53,7 @@ class libdecorConan(ConanFile):
             self.requires("gtk/system")
         self.requires("pango/1.51.0")
         self.requires("wayland/1.22.0")
-        self.requires("wayland-protocols/1.32")
+        self.requires("wayland-protocols/1.33")
 
     def validate(self):
         if self.settings.os != "Linux":
