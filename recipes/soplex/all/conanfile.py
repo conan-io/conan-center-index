@@ -90,6 +90,7 @@ class SoPlexConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["MPFR"] = False
         tc.variables["GMP"] = self.options.with_gmp
         tc.variables["BOOST"] = self.options.with_boost
         tc.variables["Boost_VERSION_MACRO"] = "108300"
