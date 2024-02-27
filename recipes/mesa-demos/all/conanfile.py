@@ -116,7 +116,7 @@ class MesaDemosConan(ConanFile):
             self.requires("freeglut/3.4.0")
 
         if self.options.get_safe("with_libdrm"):
-            self.requires("libdrm/2.4.119")
+            self.requires("libdrm/2.4.120")
 
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.268.0")
@@ -127,11 +127,11 @@ class MesaDemosConan(ConanFile):
             # Override requirements for libdecor's use of Pango.
             # todo Remove these when a PR to update Pango finally gets merged.
             self.requires("freetype/2.13.2")
-            self.requires("fontconfig/2.14.2")
-            self.requires("glib/2.78.1")
+            self.requires("fontconfig/2.15.0")
+            self.requires("glib/2.78.3")
 
             self.requires("wayland/1.22.0")
-            self.requires("wayland-protocols/1.32")
+            self.requires("wayland-protocols/1.33")
 
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
@@ -169,7 +169,7 @@ class MesaDemosConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires the with_x11 option of xkbcommon to be enabled when the with_x11 option is enabled")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.1")
+        self.tool_requires("meson/1.3.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         if self.options.get_safe("with_wayland"):
