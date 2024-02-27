@@ -1,4 +1,7 @@
 sources:
+  "1.5.0":
+    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.5.0.tar.gz"
+    sha256: "577986929f911320fb9ef6a3e2badd464dc38411ebc25d2966f5cb85c39f0897"
   "1.4.0":
     url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.4.0.tar.gz"
     sha256: "ca7405c7f0f9ae3023dcfa37bc68974c4b8a1c9ea2909b970e0aedc3e8657ee6"
