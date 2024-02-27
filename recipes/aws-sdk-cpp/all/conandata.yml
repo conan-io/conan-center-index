@@ -16,6 +16,7 @@ patches:
     - patch_file: patches/1.11.179-0001-disable-sort-links.patch
     - patch_file: patches/1.11.179-0002-fix-openssl-and-curl-lookup.patch
     - patch_file: patches/1.11.179-0003-improve-pulseaudio-detection.patch
+    - patch_file: patches/1.11.179-0004-lookup-openssl-instead-of-crypt.patch
     - patch_file: patches/1.9.100-0002-aws-plugin-conf.patch
   "1.9.234":
     - patch_file: patches/1.9.234-0001-issue-1816.patch
