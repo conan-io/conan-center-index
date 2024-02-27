@@ -64,8 +64,17 @@ class Liburing(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
+
+        if Version(self.version) >= "2.5":
+            if self.options.with_libc:
+                tc.configure_args.append("--use-libc")
+        elif Version(self.version) >= "2.2":
+            if not self.options.with_libc:
+                tc.configure_args.append("--nolibc")
+
         tc.update_configure_args({
-            "--nolibc": None if self.options.get_safe("with_libc", default=True) else "",
+            "--host": None,
+            "--build": None,
             "--enable-shared": None,
             "--disable-shared": None,
             "--enable-static": None,

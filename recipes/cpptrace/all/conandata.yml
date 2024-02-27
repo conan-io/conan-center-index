@@ -1,5 +1,9 @@
 sources:
   # Newer versions at the top
+  "0.4.0":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: "eef368f5bed2d85c976ea90b325e4c9bfc1b9618cbbfa15bf088adc8fa98ff89"
   "0.3.1":
     url:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.3.1.tar.gz"
@@ -13,6 +17,15 @@ sources:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.2.1.tar.gz"
     sha256: "3184f404c61b6b8ba6fe7c64fc40d1c3d6d87df59bcacf1845d846101bc22f9a"
 patches:
+  "0.4.0":
+    - patch_file: "patches/0.4.0/0001-libdwarf_path.patch"
+      patch_type: "conan"
+      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/a1624238000c794243e20801dc2b35b2f847d492"
+      patch_description: "Use new libdwarf header placement"
+    - patch_file: "patches/0.4.0/0002-zstd.patch"
+      patch_type: "conan"
+      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/b7d14bc952111df973268c76133bb8ad99afdeb0"
+      patch_description: "Zstd is handled by libdwarf"
   "0.3.0":
     - patch_file: "patches/0.3.0/0001-cpptrace_export.patch"
       patch_type: "bugfix"

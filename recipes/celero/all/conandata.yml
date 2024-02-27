@@ -1,4 +1,7 @@
 sources:
+  "2.9.0":
+    url: "https://github.com/DigitalInBlue/Celero/archive/v2.9.0.tar.gz"
+    sha256: "d59df84696e0dd58022d2c42837362c06eba6d1e29bac61f7b3143bc73d779e5"
   "2.8.2":
     url: "https://github.com/DigitalInBlue/Celero/archive/v2.8.2.tar.gz"
     sha256: "7d2131ba27ca5343b31f1e04777ed3e666e2ad7f785e79c960c872fc48cd5f88"
@@ -6,11 +9,33 @@ sources:
     url: "https://github.com/DigitalInBlue/Celero/archive/v2.6.0.tar.gz"
     sha256: "a5b72da254f81d42369382ba3157229b6b32ebbb670a22b185f80db95535e66e"
 patches:
+  "2.9.0":
+    - patch_file: "patches/0005-2.9.0-drop-runtime.patch"
+      patch_description: "remove /MT /MD flags"
+      patch_type: "conan"
+    - patch_file: "patches/0006-2.9.0-fix-install-target.patch"
+      patch_description: "fix install target for Windows"
+      patch_type: "portability"
   "2.8.2":
     - patch_file: "patches/0004-2.8.2-missing-include.patch"
+      patch_description: "include memory header"
+      patch_type: "portability"
+      patch_source: "https://github.com/DigitalInBlue/Celero/pull/160"
     - patch_file: "patches/0005-drop-runtime.patch"
+      patch_description: "remove /MT /MD flags"
+      patch_type: "conan"
   "2.6.0":
     - patch_file: "patches/0001-cmake-install-pic-cxx-standard-sytem-libs.patch"
+      patch_description: "disable PIC, remove /std:c++14 flag, fix install path"
+      patch_type: "conan"
     - patch_file: "patches/0002-lowercase-include-system-libs-windows.patch"
+      patch_description: "lowercase include file names"
+      patch_type: "portability"
     - patch_file: "patches/0003-typo-declspec.patch"
+      patch_description: "fix typo declspec"
+      patch_type: "portability"
+      patch_source: "https://github.com/DigitalInBlue/Celero/pull/147"
     - patch_file: "patches/0004-2.6.0-missing-include.patch"
+      patch_description: "include memory header"
+      patch_type: "portability"
+      patch_source: "https://github.com/DigitalInBlue/Celero/pull/160"
