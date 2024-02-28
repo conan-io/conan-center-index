@@ -1,4 +1,4 @@
 sources:
-  "2.4.0":
-    url: "https://github.com/unum-cloud/usearch/archive/v2.4.0.tar.gz"
-    sha256: "cc9ed7cf978b53a44f3a383b6172734647d4b6c4d9868b286b67be6202e6ba1b"
+  "2.9.1":
+    url: "https://github.com/unum-cloud/usearch/archive/v2.9.1.tar.gz"
+    sha256: "a210d24303b9708601746b25760fb0ee2b47f253ecbff5ddc480440a67fc2b37"

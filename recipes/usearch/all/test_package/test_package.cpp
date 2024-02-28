@@ -1,24 +1,20 @@
-#include <usearch/usearch.hpp>
-
-using namespace unum::usearch;
+#include <usearch/index.hpp>
+#include <usearch/index_dense.hpp>
+#include <usearch/index_plugins.hpp>
 
 int main()
 {
-  index_gt<cos_gt<float>> index;
-  float vec[3] = {0.1, 0.3, 0.2};
+    using namespace unum::usearch;
 
-  index.reserve(10);
-  index.add(42, {&vec[0], 3});
+    metric_punned_t metric(256, metric_kind_t::l2sq_k, scalar_kind_t::f32_k);
+    index_dense_t index = index_dense_t::make(metric);
+    float vec[3] = {0.1, 0.3, 0.2};
 
-  auto results = index.search({&vec[0], 3}, 5);
-  for (std::size_t i = 0; i != results.size(); ++i)
-  {
-    (void)results[i].member.label;
-    (void)results[i].member.vector;
-    (void)results[i].distance;
-  }
+    index.reserve(10);
+    index.add(42, &vec[0]);
+    auto results = index.search(&vec[0], 5);
 
-  if (results.size() != 1)
-    return EXIT_FAILURE;
-  return EXIT_SUCCESS;
+    if (results.size() != 1)
+        return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }

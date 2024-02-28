@@ -13,8 +13,8 @@ class USearchConan(ConanFile):
     name = "usearch"
     license = "Apache-2.0"
     description = "Smaller & Faster Single-File Vector Search Engine from Unum"
-    homepage = "https://github.com/unum-cloud/usearch"
-    topics = ("search", "vector", "simd")
+    homepage = "https://unum-cloud.github.io/usearch/"
+    topics = ("search", "vector", "simd", "header-only")
     settings = "os", "arch", "compiler", "build_type"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
@@ -30,6 +30,9 @@ class USearchConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
+    def requirements(self):
+        self.requires("fp16/cci.20210320")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
@@ -38,19 +41,14 @@ class USearchConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        copy(
-            self,
-            pattern="LICENSE",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
-        )
-        copy(
-            self,
-            pattern="index.hpp",
-            dst=os.path.join(self.package_folder, "include/usearch"),
-            src=os.path.join(self.source_folder, "include/usearch"),
-        )
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*",
+             src=os.path.join(self.source_folder, "include"),
+             dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "usearch")
+        self.cpp_info.set_property("cmake_target_name", "usearch::usearch")
+        self.cpp_info.set_property("pkg_config_name", "usearch")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
