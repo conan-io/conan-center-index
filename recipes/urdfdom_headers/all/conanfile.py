@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 import os
@@ -22,6 +23,10 @@ class PackageConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
