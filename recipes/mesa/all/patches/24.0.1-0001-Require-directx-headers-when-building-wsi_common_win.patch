@@ -15,7 +15,7 @@ diff --git a/meson.build b/meson.build
 index 59732981b8a..ae9dc4b2ad3 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -511,13 +511,13 @@ if with_gallium_kmsro and (with_platform_x11 and not with_dri3)
+@@ -572,13 +572,13 @@ if with_gallium_kmsro and (with_platform_x11 and not with_dri3)
  endif
  
  dep_dxheaders = null_dep
@@ -24,7 +24,7 @@ index 59732981b8a..ae9dc4b2ad3 100644
    dep_dxheaders = dependency('directx-headers', required : false)
    if not dep_dxheaders.found()
      dep_dxheaders = dependency('DirectX-Headers',
-       version : '>= 1.610.0',
+       version : '>= 1.611.0',
        fallback : ['DirectX-Headers', 'dep_dxheaders'],
 -      required : with_gallium_d3d12 or with_microsoft_vk
 +      required : with_gallium_d3d12 or with_microsoft_vk or (with_platform_windows and (with_any_vk or with_gallium_zink))

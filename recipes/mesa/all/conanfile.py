@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.build import check_max_cppstd, check_min_cppstd, cross_building
 from conan.tools.cmake import CMakeDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
@@ -16,12 +16,12 @@ from conan.tools.files import (
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.0"
 
 
 # todo The Python mako module is required to build.
@@ -74,7 +74,7 @@ tools = [
     "nouveau",
     "panfrost",
 ]
-video_codecs = ["h264dec", "h264enc", "h265dec", "h265enc", "vc1dec"]
+video_codecs = ['av1dec', "av1enc", "h264dec", "h264enc", "h265dec", "h265enc", "vc1dec", "vp9dec"]
 vulkan_drivers = [
     "amd",
     "broadcom",
@@ -162,10 +162,10 @@ class MesaConan(ConanFile):
         "opengl": [True, False],
         "osmesa": [True, False],
         "platform_sdk_version": ["ANY"],
-        "radv_build_id": ["ANY"],
+        "radv_build_id": [None, "ANY"],
         "shader_cache": [True, False],
         "shader_cache_default": [True, False],
-        "shader_cache_max_size": ["ANY"],
+        "shader_cache_max_size": [None, "ANY"],
         "shared_glapi": [True, False],
         "spirv_to_dxil": [True, False],
         "sse2": [True, False],
@@ -305,6 +305,10 @@ class MesaConan(ConanFile):
         return 11
 
     @property
+    def _max_cppstd(self):
+        return 17
+
+    @property
     def _compilers_minimum_version(self):
         return {
             "apple-clang": "13",
@@ -320,7 +324,7 @@ class MesaConan(ConanFile):
 
     @property
     def _requires_expat(self):
-        return self.options.get_safe("with_expat") or self.options.xmlconfig
+        return self.options.get_safe("with_expat") or self.options.tool_intel or self.options.xmlconfig
 
     @property
     def _requires_moltenvk(self):
@@ -753,7 +757,7 @@ class MesaConan(ConanFile):
             self.options.rm_safe("gles1")
             self.options.rm_safe("gles2")
 
-        if self.options.get_safe("xmlconfig"):
+        if self.options.get_safe("tool_intel") or self.options.get_safe("xmlconfig"):
             self.options.rm_safe("with_expat")
 
         if self.options.get_safe("with_libglvnd"):
@@ -812,17 +816,17 @@ class MesaConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libgettext/0.22")
+        # todo not needed?
+        # self.requires("libgettext/0.22")
 
         if self._with_libdrm:
-            self.requires("libdrm/2.4.114")
+            self.requires("libdrm/2.4.120")
 
         if self._requires_expat:
-            self.requires("expat/2.5.0")
+            self.requires("expat/2.6.0")
 
         if self.options.get_safe("platform_wayland"):
             self.requires("wayland/1.22.0")
-            self.requires("wayland-protocols/1.32")
 
         if self.options.get_safe("platform_x11"):
             self.requires("libxshmfence/1.3")
@@ -833,13 +837,13 @@ class MesaConan(ConanFile):
             self.requires("libelf/0.8.13")
 
         if self.options.get_safe("with_libglvnd"):
-            self.requires("libglvnd/1.5.0")
+            self.requires("libglvnd/1.7.0")
 
         if self.options.get_safe("with_libselinux"):
             self.requires("libselinux/3.5")
 
         if self.options.get_safe("with_libudev") == "systemd":
-            self.requires("libsystemd/253.10")
+            self.requires("libsystemd/255.2")
         elif self.options.get_safe("with_libudev") == "eudev":
             self.requires("eudev/3.2.12")
 
@@ -875,8 +879,14 @@ class MesaConan(ConanFile):
         ):
             self.requires("directx-headers/1.610.2")
 
+        if self.options.get_safe("gallium_va"):
+            self.requires("libva/2.20.0")
+
+        if self.options.get_safe("gallium_vdpau"):
+            self.requires("libvdpau/1.5")
+
         if self.options.get_safe("tool_freedreno"):
-            self.requires("libarchive/3.7.1")
+            self.requires("libarchive/3.7.2")
             self.requires("libxml2/2.11.4")
             self.requires("lua/5.4.6")
 
@@ -885,6 +895,7 @@ class MesaConan(ConanFile):
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
+            check_max_cppstd(self, self._max_cppstd)
             check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._compilers_minimum_version.get(
@@ -1103,11 +1114,12 @@ class MesaConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/1.3.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self.options.get_safe("platform_wayland"):
             self.tool_requires("wayland/<host_version>")
+            self.tool_requires("wayland-protocols/1.33")
         if self._settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.25")
         else:
@@ -1133,18 +1145,24 @@ class MesaConan(ConanFile):
             "dep_wl_scanner = dependency('wayland-scanner', native: true)",
             "dep_wl_scanner = dependency('wayland-scanner_BUILD', native: true)",
         )
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "meson.build"),
+            "dep_wl_protocols = dependency('wayland-protocols', version : '>= 1.30')",
+            "dep_wl_protocols = dependency('wayland-protocols_BUILD', native: true, version : '>= 1.30')",
+        )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         self._patch_sources()
 
     def generate(self):
-        boolean = lambda option: self.options.get_safe(option, default=False)
-        feature = (
-            lambda option: "enabled" if self.options.get_safe(option) else "disabled"
-        )
+        def boolean(option):
+            return self.options.get_safe(option, default=False)
+        def feature(option):
+            return "enabled" if self.options.get_safe(option) else "disabled"
 
-        def string(option, default=""):
+        def stringifier(option, default=""):
             return (
                 str(self.options.get_safe(option))
                 if self.options.get_safe(option)
@@ -1165,7 +1183,7 @@ class MesaConan(ConanFile):
         tc.project_options["draw-use-llvm"] = boolean("draw_use_llvm")
         tc.project_options["dri3"] = feature("dri3")
         tc.project_options["egl"] = feature("egl")
-        tc.project_options["egl-lib-suffix"] = string("egl_lib_suffix")
+        tc.project_options["egl-lib-suffix"] = stringifier("egl_lib_suffix")
         tc.project_options["egl-native-platform"] = str(
             self.options.get_safe("egl_native_platform")
         )
@@ -1185,8 +1203,8 @@ class MesaConan(ConanFile):
         ]
         tc.project_options["gallium-extra-hud"] = boolean("gallium_extra_hud")
         tc.project_options["gallium-nine"] = boolean("gallium_nine")
-        tc.project_options["gallium-omx"] = string("gallium_omx", default="disabled")
-        tc.project_options["gallium-opencl"] = string(
+        tc.project_options["gallium-omx"] = stringifier("gallium_omx", default="disabled")
+        tc.project_options["gallium-opencl"] = stringifier(
             "gallium_opencl", default="disabled"
         )
         tc.project_options["gallium-rusticl"] = boolean("gallium_rusticl")
@@ -1201,10 +1219,10 @@ class MesaConan(ConanFile):
         tc.project_options["gles1"] = feature("gles1")
         tc.project_options["gles2"] = feature("gles2")
         tc.project_options["glvnd"] = boolean("with_libglvnd")
-        tc.project_options["glvnd-vendor-name"] = string(
+        tc.project_options["glvnd-vendor-name"] = stringifier(
             "glvnd_vendor_name", default="mesa"
         )
-        tc.project_options["glx"] = string("glx", default="disabled")
+        tc.project_options["glx"] = stringifier("glx", default="disabled")
         tc.project_options["glx-direct"] = boolean("glx_direct")
         tc.project_options["imagination-srv"] = boolean("imagination_srv")
         tc.project_options["install-intel-gpu-tests"] = False
@@ -1236,12 +1254,12 @@ class MesaConan(ConanFile):
             for platform in platforms
             if self.options.get_safe(f"platform_{platform}")
         ]
-        tc.project_options["radv-build-id"] = string("radv_build_id")
+        tc.project_options["radv-build-id"] = stringifier("radv_build_id")
         tc.project_options["selinux"] = boolean("with_libselinux")
         tc.project_options["spirv-to-dxil"] = boolean("spirv_to_dxil")
         tc.project_options["shader-cache"] = feature("shader_cache")
         tc.project_options["shader-cache-default"] = boolean("shader_cache_default")
-        tc.project_options["shader-cache-max-size"] = string("shader_cache_max_size")
+        tc.project_options["shader-cache-max-size"] = stringifier("shader_cache_max_size")
         tc.project_options["shared-glapi"] = feature("shared_glapi")
         if self.options.get_safe("with_llvm"):
             tc.project_options["shared-llvm"] = (
@@ -1278,8 +1296,8 @@ class MesaConan(ConanFile):
             tc.project_options["build.pkg_config_path"] = self.generators_folder
         tc.generate()
         pkg_config_deps = PkgConfigDeps(self)
-        pkg_config_deps.build_context_activated = ["wayland"]
-        pkg_config_deps.build_context_suffix = {"wayland": "_BUILD"}
+        pkg_config_deps.build_context_activated = ["wayland", "wayland-protocols"]
+        pkg_config_deps.build_context_suffix = {"wayland": "_BUILD", "wayland-protocols": "_BUILD"}
         pkg_config_deps.generate()
         if self.options.get_safe("with_llvm"):
             cmake_deps = CMakeDeps(self)
@@ -1346,6 +1364,10 @@ class MesaConan(ConanFile):
                 self.cpp_info.components["egl"].system_libs.append("opengl32")
         if self.options.get_safe("gbm"):
             self.cpp_info.components["gbm"].libs = ["gbm"]
+            if self._requires_expat:
+                self.cpp_info.components["gbm"].requires.append("expat::expat")
+                self.cpp_info.components["gbm"].requires.append("libdrm::libdrm")
+                self.cpp_info.components["gbm"].requires.append("wayland::wayland-server")
             self.cpp_info.components["gbm"].set_property("pkg_config_name", "gbm")
             self.cpp_info.components["gbm"].set_property(
                 "component_version", self.version
@@ -1384,6 +1406,7 @@ class MesaConan(ConanFile):
                         "xorg::xfixes",
                     ]
                 )
+                self.cpp_info.components["glx"].requires.append("libxshmfence::libxshmfence")
                 if self.options.get_safe("with_glx") == "dri":
                     self.cpp_info.components["gl"].requires.append("xorg::xxf86vm")
             if self.settings.os in ["Linux", "FreeBSD"]:
@@ -1392,12 +1415,18 @@ class MesaConan(ConanFile):
                 self.cpp_info.components["gl"].system_libs.extend(["gdi32", "opengl32"])
         if self.options.get_safe("shared_glapi"):
             self.cpp_info.components["glapi"].libs = ["glapi"]
+            if self.options.get_safe("with_libselinux"):
+                self.cpp_info.components["glapi"].requires.append("libselinux")
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["glapi"].system_libs.extend(["pthread"])
         if self.options.get_safe("osmesa"):
             self.cpp_info.components["osmesa"].libs = ["OSMesa"]
             self.cpp_info.components["osmesa"].set_property("pkg_config_name", "osmesa")
             # self.cpp_info.components["osmesa"].set_property("component_version", "8.0.0")
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.extend(["m", "pthread"])
+            if self.options.get_safe("with_libselinux"):
+                self.cpp_info.components["osmesa"].requires.append("libselinux")
 
         if self.settings.os == "Windows":
             self.cpp_info.components["gallium_wgl"].libs = [
@@ -1407,6 +1436,83 @@ class MesaConan(ConanFile):
             self.cpp_info.components["opengl32"].libs = ["opengl32"]
             self.cpp_info.components["opengl32"].requires = ["gallium_wgl"]
             self.cpp_info.components["opengl32"].system_libs.append("opengl32")
+
+        if self.options.get_safe("with_expat") or self.options.get_safe("tool_intel") or self.options.get_safe("xmlconfig"):
+            self.cpp_info.requires.append("expat::expat")
+
+        # todo
+        # libunwind
+        # spirv-tools
+        # perfetto
+        # libarchive
+        # lua
+        # directx-headers
+        # libxml2
+        # moltenvk
+        # zlib
+        # zstd
+
+        if self.options.get_safe("platform_wayland"):
+            self.cpp_info.requires.append("wayland::wayland")
+
+        if self.options.get_safe("platform_x11"):
+            self.cpp_info.requires.append("libxshmfence::libxshmfence")
+            if self.settings.os in ["FreeBSD", "Linux"]:
+                self.cpp_info.requires.append("xorg::xorg")
+
+        if self.options.with_libelf:
+            self.cpp_info.requires.append("libelf::libelf")
+
+        if self.options.get_safe("with_libselinux"):
+            self.cpp_info.requires.append("libselinux::libselinux")
+
+        if self.options.get_safe("with_libudev") == "systemd":
+            self.cpp_info.requires.append("libsystemd::udev")
+        elif self.options.get_safe("with_libudev") == "eudev":
+            self.cpp_info.requires.append("eudev::eudev")
+
+        if self.options.get_safe("with_libunwind"):
+            self.cpp_info.requires.append("libunwind::libunwind")
+
+        if self.options.get_safe("opencl_spirv"):
+            self.cpp_info.requires.append("spirv-tools::spirv-tools")
+
+        if self.options.get_safe("with_perfetto"):
+            self.cpp_info.requires.append("perfetto::perfetto")
+
+        if self.options.with_zlib:
+            self.cpp_info.requires.append("zlib::zlib")
+
+        if self.options.with_zstd:
+            self.cpp_info.requires.append("zstd::zstd")
+
+        if self.options.get_safe("with_llvm"):
+            self.cpp_info.requires.append("llvm::llvm")
+        if self.options.get_safe("gallium_va"):
+            self.cpp_info.requires.append("libva::libva")
+        if self.options.get_safe("gallium_vdpau"):
+            self.cpp_info.requires.append("libvdpau::libvdpau")
+
+        if self.options.get_safe("tool_freedreno"):
+            self.cpp_info.requires.append("libarchive::libarchive")
+            self.cpp_info.requires.append("libxml2::libxml2")
+            self.cpp_info.requires.append("lua::lua")
+
+        if self._requires_moltenvk:
+            self.cpp_info.requires.append("moltenvk::moltenvk")
+
+        if (
+            self.options.get_safe("gallium_driver_d3d12")
+            or self.options.get_safe("gallium_d3d12_video")
+            or self.options.get_safe("microsoft_clc")
+            or self.options.get_safe("vulkan_driver_microsoft_experimental")
+            or (
+                self.settings.os == "Windows"
+                and self.options.get_safe("gallium_driver_zink")
+            )
+            or (self.settings.os == "Windows" and self._with_any_vulkan_driver)
+        ):
+            self.cpp_info.requires.append("directx-headers::directx-headers")
 
         libgl_drivers_path = os.path.join(self.package_folder, "lib", "dri")
         if self.settings.os == "Windows":
