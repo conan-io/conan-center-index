@@ -1,0 +1,272 @@
+From 6b83b5c01753a49cdfb888eea657f72c444eed8f Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Mon, 4 Mar 2024 08:48:13 -0600
+Subject: [PATCH] Rename os_create_anonymous_file to
+ weston_os_create_anonymous_file
+
+This avoids a conflict with the os_create_anonymous_file function in wayland-cursor.
+---
+ clients/constraints.c               | 2 +-
+ clients/ivi-shell-user-interface.c  | 2 +-
+ clients/multi-resource.c            | 2 +-
+ clients/presentation-shm.c          | 2 +-
+ clients/screenshot.c                | 2 +-
+ clients/simple-damage.c             | 2 +-
+ clients/simple-shm.c                | 2 +-
+ clients/simple-touch.c              | 2 +-
+ clients/window.c                    | 2 +-
+ compositor/screen-share.c           | 4 ++--
+ libweston/backend-wayland/wayland.c | 2 +-
+ libweston/linux-dmabuf.c            | 2 +-
+ shared/os-compatibility.c           | 6 +++---
+ shared/os-compatibility.h           | 2 +-
+ tests/bad-buffer-test.c             | 2 +-
+ tests/weston-test-client-helper.c   | 2 +-
+ tests/yuv-buffer-test.c             | 2 +-
+ 17 files changed, 20 insertions(+), 20 deletions(-)
+
+diff --git a/clients/constraints.c b/clients/constraints.c
+index 4bea0e09..616e5599 100644
+--- a/clients/constraints.c
++++ b/clients/constraints.c
+@@ -622,7 +622,7 @@ static int
+ shm_pool_init(struct shm_pool *pool, size_t size, struct wl_shm *wl_shm)
+ {
+ 	size_t pool_size = size * ARRAY_LENGTH(pool->buffers);
+-	int fd = os_create_anonymous_file(pool_size);
++	int fd = weston_os_create_anonymous_file(pool_size);
+ 
+ 	if (fd < 0) {
+ 		fprintf(stderr, "creating a buffer file for %zu B failed: %s\n",
+diff --git a/clients/ivi-shell-user-interface.c b/clients/ivi-shell-user-interface.c
+index bcb61c0b..52b99657 100644
+--- a/clients/ivi-shell-user-interface.c
++++ b/clients/ivi-shell-user-interface.c
+@@ -805,7 +805,7 @@ createShmBuffer(struct wlContextStruct *p_wlCtx)
+ 
+ 	size = stride * height;
+ 
+-	fd = os_create_anonymous_file(size);
++	fd = weston_os_create_anonymous_file(size);
+ 	if (fd < 0) {
+ 		fprintf(stderr, "creating a buffer file for %d B failed: %s\n",
+ 			size, strerror(errno));
+diff --git a/clients/multi-resource.c b/clients/multi-resource.c
+index 93329c3b..3a896922 100644
+--- a/clients/multi-resource.c
++++ b/clients/multi-resource.c
+@@ -102,7 +102,7 @@ attach_buffer(struct window *window, int width, int height)
+ 	stride = width * 4;
+ 	size = stride * height;
+ 
+-	fd = os_create_anonymous_file(size);
++	fd = weston_os_create_anonymous_file(size);
+ 	if (fd < 0) {
+ 		fprintf(stderr, "creating a buffer file for %d B failed: %s\n",
+ 			size, strerror(errno));
+diff --git a/clients/presentation-shm.c b/clients/presentation-shm.c
+index 2bb0aa1c..c93ac137 100644
+--- a/clients/presentation-shm.c
++++ b/clients/presentation-shm.c
+@@ -143,7 +143,7 @@ create_shm_buffers(struct display *display, struct buffer **buffers,
+ 	stride = width * 4;
+ 	size = stride * height * num_buffers;
+ 
+-	fd = os_create_anonymous_file(size);
++	fd = weston_os_create_anonymous_file(size);
+ 	if (fd < 0) {
+ 		fprintf(stderr, "creating a buffer file for %d B failed: %s\n",
+ 			size, strerror(errno));
+diff --git a/clients/screenshot.c b/clients/screenshot.c
+index a160406b..863d8f42 100644
+--- a/clients/screenshot.c
++++ b/clients/screenshot.c
+@@ -112,7 +112,7 @@ screenshot_create_shm_buffer(struct screenshooter_app *app,
+ 	assert(width == stride / bytes_pp);
+ 	assert(height == buffer->len / stride);
+ 
+-	fd = os_create_anonymous_file(buffer->len);
++	fd = weston_os_create_anonymous_file(buffer->len);
+ 	if (fd < 0) {
+ 		fprintf(stderr, "creating a buffer file for %zd B failed: %s\n",
+ 			buffer->len, strerror(errno));
+diff --git a/clients/simple-damage.c b/clients/simple-damage.c
+index 7471117d..4272c43b 100644
+--- a/clients/simple-damage.c
++++ b/clients/simple-damage.c
+@@ -122,7 +122,7 @@ create_shm_buffer(struct display *display, struct buffer *buffer,
+ 	pitch = width * 4;
+ 	size = pitch * height;
+ 
+-	fd = os_create_anonymous_file(size);
++	fd = weston_os_create_anonymous_file(size);
+ 	if (fd < 0) {
+ 		fprintf(stderr, "creating a buffer file for %d B failed: %s\n",
+ 			size, strerror(errno));
+diff --git a/clients/simple-shm.c b/clients/simple-shm.c
+index 6bcb45ad..bf93228e 100644
+--- a/clients/simple-shm.c
++++ b/clients/simple-shm.c
+@@ -167,7 +167,7 @@ create_shm_buffer(struct window *window, struct buffer *buffer, uint32_t format)
+ 	size = stride * height;
+ 	display = window->display;
+ 
+-	fd = os_create_anonymous_file(size);
++	fd = weston_os_create_anonymous_file(size);
+ 	if (fd < 0) {
+ 		fprintf(stderr, "creating a buffer file for %d B failed: %s\n",
+ 			size, strerror(errno));
+diff --git a/clients/simple-touch.c b/clients/simple-touch.c
+index e3201316..a5e0ec2a 100644
+--- a/clients/simple-touch.c
++++ b/clients/simple-touch.c
+@@ -86,7 +86,7 @@ create_shm_buffer(struct touch *touch)
+ 	stride = touch->width * 4;
+ 	size = stride * touch->height;
+ 
+-	fd = os_create_anonymous_file(size);
++	fd = weston_os_create_anonymous_file(size);
+ 	if (fd < 0) {
+ 		fprintf(stderr, "creating a buffer file for %d B failed: %s\n",
+ 			size, strerror(errno));
+diff --git a/clients/window.c b/clients/window.c
+index 30f64109..e1238955 100644
+--- a/clients/window.c
++++ b/clients/window.c
+@@ -602,7 +602,7 @@ make_shm_pool(struct display *display, int size, void **data)
+ 	struct wl_shm_pool *pool;
+ 	int fd;
+ 
+-	fd = os_create_anonymous_file(size);
++	fd = weston_os_create_anonymous_file(size);
+ 	if (fd < 0) {
+ 		fprintf(stderr, "creating a buffer file for %d B failed: %s\n",
+ 			size, strerror(errno));
+diff --git a/compositor/screen-share.c b/compositor/screen-share.c
+index 305bab18..bdf940be 100644
+--- a/compositor/screen-share.c
++++ b/compositor/screen-share.c
+@@ -470,9 +470,9 @@ shared_output_get_shm_buffer(struct shared_output *so)
+ 		return sb;
+ 	}
+ 
+-	fd = os_create_anonymous_file(height * stride);
++	fd = weston_os_create_anonymous_file(height * stride);
+ 	if (fd < 0) {
+-		weston_log("os_create_anonymous_file: %s\n", strerror(errno));
++		weston_log("weston_os_create_anonymous_file: %s\n", strerror(errno));
+ 		return NULL;
+ 	}
+ 
+diff --git a/libweston/backend-wayland/wayland.c b/libweston/backend-wayland/wayland.c
+index 447ea3f0..0c422654 100644
+--- a/libweston/backend-wayland/wayland.c
++++ b/libweston/backend-wayland/wayland.c
+@@ -331,7 +331,7 @@ wayland_output_get_shm_buffer(struct wayland_output *output)
+ 
+ 	stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
+ 
+-	fd = os_create_anonymous_file(height * stride);
++	fd = weston_os_create_anonymous_file(height * stride);
+ 	if (fd < 0) {
+ 		weston_log("could not create an anonymous file buffer: %s\n",
+ 			   strerror(errno));
+diff --git a/libweston/linux-dmabuf.c b/libweston/linux-dmabuf.c
+index ea781cdf..b02e1c4f 100644
+--- a/libweston/linux-dmabuf.c
++++ b/libweston/linux-dmabuf.c
+@@ -532,7 +532,7 @@ weston_dmabuf_feedback_format_table_create(const struct weston_drm_format_array
+ 	/* Creates formats file table and mmap it */
+ 	format_table->size = weston_drm_format_array_count_pairs(renderer_formats) *
+ 			     sizeof(*format_table->data);
+-	format_table->fd = os_create_anonymous_file(format_table->size);
++	format_table->fd = weston_os_create_anonymous_file(format_table->size);
+ 	if (format_table->fd < 0) {
+ 		weston_log("error: failed to create format table file: %s\n",
+ 			   strerror(errno));
+diff --git a/shared/os-compatibility.c b/shared/os-compatibility.c
+index a9d91c52..3b55c56c 100644
+--- a/shared/os-compatibility.c
++++ b/shared/os-compatibility.c
+@@ -175,7 +175,7 @@ create_tmpfile_cloexec(char *tmpname)
+  * XDG_RUNTIME_DIR.
+  */
+ int
+-os_create_anonymous_file(off_t size)
++weston_os_create_anonymous_file(off_t size)
+ {
+ 	static const char template[] = "/weston-shared-XXXXXX";
+ 	const char *path;
+@@ -278,7 +278,7 @@ os_ro_anonymous_file_create(size_t size,
+ 	}
+ 
+ 	file->size = size;
+-	file->fd = os_create_anonymous_file(size);
++	file->fd = weston_os_create_anonymous_file(size);
+ 	if (file->fd == -1)
+ 		goto err_free;
+ 
+@@ -369,7 +369,7 @@ os_ro_anonymous_file_get_fd(struct ro_anonymous_file *file,
+ 	/* for all other cases we create a new anonymous file that can be mapped
+ 	 * with MAP_SHARED and copy the contents to it and return that instead
+ 	 */
+-	fd = os_create_anonymous_file(file->size);
++	fd = weston_os_create_anonymous_file(file->size);
+ 	if (fd == -1)
+ 		return fd;
+ 
+diff --git a/shared/os-compatibility.h b/shared/os-compatibility.h
+index 85f65854..200c217c 100644
+--- a/shared/os-compatibility.h
++++ b/shared/os-compatibility.h
+@@ -43,7 +43,7 @@ int
+ os_epoll_create_cloexec(void);
+ 
+ int
+-os_create_anonymous_file(off_t size);
++weston_os_create_anonymous_file(off_t size);
+ 
+ #ifndef HAVE_STRCHRNUL
+ char *
+diff --git a/tests/bad-buffer-test.c b/tests/bad-buffer-test.c
+index 6d966d9b..96da9be6 100644
+--- a/tests/bad-buffer-test.c
++++ b/tests/bad-buffer-test.c
+@@ -52,7 +52,7 @@ DECLARE_FIXTURE_SETUP(fixture_setup);
+  * behave like older clients, and allow ftruncate() to shrink the file’s size,
+  * so SIGBUS can still happen.
+  *
+- * There is no reason not to use os_create_anonymous_file() otherwise. */
++ * There is no reason not to use weston_os_create_anonymous_file() otherwise. */
+ 
+ #ifndef HAVE_MKOSTEMP
+ static int
+diff --git a/tests/weston-test-client-helper.c b/tests/weston-test-client-helper.c
+index 654e5088..0694f47e 100644
+--- a/tests/weston-test-client-helper.c
++++ b/tests/weston-test-client-helper.c
+@@ -494,7 +494,7 @@ create_shm_buffer(struct client *client, int width, int height,
+ 	buf->len = stride_bytes * height;
+ 	assert(buf->len / stride_bytes == (unsigned)height);
+ 
+-	fd = os_create_anonymous_file(buf->len);
++	fd = weston_os_create_anonymous_file(buf->len);
+ 	assert(fd >= 0);
+ 
+ 	data = mmap(NULL, buf->len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+diff --git a/tests/yuv-buffer-test.c b/tests/yuv-buffer-test.c
+index 2a3c679c..0425c1a5 100644
+--- a/tests/yuv-buffer-test.c
++++ b/tests/yuv-buffer-test.c
+@@ -87,7 +87,7 @@ yuv_buffer_create(struct client *client,
+ 	buf->width = width;
+ 	buf->height = height;
+ 
+-	fd = os_create_anonymous_file(buf->bytes);
++	fd = weston_os_create_anonymous_file(buf->bytes);
+ 	assert(fd >= 0);
+ 
+ 	buf->data = mmap(NULL, buf->bytes,
+-- 
+2.44.0
+
