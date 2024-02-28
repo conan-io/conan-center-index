@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.10)
-project(PackageTest)
+cmake_minimum_required(VERSION 3.15)
+project(PackageTest LANGUAGES C)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(libnetfilter_conntrack REQUIRED CONFIG)
 
 add_executable(example example.c)
-target_link_libraries(example ${CONAN_LIBS})
+target_link_libraries(example libnetfilter_conntrack::libnetfilter_conntrack)

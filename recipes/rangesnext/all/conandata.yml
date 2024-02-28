@@ -1,8 +1,4 @@
 sources:
   "cci.20210426":
     url: "https://github.com/cor3ntin/rangesnext/archive/10fd1cffe7a2a9688a31f91ec8754668c4cdd9a6.tar.gz"
-    sha256: 8b4ba9129346818d1ad2ab1fe00ccb85c5c1b35fef91868aece97aa079e0dec4 
-patches:
-  "cci.20210426":
-    - patch_file: "patches/0001-cmake-disable-tests.patch"
-      base_path: "source_subfolder"
+    sha256: "8b4ba9129346818d1ad2ab1fe00ccb85c5c1b35fef91868aece97aa079e0dec4"

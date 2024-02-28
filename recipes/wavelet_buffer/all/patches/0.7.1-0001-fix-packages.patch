@@ -1,0 +1,24 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e2a6681..5ef9cbb 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -59,9 +59,8 @@ else()
+ endif()
+ 
+ find_package(blaze REQUIRED)
+-find_package(libjpeg-turbo REQUIRED)
++find_package(JPEG REQUIRED)
+ find_package(cimg REQUIRED)
+-find_package(Catch2 REQUIRED)
+ 
+ # Create wb target
+ set(WB_TARGET_NAME ${PROJECT_NAME})
+@@ -146,7 +145,7 @@ target_include_directories(
+ # Link dependencies
+ target_link_libraries(${WB_TARGET_NAME} PRIVATE streamvbyte)
+ target_link_libraries(${WB_TARGET_NAME} PRIVATE fpzip)
+-target_link_libraries(${WB_TARGET_NAME} PRIVATE libjpeg-turbo::libjpeg-turbo)
++target_link_libraries(${WB_TARGET_NAME} PRIVATE JPEG::JPEG)
+ target_link_libraries(${WB_TARGET_NAME} PRIVATE cimg::cimg)
+ 
+ target_link_libraries(${WB_TARGET_NAME} PUBLIC blaze::blaze)

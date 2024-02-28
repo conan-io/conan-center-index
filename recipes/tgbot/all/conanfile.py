@@ -1,19 +1,24 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, replace_in_file
+
+required_conan_version = ">=1.53.0"
 
 
 class TgbotConan(ConanFile):
     name = "tgbot"
-
+    description = "C++ library for Telegram bot API"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://reo7sp.github.io/tgbot-cpp"
-    description = "C++ library for Telegram bot API"
-    topics = ("tgbot", "telegram", "telegram-api", "telegram-bot", "bot")
-    license = "MIT"
+    topics = ("telegram", "telegram-api", "telegram-bot", "bot")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -24,27 +29,23 @@ class TgbotConan(ConanFile):
         "fPIC": True,
     }
 
-    generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt"]
-
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.79.0")
-        self.requires("libcurl/7.84.0")
-        self.requires("openssl/1.1.1q")
+        # tgbot/Api.h:#include <boost/property_tree/ptree.hpp>
+        self.requires("boost/1.83.0", transitive_headers=True, transitive_libs=True)
+        # tgbot/net/CurlHttpClient.h:#include <curl/curl.h>
+        self.requires("libcurl/[>=7.78 <9]", transitive_headers=True, transitive_libs=True)
+        self.requires("openssl/[>=1.1 <4]")
 
     @property
     def _required_boost_components(self):
@@ -52,41 +53,50 @@ class TgbotConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
-        miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
-        if self.options["boost"].header_only or miss_boost_required_comp:
-            raise ConanInvalidConfiguration("{0} requires non header-only boost with these components: {1}".format(self.name, ", ".join(self._required_boost_components)))
+            check_min_cppstd(self, 11)
+        miss_boost_required_comp = any(
+            self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
+            for boost_comp in self._required_boost_components
+        )
+        if self.dependencies["boost"].options.header_only or miss_boost_required_comp:
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires non header-only boost with these components: "
+                + ", ".join(self._required_boost_components)
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ENABLE_TESTS"] = False
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def _patch_sources(self):
         # Don't force PIC
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "CMakeLists.txt"),
             "set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)",
-            ""
+            "",
         )
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_TESTS"] = False
-        self._cmake.configure()
-        return self._cmake
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["TgBot"]
-        self.cpp_info.requires = ["boost::headers", "boost::system", "libcurl::libcurl", "openssl::openssl"]
+        self.cpp_info.defines = ["HAVE_CURL=1"]

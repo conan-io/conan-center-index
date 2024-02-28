@@ -81,19 +81,19 @@ class LibarchiveConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.10.4")
+            self.requires("libxml2/2.12.3")
         if self.options.with_expat:
             self.requires("expat/2.5.0")
         if self.options.with_iconv:
             self.requires("libiconv/1.17")
         if self.options.with_pcreposix:
-            self.requires("pcre/8.45")
+            self.requires("pcre2/10.42")
         if self.options.with_nettle:
-            self.requires("nettle/3.8.1")
+            self.requires("nettle/3.9.1")
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_libb2:
@@ -103,11 +103,11 @@ class LibarchiveConan(ConanFile):
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.2")
+            self.requires("xz_utils/5.4.5")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.get_safe("with_mbedtls"):
-            self.requires("mbedtls/3.2.1")
+            self.requires("mbedtls/3.5.1")
 
     def validate(self):
         if self.settings.os != "Windows" and self.options.with_cng:
@@ -149,11 +149,15 @@ class LibarchiveConan(ConanFile):
         tc.variables["ENABLE_CPIO"] = False
         tc.variables["ENABLE_CAT"] = False
         tc.variables["ENABLE_TEST"] = False
+        tc.variables["ENABLE_UNZIP"] = False
         # too strict check
         tc.variables["ENABLE_WERROR"] = False
         if Version(self.version) >= "3.4.2":
             tc.variables["ENABLE_MBEDTLS"] = self.options.with_mbedtls
         tc.variables["ENABLE_XATTR"] = self.options.with_xattr
+        # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
+        if is_msvc(self):
+            tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
 
     def build(self):

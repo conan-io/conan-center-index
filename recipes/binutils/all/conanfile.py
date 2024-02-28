@@ -138,7 +138,7 @@ class BinutilsConan(ConanFile):
             self.tool_requires("flex/2.6.4")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

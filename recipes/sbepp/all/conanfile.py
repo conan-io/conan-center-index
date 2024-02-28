@@ -64,8 +64,13 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         if self.options.with_sbeppc:
-            self.requires("fmt/9.1.0")
-            self.requires("pugixml/1.12.1")
+            # sbepp/<1.1.0 requires fmt and pugixml with hardcoded versions
+            if Version(self.version) < "1.1.0":
+                self.requires("fmt/9.1.0")
+                self.requires("pugixml/1.12.1")
+            else:
+                self.requires("fmt/10.2.0")
+                self.requires("pugixml/1.14")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -106,16 +111,23 @@ class PackageConan(ConanFile):
         copy(self, "sbeppcTargets.cmake",
             src=os.path.join(self.source_folder, os.pardir, "cmake"),
             dst=os.path.join(self.package_folder, self._module_path))
+        if Version(self.version) >= "1.2.0":
+            copy(self, "sbeppcHelpers.cmake",
+                src=os.path.join(self.source_folder, "cmake"),
+                dst=os.path.join(self.package_folder, self._module_path))
 
     @property
     def _module_path(self):
         return os.path.join("lib", "cmake")
 
     def package_info(self):
-        # provide sbepp::sbeppc target
+        # provide sbepp::sbeppc target and CMake helpers from sbeppcHelpers.cmake
         build_modules = [
             os.path.join(self._module_path, "sbeppcTargets.cmake")
         ]
+        if Version(self.version) >= "1.2.0":
+            build_modules.append(os.path.join(self._module_path, "sbeppcHelpers.cmake"))
+
         self.cpp_info.builddirs.append(self._module_path)
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 

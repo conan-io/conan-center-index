@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc
-from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 import os
 
@@ -17,12 +17,14 @@ class ArsenalgearConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/JustWhit3/arsenalgear-cpp"
     topics = ("constants", "math", "operators", "stream")
-    package_type = "static-library"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
     }
 
@@ -37,10 +39,11 @@ class ArsenalgearConan(ConanFile):
             "msvc": "192",
             "gcc": "8",
             "clang": "7",
-            "apple-clang": "12.0",
+            "apple-clang": "12",
         }
 
     def export_sources(self):
+        export_conandata_patches(self)
         if Version(self.version) < "2.1.0":
             copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
@@ -49,7 +52,7 @@ class ArsenalgearConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.get_safe("shared"):
+        if self.options.shared:
             self.options.rm_safe("fPIC")
 
     def layout(self):
@@ -57,16 +60,15 @@ class ArsenalgearConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) < "2.0.0":
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.83.0")
             if self.settings.os in ["Linux", "Macos"]:
                 # exprtk is used in public header of arsenalgear
                 # https://github.com/JustWhit3/arsenalgear-cpp/blob/v1.2.2/include/math.hpp
                 self.requires("exprtk/0.0.2", transitive_headers=True)
 
     def validate(self):
-        # arsenalgear doesn't support Visual Studio(yet).
-        if is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio(yet)")
+        if Version(self.version) < "2.1.0" and is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio.")
 
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
@@ -89,6 +91,7 @@ class ArsenalgearConan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         if Version(self.version) < "2.1.0":
             cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
@@ -104,6 +107,8 @@ class ArsenalgearConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "arsenalgear")
+        self.cpp_info.set_property("cmake_target_name", "arsenalgear::arsenalgear")
         self.cpp_info.libs = ["arsenalgear"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:

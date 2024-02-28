@@ -20,6 +20,7 @@ class LoguruConan(ConanFile):
     description = "Loguru is a C++11 logging library."
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -79,16 +80,19 @@ class LoguruConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+
         tc.variables["LOGURU_USE_FMTLIB"] = self.options.with_fmt
         tc.variables["LOGURU_VERBOSE_SCOPE_ENDINGS"] = self.options.verbose_scope_endings
         tc.variables["LOGURU_REDEFINE_ASSERT"] = self.options.redefine_assert
         tc.variables["LOGURU_WITH_STREAMS"] = self.options.enable_streams
         tc.variables["LOGURU_WITH_FILEABS"] = self.options.enable_fileabs
         tc.variables["LOGURU_REPLACE_GLOG"] = self.options.replace_glog
+
         tc.variables["LOGURU_SCOPE_TEXT_SIZE"] = self.options.scope_text_size
         tc.variables["LOGURU_SCOPE_TIME_PRECISION"] = self.options.scope_time_precision
         tc.variables["LOGURU_FILENAME_WIDTH"] = self.options.filename_width
         tc.variables["LOGURU_THREADNAME_WIDTH"] = self.options.threadname_width
+
         if is_msvc(self) and self.options.shared:
             tc.preprocessor_definitions["LOGURU_EXPORT"] = "__declspec(dllexport)"
         tc.generate()
@@ -110,7 +114,7 @@ class LoguruConan(ConanFile):
         save(self, os.path.join(self.package_folder, 'licenses', 'LICENSE'), self._extracted_license)
         cmake = CMake(self)
         cmake.install()
-        
+
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
@@ -124,16 +128,18 @@ class LoguruConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "loguru")
         self.cpp_info.set_property("cmake_target_name", "loguru::loguru")
 
-        self.cpp_info.defines.append(f"LOGURU_USE_FMTLIB={self.options.with_fmt}")
+        # render each option as either 0 or 1 for loguru's #if preprocessor commands
+        self.cpp_info.defines.append(f"LOGURU_USE_FMTLIB={bool(self.options.with_fmt)*1}")
+        self.cpp_info.defines.append(f"LOGURU_VERBOSE_SCOPE_ENDINGS={bool(self.options.verbose_scope_endings)*1}")
+        self.cpp_info.defines.append(f"LOGURU_REDEFINE_ASSERT={bool(self.options.redefine_assert)*1}")
+        self.cpp_info.defines.append(f"LOGURU_WITH_STREAMS={bool(self.options.enable_streams)*1}")
+        self.cpp_info.defines.append(f"LOGURU_WITH_FILEABS={bool(self.options.enable_fileabs)*1}")
+        self.cpp_info.defines.append(f"LOGURU_REPLACE_GLOG={bool(self.options.replace_glog)*1}")
+
         self.cpp_info.defines.append(f"LOGURU_SCOPE_TEXT_SIZE={self.options.scope_text_size}")
         self.cpp_info.defines.append(f"LOGURU_SCOPE_TIME_PRECISION={self.options.scope_time_precision}")
         self.cpp_info.defines.append(f"LOGURU_FILENAME_WIDTH={self.options.filename_width}")
         self.cpp_info.defines.append(f"LOGURU_THREADNAME_WIDTH={self.options.threadname_width}")
-        self.cpp_info.defines.append(f"LOGURU_VERBOSE_SCOPE_ENDINGS={self.options.verbose_scope_endings}")
-        self.cpp_info.defines.append(f"LOGURU_REDEFINE_ASSERT={self.options.redefine_assert}")
-        self.cpp_info.defines.append(f"LOGURU_WITH_STREAMS={self.options.enable_streams}")
-        self.cpp_info.defines.append(f"LOGURU_WITH_FILEABS={self.options.enable_fileabs}")
-        self.cpp_info.defines.append(f"LOGURU_REPLACE_GLOG={self.options.replace_glog}")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl", "m"]

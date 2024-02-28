@@ -15,6 +15,7 @@ class PugiXmlConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pugixml.org/"
+    package_type = "library"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {

@@ -1,0 +1,8 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -135,4 +135,5 @@ if(AMQP-CPP_LINUX_TCP)
+     # Find OpenSSL and provide include dirs
+     find_package(OpenSSL REQUIRED)
+     target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
++    target_link_libraries(${PROJECT_NAME} OpenSSL::SSL)
+ endif()

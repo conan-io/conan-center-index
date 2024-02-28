@@ -1,4 +1,13 @@
 sources:
+  "2.1":
+    url: "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-2.1.tar.gz"
+    sha256: "fd6ed4b2c674fe6cc3b481880f6cde1eea79e296e95a139b85401eaaea6de3fc"
+  "2.0.1":
+    url: "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-2.0.1.tar.gz"
+    sha256: "b6eda55356160a8e73906e3d48e959ef81296787d764975b10f257e9660668e9"
+  "1.6.4":
+    url: "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.4.tar.gz"
+    sha256: "829d4ac268df07853609d67cfc7f476e9aa736cb2a68a630be99e8fad197be0a"
   "1.6.3":
     url: "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.3.tar.gz"
     sha256: "eb446070be1444fd7d32d32bbca53c2f3bbb0a21193db86198cf6050b7a28441"

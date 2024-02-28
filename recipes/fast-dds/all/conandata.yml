@@ -1,4 +1,10 @@
 sources:
+  "2.11.2":
+    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.11.2.tar.gz"
+    sha256: "711f5d7afc6a31a908ab204f8b67045d5e7cab7b4052614b595b37c774f357fd"
+  "2.11.1":
+    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.11.1.tar.gz"
+    sha256: "3fe8b9f67a13a5d2aa40c0bd10581bd90f0a192b39c71f92ee233ffe584d3374"
   "2.10.1":
     url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.10.1.tar.gz"
     sha256: "2cc2682db5dc7e87684b7f23166e2f32faf8d5c4b4a8c94c6c21211a8a38f553"
@@ -12,6 +18,14 @@ sources:
     url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.3.2.tar.gz"
     sha256: "4d8183cf4d37c3de9e6fd28d2850dd08023a9079001c4880b23c95f0d8c0b5ce"
 patches:
+  "2.11.2":
+    - patch_file: "patches/2.11.1-0001-fix-find-asio-and-tinyxml2.patch"
+      patch_type: "conan"
+      patch_description: "Fixup find asio and tinyxml2"
+  "2.11.1":
+    - patch_file: "patches/2.11.1-0001-fix-find-asio-and-tinyxml2.patch"
+      patch_type: "conan"
+      patch_description: "Fixup find asio and tinyxml2"
   "2.10.1":
     - patch_file: "patches/2.10.1-0001-fix-find-asio-and-tinyxml2.patch"
       patch_type: "conan"

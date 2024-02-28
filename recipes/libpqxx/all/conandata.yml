@@ -1,25 +1,19 @@
 sources:
+  "7.9.0":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.9.0.tar.gz"
+    sha256: "a1fafd5f6455f6c66241fca1f35f5cb603251580b99f9a0cf1b5d0a586006f16"
+  "7.8.1":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.8.1.tar.gz"
+    sha256: "0f4c0762de45a415c9fd7357ce508666fa88b9a4a463f5fb76c235bc80dd6a84"
+  "7.8.0":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.8.0.tar.gz"
+    sha256: "bc471d8d34588f820f38e19e1cc217f399212eef900416cf12f90fab293628af"
   "7.7.5":
     url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.7.5.tar.gz"
     sha256: "c7dc3e8fa2eee656f2b6a8179d72f15db10e97a80dc4f173f806e615ea990973"
-  "7.7.4":
-    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.7.4.tar.gz"
-    sha256: "65b0a06fffd565a19edacedada1dcfa0c1ecd782cead0ee067b19e2464875c36"
-  "7.7.3":
-    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.7.3.tar.gz"
-    sha256: "11e147bbe2d3024d68d29b38eab5d75899dbb6131e421a2dbf9f88bac9bf4b0d"
-  "7.7.2":
-    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.7.2.tar.gz"
-    sha256: "4b7a0b67cbd75d1c31e1e8a07c942ffbe9eec4e32c29b15d71cc225dc737e243"
-  "7.7.0":
-    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.7.0.tar.gz"
-    sha256: "2d99de960aa3016915bc69326b369fcee04425e57fbe9dad48dd3fa6203879fb"
   "7.6.1":
     url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.6.1.tar.gz"
     sha256: "7f4ad37fce20e8c9a61387cd5d6f85cf264f2bc9c0e6b27e8d5751a5429f87d0"
-  "7.6.0":
-    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.6.0.tar.gz"
-    sha256: "8194ce4eff3fee5325963ccc28d3542cfaa54ba1400833d0df6948de3573c118"
   "7.5.3":
     url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.5.3.tar.gz"
     sha256: "4229ed9205e484a4bafb10edd6ce75b98c12d63c082a98baada0c01766d218e0"
@@ -29,52 +23,67 @@ sources:
   "7.3.2":
     url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.3.2.tar.gz"
     sha256: "493991345de5cbddfed8836917a333add2cd00ecbfd21b1acbc9345ce784225f"
-  "7.2.1":
-    url: "https://github.com/jtv/libpqxx/archive/7.2.1.tar.gz"
-    sha256: "3fd8318d2e421483495bf1a8ea1365fce4105934e9600ca87be0dff470d8c8dc"
-  "7.1.2":
-    url: "https://github.com/jtv/libpqxx/archive/7.1.2.tar.gz"
-    sha256: "3af7b4cfd572c67275ad24fea31bcf9d9f365ec16a1b7e90d4bde930936707f3"
-  "7.0.7":
-    url: "https://github.com/jtv/libpqxx/archive/7.0.7.tar.gz"
-    sha256: "856fffb76141a236df608a86aa7d63b04f82816c9bbf80d33189705a0b2682eb"
   "6.4.8":
     url: "https://github.com/jtv/libpqxx/archive/6.4.8.tar.gz"
     sha256: "3f7aba951822e01f1b9f9f353702954773323dd9f9dc376ffb57cb6bbd9a7a2f"
 patches:
+  "7.9.0":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
+      patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."
+      patch_type: "conan"
+  "7.8.1":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
+      patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."
+      patch_type: "conan"
+  "7.8.0":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
+      patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."
+      patch_type: "conan"
+    - patch_file: "patches/fix-alternative-operator-error-7.8.0.patch"
+      patch_source: "https://github.com/jtv/libpqxx/pull/714"
+      patch_description: "Fix a bug undeclared identifier alternative operator."
+      patch_type: "bugfix"
   "7.7.5":
     - patch_file: "patches/0001-cmake-fix-module.patch"
-  "7.7.4":
-    - patch_file: "patches/0001-cmake-fix-module.patch"
-  "7.7.3":
-    - patch_file: "patches/0001-cmake-fix-module.patch"
-  "7.7.2":
-    - patch_file: "patches/0001-cmake-fix-module.patch"
-    - patch_file: "patches/fix-install-library-symlink-7.7.2.patch"
-  "7.7.0":
-    - patch_file: "patches/0001-cmake-fix-module.patch"
-    - patch_file: "patches/fix-clang-compilation-7.7.0.patch"
+      patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."
+      patch_type: "conan"
   "7.6.1":
     - patch_file: "patches/0001-cmake-fix-module.patch"
+      patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."
+      patch_type: "conan"
     - patch_file: "patches/fix-inline-constexpr-local-variable-problem-7.6.0.patch"
+      patch_source: "https://github.com/jtv/libpqxx/pull/468"
+      patch_description: "Fixed a problem that some compilers did not allow `inline constexpr` local variable declarations."
+      patch_type: "bugfix"
     - patch_file: "patches/fix-remove-unlikely-annotation-before-return-7.6.0_to_7.6.1.patch"
-  "7.6.0":
-    - patch_file: "patches/0001-cmake-fix-module.patch"
-    - patch_file: "patches/fix-inline-constexpr-local-variable-problem-7.6.0.patch"
-    - patch_file: "patches/fix-remove-unlikely-annotation-before-return-7.6.0_to_7.6.1.patch"
+      patch_source: "https://github.com/jtv/libpqxx/pull/476"
+      patch_description: "fix: Remove `unlikely` annotation before `return`"
+      patch_type: "bugfix"
   "7.5.3":
     - patch_file: "patches/0001-cmake-fix-module.patch"
+      patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."
+      patch_type: "conan"
   "7.4.2":
     - patch_file: "patches/0001-cmake-fix-module.patch"
+      patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."
+      patch_type: "conan"
+    - patch_file: "patches/stop-using-strnlen-7.4.2.patch"
+      patch_source: "https://github.com/jtv/libpqxx/commit/df30e186e148acb031244ed0ab1151731d3501a4"
+      patch_description: "Fix MSVC 2022 compile error: '<': no operator found which takes a right-hand operand of type 'std::_String_view_iterator<_Traits>'"
+      patch_type: "bugfix"
   "7.3.2":
     - patch_file: "patches/0001-cmake-fix-module.patch"
+      patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."
+      patch_type: "conan"
     - patch_file: "patches/fix-msvc-compilation-7.3.1.patch"
-  "7.2.1":
-    - patch_file: "patches/0001-cmake-fix-module.patch"
-  "7.1.2":
-    - patch_file: "patches/0001-cmake-fix-module.patch"
-  "7.0.7":
-    - patch_file: "patches/0001-cmake-fix-module.patch"
-    - patch_file: "patches/fix-not-declared-dumb_stringstream-7.0.6_to_7.0.7.patch"
+      patch_source: "https://github.com/jtv/libpqxx/pull/406"
+      patch_description: "Fix a bug that syntax error on Visual Studio 2017"
+      patch_type: "bugfix"
+    - patch_file: "patches/stop-using-strnlen-7.3.2.patch"
+      patch_source: "https://github.com/jtv/libpqxx/commit/df30e186e148acb031244ed0ab1151731d3501a4"
+      patch_description: "Fix MSVC 2022 compile error: '<': no operator found which takes a right-hand operand of type 'std::_String_view_iterator<_Traits>'"
+      patch_type: "bugfix"
   "6.4.8":
     - patch_file: "patches/0001-cmake-fix-module-6.4.8.patch"
+      patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."
+      patch_type: "conan"

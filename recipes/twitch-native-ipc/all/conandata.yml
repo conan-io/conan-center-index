@@ -5,8 +5,5 @@ sources:
 patches:
   "3.1.1":
     - patch_file: "patches/cmake-fixes.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/linux-build-fixes.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/export-fixes.patch"
-      base_path: "source_subfolder"

@@ -30,15 +30,6 @@ diff --git a/cmake/external/onnxruntime_external_deps.cmake b/cmake/external/onn
 index 9effd1a2db..a059c28e36 100644
 --- a/cmake/external/onnxruntime_external_deps.cmake
 +++ b/cmake/external/onnxruntime_external_deps.cmake
-@@ -152,7 +152,7 @@ FetchContent_Declare(
-   URL ${DEP_URL_protobuf}
-   URL_HASH SHA1=${DEP_SHA1_protobuf}
-   PATCH_COMMAND ${ONNXRUNTIME_PROTOBUF_PATCH_COMMAND}
--  FIND_PACKAGE_ARGS 3.21.12 NAMES Protobuf
-+  FIND_PACKAGE_ARGS NAMES Protobuf
- )
- set(protobuf_BUILD_TESTS OFF CACHE BOOL "Build protobuf tests" FORCE)
- if (CMAKE_SYSTEM_NAME STREQUAL "Android")
 @@ -173,6 +173,7 @@ FetchContent_Declare(
        date
        URL ${DEP_URL_date}
@@ -142,19 +133,6 @@ index 1fc2c6ccdc..a2c28957f9 100644
  
  set(onnxruntime_EXTERNAL_LIBRARIES_XNNPACK XNNPACK pthreadpool)
  
-diff --git a/cmake/onnxruntime_common.cmake b/cmake/onnxruntime_common.cmake
-index 0410d3361c..685df7a487 100644
---- a/cmake/onnxruntime_common.cmake
-+++ b/cmake/onnxruntime_common.cmake
-@@ -195,7 +195,7 @@ if (ARM64 OR ARM OR X86 OR X64 OR X86_64)
-     # Its functionality in detecting x86 cpu features are lacking, so is support for Windows.
-     if (CPUINFO_SUPPORTED)
-       onnxruntime_add_include_to_target(onnxruntime_common cpuinfo::cpuinfo)
--      list(APPEND onnxruntime_EXTERNAL_LIBRARIES cpuinfo::cpuinfo cpuinfo::clog)
-+      list(APPEND onnxruntime_EXTERNAL_LIBRARIES cpuinfo::cpuinfo)
-     endif()
-   endif()
- endif()
 diff --git a/cmake/onnxruntime_providers.cmake b/cmake/onnxruntime_providers.cmake
 index 0daa1b8a3d..1f25467a8c 100644
 --- a/cmake/onnxruntime_providers.cmake

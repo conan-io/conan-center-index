@@ -1,17 +1,21 @@
 import os
-import glob
-from conans import ConanFile, CMake, tools
+
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import collect_libs, copy, get, replace_in_file
+
+required_conan_version = ">=1.53.0"
 
 
 class PoshlibConan(ConanFile):
     name = "poshlib"
     description = "Posh is a software framework used in cross-platform software development."
-    homepage = "https://github.com/PhilipLudington/poshlib"
-    url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "posh", "framework", "cross-platform")
     license = "BSD-2-Clause"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/PhilipLudington/poshlib"
+    topics = ("posh", "framework", "cross-platform")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,47 +26,51 @@ class PoshlibConan(ConanFile):
         "fPIC": True,
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob('poshlib-*/')[0]
-        os.rename(extracted_dir, self._source_subfolder)
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+
+    def _patch_sources(self):
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "posh.h"),
+            "defined _ARM",
+            "defined _ARM || defined __arm64 || defined __arm64__ || defined __aarch64__",
+        )
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "posh.h"),
-                              "defined _ARM",
-                              "defined _ARM || defined __arm64")
-        cmake = self._configure_cmake()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == 'Windows' and self.options.shared:
+        self.cpp_info.libs = collect_libs(self)
+        if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("POSH_DLL")
