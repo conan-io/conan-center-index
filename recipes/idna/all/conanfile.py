@@ -64,6 +64,8 @@ class IdnaConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
+
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["IDNA_SRC_DIR"] = self.source_folder.replace("\\", "/")
