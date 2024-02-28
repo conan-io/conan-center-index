@@ -53,7 +53,7 @@ class TreeGenConan(ConanFile):
 
     def build_requirements(self):
         if self._should_build_test:
-            self.tool_requires("gtest/1.14.0")
+            self.test_requires("gtest/1.14.0")
         self.tool_requires("m4/1.4.19")
         if self.settings.os == "Windows":
             self.tool_requires("winflexbison/2.5.24")
@@ -118,4 +118,5 @@ class TreeGenConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tree-gen"]
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
         self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "generate_tree.cmake")])
