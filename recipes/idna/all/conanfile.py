@@ -69,6 +69,7 @@ class IdnaConan(ConanFile):
 
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
+        tc.variables["ADA_IDNA_BENCHMARKS"] = False
         tc.variables["IDNA_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.generate()
 
