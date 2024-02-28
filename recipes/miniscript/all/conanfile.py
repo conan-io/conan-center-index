@@ -56,6 +56,13 @@ class MiniscriptConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
+        # miniscript doesn't declare export symbols with __declspec.
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} doesn't support msvc shared build.(yet)"
+            )
+
+        # miniscript < 1.6.2 doesn't require C++xx
         if Version(self.version) < "1.6.2":
             return
         if self.settings.compiler.get_safe("cppstd"):
@@ -64,11 +71,6 @@ class MiniscriptConan(ConanFile):
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
-        # miniscript <= 1.6.2 doesn't declare export symbols with __declspec.
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} doesn't support msvc shared build.(yet)"
             )
 
     def source(self):
