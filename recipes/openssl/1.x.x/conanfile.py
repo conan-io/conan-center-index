@@ -95,8 +95,9 @@ class OpenSSLConan(ConanFile):
     default_options["openssldir"] = None
 
     @property
-    def _is_clangcl(self):
-        return self.settings.compiler == "clang" and self.settings.os == "Windows"
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+               self.settings.compiler.get_safe("runtime")
 
     @property
     def _is_mingw(self):
@@ -104,7 +105,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _use_nmake(self):
-        return self._is_clangcl or is_msvc(self)
+        return self._is_clang_cl or is_msvc(self)
 
     @property
     def _settings_build(self):
@@ -374,7 +375,7 @@ class OpenSSLConan(ConanFile):
 
         if self.settings.os == "Neutrino":
             args.append("no-asm -lsocket -latomic")
-        if self._is_clangcl:
+        if self._is_clang_cl:
             # #error <stdatomic.h> is not yet supported when compiling as C, but this is planned for a future release.
             args.append("-D__STDC_NO_ATOMICS__")
 
@@ -500,7 +501,7 @@ class OpenSSLConan(ConanFile):
         with self._make_context():
             with chdir(self, self.source_folder):
                 # workaround for clang-cl not producing .pdb files
-                if self._is_clangcl:
+                if self._is_clang_cl:
                     save(self, "ossl_static.pdb", "")
                 args = " ".join(self._configure_args)
                 self.output.info(self._configure_args)

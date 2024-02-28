@@ -61,7 +61,7 @@ class LibgdConan(ConanFile):
         if self.options.with_tiff:
             self.requires("libtiff/4.6.0")
         if self.options.with_freetype:
-            self.requires("freetype/2.13.0")
+            self.requires("freetype/2.13.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

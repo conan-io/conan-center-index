@@ -1,3 +1,10 @@
 versions:
+  "0.8.30":
+    folder: all
+  "0.8.29":
+    folder: all
+  # 0.8.25 is the last version to support GenDC data format
+  "0.8.25":
+    folder: all
   "0.8.20":
     folder: all

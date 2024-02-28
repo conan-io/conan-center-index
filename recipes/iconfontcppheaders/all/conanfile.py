@@ -9,7 +9,7 @@ required_conan_version = ">=1.52.0"
 
 class FireHppConan(ConanFile):
     name = "iconfontcppheaders"
-    description = "Headers for icon fonts Font Awesome, Fork Awesome, Google Material Design, Kenney game icons, Fontaudio, Codicons, Pictogrammers Material Design icons."
+    description = "Headers for icon fonts Font Awesome, Fork Awesome, Google Material Design, Pictogrammers Material Design icons, Kenney game icons, Fontaudio, Codicons and Lucide."
     license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/juliettef/IconFontCppHeaders"

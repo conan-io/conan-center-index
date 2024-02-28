@@ -18,6 +18,7 @@ class CistaConan(ConanFile):
     topics = ("cista", "serialization", "deserialization", "reflection")
     homepage = "https://github.com/felixguendling/cista"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -34,6 +35,9 @@ class CistaConan(ConanFile):
             "clang": "6",
             "apple-clang": "9.1"
         }
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -53,9 +57,6 @@ class CistaConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
 
     def source(self):
         for file in self.conan_data["sources"][self.version]:

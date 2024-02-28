@@ -33,7 +33,7 @@ class FFNvEncHeaders(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             if "CONAN_MAKE_PROGRAM" not in os.environ:
-                self.build_requires("make/4.2.1")
+                self.build_requires("make/4.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

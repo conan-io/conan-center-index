@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 import os
@@ -38,7 +38,7 @@ class LibgcryptConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcap/2.66")
+        self.requires("libcap/2.69")
         self.requires("libgpg-error/1.36", transitive_headers=True)
 
     def validate(self):
@@ -63,7 +63,12 @@ class LibgcryptConan(ConanFile):
         deps = AutotoolsDeps(self)
         deps.generate()
 
+    def _patch_sources(self):
+        # Disable the tests subdir
+        save(self, os.path.join(self.source_folder, "tests", "Makefile.in"), "all:\ninstall:\n")
+
     def build(self):
+        self._patch_sources()
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
@@ -73,6 +78,7 @@ class LibgcryptConan(ConanFile):
         autotools = Autotools(self)
         autotools.install()
         rm(self, "*la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):

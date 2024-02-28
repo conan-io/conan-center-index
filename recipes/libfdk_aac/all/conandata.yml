@@ -1,4 +1,7 @@
 sources:
+  "2.0.3":
+    url: "https://sourceforge.net/projects/opencore-amr/files/fdk-aac/fdk-aac-2.0.3.tar.gz"
+    sha256: "829b6b89eef382409cda6857fd82af84fabb63417b08ede9ea7a553f811cb79e"
   "2.0.2":
     url: "https://sourceforge.net/projects/opencore-amr/files/fdk-aac/fdk-aac-2.0.2.tar.gz"
     sha256: "c9e8630cf9d433f3cead74906a1520d2223f89bcd3fa9254861017440b8eb22f"
