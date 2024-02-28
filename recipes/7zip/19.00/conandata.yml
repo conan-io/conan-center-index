@@ -1,4 +1,9 @@
 sources:
+  "23.01":
+    url:
+      - https://www.7-zip.org/a/7z2301-src.tar.xz
+      - https://sourceforge.net/projects/sevenzip/files/7-Zip/23.01/7z2301-src.tar.xz
+    sha256: "356071007360e5a1824d9904993e8b2480b51b570e8c9faf7c0f58ebe4bf9f74"
   "22.01":
     url:
       - https://www.7-zip.org/a/7z2201-src.tar.xz

@@ -1,0 +1,65 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 06b9696f2..a70245b54 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -118,6 +118,7 @@ if (sqlite3)
+ endif()
+ 
+ find_package(Iconv REQUIRED)
++get_target_property(ICONV_INCLUDE_DIR Iconv::Iconv INTERFACE_INCLUDE_DIRECTORIES)
+ include_directories(${ICONV_INCLUDE_DIR})
+ 
+ 
+diff --git a/addon/doxyapp/CMakeLists.txt b/addon/doxyapp/CMakeLists.txt
+index 707fdedbf..8d51b76f7 100644
+--- a/addon/doxyapp/CMakeLists.txt
++++ b/addon/doxyapp/CMakeLists.txt
+@@ -1,4 +1,5 @@
+ find_package(Iconv)
++get_target_property(ICONV_INCLUDE_DIR Iconv::Iconv INTERFACE_INCLUDE_DIRECTORIES)
+ 
+ include_directories(
+ 	${PROJECT_SOURCE_DIR}/src
+@@ -43,7 +44,7 @@ mscgen
+ doxygen_version
+ doxycfg
+ vhdlparser
+-${ICONV_LIBRARIES}
++Iconv::Iconv
+ ${CMAKE_THREAD_LIBS_INIT}
+ ${SQLITE3_LIBRARIES}
+ ${EXTRA_LIBS}
+diff --git a/addon/doxyparse/CMakeLists.txt b/addon/doxyparse/CMakeLists.txt
+index fe2f2c2ff..131354e95 100644
+--- a/addon/doxyparse/CMakeLists.txt
++++ b/addon/doxyparse/CMakeLists.txt
+@@ -1,4 +1,5 @@
+ find_package(Iconv)
++get_target_property(ICONV_INCLUDE_DIR Iconv::Iconv INTERFACE_INCLUDE_DIRECTORIES)
+ 
+ include_directories(
+ 	${PROJECT_SOURCE_DIR}/src
+@@ -31,7 +32,7 @@ mscgen
+ doxygen_version
+ doxycfg
+ vhdlparser
+-${ICONV_LIBRARIES}
++Iconv::Iconv
+ ${CMAKE_THREAD_LIBS_INIT}
+ ${SQLITE3_LIBRARIES}
+ ${EXTRA_LIBS}
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 5004a9578..c63399bc1 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -351,7 +351,7 @@ target_link_libraries(doxygen PRIVATE
+     doxygen_version
+     vhdlparser
+     ${SQLITE3_LIBRARIES}
+-    ${ICONV_LIBRARIES}
++    Iconv::Iconv
+     ${CMAKE_THREAD_LIBS_INIT}
+     ${EXTRA_LIBS}
+     ${CLANG_LIBS}
+-- 
+

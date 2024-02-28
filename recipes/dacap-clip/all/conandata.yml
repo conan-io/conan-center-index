@@ -1,4 +1,7 @@
 sources:
+  "1.7":
+    url: "https://github.com/dacap/clip/archive/refs/tags/v1.7.tar.gz"
+    sha256: "f494d306f3425e984368cbd94ffb213e0a3b3d44c3ab169e5134788d3342535c"
   "1.6":
     url: "https://github.com/dacap/clip/archive/refs/tags/v1.6.tar.gz"
     sha256: "fc37319775ec1b6a75475b46696f5014418d90676359b96b894f646241dcbb7e"

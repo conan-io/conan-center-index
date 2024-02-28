@@ -1,4 +1,7 @@
 sources:
+  "4.5.6":
+    url: "https://github.com/sqlcipher/sqlcipher/archive/v4.5.6.zip"
+    sha256: "5d269166c33c39c4dc6fc14be4ac8cd78b022f8bd59b0775becf0c896331a539"
   "4.5.1":
     url: "https://github.com/sqlcipher/sqlcipher/archive/v4.5.1.zip"
     sha256: "08a1024b299b5527d5b5ed79f67957938b516567f68662e973c4bec1b843b28e"
@@ -18,45 +21,31 @@ sources:
     url: "https://github.com/sqlcipher/sqlcipher/archive/v4.3.0.zip"
     sha256: "41e1408465488e9c478ca5b7c5f8410405a10caa73b82db60ac115a76c563c05"
 patches:
+  "4.5.6":
+    - patch_file: patches/Makefile.in-v4.5.6.patch
+    - patch_file: patches/Makefile.msc-v4.5.6.patch
+    - patch_file: patches/fix_configure-v4.5.6.patch
   "4.5.1":
     - patch_file: patches/Makefile.in-v4.5.1.patch
-      base_path: source_subfolder
     - patch_file: patches/Makefile.msc-v4.5.1.patch
-      base_path: source_subfolder
     - patch_file: patches/fix_configure-v4.5.1.patch
-      base_path: source_subfolder
   "4.5.0":
     - patch_file: patches/Makefile.in-v4.5.0.patch
-      base_path: source_subfolder
     - patch_file: patches/Makefile.msc-v4.5.0.patch
-      base_path: source_subfolder
     - patch_file: patches/fix_configure-v4.5.0.patch
-      base_path: source_subfolder
   "4.4.3":
     - patch_file: patches/Makefile.in-v4.4.3.patch
-      base_path: source_subfolder
     - patch_file: patches/Makefile.msc-v4.4.3.patch
-      base_path: source_subfolder
     - patch_file: patches/fix_configure-v4.4.3.patch
-      base_path: source_subfolder
   "4.4.2":
     - patch_file: patches/Makefile.in-v4.4.2.patch
-      base_path: source_subfolder
     - patch_file: patches/Makefile.msc-v4.4.2.patch
-      base_path: source_subfolder
     - patch_file: patches/fix_configure-v4.4.2.patch
-      base_path: source_subfolder
   "4.4.0":
     - patch_file: patches/Makefile.in-v4.4.0.patch
-      base_path: source_subfolder
     - patch_file: patches/Makefile.msc-v4.4.0.patch
-      base_path: source_subfolder
     - patch_file: patches/fix_configure-v4.4.0.patch
-      base_path: source_subfolder
   "4.3.0":
     - patch_file: patches/Makefile.in-v4.3.0.patch
-      base_path: source_subfolder
     - patch_file: patches/Makefile.msc-v4.3.0.patch
-      base_path: source_subfolder
     - patch_file: patches/fix_configure-v4.3.0.patch
-      base_path: source_subfolder

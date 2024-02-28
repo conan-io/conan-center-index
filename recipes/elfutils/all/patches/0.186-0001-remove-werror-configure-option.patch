@@ -1,0 +1,23 @@
+diff --git a/source/source_subfolder/configure.ac b/source/source_subfolder/configure.ac
+index 74cc749..634858d 100644
+--- configure.ac
++++ configure.ac
+@@ -262,6 +262,18 @@
+ esac
+ AC_SUBST([DEBUGPRED], $use_debugpred_val)
+ 
++dnl Enable -Werror
++AC_MSG_CHECKING([whether to treat warnings as errors])
++AC_ARG_ENABLE([werror],
++AS_HELP_STRING([--enable-werror],[treat warnings as errors]),
++[werror=$enableval], [werror=yes])
++if test "x$werror" = xyes; then
++  AC_MSG_RESULT([yes])
++  CFLAGS="$CFLAGS -Werror"
++else
++  AC_MSG_RESULT([no])
++fi
++
+ dnl Enable gprof support.
+ AC_ARG_ENABLE([gprof],
+ AS_HELP_STRING([--enable-gprof],[build binaries with gprof support]), [use_gprof=$enableval], [use_gprof=no])
