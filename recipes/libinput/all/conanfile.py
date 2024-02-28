@@ -44,10 +44,6 @@ class LibinputConan(ConanFile):
         if not self.options.debug_gui:
             self.options.rm_safe("with_wayland")
             self.options.rm_safe("with_x11")
-        if self.options.get_safe("with_wayland"):
-            self.options["gtk"].with_wayland = True
-        if self.options.get_safe("with_x11"):
-            self.options["gtk"].with_x11 = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -57,12 +53,12 @@ class LibinputConan(ConanFile):
         self.requires("libevdev/1.13.1")
 
         if self.options.debug_gui:
-            self.requires("cairo/1.17.6")
-            self.requires("glib/2.78.0")
-            self.requires("gtk/4.7.0")
+            self.requires("cairo/1.18.0")
+            self.requires("glib/2.78.3")
+            self.requires("gtk/system")
             if self.options.with_wayland:
                 self.requires("wayland/1.22.0")
-                self.requires("wayland-protocols/1.31")
+                self.requires("wayland-protocols/1.33")
             if self.options.with_x11:
                 self.requires("xorg/system")
 
@@ -74,15 +70,15 @@ class LibinputConan(ConanFile):
             self.requires("eudev/3.2.12", transitive_libs=True)
 
     def validate(self):
-        if not self.settings.os in ["FreeBSD", "Linux"]:
+        if self.settings.os not in ["FreeBSD", "Linux"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
         if self.options.with_libwacom:
             raise ConanInvalidConfiguration(f"The with_libwacom option for {self.ref} is not yet supported. Contributions welcome.")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/1.3.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/<host_version>")
 
