@@ -58,7 +58,7 @@ class CppServer(ConanFile):
 
     def requirements(self):
         self.requires("asio/1.29.0", transitive_headers=True)
-        self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
+        self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
         if Version(self.version) < "1.0.2.0":
             self.requires("cppcommon/1.0.2.0", transitive_headers=True)
         else:
