@@ -8,7 +8,6 @@ from conan.tools.cmake import CMake, cmake_layout
 class TreeGenTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "CMakeToolchain", "VirtualBuildEnv", "VirtualRunEnv"
-    apply_env = False
     test_type = "explicit"
 
     def build_requirements(self):

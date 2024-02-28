@@ -26,13 +26,11 @@ class TreeGenConan(ConanFile):
     package_type = "library"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
-        "asan_enabled": [True, False]
+        "fPIC": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
-        "asan_enabled": False
+        "fPIC": True
     }
 
     @property
@@ -54,6 +52,8 @@ class TreeGenConan(ConanFile):
         }
 
     def build_requirements(self):
+        if self._should_build_test:
+            self.test_requires("gtest/1.14.0")
         self.tool_requires("m4/1.4.19")
         if self.settings.os == "Windows":
             self.tool_requires("winflexbison/2.5.24")
@@ -63,10 +63,8 @@ class TreeGenConan(ConanFile):
                 self.tool_requires("bison/3.8.2")
 
     def requirements(self):
-        self.requires("fmt/10.1.1")
+        self.requires("fmt/10.2.1")
         self.requires("range-v3/0.12.0")
-        if self._should_build_test:
-            self.requires("gtest/1.14.0")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -86,7 +84,6 @@ class TreeGenConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
-        tc.variables["ASAN_ENABLED"] = self.options.asan_enabled
         tc.variables["TREE_GEN_BUILD_TESTS"] = self._should_build_test
         tc.generate()
         env = VirtualBuildEnv(self)
@@ -115,10 +112,10 @@ class TreeGenConan(ConanFile):
              dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*.cmake",
              src=os.path.join(self.source_folder, "cmake"),
-             dst=os.path.join(self.package_folder, "include"))
+             dst=os.path.join(self.package_folder, "lib", "cmake"))
         cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["tree-gen"]
-        self.cpp_info.set_property("cmake_build_modules", [os.path.join("include", "generate_tree.cmake")])
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "generate_tree.cmake")])
