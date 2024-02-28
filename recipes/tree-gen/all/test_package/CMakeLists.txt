@@ -4,17 +4,21 @@ project(PackageTest CXX)
 
 find_package(tree-gen REQUIRED CONFIG)
 
-## Generate the directory classes.
-#generate_tree_py(
-#    "${CMAKE_CURRENT_SOURCE_DIR}/res/directory.tree"
-#    "${CMAKE_CURRENT_SOURCE_DIR}/output/directory.actual.hpp"
-#    "${CMAKE_CURRENT_SOURCE_DIR}/output/directory.actual.cpp"
-#    "${CMAKE_CURRENT_SOURCE_DIR}/output/directory.actual.py"
-#)
+# Generate the directory classes.
+generate_tree_py(
+    "${CMAKE_CURRENT_SOURCE_DIR}/res/directory.tree"
+    "${CMAKE_CURRENT_SOURCE_DIR}/output/directory.actual.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/output/directory.actual.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/output/directory.actual.py"
+)
+
+message(STATUS
+    "tree-gen executable PATH: $(tree-gen)"
+)
 
 add_executable(example
     "${CMAKE_CURRENT_SOURCE_DIR}/src/example.cpp"
-#    "${CMAKE_CURRENT_SOURCE_DIR}/output/directory.actual.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/output/directory.actual.cpp"
 )
 
 target_compile_features(example

@@ -1,5 +1,5 @@
-//#include "output/directory.actual.hpp"  // the generated file
-//#include "utils.hpp"
+#include "output/directory.actual.hpp"  // the generated file
+#include "utils.hpp"
 #include "version.hpp"  // tree-gen version
 
 #include <cstdio>
@@ -16,6 +16,6 @@ void print_tree_gen_version() {
 int main() {
     print_tree_gen_version();
 
-//    auto system = tree::base::make<directory::System>();
-//    ASSERT(!system.is_well_formed());
+    auto system = tree::base::make<directory::System>();
+    ASSERT(!system.is_well_formed());
 }
