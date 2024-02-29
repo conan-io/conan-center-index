@@ -17,7 +17,7 @@ class PackageConan(ConanFile):
     description = "The OpenSSH (portable) suite of secure connectivity tools"
     license = "BSD"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/openssh/openssh-portable"
+    homepage = "https://www.openssh.com/portable.html"
     topics = ("security", "cryptography", "login", "keychain", "file-sharing")
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
