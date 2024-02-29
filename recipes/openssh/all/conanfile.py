@@ -54,7 +54,7 @@ class PackageConan(ConanFile):
             self.requires("openpam/20190224")
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD", "Neutrino"]:
+        if self.settings.os in ["baremetal", "Windows"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
     def source(self):
