@@ -30,6 +30,11 @@ sources:
     url: "https://download.gnome.org/sources/glib/2.75/glib-2.75.3.tar.xz"
     sha256: "7c517d0aff456c35a039bce8a8df7a08ce95a8285b09d1849f8865f633f7f871"
 patches:
+  "2.78.3":
+    - patch_file: "patches/0001-Switch-from-the-deprecated-distutils-module-to-the-p.patch"
+      patch_type: "portability"
+      patch_description: "Replace the distutils module to support Python 3.12"
+      patch_source: "https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3740"
   "2.78.1":
     - patch_file: "patches/0001-Switch-from-the-deprecated-distutils-module-to-the-p.patch"
       patch_type: "portability"
