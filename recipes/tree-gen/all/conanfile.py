@@ -102,10 +102,6 @@ class TreeGenConan(ConanFile):
         copy(self, "generate_tree.cmake", src=os.path.join(self.source_folder, "cmake"), dst=os.path.join(self.package_folder, "lib", "cmake"))
         cmake = CMake(self)
         cmake.install()
-        # Remove vendor includes
-        rmdir(self, os.path.join(self.package_folder, "include"))
-        copy(self, "*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
-        copy(self, "*.inc", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.libs = ["tree-gen"]
