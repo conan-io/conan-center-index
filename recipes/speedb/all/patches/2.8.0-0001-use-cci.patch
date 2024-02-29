@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2972cdc..49b866c 100644
+index a579792..62299e9 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -181,7 +181,11 @@ else()
+@@ -195,7 +195,11 @@ else()
      find_package(zstd REQUIRED)
      add_definitions(-DZSTD)
      include_directories(${ZSTD_INCLUDE_DIR})
