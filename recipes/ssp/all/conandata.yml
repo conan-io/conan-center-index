@@ -1,4 +1,7 @@
 sources:
+  "1.7.0":
+    url: "https://github.com/red0124/ssp/archive/refs/tags/v1.7.0.tar.gz"
+    sha256: "c59b057831c1a4bc22322c85e9e9e9dcf7dd49c7172e8a5005fdb82850f5d368"
   "1.6.2":
     url: "https://github.com/red0124/ssp/archive/refs/tags/v1.6.2.tar.gz"
     sha256: "6fa5ae1cd458eae3c1931e8cbcbd8d97956eda37db1388358456ca0743b48b7c"
