@@ -5,4 +5,3 @@ sources:
   "1.0.3":
     url: "https://dlm.mariadb.com/3700669/Connectors/cpp/connector-cpp-1.0.3/mariadb-connector-cpp-1.0.3-src.tar.gz"
     sha256: "706462facc982f5c9aeacaf8c1613055ec5961b2d121bed9da34cb88f666b068"
-

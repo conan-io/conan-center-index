@@ -1,6 +1,6 @@
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
-from conan.tools.files import get, collect_libs, replace_in_file, rm
+from conan.tools.cmake import CMake, CMakeDeps, cmake_layout, CMakeToolchain
+from conan.tools.files import get, collect_libs, replace_in_file, rm, copy
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
@@ -130,6 +130,7 @@ class MariadbConnectorCPPRecipe(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "COPYING.LIB", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rm(self, "INFO_SRC", self.package_folder)
