@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -13,15 +13,11 @@ required_conan_version = ">=1.53.0"
 
 class TreeGenConan(ConanFile):
     name = "tree-gen"
-
-    # Optional metadata
     license = "Apache-2.0"
     homepage = "https://github.com/QuTech-Delft/tree-gen"
     url = "https://github.com/conan-io/conan-center-index"
     description = "C++ and Python code generator for tree-like structures common in parser and compiler codebases."
-    topics = "code generation"
-
-    # Binary configuration
+    topics = ("code generation", "tree", "parser", "compiler")
     settings = "os", "compiler", "build_type", "arch"
     package_type = "library"
     options = {
@@ -38,33 +34,18 @@ class TreeGenConan(ConanFile):
         return not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
 
     @property
-    def _min_cpp_std(self):
+    def _min_cppstd(self):
         return 17
 
     @property
-    def _minimum_compilers_version(self):
+    def _compilers_minimum_version(self):
         return {
-            "gcc": "10",
-            "clang": "13",
-            "apple-clang": "14",
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "12",
             "Visual Studio": "16",
             "msvc": "192"
         }
-
-    def build_requirements(self):
-        if self._should_build_test:
-            self.test_requires("gtest/1.14.0")
-        self.tool_requires("m4/1.4.19")
-        if self.settings.os == "Windows":
-            self.tool_requires("winflexbison/2.5.24")
-        else:
-            if self.settings.arch != "armv8":
-                self.tool_requires("flex/2.6.4")
-                self.tool_requires("bison/3.8.2")
-
-    def requirements(self):
-        self.requires("fmt/10.2.1")
-        self.requires("range-v3/0.12.0")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -76,6 +57,28 @@ class TreeGenConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def build_requirements(self):
+        if self._should_build_test:
+            self.test_requires("gtest/1.14.0")
+        self.tool_requires("m4/1.4.19")
+        if self.settings.os == "Windows":
+            self.tool_requires("winflexbison/2.5.24")
+        else:
+            if self.settings.arch != "armv8" and self.settings.arch != "wasm":
+                self.tool_requires("flex/2.6.4")
+                self.tool_requires("bison/3.8.2")
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
+
+    def requirements(self):
+        self.requires("fmt/10.2.1", transitive_headers=True)
+        self.requires("range-v3/0.12.0", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -94,27 +97,15 @@ class TreeGenConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def validate(self):
-        compiler = str(self.settings.compiler)
-        version = Version(self.settings.compiler.version)
-        if compiler in self._minimum_compilers_version:
-            min_version = self._minimum_compilers_version[compiler]
-            if version < min_version:
-                raise ConanInvalidConfiguration(f"tree-gen requires at least {compiler} {min_version}")
-        else:
-            raise ConanInvalidConfiguration("Unsupported compiler")
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cpp_std)
-
     def package(self):
-        copy(self, "LICENSE.md",
-             src=self.source_folder,
-             dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.cmake",
-             src=os.path.join(self.source_folder, "cmake"),
-             dst=os.path.join(self.package_folder, "lib", "cmake"))
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "generate_tree.cmake", src=os.path.join(self.source_folder, "cmake"), dst=os.path.join(self.package_folder, "lib", "cmake"))
         cmake = CMake(self)
         cmake.install()
+        # Remove vendor includes
+        rmdir(self, os.path.join(self.package_folder, "include"))
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, "*.inc", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.libs = ["tree-gen"]

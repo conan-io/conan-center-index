@@ -1,4 +1,4 @@
-#include "output/directory.actual.hpp"  // the generated file
+#include "directory.hpp"  // the generated file
 #include "utils.hpp"
 #include "version.hpp"  // tree-gen version
 

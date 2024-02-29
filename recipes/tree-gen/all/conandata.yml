@@ -1,5 +1,7 @@
 sources:
-  # Newer versions at the top
+  "1.0.3":
+    url: "https://github.com/QuTech-Delft/tree-gen/archive/refs/tags/1.0.3.tar.gz"
+    sha256: "a9316bcfea8755007b913eba4ffb0c9808a399de74a7a6e0a1de5d6f588788b5"
   "1.0.1":
     url: "https://github.com/QuTech-Delft/tree-gen/archive/refs/tags/1.0.1.tar.gz"
     sha256: "82484962603caa3f769d05c508357cda75699af7b25f794f02a9375cd1787dad"
