@@ -88,6 +88,8 @@ class TreeGenConan(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
         tc.variables["TREE_GEN_BUILD_TESTS"] = self._should_build_test
+        if self.settings.os == "Windows":
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         env = VirtualBuildEnv(self)
         env.generate()
