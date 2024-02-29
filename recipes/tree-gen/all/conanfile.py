@@ -65,9 +65,8 @@ class TreeGenConan(ConanFile):
         if self.settings.os == "Windows":
             self.tool_requires("winflexbison/2.5.24")
         else:
-            if self.settings.arch != "armv8" and self.settings.arch != "wasm":
-                self.tool_requires("flex/2.6.4")
-                self.tool_requires("bison/3.8.2")
+            self.tool_requires("flex/2.6.4")
+            self.tool_requires("bison/3.8.2")
 
     def validate(self):
         if self.settings.compiler.cppstd:
