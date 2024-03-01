@@ -4,6 +4,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
+import os
 
 
 required_conan_version = ">=1.62.0"
