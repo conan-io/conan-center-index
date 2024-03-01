@@ -1,0 +1,39 @@
+From cb10fa3676d5fe2facff9a8c7a6a89911de9efdf Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Fri, 1 Mar 2024 10:50:00 -0600
+Subject: [PATCH 3/3] libselinux/src/Makefile: fix reallocarray strlcpy
+ detection
+
+Pass CFLAGS and LDFLAGS when checking for realocarray and strlcpy.
+This brings things inline with the fixes for libsepol/src/Makefile.
+This better supports cross-compiling scenarios.
+There, flags like -sysroot need to included when running these checks.
+
+Signed-off-by: Jordan Williams <jordan@jwillikers.com>
+---
+ src/Makefile | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/Makefile b/src/Makefile
+index d3b981fc..6277a195 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -104,13 +104,13 @@ override CFLAGS += -I../include -D_GNU_SOURCE $(DISABLE_FLAGS) $(PCRE_CFLAGS)
+ 
+ # check for strlcpy(3) availability
+ H := \#
+-ifeq (yes,$(shell printf '${H}include <string.h>\nint main(void){char*d,*s;strlcpy(d, s, 0);return 0;}' | $(CC) -x c -o /dev/null - >/dev/null 2>&1 && echo yes))
++ifeq (yes,$(shell printf '${H}include <string.h>\nint main(void){char*d,*s;strlcpy(d, s, 0);return 0;}' | $(CC) $(CFLAGS) -x c -o /dev/null - >/dev/null 2>&1 && echo yes))
+ override CFLAGS += -DHAVE_STRLCPY
+ endif
+ 
+ # check for reallocarray(3) availability
+ H := \#
+-ifeq (yes,$(shell printf '${H}include <stdlib.h>\nint main(void){reallocarray(NULL, 0, 0);return 0;}' | $(CC) -x c -o /dev/null - >/dev/null 2>&1 && echo yes))
++ifeq (yes,$(shell printf '${H}include <stdlib.h>\nint main(void){reallocarray(NULL, 0, 0);return 0;}' | $(CC) $(CFLAGS) -x c -o /dev/null - >/dev/null 2>&1 && echo yes))
+ override CFLAGS += -DHAVE_REALLOCARRAY
+ endif
+ 
+-- 
+2.44.0
+
