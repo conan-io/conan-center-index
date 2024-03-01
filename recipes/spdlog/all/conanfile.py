@@ -174,9 +174,11 @@ class SpdlogConan(ConanFile):
 
         # TODO: back to global scope in conan v2 once legacy generators removed
         self.cpp_info.components["libspdlog"].set_property("cmake_target_name", f"spdlog::{target}")
-        self.cpp_info.components["libspdlog"].defines.append("SPDLOG_FMT_EXTERNAL")
-        if not self.options.get_safe("use_std_fmt"):
+        if self.options.get_safe("use_std_fmt"):
+            self.cpp_info.components["libspdlog"].defines.append("SPDLOG_USE_STD_FORMAT")
+        else:
             self.cpp_info.components["libspdlog"].requires = ["fmt::fmt"]
+            self.cpp_info.components["libspdlog"].defines.append("SPDLOG_FMT_EXTERNAL")
 
         if self.options.header_only:
             self.cpp_info.components["libspdlog"].libdirs = []
