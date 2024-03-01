@@ -49,6 +49,7 @@ class ChunkIOConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["CIO_LIB_STATIC"] = not self.options.shared
         tc.variables["CIO_LIB_SHARED"] = self.options.shared
+        tc.variables["CIO_BACKEND_FILESYSTEM"] = self.options.with_filesystem
         # Relocatable shared libs on macOS
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
