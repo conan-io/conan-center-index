@@ -94,6 +94,7 @@ class SoPlexConan(ConanFile):
         tc.variables["GMP"] = self.options.with_gmp
         tc.variables["BOOST"] = self.options.with_boost
         tc.variables["Boost_VERSION_MACRO"] = "108400"
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         if self.options.with_gmp:
