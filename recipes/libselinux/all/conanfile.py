@@ -62,7 +62,7 @@ class LibSELinuxConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("flex/2.6.4")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         for download in self.conan_data["sources"][self.version]:
@@ -87,7 +87,9 @@ class LibSELinuxConan(ConanFile):
         sepol_lib_folder = os.path.join(self._sepol_source_folder, "src")
         tc.extra_ldflags.append(f"-L{sepol_lib_folder}")
         tc.make_args.append("USE_PCRE2=y")
-        tc.generate()
+        env = tc.environment()
+        env.append_path("PKG_CONFIG_LIBDIR", self.generators_folder)
+        tc.generate(env=env)
 
     def build(self):
         apply_conandata_patches(self)

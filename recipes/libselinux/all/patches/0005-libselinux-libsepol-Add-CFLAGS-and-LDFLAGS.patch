@@ -1,0 +1,61 @@
+[PATCH] libselinux, libsepol: Add CFLAGS and LDFLAGS to Makefile checks
+@ 2024-03-13 22:48 James Carter
+  0 siblings, 0 replies; only message in thread
+From: James Carter @ 2024-03-13 22:48 UTC (permalink / raw)
+  To: selinux; +Cc: jordan, winfried_mb2, James Carter
+
+In libselinux there is an availability check for strlcpy() and
+in both libselinux and libsepol there are availability checks for
+reallocarray() in the src Makfiles. CFLAGS and LDFLAGS are needed
+for cross-compiling, but, unfortunately, the default CFLAGS cause
+all of these availability checks to fail to compile because of
+compilationerrors (rather than just the function not being available).
+
+Add CFLAGS and LDFLAGS to the availibility checks, update the checks
+so that a compilation error will only happen if the function being
+checked for is not available, and make checks for the same function
+the same in both libselinux and libsepol.
+
+Suggested-by: Jordan Williams <jordan@jwillikers.com>
+Suggested-by: Winfried Dobbe <winfried_mb2@xmsnet.nl>
+Signed-off-by: James Carter <jwcart2@gmail.com>
+---
+ libselinux/src/Makefile | 4 ++--
+ libsepol/src/Makefile   | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/libselinux-3.6/src/Makefile b/libselinux-3.6/src/Makefile
+index d3b981fc..41cfbdca 100644
+--- a/libselinux-3.6/src/Makefile
++++ b/libselinux-3.6/src/Makefile
+@@ -104,13 +104,13 @@ override CFLAGS += -I../include -D_GNU_SOURCE $(DISABLE_FLAGS) $(PCRE_CFLAGS)
+ 
+ # check for strlcpy(3) availability
+ H := \#
+-ifeq (yes,$(shell printf '${H}include <string.h>\nint main(void){char*d,*s;strlcpy(d, s, 0);return 0;}' | $(CC) -x c -o /dev/null - >/dev/null 2>&1 && echo yes))
++ifeq (yes,$(shell printf '${H}include <string.h>\nint main(void){char d[2];const char *s="a";return (size_t)strlcpy(d,s,sizeof(d))>=sizeof(d);}' | $(CC) $(CFLAGS) $(LDFLAGS) -x c -o /dev/null - >/dev/null 2>&1 && echo yes))
+ override CFLAGS += -DHAVE_STRLCPY
+ endif
+ 
+ # check for reallocarray(3) availability
+ H := \#
+-ifeq (yes,$(shell printf '${H}include <stdlib.h>\nint main(void){reallocarray(NULL, 0, 0);return 0;}' | $(CC) -x c -o /dev/null - >/dev/null 2>&1 && echo yes))
++ifeq (yes,$(shell printf '${H}include <stdlib.h>\nint main(void){return reallocarray(NULL,0,0)==NULL;}' | $(CC) $(CFLAGS) $(LDFLAGS) -x c -o /dev/null - >/dev/null 2>&1 && echo yes))
+ override CFLAGS += -DHAVE_REALLOCARRAY
+ endif
+ 
+diff --git a/libsepol-3.6/src/Makefile b/libsepol-3.6/src/Makefile
+index 16b9bd5e..7b0e8446 100644
+--- a/libsepol-3.6/src/Makefile
++++ b/libsepol-3.6/src/Makefile
+@@ -31,7 +31,7 @@ endif
+ 
+ # check for reallocarray(3) availability
+ H := \#
+-ifeq (yes,$(shell printf '${H}define _GNU_SOURCE\n${H}include <stdlib.h>\nint main(void){void*p=reallocarray(NULL, 1, sizeof(char));return 0;}' | $(CC) $(LDFLAGS) -x c -o /dev/null - >/dev/null 2>&1 && echo yes))
++ifeq (yes,$(shell printf '${H}include <stdlib.h>\nint main(void){return reallocarray(NULL,0,0)==NULL;}' | $(CC) $(CFLAGS) $(LDFLAGS) -x c -o /dev/null - >/dev/null 2>&1 && echo yes))
+ override CFLAGS += -DHAVE_REALLOCARRAY
+ endif
+ 
+-- 
+2.44.0
