@@ -52,6 +52,7 @@ class ChunkIOConan(ConanFile):
         tc.variables["CIO_BACKEND_FILESYSTEM"] = self.options.with_filesystem
         # Relocatable shared libs on macOS
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):
