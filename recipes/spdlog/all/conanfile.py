@@ -44,7 +44,6 @@ class SpdlogConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        # TODO double check this version
         if Version(self.version) < "1.10.0":
             del self.options.use_std_fmt
 
@@ -143,9 +142,16 @@ class SpdlogConan(ConanFile):
     def _disable_werror(self):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "utils.cmake"), "/WX", "")
 
+    def _use_cpp20_for_std_format(self):
+        # This is properly set in later versions
+        if self.options.get_safe("use_std_fmt") and Version(self.version) < "1.12":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "CMAKE_CXX_STANDARD 11", "CMAKE_CXX_STANDARD 20")
+
     def build(self):
         apply_conandata_patches(self)
         self._disable_werror()
+        self._use_cpp20_for_std_format()
         if not self.options.header_only:
             cmake = CMake(self)
             cmake.configure()
