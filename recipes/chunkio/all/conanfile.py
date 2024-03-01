@@ -65,9 +65,6 @@ class ChunkIOConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        target_name = "chunkio-shared" if self.options.shared else "chunkio-static"
-        self.cpp_info.libs = [target_name]
-        if not self.options.shared:
-            self.cpp_info.libs.append("cio-crc32")
+        self.cpp_info.libs = ["chunkio-shared"] if self.options.shared else ["chunkio-static", "cio-crc32"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("shlwapi")
