@@ -1,0 +1,47 @@
+From fa7341eddfc06a4f021e52014223ae29ad05abcc Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Fri, 1 Mar 2024 10:49:34 -0600
+Subject: [PATCH 2/3] libsepoll/src/Makefile: Fix reallocarray detection when
+ cross-compiling
+
+From: Winfried Dobbe @ 2024-02-29 16:44 UTC (permalink / raw)
+https://lore.kernel.org/selinux/20240229164439.20521-1-winfried_mb2@xmsnet.nl/T/#u
+
+In addition to commit 3e3661f602fe7d7dc972bf695fd178370bbd7e54, CFLAGS
+are also needed for the reallocarray detection when cross-compiling
+libsepoll.
+
+For example when cross-compiling for Arm Cortex-A9 the compiler finds
+stdlib.h (after the addition of LDFLAGS in above mentioned 3e3661f).
+But then tries to include soft-float stubs because gcc options
+-mfpu=neon -mfloat-abi=hard are missing. See output of detection:
+
+In file included from /home/wdobbe/.conan2/p/b/swpt_fb08c05e04578/p/sysroots/cortexa9hf-neon-poky-linux-gnueabi/usr/include/gnu/stubs.h:40,
+                 from /home/wdobbe/.conan2/p/b/swpt_fb08c05e04578/p/sysroots/cortexa9hf-neon-poky-linux-gnueabi/usr/include/features.h:474,
+                 from /home/wdobbe/.conan2/p/b/swpt_fb08c05e04578/p/sysroots/cortexa9hf-neon-poky-linux-gnueabi/usr/include/bits/libc-header-start.h:33,
+                 from /home/wdobbe/.conan2/p/b/swpt_fb08c05e04578/p/sysroots/cortexa9hf-neon-poky-linux-gnueabi/usr/include/stdlib.h:25,
+                 from <stdin>:2:
+/home/wdobbe/.conan2/p/b/swpt_fb08c05e04578/p/sysroots/cortexa9hf-neon-poky-linux-gnueabi/usr/include/gnu/stubs-32.h:7:11: fatal error: gnu/stubs-soft.h: No such file or directory
+    7 | # include <gnu/stubs-soft.h>
+      |           ^~~~~~~~~~~~~~~~~~
+compilation terminated.
+---
+ src/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/Makefile b/src/Makefile
+index 16b9bd5e..fd6329d4 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -31,7 +31,7 @@ endif
+ 
+ # check for reallocarray(3) availability
+ H := \#
+-ifeq (yes,$(shell printf '${H}define _GNU_SOURCE\n${H}include <stdlib.h>\nint main(void){void*p=reallocarray(NULL, 1, sizeof(char));return 0;}' | $(CC) $(LDFLAGS) -x c -o /dev/null - >/dev/null 2>&1 && echo yes))
++ifeq (yes,$(shell printf '${H}define _GNU_SOURCE\n${H}include <stdlib.h>\nint main(void){void*p=reallocarray(NULL, 1, sizeof(char));return 0;}' | $(CC) $(CFLAGS) $(LDFLAGS) -x c -o /dev/null - >/dev/null 2>&1 && echo yes))
+ override CFLAGS += -DHAVE_REALLOCARRAY
+ endif
+ 
+-- 
+2.44.0
+
