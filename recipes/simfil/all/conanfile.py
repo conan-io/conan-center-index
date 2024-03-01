@@ -15,7 +15,7 @@ class SimfilRecipe(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Klebert-Engineering/simfil"
     license = "BSD-3-Clause"
-    topics = ["query language"]
+    topics = ["query-language", "json", "data-model"]
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
@@ -30,8 +30,6 @@ class SimfilRecipe(ConanFile):
         "with_json": True,
     }
 
-    exports_sources = "include/*", "src/*"
-
     @property
     def _minimum_compilers_version(self):
         return {
@@ -41,6 +39,10 @@ class SimfilRecipe(ConanFile):
             "clang": "10",
             "apple-clang": "14",
         }
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         check_min_cppstd(self, 20)
@@ -54,7 +56,7 @@ class SimfilRecipe(ConanFile):
                     f"{self.name} requires Concepts support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
     def build_requirements(self):
-        self.build_requires("cmake/3.28.1")
+        self.tool_requires("cmake/[>3.19 <4]")
 
     def requirements(self):
         self.requires("sfl/1.2.4", transitive_headers=True)
@@ -76,12 +78,12 @@ class SimfilRecipe(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["SIMFIL_CONAN"] = True
-        tc.cache_variables["SIMFIL_SHARED"] = bool(self.options.get_safe("shared"))
+        tc.cache_variables["SIMFIL_SHARED"] = self.options.get_safe("shared")
         tc.cache_variables["SIMFIL_WITH_REPL"] = False
         tc.cache_variables["SIMFIL_WITH_COVERAGE"] = False
         tc.cache_variables["SIMFIL_WITH_TESTS"] = False
         tc.cache_variables["SIMFIL_WITH_EXAMPLES"] = False
-        tc.cache_variables["SIMFIL_WITH_MODEL_JSON"] = bool(self.options.with_json)
+        tc.cache_variables["SIMFIL_WITH_MODEL_JSON"] = self.options.with_json
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -94,7 +96,7 @@ class SimfilRecipe(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.libs = ["simfil"]
-        self.cpp_info.set_property("cmake_target_name", "simfil::simfil")

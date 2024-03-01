@@ -5,3 +5,4 @@ find_package(simfil CONFIG REQUIRED)
 
 add_executable(test_package src/example.cpp)
 target_link_libraries(test_package simfil::simfil)
+target_compile_features(test_package PRIVATE cxx_std_20)
