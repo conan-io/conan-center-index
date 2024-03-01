@@ -1,0 +1,6 @@
+sources:
+  # Newer versions at the top
+  "1.24.2":
+    url:
+    - "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.24.2/gstreamer-1.24.2.tar.bz2"
+    sha256: "8bb3f93e3f4bdbff27266aed982a96062b0dcb5d5005e8dd2cdc1fc054ba5850"
