@@ -18,3 +18,4 @@ patches:
     - patch_file: "patches/012_use-functions-to-override-libtiff-warning-error-handlers.patch"
     - patch_file: "patches/013_use-typedef-as-already-declared.patch"
     - patch_file: "patches/014_no_auto_ptr.patch"
+    - patch_file: "patches/015_fix_msvc_cpp_20.patch"
