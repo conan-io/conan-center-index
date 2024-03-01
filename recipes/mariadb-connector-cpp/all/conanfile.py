@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, cmake_layout, CMakeToolchain
-from conan.tools.files import get, collect_libs, replace_in_file, rm, copy
+from conan.tools.files import get, collect_libs, replace_in_file, rm, copy, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
@@ -28,8 +28,11 @@ class MariadbConnectorCPPRecipe(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_ssl": "openssl",
-        "with_curl": True,
+        "with_curl": True
         }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     @property
     def _min_cppstd(self):
@@ -75,6 +78,8 @@ class MariadbConnectorCPPRecipe(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        # if we are compiling as shared, we need to also compile the mariadbclient as shared
+        self.options["mariadb-connector-c"].shared = self.options.shared
 
     def _package_folder_dep(self, dep):
         return self.dependencies[dep].package_folder.replace("\\", "/")
@@ -95,7 +100,7 @@ class MariadbConnectorCPPRecipe(ConanFile):
         tc.variables["USE_SYSTEM_INSTALLED_LIB"] = True
         tc.variables["WITH_UNIT_TESTS"] = False
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["MARIADB_LINK_DYNAMIC"] = False
+        tc.variables["MARIADB_LINK_DYNAMIC"] = self.options.shared
         tc.variables["CONC_WITH_UNIT_TESTS"] = False
         tc.variables["WITH_SSL"] = self.options.with_ssl
         tc.variables["WITH_EXTERNAL_ZLIB"] = True
@@ -107,6 +112,7 @@ class MariadbConnectorCPPRecipe(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         root_cmake = os.path.join(self.source_folder, "CMakeLists.txt")
         libmysqlclient_dir = self._include_folder_dep("mariadb-connector-c")
 
@@ -117,10 +123,16 @@ class MariadbConnectorCPPRecipe(ConanFile):
             "INCLUDE(SetValueMacro)\n" + f"INCLUDE_DIRECTORIES({libmysqlclient_dir}/mariadb)"
         )
 
+        replace_in_file(self,
+             root_cmake,
+             "FIND_LIBRARY(CCLIB libmariadb.so)",
+             "FIND_LIBRARY(CCLIB mariadb)"
+         )
+
         # mariadbcpp is using shared lib for unix with this we force be static library
         # this workarround for ld: library 'mariadbclient' not found with conan
-        if not self.options.shared:
-            replace_in_file(self, root_cmake, "${LIBRARY_NAME} SHARED", "${LIBRARY_NAME} STATIC")
+        #if not self.options.shared:
+        #    replace_in_file(self, root_cmake, "${LIBRARY_NAME} SHARED", "${LIBRARY_NAME} STATIC")
 
 
     def build(self):
