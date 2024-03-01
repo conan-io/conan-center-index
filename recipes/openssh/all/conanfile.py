@@ -15,7 +15,7 @@ required_conan_version = ">=1.54.0"
 class PackageConan(ConanFile):
     name = "openssh"
     description = "The OpenSSH (portable) suite of secure connectivity tools"
-    license = "BSD"
+    license = "SSH-OpenSSH"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.openssh.com/portable.html"
     topics = ("security", "cryptography", "login", "keychain", "file-sharing", "ssh")
@@ -23,12 +23,16 @@ class PackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_openssl": [True, False],
-        "with_pam": [True, False],
+        "with_pam": [None, "openpam"],
+        "with_selinux": [True, False],
+        "with_libedit": [True, False],
         "with_sandbox": ["auto", "no", "capsicum", "darwin", "rlimit", "seccomp_filter", "systrace", "pledge"]
     }
     default_options = {
         "with_openssl": True,
-        "with_pam": False,
+        "with_pam": None,
+        "with_selinux": False,
+        "with_libedit": False,
         "with_sandbox": "auto"
     }
 
@@ -49,8 +53,11 @@ class PackageConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1w")
-        if self.options.with_pam:
+            if self.version == "8.1p1":
+              self.requires("openssl/[>=1.1 <=3.0]")
+            else:
+              self.requires("openssl/[>=1.1 <=3.1]")
+        if self.options.with_pam == "openpam":
             self.requires("openpam/20190224")
 
     def validate(self):
@@ -70,6 +77,8 @@ class PackageConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             "--without-zlib-version-check",
+            "--with-libedit={}".format("yes" if self.options.with_libedit else "no"),
+            "--with-selinux={}".format("yes" if self.options.with_selinux else "no"),
             "--with-openssl={}".format("yes" if self.options.with_openssl else "no"),
             "--with-pam={}".format("yes" if self.options.with_pam else "no"),
         ])
@@ -83,26 +92,7 @@ class PackageConan(ConanFile):
 
         tc.generate()
 
-    def _patch_sources(self):
-        # Usage allowed after consideration with CCI maintainers
-        def _allowed_patch(candidate):
-            """Allow when no patch_os, or when it matches and no patch_os_version, or when it also matches"""
-            return "patch_os" not in candidate or (
-                    self.settings.os == candidate["patch_os"] and (
-                        "patch_os_version" not in candidate or self.settings.get_safe("os.version") == candidate["patch_os_version"]))
-
-        for it in self.conan_data.get("patches", {}).get(self.version, []):
-            if _allowed_patch(it):
-                entry = it.copy()
-                patch_file = entry.pop("patch_file")
-                patch_file_path = os.path.join(self.export_sources_folder, patch_file)
-                if "patch_description" not in entry:
-                    entry["patch_description"] = patch_file
-                patch(self, patch_file=patch_file_path, **entry)
-
     def build(self):
-        self._patch_sources()
-
         autotools = Autotools(self)
         env = VirtualRunEnv(self)
         with env.vars().apply():
