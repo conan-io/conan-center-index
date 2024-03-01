@@ -136,3 +136,5 @@ class SpeedbConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["speedb"]
         self.cpp_info.set_property("pkg_config_name", "speedb")
+        self.cpp_info.set_property("cmake_file_name", "Speedb")
+        self.cpp_info.set_property("cmake_target_name", "Speedb::speedb")
