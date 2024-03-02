@@ -72,7 +72,10 @@ class FltkConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_gl:
                 self.requires("opengl/system")
-                self.requires("glu/system")
+                if is_apple_os(self) or self.settings.os == "Windows":
+                    self.requires("glu/system")
+                else:
+                    self.requires("mesa-glu/9.0.3")
             self.requires("fontconfig/2.15.0")
             self.requires("xorg/system")
             if self.options.with_xft:
