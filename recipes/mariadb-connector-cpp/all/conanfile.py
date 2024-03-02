@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, cmake_layout, CMakeToolchain
-from conan.tools.files import get, collect_libs, replace_in_file, rm, copy, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, collect_libs, replace_in_file, rm, copy, apply_conandata_patches, export_conandata_patches, rmdir
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
@@ -147,6 +147,7 @@ class MariadbConnectorCPPRecipe(ConanFile):
         cmake.install()
         rm(self, "INFO_SRC", self.package_folder)
         rm(self, "INFO_BIN", self.package_folder)
+        rmdir(self, f"{self.package_folder}"+"/share")
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libmariadbcpp")
