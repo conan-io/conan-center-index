@@ -8,7 +8,9 @@ sources:
 patches:
   "1.1.3":
     - patch_file: "patches/1.1.3-0001-fix-static-or-shared.patch"
+      patch_type: "portability"
       patch_description: "creates shared or static build but not both"
   "1.0.3":
     - patch_file: "patches/1.0.3-0001-fix-static-or-shared.patch"
+      patch_type: "portability"
       patch_description: "creates shared or static build but not both"
