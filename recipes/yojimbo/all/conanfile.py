@@ -1,10 +1,11 @@
 import os
+import textwrap
 
 import yaml
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, collect_libs, copy, get, replace_in_file, rmdir
+from conan.tools.files import chdir, collect_libs, copy, get, replace_in_file, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildDeps, MSBuildToolchain, is_msvc
@@ -73,6 +74,10 @@ class YojimboConan(ConanFile):
             submodule_source = os.path.join(self.source_folder, path)
             rmdir(self, submodule_source)
 
+    @property
+    def _conan_paths_lua(self):
+        return os.path.join(self.generators_folder, "conan_paths.lua")
+
     def generate(self):
         venv = VirtualBuildEnv(self)
         venv.generate()
@@ -87,17 +92,29 @@ class YojimboConan(ConanFile):
             tc = AutotoolsDeps(self)
             tc.generate()
 
-    def _patch_sources(self):
-        # Inject Conan dependencies into premake5.lua
-        premake_path = os.path.join(self.source_folder, "premake5.lua")
         deps = list(reversed(self.dependencies.host.topological_sort.values()))
         includedirs = ', '.join(f'"{p}"'.replace("\\", "/") for dep in deps for p in dep.cpp_info.aggregated_components().includedirs)
         libdirs = ', '.join(f'"{p}"'.replace("\\", "/") for dep in deps for p in dep.cpp_info.aggregated_components().libdirs)
-        replace_in_file(self, premake_path, 'includedirs { ', 'includedirs { ' + includedirs + ', ')
-        replace_in_file(self, premake_path, 'libdirs { ', 'libdirs { ' + libdirs + ', ')
+        save(self, self._conan_paths_lua,
+             "conan_includedirs = {" + includedirs + "}\n"
+             "conan_libdirs = {" + libdirs + "}\n")
+
+    def _patch_sources(self):
+        premake_path = os.path.join(self.source_folder, "premake5.lua")
         replace_in_file(self, premake_path, ', "/usr/local/include"', "")
         if self.settings.os == "Windows":
             replace_in_file(self, premake_path, '"sodium"', '"libsodium"')
+
+        # Inject Conan dependencies
+        conan_paths_lua = self._conan_paths_lua.replace("\\", "/")
+        save(self, premake_path,
+             f"\ndofile('{conan_paths_lua}')\n" +
+             textwrap.dedent("""
+                workspace "Yojimbo"
+                    configurations { "Debug", "Release" }
+                    includedirs { conan_includedirs }
+                    libdirs { conan_libdirs }
+                """), append=True)
 
     @property
     def _premake_generator(self):
