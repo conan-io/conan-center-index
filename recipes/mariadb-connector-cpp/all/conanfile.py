@@ -1,10 +1,9 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, cmake_layout, CMakeToolchain
 from conan.tools.files import get, collect_libs, replace_in_file, rm, copy, apply_conandata_patches, export_conandata_patches, rmdir
-from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.env import VirtualBuildEnv
+from conan.tools.build import check_min_cppstd
 import os
 
 requird_conan_version = ">=1.54.0"
@@ -18,6 +17,7 @@ class MariadbConnectorCPPRecipe(ConanFile):
     topics = ("mariadb", "connector", "jdbc")
     package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -38,15 +38,6 @@ class MariadbConnectorCPPRecipe(ConanFile):
     def _min_cppstd(self):
         return "11"
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "9",
-            "clang": "6",
-        }
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -61,12 +52,8 @@ class MariadbConnectorCPPRecipe(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def validate(self):
-        check_min_vs(self, 192)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
-
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
         # I dont have a windows computer to test it
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support windows for now")
@@ -80,6 +67,7 @@ class MariadbConnectorCPPRecipe(ConanFile):
             self.options.rm_safe("fPIC")
         # if we are compiling as shared, we need to also compile the mariadbclient as shared
         self.options["mariadb-connector-c"].shared = self.options.shared
+
 
     def _package_folder_dep(self, dep):
         return self.dependencies[dep].package_folder.replace("\\", "/")
