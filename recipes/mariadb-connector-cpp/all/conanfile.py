@@ -123,16 +123,20 @@ class MariadbConnectorCPPRecipe(ConanFile):
             "INCLUDE(SetValueMacro)\n" + f"INCLUDE_DIRECTORIES({libmysqlclient_dir}/mariadb)"
         )
 
+        # find the correct library
         replace_in_file(self,
              root_cmake,
              "FIND_LIBRARY(CCLIB libmariadb.so)",
              "FIND_LIBRARY(CCLIB mariadb)"
          )
 
-        # mariadbcpp is using shared lib for unix with this we force be static library
-        # this workarround for ld: library 'mariadbclient' not found with conan
-        #if not self.options.shared:
-        #    replace_in_file(self, root_cmake, "${LIBRARY_NAME} SHARED", "${LIBRARY_NAME} STATIC")
+        # on apple mariadb-connector-cpp is requires cmake 3.23 but conan jenkins build is using 3.20.1
+        if self.settings.os == "Macos":
+            replace_in_file(self,
+                root_cmake,
+                "CMAKE_MINIMUM_REQUIRED(VERSION 3.23)",
+                "CMAKE_MINIMUM_REQUIRED(VERSION 3.20)"
+            )
 
 
     def build(self):
@@ -152,7 +156,6 @@ class MariadbConnectorCPPRecipe(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libmariadbcpp")
         self.cpp_info.includedirs.append(os.path.join("include", "mariadb"))
-        self.cpp_info.libdirs = ["lib64/debug","lib/debug"] if self.settings.build_type == "Debug" else ["lib64", "lib"]
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD", "Macos"]:
             self.cpp_info.system_libs = ["m", "resolv"]
