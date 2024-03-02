@@ -115,7 +115,7 @@ class MariadbConnectorCPPRecipe(ConanFile):
         apply_conandata_patches(self)
         root_cmake = os.path.join(self.source_folder, "CMakeLists.txt")
         libmysqlclient_dir = self._include_folder_dep("mariadb-connector-c")
-        
+
         # we need to inject into mariadb-connector-cpp the headers of conan mariadb-connector-c
         replace_in_file(self,
             root_cmake,
@@ -142,7 +142,7 @@ class MariadbConnectorCPPRecipe(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYING.LIB", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rm(self, "INFO_SRC", self.package_folder)
