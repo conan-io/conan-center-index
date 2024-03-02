@@ -72,7 +72,10 @@ class FltkConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_gl:
                 self.requires("opengl/system")
-                self.requires("glu/system")
+                if is_apple_os(self) or self.settings.os == "Windows":
+                    self.requires("glu/system")
+                else:
+                    self.requires("mesa-glu/9.0.3")
             self.requires("fontconfig/2.15.0")
             self.requires("xorg/system")
             if self.options.with_xft:
@@ -125,7 +128,7 @@ class FltkConan(ConanFile):
             if self.options.with_threads:
                 self.cpp_info.system_libs.extend(["pthread", "dl"])
             if self.options.with_gl:
-                self.cpp_info.system_libs.extend(["GL", "GLU"])
+                self.cpp_info.system_libs.append("GL")
         elif is_apple_os(self):
             self.cpp_info.frameworks = [
                 "AppKit", "ApplicationServices", "Carbon", "Cocoa", "CoreFoundation", "CoreGraphics",
