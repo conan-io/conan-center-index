@@ -88,15 +88,14 @@ class YojimboConan(ConanFile):
             tc.generate()
 
     def _patch_sources(self):
-        # Before building we need to make some edits to the premake file to build using conan dependencies rather than local/bundled
+        # Inject Conan dependencies into premake5.lua
         premake_path = os.path.join(self.source_folder, "premake5.lua")
         deps = list(reversed(self.dependencies.host.topological_sort.values()))
         includedirs = ', '.join(f'"{p}"'.replace("\\", "/") for dep in deps for p in dep.cpp_info.aggregated_components().includedirs)
         libdirs = ', '.join(f'"{p}"'.replace("\\", "/") for dep in deps for p in dep.cpp_info.aggregated_components().libdirs)
-        if self.settings.os != "Windows":
-            includedirs += ', "netcode.io", "reliable.io"'
-        replace_in_file(self, premake_path, 'includedirs { ', 'includedirs { ".", ' + includedirs + ' } --')
-        replace_in_file(self, premake_path, 'libdirs { "', 'libdirs { ' + libdirs + '} --')
+        replace_in_file(self, premake_path, 'includedirs { ', 'includedirs { ' + includedirs + ', ')
+        replace_in_file(self, premake_path, 'libdirs { ', 'libdirs { ' + libdirs + ', ')
+        replace_in_file(self, premake_path, ', "/usr/local/include"', "")
         if self.settings.os == "Windows":
             replace_in_file(self, premake_path, '"sodium"', '"libsodium"')
 
