@@ -157,6 +157,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
         cmake.install()
         rm(self, "INFO_SRC", self.package_folder)
         rm(self, "INFO_BIN", self.package_folder)
+        rm(self, "*.cmake", self.package_folder)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libmysqlcppconn")
