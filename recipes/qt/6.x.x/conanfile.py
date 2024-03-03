@@ -369,7 +369,7 @@ class QtConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.1.0")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
-            self.requires("expat/2.5.0")
+            self.requires("expat/2.6.0")
             self.requires("opus/1.4")
             self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
@@ -614,7 +614,7 @@ class QtConan(ConanFile):
             }
         if Version(self.version) >= "6.5.0":
             cpp_std_map[23] = "FEATURE_cxx2b"
-        
+
         for std,feature in cpp_std_map.items():
             tc.variables[feature] = "ON" if int(current_cpp_std) >= std else "OFF"
 
