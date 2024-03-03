@@ -343,6 +343,7 @@ required_for_references:
 - erikzenker-hsm
 - erkir
 - etc2comp
+- etcd-cpp-apiv3
 - eternal
 - ethash
 - etl
@@ -530,8 +531,10 @@ required_for_references:
 - indicators
 - indirect_value
 - influxdb-cpp
+- influxdb-cxx
 - inih
 - inja
+- intel-ipsec-mb
 - intel-neon2sse
 - intx
 - inversify-cpp
@@ -801,6 +804,7 @@ required_for_references:
 - linux-syscall-support
 - litehtml
 - lksctp-tools
+- llama-cpp
 - llhttp
 - llvm-openmp
 - lmdb
@@ -831,6 +835,7 @@ required_for_references:
 - make
 - mapbox-geometry
 - mapbox-variant
+- mapbox-wagyu
 - mariadb-connector-c
 - marisa
 - matchit
@@ -859,6 +864,7 @@ required_for_references:
 - metall
 - metis
 - mfast
+- mgclient
 - mgs
 - microprofile
 - microservice-essentials
@@ -983,6 +989,7 @@ required_for_references:
 - opencore-amr
 - opencv
 - openddl-parser
+- opendis6
 - opene57
 - openexr
 - openfbx

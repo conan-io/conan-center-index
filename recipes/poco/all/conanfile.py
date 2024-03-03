@@ -29,6 +29,7 @@ class PocoConan(ConanFile):
         "fPIC": [True, False],
         "enable_fork": [True, False],
         "enable_active_record": [True, False, "deprecated"],
+        "log_debug": [True, False],
         "with_sql_parser": [True, False],
     }
     default_options = {
@@ -36,6 +37,7 @@ class PocoConan(ConanFile):
         "fPIC": True,
         "enable_fork": True,
         "enable_active_record": "deprecated",
+        "log_debug": False,
         "with_sql_parser": True,
     }
 
@@ -149,7 +151,7 @@ class PocoConan(ConanFile):
             self.requires("pcre/8.45")
         else:
             self.requires("pcre2/10.42")
-        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
         if self.options.enable_xml:
             self.requires("expat/2.5.0", transitive_headers=True)
         if self.options.enable_data_sqlite:
@@ -169,6 +171,7 @@ class PocoConan(ConanFile):
 
     def package_id(self):
         del self.info.options.enable_active_record
+        del self.info.options.log_debug
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -348,6 +351,9 @@ class PocoConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["poco_foundation"].system_libs.extend(["pthread", "dl", "rt"])
+
+        if self.options.log_debug:
+            self.cpp_info.components["poco_foundation"].defines.append("POCO_LOG_DEBUG")
 
         if is_msvc(self):
             self.cpp_info.components["poco_foundation"].defines.append("POCO_NO_AUTOMATIC_LIBS")
