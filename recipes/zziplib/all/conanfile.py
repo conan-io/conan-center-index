@@ -11,11 +11,11 @@ required_conan_version = ">=1.53.0"
 class ZziplibConan(ConanFile):
     name = "zziplib"
     description = "The ZZIPlib provides read access on ZIP-archives and unpacked data"
-    topics = ("zip", "archive", "decompression")
+    license = "GPL-2.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/gdraheim/zziplib"
-    license = "GPL-2.0-or-later"
-
+    topics = ("zip", "archive", "decompression")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -52,8 +52,7 @@ class ZziplibConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -85,6 +84,7 @@ class ZziplibConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "zziplib-all-do-not-use")
@@ -112,7 +112,7 @@ class ZziplibConan(ConanFile):
             if Version(self.version) >= "0.13.72" and self.options.shared and is_apple_os(self):
                 self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko"]
             else:
-                self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko{suffix}"]            
+                self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko{suffix}"]
             self.cpp_info.components["zzipfseeko"].requires = ["zlib::zlib"]
         # libzzipwrap
         if self.options.zzipwrap:
