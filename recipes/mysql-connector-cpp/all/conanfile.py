@@ -152,10 +152,9 @@ class MysqlConnectorCPPRecipe(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        rename(self, f"{os.path.join(self.package_folder, "licenses")}/LICENSE.txt", "LICENSE")
         rm(self, "INFO_SRC", self.package_folder)
         rm(self, "INFO_BIN", self.package_folder)
 
