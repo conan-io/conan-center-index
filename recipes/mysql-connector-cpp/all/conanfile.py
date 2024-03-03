@@ -1,6 +1,6 @@
-from conan import ConanFile, tools
+from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
-from conan.tools.files import get, replace_in_file, rm, collect_libs, copy, rename
+from conan.tools.files import get, replace_in_file, rm, collect_libs, copy
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc
