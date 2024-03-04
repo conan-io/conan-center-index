@@ -8,4 +8,3 @@ patches:
       patch_description: "Rename os_create_anonymous_file to avoid a conflict in wayland-cursor"
       patch_type: "portability"
       patch_source: "https://gitlab.freedesktop.org/libdecor/libdecor/-/merge_requests/146"
-
