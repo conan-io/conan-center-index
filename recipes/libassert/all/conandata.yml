@@ -1,5 +1,9 @@
 sources:
   # Newer versions at the top
+  "1.2.2":
+    url:
+      - "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v1.2.2.tar.gz"
+    sha256: "68206b43bc4803357ba7d366574b4631bd327c46ab76ddef6ff9366784fa6b3c"
   "1.2.1":
     url:
       - "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v1.2.1.tar.gz"
@@ -14,6 +18,10 @@ sources:
     sha256: "e1bb3b50767994ca4d0f60b7977b279cf32b8569ff92c5830e7a1de567b82fd5"
 
 patches:
+  "1.2.2":
+    - patch_file: "patches/1.2.2/0001-cpptrace-dll-copy.patch"
+      patch_type: "conan"
+      patch_description: "Disable custom command to copy cpptrace.dll on windows"
   "1.2.1":
     - patch_file: "patches/1.2.1/0001-cpptrace-dll-copy.patch"
       patch_type: "conan"

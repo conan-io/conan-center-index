@@ -1,5 +1,28 @@
 # Changelog
 
+### 07-February-2024 - 15:43 CET
+
+- [feature] Add waiting list for new collaborators that are not found in access request issue.
+- [feature] Skip building bump dependencies PRs by default. It will require manual CI trigger.
+
+### 24-January-2024 - 12:13 CET
+
+- [feature] Update Conan 1.x branch to version 1.62.0
+- [feature] Update Conan 2.x branch to version 2.0.16
+- [feature] Require review from maintainers for Bump version and Bump requirements
+- [fix] Show header-only option in the build CI summary table
+- [fix] Use build/host profile conf also in test package
+- [fix] Use only string to handle Github labels
+
+### 05-December-2023 - 16:23 CET
+
+- [fix] Use the correct profile to test a tool_require.
+- [feature] Add armv8 extra flag in profile arch when building in Macos M1.
+- [fix] Prioritization of non-shared builds.
+- [fix] Do not raise an exception in case slack fails.
+- [fix] Remove epochs.
+- [fix] Remove some dead code.
+
 ### 26-Oct-2023 - 12:13 CEST
 
 - [feature] Allow X.Y semver for version bumps

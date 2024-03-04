@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get, replace_in_file
+from conan.tools.files import collect_libs, copy, get, save, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -58,22 +58,19 @@ class LibsrtpRecipe(ConanFile):
         if Version(self.version) < "2.4.0":
             # Relocatable shared libs on Macos
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if Version(self.version) >= "2.5.0":
+            tc.cache_variables["BUILD_WITH_WARNINGS"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
+    def _patch_sources(self):
+        save(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+             "\ninstall(TARGETS srtp2 RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)\n",
+             append=True)
+
     def build(self):
-        replace_in_file(
-            self, os.path.join(self.source_folder, "CMakeLists.txt"),
-            "install(TARGETS srtp2 DESTINATION lib)",
-            (
-                "include(GNUInstallDirs)\n"
-                "install(TARGETS srtp2\n"
-                "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}\n"
-                "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}\n"
-                "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})"
-            ),
-        )
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -82,6 +79,7 @@ class LibsrtpRecipe(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", f"libsrtp{Version(self.version).major}")

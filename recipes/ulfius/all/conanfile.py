@@ -63,7 +63,7 @@ class UlfiusConan(ConanFile):
         if self.options.with_jansson:
             self.requires("jansson/2.14", transitive_headers=True)
         if self.options.with_libcurl:
-            self.requires("libcurl/8.2.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

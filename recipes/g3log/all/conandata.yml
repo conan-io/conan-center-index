@@ -1,4 +1,7 @@
 sources:
+  "2.4":
+    url: "https://github.com/KjellKod/g3log/archive/2.4.tar.gz"
+    sha256: "a240673f6dda17a8d4d5768b6741534e6863e6c4d786c3678e4fe687eb115902"
   "2.3":
     url: "https://github.com/KjellKod/g3log/archive/2.3.tar.gz"
     sha256: "a27dc3ff0d962cc6e0b4e60890b4904e664b0df16393d27e14c878d7de09b505"

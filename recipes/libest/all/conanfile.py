@@ -1,80 +1,100 @@
 import os
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.layout import basic_layout
+
+required_conan_version = ">=1.53.0"
 
 
 class LibEstConan(ConanFile):
     name = "libest"
-    license = "BSD-3-Clause"
     description = "EST is used for secure certificate enrollment"
-    topics = ("conan", "EST", "RFC 7030", "certificate enrollment")
-    homepage = "https://github.com/cisco/libest"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "patches/**"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    homepage = "https://github.com/cisco/libest"
+    topics = ("EST", "RFC 7030", "certificate enrollment")
 
-    _autotools = None
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os in ("Windows", "Macos"):
-            raise ConanInvalidConfiguration(
-                "Platform is currently not supported by this recipe")
+        if self.settings.os == "Windows" or is_apple_os(self):
+            raise ConanInvalidConfiguration("Platform is currently not supported by this recipe")
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/1.1.1q")
+        self.requires("openssl/1.1.1w", transitive_headers=True, transitive_libs=True)
+
+    def build_requirements(self):
+        self.tool_requires("libtool/2.4.7")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-r" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self)
-            # TODO: 
-            # - Static only build: https://github.com/cisco/libest/blob/70824ddc09bee661329b9416082d88566efefb32/intro.txt#L140
-            # - Release build: https://github.com/cisco/libest/blob/70824ddc09bee661329b9416082d88566efefb32/intro.txt#L253
-            args = []
-            if self.options.shared:
-                 args.extend(["--enable-shared", "--disable-static"])
-            else:
-                 args.extend(["--disable-shared", "--enable-static"])
-            self._autotools.configure(args=args)
-        return self._autotools
+    def generate(self):
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+        tc = AutotoolsToolchain(self)
+        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        # Remove duplicate AM_INIT_AUTOMAKE
+        replace_in_file(self, os.path.join(self.source_folder, "configure.ac"),
+                        "AM_INIT_AUTOMAKE\n", "")
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
+        self._patch_sources()
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.autoreconf()
+            autotools.configure()
             autotools.make()
 
     def package(self):
-        self.copy("*LICENSE", src=self._source_subfolder, dst="licenses")
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.install()
+        copy(self, "*LICENSE",
+             src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses"))
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            if self.settings.build_type in ["Release", "MinSizeRel"]:
+                # https://github.com/cisco/libest/blob/r3.2.0/intro.txt#L244-L254
+                autotools.install(target="install-strip")
+            else:
+                autotools.install()
         os.unlink(os.path.join(self.package_folder, "lib", "libest.la"))
 
     def package_info(self):
         self.cpp_info.libs = ["est"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "pthread"]

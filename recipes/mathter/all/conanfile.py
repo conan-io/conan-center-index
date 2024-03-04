@@ -46,27 +46,22 @@ class MathterConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd}, "
-                                                f"which your compiler does not support.")
-        else:
-            self.output.warning(f"{self.name} requires C++{self._min_cppstd}. "
-                                f"Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd}, "
+                                            "which your compiler does not support.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        copy(self, "*.hpp",
-             dst=os.path.join(self.package_folder, "include", "Mathter"),
-             src=os.path.join(self.source_folder, "Mathter"))
-        copy(self, "*.natvis",
-             dst=os.path.join(self.package_folder, "include", "Mathter"),
-             src=os.path.join(self.source_folder, "Mathter"))
-        copy(self, "LICENCE",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=self.source_folder)
+        if self.version == "1.0.0":
+            copy(self, "LICENCE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+            include_dir = os.path.join(self.source_folder, "Mathter")
+        else:
+            copy(self, "LICENCE.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
+            include_dir = os.path.join(self.source_folder, "include", "Mathter")
+        copy(self, "*.hpp", include_dir, os.path.join(self.package_folder, "include", "Mathter"))
+        copy(self, "*.natvis", include_dir, os.path.join(self.package_folder, "include", "Mathter"))
 
     def package_info(self):
         self.cpp_info.bindirs = []

@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.50.0"
@@ -28,13 +29,23 @@ class ReactivePlusPlusConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "16.10",
-            "msvc": "192",
-            "gcc": "10",
-            "clang": "12",
-            "apple-clang": "14",
-        }
+        if Version(self.version) >= "2.0.0":
+            # For 'consteval' support
+            return {
+                "Visual Studio": "17",
+                "msvc": "193",
+                "gcc": "12",
+                "clang": "14",
+                "apple-clang": "14",
+            }
+        else:
+            return {
+                "Visual Studio": "16.10",
+                "msvc": "192",
+                "gcc": "10",
+                "clang": "12",
+                "apple-clang": "14",
+            }
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -47,10 +58,7 @@ class ReactivePlusPlusConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
         def loose_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
+            return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
@@ -59,8 +67,7 @@ class ReactivePlusPlusConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

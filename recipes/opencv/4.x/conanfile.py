@@ -1101,21 +1101,21 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         if self.options.get_safe("with_qt"):
-            self.requires("qt/5.15.11")
+            self.requires("qt/5.15.12")
         if self.options.get_safe("with_wayland"):
             self.requires("xkbcommon/1.6.0")
             self.requires("wayland/1.22.0")
         # imgcodecs module dependencies
         if self.options.get_safe("with_avif"):
-            self.requires("libavif/1.0.1")
+            self.requires("libavif/1.0.2")
         if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/3.0.1")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
-            self.requires("mozjpeg/4.1.3")
+            self.requires("mozjpeg/4.1.5")
         if self.options.get_safe("with_jpeg2000") == "jasper":
-            self.requires("jasper/4.0.0")
+            self.requires("jasper/4.1.0")
         elif self.options.get_safe("with_jpeg2000") == "openjpeg":
             self.requires("openjpeg/2.5.0")
         if self.options.get_safe("with_png"):
@@ -1139,11 +1139,11 @@ class OpenCVConan(ConanFile):
             self.requires("ffmpeg/4.4.4")
         # freetype module dependencies
         if self.options.freetype:
-            self.requires("freetype/2.13.0")
-            self.requires("harfbuzz/8.2.2")
+            self.requires("freetype/2.13.2")
+            self.requires("harfbuzz/8.3.0")
         # hdf module dependencies
         if self.options.hdf:
-            self.requires("hdf5/1.14.2")
+            self.requires("hdf5/1.14.3")
         # ovis module dependencies
         if self.options.ovis:
             self.requires("ogre/1.10.2")
@@ -1210,11 +1210,11 @@ class OpenCVConan(ConanFile):
             if not self._is_legacy_one_profile:
                 self.tool_requires("protobuf/<host_version>")
         if self.options.get_safe("with_wayland"):
-            self.tool_requires("wayland-protocols/1.31")
+            self.tool_requires("wayland-protocols/1.32")
             if not self._is_legacy_one_profile:
                 self.tool_requires("wayland/<host_version>")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.0.3")
+                self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
@@ -1290,10 +1290,7 @@ class OpenCVConan(ConanFile):
                 )
 
         ## Cleanup RPATH
-        if Version(self.version) < "4.1.2":
-            install_layout_file = os.path.join(self.source_folder, "CMakeLists.txt")
-        else:
-            install_layout_file = os.path.join(self.source_folder, "cmake", "OpenCVInstallLayout.cmake")
+        install_layout_file = os.path.join(self.source_folder, "cmake", "OpenCVInstallLayout.cmake")
         replace_in_file(self, install_layout_file,
                               "ocv_update(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}\")",
                               "")

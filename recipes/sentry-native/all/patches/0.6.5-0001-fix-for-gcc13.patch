@@ -1,0 +1,20 @@
+--- a/external/crashpad/third_party/mini_chromium/mini_chromium/base/logging.h	2023-08-25 09:55:27.677142704 +0800
++++ b/external/crashpad/third_party/mini_chromium/mini_chromium/base/logging.h	2023-08-25 10:06:01.654142494 +0800
+@@ -11,6 +11,7 @@
+ #include <limits>
+ #include <sstream>
+ #include <string>
++#include <cstdint>
+ 
+ #include "base/check.h"
+ #include "base/check_op.h"
+--- a/external/crashpad/third_party/mini_chromium/mini_chromium/base/strings/utf_string_conversion_utils.h	2023-08-25 10:11:28.084886020 +0800
++++ b/external/crashpad/third_party/mini_chromium/mini_chromium/base/strings/utf_string_conversion_utils.h	2023-08-25 11:06:37.044297949 +0800
+@@ -6,6 +6,7 @@
+ #define MINI_CHROMIUM_BASE_STRINGS_UTF_STRING_CONVERSION_UTILS_H_
+ 
+ #include <string>
++#include <cstdint>
+ 
+ namespace base {
+ 

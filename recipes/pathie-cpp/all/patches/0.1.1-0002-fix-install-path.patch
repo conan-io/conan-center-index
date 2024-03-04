@@ -1,0 +1,27 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e31b54b..bdf279e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -154,15 +154,19 @@ endif()
+ 
+ ########################################
+ # Installation information
+-
++include(GNUInstallDirs)
+ if (NOT BUILD_SHARED_LIBS)
+ install(TARGETS pathie
+-  DESTINATION lib)
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ endif()
+ 
+ if (BUILD_SHARED_LIBS)
+   install(TARGETS pathie-dynamic
+-    DESTINATION lib)
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ endif()
+ 
+ install(FILES

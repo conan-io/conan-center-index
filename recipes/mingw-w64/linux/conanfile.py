@@ -1,83 +1,114 @@
 import os
+from contextlib import contextmanager
+
 from conan import ConanFile
-from conan.tools.files import get, mkdir, chdir, rm, rmdir
 from conan.errors import ConanInvalidConfiguration
-from conans import tools, AutoToolsBuildEnvironment
+from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.files import chdir, copy, get, mkdir, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.layout import basic_layout
 
-
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class MingwConan(ConanFile):
     name = "mingw-w64"
-    description = "MinGW is a contraction of Minimalist GNU for Windows"
+    description = ("This package provides a MinGW-w64 environment with a GCC toolchain "
+                   "for cross-compilation of native Windows binaries from Linux.")
+    license = ("ZPL-2.1", "MIT", "GPL-2.0-or-later")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.mingw-w64.org/"
-    license = "ZPL-2.1", "MIT", "GPL-2.0-or-later"
     topics = ("gcc", "gnu", "unix", "mingw32", "binutils")
-    settings = "os", "arch", "build_type", "compiler"
-    options = {"threads": ["posix", "win32"], "exception": ["seh", "sjlj"], "gcc": ["10.3.0"]}
-    default_options = {"threads": "posix", "exception": "seh", "gcc": "10.3.0"}
-    no_copy_source = True
+
+    package_type = "application"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "threads": ["posix", "win32"],
+        "exception": ["seh", "sjlj"],
+        "gcc": ["10.5.0"],
+    }
+    default_options = {
+        "threads": "posix",
+        "exception": "seh",
+        "gcc": "10.5.0",
+    }
+    options_description = {
+        "threads": "Threading model: posix or win32",
+        "exception": "Exception model: seh (Structured Exception Handling) or sjlj (setjmp/longjmp)",
+        "gcc": "GCC version provided by MinGW-w64",
+    }
+
+    short_paths = True
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    def validate(self):
-        valid_os = ["Linux"]
-        if str(self.settings.os) not in valid_os:
-            raise ConanInvalidConfiguration("MinGW {} is only supported for the following operating systems: {}"
-                                            .format(self.version, valid_os))
-        valid_arch = ["x86_64"]
-        if str(self.settings.arch) not in valid_arch:
-            raise ConanInvalidConfiguration("MinGW {} is only supported for the following architectures on {}: {}"
-                                            .format(self.version, str(self.settings.os), valid_arch))
-
-        if "gcc" in self.conan_data["sources"][self.version]:
-            valid_gcc = self.conan_data["sources"][self.version]["gcc"].keys()
-            if str(self.options.gcc) not in valid_gcc:
-                raise ConanInvalidConfiguration("gcc version {} is not in the list of valid versions: {}"
-                                                .format(str(self.options.gcc), valid_gcc))
-
-    def build_requirements(self):
-        self.build_requires("m4/1.4.19")
-        self.build_requires("gmp/6.2.1")
-        self.build_requires("mpfr/4.1.0")
-        self.build_requires("mpc/1.2.0")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         del self.info.settings.compiler
         del self.info.settings.build_type
 
-    def _download_source(self):
-        arch_data = self.conan_data["sources"][self.version]
+    def validate(self):
+        valid_os = ["Linux", "FreeBSD"]
+        if str(self.settings.os) not in valid_os:
+            raise ConanInvalidConfiguration(
+                f"MinGW {self.version} is only supported for the following operating systems: {valid_os}"
+            )
+        valid_arch = ["x86_64"]
+        if str(self.settings.arch) not in valid_arch:
+            raise ConanInvalidConfiguration(
+                f"MinGW {self.version} is only supported for the following architectures on {str(self.settings.os)}: {valid_arch}"
+            )
 
-        for package in arch_data:
-            if package == "gcc":
-                continue
-            self.output.info("Downloading {} from {}".format(package, arch_data[package]['url']))
-            get(self, **arch_data[package], strip_root=True, destination=os.path.join(self.build_folder, "sources", package))
-        # Download gcc version
-        gcc_data = arch_data["gcc"][str(self.options.gcc)]
-        get(self, **gcc_data, strip_root=True, destination=os.path.join(self.build_folder, "sources", "gcc"))
+    def build_requirements(self):
+        self.tool_requires("m4/1.4.19")
+        self.tool_requires("gmp/6.3.0")
+        self.tool_requires("mpfr/4.2.0")
+        self.tool_requires("mpc/1.3.1")
+
+    def source(self):
+        # Source is downloaded in the build step since it depends on specific option values
+        pass
+
+    def _download_source(self, package):
+        self.output.info(f"Downloading {package} ...")
+        info = self.conan_data["sources"][self.version][package]
+        if package == "gcc":
+            info = info[str(self.options.gcc)]
+        destination = os.path.join(self.source_folder, package)
+        get(self, **info, strip_root=True, destination=destination)
+        return destination
+
+    @property
+    def _build_multilib(self):
+        # We currently cannot build with multilib and threads=posix. Otherwise we get the gcc compile error:
+        # checking for ld that supports -Wl,--gc-sections... configure: error: Link tests are not allowed after GCC_NO_EXECUTABLES.
+        # Makefile:11275: recipe for target 'configure-target-libstdc++-v3' failed
+        return False
+
+    @property
+    def _host_tag(self):
+        return "x86_64-linux-gnu"
 
     @property
     def _target_tag(self):
         return "x86_64-w64-mingw32"
 
-    def build(self):
-        # Source should be downloaded in the build step since it depends on specific options
-        self._download_source()
+    def _get_package_root(self, p):
+        return self.dependencies.build[p].package_folder.replace("\\", "/")
 
-        target_tag = self._target_tag
-        host_tag = "x86_64-linux-gnu"
+    @property
+    def _with_gmp_mpfr_mpc(self):
+        return [
+            f"--with-gmp={self._get_package_root('gmp')}",
+            f"--with-mpfr={self._get_package_root('mpfr')}",
+            f"--with-mpc={self._get_package_root('mpc')}",
+        ]
 
-        # We currently cannot build with multilib and threads=posix. Otherwise we get the gcc compile error:
-        # checking for ld that supports -Wl,--gc-sections... configure: error: Link tests are not allowed after GCC_NO_EXECUTABLES.
-        # Makefile:11275: recipe for target 'configure-target-libstdc++-v3' failed
-        build_multilib = False
-
+    def generate(self):
         # Instructions see:
         # https://sourceforge.net/p/mingw-w64/code/HEAD/tree/trunk/mingw-w64-doc/howto-build/mingw-w64-howto-build.txt
         # and
@@ -85,202 +116,228 @@ class MingwConan(ConanFile):
         # also good to see specific commands:
         # https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8/+/lollipop-dev/build-mingw64-toolchain.sh
 
-        # add binutils to path. Required for gcc build
-        env = {"PATH": os.environ["PATH"] + ":" + os.path.join(self.package_folder, "bin")}
+        # Add binutils to path. Required for gcc build.
+        env = Environment()
+        env.append_path("PATH", os.path.join(self.package_folder, "bin"))
+        env.vars(self).save_script("conanbuild_package_bin_path")
 
-        with tools.environment_append(env):
-            with_gmp_mpfc_mpc = [
-                "--with-gmp={}".format(self.deps_cpp_info["gmp"].rootpath.replace("\\", "/")),
-                "--with-mpfr={}".format(self.deps_cpp_info["mpfr"].rootpath.replace("\\", "/")),
-                "--with-mpc={}".format(self.deps_cpp_info["mpc"].rootpath.replace("\\", "/"))
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
+        self.output.info("Generating for binutils ...")
+        tc = AutotoolsToolchain(self, namespace="binutils")
+        tc.configure_args += [
+            f"--target={self._target_tag}",
+            f"--with-sysroot={self.package_folder}",
+            "--enable-silent-rules",
+            "--disable-nls",
+            "--disable-shared",
+        ]
+        if self._build_multilib:
+            tc.configure_args.append("--enable-targets=x86_64-w64-mingw32,i686-w64-mingw32")
+        tc.configure_args.extend(self._with_gmp_mpfr_mpc)
+        tc.generate()
+
+        self.output.info("Generating for mingw-w64-tools ...")
+        tc = AutotoolsToolchain(self, namespace="mingw-w64-tools")
+        tc.configure_args += [
+            f"--target={self._target_tag}"
+        ]
+        tc.generate()
+
+        self.output.info("Generating for mingw-w64-headers ...")
+        tc = AutotoolsToolchain(self, namespace="mingw-w64-headers")
+        tc.configure_args += [
+            f"--host={self._target_tag}",
+            f"--build={self._host_tag}",
+            f"--prefix=/{self._target_tag}",
+            f"--with-widl={os.path.join(self.package_folder, 'bin')}",
+            "--enable-silent-rules",
+            "--enable-sdk=all",
+        ]
+        tc.generate()
+
+        self.output.info("Generating for core gcc ...")
+        tc = AutotoolsToolchain(self, namespace="gcc")
+        tc.configure_args += [
+            f"--target={self._target_tag}",
+            f"--with-sysroot={self.package_folder}",
+            "--disable-shared",
+            "--enable-silent-rules",
+            "--enable-languages=c,c++",
+        ]
+        if self._build_multilib:
+            tc.configure_args.append("--enable-targets=all")
+            tc.configure_args.append("--enable-multilib")
+        else:
+            tc.configure_args.append("--disable-multilib")
+        tc.configure_args.extend(self._with_gmp_mpfr_mpc)
+        if self.options.exception == "sjlj":
+            tc.configure_args.append("--enable-sjlj-exceptions")
+        if self.options.threads == "posix":
+            # Some specific options which need to be set for posix thread. Otherwise it fails to compile.
+            tc.configure_args.extend([
+                "--enable-silent-rules",
+                "--enable-threads=posix",
+                # Not 100% sure why, but the following options are required, otherwise
+                # gcc fails to build with posix threads
+            ])
+        tc.libs = []
+        tc.generate()
+
+        self.output.info("Generating for mingw-w64-crt ...")
+        tc = AutotoolsToolchain(self, namespace="mingw-w64-crt")
+        tc.configure_args += [
+            f"--host={self._target_tag}",
+            f"--prefix=/{self._target_tag}",
+            f"--with-sysroot={self.package_folder}",
+            f"CC={self._target_tag}-gcc",
+            f"CXX={self._target_tag}-g++",
+            "--enable-silent-rules",
+        ]
+        if self._build_multilib:
+            tc.configure_args.append("--enable-lib32")
+        tc.generate()
+
+        if self.options.threads == "posix":
+            self.output.info("Generating for mingw-w64-libraries-winpthreads ...")
+            tc = AutotoolsToolchain(self, namespace="mingw-w64-libraries-winpthreads")
+            tc.configure_args += [
+                f"--host={self._target_tag}",
+                f"--prefix=/{self._target_tag}",
+                f"CC={self._target_tag}-gcc",
+                f"CXX={self._target_tag}-g++",
+                "--enable-silent-rules",
+                "--disable-shared",
             ]
+            tc.generate()
 
-            self.output.info("Building binutils ...")
-            mkdir(self, os.path.join(self.build_folder, "binutils"))
-            with chdir(self, os.path.join(self.build_folder, "binutils")):
-                autotools = AutoToolsBuildEnvironment(self)
-                conf_args = [
-                    "--enable-silent-rules",
-                    "--with-sysroot={}".format(self.package_folder),
-                    "--disable-nls",
-                    "--disable-shared"
-                ]
-                if build_multilib:
-                    conf_args.append("--enable-targets=x86_64-w64-mingw32,i686-w64-mingw32")
-                conf_args.extend(with_gmp_mpfc_mpc)
-                autotools.configure(configure_dir=os.path.join(self.build_folder, "sources", "binutils"),
-                                    args=conf_args, target=target_tag, host=False, build=False)
+    @contextmanager
+    def _build_namespace(self, namespace):
+        self.output.info(f"Building {namespace} ...")
+        build_dir = os.path.join(self.build_folder, namespace)
+        mkdir(self, build_dir)
+        with chdir(self, build_dir):
+            yield Autotools(self, namespace=namespace)
+
+    def build(self):
+        binutils_source = self._download_source("binutils")
+        with self._build_namespace("binutils") as autotools:
+            autotools.configure(binutils_source)
+            autotools.make()
+            autotools.install()
+
+        mingw_w64_source = self._download_source("mingw-w64")
+        with self._build_namespace("mingw-w64-tools") as autotools:
+            autotools.configure(os.path.join(mingw_w64_source, "mingw-w64-tools", "widl"))
+            autotools.make()
+            autotools.install()
+
+        with self._build_namespace("mingw-w64-headers") as autotools:
+            autotools.configure(os.path.join(mingw_w64_source, "mingw-w64-headers"))
+            autotools.make()
+            autotools.install()
+
+        # Step 3) GCC requires the x86_64-w64-mingw32 directory be mirrored as a
+        # directory 'mingw' in the same root.  So, if using configure default
+        # /usr/local, type:
+        #     ln -s /usr/local/x86_64-w64-mingw32 /usr/local/mingw
+        #     or, for sysroot, type:
+        #     ln -s /mypath/x86_64-w64-mingw32 /mypath/mingw
+        with chdir(self, self.package_folder):
+            os.symlink(self._target_tag, "mingw")
+
+        # Step 5) Symlink x86_64-w64-mingw32/lib directory as x86_64-w64-mingw32/lib64:
+        # ln -s /usr/local/x86_64-w64-mingw32/lib /usr/local/x86_64-w64-mingw32/lib64
+        # or, for sysroot:
+        #     ln -s /mypath/x86_64-w64-mingw32/lib /mypath/x86_64-w64-mingw32/lib64
+        with chdir(self, os.path.join(self.package_folder, self._target_tag)):
+            os.symlink("lib", "lib64")
+
+        gcc_source = self._download_source("gcc")
+        with self._build_namespace("gcc") as autotools:
+            autotools.configure(gcc_source)
+            autotools.make(target="all-gcc")
+            autotools.install(target="install-gcc")
+
+        with self._build_namespace("mingw-w64-crt") as autotools:
+            autotools.configure(os.path.join(mingw_w64_source, "mingw-w64-crt"))
+            autotools.make()
+            autotools.install()
+
+        if self.options.threads == "posix":
+            with self._build_namespace("mingw-w64-libraries-winpthreads") as autotools:
+                autotools.configure(os.path.join(mingw_w64_source, "mingw-w64-libraries", "winpthreads"))
                 autotools.make()
                 autotools.install()
 
-            self.output.info("Building mingw-w64-tools ...")
-            mkdir(self, os.path.join(self.build_folder, "mingw-w64-tools"))
-            with chdir(self, os.path.join(self.build_folder, "mingw-w64-tools")):
-                autotools = AutoToolsBuildEnvironment(self)
-                conf_args = []
-                autotools.configure(configure_dir=os.path.join(self.build_folder, "sources", "mingw-w64", "mingw-w64-tools", "widl"),
-                                    args=conf_args, target=target_tag, host=False, build=False)
-                autotools.make()
-                autotools.install()
-
-            self.output.info("Building mingw-w64-headers ...")
-            mkdir(self, os.path.join(self.build_folder, "mingw-w64-headers"))
-            with chdir(self, os.path.join(self.build_folder, "mingw-w64-headers")):
-                autotools = AutoToolsBuildEnvironment(self)
-                conf_args = [
-                    "--enable-silent-rules",
-                    "--with-widl={}".format(os.path.join(self.package_folder, "bin")),
-                    "--enable-sdk=all",
-                    "--prefix={}".format(os.path.join(self.package_folder, target_tag))
-                ]
-                autotools.configure(configure_dir=os.path.join(self.build_folder, "sources", "mingw-w64", "mingw-w64-headers"),
-                                    args=conf_args, target=False, host=target_tag, build=host_tag)
-                autotools.make()
-                autotools.install()
-                # Step 3) GCC requires the x86_64-w64-mingw32 directory be mirrored as a
-                # directory 'mingw' in the same root.  So, if using configure default
-                # /usr/local, type:
-                #     ln -s /usr/local/x86_64-w64-mingw32 /usr/local/mingw
-                #     or, for sysroot, type:
-                #     ln -s /mypath/x86_64-w64-mingw32 /mypath/mingw
-                self.run("ln -s {} {}".format(os.path.join(self.package_folder, target_tag),
-                                              os.path.join(self.package_folder, 'mingw')))
-                # Step 5) Symlink x86_64-w64-mingw32/lib directory as x86_64-w64-mingw32/lib64:
-                # ln -s /usr/local/x86_64-w64-mingw32/lib /usr/local/x86_64-w64-mingw32/lib64
-                # or, for sysroot:
-                #     ln -s /mypath/x86_64-w64-mingw32/lib /mypath/x86_64-w64-mingw32/lib64
-                self.run("ln -s {} {}".format(os.path.join(self.package_folder, target_tag, 'lib'),
-                                              os.path.join(self.package_folder, target_tag, 'lib64')))
-
-            self.output.info("Building core gcc ...")
-            mkdir(self, os.path.join(self.build_folder, "gcc"))
-            with chdir(self, os.path.join(self.build_folder, "gcc")):
-                autotools_gcc = AutoToolsBuildEnvironment(self)
-                conf_args = [
-                    "--enable-silent-rules",
-                    "--enable-languages=c,c++",
-                    "--with-sysroot={}".format(self.package_folder),
-                    "--disable-shared"
-                ]
-                if build_multilib:
-                    conf_args.append("--enable-targets=all")
-                    conf_args.append("--enable-multilib")
-                else:
-                    conf_args.append("--disable-multilib")
-                conf_args.extend(with_gmp_mpfc_mpc)
-                if self.options.exception == "sjlj":
-                    conf_args.append("--enable-sjlj-exceptions")
-                if self.options.threads == "posix":
-                    # Some specific options which need to be set for posix thread. Otherwise it fails compiling.
-                    conf_args.extend([
-                        "--enable-silent-rules",
-                        "--enable-threads=posix",
-                        # Not 100% sure why, but the following options are required, otherwise
-                        # gcc fails to build with posix threads
-                    ])
-                autotools_gcc.libs = []
-                autotools_gcc.configure(configure_dir=os.path.join(self.build_folder, "sources", "gcc"),
-                                        args=conf_args, target=target_tag, host=False, build=False)
-                autotools_gcc.make(target="all-gcc")
-                autotools_gcc.make(target="install-gcc")
-
-            env_compiler = dict(env)
-            # The CC and CXX compiler must be set to the mingw compiler. Conan already sets CC and CXX, therefore we need to overwrite it.
-            # If the wrong compiler is used for mingw-w64-crt, then you will get the error
-            # configure: Please check if the mingw-w64 header set and the build/host option are set properly.
-            env_compiler["CC"] = target_tag + "-gcc"
-            env_compiler["CXX"] = target_tag + "-g++"
-            with tools.environment_append(env_compiler):
-                self.output.info("Building mingw-w64-crt ...")
-                mkdir(self, os.path.join(self.build_folder, "mingw-w64-crt"))
-                with chdir(self, os.path.join(self.build_folder, "mingw-w64-crt")):
-                    autotools = AutoToolsBuildEnvironment(self)
-                    conf_args = [
-                        "--enable-silent-rules",
-                        "--prefix={}".format(os.path.join(self.package_folder, target_tag)),
-                        "--with-sysroot={}".format(self.package_folder)
-                    ]
-                    if build_multilib:
-                        conf_args.append("--enable-lib32")
-                    autotools.configure(configure_dir=os.path.join(self.build_folder, "sources", "mingw-w64", "mingw-w64-crt"),
-                                        args=conf_args, target=False, host=target_tag, build=False,
-                                        use_default_install_dirs=False)
-                    autotools.make()
-                    autotools.install()
-
-                if self.options.threads == "posix":
-                    self.output.info("Building mingw-w64-libraries-winpthreads ...")
-                    mkdir(self, os.path.join(self.build_folder, "mingw-w64-libraries-winpthreads"))
-                    with chdir(self, os.path.join(self.build_folder, "mingw-w64-libraries-winpthreads")):
-                        autotools = AutoToolsBuildEnvironment(self)
-                        conf_args = [
-                            "--enable-silent-rules",
-                            "--disable-shared",
-                            "--prefix={}".format(os.path.join(self.package_folder, target_tag))
-                        ]
-                        autotools.configure(configure_dir=os.path.join(self.build_folder, "sources", "mingw-w64", "mingw-w64-libraries", "winpthreads"),
-                                            args=conf_args, target=False, host=target_tag, build=False)
-                        autotools.make()
-                        autotools.install()
-
-            self.output.info("Building libgcc ...")
-            with chdir(self, os.path.join(self.build_folder, "gcc")):
-                autotools_gcc.make()
-                autotools_gcc.install()
+        with self._build_namespace("gcc") as autotools:
+            autotools.make()
+            autotools.install()
 
         self.output.info("Building done!")
 
     def package(self):
-        self.copy("COPYING", src=os.path.join(self.build_folder, "sources", "mingw-w64"), dst="licenses")
+        copy(self, "COPYING",
+             src=os.path.join(self.source_folder, "mingw-w64"),
+             dst=os.path.join(self.package_folder, "licenses"))
         rm(self, "*.la", self.package_folder, recursive=True)
         rmdir(self, os.path.join(self.package_folder, "share", "man"))
         rmdir(self, os.path.join(self.package_folder, "share", "doc"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # replace with relative symlinks so they'll resolve correctly on consumer's machine
-        os.unlink(os.path.join(self.package_folder, 'mingw'))
-        os.unlink(os.path.join(self.package_folder, self._target_tag, 'lib64'))
-        self.run("ln -s {} {}".format(os.path.join(os.curdir, self._target_tag),
-                                        os.path.join(self.package_folder, 'mingw')))
-        self.run("ln -s {} {}".format(os.path.join(os.curdir, 'lib'),
-                                        os.path.join(self.package_folder, self._target_tag, 'lib64')))
 
     def package_info(self):
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
+        self.cpp_info.includedirs = []
+
         if getattr(self, "settings_target", None):
             if self.settings_target.compiler != "gcc":
-                raise ConanInvalidConfiguration("Only GCC is allowed as compiler.")
+                self.output.warning("Only GCC is allowed as the compiler.")
             if str(self.settings_target.compiler.threads) != str(self.options.threads):
-                raise ConanInvalidConfiguration("Build requires 'mingw' provides binaries for gcc "
-                                                "with threads={}, your profile:host declares "
-                                                "threads={}, please use the same value for both."
-                                                .format(self.options.threads,
-                                                        self.settings_target.compiler.threads))
+                self.output.warning(
+                    f"Build requires 'mingw' provides binaries for gcc with threads={self.options.threads},"
+                    f" your profile:host declares threads={self.settings_target.compiler.threads},"
+                    " please use the same value for both."
+                )
             if str(self.settings_target.compiler.exception) != str(self.options.exception):
-                raise ConanInvalidConfiguration("Build requires 'mingw' provides binaries for gcc "
-                                                "with exception={}, your profile:host declares "
-                                                "exception={}, please use the same value for both."
-                                                .format(self.options.exception,
-                                                        self.settings_target.compiler.exception))
+                self.output.warning(
+                    f"Build requires 'mingw' provides binaries for gcc with exception={self.options.exception},"
+                    f" your profile:host declares exception={self.settings_target.compiler.exception},"
+                    " please use the same value for both."
+                )
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env var with : {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
-        self.env_info.MINGW_HOME = str(self.package_folder)
+        prefix = os.path.join(bin_path, self._target_tag + "-")
 
-        prefix = os.path.join(self.package_folder, "bin", self._target_tag + "-")
-        self.env_info.CC = prefix + "gcc"
-        self.env_info.CXX = prefix + "g++"
-        self.env_info.CPP = prefix + "cpp"
-        self.env_info.AR = prefix + "ar"
-        self.env_info.AS = prefix + "as"
-        self.env_info.GDB = prefix + "gdb"
-        self.env_info.LD = prefix + "ld"
-        self.env_info.NM = prefix + "nm"
-        self.env_info.OBJCOPY = prefix + "objcopy"
-        self.env_info.OBJDUMP = prefix + "objdump"
-        self.env_info.RANLIB = prefix + "ranlib"
-        self.env_info.SIZE = prefix + "size"
-        self.env_info.STRINGS = prefix + "strings"
-        self.env_info.STRIP = prefix + "strip"
-        self.env_info.GCOV = prefix + "gcov"
-        self.env_info.RC = prefix + "windres"
-        self.env_info.DLLTOOL = prefix + "dlltool"
+        self.buildenv_info.prepend_path("PATH", bin_path)
+        self.env_info.PATH.append(bin_path)
+
+        self.buildenv_info.define_path("MINGW_HOME", self.package_folder)
+        self.env_info.MINGW_HOME = self.package_folder
+
+        def define_tool_env(var, name):
+            self.buildenv_info.define_path(var, prefix + name)
+            setattr(self.env_info, var, prefix + name)
+
+        define_tool_env("CC", "gcc")
+        define_tool_env("CXX", "g++")
+        define_tool_env("CPP", "cpp")
+        define_tool_env("AR", "ar")
+        define_tool_env("AS", "as")
+        define_tool_env("GDB", "gdb")
+        define_tool_env("LD", "ld")
+        define_tool_env("NM", "nm")
+        define_tool_env("OBJCOPY", "objcopy")
+        define_tool_env("OBJDUMP", "objdump")
+        define_tool_env("RANLIB", "ranlib")
+        define_tool_env("SIZE", "size")
+        define_tool_env("STRINGS", "strings")
+        define_tool_env("STRIP", "strip")
+        define_tool_env("GCOV", "gcov")
+        define_tool_env("RC", "windres")
+        define_tool_env("DLLTOOL", "dlltool")

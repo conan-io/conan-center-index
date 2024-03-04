@@ -1,4 +1,7 @@
 sources:
+  "1.41":
+    url: "https://github.com/mattreecebentley/plf_indiesort/archive/fce3d54ed1a43e9e7008703f79c4f4d2e5259176.tar.gz"
+    sha256: "34cca5e0a20f278dfcd963d18653b9440b1b590f5f193d0e68115f5a1a80bf6f"
   "1.18":
     url: "https://github.com/mattreecebentley/plf_indiesort/archive/1999a3017b3a3699f426608841a5a66e0849880d.tar.gz"
     sha256: "1c035243adbd63d89a61f8a0e8bbea1911ab9421467da9e5d618c30f10f16f91"

@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.47.0"
@@ -52,10 +53,9 @@ class IttApiConan(ConanFile):
 
     def _patch_sources(self):
         # Don't force PIC
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-            "set(CMAKE_C_FLAGS \"${CMAKE_C_FLAGS} -fPIC\")",
-            ""
-        )
+        if Version(self.version) < "3.24.1":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            'set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")', "")
 
     def generate(self):
         self._patch_sources()

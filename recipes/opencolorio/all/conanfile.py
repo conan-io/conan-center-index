@@ -50,7 +50,7 @@ class OpenColorIOConan(ConanFile):
         if Version(self.version) < "2.2.0":
             self.requires("openexr/2.5.7")
         else:
-            self.requires("openexr/3.1.9")
+            self.requires("openexr/3.2.1")
             self.requires("imath/3.1.9")
 
         if Version(self.version) < "2.0.0":
@@ -61,7 +61,7 @@ class OpenColorIOConan(ConanFile):
             self.requires("yaml-cpp/0.8.0")
 
         if Version(self.version) >= "2.3.0":
-            self.requires("minizip-ng/4.0.1")
+            self.requires("minizip-ng/4.0.3")
         elif Version(self.version) >= "2.2.0":
             self.requires("minizip-ng/3.0.9")
 

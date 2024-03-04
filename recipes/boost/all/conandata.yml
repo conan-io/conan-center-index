@@ -1,4 +1,9 @@
 sources:
+  "1.84.0":
+    url:
+      - "https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/boost_1_84_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.84.0/boost_1_84_0.tar.bz2"
+    sha256: "cc4b893acf645c9d4b698e9a0f08ca8846aa5d6c68275c14c3e7949c24109454"
   "1.83.0":
     url:
       - "https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.tar.bz2"
@@ -63,10 +68,22 @@ sources:
     url: "https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.bz2"
     sha256: "d73a8da01e8bf8c7eda40b4c84915071a8c8a0df4a6734537ddde4a8580524ee"
 patches:
+  "1.84.0":
+    - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
+      patch_description: "Optional flag to specify iconv from either libc of libiconv"
+      patch_type: "conan"
+    - patch_file: "patches/1.84.0-reimplement-string_set-as-any-string.patch"
+      patch_description: "Fix compilation with cppstd=20 on libcxx platforms (e.g. MacOS)"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/locale/commit/c5e8f02c903696a213fc4b710f6740ccd1f07f4e"
   "1.83.0":
     - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
       patch_description: "Optional flag to specify iconv from either libc of libiconv"
       patch_type: "conan"
+    - patch_file: "patches/1.83.0-locale-msvc.patch"
+      patch_description: "Fix compilation on windows when NOMINMAX is not defined"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/locale/pull/189"
   "1.82.0":
     - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
       patch_description: "Optional flag to specify iconv from either libc of libiconv"

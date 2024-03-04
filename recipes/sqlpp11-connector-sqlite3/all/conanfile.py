@@ -52,7 +52,7 @@ class sqlpp11Conan(ConanFile):
         if self.options.with_sqlcipher:
             self.requires("sqlcipher/4.5.1", transitive_headers=True, transitive_libs=True)
         else:
-            self.requires("sqlite3/3.43.2", transitive_headers=True, transitive_libs=True)
+            self.requires("sqlite3/3.44.2", transitive_headers=True, transitive_libs=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

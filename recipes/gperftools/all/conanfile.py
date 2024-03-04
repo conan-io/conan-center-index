@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, XCRun
-from conan.tools.build import cross_building, check_min_cppstd
+from conan.tools.build import cross_building, check_min_cppstd, stdcpp_library
 from conan.tools.cmake import cmake_layout
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import get, copy, rm, rmdir, replace_in_file
@@ -184,12 +184,7 @@ class GperftoolsConan(ConanFile):
         autotools.make()
 
     def package(self):
-        copy(
-            self,
-            pattern="COPYING",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
-        )
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
 
@@ -200,6 +195,9 @@ class GperftoolsConan(ConanFile):
 
     def _add_component(self, lib):
         self.cpp_info.components[lib].libs = [lib]
+        self.cpp_info.components[lib].set_property("pkg_config_name", f"lib{lib}")
+        if stdcpp_library(self):
+            self.cpp_info.components[lib].system_libs.append(stdcpp_library(self))
 
     def package_info(self):
         self._add_component("tcmalloc_minimal")
@@ -217,6 +215,8 @@ class GperftoolsConan(ConanFile):
         for component in self.cpp_info.components.values():
             if self.settings.os in ["Linux", "FreeBSD"]:
                 component.system_libs.extend(["pthread", "m"])
+                component.cflags.append("-pthread")
+                component.cxxflags.append("-pthread")
             if self.options.get_safe("enable_libunwind"):
                 component.requires.append("libunwind::libunwind")
 

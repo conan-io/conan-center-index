@@ -1,0 +1,193 @@
+From 672103a67aaf0dae5be6c5adcc5ce19e5b6d7676 Mon Sep 17 00:00:00 2001
+From: Tristan Partin <tristan@neon.tech>
+Date: Mon, 27 Nov 2023 11:49:52 -0600
+Subject: [PATCH v1] Use BIO_{get,set}_app_data() instead of
+ BIO_{get,set}_data()
+
+Compiling Postgres against OpenSSL 3.2 exposed a regression:
+
+$ psql "postgresql://$DB?sslmode=require"
+psql: error: connection to server at "redacted" (redacted), port 5432 failed: ERROR:  Parameter 'user' is missing in startup packet.
+double free or corruption (out)
+Aborted (core dumped)
+
+Analyzing the backtrace, openssl was overwriting heap-allocated data in
+our PGconn struct because it thought BIO::ptr was a struct bss_sock_st
+*. OpenSSL then called a memset() on a member of that struct, and we
+zeroed out data in our PGconn struct.
+
+BIO_get_data(3) says the following:
+
+> These functions are mainly useful when implementing a custom BIO.
+>
+> The BIO_set_data() function associates the custom data pointed to by ptr
+> with the BIO a. This data can subsequently be retrieved via a call to
+> BIO_get_data(). This can be used by custom BIOs for storing
+> implementation specific information.
+
+If you take a look at my_BIO_s_socket(), we create a partially custom
+BIO, but for the most part are defaulting to the methods defined by
+BIO_s_socket(). We need to set application-specific data and not BIO
+private data, so that the BIO implementation we rely on, can properly
+assert that its private data is what it expects.
+
+Rebased against libpq15
+
+Co-authored-by: Bo Andreson <mail@boanderson.me>
+---
+ src/backend/libpq/be-secure-openssl.c    | 11 +++--------
+ src/include/pg_config.h.in               |  3 ---
+ src/interfaces/libpq/fe-secure-openssl.c | 20 +++-----------------
+ src/tools/msvc/Solution.pm               |  2 --
+ 4 files changed, 6 insertions(+), 30 deletions(-)
+
+diff --git a/configure b/configure
+index d733a59..c13ad3d 100755
+--- a/configure
++++ b/configure
+@@ -13237,7 +13237,7 @@ done
+   # defines OPENSSL_VERSION_NUMBER to claim version 2.0.0, even though it
+   # doesn't have these OpenSSL 1.1.0 functions. So check for individual
+   # functions.
+-  for ac_func in OPENSSL_init_ssl BIO_get_data BIO_meth_new ASN1_STRING_get0_data HMAC_CTX_new HMAC_CTX_free
++  for ac_func in OPENSSL_init_ssl BIO_meth_new ASN1_STRING_get0_data HMAC_CTX_new HMAC_CTX_free
+ do :
+   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+diff --git a/configure.ac b/configure.ac
+index 44868ba..77e59a2 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1347,7 +1347,7 @@ if test "$with_ssl" = openssl ; then
+   # defines OPENSSL_VERSION_NUMBER to claim version 2.0.0, even though it
+   # doesn't have these OpenSSL 1.1.0 functions. So check for individual
+   # functions.
+-  AC_CHECK_FUNCS([OPENSSL_init_ssl BIO_get_data BIO_meth_new ASN1_STRING_get0_data HMAC_CTX_new HMAC_CTX_free])
++  AC_CHECK_FUNCS([OPENSSL_init_ssl BIO_meth_new ASN1_STRING_get0_data HMAC_CTX_new HMAC_CTX_free])
+   # OpenSSL versions before 1.1.0 required setting callback functions, for
+   # thread-safety. In 1.1.0, it's no longer required, and CRYPTO_lock()
+   # function was removed.
+diff --git a/src/backend/libpq/be-secure-openssl.c b/src/backend/libpq/be-secure-openssl.c
+index 8f9b81c..9abee50 100644
+--- a/src/backend/libpq/be-secure-openssl.c
++++ b/src/backend/libpq/be-secure-openssl.c
+@@ -830,11 +830,6 @@ be_tls_write(Port *port, void *ptr, size_t len, int *waitfor)
+  * to retry; do we need to adopt their logic for that?
+  */
+ 
+-#ifndef HAVE_BIO_GET_DATA
+-#define BIO_get_data(bio) (bio->ptr)
+-#define BIO_set_data(bio, data) (bio->ptr = data)
+-#endif
+-
+ static BIO_METHOD *my_bio_methods = NULL;
+ 
+ static int
+@@ -844,7 +839,7 @@ my_sock_read(BIO *h, char *buf, int size)
+ 
+ 	if (buf != NULL)
+ 	{
+-		res = secure_raw_read(((Port *) BIO_get_data(h)), buf, size);
++		res = secure_raw_read(((Port *) BIO_get_app_data(h)), buf, size);
+ 		BIO_clear_retry_flags(h);
+ 		if (res <= 0)
+ 		{
+@@ -864,7 +859,7 @@ my_sock_write(BIO *h, const char *buf, int size)
+ {
+ 	int			res = 0;
+ 
+-	res = secure_raw_write(((Port *) BIO_get_data(h)), buf, size);
++	res = secure_raw_write(((Port *) BIO_get_app_data(h)), buf, size);
+ 	BIO_clear_retry_flags(h);
+ 	if (res <= 0)
+ 	{
+@@ -940,7 +935,7 @@ my_SSL_set_fd(Port *port, int fd)
+ 		SSLerr(SSL_F_SSL_SET_FD, ERR_R_BUF_LIB);
+ 		goto err;
+ 	}
+-	BIO_set_data(bio, port);
++	BIO_set_app_data(bio, port);
+ 
+ 	BIO_set_fd(bio, fd, BIO_NOCLOSE);
+ 	SSL_set_bio(port->ssl, bio, bio);
+diff --git a/src/include/pg_config.h.in b/src/include/pg_config.h.in
+index d09e9f9..768e3d7 100644
+--- a/src/include/pg_config.h.in
++++ b/src/include/pg_config.h.in
+@@ -77,9 +77,6 @@
+ /* Define to 1 if you have the `backtrace_symbols' function. */
+ #undef HAVE_BACKTRACE_SYMBOLS
+ 
+-/* Define to 1 if you have the `BIO_get_data' function. */
+-#undef HAVE_BIO_GET_DATA
+-
+ /* Define to 1 if you have the `BIO_meth_new' function. */
+ #undef HAVE_BIO_METH_NEW
+ 
+diff --git a/src/interfaces/libpq/fe-secure-openssl.c b/src/interfaces/libpq/fe-secure-openssl.c
+index af59ff4..8d68d02 100644
+--- a/src/interfaces/libpq/fe-secure-openssl.c
++++ b/src/interfaces/libpq/fe-secure-openssl.c
+@@ -1800,11 +1800,6 @@ PQsslAttribute(PGconn *conn, const char *attribute_name)
+  * to retry; do we need to adopt their logic for that?
+  */
+ 
+-#ifndef HAVE_BIO_GET_DATA
+-#define BIO_get_data(bio) (bio->ptr)
+-#define BIO_set_data(bio, data) (bio->ptr = data)
+-#endif
+-
+ static BIO_METHOD *my_bio_methods;
+ 
+ static int
+@@ -1812,7 +1807,7 @@ my_sock_read(BIO *h, char *buf, int size)
+ {
+ 	int			res;
+ 
+-	res = pqsecure_raw_read((PGconn *) BIO_get_data(h), buf, size);
++	res = pqsecure_raw_read((PGconn *) BIO_get_app_data(h), buf, size);
+ 	BIO_clear_retry_flags(h);
+ 	if (res < 0)
+ 	{
+@@ -1842,7 +1837,7 @@ my_sock_write(BIO *h, const char *buf, int size)
+ {
+ 	int			res;
+ 
+-	res = pqsecure_raw_write((PGconn *) BIO_get_data(h), buf, size);
++	res = pqsecure_raw_write((PGconn *) BIO_get_app_data(h), buf, size);
+ 	BIO_clear_retry_flags(h);
+ 	if (res < 0)
+ 	{
+@@ -1933,7 +1928,7 @@ my_SSL_set_fd(PGconn *conn, int fd)
+ 		SSLerr(SSL_F_SSL_SET_FD, ERR_R_BUF_LIB);
+ 		goto err;
+ 	}
+-	BIO_set_data(bio, conn);
++	BIO_set_app_data(bio, conn);
+ 
+ 	SSL_set_bio(conn->ssl, bio, bio);
+ 	BIO_set_fd(bio, fd, BIO_NOCLOSE);
+diff --git a/src/tools/msvc/Solution.pm b/src/tools/msvc/Solution.pm
+index 790f03b..a53239f 100644
+--- a/src/tools/msvc/Solution.pm
++++ b/src/tools/msvc/Solution.pm
+@@ -226,7 +226,6 @@ sub GenerateFiles
+ 		HAVE_ATOMICS               => 1,
+ 		HAVE_ATOMIC_H              => undef,
+ 		HAVE_BACKTRACE_SYMBOLS     => undef,
+-		HAVE_BIO_GET_DATA          => undef,
+ 		HAVE_BIO_METH_NEW          => undef,
+ 		HAVE_CLOCK_GETTIME         => undef,
+ 		HAVE_COMPUTED_GOTO         => undef,
+@@ -566,7 +565,6 @@ sub GenerateFiles
+ 			|| ($digit1 >= '1' && $digit2 >= '1' && $digit3 >= '0'))
+ 		{
+ 			$define{HAVE_ASN1_STRING_GET0_DATA} = 1;
+-			$define{HAVE_BIO_GET_DATA}          = 1;
+ 			$define{HAVE_BIO_METH_NEW}          = 1;
+ 			$define{HAVE_HMAC_CTX_FREE}         = 1;
+ 			$define{HAVE_HMAC_CTX_NEW}          = 1;
+-- 
+Tristan Partin
+Neon (https://neon.tech)
+

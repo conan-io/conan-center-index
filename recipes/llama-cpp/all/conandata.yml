@@ -1,0 +1,4 @@
+sources:
+  "b2038":
+    url: "https://github.com/ggerganov/llama.cpp/archive/refs/tags/b2038.tar.gz"
+    sha256: "a55bc75f5c76624cabfd9ea5e045f76597411231cb6fc231f2a0bff6287ab13b"

@@ -57,10 +57,6 @@ class GPGErrorConan(ConanFile):
         ])
         if self.options.get_safe("fPIC", True):
             tc.configure_args.append("--with-pic")
-        host = None
-        if self.settings.os == "Linux" and self.settings.arch == "x86":
-            host = "i686-linux-gnu"
-        tc.update_configure_args({"--host": host})
         tc.generate()
 
     def build(self):

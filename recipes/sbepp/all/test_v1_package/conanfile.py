@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake
+from conan.tools.cmake import CMakeToolchain
 from conan.tools.build import cross_building
 import os
 
@@ -7,6 +8,11 @@ import os
 class TestPackageV1Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["SBEPP_VERSION"] = self.deps_cpp_info["sbepp"].version
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)

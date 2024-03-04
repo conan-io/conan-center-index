@@ -52,9 +52,6 @@ class SoxrConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) < "3.21":
-            # silence warning
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0115"] = "OLD"
         if is_msvc(self):
             tc.variables["BUILD_SHARED_RUNTIME"] = not is_msvc_static_runtime(self)
         # Disable SIMD based resample engines for Apple Silicon and iOS ARMv8 architecture

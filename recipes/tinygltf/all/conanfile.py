@@ -34,11 +34,11 @@ class TinygltfConan(ConanFile):
         self.info.clear()
 
     def requirements(self):
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("nlohmann_json/3.11.3")
         if self.options.draco:
             self.requires("draco/1.5.6")
         if self.options.stb_image or self.options.stb_image_write:
-            self.requires("stb/cci.20220909")
+            self.requires("stb/cci.20230920")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):

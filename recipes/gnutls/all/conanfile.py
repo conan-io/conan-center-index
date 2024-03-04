@@ -65,7 +65,7 @@ class GnuTLSConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nettle/3.8.1")
+        self.requires("nettle/3.9.1")
         self.requires("gmp/6.3.0")
         self.requires("libiconv/1.17")
         if self.options.with_zlib:
@@ -81,7 +81,7 @@ class GnuTLSConan(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):

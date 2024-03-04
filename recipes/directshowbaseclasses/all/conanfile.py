@@ -1,40 +1,60 @@
-from conans import ConanFile, CMake, tools
 import os
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
+
+required_conan_version = ">=1.53.0"
 
 
 class DirectShowBaseClassesConan(ConanFile):
     name = "directshowbaseclasses"
-    description = "Microsoft DirectShow Base Classes are a set of C++ classes and utility functions designed for " \
-                  "implementing DirectShow filters"
+    description = (
+        "Microsoft DirectShow Base Classes are a set of C++ classes and "
+        "utility functions designed for implementing DirectShow filters"
+    )
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://docs.microsoft.com/en-us/windows/desktop/directshow/directshow-base-classes"
-    topics = ("conan", "directshow", "dshow")
-    license = "MIT"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-    settings = {"os": ["Windows"], "arch": ["x86", "x86_64"], "compiler": None, "build_type": None}
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    topics = ("directshow", "dshow")
+
+    package_type = "static-library"
+    settings = "os", "arch", "compiler", "build_type"
     short_paths = True
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename('Windows-classic-samples-%s' % self.version, self._source_subfolder)
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if self.settings.os != "Windows":
+            raise ConanInvalidConfiguration(f"{self.ref} can only be used on Windows.")
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ['strmbasd' if self.settings.build_type == 'Debug' else 'strmbase']
-        self.cpp_info.system_libs = ['strmiids', 'winmm']
+        self.cpp_info.libs = ["strmbasd" if self.settings.build_type == "Debug" else "strmbase"]
+        self.cpp_info.system_libs = ["strmiids", "winmm"]

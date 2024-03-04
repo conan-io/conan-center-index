@@ -1,8 +1,12 @@
 sources:
+  "0.4.41":
+    url: "https://mediaarea.net/download/source/libzen/0.4.41/libzen_0.4.41.tar.bz2"
+    sha256: "eb237d7d3dca6dc6ba068719420a27de0934a783ccaeb2867562b35af3901e2d"
   "0.4.38":
     url: "https://mediaarea.net/download/source/libzen/0.4.38/libzen_0.4.38.tar.bz2"
     sha256: "594e07bb4a0472cd9da258b3c4e050e9a37a39cccd85e3d8b5bf597d027b7eda"
 patches:
+  "0.4.41":
+    - patch_file: "patches/0002-export-data-in-windows-dlls.patch"
   "0.4.38":
-    - patch_file: "patches/0001-enable-WIN32-shared-libraries.patch"
     - patch_file: "patches/0002-export-data-in-windows-dlls.patch"

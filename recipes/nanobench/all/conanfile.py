@@ -14,6 +14,7 @@ class NanobenchConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/martinus/nanobench"
     topics = ("benchmark", "microbenchmark", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     @property

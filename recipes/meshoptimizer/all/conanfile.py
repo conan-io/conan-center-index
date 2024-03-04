@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
@@ -50,10 +51,11 @@ class MeshOptimizerConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # No warnings as errors
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        replace_in_file(self, cmakelists, "add_compile_options(/W4 /WX)", "")
-        replace_in_file(self, cmakelists, "-Werror", "")
+        # No warnings as errors - now fine in 0.19 and up
+        if Version(self.version) < "0.19":
+            cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+            replace_in_file(self, cmakelists, "add_compile_options(/W4 /WX)", "")
+            replace_in_file(self, cmakelists, "-Werror", "")
 
     def build(self):
         self._patch_sources()

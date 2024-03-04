@@ -1,0 +1,4 @@
+sources:
+  "2.1.0":
+    url: "https://github.com/daniele77/cli/archive/refs/tags/v2.1.0.tar.gz"
+    sha256: "dfc9fc7c72a6cdfdf852d89f151699b57460ff49775a8ff27d2a69477649acf9"

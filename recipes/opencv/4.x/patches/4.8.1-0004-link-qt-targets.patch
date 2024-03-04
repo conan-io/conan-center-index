@@ -1,0 +1,22 @@
+--- a/contrib/modules/cvv/CMakeLists.txt
++++ b/contrib/modules/cvv/CMakeLists.txt
+@@ -18,7 +18,7 @@
+ set(CMAKE_AUTOMOC ON)
+ set(CMAKE_INCLUDE_CURRENT_DIR ON)
+ foreach(module ${CVV_QT_MODULES})
+-  list(APPEND CVV_LIBRARIES ${Qt${QT_VERSION_MAJOR}${module}_LIBRARIES})
++  list(APPEND CVV_LIBRARIES Qt${QT_VERSION_MAJOR}::${module})
+ endforeach()
+ 
+ ocv_glob_module_sources()
+--- a/modules/highgui/CMakeLists.txt
++++ b/modules/highgui/CMakeLists.txt
+@@ -116,7 +116,7 @@ if(HAVE_QT)
+     foreach(dt_dep ${qt_deps})
+       add_definitions(${Qt${QT_VERSION_MAJOR}${dt_dep}_DEFINITIONS})
+       include_directories(${Qt${QT_VERSION_MAJOR}${dt_dep}_INCLUDE_DIRS})
+-      list(APPEND HIGHGUI_LIBRARIES ${Qt${QT_VERSION_MAJOR}${dt_dep}_LIBRARIES})
++      list(APPEND HIGHGUI_LIBRARIES Qt${QT_VERSION_MAJOR}::${dt_dep})
+     endforeach()
+   else()
+     ocv_assert(QT_VERSION_MAJOR EQUAL 4)

@@ -8,11 +8,7 @@ sources:
 patches:
   "2.18":
     - patch_file: "patches/2.18-0001-no-embedded-paths-makefile.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/2.18-0002-libsrc-use-extension.patch"
-      base_path: "source_subfolder"
   "2.19":
     - patch_file: "patches/2.19-0001-no-embedded-paths-makefile.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/2.19-0002-libsrc-use-extension.patch"
-      base_path: "source_subfolder"

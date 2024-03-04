@@ -12,7 +12,7 @@
          -Ofast
 -        "$<$<CONFIG:DEBUG>:-Werror>")
 +)
-+target_compile_features(oboe PUBLIC cxx_std_17)
++
  
  # Enable logging of D,V for debug builds
  target_compile_definitions(oboe PUBLIC $<$<CONFIG:DEBUG>:OBOE_ENABLE_LOGGING=1>)

@@ -42,6 +42,10 @@ set_target_properties(quickjs PROPERTIES
     WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
+if(USE_BIGNUM)
+    target_compile_definitions(quickjs PRIVATE CONFIG_BIGNUM)
+endif()
+
 find_library(LIBM m)
 target_link_libraries(quickjs PRIVATE $<$<BOOL:${LIBM}>:${LIBM}>)
 

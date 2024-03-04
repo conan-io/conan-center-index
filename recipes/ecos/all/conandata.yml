@@ -1,8 +1,13 @@
 sources:
+  "2.0.10":
+    url: "https://github.com/embotech/ecos/archive/refs/tags/v2.0.10.tar.gz"
+    sha256: "1aa24b5782b84fa33df2987510fb8f60f5f999cc2d3a5c73cfc3eb5e5f3b46af"
   "2.0.8":
     url: "https://github.com/embotech/ecos/archive/refs/tags/v2.0.8.tar.gz"
     sha256: "d905d16599efd927a75b29852c3476ff1ffd0b97ab27d5b8ad63bb4ff2ad8130"
 patches:
+  "2.0.10":
+    - patch_file: "patches/0001-fix-cmake.patch"
   "2.0.8":
     - patch_file: "patches/0001-fix-cmake.patch"
     - patch_file: "patches/0002-missing-include.patch"
