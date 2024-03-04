@@ -196,6 +196,8 @@ class PangoConan(ConanFile):
                 "pango_",
                 "freetype::freetype",
             ]
+            if self.options.with_fontconfig:
+                self.cpp_info.components["pangoft2"].requires.append("fontconfig::fontconfig")
             self.cpp_info.components["pangoft2"].includedirs = [
                 os.path.join(self.package_folder, "include", "pango-1.0")
             ]
@@ -203,7 +205,7 @@ class PangoConan(ConanFile):
         if self.options.with_fontconfig:
             self.cpp_info.components["pangofc"].set_property("pkg_config_name", "pangofc")
             if self.options.with_freetype:
-                self.cpp_info.components["pangofc"].requires = ["pangoft2"]
+                self.cpp_info.components["pangofc"].requires = ["freetype::freetype", "harfbuzz::harfbuzz" "pangoft2"]
 
         if self.settings.os != "Windows":
             self.cpp_info.components["pangoroot"].set_property("pkg_config_name", "pangoroot")
@@ -229,7 +231,7 @@ class PangoConan(ConanFile):
             self.cpp_info.components["pangocairo"].set_property("pkg_config_name", "pangocairo")
             self.cpp_info.components["pangocairo"].requires = ["pango_"]
             if self.options.with_freetype:
-                self.cpp_info.components["pangocairo"].requires.append("pangoft2")
+                self.cpp_info.components["pangocairo"].requires.extend(["cairo::cairo_", "freetype::freetype", "pangoft2"])
             if self.settings.os == "Windows":
                 self.cpp_info.components["pangocairo"].requires.append("pangowin32")
                 self.cpp_info.components["pangocairo"].system_libs.append("gdi32")
