@@ -1,66 +1,81 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.32.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir, replace_in_file
+
+required_conan_version = ">=1.53.0"
+
 
 class LibDispatchConan(ConanFile):
     name = "libdispatch"
-    homepage = "https://github.com/apple/swift-corelibs-libdispatch"
-    description = "Grand Central Dispatch (GCD or libdispatch) provides comprehensive support for concurrent code execution on multicore hardware."
-    topics = ("conan", "libdispatch", "apple", "GCD", "concurrency")
-    url = "https://github.com/conan-io/conan-center-index"
+    description = (
+        "Grand Central Dispatch (GCD or libdispatch) provides comprehensive support "
+        "for concurrent code execution on multicore hardware."
+    )
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-    settings = "os", "compiler", "build_type", "arch"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/apple/swift-corelibs-libdispatch"
+    topics = ("apple", "GCD", "concurrency")
 
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    _cmake = None
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.compiler != "clang":
             raise ConanInvalidConfiguration("Clang compiler is required.")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "swift-corelibs-{}-swift-{}-RELEASE".format(self.name, self.version)
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "modules", "DispatchCompilerWarnings.cmake"),
+                        "-Werror", "")
 
     def build(self):
-        cmake = self._configure_cmake()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        if self.settings.os == "Macos":
+        if is_apple_os(self):
             self.cpp_info.libs = ["dispatch"]
         else:
             self.cpp_info.libs = ["dispatch", "BlocksRuntime"]
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "rt"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["shlwapi", "ws2_32", "winmm", "synchronization"]

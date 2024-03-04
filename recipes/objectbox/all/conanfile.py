@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
@@ -14,18 +15,25 @@ class ObjectboxCConan(ConanFile):
     homepage = "https://github.com/objectbox/objectbox-c"
     topics = ("performance", "database", "flatbuffers")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "shared-library"
     options = {
         "with_sync": [True, False],
     }
     default_options = {
         "with_sync": False,
     }
+    upload_policy="skip"
 
     def export_sources(self):
         export_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if Version(self.version) >= "0.19.0" and \
+            self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "5":
+            raise ConanInvalidConfiguration(f"{self.ref} requires GCC 6 or higher")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

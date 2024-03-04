@@ -9,7 +9,8 @@ from conan.tools.files import (
     get,
     rename,
     rm,
-    rmdir
+    rmdir,
+    replace_in_file
 )
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -86,6 +87,19 @@ class LibiconvConan(ConanFile):
         env.generate()
 
         tc = AutotoolsToolchain(self)
+        if self.settings.os == "Windows" and self.settings.compiler == "gcc":
+            if self.settings.arch == "x86":
+                tc.update_configure_args({
+                    "--host": "i686-w64-mingw32",
+                    "RC": "windres --target=pe-i386",
+                    "WINDRES": "windres --target=pe-i386",
+                })
+            elif self.settings.arch == "x86_64":
+                tc.update_configure_args({
+                    "--host": "x86_64-w64-mingw32",
+                    "RC": "windres --target=pe-x86-64",
+                    "WINDRES": "windres --target=pe-x86-64",
+                })
         msvc_version = {"Visual Studio": "12", "msvc": "180"}
         if is_msvc(self) and Version(self.settings.compiler.version) >= msvc_version[str(self.settings.compiler)]:
             # https://github.com/conan-io/conan/issues/6514
@@ -119,8 +133,15 @@ class LibiconvConan(ConanFile):
             env.define("win32_target", "_WIN32_WINNT_VISTA")
         tc.generate(env)
 
-    def build(self):
+    def _apply_resource_patch(self):
+        if self.settings.arch == "x86":
+            windres_options_path = os.path.join(self.source_folder, "windows", "windres-options")
+            self.output.info("Applying {} resource patch: {}".format(self.settings.arch, windres_options_path))
+            replace_in_file(self, windres_options_path, '#   PACKAGE_VERSION_SUBMINOR', '#   PACKAGE_VERSION_SUBMINOR\necho "--target=pe-i386"', strict=True)
+
+    def build(self): 
         apply_conandata_patches(self)
+        self._apply_resource_patch()
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()

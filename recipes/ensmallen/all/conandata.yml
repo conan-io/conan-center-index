@@ -1,0 +1,4 @@
+sources:
+  "2.19.1":
+    url: "https://ensmallen.org/files/ensmallen-2.19.1.tar.gz"
+    sha256: "f36ad7f08b0688d2a8152e1c73dd437c56ed7a5af5facf65db6ffd977b275b2e"

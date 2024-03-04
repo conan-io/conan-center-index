@@ -1,7 +1,6 @@
 import os
 
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, save
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
@@ -52,6 +51,10 @@ class EazylzmaConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        # Relocatable shared libs on macOS
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        # Silence CMake warning about LOCATION property
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0026"] = "OLD"
         tc.generate()
 
     def build(self):
@@ -80,7 +83,6 @@ class EazylzmaConan(ConanFile):
         copy(self, "easylzma/*",
              dst=os.path.join(self.package_folder, "include"),
              src=os.path.join(self.source_folder, "src"))
-        fix_apple_shared_install_name(self)
 
     @property
     def _libname(self):
