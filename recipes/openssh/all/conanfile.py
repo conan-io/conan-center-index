@@ -1,10 +1,8 @@
-import os
-
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import patch, copy, get, rmdir, export_conandata_patches
+from conan.tools.files import copy, get, rmdir, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from os.path import join
@@ -54,9 +52,9 @@ class PackageConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_openssl:
             if self.version == "8.1p1":
-              self.requires("openssl/[>=1.1 <=3.0]")
+                self.requires("openssl/[>=1.1 <=3.0]")
             else:
-              self.requires("openssl/[>=1.1 <=3.1]")
+                self.requires("openssl/[>=1.1 <=3.1]")
         if self.options.with_pam == "openpam":
             self.requires("openpam/20190224")
 
