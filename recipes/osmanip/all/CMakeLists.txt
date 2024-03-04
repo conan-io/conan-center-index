@@ -7,6 +7,12 @@ add_library(osmanip)
 target_sources(osmanip PRIVATE
     src/graphics/canvas.cpp
     src/graphics/plot_2D.cpp
+    $<$<VERSION_GREATER_EQUAL:${OSMANIP_VERSION},4.4.0>:
+        src/utility/iostream.cpp
+        src/utility/output_redirector.cpp
+        src/utility/sstream.cpp
+        src/utility/strings.cpp
+    >
     $<$<VERSION_GREATER_EQUAL:${OSMANIP_VERSION},4.2.0>:
         src/manipulators/colsty.cpp
         src/manipulators/common.cpp

@@ -5,8 +5,8 @@ import textwrap
 
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.files import copy, get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
@@ -64,6 +64,7 @@ class QtConan(ConanFile):
         "with_gssapi": [True, False],
         "with_md4c": [True, False],
         "with_x11": [True, False],
+        "with_egl": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -107,6 +108,7 @@ class QtConan(ConanFile):
         "with_gssapi": False,
         "with_md4c": True,
         "with_x11": True,
+        "with_egl": False,
 
         "gui": True,
         "widgets": True,
@@ -165,6 +167,7 @@ class QtConan(ConanFile):
             self.options.with_glib = False
             del self.options.with_libalsa
             del self.options.with_x11
+            del self.options.with_egl
 
         if self.settings.os == "Windows":
             self.options.opengl = "dynamic"
@@ -198,6 +201,7 @@ class QtConan(ConanFile):
             del self.options.with_libpng
             del self.options.with_md4c
             self.options.rm_safe("with_x11")
+            self.options.rm_safe("with_egl")
 
         if not self.options.get_safe("qtmultimedia"):
             self.options.rm_safe("with_libalsa")
@@ -325,9 +329,9 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
             self.requires("freetype/2.13.2")
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/2.15.0")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/74.1")
+            self.requires("icu/74.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
             self.requires("harfbuzz/8.3.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
@@ -336,9 +340,9 @@ class QtConan(ConanFile):
             else:
                 self.requires("libjpeg/9e")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/1.6.42")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.44.2")
+            self.requires("sqlite3/3.45.0")
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.1.0")
         if self.options.with_pq:
@@ -354,6 +358,8 @@ class QtConan(ConanFile):
             self.requires("xkbcommon/1.5.0")
         if self.options.get_safe("with_x11", False):
             self.requires("xorg/system")
+        if self.options.get_safe("with_egl"):
+            self.requires("egl/system")
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
@@ -363,13 +369,14 @@ class QtConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.1.0")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
-            self.requires("expat/2.5.0")
+            self.requires("expat/2.6.0")
             self.requires("opus/1.4")
             self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.93")
-            self.requires("libdrm/2.4.114")
+            self.requires("libdrm/2.4.119")
         if self.options.get_safe("with_gstreamer", False):
+            self.requires("gstreamer/1.19.2")
             self.requires("gst-plugins-base/1.19.2")
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
@@ -415,6 +422,16 @@ class QtConan(ConanFile):
         tc.set_property("wayland::wayland-server", "cmake_target_name", "Wayland::Server")
         tc.set_property("wayland::wayland-cursor", "cmake_target_name", "Wayland::Cursor")
         tc.set_property("wayland::wayland-egl", "cmake_target_name", "Wayland::Egl")
+
+        # override https://github.com/qt/qtbase/blob/dev/cmake/3rdparty/extra-cmake-modules/find-modules/FindEGL.cmake
+        tc.set_property("egl", "cmake_file_name", "EGL")
+        tc.set_property("egl", "cmake_find_mode", "module")
+        tc.set_property("egl::egl", "cmake_target_name", "EGL::EGL")
+
+        # don't override https://github.com/qt/qtmultimedia/blob/dev/cmake/FindGStreamer.cmake
+        tc.set_property("gstreamer", "cmake_file_name", "gstreamer_conan")
+        tc.set_property("gstreamer", "cmake_find_mode", "module")
+
         tc.generate()
 
         for f in glob.glob("*.cmake"):
@@ -510,7 +527,9 @@ class QtConan(ConanFile):
                               ("with_zstd", "zstd"),
                               ("with_vulkan", "vulkan"),
                               ("with_brotli", "brotli"),
-                              ("with_gssapi", "gssapi")]:
+                              ("with_gssapi", "gssapi"),
+                              ("with_egl", "egl"),
+                              ("with_gstreamer", "gstreamer")]:
             tc.variables[f"FEATURE_{conf_arg}"] = ("ON" if self.options.get_safe(opt, False) else "OFF")
 
 
@@ -595,7 +614,7 @@ class QtConan(ConanFile):
             }
         if Version(self.version) >= "6.5.0":
             cpp_std_map[23] = "FEATURE_cxx2b"
-        
+
         for std,feature in cpp_std_map.items():
             tc.variables[feature] = "ON" if int(current_cpp_std) >= std else "OFF"
 
@@ -627,7 +646,6 @@ class QtConan(ConanFile):
                   strip_root=True, destination=destination)
 
         # patching in source method because of no_copy_source attribute
-
         apply_conandata_patches(self)
         for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
             replace_in_file(self, os.path.join(self.source_folder, "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
@@ -1022,6 +1040,8 @@ class QtConan(ConanFile):
                     gui_reqs.append("xkbcommon::xkbcommon")
                 if self.options.get_safe("with_x11", False):
                     gui_reqs.append("xorg::xorg")
+                if self.options.get_safe("with_egl"):
+                    gui_reqs.append("egl::egl")
             if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
@@ -1236,7 +1256,9 @@ class QtConan(ConanFile):
             if self.options.qtdeclarative and qt_quick_enabled:
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
             if self.options.with_gstreamer:
-                _create_plugin("QGstreamerMediaPlugin", "gstreamermediaplugin", "multimedia", ["gst-plugins-base::gst-plugins-base"])
+                _create_plugin("QGstreamerMediaPlugin", "gstreamermediaplugin", "multimedia", [
+                    "gstreamer::gstreamer",
+                    "gst-plugins-base::gst-plugins-base"])
 
         if self.options.get_safe("qtpositioning"):
             _create_module("Positioning", [])
