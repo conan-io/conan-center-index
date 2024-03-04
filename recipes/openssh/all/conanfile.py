@@ -57,9 +57,14 @@ class PackageConan(ConanFile):
                 self.requires("openssl/[>=1.1 <=3.1]")
         if self.options.with_pam == "openpam":
             self.requires("openpam/20190224")
+        if self.options.with_libedit:
+            self.requires("editline/3.1")
 
     def validate(self):
         if self.settings.os in ["baremetal", "Windows"]:
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
+
+        if self.settings.os in ["Macos"] and self.version == "8.1p1":
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
     def source(self):
@@ -73,17 +78,23 @@ class PackageConan(ConanFile):
         ad.generate()
 
         tc = AutotoolsToolchain(self)
-        tc.configure_args.extend([
-            "--without-zlib-version-check",
-            "--with-libedit={}".format("yes" if self.options.with_libedit else "no"),
-            "--with-selinux={}".format("yes" if self.options.with_selinux else "no"),
-            "--with-openssl={}".format("yes" if self.options.with_openssl else "no"),
-            "--with-pam={}".format("yes" if self.options.with_pam else "no"),
-        ])
+        tc.configure_args.append("--without-zlib-version-check")
+
+        if self.options.with_selinux:
+            tc.configure_args.append("--with-selinux")
+
+        if self.options.with_pam:
+            tc.configure_args.append("--with-pam")
+
+        if self.options.with_libedit:
+            editline = self.dependencies["editline"]
+            tc.configure_args.append("--with-libedit={}".format(editline.package_folder))
 
         if self.options.with_openssl:
             openssl = self.dependencies["openssl"]
             tc.configure_args.append("--with-ssl-dir={}".format(openssl.package_folder))
+        else:
+            tc.configure_args.append("--without-openssl")
 
         if self.options.with_sandbox != 'auto':
             tc.configure_args.append("--with-sandbox={}".format(self.options.with_sandbox))
