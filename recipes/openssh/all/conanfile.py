@@ -51,10 +51,7 @@ class PackageConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_openssl:
-            if self.version == "8.1p1":
-                self.requires("openssl/[>=1.1 <=3.0]")
-            else:
-                self.requires("openssl/[>=1.1 <=3.1]")
+            self.requires("openssl/[>=1.1 <=3.1]")
         if self.options.with_pam == "openpam":
             self.requires("openpam/20190224")
         if self.options.with_libedit:
@@ -62,9 +59,6 @@ class PackageConan(ConanFile):
 
     def validate(self):
         if self.settings.os in ["baremetal", "Windows"]:
-            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
-
-        if self.settings.os in ["Macos"] and self.version == "8.1p1":
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
     def source(self):
