@@ -15,7 +15,6 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-        self.requires("wayland/1.22.0")
 
     def build_requirements(self):
         self.tool_requires("meson/1.3.2")
