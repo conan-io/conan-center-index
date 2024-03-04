@@ -66,7 +66,7 @@ class PangoConan(ConanFile):
             self.requires("freetype/2.13.2")
 
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/2.15.0")
         if self.options.with_xft:
             self.requires("libxft/2.3.8")
         if (
