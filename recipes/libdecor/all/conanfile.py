@@ -1,8 +1,9 @@
 import os
+import textwrap
 
 from conan import ConanFile
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -30,17 +31,16 @@ class libdecorConan(ConanFile):
     }
 
     @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    def _has_build_profile(self):
+        return hasattr(self, "settings_build")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
         self.options["pango"].with_cairo = True
-
-        # https://gitlab.freedesktop.org/libdecor/libdecor/-/issues/66
-        if self.options.get_safe("wayland"):
-            self.options["wayland"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -52,31 +52,26 @@ class libdecorConan(ConanFile):
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         self.requires("pango/1.51.0")
-        self.requires("wayland/1.22.0")
-        self.requires("wayland-protocols/1.33")
+        self.requires("wayland/1.22.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
-        if self.options.get_safe("with_gtk") and not self.dependencies["gtk"].options.version == "3":
-            raise ConanInvalidConfiguration(f"{self.ref} requires the version option of gtk to be set to 3")
         if not self.dependencies["pango"].options.with_cairo:
             raise ConanInvalidConfiguration(f"{self.ref} requires the with_cairo option of pango to be enabled")
-
-        # https://gitlab.freedesktop.org/libdecor/libdecor/-/issues/66
-        if not self.dependencies["wayland"].options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} requires the shared option of wayland to be enabled due to a bug in libdecor")
 
     def build_requirements(self):
         self.tool_requires("meson/1.3.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         self.tool_requires("wayland/<host_version>")
+        self.tool_requires("wayland-protocols/1.33")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         replace_in_file(
             self,
             os.path.join(self.source_folder, "src", "plugins", "meson.build"),
@@ -94,6 +89,24 @@ class libdecorConan(ConanFile):
         tc.project_options["gtk"] = feature("with_gtk")
         tc.generate()
         pkg_config_deps = PkgConfigDeps(self)
+        if self._has_build_profile:
+            pkg_config_deps.build_context_activated = ["wayland-protocols"]
+        else:
+            # Manually generate pkgconfig file of wayland-protocols since
+            # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
+            # We must use legacy conan v1 deps_cpp_info because self.dependencies doesn't
+            # contain build requirements when using 1 profile.
+            wp_prefix = self.deps_cpp_info["wayland-protocols"].rootpath
+            wp_version = self.deps_cpp_info["wayland-protocols"].version
+            wp_pkg_content = textwrap.dedent(f"""\
+                prefix={wp_prefix}
+                datarootdir=${{prefix}}/res
+                pkgdatadir=${{datarootdir}}/wayland-protocols
+                Name: Wayland Protocols
+                Description: Wayland protocol files
+                Version: {wp_version}
+            """)
+            save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
         pkg_config_deps.generate()
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
