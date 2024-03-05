@@ -37,8 +37,7 @@ class EudevConan(ConanFile):
         "mtd_probe": False,
         "programs": True,
         "with_kmod": True,
-        # todo Should be enabled by default when libblkid is packaged in CCI.
-        "with_libblkid": False,
+        "with_libblkid": True,
         "with_libselinux": True,
     }
     provides = "libudev"
@@ -46,8 +45,8 @@ class EudevConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -61,20 +60,18 @@ class EudevConan(ConanFile):
         if self.options.with_kmod:
             self.requires("kmod/30")
         if self.options.with_libblkid:
-            self.requires("libmount/2.39")
+            self.requires("libmount/2.39.2")
         if self.options.with_libselinux:
-            self.requires("libselinux/3.3")
+            self.requires("libselinux/3.6")
 
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
-        if self.options.with_libblkid:
-            raise ConanInvalidConfiguration(f"The with_libblkid option is not yet supported. Contributions welcome.")
 
     def build_requirements(self):
         self.tool_requires("gperf/3.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -86,7 +83,8 @@ class EudevConan(ConanFile):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
         tc = AutotoolsToolchain(self)
-        yes_no = lambda v: "yes" if v else "no"
+        def yes_no(v):
+            return "yes" if v else "no"
         tc.configure_args.extend([
             "--sysconfdir=${prefix}/res",
             f"--enable-programs={yes_no(self.options.programs)}",
