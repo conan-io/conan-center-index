@@ -13,7 +13,7 @@ class TestPackageConan(ConanFile):
         # <filesystem> was added in GCC 8.
         return tools.Version(self.deps_cpp_info["abseil"].version) >= "20240116" \
             and self.settings.compiler == "gcc" \
-            and tools.Version(self.settings.compiler.version).major == 7
+            and int(tools.Version(self.settings.compiler.version).major) == 7
 
     def build(self):
         cmake = CMake(self)
