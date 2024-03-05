@@ -284,7 +284,6 @@ class OpenTelemetryCppConan(ConanFile):
     @property
     def _otel_libraries(self):
         libraries = [
-            self._http_client_name,
             "opentelemetry_common",
             "opentelemetry_exporter_in_memory",
             "opentelemetry_exporter_ostream_span",
@@ -292,6 +291,9 @@ class OpenTelemetryCppConan(ConanFile):
             "opentelemetry_trace",
             "opentelemetry_version",
         ]
+        if self.options.with_otlp_http or self.options.with_elasticsearch or self.options.get_safe("with_jaeger") or self.options.with_zipkin:
+            # https://github.com/open-telemetry/opentelemetry-cpp/blob/v1.12.0/CMakeLists.txt#L452-L460
+            libraries.append(self._http_client_name)
         if self.options.with_otlp_grpc or self.options.with_otlp_http:
             libraries.extend([
                 "opentelemetry_proto",
