@@ -3,26 +3,32 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
 class WiringpiConan(ConanFile):
     name = "wiringpi"
-    license = "LGPL-3.0"
     description = "GPIO Interface library for the Raspberry Pi"
+    license = "LGPL-3.0"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://wiringpi.com"
     topics = ("wiringpi", "gpio", "raspberrypi")
-    url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "wpi_extensions": [True, False],
-               "with_devlib": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "wpi_extensions": False,
-                       "with_devlib": True}
-            
+    settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "wpi_extensions": [True, False],
+        "with_devlib": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "wpi_extensions": False,
+        "with_devlib": True,
+    }
+
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
@@ -32,16 +38,20 @@ class WiringpiConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
-    def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(f"{self.ref} only works for Linux")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration(f"{self.ref} only works for Linux")
+        if Version(self.version) >= 3.0 and \
+            self.settings.compiler == "gcc" and \
+            Version(self.settings.compiler.version) < 8:
+            raise ConanInvalidConfiguration(f"{self.ref} requires gcc >= 8")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["WIRINGPI_SRC_DIR"] = self.source_folder.replace("\\", "/")
