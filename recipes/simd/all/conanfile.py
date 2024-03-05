@@ -11,7 +11,7 @@ required_conan_version = ">=1.53.0"
 
 class SimdConan(ConanFile):
     name = "simd"
-    description = "C++ image processing and machine learning library with using of SIMD"
+    description = "C++ image processing and machine learning library with SIMD"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ermig1979/Simd"
