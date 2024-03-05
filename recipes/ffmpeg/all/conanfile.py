@@ -1022,3 +1022,6 @@ class FFMpegConan(ConanFile):
         if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
             self.cpp_info.components["avutil"].requires.append(
                 "vulkan-loader::vulkan-loader")
+
+        if self.options.with_ssl == "openssl":
+            self.cpp_info.components["avutil"].requires.append("openssl::ssl")
