@@ -320,9 +320,9 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_pulse"):
             self.requires("pulseaudio/14.2")
         if self.options.get_safe("with_vaapi"):
-            self.requires("vaapi/system")
+            self.requires("libva/2.20.0")
         if self.options.get_safe("with_vdpau"):
-            self.requires("vdpau/system")
+            self.requires("libvdpau/1.5")
         if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.243.0")
         if self.options.get_safe("with_libsvtav1"):
@@ -1014,10 +1014,10 @@ class FFMpegConan(ConanFile):
 
         if self.options.get_safe("with_vaapi"):
             self.cpp_info.components["avutil"].requires.extend(
-                ["vaapi::vaapi", "xorg::x11"])
+                ["libva::libva_", "libva::libva-drm", "libva::libva-x11", "xorg::x11"])
 
         if self.options.get_safe("with_vdpau"):
-            self.cpp_info.components["avutil"].requires.append("vdpau::vdpau")
+            self.cpp_info.components["avutil"].requires.append("libvdpau::libvdpau")
 
         if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
             self.cpp_info.components["avutil"].requires.append(
