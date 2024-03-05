@@ -1,7 +1,10 @@
+import os
+
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake
-import os
+from conan.tools.gnu import PkgConfig
+from conan.tools.scm import Version
 
 
 class TestPackageConan(ConanFile):
@@ -21,6 +24,8 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
+        pkg_config = PkgConfig(self, "libudev", pkg_config_path=self.generators_folder)
+        assert Version(pkg_config.version) >= 251
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")

@@ -1,11 +1,13 @@
+import os
+import re
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, load, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-import os
 
 
 required_conan_version = ">=1.54.0"
@@ -41,6 +43,7 @@ class EudevConan(ConanFile):
         "with_selinux": True,
     }
     provides = "libudev"
+    _libudev_version = None
 
     def configure(self):
         if self.options.shared:
@@ -111,6 +114,9 @@ class EudevConan(ConanFile):
         autotools = Autotools(self)
         autotools.install()
 
+        pkg_config = load(self, os.path.join(self.package_folder, "lib", "pkgconfig", "libudev.pc"))
+        self._libudev_version = next(re.finditer("^Version: ([^\n$]+)[$\n]", pkg_config, flags=re.MULTILINE)).group(1)
+
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
@@ -118,6 +124,13 @@ class EudevConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["udev"]
         self.cpp_info.set_property("pkg_config_name", "libudev")
+        self.cpp_info.set_property("system_package_version", self._libudev_version)
+        pkgconfig_variables = {
+            'exec_prefix': '${prefix}',
+        }
+        self.cpp_info.set_property(
+            "pkg_config_custom_content",
+            "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items()))
         self.cpp_info.requires = ["acl::acl", "libcap::cap", "libxslt::xslt", "linux-headers-generic::linux-headers-generic"]
         if self.options.with_kmod:
             self.cpp_info.requires.append("kmod::kmod")
