@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, load, rm, rmdir
+from conan.tools.files import copy, get, load, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 
@@ -43,7 +43,6 @@ class EudevConan(ConanFile):
         "with_selinux": True,
     }
     provides = "libudev"
-    _libudev_version = None
 
     def configure(self):
         if self.options.shared:
@@ -109,13 +108,18 @@ class EudevConan(ConanFile):
         autotools.configure()
         autotools.make()
 
+    @property
+    def _libudev_version_txt(self):
+        return os.path.join(self.package_folder, "res", f"{self.name}-libudev-version.txt")
+
     def package(self):
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
 
         pkg_config = load(self, os.path.join(self.package_folder, "lib", "pkgconfig", "libudev.pc"))
-        self._libudev_version = next(re.finditer("^Version: ([^\n$]+)[$\n]", pkg_config, flags=re.MULTILINE)).group(1)
+        libudev_version = next(re.finditer("^Version: ([^\n$]+)[$\n]", pkg_config, flags=re.MULTILINE)).group(1)
+        save(self, self._libudev_version_txt, libudev_version)
 
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -123,8 +127,9 @@ class EudevConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["udev"]
+        libudev_version = load(self, self._libudev_version_txt).strip()
         self.cpp_info.set_property("pkg_config_name", "libudev")
-        self.cpp_info.set_property("system_package_version", str(self._libudev_version))
+        self.cpp_info.set_property("system_package_version", str(libudev_version))
         pkgconfig_variables = {
             'exec_prefix': '${prefix}',
         }
@@ -140,4 +145,4 @@ class EudevConan(ConanFile):
             self.cpp_info.requires.append("libselinux::selinux")
 
         # todo Remove this workaround for Conan v1
-        self.cpp_info.set_property("component_version", str(self._libudev_version))
+        self.cpp_info.set_property("component_version", str(libudev_version))
