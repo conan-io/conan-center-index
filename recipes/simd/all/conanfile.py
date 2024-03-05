@@ -62,6 +62,7 @@ class SimdConan(ConanFile):
             tc.variables["SIMD_AVX512BF16"] = self.options.with_avx512
             tc.variables["SIMD_TEST"] = False
             tc.variables["SIMD_SHARED"] = self.options.shared
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
             tc.generate()
 
     def build(self):
