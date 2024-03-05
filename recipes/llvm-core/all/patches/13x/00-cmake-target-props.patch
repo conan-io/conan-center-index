@@ -1,0 +1,42 @@
+diff --git a/cmake/config-ix.cmake b/cmake/config-ix.cmake
+index dd0aaadb47c..e0771f99237 100644
+--- a/cmake/config-ix.cmake
++++ b/cmake/config-ix.cmake
+@@ -127,7 +127,7 @@ if(LLVM_ENABLE_ZLIB)
+     # library on a 64-bit system which would result in a link-time failure.
+     cmake_push_check_state()
+     list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
+-    list(APPEND CMAKE_REQUIRED_LIBRARIES ${ZLIB_LIBRARY})
++    list(APPEND CMAKE_REQUIRED_LIBRARIES ${ZLIB_LIBRARIES})
+     check_symbol_exists(compress2 zlib.h HAVE_ZLIB)
+     cmake_pop_check_state()
+     if(LLVM_ENABLE_ZLIB STREQUAL FORCE_ON AND NOT HAVE_ZLIB)
+diff --git a/lib/Support/CMakeLists.txt b/lib/Support/CMakeLists.txt
+index 014b4a2caf1..486e4f39642 100644
+--- a/lib/Support/CMakeLists.txt
++++ b/lib/Support/CMakeLists.txt
+@@ -267,7 +267,7 @@ if(LLVM_ENABLE_ZLIB)
+   # CMAKE_BUILD_TYPE is only meaningful to single-configuration generators.
+   if(CMAKE_BUILD_TYPE)
+     string(TOUPPER ${CMAKE_BUILD_TYPE} build_type)
+-    get_property(zlib_library TARGET ZLIB::ZLIB PROPERTY LOCATION_${build_type})
++    set(zlib_library ${ZLIB_LIBRARIES})
+   endif()
+   if(NOT zlib_library)
+     get_property(zlib_library TARGET ZLIB::ZLIB PROPERTY LOCATION)
+diff --git a/lib/WindowsManifest/CMakeLists.txt b/lib/WindowsManifest/CMakeLists.txt
+index 8134ac8c815..1c317791fba 100644
+--- a/lib/WindowsManifest/CMakeLists.txt
++++ b/lib/WindowsManifest/CMakeLists.txt
+@@ -24,9 +24,9 @@ if(LLVM_ENABLE_LIBXML2)
+   # CMAKE_BUILD_TYPE is only meaningful to single-configuration generators.
+   if(CMAKE_BUILD_TYPE)
+     string(TOUPPER ${CMAKE_BUILD_TYPE} build_type)
+-    get_property(libxml2_library TARGET LibXml2::LibXml2 PROPERTY LOCATION_${build_type})
++    set(libxml2_library ${libxml2_LIBRARIES})
+   endif()
+-  if(NOT zlib_library)
++  if(NOT libxml2_library)
+     get_property(libxml2_library TARGET LibXml2::LibXml2 PROPERTY LOCATION)
+   endif()
+   get_library_name(${libxml2_library} libxml2_library)
