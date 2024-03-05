@@ -124,7 +124,7 @@ class EudevConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["udev"]
         self.cpp_info.set_property("pkg_config_name", "libudev")
-        self.cpp_info.set_property("system_package_version", self._libudev_version)
+        self.cpp_info.set_property("system_package_version", str(self._libudev_version))
         pkgconfig_variables = {
             'exec_prefix': '${prefix}',
         }
