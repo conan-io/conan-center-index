@@ -1,4 +1,7 @@
 sources:
+  "1.26.1":
+    url: "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/1.26.1.tar.gz"
+    sha256: "718922183339db70079d4b56d37789a9e4aa0a62bb4d5eac55e3013da18e6d39"
   "1.25.3":
     url: "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/1.25.3.tar.gz"
     sha256: "d7cdedc5164b7b8ca39bb45bee789da44097052c882fa84996e4d90eec6fe8d3"
@@ -15,6 +18,10 @@ sources:
     url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.17.6/mongo-c-driver-1.17.6.tar.gz"
     sha256: "8644deec7ae585e8d12566978f2017181e883f303a028b5b3ccb83c91248b150"
 patches:
+  "1.26.1":
+    - patch_file: "patches/1.24.1-0002-fix-uninitialized-warning.patch"
+      patch_description: "fix uninitialized variable warning"
+      patch_type: "portability"
   "1.25.3":
     - patch_file: "patches/1.24.1-0002-fix-uninitialized-warning.patch"
       patch_description: "fix uninitialized variable warning"
