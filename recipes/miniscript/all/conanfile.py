@@ -17,6 +17,7 @@ class MiniscriptConan(ConanFile):
     homepage = "https://github.com/JoeStrout/miniscript"
     topics = ("script", "embedded", "programming-language")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -29,16 +30,18 @@ class MiniscriptConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14
+        return "11" if Version(self.version) < "1.6.2" else "20"
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "6",
-            "clang": "5",
-            "apple-clang": "10",
-            "Visual Studio": "15",
-            "msvc": "191",
+            "20": {
+                "gcc": "11",
+                "clang": "12",
+                "apple-clang": "13",
+                "Visual Studio": "16",
+                "msvc": "192",
+            },
         }
 
     def export_sources(self):
@@ -62,9 +65,6 @@ class MiniscriptConan(ConanFile):
                 f"{self.ref} doesn't support msvc shared build.(yet)"
             )
 
-        # miniscript < 1.6.2 doesn't require C++xx
-        if Version(self.version) < "1.6.2":
-            return
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
