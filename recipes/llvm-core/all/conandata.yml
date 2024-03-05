@@ -10,4 +10,11 @@ sources:
     sha256: ce8508e318a01a63d4e8b3090ab2ded3c598a50258cc49e2625b9120d4c03ea5
 
 patches:
+  "13.0.0":
     - patch_file: "patches/13x/00-cmake-target-props.patch"
+    - patch_file: "patches/13x/01-calculate-job-pools.patch"
+  "12.0.0":
+    - patch_file: "patches/12x/00-cmake-target-props.patch"
+    - patch_file: "patches/12x/01-calculate-job-pools.patch"
+  "11.1.0":
+    - patch_file: "patches/11x/00-calculate-job-pools.patch"

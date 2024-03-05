@@ -54,7 +54,10 @@ class LLVMCoreConan(ConanFile):
         'with_terminfo': [True, False],
         'with_zlib': [True, False],
         'with_xml2': [True, False],
+        'with_z3': [True, False],
         'use_llvm_cmake_files': [True, False],
+        'ram_per_compile_job': ['ANY'],
+        'ram_per_link_job': ['ANY'],
     }
     default_options = {
         'shared': False,
@@ -71,10 +74,14 @@ class LLVMCoreConan(ConanFile):
         'use_perf': False,
         'use_sanitizer': 'None',
         'with_ffi': False,
-        'with_zlib': True,
+        'with_terminfo': False, # differs from LLVM default
         'with_xml2': True,
+        'with_z3': True,
+        'with_zlib': True,
         'use_llvm_cmake_files': False,
-        'with_terminfo': False # differs from LLVM default
+        # creating job pools with current free memory
+        'ram_per_compile_job': '2000',
+        'ram_per_link_job': '14000'
     }
 
     @property
@@ -143,7 +150,8 @@ class LLVMCoreConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # See https://releases.llvm.org/13.0.0/docs/CMake.html
+        # https://releases.llvm.org/12.0.0/docs/CMake.html
+        # https://releases.llvm.org/13.0.0/docs/CMake.html
         cmake_definitions = {
             'LLVM_TARGETS_TO_BUILD': self.options.targets,
             'LLVM_BUILD_LLVM_DYLIB': self.options.shared,
@@ -163,11 +171,13 @@ class LLVMCoreConan(ConanFile):
             'LLVM_ENABLE_EXPENSIVE_CHECKS': self.options.expensive_checks,
             'LLVM_ENABLE_ASSERTIONS': self.settings.build_type,
             'LLVM_USE_PERF': self.options.use_perf,
-            'LLVM_ENABLE_Z3_SOLVER': True,
+            'LLVM_ENABLE_Z3_SOLVER': self.options.with_z3,
             'LLVM_ENABLE_FFI': self.options.with_ffi,
             'LLVM_ENABLE_ZLIB': "FORCE_ON" if self.options.with_zlib else False,
-            'LLVM_ENABLE_LIBXML2': self.options.with_xml2,
-            'LLVM_ENABLE_TERMINFO': self.options.with_terminfo
+            'LLVM_ENABLE_LIBXML2': "FORCE_ON" if self.options.with_xml2 else False,
+            'LLVM_ENABLE_TERMINFO': self.options.with_terminfo,
+            'LLVM_RAM_PER_COMPILE_JOB': self.options.ram_per_compile_job,
+            'LLVM_RAM_PER_LINK_JOB': self.options.ram_per_link_job
         }
         if is_msvc(self):
             build_type = str(self.settings.build_type).upper()
@@ -211,15 +221,17 @@ set(GRAPHVIZ_OBJECT_LIBS OFF)
         cmake.configure(cli_args=["--graphviz=graph/llvm.dot"])
         cmake.build()
 
-    def package_id(self):
-        del self.info.options.use_llvm_cmake_files
-
     @property
     def _is_windows(self):
         return self.settings.os == 'Windows'
 
     def _llvm_components(self):
+        # TODO (@planetmarshall) this is a bit hacky. CMake already has this information, just
+        #  parse the LLVM CMake files.
         # The definitive list of built targets is provided by running `llvm-config --components`
+        non_distributed = {
+            "exegesis"
+        }
         graphviz_folder = Path(self.build_folder) / "graph"
         match_component = re.compile(r"""^llvm.dot.LLVM(.+)\.dependers$""")
         for lib in iglob(str(graphviz_folder / '*')):
@@ -229,7 +241,9 @@ set(GRAPHVIZ_OBJECT_LIBS OFF)
             match = match_component.match(lib_name)
             if match:
                 component = match.group(1)
-                yield component.lower(), f"LLVM{component}"
+                component_name = component.lower()
+                if component_name not in non_distributed:
+                    yield component.lower(), f"LLVM{component}"
 
     @property
     def _components_data_file(self):
@@ -255,6 +269,11 @@ set(GRAPHVIZ_OBJECT_LIBS OFF)
 
         if not self.options.shared:
             self._write_components()
+
+    def package_id(self):
+        del self.info.options.use_llvm_cmake_files
+        del self.info.options.ram_per_compile_job
+        del self.info.options.ram_per_link_job
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "LLVM")
