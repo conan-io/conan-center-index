@@ -42,7 +42,7 @@ class MiniscriptConan(ConanFile):
                 "Visual Studio": "16",
                 "msvc": "192",
             },
-        }
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
