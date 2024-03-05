@@ -138,3 +138,6 @@ class EudevConan(ConanFile):
             self.cpp_info.requires.append("libmount::libblkid")
         if self.options.with_selinux:
             self.cpp_info.requires.append("libselinux::selinux")
+
+        # todo Remove this workaround for Conan v1
+        self.cpp_info.set_property("component_version", str(self._libudev_version))
