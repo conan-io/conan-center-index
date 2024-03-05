@@ -35,7 +35,7 @@ class PrometheusCppConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "14" if Version(self.version) != "1.1.0" else "11"
+        return "14" if Version(self.version) == "1.1.0" else "11"
 
     @property
     def _compilers_minimum_version(self):
