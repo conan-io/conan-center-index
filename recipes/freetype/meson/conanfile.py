@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import (
-    apply_conandata_patches, collect_libs, copy, export_conandata_patches, load,
+    apply_conandata_patches, copy, export_conandata_patches, load,
     get, rename, replace_in_file, rmdir, save
 )
 from conan.tools.env import VirtualBuildEnv
@@ -23,6 +23,7 @@ class FreetypeConan(ConanFile):
     license = "FTL"
     topics = ("freetype", "fonts")
     package_type = "library"
+    short_paths = True
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
