@@ -36,7 +36,7 @@ class S2GeometryConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "5",
+            "gcc": "6",
             "clang": "7",
             "apple-clang": "10",
             "Visual Studio": "15",
