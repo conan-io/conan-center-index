@@ -116,8 +116,7 @@ class FreetypeConan(ConanFile):
             os.makedirs(os.path.join(self.package_folder, "bin"))
         freetype_config = os.path.join(self.package_folder, "bin", "freetype-config")
         rename(self, freetype_config_in, freetype_config)
-        libs = "-lfreetyped" if self.settings.build_type == "Debug" else "-lfreetype"
-        staticlibs = f"-lm {libs}" if self.settings.os == "Linux" else libs
+        staticlibs = "-lm -lfreetype" if self.settings.os == "Linux" else "-lfreetype"
         replace_in_file(self, freetype_config, r"%PKG_CONFIG%", r"/bin/false")  # never use pkg-config
         replace_in_file(self, freetype_config, r"%prefix%", r"$conan_prefix")
         replace_in_file(self, freetype_config, r"%exec_prefix%", r"$conan_exec_prefix")
@@ -125,7 +124,6 @@ class FreetypeConan(ConanFile):
         replace_in_file(self, freetype_config, r"%libdir%", r"$conan_libdir")
         replace_in_file(self, freetype_config, r"%ft_version%", r"$conan_ftversion")
         replace_in_file(self, freetype_config, r"%LIBSSTATIC_CONFIG%", r"$conan_staticlibs")
-        replace_in_file(self, freetype_config, r"-lfreetype", libs)
         replace_in_file(self, freetype_config, r"export LC_ALL", textwrap.dedent("""\
             export LC_ALL
             BINDIR=$(dirname $0)
