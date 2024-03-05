@@ -29,16 +29,16 @@ class MiniscriptConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 20
+        return 14
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "11",
-            "clang": "12",
-            "apple-clang": "13",
-            "Visual Studio": "16",
-            "msvc": "192",
+            "gcc": "6",
+            "clang": "5",
+            "apple-clang": "10",
+            "Visual Studio": "15",
+            "msvc": "191",
         }
 
     def export_sources(self):
