@@ -257,6 +257,7 @@ class FreetypeConan(ConanFile):
         self.cpp_info.set_property("system_package_version", libtool_version)
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.set_property("component_version", libtool_version)
         self.cpp_info.filenames["cmake_find_package"] = "Freetype"
         self.cpp_info.filenames["cmake_find_package_multi"] = "freetype"
         self.cpp_info.names["cmake_find_package"] = "Freetype"
