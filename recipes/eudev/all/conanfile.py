@@ -28,7 +28,7 @@ class EudevConan(ConanFile):
         "programs": [True, False],
         "with_kmod": [True, False],
         "with_libblkid": [True, False],
-        "with_libselinux": [True, False],
+        "with_selinux": [True, False],
     }
     default_options = {
         "shared": False,
@@ -38,7 +38,7 @@ class EudevConan(ConanFile):
         "programs": True,
         "with_kmod": True,
         "with_libblkid": True,
-        "with_libselinux": True,
+        "with_selinux": True,
     }
     provides = "libudev"
 
@@ -61,7 +61,7 @@ class EudevConan(ConanFile):
             self.requires("kmod/30")
         if self.options.with_libblkid:
             self.requires("libmount/2.39.2")
-        if self.options.with_libselinux:
+        if self.options.with_selinux:
             self.requires("libselinux/3.6")
 
     def validate(self):
@@ -89,7 +89,7 @@ class EudevConan(ConanFile):
             "--sysconfdir=${prefix}/res",
             f"--enable-programs={yes_no(self.options.programs)}",
             f"--enable-blkid={yes_no(self.options.with_libblkid)}",
-            f"--enable-selinux={yes_no(self.options.with_libselinux)}",
+            f"--enable-selinux={yes_no(self.options.with_selinux)}",
             f"--enable-kmod={yes_no(self.options.with_kmod)}",
             f"--enable-hwdb={yes_no(self.options.hwdb)}",
             f"--enable-mtd_probe={yes_no(self.options.mtd_probe)}",
@@ -118,3 +118,10 @@ class EudevConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["udev"]
         self.cpp_info.set_property("pkg_config_name", "libudev")
+        self.cpp_info.requires = ["acl::acl", "libcap::cap", "libxslt::xslt", "linux-headers-generic::linux-headers-generic"]
+        if self.options.with_kmod:
+            self.cpp_info.requires.append("kmod::kmod")
+        if self.options.with_libblkid:
+            self.cpp_info.requires.append("libmount::libblkid")
+        if self.options.with_selinux:
+            self.cpp_info.requires.append("libselinux::selinux")
