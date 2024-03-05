@@ -9,7 +9,7 @@ import os
 required_conan_version = ">=1.52.0"
 
 class FixedContainersConan(ConanFile):
-    name = "fixed_containers"
+    name = "fixed-containers"
     description = "C++ Fixed Containers"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
@@ -28,7 +28,6 @@ class FixedContainersConan(ConanFile):
         return {
             "gcc": "11",
             "clang": "12",
-            "apple-clang": "13",
             "Visual Studio": "16",
             "msvc": "192",
         }
@@ -40,6 +39,8 @@ class FixedContainersConan(ConanFile):
         self.info.clear()
 
     def validate(self):
+        if self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support apple-clang due to partial C++20 support.")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
