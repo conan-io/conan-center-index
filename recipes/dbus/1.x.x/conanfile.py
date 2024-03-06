@@ -79,6 +79,11 @@ class DbusConan(ConanFile):
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
 
+    def package_id(self):
+        # The dbus_user option only effects the installation of dbus during the package method.
+        # Otherwise, it only appears in the system.conf file in the package.
+        del self.info.options.dbus_user
+
     def validate(self):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 7:
             raise ConanInvalidConfiguration(f"{self.ref} requires at least gcc 7.")
