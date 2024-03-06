@@ -301,10 +301,6 @@ class MesaConan(ConanFile):
         {f"vulkan_layer_{vulkan_layer}": True for vulkan_layer in vulkan_layers}
     )
 
-    # todo When the llvm Conan package is available, remove these two overrides to enable the options by default.
-    default_options.gallium_driver_radeonsi = False
-    default_options.vulkan_driver_swrast = False
-
     @property
     def _min_cppstd(self):
         return 11
@@ -357,10 +353,6 @@ class MesaConan(ConanFile):
     @property
     def _with_libdrm(self):
         return self.settings.os in ["Linux", "FreeBSD"]
-
-    # @property
-    # def _with_dri(self):
-    #     return self.options.get_safe("glx") == "dri" or self.options.get_safe("egl")
 
     @property
     def _has_egl_option(self):
@@ -756,6 +748,10 @@ class MesaConan(ConanFile):
         )
         self.options.vulkan_layer_overlay = self._default_vulkan_layer_overlay_option
 
+        # todo When the llvm Conan package is available, remove these two overrides to enable the options by default.
+        self.options.gallium_driver_radeonsi = False
+        self.options.vulkan_driver_swrast = False
+
     def configure(self):
         if not self.options.get_safe("shared_glapi"):
             self.options.rm_safe("egl")
@@ -848,9 +844,9 @@ class MesaConan(ConanFile):
             self.requires("libselinux/3.5")
 
         if self.options.get_safe("with_libudev") == "systemd":
-            self.requires("libsystemd/255.2")
+            self.requires("libudev/system")
         elif self.options.get_safe("with_libudev") == "eudev":
-            self.requires("eudev/3.2.12")
+            self.requires("eudev/3.2.14")
 
         if self.options.get_safe("with_libunwind"):
             self.requires("libunwind/1.7.2")
@@ -1419,7 +1415,7 @@ class MesaConan(ConanFile):
                     ]
                 )
                 self.cpp_info.components["glx"].requires.append("libxshmfence::libxshmfence")
-                if self.options.get_safe("with_glx") == "dri":
+                if self.options.get_safe("glx") == "dri":
                     self.cpp_info.components["gl"].requires.append("xorg::xxf86vm")
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["gl"].system_libs.extend(["m", "pthread"])
@@ -1428,7 +1424,7 @@ class MesaConan(ConanFile):
         if self.options.get_safe("shared_glapi"):
             self.cpp_info.components["glapi"].libs = ["glapi"]
             if self.options.get_safe("with_libselinux"):
-                self.cpp_info.components["glapi"].requires.append("libselinux")
+                self.cpp_info.components["glapi"].requires.append("libselinux::selinux")
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["glapi"].system_libs.extend(["pthread"])
         if self.options.get_safe("osmesa"):
@@ -1438,7 +1434,7 @@ class MesaConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.extend(["m", "pthread"])
             if self.options.get_safe("with_libselinux"):
-                self.cpp_info.components["osmesa"].requires.append("libselinux")
+                self.cpp_info.components["osmesa"].requires.append("libselinux::selinux")
 
         if self.settings.os == "Windows":
             self.cpp_info.components["gallium_wgl"].libs = [
@@ -1452,18 +1448,6 @@ class MesaConan(ConanFile):
         if self.options.get_safe("with_expat") or self.options.get_safe("tool_intel") or self.options.get_safe("xmlconfig"):
             self.cpp_info.requires.append("expat::expat")
 
-        # todo
-        # libunwind
-        # spirv-tools
-        # perfetto
-        # libarchive
-        # lua
-        # directx-headers
-        # libxml2
-        # moltenvk
-        # zlib
-        # zstd
-
         if self.options.get_safe("platform_wayland"):
             self.cpp_info.requires.append("wayland::wayland")
 
@@ -1476,10 +1460,10 @@ class MesaConan(ConanFile):
             self.cpp_info.requires.append("libelf::libelf")
 
         if self.options.get_safe("with_libselinux"):
-            self.cpp_info.requires.append("libselinux::libselinux")
+            self.cpp_info.requires.append("libselinux::selinux")
 
         if self.options.get_safe("with_libudev") == "systemd":
-            self.cpp_info.requires.append("libsystemd::udev")
+            self.cpp_info.requires.append("libudev::libudev")
         elif self.options.get_safe("with_libudev") == "eudev":
             self.cpp_info.requires.append("eudev::eudev")
 

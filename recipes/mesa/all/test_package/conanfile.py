@@ -26,7 +26,6 @@ class TestPackageConan(ConanFile):
         tc.project_options["egl"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("egl") else "disabled"
         tc.generate()
 
-
     def build(self):
         meson = Meson(self)
         meson.configure()
