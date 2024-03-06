@@ -246,7 +246,7 @@ set(GRAPHVIZ_OBJECT_LIBS OFF)
 
     @property
     def _components_data_file(self):
-        return Path(self.package_folder) / "components.json"
+        return Path(self.package_folder) / "lib" / "components.json"
 
     def _write_components(self):
         component_dict = {
@@ -265,6 +265,7 @@ set(GRAPHVIZ_OBJECT_LIBS OFF)
         cmake.install()
         package_folder = Path(self.package_folder)
         rmdir(self, package_folder / "lib" / "cmake")
+        rmdir(self, package_folder / "share")
 
         if not self.options.shared:
             self._write_components()
@@ -291,6 +292,8 @@ set(GRAPHVIZ_OBJECT_LIBS OFF)
                 self.cpp_info.components[component_name].libs = [lib_name]
                 self.cpp_info.components[component_name].requires = dependencies
 
+                if component_name in ["lto", "remarks"] and self.settings.os in ["Linux", "FreeBSD"]:
+                    self.cpp_info.components[component_name].system_libs.append("rt")
         else:
             self.cpp_info.set_property("cmake_target_name", "LLVM")
             self.cpp_info.libs = collect_libs(self)

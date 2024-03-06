@@ -27,7 +27,7 @@ class TestPackageConan(ConanFile):
 
         tc = CMakeToolchain(self)
         if self.dependencies[self.tested_reference_str].options.shared:
-              tc.variables["LLVM_SHARED"] = True
+            tc.variables["LLVM_SHARED"] = True
         tc.generate()
 
         VirtualRunEnv(self).generate()
