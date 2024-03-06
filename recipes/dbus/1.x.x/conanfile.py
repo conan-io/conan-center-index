@@ -27,6 +27,7 @@ class DbusConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "dbus_user": ["ANY"],
+        "message_bus": [True, False],
         "system_socket": [None, "ANY"],
         "system_pid_file": [None, "ANY"],
         "with_x11": [True, False],
@@ -39,6 +40,7 @@ class DbusConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "dbus_user": "messagebus",
+        "message_bus": False,
         "system_socket": None,
         "system_pid_file": None,
         "with_x11": False,
@@ -64,6 +66,11 @@ class DbusConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if not self.options.message_bus:
+            self.options.rm_safe("dbus_user")
+            self.options.rm_safe("session_socket_dir")
+            self.options.rm_safe("system_pid_file")
+            self.options.rm_safe("system_socket")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -82,7 +89,7 @@ class DbusConan(ConanFile):
     def package_id(self):
         # The dbus_user option only effects the installation of dbus during the package method.
         # Otherwise, it only appears in the system.conf file in the package.
-        del self.info.options.dbus_user
+        self.info.options.rm_safe("dbus_user")
 
     def validate(self):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 7:
@@ -102,17 +109,18 @@ class DbusConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["asserts"] = not is_apple_os(self)
         tc.project_options["checks"] = False
-        tc.project_options["dbus_user"] = str(self.options.dbus_user)
         tc.project_options["doxygen_docs"] = "disabled"
         tc.project_options["modular_tests"] = "disabled"
-        tc.project_options["system_socket"] = str(self.options.get_safe("system_socket", ""))
-        tc.project_options["system_pid_file"] = str(self.options.get_safe("system_pid_file", ""))
-        tc.project_options["session_socket_dir"] = str(self.options.get_safe("session_socket_dir", ""))
         tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux", False) else "disabled"
         tc.project_options["systemd"] = "enabled" if self.options.get_safe("with_systemd", False) else "disabled"
-        if self.options.get_safe("with_systemd", False):
-            tc.project_options["systemd_system_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "system")
-            tc.project_options["systemd_user_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "user")
+        if self.options.message_bus:
+            tc.project_options["dbus_user"] = str(self.options.dbus_user)
+            tc.project_options["session_socket_dir"] = str(self.options.get_safe("session_socket_dir", ""))
+            tc.project_options["system_socket"] = str(self.options.get_safe("system_socket", ""))
+            tc.project_options["system_pid_file"] = str(self.options.get_safe("system_pid_file", ""))
+            if self.options.get_safe("with_systemd", False):
+                tc.project_options["systemd_system_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "system")
+                tc.project_options["systemd_user_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "user")
         if is_apple_os(self):
             tc.project_options["launchd_agent_dir"] = os.path.join(self.package_folder, "res", "LaunchAgents")
         tc.project_options["x11_autolaunch"] = "enabled" if self.options.get_safe("with_x11", False) else "disabled"
