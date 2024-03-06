@@ -39,9 +39,6 @@ class IdnaConan(ConanFile):
             "msvc": "192",
         }
 
-    def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -70,12 +67,11 @@ class IdnaConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["ADA_IDNA_BENCHMARKS"] = False
-        tc.variables["IDNA_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.generate()
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        cmake.configure()
         cmake.build()
 
     def package(self):

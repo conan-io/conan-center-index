@@ -1,4 +1,4 @@
 sources:
-  "cci.20240115":
-    url: "https://github.com/ada-url/idna/archive/01c745f27b20e508195cf73e859da35716244f33.tar.gz"
-    sha256: "177952f68e9f691785c936490dc154c456b953b5609f6c04e2ad4374ebda8d01"
+  "cci.20240228":
+    url: "https://github.com/ada-url/idna/archive/fff988508f659ef5c6494572ebea3d5db2466ed0.tar.gz"
+    sha256: "68cf182f822d8e8599f827767e215a0c4f67f381d729e4ba15509443b52f849b"
