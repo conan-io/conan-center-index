@@ -73,7 +73,7 @@ class TensorflowLiteConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("abseil/20230125.1")
+        self.requires("abseil/20230125.3")
         self.requires("eigen/3.4.0")
         self.requires("farmhash/cci.20190513")
         self.requires("fft/cci.20061228")
