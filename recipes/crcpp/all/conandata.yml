@@ -1,0 +1,4 @@
+sources:
+  "1.2.0.0":
+    url: "https://github.com/d-bahr/CRCpp/archive/refs/tags/release-1.2.0.0.tar.gz"
+    sha256: "382d399b939207d81537a874ec4b05abc7f59772be58425a0dd048711d43db14"
