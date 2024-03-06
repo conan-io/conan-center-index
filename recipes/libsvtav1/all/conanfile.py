@@ -44,8 +44,7 @@ class SVTAV1Conan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.settings.arch in ("x86", "x86_64"):
-            self.requires("cpuinfo/cci.20231129")
+        self.requires("cpuinfo/cci.20231129")
 
     def build_requirements(self):
         if Version(self.version) >= "1.3.0":
@@ -61,9 +60,9 @@ class SVTAV1Conan(ConanFile):
         tc.variables["BUILD_APPS"] = False
         tc.variables["BUILD_DEC"] = self.options.build_decoder
         tc.variables["BUILD_ENC"] = self.options.build_encoder
+        tc.variables["USE_EXTERNAL_CPUINFO"] = True
         if self.settings.arch in ("x86", "x86_64"):
             tc.variables["ENABLE_NASM"] = True
-            tc.variables["USE_EXTERNAL_CPUINFO"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -87,15 +86,13 @@ class SVTAV1Conan(ConanFile):
             self.cpp_info.components["encoder"].libs = ["SvtAv1Enc"]
             self.cpp_info.components["encoder"].includedirs = ["include/svt-av1"]
             self.cpp_info.components["encoder"].set_property("pkg_config_name", "SvtAv1Enc")
-            if self.settings.arch in ("x86", "x86_64"):
-                self.cpp_info.components["encoder"].requires = ["cpuinfo::cpuinfo"]
+            self.cpp_info.components["encoder"].requires = ["cpuinfo::cpuinfo"]
             if self.settings.os in ("FreeBSD", "Linux"):
                 self.cpp_info.components["encoder"].system_libs = ["pthread", "dl", "m"]
         if self.options.build_decoder:
             self.cpp_info.components["decoder"].libs = ["SvtAv1Dec"]
             self.cpp_info.components["decoder"].includedirs = ["include/svt-av1"]
             self.cpp_info.components["decoder"].set_property("pkg_config_name", "SvtAv1Dec")
-            if self.settings.arch in ("x86", "x86_64"):
-                self.cpp_info.components["decoder"].requires = ["cpuinfo::cpuinfo"]
+            self.cpp_info.components["decoder"].requires = ["cpuinfo::cpuinfo"]
             if self.settings.os in ("FreeBSD", "Linux"):
                 self.cpp_info.components["encoder"].system_libs = ["pthread", "dl", "m"]
