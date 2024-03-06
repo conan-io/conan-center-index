@@ -6,7 +6,6 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 import os
 import shutil
 
@@ -65,29 +64,26 @@ class GLibConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("libffi/3.4.4")
-        if Version(self.version) >= "2.73.2":
-            self.requires("pcre2/10.42")
-        else:
-            self.requires("pcre/8.45")
+        self.requires("pcre2/10.42")
         if self.options.get_safe("with_elf"):
             self.requires("libelf/0.8.13")
         if self.options.get_safe("with_mount"):
-            self.requires("libmount/2.36.2")
+            self.requires("libmount/2.39")
         if self.options.get_safe("with_selinux"):
-            self.requires("libselinux/3.3")
+            self.requires("libselinux/3.5")
         if self.settings.os != "Linux":
             # for Linux, gettext is provided by libc
-            self.requires("libgettext/0.21", transitive_headers=True, transitive_libs=True)
+            self.requires("libgettext/0.22", transitive_headers=True, transitive_libs=True)
 
         if is_apple_os(self):
             self.requires("libiconv/1.17")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.1.0")
+        self.tool_requires("meson/1.2.2")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -99,8 +95,6 @@ class GLibConan(ConanFile):
         tc.generate()
         tc = MesonToolchain(self)
 
-        if is_apple_os(self) and Version(self.version) < "2.75.1":
-            tc.project_options["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
         tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
         tc.project_options["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
         if self.settings.os == "FreeBSD":
@@ -116,20 +110,11 @@ class GLibConan(ConanFile):
             "subdir('fuzzing')",
             "#subdir('fuzzing')",
         )  # https://gitlab.gnome.org/GNOME/glib/-/issues/2152
-        if Version(self.version) < "2.73.2":
-            for filename in [
-                os.path.join(self.source_folder, "meson.build"),
-                os.path.join(self.source_folder, "glib", "meson.build"),
-                os.path.join(self.source_folder, "gobject", "meson.build"),
-                os.path.join(self.source_folder, "gio", "meson.build"),
-            ]:
-                replace_in_file(self, filename, "subdir('tests')", "#subdir('tests')")
         if self.settings.os != "Linux":
             # allow to find gettext
             replace_in_file(self,
                 os.path.join(self.source_folder, "meson.build"),
-                "libintl = cc.find_library('intl', required : false" if Version(self.version) < "2.73.1" \
-                else "libintl = dependency('intl', required: false",
+                "libintl = dependency('intl', required: false",
                 "libintl = dependency('libgettext', method : 'pkg-config', required : false",
             )
 
@@ -152,10 +137,7 @@ class GLibConan(ConanFile):
         meson.build()
 
     def package(self):
-        if Version(self.version) < "2.73.0":
-            copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        else:
-            copy(self, pattern="LGPL-2.1-or-later.txt", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, "LICENSES"))
+        copy(self, pattern="LGPL-2.1-or-later.txt", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, "LICENSES"))
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -234,10 +216,7 @@ class GLibConan(ConanFile):
             if is_apple_os(self):
                 self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
 
-        if Version(self.version) >= "2.73.2":
-            self.cpp_info.components["glib-2.0"].requires.append("pcre2::pcre2")
-        else:
-            self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
+        self.cpp_info.components["glib-2.0"].requires.append("pcre2::pcre2")
 
         if self.settings.os == "Linux":
             self.cpp_info.components["gio-2.0"].system_libs.append("resolv")

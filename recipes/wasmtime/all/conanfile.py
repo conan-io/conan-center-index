@@ -1,12 +1,12 @@
-from conan import ConanFile
-from conan.tools.files import get, copy
-from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import is_msvc
-
 import os
 
-required_conan_version = ">=1.47.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, get
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.53.0"
 
 
 class WasmtimeConan(ConanFile):
@@ -27,14 +27,14 @@ class WasmtimeConan(ConanFile):
     no_copy_source = True
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 11
 
     @property
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "15",
-            "msvc": "190",
+            "msvc": "191",
             "apple-clang": "9.4",
             "clang": "3.3",
             "gcc": "5.1",
@@ -58,26 +58,16 @@ class WasmtimeConan(ConanFile):
             self.info.settings.compiler = "gcc"
 
     def validate(self):
-        compiler = self.settings.compiler
-        min_version = self._minimum_compilers_version[str(compiler)]
-        try:
-            if Version(compiler.version) < min_version:
-                msg = (
-                    f"{self.name} requires C{self._minimum_cpp_standard} features "
-                    f"which are not supported by compiler {compiler} {compiler.version} !!"
-                )
-                raise ConanInvalidConfiguration(msg)
-        except KeyError:
-            msg = (
-                f"{self.name} recipe lacks information about the {compiler} compiler, "
-                f"support for the required C{self._minimum_cpp_standard} features is assumed"
-            )
-            self.output.warn(msg)
-
         try:
             self.conan_data["sources"][self.version][self._sources_os_key][str(self.settings.arch)]
         except KeyError:
             raise ConanInvalidConfiguration("Binaries for this combination of architecture/version/os are not available")
+
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def build(self):
         # This is packaging binaries so the download needs to be in build

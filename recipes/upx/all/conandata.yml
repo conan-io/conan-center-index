@@ -1,4 +1,28 @@
 sources:
+  "4.2.1":
+    "Linux":
+      "x86_64":
+        url: "https://github.com/upx/upx/releases/download/v4.2.1/upx-4.2.1-amd64_linux.tar.xz"
+        sha256: "936e67a23d72338dad3304526a29f405e44e440a9983bbdb2566657d015cc56d"
+      "armv8":
+        url: "https://github.com/upx/upx/releases/download/v4.2.1/upx-4.2.1-arm64_linux.tar.xz"
+        sha256: "922b4d021a1fdd68a883d9c837b09035317c9a52e8087403bd0d1b062c006f22"
+      "armv7":
+        url: "https://github.com/upx/upx/releases/download/v4.2.1/upx-4.2.1-arm_linux.tar.xz"
+        sha256: "0ea0ca497b8fd4ecfd9201d100a0fde251214042b09d5e070c3435aae75913e0"
+      "ppc32":
+        url: "https://github.com/upx/upx/releases/download/v4.2.1/upx-4.2.1-powerpc_linux.tar.xz"
+        sha256: "c96b6c196c31e2d78a4095d1a4c0b1a22050a2141d40c9387806d14d7ed75035"
+      "ppc64le":
+        url: "https://github.com/upx/upx/releases/download/v4.2.1/upx-4.2.1-powerpc64le_linux.tar.xz"
+        sha256: "3f683b6de4e25c135c8ff7c91f116514b6cb30834a9708f4516b897502f6d34a"
+    "Windows":
+      "x86":
+        url: "https://github.com/upx/upx/releases/download/v4.2.1/upx-4.2.1-win32.zip"
+        sha256: "475504d9b2ae5fd9ede27919ee3b3fa8869a1398645c1239fc19193022054268"
+      "x86_64":
+        url: "https://github.com/upx/upx/releases/download/v4.2.1/upx-4.2.1-win64.zip"
+        sha256: "b6e20e35303a390c3b1211f5ed0559def2c34ec5774176bb22afee19b35b2138"
   "3.96":
     "Linux":
       "x86_64":

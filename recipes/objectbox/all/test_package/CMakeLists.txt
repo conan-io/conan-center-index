@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package C)
+project(test_package LANGUAGES C)
 
 find_package(objectbox REQUIRED CONFIG)
 

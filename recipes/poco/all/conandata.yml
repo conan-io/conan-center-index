@@ -1,4 +1,19 @@
 sources:
+  "1.13.2":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.13.2-release.tar.gz"
+    sha256: "c01221870aa9bccedf1de39890279699207848fe61a0cfb6aeec7c5942c4627f"
+  "1.13.1":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.13.1-release.tar.gz"
+    sha256: "8accf6c6ebb9ae686e7c8e2390a35beaab08d0ca1abda537cc2d0b7ab9296be5"
+  "1.13.0":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.13.0-release.tar.gz"
+    sha256: "0135160663795901f317215272fadf71f3b526f38daacb2ae8d6b07ad11d319b"
+  "1.12.5p2":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.12.5p2-release.tar.gz"
+    sha256: "08d201bb287cb59e13577901758aeb3ced7ea44627c79f5c162eb60323812685"
+  "1.12.5p1":
+    url: "https://github.com/pocoproject/poco/archive/poco-1.12.5p1-release.tar.gz"
+    sha256: "8ba10b69c815e95e1c8776af0143aa8603088b84e3f6a8447994c6b92d7522f0"
   "1.12.4":
     url: "https://github.com/pocoproject/poco/archive/poco-1.12.4-release.tar.gz"
     sha256: "71ef96c35fced367d6da74da294510ad2c912563f12cd716ab02b6ed10a733ef"
@@ -17,40 +32,81 @@ sources:
   "1.11.3":
     url: "https://github.com/pocoproject/poco/archive/poco-1.11.3-release.tar.gz"
     sha256: "fb5e8e70c7dbc8f3b59ec8560140a267b4eaf06ee519dc21f312d0eb195cba37"
-  "1.11.2":
-    url: "https://github.com/pocoproject/poco/archive/poco-1.11.2-release.tar.gz"
-    sha256: "9774651a02e4cfa79fc43b7db617e45d353ede00b7be8afd0e74e6afb23d3793"
-  "1.11.1":
-    url: "https://github.com/pocoproject/poco/archive/poco-1.11.1-release.tar.gz"
-    sha256: "2412a5819a239ff2ee58f81033bcc39c40460d7a8b330013a687c8c0bd2b4ac0"
-  "1.11.0":
-    url: "https://github.com/pocoproject/poco/archive/poco-1.11.0-release.tar.gz"
-    sha256: "8a7bfd0883ee95e223058edce8364c7d61026ac1882e29643822ce9b753f3602"
 patches:
+  "1.13.2":
+    - patch_file: patches/1.13.0.patch
+      patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
+      patch_type: "conan"
+    - patch_file: patches/1.13.0-0002-mysql-include.patch
+      patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
+  "1.13.1":
+    - patch_file: patches/1.13.0.patch
+      patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
+      patch_type: "conan"
+    - patch_file: patches/1.13.0-0002-mysql-include.patch
+      patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
+  "1.13.0":
+    - patch_file: patches/1.13.0.patch
+      patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
+      patch_type: "conan"
+    - patch_file: patches/1.13.0-0002-mysql-include.patch
+      patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
+  "1.12.5p2":
+    - patch_file: patches/1.12.3.patch
+      patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
+      patch_type: "conan"
+    - patch_file: patches/1.12.5-0002-mysql-include.patch
+      patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
+  "1.12.5p1":
+    - patch_file: patches/1.12.3.patch
+      patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
+      patch_type: "conan"
+    - patch_file: patches/1.12.5-0002-mysql-include.patch
+      patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
   "1.12.4":
-    - patch_file: patches/1.12.4.patch
-    - patch_file: patches/0002-mysql-include.patch
+    - patch_file: patches/1.12.3.patch
+      patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
+      patch_type: "conan"
+    - patch_file: patches/1.11.0-0002-mysql-include.patch
+      patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
   "1.12.3":
     - patch_file: patches/1.12.3.patch
-    - patch_file: patches/0002-mysql-include.patch
+      patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
+      patch_type: "conan"
+    - patch_file: patches/1.11.0-0002-mysql-include.patch
+      patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
   "1.12.2":
-    - patch_file: patches/1.12.2.patch
-    - patch_file: patches/0002-mysql-include.patch
+    - patch_file: patches/1.12.0.patch
+      patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
+      patch_type: "conan"
+    - patch_file: patches/1.11.0-0002-mysql-include.patch
+      patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
   "1.12.1":
-    - patch_file: patches/1.12.1.patch
-    - patch_file: patches/0002-mysql-include.patch
+    - patch_file: patches/1.12.0.patch
+      patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
+      patch_type: "conan"
+    - patch_file: patches/1.11.0-0002-mysql-include.patch
+      patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
   "1.12.0":
     - patch_file: patches/1.12.0.patch
-    - patch_file: patches/0002-mysql-include.patch
+      patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
+      patch_type: "conan"
+    - patch_file: patches/1.11.0-0002-mysql-include.patch
+      patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
   "1.11.3":
-    - patch_file: patches/1.11.1.patch
-    - patch_file: patches/0002-mysql-include.patch
-  "1.11.2":
-    - patch_file: patches/1.11.1.patch
-    - patch_file: patches/0002-mysql-include.patch
-  "1.11.1":
-    - patch_file: patches/1.11.1.patch
-    - patch_file: patches/0002-mysql-include.patch
-  "1.11.0":
-    - patch_file: patches/1.11.0.patch
-    - patch_file: patches/0002-mysql-include.patch
+    - patch_file: "patches/1.11.1.patch"
+      patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
+      patch_type: "conan"
+    - patch_file: "patches/1.11.0-0002-mysql-include.patch"
+      patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"

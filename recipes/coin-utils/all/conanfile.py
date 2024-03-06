@@ -54,7 +54,8 @@ class CoinUtilsConan(ConanFile):
 
     def requirements(self):
         self.requires("bzip2/1.0.8")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
+        # TODO: add blas and lapack support
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
@@ -86,6 +87,8 @@ class CoinUtilsConan(ConanFile):
             env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--without-blas")
+        tc.configure_args.append("--without-lapack")
         if is_msvc(self):
             tc.configure_args.append(f"--enable-msvc={self.settings.compiler.runtime}")
             tc.extra_cxxflags.append("-EHsc")

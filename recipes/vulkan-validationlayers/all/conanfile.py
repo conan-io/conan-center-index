@@ -106,7 +106,7 @@ class VulkanValidationLayersConan(ConanFile):
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
             self.requires("xorg/system")
         if self._needs_wayland_for_build:
-            self.requires("wayland/1.21.0")
+            self.requires("wayland/1.22.0")
 
     def _require(self, recipe_name):
         if recipe_name not in self._dependencies_versions:
@@ -137,7 +137,7 @@ class VulkanValidationLayersConan(ConanFile):
 
     def build_requirements(self):
         if self._needs_pkg_config and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.1.0")
         if Version(self.version) >= "1.3.239":
             self.tool_requires("cmake/[>=3.17.2 <4]")
 
@@ -225,5 +225,17 @@ class VulkanValidationLayersConan(ConanFile):
         manifest_subfolder = "bin" if self.settings.os == "Windows" else os.path.join("res", "vulkan", "explicit_layer.d")
         vk_layer_path = os.path.join(self.package_folder, manifest_subfolder)
         self.runenv_info.prepend_path("VK_LAYER_PATH", vk_layer_path)
+
+        # Update runtime discovery paths to allow libVkLayer_khronos_validation.{so,dll,dylib} to be discovered
+        # and loaded by vulkan-loader when the consumer executes
+        # This is necessary because this package exports a static lib to link against and a dynamic lib to load at runtime
+        runtime_lib_discovery_path = "LD_LIBRARY_PATH"
+        if self.settings.os == "Windows":
+            runtime_lib_discovery_path = "PATH"
+        if self.settings.os == "Macos":
+            runtime_lib_discovery_path = "DYLD_LIBRARY_PATH"
+        for libdir in [os.path.join(self.package_folder, libdir) for libdir in self.cpp_info.libdirs]:
+            self.runenv_info.prepend_path(runtime_lib_discovery_path, libdir)
+
         # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
         self.env_info.VK_LAYER_PATH.append(vk_layer_path)

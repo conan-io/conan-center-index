@@ -1,12 +1,14 @@
+import os
+import textwrap
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
-import os
 
 required_conan_version = ">=1.54.0"
 
@@ -51,7 +53,11 @@ class CeressolverConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "98" if Version(self.version) < "2.0.0" else "14"
+        if Version(self.version) >= "2.2.0":
+            return "17"
+        if Version(self.version) >= "2.0.0":
+            return "14"
+        return "98"
 
     @property
     def _compilers_minimum_version(self):
@@ -62,6 +68,13 @@ class CeressolverConan(ConanFile):
                 "gcc": "5",
                 "msvc": "190",
                 "Visual Studio": "14",
+            },
+            "17": {
+                "apple-clang": "10",
+                "clang": "7",
+                "gcc": "8",
+                "msvc": "191",
+                "Visual Studio": "15",
             },
         }.get(self._min_cppstd, {})
 
@@ -105,6 +118,10 @@ class CeressolverConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
 
+    def build_requirements(self):
+        if Version(self.version) >= "2.2.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -113,7 +130,6 @@ class CeressolverConan(ConanFile):
         tc.variables["MINIGLOG"] = not self.options.use_glog
         tc.variables["GFLAGS"] = False # useless for the lib itself, gflags is not a direct dependency
         tc.variables["SUITESPARSE"] = False
-        tc.variables["CXSPARSE"] = False
         tc.variables["LAPACK"] = False
         tc.variables["SCHUR_SPECIALIZATIONS"] = self.options.use_schur_specializations
         tc.variables["CUSTOM_BLAS"] = self.options.use_custom_blas
@@ -122,21 +138,32 @@ class CeressolverConan(ConanFile):
         tc.variables["BUILD_DOCUMENTATION"] = False
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_BENCHMARKS"] = False
-        if is_msvc(self):
-            tc.variables["MSVC_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
-        if Version(self.version) >= "2.1.0":
+
+        ceres_version = Version(self.version)
+        if ceres_version >= "2.2.0":
+            tc.variables["USE_CUDA"] = False
+        elif ceres_version >= "2.1.0":
             tc.variables["CUDA"] = False
-        if Version(self.version) >= "2.0.0":
+        if ceres_version >= "2.2.0":
+            tc.variables["EIGENMETIS"] = False
+        if ceres_version >= "2.0.0":
             tc.variables["PROVIDE_UNINSTALL_TARGET"] = False
             if is_apple_os(self):
                 tc.variables["ACCELERATESPARSE"] = True
-        if Version(self.version) < "2.1.0":
+        if ceres_version < "2.2.0":
+            tc.variables["CXSPARSE"] = False
+            if is_msvc(self):
+                tc.variables["MSVC_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
+        if ceres_version < "2.1.0":
             tc.variables["LIB_SUFFIX"] = ""
-        if Version(self.version) < "2.0":
+        if ceres_version < "2.0.0":
             tc.variables["CXX11"] = self.options.use_CXX11
             tc.variables["OPENMP"] = False
             tc.variables["TBB"] = self.options.use_TBB
             tc.variables["CXX11_THREADS"] = self.options.use_CXX11_threads
+        # IOS_DEPLOYMENT_TARGET variable was added to iOS.cmake file in 1.12.0 version
+        if self.settings.os == "iOS":
+            tc.variables["IOS_DEPLOYMENT_TARGET"] = self.settings.os.version
         tc.generate()
 
         CMakeDeps(self).generate()
@@ -153,10 +180,31 @@ class CeressolverConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "CMake"))
+        self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_variables_file_rel_path))
+
+    def _create_cmake_module_variables(self, module_file):
+        # Define several variables of upstream CMake config file which are not
+        # defined out of the box by CMakeDeps.
+        # See https://github.com/ceres-solver/ceres-solver/blob/master/cmake/CeresConfig.cmake.in
+        content = textwrap.dedent(f"""\
+            set(CERES_FOUND TRUE)
+            set(CERES_VERSION {self.version})
+            if(NOT DEFINED CERES_LIBRARIES)
+                set(CERES_LIBRARIES Ceres::ceres)
+            endif()
+        """)
+        save(self, module_file, content)
+
+    @property
+    def _module_variables_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Ceres")
         self.cpp_info.set_property("cmake_target_name", "Ceres::ceres")
+        # see https://github.com/ceres-solver/ceres-solver/blob/2.2.0/cmake/CeresConfig.cmake.in#L334-L340
+        self.cpp_info.set_property("cmake_target_aliases", ["ceres"])
+        self.cpp_info.set_property("cmake_build_modules", [self._module_variables_file_rel_path])
 
         libsuffix = ""
         if self.settings.build_type == "Debug":
@@ -186,4 +234,6 @@ class CeressolverConan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Ceres"
         self.cpp_info.names["cmake_find_package_multi"] = "Ceres"
+        self.cpp_info.components["ceres"].build_modules["cmake_find_package"] = [self._module_variables_file_rel_path]
+        self.cpp_info.components["ceres"].build_modules["cmake_find_package_multi"] = [self._module_variables_file_rel_path]
         self.cpp_info.components["ceres"].set_property("cmake_target_name", "Ceres::ceres")

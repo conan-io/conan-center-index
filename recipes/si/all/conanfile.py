@@ -57,6 +57,10 @@ class SiConan(ConanFile):
         else:
             self.output.warning("'si' requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
+    def build_requirements(self):
+        if Version(self.version) >= "2.5.1":
+            self.tool_requires("cmake/[>=3.23 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 

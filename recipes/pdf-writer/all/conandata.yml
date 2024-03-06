@@ -1,0 +1,30 @@
+sources:
+  "4.6.3":
+    url: "https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.6.3.tar.gz"
+    sha256: "3b5d9ba4b49d0380678e8172f27cdb8eda196ea448e7f1cdd79620066d082ab9"
+  "4.6.2":
+    url: "https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.6.2.tar.gz"
+    sha256: "0a36815ccc9d207028567f90039785c824b211169ba5da68de84d0c15455ab62"
+  "4.6.1":
+    url: "https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.6.1.tar.gz"
+    sha256: "6e95fcb26ec679fa12ce6638d35a591e80960b35956a142d9a80b9a8c80ca824"
+  "4.5.12":
+    url: "https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.5.12.tar.gz"
+    sha256: "40fcbaa66fc46fcb588ceda119ba8839ff6d2c886191ac5e68ed702475c7336e"
+patches:
+  "4.6.3":
+    - patch_file: "patches/4.6.2-0001-fix-cmake.patch"
+      patch_description: "disable cpack"
+      patch_type: "conan"
+  "4.6.2":
+    - patch_file: "patches/4.6.2-0001-fix-cmake.patch"
+      patch_description: "disable cpack"
+      patch_type: "conan"
+  "4.6.1":
+    - patch_file: "patches/4.5.12-0001-fix-cmake.patch"
+      patch_description: "disable test/cpack, use cci package"
+      patch_type: "conan"
+  "4.5.12":
+    - patch_file: "patches/4.5.12-0001-fix-cmake.patch"
+      patch_description: "disable test/cpack, use cci package"
+      patch_type: "conan"

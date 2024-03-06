@@ -1,4 +1,14 @@
 versions:
+  "0.15.31":
+    folder: all
+  "0.15.30":
+    folder: all
+  "0.15.29":
+    folder: all
+  "0.15.25-p0":
+    folder: all
+  "0.15.24-p0":
+    folder: all
   "0.15.19-p0":
     folder: all
   "0.15.18-p0":

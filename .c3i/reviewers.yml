@@ -37,7 +37,7 @@ reviewers:
     type: "community"
     request_reviews: false
   - user: "prince-chrismc"
-    type: "team"
+    type: "community"
     request_reviews: false
   - user: "Croydon"
     type: "community"
@@ -83,4 +83,10 @@ reviewers:
     request_reviews: false
   - user: "davidsanfal"
     type: "team"
+    request_reviews: false
+  - user: "juansblanco"
+    type: "team"
+    request_reviews: false
+  - user: "valgur"
+    type: "community"
     request_reviews: false

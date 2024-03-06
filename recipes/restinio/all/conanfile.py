@@ -53,7 +53,7 @@ class RestinioConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
 
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
         if self.options.with_pcre == 1:
             self.requires("pcre/8.45")

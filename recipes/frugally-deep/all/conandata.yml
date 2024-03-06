@@ -1,4 +1,19 @@
 sources:
+  "0.15.31":
+    url: "https://github.com/Dobiasd/frugally-deep/archive/v0.15.31.tar.gz"
+    sha256: "49bf5e30ad2d33e464433afbc8b6fe8536fc959474004a1ce2ac03d7c54bc8ba"
+  "0.15.30":
+    url: "https://github.com/Dobiasd/frugally-deep/archive/v0.15.30.tar.gz"
+    sha256: "8932f7b42612598402269a54f957af09084dc2cb812d32887d991d6e45b280fb"
+  "0.15.29":
+    url: "https://github.com/Dobiasd/frugally-deep/archive/v0.15.29.tar.gz"
+    sha256: "032cd525d4a7b9b3ebe28fd5e3984ac3e569da496f65d52c81030aabd9d0c52e"
+  "0.15.25-p0":
+    url: "https://github.com/Dobiasd/frugally-deep/archive/v0.15.25-p0.tar.gz"
+    sha256: "d1204bc13ace603e97696aa7a1331d6af819c3a9b4952b4fd1e3d72dd8f524c3"
+  "0.15.24-p0":
+    url: "https://github.com/Dobiasd/frugally-deep/archive/v0.15.24-p0.tar.gz"
+    sha256: "118b0219a3f17c6d5a3535874acb145ee2079fd309e1fb83884facc684810baf"
   "0.15.19-p0":
     url: "https://github.com/Dobiasd/frugally-deep/archive/v0.15.19-p0.tar.gz"
     sha256: "acaba428ae19ef8d57a53b3767373cd96770c190dd57909e52d2759be89ac942"
