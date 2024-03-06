@@ -12,7 +12,7 @@ import os
 from pathlib import Path
 import re
 
-required_conan_version = ">=2.0.0"
+required_conan_version = ">=1.62.0"
 
 
 class LLVMCoreConan(ConanFile):
