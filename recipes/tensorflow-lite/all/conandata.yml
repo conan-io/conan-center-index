@@ -1,4 +1,7 @@
 sources:
+  "2.14.0":
+    url: "https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.14.0.tar.gz"
+    sha256: "ce357fd0728f0d1b0831d1653f475591662ec5bca736a94ff789e6b1944df19f"
   "2.12.0":
     url: "https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.10.0.tar.gz"
     sha256: "b5a1bb04c84b6fe1538377e5a1f649bb5d5f0b2e3625a3c526ff3a8af88633e8"
@@ -6,8 +9,18 @@ sources:
     url: "https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.10.0.tar.gz"
     sha256: "b5a1bb04c84b6fe1538377e5a1f649bb5d5f0b2e3625a3c526ff3a8af88633e8"
 patches:
+  "2.14.0":
+    - patch_file: "patches/disable_fetch_content.patch"
+      patch_description: "Fail if the CMake build script tries to fetch external dependencies"
+      patch_type: "conan"
+    - patch_file: "patches/dependencies.patch"
+      patch_description: "Dependency compatibility: Patch CMakeLists.txt, updating package names, target names, etc"
+      patch_type: "conan"
+    - patch_file: "patches/ml_dtypes.patch"
+      patch_description: "Add third party ml_dtypes header files"
+      patch_type: "conan"
   "2.12.0":
-    - patch_file: "patches/remove_simple_memory_arena_debug_dump.patch"
+    - patch_file: "patches/remove_simple_memory_arena_debug_dump_2_10.patch"
       patch_description: "Shared build fails on Windows with error LNK2005. Resolve the conflict by removing the conflicting implementation for now."
     - patch_file: "patches/disable_fetch_content.patch"
       patch_description: "Fail if the CMake build script tries to fetch external dependencies"
@@ -16,7 +29,7 @@ patches:
       patch_description: "Dependency compatibility: Patch CMakeLists.txt, updating package names, target names, etc"
       patch_type: "conan"
   "2.10.0":
-    - patch_file: "patches/remove_simple_memory_arena_debug_dump.patch"
+    - patch_file: "patches/remove_simple_memory_arena_debug_dump_2_10.patch"
       patch_description: "Shared build fails on Windows with error LNK2005. Resolve the conflict by removing the conflicting implementation for now."
     - patch_file: "patches/disable_fetch_content.patch"
       patch_description: "Fail if the CMake build script tries to fetch external dependencies"
