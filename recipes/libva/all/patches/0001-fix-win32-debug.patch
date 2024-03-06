@@ -1,0 +1,27 @@
+From 2a1536a7d87eee3de17c27d07a40d8578cbf7cc0 Mon Sep 17 00:00:00 2001
+From: Sil Vilerino <sivileri@microsoft.com>
+Date: Wed, 27 Sep 2023 11:50:16 -0400
+Subject: [PATCH] win32: Fix debug build break
+
+Fixes: 484f128 ("win32: remove duplicate adapter_luid entry")
+Signed-off-by: Sil Vilerino <sivileri@microsoft.com>
+---
+ va/win32/va_win32.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/va/win32/va_win32.c b/va/win32/va_win32.c
+index 7a6a895d3..350ee3a27 100644
+--- a/va/win32/va_win32.c
++++ b/va/win32/va_win32.c
+@@ -183,9 +183,9 @@ VADisplay vaGetDisplayWin32(
+         LoadDriverNameFromRegistry(adapter_luid, pWin32Ctx);
+ #ifdef _DEBUG
+         if (pWin32Ctx->registry_driver_available_flag) {
+-            fprintf(stderr, "VA_Win32: Found driver %s in the registry for LUID %ld %ld \n", pWin32Ctx->registry_driver_name, adapter_luid.LowPart, adapter_luid.HighPart);
++            fprintf(stderr, "VA_Win32: Found driver %s in the registry for LUID %ld %ld \n", pWin32Ctx->registry_driver_name, adapter_luid->LowPart, adapter_luid->HighPart);
+         } else {
+-            fprintf(stderr, "VA_Win32: Couldn't find a driver in the registry for LUID %ld %ld. Using default driver: %s \n", adapter_luid.LowPart, adapter_luid.HighPart, VAAPI_DEFAULT_DRIVER_NAME);
++            fprintf(stderr, "VA_Win32: Couldn't find a driver in the registry for LUID %ld %ld. Using default driver: %s \n", adapter_luid->LowPart, adapter_luid->HighPart, VAAPI_DEFAULT_DRIVER_NAME);
+         }
+ #endif // _DEBUG
+     }

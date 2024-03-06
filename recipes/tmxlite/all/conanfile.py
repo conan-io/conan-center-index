@@ -6,7 +6,7 @@ from conan.tools.files import apply_conandata_patches, collect_libs, copy, expor
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class TmxliteConan(ConanFile):
@@ -17,6 +17,7 @@ class TmxliteConan(ConanFile):
     homepage = "https://github.com/fallahn/tmxlite"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,17 +37,18 @@ class TmxliteConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("miniz/2.2.0")
-        self.requires("pugixml/1.12.1")
+        if Version(self.version) < "1.4.1":
+            self.requires("miniz/3.0.2")
+        else:
+            self.requires("zlib/[>=1.2.11 <2]")
+            self.requires("zstd/1.5.5")
+        self.requires("pugixml/1.14")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
@@ -55,28 +57,38 @@ class TmxliteConan(ConanFile):
             raise ConanInvalidConfiguration("gcc < 5 not supported")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["TMXLITE_STATIC_LIB"] = not self.options.shared
         tc.variables["PROJECT_STATIC_RUNTIME"] = False
         tc.variables["USE_RTTI"] = True
+        if Version(self.version) >= "1.4.1":
+            tc.variables["USE_EXTLIBS"] = True
         tc.generate()
         deps = CMakeDeps(self)
+        if Version(self.version) >= "1.4.1":
+            deps.set_property("pugixml", "cmake_file_name", "PUGIXML")
+            deps.set_property("zstd", "cmake_file_name", "Zstd")
+            deps.set_property("zstd", "cmake_target_name", "zstd::libzstd")
         deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # unvendor miniz
-        rm(self, "miniz*", os.path.join(self.source_folder, "tmxlite", "src"))
-        replace_in_file(self, os.path.join(self.source_folder, "tmxlite", "src", "CMakeLists.txt"),
-                              "${PROJECT_DIR}/miniz.c", "")
-        # unvendor pugixml
-        rmdir(self, os.path.join(self.source_folder, "tmxlite", "src", "detail"))
-        replace_in_file(self, os.path.join(self.source_folder, "tmxlite", "src", "CMakeLists.txt"),
-                              "${PROJECT_DIR}/detail/pugixml.cpp", "")
+        if Version(self.version) < "1.4.0":
+            # unvendor miniz
+            rm(self, "miniz*", os.path.join(self.source_folder, "tmxlite", "src"))
+            replace_in_file(self, os.path.join(self.source_folder, "tmxlite", "src", "CMakeLists.txt"),
+                                  "${PROJECT_DIR}/miniz.c", "")
+            # unvendor pugixml
+            rmdir(self, os.path.join(self.source_folder, "tmxlite", "src", "detail"))
+            replace_in_file(self, os.path.join(self.source_folder, "tmxlite", "src", "CMakeLists.txt"),
+                                  "${PROJECT_DIR}/detail/pugixml.cpp", "")
+        else:
+            replace_in_file(self, os.path.join(self.source_folder, "tmxlite", "CMakeLists.txt"),
+                            "target_link_libraries(${PROJECT_NAME} ${ZLIB_LIBRARIES} ${PUGIXML_LIBRARY} ${ZSTD_LIBRARY})",
+                            "target_link_libraries(${PROJECT_NAME} ZLIB::ZLIB pugixml::pugixml zstd::libzstd)")
         # Don't inject -O3 in compile flags
         replace_in_file(self, os.path.join(self.source_folder, "tmxlite", "CMakeLists.txt"),
                               "-O3", "")
@@ -91,6 +103,8 @@ class TmxliteConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
