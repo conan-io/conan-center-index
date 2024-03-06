@@ -3,12 +3,11 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches, copy, export_conandata_patches, get,
-    replace_in_file, rm, rmdir
+    rm, rmdir
 )
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.scm import Version
 
 import os
 
@@ -81,9 +80,6 @@ class FontconfigConan(ConanFile):
 
     def _patch_files(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
-                        "freetype_req = '>= 21.0.15'",
-                        f"freetype_req = '{Version(self.dependencies['freetype'].ref.version)}'")
 
     def build(self):
         self._patch_files()
