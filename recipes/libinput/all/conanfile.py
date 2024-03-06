@@ -64,10 +64,10 @@ class LibinputConan(ConanFile):
 
         if self.options.with_libudev == "systemd":
             # todo Use libudev from the libsystemd package.
-            # self.requires("libsystemd/253.10", transitive_libs=True)
+            # self.requires("libsystemd/255.2", transitive_libs=True)
             self.requires("libudev/system", transitive_libs=True)
         elif self.options.with_libudev == "eudev":
-            self.requires("eudev/3.2.12", transitive_libs=True)
+            self.requires("eudev/3.2.14", transitive_libs=True)
 
     def validate(self):
         if self.settings.os not in ["FreeBSD", "Linux"]:
