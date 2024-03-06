@@ -68,3 +68,6 @@ patches:
     - patch_file: "patches/9.2.6-fix-kissfft-use-external.patch"
       patch_type: "conan"
       patch_description: "Force VTK to use the conan-provided kissfft package"
+    - patch_file: "patches/9.2.6-fix-vtkHullOutputPrecision.patch"
+      patch_type: "conan"
+      patch_description: "Allow user to adjust output points precision in vtkHull"

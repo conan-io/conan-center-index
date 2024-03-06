@@ -1,0 +1,97 @@
+--- a/Filters/Core/vtkHull.cxx	2024-02-26 12:06:40.489396800 +0800
++++ b/Filters/Core/vtkHull.cxx	2024-02-26 12:05:43.764446200 +0800
+@@ -25,6 +25,11 @@
+ 
+ vtkStandardNewMacro(vtkHull);
+ 
++vtkHull::vtkHull()
++{
++  this->OutputPointsPrecision = vtkAlgorithm::DEFAULT_PRECISION;
++}
++
+ //------------------------------------------------------------------------------
+ int vtkHull::GetNumberOfPlanes()
+ {
+@@ -480,6 +485,23 @@
+   vtkNew<vtkPoints> outPoints;
+   vtkNew<vtkCellArray> outPolys;
+ 
++  // Set the desired precision for the points in the output.
++  if (this->OutputPointsPrecision == vtkAlgorithm::DEFAULT_PRECISION)
++  {
++    if (vtkPoints * inPts = input->GetPoints())
++    {
++      outPoints->SetDataType(inPts->GetDataType());
++    }
++  }
++  else if (this->OutputPointsPrecision == vtkAlgorithm::SINGLE_PRECISION)
++  {
++    outPoints->SetDataType(VTK_FLOAT);
++  }
++  else if (this->OutputPointsPrecision == vtkAlgorithm::DOUBLE_PRECISION)
++  {
++    outPoints->SetDataType(VTK_DOUBLE);
++  }
++
+   // Compute the D value for each plane according to the vertices in the
+   // geometry
+   this->ComputePlaneDistances(input);
+@@ -756,6 +778,23 @@
+   vtkNew<vtkCellArray> newPolys;
+   newPolys->AllocateEstimate(numPlanes, 3);
+ 
++  // Set the desired precision for the points in the output.
++  if (this->OutputPointsPrecision == vtkAlgorithm::DEFAULT_PRECISION)
++  {
++    if (vtkPoints * currentPts = pd->GetPoints())
++    {
++      newPoints->SetDataType(currentPts->GetDataType());
++    }
++  }
++  else if (this->OutputPointsPrecision == vtkAlgorithm::SINGLE_PRECISION)
++  {
++    newPoints->SetDataType(VTK_FLOAT);
++  }
++  else if (this->OutputPointsPrecision == vtkAlgorithm::DOUBLE_PRECISION)
++  {
++    newPoints->SetDataType(VTK_DOUBLE);
++  }
++
+   this->ClipPolygonsFromPlanes(newPoints, newPolys, bounds);
+ 
+   pd->SetPoints(newPoints);
+--- a/Filters/Core/vtkHull.h	2024-02-26 12:06:44.788620900 +0800
++++ b/Filters/Core/vtkHull.h	2024-02-26 12:05:43.769446900 +0800
+@@ -153,6 +153,16 @@
+ 
+   ///@{
+   /**
++   * Set/get the desired precision for the output types. See the documentation
++   * for the vtkAlgorithm::DesiredOutputPrecision enum for an explanation of
++   * the available precision settings.
++   */
++  vtkSetMacro(OutputPointsPrecision, int);
++  vtkGetMacro(OutputPointsPrecision, int);
++  ///@}
++
++  ///@{
++  /**
+    * A special method that is used to generate a polyhedron directly
+    * from a set of n planes. The planes that are supplied by the user
+    * are not squeezed towards the input data (in fact the user need
+@@ -169,12 +179,14 @@
+   ///@}
+ 
+ protected:
+-  vtkHull() = default;
++  vtkHull();
+   ~vtkHull() override = default;
+ 
+   // The planes - 4 doubles per plane for A, B, C, D.
+   std::vector<double> Planes;
+ 
++  int OutputPointsPrecision;
++
+   // Internal method used to find the position of each plane
+   void ComputePlaneDistances(vtkPointSet* input);
+ 
