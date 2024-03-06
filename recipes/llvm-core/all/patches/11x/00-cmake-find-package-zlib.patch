@@ -1,0 +1,18 @@
+diff --git a/cmake/config-ix.cmake b/cmake/config-ix.cmake
+index 90e5d327c75..bef1563b861 100644
+--- a/cmake/config-ix.cmake
++++ b/cmake/config-ix.cmake
+@@ -517,11 +517,8 @@ else( LLVM_ENABLE_THREADS )
+   message(STATUS "Threads disabled.")
+ endif()
+ 
+-if (LLVM_ENABLE_ZLIB )
+-  # Check if zlib is available in the system.
+-  if ( NOT HAVE_ZLIB_H OR NOT HAVE_LIBZ )
+-    set(LLVM_ENABLE_ZLIB 0)
+-  endif()
++if ( LLVM_ENABLE_ZLIB )
++  find_package(ZLIB REQUIRED)	
+ endif()
+ 
+ if (LLVM_ENABLE_DOXYGEN)
