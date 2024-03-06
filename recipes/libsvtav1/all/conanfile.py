@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches, replace_in_file
+from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -63,25 +63,13 @@ class SVTAV1Conan(ConanFile):
         tc.variables["BUILD_ENC"] = self.options.build_encoder
         if self.settings.arch in ("x86", "x86_64"):
             tc.variables["ENABLE_NASM"] = True
+            tc.variables["USE_EXTERNAL_CPUINFO"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-            "add_subdirectory(third_party/cpuinfo)", "")
-        replace_in_file(self, os.path.join(self.source_folder, "Source", "Lib", "Decoder", "CMakeLists.txt"), 
-            "target_link_libraries(SvtAv1Dec PRIVATE cpuinfo_public)", 
-            """find_package(cpuinfo REQUIRED)
-               target_link_libraries(SvtAv1Dec PRIVATE cpuinfo::cpuinfo)""")
-        replace_in_file(self, os.path.join(self.source_folder, "Source", "Lib", "Encoder", "CMakeLists.txt"),
-            "target_link_libraries(SvtAv1Enc PRIVATE cpuinfo_public)", 
-            """find_package(cpuinfo REQUIRED)
-               target_link_libraries(SvtAv1Enc PRIVATE cpuinfo::cpuinfo)""")
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
