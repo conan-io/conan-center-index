@@ -1,4 +1,7 @@
 sources:
+  'cci.20240102':
+    url: 'https://github.com/orca-zhang/influxdb-cpp/archive/db18273f09c113d0bd6037463997389afe978ac7.tar.gz'
+    sha256: '8c019ca700a723d9ed33d93e366cffac44b99a65485192ab70e760bf4229c7c8'
   'cci.20201227':
     url: 'https://github.com/orca-zhang/influxdb-cpp/archive/800e0912552bc1b261c2afc6553a95caf5e9c66d.tar.gz'
     sha256: '456f0160cd6b12f88a19dcd0106dc0ba1935841f53ec642bf368843fa28def0e'
