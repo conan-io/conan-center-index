@@ -266,7 +266,8 @@ class MesaConan(ConanFile):
         "with_libselinux": False,
         "with_libudev": "systemd",
         "with_libunwind": True,
-        "with_llvm": True,
+        # todo When the llvm Conan package is available, this should default to True.
+        "with_llvm": False,
         # "with_lmsensors": True,
         "with_perfetto": False,
         "with_zlib": True,
@@ -299,6 +300,10 @@ class MesaConan(ConanFile):
     default_options.update(
         {f"vulkan_layer_{vulkan_layer}": True for vulkan_layer in vulkan_layers}
     )
+
+    # todo When the llvm Conan package is available, remove these two overrides to enable the options by default.
+    default_options.gallium_driver_radeonsi = False
+    default_options.vulkan_driver_swrast = False
 
     @property
     def _min_cppstd(self):
@@ -850,7 +855,6 @@ class MesaConan(ConanFile):
         if self.options.get_safe("with_libunwind"):
             self.requires("libunwind/1.7.2")
 
-        # todo Update this to use the new llvm package when it is merged.
         if self.options.get_safe("with_llvm"):
             self.requires("llvm/17.0.2")
 
@@ -908,6 +912,15 @@ class MesaConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires at least version {minimum_version} of {self.settings.compiler}"
             )
+
+        # todo Remove this when the llvm Conan package is merged.
+        if self.options.get_safe(
+            "with_llvm"
+        ):
+            raise ConanInvalidConfiguration(
+                "The with_llvm option is not available until the llvm Conan package becomes available."
+            )
+
 
         if self.options.get_safe("egl") and not self.options.get_safe("shared_glapi"):
             raise ConanInvalidConfiguration(
@@ -1104,7 +1117,6 @@ class MesaConan(ConanFile):
         #         "The gallium_opencl, gallium_rusticl, intel_clc, and microsoft_clc options require libclc from LLVM"
         #     )
 
-        # todo
         if self.options.get_safe("opencl_spirv") and not (
             self.options.get_safe("with_llvm")
             and self.dependencies.direct_host["llvm"].options.with_project_libclc
