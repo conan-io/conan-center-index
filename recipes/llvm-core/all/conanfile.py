@@ -121,6 +121,9 @@ class LLVMCoreConan(ConanFile):
             self.requires('libxml2/2.12.4')
         self.requires('z3/4.12.4')
 
+    def build_requirements(self):
+        self.tool_requires("ninja/1.11.1")
+
     @property
     def _is_gcc(self):
         return self.settings.compiler == "gcc"
@@ -132,10 +135,6 @@ class LLVMCoreConan(ConanFile):
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
-        if self._is_gcc and Version(self.settings.compiler.version) >= "13":
-            raise ConanInvalidConfiguration(
-                f"GCC {self.settings.compiler.version} cannot compile LLVM {self.version}"
             )
 
         if self._is_windows:
