@@ -1341,7 +1341,7 @@ class MesaConan(ConanFile):
             if self._with_libdrm:
                 self.cpp_info.components["d3d"].requires.append("libdrm::libdrm")
             # todo define pkg-config custom content for the `moduledir` variable
-            # todo How to determine this?
+            # todo Extract this in the package method from the pkg-config file.
             # self.cpp_info.components["d3d"].set_property("component_version", "1.0.0")
         self.cpp_info.components["dri"].set_property("pkg_config_name", "dri")
         if self._with_libdrm:
@@ -1430,6 +1430,7 @@ class MesaConan(ConanFile):
         if self.options.get_safe("osmesa"):
             self.cpp_info.components["osmesa"].libs = ["OSMesa"]
             self.cpp_info.components["osmesa"].set_property("pkg_config_name", "osmesa")
+            # todo Extract this in the package method from the pkg-config file.
             # self.cpp_info.components["osmesa"].set_property("component_version", "8.0.0")
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.extend(["m", "pthread"])

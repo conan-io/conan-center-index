@@ -3,6 +3,12 @@ project('test_package', 'c')
 defines = []
 dependencies = []
 
+if get_option('gbm').enabled()
+    defines += '-DMESA_TEST_PACKAGE_HAS_GBM'
+    gbm_dep = dependency('gbm')
+    dependencies += gbm_dep
+endif
+
 if get_option('egl').enabled()
     defines += '-DMESA_TEST_PACKAGE_HAS_EGL'
     egl_dep = dependency('mesa-egl')

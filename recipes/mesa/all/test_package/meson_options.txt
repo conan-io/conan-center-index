@@ -1,4 +1,10 @@
 option(
+  'gbm',
+  type : 'feature',
+  value : 'disabled',
+  description : 'Build support for GBM'
+)
+option(
   'egl',
   type : 'feature',
   value : 'disabled',

@@ -1,8 +1,9 @@
+import os
+
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-import os
 
 
 class TestPackageConan(ConanFile):
@@ -23,6 +24,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = MesonToolchain(self)
+        tc.project_options["gbm"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("gbm") else "disabled"
         tc.project_options["egl"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("egl") else "disabled"
         tc.generate()
 
