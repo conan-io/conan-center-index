@@ -206,18 +206,12 @@ class LLVMCoreConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        graphviz_settings = """
-set(GRAPHVIZ_EXECUTABLES OFF)
-set(GRAPHVIZ_INTERFACE_LIBS OFF)
-set(GRAPHVIZ_OBJECT_LIBS OFF)
-        """
-        save(self, Path(self.build_folder) / "CMakeGraphVizOptions.cmake", graphviz_settings)
         apply_conandata_patches(self)
 
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(cli_args=["--graphviz=graph/llvm.dot"])
+        cmake.configure()
         cmake.build()
 
     @property
@@ -225,24 +219,24 @@ set(GRAPHVIZ_OBJECT_LIBS OFF)
         return self.settings.os == 'Windows'
 
     def _llvm_components(self):
-        # TODO (@planetmarshall) this is a bit hacky. CMake already has this information, just
-        #  parse the LLVM CMake files.
-        # The definitive list of built targets is provided by running `llvm-config --components`
-        non_distributed = {
-            "exegesis"
-        }
-        graphviz_folder = Path(self.build_folder) / "graph"
-        match_component = re.compile(r"""^llvm.dot.LLVM(.+)\.dependers$""")
-        for lib in iglob(str(graphviz_folder / '*')):
-            if os.path.isdir(lib) or os.path.islink(lib):
-                continue
-            lib_name = os.path.basename(lib)
-            match = match_component.match(lib_name)
+        with open(Path(self.package_folder) / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake") as fp:
+            cmake_config = fp.read()
+
+        match_cmake_var = re.compile(r"""^set\(LLVM_AVAILABLE_LIBS (?P<components>.*)\)$""", re.MULTILINE)
+        match = match_cmake_var.search(cmake_config)
+        if match is None:
+            self.output.warning("Could not find components in LLVMConfig.cmake")
+            return None
+
+        components = match.groupdict()["components"]
+
+        match_component = re.compile(r"""^LLVM(.+)$""")
+        for component in components.split(";"):
+            match = match_component.match(component)
             if match:
-                component = match.group(1)
-                component_name = component.lower()
-                if component_name not in non_distributed:
-                    yield component.lower(), f"LLVM{component}"
+                yield match.group(1).lower(), component
+            else:
+                yield component, component
 
     @property
     def _components_data_file(self):
@@ -264,8 +258,8 @@ set(GRAPHVIZ_OBJECT_LIBS OFF)
         cmake = CMake(self)
         cmake.install()
         package_folder = Path(self.package_folder)
-        rmdir(self, package_folder / "lib" / "cmake")
-        rmdir(self, package_folder / "share")
+        #rmdir(self, package_folder / "lib" / "cmake")
+        #rmdir(self, package_folder / "share")
 
         if not self.options.shared:
             self._write_components()
