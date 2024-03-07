@@ -1078,6 +1078,11 @@ class MesaConan(ConanFile):
                 "The gallium_rusticl, intel_clc, and microsoft_clc options require the opencl_spirv option to be enabled"
             )
 
+        if self.options.get_safe("gallium_va") and self.settings.os == "Windows" and not self.dependencies.direct_host["libva"].options.with_win32:
+            raise ConanInvalidConfiguration(
+                "The gallium_va option requires the with_win32 option of the libva package to be enabled"
+            )
+
         if self.options.get_safe("vmware_mks_stats") and not self.options.get_safe(
             "gallium_driver_svga"
         ):
@@ -1491,7 +1496,9 @@ class MesaConan(ConanFile):
         if self.options.get_safe("with_llvm"):
             self.cpp_info.requires.append("llvm::llvm")
         if self.options.get_safe("gallium_va"):
-            self.cpp_info.requires.append("libva::libva")
+            self.cpp_info.requires.append("libva::libva_")
+            if self.settings.os == "Windows":
+                self.cpp_info.requires.append("libva::libva-win32")
         if self.options.get_safe("gallium_vdpau"):
             self.cpp_info.requires.append("libvdpau::libvdpau")
 
