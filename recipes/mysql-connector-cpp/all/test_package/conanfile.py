@@ -13,17 +13,15 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def generate(self):
-        self.with_jdbc = self.dependencies["mysql-connector-cpp"].options.with_jdbc
+        tc = CMakeToolchain(self)
+        tc.variables["JDBC_ENABLED"] = self.dependencies["self.tested_reference_str].options.with_jdbc
+        tc.generate()
 
     def layout(self):
         cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)
-        if self.with_jdbc:
-            cmake.configure({"JDBC_ENABLED": "ON"})
-        else:
-            cmake.configure({"JDBC_ENABLED": "OFF"})
         cmake.build()
 
     def test(self):
