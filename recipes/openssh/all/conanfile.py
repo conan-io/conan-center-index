@@ -20,14 +20,14 @@ class PackageConan(ConanFile):
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "with_libcrypto": [None, "libressl", "openssl],
+        "with_libcrypto": [None, "libressl", "openssl"],
         "with_pam": [None, "openpam"],
         "with_selinux": [True, False],
         "with_libedit": [True, False],
         "with_sandbox": ["auto", "no", "capsicum", "darwin", "rlimit", "seccomp_filter", "systrace", "pledge"]
     }
     default_options = {
-        "with_openssl": True,
+        "with_libcrypto": "openssl",
         "with_pam": None,
         "with_selinux": False,
         "with_libedit": False,
@@ -50,8 +50,10 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
-        if self.options.with_openssl:
+        if self.options.with_libcrypto  == "openssl":
             self.requires("openssl/[>=1.1 <=3.1]")
+        elif self.options.with_libcrypto  == "libressl":
+            self.requires("libressl/[>=2.9 <=3.5]")
         if self.options.with_pam == "openpam":
             self.requires("openpam/20190224")
         if self.options.with_libedit:
@@ -84,9 +86,12 @@ class PackageConan(ConanFile):
             editline = self.dependencies["editline"]
             tc.configure_args.append("--with-libedit={}".format(editline.package_folder))
 
-        if self.options.with_openssl:
+        if self.options.with_libcrypto == "openssl":
             openssl = self.dependencies["openssl"]
             tc.configure_args.append("--with-ssl-dir={}".format(openssl.package_folder))
+        elif self.options.with_libcrypto == "libressl":
+            libressl = self.dependencies["libressl"]
+            tc.configure_args.append("--with-ssl-dir={}".format(libressl.package_folder))
         else:
             tc.configure_args.append("--without-openssl")
 
