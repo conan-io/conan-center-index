@@ -6,4 +6,4 @@ patches:
   "0.8":
     - patch_file: "patches/0.8-0001-Avoid-conflicting-definition-with-strlcpy-in-glibc.patch"
       patch_description: "Avoid conflicting definition with glibc strlcpy"
-      patch_type: "portability"
+      patch_type: "conan"
