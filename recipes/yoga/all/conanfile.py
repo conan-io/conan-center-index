@@ -30,11 +30,18 @@ class YogaConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        return {
-            "gcc": "5",
-            "clang": "3.4",
-            "apple-clang": "10",
-        }
+        if Version(self.version) >= "3.0.0":
+            return {
+                "gcc": "10.3",
+                "clang": "12",
+                "apple-clang": "13"
+            }
+        else:
+            return {
+                "gcc": "5",
+                "clang": "3.4",
+                "apple-clang": "10",
+            }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -49,7 +56,7 @@ class YogaConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-        check_min_vs(self, 191)
+        check_min_vs(self, 192 if Version(self.version) >= "3.0.0" else 191)
         if not is_msvc(self):
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if minimum_version and Version(self.settings.compiler.version) < minimum_version:
