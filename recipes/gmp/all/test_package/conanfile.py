@@ -30,5 +30,5 @@ class TestPackageConan(ConanFile):
         if not can_run(self):
             return
         with chdir(self, self.folders.build_folder):
-            env = "conanrun" if self.settings.os == "Windows" else "conanbuild"
-            self.run(f"ctest --output-on-failure -C {self.settings.build_type}", env=env)
+            cmake = CMake(self)
+            cmake.ctest()
