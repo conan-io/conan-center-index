@@ -73,7 +73,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
 
         # mysql < 8.0.29 uses `requires` in source code. It is the reserved keyword in C++20.
         # https://github.com/mysql/mysql-server/blob/mysql-8.0.0/include/mysql/components/services/dynamic_loader.h#L270
-        if self.settings.compiler.get_safe("cppstd") == "20" and Version(self.version) < "8.0.29":
+        if "20" in self.settings.compiler.get_safe("cppstd") and Version(self.version) < "8.0.29":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support C++20")
 
     def config_options(self):
