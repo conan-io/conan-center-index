@@ -86,12 +86,8 @@ class QwtConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        if self._is_legacy_one_profile:
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
-        else:
-            env = VirtualBuildEnv(self)
-            env.generate()
+        VirtualBuildEnv(self).generate()
+        VirtualRunEnv(self).generate(scope="build")
 
         tc = CMakeToolchain(self)
         tc.variables["QWT_DLL"] = self.options.shared
