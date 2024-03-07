@@ -1,12 +1,23 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
+macro(test_llvm_cmake_variable VARIABLE)
+    if(NOT DEFINED ${VARIABLE})
+        message(FATAL_ERROR "${VARIABLE} is not defined")
+    endif()
+    message(STATUS "${VARIABLE}: ${${VARIABLE}}")
+endmacro()
+
 add_executable(${PROJECT_NAME} test_package.cpp)
 
 if (LLVM_SHARED)
     find_package(LLVM REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE LLVM)
 else()
-    find_package(LLVM REQUIRED COMPONENTS LLVMSupport)
-    target_link_libraries(${PROJECT_NAME} PRIVATE LLVMSupport)
+    find_package(LLVM REQUIRED COMPONENTS LLVMSupport LLVMCore LLVMIRReader)
+    llvm_map_components_to_libnames(llvm_libs support core irreader)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${llvm_libs})
 endif()
+
+message(STATUS "Testing LLVM Build Module Variables")
+test_llvm_cmake_variable(LLVM_PACKAGE_VERSION)

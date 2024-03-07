@@ -1,3 +1,5 @@
+import textwrap
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
@@ -6,7 +8,6 @@ from conan.tools.files import apply_conandata_patches, collect_libs, get, rmdir,
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-from glob import iglob
 import json
 import os
 from pathlib import Path
@@ -78,7 +79,7 @@ class LLVMCoreConan(ConanFile):
         'with_xml2': True,
         'with_z3': True,
         'with_zlib': True,
-        'use_llvm_cmake_files': False,
+        'use_llvm_cmake_files': False, # no longer used but retained for backwards compatibility
         # creating job pools with current free memory
         'ram_per_compile_job': '2000',
         'ram_per_link_job': '14000'
@@ -236,11 +237,38 @@ class LLVMCoreConan(ConanFile):
             if match:
                 yield match.group(1).lower(), component
             else:
-                yield component, component
+                yield component.lower(), component
+
 
     @property
     def _components_data_file(self):
         return Path(self.package_folder) / "lib" / "components.json"
+
+    @property
+    def _build_module_file_rel_path(self):
+        return Path("lib") / "cmake" / "llvm" / f"conan-official-{self.name}-variables.cmake"
+
+    def _create_cmake_build_module(self, components, module_file):
+        # FIXME: define other LLVM CMake Variables as per
+        #  https://llvm.org/docs/CMake.html#embedding-llvm-in-your-project
+        json_text = json.dumps(components).replace('"', '\\"')
+        content = textwrap.dedent(f"""\
+            set(LLVM_PACKAGE_VERSION "{self.version}")
+
+            function(llvm_map_components_to_libnames OUTPUT)
+                set(_libnames )
+                set(_components_json "{json_text}")
+                foreach(_component ${{ARGN}})
+                    string(JSON _lib_name ERROR_VARIABLE ERR GET ${{_components_json}} ${{_component}})
+                    if (ERR)
+                        message(WARNING "Component ${{_component}} not found: ${{ERR}}")
+                    endif()
+                    list(APPEND _libnames ${{_lib_name}})
+                endforeach()
+                set(${{OUTPUT}} ${{_libnames}} PARENT_SCOPE)
+            endfunction()
+           """)
+        save(self, module_file, content)
 
     def _write_components(self):
         component_dict = {
@@ -248,6 +276,8 @@ class LLVMCoreConan(ConanFile):
         }
         with open(self._components_data_file, 'w') as fp:
             json.dump(component_dict, fp)
+
+        return component_dict
 
     def _read_components(self) -> dict:
         with open(self._components_data_file) as fp:
@@ -257,12 +287,20 @@ class LLVMCoreConan(ConanFile):
         copy(self, "LICENSE.TXT", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        package_folder = Path(self.package_folder)
-        #rmdir(self, package_folder / "lib" / "cmake")
-        #rmdir(self, package_folder / "share")
 
+
+        components = {}
         if not self.options.shared:
-            self._write_components()
+            components = self._write_components()
+
+        package_folder = Path(self.package_folder)
+        rmdir(self, package_folder / "lib" / "cmake")
+        rmdir(self, package_folder / "share")
+
+        self._create_cmake_build_module(
+            components,
+            package_folder / self._build_module_file_rel_path
+        )
 
     def package_id(self):
         del self.info.options.use_llvm_cmake_files
@@ -271,6 +309,7 @@ class LLVMCoreConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "LLVM")
+        self.cpp_info.set_property("cmake_build_modules", [self._build_module_file_rel_path])
 
         dependencies = [
             "zlib::zlib",
