@@ -1,4 +1,7 @@
 sources:
+  "2.2.3":
+    url: https://github.com/ValveSoftware/openvr/archive/v2.2.3.tar.gz
+    sha256: 4da20c2c33e7488703802eafd7f2e6c92dd0f324e887711e1e11e9b9d3dd3daa
   "1.12.5":
     url: https://github.com/ValveSoftware/openvr/archive/v1.12.5.tar.gz
     sha256: f3cdbaa946688553638e6d65978f156311c9b08825316198d925f5eade6cfeb7
@@ -11,4 +14,3 @@ sources:
 patches:
   "1.16.8":
     - patch_file: "patches/fix-includes-and-assert-1.16.8.patch"
-      base_path: "source_subfolder"
