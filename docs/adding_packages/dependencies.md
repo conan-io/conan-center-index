@@ -187,8 +187,9 @@ version range only when a requirement for a newer version is needed.
 * Libpng: `[>=1.6 <2]` expect if the recipe needs a newer lower version for specific reasons
 
 > **Note**: You might also see version ranges in some PR by CCI maintainers.
-> These are being done on a case-by-case basis, and are being rollwed out in phases to ensure
-> that they do not cause problems to users
+> These are being done on a case-by-case basis, and are being rolled out in phases to ensure
+> that they do not cause problems to users. Please do not open PRs that exclusively add version ranges to dependencies,
+> unless they are solving current conflicts, in which case we welcome them and they will be prioritized.
 
 
 > **Warning**: With Conan 1.x, [version ranges](https://docs.conan.io/1/versioning/version_ranges.html) adhere to a much more strict sematic version spec,
