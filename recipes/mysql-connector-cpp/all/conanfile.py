@@ -3,7 +3,7 @@ from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
 from conan.tools.files import get, replace_in_file, rm, collect_libs, copy
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.microsoft import is_msvc
 from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
 import os
@@ -82,6 +82,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.options["libmysqlclient"].shared = self.options.shared
 
     def _package_folder_dep(self, dep):
         return self.dependencies[dep].package_folder.replace("\\", "/")
@@ -103,6 +104,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
         tc.variables["WITHOUT_SERVER"] = True
         # INFO: mysql-connector-cpp caches all option values. Need to use cache_variables
         tc.cache_variables["BUILD_STATIC"] = not self.options.shared
+        tc.cache_variables["MYSQLCLIENT_STATIC_LINKING"] = not self.options.shared
         # INFO: mysql-connector-cpp doesn't use find package for cmake. Need to pass manually folder paths
         tc.variables["MYSQL_LIB_DIR"] = self._lib_folder_dep("libmysqlclient")
         tc.variables["MYSQL_INCLUDE_DIR"] = self._include_folder_dep("libmysqlclient")
@@ -123,8 +125,9 @@ class MysqlConnectorCPPRecipe(ConanFile):
        # INFO: Disable internal bootstrap to use Conan CMakeToolchain instead
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "bootstrap()", "")
         # INFO: Manage fPIC from recipe options
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "enable_pic()", "")
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "enable_pic()", "")
+        if not self.options.shared:
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "enable_pic()", "")
+            replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "enable_pic()", "")
         protobuf = "protobufd" if self.dependencies["protobuf"].settings.build_type == "Debug" else "protobuf"
         # INFO: Disable protobuf-lite to use Conan protobuf targets instead
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindProtobuf.cmake"), "LIBRARY protobuf-lite pb_libprotobuf-lite", "")
