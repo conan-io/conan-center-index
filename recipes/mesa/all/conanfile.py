@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.build import check_max_cppstd, check_min_cppstd, cross_building
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMakeDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
@@ -21,7 +21,7 @@ from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=2.0.0"
+required_conan_version = ">=1.53.0"
 
 
 # todo The Python mako module is required to build.
@@ -895,8 +895,13 @@ class MesaConan(ConanFile):
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            check_max_cppstd(self, self._max_cppstd)
             check_min_cppstd(self, self._min_cppstd)
+            # todo Use check_max_cppstd from Conan V2.
+            # check_max_cppstd(self, self._max_cppstd)
+            if self.settings.compiler.cppstd in ["20", "gnu20", "23", "gnu23"]:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} can not be built with the cppstd {self.settings.compiler.cppstd} which is later than maximum supported cppstd {self._max_cppstd}"
+                )
 
         minimum_version = self._compilers_minimum_version.get(
             str(self.settings.compiler), False
