@@ -23,19 +23,17 @@ class PackageConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "11" if self.version == "cci.20210513" else "17"
+        return 17
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "17": {
-                "Visual Studio": "16",
-                "msvc": "192",
-                "gcc": "6",
-                "clang": "6",
-                "apple-clang": "12",
-            },
-        }.get(self._min_cppstd, {})
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "6",
+            "clang": "6",
+            "apple-clang": "12",            
+        }
 
     def layout(self):
         basic_layout(self, src_folder="src")
