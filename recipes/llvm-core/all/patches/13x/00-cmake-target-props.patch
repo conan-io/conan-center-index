@@ -1,7 +1,7 @@
-diff --git a/llvm/cmake/config-ix.cmake b/llvm/cmake/config-ix.cmake
+diff --git a/cmake/config-ix.cmake b/cmake/config-ix.cmake
 index dd0aaadb47c..e0771f99237 100644
---- a/llvm/cmake/config-ix.cmake
-+++ b/llvm/cmake/config-ix.cmake
+--- a/cmake/config-ix.cmake
++++ b/cmake/config-ix.cmake
 @@ -127,7 +127,7 @@ if(LLVM_ENABLE_ZLIB)
      # library on a 64-bit system which would result in a link-time failure.
      cmake_push_check_state()
@@ -11,10 +11,10 @@ index dd0aaadb47c..e0771f99237 100644
      check_symbol_exists(compress2 zlib.h HAVE_ZLIB)
      cmake_pop_check_state()
      if(LLVM_ENABLE_ZLIB STREQUAL FORCE_ON AND NOT HAVE_ZLIB)
-diff --git a/llvm/lib/Support/CMakeLists.txt b/llvm/lib/Support/CMakeLists.txt
+diff --git a/lib/Support/CMakeLists.txt b/lib/Support/CMakeLists.txt
 index 014b4a2caf1..486e4f39642 100644
---- a/llvm/lib/Support/CMakeLists.txt
-+++ b/llvm/lib/Support/CMakeLists.txt
+--- a/lib/Support/CMakeLists.txt
++++ b/lib/Support/CMakeLists.txt
 @@ -267,7 +267,7 @@ if(LLVM_ENABLE_ZLIB)
    # CMAKE_BUILD_TYPE is only meaningful to single-configuration generators.
    if(CMAKE_BUILD_TYPE)
@@ -24,10 +24,10 @@ index 014b4a2caf1..486e4f39642 100644
    endif()
    if(NOT zlib_library)
      get_property(zlib_library TARGET ZLIB::ZLIB PROPERTY LOCATION)
-diff --git a/llvm/lib/WindowsManifest/CMakeLists.txt b/llvm/lib/WindowsManifest/CMakeLists.txt
+diff --git a/lib/WindowsManifest/CMakeLists.txt b/lib/WindowsManifest/CMakeLists.txt
 index 8134ac8c815..ccd772f6176 100644
---- a/llvm/lib/WindowsManifest/CMakeLists.txt
-+++ b/llvm/lib/WindowsManifest/CMakeLists.txt
+--- a/lib/WindowsManifest/CMakeLists.txt
++++ b/lib/WindowsManifest/CMakeLists.txt
 @@ -21,12 +21,13 @@ add_llvm_component_library(LLVMWindowsManifest
  # This block is only needed for llvm-config. When we deprecate llvm-config and
  # move to using CMake export, this block can be removed.

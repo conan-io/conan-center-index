@@ -82,8 +82,8 @@ class LLVMCoreConan(ConanFile):
         'with_zlib': True,
         'use_llvm_cmake_files': False, # no longer used but retained for backwards compatibility
         # creating job pools with current free memory
-        'ram_per_compile_job': '2000',
-        'ram_per_link_job': '14000'
+        'ram_per_compile_job': '2048',
+        'ram_per_link_job': '16384'
     }
 
     @property
