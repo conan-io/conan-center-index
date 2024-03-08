@@ -44,11 +44,13 @@ class MesonConan(ConanFile):
         # create wrapper scripts
         save(self, os.path.join(self.package_folder, "bin", "meson.cmd"), textwrap.dedent("""\
             @echo off
+            set PYTHONDONTWRITEBYTECODE=1
             CALL python %~dp0/meson.py %*
         """))
         save(self, os.path.join(self.package_folder, "bin", "meson"), textwrap.dedent("""\
             #!/usr/bin/env bash
             meson_dir=$(dirname "$0")
+            export PYTHONDONTWRITEBYTECODE=1
             exec "$meson_dir/meson.py" "$@"
         """))
 
