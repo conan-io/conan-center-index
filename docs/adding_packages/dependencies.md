@@ -16,6 +16,7 @@ from handling "vendored" dependencies to what versions should be used.
     * [Overriding the provided properties from the consumer](#overriding-the-provided-properties-from-the-consumer)
   * [Adherence to Build Service](#adherence-to-build-service)
     * [Version Ranges](#version-ranges)
+      * [Adding Version Ranges](#adding-version-ranges)
   * [Handling "internal" dependencies](#handling-internal-dependencies)<!-- endToc -->
 
 ## List Dependencies
