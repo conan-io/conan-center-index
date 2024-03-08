@@ -116,10 +116,12 @@ class PackageConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
         tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_VIZ"] = self.options.build_viz
-        tc.cache_variables["BUILD_PCAP"] = self.options.build_pcap
-        tc.cache_variables["BUILD_OSF"] = self.options.build_osf
-        tc.cache_variables["OUSTER_USE_EIGEN_MAX_ALIGN_BYTES_32"] = self.options.eigen_max_align_bytes
+        tc.variables["BUILD_VIZ"] = self.options.build_viz
+        tc.variables["BUILD_PCAP"] = self.options.build_pcap
+        tc.variables["BUILD_OSF"] = self.options.build_osf
+        tc.variables["OUSTER_USE_EIGEN_MAX_ALIGN_BYTES_32"] = self.options.eigen_max_align_bytes
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
