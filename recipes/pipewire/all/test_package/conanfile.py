@@ -1,4 +1,3 @@
-import glob
 import os
 
 from conan import ConanFile
@@ -28,7 +27,12 @@ class TestPackageConan(ConanFile):
         pkg_config_deps = PkgConfigDeps(self)
         pkg_config_deps.generate()
         tc = MesonToolchain(self)
-        libpipewire_api_version = self.dependencies.direct_host[self.tested_reference_str].cpp_info.components["libpipewire"].libs[0].split("-")[1]
+        libpipewire_api_version = (
+            self.dependencies.direct_host[self.tested_reference_str]
+            .cpp_info.components["libpipewire"]
+            .libs[0]
+            .split("-")[1]
+        )
         tc.project_options["libpipewire-api-version"] = libpipewire_api_version
         tc.generate()
 
