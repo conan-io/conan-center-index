@@ -2,21 +2,12 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, load, rm, rmdir, save
-from conan.tools.scm import Version
+from conan.tools.files import copy, get, save
 import os
-
 import yaml
 
 required_conan_version = ">=1.53.0"
 
-#
-# INFO: Please, remove all comments before pushing your PR!
-#
-
-class _Library:
-    name: str
-    deps: list[str]
 
 class FuzztestConan(ConanFile):
     name = "fuzztest"
@@ -40,21 +31,10 @@ class FuzztestConan(ConanFile):
     def _min_cppstd(self):
         return 17
 
-    def export_sources(self):
+    def export(self):
         copy(self, f"_package_info-{self.version}.yml",
              os.path.join(self.recipe_folder, "package_info"),
-             os.path.join(self.export_sources_folder))
-
-    # in case the project requires C++14/17/20/... the minimum compiler version should be listed
-#    @property
-#    def _compilers_minimum_version(self):
-#        return {
-#            "apple-clang": "10",
-#            "clang": "7",
-#            "gcc": "7",
-#            "msvc": "191",
-#            "Visual Studio": "15",
-#        }
+             os.path.join(self.export_folder))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -68,22 +48,22 @@ class FuzztestConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("abseil/20240116.1@local/beta", force=True) # Waiting on PR
+        self.requires("abseil/20240116.1@local/beta", transitive_headers=True, force=True) # Waiting on PR
         self.requires("antlr4-cppruntime/4.13.1")
-        self.requires("gtest/1.14.0")
-        self.requires("re2/20240301@local/beta", force=True) # Waiting on PR, uses internal headers
+        # TODO: Maybe an option to disable GTest? In case user wants to use another testing framework
+        self.requires("gtest/1.14.0", transitive_headers=True)
+        self.requires("re2/20240301@local/beta", transitive_headers=True, force=True) # Waiting on PR, uses internal headers
 
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
 
-        if self.settings.compiler not in ["gcc", "clang", "apple-clang"]:
-            raise ConanInvalidConfiguration(f"{self.ref} only supports GCC and (Apple) Clang")
-#        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-#        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-#            raise ConanInvalidConfiguration(
-#                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-#            )
+        # https://github.com/google/fuzztest/blob/main/doc/quickstart-cmake.md#prerequisites
+        # Clang (with libc++) verifed working as far back as clang 12.
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
+        if self.settings.compiler != "clang":
+            raise ConanInvalidConfiguration(f"{self.ref} only supports Clang")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -110,43 +90,36 @@ find_package(antlr4-runtime REQUIRED CONFIG)
         cmake.build()
 
     def package(self):
-        info_path = os.path.join(self.export_sources_folder, f"_package_info-{self.version}.yml")
-        info = yaml.safe_load(open(info_path, "r"))
-
-        for name, data in info.items():
-            if not data["header_only"]:
-                # Just assuming Linux/static for a minute
-                copy(self, f"*{name}*.a", os.path.join(self.build_folder, "fuzztest"), os.path.join(self.package_folder, "lib"))
-                print(name)
-            # TODO add an assertion to make sure no compiled libraries get missed
-            #print(name)
-            #print(data["header_only"])
-            #print(data["deps"])
-
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.h", os.path.join(self.source_folder, "fuzztest"),
+             os.path.join(self.package_folder, "include", "fuzztest"))
+        for ext in (".so", ".lib", ".a", ".dylib", ".bc"):
+            copy(self, f"*{ext}", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
+
+        copy(self, "AddFuzzTest.cmake", os.path.join(self.source_folder, "cmake"), os.path.join(self.package_folder, "lib", "cmake"))
+        copy(self, "FuzzTestFlagSetup.cmake", os.path.join(self.source_folder, "cmake"), os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        pass # TODO
-#        self.cpp_info.libs = ["package_lib"]
-#
-#        # if package has an official FindPACKAGE.cmake listed in https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules
-#        # examples: bzip2, freetype, gdal, icu, libcurl, libjpeg, libpng, libtiff, openssl, sqlite3, zlib...
-#        self.cpp_info.set_property("cmake_module_file_name", "PACKAGE")
-#        self.cpp_info.set_property("cmake_module_target_name", "PACKAGE::PACKAGE")
-#        # if package provides a CMake config file (package-config.cmake or packageConfig.cmake, with package::package target, usually installed in <prefix>/lib/cmake/<package>/)
-#        self.cpp_info.set_property("cmake_file_name", "package")
-#        self.cpp_info.set_property("cmake_target_name", "package::package")
-#        # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
-#        self.cpp_info.set_property("pkg_config_name", "package")
-#
-#        # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
-#        if self.settings.os in ["Linux", "FreeBSD"]:
-#            self.cpp_info.system_libs.append("m")
-#            self.cpp_info.system_libs.append("pthread")
-#            self.cpp_info.system_libs.append("dl")
-#
-#        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-#        self.cpp_info.filenames["cmake_find_package"] = "PACKAGE"
-#        self.cpp_info.filenames["cmake_find_package_multi"] = "package"
-#        self.cpp_info.names["cmake_find_package"] = "PACKAGE"
-#        self.cpp_info.names["cmake_find_package_multi"] = "package"
+        info_path = os.path.join(self.recipe_folder, f"_package_info-{self.version}.yml")
+        info = yaml.safe_load(open(info_path, "r"))
+
+        # Fuzztest does not document a way to consume with find_package, so stick with the default name.
+
+        # For functions like fuzztest_setup_fuzzing_flags()
+        self.cpp_info.set_property("cmake_build_modules", [
+            os.path.join("lib", "cmake", "AddFuzzTest.cmake"),
+            os.path.join("lib", "cmake", "FuzzTestFlagSetup.cmake"),
+        ])
+
+        # TODO: Used, but not linked to anything?
+        self.cpp_info.components["_hidden"].requires = ["antlr4-cppruntime::antlr4-cppruntime"]
+        self.cpp_info.components["_hidden"].libdirs = []
+        self.cpp_info.components["_hidden"].includedirs = []
+
+        for name, data in info.items():
+            component = self.cpp_info.components[name]
+            if not data["header_only"]:
+                component.libs = [f"fuzztest_{name}"]
+                component.requires = data["deps"]
+            else:
+                component.libdirs = []
