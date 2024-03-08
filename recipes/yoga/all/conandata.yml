@@ -10,6 +10,9 @@ sources:
     sha256: "29eaf05191dd857f76b6db97c77cce66db3c0067c88bd5e052909386ea66b8c5"
 patches:
   "3.0.0":
+    - patch_file: "patches/0002-warnings-arent-errors.patch"
+      patch_description: "Do not treat warnings as errors"
+      patch_type: "conan"
     - patch_file: "patches/0001-delete-tests.patch"
       patch_description: "Delete test targets from cmake"
       patch_type: "conan"
