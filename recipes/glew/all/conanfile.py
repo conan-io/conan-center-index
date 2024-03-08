@@ -46,10 +46,11 @@ class GlewConan(ConanFile):
 
     def requirements(self):
         self.requires("opengl/system")
+        # GL/glew.h includes glu.h.
         if is_apple_os(self) or self.settings.os == "Windows":
-            self.requires("glu/system")
+            self.requires("glu/system", transitive_headers=True)
         else:
-            self.requires("mesa-glu/9.0.3")
+            self.requires("mesa-glu/9.0.3", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
