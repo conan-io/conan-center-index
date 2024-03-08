@@ -14,7 +14,7 @@ required_conan_version = ">=1.53.0"
 class PulseAudioConan(ConanFile):
     name = "pulseaudio"
     description = "PulseAudio is a sound system for POSIX OSes, meaning that it is a proxy for sound applications."
-    topics = ("sound",)
+    topics = ("sound", "audio", "sound-server")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://pulseaudio.org/"
     license = "LGPL-2.1"
@@ -66,7 +66,7 @@ class PulseAudioConan(ConanFile):
 
     def validate(self):
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("pulseaudio supports only linux currently")
+            raise ConanInvalidConfiguration(f"{self.ref} recipe is only compatible with Linux right now. Contributions are welcome.")
 
         if self.options.get_safe("with_fftw"):
             if not self.dependencies["fftw"].options.precision_single:
