@@ -2,9 +2,10 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, get, rmdir, save, copy, export_conandata_patches
+from conan.tools.env import VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, collect_libs, get, rmdir, save, copy, export_conandata_patches, load
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -120,14 +121,11 @@ class LLVMCoreConan(ConanFile):
             self.requires('zlib/1.3.1')
         if self.options.with_xml2:
             self.requires('libxml2/2.12.4')
-        self.requires('z3/4.12.4')
+        if self.options.with_z3:
+            self.requires('z3/4.12.4')
 
     def build_requirements(self):
         self.tool_requires("ninja/1.11.1")
-
-    @property
-    def _is_gcc(self):
-        return self.settings.compiler == "gcc"
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -149,11 +147,12 @@ class LLVMCoreConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = CMakeToolchain(self)
+        tc = CMakeToolchain(self, generator="Ninja")
         # https://releases.llvm.org/12.0.0/docs/CMake.html
         # https://releases.llvm.org/13.0.0/docs/CMake.html
         cmake_definitions = {
             'LLVM_TARGETS_TO_BUILD': self.options.targets,
+            # See comment below on LLVM shared library builds
             'LLVM_BUILD_LLVM_DYLIB': self.options.shared,
             'LLVM_LINK_LLVM_DYLIB': self.options.shared,
             'LLVM_DYLIB_COMPONENTS': self.options.components,
@@ -196,15 +195,22 @@ class LLVMCoreConan(ConanFile):
 
         tc.variables.update(cmake_definitions)
         tc.cache_variables.update({
+            # Enables LLVM to find conan libraries during try_compile
             'CMAKE_TRY_COMPILE_CONFIGURATION': str(self.settings.build_type),
-            'BUILD_SHARED_LIBS': False,  # This variable causes LLVM to build shared libs for each separate component,
-            # which is probably not what the user wants. Use `LLVM_BUILD_LLVM_DYLIB` instead
-            # to build a single shared library
+            # LLVM has two separate concepts of a "shared library build".
+            # 'BUILD_SHARED_LIBS' builds shared versions of all of the static components
+            # 'LLVM_BUILD_LLVM_DYLIB' builds a single shared library containing all components.
+            # It is likely the latter that the user expects by a 'shared library' build.
+            'BUILD_SHARED_LIBS': False,
         })
         tc.generate()
 
         tc = CMakeDeps(self)
         tc.generate()
+
+        if can_run(self):
+            # For running llvm-tblgen during the build
+            VirtualRunEnv(self).generate(scope="build")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -220,8 +226,7 @@ class LLVMCoreConan(ConanFile):
         return self.settings.os == 'Windows'
 
     def _llvm_components(self):
-        with open(Path(self.package_folder) / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake") as fp:
-            cmake_config = fp.read()
+        cmake_config = load(self, Path(self.package_folder) / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake")
 
         match_cmake_var = re.compile(r"""^set\(LLVM_AVAILABLE_LIBS (?P<components>.*)\)$""", re.MULTILINE)
         match = match_cmake_var.search(cmake_config)
@@ -238,7 +243,6 @@ class LLVMCoreConan(ConanFile):
                 yield match.group(1).lower(), component
             else:
                 yield component.lower(), component
-
 
     @property
     def _components_data_file(self):
@@ -274,20 +278,19 @@ class LLVMCoreConan(ConanFile):
         component_dict = {
             component: lib_name for component, lib_name in self._llvm_components()
         }
-        with open(self._components_data_file, 'w') as fp:
+        with open(self._components_data_file, 'w', encoding='utf-8') as fp:
             json.dump(component_dict, fp)
 
         return component_dict
 
     def _read_components(self) -> dict:
-        with open(self._components_data_file) as fp:
+        with open(self._components_data_file, encoding='utf-8') as fp:
             return json.load(fp)
 
     def package(self):
         copy(self, "LICENSE.TXT", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-
 
         components = {}
         if not self.options.shared:
@@ -310,12 +313,17 @@ class LLVMCoreConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "LLVM")
         self.cpp_info.set_property("cmake_build_modules", [self._build_module_file_rel_path])
+        self.cpp_info.builddirs.append(os.path.dirname(self._build_module_file_rel_path))
 
-        dependencies = [
-            "zlib::zlib",
-            "libxml2::libxml2",
-            "z3::z3"
-        ]
+        dependencies = []
+        if self.options.with_zlib:
+            dependencies.append("zlib::zlib")
+        if self.options.with_xml2:
+            dependencies.append("libxml2::libxml2")
+        if self.options.with_ffi:
+            dependencies.append("libffi::libffi")
+        if self.options.with_z3:
+            dependencies.append("z3::z3")
 
         if not self.options.shared:
             components = self._read_components()
