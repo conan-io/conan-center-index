@@ -90,7 +90,7 @@ class PackageConan(ConanFile):
 
         if self.options.build_viz:
             self.requires("glad/0.1.36")
-            self.requires("glfw/3.3.8")
+            self.requires("CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS/3.4")
             if self.settings.os != "Windows":
                 self.requires("xorg/system")
 
