@@ -5,7 +5,16 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, rm, rmdir, save
+from conan.tools.files import (
+    apply_conandata_patches,
+    copy,
+    export_conandata_patches,
+    get,
+    load,
+    rm,
+    rmdir,
+    save,
+)
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -16,7 +25,9 @@ required_conan_version = ">=1.53.0"
 
 class PipeWireConan(ConanFile):
     name = "pipewire"
-    description = "PipeWire is a server and user space API to deal with multimedia pipelines."
+    description = (
+        "PipeWire is a server and user space API to deal with multimedia pipelines."
+    )
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pipewire.org/"
@@ -72,7 +83,7 @@ class PipeWireConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if os.getenv('CONAN_CENTER_BUILD_SERVICE') is not None:
+        if os.getenv("CONAN_CENTER_BUILD_SERVICE") is not None:
             self.options.with_xfixes = False
 
     def configure(self):
@@ -122,14 +133,26 @@ class PipeWireConan(ConanFile):
 
     def validate(self):
         if self.settings.os not in ["FreeBSD", "Linux"]:
-           raise ConanInvalidConfiguration(f"{self.name} not supported for {self.settings.os}")
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.name} not supported for {self.settings.os}"
+            )
+        minimum_version = self._compilers_minimum_version.get(
+            str(self.settings.compiler), False
+        )
+        if (
+            minimum_version
+            and Version(self.settings.compiler.version) < minimum_version
+        ):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires at least {self.settings.compiler} version {minimum_version}."
             )
-        if os.getenv('CONAN_CENTER_BUILD_SERVICE') is not None and self.options.with_xfixes:
-            raise ConanInvalidConfiguration(f"{self.name} requires a newer version of xfixes than is available in CCI")
+        if (
+            os.getenv("CONAN_CENTER_BUILD_SERVICE") is not None
+            and self.options.with_xfixes
+        ):
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires a newer version of xfixes than is available in CCI"
+            )
 
     def build_requirements(self):
         self.tool_requires("meson/1.3.2")
@@ -146,7 +169,11 @@ class PipeWireConan(ConanFile):
         tc.generate()
 
         def feature(option, default=False):
-            return "enabled" if self.options.get_safe(option, default=default) else "disabled"
+            return (
+                "enabled"
+                if self.options.get_safe(option, default=default)
+                else "disabled"
+            )
 
         tc = MesonToolchain(self)
         # Workaround an strict-prototypes error caused by the readline include file: readline/rltypedefs.h
@@ -156,12 +183,16 @@ class PipeWireConan(ConanFile):
         tc.c_args.append("-Wno-error=implicit-function-declaration")
         for dependency, _value in self.dependencies.direct_host.items():
             if dependency.ref.name == "linux-headers-generic":
-                for includedir in self.dependencies.direct_host["linux-headers-generic"].cpp_info.includedirs:
+                for includedir in self.dependencies.direct_host[
+                    "linux-headers-generic"
+                ].cpp_info.includedirs:
                     tc.c_args.append(f"-I{includedir}")
                 break
         tc.project_options["alsa"] = feature("with_libalsa")
         tc.project_options["auto_features"] = "disabled"
-        tc.project_options["avb"] = "enabled" if self.settings.os == "Linux" else "disabled"
+        tc.project_options["avb"] = (
+            "enabled" if self.settings.os == "Linux" else "disabled"
+        )
         tc.project_options["avahi"] = feature("with_avahi")
         tc.project_options["compress-offload"] = feature("with_libalsa")
         tc.project_options["datadir"] = os.path.join(self.package_folder, "res")
@@ -194,7 +225,9 @@ class PipeWireConan(ConanFile):
         tc.project_options["systemd-user-service"] = "disabled"
         tc.project_options["tests"] = "disabled"
         tc.project_options["udev"] = feature("with_libudev", True)
-        tc.project_options["udevrulesdir"] = os.path.join(self.package_folder, "res", "udev", "rules.d")
+        tc.project_options["udevrulesdir"] = os.path.join(
+            self.package_folder, "res", "udev", "rules.d"
+        )
         tc.project_options["vulkan"] = feature("with_vulkan")
         tc.project_options["x11"] = feature("with_x11")
         tc.project_options["x11-xfixes"] = feature("with_xfixes")
@@ -218,15 +251,28 @@ class PipeWireConan(ConanFile):
         return os.path.join(self.package_folder, "res", "libspa-api-version.txt")
 
     def package(self):
-        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(
+            self,
+            "COPYING",
+            self.source_folder,
+            os.path.join(self.package_folder, "licenses"),
+        )
         meson = Meson(self)
         meson.install()
 
-        libpipewire_pc_file = glob.glob(os.path.join(self.package_folder, "lib", "pkgconfig", "libpipewire-*.pc"))[0]
-        libspa_pc_file = glob.glob(os.path.join(self.package_folder, "lib", "pkgconfig", "libspa-*.pc"))[0]
+        libpipewire_pc_file = glob.glob(
+            os.path.join(self.package_folder, "lib", "pkgconfig", "libpipewire-*.pc")
+        )[0]
+        libspa_pc_file = glob.glob(
+            os.path.join(self.package_folder, "lib", "pkgconfig", "libspa-*.pc")
+        )[0]
 
-        libpipewire_api_version = os.path.splitext(os.path.basename(libpipewire_pc_file))[0].split("-")[1]
-        libspa_api_version = os.path.splitext(os.path.basename(libspa_pc_file))[0].split("-")[1]
+        libpipewire_api_version = os.path.splitext(
+            os.path.basename(libpipewire_pc_file)
+        )[0].split("-")[1]
+        libspa_api_version = os.path.splitext(os.path.basename(libspa_pc_file))[
+            0
+        ].split("-")[1]
 
         save(self, self._libpipewire_api_version_txt, libpipewire_api_version)
         save(self, self._libspa_api_version_txt, libspa_api_version)
@@ -242,35 +288,75 @@ class PipeWireConan(ConanFile):
         libpipewire_api_version = load(self, self._libpipewire_api_version_txt).strip()
         libspa_api_version = load(self, self._libspa_api_version_txt).strip()
 
-        self.runenv_info.prepend_path("PIPEWIRE_CONFIG_DIR", os.path.join(self.package_folder, "res", "pipewire"))
-        self.runenv_info.prepend_path("PIPEWIRE_MODULE_DIR", os.path.join(self.package_folder, "lib", f"pipewire-{libpipewire_api_version}"))
-        self.runenv_info.prepend_path("SPA_PLUGIN_DIR", os.path.join(self.package_folder, "lib", f"libspa-{libspa_api_version}"))
-        self.runenv_info.prepend_path("SPA_DATA_DIR", os.path.join(self.package_folder, "res", f"libspa-{libspa_api_version}"))
+        self.runenv_info.prepend_path(
+            "PIPEWIRE_CONFIG_DIR", os.path.join(self.package_folder, "res", "pipewire")
+        )
+        self.runenv_info.prepend_path(
+            "PIPEWIRE_MODULE_DIR",
+            os.path.join(
+                self.package_folder, "lib", f"pipewire-{libpipewire_api_version}"
+            ),
+        )
+        self.runenv_info.prepend_path(
+            "SPA_PLUGIN_DIR",
+            os.path.join(self.package_folder, "lib", f"libspa-{libspa_api_version}"),
+        )
+        self.runenv_info.prepend_path(
+            "SPA_DATA_DIR",
+            os.path.join(self.package_folder, "res", f"libspa-{libspa_api_version}"),
+        )
 
         if self.options.with_libalsa:
-            self.runenv_info.prepend_path("ACP_PATHS_DIR", os.path.join(self.package_folder, "res", "alsa-card-profile", "mixer", "paths"))
-            self.runenv_info.prepend_path("ACP_PROFILES_DIR", os.path.join(self.package_folder, "res", "alsa-card-profile", "mixer", "profiles-sets"))
-            self.runenv_info.prepend_path("ALSA_PLUGIN_DIR", os.path.join(self.package_folder, "lib", "alsa-lib"))
+            self.runenv_info.prepend_path(
+                "ACP_PATHS_DIR",
+                os.path.join(
+                    self.package_folder, "res", "alsa-card-profile", "mixer", "paths"
+                ),
+            )
+            self.runenv_info.prepend_path(
+                "ACP_PROFILES_DIR",
+                os.path.join(
+                    self.package_folder,
+                    "res",
+                    "alsa-card-profile",
+                    "mixer",
+                    "profiles-sets",
+                ),
+            )
+            self.runenv_info.prepend_path(
+                "ALSA_PLUGIN_DIR", os.path.join(self.package_folder, "lib", "alsa-lib")
+            )
 
-        self.cpp_info.components["libpipewire"].libs = [f"pipewire-{libpipewire_api_version}"]
-        self.cpp_info.components["libpipewire"].includedirs = [os.path.join(self.package_folder, "include", f"pipewire-{libpipewire_api_version}")]
+        self.cpp_info.components["libpipewire"].libs = [
+            f"pipewire-{libpipewire_api_version}"
+        ]
+        self.cpp_info.components["libpipewire"].includedirs = [
+            os.path.join(
+                self.package_folder, "include", f"pipewire-{libpipewire_api_version}"
+            )
+        ]
         self.cpp_info.components["libpipewire"].defines = ["_REENTRANT"]
-        self.cpp_info.components["libpipewire"].set_property("pkg_config_name", f"libpipewire-{libpipewire_api_version}")
+        self.cpp_info.components["libpipewire"].set_property(
+            "pkg_config_name", f"libpipewire-{libpipewire_api_version}"
+        )
         pkgconfig_variables = {
             # todo When Conan V1 doesn't need to be supported, use the ${libdir} variable.
             # 'moduledir': f"${{libdir}}/pipewire-{libpipewire_api_version}",
-            'moduledir': f"${{prefix}}/lib/pipewire-{libpipewire_api_version}",
+            "moduledir": f"${{prefix}}/lib/pipewire-{libpipewire_api_version}",
         }
         self.cpp_info.components["libpipewire"].set_property(
             "pkg_config_custom_content",
-            "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))
+            "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items()),
+        )
         self.cpp_info.components["libpipewire"].requires = ["libspa"]
         if self.options.flatpak:
             self.cpp_info.components["libpipewire"].requires.append("glib::glib-2.0")
         if self.options.gsettings:
             self.cpp_info.components["libpipewire"].requires.append("glib::gio-2.0")
         if self.options.raop:
-            self.cpp_info.components["libpipewire"].requires.extend(["openssl::crypto", "openssl::ssl"])
+            self.cpp_info.components["libpipewire"].requires.extend(
+                ["openssl::crypto", "openssl::ssl"]
+            )
         if self.options.with_avahi:
             self.cpp_info.components["libpipewire"].requires.append("avahi::client")
         if self.options.with_dbus:
@@ -278,31 +364,42 @@ class PipeWireConan(ConanFile):
         if self.options.with_libalsa:
             self.cpp_info.components["libpipewire"].requires.append("libalsa::libalsa")
         if self.options.with_libsndfile:
-            self.cpp_info.components["libpipewire"].requires.append("libsndfile::libsndfile")
+            self.cpp_info.components["libpipewire"].requires.append(
+                "libsndfile::libsndfile"
+            )
         if self.options.with_opus:
             self.cpp_info.components["libpipewire"].requires.append("opus::opus")
         if self.options.with_pulseaudio:
             self.cpp_info.components["libpipewire"].requires.append("pulseaudio::pulse")
         if self.options.with_selinux:
-            self.cpp_info.components["libpipewire"].requires.append("libselinux::selinux")
+            self.cpp_info.components["libpipewire"].requires.append(
+                "libselinux::selinux"
+            )
         if self.options.with_x11:
             self.cpp_info.components["libpipewire"].requires.append("xorg::x11-xcb")
         if self.options.with_xfixes:
             self.cpp_info.components["libpipewire"].requires.append("xorg::xfixes")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["libpipewire"].system_libs.extend(["m", "pthread", "dl"])
+            self.cpp_info.components["libpipewire"].system_libs.extend(
+                ["m", "pthread", "dl"]
+            )
 
-        self.cpp_info.components["libspa"].set_property("pkg_config_name", f"libspa-{libspa_api_version}")
-        self.cpp_info.components["libspa"].includedirs = [os.path.join(self.package_folder, "include", f"spa-{libspa_api_version}")]
+        self.cpp_info.components["libspa"].set_property(
+            "pkg_config_name", f"libspa-{libspa_api_version}"
+        )
+        self.cpp_info.components["libspa"].includedirs = [
+            os.path.join(self.package_folder, "include", f"spa-{libspa_api_version}")
+        ]
         self.cpp_info.components["libspa"].defines = ["_REENTRANT"]
         pkgconfig_variables = {
             # todo When Conan V1 doesn't need to be supported, use the ${libdir} variable.
             # 'plugindir': "${{libdir}}/spa-{libspa_api_version}",
-            'plugindir': "${{prefix}}/lib/spa-{libspa_api_version}",
+            "plugindir": "${{prefix}}/lib/spa-{libspa_api_version}",
         }
         self.cpp_info.components["libpipewire"].set_property(
             "pkg_config_custom_content",
-            "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))
+            "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items()),
+        )
         if self.options.with_libalsa:
             self.cpp_info.components["libspa"].requires.append("libalsa::libalsa")
         if self.options.with_dbus:
@@ -314,13 +411,22 @@ class PipeWireConan(ConanFile):
         if self.options.get_safe("with_libudev", True):
             self.cpp_info.components["libspa"].requires.append("libudev::libudev")
         if self.options.with_vulkan:
-            self.cpp_info.components["libspa"].requires.extend(["libdrm::libdrm_libdrm", "linux-headers-generic::linux-headers-generic", "vulkan-headers::vulkan-headers", "vulkan-loader::vulkan-loader"])
+            self.cpp_info.components["libspa"].requires.extend(
+                [
+                    "libdrm::libdrm_libdrm",
+                    "linux-headers-generic::linux-headers-generic",
+                    "vulkan-headers::vulkan-headers",
+                    "vulkan-loader::vulkan-loader",
+                ]
+            )
 
         self.cpp_info.components["tools"].requires = ["libpipewire"]
 
         # pw-cat
         if self.options.with_ffmpeg:
-            self.cpp_info.components["tools"].requires.extend(["ffmpeg::avcodec", "ffmpeg::avformat", "ffmpeg::avutil"])
+            self.cpp_info.components["tools"].requires.extend(
+                ["ffmpeg::avcodec", "ffmpeg::avformat", "ffmpeg::avutil"]
+            )
         if self.options.with_libsndfile:
             self.cpp_info.components["tools"].requires.append("libsndfile::libsndfile")
 
