@@ -15,6 +15,12 @@ if get_option('egl').enabled()
     dependencies += egl_dep
 endif
 
+if get_option('osmesa').enabled()
+    defines += '-DMESA_TEST_PACKAGE_HAS_OSMESA'
+    osmesa_dep = dependency('osmesa')
+    dependencies += osmesa_dep
+endif
+
 if host_machine.system() == 'windows'
     opengl32_dep = dependency('mesa-opengl32')
     dependencies += opengl32_dep

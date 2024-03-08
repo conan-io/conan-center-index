@@ -26,6 +26,7 @@ class TestPackageConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["gbm"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("gbm") else "disabled"
         tc.project_options["egl"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("egl") else "disabled"
+        tc.project_options["osmesa"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("osmesa") else "disabled"
         tc.generate()
 
     def build(self):

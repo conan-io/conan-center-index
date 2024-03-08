@@ -1,3 +1,6 @@
+import os
+import re
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
@@ -8,17 +11,18 @@ from conan.tools.files import (
     apply_conandata_patches,
     copy,
     export_conandata_patches,
+    load,
     get,
     replace_in_file,
     rm,
     rmdir,
+    save,
 )
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-import os
 
 
 required_conan_version = ">=1.53.0"
@@ -150,7 +154,7 @@ class MesaConan(ConanFile):
         "gbm": [True, False],
         "gles1": [True, False],
         "gles2": [True, False],
-        "glvnd_vendor_name": ["ANY"],
+        "glvnd_vendor_name": ["mesa"],
         "glx": [False, "dri", "xlib"],
         "glx_direct": [True, False],
         "imagination_srv": [True, False],
@@ -821,7 +825,7 @@ class MesaConan(ConanFile):
         # self.requires("libgettext/0.22")
 
         if self._with_libdrm:
-            self.requires("libdrm/2.4.120")
+            self.requires("libdrm/2.4.119")
 
         if self._requires_expat:
             self.requires("expat/2.6.0")
@@ -1328,6 +1332,19 @@ class MesaConan(ConanFile):
         meson.configure()
         meson.build()
 
+    def _extract_pkg_config_version(self, file):
+        pkg_config = load(self, os.path.join(self.package_folder, "lib", "pkgconfig", file))
+        return next(re.finditer("^Version: ([^\n$]+)[$\n]", pkg_config, flags=re.MULTILINE)).group(1)
+
+    def _pkg_config_version_file(self, name):
+        return os.path.join(self.package_folder, "res", f"{self.name}-{name}-version.txt")
+
+    def _save_pkg_config_version(self, name):
+        save(self, self._pkg_config_version_file(name), self._extract_pkg_config_version(f"{name}.pc"))
+
+    def _load_pkg_config_version(self, name):
+        load(self, self._pkg_config_version_file(name)).strip()
+
     def package(self):
         copy(
             self,
@@ -1337,6 +1354,11 @@ class MesaConan(ConanFile):
         )
         meson = Meson(self)
         meson.install()
+
+        if self.options.get_safe("gallium_driver_d3d12"):
+            self._save_pkg_config_version("d3d")
+        if self.options.get_safe("osmesa"):
+            self._save_pkg_config_version("osmesa")
 
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -1350,15 +1372,22 @@ class MesaConan(ConanFile):
             self.cpp_info.components["d3d"].set_property("pkg_config_name", "d3d")
             if self._with_libdrm:
                 self.cpp_info.components["d3d"].requires.append("libdrm::libdrm")
-            # todo define pkg-config custom content for the `moduledir` variable
-            # todo Extract this in the package method from the pkg-config file.
-            # self.cpp_info.components["d3d"].set_property("component_version", "1.0.0")
+            pkgconfig_variables = {
+                # todo Use `libdir` when Conan V1 no longer needs to be supported.
+                # 'moduledir': '${libdir}/d3d',
+                'moduledir': '${prefix}/lib/d3d',
+            }
+            self.cpp_info.components["d3d"].set_property(
+                "pkg_config_custom_content",
+                "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items()))
+            self.cpp_info.components["d3d"].set_property("component_version", str(self._load_pkg_config_version("d3d")))
         self.cpp_info.components["dri"].set_property("pkg_config_name", "dri")
         if self._with_libdrm:
             self.cpp_info.components["dri"].requires.append("libdrm::libdrm")
         self.cpp_info.components["dri"].set_property("component_version", self.version)
         dri_pkg_config_variables = {
-            # Can't use libdir here as it is libdir1 when using the PkgConfigDeps generator.
+            # todo Use `libdir` when Conan V1 no longer needs to be supported.
+            # "dridriverdir": "${libdir}/dri",
             "dridriverdir": "${prefix}/lib/dri",
         }
         self.cpp_info.components["dri"].set_property(
@@ -1391,7 +1420,8 @@ class MesaConan(ConanFile):
                 "component_version", self.version
             )
             gbm_pkg_config_variables = {
-                # Can't use libdir here as it is libdir1 when using the PkgConfigDeps generator.
+                # todo Use `libdir` when Conan V1 no longer needs to be supported.
+                # "gbmbackendspath": "${libdir}/gbm",
                 "gbmbackendspath": "${prefix}/lib/gbm",
             }
             self.cpp_info.components["gbm"].set_property(
@@ -1401,7 +1431,12 @@ class MesaConan(ConanFile):
                 ),
             )
         if self.options.get_safe("glx"):
-            self.cpp_info.components["glx"].libs = ["GLX_mesa"]
+            glx_lib_name = (
+                f"GLX_{self.options.glvnd_vendor_name}"
+                if self.options.get_safe("with_libglvnd")
+                else "GLX"
+            )
+            self.cpp_info.components["glx"].libs = [glx_lib_name]
             if self.options.get_safe("with_libglvnd"):
                 self.cpp_info.components["glx"].requires.append("libglvnd::glx")
             gl_lib_name = (
@@ -1411,7 +1446,6 @@ class MesaConan(ConanFile):
             )
             self.cpp_info.components["gl"].libs = [gl_lib_name]
             if self.options.get_safe("with_xorg"):
-                # todo Refine these more.
                 self.cpp_info.components["gl"].requires.extend(
                     [
                         "xorg::x11",
@@ -1440,8 +1474,7 @@ class MesaConan(ConanFile):
         if self.options.get_safe("osmesa"):
             self.cpp_info.components["osmesa"].libs = ["OSMesa"]
             self.cpp_info.components["osmesa"].set_property("pkg_config_name", "osmesa")
-            # todo Extract this in the package method from the pkg-config file.
-            # self.cpp_info.components["osmesa"].set_property("component_version", "8.0.0")
+            self.cpp_info.components["osmesa"].set_property("component_version", str(self._load_pkg_config_version("osmesa")))
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.extend(["m", "pthread"])
             if self.options.get_safe("with_libselinux"):
