@@ -30,6 +30,8 @@ class FixedContainersConan(ConanFile):
             "clang": "12",
             "Visual Studio": "16",
             "msvc": "192",
+            # apple-clang has support std::lexicographical_compare_three_way since 15.
+            "apple-clang": "15",
         }
 
     def layout(self):
@@ -39,8 +41,6 @@ class FixedContainersConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler == "apple-clang":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support apple-clang due to partial C++20 support.")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -64,4 +64,3 @@ class FixedContainersConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
