@@ -257,6 +257,10 @@ class ITKConan(ConanFile):
     @property
     def _cmake_module_dir(self):
         return os.path.join("lib", "cmake", self._itk_subdir)
+    
+    @property
+    def _module_variables_file_rel_path(self):
+        return os.path.join(self._cmake_module_dir, f"conan-official-{self.name}-variables.cmake")
 
     @property
     def _module_file_rel_path(self):
@@ -451,6 +455,16 @@ class ITKConan(ConanFile):
             },
             "ITKVideoCore": {"requires": ["ITKCommon"]},
         }
+    
+    def _create_cmake_module_variables(self):
+        itk_version = Version(self.version)
+        lib_suffix = f"{itk_version.major}.{itk_version.minor}"
+
+        content = textwrap.dedent("""\
+                                  set(ITK_CMAKE_DIR " ${itk_LIB_DIRS_RELEASE}/cmake/ITK-%(version)s")
+                                  """ % {"version":lib_suffix})
+        
+        save(self, os.path.join(self.package_folder, self._module_variables_file_rel_path), content)
 
     def _create_cmake_module_alias_targets(self):
         targets = {target:f"ITK::{target}" for target in self._itk_components.keys()}
@@ -472,15 +486,24 @@ class ITKConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, self._cmake_module_dir, "Modules"))
-        # Do not remove UseITK.cmake and *.h.in files
+
+        keep_list =["UseITK.cmake", "ITKFactoryRegistration.cmake", "ITKInitializeCXXStandard.cmake"]
+        # Do not remove UseITK.cmake, ITKFactoryRegistration.cmake, ITKInitializeCXXStandard.cmake  and *.h.in files
         for cmake_file in glob.glob(os.path.join(self.package_folder, self._cmake_module_dir, "*.cmake")):
-            if os.path.basename(cmake_file) != "UseITK.cmake":
+            file_name = os.path.basename(cmake_file)
+            if file_name not in keep_list:
                 os.remove(cmake_file)
+
+        self._create_cmake_module_variables()
         self._create_cmake_module_alias_targets()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "ITK")
-        self.cpp_info.set_property("cmake_build_modules", [os.path.join(self._cmake_module_dir, "UseITK.cmake")])
+        self.cpp_info.set_property("cmake_build_modules", 
+                                   [os.path.join(self._cmake_module_dir, f"conan-official-{self.name}-variables.cmake"),
+                                    os.path.join(self._cmake_module_dir, "ITKInitializeCXXStandard.cmake"),
+                                    os.path.join(self._cmake_module_dir, "ITKFactoryRegistration.cmake"),
+                                    os.path.join(self._cmake_module_dir, "UseITK.cmake")])
 
         itk_version = Version(self.version)
         lib_suffix = f"-{itk_version.major}.{itk_version.minor}"
