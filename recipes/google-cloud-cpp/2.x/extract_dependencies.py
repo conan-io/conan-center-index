@@ -39,7 +39,6 @@ _PROTO_DEPS_REMOVED_TARGETS = {
 # Bazel and contain a few targets that have incorrect names for CMake.
 #
 # This list maps onto google_cloud_cpp_load_protodeps()'s `targets_substitutions`.
-
 _PROTO_DEPS_REPLACED_TARGETS = {
     "grafeas_v1_grafeas_protos": "grafeas_protos",
     "iam_v2_policy_protos": "iam_v2_protos",

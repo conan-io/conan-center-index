@@ -224,6 +224,12 @@ class GoogleCloudCppConan(ConanFile):
         if self.settings.os == "Android":
             result.remove('accesscontextmanager_protos')
             result.remove('talent_protos')
+        if Version(self.version) <= '2.19.0':
+            # Handling of these proto libraries was simplified in the 2.22.0
+            # `conanfile.py`. We prefer not to regenerate the old
+            # `components_*.py` files, so we manually skip the protos in here.
+            result.remove('logging_type_type_protos')
+            result.remove('devtools_source_v1_source_context_protos')
         return result
 
     def package(self):
