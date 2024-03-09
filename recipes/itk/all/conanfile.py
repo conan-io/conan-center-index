@@ -511,7 +511,7 @@ class ITKConan(ConanFile):
         build_modules.append(os.path.join(self._cmake_module_dir, "UseITK.cmake"))
 
         self.cpp_info.set_property("cmake_file_name", "ITK")
-        self.cpp_info.set_property("cmake_build_modules", build_modules);
+        self.cpp_info.set_property("cmake_build_modules", build_modules)
 
         for name, values in self._itk_components.items():
             is_header_only = values.get("header_only", False)
