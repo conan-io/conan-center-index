@@ -21,6 +21,9 @@ patches:
     - patch_file: patches/13x/02-missing-includes.patch
       patch_description: fix missing header files
       patch_type: portability
+    - patch_file: patches/13x/03-split-dwarf.patch
+      patch_description: enable split dwarf option from 14.x
+      patch_type: backport
   "12.0.0":
     - patch_file: patches/12x/00-cmake-target-props.patch
       patch_description: fix references to third party libs to match conan variables and targets
@@ -32,6 +35,9 @@ patches:
     - patch_file: patches/12x/02-missing-includes.patch
       patch_description: fix missing header files
       patch_type: portability
+    - patch_file: patches/12x/03-split-dwarf.patch
+      patch_description: enable split dwarf option from 14.x
+      patch_type: backport
   "11.1.0":
     - patch_file: patches/11x/00-cmake-find-package-zlib.patch
       patch_description: find zlib using conan rather than assuming a system library
@@ -43,3 +49,6 @@ patches:
     - patch_file: patches/11x/02-missing-includes.patch
       patch_description: fix missing header files
       patch_type: portability
+    - patch_file: patches/11x/03-split-dwarf.patch
+      patch_description: enable split dwarf option from 14.x
+      patch_type: backport

@@ -18,72 +18,72 @@ required_conan_version = ">=1.62.0"
 
 
 class LLVMCoreConan(ConanFile):
-    name = 'llvm-core'
+    name = "llvm-core"
     description = (
-        'A toolkit for the construction of highly optimized compilers,'
-        'optimizers, and runtime environments.'
+        "A toolkit for the construction of highly optimized compilers,"
+        "optimizers, and runtime environments."
     )
-    license = 'Apache-2.0 WITH LLVM-exception'
-    topics = ('llvm', 'compiler')
-    homepage = 'https://llvm.org'
-    url = 'https://github.com/conan-io/conan-center-index'
+    license = "Apache-2.0 WITH LLVM-exception"
+    topics = ("llvm", "compiler")
+    homepage = "https://llvm.org"
+    url = "https://github.com/conan-io/conan-center-index"
 
-    settings = 'os', 'arch', 'compiler', 'build_type'
+    settings = "os", "arch", "compiler", "build_type"
     options = {
-        'shared': [True, False],
-        'fPIC': [True, False],
-        'components': ['ANY'],
-        'targets': ['ANY'],
-        'exceptions': [True, False],
-        'rtti': [True, False],
-        'threads': [True, False],
-        'lto': ['On', 'Off', 'Full', 'Thin'],
-        'static_stdlib': [True, False],
-        'unwind_tables': [True, False],
-        'expensive_checks': [True, False],
-        'use_perf': [True, False],
-        'use_sanitizer': [
-            'Address',
-            'Memory',
-            'MemoryWithOrigins',
-            'Undefined',
-            'Thread',
-            'DataFlow',
-            'Address;Undefined',
-            'None'
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "components": ["ANY"],
+        "targets": ["ANY"],
+        "exceptions": [True, False],
+        "rtti": [True, False],
+        "threads": [True, False],
+        "lto": ["On", "Off", "Full", "Thin"],
+        "static_stdlib": [True, False],
+        "unwind_tables": [True, False],
+        "expensive_checks": [True, False],
+        "use_perf": [True, False],
+        "use_sanitizer": [
+            "Address",
+            "Memory",
+            "MemoryWithOrigins",
+            "Undefined",
+            "Thread",
+            "DataFlow",
+            "Address;Undefined",
+            "None"
         ],
-        'with_ffi': [True, False],
-        'with_terminfo': [True, False],
-        'with_zlib': [True, False],
-        'with_xml2': [True, False],
-        'with_z3': [True, False],
-        'use_llvm_cmake_files': [True, False],
-        'ram_per_compile_job': ['ANY'],
-        'ram_per_link_job': ['ANY'],
+        "with_ffi": [True, False],
+        "with_terminfo": [True, False],
+        "with_zlib": [True, False],
+        "with_xml2": [True, False],
+        "with_z3": [True, False],
+        "use_llvm_cmake_files": [True, False],
+        "ram_per_compile_job": ["ANY"],
+        "ram_per_link_job": ["ANY"],
     }
     default_options = {
-        'shared': False,
-        'fPIC': True,
-        'components': 'all',
-        'targets': 'all',
-        'exceptions': True,
-        'rtti': True,
-        'threads': True,
-        'lto': 'Off',
-        'static_stdlib': False,
-        'unwind_tables': True,
-        'expensive_checks': False,
-        'use_perf': False,
-        'use_sanitizer': 'None',
-        'with_ffi': False,
-        'with_terminfo': False, # differs from LLVM default
-        'with_xml2': True,
-        'with_z3': True,
-        'with_zlib': True,
-        'use_llvm_cmake_files': False, # no longer used but retained for backwards compatibility
+        "shared": False,
+        "fPIC": True,
+        "components": "all",
+        "targets": "all",
+        "exceptions": True,
+        "rtti": True,
+        "threads": True,
+        "lto": "Off",
+        "static_stdlib": False,
+        "unwind_tables": True,
+        "expensive_checks": False,
+        "use_perf": False,
+        "use_sanitizer": "None",
+        "with_ffi": False,
+        "with_terminfo": False, # differs from LLVM default
+        "with_xml2": True,
+        "with_z3": True,
+        "with_zlib": True,
+        "use_llvm_cmake_files": False, # no longer used but retained for backwards compatibility
         # creating job pools with current free memory
-        'ram_per_compile_job': '2048',
-        'ram_per_link_job': '16384'
+        "ram_per_compile_job": "2048",
+        "ram_per_link_job": "16384"
     }
 
     @property
@@ -116,13 +116,13 @@ class LLVMCoreConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ffi:
-            self.requires('libffi/3.4.4')
+            self.requires("libffi/3.4.4")
         if self.options.with_zlib:
-            self.requires('zlib/1.3.1')
+            self.requires("zlib/1.3.1")
         if self.options.with_xml2:
-            self.requires('libxml2/2.12.4')
+            self.requires("libxml2/2.12.4")
         if self.options.with_z3:
-            self.requires('z3/4.12.4')
+            self.requires("z3/4.12.4")
 
     def build_requirements(self):
         self.tool_requires("ninja/1.11.1")
@@ -138,10 +138,10 @@ class LLVMCoreConan(ConanFile):
 
         if self._is_windows:
             if self.options.shared:  # Shared builds disabled just due to the CI
-                raise ConanInvalidConfiguration('Shared builds not currently supported on Windows')
+                raise ConanInvalidConfiguration("Shared builds not currently supported on Windows")
 
         if self.options.exceptions and not self.options.rtti:
-            raise ConanInvalidConfiguration('Cannot enable exceptions without rtti support')
+            raise ConanInvalidConfiguration("Cannot enable exceptions without rtti support")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -151,57 +151,67 @@ class LLVMCoreConan(ConanFile):
         # https://releases.llvm.org/12.0.0/docs/CMake.html
         # https://releases.llvm.org/13.0.0/docs/CMake.html
         cmake_definitions = {
-            'LLVM_TARGETS_TO_BUILD': self.options.targets,
+            "LLVM_TARGETS_TO_BUILD": self.options.targets,
             # See comment below on LLVM shared library builds
-            'LLVM_BUILD_LLVM_DYLIB': self.options.shared,
-            'LLVM_LINK_LLVM_DYLIB': self.options.shared,
-            'LLVM_DYLIB_COMPONENTS': self.options.components,
-            'LLVM_ABI_BREAKING_CHECKS': 'WITH_ASSERTS',
-            'LLVM_INCLUDE_TOOLS': True,
-            'LLVM_INCLUDE_EXAMPLES': False,
-            'LLVM_INCLUDE_TESTS': False,
-            'LLVM_ENABLE_IDE': False,
-            'LLVM_ENABLE_EH': self.options.exceptions,
-            'LLVM_ENABLE_RTTI': self.options.rtti,
-            'LLVM_ENABLE_THREADS': self.options.threads,
-            'LLVM_ENABLE_LTO': self.options.lto,
-            'LLVM_STATIC_LINK_CXX_STDLIB': self.options.static_stdlib,
-            'LLVM_ENABLE_UNWIND_TABLES': self.options.unwind_tables,
-            'LLVM_ENABLE_EXPENSIVE_CHECKS': self.options.expensive_checks,
-            'LLVM_ENABLE_ASSERTIONS': self.settings.build_type,
-            'LLVM_USE_PERF': self.options.use_perf,
-            'LLVM_ENABLE_Z3_SOLVER': self.options.with_z3,
-            'LLVM_ENABLE_FFI': self.options.with_ffi,
-            'LLVM_ENABLE_ZLIB': "FORCE_ON" if self.options.with_zlib else False,
-            'LLVM_ENABLE_LIBXML2': "FORCE_ON" if self.options.with_xml2 else False,
-            'LLVM_ENABLE_TERMINFO': self.options.with_terminfo,
-            'LLVM_RAM_PER_COMPILE_JOB': self.options.ram_per_compile_job,
-            'LLVM_RAM_PER_LINK_JOB': self.options.ram_per_link_job
+            "LLVM_BUILD_LLVM_DYLIB": self.options.shared,
+            "LLVM_LINK_LLVM_DYLIB": self.options.shared,
+            "LLVM_DYLIB_COMPONENTS": self.options.components,
+            "LLVM_ABI_BREAKING_CHECKS": "WITH_ASSERTS",
+            "LLVM_INCLUDE_TOOLS": True,
+            "LLVM_INCLUDE_EXAMPLES": False,
+            "LLVM_INCLUDE_TESTS": False,
+            "LLVM_ENABLE_IDE": False,
+            "LLVM_ENABLE_EH": self.options.exceptions,
+            "LLVM_ENABLE_RTTI": self.options.rtti,
+            "LLVM_ENABLE_THREADS": self.options.threads,
+            "LLVM_ENABLE_LTO": self.options.lto,
+            "LLVM_STATIC_LINK_CXX_STDLIB": self.options.static_stdlib,
+            "LLVM_ENABLE_UNWIND_TABLES": self.options.unwind_tables,
+            "LLVM_ENABLE_EXPENSIVE_CHECKS": self.options.expensive_checks,
+            "LLVM_ENABLE_ASSERTIONS": self.settings.build_type,
+            "LLVM_USE_PERF": self.options.use_perf,
+            "LLVM_ENABLE_Z3_SOLVER": self.options.with_z3,
+            "LLVM_ENABLE_FFI": self.options.with_ffi,
+            "LLVM_ENABLE_ZLIB": "FORCE_ON" if self.options.with_zlib else False,
+            "LLVM_ENABLE_LIBXML2": "FORCE_ON" if self.options.with_xml2 else False,
+            "LLVM_ENABLE_TERMINFO": self.options.with_terminfo,
         }
+        if self.options.ram_per_compile_job != "auto":
+            cmake_definitions["LLVM_RAM_PER_COMPILE_JOB"] = self.options.ram_per_compile_job
+        if self.options.ram_per_link_job != "auto":
+            cmake_definitions["LLVM_RAM_PER_LINK_JOB"] = self.options.ram_per_link_job
+
+        is_platform_ELF_based = self.settings.os in [
+            "Linux", "Android", "FreeBSD", "SunOS", "AIX", "Neutrino", "VxWorks"
+        ]
+        if is_platform_ELF_based:
+            self.output.info(f"ELF Platform Detected, optimizing memory usage during debug build linking.")
+            cmake_definitions["LLVM_USE_SPLIT_DWARF"] = True
+
         if is_msvc(self):
             build_type = str(self.settings.build_type).upper()
-            cmake_definitions['LLVM_USE_CRT_{}'.format(build_type)] = self.settings.compiler.runtime
+            cmake_definitions["LLVM_USE_CRT_{}".format(build_type)] = self.settings.compiler.runtime
 
         if not self.options.shared:
             cmake_definitions.update({
-                'DISABLE_LLVM_LINK_LLVM_DYLIB': True,
-                'LLVM_ENABLE_PIC': self.options.get_safe('fPIC', default=False)
+                "DISABLE_LLVM_LINK_LLVM_DYLIB": True,
+                "LLVM_ENABLE_PIC": self.options.get_safe("fPIC", default=False)
             })
 
-        if self.options.use_sanitizer == 'None':
-            cmake_definitions['LLVM_USE_SANITIZER'] = ''
+        if self.options.use_sanitizer == "None":
+            cmake_definitions["LLVM_USE_SANITIZER"] = ""
         else:
-            cmake_definitions['LLVM_USE_SANITIZER'] = self.options.use_sanitizer
+            cmake_definitions["LLVM_USE_SANITIZER"] = self.options.use_sanitizer
 
         tc.variables.update(cmake_definitions)
         tc.cache_variables.update({
             # Enables LLVM to find conan libraries during try_compile
-            'CMAKE_TRY_COMPILE_CONFIGURATION': str(self.settings.build_type),
+            "CMAKE_TRY_COMPILE_CONFIGURATION": str(self.settings.build_type),
             # LLVM has two separate concepts of a "shared library build".
-            # 'BUILD_SHARED_LIBS' builds shared versions of all of the static components
-            # 'LLVM_BUILD_LLVM_DYLIB' builds a single shared library containing all components.
-            # It is likely the latter that the user expects by a 'shared library' build.
-            'BUILD_SHARED_LIBS': False,
+            # "BUILD_SHARED_LIBS" builds shared versions of all of the static components
+            # "LLVM_BUILD_LLVM_DYLIB" builds a single shared library containing all components.
+            # It is likely the latter that the user expects by a "shared library" build.
+            "BUILD_SHARED_LIBS": False,
         })
         tc.generate()
 
@@ -223,7 +233,7 @@ class LLVMCoreConan(ConanFile):
 
     @property
     def _is_windows(self):
-        return self.settings.os == 'Windows'
+        return self.settings.os == "Windows"
 
     def _llvm_components(self):
         cmake_config = load(self, Path(self.package_folder) / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake")
@@ -278,13 +288,13 @@ class LLVMCoreConan(ConanFile):
         component_dict = {
             component: lib_name for component, lib_name in self._llvm_components()
         }
-        with open(self._components_data_file, 'w', encoding='utf-8') as fp:
+        with open(self._components_data_file, "w", encoding="utf-8") as fp:
             json.dump(component_dict, fp)
 
         return component_dict
 
     def _read_components(self) -> dict:
-        with open(self._components_data_file, encoding='utf-8') as fp:
+        with open(self._components_data_file, encoding="utf-8") as fp:
             return json.load(fp)
 
     def package(self):

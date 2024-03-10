@@ -1,14 +1,9 @@
 diff --git a/cmake/modules/HandleLLVMOptions.cmake b/cmake/modules/HandleLLVMOptions.cmake
-index 5d4d692a70a..94717899a02 100644
+index 5d4d692a70a..5776a85b747 100644
 --- a/cmake/modules/HandleLLVMOptions.cmake
 +++ b/cmake/modules/HandleLLVMOptions.cmake
-@@ -25,8 +25,24 @@ string(TOUPPER "${LLVM_ENABLE_LTO}" uppercase_LLVM_ENABLE_LTO)
- 
- # Ninja Job Pool support
+@@ -27,6 +27,19 @@ string(TOUPPER "${LLVM_ENABLE_LTO}" uppercase_LLVM_ENABLE_LTO)
  # The following only works with the Ninja generator in CMake >= 3.0.
-+if (NOT LLVM_RAM_PER_COMPILE_JOB)
-+  set(LLVM_RAM_PER_COMPILE_JOB "2000")
-+endif()
  set(LLVM_PARALLEL_COMPILE_JOBS "" CACHE STRING
    "Define the maximum number of concurrent compilation jobs (Ninja only).")
 +cmake_host_system_information(RESULT AVAILABLE_PHYSICAL_MEMORY QUERY AVAILABLE_PHYSICAL_MEMORY)
@@ -27,13 +22,8 @@ index 5d4d692a70a..94717899a02 100644
  if(LLVM_PARALLEL_COMPILE_JOBS)
    if(NOT CMAKE_GENERATOR STREQUAL "Ninja")
      message(WARNING "Job pooling is only available with Ninja generators.")
-@@ -36,8 +52,22 @@ if(LLVM_PARALLEL_COMPILE_JOBS)
-   endif()
- endif()
+@@ -38,6 +51,17 @@ endif()
  
-+if (NOT LLVM_RAM_PER_LINK_JOB)
-+  set(LLVM_RAM_PER_LINK_JOB "14000")
-+endif()
  set(LLVM_PARALLEL_LINK_JOBS "" CACHE STRING
    "Define the maximum number of concurrent link jobs (Ninja only).")
 +if(LLVM_RAM_PER_LINK_JOB)
