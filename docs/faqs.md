@@ -45,7 +45,8 @@ This section gathers the most common questions from the community related to pac
   * [Can we add package which are parts of bigger projects like Boost?](#can-we-add-package-which-are-parts-of-bigger-projects-like-boost)
     * [Can I add my project which I will submit to Boost?](#can-i-add-my-project-which-i-will-submit-to-boost)
   * [Can I add options that do not affect `package_id` or the package contents](#can-i-add-options-that-do-not-affect-package_id-or-the-package-contents)
-  * [Can I use full_package_mode for a requirement in my recipe?](#can-i-use-full_package_mode-for-a-requirement-in-my-recipe)<!-- endToc -->
+  * [Can I use full_package_mode for a requirement in my recipe?](#can-i-use-full_package_mode-for-a-requirement-in-my-recipe)
+  * [How to detect if is running in ConanCenterIndex CI service?](#how-to-detect-if-is-running-in-conancenterindex-ci-service)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
@@ -483,3 +484,15 @@ To have more context about it, please, visit issues #11684 and #11022
 In summary, we do not recommend `full_package_mode` or any other custom package id mode for requirements on CCI, it will break other PRs soon or later.
 Instead, prefer using `shared=True` by default, when needed.
 Also, when having a similar situation, do not hesitate in opening an issue explaining your case, and ask for support from the community.
+
+## How to detect if is running in ConanCenterIndex CI service?
+
+The environment variable `CONAN_CENTER_BUILD_SERVICE` is set to `1` when running in the ConanCenterIndex CI service.
+This can be used to detect if the recipe is being built in the CI service.
+
+```python
+
+def configure(self):
+    if os.getenv('CONAN_CENTER_BUILD_SERVICE') is not None:
+        self.output.info("Running in ConanCenterIndex CI service")
+```
