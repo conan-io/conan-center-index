@@ -82,24 +82,24 @@ class OnnxRuntimeConan(ConanFile):
         elif Version(self.version) >= "1.15":
             self.requires("onnx/1.14.1")
         else:
-            self.requires("onnx/1.13.1")
+            self.requires("onnx/1.15.0")
         self.requires("abseil/20230802.1")
         self.requires("protobuf/3.21.12")
         self.requires("date/3.0.1")
         self.requires("re2/20231101")
         self.requires("flatbuffers/1.12.0")  # v1.* is required, newer versions are not compatible
-        self.requires("boost/1.83.0", headers=True, libs=False)  # for mp11, header only, no need for libraries
-        self.requires("safeint/3.24")
+        self.requires("boost/1.84.0", headers=True, libs=False)  # for mp11, header only, no need for libraries
+        self.requires("safeint/3.0.28")
         self.requires("nlohmann_json/3.11.3")
         self.requires("eigen/3.4.0")
         self.requires("ms-gsl/4.0.0")
-        self.requires("cpuinfo/cci.20220618") # Newer versions are not compatible
+        self.requires("cpuinfo/cci.20231129") # Newer versions are not compatible
         if self.settings.os != "Windows":
             self.requires("nsync/1.26.0")
         else:
-            self.requires("wil/1.0.231216.1")
+            self.requires("wil/1.0.240122.1")
         if self.options.with_xnnpack:
-            self.requires("xnnpack/cci.20230715")
+            self.requires("xnnpack/cci.20231026")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
