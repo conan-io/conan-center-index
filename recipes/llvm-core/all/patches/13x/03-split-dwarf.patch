@@ -1,8 +1,8 @@
 diff --git a/cmake/modules/HandleLLVMOptions.cmake b/cmake/modules/HandleLLVMOptions.cmake
-index 0c3419390c2..29dabe858a3 100644
+index eb234109e88..9a11f0efa49 100644
 --- a/cmake/modules/HandleLLVMOptions.cmake
 +++ b/cmake/modules/HandleLLVMOptions.cmake
-@@ -57,6 +57,29 @@ elseif(LLVM_PARALLEL_LINK_JOBS)
+@@ -81,6 +81,29 @@ elseif(LLVM_PARALLEL_LINK_JOBS)
    message(WARNING "Job pooling is only available with Ninja generators.")
  endif()
  
