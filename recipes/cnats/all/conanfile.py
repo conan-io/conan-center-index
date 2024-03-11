@@ -1,10 +1,11 @@
 from conan import ConanFile
 from conan.tools.files import get, copy, rename, mkdir, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class PackageConan(ConanFile):
@@ -64,7 +65,7 @@ class PackageConan(ConanFile):
         tc.variables["NATS_BUILD_LIB_STATIC"] = not self.options.shared
         tc.variables["NATS_BUILD_LIB_SHARED"] = self.options.shared
         if self.options.with_tls:
-            tc.variables["NATS_BUILD_TLS_USE_OPENSSL_1_1_API"] = self.dependencies["openssl"].ref.version.major > 1
+            tc.variables["NATS_BUILD_TLS_USE_OPENSSL_1_1_API"] = Version(self.dependencies["openssl"].ref.version) >= "1.1"
         tc.variables["NATS_BUILD_STREAMING"] = self.options.enable_streaming
         tc.generate()
         tc = CMakeDeps(self)
