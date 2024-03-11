@@ -2,7 +2,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd, can_run
+from conan.tools.build import check_min_cppstd, can_run, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, get, rmdir, save, copy, export_conandata_patches, load
@@ -146,6 +146,13 @@ class LLVMCoreConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    @property
+    def _gnu_target_triple(self):
+        if self.settings.os == "Macos":
+            return f"{self.settings.arch}-apple-darwin"
+
+        return f"{self.settings.arch}-pc-{str(self.settings.os).lower()}"
+
     def generate(self):
         tc = CMakeToolchain(self, generator="Ninja")
         # https://releases.llvm.org/12.0.0/docs/CMake.html
@@ -180,6 +187,9 @@ class LLVMCoreConan(ConanFile):
             cmake_definitions["LLVM_RAM_PER_COMPILE_JOB"] = self.options.ram_per_compile_job
         if self.options.ram_per_link_job != "auto":
             cmake_definitions["LLVM_RAM_PER_LINK_JOB"] = self.options.ram_per_link_job
+
+        if cross_building(self):
+            cmake_definitions["LLVM_HOST_TRIPLE"] = self._gnu_target_triple
 
         is_platform_ELF_based = self.settings.os in [
             "Linux", "Android", "FreeBSD", "SunOS", "AIX", "Neutrino", "VxWorks"
