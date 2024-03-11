@@ -1,7 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 6b3e5b3..80a8025 100644
+index 6b3e5b3..2536fc6 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -134,7 +134,7 @@ else (USE_EXT_GD)
+ 	endif (ENABLE_ICONV)
+ 
+ 	IF (ENABLE_WEBP)
+-		FIND_PACKAGE(WEBP REQUIRED)
++		FIND_PACKAGE(WebP REQUIRED)
+ 	ENDIF (ENABLE_WEBP)
+ 
+ 	IF (ENABLE_HEIF)
 @@ -169,7 +169,7 @@ else (USE_EXT_GD)
  	endif (ENABLE_FREETYPE)
  
