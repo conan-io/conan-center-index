@@ -1107,29 +1107,29 @@ class OpenCVConan(ConanFile):
             self.requires("wayland/1.22.0")
         # imgcodecs module dependencies
         if self.options.get_safe("with_avif"):
-            self.requires("libavif/1.0.2")
+            self.requires("libavif/1.0.4")
         if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.1")
+            self.requires("libjpeg-turbo/3.0.2")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
             self.requires("mozjpeg/4.1.5")
         if self.options.get_safe("with_jpeg2000") == "jasper":
-            self.requires("jasper/4.1.0")
+            self.requires("jasper/4.2.0")
         elif self.options.get_safe("with_jpeg2000") == "openjpeg":
-            self.requires("openjpeg/2.5.0")
+            self.requires("openjpeg/2.5.2")
         if self.options.get_safe("with_png"):
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/1.6.43")
         if self.options.get_safe("with_openexr"):
-            self.requires("openexr/3.2.1")
+            self.requires("openexr/3.2.3")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_webp"):
             self.requires("libwebp/1.3.2")
         if self.options.get_safe("with_gdal"):
-            self.requires("gdal/3.7.0")
+            self.requires("gdal/3.8.3")
         if self.options.get_safe("with_gdcm"):
-            self.requires("gdcm/3.0.21")
+            self.requires("gdcm/3.0.23")
         # objdetect module dependencies
         if self.options.get_safe("with_quirc"):
             self.requires("quirc/1.2")
@@ -1150,10 +1150,10 @@ class OpenCVConan(ConanFile):
         # sfm module dependencies
         if self.options.sfm:
             self.requires("gflags/2.2.2")
-            self.requires("glog/0.6.0")
+            self.requires("glog/0.7.0")
         # text module dependencies
         if self.options.get_safe("with_tesseract"):
-            self.requires("tesseract/5.3.0")
+            self.requires("tesseract/5.3.3")
 
     def package_id(self):
         # deprecated options
@@ -1210,7 +1210,7 @@ class OpenCVConan(ConanFile):
             if not self._is_legacy_one_profile:
                 self.tool_requires("protobuf/<host_version>")
         if self.options.get_safe("with_wayland"):
-            self.tool_requires("wayland-protocols/1.32")
+            self.tool_requires("wayland-protocols/1.33")
             if not self._is_legacy_one_profile:
                 self.tool_requires("wayland/<host_version>")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
