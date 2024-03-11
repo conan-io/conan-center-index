@@ -491,7 +491,6 @@ The environment variable `CONAN_CENTER_BUILD_SERVICE` is set to `1` when running
 This can be used to detect if the recipe is being built in the CI service.
 
 ```python
-
 def configure(self):
     if os.getenv('CONAN_CENTER_BUILD_SERVICE') is not None:
         self.output.info("Running in ConanCenterIndex CI service")
