@@ -489,6 +489,7 @@ Also, when having a similar situation, do not hesitate in opening an issue expla
 
 The environment variable `CONAN_CENTER_BUILD_SERVICE` is set to `1` when running in the ConanCenterIndex CI service.
 This can be used to detect if the recipe is being built in the CI service.
+Please bear in mind that it's not intended for general use and will be only allowed on a case-by-case basis. So please ask us before adding it to a recipe.
 
 ```python
 def configure(self):
