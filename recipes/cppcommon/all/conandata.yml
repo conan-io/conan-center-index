@@ -1,4 +1,7 @@
 sources:
+  "1.0.4.1":
+    url: "https://github.com/chronoxor/CppCommon/archive/1.0.4.1.tar.gz"
+    sha256: "b4fd34cd1ef7fb0664321dde678ade2d00b29e299b457560799ea46b3c4a2524"
   "1.0.4.0":
     url: "https://github.com/chronoxor/CppCommon/archive/1.0.4.0.tar.gz"
     sha256: "724865a64309ab24b3e10d29b04dfec821003013635eff84dd2108f98e7a6fc3"
@@ -18,6 +21,13 @@ sources:
     url: "https://github.com/chronoxor/CppCommon/archive/cacfa9554d367467808663d9d5a695933ae566bb.tar.gz"
     sha256: "d2e717798e1668c831ee977763eaff7413ef48e6e0914a6322c9918016092048"
 patches:
+  "1.0.4.1":
+    - patch_file: "patches/0001-update-cmakelists-1-0-4-0.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"
+    - patch_file: "patches/0003-define-win32-winnt-1-0-4-0.patch"
+      patch_description: "define _WIN32_WINNT"
+      patch_type: "portability"
   "1.0.4.0":
     - patch_file: "patches/0001-update-cmakelists-1-0-4-0.patch"
       patch_description: "use cci packages"
