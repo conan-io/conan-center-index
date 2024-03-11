@@ -26,7 +26,7 @@ class PackageConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_tls": False,
+        "with_tls": True,
         "with_sodium": False,
         "enable_streaming": True
     }
@@ -97,11 +97,12 @@ class PackageConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", f"cnats::{self._nats_library_name}")
         self.cpp_info.set_property("pkg_config_name", "libnats")
 
+        if self.options.enable_streaming:
+            self.cpp_info.defines.append("NATS_HAS_STREAMING")
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("nats_IMPORTS")
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread", "rt"])
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "cnats"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "cnats"
-        self.cpp_info.names["cmake_find_package"] = self._nats_library_name
-        self.cpp_info.names["cmake_find_package_multi"] = self._nats_library_name
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("ws2_32")
