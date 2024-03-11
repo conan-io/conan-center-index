@@ -81,9 +81,8 @@ class LLVMCoreConan(ConanFile):
         "with_z3": True,
         "with_zlib": True,
         "use_llvm_cmake_files": False, # no longer used but retained for backwards compatibility
-        # creating job pools with current free memory
-        "ram_per_compile_job": "2048",
-        "ram_per_link_job": "16384"
+        "ram_per_compile_job": "auto",
+        "ram_per_link_job": "auto"
     }
 
     @property
@@ -110,6 +109,9 @@ class LLVMCoreConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if os.getenv("CONAN_CENTER_BUILD_SERVICE"):
+            self.options.ram_per_compile_job = "2048"
+            self.options.ram_per_link_job = "16384"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -185,6 +187,7 @@ class LLVMCoreConan(ConanFile):
         if self.options.ram_per_link_job != "auto":
             cmake_definitions["LLVM_RAM_PER_LINK_JOB"] = self.options.ram_per_link_job
 
+        # this capability is back-ported from LLVM 14.x
         is_platform_ELF_based = self.settings.os in [
             "Linux", "Android", "FreeBSD", "SunOS", "AIX", "Neutrino", "VxWorks"
         ]
