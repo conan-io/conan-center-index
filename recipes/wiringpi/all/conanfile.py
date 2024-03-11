@@ -44,10 +44,14 @@ class WiringpiConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} only works for Linux")
-        if Version(self.version) >= 3.0 and \
-            self.settings.compiler == "gcc" and \
-            Version(self.settings.compiler.version) < 8:
-            raise ConanInvalidConfiguration(f"{self.ref} requires gcc >= 8")
+        if Version(self.version) >= 3.0:
+            if self.settings.compiler == "gcc" and \
+                Version(self.settings.compiler.version) < 8:
+                raise ConanInvalidConfiguration(f"{self.ref} requires gcc >= 8")
+            if self.settings.compiler == "gcc" and \
+                Version(self.settings.compiler.version).major == 11 and \
+                self.settings.build_type == "Debug":
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc 11 in Debug build")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
