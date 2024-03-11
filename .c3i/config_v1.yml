@@ -38,7 +38,6 @@ tasks:
     # * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
     check_runs:
       - name: "Lint changed files (YAML files)"
-      - name: "Lint changed conanfile.py (v2 migration)"
     status_checks:
       - name: "license/cla"
       - name: "continuous-integration/jenkins/pr-merge"

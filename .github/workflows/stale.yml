@@ -42,8 +42,6 @@ jobs:
 
         # Label to apply on staled PRs
         stale-pr-label: 'stale'
-        # Label to be removed when updating a PR
-        labels-to-remove-when-unstale: 'stale'
 
         # Skip issues when having stale state
         remove-issue-stale-when-updated: false
