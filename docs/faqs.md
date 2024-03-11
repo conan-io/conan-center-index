@@ -485,7 +485,7 @@ In summary, we do not recommend `full_package_mode` or any other custom package 
 Instead, prefer using `shared=True` by default, when needed.
 Also, when having a similar situation, do not hesitate in opening an issue explaining your case, and ask for support from the community.
 
-## How to detect if is running in ConanCenterIndex CI service?
+## How to detect if running in ConanCenterIndex CI service?
 
 The environment variable `CONAN_CENTER_BUILD_SERVICE` is set to `1` when running in the ConanCenterIndex CI service.
 This can be used to detect if the recipe is being built in the CI service.
