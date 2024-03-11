@@ -46,7 +46,7 @@ This section gathers the most common questions from the community related to pac
     * [Can I add my project which I will submit to Boost?](#can-i-add-my-project-which-i-will-submit-to-boost)
   * [Can I add options that do not affect `package_id` or the package contents](#can-i-add-options-that-do-not-affect-package_id-or-the-package-contents)
   * [Can I use full_package_mode for a requirement in my recipe?](#can-i-use-full_package_mode-for-a-requirement-in-my-recipe)
-  * [How to detect if is running in ConanCenterIndex CI service?](#how-to-detect-if-is-running-in-conancenterindex-ci-service)<!-- endToc -->
+  * [How to detect if running in ConanCenterIndex CI service?](#how-to-detect-if-running-in-conancenterindex-ci-service)<!-- endToc -->
 
 ## What is the policy on recipe name collisions?
 
