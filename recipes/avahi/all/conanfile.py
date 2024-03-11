@@ -78,8 +78,7 @@ class AvahiConan(ConanFile):
         tc.configure_args.append("--with-systemdsystemunitdir=/lib/systemd/system")
         tc.configure_args.append("--with-distro=none")
         tc.configure_args.append("ac_cv_func_strlcpy=no")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            tc.configure_args.append("ac_cv_func_setproctitle=no")
+        tc.configure_args.append("ac_cv_func_setproctitle=no")
         tc.generate()
         AutotoolsDeps(self).generate()
         PkgConfigDeps(self).generate()
