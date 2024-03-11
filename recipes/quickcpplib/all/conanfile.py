@@ -2,11 +2,11 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, default_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools.files import (
     get, copy, rmdir, rm, apply_conandata_patches,
     export_conandata_patches
 )
+from conan.tools.apple import is_apple_os
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
@@ -118,4 +118,3 @@ class QuickcpplibCodeConan(ConanFile):
 
         self.cpp_info.components["quickcpplib_hl"].defines.append("QUICKCPPLIB_USE_STD_BYTE=1")
         self.cpp_info.components["quickcpplib_hl"].defines.append("QUICKCPPLIB_USE_STD_OPTIONAL=1")
-
