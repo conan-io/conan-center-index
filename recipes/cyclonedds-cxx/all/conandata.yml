@@ -1,0 +1,4 @@
+sources:
+  "0.10.4":
+    url: "https://github.com/eclipse-cyclonedds/cyclonedds-cxx/archive/refs/tags/0.10.4.tar.gz"
+    sha256: "ca09d738b150a7dc1fa63dcb5ad211a4ba516c92710ebff7b9fe817c7c5a257e"

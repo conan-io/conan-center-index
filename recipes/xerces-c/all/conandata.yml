@@ -1,4 +1,7 @@
 sources:
+  "3.2.5":
+    url: "https://github.com/apache/xerces-c/archive/v3.2.5.tar.gz"
+    sha256: "4042f6f11c9eba745dc0e5f8035d98b442097ee4efc69e4853410e4737a987f8"
   "3.2.4":
     url: "https://github.com/apache/xerces-c/archive/v3.2.4.tar.gz"
     sha256: "8dfaa30d6a641bda113625ef65e43c433e8ffd94fadd3b8d39dfe6faf450f26d"
@@ -9,12 +12,11 @@ sources:
     url: "https://github.com/apache/xerces-c/archive/v3.2.2.tar.gz"
     sha256: "7fe5af7d7ad9d4a06503c15fb5bb0aa5f2ba7959700d16c21b8bd183ca542e7f"
 patches:
+  "3.2.5":
+    - patch_file: "patches/0002-find-icu-programs.patch"
   "3.2.4":
-    - patch_file: "patches/0001-remove-test-samples-324.patch"
     - patch_file: "patches/0002-find-icu-programs.patch"
   "3.2.3":
-    - patch_file: "patches/0001-remove-test-samples.patch"
     - patch_file: "patches/0002-find-icu-programs.patch"
   "3.2.2":
-    - patch_file: "patches/0001-remove-test-samples.patch"
     - patch_file: "patches/0002-find-icu-programs.patch"
