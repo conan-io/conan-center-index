@@ -61,8 +61,9 @@ class QuickcpplibCodeConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("quickcpplib does not support macOS.")
+        # FIXME: No passing on ConanCenterIndex: error: 'auto' not allowed in function return type
+        if is_apple_os(self):
+            raise ConanInvalidConfiguration(f"{self.ref} is not building on {self.settings.os} yet. Contributions are welcome.")
 
         if self.settings.compiler.get_safe("cppstd"):
             # To simplify library integration to CCI
