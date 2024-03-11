@@ -31,10 +31,10 @@ class YogaConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         if Version(self.version) >= "3.0.0":
-            return {
-                "gcc": "10.3",
-                "clang": "12",
-                "apple-clang": "13"
+            return {  # C++20 with bit_cast
+                "gcc": "11",
+                "clang": "14",
+                "apple-clang": "14"
             }
         else:
             return {
