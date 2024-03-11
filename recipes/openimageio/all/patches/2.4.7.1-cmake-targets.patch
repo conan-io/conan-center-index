@@ -60,7 +60,7 @@ index 48e871418..21f709b1d 100644
 -                                  JPEG_LIBRARIES JPEG_VERSION)
 -if (NOT JPEG_FOUND) # Try to find the non-turbo version
 +if (USE_JPEGTURBO)
-+    checked_find_package (JPEGTurbo
++    checked_find_package (libjpeg-turbo REQUIRED
 +                          DEFINITIONS -DUSE_JPEG_TURBO=1
 +                          PRINT libjpeg-turbo_INCLUDES libjpeg-turbo_LIBRARIES)
 +    add_library(JPEG::JPEG ALIAS libjpeg-turbo::libjpeg-turbo)
