@@ -109,9 +109,6 @@ class LLVMCoreConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if os.getenv("CONAN_CENTER_BUILD_SERVICE"):
-            self.options.ram_per_compile_job = "2048"
-            self.options.ram_per_link_job = "16384"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -152,6 +149,18 @@ class LLVMCoreConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def _apply_resource_limits(self, cmake_definitions):
+        if os.getenv("CONAN_CENTER_BUILD_SERVICE"):
+            cmake_definitions.update({
+                "LLVM_RAM_PER_LINK_JOB": "16384",
+                "LLVM_RAM_PER_COMPILE_JOB": "2048"
+            })
+        else:
+            if self.options.ram_per_compile_job != "auto":
+                cmake_definitions["LLVM_RAM_PER_COMPILE_JOB"] = self.options.ram_per_compile_job
+            if self.options.ram_per_link_job != "auto":
+                cmake_definitions["LLVM_RAM_PER_LINK_JOB"] = self.options.ram_per_link_job
+
     def generate(self):
         tc = CMakeToolchain(self, generator="Ninja")
         # https://releases.llvm.org/12.0.0/docs/CMake.html
@@ -182,10 +191,8 @@ class LLVMCoreConan(ConanFile):
             "LLVM_ENABLE_LIBXML2": "FORCE_ON" if self.options.with_xml2 else False,
             "LLVM_ENABLE_TERMINFO": self.options.with_terminfo,
         }
-        if self.options.ram_per_compile_job != "auto":
-            cmake_definitions["LLVM_RAM_PER_COMPILE_JOB"] = self.options.ram_per_compile_job
-        if self.options.ram_per_link_job != "auto":
-            cmake_definitions["LLVM_RAM_PER_LINK_JOB"] = self.options.ram_per_link_job
+
+        self._apply_resource_limits(cmake_definitions)
 
         # this capability is back-ported from LLVM 14.x
         is_platform_ELF_based = self.settings.os in [
