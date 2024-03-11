@@ -141,10 +141,6 @@ class canteraRecipe(ConanFile):
         if self._is_gnu_pre11_stdlib:
             replace_in_file(self, os.path.join(self.source_folder, "SConstruct"), "env['CPPDEFINES'] = {}", "env['CPPDEFINES'] = {'_GLIBCXX_USE_CXX11_ABI' : 0}")
 
-        # Use /MT instead of /MD when building static lib with msvc
-        if not self.options.shared and self._is_msvc:
-            options["cc_flags"] = "/MT /nologo /D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_WARNINGS"
-
         # Write args file
         escape_str = lambda x: f'"{x}"'
         scons_args = ' '.join([f"{key}={escape_str(option)}" for key, option in options.items()])
