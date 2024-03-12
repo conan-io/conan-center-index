@@ -1,0 +1,9 @@
+sources:
+  "1.2.2":
+    url: "https://github.com/amiremohamadi/DuckX/archive/refs/tags/v1.2.2.tar.gz"
+    sha256: "ca924b9dc3a38184f617d2ec96b91deae3f06caf42a4508c23dd9943dcf9da39"
+patches:
+  "1.2.2":
+    - patch_file: "patches/0001-use-cci.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"

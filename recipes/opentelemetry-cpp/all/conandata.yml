@@ -8,6 +8,3 @@ sources:
   "1.8.3":
     url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/v1.8.3.tar.gz"
     sha256: "b23d3c80d2e0012734ea343d2be69b2a7139ec5545453c503b13e629eb8fbe05"
-  "1.7.0":
-    url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/v1.7.0.tar.gz"
-    sha256: "2ad0911cdc94fe84a93334773bef4789a38bd1f01e39560cabd4a5c267e823c3"

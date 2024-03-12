@@ -1,0 +1,53 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f452186..14a8c03 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,15 +9,19 @@ endif()
+ option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
+ option(BUILD_SAMPLE "Build provided sample" OFF)
+ 
+-set(HEADERS src/duckx.hpp src/zip.h src/miniz.h
+-	src/pugixml.hpp src/pugiconfig.hpp)
+-set(SOURCES src/duckx.cpp src/zip.c src/pugixml.cpp)
++find_package(pugixml REQUIRED CONFIG)
++find_package(zip REQUIRED CONFIG)
++
++set(HEADERS src/duckx.hpp
++	)
++set(SOURCES src/duckx.cpp)
+ 
+ if(BUILD_SHARED_LIBS)
+     add_library(duckx SHARED ${HEADERS} ${SOURCES})
+ else()
+     add_library(duckx STATIC ${HEADERS} ${SOURCES})
+ endif()
++target_link_libraries(duckx PRIVATE pugixml::pugixml zip::zip)
+ 
+ add_library(duckx::duckx ALIAS duckx)
+ 
+diff --git a/src/duckx.cpp b/src/duckx.cpp
+index 7379d02..4d66e62 100644
+--- a/src/duckx.cpp
++++ b/src/duckx.cpp
+@@ -292,7 +292,7 @@ void duckx::Document::save() const {
+ 	// Open the original zip and copy all files which are not replaced by duckX
+ 	zip_t* orig_zip = zip_open(original_file.c_str(), ZIP_DEFAULT_COMPRESSION_LEVEL, 'r');
+ 	// Loop & copy each relevant entry in the original zip
+-	int orig_zip_entry_ct = zip_total_entries(orig_zip);
++	int orig_zip_entry_ct = zip_entries_total(orig_zip);
+ 	for (int i = 0; i < orig_zip_entry_ct; i++)
+ 	{
+ 		zip_entry_openbyindex(orig_zip, i);
+diff --git a/src/duckx.hpp b/src/duckx.hpp
+index fd54d10..c3350d3 100644
+--- a/src/duckx.hpp
++++ b/src/duckx.hpp
+@@ -12,7 +12,7 @@
+ #include <string>
+ 
+ #include "pugixml.hpp"
+-#include "zip.h"
++#include "zip/zip.h"
+ 
+ 
+ // TODO: Use container-iterator design pattern!

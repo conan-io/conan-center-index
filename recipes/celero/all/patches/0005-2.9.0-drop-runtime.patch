@@ -1,0 +1,33 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3f12ab9..73474a1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -66,17 +66,17 @@ macro(CeleroSetDefaultCompilerOptions)
+ 		target_compile_options(${PROJECT_NAME} PRIVATE /permissive-)
+ 		target_compile_options(${PROJECT_NAME} PRIVATE /MP)
+ 
+-		if (NOT CELERO_COMPILE_DYNAMIC_LIBRARIES)
+-			if(VCPKG_CRT_LINKAGE)
+-				if(VCPKG_CRT_LINKAGE STREQUAL "static")
+-					target_compile_options(${PROJECT_NAME} PRIVATE /MT$<$<CONFIG:Debug>:d>)
+-				else()
+-					target_compile_options(${PROJECT_NAME} PRIVATE /MD$<$<CONFIG:Debug>:d>)
+-				endif()
+-			else()
+-				target_compile_options(${PROJECT_NAME} PRIVATE /MT$<$<CONFIG:Debug>:d>)
+-			endif()
+-		endif()
++		# if (NOT CELERO_COMPILE_DYNAMIC_LIBRARIES)
++		# 	if(VCPKG_CRT_LINKAGE)
++		# 		if(VCPKG_CRT_LINKAGE STREQUAL "static")
++		# 			target_compile_options(${PROJECT_NAME} PRIVATE /MT$<$<CONFIG:Debug>:d>)
++		# 		else()
++		# 			target_compile_options(${PROJECT_NAME} PRIVATE /MD$<$<CONFIG:Debug>:d>)
++		# 		endif()
++		# 	else()
++		# 		target_compile_options(${PROJECT_NAME} PRIVATE /MT$<$<CONFIG:Debug>:d>)
++		# 	endif()
++		# endif()
+ 
+         if(CELERO_ENABLE_WARNINGS_AS_ERRORS)
+             target_compile_options(${PROJECT_NAME} PRIVATE /WX)

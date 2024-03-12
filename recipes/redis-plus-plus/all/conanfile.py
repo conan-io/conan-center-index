@@ -33,7 +33,7 @@ class RedisPlusPlusConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "11" if Version(self.version) < "1.3.0" else "17"
+        return "11"
 
     @property
     def _compilers_minimum_version(self):
@@ -86,11 +86,8 @@ class RedisPlusPlusConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.settings.compiler.get_safe("cppstd"):
-            cppstd = str(self.settings.compiler.cppstd)
-            if cppstd.startswith("gnu"):
-                cppstd = cppstd[3:]
-            tc.cache_variables["REDIS_PLUS_PLUS_CXX_STANDARD"] = cppstd
+        cppstd = str(self.settings.get_safe("compiler.cppstd", 11)).replace("gnu", "")
+        tc.cache_variables["REDIS_PLUS_PLUS_CXX_STANDARD"] = cppstd
         tc.variables["REDIS_PLUS_PLUS_USE_TLS"] = self.options.with_tls
         if self.options.get_safe("build_async"):
             tc.cache_variables["REDIS_PLUS_PLUS_BUILD_ASYNC"] = "libuv"

@@ -39,6 +39,10 @@ class GperfConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
+        # gperf makefile relies on GNU Make behaviour
+        if self._settings_build.os == "FreeBSD":
+            self.tool_requires("make/4.4.1")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)

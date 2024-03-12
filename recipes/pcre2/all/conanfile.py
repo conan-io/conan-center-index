@@ -149,6 +149,9 @@ class PCRE2Conan(ConanFile):
             self.cpp_info.components["pcre2-posix"].set_property("pkg_config_name", "libpcre2-posix")
             self.cpp_info.components["pcre2-posix"].libs = [self._lib_name("pcre2-posix")]
             self.cpp_info.components["pcre2-posix"].requires = ["pcre2-8"]
+            if Version(self.version) >= "10.43" and is_msvc(self) and self.options.shared:
+                self.cpp_info.components["pcre2-posix"].defines.append("PCRE2POSIX_SHARED=1")
+
         # pcre2-16
         if self.options.build_pcre2_16:
             self.cpp_info.components["pcre2-16"].set_property("cmake_target_name", "PCRE2::16BIT")

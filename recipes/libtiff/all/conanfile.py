@@ -13,7 +13,7 @@ class LibtiffConan(ConanFile):
     name = "libtiff"
     description = "Library for Tag Image File Format (TIFF)"
     url = "https://github.com/conan-io/conan-center-index"
-    license = "MIT"
+    license = "libtiff"
     homepage = "http://www.simplesystems.org/libtiff"
     topics = ("tiff", "image", "bigtiff", "tagged-image-file-format")
 

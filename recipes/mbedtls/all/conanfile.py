@@ -108,9 +108,13 @@ class MBedTLSConan(ConanFile):
 
         self.cpp_info.components["mbedcrypto"].set_property("cmake_target_name", "MbedTLS::mbedcrypto")
         self.cpp_info.components["mbedcrypto"].libs = ["mbedcrypto"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["mbedcrypto"].system_libs = ["bcrypt"]
 
         self.cpp_info.components["mbedx509"].set_property("cmake_target_name", "MbedTLS::mbedx509")
         self.cpp_info.components["mbedx509"].libs = ["mbedx509"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["mbedx509"].system_libs = ["ws2_32"]
         self.cpp_info.components["mbedx509"].requires = ["mbedcrypto"]
 
         self.cpp_info.components["libembedtls"].set_property("cmake_target_name", "MbedTLS::mbedtls")

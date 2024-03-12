@@ -1,0 +1,4 @@
+sources:
+  "49.0":
+    url: "https://github.com/linux-rdma/rdma-core/releases/download/v49.0/rdma-core-49.0.tar.gz"
+    sha256: "953546ad2b179f9ce68dc21eb1eb26003098ea1bf0f87a4baed45bcea134b2b4"

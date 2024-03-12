@@ -82,7 +82,7 @@ class GlfwConan(ConanFile):
 
     def build_requirements(self):
         if self.options.get_safe("with_wayland"):
-            self.tool_requires("wayland-protocols/1.32")
+            self.tool_requires("wayland-protocols/1.33")
             if self._has_build_profile:
                 self.tool_requires("wayland/<host_version>")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):

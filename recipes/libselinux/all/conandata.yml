@@ -40,6 +40,9 @@ patches:
       base_path: libselinux-3.6
       patch_description: "Fix a missing #include <stdint.h>"
       patch_type: "portability"
+  "3.3":
+    - patch_file: patches/0003-fix-link-pcre.patch
+      base_path: libselinux-3.3
   "3.0":
     - patch_file: patches/0001-fix-fno-common-3.0.patch
       base_path: libsepol-3.0

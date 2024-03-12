@@ -10,12 +10,11 @@ required_conan_version = ">=1.53.0"
 
 class CCTZConan(ConanFile):
     name = "cctz"
+    description = "C++ library for translating between absolute and civil times"
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/cctz"
-    description = "C++ library for translating between absolute and civil times"
     topics = ("time", "timezones")
-    license = "Apache-2.0"
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -54,6 +53,7 @@ class CCTZConan(ConanFile):
         tc.variables["BUILD_TOOLS"] = self.options.build_tools
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_TESTING"] = False
+        tc.variables["BUILD_BENCHMARK"] = False
         # For shared msvc
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         # Relocatable shared lib on Macos
