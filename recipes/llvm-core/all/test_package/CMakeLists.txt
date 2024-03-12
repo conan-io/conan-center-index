@@ -21,3 +21,6 @@ endif()
 
 message(STATUS "Testing LLVM Build Module Variables")
 test_llvm_cmake_variable(LLVM_PACKAGE_VERSION)
+test_llvm_cmake_variable(LLVM_BUILD_TYPE)
+test_llvm_cmake_variable(LLVM_CMAKE_DIR)
+test_llvm_cmake_variable(LLVM_TOOLS_BINARY_DIR)
