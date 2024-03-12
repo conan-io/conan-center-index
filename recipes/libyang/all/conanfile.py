@@ -8,7 +8,7 @@ required_conan_version = ">=1.53.0"
 class LibYangConan(ConanFile):
     name = "libyang"
     license = "BSD-3-Clause license"
-    url = "https://github.com/CESNET/libyang"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "YANG data modeling language library"
     homepage = "https://github.com/CESNET/libyang"
     topics = ("yang", "bsd", "netconf", "restconf", "yin")
