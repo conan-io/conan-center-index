@@ -1,13 +1,15 @@
+import os
+
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import get
+from conan.tools.files import get, rmdir
 
 required_conan_version = ">=1.53.0"
 
 
 class LibYangConan(ConanFile):
     name = "libyang"
-    license = "BSD-3-Clause license"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     description = "YANG data modeling language library"
     homepage = "https://github.com/CESNET/libyang"
@@ -42,6 +44,9 @@ class LibYangConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["ENABLE_TESTS"] = False
+        tc.variables["ENABLE_VALGRIND_TESTS"] = False
+        tc.variables["ENABLE_STATIC"] = not self.options.shared
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -54,8 +59,12 @@ class LibYangConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "libyang")
         self.cpp_info.libs = ["yang"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["ws2_32", "shlwapi"])
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["pthread", "dl", "m"])
