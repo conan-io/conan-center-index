@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get
-from conan.tools.scm import Git
 
 required_conan_version = ">=1.53.0"
 
