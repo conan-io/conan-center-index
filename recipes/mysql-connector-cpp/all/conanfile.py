@@ -47,7 +47,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
         self.requires("zstd/1.5.5")
         self.requires("protobuf/3.21.12")
         self.requires("boost/1.84.0")
-        self.requires("openssl/[>=1.1.1 <4]")
+        #self.requires("openssl/[>=1.1.1 <4]")
         self.requires("libmysqlclient/8.1.0")
 
     def source(self):
@@ -111,8 +111,8 @@ class MysqlConnectorCPPRecipe(ConanFile):
         tc.variables["Boost_INCLUDE_DIRS"] = self._include_folder_dep("boost")
         tc.variables["Boost_LIB_DIRS"] = self._lib_folder_dep("boost")
         # INFO: Some dependencies can be found in mysql-connector-cpp source folder. Need to set to use Conan package
-        tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
-        tc.cache_variables["WITH_BOOST"] = self._package_folder_dep("boost")
+        #tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
+        #tc.cache_variables["WITH_BOOST"] = self._package_folder_dep("boost")
         tc.cache_variables["WITH_ZLIB"] = self._package_folder_dep("zlib")
         tc.cache_variables["WITH_LZ4"] = self._package_folder_dep("lz4")
         tc.cache_variables["WITH_ZSTD"] = self._package_folder_dep("zstd")
