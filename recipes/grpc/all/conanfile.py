@@ -132,7 +132,9 @@ class GrpcConan(ConanFile):
             self.tool_requires(f"grpc/{self.version}")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        data = self.conan_data["sources"][self.version]
+        get(self, **data[0], strip_root=True)
+        get(self, **data[1], strip_root=True, destination="third_party/opencensus-proto")
 
     def generate(self):
         # Set up environment so that we can run grpc-cpp-plugin at build time
@@ -204,6 +206,7 @@ class GrpcConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}",
                             'COMMAND ${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}')
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
@@ -316,12 +319,12 @@ class GrpcConan(ConanFile):
             "gpr": {
                 "lib": "gpr",
                 "requires": [
-                    "upb", "abseil::absl_base", "abseil::absl_memory",
-                    "abseil::absl_status", "abseil::absl_str_format",
-                    "abseil::absl_strings", "abseil::absl_synchronization",
-                    "abseil::absl_time", "abseil::absl_optional",
-                    "abseil::absl_flags"
-                ] + libsystemd(),
+                                "upb", "abseil::absl_base", "abseil::absl_memory",
+                                "abseil::absl_status", "abseil::absl_str_format",
+                                "abseil::absl_strings", "abseil::absl_synchronization",
+                                "abseil::absl_time", "abseil::absl_optional",
+                                "abseil::absl_flags"
+                            ] + libsystemd(),
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
             },
             "_grpc": {
