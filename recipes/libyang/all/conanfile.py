@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import get, rmdir
+from conan.tools.files import get, rmdir, copy
 
 required_conan_version = ">=1.53.0"
 
@@ -57,6 +57,8 @@ class LibYangConan(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "LICENSE", self.source_folder,
+             os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
