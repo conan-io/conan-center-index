@@ -15,19 +15,9 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
-    @property
-    def _skip_cpp17_build(self):
-        # 20240116 added a hasher for std::filesystem::path, so absl/hash/internal/hash.h
-        # includes <filesystem> if in C++17 mode. GCC 7 supported C++17, but notably
-        # <filesystem> was added in GCC 8.
-        return Version(self.dependencies["abseil"].ref.version) >= "20240116" \
-            and self.settings.compiler == "gcc" \
-            and Version(self.settings.compiler.version).major == 7
-
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CXX20_SUPPORTED"] = Version(self.dependencies["abseil"].ref.version) > "20210324.2"
-        tc.variables["SKIP_CPP_17_BUILD"] = self._skip_cpp17_build
         tc.generate()
 
     def build(self):
