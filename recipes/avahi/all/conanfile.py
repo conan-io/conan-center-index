@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rmdir, rm
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
@@ -31,6 +31,9 @@ class AvahiConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
@@ -86,6 +89,7 @@ class AvahiConan(ConanFile):
         env.vars(self).save_script("conanbuild_pkg_config")
 
     def build(self):
+        apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
