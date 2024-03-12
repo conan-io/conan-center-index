@@ -1,0 +1,9 @@
+versions:
+  "14.2":
+    folder: all
+  "14":
+    folder: all
+  "13.3":
+    folder: all
+  "13":
+    folder: all
