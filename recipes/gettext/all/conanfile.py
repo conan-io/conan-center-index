@@ -50,7 +50,7 @@ class GetTextConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        if is_msvc(self):
+        if is_msvc(self) or self.settings.os == "Linux":
             self.build_requires("automake/1.16.5")
 
     def source(self):
