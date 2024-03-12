@@ -20,6 +20,10 @@ patches:
       patch_description: "link libm to absl string"
       patch_type: "portability"
       patch_source: "https://github.com/abseil/abseil-cpp/issues/1100"
+    - patch_file: "patches/20240116.1-0001-fix-filesystem-include.patch"
+      patch_description: "Fix GCC 7 including <filesystem> in C++17 mode when it is not available (until GCC 8)"
+      patch_type: "portability"
+      patch_source: "https://github.com/abseil/abseil-cpp/commit/bb83aceacb554e79e7cd2404856f0be30bd00303"
   "20230802.1":
     - patch_file: "patches/0003-absl-string-libm-20230802.patch"
       patch_description: "link libm to absl string"
