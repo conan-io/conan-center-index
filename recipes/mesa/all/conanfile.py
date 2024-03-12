@@ -1,3 +1,4 @@
+import glob
 import os
 import re
 
@@ -618,6 +619,13 @@ class MesaConan(ConanFile):
                 return True
         return False
 
+    @property
+    def _with_any_vulkan_layer(self):
+        for vulkan_layer in vulkan_layers:
+            if self.options.get_safe(f"vulkan_layer_{vulkan_layer}"):
+                return True
+        return False
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -757,6 +765,9 @@ class MesaConan(ConanFile):
         self.options.vulkan_driver_swrast = False
 
     def configure(self):
+        if self._has_with_libglvnd_option and not self.options.with_libglvnd:
+            self.provides = "libglvnd"
+
         if not self.options.get_safe("shared_glapi"):
             self.options.rm_safe("egl")
             self.options.rm_safe("gles1")
@@ -771,7 +782,7 @@ class MesaConan(ConanFile):
         if not self.options.get_safe("with_llvm"):
             self.options.rm_safe("draw_use_llvm")
 
-        if self.options.get_safe("egl"):
+        if self.options.get_safe("egl") and self.options.get_safe("with_libglvnd"):
             self.options["libglvnd"].egl = True
         if (
             self.options.get_safe("vulkan_driver_amd")
@@ -788,11 +799,11 @@ class MesaConan(ConanFile):
             or self.options.get_safe("gallium_driver_radeonsi")
         ):
             self.options["libdrm"].radeon = True
-        if self.options.get_safe("gles1"):
+        if self.options.get_safe("gles1") and self.options.get_safe("with_libglvnd"):
             self.options["libglvnd"].gles1 = True
-        if self.options.get_safe("gles2"):
+        if self.options.get_safe("gles2") and self.options.get_safe("with_libglvnd"):
             self.options["libglvnd"].gles2 = True
-        if self.options.get_safe("glx"):
+        if self.options.get_safe("glx") and self.options.get_safe("with_libglvnd"):
             self.options["libglvnd"].glx = True
 
         if self.options.get_safe("gallium_d3d12_video"):
@@ -1197,6 +1208,7 @@ class MesaConan(ConanFile):
         tc.project_options["allow-kcmp"] = feature("allow_kcmp")
         tc.project_options["build-aco-tests"] = False
         tc.project_options["build-tests"] = False
+        tc.project_options["datadir"] = os.path.join(self.package_folder, "res")
         tc.project_options["datasources"] = [
             datasource
             for datasource in datasources
@@ -1360,7 +1372,6 @@ class MesaConan(ConanFile):
         if self.options.get_safe("osmesa"):
             self._save_pkg_config_version("osmesa")
 
-        rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
@@ -1372,14 +1383,14 @@ class MesaConan(ConanFile):
             self.cpp_info.components["d3d"].set_property("pkg_config_name", "d3d")
             if self._with_libdrm:
                 self.cpp_info.components["d3d"].requires.append("libdrm::libdrm")
-            pkgconfig_variables = {
+            d3d_pkgconfig_variables = {
                 # todo Use `libdir` when Conan V1 no longer needs to be supported.
                 # 'moduledir': '${libdir}/d3d',
                 'moduledir': '${prefix}/lib/d3d',
             }
             self.cpp_info.components["d3d"].set_property(
                 "pkg_config_custom_content",
-                "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items()))
+                "\n".join(f"{key}={value}" for key, value in d3d_pkgconfig_variables.items()))
             self.cpp_info.components["d3d"].set_property("component_version", str(self._load_pkg_config_version("d3d")))
         self.cpp_info.components["dri"].set_property("pkg_config_name", "dri")
         if self._with_libdrm:
@@ -1404,6 +1415,8 @@ class MesaConan(ConanFile):
             )
             if self.options.get_safe("with_libglvnd"):
                 suffix = f"_{self.options.glvnd_vendor_name}"
+            else:
+                self.cpp_info.components["egl"].set_property("pkg_config_name", "egl")
             self.cpp_info.components["egl"].libs = [f"EGL{suffix}"]
             if self.options.get_safe("with_libglvnd"):
                 self.cpp_info.components["egl"].requires.append("libglvnd::egl")
@@ -1430,6 +1443,16 @@ class MesaConan(ConanFile):
                     f"{key}={value}" for key, value in gbm_pkg_config_variables.items()
                 ),
             )
+        if self.options.get_safe("gles1") and not self.options.get_safe("with_libglvnd"):
+            self.cpp_info.components["gles1"].libs = ["GLESv1_CM"]
+            self.cpp_info.components["gles1"].set_property("pkg_config_name", "glesv1_cm")
+            if self.settings.os in ["FreeBSD", "Linux"]:
+                self.cpp_info.components["gles1"].system_libs = ["m", "pthread"]
+        if self.options.get_safe("gles2") and not self.options.get_safe("with_libglvnd"):
+            self.cpp_info.components["gles2"].libs = ["GLESv2"]
+            self.cpp_info.components["gles2"].set_property("pkg_config_name", "glesv1")
+            if self.settings.os in ["FreeBSD", "Linux"]:
+                self.cpp_info.components["gles2"].system_libs = ["m", "pthread"]
         if self.options.get_safe("glx"):
             glx_lib_name = (
                 f"GLX_{self.options.glvnd_vendor_name}"
@@ -1439,12 +1462,24 @@ class MesaConan(ConanFile):
             self.cpp_info.components["glx"].libs = [glx_lib_name]
             if self.options.get_safe("with_libglvnd"):
                 self.cpp_info.components["glx"].requires.append("libglvnd::glx")
+
             gl_lib_name = (
                 f"GLX_{self.options.glvnd_vendor_name}"
                 if self.options.get_safe("with_libglvnd")
                 else "GL"
             )
             self.cpp_info.components["gl"].libs = [gl_lib_name]
+            if not self.options.get_safe("with_libglvnd"):
+                gl_pkg_config_variables = {
+                    "glx_tls": "yes",
+                }
+                self.cpp_info.components["gl"].set_property(
+                    "pkg_config_custom_content",
+                    "\n".join(
+                        f"{key}={value}" for key, value in gl_pkg_config_variables.items()
+                    ),
+                )
+                self.cpp_info.components["gl"].set_property("pkg_config_name", "gl")
             if self.options.get_safe("with_xorg"):
                 self.cpp_info.components["gl"].requires.extend(
                     [
@@ -1560,3 +1595,13 @@ class MesaConan(ConanFile):
         if self.settings.os == "Windows":
             libgl_drivers_path = os.path.join(self.package_folder, "bin")
         self.runenv_info.prepend_path("LIBGL_DRIVERS_PATH", libgl_drivers_path)
+
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            self.runenv_info.prepend_path("DRIRC_CONFIGDIR", os.path.join(os.path.join(self.package_folder, "res", "drirc.d")))
+
+        if self._with_any_vulkan_layer:
+            self.runenv_info.prepend_path("VK_ADD_LAYER_PATH", os.path.join(self.package_folder, "res", "vulkan", "explicit_layer.d"))
+
+        if self._with_any_vulkan_driver:
+            for driver_file in glob.glob(os.path.join(self.package_folder, "res", "vulkan", "icd.d", "*.json")):
+                self.runenv_info.prepend_path("VK_ADD_DRIVER_FILES", driver_file)

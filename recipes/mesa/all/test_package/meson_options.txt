@@ -1,14 +1,20 @@
 option(
+  'egl',
+  type : 'feature',
+  value : 'disabled',
+  description : 'Build support for EGL platform'
+)
+option(
   'gbm',
   type : 'feature',
   value : 'disabled',
   description : 'Build support for GBM'
 )
 option(
-  'egl',
+  'glvnd',
   type : 'feature',
   value : 'disabled',
-  description : 'Build support for EGL platform'
+  description : 'Mesa was built with support for libglvnd'
 )
 option(
   'osmesa',

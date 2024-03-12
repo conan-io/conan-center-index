@@ -11,7 +11,11 @@ endif
 
 if get_option('egl').enabled()
     defines += '-DMESA_TEST_PACKAGE_HAS_EGL'
-    egl_dep = dependency('mesa-egl')
+    if get_option('glvnd').disabled()
+        egl_dep = dependency('egl')
+    else
+        egl_dep = dependency('mesa-egl')
+    endif
     dependencies += egl_dep
 endif
 
