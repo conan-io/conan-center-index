@@ -1591,6 +1591,9 @@ class MesaConan(ConanFile):
         ):
             self.cpp_info.requires.append("directx-headers::directx-headers")
 
+        if self.options.get_safe("with_libglvnd"):
+            self.runenv_info.prepend_path("__EGL_VENDOR_LIBRARY_DIRS", os.path.join(self.package_folder, "res", "glvnd", "egl_vendor.d"))
+
         libgl_drivers_path = os.path.join(self.package_folder, "lib", "dri")
         if self.settings.os == "Windows":
             libgl_drivers_path = os.path.join(self.package_folder, "bin")
