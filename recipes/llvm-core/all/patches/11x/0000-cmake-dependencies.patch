@@ -1,5 +1,5 @@
 diff --git a/cmake/config-ix.cmake b/cmake/config-ix.cmake
-index 90e5d327c75..2bc924b79e7 100644
+index 90e5d327c75..618b19b6a2d 100644
 --- a/cmake/config-ix.cmake
 +++ b/cmake/config-ix.cmake
 @@ -5,6 +5,7 @@ endif()
@@ -10,7 +10,7 @@ index 90e5d327c75..2bc924b79e7 100644
  include(CheckSymbolExists)
  include(CheckFunctionExists)
  include(CheckStructHasMember)
-@@ -56,7 +57,15 @@ check_include_file(sys/types.h HAVE_SYS_TYPES_H)
+@@ -56,13 +57,27 @@ check_include_file(sys/types.h HAVE_SYS_TYPES_H)
  check_include_file(termios.h HAVE_TERMIOS_H)
  check_include_file(unistd.h HAVE_UNISTD_H)
  check_include_file(valgrind/valgrind.h HAVE_VALGRIND_VALGRIND_H)
@@ -27,7 +27,20 @@ index 90e5d327c75..2bc924b79e7 100644
  check_include_file(fenv.h HAVE_FENV_H)
  check_symbol_exists(FE_ALL_EXCEPT "fenv.h" HAVE_DECL_FE_ALL_EXCEPT)
  check_symbol_exists(FE_INEXACT "fenv.h" HAVE_DECL_FE_INEXACT)
-@@ -118,17 +127,12 @@ endif()
+ 
+ check_include_file(mach/mach.h HAVE_MACH_MACH_H)
+-check_include_file(histedit.h HAVE_HISTEDIT_H)
++if(LLVM_ENABLE_LIBEDIT)
++    find_package(editline REQUIRED)
++    cmake_push_check_state()
++    list(APPEND CMAKE_REQUIRED_INCLUDES ${editline_INCLUDE_DIRS})
++    check_include_file(histedit.h HAVE_HISTEDIT_H)
++    cmake_pop_check_state()
++endif()
+ check_include_file(CrashReporterClient.h HAVE_CRASHREPORTERCLIENT_H)
+ if(APPLE)
+   include(CheckCSourceCompiles)
+@@ -118,24 +133,23 @@ endif()
  # Don't look for these libraries if we're using MSan, since uninstrumented third
  # party code may call MSan interceptors like strlen, leading to false positives.
  if(NOT LLVM_USE_SANITIZER MATCHES "Memory.*")
@@ -50,7 +63,18 @@ index 90e5d327c75..2bc924b79e7 100644
    endif()
  
    # Don't look for these libraries on Windows.
-@@ -517,7 +521,7 @@ else( LLVM_ENABLE_THREADS )
+   if (NOT PURE_WINDOWS)
+     # Skip libedit if using ASan as it contains memory leaks.
+     if (LLVM_ENABLE_LIBEDIT AND HAVE_HISTEDIT_H AND NOT LLVM_USE_SANITIZER MATCHES ".*Address.*")
++      cmake_push_check_state()
++      list(APPEND CMAKE_REQUIRED_INCLUDES ${editline_INCLUDE_DIRS})
++      list(APPEND CMAKE_REQUIRED_LIBRARIES ${editline_LIBRARIES})
+       check_library_exists(edit el_init "" HAVE_LIBEDIT)
++      cmake_pop_check_state()
+     else()
+       set(HAVE_LIBEDIT 0)
+     endif()
+@@ -517,7 +531,7 @@ else( LLVM_ENABLE_THREADS )
    message(STATUS "Threads disabled.")
  endif()
  
@@ -59,3 +83,14 @@ index 90e5d327c75..2bc924b79e7 100644
    # Check if zlib is available in the system.
    if ( NOT HAVE_ZLIB_H OR NOT HAVE_LIBZ )
      set(LLVM_ENABLE_ZLIB 0)
+diff --git a/lib/LineEditor/CMakeLists.txt b/lib/LineEditor/CMakeLists.txt
+index 59190379406..3952bf0144f 100644
+--- a/lib/LineEditor/CMakeLists.txt
++++ b/lib/LineEditor/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ if(HAVE_LIBEDIT)
+-  set(link_libs edit)
++  set(link_libs editline::editline)
+ endif()
+ 
+ add_llvm_component_library(LLVMLineEditor

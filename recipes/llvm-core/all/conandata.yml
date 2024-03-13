@@ -11,47 +11,47 @@ sources:
 
 patches:
   "13.0.0":
-    - patch_file: patches/13x/00-cmake-target-props.patch
+    - patch_file: patches/13x/0000-cmake-target-props.patch
       patch_description: fix references to third party libs to match conan variables and targets
       patch_type: conan
-    - patch_file: patches/13x/01-calculate-job-pools.patch
+    - patch_file: patches/13x/0001-calculate-job-pools.patch
       patch_description: calculate resource limits for compiling LLVM
       patch_type: portability
       patch_source: https://github.com/llvm/llvm-project/pull/65274
-    - patch_file: patches/13x/02-missing-includes.patch
+    - patch_file: patches/13x/0002-missing-includes.patch
       patch_description: fix missing header files
       patch_type: portability
-    - patch_file: patches/13x/03-split-dwarf.patch
+    - patch_file: patches/13x/0003-split-dwarf.patch
       patch_description: enable split dwarf option from 14.x
       patch_source: https://reviews.llvm.org/D108776
       patch_type: bugfix
   "12.0.0":
-    - patch_file: patches/12x/00-cmake-target-props.patch
+    - patch_file: patches/12x/0000-cmake-dependencies.patch
       patch_description: fix references to third party libs to match conan variables and targets
       patch_type: conan
-    - patch_file: patches/12x/01-calculate-job-pools.patch
+    - patch_file: patches/12x/0001-calculate-job-pools.patch
       patch_description: calculate resource limits for compiling LLVM
       patch_type: portability
       patch_source: https://github.com/llvm/llvm-project/pull/65274
-    - patch_file: patches/12x/02-missing-includes.patch
+    - patch_file: patches/12x/0002-missing-includes.patch
       patch_description: fix missing header files
       patch_type: portability
-    - patch_file: patches/12x/03-split-dwarf.patch
+    - patch_file: patches/12x/0003-split-dwarf.patch
       patch_description: enable split dwarf option from 14.x
       patch_source: https://reviews.llvm.org/D108776
       patch_type: bugfix
   "11.1.0":
-    - patch_file: patches/11x/00-cmake-find-package-zlib.patch
-      patch_description: find zlib using conan rather than assuming a system library
+    - patch_file: patches/11x/0000-cmake-dependencies.patch
+      patch_description: fix references to third party libs to match conan variables and targets
       patch_type: conan
-    - patch_file: "patches/11x/01-calculate-job-pools.patch"
+    - patch_file: "patches/11x/0001-calculate-job-pools.patch"
       patch_description: calculate resource limits for compiling LLVM
       patch_type: portability
       patch_source: https://github.com/llvm/llvm-project/pull/65274
-    - patch_file: patches/11x/02-missing-includes.patch
+    - patch_file: patches/11x/0002-missing-includes.patch
       patch_description: fix missing header files
       patch_type: portability
-    - patch_file: patches/11x/03-split-dwarf.patch
+    - patch_file: patches/11x/0003-split-dwarf.patch
       patch_description: enable split dwarf option from 14.x
       patch_source: https://reviews.llvm.org/D108776
       patch_type: bugfix

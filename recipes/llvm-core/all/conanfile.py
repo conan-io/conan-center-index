@@ -67,6 +67,7 @@ class LLVMCoreConan(ConanFile):
             "None"
         ],
         "with_ffi": [True, False],
+        "with_libedit": [True, False],
         "with_terminfo": [True, False],
         "with_zlib": [True, False],
         "with_xml2": [True, False],
@@ -88,6 +89,7 @@ class LLVMCoreConan(ConanFile):
         "expensive_checks": False,
         "use_perf": False,
         "use_sanitizer": "None",
+        "with_libedit": True,
         "with_ffi": False,
         "with_terminfo": False,  # differs from LLVM default
         "with_xml2": True,
@@ -136,6 +138,8 @@ class LLVMCoreConan(ConanFile):
     def requirements(self):
         if self.options.with_ffi:
             self.requires("libffi/3.4.4")
+        if self.options.with_libedit:
+            self.requires("editline/3.1")
         if self.options.with_zlib:
             self.requires("zlib/1.3.1")
         if self.options.with_xml2:
@@ -221,6 +225,7 @@ class LLVMCoreConan(ConanFile):
             "LLVM_ENABLE_EXPENSIVE_CHECKS": self.options.expensive_checks,
             "LLVM_ENABLE_ASSERTIONS": self.settings.build_type,
             "LLVM_USE_PERF": self.options.use_perf,
+            "LLVM_ENABLE_LIBEDIT": self.options.with_libedit,
             "LLVM_ENABLE_Z3_SOLVER": self.options.with_z3,
             "LLVM_ENABLE_FFI": self.options.with_ffi,
             "LLVM_ENABLE_ZLIB": "FORCE_ON" if self.options.with_zlib else False,
@@ -326,14 +331,11 @@ class LLVMCoreConan(ConanFile):
                         yield dep
 
         def _parse_deps(deps_list):
-            ignore = ["libedit::libedit", "edit"]
             data = {
                 "requires": [],
                 "system_libs": []
             }
             for component in _sanitized_components(deps_list):
-                if component.lower() in ignore:
-                    continue
                 if component in ["rt", "m", "dl", "pthread"]:
                     data["system_libs"].append(component)
                 else:
