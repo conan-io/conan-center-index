@@ -67,3 +67,7 @@ class MetalcppConan(ConanFile):
         self.cpp_info.libdirs = []
 
         self.cpp_info.set_property("pkg_config_name", "metal-cpp")
+
+        # TODO: Clarify if we need framework linking here
+        # Also it could have a c++ file to get the actual implementation, but
+        # depending on the needs this can be done without defining all the implementation
