@@ -2,6 +2,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, can_run, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv
@@ -232,6 +233,10 @@ class LLVMCoreConan(ConanFile):
             cmake_definitions["LLVM_USE_SANITIZER"] = ""
         else:
             cmake_definitions["LLVM_USE_SANITIZER"] = self.options.use_sanitizer
+
+        if is_apple_os(self):
+            # otherwise we can't find shared dependencies during the build
+            cmake_definitions["CMAKE_SKIP_RPATH"] = True
 
         tc.variables.update(cmake_definitions)
         tc.cache_variables.update({
