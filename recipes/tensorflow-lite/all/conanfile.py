@@ -151,6 +151,7 @@ class TensorflowLiteConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", self.source_folder, join(self.package_folder, "licenses"))
         copy(self, "*.h", join(self.source_folder, "tensorflow", "lite"), join(self.package_folder, "include", "tensorflow", "lite"))
+        copy(self, "version.h", join(self.source_folder, "tensorflow", "core", "public"), join(self.package_folder, "include", "tensorflow", "core", "public"))
         copy(self, "*.a", self.build_folder, join(self.package_folder, "lib"))
         copy(self, "*.so", self.build_folder, join(self.package_folder, "lib"))
         copy(self, "*.dylib", self.build_folder, join(self.package_folder, "lib"))
