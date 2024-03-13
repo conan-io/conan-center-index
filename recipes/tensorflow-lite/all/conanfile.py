@@ -83,9 +83,9 @@ class TensorflowLiteConan(ConanFile):
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
         if self.options.with_xnnpack:
-            self.requires("xnnpack/cci.20220801")
+            self.requires("xnnpack/cci.20231026")
             # https://github.com/tensorflow/tensorflow/blob/359c3cdfc5fabac82b3c70b3b6de2b0a8c16874f/tensorflow/lite/delegates/xnnpack/xnnpack_delegate.cc#L165
-            self.requires("pthreadpool/cci.20210218")
+            self.requires("pthreadpool/cci.20231129")
         if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
             self.requires("fp16/cci.20210320")
 
