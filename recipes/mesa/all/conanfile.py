@@ -1371,6 +1371,20 @@ class MesaConan(ConanFile):
             self._save_pkg_config_version("d3d")
         if self.options.get_safe("osmesa"):
             self._save_pkg_config_version("osmesa")
+        if self.options.get_safe("with_libglvnd") and self.options.get_safe("egl"):
+            # According to the libglvnd ICD loading rules, an ICD library installed in a non-standard directory should be referenced using an absolute path.
+            replace_in_file(
+                self,
+                os.path.join(
+                    self.package_folder, "res", "glvnd", "egl_vendor.d", "50_mesa.json"
+                ),
+                f"libEGL_{self.options.glvnd_vendor_name}",
+                os.path.join(
+                    self.package_folder,
+                    "lib",
+                    f"libEGL_{self.options.glvnd_vendor_name}",
+                ),
+            )
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
@@ -1591,7 +1605,7 @@ class MesaConan(ConanFile):
         ):
             self.cpp_info.requires.append("directx-headers::directx-headers")
 
-        if self.options.get_safe("with_libglvnd"):
+        if self.options.get_safe("with_libglvnd") and self.options.get_safe("egl"):
             self.runenv_info.prepend_path("__EGL_VENDOR_LIBRARY_DIRS", os.path.join(self.package_folder, "res", "glvnd", "egl_vendor.d"))
 
         libgl_drivers_path = os.path.join(self.package_folder, "lib", "dri")
