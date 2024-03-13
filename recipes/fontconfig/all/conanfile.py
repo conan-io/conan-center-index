@@ -131,14 +131,10 @@ class FontconfigConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["m", "pthread"])
 
-        fontconfig_file = os.path.join(self.package_folder, "bin", "etc", "fonts", "fonts.conf")
-        self.runenv_info.prepend_path("FONTCONFIG_FILE", fontconfig_file)
-
         fontconfig_path = os.path.join(self.package_folder, "bin", "etc", "fonts")
-        self.runenv_info.prepend_path("FONTCONFIG_PATH", fontconfig_path)
+        self.runenv_info.append_path("FONTCONFIG_PATH", fontconfig_path)
 
         # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "Fontconfig"
         self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"
-        self.env_info.FONTCONFIG_FILE = fontconfig_file
         self.env_info.FONTCONFIG_PATH = fontconfig_path

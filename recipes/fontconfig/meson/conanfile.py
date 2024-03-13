@@ -74,7 +74,9 @@ class FontconfigConan(ConanFile):
             "doc": "disabled",
             "nls": "disabled",
             "tests": "disabled",
-            "tools": "disabled"
+            "tools": "disabled",
+            "sysconfdir": os.path.join(self.package_folder, "res", "etc"),
+            "datadir": os.path.join(self.package_folder, "res", "share"),
         })
         tc.generate()
 
@@ -92,11 +94,9 @@ class FontconfigConan(ConanFile):
         meson = Meson(self)
         meson.install()
         rm(self, "*.pdb", self.package_folder, recursive=True)
-        rm(self, "*.conf", os.path.join(self.package_folder, "bin", "etc", "fonts", "conf.d"))
+        rm(self, "*.conf", os.path.join(self.package_folder, "res", "etc", "fonts", "conf.d"))
         rm(self, "*.def", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "etc"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
         fix_msvc_libname(self)
 
@@ -109,16 +109,12 @@ class FontconfigConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["m", "pthread"])
 
-        fontconfig_file = os.path.join(self.package_folder, "bin", "etc", "fonts", "fonts.conf")
-        self.runenv_info.prepend_path("FONTCONFIG_FILE", fontconfig_file)
-
-        fontconfig_path = os.path.join(self.package_folder, "bin", "etc", "fonts")
-        self.runenv_info.prepend_path("FONTCONFIG_PATH", fontconfig_path)
+        fontconfig_path = os.path.join(self.package_folder, "res", "etc", "fonts")
+        self.runenv_info.append_path("FONTCONFIG_PATH", fontconfig_path)
 
         # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "Fontconfig"
         self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"
-        self.env_info.FONTCONFIG_FILE = fontconfig_file
         self.env_info.FONTCONFIG_PATH = fontconfig_path
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
