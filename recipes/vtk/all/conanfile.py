@@ -381,7 +381,7 @@ class VtkConan(ConanFile):
                 # NOTE: optionally force to break dependency version clashes until CCI deps have been bumped
                 # TODO: Change to use [replace_requires] for this to work correctly, locally
                 self.output.info(f"Requires: {requirement[1]}")
-                self.requires(requirement[1], force=requirement[0])
+                self.requires(requirement[1], force=requirement[0], transitive_headers=True, transitive_libs=True)
 
 
     # def package_id(self):
@@ -1067,9 +1067,10 @@ class VtkConan(ConanFile):
                 # print(f"5 Adding component {comp}")
                 self.cpp_info.components[comp].requires.append("headers")
 
-                # these are the public depends + private depends
-                # FIXME should private be added as a different kind of private-requires?
-                for section in ["depends", "private_depends"]:
+                # these are the public depends ONLY
+                # For consumers of this VTK recipe, they need to also link the public depends of a module.
+                # Optional and Private depends (in VTK's world) are only used when building VTK.
+                for section == "depends":
                     for dep in vtkmods["modules"][module_name][section]:
                         depname = dep.split(':')[2]
                         if depname in self.cpp_info.components:
@@ -1267,7 +1268,7 @@ class VtkConan(ConanFile):
                     "doubleconversion":  [False, "double-conversion/[>=3.2.1]", "double-conversion::double-conversion" ],
                     "eigen":             [False, "eigen/[>=3.4.0]",             "eigen::eigen"  ],
                     "expat":             [True,  "expat/[=2.6.0]",              "expat::expat"  ],  # TODO conflict: wayland (2.5.0)
-                    "exprtk":            [True,  "exprtk/[=0.0.1]",             "exprtk::exprtr"],  # TODO upgrade to 0.0.2 (there was a problem with first attempt)
+                    "exprtk":            [True,  "exprtk/[=0.0.1]",             "exprtk::exprtk"],  # TODO upgrade to 0.0.2 (there was a problem with first attempt)
                     "fmt":               [True,  "fmt/[=8.1.1]",                "fmt::fmt"      ],  # TODO must be 8.1.1 for some reason ... VTK 9.1.0 release docs mention a PR - confirmed merged 8.1.0, will be bumped in future VTK release
                     "freetype":          [False, "freetype/[>=2.13.0]",         "freetype::freetype" ],
                     "glew":              [False, "glew/[>=2.2.0]",              "glew::glew"    ],
@@ -1320,9 +1321,9 @@ class VtkConan(ConanFile):
                 parties["jpeg"] = [False, "libjpeg-turbo/[>=2.1.5]", "libjpeg-turbo::jpeg"]
 
             if self.options.qt_version == "5":
-                parties["QtOpenGL"] = [False, "qt/[>=5.15.9]", "qt::qtOpenGL"]
+                parties["QtOpenGL"] = [False, "qt/[>=5.15.9]", "qt::qtOpenGLWidgets"]
             else:
-                parties["QtOpenGL"] = [False, "qt/[>=6.5.0]", "qt::qtOpenGL"]
+                parties["QtOpenGL"] = [False, "qt/[>=6.5.0]", "qt::qtOpenGLWidgets"]
             return parties
 
 
@@ -1337,7 +1338,7 @@ class VtkConan(ConanFile):
                     "doubleconversion":  [False, "double-conversion/[>=3.2.1]", "double-conversion::double-conversion" ],
                     "eigen":             [False, "eigen/[>=3.4.0]",             "eigen::eigen"  ],
                     "expat":             [True,  "expat/[=2.6.0]",              "expat::expat"  ],  # TODO conflict: wayland (2.5.0)
-                    "exprtk":            [True,  "exprtk/[=0.0.1]",             "exprtk::exprtr"],  # TODO upgrade to 0.0.2 (there was a problem with first attempt)
+                    "exprtk":            [True,  "exprtk/[=0.0.1]",             "exprtk::exprtk"],  # TODO upgrade to 0.0.2 (there was a problem with first attempt)
                     "fast_float":        [False, "fast_float/3.9.0",            "fast_float::fast_float"],
                     "fmt":               [True,  "fmt/10.2.1",                  "fmt::fmt"      ],
                     "freetype":          [False, "freetype/[>=2.13.0]",         "freetype::freetype" ],
@@ -1391,9 +1392,9 @@ class VtkConan(ConanFile):
                 parties["jpeg"] = [False, "libjpeg-turbo/[>=2.1.5]", "libjpeg-turbo::jpeg"]
 
             if self.options.qt_version == "5":
-                parties["QtOpenGL"] = [False, "qt/[>=5.15.9]", "qt::qtOpenGL"]
+                parties["QtOpenGL"] = [False, "qt/[>=5.15.9]", "qt::qtOpenGLWidgets"]
             else:
-                parties["QtOpenGL"] = [False, "qt/[>=6.5.0]", "qt::qtOpenGL"]
+                parties["QtOpenGL"] = [False, "qt/[>=6.5.0]", "qt::qtOpenGLWidgets"]
             return parties
 
         raise ConanInvalidConfiguration(f"{self.version} not supported by recipe (update _third_party(self))")
