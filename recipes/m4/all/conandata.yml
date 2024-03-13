@@ -1,14 +1,14 @@
 sources:
   "1.4.19":
     url:
-      - "https://ftp.gnu.org/gnu/m4/m4-1.4.19.tar.gz"
-      - "https://ftpmirror.gnu.org/gnu/m4/m4-1.4.19.tar.gz"
-    sha256: "3be4a26d825ffdfda52a56fc43246456989a3630093cced3fbddf4771ee58a70"
+      - "https://ftp.gnu.org/gnu/m4/m4-1.4.19.tar.xz"
+      - "https://ftpmirror.gnu.org/gnu/m4/m4-1.4.19.tar.xz"
+    sha256: "63aede5c6d33b6d9b13511cd0be2cac046f2e70fd0a07aa9573a04a82783af96"
   "1.4.18":
     url:
-      - "https://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.gz"
-      - "https://ftpmirror.gnu.org/gnu/m4/m4-1.4.18.tar.gz"
-    sha256: "ab2633921a5cd38e48797bf5521ad259bdc4b979078034a3b790d7fec5493fab"
+      - "https://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.xz"
+      - "https://ftpmirror.gnu.org/gnu/m4/m4-1.4.18.tar.xz"
+    sha256: "f2c1e86ca0a404ff281631bdc8377638992744b175afb806e25871a24a934e07"
 patches:
   "1.4.19":
     - patch_file: "patches/1.4.19-0001-open-files-in-binary-mode.patch"

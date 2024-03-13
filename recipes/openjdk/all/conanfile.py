@@ -13,7 +13,7 @@ class OpenJDK(ConanFile):
     url = "https://github.com/conan-io/conan-center-index/"
     description = "Java Development Kit builds, from Oracle"
     homepage = "https://jdk.java.net"
-    license = "GPL-2.0-with-classpath-exception"
+    license = "GPL-2.0-only WITH Classpath-exception-2.0", "GPL-2.0-only WITH OpenJDK-assembly-exception-1.0"
     topics = ("java", "jdk", "openjdk")
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
