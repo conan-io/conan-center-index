@@ -162,8 +162,12 @@ class LLVMCoreConan(ConanFile):
     def _apply_resource_limits(self, cmake_definitions):
         if os.getenv("CONAN_CENTER_BUILD_SERVICE"):
             self.output.info("Applying CCI Resource Limits")
+            if self.options.shared and self.settings.build_type == "Debug":
+                ram_per_link_job = "32768"
+            else:
+                ram_per_link_job = "16384"
             cmake_definitions.update({
-                "LLVM_RAM_PER_LINK_JOB": "16384",
+                "LLVM_RAM_PER_LINK_JOB": ram_per_link_job,
                 "LLVM_RAM_PER_COMPILE_JOB": "2048"
             })
         else:
