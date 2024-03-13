@@ -1,0 +1,87 @@
+Add option to specify the precision of the output points.
+Patch upstream in progress.
+
+--- a/Filters/Core/vtkQuadricDecimation.cxx	2023-11-14 07:37:21.000000000 +0800
++++ b/Filters/Core/vtkQuadricDecimation.cxx	2024-03-13 13:05:03.621011727 +0800
+@@ -76,6 +76,7 @@
+   this->TensorsWeight = 0.1;
+ 
+   this->ActualReduction = 0.0;
++  this->OutputPointsPrecision = vtkAlgorithm::DEFAULT_PRECISION;
+ }
+ 
+ //------------------------------------------------------------------------------
+@@ -258,6 +259,20 @@
+   points = vtkPoints::New();
+   outputCellList = vtkIdList::New();
+ 
++  // Set the desired precision for the points in the output.
++  if (this->OutputPointsPrecision == vtkAlgorithm::DEFAULT_PRECISION)
++  {
++    points->SetDataType(input->GetPoints()->GetDataType());
++  }
++  else if (this->OutputPointsPrecision == vtkAlgorithm::SINGLE_PRECISION)
++  {
++    points->SetDataType(VTK_FLOAT);
++  }
++  else if (this->OutputPointsPrecision == vtkAlgorithm::DOUBLE_PRECISION)
++  {
++    points->SetDataType(VTK_DOUBLE);
++  }
++
+   // copy the input (only polys) to our working mesh
+   this->Mesh = vtkPolyData::New();
+   points->DeepCopy(input->GetPoints());
+@@ -430,7 +445,25 @@
+     }
+   }
+ 
++
++  // Explicitly set the desired precision for the points in the output.
++  vtkPoints * outputPoints = vtkPoints::New();
++  if (this->OutputPointsPrecision == vtkAlgorithm::DEFAULT_PRECISION)
++  {
++    outputPoints->SetDataType(input->GetPoints()->GetDataType());
++  }
++  else if (this->OutputPointsPrecision == vtkAlgorithm::SINGLE_PRECISION)
++  {
++    outputPoints->SetDataType(VTK_FLOAT);
++  }
++  else if (this->OutputPointsPrecision == vtkAlgorithm::DOUBLE_PRECISION)
++  {
++    outputPoints->SetDataType(VTK_DOUBLE);
++  }
++
++
+   output->Reset();
++  output->SetPoints(outputPoints);
+   output->AllocateCopy(this->Mesh);
+   output->GetPointData()->CopyAllocate(this->Mesh->GetPointData(), 1);
+   output->CopyCells(this->Mesh, outputCellList);
+--- a/Filters/Core/vtkQuadricDecimation.h	2023-11-14 07:37:21.000000000 +0800
++++ b/Filters/Core/vtkQuadricDecimation.h	2024-03-13 13:05:03.621011727 +0800
+@@ -194,6 +194,16 @@
+   vtkGetMacro(ActualReduction, double);
+   ///@}
+ 
++  ///@{
++  /**
++   * Set/get the desired precision for the output types. See the documentation
++   * for the vtkAlgorithm::DesiredOutputPrecision enum for an explanation of
++   * the available precision settings.
++   */
++  vtkSetMacro(OutputPointsPrecision, int);
++  vtkGetMacro(OutputPointsPrecision, int);
++  ///@}
++
+ protected:
+   vtkQuadricDecimation();
+   ~vtkQuadricDecimation() override;
+@@ -275,6 +285,7 @@
+ 
+   double TargetReduction;
+   double ActualReduction;
++  int OutputPointsPrecision;
+   vtkTypeBool AttributeErrorMetric;
+   vtkTypeBool VolumePreservation;
+ 
