@@ -1273,8 +1273,8 @@ class VtkConan(ConanFile):
                     "freetype":          [False, "freetype/[>=2.13.0]",         "freetype::freetype" ],
                     "glew":              [False, "glew/[>=2.2.0]",              "glew::glew"    ],
                     "hdf5":              [True,  "hdf5/[=1.14.3]",              "hdf5::hdf5"    ],  # TODO conflict: netcdf (.1) and cgns (.0)
-                    "jsoncpp":           [False, "jsoncpp/[>=1.9.4]"            "jsoncpp::jsoncpp"  ],
-                    "libharu":           [False, "libharu/[>=2.4.3]"            "libharu::libharu"  ],
+                    "jsoncpp":           [False, "jsoncpp/[>=1.9.4]",           "jsoncpp::jsoncpp"  ],
+                    "libharu":           [False, "libharu/[>=2.4.3]",            "libharu::libharu"  ],
                     "kissfft":           [False, "kissfft/[>=131.1.0]",         "kissfft::kissfft"  ],
                     "lz4":               [False, "lz4/[>=1.9.4]",               "lz4::lz4"          ],
 
