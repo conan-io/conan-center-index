@@ -237,8 +237,8 @@ class MesaConan(ConanFile):
         "gallium_omx": False,
         "gallium_opencl": False,
         "gallium_rusticl": False,
-        "gallium_va": False,
-        "gallium_vdpau": False,
+        "gallium_va": True,
+        "gallium_vdpau": True,
         "gallium_windows_dll_name": "libgallium_wgl",
         "gallium_xa": False,
         "gbm": True,
@@ -499,7 +499,7 @@ class MesaConan(ConanFile):
             "i915": self._system_has_kms_drm
             and self.settings.arch in ["x86", "x86_64"],
             "iris": self._system_has_kms_drm
-            and str(self.settings.arch).startswith("arm"),
+            and (str(self.settings.arch).startswith("arm") or self.settings.arch in ["x86", "x86_64"]),
             # kmsro is enabled if any of the conditions for "asahi", "etnaviv", "freedreno", "lima", "panfrost", "v3d", or "vc4" are met.
             "kmsro": self._system_has_kms_drm
             and (str(self.settings.arch).startswith("arm")),
@@ -823,6 +823,10 @@ class MesaConan(ConanFile):
         ):
             self.options["glslang"].build_executables = True
             self.options["glslang"].enable_optimizer = False
+
+        if not self._with_gallium_drivers:
+            self.options.rm_safe("gallium_va")
+            self.options.rm_safe("gallium_vdpau")
 
         # todo
         # if self._requires_libclc:
@@ -1373,6 +1377,7 @@ class MesaConan(ConanFile):
             self._save_pkg_config_version("osmesa")
         if self.options.get_safe("with_libglvnd") and self.options.get_safe("egl"):
             # According to the libglvnd ICD loading rules, an ICD library installed in a non-standard directory should be referenced using an absolute path.
+            # For Conan, a relative path will have to suffice.
             replace_in_file(
                 self,
                 os.path.join(
@@ -1380,7 +1385,9 @@ class MesaConan(ConanFile):
                 ),
                 f"libEGL_{self.options.glvnd_vendor_name}",
                 os.path.join(
-                    self.package_folder,
+                    "..",
+                    "..",
+                    "..",
                     "lib",
                     f"libEGL_{self.options.glvnd_vendor_name}",
                 ),
@@ -1608,10 +1615,17 @@ class MesaConan(ConanFile):
         if self.options.get_safe("with_libglvnd") and self.options.get_safe("egl"):
             self.runenv_info.prepend_path("__EGL_VENDOR_LIBRARY_DIRS", os.path.join(self.package_folder, "res", "glvnd", "egl_vendor.d"))
 
-        libgl_drivers_path = os.path.join(self.package_folder, "lib", "dri")
-        if self.settings.os == "Windows":
-            libgl_drivers_path = os.path.join(self.package_folder, "bin")
-        self.runenv_info.prepend_path("LIBGL_DRIVERS_PATH", libgl_drivers_path)
+        if self._with_gallium_drivers:
+            libgl_drivers_path = os.path.join(self.package_folder, "lib", "dri")
+            if self.settings.os == "Windows":
+                libgl_drivers_path = os.path.join(self.package_folder, "bin")
+            self.runenv_info.prepend_path("LIBGL_DRIVERS_PATH", libgl_drivers_path)
+
+            if self.options.get_safe("gallium_va"):
+                self.runenv_info.prepend_path("LIBVA_DRIVERS_PATH", libgl_drivers_path)
+
+            if self.options.get_safe("gallium_vdpau"):
+                self.runenv_info.prepend_path("VDPAU_DRIVER_PATH", os.path.join(self.package_folder, "lib", "vdpau"))
 
         if self.settings.os in ["FreeBSD", "Linux"]:
             self.runenv_info.prepend_path("DRIRC_CONFIGDIR", os.path.join(os.path.join(self.package_folder, "res", "drirc.d")))
