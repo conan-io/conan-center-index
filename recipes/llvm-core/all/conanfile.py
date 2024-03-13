@@ -259,11 +259,8 @@ class LLVMCoreConan(ConanFile):
             # For running llvm-tblgen during the build
             VirtualRunEnv(self).generate(scope="build")
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -293,14 +290,22 @@ class LLVMCoreConan(ConanFile):
         """
         def _sanitized_components(deps_list):
             match_genex = re.compile(r"""\\\$<LINK_ONLY:(.+)>""")
+            replacements = {
+                "LibXml2::LibXml2": "libxml2::libxml2",
+                "ZLIB::ZLIB": "zlib::zlib"
+            }
             for dep in deps_list.split(";"):
                 match = match_genex.search(dep)
                 if match:
                     yield match.group(1)
-                elif dep.startswith("-l"):
-                    yield dep[2:]
                 else:
-                    yield dep
+                    replacement = replacements.get(dep)
+                    if replacement:
+                        yield replacement
+                    elif dep.startswith("-l"):
+                        yield dep[2:]
+                    else:
+                        yield dep
 
         def _parse_deps(deps_list):
             ignore = ["libedit::libedit", "edit"]
@@ -309,7 +314,7 @@ class LLVMCoreConan(ConanFile):
                 "system_libs": []
             }
             for component in _sanitized_components(deps_list):
-                if component in ignore:
+                if component.lower() in ignore:
                     continue
                 if component in ["rt", "m", "dl", "pthread"]:
                     data["system_libs"].append(component)
@@ -319,7 +324,7 @@ class LLVMCoreConan(ConanFile):
 
         cmake_exports = load(self, Path(self.package_folder) / "lib" / "cmake" / "llvm" / "LLVMExports.cmake")
         match_dependencies = re.compile(
-            r'''^set_target_properties\(LLVM(\w+).*\n?\s*INTERFACE_LINK_LIBRARIES\s+"(\S+)"''', re.MULTILINE)
+            r'''^set_target_properties\((\w+).*\n?\s*INTERFACE_LINK_LIBRARIES\s+"(\S+)"''', re.MULTILINE)
 
         components = {component: {} for component in self._llvm_components()}
         for llvm_lib, dependencies in match_dependencies.findall(cmake_exports):
