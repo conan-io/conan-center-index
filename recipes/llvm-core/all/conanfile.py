@@ -16,7 +16,7 @@ from conan.tools.files import (
     export_conandata_patches,
     load,
     rm,
-    rename
+    rename, replace_in_file
 )
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -391,6 +391,7 @@ class LLVMCoreConan(ConanFile):
         # need to rename this as Conan will flag it, but it's not actually a Config file and is needed by
         # downstream packages
         rename(self, cmake_folder / "LLVM-Config.cmake", cmake_folder / "LLVM-ConfigInternal.cmake")
+        replace_in_file(self, cmake_folder / "AddLLVM.cmake", "LLVM-Config", "LLVM-ConfigInternal")
         rmdir(self, package_folder / "share")
 
         self._create_cmake_build_module(
