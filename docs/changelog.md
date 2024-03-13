@@ -1,5 +1,10 @@
 # Changelog
 
+### 13-Mar-2024 - 11:08 CET
+
+- [feature]: Build with both */*:shared=True/False option when package type is declared as ``shared-library``.
+- [fix]: Fix ValidateInfra python version check to be aligned with the latest Jenkins version.
+
 ### 07-February-2024 - 15:43 CET
 
 - [feature] Add waiting list for new collaborators that are not found in access request issue.
