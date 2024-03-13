@@ -371,7 +371,7 @@ class QtConan(ConanFile):
             else:
                 self.requires("libjpeg/9e")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/1.6.42")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
             self.requires("sqlite3/3.45.0")
         if self.options.get_safe("with_mysql", False):
@@ -394,7 +394,7 @@ class QtConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("expat/2.5.0")
+            self.requires("expat/2.6.0")
             self.requires("opus/1.4")
             if not self.options.qtwayland:
                 self.requires("xorg-proto/2022.2")

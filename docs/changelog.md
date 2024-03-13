@@ -1,5 +1,10 @@
 # Changelog
 
+### 07-February-2024 - 15:43 CET
+
+- [feature] Add waiting list for new collaborators that are not found in access request issue.
+- [feature] Skip building bump dependencies PRs by default. It will require manual CI trigger.
+
 ### 24-January-2024 - 12:13 CET
 
 - [feature] Update Conan 1.x branch to version 1.62.0
