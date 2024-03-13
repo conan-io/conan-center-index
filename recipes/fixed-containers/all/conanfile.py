@@ -37,6 +37,9 @@ class FixedContainersConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def requirements(self):
+       self.requires("magic_enum/0.9.3", transitive_headers=True)
+
     def package_id(self):
         self.info.clear()
 
