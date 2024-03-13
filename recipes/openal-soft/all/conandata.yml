@@ -17,6 +17,7 @@ sources:
 patches:
   "1.22.2":
     - patch_file: "patches/1.22.2-0001-fix-al-optional-in-if-compile-error.patch"
+    - patch_file: "patches/1.22.2-0002-fix-pulseaudio-find-package-vars.patch"
   "1.21.0":
     - patch_file: "patches/1.21.0-0001-c++14-does-not-have-std-aligned_alloc.patch"
     - patch_file: "patches/1.21.0-0002-fix-windows-sdk.patch"
