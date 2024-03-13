@@ -61,6 +61,9 @@ class GaiaConan(ConanFile):
         copy(self, "*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            self.cpp_info.system_libs = ["pthread"]
+        
         self.cpp_info.set_property("cmake_file_name", "gaia")
         self.cpp_info.set_property("cmake_target_name", "gaia::gaia")
         self.cpp_info.bindirs = []
