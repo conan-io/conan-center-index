@@ -28,6 +28,12 @@ patches:
     - patch_file: "patches/9.3.0-fix-kissfft-use-external.patch"
       patch_type: "conan"
       patch_description: "Force VTK to use the conan-provided kissfft package"
+    - patch_file: "patches/9.3.0-fix-vtkHull-OutputPrecision.patch"
+      patch_type: "conan"
+      patch_description: "Allow user to adjust output points precision in vtkHull"
+    - patch_file: "patches/9.3.0-fix-vtkQuadricDecimation-OutputPrecision.patch"
+      patch_type: "conan"
+      patch_description: "Allow user to adjust output points precision in vtkQuadricDecimation"
   "9.2.6":
     - patch_file: "patches/9.2.2-remove-qt-59-limit.patch"
       patch_type: "conan"
