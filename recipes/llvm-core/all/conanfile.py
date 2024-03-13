@@ -14,7 +14,7 @@ from conan.tools.files import (
     copy,
     export_conandata_patches,
     load,
-    rm
+    rm, rename
 )
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -379,6 +379,10 @@ class LLVMCoreConan(ConanFile):
         cmake_folder = package_folder / "lib" / "cmake" / "llvm"
         rm(self, "LLVMConfig*", cmake_folder)
         rm(self, "LLVMExports*", cmake_folder)
+        rm(self, "Find*", cmake_folder)
+        # need to rename this as Conan will flag it, but it's not actually a Config file and is needed by
+        # downstream packages
+        rename(self, cmake_folder / "LLVM-Config.cmake", cmake_folder / "LLVM-ConfigInternal.cmake")
         rmdir(self, package_folder / "share")
 
         self._create_cmake_build_module(
@@ -394,7 +398,9 @@ class LLVMCoreConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "LLVM")
         self.cpp_info.set_property("cmake_build_modules",
-                                   [self._build_module_file_rel_path, self._cmake_module_path / "LLVM-Config.cmake"])
+            [self._build_module_file_rel_path,
+             self._cmake_module_path / "LLVM-ConfigInternal.cmake"]
+        )
         self.cpp_info.builddirs.append(self._cmake_module_path)
 
         if not self.options.shared:
