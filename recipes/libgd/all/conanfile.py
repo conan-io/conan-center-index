@@ -15,7 +15,7 @@ class LibgdConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libgd.github.io"
     topics = ("images", "graphics")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -24,6 +24,8 @@ class LibgdConan(ConanFile):
         "with_jpeg": [True, False],
         "with_tiff": [True, False],
         "with_freetype": [True, False],
+        "with_xpm": [True, False],
+        "with_webp": [True, False],
     }
     default_options = {
         "shared": False,
@@ -32,6 +34,8 @@ class LibgdConan(ConanFile):
         "with_jpeg": False,
         "with_tiff": False,
         "with_freetype": False,
+        "with_xpm": False,
+        "with_webp": False,
     }
 
     def export_sources(self):
@@ -62,6 +66,10 @@ class LibgdConan(ConanFile):
             self.requires("libtiff/4.6.0")
         if self.options.with_freetype:
             self.requires("freetype/2.13.2")
+        if self.options.with_xpm:
+            self.requires("libxpm/3.5.13")
+        if self.options.with_webp:
+            self.requires("libwebp/1.3.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -77,10 +85,10 @@ class LibgdConan(ConanFile):
         tc.variables["ENABLE_JPEG"] = self.options.with_jpeg
         tc.variables["ENABLE_TIFF"] = self.options.with_tiff
         tc.variables["ENABLE_ICONV"] = False
-        tc.variables["ENABLE_XPM"] = False
+        tc.variables["ENABLE_XPM"] =  self.options.with_xpm
         tc.variables["ENABLE_FREETYPE"] = self.options.with_freetype
         tc.variables["ENABLE_FONTCONFIG"] = False
-        tc.variables["ENABLE_WEBP"] = False
+        tc.variables["ENABLE_WEBP"] = self.options.with_webp
         if Version(self.version) >= "2.3.2":
             tc.variables["ENABLE_HEIF"] = False
             tc.variables["ENABLE_AVIF"] = False
