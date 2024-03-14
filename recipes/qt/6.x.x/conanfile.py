@@ -60,6 +60,7 @@ class QtConan(ConanFile):
         "with_libalsa": [True, False],
         "with_openal": [True, False],
         "with_gstreamer": [True, False],
+        "with_ffmpeg": [True, False],
         "with_pulseaudio": [True, False],
         "with_gssapi": [True, False],
         "with_md4c": [True, False],
@@ -104,6 +105,7 @@ class QtConan(ConanFile):
         "with_libalsa": False,
         "with_openal": True,
         "with_gstreamer": False,
+        "with_ffmpeg": True,
         "with_pulseaudio": False,
         "with_gssapi": False,
         "with_md4c": True,
@@ -207,6 +209,7 @@ class QtConan(ConanFile):
             del self.options.with_openal
             del self.options.with_gstreamer
             del self.options.with_pulseaudio
+            del self.options.with_ffmpeg
 
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.get_safe("qtwebengine"):
@@ -285,8 +288,8 @@ class QtConan(ConanFile):
         if "MT" in self.settings.get_safe("compiler.runtime", default="") and self.options.shared:
             raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
 
-        if self.options.get_safe("with_pulseaudio", False) or self.options.get_safe("with_libalsa", False):
-            raise ConanInvalidConfiguration("alsa and pulseaudio are not supported (QTBUG-95116), please disable them.")
+        # if self.options.get_safe("with_pulseaudio", False) or self.options.get_safe("with_libalsa", False):
+        #     raise ConanInvalidConfiguration("alsa and pulseaudio are not supported (QTBUG-95116), please disable them.")
         if not self.options.with_pcre2:
             raise ConanInvalidConfiguration("pcre2 is actually required by qt (QTBUG-92454). please use option qt:with_pcre2=True")
 
@@ -353,7 +356,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_x11") or self.options.qtwayland:
-            self.requires("xkbcommon/1.5.0")
+            self.requires("xkbcommon/1.6.0")
         if self.options.get_safe("with_x11", False):
             self.requires("xorg/system")
         if self.options.get_safe("with_egl"):
@@ -376,6 +379,8 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gstreamer/1.19.2")
             self.requires("gst-plugins-base/1.19.2")
+        if self.options.get_safe("with_ffmpeg", False):
+            self.requires("ffmpeg/6.1")
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
@@ -429,6 +434,30 @@ class QtConan(ConanFile):
         # don't override https://github.com/qt/qtmultimedia/blob/dev/cmake/FindGStreamer.cmake
         tc.set_property("gstreamer", "cmake_file_name", "gstreamer_conan")
         tc.set_property("gstreamer", "cmake_find_mode", "module")
+
+        # override ffmpeg
+        tc.set_property("ffmpeg", "cmake_file_name", "FFmpeg")
+        tc.set_property("ffmpeg", "cmake_find_mode", "module")    
+        tc.set_property("ffmpeg::avcodec", "cmake_target_name", "FFmpeg::avcodec")
+        tc.set_property("ffmpeg::avdevice", "cmake_target_name", "FFmpeg::avdevice")
+        tc.set_property("ffmpeg::avformat", "cmake_target_name", "FFmpeg::avformat")
+        tc.set_property("ffmpeg::avfilter", "cmake_target_name", "FFmpeg::avfilter")
+        tc.set_property("ffmpeg::avutil", "cmake_target_name", "FFmpeg::avutil")
+        tc.set_property("ffmpeg::postproc", "cmake_target_name", "FFmpeg::postproc")
+        tc.set_property("ffmpeg::swscale", "cmake_target_name", "FFmpeg::swscale")
+        tc.set_property("ffmpeg::swresample", "cmake_target_name", "FFmpeg::swresample")
+        
+        # override libva
+        tc.set_property("libva", "cmake_file_name", "VAAPI")
+        tc.set_property("libva", "cmake_find_mode", "module")
+        tc.set_property("libva::va", "cmake_target_name", "VAAPI::VA")
+        tc.set_property("libva::va-drm", "cmake_target_name", "VAAPI::DRM")
+        tc.set_property("libva::va-x11", "cmake_target_name", "VAAPI::X11")
+
+        # override pulseaudio
+        tc.set_property("pulseaudio", "cmake_file_name", "WrapPulseAudio")
+        tc.set_property("pulseaudio", "cmake_find_mode", "module")
+        tc.set_property("pulseaudio::pulseaudio", "cmake_target_name", "WrapPulseAudio::WrapPulseAudio")
 
         tc.generate()
 
@@ -491,6 +520,9 @@ class QtConan(ConanFile):
 
         tc.variables["INPUT_opengl"] = self.options.get_safe("opengl", "no")
 
+        if self.options.get_safe("with_pulseaudio", False):
+            tc.variables["QT_FEATURE_pulseaudio"] = "ON"
+
         # openSSL
         if not self.options.openssl:
             tc.variables["INPUT_openssl"] = "no"
@@ -527,7 +559,8 @@ class QtConan(ConanFile):
                               ("with_brotli", "brotli"),
                               ("with_gssapi", "gssapi"),
                               ("with_egl", "egl"),
-                              ("with_gstreamer", "gstreamer")]:
+                              ("with_gstreamer", "gstreamer"),
+                              ("with_ffmpeg", "ffmpeg")]:
             tc.variables[f"FEATURE_{conf_arg}"] = ("ON" if self.options.get_safe(opt, False) else "OFF")
 
 
@@ -1323,6 +1356,9 @@ class QtConan(ConanFile):
                 _create_plugin("QGstreamerMediaPlugin", "gstreamermediaplugin", "multimedia", [
                     "gstreamer::gstreamer",
                     "gst-plugins-base::gst-plugins-base"])
+            if self.options.with_ffmpeg:
+                _create_plugin("QFFmpegMediaPlugin", "ffmpegmediaplugin", "multimedia", [
+                    "ffmpeg::ffmpeg"])
 
         if self.options.get_safe("qtpositioning"):
             _create_module("Positioning", [])
