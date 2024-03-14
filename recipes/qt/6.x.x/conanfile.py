@@ -523,6 +523,10 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_pulseaudio", False):
             tc.variables["QT_FEATURE_pulseaudio"] = "ON"
 
+        # There is currently no recipe for Libmng and Qt is looking for it in the system
+        if self.options.get_safe("imageformats", False):
+            tc.variables["QT_FEATURE_mng"] = "OFF"
+
         # openSSL
         if not self.options.openssl:
             tc.variables["INPUT_openssl"] = "no"
