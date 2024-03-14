@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
-from conan.tools.layout import basic_layout
+from conan.tools.files import chdir, copy, get, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.scm import Version
 from conan.tools.build import cross_building
 import os
@@ -28,7 +27,7 @@ class LibsndioConan(ConanFile):
         "with_alsa": True
     }
 
-    def configure(self):        
+    def configure(self):
         if self.options.get_safe("with_alsa"):
             self.requires("libalsa/1.2.10")
             self.options["libalsa/*"].shared = True
@@ -70,22 +69,22 @@ class LibsndioConan(ConanFile):
             tc.configure_args.append("--enable-alsa")
         else:
             tc.configure_args.append("--disable-alsa")
-        
+
         # Inject conan dependency information into sndio configuration
         dep_cflags = []
         dep_ldflags = []
         for dependency in reversed(self.dependencies.host.topological_sort.values()):
-                deps_cpp_info = dependency.cpp_info.aggregated_components()
+            deps_cpp_info = dependency.cpp_info.aggregated_components()
 
-                dep_cflags.extend( deps_cpp_info.cflags + deps_cpp_info.defines )
-                for path in deps_cpp_info.includedirs:
-                    dep_cflags.append( "-I%s" % path )
-                
-                dep_ldflags.extend( deps_cpp_info.sharedlinkflags + deps_cpp_info.exelinkflags )
-                for path in deps_cpp_info.libdirs:
-                    dep_ldflags.append( "-L%s" % path )
-                for lib in reversed(deps_cpp_info.libs + deps_cpp_info.system_libs):
-                    dep_ldflags.append( "-l%s" % lib )
+            dep_cflags.extend( deps_cpp_info.cflags + deps_cpp_info.defines )
+            for path in deps_cpp_info.includedirs:
+                dep_cflags.append( f"-I{path}" )
+
+            dep_ldflags.extend( deps_cpp_info.sharedlinkflags + deps_cpp_info.exelinkflags )
+            for path in deps_cpp_info.libdirs:
+                dep_ldflags.append( f"-L{path}" )
+            for lib in reversed(deps_cpp_info.libs + deps_cpp_info.system_libs):
+                dep_ldflags.append( f"-l{lib}" )
 
         cflags = ' '.join([flag for flag in dep_cflags])
         ldflags = ' '.join([flag for flag in dep_ldflags])
