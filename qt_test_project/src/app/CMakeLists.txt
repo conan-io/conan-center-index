@@ -2,20 +2,22 @@
 # Targets
 
 # App target
-qt_add_executable(geojsonviewer src/main.cpp)
+qt_add_executable(qtffmpegtest src/main.cpp)
 
 target_link_libraries(
-    geojsonviewer
+    qtffmpegtest
     PUBLIC ${LIBRARY_NAME}
-
-        Qt6::Core
         Qt6::Gui
-        Qt6::LocationPrivate
-        Qt6::Positioning
-        Qt6::Qml
-        Qt6::Quick
+        Qt6::OpenGL
+        Qt6::Xml
         Qt6::Svg
+        Qt6::Network
+        Qt6::Quick
+        Qt6::QuickControls2
         Qt6::Multimedia
+        Qt6::Qml
+        Qt6::Sql
+        Qt6::Widgets
 
         ffmpeg::avutil
         ffmpeg::avdevice
@@ -32,13 +34,13 @@ target_link_libraries(
     )
 
 target_compile_options(
-    geojsonviewer
+    qtffmpegtest
     PUBLIC -Wall
            -Wextra
            -Wpedantic
            -fPIC)
 
-target_compile_features(geojsonviewer PUBLIC cxx_std_17)
+target_compile_features(qtffmpegtest PUBLIC cxx_std_17)
 
 # target_link_options(navx PRIVATE "-Wl,--copy-dt-needed-entries")
 
@@ -47,17 +49,11 @@ target_compile_features(geojsonviewer PUBLIC cxx_std_17)
 
 # Bundle Resources
 set(qml_resource_files
-    "res/qml/GeoJsonDelegate.qml"
-    "res/qml/main.qml"
-    "res/qml/mapitems/CircleItem.qml"
-    "res/qml/mapitems/PolygonItem.qml"
-    "res/qml/mapitems/PolylineItem.qml"
-    "res/qml/mapitems/RectangleItem.qml")
+    "res/qml/main.qml")
 set(svg_resource_files "res/svg/lightbulb.svg")
-set(font_resource_files "res/font/Roboto-Regular.ttf")
 
 qt6_add_resources(
-    geojsonviewer
+    qtffmpegtest
     "qml"
     PREFIX
     "/"
@@ -66,20 +62,19 @@ qt6_add_resources(
     FILES
     ${qml_resource_files})
 qt6_add_resources(
-    geojsonviewer
+    qtffmpegtest
     "other"
     PREFIX
     "/"
     BASE
     "res"
     FILES
-    ${svg_resource_files}
-    ${font_resource_files})
+    ${svg_resource_files})
 
 # ==============================================
 # Install
 
 install(
-    TARGETS geojsonviewer
+    TARGETS qtffmpegtest
     RUNTIME DESTINATION "bin"
     LIBRARY DESTINATION "lib")

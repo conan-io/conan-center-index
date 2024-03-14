@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(geojsonviewer LANGUAGES CXX)
+project(qtffmpegtest LANGUAGES CXX)
 
 # ==============================================
 # Configuration
@@ -21,9 +21,9 @@ set(CMAKE_AUTORCC ON)
 
 find_package(ffmpeg REQUIRED CONFIG)
 find_package(libva REQUIRED CONFIG)
-find_package(yaml-cpp REQUIRED CONFIG)
 find_package(spdlog REQUIRED CONFIG)
 find_package(SDL2 REQUIRED CONFIG)
+find_package(nlohmann_json REQUIRED CONFIG)
 
 # Find Qt components
 find_package( Qt6 COMPONENTS
