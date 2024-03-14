@@ -1,0 +1,380 @@
+{
+    "type" : "FeatureCollection",
+    "features" : [
+        {
+            "type" : "Feature",
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [
+                    3,
+                    11
+                ]
+            },
+            "properties" : {
+                "name" : null,
+        "color" : "darkviolet"
+            }
+        },
+        {
+            "type" : "Feature",
+            "geometry" : {
+                "type" : "MultiPoint",
+                "coordinates" : [
+                    [
+                        3,
+                        11
+                    ],
+                    [
+                        3,
+                        11.5
+                    ],
+                    [
+                        3,
+                        12
+                    ]
+                ]
+            },
+            "properties" : {
+                "name" : null,
+        "color" : "deeppink"
+            }
+        },
+        {
+            "type" : "Feature",
+            "geometry" : {
+                "type" : "LineString",
+                "coordinates" : [
+                    [
+                        1,
+                        11
+                    ],
+                    [
+                        3,
+                        13
+                    ],
+                    [
+                        3,
+                        15
+                    ]
+                ]
+            },
+            "properties" : {
+                "color" : "red",
+                "thickness":1.1
+            }
+        },
+        {
+            "type" : "Feature",
+            "geometry" : {
+                "type" : "MultiLineString",
+                "coordinates" : [
+                    [
+                        [
+                            6,
+                            11
+                        ],
+                        [
+                            8,
+                            13
+                        ],
+                        [
+                            8,
+                            15
+                        ]
+                    ],
+                    [
+                        [
+                            6,
+                            14
+                        ],
+                        [
+                            8,
+                            14
+                        ],
+                        [
+                            8,
+                            16
+                        ]
+                    ]
+                ]
+            },
+            "properties" : {
+                "color" : "green",
+                "happyness" : "a lot",
+                "hope" : "a wee"
+            }
+        },
+        {
+            "type" : "Feature",
+            "geometry" : {
+                "type" : "Polygon",
+                "coordinates" : [
+                    [
+                        [
+                            1,
+                            5
+                        ],
+                        [
+                            5,
+                            5
+                        ],
+                        [
+                            5,
+                            1
+                        ],
+                        [
+                            1,
+                            1
+                        ],
+                        [
+                            1,
+                            5
+                        ]
+                    ]
+                ]
+            },
+            "properties" : {
+                "name" : null,
+                "color" : "red"
+            }
+        },
+        {
+            "type" : "Feature",
+            "geometry" : {
+                "type" : "Polygon",
+                "coordinates" : [
+                    [
+                        [
+                            6,
+                            8
+                        ],
+                        [
+                            12,
+                            8
+                        ],
+                        [
+                            12,
+                            1
+                        ],
+                        [
+                            6,
+                            1
+                        ],
+                        [
+                            6,
+                            8
+                        ]
+                    ],
+                    [
+                        [
+                            7,
+                            7
+                        ],
+                        [
+                            9,
+                            7
+                        ],
+                        [
+                            9,
+                            5
+                        ],
+                        [
+                            7,
+                            5
+                        ],
+                        [
+                            7,
+                            7
+                        ]
+                    ],
+                    [
+                        [
+                            7,
+                            4
+                        ],
+                        [
+                            8,
+                            4
+                        ],
+                        [
+                            8,
+                            3
+                        ],
+                        [
+                            7,
+                            3
+                        ],
+                        [
+                            7,
+                            4
+                        ]
+                    ],
+                    [
+                        [
+                            10,
+                            5
+                        ],
+                        [
+                            11,
+                            5
+                        ],
+                        [
+                            11,
+                            2
+                        ],
+                        [
+                            9,
+                            2
+                        ],
+                        [
+                            9,
+                            4
+                        ],
+                        [
+                            9,
+                            4
+                        ],
+                        [
+                            10,
+                            5
+                        ]
+                    ],
+                    [
+                        [
+                            10,
+                            7
+                        ],
+                        [
+                            11,
+                            7
+                        ],
+                        [
+                            11,
+                            6
+                        ],
+                        [
+                            10,
+                            6
+                        ],
+                        [
+                            10,
+                            7
+                        ]
+                    ]
+                ]
+            },
+            "properties" : {
+                "name" : "MiX creation",
+                "implemented by" : "Julian Sherollari",
+                "creation quality":10,
+                "implementation quality":3.14159
+            }
+        },
+        {
+            "type" : "Feature",
+            "geometry" : {
+                "type" : "MultiPolygon",
+                "coordinates" : [
+                    [
+                        [
+                            [
+                                4,
+                                10
+                            ],
+                            [
+                                5,
+                                10
+                            ],
+                            [
+                                5,
+                                9
+                            ],
+                            [
+                                4,
+                                9
+                            ],
+                            [
+                                4,
+                                10
+                            ]
+                        ]
+                    ],
+                    [
+                        [
+                            [
+                                1,
+                                8
+                            ],
+                            [
+                                5,
+                                8
+                            ],
+                            [
+                                5,
+                                6
+                            ],
+                            [
+                                1,
+                                6
+                            ],
+                            [
+                                1,
+                                8
+                            ]
+                        ]
+                    ]
+                ]
+            },
+            "properties" : {
+                "color" : "yellow",
+                "name" : null
+            }
+        },
+        {
+            "type" : "Feature",
+            "geometry" : {
+                "type" : "GeometryCollection",
+                "geometries" : [
+                    {
+                        "type" : "Point",
+                        "coordinates" : [
+                            14,
+                            2
+                        ]
+                    },
+                    {
+                        "type" : "Polygon",
+                        "coordinates" : [
+                            [
+                                [
+                                    12,
+                                    2
+                                ],
+                                [
+                                    13,
+                                    2
+                                ],
+                                [
+                                    13,
+                                    1
+                                ],
+                                [
+                                    12,
+                                    1
+                                ],
+                                [
+                                    12,
+                                    2
+                                ]
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "properties" : {
+                "color" : "dodgerblue",
+                "name" : null
+            }
+        }
+    ]
+}

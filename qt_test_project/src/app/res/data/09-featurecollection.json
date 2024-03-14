@@ -1,0 +1,48 @@
+{
+    "type" : "FeatureCollection",
+    "properties" : {
+        "color" : "crimson"
+    },
+    "features" : [
+        {
+            "type" : "Feature",
+            "id" : "Poly",
+            "properties" : {
+                "text" : "This is a Feature with a Polygon"
+            },
+            "geometry" : {
+               "type" : "Polygon",
+               "coordinates" : [
+                   [
+                       [17.13, 51.11],
+                       [30.54, 50.42],
+                       [26.70, 58.36],
+                       [17.13, 51.11]
+                   ],
+                   [
+                       [23.46, 54.36],
+                       [20.52, 51.91],
+                       [28.25, 51.50],
+                       [26.80, 54.36],
+                       [23.46, 54.36]
+                   ]
+               ]
+           }
+       },
+       {
+           "type" : "Feature",
+           "id" : "MultiLine",
+           "properties" : {
+               "text" : "This is a Feature with a MultiLineString",
+               "color" : "deepskyblue"
+           },
+           "geometry" : {
+              "type" : "MultiLineString",
+              "coordinates" : [
+                [[13.5, 43], [10.73, 59.92]],
+                [[9.15, 45], [-3.15, 58.90]]
+              ]
+           }
+       }
+    ]
+}
