@@ -1,0 +1,4 @@
+sources:
+  "22.6.6-dev":
+    url: "https://github.com/spiderkeys/media-driver/archive/refs/tags/22.6.6-dev.tar.gz"
+    sha256: "b8c7b49b3464135b02047c4d9a122d19563eeb0c6562a76a2df0f9d35dcab2cc"
