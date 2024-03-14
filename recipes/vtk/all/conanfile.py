@@ -1070,7 +1070,7 @@ class VtkConan(ConanFile):
                 # these are the public depends ONLY
                 # For consumers of this VTK recipe, they need to also link the public depends of a module.
                 # Optional and Private depends (in VTK's world) are only used when building VTK.
-                for section == "depends":
+                for section in ["depends"]:
                     for dep in vtkmods["modules"][module_name][section]:
                         depname = dep.split(':')[2]
                         if depname in self.cpp_info.components:
@@ -1274,7 +1274,7 @@ class VtkConan(ConanFile):
                     "glew":              [False, "glew/[>=2.2.0]",              "glew::glew"    ],
                     "hdf5":              [True,  "hdf5/[=1.14.3]",              "hdf5::hdf5"    ],  # TODO conflict: netcdf (.1) and cgns (.0)
                     "jsoncpp":           [False, "jsoncpp/[>=1.9.4]",           "jsoncpp::jsoncpp"  ],
-                    "libharu":           [False, "libharu/[>=2.4.3]",            "libharu::libharu"  ],
+                    "libharu":           [False, "libharu/[>=2.4.3]",           "libharu::libharu"  ],
                     "kissfft":           [False, "kissfft/[>=131.1.0]",         "kissfft::kissfft"  ],
                     "lz4":               [False, "lz4/[>=1.9.4]",               "lz4::lz4"          ],
 
