@@ -80,7 +80,7 @@ class LibsystemdConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.name}/{self.version} and newer cannot be built with gcc 9.1 or 9.2")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.0")
+        self.tool_requires("meson/1.3.2")
         self.tool_requires("m4/1.4.19")
         self.tool_requires("gperf/3.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
