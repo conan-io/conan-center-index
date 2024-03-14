@@ -526,6 +526,7 @@ class QtConan(ConanFile):
         # There is currently no recipe for Libmng and Qt is looking for it in the system
         if self.options.get_safe("imageformats", False):
             tc.variables["QT_FEATURE_mng"] = "OFF"
+            tc.variables["QT_FEATURE_webp"] = "OFF"
 
         # openSSL
         if not self.options.openssl:
