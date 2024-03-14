@@ -74,6 +74,8 @@ class FFMpegConan(ConanFile):
         "with_libsvtav1": [True, False],
         "with_libaom": [True, False],
         "with_libdav1d": [True, False],
+        "with_libdrm": [True, False],
+        "with_cuvid": [True, False],
         "disable_everything": [True, False],
         "disable_all_encoders": [True, False],
         "disable_encoders": [None, "ANY"],
@@ -154,6 +156,8 @@ class FFMpegConan(ConanFile):
         "with_libsvtav1": True,
         "with_libaom": True,
         "with_libdav1d": True,
+        "with_libdrm": True,
+        "with_cuvid": True,
         "disable_everything": False,
         "disable_all_encoders": False,
         "disable_encoders": None,
@@ -225,6 +229,7 @@ class FFMpegConan(ConanFile):
             "with_libsvtav1": ["avcodec"],
             "with_libaom": ["avcodec"],
             "with_libdav1d": ["avcodec"],
+            "with_cuvid": ["avcodec"]
         }
 
     @property
@@ -245,13 +250,15 @@ class FFMpegConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_vaapi
             del self.options.with_vdpau
             del self.options.with_vulkan
             del self.options.with_xcb
             del self.options.with_libalsa
             del self.options.with_pulse
+            del self.options.with_libdrm
+            del self.options.with_cuvid
         if self.settings.os != "Macos":
             del self.options.with_appkit
         if self.settings.os not in ["Macos", "iOS", "tvOS"]:
@@ -315,22 +322,26 @@ class FFMpegConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.10")
-        if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi"):
+        if self.options.get_safe("with_xcb"):
             self.requires("xorg/system")
         if self.options.get_safe("with_pulse"):
             self.requires("pulseaudio/14.2")
         if self.options.get_safe("with_vaapi"):
-            self.requires("vaapi/system")
+            self.requires("libva/2.20.0")
         if self.options.get_safe("with_vdpau"):
-            self.requires("vdpau/system")
+            self.requires("libvdpau/1.5")
+        if self.options.get_safe("with_cuvid"):
+            self.requires("nv-codec-headers/12.1.14.0")
         if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.243.0")
+            self.requires("vulkan-loader/1.3.268.0")
         if self.options.get_safe("with_libsvtav1"):
             self.requires("libsvtav1/1.6.0")
         if self.options.with_libaom:
             self.requires("libaom-av1/3.6.1")
         if self.options.get_safe("with_libdav1d"):
             self.requires("dav1d/1.2.1")
+        if self.options.get_safe("with_libdrm"):
+            self.requires("libdrm/2.4.119")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -493,6 +504,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable(
                 "libpulse", self.options.get_safe("with_pulse")),
             opt_enable_disable("vaapi", self.options.get_safe("with_vaapi")),
+            opt_enable_disable("libdrm", self.options.get_safe("with_libdrm")),
             opt_enable_disable("vdpau", self.options.get_safe("with_vdpau")),
             opt_enable_disable("libxcb", self.options.get_safe("with_xcb")),
             opt_enable_disable(
@@ -512,8 +524,8 @@ class FFMpegConan(ConanFile):
                 "videotoolbox", self.options.get_safe("with_videotoolbox")),
             opt_enable_disable("securetransport",
                                self.options.with_ssl == "securetransport"),
+            opt_enable_disable("cuvid", self.options.get_safe("with_cuvid")),
             "--disable-cuda",  # FIXME: CUDA support
-            "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
             opt_enable_disable("nonfree", self.options.with_libfdk_aac or (self.options.with_ssl and (
                 self.options.with_libx264 or self.options.with_libx265 or self.options.postproc))),
@@ -954,6 +966,9 @@ class FFMpegConan(ConanFile):
             if self.options.with_libx265:
                 self.cpp_info.components["avcodec"].requires.append(
                     "libx265::libx265")
+            if self.options.with_cuvid:
+                self.cpp_info.components["avcodec"].requires.append(
+                    "nv-codec-headers::nv-codec-headers")
             if self.options.with_libvpx:
                 self.cpp_info.components["avcodec"].requires.append(
                     "libvpx::libvpx")
@@ -1012,13 +1027,24 @@ class FFMpegConan(ConanFile):
             if Version(self.version) >= "5.0" and is_apple_os(self):
                 self.cpp_info.components["avfilter"].frameworks.append("Metal")
 
+        if self.options.get_safe("with_libdrm"):
+            self.cpp_info.components["avutil"].requires.append("libdrm::libdrm_libdrm")
         if self.options.get_safe("with_vaapi"):
-            self.cpp_info.components["avutil"].requires.extend(
-                ["vaapi::vaapi", "xorg::x11"])
+            self.cpp_info.components["avutil"].requires.append("libva::va")
+            if self.options.get_safe("with_libdrm"):
+                self.cpp_info.components["avutil"].requires.append("libva::va-drm")
+            if self.options.get_safe("with_xcb"):
+                self.cpp_info.components["avutil"].requires.extend(["libva::va-x11", "xorg::x11"])
+
+        if self.options.get_safe("with_libdrm"):
+            self.cpp_info.components["avutil"].requires.append("libdrm::libdrm_libdrm")
 
         if self.options.get_safe("with_vdpau"):
-            self.cpp_info.components["avutil"].requires.append("vdpau::vdpau")
+            self.cpp_info.components["avutil"].requires.append("libvdpau::libvdpau")
 
         if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
             self.cpp_info.components["avutil"].requires.append(
                 "vulkan-loader::vulkan-loader")
+
+        if self.options.with_ssl == "openssl":
+            self.cpp_info.components["avutil"].requires.append("openssl::ssl")
