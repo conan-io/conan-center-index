@@ -17,5 +17,8 @@ if(TARGET protobuf::libprotoc)
     target_link_libraries(${PROJECT_NAME} PRIVATE protobuf::libprotoc)
 endif()
 
+if (NOT (rotobuf_VERSION LESS 3.22.0))
+    find_program(protobuf_PROTOC_EXE NAMES protoc PATHS ENV PATH NO_DEFAULT_PATH)
+endif()
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS TARGET ${PROJECT_NAME})
 protobuf_generate(LANGUAGE cpp TARGET ${PROJECT_NAME} PROTOS addressbook.proto)
