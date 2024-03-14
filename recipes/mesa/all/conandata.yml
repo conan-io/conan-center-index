@@ -1,9 +1,9 @@
 sources:
-  "24.0.2":
-    url: "https://archive.mesa3d.org/mesa-24.0.2.tar.xz"
-    sha256: "94e28a8edad06d8ed2b83eb53f253b9eb5aa62c3080f939702e1b3039b56c9e8"
+  "24.0.3":
+    url: "https://archive.mesa3d.org/mesa-24.0.3.tar.xz"
+    sha256: "77aec9a2a37b7d3596ea1640b3cc53d0b5d9b3b52abed89de07e3717e91bfdbe"
 patches:
-  "24.0.2":
+  "24.0.3":
     - patch_file: "patches/24.0.1-0001-Require-directx-headers-when-building-wsi_common_win.patch"
       patch_description: "Fix the directx-headers dependency to be included when it is needed"
       patch_source: "https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/25791"
