@@ -63,8 +63,6 @@ class LibinputConan(ConanFile):
                 self.requires("xorg/system")
 
         if self.options.with_libudev == "systemd":
-            # todo Use libudev from the libsystemd package.
-            # self.requires("libsystemd/255.2", transitive_libs=True)
             self.requires("libudev/system", transitive_libs=True)
         elif self.options.with_libudev == "eudev":
             self.requires("eudev/3.2.14", transitive_libs=True)
@@ -79,7 +77,7 @@ class LibinputConan(ConanFile):
         self.tool_requires("meson/1.3.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.1.0")
-        if self.options.get_safe("with_wayland"):
+        if self.options.debug_gui and self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/<host_version>")
 
     def source(self):
