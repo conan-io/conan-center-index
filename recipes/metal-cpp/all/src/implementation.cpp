@@ -13,3 +13,7 @@
 #ifdef HAS_METALFX
 #include <MetalFX/MetalFX.hpp>
 #endif  // HAS_METALFX
+
+//! @file
+//!       Helper file to allow the build as a library, as an implementation is needed but the
+//!       metal-cpp package is shipped as "header-only".
