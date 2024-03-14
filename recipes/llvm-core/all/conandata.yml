@@ -10,6 +10,11 @@ sources:
     sha256: ce8508e318a01a63d4e8b3090ab2ded3c598a50258cc49e2625b9120d4c03ea5
 
 patches:
+  "18.1.1":
+    - patch_file: patches/18x/0000-cmake-dependencies.patch
+      patch_description: fix references to third party libs to match conan variables and targets
+      patch_type: conan
+      base_path: llvm-main
   "13.0.0":
     - patch_file: patches/13x/0000-cmake-dependencies.patch
       patch_description: fix references to third party libs to match conan variables and targets
