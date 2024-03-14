@@ -5,6 +5,8 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm
 from conan.tools.microsoft import check_min_vs, msvc_runtime_flag, is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
+
 
 import os
 import textwrap
@@ -28,6 +30,7 @@ class ProtobufConan(ConanFile):
         "with_rtti": [True, False],
         "lite": [True, False],
         "debug_suffix": [True, False],
+        "set_rpath": [True, False]
     }
     default_options = {
         "shared": False,
@@ -36,6 +39,7 @@ class ProtobufConan(ConanFile):
         "with_rtti": True,
         "lite": False,
         "debug_suffix": True,
+        "set_rpath" : False
     }
 
     short_paths = True
@@ -63,18 +67,28 @@ class ProtobufConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        if Version(self.version) >= "4.25.0":
+            self.requires("abseil/20240116.1", transitive_headers=True)
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if self.options.shared and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
-
-        check_min_vs(self, "190")
-
-        if self.settings.compiler == "clang":
-            if Version(self.settings.compiler.version) < "4":
-                raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 4")
+        if self.options.shared and is_msvc(self):
+            if Version(self.version) < "4.25.0" and is_msvc_static_runtime(self):
+                raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
+            if Version(self.version) >= "4.25.0":
+                # The executable protoc is not supported for shared type on Windows.
+                # For v4.25.0+ , the dependency, shared abseil is not currently supported on Windows; shared protobuf cannot build with static asbeil on Windows.
+                raise ConanInvalidConfiguration(
+                    "Windows shared build is not supported for 4.25.0+ yet."
+                )
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -83,11 +97,53 @@ class ProtobufConan(ConanFile):
     def _cmake_install_base_path(self):
         return os.path.join("lib", "cmake", "protobuf")
 
+    @property
+    def _min_cppstd(self):
+        return "11" if Version(self.version) < "4.25.0" else "14"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "14": {
+                "gcc": "6",
+                "clang": "5",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+            "11": {
+            "clang": "4",
+            "Visual Studio": "14",
+            "msvc": "190",
+            }
+        }.get(self._min_cppstd, {})
+
+    def _get_rpath(self):
+        dep_dirs = set()
+        for dependency in self.dependencies.values():
+            cpp_info = dependency.cpp_info
+            dep_dirs.update(cpp_info.libdirs)
+        origin = ""
+        separator = ""
+        if is_apple_os(self):
+            origin = "@loader_path"
+            separator = ";"
+        elif self.settings.os == "Linux":
+            origin = "$ORIGIN"
+            separator = ":"
+        rpath = f"{origin}/../lib"
+        for dep_dir in dep_dirs:
+            rel_path = os.path.relpath(dep_dir, self.package_folder)
+            rpath += f"{separator}{origin}/../{rel_path}"
+        return f'\"{rpath}\"'
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
         tc.cache_variables["protobuf_WITH_ZLIB"] = self.options.with_zlib
         tc.cache_variables["protobuf_BUILD_TESTS"] = False
+        if Version(self.version) >= "4.25.0":
+            tc.cache_variables["protobuf_ABSL_PROVIDER"] = "package"
         tc.cache_variables["protobuf_BUILD_PROTOC_BINARIES"] = self.settings.os != "tvOS"
         if not self.options.debug_suffix:
             tc.cache_variables["protobuf_DEBUG_POSTFIX"] = ""
@@ -98,9 +154,12 @@ class ProtobufConan(ConanFile):
             if not runtime:
                 runtime = self.settings.get_safe("compiler.runtime")
             tc.cache_variables["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in runtime
-        if is_apple_os(self) and self.options.shared:
+        if is_apple_os(self) and self.options.shared and not self.options.set_rpath:
             # Workaround against SIP on macOS for consumers while invoking protoc when protobuf lib is shared
             tc.variables["CMAKE_INSTALL_RPATH"] = "@loader_path/../lib"
+
+        if Version(self.version) >= "4.25.0" and not self.settings.compiler.get_safe("cppstd", False):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -178,6 +237,16 @@ class ProtobufConan(ConanFile):
                 "#elif PROTOBUF_GNUC_MIN(12, 0)",
                 "#elif PROTOBUF_GNUC_MIN(12, 2)")
 
+        # Add $ORIGIN/../{relative_path} in RPATH for running executables.
+        if self.options.set_rpath and self.options.shared and (self.settings.os == "Linux" or is_apple_os(self)) :
+            old_str = ""
+            if is_apple_os(self):
+                old_str = 'PROPERTY INSTALL_RPATH "@loader_path/../lib"'
+            elif self.settings.os == "Linux":
+                old_str = 'PROPERTY INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}"'
+            new_str = "PROPERTY INSTALL_RPATH " + self._get_rpath()
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "install.cmake"), old_str, new_str)
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
@@ -190,11 +259,16 @@ class ProtobufConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config-version.cmake"))
-        os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets.cmake"))
-        os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets-{}.cmake".format(str(self.settings.build_type).lower())))
-        rename(self, os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config.cmake"),
-                     os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-generate.cmake"))
+        install_dir = os.path.join(self.package_folder, self._cmake_install_base_path)
+        os.unlink(os.path.join(install_dir, "protobuf-config-version.cmake"))
+        os.unlink(os.path.join(install_dir, "protobuf-targets.cmake"))
+        os.unlink(os.path.join(install_dir, "protobuf-targets-{}.cmake".format(str(self.settings.build_type).lower())))
+        cmake_config = os.path.join(install_dir, "protobuf-config.cmake")
+        if Version(self.version) < "4.25.0":
+            rename(self, cmake_config, os.path.join(install_dir, "protobuf-generate.cmake"))
+        else:
+            os.unlink(cmake_config)
+            rmdir(self, os.path.join(install_dir, "../utf8_range"))
 
         if not self.options.lite:
             rm(self, "libprotobuf-lite*", os.path.join(self.package_folder, "lib"))
@@ -205,33 +279,71 @@ class ProtobufConan(ConanFile):
         self.cpp_info.set_property("cmake_module_file_name", "Protobuf")
         self.cpp_info.set_property("cmake_file_name", "protobuf")
         self.cpp_info.set_property("pkg_config_name", "protobuf_full_package") # unofficial, but required to avoid side effects (libprotobuf component "steals" the default global pkg_config name)
-
-        build_modules = [
-            os.path.join(self._cmake_install_base_path, "protobuf-generate.cmake"),
-            os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
-            os.path.join(self._cmake_install_base_path, "protobuf-options.cmake"),
-        ]
+        build_modules = [ os.path.join(self._cmake_install_base_path, path) for path in os.listdir(os.path.join(self._cmake_install_base_path)) if path.endswith(".cmake")]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
         lib_prefix = "lib" if (is_msvc(self) or self._is_clang_cl) else ""
         lib_suffix = "d" if self.settings.build_type == "Debug" and self.options.debug_suffix else ""
+
+        # utf8_validity
+        if Version(self.version) >= "4.25.0":
+            self.cpp_info.components["utf8_validity"].libs = ["utf8_validity"]
+            self.cpp_info.components["utf8_validity"].requires = ["abseil::absl_strings"]
 
         # libprotobuf
         self.cpp_info.components["libprotobuf"].set_property("cmake_target_name", "protobuf::libprotobuf")
         self.cpp_info.components["libprotobuf"].set_property("pkg_config_name", "protobuf")
         self.cpp_info.components["libprotobuf"].builddirs.append(self._cmake_install_base_path)
         self.cpp_info.components["libprotobuf"].libs = [lib_prefix + "protobuf" + lib_suffix]
+        required_abseil = [] if Version(self.version) < "4.25.0" else [
+            "abseil::absl_check",
+            "abseil::absl_log",
+            "abseil::absl_algorithm",
+            "abseil::absl_base",
+            "abseil::absl_bind_front",
+            "abseil::absl_bits",
+            "abseil::absl_btree",
+            "abseil::absl_cleanup",
+            "abseil::absl_cord",
+            "abseil::absl_core_headers",
+            "abseil::absl_debugging",
+            "abseil::absl_die_if_null",
+            "abseil::absl_dynamic_annotations",
+            "abseil::absl_flags",
+            "abseil::absl_flat_hash_map",
+            "abseil::absl_flat_hash_set",
+            "abseil::absl_function_ref",
+            "abseil::absl_hash",
+            "abseil::absl_layout",
+            "abseil::absl_log_initialize",
+            "abseil::absl_log_severity",
+            "abseil::absl_memory",
+            "abseil::absl_node_hash_map",
+            "abseil::absl_node_hash_set",
+            "abseil::absl_optional",
+            "abseil::absl_span",
+            "abseil::absl_status",
+            "abseil::absl_statusor",
+            "abseil::absl_strings",
+            "abseil::absl_synchronization",
+            "abseil::absl_time",
+            "abseil::absl_type_traits",
+            "abseil::absl_utility",
+            "abseil::absl_variant"
+        ]
+        self.cpp_info.components["libprotobuf"].requires = required_abseil
+        if Version(self.version) >= "4.25.0":
+            self.cpp_info.components["libprotobuf"].requires.append("utf8_validity")
         if self.options.with_zlib:
-            self.cpp_info.components["libprotobuf"].requires = ["zlib::zlib"]
+            self.cpp_info.components["libprotobuf"].requires.append("zlib::zlib")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libprotobuf"].system_libs.extend(["m", "pthread"])
             if self._is_clang_x86 or "arm" in str(self.settings.arch):
                 self.cpp_info.components["libprotobuf"].system_libs.append("atomic")
         if self.settings.os == "Android":
             self.cpp_info.components["libprotobuf"].system_libs.append("log")
-        if self.settings.os == "Windows":
-            if self.options.shared:
-                self.cpp_info.components["libprotobuf"].defines = ["PROTOBUF_USE_DLLS"]
+        if self.options.shared:
+            self.cpp_info.components["libprotobuf"].defines = ["PROTOBUF_USE_DLLS"]
 
         # libprotoc
         if self.settings.os != "tvOS":
@@ -241,6 +353,8 @@ class ProtobufConan(ConanFile):
 
         # libprotobuf-lite
         if self.options.lite:
+            if Version(self.version) >= "4.25.0":
+                self.cpp_info.components["libprotobuf-lite"].requires = ["utf8_validity"]
             self.cpp_info.components["libprotobuf-lite"].set_property("cmake_target_name", "protobuf::libprotobuf-lite")
             self.cpp_info.components["libprotobuf-lite"].set_property("pkg_config_name", "protobuf-lite")
             self.cpp_info.components["libprotobuf-lite"].builddirs.append(self._cmake_install_base_path)
@@ -249,9 +363,9 @@ class ProtobufConan(ConanFile):
                 self.cpp_info.components["libprotobuf-lite"].system_libs.extend(["m", "pthread"])
                 if self._is_clang_x86 or "arm" in str(self.settings.arch):
                     self.cpp_info.components["libprotobuf-lite"].system_libs.append("atomic")
-            if self.settings.os == "Windows":
-                if self.options.shared:
-                    self.cpp_info.components["libprotobuf-lite"].defines = ["PROTOBUF_USE_DLLS"]
+
+            if self.options.shared:
+                self.cpp_info.components["libprotobuf-lite"].defines = ["PROTOBUF_USE_DLLS"]
             if self.settings.os == "Android":
                 self.cpp_info.components["libprotobuf-lite"].system_libs.append("log")
 
@@ -264,4 +378,6 @@ class ProtobufConan(ConanFile):
         if self.options.lite:
             for generator in ["cmake_find_package", "cmake_find_package_multi"]:
                 self.cpp_info.components["libprotobuf-lite"].build_modules[generator] = build_modules
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.env_info.PATH.append(bin_path)
+        self.buildenv_info.append_path("PATH", bin_path)
