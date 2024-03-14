@@ -6,6 +6,9 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi", "pkg_config"
 
+    def requirements(self):
+        self.requires("python_packaging/24.0")
+
     def build_requirements(self):
         if self.settings.os != "Windows":
             self.tool_requires("pkgconf/2.0.3")
