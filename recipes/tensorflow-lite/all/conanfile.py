@@ -72,6 +72,10 @@ class TensorflowLiteConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    @property
+    def _needs_fxdiv(self):
+        return Version(self.version) >= "2.12.0"
+
     def requirements(self):
         self.requires("abseil/20230125.3")
         self.requires("eigen/3.4.0")
@@ -88,6 +92,8 @@ class TensorflowLiteConan(ConanFile):
             self.requires("pthreadpool/cci.20231129")
         if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
             self.requires("fp16/cci.20210320")
+        if self._needs_fxdiv:
+            self.requires("fxdiv/cci.20200417")
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
