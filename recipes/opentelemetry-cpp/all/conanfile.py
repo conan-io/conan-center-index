@@ -235,14 +235,9 @@ class OpenTelemetryCppConan(ConanFile):
             replace_in_file(self, protos_cmake_path,
                             "if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto/.git)",
                             "if(1)")
-            if Version(self.version) < "1.8.3":
-                replace_in_file(self, protos_cmake_path,
-                                'set(PROTO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto")',
-                                f'set(PROTO_PATH "{protos_path}")')
-            else:
-                replace_in_file(self, protos_cmake_path,
-                                '"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto")',
-                                f'"{protos_path}")')
+            replace_in_file(self, protos_cmake_path,
+                            '"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto")',
+                            f'"{protos_path}")')
             if self.options.with_otlp_grpc and Version(self.version) < "1.9.1":
                 save(self, protos_cmake_path, "\ntarget_link_libraries(opentelemetry_proto PUBLIC gRPC::grpc++)", append=True)
 
@@ -284,7 +279,6 @@ class OpenTelemetryCppConan(ConanFile):
     @property
     def _otel_libraries(self):
         libraries = [
-            self._http_client_name,
             "opentelemetry_common",
             "opentelemetry_exporter_in_memory",
             "opentelemetry_exporter_ostream_span",
@@ -292,6 +286,9 @@ class OpenTelemetryCppConan(ConanFile):
             "opentelemetry_trace",
             "opentelemetry_version",
         ]
+        if self.options.with_otlp_http or self.options.with_elasticsearch or self.options.get_safe("with_jaeger") or self.options.with_zipkin:
+            # https://github.com/open-telemetry/opentelemetry-cpp/blob/v1.12.0/CMakeLists.txt#L452-L460
+            libraries.append(self._http_client_name)
         if self.options.with_otlp_grpc or self.options.with_otlp_http:
             libraries.extend([
                 "opentelemetry_proto",
@@ -383,12 +380,6 @@ class OpenTelemetryCppConan(ConanFile):
             ])
 
         if self.options.with_otlp_grpc:
-            if Version(self.version) <= "1.7.0":
-                self.cpp_info.components["opentelemetry_exporter_otlp_grpc"].requires.extend([
-                    "grpc::grpc++",
-                    "opentelemetry_otlp_recordable",
-                ])
-
             self.cpp_info.components["opentelemetry_exporter_otlp_grpc_client"].requires.extend([
                 "grpc::grpc++",
                 "opentelemetry_proto",

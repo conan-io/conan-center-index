@@ -16,6 +16,7 @@ from handling "vendored" dependencies to what versions should be used.
     * [Overriding the provided properties from the consumer](#overriding-the-provided-properties-from-the-consumer)
   * [Adherence to Build Service](#adherence-to-build-service)
     * [Version Ranges](#version-ranges)
+      * [Adding Version Ranges](#adding-version-ranges)
   * [Handling "internal" dependencies](#handling-internal-dependencies)<!-- endToc -->
 
 ## List Dependencies
@@ -180,13 +181,11 @@ With the introduction of Conan 2.0, we are currently working to allow the use of
 Currently, these are:
 
 * OpenSSL: `[>=1.1 <4]` for libraries known to be compatible with OpenSSL 1.x and 3.x
-* CMake: `[>3.XX <4]`, where `3.XX` is the minimum version of CMake required by the relevant build scripts
+* CMake: `[>3.XX <4]`, where `3.XX` is the minimum version of CMake required by the relevant build scripts. Note that CCI recipes assume 3.15 is installed in the system, so add this
+version range only when a requirement for a newer version is needed.
 * Libcurl: `[>=X.YY <9]`, where `X.YY` is the minimum version of Libcurl required, starting from `7.78`
-
-> **Note**: You might also see Zlib ranges in some PR by CCI maintainers.
-> We're adding them little by little to avoid missing binaries and conflict errors.
-> Please do not open PRs moving Zlib to ranges for now, we'll update this page when PRs are free to add new ranges.
-
+* Zlib: `[>=1.2.11 <2]` expect if the recipe needs a newer lower version for specific reasons
+* Libpng: `[>=1.6 <2]` expect if the recipe needs a newer lower version for specific reasons
 
 > **Warning**: With Conan 1.x, [version ranges](https://docs.conan.io/1/versioning/version_ranges.html) adhere to a much more strict sematic version spec,
 > OpenSSL 1.1.x does not follow this so the client will not resolve to that range and will pick a 3.x version. In order to select a lower version you
@@ -195,7 +194,15 @@ Currently, these are:
 
 Conan maintainers may introduce this for other dependencies over time. Outside of the cases outlined above, version ranges are not allowed in ConanCenter recipes.
 
+#### Adding Version Ranges
+
+You might also see version ranges in some PR by CCI maintainers.
+
+These are being done on a case-by-case basis, and are being rolled out in phases to ensure
+that they do not cause problems to users. Please do not open PRs that exclusively add version ranges to dependencies,
+unless they are solving current conflicts, in which case we welcome them and they will be prioritized.
+
 ## Handling "internal" dependencies
 
-Vendoring in library source code should be removed (best effort) to avoid potential ODR violations. If upstream takes care to rename
-symbols, it may be acceptable.
+Vendoring in library source code should be removed (in a best effort basis) to avoid potential ODR violations.
+If upstream takes care to rename symbols, it may be acceptable.
