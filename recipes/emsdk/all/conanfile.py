@@ -19,6 +19,18 @@ class EmSDKConan(ConanFile):
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
 
+    options = {
+        "nodejs_version": [
+            "16.3.0",
+            "16.20.2",
+            "18.15.0"
+        ]
+    }
+
+    default_options = {
+        "nodejs_version": "16.3.0"
+    }
+
     short_paths = True
 
     @property
@@ -29,7 +41,7 @@ class EmSDKConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nodejs/16.3.0")
+        self.requires("nodejs/" + str(self.options.nodejs_version))
         # self.requires("python")  # FIXME: Not available as Conan package
         # self.requires("wasm")  # FIXME: Not available as Conan package
 
