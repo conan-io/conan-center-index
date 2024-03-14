@@ -62,13 +62,14 @@ diff --git src/OpenColorIO/CMakeLists.txt src/OpenColorIO/CMakeLists.txt
 index 26b4bb4c..d54cff3d 100755
 --- src/OpenColorIO/CMakeLists.txt
 +++ src/OpenColorIO/CMakeLists.txt
-@@ -309,8 +309,8 @@ target_link_libraries(OpenColorIO
+@@ -309,8 +309,9 @@ target_link_libraries(OpenColorIO
          "$<BUILD_INTERFACE:utils::from_chars>"
          "$<BUILD_INTERFACE:utils::strings>"
          "$<BUILD_INTERFACE:xxHash>"
 -        ${YAML_CPP_LIBRARIES}
 -        MINIZIP::minizip-ng
 +        yaml-cpp
++      PUBLIC
 +        MINIZIP::minizip
  )
  
