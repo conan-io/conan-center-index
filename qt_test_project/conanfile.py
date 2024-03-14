@@ -1,25 +1,46 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.cmake import CMakeDeps
-from conan.tools.files import copy
+from conan.tools.files import copy, save
 from conan.tools.build import cross_building
+from conan.tools.env import VirtualRunEnv
 
 import os
 
 class QtFfmpegTestConan(ConanFile):
     name = "qt_ffmpeg_test"
     settings    = "os", "compiler", "build_type", "arch"
-    generators  = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    generators  = "CMakeToolchain", "CMakeDeps"
 
     def layout(self):
         cmake_layout(self)
 
     def generate(self):
+        path = self.dependencies["qt"].package_folder.replace("\\", "/")
+        folder = os.path.join(path, "bin")
+        bin_folder = "bin" if self.settings.os == "Windows" else "libexec"
+        save(self, "qt.conf", f"""[Paths]
+            Prefix = {path}
+            ArchData = {folder}/archdatadir
+            HostData = {folder}/archdatadir
+            Data = {folder}/datadir
+            Sysconf = {folder}/sysconfdir
+            LibraryExecutables = {folder}/archdatadir/{bin_folder}
+            HostLibraryExecutables = bin
+            Plugins = {folder}/archdatadir/plugins
+            Imports = {folder}/archdatadir/imports
+            Qml2Imports = {folder}/archdatadir/qml
+            Translations = {folder}/datadir/translations
+            Documentation = {folder}/datadir/doc
+            Examples = {folder}/datadir/examples""")
+
         conanlibs_path = os.path.join( self.build_folder, "thirdparty" )
         for dep in self.dependencies.values():
             for libdir in dep.cpp_info.libdirs:
-                copy(self, "*.so", libdir, conanlibs_path )
-                copy(self, "*.so.*", libdir, conanlibs_path )
+                copy(self, "**.so", libdir, conanlibs_path, keep_path=False )
+                copy(self, "**.so.*", libdir, conanlibs_path, keep_path=False )
+
+        VirtualRunEnv(self).generate(scope="build")
 
     def requirements(self):
         self.requires( "qt/6.6.2" )
@@ -34,11 +55,11 @@ class QtFfmpegTestConan(ConanFile):
         self.options["qt"].qtsvg=True
         self.options["qt"].qtdeclarative=True
         self.options["qt"].qt5compat=True
-        self.options["qt"].qtcharts=False
-        self.options["qt"].qtimageformats=False
+        self.options["qt"].qtcharts=True
+        self.options["qt"].qtimageformats=True
         self.options["qt"].qtmultimedia=True
-        self.options["qt"].qtlocation=False
-        self.options["qt"].qtconnectivity=False
+        self.options["qt"].qtlocation=True
+        self.options["qt"].qtconnectivity=True
         self.options["qt"].with_ffmpeg=True
         self.options["qt"].with_pulseaudio=True
 
@@ -80,3 +101,5 @@ class QtFfmpegTestConan(ConanFile):
         self.options["ffmpeg"].with_libx265=False
         self.options["ffmpeg"].with_cuvid=True
         self.options["ffmpeg"].with_libva=True
+
+        self.options["pulseaudio"].shared=True

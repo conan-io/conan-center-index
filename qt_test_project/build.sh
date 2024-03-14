@@ -32,8 +32,4 @@ cmake --build --preset "${CMAKE_PRESET}" -- -j 4
 popd
 
 # Install files, create appimage if needed
-if [ "${BUILD_TYPE}" = "Release" ]; then
-    cmake --install "${BUILD_DIR}/${BUILD_TYPE}" --prefix "${INSTALL_DIR}"
-
-    # TODO: AppImage
-fi
+cmake --install "${BUILD_DIR}/${BUILD_TYPE}" --prefix "${INSTALL_DIR}"
