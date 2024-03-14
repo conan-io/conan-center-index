@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
-from conan.tools.layout import basic_layout
+from conan.tools.files import chdir, copy, get, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.scm import Version
 from conan.tools.build import cross_building
 import os
@@ -19,25 +18,19 @@ class LibsndioConan(ConanFile):
     topics = ("sndio", "sound", "audio", "midi")
     description = "A small audio and MIDI framework that provides a lightweight audio & MIDI server \
         and a user-space API to access either the server or the hardware directly in a uniform way."
-    package_type = "library"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
         "with_alsa": [True, False]
     }
     default_options = {
-        "shared": True,
-        "fPIC": True,
         "with_alsa": True
     }
 
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        
         if self.options.get_safe("with_alsa"):
             self.requires("libalsa/1.2.10")
+            self.options["libalsa/*"].shared = True
 
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
@@ -63,21 +56,43 @@ class LibsndioConan(ConanFile):
             env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
-        yes_no = lambda v: "yes" if v else "no"
+
+        # Set expected config
+        tc.configure_args.append( "--datadir=${prefix}/res" )
 
         # Bundled `configure` script does not support these options, so remove
-        exclusions = ["--enable-shared", "--disable-static", "--sbindir", "--oldincludedir"]
+        exclusions = ["--enable-shared", "--disable-shared", "--disable-static", "--enable-static", "--sbindir", "--oldincludedir"]
         tc.configure_args = [arg for arg in tc.configure_args if not any(exclusion in arg for exclusion in exclusions)]
 
-        tc.configure_args.append("--datadir=${prefix}/res")
-        tc.configure_args.append("LDFLAGS=-lm")
-        
+        # Add alsa support
         if self.options.get_safe("with_alsa"):
             tc.configure_args.append("--enable-alsa")
+        else:
+            tc.configure_args.append("--disable-alsa")
 
-        tc.generate()
+        # Inject conan dependency information into sndio configuration
+        dep_cflags = []
+        dep_ldflags = []
+        for dependency in reversed(self.dependencies.host.topological_sort.values()):
+            deps_cpp_info = dependency.cpp_info.aggregated_components()
 
-        tc = PkgConfigDeps(self)
+            dep_cflags.extend( deps_cpp_info.cflags + deps_cpp_info.defines )
+            for path in deps_cpp_info.includedirs:
+                dep_cflags.append( f"-I{path}" )
+
+            dep_ldflags.extend( deps_cpp_info.sharedlinkflags + deps_cpp_info.exelinkflags )
+            for path in deps_cpp_info.libdirs:
+                dep_ldflags.append( f"-L{path}" )
+            for lib in reversed(deps_cpp_info.libs + deps_cpp_info.system_libs):
+                dep_ldflags.append( f"-l{lib}" )
+
+        cflags = ' '.join([flag for flag in dep_cflags])
+        ldflags = ' '.join([flag for flag in dep_ldflags])
+        tc.configure_args.extend([
+            f"CFLAGS={cflags}",
+            f"LDFLAGS={ldflags}"
+        ])
+
         tc.generate()
 
         tc = AutotoolsDeps(self)
