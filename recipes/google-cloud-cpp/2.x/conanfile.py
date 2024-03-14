@@ -213,6 +213,8 @@ class GoogleCloudCppConan(ConanFile):
         if self.settings.os == "Android":
             result.remove('accesscontextmanager')
             result.remove('talent')
+        if self.settings.os == "Windows" and Version(self.version) >= '2.22.0':
+            result.remove('securitycenter')
         return result
 
     def _proto_components(self):
