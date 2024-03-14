@@ -1,0 +1,4 @@
+sources:
+  "24.0":
+    url: "https://github.com/pypa/packaging/archive/refs/tags/24.0.tar.gz"
+    sha256: "1bf35cf2c2be982f2ae6c905760ae19cb744fadbf56269f2e54f7bdcef64d291"
