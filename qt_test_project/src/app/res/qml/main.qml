@@ -17,36 +17,9 @@ ApplicationWindow {
 
    MediaPlayer {
         id: mediaplayer
-        source: "" //"/home/spiderkeys/qt_videos/bad.mp4"
+        source: "https://download.samplelib.com/mp4/sample-5s.mp4"
         videoOutput: videoOutput
-
-        Component.onCompleted: {
-console.log("z")
-        }
-
-        onPlaybackRateChanged: {
-            console.log( "playback rate: " + playbackRate )
-        }
-
-        onSourceChanged: function(source) {
-            if( source === "" )
-            {
-                console.log("A")
-            }
-            else
-            {
-                console.log("B")
-                mediaPlayer.pause()
-            }
-        }
-
-        onMediaStatusChanged: {
-            if( mediaStatus == MediaPlayer.EndOfMedia )
-            {
-                console.log("C")
-            }
-            console.log("D")
-        }
+        audioOutput: AudioOutput {}
 
         onErrorOccurred: {
             console.log("E")
@@ -68,5 +41,15 @@ console.log("z")
         color: "green"
         width: 50
         height: 50
+    }
+
+    Image {
+        source: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/PNG_Test.png/477px-PNG_Test.png"
+        width: 100
+        height: 100
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.rightMargin: 5
+        anchors.bottomMargin: 5
     }
 }

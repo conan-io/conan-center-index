@@ -42,7 +42,6 @@ target_compile_options(
 
 target_compile_features(qtffmpegtest PUBLIC cxx_std_17)
 
-# target_link_options(navx PRIVATE "-Wl,--copy-dt-needed-entries")
 
 # ==============================================
 # Resources

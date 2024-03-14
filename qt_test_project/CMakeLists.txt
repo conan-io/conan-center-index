@@ -19,7 +19,7 @@ set(CMAKE_AUTORCC ON)
 # ==============================================
 # Dependencies
 
-find_package(ffmpeg REQUIRED CONFIG)
+find_package(ffmpeg COMPONENTS avcodec avformat avutil avdevice avfilter swscale swresample REQUIRED CONFIG)
 find_package(libva REQUIRED CONFIG)
 find_package(spdlog REQUIRED CONFIG)
 find_package(SDL2 REQUIRED CONFIG)

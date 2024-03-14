@@ -13,16 +13,23 @@
 #include <QVariantMap>
 #include <QtCore/qobjectdefs.h>
 
+extern "C" {
+#include <libavutil/log.h>
+}
+
 using namespace Qt::StringLiterals;
 
 #include <SDL2/SDL.h>
 
-#include "main.moc"
+
+
 
 int main(int argc, char *argv[])
 {
     // Instruct SDL to report events even when no window has focus
     SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
+
+    // av_log_set_level( AV_LOG_TRACE );
 
     // Initialize SDL
     auto ret = SDL_Init(SDL_INIT_GAMECONTROLLER);

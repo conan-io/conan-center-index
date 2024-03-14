@@ -37,13 +37,14 @@ class QtFfmpegTestConan(ConanFile):
         conanlibs_path = os.path.join( self.build_folder, "thirdparty" )
         for dep in self.dependencies.values():
             for libdir in dep.cpp_info.libdirs:
-                copy(self, "**.so", libdir, conanlibs_path, keep_path=False )
-                copy(self, "**.so.*", libdir, conanlibs_path, keep_path=False )
+                copy(self, "**.so", libdir, conanlibs_path)
+                copy(self, "**.so.*", libdir, conanlibs_path )
 
         VirtualRunEnv(self).generate(scope="build")
 
     def requirements(self):
         self.requires( "qt/6.6.2" )
+        self.requires( "ffmpeg/6.1" )
         self.requires( "intel-media-driver/23.4.3" )
         self.requires( "nlohmann_json/3.11.3" )
         self.requires( "spdlog/1.13.0" )
@@ -101,5 +102,8 @@ class QtFfmpegTestConan(ConanFile):
         self.options["ffmpeg"].with_libx265=False
         self.options["ffmpeg"].with_cuvid=True
         self.options["ffmpeg"].with_libva=True
+        self.options["ffmpeg"].with_vdpau=False
 
+        self.options["libalsa"].shared=True
         self.options["pulseaudio"].shared=True
+        self.options["libsndio"].shared=True
