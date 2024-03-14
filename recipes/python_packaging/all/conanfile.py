@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 import os
 
 
@@ -9,18 +10,19 @@ required_conan_version = ">=1.47.0"
 class PackageConan(ConanFile):
     name = "python_packaging"
     description = "Core utilities for Python packages"
-    license = "BSD-2-Clause"  # or Apache-2.0
+    license = ("BSD-2-Clause", "Apache-2.0")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/pypa/packaging/"
     topics = ("python")
     package_type = "build-scripts"
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        del self.info.settings.os
-        del self.info.settings.arch
-        del self.info.settings.compiler
-        del self.info.settings.build_type
+        self.info.clear()
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
