@@ -50,6 +50,10 @@ class DbusConan(ConanFile):
         "session_socket_dir": "/tmp",
     }
 
+    @property
+    def _has_message_bus_option(self):
+        return Version(self.version) > "1.15.2"
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -60,13 +64,15 @@ class DbusConan(ConanFile):
             del self.options.with_x11
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._has_message_bus_option:
+            self.options.rm_safe("message_bus")
 
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if not self.options.message_bus:
+        if not self.options.get_safe("message_bus", True):
             self.options.rm_safe("dbus_user")
             self.options.rm_safe("session_socket_dir")
             self.options.rm_safe("system_pid_file")
@@ -109,11 +115,18 @@ class DbusConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["asserts"] = not is_apple_os(self)
         tc.project_options["checks"] = False
+        tc.project_options["datadir"] = os.path.join(self.package_folder, "res", "share")
+        tc.project_options["localstatedir"] = os.path.join(self.package_folder, "res", "var")
+        tc.project_options["sysconfdir"] = os.path.join(self.package_folder, "res", "etc")
         tc.project_options["doxygen_docs"] = "disabled"
+        tc.project_options["ducktype_docs"] = "disabled"
+        tc.project_options["qt_help"] = "disabled"
         tc.project_options["modular_tests"] = "disabled"
         tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux", False) else "disabled"
         tc.project_options["systemd"] = "enabled" if self.options.get_safe("with_systemd", False) else "disabled"
-        if self.options.message_bus:
+        if self._has_message_bus_option:
+            tc.project_options["message_bus"] = self.options.message_bus
+        if self.options.get_safe("message_bus"):
             tc.project_options["dbus_user"] = str(self.options.dbus_user)
             tc.project_options["session_socket_dir"] = str(self.options.get_safe("session_socket_dir", ""))
             tc.project_options["system_socket"] = str(self.options.get_safe("system_socket", ""))
@@ -142,10 +155,7 @@ class DbusConan(ConanFile):
         meson.install()
 
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-        rmdir(self, os.path.join(self.package_folder, "share", "doc"))
-        mkdir(self, os.path.join(self.package_folder, "res"))
-        for i in ["var", "share", "etc"]:
-            rename(self, os.path.join(self.package_folder, i), os.path.join(self.package_folder, "res", i))
+        rmdir(self, os.path.join(self.package_folder, "res", "share", "doc"))
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
