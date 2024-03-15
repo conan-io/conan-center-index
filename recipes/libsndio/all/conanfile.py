@@ -99,7 +99,6 @@ class LibsndioConan(ConanFile):
                 dep_ldflags.append( f"-L{path}" )
             for lib in deps_cpp_info.libs + deps_cpp_info.system_libs:
                 dep_ldflags.append( f"-l{lib}" )
-                pass
 
         cflags = ' '.join([flag for flag in dep_cflags])
         ldflags = ' '.join([flag for flag in dep_ldflags])
