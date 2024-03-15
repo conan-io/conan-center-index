@@ -1,7 +1,6 @@
 import glob
 import os
 import re
-from io import StringIO
 
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
@@ -450,6 +449,13 @@ class MesaConan(ConanFile):
     def _default_shared_glapi_option(self):
         return True
 
+    @property
+    def _python(self):
+        if conan_version.major >= 2:
+            return self.dependencies.direct_build["cpython"].conf_info.get("user.cpython:python", check_type=str)
+        else:
+            return self.deps_user_info["cpython"].python
+
     def _default_gallium_driver_option(self, option: str):
         return {
             "asahi": False,
@@ -877,16 +883,6 @@ class MesaConan(ConanFile):
             self.requires("moltenvk/1.2.2")
 
     def validate(self):
-        stdout = StringIO()
-        python_suffix = ".exe" if self.settings.os == "Windows" else "3"
-        if conan_version.major >= 2:
-            self.run(f"python{python_suffix} --version", quiet=True, stdout=stdout)
-        else:
-            self.run(f"python{python_suffix} --version")
-        python_version = stdout.getvalue().strip().replace("Python ", "")
-        if Version(python_version) < "3.9":
-            self.output.error(f"{self.ref} internal scripts require Python 3.9 or later. Please update your Python installation.")
-
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
             # todo Use check_max_cppstd from Conan V2.
@@ -1126,6 +1122,7 @@ class MesaConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/1.3.2")
+        self.tool_requires("cpython/3.10.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         if self.options.get_safe("platform_wayland"):
@@ -1309,7 +1306,7 @@ class MesaConan(ConanFile):
         script_subfolder = "Scripts" if self.settings.os == "Windows" else "bin"
         python_suffix = ".exe" if self.settings.os == "Windows" else "3"
         venv_python = os.path.join(venv_folder, script_subfolder, f"python{python_suffix}")
-        self.run(f"python{python_suffix} -m venv {venv_folder}")
+        self.run(f"{self._python} -m venv {venv_folder}")
         self.run(f"{venv_python} -m pip install pip --upgrade")
         self.run(f"{venv_python} -m pip install mako==1.3.2")
         # INFO: Preserve user's PYTHONPATH in case defined. Only can access venv path after installing mako.
