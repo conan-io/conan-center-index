@@ -121,6 +121,7 @@ class MesaConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
     # Reduce the cost of copying a lot of source code.
+    no_copy_source = True
     options = {
         "android_stub": [True, False],
         "android_libbacktrace": [True, False],
@@ -1191,15 +1192,10 @@ class MesaConan(ConanFile):
             "dep_wl_protocols = dependency('wayland-protocols', version : '>= 1.30')",
             "dep_wl_protocols = dependency('wayland-protocols_BUILD', native: true, version : '>= 1.30')",
         )
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "meson.build"),
-            "find_installation('python3')",
-            "find_installation('python3', modules : ['mako'])",
-        )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         def boolean(option):
@@ -1370,7 +1366,6 @@ class MesaConan(ConanFile):
         return pythonpath[0] if pythonpath else ""
 
     def build(self):
-        self._patch_sources()
         self._install_python_mako()
         with self._env_pythonpath.vars(self).apply():
             meson = Meson(self)
