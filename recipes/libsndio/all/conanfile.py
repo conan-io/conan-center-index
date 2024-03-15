@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import chdir, copy, get, rmdir, replace_in_file
+from conan.tools.files import chdir, copy, get, rmdir, replace_in_file, download
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.scm import Version
 from conan.tools.build import cross_building
@@ -44,6 +44,7 @@ class LibsndioConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        download(self, self.conan_data["license"]["url"], "LICENSE" )
 
         # Remove all targets other than libsndio
         lines = [

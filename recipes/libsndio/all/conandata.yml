@@ -1,4 +1,6 @@
 sources:
   "1.9.0":
-    url: "https://sndio.org/sndio-1.9.0.tar.gz"
-    sha256: "f30826fc9c07e369d3924d5fcedf6a0a53c0df4ae1f5ab50fe9cf280540f699a"
+    url: "https://github.com/ratchov/sndio/archive/refs/tags/v1.9.0.tar.gz"
+    sha256: "4e8d77069b651d7c4bb2a50ba49004bd7fcfdfec1516f88a76457f831c17a546"
+license:
+  url: "https://github.com/ratchov/sndio/blob/a15be2c70311c703352c9d4ef2eca5219730ae06/LICENSE"
