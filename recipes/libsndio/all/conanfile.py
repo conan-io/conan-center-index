@@ -43,8 +43,8 @@ class LibsndioConan(ConanFile):
         self.tool_requires("libtool/2.4.7")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        download(self, self.conan_data["license"]["url"], "LICENSE" )
+        get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
+        download(self, **self.conan_data["sources"][self.version]["license"], filename="LICENSE")
 
         # Remove all targets other than libsndio
         lines = [
