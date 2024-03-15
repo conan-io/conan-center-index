@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import chdir, copy, get, rmdir
+from conan.tools.files import chdir, copy, get, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.scm import Version
 from conan.tools.build import cross_building
@@ -45,6 +45,20 @@ class LibsndioConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+        # Remove all targets other than libsndio
+        lines = [
+            "cd sndiod && ${MAKE} install",
+            "cd sndioctl && ${MAKE} install",
+            "cd aucat && ${MAKE} install",
+            "cd midicat && ${MAKE} install",
+            "cd sndiod && ${MAKE}",
+            "cd sndioctl && ${MAKE}",
+            "cd aucat && ${MAKE}",
+            "cd midicat && ${MAKE}"
+        ]
+        for line in lines:
+            replace_in_file(self, os.path.join(self.source_folder, "Makefile.in"), line, "")
+
     def generate(self):
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
@@ -85,6 +99,7 @@ class LibsndioConan(ConanFile):
                 dep_ldflags.append( f"-L{path}" )
             for lib in deps_cpp_info.libs + deps_cpp_info.system_libs:
                 dep_ldflags.append( f"-l{lib}" )
+                pass
 
         cflags = ' '.join([flag for flag in dep_cflags])
         ldflags = ' '.join([flag for flag in dep_ldflags])
