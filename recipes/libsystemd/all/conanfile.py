@@ -82,10 +82,10 @@ class LibsystemdConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires at least version {minimum_version} of {self.settings.compiler} but version {self.settings.compiler.version} is selected."
             )
-        if not self.conf.get('user.c3i.skip:libsystemd', default=False, check_type=bool) and Version(self.version) >= "247.13" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "9":
+        if not self.conf.get('user.c3i.skip:libsystemd', default=False, check_type=bool) and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "9":
             raise ConanInvalidConfiguration(f"{self.name}/{self.version} and newer is not supported with gcc 9 on C3I until gcc 9.3 or newer is used\n"\
                                             "If your using gcc 9.3 or newer, set the conf variable user.c3i.skip:libsystemd to True")
-        if Version(self.version) >= "247.13" and self.settings.compiler == "gcc":
+        if self.settings.compiler == "gcc":
             if Version(self.settings.compiler.version) == "9":
                 self.output.warn(f"{self.name}/{self.version} and newer requires gcc 9.3 or newer")
             elif Version(self.settings.compiler.version) in ["9.1", "9.2"]:
