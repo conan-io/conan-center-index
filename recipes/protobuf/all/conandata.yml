@@ -1,4 +1,8 @@
 sources:
+  # Protobuf maintains multiple different "versions" with the same code for different
+  # languages, so it is possible to bump these versions incorrectly.
+  # Follow https://protobuf.dev/support/version-support/#cpp to see what the correct
+  # version is for C++.
   "5.26.0":
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v5.26.0.tar.gz"
     sha256: "c3acedccecd385affbd0a32fbbc7e0c7af427d156789726cc27c8a54649e6926"
