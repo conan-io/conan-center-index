@@ -303,6 +303,8 @@ class MesaConan(ConanFile):
         {f"vulkan_layer_{vulkan_layer}": True for vulkan_layer in vulkan_layers}
     )
 
+    _env_pythonpath = Environment()
+
     @property
     def _min_cppstd(self):
         return 11
@@ -910,6 +912,10 @@ class MesaConan(ConanFile):
             self.requires("moltenvk/1.2.2")
 
     def validate(self):
+        python_version = self.run("python3 --version").strip().replace("Python ", "")
+        if Version(python_version) < "3.9":
+            self.output.error(f"{self.ref} internal scripts require Python 3.9 or later")
+
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
             # todo Use check_max_cppstd from Conan V2.
@@ -1354,7 +1360,10 @@ class MesaConan(ConanFile):
         venv_python = os.path.join(venv_folder, script_subfolder, f"python{python_suffix}")
         self.run(f"python3 -m venv {venv_folder}")
         self.run(f"{venv_python} -m pip install pip --upgrade")
-        self.run(f"{venv_python} -m pip install mako==1.2.4")
+        self.run(f"{venv_python} -m pip install mako==1.3.2")
+        # INFO: Preserve user's PYTHONPATH in case defined. Only can access venv path after installing mako.
+        pythonpath = glob.glob(os.path.join(self.build_folder, "venv", "lib", "python*", "site-packages"))
+        self._env_pythonpath.append_path("PYTHONPATH", pythonpath)
 
     def _get_python_path(self):
         pythonpath = glob.glob(os.path.join(self.build_folder, "venv", "lib", "python*", "site-packages"))
@@ -1363,11 +1372,7 @@ class MesaConan(ConanFile):
     def build(self):
         self._patch_sources()
         self._install_python_mako()
-        # INFO: Preserve user's PYTHONPATH in case defined. Only can access venv path after installing mako.
-        env = Environment()
-        env.append_path("PYTHONPATH", self._get_python_path())
-        envvars = env.vars(self)
-        with envvars.apply():
+        with self._env_pythonpath.vars(self).apply():
             meson = Meson(self)
             meson.configure()
             meson.build()
@@ -1392,8 +1397,9 @@ class MesaConan(ConanFile):
             os.path.join(self.source_folder, "docs"),
             os.path.join(self.package_folder, "licenses"),
         )
-        meson = Meson(self)
-        meson.install()
+        with self._env_pythonpath.vars(self).apply():
+            meson = Meson(self)
+            meson.install()
 
         if self.options.get_safe("gallium_driver_d3d12"):
             self._save_pkg_config_version("d3d")
