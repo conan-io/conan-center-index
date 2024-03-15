@@ -50,7 +50,7 @@ class FastDDSConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "5",
+            "gcc": "10",
             "clang": "3.9",
             "apple-clang": "8",
         }
