@@ -3,7 +3,7 @@ import os
 import re
 from io import StringIO
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
@@ -915,7 +915,10 @@ class MesaConan(ConanFile):
 
     def validate(self):
         stdout = StringIO()
-        self.run("python3 --version", quiet=True, stdout=stdout)
+        if conan_version.major >= 2:
+            self.run("python3 --version", quiet=True, stdout=stdout)
+        else:
+            self.run("python3 --version")
         python_version = stdout.getvalue().strip().replace("Python ", "")
         if Version(python_version) < "3.9":
             self.output.error(f"{self.ref} internal scripts require Python 3.9 or later. Please update your Python installation.")
