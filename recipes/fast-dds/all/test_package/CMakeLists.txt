@@ -5,7 +5,7 @@ find_package(fastdds REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 
-if ("${fastdds_VERSION_STRING}" VERSION_LESS "2.12.0")
+if ("${fastdds_VERSION}" VERSION_LESS "2.12.0")
   target_sources(${PROJECT_NAME} PRIVATE
     msg/HelloWorld.cxx
     msg/HelloWorldPubSubTypes.cxx)
