@@ -1,6 +1,7 @@
 import glob
 import os
 import re
+from io import StringIO
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -913,9 +914,11 @@ class MesaConan(ConanFile):
             self.requires("moltenvk/1.2.2")
 
     def validate(self):
-        python_version = self.run("python3 --version").strip().replace("Python ", "")
+        stdout = StringIO()
+        self.run("python3 --version", quiet=True, stdout=stdout)
+        python_version = stdout.getvalue().strip().replace("Python ", "")
         if Version(python_version) < "3.9":
-            self.output.error(f"{self.ref} internal scripts require Python 3.9 or later")
+            self.output.error(f"{self.ref} internal scripts require Python 3.9 or later. Please update your Python installation.")
 
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
