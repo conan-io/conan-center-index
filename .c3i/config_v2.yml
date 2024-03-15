@@ -23,6 +23,7 @@ artifactory:
 github:
   reviewers: "reviewers.yml"
   authorized_users: "authorized_users.yml"
+  waitlist_users: "waitlist_users.yml"
 
 # Things related to Jenkins jobs:
 tasks:
@@ -65,7 +66,7 @@ tasks:
   validate_infrastructure:
     macos_executors: 2
     windows_executors: 4
-    open_docs_pull-request: false
+    create_docs_pull-request: false
 
 configurations:
   - id: linux-gcc

@@ -34,14 +34,14 @@ jobs:
         # Idle number of days before closing stale PRs
         days-before-pr-close: 30
 
+        # process older PRs first
+        ascending: true
 
         # Labels on PRs exempted from stale
         exempt-pr-labels: blocked,infrastructure
 
         # Label to apply on staled PRs
         stale-pr-label: 'stale'
-        # Label to be removed when updating a PR
-        labels-to-remove-when-unstale: 'stale'
 
         # Skip issues when having stale state
         remove-issue-stale-when-updated: false
