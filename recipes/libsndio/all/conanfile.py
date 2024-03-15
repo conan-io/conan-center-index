@@ -83,7 +83,7 @@ class LibsndioConan(ConanFile):
             dep_ldflags.extend( deps_cpp_info.sharedlinkflags + deps_cpp_info.exelinkflags )
             for path in deps_cpp_info.libdirs:
                 dep_ldflags.append( f"-L{path}" )
-            for lib in reversed(deps_cpp_info.libs + deps_cpp_info.system_libs):
+            for lib in deps_cpp_info.libs + deps_cpp_info.system_libs:
                 dep_ldflags.append( f"-l{lib}" )
 
         cflags = ' '.join([flag for flag in dep_cflags])
