@@ -41,6 +41,13 @@ class LibsystemdConan(ConanFile):
         "with_zstd": True,
     }
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "clang": "10",
+            "gcc": "8",
+        }
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -70,7 +77,12 @@ class LibsystemdConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Only Linux supported")
-        if not self.conf.get('user.c3i.skip:libsystemd', default=False, check_type=bool) and Version(self.version) >= "253.10" and self.settings.compiler == "gcc" and (Version(self.settings.compiler.version) == "9" or Version(self.settings.compiler.version) == "5"):
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires at least version {minimum_version} of {self.settings.compiler} but version {self.settings.compiler.version} is selected."
+            )
+        if not self.conf.get('user.c3i.skip:libsystemd', default=False, check_type=bool) and Version(self.version) >= "253.10" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "9":
             raise ConanInvalidConfiguration(f"{self.name}/{self.version} and newer is not supported with gcc 9 on C3I until gcc 9.3 or newer is used\n"\
                                             "If your using gcc 9.3 or newer, set the conf variable user.c3i.skip:libsystemd to True")
         if Version(self.version) >= "253.10" and self.settings.compiler == "gcc":
