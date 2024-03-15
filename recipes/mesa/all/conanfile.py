@@ -1364,10 +1364,6 @@ class MesaConan(ConanFile):
         pythonpath = glob.glob(os.path.join(self.build_folder, "venv", "lib", "python*", "site-packages"))
         self._env_pythonpath.append_path("PYTHONPATH", pythonpath)
 
-    def _get_python_path(self):
-        pythonpath = glob.glob(os.path.join(self.build_folder, "venv", "lib", "python*", "site-packages"))
-        return pythonpath[0] if pythonpath else ""
-
     def build(self):
         self._install_python_mako()
         with self._env_pythonpath.vars(self).apply():
