@@ -188,7 +188,7 @@ class OpenColorIOConan(ConanFile):
 
         self.cpp_info.libs = ["OpenColorIO"]
 
-        self.cpp_info.requires.append("MINIZIP::minizip")
+        self.cpp_info.requires.append("minizip-ng::minizip")
         self.cpp_info.requires.append("yaml-cpp::yaml-cpp")
         self.cpp_info.requires.append("pystring::pystring")
 
