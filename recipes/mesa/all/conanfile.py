@@ -7,7 +7,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMakeDeps
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import (
     apply_conandata_patches,
     copy,
@@ -121,7 +121,6 @@ class MesaConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
     # Reduce the cost of copying a lot of source code.
-    no_copy_source = True
     options = {
         "android_stub": [True, False],
         "android_libbacktrace": [True, False],
@@ -1150,7 +1149,6 @@ class MesaConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/1.3.2")
-        self.tool_requires("python-mako/1.3.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         if self.options.get_safe("platform_wayland"):
@@ -1187,10 +1185,15 @@ class MesaConan(ConanFile):
             "dep_wl_protocols = dependency('wayland-protocols', version : '>= 1.30')",
             "dep_wl_protocols = dependency('wayland-protocols_BUILD', native: true, version : '>= 1.30')",
         )
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "meson.build"),
+            "find_installation('python3')",
+            "find_installation('python3', modules : ['mako'])",
+        )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
 
     def generate(self):
         def boolean(option):
@@ -1342,10 +1345,32 @@ class MesaConan(ConanFile):
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
 
+    def _install_python_mako(self):
+        if self.conf.get("user.mesa:skip_install_mako", default=False, check_type=bool):
+            return
+        venv_folder = os.path.join(self.build_folder, "venv")
+        script_subfolder = "" if self.settings.os == "Windows" else "bin"
+        python_suffix = ".exe" if self.settings.os == "Windows" else "3"
+        venv_python = os.path.join(venv_folder, script_subfolder, f"python{python_suffix}")
+        self.run(f"python3 -m venv {venv_folder}")
+        self.run(f"{venv_python} -m pip install pip --upgrade")
+        self.run(f"{venv_python} -m pip install mako==1.2.4")
+
+    def _get_python_path(self):
+        pythonpath = glob.glob(os.path.join(self.build_folder, "venv", "lib", "python*", "site-packages"))
+        return pythonpath[0] if pythonpath else ""
+
     def build(self):
-        meson = Meson(self)
-        meson.configure()
-        meson.build()
+        self._patch_sources()
+        self._install_python_mako()
+        # INFO: Preserve user's PYTHONPATH in case defined. Only can access venv path after installing mako.
+        env = Environment()
+        env.append_path("PYTHONPATH", self._get_python_path())
+        envvars = env.vars(self)
+        with envvars.apply():
+            meson = Meson(self)
+            meson.configure()
+            meson.build()
 
     def _extract_pkg_config_version(self, file):
         pkg_config = load(self, os.path.join(self.package_folder, "lib", "pkgconfig", file))
