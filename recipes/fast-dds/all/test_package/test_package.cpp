@@ -5,8 +5,13 @@
 #include <fastrtps/publisher/Publisher.h>
 #include <fastrtps/Domain.h>
 
-#include "msg/HelloWorld.h"
-#include "msg/HelloWorldPubSubTypes.h"
+#if FASTRTPS_VERSION_MAJOR >=2 && FASTRTPS_VERSION_MINOR >= 12
+#include "msg/v2/HelloWorld.h"
+#include "msg/v2/HelloWorldPubSubTypes.h"
+#else
+#include "msg/v1/HelloWorld.h"
+#include "msg/v1/HelloWorldPubSubTypes.h"
+#endif
 
 int main()
 {
