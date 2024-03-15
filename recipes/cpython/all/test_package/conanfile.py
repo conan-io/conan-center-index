@@ -6,7 +6,7 @@ from conan.errors import ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualRunEnv
+from conan.tools.env import Environment, VirtualRunEnv
 from conan.tools.gnu import AutotoolsDeps
 from conan.tools.microsoft import is_msvc, VCVars
 from conan.tools.scm import Version
@@ -194,7 +194,11 @@ class TestPackageConan(ConanFile):
                 skip_ssl_test = is_msvc(self) and self._py_version < "3.8" and self._cpython_option("shared")
                 if not skip_ssl_test:
                     # Unsure cause of failure in this oddly specific combo, but these versions are EOL so not concerned with fixing.
-                    self._test_module("ssl", True)
+                    env = Environment()
+                    if self.settings.os != "Windows":
+                        env.define_path("OPENSSL_CONF", os.path.join(os.sep, "dev", "null"))
+                    with env.vars(self).apply():
+                        self._test_module("ssl", True)
 
             if is_apple_os(self) and not self._cpython_option("shared"):
                 self.output.info(
