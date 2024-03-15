@@ -82,7 +82,7 @@ class TestPackageConan(ConanFile):
     @property
     def _cmake_abi(self):
         pymalloc = self._cpython_option("pymalloc") if self._py_version < "3.8" else False
-        return CmakePython3Abi(debug=self.settings.build_type == "Debug", pymalloc=pymalloc, unicode=False)
+        return CmakePython3Abi(debug=self.settings.build_type == "Debug", pymalloc=bool(pymalloc), unicode=False)
 
     @property
     def _cmake_try_FindPythonX(self):
