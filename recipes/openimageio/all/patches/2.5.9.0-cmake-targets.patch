@@ -444,9 +444,11 @@ index aeb7b7f93..9a32e4cf2 100644
              ${OPENIMAGEIO_OPENEXR_TARGETS}
 -            ${OpenCV_LIBRARIES}
              ${format_plugin_libs} # Add all the target link libraries from the plugins
-             $<TARGET_NAME_IF_EXISTS:OpenColorIO::OpenColorIO>
+-            $<TARGET_NAME_IF_EXISTS:OpenColorIO::OpenColorIO>
++        PUBLIC    $<TARGET_NAME_IF_EXISTS:OpenColorIO::OpenColorIO>
              $<TARGET_NAME_IF_EXISTS:OpenColorIO::OpenColorIOHeaders>
-             $<TARGET_NAME_IF_EXISTS:pugixml::pugixml>
+-            $<TARGET_NAME_IF_EXISTS:pugixml::pugixml>
++        PRIVATE    $<TARGET_NAME_IF_EXISTS:pugixml::pugixml>
              $<TARGET_NAME_IF_EXISTS:TBB::tbb>
 -            $<TARGET_NAME_IF_EXISTS:Freetype::Freetype>
              ${BZIP2_LIBRARIES}
