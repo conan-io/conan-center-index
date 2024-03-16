@@ -1,0 +1,154 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 481ddd0..0f9ae85 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -54,10 +54,10 @@ set(LIBEVHTP_SOURCE_FILES
+     parser.c
+     log.c)
+
+-find_package(LibEvent REQUIRED)
+-list(APPEND LIBEVHTP_EXTERNAL_LIBS ${LIBEVENT_LIBRARIES})
+-list(APPEND LIBEVHTP_EXTERNAL_INCLUDES ${LIBEVENT_INCLUDE_DIRS})
+-list(APPEND package_deps LibEvent)
++find_package(Libevent REQUIRED)
++list(APPEND LIBEVHTP_EXTERNAL_LIBS ${Libevent_LIBRARIES})
++list(APPEND LIBEVHTP_EXTERNAL_INCLUDES ${Libevent_INCLUDE_DIRS})
++list(APPEND package_deps Libevent)
+
+ set(evhtp_dir_headers
+   "include/evhtp/evhtp.h"
+@@ -65,52 +65,68 @@ set(evhtp_dir_headers
+   "include/evhtp/log.h")
+
+ if(NOT EVHTP_DISABLE_SSL)
+-    find_package(OpenSSL)
++    find_package(OpenSSL REQUIRED)
+     if(OPENSSL_FOUND)
+         list(APPEND LIBEVHTP_SOURCE_FILES sslutils.c)
+         list(APPEND LIBEVHTP_EXTERNAL_LIBS OpenSSL::SSL OpenSSL::Crypto)
+         list(APPEND package_deps OpenSSL)
+         list(APPEND evhtp_dir_headers "include/evhtp/sslutils.h")
+-    endif()
++    else ()
++        message(STATUS "${BoldRed}${CMAKE_BUILD_TYPE} OpenSSL NOT FOUND, DISABLING SSL SUPPORT${ColourReset}")
++        set(EVHTP_DISABLE_SSL ON)
++    endif ()
+ endif()
+
+ if(NOT EVHTP_DISABLE_EVTHR)
+-    find_package(Threads)
++    find_package(Threads REQUIRED)
+     if(TARGET Threads::Threads)
+         list(APPEND LIBEVHTP_SOURCE_FILES  thread.c)
+         list(APPEND LIBEVHTP_EXTERNAL_LIBS Threads::Threads)
+         list(APPEND package_deps Threads)
+         list(APPEND evhtp_dir_headers "include/evhtp/thread.h")
++    else ()
++        message(STATUS "${BoldRed}${CMAKE_BUILD_TYPE} Threads NOT FOUND, DISABLING EVTHR SUPPORT${ColourReset}")
++        set(EVHTP_DISABLE_EVTHR ON)
+     endif()
+ endif()
+
+ if(NOT EVHTP_DISABLE_REGEX)
+-    find_package(Oniguruma)
+-    if(ONIGURUMA_FOUND)
+-        list(APPEND LIBEVHTP_EXTERNAL_LIBS ${ONIGURUMA_LIBRARIES})
+-        list(APPEND LIBEVHTP_EXTERNAL_INCLUDES ${ONIGURUMA_INCLUDE_DIRS})
++    find_package(oniguruma REQUIRED)
++    if(oniguruma_FOUND)
++        list(APPEND LIBEVHTP_EXTERNAL_LIBS ${oniguruma_LIBRARIES})
++        list(APPEND LIBEVHTP_EXTERNAL_INCLUDES ${oniguruma_INCLUDE_DIRS})
+         list(APPEND package_deps oniguruma)
+     else()
+-        message(STATUS "${BoldRed}${CMAKE_BUILD_TYPE}ONIGURUMA NOT FOUND, DISABLING REGEX SUPPORT${ColourReset}")
++        message(STATUS "${BoldRed}${CMAKE_BUILD_TYPE} oniguruma NOT FOUND, DISABLING REGEX SUPPORT${ColourReset}")
+         set(EVHTP_DISABLE_REGEX ON)
+     endif()
+ endif()
+
+-if(EVHTP_ALLOCATOR STREQUAL "jemalloc")
+-    find_package(jemalloc)
+-    if(JEMALLOC_FOUND)
+-        list(APPEND LIBEVHTP_EXTERNAL_LIBS jemalloc)
++if(EVHTP_USE_JEMALLOC)
++    find_package(jemalloc REQUIRED)
++    if(jemalloc_FOUND)
++        list(APPEND LIBEVHTP_EXTERNAL_LIBS ${jemalloc_LIBRARIES})
+         list(APPEND package_deps jemalloc)
+-    endif()
+-elseif(EVHTP_ALLOCATOR STREQUAL "tcmalloc")
+-    find_package(tcmalloc)
+-    if(TCMALLOC_FOUND)
+-        list(APPEND LIBEVHTP_EXTERNAL_LIBS tcmalloc)
+-        list(APPEND package_deps tcmalloc)
+-    endif()
++    else ()
++        message(STATUS "${BoldRed}${CMAKE_BUILD_TYPE} jemalloc NOT FOUND, DISABLING JEMALLOC SUPPORT${ColourReset}")
++        set(EVHTP_USE_JEMALLOC OFF)
++    endif ()
++elseif(EVHTP_USE_TCMALLOC)
++    find_package(gperftools REQUIRED)
++    if(gperftools_FOUND)
++        list(APPEND LIBEVHTP_EXTERNAL_LIBS ${gperftools_LIBRARIES})
++        list(APPEND package_deps gperftools)
++    else ()
++        message(STATUS "${BoldRed}${CMAKE_BUILD_TYPE} gperftools NOT FOUND, DISABLING TCMALLOC SUPPORT${ColourReset}")
++        set(EVHTP_USE_TCMALLOC OFF)
++    endif ()
+ endif()
+
+-add_library(evhtp ${LIBEVHTP_SOURCE_FILES})
++if(EVHTP_BUILD_SHARED)
++    add_library(evhtp SHARED ${LIBEVHTP_SOURCE_FILES})
++else ()
++    add_library(evhtp STATIC ${LIBEVHTP_SOURCE_FILES})
++endif ()
+ target_link_libraries(evhtp PUBLIC ${LIBEVHTP_EXTERNAL_LIBS})
+ target_include_directories(evhtp PUBLIC ${LIBEVHTP_EXTERNAL_INCLUDES})
+
+@@ -212,7 +228,7 @@ if(BUILD_SHARED_LIBS)
+         C_VISIBILITY_PRESET hidden)
+ endif()
+
+-add_subdirectory(examples)
++# add_subdirectory(examples)
+
+ # Installation (https://github.com/forexample/package-example)
+
+diff --git a/cmake/options.cmake b/cmake/options.cmake
+index f7d6f22..e9a54df 100644
+--- a/cmake/options.cmake
++++ b/cmake/options.cmake
+@@ -1,19 +1,23 @@
+ # -DEVHTP_DISABLE_SSL=ON
+-option (EVHTP_DISABLE_SSL   "Disable ssl support"          OFF)
++option(EVHTP_DISABLE_SSL "Disable ssl support" OFF)
+
+ # -DEVHTP_DISABLE_EVTHR=ON
+-option (EVHTP_DISABLE_EVTHR "Disable evthread support"     OFF)
++option(EVHTP_DISABLE_EVTHR "Disable evthread support" OFF)
+
+ # -DEVHTP_DISABLE_REGEX=ON
+-find_package(Oniguruma)
+-option (EVHTP_DISABLE_REGEX "Disable regex support"        OFF)
++option(EVHTP_DISABLE_REGEX "Disable regex support" OFF)
+
+ # -DEVHTP_DEBUG=ON
+-option (EVHTP_DEBUG         "Enable verbose debug logging"     OFF)
++option(EVHTP_DEBUG "Enable verbose debug logging" OFF)
+
+-# can be overwritten by new set_alloc functions
+-set(EVHTP_ALLOCATOR CACHE STRING "Allocator library")
+-set_property(CACHE EVHTP_ALLOCATOR PROPERTY STRINGS "jemalloc;tcmalloc")
++# -DEVHTP_USE_JEMALLOC=ON
++option(EVHTP_USE_JEMALLOC "Enable jemalloc" OFF)
++
++# -DEVHTP_USE_TCMALLOC=ON
++option(EVHTP_USE_TCMALLOC "Enable tcmalloc" OFF)
++
++# -DEVHTP_BUILD_SHARED=ON
++option(EVHTP_BUILD_SHARED "Enable build share library" OFF)
+
+ # disable ability to wrap memory functions
+-option (EVHTP_DISABLE_MEMFUNCTIONS "Disable custom allocators" OFF)
++option(EVHTP_DISABLE_MEMFUNCTIONS "Disable custom allocators" OFF)
