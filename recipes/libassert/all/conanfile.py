@@ -131,7 +131,10 @@ class LibassertConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = ["assert"]
+        if Version(self.version) >= Version("2.0.0"):
+            self.cpp_info.libs = ["assert"]
+        else:
+            self.cpp_info.libs = ["libassert"]
 
         if Version(self.version) >= Version("2.0.0"):
             self.cpp_info.set_property("cmake_file_name", "libassert")
