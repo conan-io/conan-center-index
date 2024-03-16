@@ -219,6 +219,10 @@ class LibsystemdConan(ConanFile):
         copy(self, "libudev.h", os.path.join(self.source_folder, "src", "libudev"),
              os.path.join(self.package_folder, "include"))
 
+        libudev_directory = self.build_folder
+        if Version(self.version) < "248":
+            libudev_directory = os.path.join(self.build_folder, "src", "udev")
+
         if self.options.shared:
             copy(self, "libsystemd.so", self.build_folder,
                  os.path.join(self.package_folder, "lib"))
@@ -226,18 +230,16 @@ class LibsystemdConan(ConanFile):
                  self.build_folder, os.path.join(self.package_folder, "lib"))
             copy(self, f"libsystemd.so.{self._so_version}",
                  self.build_folder, os.path.join(self.package_folder, "lib"))
-            copy(self, "libudev.so", os.path.join(self.build_folder, "src", "udev"), os.path.join(self.package_folder, "lib"))
-            copy(self, "libudev.so.*", os.path.join(self.build_folder, "src", "udev"), os.path.join(self.package_folder, "lib"))
+            copy(self, "libudev.so", libudev_directory, os.path.join(self.package_folder, "lib"))
+            copy(self, "libudev.so.*", libudev_directory, os.path.join(self.package_folder, "lib"))
         else:
             copy(self, "libsystemd.a", self.build_folder,
                  os.path.join(self.package_folder, "lib"))
-            libudev_directory = self.build_folder
-            if Version(self.version) < "248":
-                libudev_directory = os.path.join(self.build_folder, "src", "udev")
             copy(self, "libudev.a", libudev_directory,
                  os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
+        self.cpp_info.set_property("system_package_version", str(Version(self.version).major))
         self.cpp_info.components["libsystemd"].libs = ["systemd"]
         self.cpp_info.components["libsystemd"].requires = ["libcap::cap", "libmount::libmount", "linux-headers-generic::linux-headers-generic"]
         if Version(self.version) >= "251.18":
@@ -260,6 +262,7 @@ class LibsystemdConan(ConanFile):
         self.cpp_info.components["libudev"].libs = ["udev"]
         self.cpp_info.components["libudev"].requires = ["libcap::cap", "linux-headers-generic::linux-headers-generic"]
         self.cpp_info.components["libudev"].set_property("pkg_config_name", "libudev")
+        self.cpp_info.components["libudev"].set_property("component_version", str(Version(self.version).major))
         self.cpp_info.components["libudev"].system_libs = ["rt", "pthread"]
 
         # TODO: to remove in conan v2
