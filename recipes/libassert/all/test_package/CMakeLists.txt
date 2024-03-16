@@ -12,7 +12,7 @@ endif()
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 # don't link to ${CONAN_LIBS} or CONAN_PKG::package
-if(${assert_VERSION} VERSION_GREATER_EQUAL "2.0.0")
+if(LIBASSERT2)
   target_link_libraries(${PROJECT_NAME} PRIVATE libassert::assert)
   target_compile_definitions(${PROJECT_NAME} PRIVATE LIBASSERT2)
 else()

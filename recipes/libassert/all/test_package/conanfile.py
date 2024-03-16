@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake
+from conan.tools.scm import Version
 import os
 
 class TestPackageConan(ConanFile):
@@ -16,7 +17,9 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(
+            variables={"LIBASSERT2": "True"} if Version(self.tested_reference_str) >= Version("2.0.0") else {}
+        )
         cmake.build()
 
     def test(self):

@@ -133,11 +133,11 @@ class LibassertConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["assert"]
 
-        self.cpp_info.set_property("cmake_file_name", "assert")
-        
         if Version(self.version) >= Version("2.0.0"):
+            self.cpp_info.set_property("cmake_file_name", "libassert")
             self.cpp_info.set_property("cmake_target_name", "libassert::assert")
         else:
+            self.cpp_info.set_property("cmake_file_name", "assert")
             self.cpp_info.set_property("cmake_target_name", "assert::assert")
 
         # the first version of this library used assert/assert as include folder
