@@ -201,7 +201,7 @@ class OpenColorIOConan(ConanFile):
             self.cpp_info.requires.append("tinyxml::tinyxml")
         if Version(self.version) >= "2.2.0":
             self.cpp_info.requires.append("imath::imath")
-        if Version(self.version) >= "2.3.0":
+        if Version(self.version) >= "2.2.0":
             self.cpp_info.requires.append("minizip-ng::minizip")
 
         if Version(self.version) < "2.1.0":
