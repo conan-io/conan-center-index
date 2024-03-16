@@ -231,13 +231,16 @@ class LibsystemdConan(ConanFile):
         else:
             copy(self, "libsystemd.a", self.build_folder,
                  os.path.join(self.package_folder, "lib"))
-            copy(self, "libudev.a", os.path.join(self.build_folder, "src", "udev"),
+            libudev_directory = self.build_folder
+            if Version(self.version) < "248":
+                libudev_directory = os.path.join(self.build_folder, "src", "udev")
+            copy(self, "libudev.a", libudev_directory,
                  os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.components["libsystemd"].libs = ["systemd"]
         self.cpp_info.components["libsystemd"].requires = ["libcap::cap", "libmount::libmount", "linux-headers-generic::linux-headers-generic"]
-        if Version(self.version) >= "253.6":
+        if Version(self.version) >= "251.18":
             self.cpp_info.components["libsystemd"].requires.append("libxcrypt::libxcrypt")
         if self.options.with_selinux:
             self.cpp_info.components["libsystemd"].requires.append("libselinux::selinux")
