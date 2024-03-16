@@ -63,6 +63,7 @@ class LibsystemdConan(ConanFile):
     def requirements(self):
         self.requires("libcap/2.69")
         self.requires("libmount/2.39.2")
+        self.requires("linux-headers-generic/6.5.9")
         if Version(self.version) >= "251.18":
             self.requires("libxcrypt/4.4.36")
         if self.options.with_selinux:
@@ -234,7 +235,7 @@ class LibsystemdConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["libsystemd"].libs = ["systemd"]
-        self.cpp_info.components["libsystemd"].requires = ["libcap::cap", "libmount::libmount"]
+        self.cpp_info.components["libsystemd"].requires = ["libcap::cap", "libmount::libmount", "linux-headers-generic::linux-headers-generic"]
         if Version(self.version) >= "253.6":
             self.cpp_info.components["libsystemd"].requires.append("libxcrypt::libxcrypt")
         if self.options.with_selinux:
@@ -253,7 +254,7 @@ class LibsystemdConan(ConanFile):
         self.cpp_info.components["libsystemd"].version = str(Version(self.version).major)
 
         self.cpp_info.components["libudev"].libs = ["udev"]
-        self.cpp_info.components["libudev"].requires = ["libcap::cap"]
+        self.cpp_info.components["libudev"].requires = ["libcap::cap", "linux-headers-generic::linux-headers-generic"]
         self.cpp_info.components["libudev"].set_property("pkg_config_name", "libudev")
         self.cpp_info.components["libudev"].system_libs = ["rt", "pthread"]
 
