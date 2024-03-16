@@ -285,10 +285,6 @@ class LLVMCoreConan(ConanFile):
         else:
             cmake_definitions["LLVM_USE_SANITIZER"] = self.options.use_sanitizer
 
-        if is_apple_os(self):
-            # otherwise llvm-tablegen can't find shared dependencies during the build
-            cmake_definitions["CMAKE_SKIP_RPATH"] = True
-
         tc.variables.update(cmake_definitions)
         tc.cache_variables.update({
             # Enables LLVM to find conan libraries during try_compile
@@ -299,6 +295,11 @@ class LLVMCoreConan(ConanFile):
             # It is likely the latter that the user expects by a "shared library" build.
             "BUILD_SHARED_LIBS": False
         })
+
+        if is_apple_os(self):
+            # otherwise llvm-tablegen can't find shared dependencies during the build
+            tc.cache_variables["CMAKE_SKIP_BUILD_RPATH"] = True
+
         tc.generate()
 
         tc = CMakeDeps(self)
