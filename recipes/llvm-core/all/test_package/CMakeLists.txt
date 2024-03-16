@@ -8,6 +8,7 @@ macro(test_llvm_cmake_variable VARIABLE)
     message(STATUS "${VARIABLE}: ${${VARIABLE}}")
 endmacro()
 
+set(CMAKE_CXX_STANDARD 14)
 add_executable(${PROJECT_NAME} test_package.cpp)
 
 if (LLVM_SHARED)

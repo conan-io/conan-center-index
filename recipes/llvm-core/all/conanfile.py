@@ -1,5 +1,3 @@
-import textwrap
-
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
@@ -26,6 +24,8 @@ import json
 import os
 from pathlib import Path
 import re
+import textwrap
+
 
 required_conan_version = ">=1.62.0"
 
@@ -181,19 +181,19 @@ class LLVMCoreConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self._is_windows:
-            if self.options.shared:  # Shared builds disabled just due to the CI
+        if self.options.shared:
+            if self._is_windows:
                 raise ConanInvalidConfiguration("Shared builds not currently supported on Windows")
+            if os.getenv("CONAN_CENTER_BUILD_SERVICE") and self.settings.build_type == "Debug":
+                raise ConanInvalidConfiguration("Shared Debug build is not supported on CCI due to resource limitations")
 
         if self.options.exceptions and not self.options.rtti:
             raise ConanInvalidConfiguration("Cannot enable exceptions without rtti support")
 
         if cross_building(self):
             # FIXME support cross compilation, at least for common cases like Apple Silicon -> X86
+            #  requires a host-compiled version of llvm-tablegen
             raise ConanInvalidConfiguration("Cross compilation is not supported")
-
-        if os.getenv("CONAN_CENTER_BUILD_SERVICE") and self.options.shared and self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration("Shared Debug build is not supported on CCI due to resource limitations")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -279,7 +279,7 @@ class LLVMCoreConan(ConanFile):
             cmake_definitions["LLVM_USE_SANITIZER"] = self.options.use_sanitizer
 
         if is_apple_os(self):
-            # otherwise we can't find shared dependencies during the build
+            # otherwise llvm-tablegen can't find shared dependencies during the build
             cmake_definitions["CMAKE_SKIP_RPATH"] = True
 
         tc.variables.update(cmake_definitions)
