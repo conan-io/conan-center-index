@@ -5,8 +5,8 @@ from conan import ConanFile, conan_version
 from conan.errors import ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualRunEnv
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import Environment, VirtualRunEnv
 from conan.tools.gnu import AutotoolsDeps
 from conan.tools.microsoft import is_msvc, VCVars
 from conan.tools.scm import Version
@@ -41,7 +41,6 @@ class CmakePython3Abi(object):
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps"
     test_type = "explicit"
 
     def requirements(self):
@@ -64,9 +63,14 @@ class TestPackageConan(ConanFile):
         else:
             return self.deps_user_info["cpython"].python
 
-    @property
-    def _clean_py_version(self):
-        return str(self._py_version)
+    def _cpython_option(self, name):
+        if conan2:
+            return self.dependencies["cpython"].options.get_safe(name, False)
+        else:
+            try:
+                return getattr(self.options["cpython"], name, False)
+            except ConanException:
+                return False
 
     @property
     def _py_version(self):
@@ -82,18 +86,9 @@ class TestPackageConan(ConanFile):
         return can_run(self) and self._supports_modules and self._py_version < "3.12"
 
     @property
-    def _pymalloc(self):
-        if conan2:
-            return bool(self.dependencies["cpython"].options.get_safe("pymalloc", False))
-        else:
-            return bool("pymalloc" in self.options["cpython"] and self.options["cpython"].pymalloc)
-
-    @property
     def _cmake_abi(self):
-        if self._py_version < "3.8":
-            return CmakePython3Abi(debug=self.settings.build_type == "Debug", pymalloc=self._pymalloc, unicode=False)
-        else:
-            return CmakePython3Abi(debug=self.settings.build_type == "Debug", pymalloc=False, unicode=False)
+        pymalloc = self._cpython_option("pymalloc") if self._py_version < "3.8" else False
+        return CmakePython3Abi(debug=self.settings.build_type == "Debug", pymalloc=bool(pymalloc), unicode=False)
 
     @property
     def _cmake_try_FindPythonX(self):
@@ -101,10 +96,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _supports_modules(self):
-        if conan2:
-            return not is_msvc(self) or self.dependencies["cpython"].options.shared
-        else:
-            return not is_msvc(self) or self.options["cpython"].shared
+        return not is_msvc(self) or self._cpython_option("shared")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -113,8 +105,7 @@ class TestPackageConan(ConanFile):
         tc.cache_variables["BUILD_MODULE"] = self._supports_modules
         tc.cache_variables["PY_VERSION_MAJOR"] = py_major
         tc.cache_variables["PY_VERSION_MAJOR_MINOR"] = f"{version.major}.{version.minor}"
-        tc.cache_variables["PY_FULL_VERSION"] = str(version)
-        tc.cache_variables["PY_VERSION"] = self._clean_py_version
+        tc.cache_variables["PY_VERSION"] = str(self._py_version)
         tc.cache_variables["PY_VERSION_SUFFIX"] = self._cmake_abi.suffix
         tc.cache_variables["PYTHON_EXECUTABLE"] = self._python
         tc.cache_variables["USE_FINDPYTHON_X"] = self._cmake_try_FindPythonX
@@ -128,6 +119,9 @@ class TestPackageConan(ConanFile):
         if not is_msvc(self) and self._py_version < "3.8":
             tc.cache_variables[f"Python{py_major}_FIND_ABI"] = self._cmake_abi.cmake_arg
         tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
         try:
             # CMakeToolchain might generate VCVars, but we need it
@@ -176,15 +170,6 @@ class TestPackageConan(ConanFile):
             raise ConanException(f"Module '{module}' works, but should not have worked")
         self.output.info("Module worked as expected")
 
-    def _cpython_option(self, name):
-        if conan2:
-            return self.dependencies["cpython"].options.get_safe(name, False)
-        else:
-            try:
-                return getattr(self.options["cpython"], name, False)
-            except ConanException:
-                return False
-
     def test(self):
         if can_run(self):
             self.run(f"{self._python} --version", env="conanrun")
@@ -195,9 +180,9 @@ class TestPackageConan(ConanFile):
             self.run(f"{self._python} -c \"import sys; print('.'.join(str(s) for s in sys.version_info[:3]))\"", buffer, env="conanrun")
             self.output.info(buffer.getvalue())
             version_detected = buffer.getvalue().splitlines()[-1].strip()
-            if self._clean_py_version != version_detected:
+            if self._py_version != version_detected:
                 raise ConanException(
-                    f"python reported wrong version. Expected {self._clean_py_version}. Got {version_detected}."
+                    f"python reported wrong version. Expected {self._py_version}. Got {version_detected}."
                 )
 
             if self._supports_modules:
@@ -217,7 +202,11 @@ class TestPackageConan(ConanFile):
                 skip_ssl_test = is_msvc(self) and self._py_version < "3.8" and self._cpython_option("shared")
                 if not skip_ssl_test:
                     # Unsure cause of failure in this oddly specific combo, but these versions are EOL so not concerned with fixing.
-                    self._test_module("ssl", True)
+                    env = Environment()
+                    if self.settings.os != "Windows":
+                        env.define_path("OPENSSL_CONF", os.path.join(os.sep, "dev", "null"))
+                    with env.vars(self).apply():
+                        self._test_module("ssl", True)
 
             if is_apple_os(self) and not self._cpython_option("shared"):
                 self.output.info(

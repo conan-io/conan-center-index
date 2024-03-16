@@ -180,7 +180,7 @@ class CPythonConan(ConanFile):
         if self.options.get_safe("with_bsddb", False):
             self.requires("libdb/5.3.28")
         if self.options.get_safe("with_lzma", False):
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/5.6.1")
 
     def package_id(self):
         del self.info.options.env_vars
