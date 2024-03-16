@@ -41,6 +41,16 @@ class LibsystemdConan(ConanFile):
         "with_zstd": True,
     }
 
+    def _compilers_minimum_version(self, version):
+        # Version 249 documented the minimum version of Clang.
+        # This same version is when __VA_OPT__ started being used, which was introduced in GCC 8.
+        if Version(version) >= "249":
+            return {
+                "clang": "10",
+                "gcc": "8",
+            }
+        return {}
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -71,6 +81,11 @@ class LibsystemdConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Only Linux supported")
+        minimum_version = self._compilers_minimum_version(self.version).get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires at least version {minimum_version} of {self.settings.compiler} but version {self.settings.compiler.version} is selected."
+            )
 
     def build_requirements(self):
         self.tool_requires("meson/1.3.2")
