@@ -11,7 +11,7 @@ class TestPackageV1Conan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure(
-            variables={"LIBASSERT2": "True"} if Version(self.tested_reference_str) >= Version("2.0.0") else {}
+            defs={"LIBASSERT2": "True"} if Version(self.tested_reference_str) >= Version("2.0.0") else {}
         )
         cmake.build()
 
