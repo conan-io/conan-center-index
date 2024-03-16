@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -74,7 +74,6 @@ class DbusConan(ConanFile):
             self.options.rm_safe("fPIC")
         if not self.options.get_safe("message_bus", True):
             self.options.rm_safe("dbus_user")
-            self.options.rm_safe("session_socket_dir")
             self.options.rm_safe("system_pid_file")
             self.options.rm_safe("system_socket")
 
@@ -122,21 +121,23 @@ class DbusConan(ConanFile):
         tc.project_options["ducktype_docs"] = "disabled"
         tc.project_options["qt_help"] = "disabled"
         tc.project_options["modular_tests"] = "disabled"
-        tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux", False) else "disabled"
-        tc.project_options["systemd"] = "enabled" if self.options.get_safe("with_systemd", False) else "disabled"
+        tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
+        tc.project_options["session_socket_dir"] = str(self.options.get_safe("session_socket_dir", ""))
+        tc.project_options["systemd"] = "enabled" if self.options.get_safe("with_systemd") else "disabled"
         if self._has_message_bus_option:
             tc.project_options["message_bus"] = self.options.message_bus
-        if self.options.get_safe("message_bus"):
+        if self.options.get_safe("dbus_user"):
             tc.project_options["dbus_user"] = str(self.options.dbus_user)
-            tc.project_options["session_socket_dir"] = str(self.options.get_safe("session_socket_dir", ""))
-            tc.project_options["system_socket"] = str(self.options.get_safe("system_socket", ""))
+        if self.options.get_safe("system_pid_file"):
             tc.project_options["system_pid_file"] = str(self.options.get_safe("system_pid_file", ""))
-            if self.options.get_safe("with_systemd", False):
-                tc.project_options["systemd_system_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "system")
-                tc.project_options["systemd_user_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "user")
+        if self.options.get_safe("system_socket"):
+            tc.project_options["system_socket"] = str(self.options.get_safe("system_socket", ""))
+        if self.options.get_safe("with_systemd"):
+            tc.project_options["systemd_system_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "system")
+            tc.project_options["systemd_user_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "user")
         if is_apple_os(self):
             tc.project_options["launchd_agent_dir"] = os.path.join(self.package_folder, "res", "LaunchAgents")
-        tc.project_options["x11_autolaunch"] = "enabled" if self.options.get_safe("with_x11", False) else "disabled"
+        tc.project_options["x11_autolaunch"] = "enabled" if self.options.get_safe("with_x11") else "disabled"
         tc.project_options["xml_docs"] = "disabled"
         tc.generate()
         deps = PkgConfigDeps(self)
