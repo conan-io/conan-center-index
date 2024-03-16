@@ -5,7 +5,7 @@ import tarfile
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, replace_in_file, download, move_folder_contents
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, replace_in_file, rmdir, download, move_folder_contents
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -232,6 +232,9 @@ class LibsystemdConan(ConanFile):
                  self.build_folder, os.path.join(self.package_folder, "lib"))
             copy(self, "libudev.so", libudev_directory, os.path.join(self.package_folder, "lib"))
             copy(self, "libudev.so.*", libudev_directory, os.path.join(self.package_folder, "lib"))
+            for x in os.walk(os.path.join(self.package_folder, "lib")):
+                if x[0] != os.path.join(self.package_folder, "lib"):
+                    rmdir(self, x[0])
         else:
             copy(self, "libsystemd.a", self.build_folder,
                  os.path.join(self.package_folder, "lib"))
