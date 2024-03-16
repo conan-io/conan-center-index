@@ -1,5 +1,9 @@
 sources:
   # Newer versions at the top
+  "2.0.0":
+    url:
+      - "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.0.0-beta.tar.gz"
+    sha256: "8615f10979bf3a940f6b19920050f4aa1ee12c9a3a3d5e74aa431136c7b6fa73"
   "1.2.2":
     url:
       - "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v1.2.2.tar.gz"
