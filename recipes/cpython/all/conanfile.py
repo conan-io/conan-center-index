@@ -160,8 +160,12 @@ class CPythonConan(ConanFile):
         if self.settings.os != "Windows":
             if not is_apple_os(self):
                 self.requires("util-linux-libuuid/2.39.2")
-            # If crypt.h is detected, it is included in the public headers.
-            self.requires("libxcrypt/4.4.36", transitive_headers=True, transitive_libs=True)
+            # In <3.9 and lower patch versions of 3.9/10/11, crypt.h was exposed in Python.h
+            # This was removed in 3.11 and backported: https://github.com/python/cpython/issues/88914
+            # For the sake of this recipe, we only have later patch versions, so this version check
+            # may be slightly inaccurate if a lower patch version is desired.
+            transitive_crypt = Version(self.version) < "3.9"
+            self.requires("libxcrypt/4.4.36", transitive_headers=transitive_crypt, transitive_libs=transitive_crypt)
         if self.options.get_safe("with_bz2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_gdbm", False):
