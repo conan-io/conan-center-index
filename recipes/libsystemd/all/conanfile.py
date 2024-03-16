@@ -122,6 +122,7 @@ class LibsystemdConan(ConanFile):
         env.generate()
 
         tc = MesonToolchain(self)
+        tc.c_args.append("-Wno-error=nonnull")
         tc.project_options["werror"] = False
         tc.project_options["selinux"] = ("true" if self.options.with_selinux
                                          else "false")
