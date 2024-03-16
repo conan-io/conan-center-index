@@ -72,10 +72,8 @@ class DbusConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if not self.options.get_safe("message_bus", True):
+        if not self.options.get_safe("message_bus"):
             self.options.rm_safe("dbus_user")
-            self.options.rm_safe("system_pid_file")
-            self.options.rm_safe("system_socket")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -128,10 +126,8 @@ class DbusConan(ConanFile):
             tc.project_options["message_bus"] = self.options.message_bus
         if self.options.get_safe("dbus_user"):
             tc.project_options["dbus_user"] = str(self.options.dbus_user)
-        if self.options.get_safe("system_pid_file"):
-            tc.project_options["system_pid_file"] = str(self.options.get_safe("system_pid_file", ""))
-        if self.options.get_safe("system_socket"):
-            tc.project_options["system_socket"] = str(self.options.get_safe("system_socket", ""))
+        tc.project_options["system_pid_file"] = str(self.options.get_safe("system_pid_file", ""))
+        tc.project_options["system_socket"] = str(self.options.get_safe("system_socket", ""))
         if self.options.get_safe("with_systemd"):
             tc.project_options["systemd_system_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "system")
             tc.project_options["systemd_user_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "user")
