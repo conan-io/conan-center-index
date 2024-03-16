@@ -108,11 +108,21 @@ class LibsystemdConan(ConanFile):
         move_folder_contents(self, os.path.join(self.source_folder, f"systemd-stable-{self.version}"), self.source_folder)
 
     @property
-    def _so_version(self):
+    def _libsystemd_so_version(self):
         meson_build = os.path.join(self.source_folder, "meson.build")
         with open(meson_build, "r", encoding="utf-8") as build_file:
             for line in build_file:
                 match = re.match(r"^libsystemd_version = '(.*)'$", line)
+                if match:
+                    return match.group(1)
+        return ""
+
+    @property
+    def _libudev_so_version(self):
+        meson_build = os.path.join(self.source_folder, "meson.build")
+        with open(meson_build, "r", encoding="utf-8") as build_file:
+            for line in build_file:
+                match = re.match(r"^libudev_version = '(.*)'$", line)
                 if match:
                     return match.group(1)
         return ""
@@ -226,15 +236,15 @@ class LibsystemdConan(ConanFile):
         if self.options.shared:
             copy(self, "libsystemd.so", self.build_folder,
                  os.path.join(self.package_folder, "lib"))
-            copy(self, "libsystemd.so.{}".format(self._so_version.split('.')),
+            copy(self, "libsystemd.so.{}".format(self._libsystemd_so_version.split('.')),
                  self.build_folder, os.path.join(self.package_folder, "lib"))
-            copy(self, f"libsystemd.so.{self._so_version}",
+            copy(self, f"libsystemd.so.{self._libsystemd_so_version}",
                  self.build_folder, os.path.join(self.package_folder, "lib"))
             copy(self, "libudev.so", libudev_directory, os.path.join(self.package_folder, "lib"))
-            copy(self, "libudev.so.*", libudev_directory, os.path.join(self.package_folder, "lib"))
-            for x in os.walk(os.path.join(self.package_folder, "lib")):
-                if x[0] != os.path.join(self.package_folder, "lib"):
-                    rmdir(self, x[0])
+            copy(self, "libudev.so.{}".format(self._libudev_so_version.split('.')),
+                 libudev_directory, os.path.join(self.package_folder, "lib"))
+            copy(self, f"libudev.so.{self._libudev_so_version}",
+                 libudev_directory, os.path.join(self.package_folder, "lib"))
         else:
             copy(self, "libsystemd.a", self.build_folder,
                  os.path.join(self.package_folder, "lib"))
