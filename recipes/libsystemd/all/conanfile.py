@@ -5,7 +5,7 @@ import tarfile
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, replace_in_file, rmdir, download, move_folder_contents
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, replace_in_file, download, move_folder_contents
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -41,13 +41,6 @@ class LibsystemdConan(ConanFile):
         "with_zstd": True,
     }
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "clang": "10",
-            "gcc": "8",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -78,19 +71,6 @@ class LibsystemdConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Only Linux supported")
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires at least version {minimum_version} of {self.settings.compiler} but version {self.settings.compiler.version} is selected."
-            )
-        if not self.conf.get('user.c3i.skip:libsystemd', default=False, check_type=bool) and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "9":
-            raise ConanInvalidConfiguration(f"{self.name}/{self.version} and newer is not supported with gcc 9 on C3I until gcc 9.3 or newer is used\n"\
-                                            "If your using gcc 9.3 or newer, set the conf variable user.c3i.skip:libsystemd to True")
-        if self.settings.compiler == "gcc":
-            if Version(self.settings.compiler.version) == "9":
-                self.output.warn(f"{self.name}/{self.version} and newer requires gcc 9.3 or newer")
-            elif Version(self.settings.compiler.version) in ["9.1", "9.2"]:
-                raise ConanInvalidConfiguration(f"{self.name}/{self.version} and newer cannot be built with gcc 9.1 or 9.2")
 
     def build_requirements(self):
         self.tool_requires("meson/1.3.2")
