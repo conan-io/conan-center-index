@@ -28,7 +28,7 @@ class IguanaConan(ConanFile):
         return {
             "gcc": "11",
             "clang": "12",
-            "apple-clang": "13",
+            "apple-clang": "14",
             "Visual Studio": "16",
             "msvc": "192",
         }
