@@ -79,12 +79,12 @@ class SDLConan(ConanFile):
         "libunwind": True,
     }
     generators = "CMakeDeps", "PkgConfigDeps", "VirtualBuildEnv"
-    
+
     @property
     def _is_clang_cl(self):
         return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
                self.settings.compiler.get_safe("runtime")
-    
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -192,22 +192,23 @@ class SDLConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        if self.settings.os == "Macos":
-            if self.options.iconv:
-                # If using conan-provided iconv, search for the symbol "libiconv_open"
-                replace_check = "check_library_exists(iconv libiconv_open"
-            else:
-                # When no tusing conan-provided icon, don't check for iconv at all
-                replace_check = "#check_library_exists(iconv iconv_open"
-            replace_in_file(self, cmakelists, "check_library_exists(iconv iconv_open",
-                            replace_check)
+        if Version(self.version) < "2.30.0":
+            cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+            if self.settings.os == "Macos":
+                if self.options.iconv:
+                    # If using conan-provided iconv, search for the symbol "libiconv_open"
+                    replace_check = "check_library_exists(iconv libiconv_open"
+                else:
+                    # When no tusing conan-provided icon, don't check for iconv at all
+                    replace_check = "#check_library_exists(iconv iconv_open"
+                replace_in_file(self, cmakelists, "check_library_exists(iconv iconv_open",
+                                replace_check)
 
-        # Avoid assuming iconv is available if it is provided by the C runtime,
-        # and let SDL build the fallback implementation
-        replace_in_file(self, cmakelists,
-                        'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
-                        '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
+            # Avoid assuming iconv is available if it is provided by the C runtime,
+            # and let SDL build the fallback implementation
+            replace_in_file(self, cmakelists,
+                            'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
+                            '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
 
         # Ensure to find wayland-scanner from wayland recipe in build requirements (or requirements if 1 profile)
         if self.options.get_safe("wayland"):
