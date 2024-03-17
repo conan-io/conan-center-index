@@ -61,7 +61,8 @@ class PackageConan(ConanFile):
         # Prefer self.requires method instead of requires attribute
         # Direct dependencies of header only libs are always transitive since they are included in public headers
         #self.requires("dependency/0.8.1", transitive_headers=True)
-        self.test_requires("gtest/1.14.0")
+        if not self.conf.get("tools.build:skip_test", default=False):
+            self.requires("gtest/1.14.0")
 
     # same package ID for any package
     def package_id(self):
