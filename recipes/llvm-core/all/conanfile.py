@@ -295,11 +295,6 @@ class LLVMCoreConan(ConanFile):
             # It is likely the latter that the user expects by a "shared library" build.
             "BUILD_SHARED_LIBS": False
         })
-
-        if is_apple_os(self):
-            # otherwise llvm-tablegen can't find shared dependencies during the build
-            tc.cache_variables["CMAKE_SKIP_BUILD_RPATH"] = True
-
         tc.generate()
 
         tc = CMakeDeps(self)
