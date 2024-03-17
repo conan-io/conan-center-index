@@ -9,6 +9,9 @@ from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
+# This PR tests whether google-cloud-cpp builds at HEAD. This test is motivated
+# by the build failures in #22993, an attempted upgrade of google-cloud-cpp.
+
 # Load the generated component dependency information.
 #
 # `google-cloud-cpp` has well over 200 components. Conan cannot use the CMake
@@ -24,7 +27,6 @@ import components_2_15_1
 import components_2_19_0
 
 required_conan_version = ">=1.56.0"
-
 
 class GoogleCloudCppConan(ConanFile):
     name = "google-cloud-cpp"
