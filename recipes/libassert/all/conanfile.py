@@ -158,6 +158,9 @@ class LibassertConan(ConanFile):
             self.cpp_info.filenames["cmake_find_package_multi"] = "assert"
             self.cpp_info.names["cmake_find_package"] = "assert"
             self.cpp_info.names["cmake_find_package_multi"] = "assert"
+            
+        if not self.options.shared:
+            self.cpp_info.defines.append("LIBASSERT_STATIC_DEFINE")
 
         if Version(self.version) < Version("1.2.1"):
             # pre-cpptrace
