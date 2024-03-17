@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake
 from conan.tools.build import cross_building
-from conan.tools.scm import Version
 import os
+
 
 # legacy validation with Conan 1.x
 class TestPackageV1Conan(ConanFile):
@@ -10,10 +10,8 @@ class TestPackageV1Conan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        version = self.tested_reference_str.split('/')[1].split('#')[0]
-        cmake.configure(
-            defs={"LIBASSERT2": "True"} if Version(version) >= Version("2.0.0") else {}
-        )
+        cmake.definitions["LIBASSERT2"] = "ON" if self.deps_cpp_info["libassert"].version else "OFF"
+        cmake.configure()
         cmake.build()
 
     def test(self):

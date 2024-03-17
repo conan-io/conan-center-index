@@ -53,7 +53,8 @@ class LibassertConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= Version("2.0.0"):
-            self.requires("cpptrace/0.4.1", transitive_headers=True)
+            # libassert::detail::process_assert_fail
+            self.requires("cpptrace/0.4.1", transitive_headers=True, transitive_libs=True)
         elif Version(self.version) >= Version("1.2.2"):
             self.requires("cpptrace/0.3.1")
         elif Version(self.version) >= Version("1.2.1"):
@@ -117,7 +118,7 @@ class LibassertConan(ConanFile):
             copy(
                 self,
                 "*.dll",
-                src=self.build_folder,
+                src=os.path.join(self.package_folder, "lib"),
                 dst=os.path.join(self.package_folder, "bin"),
                 keep_path=False
             )
@@ -164,6 +165,6 @@ class LibassertConan(ConanFile):
                 self.cpp_info.system_libs.append("dl")
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs.append("dbghelp")
-        
+
         if Version(self.version) >= Version("2.0.0"):
             self.cpp_info.requires = ["cpptrace::cpptrace"]
