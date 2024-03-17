@@ -39,6 +39,10 @@ patches:
     - patch_file: patches/12x/0002-missing-includes.patch
       patch_description: fix missing header files
       patch_type: portability
+    - patch_file: patches/12x/0003-split-dwarf.patch
+      patch_description: enable split dwarf option from 14.x
+      patch_source: https://reviews.llvm.org/D108776
+      patch_type: bugfix
     - patch_file: patches/12x/0004-tblgen-dyld-lib-path.patch
       patch_description: propagate DTLD_LIBRARY_PATH to tblgen command
       patch_type: conan
