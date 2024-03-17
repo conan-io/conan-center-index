@@ -88,7 +88,6 @@ class LibassertConan(ConanFile):
             # if not self.options.shared:
                 # tc.variables["LIBASSERT_STATIC_DEFINE"] = True
             tc.variables["LIBASSERT_USE_EXTERNAL_CPPTRACE"] = True
-            tc.variables["LIBASSERT2"] = True
             deps = CMakeDeps(self)
             deps.generate()
         elif Version(self.version) >= Version("1.2.1"):
