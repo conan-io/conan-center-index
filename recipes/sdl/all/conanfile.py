@@ -368,8 +368,8 @@ class SDLConan(ConanFile):
 
         self.cpp_info.components["libsdl2"].includedirs.append(os.path.join("include", "SDL2"))
         self.cpp_info.components["libsdl2"].libs = ["SDL2" + lib_postfix]
-        if self.options.get_safe("iconv", False) and Version(self.version) < "2.30.0":
-            self.cpp_info.components["libsdl2"].requires.append("lib1::libiconv")
+        if self.options.get_safe("iconv", False):
+            self.cpp_info.components["libsdl2"].requires.append("libiconv::libiconv")
         if self.settings.os == "Linux":
             self.cpp_info.components["libsdl2"].system_libs = ["dl", "rt", "pthread"]
             if self.options.alsa:
