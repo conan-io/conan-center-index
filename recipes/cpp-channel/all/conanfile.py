@@ -2,7 +2,9 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.52.0"
 
@@ -28,6 +30,9 @@ class CppCHannelConan(ConanFile):
         self.info.clear()
 
     def validate(self):
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 7")
+
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
