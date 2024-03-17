@@ -10,3 +10,6 @@ patches:
     - patch_file: "patches/1.6.2-0001-fix-install.patch"
       patch_description: "fix install destinations"
       patch_type: "portability"
+    - patch_file: "patches/1.6.2-0002-remove-bit.patch"
+      patch_description: "remove unused bit header"
+      patch_type: "portability"

@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, copy, apply_conandata_patches, export_conandata_patches, replace_in_file
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
@@ -30,15 +30,15 @@ class MiniscriptConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "11" if Version(self.version) < "1.6.2" else "20"
+        return "11" if Version(self.version) < "1.6.2" else "17"
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "20": {
-                "gcc": "11",
-                "clang": "12",
-                "apple-clang": "13",
+            "17": {
+                "gcc": "8",
+                "clang": "7",
+                "apple-clang": "12",
                 "Visual Studio": "16",
                 "msvc": "192",
             },
