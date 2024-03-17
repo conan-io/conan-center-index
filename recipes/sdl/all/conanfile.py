@@ -314,6 +314,9 @@ class SDLConan(ConanFile):
 
         if Version(self.version) >= "2.0.22":
             tc.variables["SDL2_DISABLE_SDL2MAIN"] = not self.options.sdl2main
+        if Version(self.version) >= "2.30.0":
+            tc.variables["SDL_LIBICONV"] = self.options.get_safe("iconv", False)
+            tc.variables["SDL_SYSTEM_ICONV"] = False
 
         # Add extra information collected from the deps
         tc.variables["EXTRA_LDFLAGS"] = ";".join(cmake_extra_ldflags)
@@ -365,8 +368,8 @@ class SDLConan(ConanFile):
 
         self.cpp_info.components["libsdl2"].includedirs.append(os.path.join("include", "SDL2"))
         self.cpp_info.components["libsdl2"].libs = ["SDL2" + lib_postfix]
-        if self.options.get_safe("iconv", False):
-            self.cpp_info.components["libsdl2"].requires.append("libiconv::libiconv")
+        if self.options.get_safe("iconv", False) and Version(self.version) < "2.30.0":
+            self.cpp_info.components["libsdl2"].requires.append("lib1::libiconv")
         if self.settings.os == "Linux":
             self.cpp_info.components["libsdl2"].system_libs = ["dl", "rt", "pthread"]
             if self.options.alsa:
