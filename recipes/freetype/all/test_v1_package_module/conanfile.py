@@ -5,6 +5,7 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package"
+    license = "OFL-1.1-no-RFN"
 
     def build(self):
         cmake = CMake(self)
