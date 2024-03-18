@@ -54,7 +54,7 @@ class LibassertConan(ConanFile):
     def requirements(self):
         if Version(self.version) >= "2.0.0":
             # libassert::detail::process_assert_fail
-            self.requires("cpptrace/0.4.1", transitive_headers=True, transitive_libs=True)
+            self.requires("cpptrace/0.5.0", transitive_headers=True, transitive_libs=True)
         elif Version(self.version) >= "1.2.2":
             self.requires("cpptrace/0.3.1")
         elif Version(self.version) >= "1.2.1":
