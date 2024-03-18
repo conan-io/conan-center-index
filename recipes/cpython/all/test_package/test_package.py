@@ -56,10 +56,7 @@ def test_expat():
 
 @add_test
 def test_gdbm():
-    if sys.version_info < (3, 0):
-        import gdbm
-    else:
-        import dbm.gnu as gdbm
+    import dbm.gnu as gdbm
 
     dbfile = "gdbm.db"
 
@@ -103,24 +100,6 @@ def test_bz2():
     compressed = bz2.compress(b"hellow world")
     if compressed is None:
         raise Exception("bz2.compress returned no data")
-
-
-@add_test
-def test_bsddb():
-    import bsddb
-
-    db = bsddb.btopen("bsddb.db", "c")
-    db["key1"] = "value1"
-    db["key2"] = "value2"
-    db.close()
-
-    db = bsddb.btopen("bsddb.db", "r")
-    if len(db) != 2:
-        raise Exception("Wrong length")
-    if db["key1"] != "value1":
-        raise Exception("value1 incorrect {}".format(db["key1"]))
-    if db["key2"] != "value2":
-        raise Exception("value2 incorrect {}".format(db["key2"]))
 
 
 @add_test
@@ -170,11 +149,9 @@ def test_sqlite3():
 
 @add_test
 def test_decimal():
-    if sys.version_info >= (3,):
-        # Check whether the _decimal package was built successfully
-        import _decimal as decimal
-    else:
-        import decimal
+    # Check whether the _decimal package was built successfully
+    import _decimal as decimal
+    
     decimal.getcontext().prec = 6
     print("1/7 =", decimal.Decimal(1) / decimal.Decimal(7))
     decimal.getcontext().prec = 40

@@ -38,11 +38,6 @@ class CPythonConan(ConanFile):
         "with_sqlite3": [True, False],
         "with_tkinter": [True, False],
         "with_curses": [True, False],
-
-        # Python 2 options
-        "unicode": ["ucs2", "ucs4"],
-        "with_bsddb": [True, False],
-        # Python 3 options
         "with_lzma": [True, False],
 
         # options that don't change package id
@@ -61,11 +56,6 @@ class CPythonConan(ConanFile):
         "with_sqlite3": True,
         "with_tkinter": True,
         "with_curses": True,
-
-        # Python 2 options
-        "unicode": "ucs2",
-        "with_bsddb": False,  # True,  # FIXME: libdb package missing (#5309/#5392)
-        # Python 3 options
         "with_lzma": True,
 
         # options that don't change package id
@@ -83,14 +73,6 @@ class CPythonConan(ConanFile):
         joiner = "" if is_msvc(self) else "."
         return f"{v.major}{joiner}{v.minor}"
 
-    @property
-    def _is_py3(self):
-        return Version(self.version).major == 3
-
-    @property
-    def _is_py2(self):
-        return Version(self.version).major == 2
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -104,13 +86,6 @@ class CPythonConan(ConanFile):
             del self.options.with_curses
             del self.options.with_gdbm
             del self.options.with_nis
-        if self._is_py2:
-            # Python 2.xx does not support following options
-            del self.options.with_lzma
-        elif self._is_py3:
-            # Python 3.xx does not support following options
-            del self.options.with_bsddb
-            del self.options.unicode
 
         self.settings.compiler.rm_safe("libcxx")
         self.settings.compiler.rm_safe("cppstd")
@@ -122,33 +97,18 @@ class CPythonConan(ConanFile):
             self.options.rm_safe("with_bz2")
             self.options.rm_safe("with_sqlite3")
             self.options.rm_safe("with_tkinter")
-
-            self.options.rm_safe("with_bsddb")
             self.options.rm_safe("with_lzma")
 
     def layout(self):
         basic_layout(self, src_folder="src")
-
-    @property
-    def _use_vendored_libffi(self):
-        # cpython < 3.8 on MSVC uses an ancient libffi 2.00-beta
-        # (which is not available at cci, and is API/ABI incompatible with current 3.2+)
-        return Version(self.version) < "3.8" and is_msvc(self)
-
-    @property
-    def _with_libffi(self):
-        return self._supports_modules and not self._use_vendored_libffi
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         if self._supports_modules:
             self.requires("openssl/[>=1.1 <4]")
             self.requires("expat/2.6.0")
-            if not self._use_vendored_libffi:
-                self.requires("libffi/3.4.4")
-            if Version(self.version) < "3.8":
-                self.requires("mpdecimal/2.4.2")
-            elif Version(self.version) < "3.10" or is_apple_os(self):
+            self.requires("libffi/3.4.4")
+            if Version(self.version) < "3.10" or is_apple_os(self):
                 # FIXME: mpdecimal > 2.5.0 on MacOS causes the _decimal module to not be importable
                 self.requires("mpdecimal/2.5.0")
             else:
@@ -173,8 +133,6 @@ class CPythonConan(ConanFile):
             # Used in a public header
             # https://github.com/python/cpython/blob/v3.10.13/Include/py_curses.h#L34
             self.requires("ncurses/6.4", transitive_headers=True, transitive_libs=True)
-        if self.options.get_safe("with_bsddb", False):
-            self.requires("libdb/5.3.28")
         if self.options.get_safe("with_lzma", False):
             self.requires("xz_utils/5.6.1")
 
@@ -211,15 +169,9 @@ class CPythonConan(ConanFile):
             raise ConanInvalidConfiguration("cpython requires ncurses with wide character support")
 
         if self._supports_modules:
-            if Version(self.version) < "3.8.0":
-                if self.dependencies["mpdecimal"].ref.version >= Version("2.5.0"):
-                    raise ConanInvalidConfiguration("cpython versions lesser then 3.8.0 require a mpdecimal lesser then 2.5.0")
-            elif Version(self.version) >= "3.9.0":
+            if Version(self.version) >= "3.9.0":
                 if self.dependencies["mpdecimal"].ref.version < Version("2.5.0"):
                     raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
-
-        if is_apple_os(self) and self.settings.arch == "armv8" and Version(self.version) < "3.8.0":
-            raise ConanInvalidConfiguration("cpython 3.7 and older does not support Apple ARM CPUs")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -237,20 +189,15 @@ class CPythonConan(ConanFile):
             "--enable-optimizations={}".format(yes_no(self.options.optimizations)),
             "--with-lto={}".format(yes_no(self.options.lto)),
             "--with-pydebug={}".format(yes_no(self.settings.build_type == "Debug")),
+            "--with-system-libmpdec",
+            "--with-openssl={}".format(self.dependencies["openssl"].package_folder),
         ]
         if Version(self.version) >= "3.10":
             tc.configure_args.append("--disable-test-modules")
-        if self._is_py2:
-            tc.configure_args.append("--enable-unicode={}".format(yes_no(self.options.unicode)))
-        if self._is_py3:
-            tc.configure_args += [
-                "--with-system-libmpdec",
-                "--with-openssl={}".format(self.dependencies["openssl"].package_folder),
-            ]
-            if self.options.get_safe("with_sqlite3"):
-                tc.configure_args.append("--enable-loadable-sqlite-extensions={}".format(
-                    yes_no(not self.dependencies["sqlite3"].options.omit_load_extension)
-                ))
+        if self.options.get_safe("with_sqlite3"):
+            tc.configure_args.append("--enable-loadable-sqlite-extensions={}".format(
+                yes_no(not self.dependencies["sqlite3"].options.omit_load_extension)
+            ))
         if self.settings.compiler == "intel-cc":
             tc.configure_args.append("--with-icc")
         if os.environ.get("CC") or self.settings.compiler != "gcc":
@@ -296,7 +243,7 @@ class CPythonConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         setup_py = os.path.join(self.source_folder, "setup.py")
-        if self._is_py3 and Version(self.version) < "3.10":
+        if Version(self.version) < "3.10":
             replace_in_file(self, setup_py, ":libmpdec.so.2", "mpdec")
         if is_msvc(self):
             runtime_library = {
@@ -325,21 +272,15 @@ class CPythonConan(ConanFile):
         if self._supports_modules:
             openssl = self.dependencies["openssl"].cpp_info.aggregated_components()
             zlib = self.dependencies["zlib"].cpp_info.aggregated_components()
-            if self._is_py3:
-                replace_in_file(self, setup_py,
-                                "openssl_includes = ",
-                                f"openssl_includes = {openssl.includedirs + zlib.includedirs} #")
-                replace_in_file(self, setup_py,
-                                "openssl_libdirs = ",
-                                f"openssl_libdirs = {openssl.libdirs + zlib.libdirs} #")
-                replace_in_file(self, setup_py,
-                                "openssl_libs = ",
-                                f"openssl_libs = {openssl.libs + zlib.libs} #")
-            else:
-                replace_in_file(self, setup_py, "'/usr/local/ssl/include',", f"{(openssl.includedirs + zlib.includedirs)[1:-2]}") 
-                replace_in_file(self, setup_py, "'/usr/contrib/ssl/include/'", "")
-                replace_in_file(self, setup_py, "lib_dirs = []", f"lib_dirs = {openssl.libdirs + zlib.libdirs}")
-                replace_in_file(self, setup_py, "libraries = ['ssl', 'crypto'],", f"libraries = {openssl.libs + zlib.libs}, #")
+            replace_in_file(self, setup_py,
+                            "openssl_includes = ",
+                            f"openssl_includes = {openssl.includedirs + zlib.includedirs} #")
+            replace_in_file(self, setup_py,
+                            "openssl_libdirs = ",
+                            f"openssl_libdirs = {openssl.libdirs + zlib.libdirs} #")
+            replace_in_file(self, setup_py,
+                            "openssl_libs = ",
+                            f"openssl_libs = {openssl.libs + zlib.libs} #")
 
         # Enable static MSVC cpython
         if not self.options.shared:
@@ -424,6 +365,9 @@ class CPythonConan(ConanFile):
             "_freeze_importlib",
             "sqlite3",
             "bdist_wininst",
+            "liblzma",
+            "openssl",
+            "xxlimited",
         }
         if not self.options.with_bz2:
             discarded.add("bz2")
@@ -431,25 +375,8 @@ class CPythonConan(ConanFile):
             discarded.add("_sqlite3")
         if not self.options.with_tkinter:
             discarded.add("_tkinter")
-        if self._is_py2:
-            # Python 2 Visual Studio projects NOT to build
-            discarded = discarded.union({
-                "libeay",
-                "ssleay",
-                "tcl",
-                "tk",
-                "tix",
-            })
-            if not self.options.with_bsddb:
-                discarded.add("_bsddb")
-        elif self._is_py3:
-            discarded = discarded.union({
-                "liblzma",
-                "openssl",
-                "xxlimited",
-            })
-            if not self.options.with_lzma:
-                discarded.add("_lzma")
+        if not self.options.with_lzma:
+            discarded.add("_lzma")
         return discarded
 
     @property
@@ -457,13 +384,10 @@ class CPythonConan(ConanFile):
         archs = {
             "x86": "Win32",
             "x86_64": "x64",
+            "armv7": "ARM",
+            "armv8_32": "ARM",
+            "armv8": "ARM64",
         }
-        if Version(self.version) >= "3.8":
-            archs.update({
-                "armv7": "ARM",
-                "armv8_32": "ARM",
-                "armv8": "ARM64",
-            })
         return archs
 
     def _msvc_build(self):
@@ -498,13 +422,10 @@ class CPythonConan(ConanFile):
         build_subdir_lut = {
             "x86_64": "amd64",
             "x86": "win32",
+            "armv7": "arm32",
+            "armv8_32": "arm32",
+            "armv8": "arm64",
         }
-        if Version(self.version) >= "3.8":
-            build_subdir_lut.update({
-                "armv7": "arm32",
-                "armv8_32": "arm32",
-                "armv8": "arm64",
-            })
         return os.path.join(self.source_folder, "PCbuild", build_subdir_lut[str(self.settings.arch)])
 
     @property
@@ -516,9 +437,8 @@ class CPythonConan(ConanFile):
             # Until MSVC builds support cross building, copy dll's of essential (shared) dependencies to python binary location.
             # These dll's are required when running the layout tool using the newly built python executable.
             dest_path = os.path.join(self.build_folder, self._msvc_artifacts_path)
-            if self._with_libffi:
-                for bin_path in self.dependencies["libffi"].cpp_info.bindirs:
-                    copy(self, "*.dll", src=bin_path, dst=dest_path)
+            for bin_path in self.dependencies["libffi"].cpp_info.bindirs:
+                copy(self, "*.dll", src=bin_path, dst=dest_path)
             for bin_path in self.dependencies["expat"].cpp_info.bindirs:
                 copy(self, "*.dll", src=bin_path, dst=dest_path)
             for bin_path in self.dependencies["zlib"].cpp_info.bindirs:
@@ -605,10 +525,10 @@ class CPythonConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
-            if self._is_py2 or not self.options.shared:
-                self._msvc_package_copy()
-            else:
+            if self.options.shared:
                 self._msvc_package_layout()
+            else:
+                self._msvc_package_copy()
             rm(self, "vcruntime*", os.path.join(self.package_folder, "bin"), recursive=True)
         else:
             if (os.path.isfile(os.path.join(self.package_folder, "lib"))):
@@ -678,12 +598,8 @@ class CPythonConan(ConanFile):
     @property
     def _abi_suffix(self):
         res = ""
-        if self._is_py3:
-            if self.settings.build_type == "Debug":
-                res += "d"
-            if Version(self.version) < "3.8":
-                if self.options.get_safe("pymalloc", False):
-                    res += "m"
+        if self.settings.build_type == "Debug":
+            res += "d"
         return res
 
     @property
@@ -754,9 +670,8 @@ class CPythonConan(ConanFile):
                 "openssl::openssl",
                 "expat::expat",
                 "mpdecimal::mpdecimal",
+                "libffi::libffi",
             ]
-            if self._with_libffi:
-                self.cpp_info.components["_hidden"].requires.append("libffi::libffi")
             if self.settings.os != "Windows":
                 if not is_apple_os(self):
                     self.cpp_info.components["_hidden"].requires.append("util-linux-libuuid::util-linux-libuuid")
@@ -769,8 +684,6 @@ class CPythonConan(ConanFile):
                 self.cpp_info.components["_hidden"].requires.append("sqlite3::sqlite3")
             if self.options.get_safe("with_curses", False):
                 self.cpp_info.components["_hidden"].requires.append("ncurses::ncurses")
-            if self.options.get_safe("with_bsddb"):
-                self.cpp_info.components["_hidden"].requires.append("libdb::libdb")
             if self.options.get_safe("with_lzma"):
                 self.cpp_info.components["_hidden"].requires.append("xz_utils::xz_utils")
             if self.options.get_safe("with_tkinter"):
@@ -807,12 +720,9 @@ class CPythonConan(ConanFile):
                 self.output.info(f"Setting PYTHONHOME environment variable: {pythonhome}")
                 self.env_info.PYTHONHOME = pythonhome
 
-        if self._is_py2:
-            python_root = ""
-        else:
-            python_root = self.package_folder
-            if self.options.env_vars:
-                self.output.info(f"Setting PYTHON_ROOT environment variable: {python_root}")
-                self.env_info.PYTHON_ROOT = python_root
+        python_root = self.package_folder
+        if self.options.env_vars:
+            self.output.info(f"Setting PYTHON_ROOT environment variable: {python_root}")
+            self.env_info.PYTHON_ROOT = python_root
         self.conf_info.define("user.cpython:python_root", python_root)
         self.user_info.python_root = python_root

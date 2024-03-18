@@ -9,12 +9,11 @@ find_package(cpython REQUIRED CONFIG)
 # but otherwise not at build time (in consumer packages).
 link_libraries(cpython::python)
 
-set(PY_VERSION_MAJOR "" CACHE STRING "MAJOR version of python")
 set(PY_VERSION_MAJOR_MINOR "" CACHE STRING "MAJOR.MINOR version of python")
 set(PY_VERSION "" CACHE STRING "Required version of python")
 set(PY_VERSION_SUFFIX "" CACHE STRING "Suffix of python")
 
-set(Python_ADDITIONAL_VERSIONS ${PY_VERSION}${PY_VERSION_SUFFIX} ${PY_VERSION_MAJOR_MINOR}${PY_VERSION_SUFFIX} ${PY_VERSION_MAJOR}${PY_VERSION_SUFFIX} ${PY_VERSION} ${PY_VERSION_MAJOR_MINOR} ${PY_VERSION_MAJOR})
+set(Python_ADDITIONAL_VERSIONS ${PY_VERSION}${PY_VERSION_SUFFIX} ${PY_VERSION_MAJOR_MINOR}${PY_VERSION_SUFFIX} 3${PY_VERSION_SUFFIX} ${PY_VERSION} ${PY_VERSION_MAJOR_MINOR} 3)
 message("Using Python_ADDITIONAL_VERSIONS: ${Python_ADDITIONAL_VERSIONS}")
 
 find_package(PythonInterp REQUIRED)
@@ -27,7 +26,6 @@ endif()
 
 message(STATUS "FindPythonInterp:")
 message(STATUS "PYTHON_VERSION_STRING: ${PYTHON_VERSION_STRING}")
-message(STATUS "PYTHON_VERSION_MAJOR: ${PYTHON_VERSION_MAJOR}")
 message(STATUS "PYTHON_VERSION_MINOR: ${PYTHON_VERSION_MINOR}")
 message(STATUS "PYTHON_VERSION_PATCH: ${PYTHON_VERSION_PATCH}")
 message(STATUS "=============================================")
@@ -59,7 +57,7 @@ endif()
 option(BUILD_MODULE "Build python module")
 
 if(BUILD_MODULE)
-    add_library(spam MODULE "py${PY_VERSION_MAJOR}/test_module.c")
+    add_library(spam MODULE "test_module.c")
     target_include_directories(spam
         PRIVATE
             ${PYTHON_INCLUDE_DIRS}
@@ -77,27 +75,21 @@ if(BUILD_MODULE)
 
     option(USE_FINDPYTHON_X "Use new-style FindPythonX module")
     if(USE_FINDPYTHON_X AND NOT CMAKE_VERSION VERSION_LESS "3.16")
-        # Require CMake 3.16 because this version introduces Python${PY_VERSION_MAJOR}_FIND_ABI
-        find_package(Python${PY_VERSION_MAJOR} REQUIRED COMPONENTS Interpreter Development)
-        message("Python${PY_VERSION_MAJOR}_EXECUTABLE: ${Python${PY_VERSION_MAJOR}_EXECUTABLE}")
-        message("Python${PY_VERSION_MAJOR}_INTERPRETER_ID: ${Python${PY_VERSION_MAJOR}_INTERPRETER_ID}")
-        message("Python${PY_VERSION_MAJOR}_VERSION: ${Python${PY_VERSION_MAJOR}_VERSION}")
-        message("Python${PY_VERSION_MAJOR}_INCLUDE_DIRS: ${Python${PY_VERSION_MAJOR}_INCLUDE_DIRS}")
-        message("Python${PY_VERSION_MAJOR}_LIBRARIES: ${Python${PY_VERSION_MAJOR}_LIBRARIES}")
-        if(NOT Python${PY_VERSION_MAJOR}_VERSION STREQUAL "${PY_VERSION}")
+        # Require CMake 3.16 because this version introduces Python3_FIND_ABI
+        find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+        message("Python3_EXECUTABLE: ${Python3_EXECUTABLE}")
+        message("Python3_INTERPRETER_ID: ${Python3_INTERPRETER_ID}")
+        message("Python3_VERSION: ${Python3_VERSION}")
+        message("Python3_INCLUDE_DIRS: ${Python3_INCLUDE_DIRS}")
+        message("Python3_LIBRARIES: ${Python3_LIBRARIES}")
+        if(NOT Python3_VERSION STREQUAL "${PY_VERSION}")
             message("Python_ADDITIONAL_VERSIONS does not match PY_VERSION")
             message(FATAL_ERROR "CMake detected wrong cpython version")
         endif()
 
-        if(PY_VERSION_MAJOR STREQUAL "2")
-            python2_add_library(spam2 "py${PY_VERSION_MAJOR}/test_module.c")
-        elseif(PY_VERSION_MAJOR STREQUAL "3")
-            python3_add_library(spam2 "py${PY_VERSION_MAJOR}/test_module.c")
-        else()
-            message(FATAL_ERROR "Unknown PY_VERSION_MAJOR")
-        endif()
+        python3_add_library(spam2 "test_module.c")
     endif()
 endif()
 
-add_executable(${PROJECT_NAME} "py${PY_VERSION_MAJOR}/test_package.c")
+add_executable(${PROJECT_NAME} "test_package.c")
 target_link_libraries(${PROJECT_NAME} PRIVATE cpython::embed)
