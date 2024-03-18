@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
@@ -71,13 +71,13 @@ class ArrowConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "gandiva": False,
-        "parquet": "auto",
+        "parquet": False,
         "skyhook": False,
         "substrait": False,
         "acero": False,
         "cli": False,
-        "compute": "auto",
-        "dataset_modules": "auto",
+        "compute": False,
+        "dataset_modules": False,
         "deprecated": True,
         "encryption": False,
         "filesystem_layer": False,
@@ -86,29 +86,29 @@ class ArrowConan(ConanFile):
         "simd_level": "default",
         "runtime_simd_level": "max",
         "with_backtrace": False,
-        "with_boost": "auto",
+        "with_boost": False,
         "with_brotli": False,
         "with_bz2": False,
         "with_csv": False,
         "with_cuda": False,
-        "with_flight_rpc": "auto",
+        "with_flight_rpc": False,
         "with_flight_sql": False,
         "with_gcs": False,
-        "with_gflags": "auto",
-        "with_jemalloc": "auto",
+        "with_gflags": False,
+        "with_jemalloc": False,
         "with_mimalloc": False,
-        "with_glog": "auto",
-        "with_grpc": "auto",
+        "with_glog": False,
+        "with_grpc": False,
         "with_json": False,
-        "with_thrift": "auto",
-        "with_llvm": "auto",
-        "with_openssl": "auto",
+        "with_thrift": False,
+        "with_llvm": False,
+        "with_openssl": False,
         "with_opentelemetry": False,
         "with_orc": False,
-        "with_protobuf": "auto",
-        "with_re2": "auto",
+        "with_protobuf": False,
+        "with_re2": False,
         "with_s3": False,
-        "with_utf8proc": "auto",
+        "with_utf8proc": False,
         "with_lz4": False,
         "with_snappy": False,
         "with_zlib": False,
@@ -158,22 +158,6 @@ class ArrowConan(ConanFile):
         if Version(self.version) < "8.0.0":
             del self.options.substrait
 
-        self.options.parquet = self._parquet()
-        self.options.compute = self._compute()
-        self.options.dataset_modules = self._dataset_modules()
-        self.options.with_boost = self._with_boost()
-        self.options.with_flight_rpc = self._with_flight_rpc()
-        self.options.with_gflags = self._with_gflags()
-        self.options.with_glog = self._with_glog()
-        self.options.with_grpc = self._with_grpc()
-        self.options.with_jemalloc = self._with_jemalloc()
-        self.options.with_thrift = self._with_thrift()
-        self.options.with_llvm = self._with_llvm()
-        self.options.with_openssl = self._with_openssl()
-        self.options.with_protobuf = self._with_protobuf()
-        self.options.with_re2 = self._with_re2()
-        self.options.with_utf8proc = self._with_utf8proc()
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -181,115 +165,8 @@ class ArrowConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def _compute(self):
-        if self.options.compute == "auto":
-            return bool(self._parquet() or self._dataset_modules()) or bool(self.options.get_safe("substrait", False))
-        else:
-            return bool(self.options.compute)
-
-    def _parquet(self):
-        if self.options.parquet == "auto":
-            return bool(self.options.get_safe("substrait", False))
-        else:
-            return bool(self.options.parquet)
-
-    def _dataset_modules(self):
-        if self.options.dataset_modules == "auto":
-            return bool(self.options.get_safe("substrait", False))
-        else:
-            return bool(self.options.dataset_modules)
-
-    def _with_jemalloc(self):
-        if self.options.with_jemalloc == "auto":
-            return bool("BSD" in str(self.settings.os))
-        else:
-            return bool(self.options.with_jemalloc)
-
-    def _with_re2(self):
-        if self.options.with_re2 == "auto":
-            if self.options.gandiva or self.options.parquet:
-                return True
-            if Version(self) >= "7.0.0" and (self._compute() or self._dataset_modules()):
-                return True
-            return False
-        else:
-            return bool(self.options.with_re2)
-
-    def _with_protobuf(self):
-        if self.options.with_protobuf == "auto":
-            return bool(self.options.gandiva or self._with_flight_rpc() or self.options.with_orc or self.options.get_safe("substrait", False))
-        else:
-            return bool(self.options.with_protobuf)
-
-    def _with_flight_rpc(self):
-        if self.options.with_flight_rpc == "auto":
-            return bool(self.options.get_safe("with_flight_sql", False))
-        else:
-            return bool(self.options.with_flight_rpc)
-
-    def _with_gflags(self):
-        if self.options.with_gflags == "auto":
-            return bool(self._with_glog() or self._with_grpc())
-        else:
-            return bool(self.options.with_gflags)
-
-    def _with_glog(self):
-        if self.options.with_glog == "auto":
-            return False
-        else:
-            return bool(self.options.with_glog)
-
-    def _with_grpc(self):
-        if self.options.with_grpc == "auto":
-            return self._with_flight_rpc()
-        else:
-            return bool(self.options.with_grpc)
-
-    def _with_boost(self):
-        if self.options.with_boost == "auto":
-            if self.options.gandiva:
-                return True
-            version = Version(self.version)
-            if version.major == "1":
-                if self._parquet() and self.settings.compiler == "gcc" and self.settings.compiler.version < Version("4.9"):
-                    return True
-            elif version.major >= "2":
-                if is_msvc(self):
-                    return True
-            return False
-        else:
-            return bool(self.options.with_boost)
-
-    def _with_thrift(self):
-        if self.options.with_thrift == "auto":
-            return bool(self._parquet())
-        else:
-            return bool(self.options.with_thrift)
-
-    def _with_utf8proc(self):
-        if self.options.with_utf8proc == "auto":
-            return bool(self._compute() or self.options.gandiva)
-        else:
-            return bool(self.options.with_utf8proc)
-
-    def _with_llvm(self):
-        if self.options.with_llvm == "auto":
-            return bool(self.options.gandiva)
-        else:
-            return bool(self.options.with_llvm)
-
-    def _with_openssl(self):
-        if self.options.with_openssl == "auto":
-            return bool(self.options.encryption or self._with_flight_rpc() or self.options.with_s3)
-        else:
-            return bool(self.options.with_openssl)
-
     def _requires_rapidjson(self):
-        if self.options.with_json:
-            return True
-        if Version(self.version) >= "7.0.0" and self.options.encryption:
-            return True
-        return False
+       return self.options.with_json or (Version(self.version) >= "7.0.0" and self.options.encryption)
 
     def requirements(self):
         if self.options.with_thrift:
@@ -348,11 +225,29 @@ class ArrowConan(ConanFile):
             self.requires("libbacktrace/cci.20210118")
 
     def validate(self):
-        # validate options with 'auto' as default value
-        auto_options = ["parquet", "compute", "dataset_modules", "with_boost", "with_flight_rpc", "with_gflags", "with_glog",
-                        "with_grpc", "with_jemalloc", "with_thrift", "with_llvm", "with_openssl", "with_protobuf", "with_re2", "with_utf8proc"]
-        for option in auto_options:
-            assert "auto" not in str(self.options.get_safe(option)), f"Option '{option}' contains 'auto' value, wich is not allowed. Generally the final value should be True/False"
+        # Do not allow options with 'auto' value
+        auto_options = [option for option, value in self.options.items() if value == "auto"]
+        if auto_options:
+            raise ConanException("Options with value 'auto' are not allowed anymore. Please set them true/false or use its default value."
+                                 f" Please change the following options: {auto_options}")
+
+        # Warn/error on some option values
+        version = Version(self.version)
+        if not self.options.with_boost:
+            if self.options.gandiva:
+                self.output.warning("Option 'with_boost=True' could be required when option 'gandiva=True'")
+            if (version.major == "1") and self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < Version("4.9"):
+                self.output.warning("Option 'with_boost=True' could be required when option 'parquet=True' and using gcc < 4.9")
+            if version.major >= "2" and is_msvc(self):
+                raise ConanInvalidConfiguration("Option 'with_boost=True' is required for Visual Studio")
+        if not self.options.with_re2:
+            if self.options.gandiva or self.options.parquet:
+                self.output.warning("Option 'with_re2=True' could be required when option 'gandiva=True' or 'parquet=True'")
+            if version >= "7.0.0" and (self.options.compute or self.options.dataset_modules):
+                self.output.warning("Option 'with_re2=True' could be required when 'compute=True' or 'dataset_modules=True'")
+        if not self.options.with_jemalloc:
+            if "BSD" in self.settings.os:
+                self.output.warning("Option 'with_jemalloc=True' could be required for BSD in settings.os")
 
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
@@ -376,7 +271,7 @@ class ArrowConan(ConanFile):
             if self.dependencies["jemalloc"].options.enable_cxx:
                 raise ConanInvalidConfiguration("jemmalloc.enable_cxx of a static jemalloc must be disabled")
 
-        if Version(self.version) < "6.0.0" and self.options.get_safe("simd_level") == "default":
+        if version < "6.0.0" and self.options.get_safe("simd_level") == "default":
             raise ConanInvalidConfiguration(f"In {self.ref}, simd_level options is not supported `default` value.")
 
     def build_requirements(self):
