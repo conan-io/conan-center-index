@@ -153,6 +153,11 @@ class LibassertConan(ConanFile):
             self.cpp_info.filenames["cmake_find_package_multi"] = "libassert"
             self.cpp_info.names["cmake_find_package"] = "libassert"
             self.cpp_info.names["cmake_find_package_multi"] = "libassert"
+
+            self.cpp_info.components["assert"].names["cmake_find_package"] = "assert"
+            self.cpp_info.components["assert"].names["cmake_find_package_multi"] = "assert"
+            self.cpp_info.components["assert"].requires = ["cpptrace::cpptrace"]
+            self.cpp_info.components["assert"].libs = ["assert"]
         else:
             self.cpp_info.filenames["cmake_find_package"] = "assert"
             self.cpp_info.filenames["cmake_find_package_multi"] = "assert"
