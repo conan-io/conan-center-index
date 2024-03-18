@@ -1,4 +1,7 @@
 sources:
+  "0.3.1":
+    url: "https://github.com/Neargye/semver/archive/refs/tags/v0.3.1.tar.gz"
+    sha256: "422b5882460a685a455fda9da53b85aa1824dcb9ba9dfbd0460ce50393f71061"
   "0.3.0":
     url: "https://github.com/Neargye/semver/archive/refs/tags/v0.3.0.tar.gz"
     sha256: "f88697a059e7a850ca65315828682e14c34958fb585c3b8555b9d89f5c76e3cc"

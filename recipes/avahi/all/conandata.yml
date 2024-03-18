@@ -2,3 +2,8 @@ sources:
   "0.8":
     url: "https://github.com/lathiat/avahi/releases/download/v0.8/avahi-0.8.tar.gz"
     sha256: "060309d7a333d38d951bc27598c677af1796934dbd98e1024e7ad8de798fedda"
+patches:
+  "0.8":
+    - patch_file: "patches/0.8-0001-Avoid-conflicting-definition-with-strlcpy-in-glibc.patch"
+      patch_description: "Avoid conflicting definition with glibc strlcpy"
+      patch_type: "conan"
