@@ -214,7 +214,7 @@ class FreetypeConan(ConanFile):
         self.cpp_info.set_property("cmake_target_aliases", ["freetype"]) # other possible target name in upstream config file
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
         self.cpp_info.set_property("pkg_config_name", "freetype2")
-        self.cpp_info.libs = ["freetype"]
+        self.cpp_info.libs = ["libfreetype.a" if self.settings.os == "Windows" and not self.options.shared else "freetype"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
         self.cpp_info.includedirs.append(os.path.join("include", "freetype2"))
