@@ -64,20 +64,19 @@ class TestPackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         version = self._py_version
-        py_major = str(version.major)
         tc.cache_variables["BUILD_MODULE"] = self._supports_modules
         tc.cache_variables["PY_VERSION_MAJOR_MINOR"] = f"{version.major}.{version.minor}"
         tc.cache_variables["PY_VERSION"] = str(self._py_version)
         tc.cache_variables["PY_VERSION_SUFFIX"] = "d" if self.settings.build_type == "Debug" else ""
         tc.cache_variables["PYTHON_EXECUTABLE"] = self._python
         tc.cache_variables["USE_FINDPYTHON_X"] = self._cmake_try_FindPythonX
-        tc.cache_variables[f"Python{py_major}_EXECUTABLE"] = self._python
-        tc.cache_variables[f"Python{py_major}_ROOT_DIR"] = self.dependencies["cpython"].package_folder
-        tc.cache_variables[f"Python{py_major}_USE_STATIC_LIBS"] = not self.dependencies["cpython"].options.shared
-        tc.cache_variables[f"Python{py_major}_FIND_FRAMEWORK"] = "NEVER"
-        tc.cache_variables[f"Python{py_major}_FIND_REGISTRY"] = "NEVER"
-        tc.cache_variables[f"Python{py_major}_FIND_IMPLEMENTATIONS"] = "CPython"
-        tc.cache_variables[f"Python{py_major}_FIND_STRATEGY"] = "LOCATION"
+        tc.cache_variables["Python3_EXECUTABLE"] = self._python
+        tc.cache_variables["Python3_ROOT_DIR"] = self.dependencies["cpython"].package_folder
+        tc.cache_variables["Python3_USE_STATIC_LIBS"] = not self.dependencies["cpython"].options.shared
+        tc.cache_variables["Python3_FIND_FRAMEWORK"] = "NEVER"
+        tc.cache_variables["Python3_FIND_REGISTRY"] = "NEVER"
+        tc.cache_variables["Python3_FIND_IMPLEMENTATIONS"] = "CPython"
+        tc.cache_variables["Python3_FIND_STRATEGY"] = "LOCATION"
         tc.generate()
 
         deps = CMakeDeps(self)
