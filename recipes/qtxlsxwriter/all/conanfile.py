@@ -44,7 +44,7 @@ class QtXlsxWriterConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/5.15.7")
+        self.requires("qt/5.15.13")
 
     def validate(self):
         if not self.dependencies["qt"].options.gui:
