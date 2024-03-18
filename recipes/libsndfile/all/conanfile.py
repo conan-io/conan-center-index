@@ -57,7 +57,9 @@ class LibsndfileConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("libsndio/1.9.0")
         if self.options.get_safe("with_alsa"):
+            self.options["libsndio"].with_alsa = True
             self.requires("libalsa/1.2.10")
         if self.options.with_external_libs:
             self.requires("ogg/1.3.5")
@@ -73,7 +75,6 @@ class LibsndfileConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Sndio"] = True  # FIXME: missing sndio cci recipe (check whether it is really required)
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Speex"] = True  # FIXME: missing sndio cci recipe (check whether it is really required)
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_SQLite3"] = True  # only used for regtest
         tc.variables["ENABLE_EXTERNAL_LIBS"] = self.options.with_external_libs
@@ -122,6 +123,7 @@ class LibsndfileConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "sndfile")
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["sndfile"].libs = ["sndfile"]
+        self.cpp_info.components["sndfile"].requires.append("libsndio::libsndio")
         if self.options.with_external_libs:
             self.cpp_info.components["sndfile"].requires.extend([
                 "ogg::ogg", "vorbis::vorbismain", "vorbis::vorbisenc",
