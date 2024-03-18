@@ -17,7 +17,7 @@ class QuickcpplibCodeConan(ConanFile):
     description = "Eliminate all the tedious hassle when making state-of-the-art C++ 17 - 23 libraries!"
     topics = ("header-only", "common")
     package_type = "header-library"
-    settings = "os", "compiler"
+    settings = "os", "compiler", "build_type", "arch"
 
     @property
     def _compiler_required_version(self):
@@ -30,7 +30,12 @@ class QuickcpplibCodeConan(ConanFile):
 
     @property
     def _needs_span_lite(self):
-        return valid_max_cppstd(self, "17")
+        # TODO: Conan 1 only has check_min_cppstd, move to `valid_max_cppstd` when only Conan 2 is required
+        try:
+            check_min_cppstd(self, "20")
+            return False
+        except ConanInvalidConfiguration:
+            return True
 
     @property
     def _min_cppstd(self):
