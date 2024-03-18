@@ -27,7 +27,6 @@ class PackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     # Do not copy sources to build folder for header only projects, unless you need to apply patches
     no_copy_source = True
-    generators = "CMakeToolchain", "CMakeDeps"
 
     @property
     def _min_cppstd(self):
