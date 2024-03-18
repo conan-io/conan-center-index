@@ -94,8 +94,6 @@ class LeptonicaConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) < "1.79.0":
-            tc.variables["STATIC"] = not self.options.shared
         tc.variables["BUILD_PROG"] = False
         tc.variables["SW_BUILD"] = False
         if Version(self.version) >= "1.83.0":
@@ -162,10 +160,7 @@ class LeptonicaConan(ConanFile):
         replace_in_file(self, cmakelists_src, "${JP2K_LIBRARIES}", "openjp2")
         if Version(self.version) < "1.83.0":
             # pkgconfig is prefered to CMake. Disable pkgconfig so only CMake is used
-            if Version(self.version) <= "1.78.0":
-                replace_in_file(self, cmakelists, "pkg_check_modules(JP2K libopenjp2)", "")
-            else:
-                replace_in_file(self, cmakelists, "pkg_check_modules(JP2K libopenjp2>=2.0 QUIET)", "")
+            replace_in_file(self, cmakelists, "pkg_check_modules(JP2K libopenjp2>=2.0 QUIET)", "")
             # versions below 1.83.0 do not have an option toggle
             replace_in_file(self, cmakelists, "if(NOT JP2K)", "if(0)")
             if not self.options.with_openjpeg:
@@ -180,8 +175,7 @@ class LeptonicaConan(ConanFile):
         if Version(self.version) < "1.83.0":
             # versions below 1.83.0 do not have an option toggle
             replace_in_file(self, cmakelists, "if(NOT WEBP)", "if(0)")
-            if Version(self.version) >= "1.79.0":
-                replace_in_file(self, cmakelists, "if(NOT WEBPMUX)", "if(0)")
+            replace_in_file(self, cmakelists, "if(NOT WEBPMUX)", "if(0)")
             if not self.options.with_webp:
                 replace_in_file(self, cmakelists_src, "if (WEBP_FOUND)", "if(0)")
                 replace_in_file(self, cmake_configure, "if (WEBP_FOUND)", "if(0)")
