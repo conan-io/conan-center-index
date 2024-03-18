@@ -226,9 +226,10 @@ class ArrowConan(ConanFile):
 
     def validate(self):
         # Do not allow options with 'auto' value
+        # TODO: Remove "auto" from the possible values for these options
         auto_options = [option for option, value in self.options.items() if value == "auto"]
         if auto_options:
-            raise ConanException("Options with value 'auto' are not allowed anymore. Please set them true/false or use its default value."
+            raise ConanException("Options with value 'auto' are deprecated. Please set them true/false or use its default value."
                                  f" Please change the following options: {auto_options}")
 
         # Warn/error on some option values
