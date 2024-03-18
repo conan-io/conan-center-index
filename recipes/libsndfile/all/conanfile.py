@@ -75,7 +75,7 @@ class LibsndfileConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Speex"] = True  # FIXME: missing sndio cci recipe (check whether it is really required)
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Speex"] = True  # FIXME: missing speex cci recipe (check whether it is really required)
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_SQLite3"] = True  # only used for regtest
         tc.variables["ENABLE_EXTERNAL_LIBS"] = self.options.with_external_libs
         if not self.options.with_external_libs:
