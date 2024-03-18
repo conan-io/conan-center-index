@@ -1,9 +1,10 @@
+import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.scm import Version
 from os.path import join
 import textwrap
@@ -134,6 +135,9 @@ class TensorflowLiteConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        # FIXME: move this to a patch file
+        replace_in_file(self, os.path.join(self.source_folder, "tensorflow", "lite", "CMakeLists.txt"),
+                        "set(TFLITE_PROFILER_SRCS", "set(TFLITE_PROFILER_SRCS\n${TFLITE_SOURCE_DIR}/profiling/telemetry/telemetry.cc")
         cmake = CMake(self)
         cmake.configure(build_script_folder=join("tensorflow", "lite"))
         cmake.build()
