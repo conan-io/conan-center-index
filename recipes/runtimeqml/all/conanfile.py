@@ -86,6 +86,7 @@ class RuntimeQml(ConanFile):
         tc.generate()
 
     def build(self):
+        copy(self, "CMakeLists.txt", src=self.export_sources_folder, dst=self.source_folder)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
