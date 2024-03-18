@@ -63,6 +63,7 @@ class FastDDSConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        self.options["fast-cdr"].shared = self.options.shared
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
