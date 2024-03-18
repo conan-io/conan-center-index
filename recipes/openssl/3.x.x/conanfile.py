@@ -346,7 +346,7 @@ class OpenSSLConan(ConanFile):
         return ancestor
 
     def _get_default_openssl_dir(self):
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "Neutrino"]:
             return "/etc/ssl"
         return os.path.join(self.package_folder, "res")
 
