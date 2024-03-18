@@ -114,7 +114,7 @@ _DEFAULT_EXPERIMENTAL_COMPONENTS = {
     "pubsublite",
 }
 
-# `google-cloud-cpp` managems these dependencies using CMake code.
+# `google-cloud-cpp` manages these dependencies using CMake code.
 _HARD_CODED_DEPENDENCIES = {
     "api_annotations_protos": ["api_http_protos"],
     "api_auth_protos": ["api_annotations_protos"],
