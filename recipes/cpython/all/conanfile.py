@@ -304,7 +304,7 @@ class CPythonConan(ConanFile):
 
     def _patch_msvc_projects(self):
         self._regex_replace_in_file(self._msvc_project_path("_bz2"), r'.*Include=\"\$\(bz2Dir\).*', "")
-        if self._with_libffi:
+        if self._supports_modules:
             replace_in_file(self, self._msvc_project_path("_ctypes"), '<Import Project="libffi.props" />', "")
             if Version(self.version) < "3.11":
                 replace_in_file(self, self._msvc_project_path("_ctypes"), "FFI_BUILDING;", "")
@@ -380,7 +380,7 @@ class CPythonConan(ConanFile):
         self._inject_conan_props_file("pythoncore", "zlib")
         self._inject_conan_props_file("python", "zlib")
         self._inject_conan_props_file("pythonw", "zlib")
-        self._inject_conan_props_file("_ctypes", "libffi", self._with_libffi)
+        self._inject_conan_props_file("_ctypes", "libffi", self._supports_modules)
         self._inject_conan_props_file("_decimal", "mpdecimal", self._supports_modules)
         self._inject_conan_props_file("_lzma", "xz_utils", self.options.get_safe("with_lzma"))
         self._inject_conan_props_file("_bsddb", "libdb", self.options.get_safe("with_bsddb"))
