@@ -41,8 +41,7 @@ class RuntimeQml(ConanFile):
         }
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder,
-             self.export_sources_folder)
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -78,8 +77,7 @@ class RuntimeQml(ConanFile):
                 f"{self.ref} requires option qt:qtdeclarative=True")
 
     def source(self):
-        get(self, **self.conan_data["sources"][str(self.version)],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
