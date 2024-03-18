@@ -349,7 +349,7 @@ class CPythonConan(ConanFile):
             replace_in_file(self, self._msvc_project_path("pythoncore"),
                             r'<ClCompile Include="$(zlibDir)\deflate.c">',
                             r'<ClCompile Include= "$(zlibDir)\deflate.c" Condition="False">')
-            self._regex_replace_in_file(self._msvc_project_path("pythoncore"), r'.*Include=\"\$\(zlibDir\).*', "")
+        self._regex_replace_in_file(self._msvc_project_path("pythoncore"), r'.*Include=\"\$\(zlibDir\).*', "")
 
         replace_in_file(self, self._msvc_project_path("_tkinter"), "<AdditionalIncludeDirectories>$(tcltkDir)include;", "<AdditionalIncludeDirectories>")
         replace_in_file(self, self._msvc_project_path("_tkinter"), "<AdditionalDependencies>$(tcltkLib);", "<AdditionalDependencies>")
