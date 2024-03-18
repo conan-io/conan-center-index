@@ -85,6 +85,12 @@ class GetTextConan(ConanFile):
             if check_min_vs(self, "180", raise_invalid=False):
                 tc.extra_cflags.append("-FS") #TODO: reference github issue
 
+            # prevent redefining compiler instrinsic functions
+            tc.configure_args.extend([
+                'ac_cv_func_memmove=yes',
+                'ac_cv_func_memset=yes'
+            ])
+
             # The flag above `--with-libiconv-prefix` fails to correctly detect libiconv on windows+msvc
             # so it needs an extra nudge. We could use `AutotoolsDeps` but it's currently affected by the
             # following outstanding issue: https://github.com/conan-io/conan/issues/12784

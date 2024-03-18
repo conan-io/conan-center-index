@@ -17,7 +17,6 @@ patches:
       patch_description: "fix ability to crossbuild on macos and assume macOS newer than 10.4"
       patch_type: "conan"
   "0.21":
-    - patch_file: "patches/0002-memmove-is-intrinsic-function-on-MSVC.patch"
     - patch_file: "patches/0004-autopoint-relocatable.patch"
       patch_description: "relocatable autopoint with resources relative to script"
       patch_type: "conan"
