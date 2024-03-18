@@ -13,32 +13,6 @@ from conan.tools.scm import Version
 
 conan2 = conan_version.major >= 2
 
-class CmakePython3Abi(object):
-    def __init__(self, debug, pymalloc, unicode):
-        self.debug, self.pymalloc, self.unicode = debug, pymalloc, unicode
-
-    _cmake_lut = {
-        None: "ANY",
-        True: "ON",
-        False: "OFF",
-    }
-
-    @property
-    def suffix(self):
-        suffix = ""
-        if self.debug:
-            suffix += "d"
-        if self.pymalloc:
-            suffix += "m"
-        if self.unicode:
-            suffix += "u"
-        return suffix
-
-    @property
-    def cmake_arg(self):
-        return ";".join(self._cmake_lut[a] for a in (self.debug, self.pymalloc, self.unicode))
-
-
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     test_type = "explicit"
@@ -86,11 +60,6 @@ class TestPackageConan(ConanFile):
         return can_run(self) and self._supports_modules and self._py_version < "3.12"
 
     @property
-    def _cmake_abi(self):
-        pymalloc = self._cpython_option("pymalloc") if self._py_version < "3.8" else False
-        return CmakePython3Abi(debug=self.settings.build_type == "Debug", pymalloc=bool(pymalloc), unicode=False)
-
-    @property
     def _cmake_try_FindPythonX(self):
         return not is_msvc(self) or self.settings.build_type != "Debug"
 
@@ -103,10 +72,9 @@ class TestPackageConan(ConanFile):
         version = self._py_version
         py_major = str(version.major)
         tc.cache_variables["BUILD_MODULE"] = self._supports_modules
-        tc.cache_variables["PY_VERSION_MAJOR"] = py_major
         tc.cache_variables["PY_VERSION_MAJOR_MINOR"] = f"{version.major}.{version.minor}"
         tc.cache_variables["PY_VERSION"] = str(self._py_version)
-        tc.cache_variables["PY_VERSION_SUFFIX"] = self._cmake_abi.suffix
+        tc.cache_variables["PY_VERSION_SUFFIX"] = "d" if self.settings.build_type == "Debug" else ""
         tc.cache_variables["PYTHON_EXECUTABLE"] = self._python
         tc.cache_variables["USE_FINDPYTHON_X"] = self._cmake_try_FindPythonX
         tc.cache_variables[f"Python{py_major}_EXECUTABLE"] = self._python
@@ -116,8 +84,6 @@ class TestPackageConan(ConanFile):
         tc.cache_variables[f"Python{py_major}_FIND_REGISTRY"] = "NEVER"
         tc.cache_variables[f"Python{py_major}_FIND_IMPLEMENTATIONS"] = "CPython"
         tc.cache_variables[f"Python{py_major}_FIND_STRATEGY"] = "LOCATION"
-        if not is_msvc(self) and self._py_version < "3.8":
-            tc.cache_variables[f"Python{py_major}_FIND_ABI"] = self._cmake_abi.cmake_arg
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -194,25 +160,19 @@ class TestPackageConan(ConanFile):
             if self._supports_modules:
                 self._test_module("gdbm", self._cpython_option("with_gdbm"))
                 self._test_module("bz2", self._cpython_option("with_bz2"))
-                if self._py_version.major < 3:
-                    self._test_module("bsddb", self._cpython_option("with_bsddb"))
                 self._test_module("lzma", self._cpython_option("with_lzma"))
                 self._test_module("tkinter", self._cpython_option("with_tkinter"))
                 os.environ["TERM"] = "ansi"
                 self._test_module("curses", self._cpython_option("with_curses"))
-
                 self._test_module("expat", True)
                 self._test_module("sqlite3", self._cpython_option("with_sqlite3"))
                 self._test_module("decimal", True)
                 self._test_module("ctypes", True)
-                skip_ssl_test = is_msvc(self) and self._py_version < "3.8" and self._cpython_option("shared")
-                if not skip_ssl_test:
-                    # Unsure cause of failure in this oddly specific combo, but these versions are EOL so not concerned with fixing.
-                    env = Environment()
-                    if self.settings.os != "Windows":
-                        env.define_path("OPENSSL_CONF", os.path.join(os.sep, "dev", "null"))
-                    with env.vars(self).apply():
-                        self._test_module("ssl", True)
+                env = Environment()
+                if self.settings.os != "Windows":
+                    env.define_path("OPENSSL_CONF", os.path.join(os.sep, "dev", "null"))
+                with env.vars(self).apply():
+                    self._test_module("ssl", True)
 
             if is_apple_os(self) and not self._cpython_option("shared"):
                 self.output.info(

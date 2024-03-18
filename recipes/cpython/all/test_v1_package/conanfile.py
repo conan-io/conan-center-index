@@ -5,30 +5,6 @@ from io import StringIO
 import os
 import re
 
-
-class CmakePython3Abi(object):
-    def __init__(self, debug, pymalloc, unicode):
-        self.debug, self.pymalloc, self.unicode = debug, pymalloc, unicode
-
-    _cmake_lut = {
-        None: "ANY",
-        True: "ON",
-        False: "OFF",
-    }
-
-    @property
-    def suffix(self):
-        return "{}{}{}".format(
-            "d" if self.debug else "",
-            "m" if self.pymalloc else "",
-            "u" if self.unicode else "",
-        )
-
-    @property
-    def cmake_arg(self):
-        return ";".join(self._cmake_lut[a] for a in (self.debug, self.pymalloc, self.unicode))
-
-
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
@@ -42,25 +18,6 @@ class TestPackageConan(ConanFile):
         # TODO Should we still try to test this?
         # https://github.com/python/cpython/pull/101039
         return not tools.cross_building(self, skip_x64_x86=True) and self._supports_modules and self._py_version < tools.Version("3.12")
-
-    @property
-    def _pymalloc(self):
-        return bool("pymalloc" in self.options["cpython"] and self.options["cpython"].pymalloc)
-
-    @property
-    def _cmake_abi(self):
-        if self._py_version < tools.Version("3.8"):
-            return CmakePython3Abi(
-                debug=self.settings.build_type == "Debug",
-                pymalloc=self._pymalloc,
-                unicode=False,
-            )
-        else:
-            return CmakePython3Abi(
-                debug=self.settings.build_type == "Debug",
-                pymalloc=False,
-                unicode=False,
-            )
 
     @property
     def _cmake_try_FindPythonX(self):
@@ -95,11 +52,10 @@ class TestPackageConan(ConanFile):
         cmake = CMake(self)
         py_major = self.deps_cpp_info["cpython"].version.split(".")[0]
         cmake.definitions["BUILD_MODULE"] = self._supports_modules
-        cmake.definitions["PY_VERSION_MAJOR"] = py_major
         cmake.definitions["PY_VERSION_MAJOR_MINOR"] = ".".join(self._py_version.split(".")[:2])
         cmake.definitions["PY_FULL_VERSION"] = self.deps_cpp_info["cpython"].version
         cmake.definitions["PY_VERSION"] = self._py_version
-        cmake.definitions["PY_VERSION_SUFFIX"] = self._cmake_abi.suffix
+        cmake.definitions["PY_VERSION_SUFFIX"] = "d" if self.settings.build_type == "Debug" else ""
         cmake.definitions["PYTHON_EXECUTABLE"] = self.deps_user_info["cpython"].python
         cmake.definitions["USE_FINDPYTHON_X".format(py_major)] = self._cmake_try_FindPythonX
         cmake.definitions["Python{}_EXECUTABLE".format(py_major)] = self.deps_user_info["cpython"].python
@@ -109,10 +65,6 @@ class TestPackageConan(ConanFile):
         cmake.definitions["Python{}_FIND_REGISTRY".format(py_major)] = "NEVER"
         cmake.definitions["Python{}_FIND_IMPLEMENTATIONS".format(py_major)] = "CPython"
         cmake.definitions["Python{}_FIND_STRATEGY".format(py_major)] = "LOCATION"
-
-        if self.settings.compiler != "Visual Studio":
-            if tools.Version(self._py_version) < tools.Version("3.8"):
-                cmake.definitions["Python{}_FIND_ABI".format(py_major)] = self._cmake_abi.cmake_arg
 
         with tools.environment_append(RunEnvironment(self).vars):
             cmake.configure()
@@ -179,7 +131,6 @@ class TestPackageConan(ConanFile):
             if self._supports_modules:
                 self._test_module("gdbm", self._cpython_option("with_gdbm"))
                 self._test_module("bz2", self._cpython_option("with_bz2"))
-                self._test_module("bsddb", self._cpython_option("with_bsddb"))
                 self._test_module("lzma", self._cpython_option("with_lzma"))
                 self._test_module("tkinter", self._cpython_option("with_tkinter"))
                 with tools.environment_append({"TERM": "ansi"}):
