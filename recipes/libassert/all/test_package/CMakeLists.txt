@@ -11,7 +11,6 @@ if(LIBASSERT2)
   target_compile_definitions(${PROJECT_NAME} PRIVATE LIBASSERT2)
 else()
   find_package(assert REQUIRED CONFIG)
-  message(STATUS "V1")
   target_link_libraries(${PROJECT_NAME} PRIVATE assert::assert)
 endif()
 

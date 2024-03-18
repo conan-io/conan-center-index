@@ -52,16 +52,16 @@ class LibassertConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= Version("2.0.0"):
+        if Version(self.version) >= "2.0.0":
             # libassert::detail::process_assert_fail
             self.requires("cpptrace/0.4.1", transitive_headers=True, transitive_libs=True)
-        elif Version(self.version) >= Version("1.2.2"):
+        elif Version(self.version) >= "1.2.2":
             self.requires("cpptrace/0.3.1")
-        elif Version(self.version) >= Version("1.2.1"):
+        elif Version(self.version) >= "1.2.1":
             self.requires("cpptrace/0.2.1")
 
     def validate(self):
-        if Version(self.version) <= Version("2.0.0") and self.settings.compiler == "apple-clang":
+        if Version(self.version) <= "2.0.0" and self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration("apple-clang not supported")
 
         if self.settings.compiler.cppstd:
@@ -85,13 +85,13 @@ class LibassertConan(ConanFile):
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
 
-        if Version(self.version) >= Version("2.0.0"):
+        if Version(self.version) >= "2.0.0":
             # if not self.options.shared:
                 # tc.variables["LIBASSERT_STATIC_DEFINE"] = True
             tc.variables["LIBASSERT_USE_EXTERNAL_CPPTRACE"] = True
             deps = CMakeDeps(self)
             deps.generate()
-        elif Version(self.version) >= Version("1.2.1"):
+        elif Version(self.version) >= "1.2.1":
             if not self.options.shared:
                 tc.variables["ASSERT_STATIC"] = True
             tc.variables["ASSERT_USE_EXTERNAL_CPPTRACE"] = True
@@ -133,7 +133,7 @@ class LibassertConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["assert"]
 
-        if Version(self.version) >= Version("2.0.0"):
+        if Version(self.version) >= "2.0.0":
             self.cpp_info.set_property("cmake_file_name", "libassert")
             self.cpp_info.set_property("cmake_target_name", "libassert::assert")
         else:
@@ -142,13 +142,13 @@ class LibassertConan(ConanFile):
 
         # the first version of this library used assert/assert as include folder
         # appending this one but not removing the default to not break consumers
-        if Version(self.version) >= Version("2.0.0"):
+        if Version(self.version) >= "2.0.0":
             self.cpp_info.includedirs.append(os.path.join("include", "libassert"))
         else:
             self.cpp_info.includedirs.append(os.path.join("include", "assert"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        if Version(self.version) >= Version("2.0.0"):
+        if Version(self.version) >= "2.0.0":
             self.cpp_info.filenames["cmake_find_package"] = "libassert"
             self.cpp_info.filenames["cmake_find_package_multi"] = "libassert"
             self.cpp_info.names["cmake_find_package"] = "libassert"
@@ -158,16 +158,16 @@ class LibassertConan(ConanFile):
             self.cpp_info.filenames["cmake_find_package_multi"] = "assert"
             self.cpp_info.names["cmake_find_package"] = "assert"
             self.cpp_info.names["cmake_find_package_multi"] = "assert"
-            
+
         if not self.options.shared:
             self.cpp_info.defines.append("LIBASSERT_STATIC_DEFINE")
 
-        if Version(self.version) < Version("1.2.1"):
+        if Version(self.version) < "1.2.1":
             # pre-cpptrace
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs.append("dl")
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs.append("dbghelp")
 
-        if Version(self.version) >= Version("2.0.0"):
+        if Version(self.version) >= "2.0.0":
             self.cpp_info.requires = ["cpptrace::cpptrace"]
