@@ -441,6 +441,8 @@ class LLVMCoreConan(ConanFile):
         rename(self, cmake_folder / "LLVM-Config.cmake", cmake_folder / "LLVM-ConfigInternal.cmake")
         replace_in_file(self, cmake_folder / "AddLLVM.cmake", "LLVM-Config", "LLVM-ConfigInternal")
         rmdir(self, package_folder / "share")
+        if self.options.shared:
+            rm(self, "*.a", package_folder / "lib")
 
         self._create_cmake_build_module(
             components.keys(),
