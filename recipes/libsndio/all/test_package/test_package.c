@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
 
 	hdl = sio_open(NULL, mode, 0);
 	if (hdl == NULL) {
-		fprintf(stderr, "sio_open() failed\n");
+		fprintf(stderr, "sio_open() failed, but test is ok\n");
 		exit(0);
 	} else {
 		printf("sio_open() success" );
