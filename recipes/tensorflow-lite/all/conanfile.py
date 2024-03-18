@@ -136,7 +136,7 @@ class TensorflowLiteConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         # FIXME: move this to a patch file
-        if self.version >= Version("2.0.12"):
+        if self.version >= Version("2.12.0"):
             replace_in_file(self, os.path.join(self.source_folder, "tensorflow", "lite", "CMakeLists.txt"),
                             "set(TFLITE_PROFILER_SRCS", 
                             "set(TFLITE_PROFILER_SRCS\n${TFLITE_SOURCE_DIR}/profiling/telemetry/telemetry.cc")
