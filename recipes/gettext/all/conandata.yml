@@ -22,7 +22,6 @@ patches:
       patch_type: "conan"
   "0.20.1":
     - patch_file: "patches/0.20.1-0001-fix-build-errors-with-MSVC.patch"
-    - patch_file: "patches/0002-memmove-is-intrinsic-function-on-MSVC.patch"
     - patch_file: "patches/0.20.1-0003-Reported-by-Gabor-Z.-Papp-gzp-papp.hu.patch"
     - patch_file: "patches/0004-autopoint-relocatable.patch"
       patch_description: "relocatable autopoint with resources relative to script"
