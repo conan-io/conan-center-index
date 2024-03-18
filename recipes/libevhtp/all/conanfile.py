@@ -90,7 +90,5 @@ class LibevhtpConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "libevhtp")
-        self.cpp_info.set_property("pkg_config_name", "libevhtp")
         self.cpp_info.libs = ["evhtp"]
 
