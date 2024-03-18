@@ -1,0 +1,23 @@
+diff --git a/tensorflow/lite/CMakeLists.txt b/tensorflow/lite/CMakeLists.txt
+index 24b8265..7260efe 100644
+--- a/tensorflow/lite/CMakeLists.txt
++++ b/tensorflow/lite/CMakeLists.txt
+@@ -657,4 +657,4 @@ target_link_libraries(_pywrap_tensorflow_interpreter_wrapper
+ target_compile_options(_pywrap_tensorflow_interpreter_wrapper
+   PUBLIC ${TFLITE_TARGET_PUBLIC_OPTIONS}
+   PRIVATE ${TFLITE_TARGET_PRIVATE_OPTIONS}
+-)
+\ No newline at end of file
++)
+diff --git a/tensorflow/lite/tools/cmake/modules/OverridableFetchContent.cmake b/tensorflow/lite/tools/cmake/modules/OverridableFetchContent.cmake
+index 9ed9510..4a6a45d 100644
+--- a/tensorflow/lite/tools/cmake/modules/OverridableFetchContent.cmake
++++ b/tensorflow/lite/tools/cmake/modules/OverridableFetchContent.cmake
+@@ -251,6 +251,7 @@ function(OverridableFetchContent_Declare CONTENT_NAME)
+     URL_HASH
+     URL_MD5
+   )
++  message(FATAL_ERROR "OverridableFetchContent_Declare called by ${CONTENT_NAME}! Failing build.")
+   set(ALL_VALUE_ARGS LICENSE_FILE LICENSE_URL ${OVERRIDABLE_ARGS})
+   cmake_parse_arguments(ARGS
+     ""
