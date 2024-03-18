@@ -50,13 +50,10 @@ class RuntimeQml(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if Version(self.version) <= "cci.20211220":
