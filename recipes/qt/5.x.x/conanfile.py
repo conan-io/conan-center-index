@@ -338,9 +338,6 @@ class QtConan(ConanFile):
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
 
-        if Version(self.version) < "5.15.9" and self.settings.os == "Macos" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("qt does not support macOS on ARM before 5.15.9 (QTBUG-85279)")
-
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.openssl:
@@ -447,6 +444,10 @@ class QtConan(ConanFile):
         if self.options.qtwayland:
             self.tool_requires("wayland/<host_version>")
 
+    @property
+    def angle_path(self):
+        return os.path.join(self.source_folder, "angle")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             strip_root=True, destination="qt5")
@@ -463,6 +464,10 @@ class QtConan(ConanFile):
         )
         save(self, os.path.join(self.source_folder, "qt5", "qtbase", "mkspecs", "features", "uikit", "bitcode.prf"), "")
 
+        # shorten the path to ANGLE to avoid the following error:
+        # C:\J2\w\prod-v2\bsr@4\104220\ebfcf\p\qtde01f793a6074\s\qt5\qtbase\src\3rdparty\angle\src\libANGLE\renderer\d3d\d3d11\texture_format_table_autogen.cpp : fatal error C1083: Cannot open compiler generated file: '': Invalid argument
+        copy(self, "*", os.path.join(self.source_folder, "qt5", "qtbase", "src", "3rdparty", "angle"), self.angle_path)
+
     def generate(self):
         pc = PkgConfigDeps(self)
         pc.generate()
@@ -475,6 +480,7 @@ class QtConan(ConanFile):
             vre.generate(scope="build")
         env = Environment()
         env.define("MAKEFLAGS", f"j{build_jobs(self)}")
+        env.define("ANGLE_DIR", self.angle_path)
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         if self.settings.os == "Windows":
             env.prepend_path("PATH", os.path.join(self.source_folder, "qt5", "gnuwin32", "bin"))
