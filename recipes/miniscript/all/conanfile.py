@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, apply_conandata_patches, export_conandata_patches, replace_in_file
+from conan.tools.files import get, copy, apply_conandata_patches, export_conandata_patches
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
