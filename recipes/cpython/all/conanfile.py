@@ -320,7 +320,7 @@ class CPythonConan(ConanFile):
 
     def _inject_conan_props_file(self, project_basename, dep_name, condition=True):
         if condition:
-            search = '<Import Project="python.props" />' if self._is_py3 else '<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />'
+            search = '<Import Project="python.props" />' if self._is_py3 else r'<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />'
             replace_in_file(self,
                             self._msvc_project_path(project_basename),
                             search,
@@ -380,7 +380,7 @@ class CPythonConan(ConanFile):
             replace_in_file(self, self._msvc_project_path("_decimal"), "<CustomBuild", "<!--<CustomBuild")
             replace_in_file(self, self._msvc_project_path("_decimal"), "</CustomBuild>", "</CustomBuild>-->")
             # Remove extra include directory
-            replace_in_file(self, self._msvc_project_path("_decimal"), "..\Modules\_decimal\libmpdec;", "")
+            replace_in_file(self, self._msvc_project_path("_decimal"), r"..\Modules\_decimal\libmpdec;", "")
 
         replace_in_file(self, self._msvc_project_path("_sqlite3"),
                         '<ProjectReference Include="sqlite3.vcxproj">',
@@ -394,13 +394,13 @@ class CPythonConan(ConanFile):
                             '<ProjectReference Include="liblzma.vcxproj" Condition="False">')
 
         replace_in_file(self, self._msvc_project_path("pyexpat"),
-                        "<AdditionalIncludeDirectories>$(PySourcePath)Modules\expat;",
+                        r"<AdditionalIncludeDirectories>$(PySourcePath)Modules\expat;",
                         "<AdditionalIncludeDirectories>")
         replace_in_file(self, self._msvc_project_path("pyexpat"), ("HAVE_EXPAT_H;" if self._is_py3 and Version(self.version) < "3.11" else "") + "XML_STATIC;", "")
         self._regex_replace_in_file(self._msvc_project_path("pyexpat"), r'.*Include=\"\.\.\\Modules\\expat\\.*" />', "")
 
         replace_in_file(self, self._msvc_project_path("_elementtree"),
-                        "<AdditionalIncludeDirectories>..\Modules\expat;",
+                        r"<AdditionalIncludeDirectories>..\Modules\expat;",
                         "<AdditionalIncludeDirectories>")
         replace_in_file(self, self._msvc_project_path("_elementtree"), "XML_STATIC;", "")
         self._regex_replace_in_file(self._msvc_project_path("_elementtree"), r'.*Include=\"\.\.\\Modules\\expat\\.*" />', "")
