@@ -50,21 +50,20 @@ class TestPackageConan(ConanFile):
             self.run(command, run_environment=True)
 
         cmake = CMake(self)
-        py_major = self.deps_cpp_info["cpython"].version.split(".")[0]
         cmake.definitions["BUILD_MODULE"] = self._supports_modules
         cmake.definitions["PY_VERSION_MAJOR_MINOR"] = ".".join(self._py_version.split(".")[:2])
         cmake.definitions["PY_FULL_VERSION"] = self.deps_cpp_info["cpython"].version
         cmake.definitions["PY_VERSION"] = self._py_version
         cmake.definitions["PY_VERSION_SUFFIX"] = "d" if self.settings.build_type == "Debug" else ""
         cmake.definitions["PYTHON_EXECUTABLE"] = self.deps_user_info["cpython"].python
-        cmake.definitions["USE_FINDPYTHON_X".format(py_major)] = self._cmake_try_FindPythonX
-        cmake.definitions["Python{}_EXECUTABLE".format(py_major)] = self.deps_user_info["cpython"].python
-        cmake.definitions["Python{}_ROOT_DIR".format(py_major)] = self.deps_cpp_info["cpython"].rootpath
-        cmake.definitions["Python{}_USE_STATIC_LIBS".format(py_major)] = not self.options["cpython"].shared
-        cmake.definitions["Python{}_FIND_FRAMEWORK".format(py_major)] = "NEVER"
-        cmake.definitions["Python{}_FIND_REGISTRY".format(py_major)] = "NEVER"
-        cmake.definitions["Python{}_FIND_IMPLEMENTATIONS".format(py_major)] = "CPython"
-        cmake.definitions["Python{}_FIND_STRATEGY".format(py_major)] = "LOCATION"
+        cmake.definitions["USE_FINDPYTHON_X"] = self._cmake_try_FindPythonX
+        cmake.definitions["Python3_EXECUTABLE"] = self.deps_user_info["cpython"].python
+        cmake.definitions["Python3_ROOT_DIR"] = self.deps_cpp_info["cpython"].rootpath
+        cmake.definitions["Python3_USE_STATIC_LIBS"] = not self.options["cpython"].shared
+        cmake.definitions["Python3_FIND_FRAMEWORK"] = "NEVER"
+        cmake.definitions["Python3_FIND_REGISTRY"] = "NEVER"
+        cmake.definitions["Python3_FIND_IMPLEMENTATIONS"] = "CPython"
+        cmake.definitions["Python3_FIND_STRATEGY"] = "LOCATION"
 
         with tools.environment_append(RunEnvironment(self).vars):
             cmake.configure()
