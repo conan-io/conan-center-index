@@ -440,6 +440,7 @@ class OpenSSLConan(ConanFile):
                     cxxflags => add("{cxxflags}"),
                     {defines}
                     lflags => add("{lflags}"),
+                    {dso_scheme}
                     {shared_target}
                     {shared_cflag}
                     {shared_extension}
@@ -447,6 +448,10 @@ class OpenSSLConan(ConanFile):
                 }},
             );
         """)
+
+        dso_scheme = ""
+        if self.settings.os == "Neutrino":
+          dso_scheme = 'dso_scheme => "dlfcn",'
 
         perlasm_scheme = ""
         if self._perlasm_scheme:
@@ -481,6 +486,7 @@ class OpenSSLConan(ConanFile):
             cxxflags=" ".join(cxxflags),
             defines=defines,
             perlasm_scheme=perlasm_scheme,
+            dso_scheme=dso_scheme,
             shared_target=shared_target,
             shared_extension=shared_extension,
             shared_cflag=shared_cflag,
