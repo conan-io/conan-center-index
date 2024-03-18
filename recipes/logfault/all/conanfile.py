@@ -39,7 +39,7 @@ class PackageConan(ConanFile):
             "apple-clang": "15",
             "clang": "15",
             "gcc": "13",
-            "msvc": "14.31",
+            "msvc": "193",
             "Visual Studio": "17.1",
         }
     
