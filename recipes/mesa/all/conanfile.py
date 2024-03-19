@@ -688,7 +688,8 @@ class MesaConan(ConanFile):
             self.options.rm_safe("platform_x11")
 
         if is_apple_os(self):
-            [self.options.rm_safe(vulkan_driver) for vulkan_driver in vulkan_drivers]
+            for vulkan_driver in vulkan_drivers:
+                self.options.rm_safe(vulkan_driver)
 
         self.options.egl_native_platform = self._default_egl_native_platform_option
 
