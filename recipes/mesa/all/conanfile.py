@@ -928,7 +928,7 @@ class MesaConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
             # todo Use check_max_cppstd from Conan V2.
             # check_max_cppstd(self, self._max_cppstd)
-            if self.settings.compiler.cppstd in ["20", "gnu20", "23", "gnu23"]:
+            if str(self.settings.compiler.cppstd) in ["20", "gnu20", "23", "gnu23"]:
                 raise ConanInvalidConfiguration(
                     f"{self.ref} can not be built with the cppstd {self.settings.compiler.cppstd} which is later than maximum supported cppstd {self._max_cppstd}"
                 )
