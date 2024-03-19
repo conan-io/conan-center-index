@@ -311,7 +311,7 @@ class ArrowConan(ConanFile):
         tc.variables["ARROW_NO_DEPRECATED_API"] = not bool(self.options.deprecated)
         tc.variables["ARROW_FLIGHT"] = self.options.with_flight_rpc
         tc.variables["ARROW_FLIGHT_SQL"] = bool(self.options.get_safe("with_flight_sql", False))
-        tc.variables["ARROW_COMPUTE"] = self.options.compute
+        tc.variables["ARROW_COMPUTE"] = bool(self.options.compute)
         tc.variables["ARROW_CSV"] = bool(self.options.with_csv)
         tc.variables["ARROW_CUDA"] = bool(self.options.with_cuda)
         tc.variables["ARROW_JEMALLOC"] = self.options.with_jemalloc
