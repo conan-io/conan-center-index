@@ -21,25 +21,9 @@ sources:
 patches:
   "10.7.3":
     - patch_file: "patches/0001-Guard-dependency-discovery-10.7.x.patch"
-      patch_description: "Add find_package statements to inject conan dependencies"
+      patch_description: "Do not define ARMA_HDF5_INCLUDE_DIR"
       patch_type: "conan"
   "11.4.3":
     - patch_file: "patches/0002-Guard-dependency-discovery-11.4.x.patch"
-      patch_description: "Add find_package statements to inject conan dependencies"
-      patch_type: "conan"
-  "12.2.0":
-    - patch_file: "patches/0003-Guard-dependency-discovery-12.2.x.patch"
-      patch_description: "Add find_package statements to inject conan dependencies"
-      patch_type: "conan"
-  "12.6.4":
-    - patch_file: "patches/0004-Guard-dependency-discovery-12.6.x.patch"
-      patch_description: "Add find_package statements to inject conan dependencies"
-      patch_type: "conan"
-  "12.6.7":
-    - patch_file: "patches/0004-Guard-dependency-discovery-12.6.x.patch"
-      patch_description: "Add find_package statements to inject conan dependencies"
-      patch_type: "conan"
-  "12.8.1":
-    - patch_file: "patches/0004-Guard-dependency-discovery-12.6.x.patch"
-      patch_description: "Add find_package statements to inject conan dependencies"
+      patch_description: "Do not define ARMA_HDF5_INCLUDE_DIR"
       patch_type: "conan"
