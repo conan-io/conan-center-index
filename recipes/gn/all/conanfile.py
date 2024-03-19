@@ -128,25 +128,13 @@ class GnConan(ConanFile):
                             "def GenerateLastCommitPosition(host, header):",
                             "def GenerateLastCommitPosition(host, header):\n  return")
 
-            # Try sleeping to avoid time skew of the generated ninja.build file (and having to re-run build/gen.py)
-            err = None
-            for sleep in [0, 1, 2, 4, 8]:
-                self.run(f"{sys.executable} build/gen.py " + load(self, "configure_args"))
-                time.sleep(sleep)
-                try:
-                    build_args = ["-C", "out", f"-j{os.cpu_count()}", "-v"]
-                    self.run("ninja " + " ".join(build_args))
-                    break
-                except Exception as e:
-                    err = e
-            if err:
-                raise err
+            self.run(f"{sys.executable} build/gen.py " + load(self, "configure_args"))
+            self.run(f"ninja -C out -j{os.cpu_count()} -v")
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if self.settings.os == "Windows":
-            copy(self,
-                 "gn.exe",
+            copy(self, "gn.exe",
                  src=os.path.join(self.source_folder, "out"),
                  dst=os.path.join(self.package_folder, "bin"))
         else:
