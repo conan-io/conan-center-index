@@ -123,6 +123,7 @@ class QtConan(ConanFile):
         "disabled_features": "",
         "essential_modules": not os.getenv('CONAN_CENTER_BUILD_SERVICE')
     }
+    default_options.update({f"{status}_modules": False for status in _module_statuses if status != "essential"})
 
     short_paths = True
 
@@ -207,16 +208,6 @@ class QtConan(ConanFile):
             self.options.rm_safe("with_x11")
             self.options.rm_safe("with_egl")
 
-        if not self.options.get_safe("qtmultimedia"):
-            self.options.rm_safe("with_libalsa")
-            del self.options.with_openal
-            del self.options.with_gstreamer
-            del self.options.with_pulseaudio
-
-        if self.settings.os in ("FreeBSD", "Linux"):
-            if self.options.get_safe("qtwebengine"):
-                self.options.with_fontconfig = True
-
         if self.options.multiconfiguration:
             del self.settings.build_type
 
@@ -242,6 +233,16 @@ class QtConan(ConanFile):
         for module in self._get_module_tree:
             if getattr(self.options, module).value is None:
                 setattr(self.options, module, False)
+
+        if not self.options.get_safe("qtmultimedia"):
+            self.options.rm_safe("with_libalsa")
+            del self.options.with_openal
+            del self.options.with_gstreamer
+            del self.options.with_pulseaudio
+
+        if self.settings.os in ("FreeBSD", "Linux"):
+            if self.options.get_safe("qtwebengine"):
+                self.options.with_fontconfig = True
 
     def validate(self):
         if os.getenv('CONAN_CENTER_BUILD_SERVICE') is not None:

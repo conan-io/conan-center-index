@@ -124,6 +124,7 @@ class QtConan(ConanFile):
         "multiconfiguration": False,
         "essential_modules": not os.getenv('CONAN_CENTER_BUILD_SERVICE')
     }
+    default_options.update({f"{status}_modules": False for status in _module_statuses if status != "essential"})
 
     no_copy_source = True
     short_paths = True
@@ -226,16 +227,6 @@ class QtConan(ConanFile):
         if not self.options.with_dbus:
             del self.options.with_atspi
 
-        if not self.options.qtmultimedia:
-            self.options.rm_safe("with_libalsa")
-            del self.options.with_openal
-            del self.options.with_gstreamer
-            del self.options.with_pulseaudio
-
-        if self.settings.os in ("FreeBSD", "Linux"):
-            if self.options.qtwebengine:
-                self.options.with_fontconfig = True
-
         if self.options.multiconfiguration:
             del self.settings.build_type
 
@@ -280,6 +271,16 @@ class QtConan(ConanFile):
         for module in self._submodules:
             if module in self.options and not self.options.get_safe(module):
                 setattr(self.options, module, False)
+
+        if not self.options.qtmultimedia:
+            self.options.rm_safe("with_libalsa")
+            del self.options.with_openal
+            del self.options.with_gstreamer
+            del self.options.with_pulseaudio
+
+        if self.settings.os in ("FreeBSD", "Linux"):
+            if self.options.qtwebengine:
+                self.options.with_fontconfig = True
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
