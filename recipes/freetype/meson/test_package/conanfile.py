@@ -6,12 +6,15 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualBuildEnv", "VirtualRunEnv"
     test_type = "explicit"
     license = "OFL-1.1-no-RFN"
 
     def layout(self):
         cmake_layout(self)
+
+    def build_requirements(self):
+        self.tool_requires("cmake/3.28.1")
 
     def requirements(self):
         self.requires(self.tested_reference_str)
