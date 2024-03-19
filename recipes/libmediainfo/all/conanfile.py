@@ -142,6 +142,7 @@ class LibmediainfoConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "MediaInfoLib")
         self.cpp_info.set_property("cmake_target_name", "mediainfo")
         self.cpp_info.set_property("pkg_config_name", "libmediainfo")
+
         postfix = ""
         if self.settings.build_type == "Debug":
             if self.settings.os == "Windows":
@@ -151,6 +152,9 @@ class LibmediainfoConan(ConanFile):
         self.cpp_info.libs = [f"mediainfo{postfix}"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
+
+        if self.options.shared:
+            self.cpp_info.defines.append("LIBMEDIAINFO_SHARED")
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "MediaInfoLib"

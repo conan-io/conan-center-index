@@ -9,7 +9,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def layout(self):
@@ -17,11 +17,6 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.preprocessor_definitions["LIBMEDIAINFO_SHARED"] = ""
-        tc.generate()
 
     def build(self):
         cmake = CMake(self)
