@@ -106,7 +106,7 @@ class ArrowConan(ConanFile):
         "with_opentelemetry": False,
         "with_orc": False,
         "with_protobuf": False,
-        "with_re2": False,
+        "with_re2": True,
         "with_s3": False,
         "with_utf8proc": False,
         "with_lz4": False,
@@ -243,8 +243,8 @@ class ArrowConan(ConanFile):
             if (version.major == "1") and self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < Version("4.9"):
                 self.output.warning("Option 'with_boost=True' could be required when option 'parquet=True' and using gcc < 4.9")
         if not self.options.with_re2:
-            if self.options.gandiva or self.options.parquet:
-                self.output.warning("Option 'with_re2=True' could be required when option 'gandiva=True' or 'parquet=True'")
+            # if self.options.gandiva or self.options.parquet:
+            #     self.output.warning("Option 'with_re2=True' could be required when option 'gandiva=True' or 'parquet=True'")
             if version >= "7.0.0" and (self.options.compute or self.options.dataset_modules):
                 self.output.warning("Option 'with_re2=True' could be required when 'compute=True' or 'dataset_modules=True'")
         if not self.options.with_jemalloc:
