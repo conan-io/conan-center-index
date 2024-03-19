@@ -1363,7 +1363,7 @@ class MesaConan(ConanFile):
         if self.conf.get("user.mesa:skip_install_mako", default=False, check_type=bool):
             return
         venv_folder = os.path.join(self.build_folder, "venv")
-        script_subfolder = "" if self.settings.os == "Windows" else "bin"
+        script_subfolder = "Scripts" if self.settings.os == "Windows" else "bin"
         python_suffix = ".exe" if self.settings.os == "Windows" else "3"
         venv_python = os.path.join(venv_folder, script_subfolder, f"python{python_suffix}")
         self.run(f"python{python_suffix} -m venv {venv_folder}")
