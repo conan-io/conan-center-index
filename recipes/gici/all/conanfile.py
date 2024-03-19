@@ -33,13 +33,17 @@ class GiciConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        # For std::index_sequence in ceres
+        return 14
 
     @property
     def _compilers_minimum_version(self):
         return {
-            # For atomic_uint64_t
             "gcc": "6",
+            "clang": "5",
+            "apple-clang": "10",
+            "Visual Studio": "15",
+            "msvc": "191",
         }
 
     def export_sources(self):
