@@ -40,6 +40,7 @@ class PackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables['LOGFAULT_BUILD_TESTS'] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
+        tc.generate()
 
     def layout(self):
         basic_layout(self, src_folder="src")
