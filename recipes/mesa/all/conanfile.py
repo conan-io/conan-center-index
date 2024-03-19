@@ -834,6 +834,15 @@ class MesaConan(ConanFile):
             self.options.rm_safe("gallium_va")
             self.options.rm_safe("gallium_vdpau")
 
+        if not (
+            self.options.get_safe("gallium_d3d12_video")
+            or self.options.get_safe("gallium_driver_nouveau")
+            or self.options.get_safe("gallium_driver_r600")
+            or self.options.get_safe("gallium_driver_radeonsi")
+            or self.options.get_safe("gallium_driver_virgl")
+        ):
+            self.options.rm_safe("gallium_va")
+
         # todo
         # if self._requires_libclc:
         #     self.dependencies["llvm"].options.with_project_libclc = True
