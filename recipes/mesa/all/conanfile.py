@@ -1360,7 +1360,7 @@ class MesaConan(ConanFile):
         script_subfolder = "" if self.settings.os == "Windows" else "bin"
         python_suffix = ".exe" if self.settings.os == "Windows" else "3"
         venv_python = os.path.join(venv_folder, script_subfolder, f"python{python_suffix}")
-        self.run(f"python3 -m venv {venv_folder}")
+        self.run(f"python{python_suffix} -m venv {venv_folder}")
         self.run(f"{venv_python} -m pip install pip --upgrade")
         self.run(f"{venv_python} -m pip install mako==1.3.2")
         # INFO: Preserve user's PYTHONPATH in case defined. Only can access venv path after installing mako.
