@@ -472,7 +472,9 @@ class MesaConan(ConanFile):
 
     @property
     def _default_microsoft_clc_option(self):
-        return self.settings.os == "Windows"
+        return False
+        # todo Enable by default on Windows when the LLVM package is available.
+        # return self.settings.os == "Windows"
 
     @property
     def _default_opencl_spirv_option(self):
@@ -671,6 +673,8 @@ class MesaConan(ConanFile):
 
         if self.settings.os != "Windows":
             self.options.rm_safe("gallium_windows_dll_name")
+        else:
+            self.options.rm_safe("gallium_vdpau")
 
         if not self._has_platform_android_option:
             self.options.rm_safe("platform_android")
