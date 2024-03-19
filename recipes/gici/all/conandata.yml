@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/001-cmake-tweaks.patch"
       patch_description: "Allow shared builds, bump CMake standard"
       patch_type: "conan"
+    - patch_file: "patches/002-add-missing-include.patch"
+      patch_description: "Add a missing include"
+      patch_type: "bugfix"
