@@ -20,7 +20,7 @@ patches:
     - patch_file: "patches/0004-autopoint-relocatable.patch"
       patch_description: "relocatable autopoint with resources relative to script"
       patch_type: "conan"
-    - patch_file: "patches/clang-16-noreturn-attribute-warning.patch"
+    - patch_file: "patches/0.21-clang-16-noreturn-attribute-warning.patch"
       patch_description: "apply the __atribute_noreturn__ to print_and_abort"
       patch_source: "https://github.com/coreutils/gnulib/commit/0cc39712803ade7b2d4b89c36b143dad72404063"
       patch_type: "conan"
