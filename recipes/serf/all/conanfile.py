@@ -2,6 +2,7 @@ import os
 import re
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, mkdir, rm, rmdir, save
@@ -53,6 +54,12 @@ class SerfConan(ConanFile):
         self.requires("apr-util/1.6.1", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("openssl/[>=1.1 <4]")
+
+    def validate(self):
+        if self.settings.build_type == "Debug" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == 11:
+            # https://github.com/conan-io/conan-center-index/pull/22003#issuecomment-1984297329
+            # Fails with 'error adding symbols: File format not recognized'
+            raise ConanInvalidConfiguration("Debug build is not supported for GCC 11")
 
     def build_requirements(self):
         self.tool_requires("scons/4.6.0")
