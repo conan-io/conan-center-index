@@ -27,6 +27,8 @@ class QtConan(ConanFile):
     "qtspeech", "qtnetworkauth", "qtremoteobjects", "qtwebglplugin", "qtlottie", "qtquicktimeline", "qtquick3d",
     "qtknx", "qtmqtt", "qtcoap", "qtopcua"]
 
+    _module_statuses = ["essential", "addon", "deprecated", "preview"]
+
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
     topics = ("ui", "framework")
@@ -78,6 +80,7 @@ class QtConan(ConanFile):
         "multiconfiguration": [True, False]
     }
     options.update({module: [True, False] for module in _submodules})
+    options.update({f"{status}_modules": [True, False] for status in _module_statuses})
 
     default_options = {
         "shared": False,
@@ -118,7 +121,8 @@ class QtConan(ConanFile):
         "cross_compile": None,
         "sysroot": None,
         "config": None,
-        "multiconfiguration": False
+        "multiconfiguration": False,
+        "essential_modules": not os.getenv('CONAN_CENTER_BUILD_SERVICE')
     }
 
     no_copy_source = True
@@ -246,6 +250,7 @@ class QtConan(ConanFile):
             modulename = section[section.find('"') + 1: section.rfind('"')]
             status = str(config.get(section, "status"))
             if status not in ("obsolete", "ignore"):
+                assert status in self._module_statuses, f"module {modulename} has status {status} which is not in self._module_statuses {self._module_statuses}"
                 submodules_tree[modulename] = {"status": status,
                                 "path": str(config.get(section, "path")), "depends": []}
                 if config.has_option(section, "depends"):
@@ -265,6 +270,10 @@ class QtConan(ConanFile):
                 _enablemodule(req)
 
         for module in self._submodules:
+            for status in self._module_statuses:
+                if getattr(self.options, f"{status}_modules"):
+                    if module in submodules_tree and submodules_tree[module]['status'] == status:
+                        _enablemodule(module)
             if self.options.get_safe(module):
                 _enablemodule(module)
 
@@ -430,6 +439,8 @@ class QtConan(ConanFile):
                 self.info.settings.compiler.runtime_type = "Release/Debug"
         if self.info.settings.os == "Android":
             del self.info.options.android_sdk
+        for status in self._module_statuses:
+            delattr(self.info.options, f"{status}_modules")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and is_msvc(self):
