@@ -238,6 +238,7 @@ class SDLConan(ConanFile):
             tc.variables["HAVE_LIBC"] = True
         tc.variables["SDL_SHARED"] = self.options.shared
         tc.variables["SDL_STATIC"] = not self.options.shared
+        tc.variables["SDL_TEST"] = False
         tc.variables["SDL_OPENGL"] = self.options.opengl
         tc.variables["SDL_OPENGLES"] = self.options.opengles
         tc.variables["SDL_VULKAN"] = self.options.vulkan
