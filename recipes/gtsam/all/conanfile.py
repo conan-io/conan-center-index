@@ -126,9 +126,7 @@ class GtsamConan(ConanFile):
             del self.options.wrap_serialization
         else:
             del self.options.slow_but_correct_betweenfactor
-        if self.version == "4.0.3" and is_msvc(self):
-            # error LNK2019: unresolved external symbol METIS_NodeND
-            self.options.support_nested_dissection = False
+        self.options.support_nested_dissection = not is_msvc(self)
 
     def configure(self):
         if self.options.shared:
@@ -204,6 +202,11 @@ class GtsamConan(ConanFile):
                 if Version(self.version) < "4.2"
                 else "https://github.com/borglab/gtsam/issues/1541"
             )
+
+        if is_msvc(self) and self.options.support_nested_dissection and self.options.with_vendored_metis:
+            # FIXME: not clear why this happens with vendored METIS. The symbol is defined in the sources.
+            # error LNK2019: unresolved external symbol METIS_NodeND
+            raise ConanInvalidConfiguration("with_vendored_metis is not compatible with MSVC")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
