@@ -33,10 +33,11 @@ class PackageConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
+        # https://en.cppreference.com/w/cpp/utility/source_location requires new compilers
         return {
-            "apple-clang": "14",
-            "clang": "10",
-            "gcc": "10",
+            "apple-clang": "15",
+            "clang": "15",
+            "gcc": "11",
             "msvc": "192",
             "Visual Studio": "16",
         }
