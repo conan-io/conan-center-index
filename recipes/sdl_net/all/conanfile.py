@@ -65,7 +65,8 @@ class SdlnetConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYING.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        license_file = "COPYING.txt" if Version(self.version) < "2.2.0" else "LICENSE.txt"
+        copy(self, license_file, self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
