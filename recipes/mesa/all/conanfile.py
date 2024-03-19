@@ -915,10 +915,11 @@ class MesaConan(ConanFile):
 
     def validate(self):
         stdout = StringIO()
+        python_suffix = ".exe" if self.settings.os == "Windows" else "3"
         if conan_version.major >= 2:
-            self.run("python3 --version", quiet=True, stdout=stdout)
+            self.run(f"python{python_suffix} --version", quiet=True, stdout=stdout)
         else:
-            self.run("python3 --version")
+            self.run(f"python{python_suffix} --version")
         python_version = stdout.getvalue().strip().replace("Python ", "")
         if Version(python_version) < "3.9":
             self.output.error(f"{self.ref} internal scripts require Python 3.9 or later. Please update your Python installation.")
