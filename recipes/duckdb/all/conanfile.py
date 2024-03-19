@@ -115,7 +115,7 @@ class DuckdbConan(ConanFile):
         tc.variables["DUCKDB_MINOR_VERSION"] = Version(self.version).minor
         tc.variables["DUCKDB_PATCH_VERSION"] = Version(self.version).patch
         tc.variables["DUCKDB_DEV_ITERATION"] = 0
-
+        tc.variables["OVERRIDE_GIT_DESCRIBE"] = f"v{self.version}"
         if "with_parquet" in self.options:
             tc.variables["BUILD_PARQUET_EXTENSION"] = self.options.with_parquet
 

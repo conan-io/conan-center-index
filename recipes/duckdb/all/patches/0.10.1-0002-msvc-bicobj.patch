@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 62e45c6..dc98de2 100644
+index aebc060..4a696b6 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -467,7 +467,7 @@ if(NOT MSVC)
+@@ -508,7 +508,7 @@ if(NOT MSVC)
    endif()
  else()
    set(CMAKE_CXX_WINDOWS_FLAGS
