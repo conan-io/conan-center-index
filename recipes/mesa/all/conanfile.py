@@ -1379,7 +1379,11 @@ class MesaConan(ConanFile):
         self.run(f"{venv_python} -m pip install pip --upgrade")
         self.run(f"{venv_python} -m pip install mako==1.3.2")
         # INFO: Preserve user's PYTHONPATH in case defined. Only can access venv path after installing mako.
-        pythonpath = glob.glob(os.path.join(self.build_folder, "venv", "lib", "python*", "site-packages"))
+        pythonpath = None
+        if self.settings.os == "Windows":
+            pythonpath = glob.glob(os.path.join(self.build_folder, "venv", "lib", "python*", "site-packages"))
+        else:
+            pythonpath = os.path.join(self.build_folder, "venv", "Lib", "site-packages")
         self._env_pythonpath.append_path("PYTHONPATH", pythonpath)
 
     def build(self):
