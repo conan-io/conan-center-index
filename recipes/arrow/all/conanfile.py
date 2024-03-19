@@ -142,6 +142,7 @@ class ArrowConan(ConanFile):
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
+        version = Version(self.version)
         if self.settings.os == "Windows":
             del self.options.fPIC
         if Version(self.version) < "2.0.0":
@@ -157,6 +158,8 @@ class ArrowConan(ConanFile):
             del self.options.with_opentelemetry
         if Version(self.version) < "8.0.0":
             del self.options.substrait
+        if version.major >= "2" and is_msvc(self):
+            self.options.with_boost = True
 
     def configure(self):
         if self.options.shared:
@@ -239,8 +242,6 @@ class ArrowConan(ConanFile):
                 self.output.warning("Option 'with_boost=True' could be required when option 'gandiva=True'")
             if (version.major == "1") and self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < Version("4.9"):
                 self.output.warning("Option 'with_boost=True' could be required when option 'parquet=True' and using gcc < 4.9")
-            if version.major >= "2" and is_msvc(self):
-                raise ConanInvalidConfiguration("Option 'with_boost=True' is required for Visual Studio")
         if not self.options.with_re2:
             if self.options.gandiva or self.options.parquet:
                 self.output.warning("Option 'with_re2=True' could be required when option 'gandiva=True' or 'parquet=True'")
