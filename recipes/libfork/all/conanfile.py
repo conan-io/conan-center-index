@@ -38,8 +38,8 @@ class PackageConan(ConanFile):
             "apple-clang": "15",
             "clang": "15",
             "gcc": "11",
-            "msvc": "192",
-            "Visual Studio": "16",
+            "msvc": "192.10",
+            "Visual Studio": "16.10",
         }
 
     def layout(self):
