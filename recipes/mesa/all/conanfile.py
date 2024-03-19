@@ -1381,9 +1381,9 @@ class MesaConan(ConanFile):
         # INFO: Preserve user's PYTHONPATH in case defined. Only can access venv path after installing mako.
         pythonpath = None
         if self.settings.os == "Windows":
-            pythonpath = glob.glob(os.path.join(self.build_folder, "venv", "lib", "python*", "site-packages"))
-        else:
             pythonpath = os.path.join(self.build_folder, "venv", "Lib", "site-packages")
+        else:
+            pythonpath = glob.glob(os.path.join(self.build_folder, "venv", "lib", "python*", "site-packages"))
         self._env_pythonpath.append_path("PYTHONPATH", pythonpath)
 
     def build(self):
