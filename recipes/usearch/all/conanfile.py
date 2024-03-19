@@ -96,6 +96,7 @@ class USearchConan(ConanFile):
     def generate(self):
         if not self.options.header_only:
             tc = CMakeToolchain(self)
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
             tc.variables["CMAKE_PROJECT_usearch_INCLUDE"] = "conan_deps.cmake"
             tc.variables["USEARCH_USE_OPENMP"] = self.options.get_safe("with_openmp", False)
             tc.variables["USEARCH_USE_SIMSIMD"] = self.options.get_safe("with_simsimd", False)
