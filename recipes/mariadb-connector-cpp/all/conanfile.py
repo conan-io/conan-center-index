@@ -139,7 +139,7 @@ class MariadbConnectorCPPRecipe(ConanFile):
         cmake.install()
         rm(self, "INFO_SRC", self.package_folder)
         rm(self, "INFO_BIN", self.package_folder)
-        rmdir(self, f"{self.package_folder}"+"/share")
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libmariadbcpp")
