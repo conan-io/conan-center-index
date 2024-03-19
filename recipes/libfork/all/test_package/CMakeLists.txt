@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(libfork_test_package CXX)
+project(test_package CXX)
 
 find_package(libfork REQUIRED)
 
