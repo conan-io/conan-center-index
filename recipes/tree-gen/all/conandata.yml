@@ -1,7 +1,7 @@
 sources:
   "1.0.7":
     url: "https://github.com/QuTech-Delft/tree-gen/archive/refs/tags/1.0.7.tar.gz"
-    sha256: "cddb6d90d25d781e04c28c17d3d2c7b00c3b15e46573bdfdaeabe2f358e35453"
+    sha256: "7978cc5f3c9cd28081bc757126000351029e69070e5091ea758757fed3298d15"
   "1.0.6":
     url: "https://github.com/QuTech-Delft/tree-gen/archive/refs/tags/1.0.6.tar.gz"
     sha256: "a7f6617830b3817b21cddc0f4442a04c10fbb89a19cabb1bbd0e8facb040cba8"
