@@ -679,6 +679,10 @@ class CPythonConan(ConanFile):
 
         if self.options.env_vars:
             bindir = os.path.join(self.package_folder, "bin")
+            self.runenv_info.append_path("PATH", bindir)
+            self.buildenv_info.append_path("PATH", bindir)
+
+            # TODO remove once Conan 1.x is no longer supported
             self.output.info(f"Appending PATH environment variable: {bindir}")
             self.env_info.PATH.append(bindir)
 
@@ -686,6 +690,11 @@ class CPythonConan(ConanFile):
         self.conf_info.define("user.cpython:python", python)
         self.user_info.python = python
         if self.options.env_vars:
+            self.runenv_info.append_path("PYTHON", python)
+            self.buildenv_info.append_path("PYTHON", python)
+
+            # TODO remove once Conan 1.x is no longer supported
+            self.output.info(f"Appending PYTHON environment variable: {python}")
             self.env_info.PYTHON = python
 
         if is_msvc(self):
@@ -701,11 +710,19 @@ class CPythonConan(ConanFile):
 
         if is_msvc(self):
             if self.options.env_vars:
+                self.runenv_info.append_path("PYTHONHOME", pythonhome)
+                self.buildenv_info.append_path("PYTHONHOME", pythonhome)
+
+                # TODO remove once Conan 1.x is no longer supported
                 self.output.info(f"Setting PYTHONHOME environment variable: {pythonhome}")
                 self.env_info.PYTHONHOME = pythonhome
 
         python_root = self.package_folder
         if self.options.env_vars:
+            self.runenv_info.append_path("PYTHON_ROOT", python_root)
+            self.buildenv_info.append_path("PYTHON_ROOT", python_root)
+
+            # TODO remove once Conan 1.x is no longer supported
             self.output.info(f"Setting PYTHON_ROOT environment variable: {python_root}")
             self.env_info.PYTHON_ROOT = python_root
         self.conf_info.define("user.cpython:python_root", python_root)
