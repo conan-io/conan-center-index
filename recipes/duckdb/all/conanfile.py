@@ -40,7 +40,6 @@ class DuckdbConan(ConanFile):
         "with_shell": [True, False],
         "with_threads": [True, False],
         "with_rdtsc": [True, False],
-        "platform": ["ANY"],
     }
     default_options = {
         "shared": False,
@@ -62,7 +61,6 @@ class DuckdbConan(ConanFile):
         "with_shell": False,
         "with_threads": True,
         "with_rdtsc": False,
-        "platform": "",
     }
     short_paths = True
 
@@ -78,8 +76,6 @@ class DuckdbConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) >= "0.9.0":
             del self.options.with_parquet
-        if Version(self.version) < "0.10.0":
-            del self.options.platform
 
     def configure(self):
         if self.options.shared:
@@ -102,9 +98,6 @@ class DuckdbConan(ConanFile):
         if Version(self.version) >= "0.9.2" and \
                 is_msvc(self) and self.options.shared and self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC debug shared build")
-        if Version(self.version) >= "0.10.0" and \
-            cross_building(self) and self.options.platform == "":
-            raise ConanInvalidConfiguration(f"{self.ref} requires the 'platform' option when cross-building")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -167,7 +160,7 @@ class DuckdbConan(ConanFile):
         if is_msvc(self) and not self.options.shared:
             tc.preprocessor_definitions["DUCKDB_API"] = ""
         if Version(self.version) >= "0.10.0" and cross_building(self):
-            tc.variables["DDUCKDB_EXPLICIT_PLATFORM"] = f"{self.settings.os}_{self.settings.arch}"
+            tc.variables["DUCKDB_EXPLICIT_PLATFORM"] = f"{self.settings.os}_{self.settings.arch}"
         tc.generate()
 
         dpes = CMakeDeps(self)
