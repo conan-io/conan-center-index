@@ -1,0 +1,4 @@
+sources:
+  "3.7.2":
+    url: "https://github.com/conorwilliams/libfork/archive/v3.7.2.tar.gz"
+    sha256: "0c4fbb7a6000c0a93b219b385d9834bd07bc5f19d89aa41ba8e27b5723694b15"
