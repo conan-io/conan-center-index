@@ -154,7 +154,6 @@ class MesaConan(ConanFile):
         "gbm": [True, False],
         "gles1": [True, False],
         "gles2": [True, False],
-        "glvnd_vendor_name": ["mesa"],
         "glx": [False, "dri", "xlib"],
         "glx_direct": [True, False],
         "imagination_srv": [True, False],
@@ -243,7 +242,6 @@ class MesaConan(ConanFile):
         "gbm": True,
         "gles1": True,
         "gles2": True,
-        "glvnd_vendor_name": "mesa",
         "glx": "dri",
         "glx_direct": True,
         "imagination_srv": False,
@@ -1282,9 +1280,6 @@ class MesaConan(ConanFile):
         tc.project_options["gles1"] = feature("gles1")
         tc.project_options["gles2"] = feature("gles2")
         tc.project_options["glvnd"] = boolean("with_libglvnd")
-        tc.project_options["glvnd-vendor-name"] = stringifier(
-            "glvnd_vendor_name", default="mesa"
-        )
         tc.project_options["glx"] = stringifier("glx", default="disabled")
         tc.project_options["glx-direct"] = boolean("glx_direct")
         tc.project_options["imagination-srv"] = boolean("imagination_srv")
@@ -1429,13 +1424,13 @@ class MesaConan(ConanFile):
                 os.path.join(
                     self.package_folder, "res", "glvnd", "egl_vendor.d", "50_mesa.json"
                 ),
-                f"libEGL_{self.options.glvnd_vendor_name}",
+                "libEGL_mesa",
                 os.path.join(
                     "..",
                     "..",
                     "..",
                     "lib",
-                    f"libEGL_{self.options.glvnd_vendor_name}",
+                    "libEGL_mesa",
                 ),
             )
 
@@ -1481,7 +1476,7 @@ class MesaConan(ConanFile):
                 else ""
             )
             if self.options.get_safe("with_libglvnd"):
-                suffix = f"_{self.options.glvnd_vendor_name}"
+                suffix = "_mesa"
             else:
                 self.cpp_info.components["egl"].set_property("pkg_config_name", "egl")
             self.cpp_info.components["egl"].libs = [f"EGL{suffix}"]
@@ -1522,7 +1517,7 @@ class MesaConan(ConanFile):
                 self.cpp_info.components["gles2"].system_libs = ["m", "pthread"]
         if self.options.get_safe("glx"):
             glx_lib_name = (
-                f"GLX_{self.options.glvnd_vendor_name}"
+                "GLX_mesa"
                 if self.options.get_safe("with_libglvnd")
                 else "GLX"
             )
@@ -1531,7 +1526,7 @@ class MesaConan(ConanFile):
                 self.cpp_info.components["glx"].requires.append("libglvnd::glx")
 
             gl_lib_name = (
-                f"GLX_{self.options.glvnd_vendor_name}"
+                "GLX_mesa"
                 if self.options.get_safe("with_libglvnd")
                 else "GL"
             )
