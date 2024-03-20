@@ -118,13 +118,6 @@ class MariadbConnectorCPPRecipe(ConanFile):
              "FIND_LIBRARY(CCLIB mariadb)"
          )
 
-        # on apple mariadb-connector-cpp is requires cmake 3.23 but conan jenkins build is using 3.20.1
-        if self.settings.os == "Macos":
-            replace_in_file(self,
-                root_cmake,
-                "CMAKE_MINIMUM_REQUIRED(VERSION 3.23)",
-                "CMAKE_MINIMUM_REQUIRED(VERSION 3.20)"
-            )
 
 
     def build(self):
