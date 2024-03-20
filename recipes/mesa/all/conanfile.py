@@ -164,7 +164,6 @@ class MesaConan(ConanFile):
         "opengl": [True, False],
         "osmesa": [True, False],
         "platform_sdk_version": ["ANY"],
-        "radv_build_id": [None, "ANY"],
         "shader_cache": [True, False],
         "shader_cache_default": [True, False],
         "shader_cache_max_size": [None, "ANY"],
@@ -251,7 +250,6 @@ class MesaConan(ConanFile):
         "opengl": True,
         "osmesa": False,
         "platform_sdk_version": "25",
-        "radv_build_id": None,
         "spirv_to_dxil": False,
         "shader_cache": True,
         "shader_cache_default": True,
@@ -1304,7 +1302,6 @@ class MesaConan(ConanFile):
             for platform in platforms
             if self.options.get_safe(f"platform_{platform}")
         ]
-        tc.project_options["radv-build-id"] = stringifier("radv_build_id")
         tc.project_options["selinux"] = boolean("with_libselinux")
         tc.project_options["spirv-to-dxil"] = boolean("spirv_to_dxil")
         tc.project_options["shader-cache"] = feature("shader_cache")
