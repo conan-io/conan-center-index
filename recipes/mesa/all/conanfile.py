@@ -119,7 +119,6 @@ class MesaConan(ConanFile):
     # Reduce the cost of copying a lot of source code.
     no_copy_source = True
     options = {
-        "android_libbacktrace": [True, False],
         "dri3": [True, False],
         "egl": [True, False],
         "egl_native_platform": [
@@ -206,7 +205,6 @@ class MesaConan(ConanFile):
         }
     )
     default_options = {
-        "android_libbacktrace": True,
         "dri3": True,
         "egl": True,
         "egl_native_platform": "wayland",
@@ -311,10 +309,6 @@ class MesaConan(ConanFile):
     @property
     def _requires_moltenvk(self):
         return is_apple_os(self) and self.options.get_safe("gallium_driver_zink")
-
-    @property
-    def _has_android_libbacktrace_option(self):
-        return self.settings.os == "Android"
 
     @property
     def _with_gallium_drivers(self):
@@ -600,8 +594,6 @@ class MesaConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if not self._has_android_libbacktrace_option:
-            self.options.rm_safe("android_libbacktrace")
         if not self._has_dri3_option:
             self.options.rm_safe("dri3")
         if not self._has_gbm_option:
@@ -1189,7 +1181,6 @@ class MesaConan(ConanFile):
             )
 
         tc = MesonToolchain(self)
-        tc.project_options["android-libbacktrace"] = feature("android_libbacktrace")
         tc.project_options["build-aco-tests"] = False
         tc.project_options["build-tests"] = False
         tc.project_options["datadir"] = os.path.join(self.package_folder, "res")
