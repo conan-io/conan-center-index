@@ -536,9 +536,7 @@ class CPythonConan(ConanFile):
                 self.output.info(f"{os.path.join(self.package_folder, 'lib')} exists, but it shouldn't.")
                 rm(self, "lib", self.package_folder)
             autotools = Autotools(self)
-            # FIXME: Autotools.install() always adds DESTDIR, we don't want this argument.
-            # Use .make() directly instead
-            autotools.make(target="altinstall")
+            autotools.install(args=["DESTDIR="])
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
 
