@@ -69,7 +69,7 @@ class PackageConan(ConanFile):
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
-            cmake.ctest()
+            cmake.test(target='all')
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
