@@ -461,6 +461,8 @@ class LLVMCoreConan(ConanFile):
         rm(self, "LLVMConfig.cmake", cmake_folder)
         rm(self, "LLVMExports*", cmake_folder)
         rm(self, "Find*", cmake_folder)
+        rm(self, "*.pdb", package_folder / "lib")
+        rm(self, "*.pdb", package_folder / "bin")
         # need to rename this as Conan will flag it, but it's not actually a Config file and is needed by
         # downstream packages
         rename(self, cmake_folder / "LLVM-Config.cmake", cmake_folder / "LLVM-ConfigInternal.cmake")
