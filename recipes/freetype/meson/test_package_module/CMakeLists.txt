@@ -1,7 +1,4 @@
 cmake_minimum_required(VERSION 3.15)
-
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.lib" ".lib" ".a" CACHE BOOL "")
-
 project(test_package LANGUAGES C)
 
 find_package(Freetype REQUIRED MODULE)
