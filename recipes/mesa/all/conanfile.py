@@ -124,7 +124,6 @@ class MesaConan(ConanFile):
         "allow_kcmp": [True, False],
         "dri3": [True, False],
         "egl": [True, False],
-        "egl_lib_suffix": [None, "ANY"],
         "egl_native_platform": [
             "android",
             "drm",
@@ -214,7 +213,6 @@ class MesaConan(ConanFile):
         "android_libbacktrace": True,
         "dri3": True,
         "egl": True,
-        "egl_lib_suffix": None,
         "egl_native_platform": "wayland",
         "gallium_d3d10umd": False,
         "gallium_d3d12_video": False,
@@ -638,8 +636,6 @@ class MesaConan(ConanFile):
             self.options.rm_safe("shader_cache")
         if not self._has_with_libglvnd_option:
             self.options.rm_safe("with_libglvnd")
-        else:
-            self.options.rm_safe("egl_lib_suffix")
         if not self._has_with_libselinux_option:
             self.options.rm_safe("with_libselinux")
         if not self._has_with_libudev_option:
@@ -764,9 +760,6 @@ class MesaConan(ConanFile):
 
         if self.options.get_safe("tool_intel") or self.options.get_safe("xmlconfig"):
             self.options.rm_safe("with_expat")
-
-        if self.options.get_safe("with_libglvnd"):
-            self.options.rm_safe("egl_lib_suffix")
 
         if self.options.get_safe("egl") and self.options.get_safe("with_libglvnd"):
             self.options["libglvnd"].egl = True
@@ -1226,7 +1219,6 @@ class MesaConan(ConanFile):
         tc.project_options["draw-use-llvm"] = boolean("with_llvm")
         tc.project_options["dri3"] = feature("dri3")
         tc.project_options["egl"] = feature("egl")
-        tc.project_options["egl-lib-suffix"] = stringifier("egl_lib_suffix")
         tc.project_options["egl-native-platform"] = str(
             self.options.get_safe("egl_native_platform")
         )
@@ -1444,11 +1436,7 @@ class MesaConan(ConanFile):
             ),
         )
         if self.options.get_safe("egl"):
-            suffix = (
-                self.options.egl_lib_suffix
-                if self.options.get_safe("egl_lib_suffix")
-                else ""
-            )
+            suffix = ""
             if self.options.get_safe("with_libglvnd"):
                 suffix = "_mesa"
             else:
