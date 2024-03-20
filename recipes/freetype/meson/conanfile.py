@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import (
     apply_conandata_patches, copy, export_conandata_patches, load,
     get, rename, replace_in_file, rmdir, save
@@ -170,16 +170,7 @@ class FreetypeConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def _create_cmake_module_variables(self, module_file):
-        lib_suffix = ".a"
-        if self.options.shared:
-            lib_suffix = ".so"
-            if self.settings.os == "Windows":
-                lib_suffix = ".dll"
-            elif is_apple_os(self):
-                lib_suffix = ".dylib"
-        library = os.path.join(self.package_folder, "lib", f"libfreetype{lib_suffix}").replace('\\','/')
         content = textwrap.dedent(f"""\
-            set(FREETYPE_LIBRARY "{library}")
             set(FREETYPE_FOUND TRUE)
             if(DEFINED Freetype_INCLUDE_DIRS)
                 set(FREETYPE_INCLUDE_DIRS ${{Freetype_INCLUDE_DIRS}})
