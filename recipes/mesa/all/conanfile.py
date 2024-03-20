@@ -101,6 +101,7 @@ class MesaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://mesa3d.org/"
     topics = (
+        "acceleration",
         "egl",
         "graphics",
         "opencl",
@@ -109,6 +110,7 @@ class MesaConan(ConanFile):
         "openmax",
         "va-api",
         "vdpau",
+        "video",
         "vulkan",
     )
     package_type = "shared-library"
