@@ -149,7 +149,6 @@ class MesaConan(ConanFile):
         "gallium_rusticl": [True, False],
         "gallium_va": [True, False],
         "gallium_vdpau": [True, False],
-        "gallium_windows_dll_name": ["ANY"],
         "gallium_xa": [True, False],
         "gbm": [True, False],
         "gles1": [True, False],
@@ -237,7 +236,6 @@ class MesaConan(ConanFile):
         "gallium_rusticl": False,
         "gallium_va": True,
         "gallium_vdpau": True,
-        "gallium_windows_dll_name": "libgallium_wgl",
         "gallium_xa": False,
         "gbm": True,
         "gles1": True,
@@ -669,9 +667,7 @@ class MesaConan(ConanFile):
         if not self._has_egl_option:
             self.options.rm_safe("egl")
 
-        if self.settings.os != "Windows":
-            self.options.rm_safe("gallium_windows_dll_name")
-        else:
+        if self.settings.os == "Windows":
             self.options.rm_safe("gallium_vdpau")
 
         if not self._has_platform_android_option:
@@ -1271,10 +1267,6 @@ class MesaConan(ConanFile):
         tc.project_options["gallium-rusticl"] = boolean("gallium_rusticl")
         tc.project_options["gallium-va"] = feature("gallium_va")
         tc.project_options["gallium-vdpau"] = feature("gallium_vdpau")
-        if self.options.get_safe("gallium_windows_dll_name"):
-            tc.project_options["gallium-windows-dll-name"] = str(
-                self.options.gallium_windows_dll_name
-            )
         tc.project_options["gallium-xa"] = feature("gallium_xa")
         tc.project_options["gbm"] = feature("gbm")
         tc.project_options["gles1"] = feature("gles1")
@@ -1578,9 +1570,7 @@ class MesaConan(ConanFile):
                 self.cpp_info.components["osmesa"].requires.append("libselinux::selinux")
 
         if self.settings.os == "Windows":
-            self.cpp_info.components["gallium_wgl"].libs = [
-                str(self.options.gallium_windows_dll_name)
-            ]
+            self.cpp_info.components["gallium_wgl"].libs = ["libgallium_wgl"]
             self.cpp_info.components["gallium_wgl"].system_libs.append("ws2_32")
             self.cpp_info.components["opengl32"].libs = ["opengl32"]
             self.cpp_info.components["opengl32"].requires = ["gallium_wgl"]
