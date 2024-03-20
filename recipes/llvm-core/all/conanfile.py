@@ -12,7 +12,6 @@ from conan.tools.files import (
     save,
     copy,
     export_conandata_patches,
-    load,
     rm,
     rename,
     replace_in_file
@@ -146,6 +145,7 @@ class LLVMCoreConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.with_libedit # not supported on windows
         if self._major_version < 14:
             del self.options.with_target_loongarch  # experimental
             del self.options.with_target_ve  # experimental
@@ -160,7 +160,7 @@ class LLVMCoreConan(ConanFile):
     def requirements(self):
         if self.options.with_ffi:
             self.requires("libffi/3.4.4")
-        if self.options.with_libedit:
+        if self.options.get_safe("with_libedit"):
             self.requires("editline/3.1")
         if self.options.with_zlib:
             self.requires("zlib/1.3.1")
@@ -252,7 +252,7 @@ class LLVMCoreConan(ConanFile):
             "LLVM_ENABLE_EXPENSIVE_CHECKS": self.options.expensive_checks,
             "LLVM_ENABLE_ASSERTIONS": self.settings.build_type,
             "LLVM_USE_PERF": self.options.use_perf,
-            "LLVM_ENABLE_LIBEDIT": self.options.with_libedit,
+            "LLVM_ENABLE_LIBEDIT": self.options.get_safe("with_libedit", False),
             "LLVM_ENABLE_Z3_SOLVER": self.options.with_z3,
             "LLVM_ENABLE_FFI": self.options.with_ffi,
             "LLVM_ENABLE_ZLIB": "FORCE_ON" if self.options.with_zlib else False,
@@ -272,7 +272,17 @@ class LLVMCoreConan(ConanFile):
 
         if is_msvc(self):
             build_type = str(self.settings.build_type).upper()
-            cmake_definitions[f"LLVM_USE_CRT_{build_type}"] = self.settings.compiler.runtime
+            if build_type in ["DEBUG", "RELWITHDEBINFO"]:
+                crt = {
+                    "static": "MTd",
+                    "dynamic": "MDd",
+                }
+            else:
+                crt = {
+                    "static": "MT",
+                    "dynamic": "MD",
+                }
+            cmake_definitions[f"LLVM_USE_CRT_{build_type}"] = crt[str(self.settings.compiler.runtime)]
 
         if not self.options.shared:
             cmake_definitions.update({
@@ -314,6 +324,12 @@ class LLVMCoreConan(ConanFile):
     def _is_windows(self):
         return self.settings.os == "Windows"
 
+    @staticmethod
+    def load(filename):
+        # regex fails on Windows when using conan's built in 'load' method
+        with open(filename, "r", encoding="utf-8")as fp:
+            return fp.read()
+
     def _update_component_dependencies(self, components):
         def _sanitized_components(deps_list):
             match_genex = re.compile(r"""\\\$<LINK_ONLY:(.+)>""")
@@ -339,14 +355,26 @@ class LLVMCoreConan(ConanFile):
                 "requires": [],
                 "system_libs": []
             }
+            windows_system_libs=[
+                "ole32",
+                "delayimp",
+                "shell32",
+                "advapi32",
+                "-delayload:shell32.dll",
+                "uuid",
+                "psapi",
+                "-delayload:ole32.dll"
+            ]
             for component in _sanitized_components(deps_list):
+                if component in windows_system_libs:
+                    continue
                 if component in ["rt", "m", "dl", "pthread"]:
                     data["system_libs"].append(component)
                 else:
                     data["requires"].append(component)
             return data
 
-        cmake_exports = load(self, Path(self.package_folder) / "lib" / "cmake" / "llvm" / "LLVMExports.cmake")
+        cmake_exports = self.load(Path(self.package_folder) / "lib" / "cmake" / "llvm" / "LLVMExports.cmake")
         match_dependencies = re.compile(
             r'''^set_target_properties\((\w+).*\n?\s*INTERFACE_LINK_LIBRARIES\s+"(\S+)"''', re.MULTILINE)
 
@@ -355,7 +383,7 @@ class LLVMCoreConan(ConanFile):
                 components[llvm_lib].update(_parse_deps(dependencies))
 
     def _llvm_build_info(self):
-        cmake_config = load(self, Path(self.package_folder) / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake")
+        cmake_config = self.load(Path(self.package_folder) / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake")
 
         match_cmake_var = re.compile(r"""^set\(LLVM_AVAILABLE_LIBS (?P<components>.*)\)$""", re.MULTILINE)
         match = match_cmake_var.search(cmake_config)
@@ -384,14 +412,14 @@ class LLVMCoreConan(ConanFile):
         return self._cmake_module_path / f"conan-official-{self.name}-variables.cmake"
 
     def _create_cmake_build_module(self, build_info, module_file):
-        package_folder = Path(self.package_folder)
         targets_with_jit = ["X86", "PowerPC", "AArch64", "ARM", "Mips", "SystemZ"]
         content = textwrap.dedent(f"""\
+            set(LLVM_TOOLS_BINARY_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../../../bin")
+            cmake_path(NORMAL_PATH LLVM_TOOLS_BINARY_DIR)
             set(LLVM_PACKAGE_VERSION "{self.version}")
             set(LLVM_AVAILABLE_LIBS "{';'.join(build_info['components'].keys())}")
             set(LLVM_BUILD_TYPE "{self.settings.build_type}")
-            set(LLVM_CMAKE_DIR "{str(package_folder / "lib" / "cmake" / "llvm")}")
-            set(LLVM_TOOLS_BINARY_DIR "{str(package_folder / "bin")}")
+            set(LLVM_CMAKE_DIR "${{CMAKE_CURRENT_LIST_DIR}}")
             set(LLVM_ALL_TARGETS "{self._all_targets}")
             set(LLVM_TARGETS_TO_BUILD "{self._targets_to_build}")
             set(LLVM_TARGETS_WITH_JIT "{';'.join(targets_with_jit)}")

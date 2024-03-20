@@ -1,5 +1,5 @@
 diff --git a/cmake/config-ix.cmake b/cmake/config-ix.cmake
-index 90e5d327c75..618b19b6a2d 100644
+index 90e5d327c75..c8bcb1afb76 100644
 --- a/cmake/config-ix.cmake
 +++ b/cmake/config-ix.cmake
 @@ -5,6 +5,7 @@ endif()
@@ -40,7 +40,7 @@ index 90e5d327c75..618b19b6a2d 100644
  check_include_file(CrashReporterClient.h HAVE_CRASHREPORTERCLIENT_H)
  if(APPLE)
    include(CheckCSourceCompiles)
-@@ -118,24 +133,23 @@ endif()
+@@ -118,24 +133,21 @@ endif()
  # Don't look for these libraries if we're using MSan, since uninstrumented third
  # party code may call MSan interceptors like strlen, leading to false positives.
  if(NOT LLVM_USE_SANITIZER MATCHES "Memory.*")
@@ -62,8 +62,8 @@ index 90e5d327c75..618b19b6a2d 100644
 +    cmake_pop_check_state()
    endif()
  
-   # Don't look for these libraries on Windows.
-   if (NOT PURE_WINDOWS)
+-  # Don't look for these libraries on Windows.
+-  if (NOT PURE_WINDOWS)
      # Skip libedit if using ASan as it contains memory leaks.
      if (LLVM_ENABLE_LIBEDIT AND HAVE_HISTEDIT_H AND NOT LLVM_USE_SANITIZER MATCHES ".*Address.*")
 +      cmake_push_check_state()
@@ -74,7 +74,29 @@ index 90e5d327c75..618b19b6a2d 100644
      else()
        set(HAVE_LIBEDIT 0)
      endif()
-@@ -517,7 +531,7 @@ else( LLVM_ENABLE_THREADS )
+@@ -157,19 +169,11 @@ if(NOT LLVM_USE_SANITIZER MATCHES "Memory.*")
+     find_library(ICONV_LIBRARY_PATH NAMES iconv libiconv libiconv-2 c)
+     set(LLVM_LIBXML2_ENABLED 0)
+     set(LIBXML2_FOUND 0)
+-    if((LLVM_ENABLE_LIBXML2) AND ((CMAKE_SYSTEM_NAME MATCHES "Linux") AND (ICONV_LIBRARY_PATH) OR APPLE))
+-      find_package(LibXml2)
+-      if (LIBXML2_FOUND)
++    if(LLVM_ENABLE_LIBXML2)
++	find_package(LibXml2 REQUIRED)
+         set(LLVM_LIBXML2_ENABLED 1)
+-        if ((CMAKE_OSX_SYSROOT) AND (EXISTS ${CMAKE_OSX_SYSROOT}/${LIBXML2_INCLUDE_DIR}))
+-          include_directories(${CMAKE_OSX_SYSROOT}/${LIBXML2_INCLUDE_DIR})
+-        else()
+-          include_directories(${LIBXML2_INCLUDE_DIR})
+-        endif()
+-      endif()
+     endif()
+   endif()
+-endif()
+ 
+ if (LLVM_ENABLE_LIBXML2 STREQUAL "FORCE_ON" AND NOT LLVM_LIBXML2_ENABLED)
+   message(FATAL_ERROR "Failed to congifure libxml2")
+@@ -517,7 +521,7 @@ else( LLVM_ENABLE_THREADS )
    message(STATUS "Threads disabled.")
  endif()
  
