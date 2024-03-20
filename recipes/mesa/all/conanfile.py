@@ -146,7 +146,6 @@ class MesaConan(ConanFile):
         "gles1": [True, False],
         "gles2": [True, False],
         "glx": [False, "dri", "xlib"],
-        "glx_direct": [True, False],
         "imagination_srv": [True, False],
         "intel_clc": [True, False, "system"],
         "intel_xe_kmd": [True, False],
@@ -229,7 +228,6 @@ class MesaConan(ConanFile):
         "gles1": True,
         "gles2": True,
         "glx": "dri",
-        "glx_direct": True,
         "imagination_srv": False,
         "intel_clc": False,
         "intel_xe_kmd": False,
@@ -1255,7 +1253,6 @@ class MesaConan(ConanFile):
         tc.project_options["gles2"] = feature("gles2")
         tc.project_options["glvnd"] = boolean("with_libglvnd")
         tc.project_options["glx"] = stringifier("glx", default="disabled")
-        tc.project_options["glx-direct"] = boolean("glx_direct")
         tc.project_options["imagination-srv"] = boolean("imagination_srv")
         tc.project_options["install-intel-gpu-tests"] = False
         tc.project_options["intel-clc"] = (
