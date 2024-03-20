@@ -20,7 +20,7 @@ patches:
       patch_type: "conan"
       patch_description: "Add gettid macro for glibc compat. See: eProsima/Fast-DDS#4565"
   "2.11.2":
-    - patch_file: "patches/2.11.1-0001-fix-find-asio-and-tinyxml2.patch"
+    - patch_file: "patches/2.10.1-0001-fix-find-asio-and-tinyxml2.patch"
       patch_type: "conan"
       patch_description: "Fixup find asio and tinyxml2"
   "2.10.1":
