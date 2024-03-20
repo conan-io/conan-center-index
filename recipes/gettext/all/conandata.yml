@@ -1,4 +1,7 @@
 sources:
+  "0.22.5":
+    url: "https://ftp.gnu.org/pub/gnu/gettext/gettext-0.22.5.tar.gz"
+    sha256: "ec1705b1e969b83a9f073144ec806151db88127f5e40fe5a94cb6c8fa48996a0"
   "0.21":
     url: "https://ftp.gnu.org/pub/gnu/gettext/gettext-0.21.tar.gz"
     sha256: "c77d0da3102aec9c07f43671e60611ebff89a996ef159497ce8e59d075786b12"
@@ -6,14 +9,23 @@ sources:
     url: "https://ftp.gnu.org/pub/gnu/gettext/gettext-0.20.1.tar.gz"
     sha256: "66415634c6e8c3fa8b71362879ec7575e27da43da562c798a8a2f223e6e47f5c"
 patches:
-  "0.21":
-    - patch_file: "patches/0002-memmove-is-intrinsic-function-on-MSVC.patch"
+  "0.22.5":
     - patch_file: "patches/0004-autopoint-relocatable.patch"
       patch_description: "relocatable autopoint with resources relative to script"
       patch_type: "conan"
+    - patch_file: "patches/0.22.5-0001-fix-macos-crossbuild.patch"
+      patch_description: "fix ability to crossbuild on macos and assume macOS newer than 10.4"
+      patch_type: "conan"
+  "0.21":
+    - patch_file: "patches/0004-autopoint-relocatable.patch"
+      patch_description: "relocatable autopoint with resources relative to script"
+      patch_type: "conan"
+    - patch_file: "patches/0.21-clang-16-noreturn-attribute-warning.patch"
+      patch_description: "apply the __atribute_noreturn__ to print_and_abort"
+      patch_source: "https://github.com/coreutils/gnulib/commit/0cc39712803ade7b2d4b89c36b143dad72404063"
+      patch_type: "conan"
   "0.20.1":
     - patch_file: "patches/0.20.1-0001-fix-build-errors-with-MSVC.patch"
-    - patch_file: "patches/0002-memmove-is-intrinsic-function-on-MSVC.patch"
     - patch_file: "patches/0.20.1-0003-Reported-by-Gabor-Z.-Papp-gzp-papp.hu.patch"
     - patch_file: "patches/0004-autopoint-relocatable.patch"
       patch_description: "relocatable autopoint with resources relative to script"
