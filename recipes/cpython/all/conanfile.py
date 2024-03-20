@@ -198,10 +198,6 @@ class CPythonConan(ConanFile):
             tc.configure_args.append("--enable-loadable-sqlite-extensions={}".format(
                 yes_no(not self.dependencies["sqlite3"].options.omit_load_extension)
             ))
-        if self.settings.compiler == "intel-cc":
-            tc.configure_args.append("--with-icc")
-        if os.environ.get("CC") or self.settings.compiler != "gcc":
-            tc.configure_args.append("--without-gcc")
         if self.options.with_tkinter:
             tcltk_includes = []
             tcltk_libs = []
@@ -408,13 +404,7 @@ class CPythonConan(ConanFile):
             self._msvc_build()
         else:
             autotools = Autotools(self)
-            # For debugging configure errors
-            try:
-                autotools.configure()
-            except ConanException:
-                with open(os.path.join(self.build_folder, "config.log"), 'r') as f:
-                    self.output.info(f.read())
-                raise
+            autotools.configure()
             autotools.make()
 
     @property
@@ -531,10 +521,6 @@ class CPythonConan(ConanFile):
                 self._msvc_package_copy()
             rm(self, "vcruntime*", os.path.join(self.package_folder, "bin"), recursive=True)
         else:
-            if (os.path.isfile(os.path.join(self.package_folder, "lib"))):
-                # FIXME not sure where this file comes from
-                self.output.info(f"{os.path.join(self.package_folder, 'lib')} exists, but it shouldn't.")
-                rm(self, "lib", self.package_folder)
             autotools = Autotools(self)
             autotools.install(args=["DESTDIR="])
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
