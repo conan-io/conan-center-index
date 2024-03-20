@@ -185,7 +185,7 @@ class FreetypeConan(ConanFile):
                 set(FREETYPE_INCLUDE_DIRS ${{Freetype_INCLUDE_DIRS}})
             endif()
             if(DEFINED Freetype_LIBRARIES)
-                set(FREETYPE_LIBRARIES ${{Freetype_LIBRARIES}})
+                set(FREETYPE_LIBRARIES "{library}")
             endif()
             set(FREETYPE_VERSION_STRING "{self.version}")
         """)
