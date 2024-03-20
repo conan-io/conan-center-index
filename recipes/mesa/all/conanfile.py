@@ -751,7 +751,11 @@ class MesaConan(ConanFile):
 
     def configure(self):
         if self._has_with_libglvnd_option and not self.options.with_libglvnd:
-            self.provides = "libglvnd"
+            self.provides = ["libglvnd"]
+            if self.options.get_safe("egl"):
+                self.provides.append("egl")
+            if self.options.get_safe("opengl"):
+                self.provides.append("opengl")
 
         if not self.options.get_safe("shared_glapi"):
             self.options.rm_safe("egl")
