@@ -38,7 +38,7 @@ class PackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables['LOGFAULT_BUILD_TESTS'] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
+        tc.variables['LOGFAULT_BUILD_TESTS'] = not self.conf.get("tools.build:skip_test", default=False, check_type=bool)
         tc.generate()
 
     def layout(self):
@@ -69,7 +69,7 @@ class PackageConan(ConanFile):
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
-            cmake.test(target='all')
+            cmake.test()
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
