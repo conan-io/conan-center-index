@@ -4,10 +4,10 @@
 #include "fpng.h"
 
 int main() {
-	fpng::fpng_init();
+    fpng::fpng_init();
 
-    auto const WIDTH = 800;
-    auto const HEIGHT = 600;
+    auto const WIDTH   = 800;
+    auto const HEIGHT  = 600;
     auto const CHANNEL = 3;
 
     auto buffer = std::vector<uint8_t>{};
