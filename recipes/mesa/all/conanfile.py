@@ -164,7 +164,6 @@ class MesaConan(ConanFile):
         "osmesa": [True, False],
         "platform_sdk_version": ["ANY"],
         "shader_cache": [True, False],
-        "shader_cache_default": [True, False],
         "shader_cache_max_size": [None, "ANY"],
         "shared_glapi": [True, False],
         "spirv_to_dxil": [True, False],
@@ -251,7 +250,6 @@ class MesaConan(ConanFile):
         "platform_sdk_version": "25",
         "spirv_to_dxil": False,
         "shader_cache": True,
-        "shader_cache_default": True,
         "shader_cache_max_size": None,
         "shared_glapi": True,
         "sse2": True,
@@ -1304,7 +1302,6 @@ class MesaConan(ConanFile):
         tc.project_options["selinux"] = boolean("with_libselinux")
         tc.project_options["spirv-to-dxil"] = boolean("spirv_to_dxil")
         tc.project_options["shader-cache"] = feature("shader_cache")
-        tc.project_options["shader-cache-default"] = boolean("shader_cache_default")
         tc.project_options["shader-cache-max-size"] = stringifier("shader_cache_max_size")
         tc.project_options["shared-glapi"] = feature("shared_glapi")
         if self.options.get_safe("with_llvm"):
