@@ -30,12 +30,6 @@ from conan.tools.scm import Version
 required_conan_version = ">=1.53.0"
 
 
-# macOS:
-#   https://docs.mesa3d.org/macos.html
-#   https://github.com/Mesa3D/mesa/blob/main/.github/workflows/macos.yml
-#   glx=dri has been broken since 23.0.0
-#   Requires building under `brew sh` or will get errors about the include X11/Xlib.h not being found.
-
 datasources = ["freedreno", "intel", "panfrost"]
 freedreno_kmds = ["kgsl", "msm", "virtio"]
 gallium_drivers = [
