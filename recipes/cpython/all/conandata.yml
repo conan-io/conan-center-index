@@ -5,15 +5,15 @@ sources:
   "3.11.8":
     url: "https://www.python.org/ftp/python/3.11.8/Python-3.11.8.tgz"
     sha256: "d3019a613b9e8761d260d9ebe3bd4df63976de30464e5c0189566e1ae3f61889"
-  "3.10.13":
-    url: "https://www.python.org/ftp/python/3.10.13/Python-3.10.13.tgz"
-    sha256: "698ec55234c1363bd813b460ed53b0f108877c7a133d48bde9a50a1eb57b7e65"
-  "3.9.18":
-    url: "https://www.python.org/ftp/python/3.9.18/Python-3.9.18.tgz"
-    sha256: "504ce8cfd59addc04c22f590377c6be454ae7406cb1ebf6f5a350149225a9354"
-  "3.8.18":
-    url: "https://www.python.org/ftp/python/3.8.18/Python-3.8.18.tgz"
-    sha256: "7c5df68bab1be81a52dea0cc2e2705ea00553b67107a301188383d7b57320b16"
+  "3.10.14":
+    url: "https://www.python.org/ftp/python/3.10.14/Python-3.10.14.tgz"
+    sha256: "cefea32d3be89c02436711c95a45c7f8e880105514b78680c14fe76f5709a0f6"
+  "3.9.19":
+    url: "https://www.python.org/ftp/python/3.9.19/Python-3.9.19.tgz"
+    sha256: "f5f9ec8088abca9e399c3b62fd8ef31dbd2e1472c0ccb35070d4d136821aaf71"
+  "3.8.19":
+    url: "https://www.python.org/ftp/python/3.8.19/Python-3.8.19.tgz"
+    sha256: "c7fa55a36e5c7a19ec37d8f90f60a2197548908c9ac8b31e7c0dbffdd470eeac"
 patches:
   "3.12.2":
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
@@ -41,7 +41,7 @@ patches:
     - patch_file: "patches/3.x-0002-remove-module-deps.patch"
       patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
       patch_type: "conan"
-  "3.10.13":
+  "3.10.14":
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
       patch_description: "Fix ARM/ARM64 mismatch in project file"
       patch_type: "bugfix"
@@ -54,7 +54,7 @@ patches:
     - patch_file: "patches/3.x-0002-remove-module-deps.patch"
       patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
       patch_type: "conan"
-  "3.9.18":
+  "3.9.19":
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
       patch_description: "Fix ARM/ARM64 mismatch in project file"
       patch_type: "bugfix"
@@ -67,7 +67,7 @@ patches:
     - patch_file: "patches/3.x-0002-remove-module-deps.patch"
       patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
       patch_type: "conan"
-  "3.8.18":
+  "3.8.19":
     - patch_file: "patches/3.8/3.8.12-0002-_ctypes-ffi.patch"
       patch_description: "Remove duplicate libffi symbols and support shared libffi"
       patch_type: "portability"
