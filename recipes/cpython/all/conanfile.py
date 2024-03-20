@@ -710,8 +710,14 @@ class CPythonConan(ConanFile):
 
         if is_msvc(self):
             if self.options.env_vars:
-                self.runenv_info.append_path("PYTHONHOME", pythonhome)
-                self.buildenv_info.append_path("PYTHONHOME", pythonhome)
+                # FIXME: On Windows, defining this breaks the packaged Python executable, but fixes
+                # separately built executables with an embedded interpreter trying to run standard Python
+                # modules. However, NOT defining this reverses the situation, normal Python executables
+                #work, but embedded interpreters break.
+                # The docs at https://python.readthedocs.io/en/latest/using/cmdline.html#envvar-PYTHONHOME
+                # seem to not be accurate to Windows (https://discuss.python.org/t/the-document-on-pythonhome-might-be-wrong/19614/5)
+                #self.runenv_info.append_path("PYTHONHOME", pythonhome)
+                #self.buildenv_info.append_path("PYTHONHOME", pythonhome)
 
                 # TODO remove once Conan 1.x is no longer supported
                 self.output.info(f"Setting PYTHONHOME environment variable: {pythonhome}")
