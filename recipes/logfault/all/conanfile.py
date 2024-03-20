@@ -35,7 +35,7 @@ class PackageConan(ConanFile):
            "clang": "7",
            "apple-clang": "12",
         }
-    
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables['LOGFAULT_BUILD_TESTS'] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
@@ -69,7 +69,7 @@ class PackageConan(ConanFile):
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
-            cmake.test()
+            cmake.ctest()
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
