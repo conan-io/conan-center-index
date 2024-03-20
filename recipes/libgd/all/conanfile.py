@@ -57,7 +57,7 @@ class LibgdConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
             if is_msvc(self):
                 self.requires("getopt-for-visual-studio/20200201")
         if self.options.with_jpeg:

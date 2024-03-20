@@ -57,6 +57,7 @@ class XZUtilsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
         tc.generate()
 
     def build(self):
