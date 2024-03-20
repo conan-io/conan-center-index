@@ -212,10 +212,6 @@ class CPythonConan(ConanFile):
             tc.configure_args.append("--enable-loadable-sqlite-extensions={}".format(
                 yes_no(not self.dependencies["sqlite3"].options.omit_load_extension)
             ))
-        if self.settings.compiler == "intel-cc":
-            tc.configure_args.append("--with-icc")
-        if os.environ.get("CC") or self.settings.compiler != "gcc":
-            tc.configure_args.append("--without-gcc")
         if self.options.with_tkinter and Version(self.version) < "3.11":
             tcltk_includes = []
             tcltk_libs = []
@@ -523,13 +519,7 @@ class CPythonConan(ConanFile):
             self._msvc_build()
         else:
             autotools = Autotools(self)
-            # For debugging configure errors
-            try:
-                autotools.configure()
-            except ConanException:
-                with open(os.path.join(self.build_folder, "config.log"), 'r') as f:
-                    self.output.info(f.read())
-                raise
+            autotools.configure()
             autotools.make()
 
     @property
@@ -646,24 +636,8 @@ class CPythonConan(ConanFile):
                 self._msvc_package_copy()
             rm(self, "vcruntime*", os.path.join(self.package_folder, "bin"), recursive=True)
         else:
-            # FIXME: C3I sometimes has a `lib` folder in the package folder, only on MacOS.
-            # Shot in the dark attempt: If it fails, remove the entire package folder and try again
-            try:
-                autotools = Autotools(self)
-                # FIXME: Autotools.install() always adds DESTDIR, we don't want this argument.
-                # Use .make() directly instead
-                autotools.make(target="altinstall")
-            except:
-                if os.path.isfile(os.path.join(self.package_folder, "lib")):
-                    # FIXME not sure where this file comes from
-                    self.output.info(f"{os.path.join(self.package_folder, 'lib')} exists, but it shouldn't.")
-                    rmdir(self, self.package_folder)
-                    mkdir(self, self.package_folder)
-
-                copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-                autotools = Autotools(self)
-                autotools.make(target="altinstall")
-
+            autotools = Autotools(self)
+            autotools.install(args=["DESTDIR="])
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
 
@@ -820,6 +794,10 @@ class CPythonConan(ConanFile):
 
         if self.options.env_vars:
             bindir = os.path.join(self.package_folder, "bin")
+            self.runenv_info.append_path("PATH", bindir)
+            self.buildenv_info.append_path("PATH", bindir)
+
+            # TODO remove once Conan 1.x is no longer supported
             self.output.info(f"Appending PATH environment variable: {bindir}")
             self.env_info.PATH.append(bindir)
 
@@ -827,6 +805,11 @@ class CPythonConan(ConanFile):
         self.conf_info.define("user.cpython:python", python)
         self.user_info.python = python
         if self.options.env_vars:
+            self.runenv_info.append_path("PYTHON", python)
+            self.buildenv_info.append_path("PYTHON", python)
+
+            # TODO remove once Conan 1.x is no longer supported
+            self.output.info(f"Appending PYTHON environment variable: {python}")
             self.env_info.PYTHON = python
 
         if is_msvc(self):
@@ -842,11 +825,25 @@ class CPythonConan(ConanFile):
 
         if is_msvc(self):
             if self.options.env_vars:
+                # FIXME: On Windows, defining this breaks the packaged Python executable, but fixes
+                # separately built executables with an embedded interpreter trying to run standard Python
+                # modules. However, NOT defining this reverses the situation, normal Python executables
+                #work, but embedded interpreters break.
+                # The docs at https://python.readthedocs.io/en/latest/using/cmdline.html#envvar-PYTHONHOME
+                # seem to not be accurate to Windows (https://discuss.python.org/t/the-document-on-pythonhome-might-be-wrong/19614/5)
+                #self.runenv_info.append_path("PYTHONHOME", pythonhome)
+                #self.buildenv_info.append_path("PYTHONHOME", pythonhome)
+
+                # TODO remove once Conan 1.x is no longer supported
                 self.output.info(f"Setting PYTHONHOME environment variable: {pythonhome}")
                 self.env_info.PYTHONHOME = pythonhome
 
         python_root = self.package_folder
         if self.options.env_vars:
+            self.runenv_info.append_path("PYTHON_ROOT", python_root)
+            self.buildenv_info.append_path("PYTHON_ROOT", python_root)
+
+            # TODO remove once Conan 1.x is no longer supported
             self.output.info(f"Setting PYTHON_ROOT environment variable: {python_root}")
             self.env_info.PYTHON_ROOT = python_root
         self.conf_info.define("user.cpython:python_root", python_root)
