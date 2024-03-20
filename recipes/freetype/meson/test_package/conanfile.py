@@ -14,11 +14,11 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
-    def build_requirements(self):
-        self.tool_requires("cmake/3.28.1")
-
     def requirements(self):
         self.requires(self.tested_reference_str)
+
+    def build_requirements(self):
+        self.tool_requires("cmake/3.28.1")
 
     def build(self):
         cmake = CMake(self)
