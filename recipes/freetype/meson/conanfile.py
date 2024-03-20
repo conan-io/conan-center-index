@@ -147,6 +147,10 @@ class FreetypeConan(ConanFile):
         meson = Meson(self)
         meson.install()
 
+        # As a workaround to support versions of CMake before 3.29, rename the .a static library to .lib on Windows.
+        if self.settings.os == "Windows" and not self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "libfreetype.a"), os.path.join(self.package_folder, "lib", "libfreetype.lib"))
+
         libtool_version = self._extract_libtool_version()
         save(self, self._libtool_version_txt, libtool_version)
         self._make_freetype_config(libtool_version)
