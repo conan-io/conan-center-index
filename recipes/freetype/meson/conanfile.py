@@ -171,6 +171,9 @@ class FreetypeConan(ConanFile):
 
     def _create_cmake_module_variables(self, module_file):
         content = textwrap.dedent(f"""\
+            if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+                set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.lib" ".lib" ".a")
+            endif()
             set(FREETYPE_FOUND TRUE)
             if(DEFINED Freetype_INCLUDE_DIRS)
                 set(FREETYPE_INCLUDE_DIRS ${{Freetype_INCLUDE_DIRS}})
@@ -186,6 +189,9 @@ class FreetypeConan(ConanFile):
         content = ""
         for alias, aliased in targets.items():
             content += textwrap.dedent("""\
+                if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+                    set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.lib" ".lib" ".a")
+                endif()
                 if(TARGET {aliased} AND NOT TARGET {alias})
                     add_library({alias} INTERFACE IMPORTED)
                     set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
