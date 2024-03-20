@@ -166,8 +166,8 @@ class DuckdbConan(ConanFile):
         tc.variables["ENABLE_UBSAN"] = False
         if is_msvc(self) and not self.options.shared:
             tc.preprocessor_definitions["DUCKDB_API"] = ""
-        if Version(self.version) >= "0.10.0" and self.options.platform != "":
-            tc.variables["DDUCKDB_EXPLICIT_PLATFORM"] = self.options.platform
+        if Version(self.version) >= "0.10.0" and cross_building(self):
+            tc.variables["DDUCKDB_EXPLICIT_PLATFORM"] = f"{self.settings.os}_{self.settings.arch}"
         tc.generate()
 
         dpes = CMakeDeps(self)
