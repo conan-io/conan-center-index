@@ -126,7 +126,6 @@ class MesaConan(ConanFile):
         "android_stub": [True, False],
         "android_libbacktrace": [True, False],
         "allow_kcmp": [True, False],
-        "draw_use_llvm": [True, False],
         "dri3": [True, False],
         "egl": [True, False],
         "egl_lib_suffix": [None, "ANY"],
@@ -218,7 +217,6 @@ class MesaConan(ConanFile):
         "allow_kcmp": True,
         "android_stub": False,
         "android_libbacktrace": True,
-        "draw_use_llvm": True,
         "dri3": True,
         "egl": True,
         "egl_lib_suffix": None,
@@ -772,9 +770,6 @@ class MesaConan(ConanFile):
         if self.options.get_safe("with_libglvnd"):
             self.options.rm_safe("egl_lib_suffix")
 
-        if not self.options.get_safe("with_llvm"):
-            self.options.rm_safe("draw_use_llvm")
-
         if self.options.get_safe("egl") and self.options.get_safe("with_libglvnd"):
             self.options["libglvnd"].egl = True
         if (
@@ -1230,7 +1225,7 @@ class MesaConan(ConanFile):
             for datasource in datasources
             if self.options.get_safe(f"datasource_{datasource}")
         ]
-        tc.project_options["draw-use-llvm"] = boolean("draw_use_llvm")
+        tc.project_options["draw-use-llvm"] = boolean("with_llvm")
         tc.project_options["dri3"] = feature("dri3")
         tc.project_options["egl"] = feature("egl")
         tc.project_options["egl-lib-suffix"] = stringifier("egl_lib_suffix")
