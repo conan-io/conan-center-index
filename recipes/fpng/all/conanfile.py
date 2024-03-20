@@ -24,7 +24,7 @@ class FpngConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_sse": False,
+        "with_sse": True,
     }
     exports_sources = ["CMakeLists.txt"]
 
