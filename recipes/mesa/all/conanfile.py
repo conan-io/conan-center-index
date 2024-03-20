@@ -63,7 +63,6 @@ gallium_drivers = [
 ]
 platforms = ["android", "haiku", "wayland", "windows", "x11"]
 tools = [
-    "all",
     "asahi",
     "dlclose_skip",
     "drm-shim",
