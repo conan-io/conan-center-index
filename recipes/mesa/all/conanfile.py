@@ -119,7 +119,6 @@ class MesaConan(ConanFile):
     # Reduce the cost of copying a lot of source code.
     no_copy_source = True
     options = {
-        "android_stub": [True, False],
         "android_libbacktrace": [True, False],
         "dri3": [True, False],
         "egl": [True, False],
@@ -207,7 +206,6 @@ class MesaConan(ConanFile):
         }
     )
     default_options = {
-        "android_stub": False,
         "android_libbacktrace": True,
         "dri3": True,
         "egl": True,
@@ -313,10 +311,6 @@ class MesaConan(ConanFile):
     @property
     def _requires_moltenvk(self):
         return is_apple_os(self) and self.options.get_safe("gallium_driver_zink")
-
-    @property
-    def _has_android_stub_option(self):
-        return self.settings.os == "Android"
 
     @property
     def _has_android_libbacktrace_option(self):
@@ -606,8 +600,6 @@ class MesaConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if not self._has_android_stub_option:
-            self.options.rm_safe("android_stub")
         if not self._has_android_libbacktrace_option:
             self.options.rm_safe("android_libbacktrace")
         if not self._has_dri3_option:
@@ -1197,7 +1189,6 @@ class MesaConan(ConanFile):
             )
 
         tc = MesonToolchain(self)
-        tc.project_options["android-stub"] = boolean("android_stub")
         tc.project_options["android-libbacktrace"] = feature("android_libbacktrace")
         tc.project_options["build-aco-tests"] = False
         tc.project_options["build-tests"] = False
