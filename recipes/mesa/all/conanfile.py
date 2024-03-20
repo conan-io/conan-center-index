@@ -1212,7 +1212,7 @@ class MesaConan(ConanFile):
 
     def generate(self):
         def boolean(option):
-            return self.options.get_safe(option, default=False)
+            return bool(self.options.get_safe(option, default=False))
         def feature(option):
             return "enabled" if self.options.get_safe(option) else "disabled"
 
