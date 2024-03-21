@@ -17,10 +17,6 @@ class LielabConan(ConanFile):
     license = "MIT"
 
     settings = "os", "arch", "compiler", "build_type"
-
-    exports_sources = ("CMakeLists.txt",
-                       "LICENSE",
-                       "lielab/*")
     
     no_copy_source = True
 
