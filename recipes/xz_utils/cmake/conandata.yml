@@ -1,0 +1,7 @@
+sources:
+  "5.6.1":
+    url: "https://github.com/tukaani-project/xz/releases/download/v5.6.1/xz-5.6.1.tar.xz"
+    sha256: "f334777310ca3ae9ba07206d78ed286a655aa3f44eec27854f740c26b2cd2ed0"
+  "5.6.0":
+    url: "https://github.com/tukaani-project/xz/releases/download/v5.6.0/xz-5.6.0.tar.xz"
+    sha256: "cdafe1632f139c82937cc1ed824f7a60b7b0a0619dfbbd681dcac02b1ac28f5b"
