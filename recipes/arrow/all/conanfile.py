@@ -228,6 +228,9 @@ class ArrowConan(ConanFile):
             self.requires("libbacktrace/cci.20210118")
 
     def validate(self):
+        # FIXME: Temporaly discard these configurations
+        if self.version == "1.0.0" and self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration("Not supported")
         # Do not allow options with 'auto' value
         # TODO: Remove "auto" from the possible values for these options
         auto_options = [option for option, value in self.options.items() if value == "auto"]
