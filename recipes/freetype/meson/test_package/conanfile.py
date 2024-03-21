@@ -6,7 +6,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     test_type = "explicit"
     license = "OFL-1.1-no-RFN"
     short_paths = True
@@ -16,9 +16,6 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-
-    def build_requirements(self):
-        self.tool_requires("cmake/3.28.1")
 
     def build(self):
         cmake = CMake(self)
