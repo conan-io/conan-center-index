@@ -32,6 +32,9 @@ sources:
 patches:
   "2.80.0":
     - patch_file: "patches/remove-packaging.patch"
+      patch_description: don't dependend on python packaging
+      patch_type: bugfix
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3976
   "2.76.3":
     - patch_file: "patches/libintl-discovery.patch"
       patch_type: bugfix
