@@ -18,7 +18,7 @@ class TileDBConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/TileDB-Inc/TileDB"
     topics = ("data science", "storage engine", "s3", "sparse data", "scientific computing", "s3 storage",
-              "arrays", "hdfs", "data analysis", "dataframes", "dense data", "sparse arrays")
+              "arrays", "data analysis", "dataframes", "dense data", "sparse arrays")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -29,7 +29,6 @@ class TileDBConan(ConanFile):
         "s3": [True, False],
         "azure": [True, False],
         "gcs": [True, False],
-        "hdfs": [True, False],
         "serialization": [True, False],
         "webp": [True, False],
         "tools": [True, False],
@@ -45,7 +44,6 @@ class TileDBConan(ConanFile):
         "s3": False,
         "azure": False,
         "gcs": False,
-        "hdfs": False,
         "serialization": False,
         "webp": True,
         "tools": False,
@@ -59,7 +57,6 @@ class TileDBConan(ConanFile):
         "s3": "Support AWS S3 Storage",
         "azure": "Support Azure Blob Storage",
         "gcs": "Support Google Cloud Storage",
-        "hdfs": "Support HDFS",
         "serialization": "Enable TileDB Cloud support by building with support for query serialization.",
         "webp": "Support WebP compression",
         "tools": "Build tiledb command-line tool",
@@ -117,9 +114,6 @@ class TileDBConan(ConanFile):
             self.requires("azure-storage-cpp/12.6.1")
         if self.options.gcs:
             self.requires("google-cloud-cpp/2.19.0")
-        if self.options.hdfs:
-            # Not available on CCI yet
-            self.requires("libhdfs/x.y.z")
         if self.options.serialization:
             self.requires("capnproto/1.0.1")
             self.requires("libcurl/[>=7.78.0 <9]")
@@ -153,7 +147,6 @@ class TileDBConan(ConanFile):
         tc.cache_variables["TILEDB_S3"] = self.options.s3
         tc.cache_variables["TILEDB_AZURE"] = self.options.azure
         tc.cache_variables["TILEDB_GCS"] = self.options.gcs
-        tc.cache_variables["TILEDB_HDFS"] = self.options.hdfs
         tc.cache_variables["TILEDB_CPP_API"] = self.options.cpp_api
         tc.cache_variables["TILEDB_STATS"] = self.options.stats
         tc.cache_variables["TILEDB_STATIC"] = not self.options.shared
