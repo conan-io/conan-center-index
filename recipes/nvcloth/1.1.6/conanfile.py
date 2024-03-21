@@ -37,6 +37,7 @@ class NvclothConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -67,6 +68,16 @@ class NvclothConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    @property
+    def _target_build_platform(self):
+        return {
+            "Windows": "windows",
+            "Linux": "linux",
+            "Macos": "mac",
+            "Android": "android",
+            "iOS": "ios",
+        }.get(str(self.settings.os))
+
     def generate(self):
         tc = CMakeToolchain(self)
         if not self.options.shared:
@@ -74,7 +85,7 @@ class NvclothConan(ConanFile):
         tc.variables["STATIC_WINCRT"] = is_msvc_static_runtime(self)
         tc.variables["NV_CLOTH_ENABLE_CUDA"] = self.options.use_cuda
         tc.variables["NV_CLOTH_ENABLE_DX11"] = self.options.use_dx11
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.variables["TARGET_BUILD_PLATFORM"] = self._target_build_platform
         tc.generate()
 
         env = Environment()
@@ -104,25 +115,8 @@ class NvclothConan(ConanFile):
         self._patch_sources()
         self._remove_samples()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, "NvCloth", "compiler", "cmake", self._get_target_build_platform()))
+        cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
-
-    def _get_build_type(self):
-        if self.settings.build_type == "Debug":
-            return "debug"
-        elif self.settings.build_type == "RelWithDebInfo":
-            return "checked"
-        elif self.settings.build_type == "Release":
-            return "release"
-
-    def _get_target_build_platform(self):
-        return {
-            "Windows": "windows",
-            "Linux": "linux",
-            "Macos": "mac",
-            "Android": "android",
-            "iOS": "ios",
-        }.get(str(self.settings.os))
 
     def package(self):
         if self.settings.build_type == "Debug":
