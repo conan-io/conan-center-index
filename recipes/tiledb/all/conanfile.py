@@ -144,6 +144,7 @@ class TileDBConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         # https://github.com/TileDB-Inc/TileDB/blob/2.21.0/cmake/Options/BuildOptions.cmake
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["TILEDB_AZURE"] = self.options.azure
         tc.cache_variables["TILEDB_CPP_API"] = self.options.cpp_api
         tc.cache_variables["TILEDB_EXPERIMENTAL_FEATURES"] = self.options.experimental_features
