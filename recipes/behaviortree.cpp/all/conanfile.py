@@ -218,9 +218,6 @@ class BehaviorTreeCPPConan(ConanFile):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # Let Conan handle -fPIC
         replace_in_file(self, cmakelists, "set(CMAKE_POSITION_INDEPENDENT_CODE ON)\n", "")
-        # Disable -Werror
-        if Version(self.version) < "4.3":
-            replace_in_file(self, cmakelists, " -Werror=return-type", "")
         # Unvendor lexy
         if self._with_lexy:
             rmdir(self, os.path.join(self.source_folder, "3rdparty", "lexy"))
