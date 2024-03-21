@@ -1,6 +1,6 @@
 --- meson.build
 +++ meson.build
-@@ -22,7 +22,6 @@
+@@ -20,7 +20,6 @@
  
  cc = meson.get_compiler('c')
  cpp = meson.get_compiler('cpp')
@@ -8,7 +8,7 @@
  
  # Check compiler is recent enough (see the SciPy Toolchain Roadmap for details)
  if cc.get_id() == 'gcc'
-@@ -34,9 +33,6 @@
+@@ -32,9 +31,6 @@
      error('NumPy requires at least vc142 (default with Visual Studio 2019) ' + \
            'when building with MSVC')
    endif
@@ -18,11 +18,12 @@
  endif
  
  py = import('python').find_installation(pure: false)
+
 --- numpy/meson.build
 +++ numpy/meson.build
-@@ -265,18 +265,11 @@
-   'py.typed'
- ]
+@@ -234,18 +234,11 @@
+   python_sources += ['_distributor_init_local.py']
+ endif
  
 -py.install_sources(
 -  python_sources,
@@ -39,7 +40,7 @@
  
  pure_subdirs = [
    '_pyinstaller',
-@@ -300,34 +293,6 @@
+@@ -270,34 +263,6 @@
  
  np_dir = py.get_install_dir() / 'numpy'
  
@@ -74,7 +75,7 @@
  compilers = {
    'C': cc,
    'CPP': cpp,
-@@ -401,14 +366,5 @@
+@@ -369,14 +334,5 @@
    endif
  endforeach
  

@@ -1,6 +1,7 @@
-// Based on https://github.com/numpy/numpy/blob/v1.26.0/numpy/core/tests/examples/limited_api/limited_api.c
+// Based on https://github.com/numpy/numpy/blob/v1.26.4/numpy/core/tests/examples/limited_api/limited_api.c
 
 #define Py_LIMITED_API 0x03060000
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
 #include <Python.h>
 #include <numpy/arrayobject.h>
