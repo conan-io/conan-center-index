@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import (
     apply_conandata_patches, copy, export_conandata_patches, load,
-    get, rename, replace_in_file, rmdir, save
+    get, rename, replace_in_file, rm, rmdir, save
 )
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import PkgConfigDeps
@@ -160,6 +160,8 @@ class FreetypeConan(ConanFile):
         copy(self, "FTL.TXT", doc_folder, license_folder)
         copy(self, "GPLv2.TXT", doc_folder, license_folder)
         copy(self, "LICENSE.TXT", doc_folder, license_folder)
+
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
