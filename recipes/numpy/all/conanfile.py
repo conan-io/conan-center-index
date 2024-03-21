@@ -47,6 +47,7 @@ class NumpyConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cpython/<host_version>")
+        self.tool_requires("ninja/1.11.1")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.1.0")
 
