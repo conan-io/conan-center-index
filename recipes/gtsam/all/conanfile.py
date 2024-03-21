@@ -134,7 +134,7 @@ class GtsamConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.83.0", transitive_headers=True)
+        self.requires("boost/1.84.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.with_TBB:
             if Version(self.version) >= "4.1":
@@ -142,7 +142,7 @@ class GtsamConan(ConanFile):
             else:
                 self.requires("onetbb/2020.3.3", transitive_headers=True, transitive_libs=True)
         if self.options.default_allocator == "tcmalloc":
-            self.requires("gperftools/2.14.0")
+            self.requires("gperftools/2.15")
         if self.options.support_nested_dissection:
             # Used in a public header here:
             # https://github.com/borglab/gtsam/blob/4.2.0/gtsam_unstable/partition/FindSeparator-inl.h#L23-L27
