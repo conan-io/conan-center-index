@@ -1,6 +1,9 @@
+#include <QCoreApplication>
+
 #include "MockNetworkAccessManager.hpp"
 
-int main(void) {
+int main(int argc, char *argv[]) {
+    QCoreApplication app(argc, argv);
     MockNetworkAccess::Manager< QNetworkAccessManager > mnam;
 
     mnam.whenGet( QUrl( "http://example.com/hello" ) )
