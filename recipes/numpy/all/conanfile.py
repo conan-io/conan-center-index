@@ -20,7 +20,7 @@ class NumpyConan(ConanFile):
     homepage = "https://numpy.org/devdocs/reference/c-api/index.html"
     topics = ("ndarray", "array", "linear algebra", "npymath")
 
-    package_type = "static-library"
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
