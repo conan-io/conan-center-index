@@ -1,17 +1,13 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.1)
 project(test_package C)
 
-find_package(cpython REQUIRED CONFIG)
+include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+conan_basic_setup()
 
-# FIXME: We can't modify CMake's FindPython to link dependencies pulled by
-# Conan, so here we just include them globally. This is mainly necessary for
-# MacOS missing crypt.h, which is available at configure time (in the main recipe)
-# but otherwise not at build time (in consumer packages).
-link_libraries(cpython::python)
-
-set(PY_VERSION_MAJOR_MINOR "" CACHE STRING "MAJOR.MINOR version of python")
-set(PY_VERSION "" CACHE STRING "Required version of python")
-set(PY_VERSION_SUFFIX "" CACHE STRING "Suffix of python")
+set(CACHE PY_VERSION_MAJOR "" CACHE STRING "MAJOR version of python")
+set(CACHE PY_VERSION_MAJOR_MINOR "" CACHE STRING "MAJOR.MINOR version of python")
+set(CACHE PY_VERSION "" CACHE STRING "Required version of python")
+set(CACHE PY_VERSION_SUFFIX "" CACHE STRING "Suffix of python")
 
 set(Python_ADDITIONAL_VERSIONS ${PY_VERSION}${PY_VERSION_SUFFIX} ${PY_VERSION_MAJOR_MINOR}${PY_VERSION_SUFFIX} 3${PY_VERSION_SUFFIX} ${PY_VERSION} ${PY_VERSION_MAJOR_MINOR} 3)
 message("Using Python_ADDITIONAL_VERSIONS: ${Python_ADDITIONAL_VERSIONS}")
@@ -26,6 +22,7 @@ endif()
 
 message(STATUS "FindPythonInterp:")
 message(STATUS "PYTHON_VERSION_STRING: ${PYTHON_VERSION_STRING}")
+message(STATUS "PYTHON_VERSION_MAJOR: ${PYTHON_VERSION_MAJOR}")
 message(STATUS "PYTHON_VERSION_MINOR: ${PYTHON_VERSION_MINOR}")
 message(STATUS "PYTHON_VERSION_PATCH: ${PYTHON_VERSION_PATCH}")
 message(STATUS "=============================================")
@@ -48,16 +45,18 @@ if(PYTHON_VERSION_STRING)
 endif()
 
 if(PYTHONLIBS_VERSION_STRING)
-    if(NOT PYTHONLIBS_VERSION_STRING STREQUAL "${PY_VERSION}")
-        message("PYTHONLIBS_VERSION_STRING does not match PY_VERSION")
+    if(NOT PYTHONLIBS_VERSION_STRING STREQUAL "${PY_FULL_VERSION}")
+        message("PYTHONLIBS_VERSION_STRING does not match PY_FULL_VERSION")
         message(FATAL_ERROR "CMake detected wrong cpython version")
     endif()
 endif()
 
 option(BUILD_MODULE "Build python module")
 
+set(SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../test_package")
+
 if(BUILD_MODULE)
-    add_library(spam MODULE "test_module.c")
+    add_library(spam MODULE "${SOURCE_DIR}/test_module.c")
     target_include_directories(spam
         PRIVATE
             ${PYTHON_INCLUDE_DIRS}
@@ -67,14 +66,16 @@ if(BUILD_MODULE)
     )
     set_property(TARGET spam PROPERTY PREFIX "")
     if(MSVC)
-        set_target_properties(spam PROPERTIES 
-            DEBUG_POSTFIX "_d"
-            SUFFIX ".pyd"
-        )
+        if(CONAN_SETTINGS_BUILD_TYPE STREQUAL "Debug")
+            set(SUFFIX "_d.pyd")
+        else()
+            set(SUFFIX ".pyd")
+        endif()
+        set_property(TARGET spam PROPERTY SUFFIX "${SUFFIX}")
     endif()
 
     option(USE_FINDPYTHON_X "Use new-style FindPythonX module")
-    if(USE_FINDPYTHON_X AND NOT CMAKE_VERSION VERSION_LESS "3.16")
+    if(USE_FINDPYTHON_X AND NOT (CMAKE_VERSION VERSION_LESS "3.16"))
         # Require CMake 3.16 because this version introduces Python3_FIND_ABI
         find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
         message("Python3_EXECUTABLE: ${Python3_EXECUTABLE}")
@@ -87,9 +88,9 @@ if(BUILD_MODULE)
             message(FATAL_ERROR "CMake detected wrong cpython version")
         endif()
 
-        python3_add_library(spam2 "test_module.c")
+        python3_add_library(spam2 "${SOURCE_DIR}/test_module.c")
     endif()
 endif()
 
-add_executable(${PROJECT_NAME} "test_package.c")
-target_link_libraries(${PROJECT_NAME} PRIVATE cpython::embed)
+add_executable(${PROJECT_NAME} "${SOURCE_DIR}/test_package.c")
+target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
