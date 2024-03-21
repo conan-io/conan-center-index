@@ -3,15 +3,16 @@
 
 #include <Python.h>
 #include <numpy/arrayobject.h>
+#include <numpy/halffloat.h>
 #include <numpy/ufuncobject.h>
 
 static PyObject* create_numpy_array(PyObject *self, PyObject *args) {
     npy_intp dims[2] = {5, 5};
-    PyObject *pyArray = PyArray_SimpleNew(2, dims, NPY_FLOAT64);
+    PyObject *pyArray = PyArray_SimpleNew(2, dims, NPY_HALF);
 
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
-            *((double *)PyArray_GETPTR2(pyArray, i, j)) = (double)i * j;
+            *((npy_half *)PyArray_GETPTR2((PyArrayObject *)pyArray, i, j)) = npy_float_to_half((float)i * j);
         }
     }
 
