@@ -1107,29 +1107,29 @@ class OpenCVConan(ConanFile):
             self.requires("wayland/1.22.0")
         # imgcodecs module dependencies
         if self.options.get_safe("with_avif"):
-            self.requires("libavif/1.0.2")
+            self.requires("libavif/1.0.4")
         if self.options.get_safe("with_jpeg") == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.1")
+            self.requires("libjpeg-turbo/3.0.2")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
             self.requires("mozjpeg/4.1.5")
         if self.options.get_safe("with_jpeg2000") == "jasper":
-            self.requires("jasper/4.1.0")
+            self.requires("jasper/4.2.0")
         elif self.options.get_safe("with_jpeg2000") == "openjpeg":
-            self.requires("openjpeg/2.5.0")
+            self.requires("openjpeg/2.5.2")
         if self.options.get_safe("with_png"):
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/1.6.43")
         if self.options.get_safe("with_openexr"):
-            self.requires("openexr/3.2.1")
+            self.requires("openexr/3.2.3")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_webp"):
             self.requires("libwebp/1.3.2")
         if self.options.get_safe("with_gdal"):
-            self.requires("gdal/3.7.0")
+            self.requires("gdal/3.8.3")
         if self.options.get_safe("with_gdcm"):
-            self.requires("gdcm/3.0.21")
+            self.requires("gdcm/3.0.23")
         # objdetect module dependencies
         if self.options.get_safe("with_quirc"):
             self.requires("quirc/1.2")
@@ -1150,10 +1150,10 @@ class OpenCVConan(ConanFile):
         # sfm module dependencies
         if self.options.sfm:
             self.requires("gflags/2.2.2")
-            self.requires("glog/0.6.0")
+            self.requires("glog/0.7.0")
         # text module dependencies
         if self.options.get_safe("with_tesseract"):
-            self.requires("tesseract/5.3.0")
+            self.requires("tesseract/5.3.3")
 
     def package_id(self):
         # deprecated options
@@ -1210,7 +1210,7 @@ class OpenCVConan(ConanFile):
             if not self._is_legacy_one_profile:
                 self.tool_requires("protobuf/<host_version>")
         if self.options.get_safe("with_wayland"):
-            self.tool_requires("wayland-protocols/1.32")
+            self.tool_requires("wayland-protocols/1.33")
             if not self._is_legacy_one_profile:
                 self.tool_requires("wayland/<host_version>")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
@@ -1272,22 +1272,6 @@ class OpenCVConan(ConanFile):
                 "ocv_check_modules(XKBCOMMON xkbcommon)",
                 "ocv_check_modules(XKBCOMMON xkbcommon)\nfind_package(xkbcommon REQUIRED CONFIG)\nset(XKBCOMMON_LINK_LIBRARIES xkbcommon::libxkbcommon)",
             )
-            # OpenCV uses pkgconfig to find wayland-protocols files, but we can't generate
-            # pkgconfig files of a build requirement with 1 profile, so here is a workaround
-            if self._is_legacy_one_profile:
-                replace_in_file(
-                    self,
-                    detect_wayland,
-                    "ocv_check_modules(WAYLAND_PROTOCOLS wayland-protocols>=1.13)",
-                    "set(HAVE_WAYLAND_PROTOCOLS TRUE)",
-                )
-                pkgdatadir = os.path.join(self.dependencies["wayland-protocols"].package_folder, "res", "wayland-protocols")
-                replace_in_file(
-                    self,
-                    detect_wayland,
-                    "pkg_get_variable(WAYLAND_PROTOCOLS_BASE wayland-protocols pkgdatadir)",
-                    f"set(WAYLAND_PROTOCOLS_BASE {pkgdatadir})",
-                )
 
         ## Cleanup RPATH
         install_layout_file = os.path.join(self.source_folder, "cmake", "OpenCVInstallLayout.cmake")
@@ -1547,7 +1531,21 @@ class OpenCVConan(ConanFile):
 
         if self.options.get_safe("with_wayland"):
             deps = PkgConfigDeps(self)
-            if not self._is_legacy_one_profile:
+            if self._is_legacy_one_profile:
+                # Manually generate pkgconfig file of wayland-protocols since
+                # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
+                wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
+                wp_version = self.dependencies.build["wayland-protocols"].ref.version
+                wp_pkg_content = textwrap.dedent(f"""\
+                    prefix={wp_prefix}
+                    datarootdir=${{prefix}}/res
+                    pkgdatadir=${{datarootdir}}/wayland-protocols
+                    Name: Wayland Protocols
+                    Description: Wayland protocol files
+                    Version: {wp_version}
+                """)
+                save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
+            else:
                 deps.build_context_activated = ["wayland-protocols"]
             deps.generate()
 
