@@ -27,6 +27,8 @@ class LielabConan(ConanFile):
     def requirements(self):
         self.requires("eigen/3.4.0")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.23 <4]")
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
