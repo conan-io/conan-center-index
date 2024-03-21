@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rm, rename
+from conan.tools.files import get, copy, rename
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -20,14 +20,6 @@ class PackageConan(ConanFile):
 
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-    }
 
     @property
     def _min_cppstd(self):
@@ -43,16 +35,11 @@ class PackageConan(ConanFile):
             "Visual Studio": "15",
         }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
 
     def requirements(self):
         self.requires("tsl-robin-map/1.2.2")
@@ -82,16 +69,16 @@ class PackageConan(ConanFile):
 
     @property
     def _cmake_rel_dir(self):
-        return os.path.join("share", "nanobind", "cmake")
+        return os.path.join("lib", "nanobind", "cmake")
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rename(self, os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "lib"))
         rename(self,
                os.path.join(self.package_folder, self._cmake_rel_dir, "nanobind-config.cmake"),
                os.path.join(self.package_folder, self._cmake_rel_dir, "nanobind-conan-config.cmake"))
-        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.builddirs = [self._cmake_rel_dir]
