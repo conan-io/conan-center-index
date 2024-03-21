@@ -23,6 +23,27 @@ class LielabConan(ConanFile):
     def requirements(self):
         self.requires("eigen/3.4.0")
 
+    @property
+    def _min_cppstd(self):
+        return 20
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "11",
+            "clang": "12",
+            "apple-clang": "13.1",
+            "Visual Studio": "17",
+            "msvc": "193",
+        }
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.23 <4]")
     def source(self):
