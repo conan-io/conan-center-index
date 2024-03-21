@@ -8,17 +8,15 @@ from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv", "VirtualBuildEnv"
     test_type = "explicit"
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.25.3")
+        self.tool_requires("cmake/[>=3.25 <4]")
+        self.tool_requires("cpython/3.10.0")
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-
-        if "with_python" not in self.options["openassetio"] or self.options["openassetio"].with_python:
-            self.requires("cpython/3.9.7")
 
     def layout(self):
         cmake_layout(self)
@@ -59,8 +57,8 @@ class TestPackageConan(ConanFile):
     @property
     def _python_windows_lib(self):
         pth = pathlib.Path(
-            self.dependencies["cpython"].package_folder,
-            self.dependencies["cpython"].cpp_info.components["embed"].libdirs[0],
-            self.dependencies["cpython"].cpp_info.components["embed"].libs[0])
+            self.dependencies.build["cpython"].package_folder,
+            self.dependencies.build["cpython"].cpp_info.components["embed"].libdir,
+            self.dependencies.build["cpython"].cpp_info.components["embed"].libs[0])
         pth = pth.with_suffix(".lib")
         return pth.as_posix()
