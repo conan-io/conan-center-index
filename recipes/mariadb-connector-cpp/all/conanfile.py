@@ -43,6 +43,7 @@ class MariadbConnectorCPPRecipe(ConanFile):
 
     def requirements(self):
         self.requires("mariadb-connector-c/3.3.3")
+        self.tool_requires("cmake/[>=3.23 <4]")
         self.requires("zlib/[>=1.2.10 <2]")
         self.requires("zstd/1.5.5")
         if self.options.with_ssl == "openssl":
@@ -84,7 +85,6 @@ class MariadbConnectorCPPRecipe(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
         tc = CMakeToolchain(self)
-        tc.presets_build_environment = env.environment()
         tc.variables["USE_SYSTEM_INSTALLED_LIB"] = True
         tc.variables["WITH_UNIT_TESTS"] = False
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
