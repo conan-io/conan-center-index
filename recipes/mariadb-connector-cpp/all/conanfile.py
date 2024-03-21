@@ -43,11 +43,13 @@ class MariadbConnectorCPPRecipe(ConanFile):
 
     def requirements(self):
         self.requires("mariadb-connector-c/3.3.3")
-        self.tool_requires("cmake/[>=3.23 <4]")
         self.requires("zlib/[>=1.2.10 <2]")
         self.requires("zstd/1.5.5")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.23 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
