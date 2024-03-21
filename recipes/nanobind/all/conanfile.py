@@ -29,7 +29,7 @@ class PackageConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "stable_abi": False,  # FIXME: should be True by default
+        "stable_abi": False,  # TODO: enable after CPython 3.12 is available
         "domain": None,
     }
 
@@ -59,9 +59,8 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("tsl-robin-map/1.2.1")
-        # FIXME: add cpython dependency
-        # self.requires("cpython/3.12.0")
+        self.requires("tsl-robin-map/1.2.2")
+        self.requires("cpython/3.10.0")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -71,7 +70,11 @@ class PackageConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        # FIXME: need to check that we are using CPython 3.12+ for self.options.stable_abi
+
+        if self.options.stable_abi and Version(self.dependencies["cpython"].ref.version) < "3.12":
+            raise ConanInvalidConfiguration(
+                f"CPython 3.12+ is required for stable ABI support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
