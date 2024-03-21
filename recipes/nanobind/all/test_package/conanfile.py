@@ -1,6 +1,3 @@
-import importlib
-import sys
-
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake
@@ -13,6 +10,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        self.requires("cpython/3.10.0", run=True)
 
     def layout(self):
         cmake_layout(self)
@@ -22,14 +20,7 @@ class TestPackageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def _test_nanobind_module(self):
-        sys.path.append(self.build_folder)
-        # Cannot use 'import test_package' due to pylint
-        test_package = importlib.import_module("test_package")
-        assert test_package.add(2, 3) == 5
-        self.output.info("test_package.add(2, 3) ran successfully")
-        sys.path.pop()
-
     def test(self):
         if can_run(self):
-            self._test_nanobind_module()
+            self.run('python -c "import test_package; print(test_package.add(2, 3))"',
+                     env="conanrun", cwd=self.cpp.build.bindir)
