@@ -94,7 +94,7 @@ class GtsamConan(ConanFile):
         "rot3_expmap": ("Ignore if GTSAM_USE_QUATERNIONS is OFF (Rot3::EXPMAP by default). "
                         "Otherwise, enable Rot3::EXPMAP, or if disabled, use Rot3::CAYLEY."),
         "slow_but_correct_betweenfactor": "Use the slower but correct version of BetweenFactor",
-        "support_nested_dissection": "Support Metis-based nested dissection",
+        "support_nested_dissection": "Support METIS-based nested dissection",
         "tangent_preintegration": "Use the new ImuFactor with integration on tangent space",
         "throw_cheirality_exception": "Throw exception when a triangulated point is behind a camera",
         "use_quaternions": ("Enable an internal Quaternion representation for rotations instead of rotation matrices. "
@@ -271,6 +271,7 @@ class GtsamConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("metis", "cmake_target_name", "metis-gtsam-if")
         deps.generate()
 
     def _patch_sources(self):
@@ -300,11 +301,10 @@ class GtsamConan(ConanFile):
             replace_in_file(self, handle_allocators_path,
                             'GTSAM_ADDITIONAL_LIBRARIES "tcmalloc"',
                             'GTSAM_ADDITIONAL_LIBRARIES "gperftools::gperftools"')
-        # Fix HandleMetis.cmake incompatibility with Metis from Conan
-        if self.options.support_nested_dissection:
-            save(self, os.path.join(self.source_folder, "cmake", "HandleMetis.cmake"),
-                 "find_package(metis REQUIRED CONFIG)\n"
-                 "add_library(metis-gtsam-if ALIAS metis::metis)\n")
+
+        # Fix HandleMetis.cmake incompatibility with METIS from Conan
+        save(self, os.path.join(self.source_folder, "cmake", "HandleMetis.cmake"),
+             "find_package(metis REQUIRED CONFIG)\n")
 
         # Fix TBB handling
         handle_tbb_path = os.path.join(self.source_folder, "cmake", "HandleTBB.cmake")
