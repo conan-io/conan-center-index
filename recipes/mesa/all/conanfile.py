@@ -1180,7 +1180,7 @@ class MesaConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["build-aco-tests"] = False
         tc.project_options["build-tests"] = False
-        tc.project_options["datadir"] = os.path.join(self.package_folder, "res")
+        tc.project_options["datadir"] = "res"
         tc.project_options["datasources"] = [
             datasource
             for datasource in datasources
