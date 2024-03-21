@@ -2,9 +2,8 @@ import os
 import textwrap
 
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import copy, export_conandata_patches, get, apply_conandata_patches, rmdir, move_folder_contents, mkdir, save
+from conan.tools.files import copy, export_conandata_patches, get, apply_conandata_patches, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -18,8 +17,8 @@ class NumpyConan(ConanFile):
     description = "NumPy is the fundamental package for scientific computing with Python."
     license = "BSD 3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://numpy.org/doc/stable/reference/c-api/coremath.html"
-    topics = ("ndarray", "array", "linear algebra", "npymath", "npyrandom")
+    homepage = "https://numpy.org/devdocs/reference/c-api/index.html"
+    topics = ("ndarray", "array", "linear algebra", "npymath")
 
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
@@ -60,14 +59,20 @@ class NumpyConan(ConanFile):
     def _meson_root(self):
         return self.source_path.joinpath("vendored-meson", "meson")
 
+    @property
+    def _build_site_packages(self):
+        return os.path.join(self.build_folder, "site-packages")
+
     def generate(self):
         venv = VirtualBuildEnv(self)
         venv.generate()
 
-        # NumPy can only be built with its vendored Meson
         env = Environment()
+        # NumPy can only be built with its vendored Meson
         env.prepend_path("PATH", str(self._meson_root))
-        env.vars(self).save_script("conanbuild_meson")
+        env.prepend_path("PYTHONPATH", self._build_site_packages)
+        env.prepend_path("PATH", os.path.join(self._build_site_packages, "bin"))
+        env.vars(self).save_script("conanbuild_paths")
 
         tc = MesonToolchain(self)
         tc.project_options["allow-noblas"] = False
@@ -100,6 +105,9 @@ class NumpyConan(ConanFile):
                  CALL python %~dp0/meson.py %*
              """))
 
+        # Install cython
+        self.run(f"python -m pip install cython --no-cache-dir --target {self._build_site_packages}")
+
     def build(self):
         self._patch_sources()
         meson = Meson(self)
@@ -110,18 +118,28 @@ class NumpyConan(ConanFile):
         copy(self, "LICENSE*.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
+
+    @property
+    def _rel_site_packages(self):
         python_minor = Version(self.dependencies["cpython"].ref.version).minor
-        python_lib = os.path.join(self.package_folder, "lib", f"python3.{python_minor}")
-        pkg_root = os.path.join(python_lib, "site-packages", "numpy")
-        copy(self, "*.a", pkg_root, os.path.join(self.package_folder, "lib"), keep_path=False)
-        mkdir(self, os.path.join(self.package_folder, "include"))
-        move_folder_contents(self, os.path.join(pkg_root, "core", "include"), os.path.join(self.package_folder, "include"))
-        rmdir(self, python_lib)
-        fix_apple_shared_install_name(self)
+        return os.path.join("lib", f"python3.{python_minor}", "site-packages")
+
+    @property
+    def _rel_pkg_root(self):
+        return os.path.join(self._rel_site_packages, "numpy")
 
     def package_info(self):
         self.cpp_info.components["npymath"].set_property("pkg_config_name", "npymath")
-        self.cpp_info.components["npymath"].libs = ["npymath", "npyrandom"]
-        self.cpp_info.components["npymath"].requires = ["openblas::openblas", "cpython::cpython"]
+        self.cpp_info.components["npymath"].libs = ["npymath"]
+        self.cpp_info.components["npymath"].libdirs = [
+            os.path.join(self._rel_pkg_root, "core", "lib"),
+            os.path.join(self._rel_pkg_root, "random", "lib"),
+        ]
+        self.cpp_info.components["npymath"].includedirs = [os.path.join(self._rel_pkg_root, "core", "include")]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["npymath"].system_libs = ["m"]
+
+        self.cpp_info.components["numpy"].libdirs = [os.path.join(self._rel_pkg_root, "core")]
+        self.cpp_info.components["numpy"].requires = ["openblas::openblas", "cpython::cpython", "npymath"]
+
+        self.runenv_info.prepend_path("PYTHONPATH", os.path.join(self.package_folder, self._rel_site_packages))
