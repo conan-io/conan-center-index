@@ -3,7 +3,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import copy, export_conandata_patches, get, apply_conandata_patches, save
+from conan.tools.files import copy, get, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -28,9 +28,7 @@ class NumpyConan(ConanFile):
     default_options = {
         "fPIC": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
+    short_paths = True
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -88,7 +86,6 @@ class NumpyConan(ConanFile):
         os.chmod(name, os.stat(name).st_mode | 0o111)
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Add missing wrapper scripts to the vendored meson
         save(self, self._meson_root.joinpath("meson"),
              textwrap.dedent("""\
