@@ -138,8 +138,8 @@ class PkgConfConan(ConanFile):
         self.buildenv_info.prepend_path("ACLOCAL_PATH", pkgconf_aclocal)
         # TODO: evaluate if `ACLOCAL_PATH` is enough and we can stop using `AUTOMAKE_CONAN_INCLUDES`
         self.buildenv_info.prepend_path("AUTOMAKE_CONAN_INCLUDES", pkgconf_aclocal)
-        
-        self.conf_info.define("tools.gnu:pkg_config", "pkgconf")
+
+        self.conf_info.define("tools.gnu:pkg_config", pkg_config)
 
         # TODO: remove in conanv2
         automake_extra_includes = unix_path_package_info_legacy(self, pkgconf_aclocal.replace("\\", "/"))
