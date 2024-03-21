@@ -1,0 +1,32 @@
+diff --git a/meson.build b/meson.build
+index b968102b2c7b3b8041a70b50cd2dd9b2436bbd14..7981c90e9634d3fba6245a9a3c222b690ff81efb 100644
+--- a/meson.build
++++ b/meson.build
+@@ -2419,7 +2419,7 @@ endif
+ 
+ glib_conf.set('HAVE_PROC_SELF_CMDLINE', have_proc_self_cmdline)
+ 
++python = import('python').find_installation()
+-python = import('python').find_installation(modules: ['packaging'])
+ # used for '#!/usr/bin/env <name>'
+ python_name = 'python3'
+ 
+diff --git a/gio/gdbus-2.0/codegen/utils.py b/gio/gdbus-2.0/codegen/utils.py
+index 02046108dae49efb140c6438b03b80a73770d2c0..08f1ba9731d0582015ef9807eb739a3efa410e0d 100644
+--- a/gio/gdbus-2.0/codegen/utils.py
++++ b/gio/gdbus-2.0/codegen/utils.py
+@@ -19,7 +19,7 @@
+ #
+ # Author: David Zeuthen <davidz@redhat.com>
+ 
++from pkg_resources import parse_version
+-import packaging.version
+ import os
+ import sys
+ 
+@@ -166,4 +166,4 @@ def version_cmp_key(key):
+         v = str(key[0])
+     else:
+         v = "0"
++    return (parse_version(v), key[1])
+-    return (packaging.version.Version(v), key[1])
