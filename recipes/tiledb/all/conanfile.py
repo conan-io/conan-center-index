@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir, replace_in_file, rm, save
+from conan.tools.files import get, copy, rmdir, replace_in_file, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 
@@ -72,7 +72,7 @@ class TileDBConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        # https://github.com/TileDB-Inc/TileDB/blob/0da5c1a84d23c76eaa80c82e87990c1084c6aed2/doc/dev/BUILD.md#prerequisites
+        # https://github.com/TileDB-Inc/TileDB/blob/2.21.0/doc/dev/BUILD.md#prerequisites
         return {
             "gcc": "10",
             "clang": "10",
@@ -143,27 +143,26 @@ class TileDBConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # https://github.com/TileDB-Inc/TileDB/blob/2.19.0/cmake/Options/BuildOptions.cmake
-        tc.cache_variables["TILEDB_S3"] = self.options.s3
+        # https://github.com/TileDB-Inc/TileDB/blob/2.21.0/cmake/Options/BuildOptions.cmake
         tc.cache_variables["TILEDB_AZURE"] = self.options.azure
-        tc.cache_variables["TILEDB_GCS"] = self.options.gcs
         tc.cache_variables["TILEDB_CPP_API"] = self.options.cpp_api
-        tc.cache_variables["TILEDB_STATS"] = self.options.stats
-        tc.cache_variables["TILEDB_STATIC"] = not self.options.shared
-        tc.cache_variables["TILEDB_TOOLS"] = self.options.tools
-        tc.cache_variables["TILEDB_SERIALIZATION"] = self.options.serialization
-        tc.cache_variables["TILEDB_WEBP"] = self.options.webp
         tc.cache_variables["TILEDB_EXPERIMENTAL_FEATURES"] = self.options.experimental_features
-        tc.cache_variables["TILEDB_REMOVE_DEPRECATIONS"] = self.options.remove_deprecations
-        tc.cache_variables["TILEDB_VERBOSE"] = self.options.verbose
+        tc.cache_variables["TILEDB_GCS"] = self.options.gcs
         tc.cache_variables["TILEDB_INSTALL_LIBDIR"] = os.path.join(self.package_folder, "lib")
         tc.cache_variables["TILEDB_LOG_OUTPUT_ON_FAILURE"] = True
-        tc.cache_variables["TILEDB_WERROR"] = False
-        tc.cache_variables["TILEDB_TESTS"] = False
-        tc.cache_variables["SANITIZER"] = False
+        tc.cache_variables["TILEDB_REMOVE_DEPRECATIONS"] = self.options.remove_deprecations
+        tc.cache_variables["TILEDB_S3"] = self.options.s3
+        tc.cache_variables["TILEDB_SERIALIZATION"] = self.options.serialization
+        tc.cache_variables["TILEDB_STATS"] = self.options.stats
         tc.cache_variables["TILEDB_SUPERBUILD"] = False
-        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["TILEDB_TESTS"] = False
+        tc.cache_variables["TILEDB_TOOLS"] = self.options.tools
         tc.cache_variables["TILEDB_VCPKG"] = True
+        tc.cache_variables["TILEDB_VERBOSE"] = self.options.verbose
+        tc.cache_variables["TILEDB_WEBP"] = self.options.webp
+        tc.cache_variables["TILEDB_WERROR"] = False
+        # Disable ExternalProject just in case
+        tc.cache_variables["FETCHCONTENT_FULLY_DISCONNECTED"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -243,11 +242,6 @@ class TileDBConan(ConanFile):
                  keep_path=False)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        # TileDB always builds shared libraries
-        if not self.options.shared:
-            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dylib*", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dll*", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "TileDB")
