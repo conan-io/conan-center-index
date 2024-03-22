@@ -156,6 +156,8 @@ class OpenVDBConan(ConanFile):
             if self.options.simd:
                 raise ConanInvalidConfiguration("Only intel architectures support SSE4 or AVX.")
         self._check_compiler_version()
+        if self.options.with_exr != "deprecated":
+            self.output.warning("with_exr option is deprecated, do not use anymore.")
 
     @property
     def _settings_build(self):
@@ -259,10 +261,6 @@ class OpenVDBConan(ConanFile):
             defines.append("NOMINMAX")
         if self.options.with_log4cplus:
             defines.append("OPENVDB_USE_LOG4CPLUS")
-        # if self.options.with_exr:
-        #     defines.append("OPENVDB_TOOLS_RAYTRACER_USE_EXR")
-        #     if not self.dependencies["openexr"].options.shared:
-        #         defines.append("OPENVDB_OPENEXR_STATICLIB")
         return defines
 
     def package_info(self):
