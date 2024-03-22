@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, load, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
@@ -51,7 +52,7 @@ class OneTBBConan(ConanFile):
 
     @property
     def _tbbbind_supported(self):
-        return Version(self.version) >= "2021.1.1" and not self.settings.os == "Macos"
+        return self.settings.os != "Macos"
 
     @property
     def _tbbbind_build(self):
@@ -79,8 +80,6 @@ class OneTBBConan(ConanFile):
     def configure(self):
         if Version(self.version) >= "2021.6.0" and not self.options.tbbmalloc:
             self.options.rm_safe("tbbproxy")
-        if self._tbbbind_explicit_hwloc:
-            self.options["hwloc"].shared = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -93,17 +92,22 @@ class OneTBBConan(ConanFile):
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "11.0":
             raise ConanInvalidConfiguration(f"{self.ref} couldn't be built by apple-clang < 11.0")
 
-        if self._tbbbind_explicit_hwloc and not self.dependencies["hwloc"].options.shared:
+        # Old versions used to have shared option before hwloc dependency was moved to shared only
+        if self._tbbbind_explicit_hwloc and not self.dependencies["hwloc"].options.get_safe("shared", True):
             raise ConanInvalidConfiguration(f"{self.ref} requires hwloc:shared=True to be built.")
 
     def build_requirements(self):
-        if not self._tbbbind_explicit_hwloc and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+        if self._tbbbind_build and not self._tbbbind_explicit_hwloc:
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         toolchain = CMakeToolchain(self)
         toolchain.variables["TBB_TEST"] = False
         toolchain.variables["TBB_STRICT"] = False
@@ -126,7 +130,7 @@ class OneTBBConan(ConanFile):
                     os.path.join(hwloc_package_folder, "bin", "hwloc.dll").replace("\\", "/")
         toolchain.generate()
 
-        if self._tbbbind_build:
+        if self._tbbbind_build and not self._tbbbind_explicit_hwloc:
             deps = PkgConfigDeps(self)
             deps.generate()
 

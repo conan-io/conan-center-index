@@ -1,4 +1,7 @@
 sources:
+  "2.0.2":
+    url: "https://github.com/mattreecebentley/plf_queue/archive/1fb9d87a210f7813450ee54a469f9f79ea4ec872.tar.gz"
+    sha256: "812976e4ebc50556891590e1ba066fbe7b73518749e86bbe227428152a3820c8"
   "1.22":
     url: "https://github.com/mattreecebentley/plf_queue/archive/bef2bda67cb4cadfd5dceaaf2c8f037c540a12bc.tar.gz"
     sha256: "96da3d7f27c62b39a147bc38a8d9f3a1a5f1cb0bfcc3b37d5ee2c7c056ad368e"

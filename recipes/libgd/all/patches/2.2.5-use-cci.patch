@@ -1,0 +1,63 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8c99816..63775fd 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -97,7 +97,7 @@ else (USE_EXT_GD)
+ 	FIND_PACKAGE(ZLIB)
+ 
+ 	IF (ENABLE_WEBP)
+-		FIND_PACKAGE(WEBP)
++		FIND_PACKAGE(WebP)
+ 	ENDIF (ENABLE_WEBP)
+ 
+ 	IF (ENABLE_LIQ)
+@@ -121,7 +121,7 @@ else (USE_EXT_GD)
+ 	endif (ENABLE_FREETYPE)
+ 
+ 	if (ENABLE_XPM)
+-		FIND_PACKAGE(XPM)
++		FIND_PACKAGE(libxpm)
+ 	endif (ENABLE_XPM)
+ 
+ 	if (ENABLE_FONTCONFIG)
+@@ -140,7 +140,7 @@ else (USE_EXT_GD)
+ 	ENDIF(ZLIB_FOUND)
+ 
+ 	IF(WEBP_FOUND)
+-		INCLUDE_DIRECTORIES(${WEBP_INCLUDE_DIR})
++		INCLUDE_DIRECTORIES(${WebP_INCLUDE_DIR})
+ 		SET(HAVE_LIBWEBP 1)
+ 	ENDIF(WEBP_FOUND)
+ 
+@@ -161,7 +161,7 @@ else (USE_EXT_GD)
+ 	ENDIF(LIQ_FOUND)
+ 
+ 	IF(XPM_FOUND)
+-		INCLUDE_DIRECTORIES(${XPM_INCLUDE_DIR})
++		INCLUDE_DIRECTORIES(${libxpm_INCLUDE_DIR})
+ 		SET(HAVE_LIBXPM 1)
+ 	ENDIF(XPM_FOUND)
+ 
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 5b764eb..11d3a46 100755
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -110,15 +110,15 @@ INCLUDE_DIRECTORIES(BEFORE "${PROJECT_BINARY_DIR}" "${CMAKE_BINARY_DIR}" "${GD_S
+ 
+ SET(LIBGD_DEP_LIBS
+ 	${ZLIB_LIBRARIES}
+-	${FREETYPE_LIBRARIES}
++	${freetype_LIBRARIES}
+ 	${PNG_LIBRARIES}
+ 	${ICONV_LIBRARIES}
+ 	${LIQ_LIBRARIES}
+ 	${JPEG_LIBRARIES}
+ 	${TIFF_LIBRARIES}
+-	${XPM_LIBRARIES}
++	${libxpm_LIBRARIES}
+ 	${FONTCONFIG_LIBRARY}
+-	${WEBP_LIBRARIES}
++	${WebP_LIBRARIES}
+ )
+ if (BUILD_SHARED_LIBS)
+ 	target_link_libraries(${GD_LIB} ${LIBGD_DEP_LIBS})

@@ -16,6 +16,7 @@ class InjaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Inja is a template engine for modern C++, loosely inspired by jinja for python"
     topics = ("jinja2", "string templates", "templates engine")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -35,8 +36,11 @@ class InjaConan(ConanFile):
             "apple-clang": "10",
         }
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("nlohmann_json/3.11.3")
 
     def package_id(self):
         self.info.clear()
@@ -50,12 +54,8 @@ class InjaConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
         )
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -68,9 +68,7 @@ class InjaConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "inja")
         self.cpp_info.set_property("cmake_target_name", "pantor::inja")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.filenames["cmake_find_package"] = "inja"
@@ -82,6 +80,4 @@ class InjaConan(ConanFile):
         self.cpp_info.components["libinja"].set_property("cmake_target_name", "pantor::inja")
         self.cpp_info.components["libinja"].requires = ["nlohmann_json::nlohmann_json"]
         self.cpp_info.components["libinja"].bindirs = []
-        self.cpp_info.components["libinja"].frameworkdirs = []
         self.cpp_info.components["libinja"].libdirs = []
-        self.cpp_info.components["libinja"].resdirs = []
