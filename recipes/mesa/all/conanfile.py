@@ -728,12 +728,21 @@ class MesaConan(ConanFile):
         self.options.vulkan_driver_swrast = False
 
     def configure(self):
+        self.provides = []
         if self._has_with_libglvnd_option and not self.options.with_libglvnd:
-            self.provides = ["libglvnd"]
+            self.provides.append("libglvnd")
             if self.options.get_safe("egl"):
                 self.provides.append("egl")
             if self.options.get_safe("opengl"):
                 self.provides.append("opengl")
+
+        if not self.options.get_safe("with_libglvnd") and self.settings.os != "Windows":
+            if self.options.get_safe("gles1") or self.options.get_safe("gles2") or self.options.get_safe("opengl") or self.options.get_safe("egl"):
+                self.provides.append("khrplatform")
+            if self.options.get_safe("gles1") or self.options.get_safe("gles2") or self.options.get_safe("opengl"):
+                self.provides.append("opengl-registry")
+            if self.options.get_safe("egl"):
+                self.provides.append("egl-headers")
 
         if not self.options.get_safe("shared_glapi"):
             self.options.rm_safe("egl")
@@ -814,9 +823,6 @@ class MesaConan(ConanFile):
 
         if self.settings.os == "Windows" and self.options.get_safe("egl"):
             self.requires("egl-headers/cci.20220525")
-
-        if self.settings.os == "Windows" and self.options.get_safe("opengl"):
-            self.requires("opengl-registry/cci.20220929")
 
         if self.options.get_safe("platform_wayland"):
             self.requires("wayland/1.22.0")
@@ -1418,6 +1424,7 @@ class MesaConan(ConanFile):
             if self.options.get_safe("with_libglvnd"):
                 self.cpp_info.components["egl"].requires.append("libglvnd::egl")
             if self.settings.os == "Windows":
+                self.cpp_info.components["egl"].requires.append("egl-headers::egl-headers")
                 self.cpp_info.components["egl"].system_libs.append("opengl32")
         if self.options.get_safe("gbm"):
             self.cpp_info.components["gbm"].libs = ["gbm"]
@@ -1512,7 +1519,7 @@ class MesaConan(ConanFile):
             if self.options.get_safe("with_libselinux"):
                 self.cpp_info.components["osmesa"].requires.append("libselinux::selinux")
 
-        if self.settings.os == "Windows":
+        if self.settings.os == "Windows" and self.options.get_safe("with_opengl"):
             self.cpp_info.components["gallium_wgl"].libs = ["libgallium_wgl"]
             self.cpp_info.components["gallium_wgl"].system_libs.append("ws2_32")
             self.cpp_info.components["opengl32"].libs = ["opengl32"]
