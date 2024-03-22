@@ -38,14 +38,14 @@ class PackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables['LOGFAULT_BUILD_TESTS'] = not self.conf.get("tools.build:skip_test", default=False, check_type=bool)
+        tc.variables['LOGFAULT_BUILD_TESTS'] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
         tc.generate()
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if not self.conf.get("tools.build:skip_test", default=False):
+        if not self.conf.get("tools.build:skip_test", default=True):
             self.requires("gtest/1.14.0")
 
     def package_id(self):
@@ -65,7 +65,7 @@ class PackageConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
-        if not self.conf.get("tools.build:skip_test", default=False):
+        if not self.conf.get("tools.build:skip_test", default=True):
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
