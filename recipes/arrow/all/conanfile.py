@@ -100,7 +100,7 @@ class ArrowConan(ConanFile):
         "with_glog": False,
         "with_grpc": False,
         "with_json": False,
-        "with_thrift": True,
+        "with_thrift": False,
         "with_llvm": False,
         "with_openssl": False,
         "with_opentelemetry": False,
