@@ -829,9 +829,6 @@ class MesaConan(ConanFile):
         if self._requires_expat:
             self.requires("expat/2.6.0")
 
-        if self.settings.os == "Windows" and self.options.get_safe("egl"):
-            self.requires("egl-headers/cci.20220525")
-
         if self.options.get_safe("platform_wayland"):
             self.requires("wayland/1.22.0")
 
@@ -1432,7 +1429,6 @@ class MesaConan(ConanFile):
             if self.options.get_safe("with_libglvnd"):
                 self.cpp_info.components["egl"].requires.append("libglvnd::egl")
             if self.settings.os == "Windows":
-                self.cpp_info.components["egl"].requires.append("egl-headers::egl-headers")
                 self.cpp_info.components["egl"].system_libs.append("opengl32")
         if self.options.get_safe("gbm"):
             self.cpp_info.components["gbm"].libs = ["gbm"]
