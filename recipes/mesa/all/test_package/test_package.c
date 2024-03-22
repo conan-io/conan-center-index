@@ -9,6 +9,10 @@
 #include <EGL/eglmesaext.h>
 #endif
 
+#ifdef MESA_TEST_PACKAGE_HAS_OPENGL
+#include <GL/gl.h>
+#endif
+
 #ifdef MESA_TEST_PACKAGE_HAS_OSMESA
 #include <GL/osmesa.h>
 #endif
@@ -22,6 +26,11 @@ int main(void) {
 #endif
 #if MESA_TEST_PACKAGE_HAS_EGL
     if (EGL_DRM_BUFFER_FORMAT_ARGB2101010_MESA <= 0) {
+        return EXIT_FAILURE;
+    }
+#endif
+#ifdef MESA_TEST_PACKAGE_HAS_OPENGL
+    if (glGetError() != GL_NO_ERROR) {
         return EXIT_FAILURE;
     }
 #endif
