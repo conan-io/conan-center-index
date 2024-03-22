@@ -24,10 +24,6 @@ sources:
     url: "https://github.com/SRombauts/SQLiteCpp/archive/2.4.0.tar.gz"
     sha256: "16bf963619786652a60533bcdc71a0412cad1ce132cd09ce43344af6ed7463d9"
 patches:
-  "3.3.1":
-    - patch_file: "patches/3.3.1-0001-cmake-sqlite3.patch"
-      patch_description: "Fix Sqlite3 CMake target"
-      patch_type: "conan"
   "2.5.0":
     - patch_file: "patches/2.5.0-0001-cmake-sqlite3.patch"
       patch_description: "Fix Sqlite3 CMake target"
