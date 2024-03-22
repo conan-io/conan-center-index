@@ -53,7 +53,7 @@ class OpenVDBConan(ConanFile):
         "use_imath_half": True,
         "with_blosc": True,
         "with_exr": "deprecated",
-        "with_log4cplus": False,
+        "with_log4cplus": True,
         "with_zlib": True,
     }
     options_description = {
@@ -130,16 +130,15 @@ class OpenVDBConan(ConanFile):
 
     def requirements(self):
         # https://github.com/AcademySoftwareFoundation/openvdb/blob/v10.0.1/doc/dependencies.txt#L36-L84
-        self.requires("boost/1.83.0", transitive_headers=True)
+        self.requires("boost/1.84.0", transitive_headers=True)
         self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
         if self.options.use_imath_half:
-            self.requires("imath/3.1.9", transitive_headers=True, transitive_libs=True)
+            self.requires("imath/3.1.10", transitive_headers=True, transitive_libs=True)
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_blosc:
             self.requires("c-blosc/1.21.5")
         if self.options.with_log4cplus:
-            # TODO: OpenVDB requires log4cplus v1.*, which is not available in CCI
             self.requires("log4cplus/1.2.2", transitive_headers=True)
 
     def _check_compiler_version(self):
