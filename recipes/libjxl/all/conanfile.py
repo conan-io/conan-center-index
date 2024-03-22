@@ -68,12 +68,12 @@ class LibjxlConan(ConanFile):
     def requirements(self):
         self.requires("brotli/1.1.0")
         if Version(self.version) >= "0.7":
-            self.requires("highway/1.0.7")
+            self.requires("highway/1.1.0")
         else:
             self.requires("highway/0.12.2")
         self.requires("lcms/2.16")
         if self.options.with_tcmalloc:
-            self.requires("gperftools/2.13.0")
+            self.requires("gperftools/2.15")
 
     def validate(self):
         if self.settings.compiler.cppstd:
