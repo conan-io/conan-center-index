@@ -90,8 +90,8 @@ class PackageConan(ConanFile):
                os.path.join(self.package_folder, "include"))
         rename(self,
                os.path.join(self.package_folder, self._cmake_rel_dir, "nanobind-config.cmake"),
-               os.path.join(self.package_folder, self._cmake_rel_dir, "nanobind-conan-config.cmake"))
+               os.path.join(self.package_folder, self._cmake_rel_dir, "nanobind.cmake"))
 
     def package_info(self):
         self.cpp_info.builddirs = [self._cmake_rel_dir]
-        self.cpp_info.set_property("cmake_build_modules", [os.path.join(self._cmake_rel_dir, "nanobind-conan-config.cmake")])
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join(self._cmake_rel_dir, "nanobind.cmake")])
