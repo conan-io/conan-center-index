@@ -355,8 +355,9 @@ class OpenvinoConan(ConanFile):
             if self.options.enable_pytorch_frontend:
                 openvino_runtime.libs.append("openvino_pytorch_frontend")
             # Common private dependencies should go last, because they satisfy dependencies for all other libraries
-            openvino_runtime.libs.extend(["openvino_reference", "openvino_builders",
-                                          "openvino_shape_inference", "openvino_itt",
+            if Version(self.version) < "2024.0.0":
+                openvino_runtime.libs.append("openvino_builders")
+            openvino_runtime.libs.extend(["openvino_reference", "openvino_shape_inference", "openvino_itt",
                                           # utils goes last since all others depend on it
                                           "openvino_util"])
             # set 'openvino' once again for transformations objects files (cyclic dependency)
