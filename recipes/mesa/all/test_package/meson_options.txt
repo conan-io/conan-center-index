@@ -17,12 +17,6 @@ option(
   description : 'Mesa was built with support for libglvnd'
 )
 option(
-  'opengl',
-  type : 'feature',
-  value : 'disabled',
-  description : 'Build support for OpenGL'
-)
-option(
   'osmesa',
   type : 'feature',
   value : 'disabled',

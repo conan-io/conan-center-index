@@ -27,7 +27,6 @@ class TestPackageConan(ConanFile):
         tc.project_options["egl"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("egl") else "disabled"
         tc.project_options["gbm"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("gbm") else "disabled"
         tc.project_options["glvnd"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("with_libglvnd") else "disabled"
-        tc.project_options["opengl"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("opengl") else "disabled"
         tc.project_options["osmesa"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("osmesa") else "disabled"
         tc.generate()
 

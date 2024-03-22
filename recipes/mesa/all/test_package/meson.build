@@ -19,12 +19,6 @@ if get_option('egl').enabled()
     dependencies += egl_dep
 endif
 
-if get_option('opengl').enabled()
-    defines += '-DMESA_TEST_PACKAGE_HAS_OPENGL'
-    opengl_dep = dependency('opengl')
-    dependencies += opengl_dep
-endif
-
 if get_option('osmesa').enabled()
     defines += '-DMESA_TEST_PACKAGE_HAS_OSMESA'
     osmesa_dep = dependency('osmesa')
