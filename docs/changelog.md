@@ -1,9 +1,14 @@
 # Changelog
 
-### 13-Mar-2024 - 11:08 CET
+### 20-March-2024 - 11:13 CET
 
-- [feature]: Build with both */*:shared=True/False option when package type is declared as ``shared-library``.
-- [fix]: Fix ValidateInfra python version check to be aligned with the latest Jenkins version.
+- [fix] Changing Version Ranges in dependencies is now bump dependencies
+- [fix] Static library package type should be built with both all static and all shared dependencies
+
+### 13-March-2024 - 11:08 CET
+
+- [feature] Build with both */*:shared=True/False option when package type is declared as ``shared-library``.
+- [fix] Fix ValidateInfra python version check to be aligned with the latest Jenkins version.
 
 ### 07-February-2024 - 15:43 CET
 
