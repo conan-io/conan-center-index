@@ -17,17 +17,16 @@ if get_option('egl').enabled()
         egl_dep = dependency('mesa-egl')
     endif
     dependencies += egl_dep
+    if host_machine.system() == 'windows'
+        egl_headers_dep = dependency('egl-headers')
+        dependencies += egl_headers_dep
+    endif
 endif
 
 if get_option('osmesa').enabled()
     defines += '-DMESA_TEST_PACKAGE_HAS_OSMESA'
     osmesa_dep = dependency('osmesa')
     dependencies += osmesa_dep
-endif
-
-if host_machine.system() == 'windows'
-    opengl32_dep = dependency('mesa-opengl32')
-    dependencies += opengl32_dep
 endif
 
 executable('test_package',

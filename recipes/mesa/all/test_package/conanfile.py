@@ -16,6 +16,8 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        if self.settings.os == "Windows":
+            self.requires("egl-headers/cci.20220525")
 
     def build_requirements(self):
         self.tool_requires("meson/1.3.2")
@@ -24,10 +26,28 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = MesonToolchain(self)
-        tc.project_options["egl"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("egl") else "disabled"
-        tc.project_options["gbm"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("gbm") else "disabled"
-        tc.project_options["glvnd"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("with_libglvnd") else "disabled"
-        tc.project_options["osmesa"] = "enabled" if self.dependencies[self.tested_reference_str].options.get_safe("osmesa") else "disabled"
+        tc.project_options["egl"] = (
+            "enabled"
+            if self.dependencies[self.tested_reference_str].options.get_safe("egl")
+            else "disabled"
+        )
+        tc.project_options["gbm"] = (
+            "enabled"
+            if self.dependencies[self.tested_reference_str].options.get_safe("gbm")
+            else "disabled"
+        )
+        tc.project_options["glvnd"] = (
+            "enabled"
+            if self.dependencies[self.tested_reference_str].options.get_safe(
+                "with_libglvnd"
+            )
+            else "disabled"
+        )
+        tc.project_options["osmesa"] = (
+            "enabled"
+            if self.dependencies[self.tested_reference_str].options.get_safe("osmesa")
+            else "disabled"
+        )
         tc.generate()
 
     def build(self):
