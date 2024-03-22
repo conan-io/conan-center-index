@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
+from conan.tools.apple import is_apple_os
 from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -61,8 +62,8 @@ class LibassertConan(ConanFile):
             self.requires("cpptrace/0.2.1")
 
     def validate(self):
-        if Version(self.version) <= "2.0.0" and self.settings.compiler == "apple-clang":
-            raise ConanInvalidConfiguration("apple-clang not supported")
+        if Version(self.version) <= "2.0.0" and is_apple_os(self):
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on Mac. Please, update to version >=2.0.0")
 
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
@@ -86,8 +87,6 @@ class LibassertConan(ConanFile):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
 
         if Version(self.version) >= "2.0.0":
-            # if not self.options.shared:
-                # tc.variables["LIBASSERT_STATIC_DEFINE"] = True
             tc.variables["LIBASSERT_USE_EXTERNAL_CPPTRACE"] = True
             deps = CMakeDeps(self)
             deps.generate()
@@ -118,7 +117,7 @@ class LibassertConan(ConanFile):
             copy(
                 self,
                 "*.dll",
-                src=os.path.join(self.package_folder, "lib"),
+                src=self.build_folder,
                 dst=os.path.join(self.package_folder, "bin"),
                 keep_path=False
             )
@@ -164,7 +163,7 @@ class LibassertConan(ConanFile):
             self.cpp_info.filenames["cmake_find_package"] = "assert"
             self.cpp_info.filenames["cmake_find_package_multi"] = "assert"
             self.cpp_info.names["cmake_find_package"] = "assert"
-            self.cpp_info.names["cmake_find_package_multi"] = "assert"        
+            self.cpp_info.names["cmake_find_package_multi"] = "assert"
 
         if Version(self.version) < "1.2.1":
             # pre-cpptrace
@@ -172,6 +171,9 @@ class LibassertConan(ConanFile):
                 self.cpp_info.system_libs.append("dl")
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs.append("dbghelp")
+        
+        if Version(self.version) >= "2.0.0":
+            self.cpp_info.system_libs.append("m")
 
         if Version(self.version) >= "2.0.0":
             self.cpp_info.requires = ["cpptrace::cpptrace"]
