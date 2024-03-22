@@ -15,6 +15,8 @@ class TestPackageConan(ConanFile):
     def build_requirements(self):
         # Required for find_package(Python)
         self.tool_requires("cpython/<host_version>")
+        # Required for Development.Module in find_package(Python)
+        self.tool_requires("cmake/[>=3.18 <4]")
 
     def layout(self):
         cmake_layout(self)
