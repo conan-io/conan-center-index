@@ -1,0 +1,11 @@
+sources:
+  "2.5.0":
+    url: "https://github.com/edrosten/libcvd/archive/refs/tags/RELEASE_2_5_0.tar.gz"
+    sha256: "37bc7a01226ff042908ac52e0284a13e416b244bee4c33741b678d760e5cf114"
+#
+patches:
+  "2.5.0":
+    - patch_file: "patches/001-fix-missing-header-install.patch"
+      patch_description: "Fix 'cvd/convert_image.h' not being installed"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/edrosten/libcvd/pull/94"
