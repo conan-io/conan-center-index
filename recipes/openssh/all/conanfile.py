@@ -53,7 +53,7 @@ class PackageConan(ConanFile):
         if self.options.with_libcrypto  == "openssl":
             self.requires("openssl/[>=1.1 <=3.1]")
         elif self.options.with_libcrypto  == "libressl":
-            self.requires("libressl/[>=2.9 <=3.5]")
+            self.requires("libressl/3.5.3")
         if self.options.with_pam == "openpam":
             self.requires("openpam/20190224")
         if self.options.with_libedit:
