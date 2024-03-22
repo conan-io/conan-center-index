@@ -53,7 +53,7 @@ class OpenVDBConan(ConanFile):
         "use_imath_half": True,
         "with_blosc": True,
         "with_exr": "deprecated",
-        "with_log4cplus": True,
+        "with_log4cplus": False,  # Disabled by default because it is not compatible with C++17
         "with_zlib": True,
     }
     options_description = {
@@ -139,6 +139,7 @@ class OpenVDBConan(ConanFile):
         if self.options.with_blosc:
             self.requires("c-blosc/1.21.5")
         if self.options.with_log4cplus:
+            # log4cplus 2.x is not supported
             self.requires("log4cplus/1.2.2", transitive_headers=True)
 
     def _check_compiler_version(self):
