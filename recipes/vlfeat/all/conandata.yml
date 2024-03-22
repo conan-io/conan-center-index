@@ -1,0 +1,4 @@
+sources:
+  "0.9.21":
+    url: "https://github.com/vlfeat/vlfeat/archive/refs/tags/v0.9.21.tar.gz"
+    sha256: "221d7fb5103f004cc90201307fd1acb080c0caf5c2c26435ba1d5307c07e8cce"
