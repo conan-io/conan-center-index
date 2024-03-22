@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rename
+from conan.tools.files import get, copy, rename, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -62,7 +62,14 @@ class PackageConan(ConanFile):
         tc.variables["NB_USE_SUBMODULE_DEPS"] = False
         tc.generate()
 
+    def _patch_sources(self):
+        # Look for headers in <package_folder>/include
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "nanobind-config.cmake"),
+                        "${NB_DIR}/include",
+                        "${NB_DIR}/../../include")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -75,7 +82,12 @@ class PackageConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rename(self, os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "lib"))
+        rename(self,
+               os.path.join(self.package_folder, "share"),
+               os.path.join(self.package_folder, "lib"))
+        rename(self,
+               os.path.join(self.package_folder, "lib", "nanobind", "include"),
+               os.path.join(self.package_folder, "include"))
         rename(self,
                os.path.join(self.package_folder, self._cmake_rel_dir, "nanobind-config.cmake"),
                os.path.join(self.package_folder, self._cmake_rel_dir, "nanobind-conan-config.cmake"))
