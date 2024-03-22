@@ -5,3 +5,7 @@ sources:
 patches:
   "1.7.3":
     - patch_file: "patches/1.6.0-0002-fix-exports-extension-libraries.patch"
+    - patch_file: "patches/1.7.3-fix-windows-build.patch"
+      patch_description: "Fix Windows build"
+      patch_source: "https://github.com/getdnsapi/getdns/pull/538"
+      patch_type: "portability"
