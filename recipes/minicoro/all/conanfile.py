@@ -32,8 +32,9 @@ class PackageConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.h", self.source_folder, os.path.join(self.package_folder, "include"))
+        copy(self, "*.h", self.source_folder, os.path.join(self.package_folder, "include", "minicoro"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.includedirs.append(os.path.join("include", "minicoro"))
