@@ -806,9 +806,6 @@ class MesaConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # todo not needed?
-        # self.requires("libgettext/0.22")
-
         if self._with_libdrm:
             self.requires("libdrm/2.4.119")
 
