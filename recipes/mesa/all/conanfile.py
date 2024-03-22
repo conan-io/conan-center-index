@@ -736,6 +736,9 @@ class MesaConan(ConanFile):
             if self.options.get_safe("opengl"):
                 self.provides.append("opengl")
 
+        # todo Perhapps it would be better to just remove these header files from the package and require these dependencies instead?
+        # That's where Mesa is getting these from.
+        # The same should be done for `libglvnd` too, then.
         if not self.options.get_safe("with_libglvnd") and self.settings.os != "Windows":
             if self.options.get_safe("gles1") or self.options.get_safe("gles2") or self.options.get_safe("opengl") or self.options.get_safe("egl"):
                 self.provides.append("khrplatform")
@@ -806,6 +809,11 @@ class MesaConan(ConanFile):
             or self.options.get_safe("gallium_driver_virgl")
         ):
             self.options.rm_safe("gallium_va")
+
+
+        if self.options.get_safe("gallium_va") and self.settings.os in ["Linux", "FreeBSD"] and not self.options.get_safe("with_libglvnd"):
+            # The `with_glx` option in libva requires `opengl/system` which causes a conflict when not using libglvnd.
+            self.options["libva"].with_glx = False
 
         # todo
         # if self._requires_libclc:
