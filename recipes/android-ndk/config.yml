@@ -1,4 +1,6 @@
 versions:
+  "r26c":
+    folder: all
   "r26b":
     folder: all
   "r26":
