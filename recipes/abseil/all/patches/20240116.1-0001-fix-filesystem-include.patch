@@ -1,0 +1,53 @@
+From bb83aceacb554e79e7cd2404856f0be30bd00303 Mon Sep 17 00:00:00 2001
+From: Derek Mauro <dmauro@google.com>
+Date: Tue, 12 Mar 2024 08:33:40 -0700
+Subject: [PATCH] Fix GCC7 C++17 build
+
+GCC did not support <filesystem> until GCC8.
+
+Fixes #1635
+
+PiperOrigin-RevId: 615051227
+Change-Id: If7cd5802ead40805b1ff1c3bdfc10ba6d2858ef0
+---
+ absl/hash/hash_test.cc    |  2 +-
+ absl/hash/internal/hash.h | 12 ++++++++++--
+ 2 files changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/absl/hash/internal/hash.h b/absl/hash/internal/hash.h
+index f4a94f9129f..b7d89b01807 100644
+--- a/absl/hash/internal/hash.h
++++ b/absl/hash/internal/hash.h
+@@ -24,6 +24,15 @@
+ #include <TargetConditionals.h>
+ #endif
+ 
++#include "absl/base/config.h"
++
++// For feature testing and determining which headers can be included.
++#if ABSL_INTERNAL_CPLUSPLUS_LANG >= 202002L
++#include <version>
++#else
++#include <ciso646>
++#endif
++
+ #include <algorithm>
+ #include <array>
+ #include <bitset>
+@@ -47,7 +56,6 @@
+ #include <utility>
+ #include <vector>
+ 
+-#include "absl/base/config.h"
+ #include "absl/base/internal/unaligned_access.h"
+ #include "absl/base/port.h"
+ #include "absl/container/fixed_array.h"
+@@ -61,7 +69,7 @@
+ #include "absl/types/variant.h"
+ #include "absl/utility/utility.h"
+ 
+-#if ABSL_INTERNAL_CPLUSPLUS_LANG >= 201703L && \
++#if defined(__cpp_lib_filesystem) && __cpp_lib_filesystem >= 201703L && \
+     !defined(_LIBCPP_HAS_NO_FILESYSTEM_LIBRARY)
+ #include <filesystem>  // NOLINT
+ #endif

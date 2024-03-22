@@ -1143,6 +1143,9 @@ class BoostConan(ConanFile):
         if self._with_zstd:
             add_defines("zstd")
 
+        for define in self.conf.get("tools.build:defines", default=[], check_type=list):
+            flags.append(f"define={define}")
+
         if is_msvc(self):
             flags.append(f"runtime-link={'static' if is_msvc_static_runtime(self) else 'shared'}")
             flags.append(f"runtime-debugging={'on' if 'd' in msvc_runtime_flag(self) else 'off'}")

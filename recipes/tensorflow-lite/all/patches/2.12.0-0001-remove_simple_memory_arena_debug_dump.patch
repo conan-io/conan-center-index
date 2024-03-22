@@ -1,0 +1,21 @@
+diff --git a/tensorflow/lite/CMakeLists.txt b/tensorflow/lite/CMakeLists.txt
+index c71a392..7260efe 100644
+--- a/tensorflow/lite/CMakeLists.txt
++++ b/tensorflow/lite/CMakeLists.txt
+@@ -221,6 +221,9 @@ if(CMAKE_SYSTEM_NAME MATCHES "Android")
+ endif()
+ # Build a list of source files to compile into the TF Lite library.
+ populate_tflite_source_vars("." TFLITE_SRCS)
++if(CMAKE_SYSTEM_NAME MATCHES "Windows" AND BUILD_SHARED_LIBS)
++  list(FILTER TFLITE_SRCS EXCLUDE REGEX ".*simple_memory_arena_debug_dump\\.cc$")
++endif()
+ 
+ # This particular file is excluded because the more explicit approach to enable
+ # XNNPACK delegate is preferred to the weak-symbol one.
+@@ -654,4 +657,4 @@ target_link_libraries(_pywrap_tensorflow_interpreter_wrapper
+ target_compile_options(_pywrap_tensorflow_interpreter_wrapper
+   PUBLIC ${TFLITE_TARGET_PUBLIC_OPTIONS}
+   PRIVATE ${TFLITE_TARGET_PRIVATE_OPTIONS}
+-)
+\ No newline at end of file
++)

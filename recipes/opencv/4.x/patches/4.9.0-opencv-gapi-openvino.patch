@@ -1,0 +1,79 @@
+commit d1d314dcd7d3ec9acde5f6e0104aa4d4ed0e09bf
+Author: TolyaTalamanov <anatoliy.talamanov@intel.com>
+Date:   Wed Jan 17 13:28:53 2024 +0000
+
+    Ifdef OpenVINO API 1.0 usage in G-API module
+
+diff --git a/modules/gapi/src/backends/ie/giebackend.cpp b/modules/gapi/src/backends/ie/giebackend.cpp
+index 935f81d275..cdb246e4a2 100644
+--- a/modules/gapi/src/backends/ie/giebackend.cpp
++++ b/modules/gapi/src/backends/ie/giebackend.cpp
+@@ -2,7 +2,7 @@
+ // It is subject to the license terms in the LICENSE file found in the top-level directory
+ // of this distribution and at http://opencv.org/license.html.
+ //
+-// Copyright (C) 2018-2023 Intel Corporation
++// Copyright (C) 2018-2024 Intel Corporation
+ 
+ #include "precomp.hpp"
+ 
+@@ -10,7 +10,7 @@
+ // (cv::gapi::ie::backend() is still there and is defined always)
+ #include "backends/ie/giebackend.hpp"
+ 
+-#ifdef HAVE_INF_ENGINE
++#if defined HAVE_INF_ENGINE && INF_ENGINE_RELEASE < 2024000000
+ 
+ #if INF_ENGINE_RELEASE <= 2019010000
+ #   error G-API IE module supports only OpenVINO IE >= 2019 R1
+diff --git a/modules/gapi/src/backends/ie/giebackend.hpp b/modules/gapi/src/backends/ie/giebackend.hpp
+index c7d938878d..98715fc2db 100644
+--- a/modules/gapi/src/backends/ie/giebackend.hpp
++++ b/modules/gapi/src/backends/ie/giebackend.hpp
+@@ -2,7 +2,7 @@
+ // It is subject to the license terms in the LICENSE file found in the top-level directory
+ // of this distribution and at http://opencv.org/license.html.
+ //
+-// Copyright (C) 2018-2020 Intel Corporation
++// Copyright (C) 2018-2024 Intel Corporation
+ 
+ #ifndef OPENCV_GAPI_GIEBACKEND_HPP
+ #define OPENCV_GAPI_GIEBACKEND_HPP
+@@ -10,7 +10,7 @@
+ // Include anyway - cv::gapi::ie::backend() still needs to be defined
+ #include "opencv2/gapi/infer/ie.hpp"
+ 
+-#ifdef HAVE_INF_ENGINE
++#if defined HAVE_INF_ENGINE && INF_ENGINE_RELEASE < 2024000000
+ 
+ #include <ade/util/algorithm.hpp> // type_list_index
+ #include <condition_variable>
+diff --git a/modules/gapi/src/backends/ie/giebackend/giewrapper.cpp b/modules/gapi/src/backends/ie/giebackend/giewrapper.cpp
+index a185e7b8ce..6df8187e16 100644
+--- a/modules/gapi/src/backends/ie/giebackend/giewrapper.cpp
++++ b/modules/gapi/src/backends/ie/giebackend/giewrapper.cpp
+@@ -2,9 +2,9 @@
+ // It is subject to the license terms in the LICENSE file found in the top-level directory
+ // of this distribution and at http://opencv.org/license.html.
+ //
+-// Copyright (C) 2020 Intel Corporation
++// Copyright (C) 2020-2024 Intel Corporation
+ 
+-#ifdef HAVE_INF_ENGINE
++#if defined HAVE_INF_ENGINE && INF_ENGINE_RELEASE < 2024000000
+ 
+ #include <vector>
+ #include <string>
+diff --git a/modules/gapi/test/infer/gapi_infer_ie_test.cpp b/modules/gapi/test/infer/gapi_infer_ie_test.cpp
+index 92de39abfa..8e91d576aa 100644
+--- a/modules/gapi/test/infer/gapi_infer_ie_test.cpp
++++ b/modules/gapi/test/infer/gapi_infer_ie_test.cpp
+@@ -6,7 +6,7 @@
+ 
+ #include "../test_precomp.hpp"
+ 
+-#ifdef HAVE_INF_ENGINE
++#if defined HAVE_INF_ENGINE && INF_ENGINE_RELEASE < 2024000000
+ 
+ #include <stdexcept>
+ #include <mutex>

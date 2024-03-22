@@ -280,7 +280,7 @@ class OpenCVConan(ConanFile):
 
     @property
     def _has_openvino_option(self):
-        return Version(self.version) >= "4.6.0"
+        return Version(self.version) >= "4.9.0"
 
     @property
     def _has_with_wayland_option(self):
@@ -343,6 +343,8 @@ class OpenCVConan(ConanFile):
             del self.options.with_avif
         if not self._has_with_flatbuffers_option:
             del self.options.with_flatbuffers
+        if not self._has_openvino_option:
+            del self.options.with_openvino
 
         # Conditional default options
         if self._is_mingw:
@@ -1108,7 +1110,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-headers/1.3.268.0")
         if self.options.get_safe("with_openvino"):
-            self.requires("openvino/2023.2.0")
+            self.requires("openvino/2024.0.0")
         # gapi module dependencies
         if self.options.gapi:
             self.requires("ade/0.1.2d")
@@ -1487,10 +1489,8 @@ class OpenCVConan(ConanFile):
 
         tc.variables["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
 
-        if self._has_openvino_option:
-            tc.variables["WITH_OPENVINO"] = self.options.get_safe("with_openvino", False)
-
         if Version(self.version) >= "4.6.0":
+            tc.variables["WITH_OPENVINO"] = self.options.get_safe("with_openvino", False)
             tc.variables["WITH_TIMVX"] = False
         else:
             tc.variables["WITH_INF_ENGINE"] = False

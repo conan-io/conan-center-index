@@ -20,6 +20,15 @@ sources:
     - url: "https://github.com/opencv/opencv_contrib/archive/refs/tags/4.1.2.tar.gz"
       sha256: "0f6c3d30baa39e3e7611afb481ee86dea45dafb182cac87d570c95dccd83eb8b"
 patches:
+  "4.9.0":
+    - patch_file: "patches/patches/4.9.0-opencv-gapi-openvino.patch"
+      patch_description: "Fixed issue with OpenVINO 2.0 and G-API module"
+      patch_type: "portability"
+      patch_source: "https://github.com/opencv/opencv/pull/24878"
+    - patch_file: "patches/4.9.0-openvino-2022.1.0-and-newer.patch"
+      patch_description: "Use only OpenVINO 2.0 API for DNN module"
+      patch_type: "portability"
+      patch_source: "https://github.com/opencv/opencv/pull/25199"
   "4.8.1":
     - patch_file: "patches/4.5.5-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
@@ -49,14 +58,6 @@ patches:
       patch_description: "MinGW: disable obsensor to avoid build issue"
       patch_type: "portability"
       patch_source: "https://github.com/opencv/opencv/pull/24478"
-    - patch_file: "patches/4.8.1-0003-openvino-cmake-fix.patch"
-      patch_description: "Fixed issue with OpenVINO and static build"
-      patch_type: "portability"
-      patch_source: "https://github.com/opencv/opencv/pull/23963"
-    - patch_file: "patches/4.8.1-0004-use-openvino-2-0-only.patch"
-      patch_description: "Use only OpenVINO 2.0 API"
-      patch_type: "portability"
-      patch_source: "https://github.com/opencv/opencv/pull/24878"
   "4.5.5":
     - patch_file: "patches/4.5.5-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
