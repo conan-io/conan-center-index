@@ -815,6 +815,12 @@ class MesaConan(ConanFile):
         if self._requires_expat:
             self.requires("expat/2.6.0")
 
+        if self.settings.os == "Windows" and self.options.get_safe("egl"):
+            self.requires("egl-headers/cci.20220525")
+
+        if self.settings.os == "Windows" and self.options.get_safe("opengl"):
+            self.requires("opengl-registry/cci.20220929")
+
         if self.options.get_safe("platform_wayland"):
             self.requires("wayland/1.22.0")
 
