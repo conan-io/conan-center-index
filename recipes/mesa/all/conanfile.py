@@ -454,7 +454,7 @@ class MesaConan(ConanFile):
         if conan_version.major >= 2:
             return self.dependencies.direct_build["cpython"].conf_info.get("user.cpython:python", check_type=str)
         else:
-            return self.deps_user_info["cpython"].python
+            return self.user_info_build["cpython"].python
 
     def _default_gallium_driver_option(self, option: str):
         return {
