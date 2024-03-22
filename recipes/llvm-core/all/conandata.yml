@@ -24,6 +24,7 @@ patches:
     - patch_file: patches/13x/0003-split-dwarf.patch
       patch_description: enable split dwarf option from 14.x
       patch_source: https://reviews.llvm.org/D108776
+      patch_type: bugfix
     - patch_file: patches/13x/0004-no-build-with-install-rpath.patch
       patch_description: do not build shared libs with install rpath
       patch_type: conan
