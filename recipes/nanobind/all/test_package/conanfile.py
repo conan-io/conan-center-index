@@ -5,12 +5,16 @@ from conan.tools.cmake import cmake_layout, CMake
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv", "VirtualBuildEnv"
     test_type = "explicit"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
         self.requires("cpython/3.10.0", run=True)
+
+    def build_requirements(self):
+        # Required for find_package(Python)
+        self.tool_requires("cpython/<host_version>")
 
     def layout(self):
         cmake_layout(self)
