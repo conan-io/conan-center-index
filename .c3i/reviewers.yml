@@ -87,3 +87,6 @@ reviewers:
   - user: "juansblanco"
     type: "team"
     request_reviews: false
+  - user: "valgur"
+    type: "community"
+    request_reviews: false

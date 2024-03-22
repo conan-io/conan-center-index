@@ -33,6 +33,7 @@ class DiceTemplateLibrary(ConanFile):
         return {
             "gcc": "10.2",
             "clang": "12",
+            "apple-clang": "14",
         }
 
     def layout(self):
@@ -42,8 +43,6 @@ class DiceTemplateLibrary(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler == "apple-clang":
-            raise ConanInvalidConfiguration("apple-clang is not supported because a full concept implementation is needed")
         if is_msvc(self):
             raise ConanInvalidConfiguration("MSVC is not supported because a full concept implementation is needed")
 
