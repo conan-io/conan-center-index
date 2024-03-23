@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 
@@ -61,10 +62,16 @@ class ShadercConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.17.2 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+
         tc = CMakeToolchain(self)
         tc.cache_variables["SHADERC_SKIP_INSTALL"] = False
         tc.cache_variables["SHADERC_SKIP_EXAMPLES"] = True
@@ -78,6 +85,7 @@ class ShadercConan(ConanFile):
         self.dependencies["glslang"].cpp_info.components["glslang-core"].includedirs.append(
             os.path.join(self.dependencies["glslang"].package_folder, "include", "glslang")
         )
+
         deps = CMakeDeps(self)
         deps.set_property("glslang::glslang-core", "cmake_target_name", "glslang")
         deps.set_property("glslang::osdependent", "cmake_target_name", "OSDependent")
