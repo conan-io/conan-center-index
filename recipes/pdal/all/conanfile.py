@@ -75,12 +75,17 @@ class PdalConan(ConanFile):
     def requirements(self):
         self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
         self.requires("gdal/3.8.3", transitive_headers=True, transitive_libs=True)
+        self.requires("h3/4.1.0")
         self.requires("json-schema-validator/2.3.0")
+        self.requires("libcurl/[>=7.78.0 <9]") # for arbiter
         self.requires("libgeotiff/1.7.1")
         self.requires("nanoflann/1.5.2", transitive_headers=True, transitive_libs=True)
         self.requires("nlohmann_json/3.11.3", transitive_headers=True, transitive_libs=True)
+        self.requires("openssl/[>=1.1 <4]") # for arbiter
         self.requires("proj/9.3.1", transitive_headers=True, transitive_libs=True)
+        self.requires("rapidxml/1.13", transitive_headers=True) # for arbiter
         self.requires("utfcpp/4.0.4")
+        self.requires("zlib/[>=1.2.11 <2]") # for arbiter
         if self.options.with_xml:
             self.requires("libxml2/2.12.5", transitive_headers=True, transitive_libs=True)
         if self.options.with_zstd:
@@ -176,6 +181,7 @@ class PdalConan(ConanFile):
 
         for cmake_module in [
             # Remove .cmake modules for unvendored dependencies
+            "h3",
             "nlohmann",
             "schema-validator",
             "utfcpp",
@@ -193,6 +199,8 @@ class PdalConan(ConanFile):
         # Overwrite JsonFwd.hpp since it's only compatible with nlohmann_json/3.10.15
         save(self, os.path.join(self.source_folder, "pdal", "JsonFwd.hpp"),
              "#include <nlohmann/json.hpp>\nnamespace NL = nlohmann;")
+        # Unvendor h3
+        rmdir(self, os.path.join(self.source_folder, "vendor", "h3"))
         # Unvendor eigen
         rmdir(self, os.path.join(self.source_folder, "vendor", "eigen"))
         # Unvendor nanoflann
@@ -208,9 +216,6 @@ class PdalConan(ConanFile):
         save(self, os.path.join(self.source_folder, "vendor", "schema-validator", "json-schema.hpp"),
              "#include <nlohmann/json-schema.hpp>\n")
         replace_in_file(self, top_cmakelists, "${JSON_SCHEMA_LIB_NAME}", "")
-
-        # Disable rpath manipulation
-        replace_in_file(self, top_cmakelists, "include(${PDAL_CMAKE_DIR}/rpath.cmake)", "")
 
         # TODO: should be turned into a patch and submitted upstream
         for header in [os.path.join(self.source_folder, "io", "private", "connector", "Connector.hpp"),
