@@ -81,7 +81,7 @@ class MsixConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"] and not self.options.skip_bundles:
             self.requires("icu/74.2")
         if self.options.crypto_lib == "openssl":
-            self.requires("openssl/1.1.1w")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.use_external_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.xml_parser == "xerces":
