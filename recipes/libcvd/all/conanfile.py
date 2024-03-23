@@ -62,6 +62,8 @@ class LibCVDConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            # OpenGL is always used on Windows
+            del self.options.with_opengl
 
     def configure(self):
         if self.options.shared:
@@ -89,7 +91,7 @@ class LibCVDConan(ConanFile):
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_libtiff:
             self.requires("libtiff/4.6.0")
-        if self.options.with_opengl:
+        if self.options.get_safe("with_opengl"):
             # https://github.com/edrosten/libcvd/blob/RELEASE_2_5_0/cvd/videodisplay.h#L18-L20
             self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
             if self.settings.os in ["Linux", "FreeBSD"]:
@@ -120,8 +122,8 @@ class LibCVDConan(ConanFile):
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_JPEG"] = not self.options.with_libjpeg
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_PNG"] = not self.options.with_libpng
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_TIFF"] = not self.options.with_libtiff
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_OpenGL"] = not self.options.with_opengl
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_X11"] = not self.options.with_opengl
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_OpenGL"] = not self.options.get_safe("with_opengl", False)
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_X11"] = not self.options.get_safe("with_opengl", False)
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_TooN"] = True
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
