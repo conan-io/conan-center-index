@@ -28,9 +28,6 @@ find_package(nlohmann_json_schema_validator REQUIRED CONFIG)
 set(JSON_SCHEMA_LIB_NAME nlohmann_json_schema_validator)
 link_libraries(nlohmann_json_schema_validator)
 
-find_package(arbiter REQUIRED CONFIG)
-set(PDAL_ARBITER_LIB_NAME arbiter::arbiter)
-
 find_package(utf8cpp REQUIRED CONFIG)
 set(UTFCPP_INCLUDE_DIR ${utf8cpp_INCLUDE_DIR})
 set(UTFCPP_LIB_NAME utf8::cpp)

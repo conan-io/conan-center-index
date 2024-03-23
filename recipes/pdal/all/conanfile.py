@@ -73,7 +73,6 @@ class PdalConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("arbiter/cci.20231122", transitive_headers=True, transitive_libs=True)
         self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
         self.requires("gdal/3.8.3", transitive_headers=True, transitive_libs=True)
         self.requires("json-schema-validator/2.3.0")
@@ -177,7 +176,6 @@ class PdalConan(ConanFile):
 
         for cmake_module in [
             # Remove .cmake modules for unvendored dependencies
-            "arbiter",
             "nlohmann",
             "schema-validator",
             "utfcpp",
@@ -188,9 +186,6 @@ class PdalConan(ConanFile):
             assert os.path.exists(cmake_module), f"{cmake_module} not found"
             save(self, cmake_module, "")
 
-        # Unvendor arbiter
-        rmdir(self, os.path.join(self.source_folder, "vendor", "arbiter"))
-        save(self, os.path.join(self.source_folder, "vendor", "arbiter", "CMakeLists.txt"), "")
         # Unvendor nlohmann
         rmdir(self, os.path.join(self.source_folder, "vendor", "nlohmann"))
         save(self, os.path.join(self.source_folder, "vendor", "nlohmann", "nlohmann", "json.hpp"),
@@ -273,7 +268,6 @@ class PdalConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.libs.extend(["pdal_kazhdan", "pdal_lepcc"])
         self.cpp_info.requires = [
-            "arbiter::arbiter",
             "eigen::eigen",
             "gdal::gdal",
             "json-schema-validator::json-schema-validator",
