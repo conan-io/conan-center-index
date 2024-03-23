@@ -20,11 +20,9 @@ class PdalConan(ConanFile):
     homepage = "https://pdal.io"
     topics = ("gdal", "point-cloud-data", "lidar")
 
-    package_type = "library"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
         "with_unwind": [True, False],
         "with_xml": [True, False],
         "with_zlib": [True, False],
@@ -32,8 +30,6 @@ class PdalConan(ConanFile):
         "with_zstd": [True, False],
     }
     default_options = {
-        "shared": True,
-        "fPIC": True,
         "with_unwind": False,
         "with_xml": True,
         "with_zlib": True,
@@ -60,14 +56,8 @@ class PdalConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
         if self.settings.os not in ["Linux", "FreeBSD"]:
             self.options.rm_safe("with_unwind")
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -133,7 +123,6 @@ class PdalConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["PDAL_BUILD_STATIC"] = not self.options.shared
         tc.variables["WITH_TESTS"] = False
         tc.variables["PDAL_HAVE_ZSTD"] = self.options.with_zstd
         tc.variables["PDAL_HAVE_ZLIB"] = self.options.with_zlib
@@ -270,28 +259,6 @@ class PdalConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "pdal")
 
         self.cpp_info.libs = ["pdalcpp"]
-        if not self.options.shared:
-            self.cpp_info.libs.extend(["pdal_kazhdan", "pdal_lepcc"])
-        self.cpp_info.requires = [
-            "eigen::eigen",
-            "gdal::gdal",
-            "json-schema-validator::json-schema-validator",
-            "libgeotiff::libgeotiff",
-            "nanoflann::nanoflann",
-            "nlohmann_json::nlohmann_json",
-            "proj::proj",
-            "utfcpp::utfcpp",
-        ]
-        if self.options.get_safe("with_unwind"):
-            self.cpp_info.requires.append("libunwind::libunwind")
-        if self.options.with_xml:
-            self.cpp_info.requires.append("libxml2::libxml2")
-        if self.options.with_zstd:
-            self.cpp_info.requires.append("zstd::zstd")
-        if self.options.with_zlib:
-            self.cpp_info.requires.append("zlib::zlib")
-        if self.options.with_lzma:
-            self.cpp_info.requires.append("xz_utils::xz_utils")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.0":
