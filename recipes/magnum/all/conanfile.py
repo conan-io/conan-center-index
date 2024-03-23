@@ -231,7 +231,7 @@ class MagnumConan(ConanFile):
 
         if self.options.glfw_application:
             # https://github.com/mosra/magnum/blob/v2020.06/src/Magnum/Platform/GlfwApplication.h#L51
-            self.requires("glfw/3.3.8", transitive_headers=True, transitive_libs=True)
+            self.requires("glfw/3.4", transitive_headers=True, transitive_libs=True)
 
         if self.options.sdl2_application:
             # https://github.com/mosra/magnum/blob/v2020.06/src/Magnum/Platform/Sdl2Application.h#L60-L64
