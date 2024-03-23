@@ -1,10 +1,10 @@
 sources:
   "5.0.0-beta2":
-    url: "https://github.com/premake/premake-core/archive/refs/tags/v5.0.0-beta2.tar.gz"
-    sha256: "84a7775fe0a90c0f649eb18b10779b84626ad8c58dea4a8f24cca83690dd47d4"
+    url: "https://github.com/premake/premake-core/releases/download/v5.0.0-beta2/premake-5.0.0-beta2-src.zip"
+    sha256: "4c1100f5170ae1c3bd1b4fd9458b3b02ae841aefbfc41514887b80996436dee2"
   "5.0.0-alpha15":
-    url: "https://github.com/premake/premake-core/archive/refs/tags/v5.0.0-alpha15.tar.gz"
-    sha256: "188c590f23b944f8fb2a3254acbb63c9655617be021ba4a670d81e6d499ff6cf"
+    url: "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha15/premake-5.0.0-alpha15-src.zip"
+    sha256: "880f56e7cb9f4945d1cb879f059189462c1b7bf62ef43ac7d25842dfb177dd53"
 patches:
   "5.0.0-beta2":
     - patch_file: "patches/5.0.0-beta2/0001-use-conan-deps.patch"
