@@ -72,7 +72,7 @@ class QtAwesomeConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
-        if self.settings.os == "Linux":
+        if self.version == "6.4.0" and self.settings.os == "Linux":
             raise ConanInvalidConfiguration("Linux is not supported yet")
 
     def source(self):
