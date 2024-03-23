@@ -5,7 +5,6 @@ from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rename, rm
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, VCVars
-from conan.tools.scm import Version
 import os
 import glob
 
@@ -55,9 +54,6 @@ class NSSConan(ConanFile):
             raise ConanInvalidConfiguration("NSS cannot link to static sqlite. Please use option sqlite3:shared=True")
         if self.settings.arch in ["armv8", "armv8.3"] and is_apple_os(self):
             raise ConanInvalidConfiguration("Macos ARM64 builds not yet supported. Contributions are welcome.")
-        if Version(self.version) < "3.74":
-            if self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= 13:
-                raise ConanInvalidConfiguration("nss < 3.74 requires clang < 13.")
         if is_msvc(self):
             # https://c3i.jfrog.io/c3i/misc/summary.html?json=https://c3i.jfrog.io/c3i/misc/logs/pr/19262/4-windows-visual_studio/nss/3.89/summary.json
             raise ConanInvalidConfiguration("MSVC is currently not supported. Contributions are welcome.")
