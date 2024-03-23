@@ -6,7 +6,7 @@ import shutil
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rmdir, load, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, check_min_vs
@@ -49,8 +49,13 @@ class PremakeConan(ConanFile):
         del self.info.settings.compiler
 
     def requirements(self):
+        self.requires("libcurl/[>=7.78.0 <9]")
+        self.requires("libzip/1.10.1")
+        self.requires("mbedtls/3.5.2")
+        self.requires("zlib/1.3.1")
         if self.settings.os != "Windows":
-            self.requires("util-linux-libuuid/2.39")
+            self.requires("util-linux-libuuid/2.39.2")
+        # Lua sources are required during the build and cannot be unvendored
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
@@ -78,18 +83,6 @@ class PremakeConan(ConanFile):
     @property
     def _msvc_build_dir(self):
         return os.path.join(self.source_folder, "build", f"vs{self._ide_version}")
-
-    def _version_info(self, version):
-        res = []
-        for p in re.split("[.-]|(alpha|beta)", version):
-            if p is None:
-                continue
-            try:
-                res.append(int(p))
-                continue
-            except ValueError:
-                res.append(p)
-        return tuple(res)
 
     @property
     def _gmake_platform(self):
@@ -140,6 +133,25 @@ class PremakeConan(ConanFile):
                             os.path.join(self.source_folder, "build", "vs2022"))
                 for vcxproj in glob.glob(os.path.join(self.source_folder, "build", "vs2022", "*.vcxproj")):
                     replace_in_file(self, vcxproj, "v142", "v143")
+
+        # Unvendor
+        for lib in ["curl", "libzip", "mbedtls", "zlib"]:
+            rmdir(self, os.path.join(self.source_folder, "contrib", lib))
+        replace_in_file(self, os.path.join(self._gmake_build_dir, "Makefile"),
+                        "contrib: curl-lib lua-lib luashim-lib mbedtls-lib zip-lib zlib-lib",
+                        "contrib: lua-lib luashim-lib")
+        replace_in_file(self, os.path.join(self._gmake_build_dir, "Makefile"),
+                        "Premake5: lua-lib zip-lib zlib-lib curl-lib mbedtls-lib",
+                        "Premake5: lua-lib")
+        content = load(self, os.path.join(self._gmake_build_dir, "Premake5.make"))
+        # bin/Release/liblua-lib.a -> -llua
+        content = re.sub(r"\bbin/(?:Release|Debug)/lib(\w+)-lib.a\b",
+                         lambda m: f"-l{m[1]}" if m[1] != "lua" else m[0], content)
+        content = re.sub(r" -I../../contrib/(\S+)",
+                         lambda m: "" if "lua" not in m[1] else m[0], content)
+        content = content.replace(" $(LDDEPS)", "")
+        content = content.replace("-lzlib", "-lz")
+        save(self, os.path.join(self._gmake_build_dir, "Premake5.make"), content)
 
     def build(self):
         self._patch_sources()
