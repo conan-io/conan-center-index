@@ -70,6 +70,8 @@ class UnleashConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        if self.version == "1.1.1" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("armv8 is not supported by unleash-client-cpp 1.1.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
