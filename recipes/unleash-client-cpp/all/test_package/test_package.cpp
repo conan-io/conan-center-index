@@ -1,10 +1,11 @@
-#include <cassert>
-
 #include <unleash/unleashclient.h>
 
+#include <iostream>
+
 int main() {
-    unleash::UnleashClient unleashClient =
-        unleash::UnleashClient::create("production", "https://www.apple.com/%");
+    unleash::UnleashClient unleashClient = unleash::UnleashClient::create("production", "urlMock");
+    std::cout << unleashClient << std::endl;
     unleashClient.initializeClient();
-    return unleashClient.isEnabled("feature.toogle");
+    unleashClient.isEnabled("feature.toogle");
+    return 0;
 }
