@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm
@@ -212,7 +213,7 @@ class PclConan(ConanFile):
             "libusb": ["libusb::libusb"],
             "metslib": [],
             "opencv": ["opencv::opencv"],
-            "opengl": ["opengl::opengl", "freeglut::freeglut", "glew::glew", "glu::glu"],
+            "opengl": ["opengl::opengl", "freeglut::freeglut", "glew::glew", "glu::glu" if is_apple_os(self) or self.settings.os == "Windows" else "mesa-glu::mesa-glu"],
             "openni": [],
             "openni2": [],
             "pcap": ["libpcap::libpcap"],
@@ -361,16 +362,16 @@ class PclConan(ConanFile):
         return is_available and is_used
 
     def requirements(self):
-        self.requires("boost/1.82.0", transitive_headers=True)
+        self.requires("boost/1.83.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self._is_enabled("flann"):
             self.requires("flann/1.9.2", transitive_headers=True)
         if self._is_enabled("png"):
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self._is_enabled("qhull"):
             self.requires("qhull/8.0.1", transitive_headers=True)
         if self._is_enabled("qt"):
-            self.requires("qt/6.5.1")
+            self.requires("qt/6.6.1")
         if self._is_enabled("libusb"):
             self.requires("libusb/1.0.26", transitive_headers=True)
         if self._is_enabled("pcap"):
@@ -380,9 +381,12 @@ class PclConan(ConanFile):
             self.requires("opengl/system", transitive_headers=True)
             self.requires("freeglut/3.4.0", transitive_headers=True)
             self.requires("glew/2.2.0", transitive_headers=True)
-            self.requires("glu/system", transitive_headers=True)
+            if is_apple_os(self) or self.settings.os == "Windows":
+                self.requires("glu/system", transitive_headers=True)
+            else:
+                self.requires("mesa-glu/9.0.3", transitive_headers=True)
         if self._is_enabled("opencv"):
-            self.requires("opencv/4.5.5", transitive_headers=True)
+            self.requires("opencv/4.8.1", transitive_headers=True)
         if self._is_enabled("zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
         # TODO:
