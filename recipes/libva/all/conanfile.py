@@ -67,11 +67,13 @@ class PackageConan(ConanFile):
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0")
         if self.options.get_safe("with_glx"):
-            self.requires("opengl/system")
+            self.requires("libglvnd/1.7.0", options={"glx": True})
 
     def validate(self):
         if self.options.get_safe("with_glx") and not self.options.get_safe("with_x11"):
             raise ConanInvalidConfiguration(f"{self.ref} requires x11 when glx is enabled")
+        if self.options.get_safe("with_glx") and not self.dependencies["libglvnd"].options.glx:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the glx option of the libglvnd package to be enabled when glx is enabled")
         if not self.options.get_safe("with_drm") and not self.options.get_safe("with_x11") and not self.options.get_safe("with_wayland") and not self.options.get_safe("with_win32"):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built without at least one backend dev files.")
 
@@ -131,7 +133,7 @@ class PackageConan(ConanFile):
         if self.options.get_safe("with_glx"):
             self.cpp_info.components["libva-glx"].libs = ["va-glx"]
             self.cpp_info.components["libva-glx"].set_property("pkg_config_name", "libva-glx")
-            self.cpp_info.components["libva-glx"].requires = ["libva_", "opengl::opengl"]
+            self.cpp_info.components["libva-glx"].requires = ["libva_", "libglvnd::gl"]
 
         if self.options.get_safe("with_wayland"):
             self.cpp_info.components["libva-wayland"].libs = ["va-wayland"]
