@@ -117,11 +117,11 @@ class PopplerConan(ConanFile):
         if self.options.get_safe("with_gobject_introspection"):
             self.requires("gobject-introspection/1.72.0")
         if self.options.with_qt:
-            self.requires("qt/6.6.1")
+            self.requires("qt/6.6.2")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/4.7.0")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.5.0")
+            self.requires("openjpeg/2.5.2")
         if self.options.with_lcms:
             self.requires("lcms/2.16")
         if self.options.with_libjpeg == "libjpeg":
@@ -129,11 +129,11 @@ class PopplerConan(ConanFile):
         if self.options.with_nss:
             self.requires("nss/3.93")
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_tiff:
             self.requires("libtiff/4.6.0")
         if self.options.splash:
-            self.requires("boost/1.83.0")
+            self.requires("boost/1.84.0")
         if self.options.with_libcurl:
             # https://gitlab.freedesktop.org/poppler/poppler/-/blob/poppler-23.11.0/poppler/CurlCachedFile.h#L18
             self.requires("libcurl/[>=7.78 <9]", transitive_headers=True, transitive_libs=True)
