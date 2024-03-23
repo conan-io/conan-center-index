@@ -31,10 +31,6 @@ class TestPackageConan(ConanFile):
         if self.dependencies["openassetio"].options.with_python:
             if is_msvc(self):
                 tc.variables["Python_LIBRARY"] = self._python_windows_lib
-            if self.settings.compiler == "clang":
-                # Work around cpython recipe bug.
-                # FIXME: remove once fixed upstream.
-                tc.variables["CMAKE_EXE_LINKER_FLAGS"] = "-lpthread"
 
         tc.generate()
         tc = CMakeDeps(self)
