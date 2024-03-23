@@ -13,10 +13,11 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        self.requires("cpython/3.10.0")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25 <4]")
-        self.tool_requires("cpython/3.10.0")
+        self.tool_requires("cpython/<host_version>")
 
     def layout(self):
         cmake_layout(self)
