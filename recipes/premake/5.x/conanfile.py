@@ -6,7 +6,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, VCVars
+from conan.tools.microsoft import is_msvc, VCVars, is_msvc_static_runtime
 
 required_conan_version = ">=1.53.0"
 
@@ -74,9 +74,10 @@ class PremakeConan(ConanFile):
         libs = ', '.join([f'"{lib}"' for dep in deps for lib in dep.libs + dep.system_libs])
         if is_apple_os(self):
             libs += ''.join(f', "{lib}.framework"' for dep in deps for lib in dep.frameworks)
+        defines = ', '.join(f'"{d}"' for dep in deps for d in dep.defines)
         save(self, self._conan_deps_lua,
-             "conan_includedirs = {%s}\nconan_libdirs = {%s}\nconan_libs = {%s}\n" %
-             (includedirs, libdirs, libs))
+             "conan_includedirs = {%s}\nconan_libdirs = {%s}\nconan_libs = {%s}\nconan_defines = {%s}\n" %
+             (includedirs, libdirs, libs, defines))
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -99,8 +100,15 @@ class PremakeConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "premake5.lua"),
                         "@CONAN_DEPS_LUA@", self._conan_deps_lua.replace("\\", "/"))
 
+        # Fix mismatching win32 arch name
         replace_in_file(self, os.path.join(self.source_folder, "Bootstrap.mak"),
                         "$(PLATFORM:x86=win32)", "$(VS_ARCH)")
+
+        # Fix runtime library linkage
+        if not is_msvc_static_runtime(self):
+            replace_in_file(self, os.path.join(self.source_folder, "premake5.lua"),
+                            '"StaticRuntime", ', "")
+
 
     @property
     def _os_target(self):
@@ -124,17 +132,20 @@ class PremakeConan(ConanFile):
     def _vs_ide_year(self):
         compiler_version = str(self.settings.compiler.version)
         if str(self.settings.compiler) == "Visual Studio":
-            return {"17": "2022",
+            year = {"17": "2022",
                     "16": "2019",
                     "15": "2017",
                     "14": "2015",
                     "12": "2013"}.get(compiler_version)
         else:
-            return {"193": "2022",
+            year = {"193": "2022",
                     "192": "2019",
                     "191": "2017",
                     "190": "2015",
                     "180": "2013"}.get(compiler_version)
+        if self.version == "5.0.0-alpha15" and year == "2022":
+            year = "2019"
+        return year
 
     def build(self):
         self._patch_sources()

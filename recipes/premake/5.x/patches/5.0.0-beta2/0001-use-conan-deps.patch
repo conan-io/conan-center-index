@@ -25,7 +25,7 @@
  
  		filter { "system:macosx", "options:arch=ARM or arch=ARM64" }
  			buildoptions { "-arch arm64" }
-@@ -197,16 +194,9 @@
+@@ -197,16 +194,10 @@
  		includedirs { "contrib/lua/src", "contrib/luashim" }
  		links       { "lua-lib" }
  
@@ -42,10 +42,11 @@
 +		includedirs { conan_includedirs }
 +		libdirs { conan_libdirs }
 +		links { conan_libs }
++		defines { conan_defines }
  
  		files
  		{
-@@ -244,11 +234,6 @@
+@@ -244,11 +235,6 @@
  		filter "system:linux or hurd"
  			links       { "dl", "rt" }
  
@@ -57,7 +58,7 @@
  		filter "system:macosx"
  			defines     { "LUA_USE_MACOSX" }
  			links       { "CoreServices.framework", "Foundation.framework", "Security.framework", "readline" }
-@@ -276,23 +261,6 @@
+@@ -276,23 +262,6 @@
  		include "contrib/lua"
  		include "contrib/luashim"
  

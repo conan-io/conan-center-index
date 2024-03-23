@@ -25,7 +25,7 @@
  
  		filter { 'system:windows' }
  			platforms   { 'x86', 'x64' }
-@@ -139,16 +136,9 @@
+@@ -139,16 +136,10 @@
  		includedirs { "contrib/lua/src", "contrib/luashim" }
  		links       { "lua-lib" }
  
@@ -42,10 +42,11 @@
 +		includedirs { conan_includedirs }
 +		libdirs { conan_libdirs }
 +		links { conan_libs }
++		defines { conan_defines }
  
  		files
  		{
-@@ -185,11 +175,6 @@
+@@ -185,11 +176,6 @@
  		filter "system:linux or hurd"
  			links       { "dl", "rt" }
  
@@ -57,7 +58,7 @@
  		filter "system:macosx"
  			defines     { "LUA_USE_MACOSX" }
  			links       { "CoreServices.framework", "Foundation.framework", "Security.framework", "readline" }
-@@ -213,23 +198,6 @@
+@@ -213,23 +199,6 @@
  	group "contrib"
  		include "contrib/lua"
  		include "contrib/luashim"
