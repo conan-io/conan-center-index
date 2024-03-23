@@ -44,6 +44,8 @@ class PremakeConan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
+        if self.info.settings.build_type != "Debug":
+            self.info.settings.build_type = "Release"
 
     def requirements(self):
         self.requires("libcurl/[>=7.78.0 <9]")
@@ -122,8 +124,9 @@ class PremakeConan(ConanFile):
     def build(self):
         self._patch_sources()
         make = "nmake" if is_msvc(self) else "make"
+        config = "debug" if self.settings.build_type == "Debug" else "release"
         with chdir(self, self.source_folder):
-            self.run(f"{make} -f Bootstrap.mak {self._os_target} PLATFORM={self._arch}")
+            self.run(f"{make} -f Bootstrap.mak {self._os_target} PLATFORM={self._arch} CONFIG={config}")
 
     def package(self):
         copy(self, "LICENSE.txt",
