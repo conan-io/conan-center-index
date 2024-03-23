@@ -49,7 +49,7 @@ class PremakeConan(ConanFile):
         self.requires("libcurl/[>=7.78.0 <9]")
         self.requires("libzip/1.10.1")
         self.requires("zlib/1.3.1")
-        if self.settings.os != "Windows":
+        if self.version != "5.0.0-alpha15" and self.settings.os == "Linux":
             self.requires("util-linux-libuuid/2.39.2")
         # Lua sources are required during the build and cannot be unvendored
 
@@ -113,6 +113,12 @@ class PremakeConan(ConanFile):
         if self.options.get_safe("lto", None) is False:
             replace_in_file(self, os.path.join(self.source_folder, "premake5.lua"),
                             '"LinkTimeOptimization"', "")
+
+        # Add missing libuuid include dir
+        if self.version != "5.0.0-alpha15" and self.settings.os == "Linux":
+            libuuid_info = self.dependencies["util-linux-libuuid"].cpp_info.aggregated_components()
+            replace_in_file(self, os.path.join(self.source_folder, "Bootstrap.mak"),
+                            " -luuid", f" -luuid -I{libuuid_info.includedirs[0]} -L{libuuid_info.libdirs[0]}")
 
         # Unvendor
         for lib in ["curl", "libzip", "mbedtls", "zlib"]:
