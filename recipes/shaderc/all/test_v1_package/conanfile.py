@@ -19,6 +19,6 @@ class TestPackageConan(ConanFile):
             bin_path_shaderc_cpp = os.path.join("bin", "test_package_shaderc_cpp")
             self.run(bin_path_shaderc_cpp, run_environment=True)
             # Test glslc executable
-            in_glsl_name = os.path.join(self.source_folder, os.pardir, "test_package", "test_package.vert")
+            in_glsl_name = os.path.abspath(os.path.join(self.source_folder, os.pardir, "test_package", "test_package.vert"))
             spv_name = "test_package.spv"
-            self.run(f"glslc '{in_glsl_name}' -o {spv_name}", run_environment=True)
+            self.run(f"glslc {in_glsl_name} -o {spv_name}", run_environment=True)

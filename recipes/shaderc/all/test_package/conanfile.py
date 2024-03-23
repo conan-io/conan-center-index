@@ -33,4 +33,4 @@ class TestPackageConan(ConanFile):
             # Test glslc executable
             in_glsl_name = os.path.join(self.source_folder, "test_package.vert")
             spv_name = "test_package.spv"
-            self.run(f"glslc '{in_glsl_name}' -o {spv_name}", env="conanrun")
+            self.run(f"glslc {in_glsl_name} -o {spv_name}", env="conanrun")
