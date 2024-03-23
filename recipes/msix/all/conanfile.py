@@ -6,7 +6,6 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get
-from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -162,10 +161,13 @@ class MsixConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["runtimeobject"]
-            if is_msvc(self):
-                self.cpp_info.system_libs.append("delayimp")
-            if self.options.crypto_lib == "crypt32":
-                self.cpp_info.system_libs.extend(["bcrypt", "crypt32", "wintrust"])
+            # https://github.com/microsoft/msix-packaging/blob/v1.7/src/msix/CMakeLists.txt#L271
+            self.cpp_info.system_libs.extend(["bcrypt", "crypt32", "wintrust", "runtimeobject", "delayimp"])
             if self.options.xml_parser == "msxml6":
                 self.cpp_info.system_libs.append("msxml6")
+        if is_apple_os(self):
+            # https://github.com/microsoft/msix-packaging/blob/v1.7/src/msix/CMakeLists.txt#L364
+            self.cpp_info.frameworks.extend(["CoreFoundation", "Foundation"])
+            if not self.options.use_external_zlib:
+                # https://github.com/microsoft/msix-packaging/blob/v1.7/src/msix/CMakeLists.txt#L285
+                self.cpp_info.frameworks.append("Compression")
