@@ -6,3 +6,7 @@ patches:
   "1.7":
     - patch_file: "patches/1.7/cmake.patch"
     - patch_file: "patches/1.7/signaturevalidator.patch"
+    - patch_file: "patches/1.7/001-fix-missing-include.patch"
+      patch_description: "Fix missing #include <cstdint>"
+      patch_type: "portability"
+

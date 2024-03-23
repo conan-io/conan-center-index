@@ -56,17 +56,16 @@ class MsixConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            self.options.crypto_lib = "crypt32"
 
-        if self.options.xml_parser == "auto":
-            if self.settings.os == "Android":
-                self.options.xml_parser = "javaxml"
-            elif is_apple_os(self):
-                self.options.xml_parser = "applexml"
-            elif self.settings.os == "Windows":
-                self.options.xml_parser = "msxml6"
-            else:
-                self.options.xml_parser = "xerces"
+        if self.settings.os == "Android":
+            self.options.xml_parser = "javaxml"
+        elif is_apple_os(self):
+            self.options.xml_parser = "applexml"
+        elif self.settings.os == "Windows":
+            self.options.xml_parser = "msxml6"
+            self.options.crypto_lib = "crypt32"
+        else:
+            self.options.xml_parser = "xerces"
 
     def configure(self):
         if self.options.shared:
@@ -86,7 +85,7 @@ class MsixConan(ConanFile):
         if self.options.use_external_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.xml_parser == "xerces":
-            self.requires("xerces-c/3.2.4")
+            self.requires("xerces-c/3.2.5")
 
     def _validate_compiler_settings(self):
         compiler = self.settings.compiler
