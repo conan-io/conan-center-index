@@ -1,0 +1,83 @@
+--- premake5.lua
++++ premake5.lua
+@@ -118,6 +118,8 @@
+ 		default = "default",
+ 	}
+ 
++dofile('@CONAN_DEPS_LUA@')
++
+ --
+ -- Define the project. Put the release configuration first so it will be the
+ -- default when folks build using the makefile. That way they don't have to
+@@ -136,13 +138,8 @@
+ 		flags { "StaticRuntime", "MultiProcessorCompile" }
+ 		warnings "Extra"
+ 
+-		if not _OPTIONS["no-zlib"] then
+-			defines { "PREMAKE_COMPRESSION" }
+-		end
+-
+-		if not _OPTIONS["no-curl"] then
+-			defines { "CURL_STATICLIB", "PREMAKE_CURL"}
+-		end
++		defines { "PREMAKE_COMPRESSION" }
++		defines { "PREMAKE_CURL" }
+ 
+ 		filter { "system:macosx", "options:arch=ARM or arch=ARM64" }
+ 			buildoptions { "-arch arm64" }
+@@ -197,16 +194,9 @@
+ 		includedirs { "contrib/lua/src", "contrib/luashim" }
+ 		links       { "lua-lib" }
+ 
+-		-- optional 3rd party libraries
+-		if not _OPTIONS["no-zlib"] then
+-			includedirs { "contrib/zlib", "contrib/libzip" }
+-			links { "zip-lib", "zlib-lib" }
+-		end
+-
+-		if not _OPTIONS["no-curl"] then
+-			includedirs { "contrib/curl/include" }
+-			links { "curl-lib" }
+-		end
++		includedirs { conan_includedirs }
++		libdirs { conan_libdirs }
++		links { conan_libs }
+ 
+ 		files
+ 		{
+@@ -244,11 +234,6 @@
+ 		filter "system:linux or hurd"
+ 			links       { "dl", "rt" }
+ 
+-		filter { "system:not windows", "system:not macosx" }
+-			if not _OPTIONS["no-curl"] then
+-				links   { "mbedtls-lib" }
+-			end
+-
+ 		filter "system:macosx"
+ 			defines     { "LUA_USE_MACOSX" }
+ 			links       { "CoreServices.framework", "Foundation.framework", "Security.framework", "readline" }
+@@ -276,23 +261,6 @@
+ 		include "contrib/lua"
+ 		include "contrib/luashim"
+ 
+-		if not _OPTIONS["no-zlib"] then
+-			include "contrib/zlib"
+-			include "contrib/libzip"
+-		end
+-
+-		if not _OPTIONS["no-curl"] then
+-			include "contrib/mbedtls"
+-			include "contrib/curl"
+-		end
+-
+-	group "Binary Modules"
+-		include "binmodules/example"
+-
+-		if not _OPTIONS["no-luasocket"] then
+-			include "binmodules/luasocket"
+-		end
+-
+ --
+ -- A more thorough cleanup.
+ --

@@ -1,0 +1,83 @@
+--- premake5.lua
++++ premake5.lua
+@@ -84,6 +84,8 @@
+ 		description = "Embed scripts as bytecode instead of stripped souce code"
+ 	}
+ 
++dofile('@CONAN_DEPS_LUA@')
++
+ --
+ -- Define the project. Put the release configuration first so it will be the
+ -- default when folks build using the makefile. That way they don't have to
+@@ -102,13 +104,8 @@
+ 		flags { "StaticRuntime", "MultiProcessorCompile" }
+ 		warnings "Extra"
+ 
+-		if not _OPTIONS["no-zlib"] then
+-			defines { "PREMAKE_COMPRESSION" }
+-		end
+-		
+-		if not _OPTIONS["no-curl"] then
+-			defines { "CURL_STATICLIB", "PREMAKE_CURL"}
+-		end
++		defines { "PREMAKE_COMPRESSION" }
++		defines { "PREMAKE_CURL" }
+ 
+ 		filter { 'system:windows' }
+ 			platforms   { 'x86', 'x64' }
+@@ -139,16 +136,9 @@
+ 		includedirs { "contrib/lua/src", "contrib/luashim" }
+ 		links       { "lua-lib" }
+ 
+-		-- optional 3rd party libraries
+-		if not _OPTIONS["no-zlib"] then
+-			includedirs { "contrib/zlib", "contrib/libzip" }
+-			links { "zip-lib", "zlib-lib" }
+-		end
+-		
+-		if not _OPTIONS["no-curl"] then
+-			includedirs { "contrib/curl/include" }
+-			links { "curl-lib" }
+-		end
++		includedirs { conan_includedirs }
++		libdirs { conan_libdirs }
++		links { conan_libs }
+ 
+ 		files
+ 		{
+@@ -185,11 +175,6 @@
+ 		filter "system:linux or hurd"
+ 			links       { "dl", "rt" }
+ 
+-		filter { "system:not windows", "system:not macosx" }
+-			if not _OPTIONS["no-curl"] then
+-				links   { "mbedtls-lib" }
+-			end
+-
+ 		filter "system:macosx"
+ 			defines     { "LUA_USE_MACOSX" }
+ 			links       { "CoreServices.framework", "Foundation.framework", "Security.framework", "readline" }
+@@ -213,23 +198,6 @@
+ 	group "contrib"
+ 		include "contrib/lua"
+ 		include "contrib/luashim"
+-		
+-		if not _OPTIONS["no-zlib"] then
+-			include "contrib/zlib"
+-			include "contrib/libzip"
+-		end
+-		
+-		if not _OPTIONS["no-curl"] then
+-			include "contrib/mbedtls"
+-			include "contrib/curl"
+-		end		
+-
+-	group "Binary Modules"
+-		include "binmodules/example"
+-		
+-		if not _OPTIONS["no-luasocket"] then
+-			include "binmodules/luasocket"
+-		end
+ 
+ --
+ -- A more thorough cleanup.

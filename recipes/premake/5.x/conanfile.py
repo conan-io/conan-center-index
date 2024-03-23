@@ -1,15 +1,12 @@
-import glob
 import os
-import re
-import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rmdir, load, save
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rmdir, save
+from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, check_min_vs
+from conan.tools.microsoft import MSBuildToolchain, is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -51,7 +48,6 @@ class PremakeConan(ConanFile):
     def requirements(self):
         self.requires("libcurl/[>=7.78.0 <9]")
         self.requires("libzip/1.10.1")
-        self.requires("mbedtls/3.5.2")
         self.requires("zlib/1.3.1")
         if self.settings.os != "Windows":
             self.requires("util-linux-libuuid/2.39.2")
@@ -65,31 +61,11 @@ class PremakeConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
-    def _ide_version(self):
-        compiler_version = str(self.settings.compiler.version)
-        if str(self.settings.compiler) == "Visual Studio":
-            return {"17": "2022",
-                    "16": "2019",
-                    "15": "2017",
-                    "14": "2015",
-                    "12": "2013"}.get(compiler_version)
-        else:
-            return {"193": "2022",
-                    "192": "2019",
-                    "191": "2017",
-                    "190": "2015",
-                    "180": "2013"}.get(compiler_version)
-
-    @property
-    def _msvc_build_dir(self):
-        return os.path.join(self.source_folder, "build", f"vs{self._ide_version}")
-
-    @property
     def _gmake_platform(self):
         return {
             "FreeBSD": "bsd",
             "Windows": "windows",
-            "Linux": "unix",
+            "Linux": "linux",
             "Macos": "macosx",
         }[str(self.settings.os)]
 
@@ -105,10 +81,13 @@ class PremakeConan(ConanFile):
                 "x86": "x86",
                 "x86_64": "x64",
             }[str(self.settings.arch)]
-            config = f"{build_type}_{arch}"
+            return f"{build_type}_{arch}"
         else:
-            config = build_type
-        return config
+            return build_type
+
+    @property
+    def _conan_deps_lua(self):
+        return os.path.join(self.generators_folder, "conan_paths.lua")
 
     def generate(self):
         if is_msvc(self):
@@ -118,51 +97,36 @@ class PremakeConan(ConanFile):
             tc = AutotoolsToolchain(self)
             tc.make_args = ["verbose=1", f"config={self._gmake_config}"]
             tc.generate()
-            deps = AutotoolsDeps(self)
-            deps.generate()
+
+        deps = list(reversed(self.dependencies.host.topological_sort.values()))
+        deps = [dep.cpp_info.aggregated_components() for dep in deps]
+        includedirs = ', '.join(f'"{p}"'.replace("\\", "/") for dep in deps for p in dep.includedirs)
+        libdirs = ', '.join(f'"{p}"'.replace("\\", "/") for dep in deps for p in dep.libdirs)
+        libs = ', '.join(f'"{lib}"' for dep in deps for lib in dep.libs + dep.system_libs)
+        save(self, self._conan_deps_lua,
+             "conan_includedirs = {%s}\nconan_libdirs = {%s}\nconan_libs = {%s}\n" %
+             (includedirs, libdirs, libs))
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+
         if self.options.get_safe("lto", None) is False:
-            for fn in glob.glob(os.path.join(self._gmake_build_dir, "*.make")):
-                replace_in_file(self, fn, "-flto", "", strict=False)
-        if check_min_vs(self, 193, raise_invalid=False):
-            # Create VS 2022 project directory based on VS 2019 one
-            if "alpha" in str(self.version):
-                shutil.move(os.path.join(self.source_folder, "build", "vs2019"),
-                            os.path.join(self.source_folder, "build", "vs2022"))
-                for vcxproj in glob.glob(os.path.join(self.source_folder, "build", "vs2022", "*.vcxproj")):
-                    replace_in_file(self, vcxproj, "v142", "v143")
+            replace_in_file(self, os.path.join(self.source_folder, "premake5.lua"),
+                            '"LinkTimeOptimization"', "")
 
         # Unvendor
         for lib in ["curl", "libzip", "mbedtls", "zlib"]:
             rmdir(self, os.path.join(self.source_folder, "contrib", lib))
-        replace_in_file(self, os.path.join(self._gmake_build_dir, "Makefile"),
-                        "contrib: curl-lib lua-lib luashim-lib mbedtls-lib zip-lib zlib-lib",
-                        "contrib: lua-lib luashim-lib")
-        replace_in_file(self, os.path.join(self._gmake_build_dir, "Makefile"),
-                        "Premake5: lua-lib zip-lib zlib-lib curl-lib mbedtls-lib",
-                        "Premake5: lua-lib")
-        content = load(self, os.path.join(self._gmake_build_dir, "Premake5.make"))
-        # bin/Release/liblua-lib.a -> -llua
-        content = re.sub(r"\bbin/(?:Release|Debug)/lib(\w+)-lib.a\b",
-                         lambda m: f"-l{m[1]}" if m[1] != "lua" else m[0], content)
-        content = re.sub(r" -I../../contrib/(\S+)",
-                         lambda m: "" if "lua" not in m[1] else m[0], content)
-        content = content.replace(" $(LDDEPS)", "")
-        content = content.replace("-lzlib", "-lz")
-        save(self, os.path.join(self._gmake_build_dir, "Premake5.make"), content)
+
+        # Inject Conan dependencies
+        replace_in_file(self, os.path.join(self.source_folder, "premake5.lua"),
+                        "@CONAN_DEPS_LUA@", self._conan_deps_lua.replace("\\", "/"))
 
     def build(self):
         self._patch_sources()
-        if is_msvc(self):
-            with chdir(self, self._msvc_build_dir):
-                msbuild = MSBuild(self)
-                msbuild.build(sln="Premake5.sln")
-        else:
-            with chdir(self, self._gmake_build_dir):
-                autotools = Autotools(self)
-                autotools.make(target="Premake5")
+        make = "nmake" if is_msvc(self) else "make"
+        with chdir(self, self.source_folder):
+            self.run(f"{make} -f Bootstrap.mak {self._gmake_platform}")
 
     def package(self):
         copy(self, "LICENSE.txt",
