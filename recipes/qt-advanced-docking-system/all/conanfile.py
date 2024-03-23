@@ -69,10 +69,8 @@ class QtADS(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # 6.6 recipe is currently broken on Windows due to missing d3d12 system lib:
-        # https://github.com/conan-io/conan-center-index/pull/21676
-        self.requires("qt/6.5.3", transitive_headers=True, transitive_libs=True)
-        self.requires("libpng/1.6.40")
+        self.requires("qt/6.7.0", transitive_headers=True, transitive_libs=True)
+        self.requires("libpng/[>=1.6 <2]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
