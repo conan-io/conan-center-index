@@ -1,7 +1,4 @@
-import pathlib
-
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 
@@ -28,10 +25,6 @@ class TestPackageConan(ConanFile):
         tc.variables["OPENASSETIOTEST_GLIBCXX_USE_CXX11_ABI"] = self.settings.get_safe("compiler.libcxx") == "libstdc++11"
         tc.variables["OPENASSETIOTEST_ENABLE_PYTHON"] = self.dependencies["openassetio"].options.with_python
 
-        if self.dependencies["openassetio"].options.with_python:
-            if is_msvc(self):
-                tc.variables["Python_LIBRARY"] = self._python_windows_lib
-
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -45,12 +38,3 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             cmake = CMake(self)
             cmake.test()
-
-    @property
-    def _python_windows_lib(self):
-        pth = pathlib.Path(
-            self.dependencies.build["cpython"].package_folder,
-            self.dependencies.build["cpython"].cpp_info.components["embed"].libdir,
-            self.dependencies.build["cpython"].cpp_info.components["embed"].libs[0])
-        pth = pth.with_suffix(".lib")
-        return pth.as_posix()
