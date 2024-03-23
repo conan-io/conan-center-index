@@ -43,7 +43,7 @@ class NSSConan(ConanFile):
 
     def requirements(self):
         self.requires("nspr/4.35", transitive_headers=True, transitive_libs=True)
-        self.requires("sqlite3/3.44.2", run=True)
+        self.requires("sqlite3/3.45.2", run=True)
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
@@ -68,7 +68,7 @@ class NSSConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         if self.settings.os == "Windows":
-            self.tool_requires("mozilla-build/3.3")
+            self.tool_requires("mozilla-build/4.0.2")
         if cross_building(self):
             self.tool_requires("sqlite3/<host_version>")
 
