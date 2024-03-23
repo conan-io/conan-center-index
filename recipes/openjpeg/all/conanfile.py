@@ -10,12 +10,11 @@ required_conan_version = ">=1.54.0"
 
 class OpenjpegConan(ConanFile):
     name = "openjpeg"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "OpenJPEG is an open-source JPEG 2000 codec written in C language."
-    topics = ("jpeg2000", "jp2", "openjpeg", "image", "multimedia", "format", "graphics")
-    homepage = "https://github.com/uclouvain/openjpeg"
     license = "BSD-2-Clause"
-
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/uclouvain/openjpeg"
+    topics = ("jpeg2000", "jp2", "openjpeg", "image", "multimedia", "format", "graphics")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -89,6 +88,8 @@ class OpenjpegConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", self._openjpeg_subdir))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake", self._openjpeg_subdir))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_vars_rel_path)
         )

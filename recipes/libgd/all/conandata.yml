@@ -48,7 +48,7 @@ patches:
     - patch_file: "patches/2.3.x-png-msvc.patch"
       patch_description: "support png on msvc"
       patch_type: "portability"
-    - patch_file: "patches/2.3.0-use-cci.patch"
+    - patch_file: "patches/2.3.1-use-cci.patch"
       patch_description: "use cci's package"
       patch_type: "conan"
   "2.3.0":
