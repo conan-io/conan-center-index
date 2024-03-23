@@ -55,10 +55,6 @@ class PremakeConan(ConanFile):
             self.requires("util-linux-libuuid/2.39.2")
         # Lua sources are required during the build and cannot be unvendored
 
-    def validate(self):
-        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross-building not implemented")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -103,6 +99,9 @@ class PremakeConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "premake5.lua"),
                         "@CONAN_DEPS_LUA@", self._conan_deps_lua.replace("\\", "/"))
 
+        replace_in_file(self, os.path.join(self.source_folder, "Bootstrap.mak"),
+                        "$(PLATFORM:x86=win32)", "$(VS_ARCH)")
+
     @property
     def _os_target(self):
         return {
@@ -121,12 +120,30 @@ class PremakeConan(ConanFile):
             "armv8": "ARM64",
         }[str(self.settings.arch)]
 
+    @property
+    def _vs_ide_year(self):
+        compiler_version = str(self.settings.compiler.version)
+        if str(self.settings.compiler) == "Visual Studio":
+            return {"17": "2022",
+                    "16": "2019",
+                    "15": "2017",
+                    "14": "2015",
+                    "12": "2013"}.get(compiler_version)
+        else:
+            return {"193": "2022",
+                    "192": "2019",
+                    "191": "2017",
+                    "190": "2015",
+                    "180": "2013"}.get(compiler_version)
+
     def build(self):
         self._patch_sources()
         make = "nmake" if is_msvc(self) else "make"
         config = "debug" if self.settings.build_type == "Debug" else "release"
+        msdev = f"vs{self._vs_ide_year}" if is_msvc(self) else ""
+        vs_arch = "x86" if self.settings.arch == "x86" else "x64"
         with chdir(self, self.source_folder):
-            self.run(f"{make} -f Bootstrap.mak {self._os_target} PLATFORM={self._arch} CONFIG={config}")
+            self.run(f"{make} -f Bootstrap.mak {self._os_target} PLATFORM={self._arch} CONFIG={config} MSDEV={msdev} VS_ARCH={vs_arch}")
 
     def package(self):
         copy(self, "LICENSE.txt",
