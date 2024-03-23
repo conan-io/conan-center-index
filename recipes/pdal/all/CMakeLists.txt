@@ -14,6 +14,9 @@ macro(custom_find_package name)
 endmacro()
 
 # Unvendored dependencies
+find_package(h3 REQUIRED CONFIG)
+set(PDAL_H3_LIB_NAME h3::h3)
+
 find_package(Eigen3 REQUIRED CONFIG)
 link_libraries(Eigen3::Eigen)
 

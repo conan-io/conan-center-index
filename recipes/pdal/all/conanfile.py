@@ -25,14 +25,12 @@ class PdalConan(ConanFile):
     options = {
         "with_unwind": [True, False],
         "with_xml": [True, False],
-        "with_zlib": [True, False],
         "with_lzma": [True, False],
         "with_zstd": [True, False],
     }
     default_options = {
         "with_unwind": False,
         "with_xml": True,
-        "with_zlib": True,
         "with_lzma": True,
         "with_zstd": True,
     }
@@ -75,13 +73,11 @@ class PdalConan(ConanFile):
         self.requires("proj/9.3.1", transitive_headers=True, transitive_libs=True)
         self.requires("rapidxml/1.13", transitive_headers=True) # for arbiter
         self.requires("utfcpp/4.0.4")
-        self.requires("zlib/[>=1.2.11 <2]") # for arbiter
+        self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True, transitive_libs=True) # for arbiter
         if self.options.with_xml:
             self.requires("libxml2/2.12.5", transitive_headers=True, transitive_libs=True)
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
-        if self.options.with_zlib:
-            self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True, transitive_libs=True)
         if self.options.with_lzma:
             self.requires("xz_utils/5.4.5")
         if self.options.get_safe("with_unwind"):
@@ -115,19 +111,20 @@ class PdalConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.options.shared and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration("pdal shared doesn't support MT runtime with Visual Studio")
+        if is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration("pdal shared build doesn't support MT runtime with Visual Studio")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["WITH_TESTS"] = False
+        tc.variables["PDAL_HAVE_HDF5"] = False
         tc.variables["PDAL_HAVE_ZSTD"] = self.options.with_zstd
-        tc.variables["PDAL_HAVE_ZLIB"] = self.options.with_zlib
+        tc.variables["PDAL_HAVE_ZLIB"] = True
         tc.variables["PDAL_HAVE_LZMA"] = self.options.with_lzma
-        # https://github.com/PDAL/PDAL/blob/2.6.0/cmake/options.cmake
+        tc.variables["PDAL_HAVE_LIBXML2"] = self.options.with_xml
+        # https://github.com/PDAL/PDAL/blob/2.7.0/cmake/options.cmake
         tc.variables["BUILD_PLUGIN_CPD"] = False
         tc.variables["BUILD_PLUGIN_DRACO"] = False
         tc.variables["BUILD_PLUGIN_E57"] = False
@@ -190,6 +187,8 @@ class PdalConan(ConanFile):
              "#include <nlohmann/json.hpp>\nnamespace NL = nlohmann;")
         # Unvendor h3
         rmdir(self, os.path.join(self.source_folder, "vendor", "h3"))
+        save(self, os.path.join(self.source_folder, "vendor", "h3", "CMakeLists.txt"), "")
+        replace_in_file(self, top_cmakelists, "H3_PREFIX=PDALH3", "")
         # Unvendor eigen
         rmdir(self, os.path.join(self.source_folder, "vendor", "eigen"))
         # Unvendor nanoflann
