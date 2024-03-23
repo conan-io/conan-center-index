@@ -83,7 +83,7 @@ class PdalConan(ConanFile):
         self.requires("proj/9.3.1", transitive_headers=True, transitive_libs=True)
         self.requires("utfcpp/4.0.4")
         if self.options.with_xml:
-            self.requires("libxml2/2.12.4", transitive_headers=True, transitive_libs=True)
+            self.requires("libxml2/2.12.5", transitive_headers=True, transitive_libs=True)
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_zlib:
