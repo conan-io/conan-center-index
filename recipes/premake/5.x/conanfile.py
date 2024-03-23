@@ -4,9 +4,8 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rmdir, save
-from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import MSBuildToolchain, is_msvc
+from conan.tools.microsoft import is_msvc, VCVars
 
 required_conan_version = ">=1.53.0"
 
@@ -61,42 +60,13 @@ class PremakeConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
-    def _gmake_platform(self):
-        return {
-            "FreeBSD": "bsd",
-            "Windows": "windows",
-            "Linux": "linux",
-            "Macos": "macosx",
-        }[str(self.settings.os)]
-
-    @property
-    def _gmake_build_dir(self):
-        return os.path.join(self.source_folder, "build", f"gmake2.{self._gmake_platform}")
-
-    @property
-    def _gmake_config(self):
-        build_type = "debug" if self.settings.build_type == "Debug" else "release"
-        if self.settings.os == "Windows":
-            arch = {
-                "x86": "x86",
-                "x86_64": "x64",
-            }[str(self.settings.arch)]
-            return f"{build_type}_{arch}"
-        else:
-            return build_type
-
-    @property
     def _conan_deps_lua(self):
         return os.path.join(self.generators_folder, "conan_paths.lua")
 
     def generate(self):
         if is_msvc(self):
-            tc = MSBuildToolchain(self)
-            tc.generate()
-        else:
-            tc = AutotoolsToolchain(self)
-            tc.make_args = ["verbose=1", f"config={self._gmake_config}"]
-            tc.generate()
+            vcvars = VCVars(self)
+            vcvars.generate()
 
         deps = list(reversed(self.dependencies.host.topological_sort.values()))
         deps = [dep.cpp_info.aggregated_components() for dep in deps]
@@ -128,11 +98,29 @@ class PremakeConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "premake5.lua"),
                         "@CONAN_DEPS_LUA@", self._conan_deps_lua.replace("\\", "/"))
 
+    @property
+    def _os_target(self):
+        return {
+            "FreeBSD": "bsd",
+            "Windows": "windows",
+            "Linux": "linux",
+            "Macos": "macosx",
+        }[str(self.settings.os)]
+
+    @property
+    def _arch(self):
+        return {
+            "x86": "x86",
+            "x86_64": "x86_64",
+            "armv7": "ARM",
+            "armv8": "ARM64",
+        }[str(self.settings.arch)]
+
     def build(self):
         self._patch_sources()
         make = "nmake" if is_msvc(self) else "make"
         with chdir(self, self.source_folder):
-            self.run(f"{make} -f Bootstrap.mak {self._gmake_platform}")
+            self.run(f"{make} -f Bootstrap.mak {self._os_target} PLATFORM={self._arch}")
 
     def package(self):
         copy(self, "LICENSE.txt",
