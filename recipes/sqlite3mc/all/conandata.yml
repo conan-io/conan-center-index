@@ -1,4 +1,16 @@
 sources:
+  "1.8.4":
+    url: "https://github.com/utelle/SQLite3MultipleCiphers/archive/refs/tags/v1.8.4.tar.gz"
+    sha256: "453e1938a02c91796a013169d56f746f153d7c7a77b59894bf8462b341a343ca"
+  "1.8.3":
+    url: "https://github.com/utelle/SQLite3MultipleCiphers/archive/refs/tags/v1.8.3.tar.gz"
+    sha256: "1a9c26082068ee36c33b0a4e061d013db345ad170bab0ab00c8dda2c7c96561a"
+  "1.8.2":
+    url: "https://github.com/utelle/SQLite3MultipleCiphers/archive/refs/tags/v1.8.2.tar.gz"
+    sha256: "c349f45505641a3ee3e5faa4498a18317b65697e9a3cbfbe41a6612e44389c55"
+  "1.8.1":
+    url: "https://github.com/utelle/SQLite3MultipleCiphers/archive/refs/tags/v1.8.1.tar.gz"
+    sha256: "44215d5812ec2cfa1a842d9aae2908be0b14dce4231bc3243394b24b3affb78a"
   "1.8.0":
     url: "https://github.com/utelle/SQLite3MultipleCiphers/archive/refs/tags/v1.8.0.tar.gz"
     sha256: "13D9B939BEF7C7371D58A3874F83B18CF330EB2171205B3680ACDDB2215BE0E5"
