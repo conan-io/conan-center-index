@@ -65,8 +65,8 @@ class VlfeatConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_THREADS"] = self.options.threads
         tc.variables["ENABLE_OPENMP"] = self.options.openmp
-        tc.variables["ENABLE_SSE2"] = self.options.get_safe("sse2")
-        tc.variables["ENABLE_AVX"] = self.options.get_safe("avx")
+        tc.variables["ENABLE_SSE2"] = self.options.get_safe("sse2", False)
+        tc.variables["ENABLE_AVX"] = self.options.get_safe("avx", False)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
