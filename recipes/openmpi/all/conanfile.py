@@ -66,7 +66,7 @@ class OpenMPIConan(ConanFile):
         # transitive_headers=True is not needed for any dependencies.
         self.requires("zlib/[>=1.2.11 <2]")
         if not is_apple_os(self):
-            self.requires("libnl/3.8.0")
+            self.requires("libnl/3.9.0")
         if self.options.external_hwloc:
             self.requires("hwloc/2.9.3")
         else:
