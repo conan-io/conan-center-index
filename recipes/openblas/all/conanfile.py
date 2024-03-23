@@ -101,7 +101,8 @@ class OpenblasConan(ConanFile):
 
         tc = CMakeToolchain(self)
 
-        tc.cache_variables["TARGET"] = str(self.settings.arch).upper()
+        if cross_building(self, skip_x64_x86=True):
+            tc.cache_variables["TARGET"] = str(self.settings.arch).upper()
         tc.cache_variables["NOFORTRAN"] = not self.options.build_lapack
         # This checks explicit user-specified fortran compiler
         if self.options.build_lapack:

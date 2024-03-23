@@ -2,49 +2,49 @@ sources:
   "0.3.26":
     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.26.tar.gz"
     sha256: "4e6e4f5cb14c209262e33e6816d70221a2fe49eb69eaf0a06f065598ac602c68"
-  "0.3.25":
-    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.25.tar.gz"
-    sha256: "4c25cb30c4bb23eddca05d7d0a85997b8db6144f5464ba7f8c09ce91e2f35543"
-  "0.3.24":
-    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.24.tar.gz"
-    sha256: "ceadc5065da97bd92404cac7254da66cc6eb192679cf1002098688978d4d5132"
-  "0.3.20":
-    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.20.tar.gz"
-    sha256: "8495c9affc536253648e942908e88e097f2ec7753ede55aca52e5dead3029e3c"
-  "0.3.17":
-    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.17.tar.gz"
-    sha256: "df2934fa33d04fd84d839ca698280df55c690c86a5a1133b3f7266fce1de279f"
-  "0.3.15":
-    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.15.tar.gz"
-    sha256: "30a99dec977594b387a17f49904523e6bc8dd88bd247266e83485803759e4bbe"
-  "0.3.13":
-    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz"
-    sha256: "79197543b17cc314b7e43f7a33148c308b0807cd6381ee77f77e15acf3e6459e"
-  "0.3.12":
-    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.12.tar.gz"
-    sha256: "65a7d3a4010a4e3bd5c0baa41a234797cd3a1735449a4a5902129152601dc57b"
-  "0.3.10":
-    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.10.tar.gz"
-    sha256: "0484d275f87e9b8641ff2eecaa9df2830cbe276ac79ad80494822721de6e1693"
+#   "0.3.25":
+#     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.25.tar.gz"
+#     sha256: "4c25cb30c4bb23eddca05d7d0a85997b8db6144f5464ba7f8c09ce91e2f35543"
+#   "0.3.24":
+#     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.24.tar.gz"
+#     sha256: "ceadc5065da97bd92404cac7254da66cc6eb192679cf1002098688978d4d5132"
+#   "0.3.20":
+#     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.20.tar.gz"
+#     sha256: "8495c9affc536253648e942908e88e097f2ec7753ede55aca52e5dead3029e3c"
+#   "0.3.17":
+#     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.17.tar.gz"
+#     sha256: "df2934fa33d04fd84d839ca698280df55c690c86a5a1133b3f7266fce1de279f"
+#   "0.3.15":
+#     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.15.tar.gz"
+#     sha256: "30a99dec977594b387a17f49904523e6bc8dd88bd247266e83485803759e4bbe"
+#   "0.3.13":
+#     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz"
+#     sha256: "79197543b17cc314b7e43f7a33148c308b0807cd6381ee77f77e15acf3e6459e"
+#   "0.3.12":
+#     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.12.tar.gz"
+#     sha256: "65a7d3a4010a4e3bd5c0baa41a234797cd3a1735449a4a5902129152601dc57b"
+#   "0.3.10":
+#     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.10.tar.gz"
+#     sha256: "0484d275f87e9b8641ff2eecaa9df2830cbe276ac79ad80494822721de6e1693"
 
-patches:
-  "0.3.17":
-    - patch_file: "patches/0001-treat-armv8-CMAKE_SYSTEM_PROCESSOR-as-arm64.patch"
-      patch_description: "treat armv8 CMAKE_SYSTEM_PROCESSOR as arm64"
-      patch_source: "https://github.com/xianyi/OpenBLAS/pull/4142"
-      patch_type: "bugfix"
-  "0.3.15":
-    - patch_file: "patches/0001-treat-armv8-CMAKE_SYSTEM_PROCESSOR-as-arm64.patch"
-      patch_description: "treat armv8 CMAKE_SYSTEM_PROCESSOR as arm64"
-      patch_source: "https://github.com/xianyi/OpenBLAS/pull/4142"
-      patch_type: "bugfix"
-  "0.3.13":
-    - patch_file: "patches/0001-treat-armv8-CMAKE_SYSTEM_PROCESSOR-as-arm64.patch"
-      patch_description: "treat armv8 CMAKE_SYSTEM_PROCESSOR as arm64"
-      patch_source: "https://github.com/xianyi/OpenBLAS/pull/4142"
-      patch_type: "bugfix"
-  "0.3.12":
-    - patch_file: "patches/0001-treat-armv8-CMAKE_SYSTEM_PROCESSOR-as-arm64.patch"
-      patch_description: "treat armv8 CMAKE_SYSTEM_PROCESSOR as arm64"
-      patch_source: "https://github.com/xianyi/OpenBLAS/pull/4142"
-      patch_type: "bugfix"
+# patches:
+#   "0.3.17":
+#     - patch_file: "patches/0001-treat-armv8-CMAKE_SYSTEM_PROCESSOR-as-arm64.patch"
+#       patch_description: "treat armv8 CMAKE_SYSTEM_PROCESSOR as arm64"
+#       patch_source: "https://github.com/xianyi/OpenBLAS/pull/4142"
+#       patch_type: "bugfix"
+#   "0.3.15":
+#     - patch_file: "patches/0001-treat-armv8-CMAKE_SYSTEM_PROCESSOR-as-arm64.patch"
+#       patch_description: "treat armv8 CMAKE_SYSTEM_PROCESSOR as arm64"
+#       patch_source: "https://github.com/xianyi/OpenBLAS/pull/4142"
+#       patch_type: "bugfix"
+#   "0.3.13":
+#     - patch_file: "patches/0001-treat-armv8-CMAKE_SYSTEM_PROCESSOR-as-arm64.patch"
+#       patch_description: "treat armv8 CMAKE_SYSTEM_PROCESSOR as arm64"
+#       patch_source: "https://github.com/xianyi/OpenBLAS/pull/4142"
+#       patch_type: "bugfix"
+#   "0.3.12":
+#     - patch_file: "patches/0001-treat-armv8-CMAKE_SYSTEM_PROCESSOR-as-arm64.patch"
+#       patch_description: "treat armv8 CMAKE_SYSTEM_PROCESSOR as arm64"
+#       patch_source: "https://github.com/xianyi/OpenBLAS/pull/4142"
+#       patch_type: "bugfix"
