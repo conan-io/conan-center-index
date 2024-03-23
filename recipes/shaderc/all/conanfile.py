@@ -47,7 +47,7 @@ class ShadercConan(ConanFile):
         return {
             # TODO: bump me once newer versions are available on CCI
             # "2023.6": "1.3.261.1",
-            "2023.6": "1.3.243.0",
+            "2023.6": "1.3.239.0", # FIXME: should be "1.3.243.0",
             "2021.1": "1.3.224.0",
         }[str(self.version)]
 
