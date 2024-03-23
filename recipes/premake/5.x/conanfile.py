@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.layout import basic_layout
@@ -72,7 +73,9 @@ class PremakeConan(ConanFile):
         deps = [dep.cpp_info.aggregated_components() for dep in deps]
         includedirs = ', '.join(f'"{p}"'.replace("\\", "/") for dep in deps for p in dep.includedirs)
         libdirs = ', '.join(f'"{p}"'.replace("\\", "/") for dep in deps for p in dep.libdirs)
-        libs = ', '.join(f'"{lib}"' for dep in deps for lib in dep.libs + dep.system_libs)
+        libs = ', '.join([f'"{lib}"' for dep in deps for lib in dep.libs + dep.system_libs])
+        if is_apple_os(self):
+            libs += ''.join(f', "{lib}.framework"' for dep in deps for lib in dep.frameworks)
         save(self, self._conan_deps_lua,
              "conan_includedirs = {%s}\nconan_libdirs = {%s}\nconan_libs = {%s}\n" %
              (includedirs, libdirs, libs))
@@ -137,6 +140,9 @@ class PremakeConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
+
+        # https://github.com/premake/premake-core/blob/v5.0.0-beta2/premake5.lua#L232-L271
+
 
         # TODO: Legacy, to be removed on Conan 2.0
         bindir = os.path.join(self.package_folder, "bin")
