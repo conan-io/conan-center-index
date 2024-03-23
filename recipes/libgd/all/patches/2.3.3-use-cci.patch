@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 6b3e5b3..2536fc6 100644
+index 6b3e5b3..22018e9 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -134,7 +134,7 @@ else (USE_EXT_GD)
+@@ -134,15 +134,15 @@ else (USE_EXT_GD)
  	endif (ENABLE_ICONV)
  
  	IF (ENABLE_WEBP)
@@ -11,6 +11,16 @@ index 6b3e5b3..2536fc6 100644
  	ENDIF (ENABLE_WEBP)
  
  	IF (ENABLE_HEIF)
+-		FIND_PACKAGE(HEIF REQUIRED)
++		FIND_PACKAGE(libheif REQUIRED)
+ 	ENDIF (ENABLE_HEIF)
+ 
+ 	IF (ENABLE_AVIF)
+-		FIND_PACKAGE(libavif 0.8.2 REQUIRED CONFIG)
++		FIND_PACKAGE(libavif REQUIRED CONFIG)
+ 		SET(HAVE_LIBAVIF 1)
+ 		SET(AVIF_LIBRARIES avif)
+ 		SET(AVIF_FOUND 1)
 @@ -169,7 +169,7 @@ else (USE_EXT_GD)
  	endif (ENABLE_FREETYPE)
  
@@ -29,7 +39,7 @@ index 6b3e5b3..2536fc6 100644
  		SET(HAVE_LIBWEBP 1)
  	ENDIF(WEBP_FOUND)
  
-@@ -223,7 +223,7 @@ else (USE_EXT_GD)
+@@ -223,12 +223,12 @@ else (USE_EXT_GD)
  	ENDIF(LIQ_FOUND)
  
  	IF(XPM_FOUND)
@@ -38,6 +48,12 @@ index 6b3e5b3..2536fc6 100644
  		SET(HAVE_LIBXPM 1)
  		LIST(APPEND PKG_REQUIRES_PRIVATES xpm)
  	ENDIF(XPM_FOUND)
+ 
+-	IF(JPEG_FOUND)
++	IF(ENABLE_JPEG AND JPEG_FOUND)
+ 		INCLUDE_DIRECTORIES(${JPEG_INCLUDE_DIR})
+ 		SET(HAVE_LIBJPEG 1)
+ 		LIST(APPEND PKG_REQUIRES_PRIVATES libjpeg)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
 index 3b271a8..55a8095 100644
 --- a/src/CMakeLists.txt
