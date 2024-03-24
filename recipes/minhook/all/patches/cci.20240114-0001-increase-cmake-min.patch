@@ -7,7 +7,7 @@ index d45414e..533dac6 100644
  #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 -cmake_minimum_required(VERSION 3.0)
-+cmake_minimum_required(VERSION 3.5)
++cmake_minimum_required(VERSION 3.15)
 
  project(minhook LANGUAGES C)
 
