@@ -189,7 +189,7 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
-            self.requires("arrow/14.0.2")
+            self.requires("arrow/15.0.0")
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
@@ -207,10 +207,10 @@ class GdalConan(ConanFile):
         if self.options.with_ecw:
             self.requires("libecwj2/3.3")
         if self.options.with_expat:
-            self.requires("expat/2.5.0")
+            self.requires("expat/2.6.2")
         if self.options.with_exr:
-            self.requires("openexr/3.2.1")
-            self.requires("imath/3.1.9")
+            self.requires("openexr/3.2.3")
+            self.requires("imath/3.1.10")
         if self.options.with_freexl:
             self.requires("freexl/2.0.0")
         if self.options.with_geos:
@@ -228,7 +228,7 @@ class GdalConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.1")
+            self.requires("libjpeg-turbo/3.0.2")
         if self.options.with_jxl:
             self.requires("libjxl/0.6.1")
         if self.options.with_kea:
@@ -246,7 +246,7 @@ class GdalConan(ConanFile):
         if self.options.with_libkml:
             self.requires("libkml/1.3.0")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/5.6.1")
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_mongocxx:
@@ -262,21 +262,20 @@ class GdalConan(ConanFile):
         if self.options.with_opencl:
             self.requires("opencl-icd-loader/2023.12.14")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.5.0")
+            self.requires("openjpeg/2.5.2")
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_pcre:
             self.requires("pcre/8.45")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.42")
+            self.requires("pcre2/10.43")
         # TODO: pdfium recipe needs to be compatible with https://github.com/rouault/pdfium_build_gdal_3_8
         # if self.options.with_pdfium:
         #     self.requires("pdfium/95.0.4629")
         if self.options.with_pg:
-            # libpq 15+ is not supported
-            self.requires("libpq/14.9")
+            self.requires("libpq/15.4")
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_podofo:
             self.requires("podofo/0.9.7")
         if self.options.with_poppler:
@@ -286,7 +285,7 @@ class GdalConan(ConanFile):
         if self.options.with_rasterlite2:
             self.requires("librasterlite2/1.1.0-beta1")
         if self.options.with_spatialite:
-            self.requires("libspatialite/5.0.1")
+            self.requires("libspatialite/5.1.0")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.44.2")
         if self.options.with_tiledb:
@@ -296,7 +295,7 @@ class GdalConan(ConanFile):
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.5")
         if self.options.with_xml2:
-            self.requires("libxml2/2.12.3")
+            self.requires("libxml2/2.12.5")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         # Use of external shapelib is not recommended and is currently broken.
