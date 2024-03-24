@@ -203,7 +203,7 @@ class OpenCVConan(ConanFile):
         "with_msmf": True,
         "with_msmf_dxva": True,
         # objdetect module options
-        "with_quirc": True,
+        "with_quirc": False,
         # videoio module options
         "with_ffmpeg": True,
         "with_v4l": False,
@@ -350,6 +350,9 @@ class OpenCVConan(ConanFile):
             # in a big dependency graph
             if not self._has_with_wayland_option:
                 self.options.with_gtk = True
+
+        if Version(self.version) >= "4.9":
+            self.options.with_quirc = True
 
     @property
     def _opencv_modules(self):
@@ -1119,7 +1122,7 @@ class OpenCVConan(ConanFile):
         elif self.options.get_safe("with_jpeg2000") == "openjpeg":
             self.requires("openjpeg/2.5.2")
         if self.options.get_safe("with_png"):
-            self.requires("libpng/1.6.43")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.get_safe("with_openexr"):
             self.requires("openexr/3.2.3")
         if self.options.get_safe("with_tiff"):
@@ -1237,6 +1240,10 @@ class OpenCVConan(ConanFile):
 
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "elseif(EMSCRIPTEN)", "elseif(QNXNTO)\nelseif(EMSCRIPTEN)")
+
+        if self.options.with_quirc:
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(3rdparty/quirc)", "# add_subdirectory(3rdparty/quirc)")
+
 
         ## Fix link to several dependencies
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
@@ -1411,10 +1418,11 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_OPENNI"] = False
         tc.variables["WITH_OPENNI2"] = False
         tc.variables["WITH_OPENVX"] = False
+        tc.variables["WITH_CAROTENE"] = False
         tc.variables["WITH_PLAIDML"] = False
         tc.variables["WITH_PVAPI"] = False
         tc.variables["WITH_QT"] = self.options.get_safe("with_qt", False)
-        tc.variables["WITH_QUIRC"] = False
+        tc.variables["WITH_QUIRC"] = self.options.get_safe("with_quirc", False)
         tc.variables["WITH_V4L"] = self.options.get_safe("with_v4l", False)
         tc.variables["WITH_VA"] = False
         tc.variables["WITH_VA_INTEL"] = False

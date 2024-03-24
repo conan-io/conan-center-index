@@ -37,6 +37,9 @@ class FixedContainersConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def requirements(self):
+        self.requires("magic_enum/0.9.3", transitive_headers=True)
+
     def package_id(self):
         self.info.clear()
 
@@ -64,3 +67,6 @@ class FixedContainersConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+
+        self.cpp_info.set_property("cmake_file_name", "fixed_containers")
+        self.cpp_info.set_property("cmake_target_name", "fixed_containers::fixed_containers")
