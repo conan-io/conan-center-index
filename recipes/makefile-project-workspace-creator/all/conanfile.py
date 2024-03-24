@@ -4,7 +4,7 @@ from conan import ConanFile, conan_version
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class MPCGeneratorConan(ConanFile):
@@ -27,8 +27,7 @@ class MPCGeneratorConan(ConanFile):
             self.tool_requires("strawberryperl/5.32.1.1", **kwargs)
 
     def package_id(self):
-        del self.info.settings.compiler
-        del self.info.settings.build_type
+        self.info.clear()
 
     def build(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -49,7 +48,6 @@ class MPCGeneratorConan(ConanFile):
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.buildenv_info.define("MPC_ROOT", bin_path)
-        self.runenv_info.define("MPC_ROOT", bin_path)
 
         self.env_info.PATH.append(bin_path)
         self.env_info.MPC_ROOT = bin_path
