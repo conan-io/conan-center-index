@@ -50,12 +50,6 @@ class GTLabLoggingConan(ConanFile):
         }.get(self._min_cppstd, {})
 
     def validate(self):
-        """
-        Adapted from the gtest recipe
-
-        Make sure that C++ 14 is available
-        """
-
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
