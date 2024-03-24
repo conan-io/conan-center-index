@@ -108,6 +108,7 @@ class USearchConan(ConanFile):
             tc.variables["USEARCH_BUILD_BENCH_CPP"] = False
             if self.options.with_jemalloc:
                 tc.variables["JEMALLOC_ROOT_DIR"] = self.dependencies["jemalloc"].package_folder
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()
