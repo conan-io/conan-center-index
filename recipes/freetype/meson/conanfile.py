@@ -137,7 +137,7 @@ class FreetypeConan(ConanFile):
 
     def _extract_libtool_version(self):
         conf_raw = load(self, os.path.join(self.source_folder, "builds", "unix", "configure.raw"))
-        return next(re.finditer(r"^version_info='([0-9:]+)'", conf_raw, flags=re.M)).group(1).replace(":", ".")
+        return re.search(r"^version_info='([0-9:]+)'", conf_raw, flags=re.M).group(1).replace(":", ".")
 
     @property
     def _libtool_version_txt(self):
