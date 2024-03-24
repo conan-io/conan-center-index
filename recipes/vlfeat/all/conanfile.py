@@ -89,8 +89,6 @@ class VlfeatConan(ConanFile):
             if self.options.threads:
                 self.cpp_info.system_libs.append("pthread")
 
-        if self.options.shared:
-            self.cpp_info.defines.append("VL_BUILD_DLL")
         if not self.options.get_safe("sse2"):
             self.cpp_info.defines.append("VL_DISABLE_SSE2")
         if not self.options.get_safe("avx"):
