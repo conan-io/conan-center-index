@@ -60,10 +60,7 @@ class GTLabLoggingConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
         def loose_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
+            return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))
 
         compiler = self.settings.compiler
         min_version = self._minimum_compilers_version.get(str(compiler))
