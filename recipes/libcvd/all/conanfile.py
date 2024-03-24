@@ -175,3 +175,6 @@ class LibCVDConan(ConanFile):
 
         postfix = "_debug" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = ["cvd" + postfix]
+
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("ws2_32")
