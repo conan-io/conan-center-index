@@ -1194,6 +1194,8 @@ Examples = bin/datadir/examples""")
                 if self.options.get_safe("with_vulkan"):
                     xcb_qpa_reqs.append("VulkanSupport")
                 if self.options.get_safe("with_x11", False):
+                    xcb_qpa_reqs += ["Core", "Gui", "ServiceSupport", "ThemeSupport", "FontDatabaseSupport",
+                                    "EdidSupport", "xorg::xorg"]
                     _create_module("XcbQpa", xcb_qpa_reqs, has_include_dir=False)
                     _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpa"])
 
