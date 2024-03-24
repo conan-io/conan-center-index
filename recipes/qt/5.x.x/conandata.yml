@@ -1,0 +1,23 @@
+sources:
+  "5.12.3":
+    url:
+      - "https://download.qt.io/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
+      - "https://mirrors.ukfast.co.uk/sitesqt.io/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
+      - "https://ftp1.nluug.nl/languages/qt/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
+      - "https://ftp2.nluug.nl/languages/qt/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
+      - "https://mirror.netcologne.de/qtproject/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
+      - "https://qt-mirror.dannhauer.de/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
+      - "https://ftp.fau.de/qtproject/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
+      - "https://mirrors.dotsrc.org/qtproject/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
+      - "https://ftp.acc.umu.se/mirror/qt.io/qtproject/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
+      - "https://master.qt.io/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
+      - "https://www.nic.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
+      - "https://qt.mirror.constant.com/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
+      - "https://mirrors.sjtug.sjtu.edu.cn/qt/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
+      - "https://ftp.jaist.ac.jp/pub/qtproject/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
+      - "https://ftp.yz.yamagata-u.ac.jp/pub/qtproject/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
+    sha256: "6462ac74c00ff466487d8ef8d0922971aa5b1d5b33c0753308ec9d57711f5a42"
+patches:
+  "5.12.3":
+    - "base_path": "qt5/qtbase"
+      "patch_file": "patches/5.12.3/0000-missing-limits-header.patch"
