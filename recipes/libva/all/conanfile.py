@@ -108,14 +108,14 @@ class PackageConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         if self.options.get_safe("with_wayland") and self._has_build_profile:
-                # Patch the build system to use the pkg-config files generated for the build context.
-                meson_build_file = os.path.join(self.source_folder, "meson.build")
-                replace_in_file(
-                    self,
-                    meson_build_file,
-                    "wayland_scanner_dep = dependency('wayland-scanner',",
-                    "wayland_scanner_dep = dependency('wayland-scanner_BUILD',",
-                )
+            # Patch the build system to use the pkg-config files generated for the build context.
+            meson_build_file = os.path.join(self.source_folder, "meson.build")
+            replace_in_file(
+                self,
+                meson_build_file,
+                "wayland_scanner_dep = dependency('wayland-scanner',",
+                "wayland_scanner_dep = dependency('wayland-scanner_BUILD',",
+            )
 
     def build(self):
         self._patch_sources()
