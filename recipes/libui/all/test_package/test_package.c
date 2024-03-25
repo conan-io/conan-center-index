@@ -1,7 +1,7 @@
 #include "ui.h"
 #include <stdio.h>
 
-int main(void)
+void init_ui(void)
 {
 	uiInitOptions o;
 
@@ -17,5 +17,11 @@ int main(void)
 
 	uiMain();
 	uiUninit();
+}
+
+int main(void)
+{
+    // Do not actually create the UI in this test
+    // init_ui();
 	return 0;
 }

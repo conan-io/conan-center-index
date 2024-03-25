@@ -1,79 +1,99 @@
-from conans import ConanFile, CMake, tools
-from conans.tools import os_info
 import os
+
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import collect_libs, copy, get
+from conan.tools.gnu import PkgConfigDeps
+
+required_conan_version = ">=1.53.0"
 
 
 class libuiConan(ConanFile):
     name = "libui"
     description = "Simple and portable GUI library in C that uses the native GUI technologies of each platform it supports."
-    topics = ("conan", "libui", "ui", "gui")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/andlabs/libui"
-    license = "MIT"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "pkg_config"
+    topics = ("ui", "gui")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.options["gtk"].version = 3
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("gtk/3.24.24")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.requires("gtk/system")
 
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
+        tc = PkgConfigDeps(self)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses",
-                  src=self._source_subfolder)
-        self.copy(pattern="*.h", dst="include", src=self._source_subfolder)
-        self.copy(pattern="*.dll", dst="bin", keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", keep_path=False)
-        self.copy(pattern="*.a", dst="lib", keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+        copy(self, "LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        copy(self, "*.h",
+             dst=os.path.join(self.package_folder, "include"),
+             src=self.source_folder)
+        copy(self, "*.dll",
+             dst=os.path.join(self.package_folder, "bin"),
+             src=self.build_folder,
+             keep_path=False)
+        for pattern in ["*.a", "*.so*", "*.dylib*", "*.lib"]:
+            copy(self, pattern,
+                 dst=os.path.join(self.package_folder, "lib"),
+                 src=self.build_folder,
+                 keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(
-                [
-                    "user32",
-                    "kernel32",
-                    "gdi32",
-                    "comctl32",
-                    "msimg32",
-                    "comdlg32",
-                    "d2d1",
-                    "dwrite",
-                    "ole32",
-                    "oleaut32",
-                    "oleacc",
-                    "uuid",
-                    "windowscodecs",
-                ]
-            )
+        self.cpp_info.libs = collect_libs(self)
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs += ["dl"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs += [
+                "user32",
+                "kernel32",
+                "gdi32",
+                "comctl32",
+                "msimg32",
+                "comdlg32",
+                "d2d1",
+                "dwrite",
+                "ole32",
+                "oleaut32",
+                "oleacc",
+                "uuid",
+                "windowscodecs",
+            ]
