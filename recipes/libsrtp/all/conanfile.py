@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import collect_libs, copy, get, save, rmdir
 from conan.tools.scm import Version
+from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.53.0"
@@ -48,6 +49,10 @@ class LibsrtpRecipe(ConanFile):
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
 
+    def build_requirements(self):
+        if Version(self.version) >= "2.6.0":
+            self.tool_requires("cmake/[>=3.21 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -69,6 +74,8 @@ class LibsrtpRecipe(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
+        venv = VirtualBuildEnv(self)
+        venv.generate(scope="build")
 
     def _patch_sources(self):
         save(self, os.path.join(self.source_folder, "CMakeLists.txt"),
