@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 82861e0f..ac15718b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -209,6 +209,7 @@ add_custom_target(google-cloud-cpp-protos)
+ add_custom_target(doxygen-docs)
+ add_custom_target(all-docfx)
+ 
++find_package(Threads REQUIRED)
+ find_package(absl CONFIG REQUIRED)
+ if (GOOGLE_CLOUD_CPP_ENABLE_GRPC)
+     find_package(gRPC REQUIRED QUIET)
