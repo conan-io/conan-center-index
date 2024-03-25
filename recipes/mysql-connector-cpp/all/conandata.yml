@@ -1,0 +1,9 @@
+sources:
+  "8.2.0":
+    url: "https://dev.mysql.com/get/Downloads/Connector-C++/mysql-connector-c++-8.2.0-src.tar.gz"
+    sha256: "9424668225c5a73f7b7805cd36d75d8502c9a8e20ca11c952653155ef6e909da"
+#patches:
+#  "8.2.0":
+#    - patch_file: "patches/0006-fix-cpp20-build-8.1.0.patch"
+#      patch_description: "Fix C++20 compilation"
+#      patch_type: "portability"
