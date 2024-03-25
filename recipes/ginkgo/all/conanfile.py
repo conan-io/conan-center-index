@@ -101,8 +101,58 @@ class GinkgoConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def _get_visual_generator(self):
+        compiler_version = str(self.settings.compiler.version)
+
+        if self.settings.compiler == "msvc":
+            toolset_override = self.conf.get("tools.microsoft.msbuild:vs_version", check_type=str)
+            if toolset_override:
+                visual_version = toolset_override
+            else:
+                visual_version = {
+                    "170": "11",
+                    "180": "12",
+                    "190": "14",
+                    "191": "15",
+                    "192": "16",
+                    "193": "17",
+                }[compiler_version]
+        else:
+            visual_version = compiler_version
+
+        visual_gen_suffix = {
+            "8": "8 2005",
+            "9": "9 2008",
+            "10": "10 2010",
+            "11": "11 2012",
+            "12": "12 2013",
+            "14": "14 2015",
+            "15": "15 2017",
+            "16": "16 2019",
+            "17": "17 2022",
+        }[visual_version]
+
+        return f"Visual Studio {visual_gen_suffix}"
+
     def generate(self):
         tc = CMakeToolchain(self)
+
+        # Since 1.5.0, force MSBuild generator if:
+        # - msvc & shared
+        # - user has set tools.cmake.cmaketoolchain:generator to Ninja
+        # It's a workaround for LINK : fatal error LNK1189: library limit of 65535 objects exceeded
+        # See https://github.com/ginkgo-project/ginkgo/issues/1495#issuecomment-1841983036
+        # and https://github.com/microsoft/vcpkg/pull/34280#discussion_r1351515284
+        if Version(self.version) >= "1.5.0" and is_msvc(self) and self.options.shared:
+            if self.conf.get("tools.cmake.cmaketoolchain:generator") == "Ninja":
+                visual_generator = self._get_visual_generator()
+                self.output.warning(
+                    f"You asked for Ninja generator, but fallback to {visual_generator}, "
+                    "otherwise it will fail during creation of DLL with "
+                    "LINK : fatal error LNK1189: library limit of 65535 objects exceeded"
+                )
+                tc.generator = visual_generator
+
         tc.variables["GINKGO_BUILD_TESTS"] = False
         tc.variables["GINKGO_BUILD_EXAMPLES"] = False
         tc.variables["GINKGO_BUILD_BENCHMARKS"] = False
@@ -117,6 +167,8 @@ class GinkgoConan(ConanFile):
             tc.variables["GINKGO_BUILD_DPCPP"] = False
         tc.variables["GINKGO_BUILD_HWLOC"] = False
         tc.variables["GINKGO_BUILD_MPI"] = False
+        if Version(self.version) >= "1.4.0":
+            tc.variables["GINKGO_WITH_CCACHE"] = False
         tc.generate()
 
     def build(self):
@@ -167,6 +219,13 @@ class GinkgoConan(ConanFile):
         self.cpp_info.components["ginkgo_reference"].libs = [
             "ginkgo_reference" + debug_suffix]
 
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["ginkgo_core"].system_libs.append("m")
+            self.cpp_info.components["ginkgo_cuda"].system_libs.append("m")
+            self.cpp_info.components["ginkgo_omp"].system_libs.append("m")
+            self.cpp_info.components["ginkgo_hip"].system_libs.append("m")
+            self.cpp_info.components["ginkgo_reference"].system_libs.append("m")
+
         if has_dpcpp_device: # Always add these components
             # See https://github.com/conan-io/conan-center-index/pull/7044#discussion_r698181588
             self.cpp_info.components["ginkgo_core"].requires += ["ginkgo_dpcpp"]
@@ -179,6 +238,10 @@ class GinkgoConan(ConanFile):
             self.cpp_info.components["ginkgo_device"].set_property("cmake_target_name", "Ginkgo::ginkgo_device")
             self.cpp_info.components["ginkgo_device"].libs = [
                 "ginkgo_device" + debug_suffix]
+
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["ginkgo_dpcpp"].system_libs.append("m")
+                self.cpp_info.components["ginkgo_device"].system_libs.append("m")
 
             self.cpp_info.components["ginkgo_omp"].requires += [
                 "ginkgo_dpcpp", "ginkgo_device"]
