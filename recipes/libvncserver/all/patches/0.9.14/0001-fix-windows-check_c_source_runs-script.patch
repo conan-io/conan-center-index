@@ -1,0 +1,17 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ab5c34f4..3bdd0311 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -99,12 +99,6 @@ if(WITH_JPEG)
+       return 0;\n
+     }")
+ 
+-    if(CMAKE_CROSSCOMPILING)
+-      check_c_source_compiles("${JPEG_TEST_SOURCE}" FOUND_LIBJPEG_TURBO)
+-    else()
+-      check_c_source_runs("${JPEG_TEST_SOURCE}" FOUND_LIBJPEG_TURBO)
+-    endif()
+-
+     set(CMAKE_REQUIRED_LIBRARIES)
+     set(CMAKE_REQUIRED_INCLUDES)
+     set(CMAKE_REQUIRED_DEFINITIONS)
