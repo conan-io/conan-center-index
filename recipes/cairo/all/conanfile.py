@@ -186,20 +186,11 @@ class CairoConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        def fix_freetype_version():
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "configure.ac"),
-                "FREETYPE_MIN_VERSION=9.7.3",
-                f"FREETYPE_MIN_VERSION={Version(self.dependencies['freetype'].ref.version)}"
-            )
-
         def exclude_tests_and_docs_from_build():
             makefile_am = os.path.join(self.source_folder, "Makefile.am")
             replace_in_file(self, makefile_am, "SUBDIRS += boilerplate test perf", "")
             replace_in_file(self, makefile_am, "SUBDIRS = src doc util", "SUBDIRS = src util")
 
-        fix_freetype_version()
         exclude_tests_and_docs_from_build()
 
         if self.options.get_safe("with_freetype"):
