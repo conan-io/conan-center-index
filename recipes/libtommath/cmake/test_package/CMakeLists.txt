@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.8)
+
 project(test_package C)
 
 find_package(libtommath REQUIRED CONFIG)
