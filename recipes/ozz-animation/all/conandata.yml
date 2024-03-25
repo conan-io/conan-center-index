@@ -8,3 +8,6 @@ sources:
   "0.14.1":
     url: "https://github.com/guillaumeblanc/ozz-animation/archive/0.14.1.tar.gz"
     sha256: "621094d43aeea4b11da530178d1199107f2b590a9bfb3cba7c36b3176a86ac1e"
+  "0.14.2":
+    url: "https://github.com/guillaumeblanc/ozz-animation/archive/0.14.2.tar.gz"
+    sha256: "52938e5a699b2c444dfeb2375facfbb7b1e3d405b424e361ad1a27391a53b89a"
