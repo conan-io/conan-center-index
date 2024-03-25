@@ -1,0 +1,4 @@
+sources:
+  "cci.20210423":
+    url: "https://codeload.github.com/lava/matplotlib-cpp/zip/ef0383f1315d32e0156335e10b82e90b334f6d9f"
+    sha256: "d061c56d53cc2355e1543198a3899a361495f5c8a72b938204a5307614ca883f"
