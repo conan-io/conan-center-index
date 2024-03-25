@@ -43,6 +43,8 @@ class FirebirdConan(ConanFile):
         # TODO: enable when merged
         # https://github.com/conan-io/conan-center-index/pull/18852
         # self.requires("libtommath/1.2.0")
+        # https://github.com/conan-io/conan-center-index/pull/22113
+        # self.requires("libtomcrypt/1.18.2")
 
     def validate(self):
         if self.settings.os == "Windows":
@@ -96,6 +98,7 @@ class FirebirdConan(ConanFile):
         self._patch_sources()
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
+            autotools.autoreconf()
             autotools.configure()
             autotools.make()
 
