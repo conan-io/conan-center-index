@@ -21,6 +21,7 @@ class VigraConan(ConanFile):
         }
 
     default_options = {"shared" : False,
+                       "fPIC" : True,
                        "with_hdf5": True,
                        "with_openexr" : True,
                        "with_boost_graph" : True,
@@ -37,6 +38,14 @@ class VigraConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        
     def requirements(self):
         self.requires("libtiff/4.6.0")
         self.requires("libpng/1.6.43")
@@ -53,10 +62,6 @@ class VigraConan(ConanFile):
 
         if self.options.with_lemon:
             self.requires("coin-lemon/1.3.1")
-
-        #override since current openexr package breaks this
-        self.requires("libdeflate/1.19", override=True)
-
 
     def generate(self):
         tc = CMakeToolchain(self)
