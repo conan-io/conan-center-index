@@ -1,0 +1,4 @@
+sources:
+  10.0.0:
+    url: https://github.com/llvm/llvm-project/archive/llvmorg-10.0.0.zip
+    sha256: d2fadc9962ccceab2b9b0d806352db690c9040f24f4a4bdef37b72dcc82fc07a
