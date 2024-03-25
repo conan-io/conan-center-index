@@ -1,10 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
-project(test_package)
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+find_package(osgearth REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::osgearth)
+target_link_libraries(${PROJECT_NAME} PRIVATE osgearth::osgearth)

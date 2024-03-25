@@ -1,13 +1,9 @@
 cmake_minimum_required(VERSION 3.1)
 project(cmake_wrapper)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
-
 if(WIN32)
     add_compile_definitions(NOGDI)
 endif()
-
 if(MSVC)
     add_compile_options(/bigobj)
 endif()
@@ -17,69 +13,92 @@ endif()
 # instead of *_LIBRARIES, but also different names). In the following
 # these different variables are set using the variables set by conan's
 # find modules.
+macro(find_package_custom name)
+    string(TOUPPER ${name} name_upper)
+    find_package(${name} REQUIRED CONFIG
+        # Forbid the use of system libs
+        NO_DEFAULT_PATH
+        PATHS ${CMAKE_PREFIX_PATH}
+    )
+    set(${name_upper}_FOUND ${${name}_FOUND})
+    set(${name_upper}_LIBRARY ${${name}_LIBRARIES})
+    set(${name_upper}_INCLUDE_DIR ${${name}_INCLUDE_DIRS})
+    unset(name_upper)
+endmacro()
 
-# OSG
-find_package(OpenSceneGraph REQUIRED)
+find_package_custom(OSG REQUIRED CONFIG)
+set(OSG_PLUGINS "osgPlugins-${OSG_VERSION}")
+set(OSG_GEN_INCLUDE_DIR "${OSG_INCLUDE_DIRS}")
 
-set(OSG_PLUGINS "osgPlugins-${OPENSCENEGRAPH_VERSION}"  CACHE STRING "" FORCE)
-set(OSG_LIBRARY ${OPENSCENEGRAPH_LIBRARIES})
-set(OSG_FOUND ${OPENSCENEGRAPH_FOUND})
-set(OSG_INCLUDE_DIRS ${OPENSCENEGRAPH_INCLUDE_DIRS})
-set(OSG_INCLUDE_DIR "${OPENSCENEGRAPH_INCLUDE_DIRS}")
-set(OSG_GEN_INCLUDE_DIR "${OPENSCENEGRAPH_INCLUDE_DIRS}")
+find_package_custom(GDAL REQUIRED CONFIG)
 
-# gdal
-find_package(GDAL REQUIRED)
-set(GDAL_LIBRARY ${GDAL_LIBRARIES})
+find_package_custom(CURL REQUIRED CONFIG)
 
-# curl
-find_package(CURL REQUIRED)
-set(CURL_LIBRARY ${CURL_LIBRARIES})
+# Unvendored dependencies
+find_package_custom(RapidJSON REQUIRED CONFIG)
+find_package_custom(lerc REQUIRED CONFIG)
 
-# protobuf
-find_package(Protobuf)
-set(Protobuf_INCLUDE_DIR ${protobuf_INCLUDE_DIR})
-set(Protobuf_LIBRARIES ${protobuf_LIBRARIES})
-
-# GEOS
-if (OSGEARTH_WITH_GEOS)
-    find_package(geos)
-endif ()
-set(GEOS_LIBRARY ${GEOS_LIBS})
-set(GEOS_FOUND ${GEOS_LIBRARY})
-
-# SQLite3
-if (OSGEARTH_WITH_SQLITE3)
-    find_package(SQLite3)
-endif ()
-set(SQLITE3_FOUND ${SQLite3_FOUND})
-set(SQLITE3_LIBRARY ${SQLite_LIBRARIES})
-set(SQLITE3_INCLUDE_DIR ${SQLite_INCLUDE_DIR})
-
-# WebP
-if (OSGEARTH_WITH_WEBP)
-    find_package(WebP)
-endif ()
-set(WEBP_FOUND ${WebP_FOUND})
-set(WEBP_LIBRARY ${WebP_LIBRARIES})
-set(WEBP_INCLUDE_DIR ${WebP_INCLUDE_DIR})
-
-# libzip
+# Optional dependencies
 if (OSGEARTH_BUILD_ZIP_PLUGIN)
-    find_package(LIBZIP)
+    find_package_custom(LibZip REQUIRED CONFIG)
 endif ()
-set(LIBZIP_FOUND ${libzip_FOUND})
-set(LIBZIP_LIBRARY ${libzip_LIBRARIES})
-set(LIBZIP_INCLUDE_DIR ${libzip_INCLUDE_DIR})
 
-# leveldb
-find_package(leveldb)
-set(LEVELDB_FOUND ${leveldb_FOUND})
-set(LEVELDB_LIBRARY ${leveldb_LIBRARIES})
-set(LEVELDB_INCLUDE_DIR ${leveldb_INCLUDE_DIR})
+if (OSGEARTH_BUILD_LEVELDB_CACHE)
+    find_package_custom(LevelDB REQUIRED CONFIG)
+endif ()
 
-find_package(RapidJSON)
+if (WITH_BASISU)
+    find_package_custom(BASISU REQUIRED CONFIG)
+endif ()
 
-find_package(lerc)
+if (WITH_BLEND2D)
+    find_package_custom(Blend2D REQUIRED CONFIG)
+endif ()
 
-add_subdirectory(source_subfolder)
+if (WITH_BLOSC)
+    find_package_custom(Blosc REQUIRED CONFIG)
+endif ()
+
+if (WITH_DRACO)
+    find_package_custom(Draco REQUIRED CONFIG)
+endif ()
+
+if (WITH_DUKTAPTE)
+    find_package_custom(Duktape REQUIRED CONFIG)
+endif ()
+
+if (WITH_GEOS)
+    find_package_custom(GEOS REQUIRED CONFIG)
+endif ()
+
+if (WITH_GLEW)
+    find_package_custom(GLEW REQUIRED CONFIG)
+endif ()
+
+if (WITH_PROTOBUF)
+    find_package_custom(Protobuf REQUIRED CONFIG)
+endif ()
+
+if (WITH_SPDLOG)
+    find_package_custom(spdlog REQUIRED CONFIG)
+endif ()
+
+if (WITH_SQLITE3)
+    find_package_custom(Sqlite3 REQUIRED CONFIG)
+endif ()
+
+if (WITH_TINYXML)
+    find_package_custom(TinyXML REQUIRED CONFIG)
+endif ()
+
+if (WITH_TRACY)
+    find_package_custom(Tracy REQUIRED CONFIG)
+endif ()
+
+if (WITH_WEBP)
+    find_package_custom(WEBP REQUIRED CONFIG)
+endif ()
+
+include_directories("${OSGEARTH_SRC_DIR}/src/osgEarth")
+
+add_subdirectory(${OSGEARTH_SRC_DIR})
