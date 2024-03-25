@@ -15,8 +15,7 @@ public:
     auto to_local(date::sys_time<Duration> tp) const
         -> date::local_time<typename std::common_type<Duration, std::chrono::minutes>::type> {
         using namespace date;
-        using namespace std::chrono;
-        using LT = local_time<typename std::common_type<Duration, minutes>::type>;
+        using LT = local_time<typename std::common_type<Duration, std::chrono::minutes>::type>;
         return LT{(tp + _offset).time_since_epoch()};
     }
 
@@ -24,8 +23,7 @@ public:
     auto to_sys(date::local_time<Duration> tp) const
         -> date::sys_time<typename std::common_type<Duration, std::chrono::minutes>::type> {
         using namespace date;
-        using namespace std::chrono;
-        using ST = sys_time<typename std::common_type<Duration, minutes>::type>;
+        using ST = sys_time<typename std::common_type<Duration, std::chrono::minutes>::type>;
         return ST{(tp - _offset).time_since_epoch()};
     }
 
@@ -34,7 +32,6 @@ private:
 };
 
 int main() {
-    using namespace std::chrono;
     using namespace date;
 
     auto date1 = 2015_y/March/22;
@@ -44,8 +41,8 @@ int main() {
     auto date3 = 22_d/March/2015;
     std::cout << date3 << '\n';
 
-    ZoneOffset p3_45{hours{3} + minutes{45}};
-    zoned_time<milliseconds, ZoneOffset*> zt{&p3_45, floor<milliseconds>(system_clock::now())};
+    ZoneOffset p3_45{std::chrono::hours{3} + std::chrono::minutes{45}};
+    zoned_time<std::chrono::milliseconds, ZoneOffset*> zt{&p3_45, floor<std::chrono::milliseconds>(std::chrono::system_clock::now())};
     std::cout << zt.get_sys_time() << " (sys time)\n";
     std::cout << zt.get_local_time() << " (local time)\n";
 
