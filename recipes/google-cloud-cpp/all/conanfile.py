@@ -87,6 +87,7 @@ class GoogleCloudCppConan(ConanFile):
         cmake.definitions["BUILD_TESTING"] = 0
 
         cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
+        cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_WERROR"] = False
 
         cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_BIGTABLE"] = True
         cmake.definitions["GOOGLE_CLOUD_CPP_ENABLE_BIGQUERY"] = True
