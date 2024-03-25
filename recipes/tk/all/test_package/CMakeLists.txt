@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(PackageTest C)
+project(test_package LANGUAGES C)
 
 find_package(tk CONFIG REQUIRED)
 
-add_executable(example src/test_package.c)
-target_link_libraries(example tk::tk)
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE tk::tk)
