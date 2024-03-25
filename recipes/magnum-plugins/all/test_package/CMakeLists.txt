@@ -1,13 +1,10 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.15)
 project(test_package CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
 if(SHARED_PLUGINS)
-    find_package(MagnumPlugins REQUIRED)
+    find_package(MagnumPlugins REQUIRED CONFIG)
 else()
-    find_package(MagnumPlugins REQUIRED StlImporter)
+    find_package(MagnumPlugins REQUIRED CONFIG StlImporter)
 endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.in
@@ -29,8 +26,8 @@ set_target_properties(${PROJECT_NAME}
 
 if(TARGET_EMSCRIPTEN)
     message("Embed OBJ file")
-    set_target_properties(${PROJECT_NAME} 
-        PROPERTIES 
+    set_target_properties(${PROJECT_NAME}
+        PROPERTIES
             LINK_FLAGS "--embed-file ${CONAN_STL_FILE}@${CONAN_STL_FILE}"
     )
 endif()
