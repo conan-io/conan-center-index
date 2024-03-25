@@ -338,9 +338,6 @@ class QtConan(ConanFile):
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
 
-        if Version(self.version) < "5.15.9" and self.settings.os == "Macos" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("qt does not support macOS on ARM before 5.15.9 (QTBUG-85279)")
-
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.openssl:
@@ -360,9 +357,9 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
             self.requires("freetype/2.13.2")
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/2.15.0")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/74.1")
+            self.requires("icu/74.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
             self.requires("harfbuzz/8.3.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
@@ -371,9 +368,9 @@ class QtConan(ConanFile):
             else:
                 self.requires("libjpeg/9e")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/1.6.42")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.44.2")
+            self.requires("sqlite3/3.45.0")
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.1.0")
         if self.options.with_pq:
@@ -394,13 +391,13 @@ class QtConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("expat/2.5.0")
+            self.requires("expat/2.6.0")
             self.requires("opus/1.4")
             if not self.options.qtwayland:
                 self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.93")
-            self.requires("libdrm/2.4.114")
+            self.requires("libdrm/2.4.119")
             self.requires("egl/system")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
@@ -413,7 +410,7 @@ class QtConan(ConanFile):
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_atspi"):
-            self.requires("at-spi2-core/2.50.0")
+            self.requires("at-spi2-core/2.51.0")
         if self.options.get_safe("with_md4c", False):
             self.requires("md4c/0.4.8")
 
@@ -447,6 +444,10 @@ class QtConan(ConanFile):
         if self.options.qtwayland:
             self.tool_requires("wayland/<host_version>")
 
+    @property
+    def angle_path(self):
+        return os.path.join(self.source_folder, "angle")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             strip_root=True, destination="qt5")
@@ -463,6 +464,10 @@ class QtConan(ConanFile):
         )
         save(self, os.path.join(self.source_folder, "qt5", "qtbase", "mkspecs", "features", "uikit", "bitcode.prf"), "")
 
+        # shorten the path to ANGLE to avoid the following error:
+        # C:\J2\w\prod-v2\bsr@4\104220\ebfcf\p\qtde01f793a6074\s\qt5\qtbase\src\3rdparty\angle\src\libANGLE\renderer\d3d\d3d11\texture_format_table_autogen.cpp : fatal error C1083: Cannot open compiler generated file: '': Invalid argument
+        copy(self, "*", os.path.join(self.source_folder, "qt5", "qtbase", "src", "3rdparty", "angle"), self.angle_path)
+
     def generate(self):
         pc = PkgConfigDeps(self)
         pc.generate()
@@ -475,6 +480,7 @@ class QtConan(ConanFile):
             vre.generate(scope="build")
         env = Environment()
         env.define("MAKEFLAGS", f"j{build_jobs(self)}")
+        env.define("ANGLE_DIR", self.angle_path)
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         if self.settings.os == "Windows":
             env.prepend_path("PATH", os.path.join(self.source_folder, "qt5", "gnuwin32", "bin"))
@@ -1341,7 +1347,7 @@ Examples = bin/datadir/examples""")
             _create_plugin("Scene2DPlugin", "scene2d", "renderplugins", [])
 
             _create_module("3DAnimation", ["3DRender", "3DCore", "Gui"])
-            _create_module("3DInput", ["3DCore", "Gamepad", "Gui"])
+            _create_module("3DInput", ["3DCore", "Gui"] + (["Gamepad"] if self.options.qtgamepad else []))
             _create_module("3DLogic", ["3DCore", "Gui"])
             _create_module("3DExtras", ["3DRender", "3DInput", "3DLogic", "3DCore", "Gui"])
             _create_module("3DQuick", ["3DCore", "Quick", "Gui", "Qml"])

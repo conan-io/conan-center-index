@@ -1,5 +1,29 @@
 # Changelog
 
+### 20-March-2024 - 11:13 CET
+
+- [fix] Changing Version Ranges in dependencies is now bump dependencies
+- [fix] Static library package type should be built with both all static and all shared dependencies
+
+### 13-March-2024 - 11:08 CET
+
+- [feature] Build with both */*:shared=True/False option when package type is declared as ``shared-library``.
+- [fix] Fix ValidateInfra python version check to be aligned with the latest Jenkins version.
+
+### 07-February-2024 - 15:43 CET
+
+- [feature] Add waiting list for new collaborators that are not found in access request issue.
+- [feature] Skip building bump dependencies PRs by default. It will require manual CI trigger.
+
+### 24-January-2024 - 12:13 CET
+
+- [feature] Update Conan 1.x branch to version 1.62.0
+- [feature] Update Conan 2.x branch to version 2.0.16
+- [feature] Require review from maintainers for Bump version and Bump requirements
+- [fix] Show header-only option in the build CI summary table
+- [fix] Use build/host profile conf also in test package
+- [fix] Use only string to handle Github labels
+
 ### 05-December-2023 - 16:23 CET
 
 - [fix] Use the correct profile to test a tool_require.
