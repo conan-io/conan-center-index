@@ -1,0 +1,4 @@
+sources:
+  "1.26.4":
+    url: "https://github.com/numpy/numpy/releases/download/v1.26.4/numpy-1.26.4.tar.gz"
+    sha256: "2a02aba9ed12e4ac4eb3ea9421c420301a0c6460d9830d74a9df87efa4912010"
