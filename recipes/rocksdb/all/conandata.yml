@@ -17,6 +17,9 @@ patches:
       patch_description: "Fix build with gcc 13 by including cstdint"
       patch_type: "portability"
       patch_source: "https://github.com/facebook/rocksdb/pull/11118"
+    - patch_file: "patches/6.29.5-0002-exclude-thirdparty.patch"
+      patch_description: "Do not include thirdparty.inc"
+      patch_type: "portability"
   "6.27.3":
     - patch_file: "patches/6.27.3-0001-add-include-cstdint-for-gcc-13.patch"
       patch_description: "Fix build with gcc 13 by including cstdint"
