@@ -1,7 +1,7 @@
 sources:
+  "4.19.0":
+    url: "https://ftpmirror.gnu.org/libtasn1/libtasn1-4.19.0.tar.gz"
+    sha256: "1613f0ac1cf484d6ec0ce3b8c06d56263cc7242f1c23b30d82d23de345a63f7a"
   "4.16.0":
-    url: "https://ftp.gnu.org/gnu/libtasn1/libtasn1-4.16.0.tar.gz"
+    url: "https://ftpmirror.gnu.org/libtasn1/libtasn1-4.16.0.tar.gz"
     sha256: "0e0fb0903839117cb6e3b56e68222771bebf22ad7fc2295a0ed7d576e8d4329d"
-patches:
-  "4.16.0":
-    - patch_file: "patches/0001-do-not-add-static-to-functions-meant-to-be-built.patch"
