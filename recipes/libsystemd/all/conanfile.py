@@ -55,14 +55,13 @@ class LibsystemdConan(ConanFile):
     def requirements(self):
         self.requires("libcap/2.69")
         self.requires("libmount/2.39.2")
-        if Version(self.version) >= "251.18":
-            self.requires("libxcrypt/4.4.36")
+        self.requires("libxcrypt/4.4.36")
         if self.options.with_selinux:
-            self.requires("libselinux/3.5")
+            self.requires("libselinux/3.6")
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_xz:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/5.6.1")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
 
@@ -71,7 +70,7 @@ class LibsystemdConan(ConanFile):
             raise ConanInvalidConfiguration("Only Linux supported")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.0")
+        self.tool_requires("meson/1.4.0")
         self.tool_requires("m4/1.4.19")
         self.tool_requires("gperf/3.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
@@ -134,14 +133,10 @@ class LibsystemdConan(ConanFile):
             "libiptc", "elfutils", "repart", "homed", "importd", "acl",
             "dns-over-tls", "log-trace"]
 
-        if Version(self.version) >= "247.1":
-            unrelated.append("oomd")
-        if Version(self.version) >= "248.1":
-            unrelated.extend(["sysext", "nscd"])
-        if Version(self.version) >= "251.1":
-            unrelated.append("link-boot-shared")
-        if Version(self.version) >= "252.1":
-            unrelated.append("link-journalctl-shared")
+        unrelated.append("oomd")
+        unrelated.extend(["sysext", "nscd"])
+        unrelated.append("link-boot-shared")
+        unrelated.append("link-journalctl-shared")
         if Version(self.version) < "254.7":
             unrelated.extend(["gnu-efi", "valgrind"])
         else:
