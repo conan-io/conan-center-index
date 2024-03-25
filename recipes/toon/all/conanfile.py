@@ -43,7 +43,7 @@ class ToonConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openblas/0.3.26")
+        self.requires("openblas/0.3.26", options={"build_lapack": True})
 
     def package_id(self):
         self.info.clear()
