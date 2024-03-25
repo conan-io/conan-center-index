@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, save, rmdir, export_conandata_patches, apply_conandata_patches, replace_in_file
+from conan.tools.files import copy, get, save, rmdir, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -55,9 +55,6 @@ class LibCVDConan(ConanFile):
             "msvc": "191",
             "Visual Studio": "15",
         }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -138,8 +135,6 @@ class LibCVDConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         # Use deps from Conan
         save(self, os.path.join(self.source_folder, "cmake", "CVDFindFFMPEG.cmake"),
              "find_package(CVD_FFMPEG REQUIRED)\n" if self.options.with_ffmpeg else "")
