@@ -63,7 +63,7 @@ class QwtConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/[>=5.15.11 <7]", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self):
