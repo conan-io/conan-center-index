@@ -325,6 +325,7 @@ class SDLConan(ConanFile):
         cmake_extra_cflags = ["-I{}".format(path) for _, dep in self.dependencies.items() for path in dep.cpp_info.includedirs]
         tc.variables["EXTRA_CFLAGS"] = ";".join(cmake_extra_cflags).replace(os.sep, '/')
         tc.variables["EXTRA_LIBS"] = ";".join(cmake_extra_libs)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):
