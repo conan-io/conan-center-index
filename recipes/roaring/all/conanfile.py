@@ -79,6 +79,8 @@ class RoaringConan(ConanFile):
         tc.variables["ENABLE_ROARING_TESTS"] = False
         # Relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if self.settings.build_type == "Debug":
+            tc.variables["ROARING_SANITIZE"] = "ON"
         tc.generate()
 
     def build(self):
