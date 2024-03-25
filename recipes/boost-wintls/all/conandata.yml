@@ -1,0 +1,5 @@
+sources:
+  "0.9.8":
+    url:
+      - "https://github.com/laudrup/boost-wintls/archive/refs/tags/v0.9.8.zip"
+    sha256: "fcdaec26cae39c9699d43e6d71920ccfcb1db6bee61262c8949fbe215a53380b"
