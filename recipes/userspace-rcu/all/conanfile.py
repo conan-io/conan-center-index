@@ -1,28 +1,25 @@
 import os
 
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conan.tools.files import get, rmdir
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import chdir, copy, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class UserspaceRCUConan(ConanFile):
     name = "userspace-rcu"
-    homepage ="https://liburcu.org/"
     description = "Userspace RCU (read-copy-update) library"
-    topics = ("urcu")
-    url = "https://github.com/conan-io/conan-center-index"
     license = "LGPL-2.1"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://liburcu.org/"
+    topics = "urcu"
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    settings = "os", "compiler", "build_type", "arch"
-
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -31,65 +28,58 @@ class UserspaceRCUConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    build_requires = (
-        "libtool/2.4.6",
-    )
 
-    generators = "PkgConfigDeps"
+    def configure(self):
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
-            raise ConanInvalidConfiguration("Building for {} unsupported".format(self.settings.os))
+            raise ConanInvalidConfiguration(f"Building for {self.settings.os} unsupported")
+        if self.version == "0.11.4" and self.settings.compiler == "apple-clang":
+            # Fails with "cds_hlist_add_head_rcu.c:19:10: fatal error: 'urcu/urcu-memb.h' file not found"
+            raise ConanInvalidConfiguration(f"{self.ref} is not compatible with apple-clang")
 
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-        if self.options.shared:
-            del self.options.fPIC
+    def build_requirements(self):
+        self.tool_requires("libtool/2.4.7")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.libs = []
-        yes_no = lambda v: "yes" if v else "no"
-        conf_args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-        ]
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return self._autotools
-
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        tc = AutotoolsToolchain(self)
+        tc.generate()
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
-            self.run("./bootstrap")
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy(pattern="LICENSE*", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
+        copy(self, "LICENSE*",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
         autotools.install()
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        rm(self, "*.la", self.package_folder, recursive=True)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         for lib_type in ["", "-bp", "-cds", "-mb", "-memb", "-qsbr", "-signal"]:
-            component_name = "urcu{}".format(lib_type)
+            component_name = f"urcu{lib_type}"
             self.cpp_info.components[component_name].libs = ["urcu-common", component_name]
             self.cpp_info.components[component_name].set_property("pkg_config_name", component_name)
-            self.cpp_info.components[component_name].names["pkg_config"] = component_name
-            # todo Remove in Conan version 1.50.0 where these are set by default for the PkgConfigDeps generator.
-            self.cpp_info.components[component_name].includedirs = ["include"]
-            self.cpp_info.components[component_name].libdirs = ["lib"]
-            if self.settings.os == "Linux":
+            if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components[component_name].system_libs = ["pthread"]
 
         # Some definitions needed for MB and Signal variants
