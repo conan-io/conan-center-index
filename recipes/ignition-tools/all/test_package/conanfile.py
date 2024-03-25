@@ -1,17 +1,21 @@
-from conans import ConanFile, CMake, tools
-import os
+from conan import ConanFile
+from conan.tools.layout import basic_layout
+
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package_multi"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "VirtualRunEnv"
+    test_type = "explicit"
 
-    def build(self):
-        cmake = CMake(self)
-        cmake.definitions["IGN_TOOLS_MAJOR_VER"] = tools.Version(self.deps_cpp_info["ignition-tools"].version).major
-        cmake.configure()
-        cmake.build()
+    def requirements(self):
+        self.requires(self.tested_reference_str, run=True)
+
+    def layout(self):
+        basic_layout(self)
 
     def test(self):
-        if not tools.cross_building(self.settings):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+        # FIXME: Can't actually run this since Ruby and required Ruby gems are not set up
+        if self.settings.os == "Windows":
+            self.run("where ign", scope="conanrun")
+        else:
+            self.run("which ign", scope="conanrun")
