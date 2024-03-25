@@ -1,5 +1,5 @@
+cmake_minimum_required(VERSION 3.6)
 project(vigra_conan_test)
-cmake_minimum_required(VERSION 3.20)
 
 find_package(Vigra REQUIRED)
 
