@@ -1,0 +1,9 @@
+sources:
+  "1.1.3":
+    url: "https://github.com/kubo/funchook/archive/refs/tags/v1.1.3.tar.gz"
+    sha256: "4b0195e70524237e222dc34c53ac25e12677bb936e64eefe33189931688444c4"
+patches:
+  "1.1.3":
+    - patch_file: "patches/1.1.3-0001-cmake-use-cci-capstone.patch"
+      patch_description: "use cci capstone package on all platforms"
+      patch_type: "conan"
