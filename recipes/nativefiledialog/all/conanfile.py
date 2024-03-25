@@ -1,76 +1,135 @@
 import os
-from conans import ConanFile, MSBuild, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import chdir, copy, get
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc
+
+required_conan_version = ">=1.53.0"
 
 
 class NativefiledialogConan(ConanFile):
     name = "nativefiledialog"
+    description = "A tiny, neat C library that portably invokes native file open and save dialogs."
     license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mlabbe/nativefiledialog"
-    description = "A tiny, neat C library that portably invokes native file open and save dialogs."
-    topics = ("conan", "dialog", "gui")
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "pkg_config",
-    
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    topics = ("dialog", "gui")
 
-    def requirements(self):
-        if self.settings.os == "Linux":
-            self.requires("gtk/3.24.24")
+    package_type = "static-library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+    }
 
-    def build_requirements(self):
-        self.build_requires("premake/5.0.0-alpha15")
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.requires("gtk/3.24.37")
+
+    def validate(self):
         if self.settings.arch not in ["x86", "x86_64"]:
-            raise ConanInvalidConfiguration("architecture %s is not supported" % self.settings.arch)
+            raise ConanInvalidConfiguration(f"{self.settings.arch} architecture is not supported")
+
+    def build_requirements(self):
+        self.tool_requires("premake/5.0.0-beta2")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-release_" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    @property
+    def _vs_ide_year(self):
+        compiler_version = str(self.settings.compiler.version)
+        if str(self.settings.compiler) == "Visual Studio":
+            return {
+                "12": "2013",
+                "14": "2015",
+                "15": "2017",
+                "16": "2019",
+                "17": "2022",
+            }[compiler_version]
+        else:
+            return {
+                "180": "2013",
+                "190": "2015",
+                "191": "2017",
+                "192": "2019",
+                "193": "2022",
+            }[compiler_version]
+
+    @property
+    def _build_subdir(self):
+        return os.path.join(self.source_folder, "build", "subdir")
+
+    def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+
+        if is_msvc(self):
+            tc = MSBuildToolchain(self)
+            tc.generate()
+        else:
+            tc = AutotoolsToolchain(self)
+            tc.generate()
+            tc = AutotoolsDeps(self)
+            tc.generate()
+
+        copy(self, "premake5.lua", os.path.join(self.source_folder, "build"), self._build_subdir)
 
     def build(self):
-        if self.settings.compiler == "Visual Studio":
-            generator = "vs" + {"16": "2019",
-                                "15": "2017",
-                                "14": "2015",
-                                "12": "2013",
-                                "11": "2012",
-                                "10": "2010",
-                                "9": "2008",
-                                "8": "2005"}.get(str(self.settings.compiler.version))
-        else:
-            generator = "gmake2"
-        subdir = os.path.join(self._source_subfolder, "build", "subdir")
-        os.makedirs(subdir)
-        with tools.chdir(subdir):
-            os.rename(os.path.join("..", "premake5.lua"), "premake5.lua")
-            self.run("premake5 %s" % generator)
-            
-            if self.settings.compiler == "Visual Studio":
+        with chdir(self, self._build_subdir):
+            generator = f"vs{self._vs_ide_year}" if is_msvc(self) else "gmake2"
+            self.run(f"premake5 {generator}")
+
+            if is_msvc(self):
                 msbuild = MSBuild(self)
                 msbuild.build("NativeFileDialog.sln")
             else:
                 config = "debug" if self.settings.build_type == "Debug" else "release"
                 config += "_x86" if self.settings.arch == "x86" else "_x64"
-                env_build = AutoToolsBuildEnvironment(self)
-                env_build.make(args=["config=%s" % config])
+                autotools = Autotools(self)
+                autotools.make(args=[f"config={config}"])
+
+    @property
+    def _lib_name(self):
+        suffix = "_d" if self.settings.build_type == "Debug" else ""
+        return "nfd" + suffix
 
     def package(self):
-        libname = "nfd_d" if self.settings.build_type == "Debug" else "nfd"
-        if self.settings.compiler == "Visual Studio":
-            self.copy("*%s.lib" % libname, dst="lib", src=self._source_subfolder, keep_path=False)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "*nfd.h",
+             dst=os.path.join(self.package_folder, "include"),
+             src=self.source_folder,
+             keep_path=False)
+
+        if is_msvc(self):
+            copy(self, f"*{self._lib_name}.lib",
+                 dst=os.path.join(self.package_folder, "lib"),
+                 src=self.source_folder,
+                 keep_path=False)
         else:
-            self.copy("*%s.a" % libname, dst="lib", src=self._source_subfolder, keep_path=False)
-        self.copy("*nfd.h", dst="include", src=self._source_subfolder, keep_path=False)
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+            copy(self, f"*{self._lib_name}.a",
+                 dst=os.path.join(self.package_folder, "lib"),
+                 src=self.source_folder,
+                 keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["nfd_d" if self.settings.build_type == "Debug" else "nfd"]
+        self.cpp_info.libs = [self._lib_name]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.requires = ["gtk::gtk+-3.0"]
