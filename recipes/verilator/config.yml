@@ -1,11 +1,7 @@
 versions:
-  "4.034":
-    folder: all
-  "4.038":
+  "5.004":
     folder: all
   "4.200":
     folder: all
   "4.224":
-    folder: all
-  "5.004":
     folder: all

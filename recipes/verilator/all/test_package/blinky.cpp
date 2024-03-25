@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void	tick(int tickcount, Vblinky *tb, VerilatedVcdC* tfp) {
+void tick(int tickcount, Vblinky *tb, VerilatedVcdC* tfp) {
 	tb->eval();
 	if (tfp)
 		tfp->dump(tickcount * 10 - 2);

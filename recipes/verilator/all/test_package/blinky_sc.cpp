@@ -29,6 +29,10 @@ SC_MODULE(BlinkyTop)
     }
 };
 
+int sc_main(int argc, char **argv) {
+    return 0;
+}
+
 int main(int argc, char **argv) {
     sc_clock clk("clk", sc_time(1, SC_NS), 0.5);
 
