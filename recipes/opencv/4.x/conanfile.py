@@ -1238,6 +1238,10 @@ class OpenCVConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "elseif(EMSCRIPTEN)", "elseif(QNXNTO)\nelseif(EMSCRIPTEN)")
 
+        ## Upstream CMakeLists vendors quirc in CMakeLists of 3rdparty/quirc.
+        ## Instead we rely on find-quirc.patch in order to link external quirc.
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(3rdparty/quirc)", "")
+
         ## Fix link to several dependencies
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "${GDAL_LIBRARY}", "GDAL::GDAL")
@@ -1415,9 +1419,7 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_PLAIDML"] = False
         tc.variables["WITH_PVAPI"] = False
         tc.variables["WITH_QT"] = self.options.get_safe("with_qt", False)
-        # Do not enable WITH_QUIRC, otherwise it vendors quirc! Instead we manually inject HAVE_QUIRC
-        # when with_quirc=True, and rely on find-quirc.patch in order to link external quirc to objdetect module.
-        tc.variables["WITH_QUIRC"] = False
+        tc.variables["WITH_QUIRC"] = self.options.get_safe("with_quirc", False)
         tc.variables["WITH_V4L"] = self.options.get_safe("with_v4l", False)
         tc.variables["WITH_VA"] = False
         tc.variables["WITH_VA_INTEL"] = False
@@ -1487,8 +1489,6 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_protobuf"):
             tc.variables["PROTOBUF_UPDATE_FILES"] = True
         tc.variables["WITH_ADE"] = self.options.gapi
-        if self.options.objdetect:
-            tc.variables["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
 
         # Extra modules
         if any([self.options.get_safe(module) for module in OPENCV_EXTRA_MODULES_OPTIONS]) or self.options.with_cuda:
