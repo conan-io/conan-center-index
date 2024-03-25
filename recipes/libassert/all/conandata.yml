@@ -1,5 +1,9 @@
 sources:
   # Newer versions at the top
+  "2.0.0":
+    url:
+      - "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "d4b2da2179a94637b34d18813a814531a1eceb0ddc6dd6db6098050dd638f4a1"
   "1.2.2":
     url:
       - "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v1.2.2.tar.gz"
@@ -18,6 +22,11 @@ sources:
     sha256: "e1bb3b50767994ca4d0f60b7977b279cf32b8569ff92c5830e7a1de567b82fd5"
 
 patches:
+  "2.0.0":
+    - patch_file: "patches/2.0.0/0001-fix-export-and-include.patch"
+      patch_type: "bugfix"
+      patch_source: https://github.com/jeremy-rifkin/libassert/commit/25c1f3e43737ab18490a0d9430cb1c70f976a662
+      patch_description: "Fix export header and an incorrect #include"
   "1.2.2":
     - patch_file: "patches/1.2.2/0001-cpptrace-dll-copy.patch"
       patch_type: "conan"
