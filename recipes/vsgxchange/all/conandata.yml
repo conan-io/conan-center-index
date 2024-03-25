@@ -1,0 +1,9 @@
+sources:
+  "1.0.2":
+    url: "https://github.com/vsg-dev/vsgXchange/archive/refs/tags/vsgXchange-1.0.2.tar.gz"
+    sha256: "e7f834f8e684acbe6d4079d76f90042c24a45e1f3d20513163398fd478e86049"
+patches:
+  "1.0.2":
+    - patch_file: "patches/1.0.2-0001-includeMacro.patch"
+      patch_description: "work around exported macro cmake file"
+      patch_type: conan
