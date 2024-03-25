@@ -102,9 +102,9 @@ class Log4cxxConan(ConanFile):
         if self.options.get_safe("with_smtp_appender"):
             self.requires("libesmtp/1.1.0")
         if self.options.get_safe("with_fmt_layout"):
-            self.requires("fmt/9.1.0")
+            self.requires("fmt/10.2.1")
         if self.options.get_safe("with_qt"):
-            self.requires("qt/5.15")
+            self.requires("qt/5.15.12")
 
     def validate(self):
         if Version(self.version) < "1.0.0" or self.options.get_safe("with_multiprocess_rolling_file_appender"):
