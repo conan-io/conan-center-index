@@ -1,0 +1,31 @@
+Fixes https://github.com/mattreecebentley/plf_list/issues/30
+
+--- plf_list.h
++++ plf_list.h
+@@ -3494,7 +3494,7 @@
+ 
+ 	iterator unordered_find_single(const element_type &element_to_match) const PLF_NOEXCEPT
+ 	{
+-		return unordered_find_single(plf::equal_to(element_to_match));
++		return unordered_find_single(plf::equal_to<element_type>(element_to_match));
+ 	}
+ 
+ 
+@@ -3581,7 +3581,7 @@
+ 
+ 	list<iterator> unordered_find_multiple(const element_type &element_to_match, size_type number_to_find) const
+ 	{
+-		return unordered_find_multiple(plf::equal_to(element_to_match), number_to_find);
++		return unordered_find_multiple(plf::equal_to<element_type>(element_to_match), number_to_find);
+ 	}
+ 
+ 
+@@ -3648,7 +3648,7 @@
+ 
+ 	list<iterator> unordered_find_all(const element_type &element_to_match) const
+ 	{
+-		return unordered_find_all(plf::equal_to(element_to_match));
++		return unordered_find_all(plf::equal_to<element_type>(element_to_match));
+ 	}
+ 
+ 
