@@ -45,7 +45,9 @@ class OpenvinoConan(ConanFile):
         "enable_tf_frontend": [True, False],
         "enable_tf_lite_frontend": [True, False],
         "enable_paddle_frontend": [True, False],
-        "enable_pytorch_frontend": [True, False]
+        "enable_pytorch_frontend": [True, False],
+        # Threading
+        "threading": ["tbb", "omp"]
     }
     default_options = {
         "shared": False,
@@ -63,7 +65,9 @@ class OpenvinoConan(ConanFile):
         "enable_tf_frontend": True,
         "enable_tf_lite_frontend": True,
         "enable_paddle_frontend": True,
-        "enable_pytorch_frontend": True
+        "enable_pytorch_frontend": True,
+        # Threading
+        "threading": "tbb"
     }
 
     @property
@@ -166,7 +170,8 @@ class OpenvinoConan(ConanFile):
             self.tool_requires("cmake/[>=3.18 <4]")
 
     def requirements(self):
-        self.requires("onetbb/2021.10.0")
+        if self.options.threading == "tbb":
+            self.requires("onetbb/2021.10.0")
         self.requires("pugixml/1.14")
         if self._target_x86_64:
             self.requires("xbyak/6.73")
@@ -218,8 +223,14 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_OV_ONNX_FRONTEND"] = self.options.enable_onnx_frontend
         toolchain.cache_variables["ENABLE_OV_PYTORCH_FRONTEND"] = self.options.enable_pytorch_frontend
         # Dependencies
-        toolchain.cache_variables["ENABLE_SYSTEM_TBB"] = True
-        toolchain.cache_variables["ENABLE_TBBBIND_2_5"] = False
+        if self.options.threading == "tbb":
+            toolchain.cache_variables["ENABLE_SYSTEM_TBB"] = True
+            toolchain.cache_variables["ENABLE_TBBBIND_2_5"] = False
+            toolchain.cache_variables["THREADING"] = "TBB"
+        else:
+            toolchain.cache_variables["ENABLE_SYSTEM_TBB"] = False
+            toolchain.cache_variables["ENABLE_TBBBIND_2_5"] = False
+            toolchain.cache_variables["THREADING"] = "OMP"
         toolchain.cache_variables["ENABLE_SYSTEM_PUGIXML"] = True
         if self._protobuf_required:
             toolchain.cache_variables["ENABLE_SYSTEM_PROTOBUF"] = True
@@ -298,7 +309,10 @@ class OpenvinoConan(ConanFile):
 
         openvino_runtime = self.cpp_info.components["Runtime"]
         openvino_runtime.set_property("cmake_target_name", "openvino::runtime")
-        openvino_runtime.requires = ["onetbb::libtbb", "pugixml::pugixml"]
+        if self.options.threading == "tbb":
+            openvino_runtime.requires = ["onetbb::libtbb", "pugixml::pugixml"]
+        else:
+            openvino_runtime.requires = ["pugixml::pugixml"]
         openvino_runtime.libs = ["openvino"]
         if self._preprocessing_available:
             openvino_runtime.requires.append("ade::ade")
