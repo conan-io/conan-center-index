@@ -1,0 +1,16 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 623bf14..bda7ede 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,9 +1,9 @@
+ cmake_minimum_required(VERSION 3.21)
+ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+-project(embed)
++# project(embed)
+
+ # Options
+-option(BUILD_EXAMPLES "Build examples" ${PROJECT_IS_TOP_LEVEL})
++option(BUILD_EXAMPLES "Build examples" OFF)
+
+ # Remember the binary dir for later
+ set(EMBED_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/embed CACHE INTERNAL "binary directory of the battery::embed library" FORCE)
