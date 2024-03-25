@@ -1,0 +1,4 @@
+sources:
+  "8.1.0":
+    url: "https://dev.mysql.com/get/Downloads/Connector-C++/mysql-connector-c++-8.1.0-src.tar.gz"
+    sha256: "2ee3c7d0d031ce581deeed747d9561d140172373592bed5d0630a790e6053dc1"
