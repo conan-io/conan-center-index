@@ -1,0 +1,4 @@
+sources:
+  "2.57.0":
+    url: "https://download.gnome.org/sources/librsvg/2.57/librsvg-2.57.0.tar.xz"
+    sha256: "335fe2e0c2cbf1b7bf0668651224a23e135451f0b1793cd813649be2bffa74e8"
