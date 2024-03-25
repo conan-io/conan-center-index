@@ -37,6 +37,7 @@ class AprConan(ConanFile):
         "fPIC": True,
         "force_apr_uuid": True,
     }
+    exports_sources = "cross_build/*"
 
     @property
     def _settings_build(self):
@@ -69,7 +70,26 @@ class AprConan(ConanFile):
 
     def validate_build(self):
         if cross_building(self) and not is_msvc(self):
-            raise ConanInvalidConfiguration("apr recipe doesn't support cross-build yet due to runtime checks in autoconf")
+            """ The APR configure.in script makes extensive (30 instances) use
+            of AC_TRY_RUN (to determine system capabilities) and checks for /dev/zero.
+            These runtime checks only work when run on the host so
+            the configure script will fail when cross compiling
+            unless the relevant configuration variables
+            are provided in a cache file or on the command line or in an environment variable.
+            The configuration variable values are most easily determined by running the configure script on a host system using:
+                ./configure --cache-file={gnu_host_triplet}.cache
+            and then removing the 'precious' autoconf variables:
+               ac_cv_env_*
+            The generated cache file can be repeatedly used to cross-compile to the targeted host system
+            by including it with the recipe data.
+            The default targeted host system name can be overriden in the profile using (for example).
+                [conf]
+                tools.gnu:host_triplet=arm-linux-gnueabihf
+            This recipe assumes the generated cache file is stored in the 'cross_build' directory.
+            """
+            gnu_host_triplet = self.conf.get("tools.gnu:host_triplet", check_type=str)
+            if not gnu_host_triplet:
+                 raise ConanInvalidConfiguration("apr cross-build requires a [conf] tools.gnu:host_triplet=XXXXX profile entry and a cross_build/XXXXX.cache file")
 
     def build_requirements(self):
         if not is_msvc(self):
@@ -95,7 +115,12 @@ class AprConan(ConanFile):
             tc = AutotoolsToolchain(self)
             tc.configure_args.append("--with-installbuilddir=${prefix}/res/build-1")
             if cross_building(self):
-                tc.configure_args.append("apr_cv_mutex_robust_shared=yes")
+                gnu_host_triplet = self.conf.get("tools.gnu:host_triplet", check_type=str)
+                if gnu_host_triplet:
+                    cacheFile = os.path.join(os.path.dirname(self.source_folder), "cross_build", os.path.basename(gnu_host_triplet + ".cache"))
+                    if not os.path.exists(cacheFile):
+                        raise ConanInvalidConfiguration(f"apr cross-building requires {gnu_host_triplet}.cache file in the 'cross_build' folder")
+                    tc.configure_args.append(f"--cache-file={cacheFile}")
             tc.generate()
 
     def _patch_sources(self):
