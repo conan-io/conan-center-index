@@ -1,7 +1,8 @@
-#include <iostream>
 #include <ignition/utils/cli/CLI.hpp>
 #include <ignition/utils/config.hh>
 #include <ignition/utils/SuppressWarning.hh>
+
+#include <iostream>
 
 
 int main(int argc, char** argv)

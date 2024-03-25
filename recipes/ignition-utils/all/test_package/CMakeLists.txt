@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 3.10.0)
-project(test_package)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
 
 set(IGN_UTILS_MAJOR_VER "" CACHE STRING "Version of igition-utils")
 
