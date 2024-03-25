@@ -19,5 +19,12 @@ sources:
     sha256: "6462ac74c00ff466487d8ef8d0922971aa5b1d5b33c0753308ec9d57711f5a42"
 patches:
   "5.12.3":
-    - "base_path": "qt5/qtbase"
-      "patch_file": "patches/5.12.3/0000-missing-limits-header.patch"
+    - base_path: qt5/qtbase
+      patch_file: patches/5.12.3/0000-missing-limits-header.patch
+      patch_type: portability
+      patch_description: fixes compilation error due to missing c++ stdlib header
+    - base_path: qt5/qtbase
+      patch_file: patches/5.12.3/0001-fix-configure-libs-var.patch
+      patch_type: bugfix
+      patch_description: fix parsing of <LIBNAME>_LIBS variables when configuring Qt. Backported from 5.15.13
+      patch_source: https://codereview.qt-project.org/c/qt/qtbase/+/281892
