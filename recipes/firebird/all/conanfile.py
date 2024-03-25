@@ -37,8 +37,8 @@ class FirebirdConan(ConanFile):
 
         # Newer versions of re2 add abseil as a transitive dependency,
         # which makes ./configure unusably slow for some reason
-        self.requires("re2/20230301")
-        # self.requires("abseil/20230802.1")  # only absl_int128 is used
+        self.requires("re2/20231101")
+        # self.requires("abseil/20240116.1")  # only absl_int128 is used
 
         # TODO: enable when merged
         # https://github.com/conan-io/conan-center-index/pull/18852
