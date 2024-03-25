@@ -2,9 +2,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
-from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
+from conan.tools.cmake import CMake, cmake_layout
 import os
 
 required_conan_version = ">=1.51.1"
@@ -19,6 +19,7 @@ class ConfuJson(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "CMakeToolchain"
     no_copy_source = True
 
     @property
@@ -43,18 +44,18 @@ class ConfuJson(ConanFile):
         }.get(self._min_cppstd, {})
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0")
-        self.requires("magic_enum/0.8.2")
+        self.requires("boost/1.84.0")
+        self.requires("magic_enum/[>=0.9.5 <10]")
 
     def package_id(self):
         self.info.clear()
 
     def validate(self):
         if self.settings.compiler == "apple-clang":
-            raise ConanInvalidConfiguration("apple-clang is not supported. Pull request welcome")
+            raise ConanInvalidConfiguration("apple-clang is not supported. Pull request welcome. ")
 
         if self.settings.compiler == "gcc" and Version(self.version) < "1.0.0":
             raise ConanInvalidConfiguration("gcc is only supported in versions greater than or equal 1.0.0.")
@@ -75,12 +76,13 @@ class ConfuJson(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
-        pass
+        cmake = CMake(self)
+        cmake.configure()
 
     def package(self):
+        cmake = CMake(self)
+        cmake.install()
         copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.h*", src=os.path.join(self.source_folder, "confu_json"),
-                           dst=os.path.join(self.package_folder, "include", "confu_json"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
