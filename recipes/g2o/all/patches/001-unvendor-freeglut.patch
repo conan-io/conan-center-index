@@ -1,0 +1,44 @@
+--- g2o/types/data/CMakeLists.txt
++++ g2o/types/data/CMakeLists.txt
+@@ -22,7 +22,8 @@
+ target_compile_features(types_data PUBLIC cxx_std_17)
+ target_link_libraries(types_data core types_slam2d)
+ if(G2O_HAVE_OPENGL)
++  find_package(FreeGLUT REQUIRED CONFIG)
+-  target_link_libraries(types_data freeglut_minimal opengl_helper)
++  target_link_libraries(types_data FreeGLUT::freeglut opengl_helper)
+ endif()
+ 
+ target_include_directories(types_data PUBLIC
+--- g2o/types/data/vertex_ellipse.cpp
++++ g2o/types/data/vertex_ellipse.cpp
+@@ -30,7 +30,7 @@
+ #include "g2o/stuff/misc.h"
+ 
+ #ifdef G2O_HAVE_OPENGL
+-#include "g2o/EXTERNAL/freeglut/freeglut_minimal.h"
++#include <GL/freeglut.h>
+ #include "g2o/stuff/opengl_primitives.h"
+ #include "g2o/stuff/opengl_wrapper.h"
+ #endif
+--- g2o/types/data/vertex_tag.cpp
++++ g2o/types/data/vertex_tag.cpp
+@@ -29,7 +29,7 @@
+ #include "g2o/stuff/macros.h"
+ 
+ #ifdef G2O_HAVE_OPENGL
+-#include "g2o/EXTERNAL/freeglut/freeglut_minimal.h"
++#include <GL/freeglut.h>
+ #include "g2o/stuff/opengl_primitives.h"
+ #include "g2o/stuff/opengl_wrapper.h"
+ #endif
+@@ -99,8 +99,7 @@
+   opengl::drawBox(0.1f * textSize, 0.1f * textSize, 0.1f * textSize);
+   glTranslatef(0.2f * textSize, 0.f, 0.f);
+   glScalef(0.003f * textSize, 0.003f * textSize, 1.f);
+-  freeglut_minimal::glutStrokeString(freeglut_minimal::GLUT_STROKE_ROMAN,
+-                                     that->name().c_str());
++  glutStrokeString(GLUT_STROKE_ROMAN, (const unsigned char*)that->name().c_str());
+   glPopMatrix();
+   return this;
+ }
