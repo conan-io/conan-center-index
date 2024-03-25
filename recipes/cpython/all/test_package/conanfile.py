@@ -130,7 +130,7 @@ class TestPackageConan(ConanFile):
 
     def _test_module(self, module, should_work):
         try:
-            self.run(f"{self._python} {self.source_folder}/test_package.py -b {self.build_folder} -t {module}", env="conanrun")
+            self.run(f"{self._python} \"{self.source_folder}/test_package.py\" -b \"{self.build_folder}\" -t {module}", env="conanrun")
         except ConanException:
             if should_work:
                 self.output.warning(f"Module '{module}' does not work, but should have worked")
