@@ -49,6 +49,9 @@ class VigraConan(ConanFile):
         if self.options.with_boost_graph:
             self.requires("boost/1.84.0")
 
+        if self.options.with_lemon:
+            self.requires("coin-lemon/1.3.1")
+
         #override since current openexr package breaks this
         self.requires("libdeflate/1.19", override=True)
 
@@ -61,7 +64,7 @@ class VigraConan(ConanFile):
 
         tc.cache_variables["WITH_OPENEXR"] = self.options.with_openexr
         tc.cache_variables["WITH_BOOST_GRAPH"] = self.options.with_boost_graph
-        tc.cache_variables["WITH_LEMON"] = False
+        tc.cache_variables["WITH_LEMON"] = self.options.with_lemon
 
         tc.cache_variables["VIGRA_STATIC_LIB"] = not self.options.shared
         tc.generate()
