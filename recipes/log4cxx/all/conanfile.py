@@ -110,14 +110,12 @@ class Log4cxxConan(ConanFile):
         if Version(self.version) < "1.0.0" or self.options.get_safe("with_multiprocess_rolling_file_appender"):
             # TODO: if compiler doesn't support C++17, boost can be used instead
             if Version(self.version) < "1.0.0":
-                self.output.info(f"Version {self.version} requires C++17. log4cxx version 1.1.0 does not.")
+                self.output.info(f"Version {self.version} requires C++17. log4cxx version 1.x does not.")
             else:
                 self.output.info("multiprocess rolling file appender requires C++17.")
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             compiler_version = Version(self.settings.compiler.version)
-            if not minimum_version:
-                self.output.warning("Your compiler is unknown. Assuming it supports C++17.")
-            elif compiler_version < minimum_version:
+            if compiler_version < minimum_version:
                 raise ConanInvalidConfiguration(f"{self.settings.compiler} {compiler_version} does not support C++17: {minimum_version} required.")
             if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, "17")
@@ -135,8 +133,8 @@ class Log4cxxConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_TESTING"] = False
-        tc.cache_variables["LOG4CXX_INSTALL_PDB"] = False
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["LOG4CXX_INSTALL_PDB"] = False
         if Version(self.version) >= "1.0.0":
             tc.variables["LOG4CXX_NETWORKING_SUPPORT"] = self.options.with_networking
             tc.variables["LOG4CXX_MULTIPROCESS_ROLLING_FILE_APPENDER"] = self.options.with_multiprocess_rolling_file_appender
