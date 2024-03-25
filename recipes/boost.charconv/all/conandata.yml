@@ -1,0 +1,4 @@
+sources:
+  "cci.20230823":
+    url: "https://github.com/cppalliance/charconv/archive/55d596dc2bdecfb1f73cdd5aaa7e7f67f23b34a7.zip"
+    sha256: "032e9bf1d961550ba1401428b526781546085ac958d20db0aa0fa77089604975"
