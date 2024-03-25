@@ -1,0 +1,33 @@
+To fix the following linking errors during package build:
+
+ld: ../../lin64/gcc/lib/libTKExpress.a(Express.cxx.o): in function `Express::WriteFileStamp(std::ostream&)':
+Express.cxx:(.text+0x9d): undefined reference to `OSD_Process::OSD_Process()'
+ld: Express.cxx:(.text+0xa5): undefined reference to `OSD_Process::SystemDate()'
+ld: Express.cxx:(.text+0xce): undefined reference to `OSD_Environment::OSD_Environment(TCollection_AsciiString const&)'
+ld: Express.cxx:(.text+0xe6): undefined reference to `OSD_Environment::Value()'
+ld: Express.cxx:(.text+0x188): undefined reference to `OSD_Process::UserName()'
+ld: ../../lin64/gcc/lib/libTKExpress.a(Express_Entity.cxx.o): in function `Express_Entity::writeIncludes(std::ostream&) const':
+Express_Entity.cxx:(.text+0x23a2): undefined reference to `OSD_Directory::OSD_Directory(OSD_Path const&)'
+ld: Express_Entity.cxx:(.text+0x23ad): undefined reference to `OSD_Directory::Build(OSD_Protection const&)'
+ld: ../../lin64/gcc/lib/libTKExpress.a(Express_Entity.cxx.o): in function `Express_Entity::GenerateClass() const':
+Express_Entity.cxx:(.text+0x9509): undefined reference to `OSD_Directory::OSD_Directory(OSD_Path const&)'
+ld: Express_Entity.cxx:(.text+0x9516): undefined reference to `OSD_Directory::Build(OSD_Protection const&)'
+ld: Express_Entity.cxx:(.text+0xafc8): undefined reference to `OSD_Directory::OSD_Directory(OSD_Path const&)'
+ld: Express_Entity.cxx:(.text+0xafd5): undefined reference to `OSD_Directory::Build(OSD_Protection const&)'
+ld: Express_Entity.cxx:(.text+0xbaff): undefined reference to `OSD_Directory::OSD_Directory(OSD_Path const&)'
+ld: Express_Entity.cxx:(.text+0xbb19): undefined reference to `OSD_Directory::Build(OSD_Protection const&)'
+ld: ../../lin64/gcc/lib/libTKExpress.a(Express_Enum.cxx.o): in function `Express_Enum::GenerateClass() const':
+Express_Enum.cxx:(.text+0x4d3): undefined reference to `OSD_Directory::OSD_Directory(OSD_Path const&)'
+ld: Express_Enum.cxx:(.text+0x4de): undefined reference to `OSD_Directory::Build(OSD_Protection const&)'
+ld: ../../lin64/gcc/lib/libTKExpress.a(Express_Select.cxx.o): in function `Express_Select::generateSelectMember(opencascade::handle<TColStd_HSequenceOfInteger> const&) const':
+Express_Select.cxx:(.text+0x345): undefined reference to `OSD_Directory::OSD_Directory(OSD_Path const&)'
+ld: Express_Select.cxx:(.text+0x350): undefined reference to `OSD_Directory::Build(OSD_Protection const&)'
+ld: ../../lin64/gcc/lib/libTKExpress.a(Express_Select.cxx.o): in function `Express_Select::GenerateClass() const':
+Express_Select.cxx:(.text+0x1923): undefined reference to `OSD_Directory::OSD_Directory(OSD_Path const&)'
+ld: Express_Select.cxx:(.text+0x192e): undefined reference to `OSD_Directory::Build(OSD_Protection const&)'
+
+--- src/TKExpress/EXTERNLIB
++++ src/TKExpress/EXTERNLIB
+@@ -1,1 +1,2 @@
+ TKernel
++OSD
