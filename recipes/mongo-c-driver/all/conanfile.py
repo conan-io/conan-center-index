@@ -118,10 +118,11 @@ class MongoCDriverConan(ConanFile):
         # therefore it defeats conan_toolchain variables, but it works fine with cache_variables
         tc.cache_variables["ENABLE_SSL"] = self._ssl_cmake_value
         tc.cache_variables["ENABLE_SASL"] = self._sasl_cmake_value
-        tc.cache_variables["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
+        tc.cache_variables["ENABLE_SHARED"] = self.options.shared
+        tc.cache_variables["ENABLE_STATIC"] = not self.options.shared
         tc.cache_variables["ENABLE_TESTS"] = "OFF"
         tc.cache_variables["ENABLE_EXAMPLES"] = "OFF"
-        tc.cache_variables["ENABLE_SRV"] = "ON" if self.options.srv else "OFF"
+        tc.cache_variables["ENABLE_SRV"] = self.options.srv
         tc.cache_variables["ENABLE_MAINTAINER_FLAGS"] = "OFF"
         tc.cache_variables["ENABLE_AUTOMATIC_INIT_AND_CLEANUP"] = "ON"
         tc.cache_variables["ENABLE_CRYPTO_SYSTEM_PROFILE"] = "OFF"
@@ -130,25 +131,24 @@ class MongoCDriverConan(ConanFile):
         tc.cache_variables["ENABLE_SHM_COUNTERS"] = "OFF"
         tc.cache_variables["ENABLE_MONGOC"] = "ON"
         tc.cache_variables["ENABLE_BSON"] = "ON"
-        tc.cache_variables["ENABLE_SNAPPY"] = "ON" if self.options.with_snappy else "OFF"
+        tc.cache_variables["ENABLE_SNAPPY"] = self.options.with_snappy
         tc.cache_variables["ENABLE_ZLIB"] = "SYSTEM" if self.options.with_zlib else "OFF"
-        tc.cache_variables["ENABLE_ZSTD"] = "ON" if self.options.with_zstd else "OFF"
+        tc.cache_variables["ENABLE_ZSTD"] = self.options.with_zstd
         tc.cache_variables["ENABLE_MAN_PAGES"] = "OFF"
         tc.cache_variables["ENABLE_HTML_DOCS"] = "OFF"
         tc.cache_variables["ENABLE_EXTRA_ALIGNMENT"] = "ON"
         tc.cache_variables["ENABLE_RDTSCP"] = "OFF"
         tc.cache_variables["ENABLE_APPLE_FRAMEWORK"] = "OFF"
-        tc.cache_variables["ENABLE_ICU"] = "ON" if self.options.with_icu else "OFF"
+        tc.cache_variables["ENABLE_ICU"] = self.options.with_icu
         tc.cache_variables["ENABLE_UNINSTALL"] = "OFF"
         tc.cache_variables["ENABLE_CLIENT_SIDE_ENCRYPTION"] = "OFF"  # libmongocrypt recipe not yet in CCI
         tc.cache_variables["ENABLE_MONGODB_AWS_AUTH"] = "AUTO"
-        tc.cache_variables["ENABLE_PIC"] = "ON" if self.options.get_safe("fPIC", True) else "OFF"
+        tc.cache_variables["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         # Avoid to install vc runtime stuff
         tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = "TRUE"
         if self.options.with_ssl == "openssl":
             tc.variables["OPENSSL_ROOT_DIR"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
-        if Version(self.version) >= "1.20.0":
-            tc.variables["MONGO_USE_CCACHE"] = False
+        tc.variables["MONGO_USE_CCACHE"] = False
         if is_msvc(self):
             # Should be added because of
             # https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-initonceexecuteonce

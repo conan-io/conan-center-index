@@ -2,30 +2,17 @@ sources:
   "1.26.1":
     url: "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/1.26.1.tar.gz"
     sha256: "718922183339db70079d4b56d37789a9e4aa0a62bb4d5eac55e3013da18e6d39"
-  "1.25.3":
-    url: "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/1.25.3.tar.gz"
-    sha256: "d7cdedc5164b7b8ca39bb45bee789da44097052c882fa84996e4d90eec6fe8d3"
   "1.24.3":
     url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.24.3/mongo-c-driver-1.24.3.tar.gz"
     sha256: "cc0ad1006447ded21bbefecf57d6fef61afe6f0d56a4e28da73805d50fdb81b5"
   "1.23.5":
     url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.23.5/mongo-c-driver-1.23.5.tar.gz"
     sha256: "260dc2207881ccbe7b79b1fa6b3ba84ab9be94eb93d4beefbbe8a6cb562947ed"
-  "1.22.2":
-    url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.22.2/mongo-c-driver-1.22.2.tar.gz"
-    sha256: "2e59b9d38d600bd63ccc0b215dd44c6254a66eeb8085a5ac513748cd6220532e"
-  "1.17.6":
-    url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.17.6/mongo-c-driver-1.17.6.tar.gz"
-    sha256: "8644deec7ae585e8d12566978f2017181e883f303a028b5b3ccb83c91248b150"
 patches:
   "1.26.1":
-    - patch_file: "patches/1.24.1-0002-fix-uninitialized-warning.patch"
-      patch_description: "fix uninitialized variable warning"
-      patch_type: "portability"
-  "1.25.3":
-    - patch_file: "patches/1.24.1-0002-fix-uninitialized-warning.patch"
-      patch_description: "fix uninitialized variable warning"
-      patch_type: "portability"
+    - patch_file: "patches/1.26.1-0003-disable-warning-errors.patch"
+      patch_description: "disable compiler flags to make warnings into errors"
+      patch_type: "conan"
   "1.24.3":
     - patch_file: "patches/1.24.1-0001-disable-shared-when-static.patch"
       patch_description: "separate static and shared builds"
@@ -45,18 +32,4 @@ patches:
       patch_type: "portability"
     - patch_file: "patches/1.22.0-0003-disable-warning-errors.patch"
       patch_description: "disable compiler flags to make warnings into errors"
-      patch_type: "conan"
-  "1.22.2":
-    - patch_file: "patches/1.22.0-0001-disable-shared-when-static.patch"
-      patch_description: "separate static and shared builds"
-      patch_type: "conan"
-    - patch_file: "patches/1.22.0-0002-fix-uninitialized-warning.patch"
-      patch_description: "fix uninitialized variable warning"
-      patch_type: "portability"
-    - patch_file: "patches/1.22.0-0003-disable-warning-errors.patch"
-      patch_description: "disable compiler flags to make warnings into errors"
-      patch_type: "conan"
-  "1.17.6":
-    - patch_file: "patches/1.17.6-0001-disable-shared-when-static.patch"
-      patch_description: "separate static and shared builds"
       patch_type: "conan"
