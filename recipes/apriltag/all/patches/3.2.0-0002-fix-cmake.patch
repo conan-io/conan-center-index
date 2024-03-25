@@ -1,0 +1,13 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -46,8 +46,8 @@
+ if (MSVC)
+     # FindThreads will not find pthread.h with MSVC
+     # winmm is necessary for __imp_timeGetTime
+-    find_library(PTHREAD_LIBRARIES NAMES pthreads)
+-    target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARIES} winmm)
++    find_package(pthreads4w REQUIRED)
++    target_link_libraries(${PROJECT_NAME} PUBLIC pthreads4w::pthreads4w winmm)
+ else()
+     find_package(Threads REQUIRED)
+     target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads m)
