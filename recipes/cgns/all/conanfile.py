@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, save
 import os
 
 
@@ -56,7 +56,7 @@ class CgnsConan(ConanFile):
 
     def requirements(self):
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.0")
+            self.requires("hdf5/1.14.3")
 
     def validate(self):
         if self.info.options.parallel and not (self.info.options.with_hdf5 and self.dependencies["hdf5"].options.parallel):
@@ -87,8 +87,20 @@ class CgnsConan(ConanFile):
         # CGNS_ENABLE_SCOPING:BOOL=OFF   --- disabled in VTK's bundle
         # HDF5_NEED_ZLIB:BOOL=ON -- should be dealt with by cmake auto dependency management or something?
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # Disable tools subdir
+        save(self, os.path.join(self.source_folder, "src", "tools", "CMakeLists.txt"), "")
+        # Install only the relevant target
+        if self.options.shared:
+            replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+                            "set (install_targets cgns_static)", "")
+        else:
+            replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+                            "set(install_targets ${install_targets} cgns_shared)", "")
+
+    def build(self):
+        self._patch_sources()
 
         cmake = CMake(self)
         cmake.configure()
