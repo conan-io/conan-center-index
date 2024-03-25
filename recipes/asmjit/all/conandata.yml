@@ -1,4 +1,7 @@
 sources:
+  "cci.20231203":
+    url: "https://github.com/asmjit/asmjit/archive/6a13a935d11ca45e2c220e143fe9a495e5ae4269.zip"
+    sha256: "88133fd05bd9843631fabebc8f529b1600b70ae4e714a03016f860973419a623"
   "cci.20230325":
     url: "https://github.com/asmjit/asmjit/archive/51b10b19b6631434d3f9ad536a6fb140944a36d2.zip"
     sha256: "4f62b1b6247864417fb50a2928d541ccf8e9273b0c3ce36ccd443c9d6ca7bc9a"
