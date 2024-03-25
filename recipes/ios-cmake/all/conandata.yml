@@ -11,3 +11,6 @@ sources:
   "4.2.0":
     url: "https://github.com/leetal/ios-cmake/archive/4.2.0.zip"
     sha256: "abcae0619751dd46d825f0f341d9a5c1a13bbe8fa84f9a62f09652087f64f87f"
+  "4.4.1":
+    url: "https://github.com/leetal/ios-cmake/archive/4.4.1.zip"
+    sha256: "9edfe43e96f1a08dd29d86c81f7ad7d65069fb6f681bbf002df85bb91c421b27"
