@@ -101,6 +101,12 @@ class ProtobufConan(ConanFile):
         if is_apple_os(self) and self.options.shared:
             # Workaround against SIP on macOS for consumers while invoking protoc when protobuf lib is shared
             tc.variables["CMAKE_INSTALL_RPATH"] = "@loader_path/../lib"
+        if Version(self.version) == "3.5.1":
+            if is_apple_os(self):
+                tc.preprocessor_definitions["_POSIX_C_SOURCE"] = "200809L"
+            elif is_msvc(self) and Version(self.settings.compiler.version) >= "193":
+                tc.preprocessor_definitions["_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS"] = "1"
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -216,6 +222,7 @@ class ProtobufConan(ConanFile):
         lib_prefix = "lib" if (is_msvc(self) or self._is_clang_cl) else ""
         lib_suffix = "d" if self.settings.build_type == "Debug" and self.options.debug_suffix else ""
 
+
         # libprotobuf
         self.cpp_info.components["libprotobuf"].set_property("cmake_target_name", "protobuf::libprotobuf")
         self.cpp_info.components["libprotobuf"].set_property("pkg_config_name", "protobuf")
@@ -232,6 +239,12 @@ class ProtobufConan(ConanFile):
         if self.settings.os == "Windows":
             if self.options.shared:
                 self.cpp_info.components["libprotobuf"].defines = ["PROTOBUF_USE_DLLS"]
+
+        if Version(self.version) == "3.5.1":
+            if is_apple_os(self):
+                self.cpp_info.components["libprotobuf"].defines.append("_POSIX_C_SOURCE=200809L")
+            elif is_msvc(self) and Version(self.settings.compiler.version) >= "193":
+                self.cpp_info.components["libprotobuf"].defines.append("_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS=1")
 
         # libprotoc
         if self.settings.os != "tvOS":

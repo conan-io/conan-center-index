@@ -1,0 +1,48 @@
+diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
+index f159f60ea..9b336d224 100644
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -8,6 +8,11 @@ endif()
+ # CMake policies
+ cmake_policy(SET CMP0022 NEW)
+ 
++# On MacOS use @rpath/ for target's install name prefix path
++if (POLICY CMP0042)
++  cmake_policy(SET CMP0042 NEW)
++endif ()
++
+ # Project
+ project(protobuf C CXX)
+ 
+diff --git a/cmake/install.cmake b/cmake/install.cmake
+index 441bf5532..ee221fb14 100644
+--- a/cmake/install.cmake
++++ b/cmake/install.cmake
+@@ -13,6 +13,13 @@ foreach(_library
+     PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+     $<BUILD_INTERFACE:${protobuf_source_dir}/src>
+     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
++  if (UNIX AND NOT APPLE)
++    set_property(TARGET ${_library}
++      PROPERTY INSTALL_RPATH "$ORIGIN")
++  elseif (APPLE)
++    set_property(TARGET ${_library}
++      PROPERTY INSTALL_RPATH "@loader_path")
++  endif()
+   install(TARGETS ${_library} EXPORT protobuf-targets
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ${_library}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${_library}
+@@ -21,6 +28,13 @@ endforeach()
+ 
+ install(TARGETS protoc EXPORT protobuf-targets
+   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT protoc)
++if (UNIX AND NOT APPLE)
++    set_property(TARGET protoc
++      PROPERTY INSTALL_RPATH "$ORIGIN/../lib")
++  elseif (APPLE)
++    set_property(TARGET protoc
++      PROPERTY INSTALL_RPATH "@loader_path/../lib")
++endif()
+ 
+ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/protobuf.pc ${CMAKE_CURRENT_BINARY_DIR}/protobuf-lite.pc DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+ 
