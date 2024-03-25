@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import chdir, copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import chdir, copy, get, replace_in_file, rm, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, NMakeDeps, NMakeToolchain
@@ -45,6 +45,9 @@ class XmlSecConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -130,6 +133,7 @@ class XmlSecConan(ConanFile):
             deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         if is_msvc(self):
             # Configure step to generate Makefile.msvc
             deps_includedirs = []
