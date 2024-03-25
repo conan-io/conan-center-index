@@ -1,7 +1,7 @@
 sources:
-  "3.3.3":
-    url: "https://cimg.eu/files/CImg_3.3.3.zip"
-    sha256: "6853194cfe1229c946698a397c891a19f4d63240a419245c9b130ec7a67825b9"
+  "3.3.5":
+    url: "https://cimg.eu/files/CImg_3.3.5.zip"
+    sha256: "c7268c270e3b93730a3eaf5738250a1b1efb0866bd57409786d750f7f4be7705"
   "3.3.2":
     url: "https://cimg.eu/files/CImg_3.3.2.zip"
     sha256: "d49ecd63b46f53ddcee5c7695ddb0fe8b07e033bb81b5ed075cfe352462c5f73"
@@ -11,9 +11,6 @@ sources:
   "3.2.6":
     url: "https://cimg.eu/files/CImg_3.2.6.zip"
     sha256: "8da3aa995027231bb18f97bb986e12788ef464b3ab8a34151650bf1217baeda7"
-  "3.0.2":
-    url: "https://cimg.eu/files/CImg_3.0.2.zip"
-    sha256: "ee55a37c33d503a64ff264b53952e502ba7c2887b59ded47c47c86ea52ac5c31"
   "2.9.9":
     url: "https://cimg.eu/files/CImg_2.9.9.zip"
     sha256: "c94412f26800ea318fa79410c58da1cf3df71771d07e515c39b16ee743f68e92"
