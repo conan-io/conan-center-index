@@ -66,6 +66,7 @@ class LibsrtpRecipe(ConanFile):
         if  "2.6.0" <= Version(self.version):
             tc.cache_variables["ENABLE_WARNINGS"] = False
             tc.cache_variables["ENABLE_WARNINGS_AS_ERRORS"] = False
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
