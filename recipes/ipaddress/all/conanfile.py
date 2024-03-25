@@ -4,7 +4,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -22,8 +21,32 @@ class IpAddressConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    options = {"exceptions": [True, False], "overload_std": [True, False], "ipv6_scope": [True, False], "ipv6_scope_max_length": ["ANY"]}
-    default_options = {"exceptions": True, "overload_std": True, "ipv6_scope": True, "ipv6_scope_max_length": 16}
+    options = {
+        "exceptions": [True, False],
+        "overload_std": [True, False],
+        "ipv6_scope": [True, False],
+        "ipv6_scope_max_length": ["ANY"],
+    }
+    default_options = {
+        "exceptions": True,
+        "overload_std": True,
+        "ipv6_scope": True,
+        "ipv6_scope_max_length": 16,
+    }
+
+    @property
+    def _min_cppstd(self):
+        return 11
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "apple-clang": "13.0",
+            "clang": "6.0",
+            "gcc": "7.5",
+            "msvc": "192",
+            "Visual Studio": "16",
+        }
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -32,19 +55,13 @@ class IpAddressConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        compiler = self.settings.compiler
-        compiler_version = Version(self.settings.compiler.version)
-
-        if compiler == "gcc" and compiler_version < "7.5":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 7.5")
-        if compiler == "clang" and compiler_version < "6.0":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 6.0")
-        if compiler == "apple-clang" and compiler_version < "13.0":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Apple clang < 13.0")
-        if is_msvc(self) and compiler_version < "16":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC < 16")
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} doesn't support {self.settings.compiler} < {minimum_version}"
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
