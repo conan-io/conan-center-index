@@ -59,9 +59,18 @@ index 175d89c2..ac93b87a 100644
  include(CheckCXXCompilerFlag)
  
 diff --git src/OpenColorIO/CMakeLists.txt src/OpenColorIO/CMakeLists.txt
-index 26b4bb4c..d54cff3d 100755
+index 26b4bb4c..f366bdd1 100755
 --- src/OpenColorIO/CMakeLists.txt
 +++ src/OpenColorIO/CMakeLists.txt
+@@ -301,7 +301,7 @@ target_include_directories(OpenColorIO
+ )
+ 
+ target_link_libraries(OpenColorIO
+-    PRIVATE
++    PUBLIC   # Change to public so that the tools properly link
+         expat::expat
+         Imath::Imath
+         pystring::pystring
 @@ -309,8 +309,8 @@ target_link_libraries(OpenColorIO
          "$<BUILD_INTERFACE:utils::from_chars>"
          "$<BUILD_INTERFACE:utils::strings>"
