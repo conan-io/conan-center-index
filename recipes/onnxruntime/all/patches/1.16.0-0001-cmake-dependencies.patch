@@ -10,6 +10,15 @@ Subject: [PATCH] CMake: ensure conan dependencies are used
  cmake/onnxruntime_mlas.cmake                   |  2 +-
  4 files changed, 19 insertions(+), 14 deletions(-)
 
+diff --git a/cmake/external/abseil-cpp.cmake b/cmake/external/abseil-cpp.cmake
+index 54d2f9c5c1..3195ef15a0 100644
+--- a/cmake/external/abseil-cpp.cmake
++++ b/cmake/external/abseil-cpp.cmake
+@@ -22,6 +22,7 @@ FetchContent_Declare(
+     URL ${DEP_URL_abseil_cpp}
+     URL_HASH SHA1=${DEP_SHA1_abseil_cpp}
+     PATCH_COMMAND ${ABSL_PATCH_COMMAND}
++    FIND_PACKAGE_ARGS REQUIRED CONFIG NAMES absl
 diff --git a/cmake/external/eigen.cmake b/cmake/external/eigen.cmake
 index c0f7ddc50e..a47de64cbd 100644
 --- a/cmake/external/eigen.cmake

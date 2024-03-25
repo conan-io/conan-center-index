@@ -25,6 +25,10 @@ patches:
     - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
       patch_description: "allow to build with abseil built without c++17 support"
       patch_type: "portability"
+    - patch_file: "patches/1.16.0-0002-vs2019.patch"
+      patch_description: "Do not include C++23 header if it is not present"
+      patch_type: "portability"
+      patch_source: "https://github.com/microsoft/onnxruntime/pull/17716"
   "1.16.2":
     - patch_file: "patches/1.16.0-0001-cmake-dependencies.patch"
       patch_description: "CMake: ensure conan dependencies are used"
@@ -32,6 +36,10 @@ patches:
     - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
       patch_description: "allow to build with abseil built without c++17 support"
       patch_type: "portability"
+    - patch_file: "patches/1.16.0-0002-vs2019.patch"
+      patch_description: "Do not include C++23 header if it is not present"
+      patch_type: "portability"
+      patch_source: "https://github.com/microsoft/onnxruntime/pull/17716"
   "1.16.1":
     - patch_file: "patches/1.16.0-0001-cmake-dependencies.patch"
       patch_description: "CMake: ensure conan dependencies are used"
@@ -39,6 +47,10 @@ patches:
     - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
       patch_description: "allow to build with abseil built without c++17 support"
       patch_type: "portability"
+    - patch_file: "patches/1.16.0-0002-vs2019.patch"
+      patch_description: "Do not include C++23 header if it is not present"
+      patch_type: "portability"
+      patch_source: "https://github.com/microsoft/onnxruntime/pull/17716"
   "1.16.0":
     - patch_file: "patches/1.16.0-0001-cmake-dependencies.patch"
       patch_description: "CMake: ensure conan dependencies are used"
@@ -46,6 +58,10 @@ patches:
     - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
       patch_description: "allow to build with abseil built without c++17 support"
       patch_type: "portability"
+    - patch_file: "patches/1.16.0-0002-vs2019.patch"
+      patch_description: "Do not include C++23 header if it is not present"
+      patch_type: "portability"
+      patch_source: "https://github.com/microsoft/onnxruntime/pull/17716"
   "1.15.1":
     - patch_file: "patches/1.15.1-0001-cmake-dependencies.patch"
       patch_description: "CMake: ensure conan dependencies are used"
