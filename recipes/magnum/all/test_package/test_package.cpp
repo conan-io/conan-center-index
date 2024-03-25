@@ -1,8 +1,9 @@
-#include <iostream>
 #include "Magnum/Math/Vector.h"
 #include "Magnum/Math/StrictWeakOrdering.h"
 #include <Corrade/PluginManager/Manager.h>
 #include <Magnum/Trade/AbstractImporter.h>
+
+#include <iostream>
 
 #include "configure.h"
 
