@@ -97,7 +97,8 @@ class ProtobufConan(ConanFile):
             runtime = msvc_runtime_flag(self)
             if not runtime:
                 runtime = self.settings.get_safe("compiler.runtime")
-            tc.cache_variables["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in runtime
+            if runtime:
+                tc.cache_variables["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in runtime
         if is_apple_os(self) and self.options.shared:
             # Workaround against SIP on macOS for consumers while invoking protoc when protobuf lib is shared
             tc.variables["CMAKE_INSTALL_RPATH"] = "@loader_path/../lib"
