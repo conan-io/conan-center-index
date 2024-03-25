@@ -1,0 +1,46 @@
+From da1229dc1b0131bd606260bfa27196ae3503085a Mon Sep 17 00:00:00 2001
+From: Niels Dekker <N.Dekker@lumc.nl>
+Date: Thu, 20 Oct 2022 11:53:47 +0200
+Subject: [PATCH] STYLE: Remove obsolete uncaught_exception() call from
+ `~LightObject()`
+
+The check that there is no uncaught exception was only relevant when the
+`LightObject` destructor still called `itkExceptionMacro`, which was before
+commit b9dd80bbfc0f7427bcf6b96e96238e8def3fadc0 "BUG: Destructors should not
+throw exceptions...", by Brad King, April 4, 2007.
+
+Note also that from C++11, any destructor is `noexcept` by default, and that
+C++17 has deprecated `std::uncaught_exception()`.
+---
+ Modules/Core/Common/src/itkLightObject.cxx | 12 ++----------
+ 1 file changed, 2 insertions(+), 10 deletions(-)
+
+diff --git a/Modules/Core/Common/src/itkLightObject.cxx b/Modules/Core/Common/src/itkLightObject.cxx
+index 4b0827fd79e..4f4881a58e8 100644
+--- a/Modules/Core/Common/src/itkLightObject.cxx
++++ b/Modules/Core/Common/src/itkLightObject.cxx
+@@ -177,22 +177,14 @@ LightObject::~LightObject()
+   /**
+    * warn user if reference counting is on and the object is being referenced
+    * by another object.
+-   * a call to uncaught_exception is necessary here to avoid throwing an
+-   * exception if one has been thrown already. This is likely to
+-   * happen when a subclass constructor (say B) is throwing an exception: at
+-   * that point, the stack unwinds by calling all superclass destructors back
+-   * to this method (~LightObject): since the ref count is still 1, an
+-   * exception would be thrown again, causing the system to abort()!
+    */
+-  if (m_ReferenceCount > 0 && !std::uncaught_exception())
++  if (m_ReferenceCount > 0)
+   {
+     // A general exception safety rule is that destructors should
+     // never throw.  Something is wrong with a program that reaches
+     // this point anyway.  Also this is the least-derived class so the
+     // whole object has been destroyed by this point anyway.  Just
+-    // issue a warning.
+-    // itkExceptionMacro(<< "Trying to delete object with non-zero reference
+-    // count.");
++    // issue a warning, do not call `itkExceptionMacro`.
+     itkWarningMacro("Trying to delete object with non-zero reference count.");
+   }
+ }
