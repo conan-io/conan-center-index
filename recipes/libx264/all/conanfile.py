@@ -25,11 +25,15 @@ class LibX264Conan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "bit_depth": [8, 10, "all"],
+        "with_opencl": [True, False],
+        "with_asm": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "bit_depth": "all",
+        "with_opencl": True,
+        "with_asm": True
     }
 
     # otherwise build fails with: ln: failed to create symbolic link './Makefile' -> '../../../../../../../../../../../../../j/w/prod/buildsinglereference@2/.conan/data/libx264/cci.20220602/_/_/build/622692a7dbc145becf87f01b017e2a0d93cc644e/src/Makefile': File name too long
@@ -87,6 +91,10 @@ class LibX264Conan(ConanFile):
             args["--enable-shared"] = ""
         else:
             args["--enable-static"] = ""
+        if not self.options.with_opencl:
+            args["--disable-opencl"] = ""
+        if not self.options.with_asm:
+            args["--disable-asm"] = ""
         if self.options.get_safe("fPIC", self.settings.os != "Windows"):
             args["--enable-pic"] = ""
         if self.settings.build_type == "Debug":
