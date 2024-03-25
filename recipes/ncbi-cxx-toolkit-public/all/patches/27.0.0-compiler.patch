@@ -1,0 +1,11 @@
+--- src/build-system/cmake/CMakeChecks.compiler.cmake
++++ src/build-system/cmake/CMakeChecks.compiler.cmake
+@@ -477,7 +477,7 @@ set(_ggdb1 "-ggdb1")
+ set(_gdw4r "-gdwarf-4")
+ if(NCBI_COMPILER_GCC)
+ 
+-    if("${NCBI_COMPILER_VERSION}" LESS "730")
++    if("${NCBI_COMPILER_VERSION}" LESS "700")
+         add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
+     endif()
+     if(BinRelease IN_LIST NCBI_PTBCFG_PROJECT_FEATURES)
