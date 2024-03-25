@@ -34,6 +34,17 @@ class Log4cxxConan(ConanFile):
         "with_smtp_appender": [True, False],
         "with_qt": [True, False],
     }
+    options_description = {
+        "char_type": "The log4cxx internal character type (selects the std::basic_string template parameter used by log4cxx::LogString)",
+        "char_encoding": "The external character set used when writing to files",
+        "with_networking": "Include appenders that use network i/o",
+        "with_wchar_t": "Include wchar_t API methods in class interfaces",
+        "with_fmt_layout": "Include the log4cxx::FMTLayout class that uses libfmt to layout messages",
+        "with_odbc_appender": "Include the log4cxx::ODBCAppender that sends log events to a database",
+        "with_multiprocess_rolling_file_appender": "Include the appender that allows multiple applications to log to the same file",
+        "with_smtp_appender": "Include the appender that sends an e-mail when a specific logging event occurs",
+        "with_qt": "Allow QString values in the LOG4CXX_WARN, LOG4CXX_INFO, LOG4CXX_DEBUG etc. macros",
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
