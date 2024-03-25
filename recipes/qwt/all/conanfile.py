@@ -66,6 +66,9 @@ class QwtConan(ConanFile):
         self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
+        qt_version = Version(self.dependencies["qt"].ref.version)
+        if not 5 <= qt_version.major <= 6:
+            raise ConanInvalidConfiguration(f"{self.name} doesn't support Qt/{qt_version}. Allowed Qt version are 5 or 6")
         if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Qwt recipe does not support cross-compilation yet")
         qt_options = self.dependencies["qt"].options
