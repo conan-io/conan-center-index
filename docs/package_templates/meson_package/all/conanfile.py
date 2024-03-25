@@ -23,13 +23,13 @@ class PackageConan(ConanFile):
     name = "package"
     description = "short description"
     # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
-    # In case not listed there, use "LicenseRef-<license-file-name>"
+    # In case not listed there, use "DocumentRef-<license-file-name>:LicenseRef-<package-name>"
     license = ""
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
     # no "conan" and project name in topics. Use topics from the upstream listed on GH
     topics = ("topic1", "topic2", "topic3")
-    # package_type should usually be "library" (if there is shared option)
+    # package_type should usually be "library", "shared-library" or "static-library"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -59,7 +59,6 @@ class PackageConan(ConanFile):
         }
 
     # no exports_sources attribute, but export_sources(self) method instead
-    # this allows finer grain exportation of patches per version
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -75,12 +74,19 @@ class PackageConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # prefer self.requires method instead of requires attribute
+        # Prefer self.requires method instead of requires attribute.
+        # Set transitive_headers=True (which usually also requires transitive_libs=True)
+        # if the dependency is used in any of the packaged header files.
         self.requires("dependency/0.8.1")
+        if self.options.with_foobar:
+            # used in foo/baz.hpp:34
+            self.requires("foobar/0.1.0", transitive_headers=True, transitive_libs=True)
+        # A small number of dependencies on CCI are allowed to use version ranges.
+        # See https://github.com/conan-io/conan-center-index/blob/master/docs/adding_packages/dependencies.md#version-ranges
+        self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         # validate the minimum cpp standard supported. For C++ projects only
@@ -91,17 +97,17 @@ class PackageConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        # in case it does not work in another configuration, it should validated here too
+        # in case it does not work in another configuration, it should be validated here too
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     # if another tool than the compiler or Meson is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         # CCI policy assumes that Meson may not be installed on consumers machine
-        self.tool_requires("meson/1.2.3")
+        self.tool_requires("meson/1.3.1")
         # pkgconf is largely used by Meson, it should be added in build requirement when there are dependencies
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -122,17 +128,16 @@ class PackageConan(ConanFile):
         # Meson project options may vary their types
         tc.project_options["tests"] = False
         tc.generate()
-        # In case there are dependencies listed on requirements, PkgConfigDeps should be used
-        tc = PkgConfigDeps(self)
-        tc.generate()
-        # In case there are dependencies listed on build_requirements, VirtualBuildEnv should be used
-        tc = VirtualBuildEnv(self)
-        tc.generate()
+        # In case there are dependencies listed under requirements, PkgConfigDeps should be used
+        deps = PkgConfigDeps(self)
+        deps.generate()
+        # In case there are dependencies listed under build_requirements, VirtualBuildEnv should be used
+        VirtualBuildEnv(self).generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
         # remove bundled xxhash
-        rm(self, "whateer.*", os.path.join(self.source_folder, "lib"))
+        rm(self, "whatever.*", os.path.join(self.source_folder, "lib"))
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "...", "")
 
     def build(self):

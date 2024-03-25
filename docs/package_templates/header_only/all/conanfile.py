@@ -14,15 +14,14 @@ class PackageConan(ConanFile):
     name = "package"
     description = "short description"
     # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
-    # In case it's not listed there, use "LicenseRef-<license-file-name>"
+    # In case it's not listed there, use "DocumentRef-<license-file-name>:LicenseRef-<package-name>"
     license = ""
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
     # Do not put "conan" nor the project name in topics. Use topics from the upstream listed on GH
-    # Keep 'header-only' as topic
+    # Include 'header-only' as a topic
     topics = ("topic1", "topic2", "topic3", "header-only")
     package_type = "header-library"
-    # Keep these or explain why it's not required for this particular case
     settings = "os", "arch", "compiler", "build_type"
     # Do not copy sources to build folder for header only projects, unless you need to apply patches
     no_copy_source = True
@@ -43,18 +42,21 @@ class PackageConan(ConanFile):
         }
 
     # Use the export_sources(self) method instead of the exports_sources attribute.
-    # This allows finer grain exportation of patches per version
     def export_sources(self):
         export_conandata_patches(self)
 
     def layout(self):
-        # src_folder must use the same source folder name than the project
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         # Prefer self.requires method instead of requires attribute
         # Direct dependencies of header only libs are always transitive since they are included in public headers
-        self.requires("dependency/0.8.1", transitive_headers=True)
+        self.requires("dependency/0.8.1")
+        if self.options.with_foobar:
+            self.requires("foobar/0.1.0", transitive_headers=True, transitive_libs=True)
+        # A small number of dependencies on CCI are allowed to use version ranges.
+        # See https://github.com/conan-io/conan-center-index/blob/master/docs/adding_packages/dependencies.md#version-ranges
+        self.requires("openssl/[>=1.1 <4]")
 
     # same package ID for any package
     def package_id(self):

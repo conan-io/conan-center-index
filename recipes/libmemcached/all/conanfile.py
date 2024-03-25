@@ -20,7 +20,7 @@ class LibmemcachedConan(ConanFile):
     homepage = "https://libmemcached.org/"
     description = "libmemcached is a C client library for interfacing to a memcached server"
     topics = ("cache", "network", "cloud")
-    # package_type should usually be "library" (if there is shared option)
+    # package_type should usually be "library", "shared-library" or "static-library"
     package_type = "library"
 
     # Binary configuration

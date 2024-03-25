@@ -22,13 +22,13 @@ class PackageConan(ConanFile):
     name = "package"
     description = "short description"
     # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
-    # In case not listed there, use "LicenseRef-<license-file-name>"
+    # In case not listed there, use "DocumentRef-<license-file-name>:LicenseRef-<package-name>"
     license = ""
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
     # no "conan" and project name in topics. Use topics from the upstream listed on GH
     topics = ("topic1", "topic2", "topic3")
-    # package_type should usually be "library" (if there is shared option)
+    # package_type should usually be "library", "shared-library" or "static-library"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -62,7 +62,6 @@ class PackageConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     # no exports_sources attribute, but export_sources(self) method instead
-    # this allows finer grain exportation of patches per version
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -78,14 +77,19 @@ class PackageConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # prefer self.requires method instead of requires attribute
+        # Prefer self.requires method instead of requires attribute.
+        # Set transitive_headers=True (which usually also requires transitive_libs=True)
+        # if the dependency is used in any of the packaged header files.
         self.requires("dependency/0.8.1")
         if self.options.with_foobar:
-            self.requires("foobar/0.1.0")
+            # used in foo/baz.hpp:34
+            self.requires("foobar/0.1.0", transitive_headers=True, transitive_libs=True)
+        # A small number of dependencies on CCI are allowed to use version ranges.
+        # See https://github.com/conan-io/conan-center-index/blob/master/docs/adding_packages/dependencies.md#version-ranges
+        self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         # validate the minimum cpp standard supported. Only for C++ projects
@@ -99,7 +103,7 @@ class PackageConan(ConanFile):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
-    # if another tool than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
+    # if a tool other than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         # only if we have to call autoreconf
         self.tool_requires("libtool/x.y.z")
@@ -120,15 +124,13 @@ class PackageConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        # inject tool_requires env vars in build scope (not needed if there is no tool_requires)
-        env = VirtualBuildEnv(self)
-        env.generate()
-        # inject requires env vars in build scope
+        # inject tool_requires env vars into the build scope (not needed if there are no tool_requires)
+        VirtualBuildEnv(self).generate()
+        # inject required env vars into the build scope
         # it's required in case of native build when there is AutotoolsDeps & at least one dependency which might be shared, because configure tries to run a test executable
         if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
-        # --fpic is automatically managed when 'fPIC'option is declared
+            VirtualRunEnv(self).generate(scope="build")
+        # --fpic is automatically managed when 'fPIC' option is declared
         # --enable/disable-shared is automatically managed when 'shared' option is declared
         tc = AutotoolsToolchain(self)
         # autotools usually uses 'yes' and 'no' to enable/disable options
@@ -143,8 +145,10 @@ class PackageConan(ConanFile):
         tc = PkgConfigDeps(self)
         tc.generate()
         # generate dependencies for autotools
-        tc = AutotoolsDeps(self)
-        tc.generate()
+        # some recipes might require a workaround for MSVC (https://github.com/conan-io/conan/issues/12784):
+        # https://github.com/conan-io/conan-center-index/blob/00ce907b910d0d772f1c73bb699971c141c423c1/recipes/xapian-core/all/conanfile.py#L106-L135
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
         # If Visual Studio is supported
         if is_msvc(self):
@@ -158,7 +162,7 @@ class PackageConan(ConanFile):
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            env.define("AR", f"{ar_wrapper} lib")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
