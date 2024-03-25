@@ -1,0 +1,8 @@
+  sources:
+    "0.0.11":
+      url: "https://github.com/elFarto/nvidia-vaapi-driver/archive/refs/tags/v0.0.11.tar.gz"
+      sha256: "3e1ed95d7e2b2b1377c9cb59c3e7caaf960134694e9441e1d91c38f224d1d5d9"
+      
+    "0.0.9-dev":
+      url: "https://github.com/spiderkeys/nvidia-vaapi-driver/archive/refs/tags/0.0.9-dev.tar.gz"
+      sha256: "f1c84d26e9277371f8004764f698b612539111940be6f869ea414380d2bc0493"

@@ -1,10 +1,12 @@
 sources:
   "6.6.2":
     url:
+      - "https://mirrors.ocf.berkeley.edu/qt/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
+      - "https://mirrors.ukfast.co.uk/sites/qt.io/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
+      - "https://qt.mirror.constant.com/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
       - "https://download.qt.io/official_releases/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
       - "https://download.qt.io/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
       - "https://mirrors.20i.com/pub/qt.io/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
-      - "https://mirrors.ukfast.co.uk/sites/qt.io/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
       - "https://ftp.nluug.nl/languages/qt/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
       - "https://mirror.netcologne.de/qtproject/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
       - "https://qt-mirror.dannhauer.de/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
@@ -13,7 +15,6 @@ sources:
       - "https://ftp.acc.umu.se/mirror/qt.io/qtproject/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
       - "https://www.nic.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
       - "https://qtproject.mirror.liquidtelecom.com/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
-      - "https://qt.mirror.constant.com/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
       - "https://mirrors.sau.edu.cn/qt/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
       - "https://mirrors.cloud.tencent.com/qt/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
       - "https://mirrors.ustc.edu.cn/qtproject/archive/qt/6.6/6.6.2/single/qt-everywhere-src-6.6.2.tar.xz"
