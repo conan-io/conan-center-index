@@ -14,9 +14,10 @@ class MortonndConan(ConanFile):
     description = "A header-only Morton encode/decode library (C++14) capable " \
                   "of encoding from and decoding to N-dimensional space."
     license = "MIT"
-    topics = ("morton-nd", "morton", "encoding", "decoding", "n-dimensional")
+    topics = ("morton", "encoding", "decoding", "n-dimensional")
     homepage = "https://github.com/kevinhartman/morton-nd"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -34,6 +35,9 @@ class MortonndConan(ConanFile):
             "apple-clang": "5.1",
         }
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def package_id(self):
         self.info.clear()
 
@@ -46,12 +50,8 @@ class MortonndConan(ConanFile):
                 f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -64,9 +64,7 @@ class MortonndConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "morton-nd")
         self.cpp_info.set_property("cmake_target_name", "morton-nd::MortonND")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.names["cmake_find_package"] = "morton-nd"
@@ -75,6 +73,4 @@ class MortonndConan(ConanFile):
         self.cpp_info.components["mortonnd"].names["cmake_find_package_multi"] = "MortonND"
         self.cpp_info.components["mortonnd"].set_property("cmake_target_name", "morton-nd::MortonND")
         self.cpp_info.components["mortonnd"].bindirs = []
-        self.cpp_info.components["mortonnd"].frameworkdirs = []
         self.cpp_info.components["mortonnd"].libdirs = []
-        self.cpp_info.components["mortonnd"].resdirs = []
