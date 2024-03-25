@@ -65,7 +65,7 @@ You can open issues in the [issue tracker](https://github.com/conan-io/conan-cen
     - Specify the name and version (`zlib/1.2.11`) and any relevant details about the fail configuration: Applied profile, building machine...
 
 * :bulb: Request a **new library** to be added:
-    - Use the `[request]` label to search the library in the issue tracker in case the it was already requested.
+    - Use the `[request]` label to search the library in the issue tracker in case it was already requested.
     - If not, use the same `[request]` tag in the title of the issue to help identifying them.
     - Indicate the name and the version of the library you would like to have in the repository. Also links to the project's website,
       source download/repository and in general any relevant information that helps creating a recipe for it.

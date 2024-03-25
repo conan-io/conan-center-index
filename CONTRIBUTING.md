@@ -32,7 +32,7 @@ To contribute follow the next steps:
    got everything working or even if you need help. Add the text to the issue body (besides other comments): "fixes #IssueNumber"
    in the body of the PR, referring to the issue of step 1.
 
-The Conan Community works hard to review all the pull requests and provided assistance where need.
+The Conan Community works hard to review all the pull requests and provide assistance where need.
 The [Review Process](docs/review_process.md) is partially automated with the help of @conan-center-index-bot :rocket:
 
 ## Issues

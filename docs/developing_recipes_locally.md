@@ -76,12 +76,12 @@ We recommend working from the `recipes/project` folder itself. You can learn abo
 
 > **Note**: You can only change one recipe per pull request, and working from the [_recipe folder_](adding_packages/README.md#the-recipe-folder-conanfilepy) will help prevent making a few mistakes. The default for this folder is `all`, follow the link above to learn more.
 
-The [entire workflow of a recipe](https://docs.conan.io/1/developing_packages/package_dev_flow.html) can be execute with the [`conan create`](https://docs.conan.io/1/reference/commands/creator/create.html). This should look like:
+The [entire workflow of a recipe](https://docs.conan.io/1/developing_packages/package_dev_flow.html) can be executed with the [`conan create`](https://docs.conan.io/1/reference/commands/creator/create.html). This should look like:
 
 * `conan create all/conanfile.py 0.0.0@ -pr:b=default -pr:h=default`
 
 ConanCenter also has a few [support settings and options](supported_platforms_and_configurations.md) which highly recommend to test. For example
-`conan create all/conanfile.py 0.0.0@ -o project:shared=True -s build_type=Debug` is a easy way to test more configurations ensuring the package is correct.
+`conan create all/conanfile.py 0.0.0@ -o project:shared=True -s build_type=Debug` is an easy way to test more configurations ensuring the package is correct.
 
 ### Try it yourself
 
@@ -165,7 +165,7 @@ schema validation. There's are to encourage the best possible quality of recipes
 ### Yamlschema
 
 * (Recommended) Use a dedicated Python virtualenv.
-* Ensure you have required tools installed: `strictyaml` and `argparse` (better to uses fixed versions)
+* Ensure you have required tools installed: `strictyaml` and `argparse` (better to use fixed versions)
 
   ```sh
   pip install strictyaml==1.16 argparse==1.4
