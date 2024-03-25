@@ -14,10 +14,10 @@ class LibsrtpRecipe(ConanFile):
         "Protocol (SRTP), the Universal Security Transform (UST), and a supporting"
         "cryptographic kernel."
     )
-    topics = ("srtp",)
-    homepage = "https://github.com/cisco/libsrtp"
-    url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-3-Clause"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/cisco/libsrtp"
+    topics = ("srtp",)
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -54,12 +54,18 @@ class LibsrtpRecipe(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_OPENSSL"] = self.options.with_openssl
-        tc.variables["TEST_APPS"] = False
+        if  Version(self.version) < "2.6.0":
+            tc.variables["TEST_APPS"] = False
+        else:
+            tc.variables["LIBSRTP_TEST_APPS"] = False
         if Version(self.version) < "2.4.0":
             # Relocatable shared libs on Macos
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        if Version(self.version) >= "2.5.0":
+        if  "2.5.0" <= Version(self.version) < "2.6.0":
             tc.cache_variables["BUILD_WITH_WARNINGS"] = False
+        if  "2.6.0" <= Version(self.version):
+            tc.cache_variables["ENABLE_WARNINGS"] = False
+            tc.cache_variables["ENABLE_WARNINGS_AS_ERRORS"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
