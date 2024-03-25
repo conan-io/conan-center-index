@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
@@ -17,6 +17,7 @@ class GlazeConan(ConanFile):
     topics = ("json", "memory", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
     def _min_cppstd(self):
@@ -24,16 +25,17 @@ class GlazeConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        return {
+        versions = {
             "Visual Studio": "17",
             "msvc": "193",
-            "gcc": "10" if Version(self.version) < "1.9.0" else "11",
-            "clang": "12",
+            "gcc": "10",
+            # glaze >= 2.1.6 uses std::bit_cast which is supported by clang >= 14
+            "clang": "12" if Version(self.version) < "2.1.6" else "14",
             "apple-clang": "13.1",
         }
-
-    def export_sources(self):
-        export_conandata_patches(self)
+        if Version(self.version) >= "1.9.0":
+            versions["gcc"] = "11"
+        return versions
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -42,7 +44,13 @@ class GlazeConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
+        if Version(self.version) >= "2.1.4" and \
+            self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "11.3":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} doesn't support 11.0<=gcc<11.3 due to gcc bug. Please use gcc>=11.3 and set compiler.version.(ex. compiler.version=11.3)",
+            )
+
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -52,9 +60,6 @@ class GlazeConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def build(self):
-        apply_conandata_patches(self)
 
     def package(self):
         copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)

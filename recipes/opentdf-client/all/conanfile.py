@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, replace_in_file, get, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -41,8 +41,8 @@ class OpenTDFConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "17" if Version(self.version) < "1.1.5" else "15",
-            "msvc": "193" if Version(self.version) < "1.1.5" else "191",
+            "Visual Studio": "15",
+            "msvc": "191",
             "gcc": "7.5",
             "clang": "12",
             "apple-clang": "12",
@@ -69,11 +69,11 @@ class OpenTDFConan(ConanFile):
         if Version(self.version) >= "1.4.0":
             self.requires("magic_enum/0.8.2")
         self.requires("ms-gsl/2.1.0")
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("nlohmann_json/3.11.3")
         self.requires("jwt-cpp/0.4.0")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("boost/1.83.0")
-        self.requires("libxml2/2.11.4")
+        self.requires("libxml2/2.11.6")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -155,8 +155,6 @@ class OpenTDFConan(ConanFile):
         ]
         if Version(self.version) >= "1.4.0":
             self.cpp_info.components["libopentdf"].requires.append("magic_enum::magic_enum")
-        if Version(self.version) < "1.1.0":
-            self.cpp_info.components["libopentdf"].requires.append("libarchive::libarchive")
         if Version(self.version) >= "1.4.0":
             self.cpp_info.components["libopentdf"].requires.append("magic_enum::magic_enum")
 

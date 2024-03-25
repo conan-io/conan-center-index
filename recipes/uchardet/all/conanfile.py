@@ -3,7 +3,8 @@ import os
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.files import copy, get, replace_in_file, rmdir, save
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -62,28 +63,14 @@ class UchardetConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        # the following fixes that apply to uchardet version 0.0.7
-        # fix broken cmake
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "${CMAKE_BINARY_DIR}",
-            "${CMAKE_CURRENT_BINARY_DIR}",
-        )
-        # fix problem with mac os
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} TARGET_ARCHITECTURE)",
-            'string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" TARGET_ARCHITECTURE)',
-        )
-        # disable building tests
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "add_subdirectory(test)",
-            "#add_subdirectory(test)",
-        )
+        if Version(self.version) < "0.0.8":
+            # fix problem with macOS
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} TARGET_ARCHITECTURE)",
+                            'string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" TARGET_ARCHITECTURE)')
+        # disable building of tests
+        save(self, os.path.join(self.source_folder, "doc", "CMakeLists.txt"), "")
+        save(self, os.path.join(self.source_folder, "test", "CMakeLists.txt"), "")
 
     def build(self):
         self._patch_sources()
@@ -97,6 +84,7 @@ class UchardetConan(ConanFile):
              src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)

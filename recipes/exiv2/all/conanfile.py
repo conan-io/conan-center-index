@@ -73,7 +73,7 @@ class Exiv2Conan(ConanFile):
     def requirements(self):
         self.requires("libiconv/1.17")
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_xmp == "bundled":
             self.requires("expat/2.5.0")
