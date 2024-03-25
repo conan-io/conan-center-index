@@ -50,7 +50,7 @@ class AwsCMQTT(ConanFile):
             self.requires("aws-c-common/0.9.6", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-cal/0.6.9")
             self.requires("aws-c-io/0.13.35", transitive_headers=True)
-            self.requires("aws-c-http/0.7.14")
+            self.requires("aws-c-http/0.8.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
