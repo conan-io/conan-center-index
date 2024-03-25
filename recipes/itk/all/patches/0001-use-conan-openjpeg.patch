@@ -1,0 +1,12 @@
+--- Modules/ThirdParty/OpenJPEG/src/CMakeLists.txt
++++ Modules/ThirdParty/OpenJPEG/src/CMakeLists.txt
+@@ -4,5 +4,7 @@
+ set(ITK3P_INSTALL_RUNTIME_DIR "${ITKOpenJPEG_INSTALL_RUNTIME_DIR}")
+ set(ITK3P_INSTALL_LIBRARY_DIR "${ITKOpenJPEG_INSTALL_LIBRARY_DIR}")
+ set(ITK3P_INSTALL_ARCHIVE_DIR "${ITKOpenJPEG_INSTALL_ARCHIVE_DIR}")
+-add_subdirectory(openjpeg)
+-itk_module_target(itkopenjpeg NO_INSTALL)
++find_package(OpenJPEG REQUIRED)
++add_library(itkopenjpeg INTERFACE)
++set_property(TARGET itkopenjpeg PROPERTY INTERFACE_LINK_LIBRARIES openjp2)
++install(TARGETS itkopenjpeg EXPORT ${ITK3P_INSTALL_EXPORT_NAME}) 
