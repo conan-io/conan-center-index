@@ -10,8 +10,10 @@ class VigraConan(ConanFile):
     url = "https://github.com/ukoethe/vigra"
     homepage = "http://ukoethe.github.io/vigra/"
     settings = "os", "arch", "compiler", "build_type"
+    topics = "image-processing", "computer-vision"
     options = {
         "shared" : [True, False],
+        "fPIC" : [True, False],
         "with_hdf5" : [True, False],
         "with_openexr" : [True, False],
         "with_boost_graph" : [True, False],
