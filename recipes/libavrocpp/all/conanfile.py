@@ -14,6 +14,7 @@ class LibavrocppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://avro.apache.org/"
     topics = ("serialization", "deserialization","avro")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -44,8 +45,10 @@ class LibavrocppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0")
-        self.requires("snappy/1.1.9")
+        # libavrocpp public headers include several boost headers
+        # (for example avro/Node.hh includes boost/noncopyable.hpp)
+        self.requires("boost/1.83.0", transitive_headers=True)
+        self.requires("snappy/1.1.10")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
