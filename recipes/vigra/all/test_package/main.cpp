@@ -16,8 +16,7 @@ int main()
 
 
   cout << "formats supported: " << endl;
-  impexListFormats();
+  cout << impexListFormats()  << endl;
 
-  cout << endl;
   
 }
