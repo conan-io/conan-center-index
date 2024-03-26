@@ -232,7 +232,7 @@ class GdalConan(ConanFile):
         if self.options.with_jxl:
             self.requires("libjxl/0.6.1")
         if self.options.with_kea:
-            self.requires("kealib/1.4.14")
+            self.requires("kealib/1.5.2")
         if self.options.with_lerc:
             self.requires("lerc/4.0.1")
         if self.options.get_safe("with_libaec"):
@@ -279,7 +279,7 @@ class GdalConan(ConanFile):
         if self.options.with_podofo:
             self.requires("podofo/0.9.7")
         if self.options.with_poppler:
-            self.requires("poppler/21.07.0")
+            self.requires("poppler/24.03.0")
         if self.options.with_qhull:
             self.requires("qhull/8.0.1")
         if self.options.with_rasterlite2:
@@ -289,7 +289,7 @@ class GdalConan(ConanFile):
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.44.2")
         if self.options.with_tiledb:
-            self.requires("tiledb/2.17.4")
+            self.requires("tiledb/2.21.0")
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
         if self.options.with_xerces:
