@@ -37,7 +37,7 @@ class OGDFConan(ConanFile):
 
     def requirements(self):
         self.requires("coin-clp/1.17.7")
-        self.requires("pugixml/1.13")
+        self.requires("pugixml/1.14")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
