@@ -2,12 +2,13 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, rename
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
+from conan.tools.env import VirtualBuildEnv
 import os
 
 
@@ -66,7 +67,7 @@ class ThorvgConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.2")
+        self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.1.0")
 
@@ -75,12 +76,14 @@ class ThorvgConan(ConanFile):
 
     def generate(self):
         if is_msvc(self):
-            tc = MesonToolchain(self, backend="vs2022")
+            tc = MesonToolchain(self, backend="vs")
         else:
             tc = MesonToolchain(self)
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
+        venv = VirtualBuildEnv(self)
+        venv.generate(scope="build")
 
     def build(self):
         meson = Meson(self)
@@ -92,8 +95,10 @@ class ThorvgConan(ConanFile):
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-
         fix_apple_shared_install_name(self)
+
+        if is_msvc(self) and not self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "libthorvg.a"), os.path.join(self.package_folder, "lib", "thorvg.lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["thorvg"]
