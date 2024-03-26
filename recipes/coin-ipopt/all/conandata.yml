@@ -1,0 +1,4 @@
+sources:
+  "3.14.13":
+    url: "https://github.com/coin-or/Ipopt/archive/refs/tags/releases/3.14.13.tar.gz"
+    sha256: "2afcb057e7cf8ed7e07f50ee0a4a06d2e4d39e0f964777e9dd55fe56199a5e0a"
