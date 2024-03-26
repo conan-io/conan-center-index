@@ -1,0 +1,105 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1fe0e2b..a850e4d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -20,7 +20,7 @@ cmake_dependent_option(UVWASI_BUILD_TESTS
+ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
+ 
+ if(CMAKE_C_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
+-  list(APPEND uvwasi_cflags -fvisibility=hidden --std=gnu89)
++  list(APPEND uvwasi_cflags --std=gnu89)
+   list(APPEND uvwasi_cflags -Wall -Wsign-compare -Wextra -Wstrict-prototypes)
+   list(APPEND uvwasi_cflags -Wno-unused-parameter)
+ endif()
+@@ -33,9 +33,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+   list(APPEND uvwasi_defines _GNU_SOURCE _POSIX_C_SOURCE=200112)
+ endif()
+ 
+-find_package(LIBUV QUIET)
+-if(LIBUV_FOUND)
+-  include_directories(${LIBUV_INCLUDE_DIR})
++find_package(libuv QUIET)
++if(libuv_FOUND)
++  include_directories(${libuv_INCLUDE_DIR})
+ else()
+   include(FetchContent)
+   ## https://libuv.org
+@@ -97,26 +97,28 @@ if(ASAN AND CMAKE_C_COMPILER_ID MATCHES "AppleClang|GNU|Clang")
+     set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+ endif()
+ 
++if (NOT BUILD_SHARED_LIBS)
+ ## Static library target.
+ add_library(uvwasi_a STATIC ${uvwasi_sources})
+ target_compile_definitions(uvwasi_a PRIVATE ${uvwasi_defines})
+ target_compile_options(uvwasi_a PRIVATE ${uvwasi_cflags})
+ target_include_directories(uvwasi_a PRIVATE ${PROJECT_SOURCE_DIR}/include)
+ if(CODE_COVERAGE)
+-    target_link_libraries(uvwasi_a PUBLIC ${LIBUV_LIBRARIES} coverage_config)
++    target_link_libraries(uvwasi_a PUBLIC ${libuv_LIBRARIES} coverage_config)
+ else()
+-    target_link_libraries(uvwasi_a PRIVATE ${LIBUV_LIBRARIES})
++    target_link_libraries(uvwasi_a PRIVATE ${libuv_LIBRARIES})
+ endif()
+-
++else()
+ ## Shared library target.
+ add_library(uvwasi SHARED ${uvwasi_sources})
+ target_compile_definitions(uvwasi PRIVATE ${uvwasi_defines})
+ target_compile_options(uvwasi PRIVATE ${uvwasi_cflags})
+ target_include_directories(uvwasi PRIVATE ${PROJECT_SOURCE_DIR}/include)
+ if(CODE_COVERAGE)
+-    target_link_libraries(uvwasi PUBLIC ${LIBUV_LIBRARIES} coverage_config)
++    target_link_libraries(uvwasi PUBLIC ${libuv_LIBRARIES} coverage_config)
+ else()
+-    target_link_libraries(uvwasi PRIVATE ${LIBUV_LIBRARIES})
++    target_link_libraries(uvwasi PRIVATE ${libuv_LIBRARIES})
++endif()
+ endif()
+ 
+ 
+@@ -132,7 +134,7 @@ if(UVWASI_BUILD_TESTS)
+         target_include_directories(${test_name}
+                                     PRIVATE
+                                     ${PROJECT_SOURCE_DIR}/include)
+-        target_link_libraries(${test_name} PRIVATE ${LIBUV_LIBRARIES} uvwasi_a)
++        target_link_libraries(${test_name} PRIVATE ${libuv_LIBRARIES} uvwasi_a)
+         list(APPEND test_list ${test_name})
+     endforeach()
+ 
+@@ -158,13 +160,23 @@ if(INSTALL_UVWASI AND NOT CODE_COVERAGE)
+     write_basic_package_version_file(${version_file} VERSION ${PROJECT_VERSION} COMPATIBILITY AnyNewerVersion)
+     configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/Config.cmake.in ${config_file} INSTALL_DESTINATION ${cmake_files_install_dir})
+ 
++    if (NOT BUILD_SHARED_LIBS)
+     install(
+-        TARGETS uvwasi_a uvwasi
++        TARGETS uvwasi_a
+         EXPORT ${target_export_name}
+         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     )
++    else()
++    install(
++        TARGETS uvwasi
++        EXPORT ${target_export_name}
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    )
++    endif()
+     install(
+         DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/uvwasi
+@@ -193,8 +205,8 @@ message(STATUS "summary of uvwasi build options:
+       C compiler:    ${CMAKE_C_COMPILER}
+       CFLAGS:        ${CMAKE_C_FLAGS_${_build_type}} ${CMAKE_C_FLAGS}
+ 
+-    LibUV libraries: ${LIBUV_LIBRARIES}
+-    LibUV includes:  ${LIBUV_INCLUDE_DIR}
++    LibUV libraries: ${libuv_LIBRARIES}
++    LibUV includes:  ${libuv_INCLUDE_DIR}
+     Debug logging:   ${UVWASI_DEBUG_LOG}
+     Code coverage:   ${CODE_COVERAGE}
+     ASAN:            ${ASAN}
