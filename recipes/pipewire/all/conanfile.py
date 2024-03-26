@@ -260,19 +260,12 @@ class PipeWireConan(ConanFile):
         meson = Meson(self)
         meson.install()
 
-        libpipewire_pc_file = glob.glob(
-            os.path.join(self.package_folder, "lib", "pkgconfig", "libpipewire-*.pc")
-        )[0]
-        libspa_pc_file = glob.glob(
-            os.path.join(self.package_folder, "lib", "pkgconfig", "libspa-*.pc")
-        )[0]
+        pkconfig_dir = self.package_path.joinpath("lib", "pkgconfig")
+        libpipewire_pc_file = next(pkconfig_dir.glob("libpipewire-*.pc"))
+        libspa_pc_file = next(pkconfig_dir.glob("libspa-*.pc"))
 
-        libpipewire_api_version = os.path.splitext(
-            os.path.basename(libpipewire_pc_file)
-        )[0].split("-")[1]
-        libspa_api_version = os.path.splitext(os.path.basename(libspa_pc_file))[
-            0
-        ].split("-")[1]
+        libpipewire_api_version = libpipewire_pc_file.stem.split("-")[1]
+        libspa_api_version = libspa_pc_file.stem.split("-")[1]
 
         save(self, self._libpipewire_api_version_txt, libpipewire_api_version)
         save(self, self._libspa_api_version_txt, libspa_api_version)
