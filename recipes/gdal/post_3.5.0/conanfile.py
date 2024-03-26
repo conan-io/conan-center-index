@@ -339,6 +339,11 @@ class GdalConan(ConanFile):
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
 
+        if self.options.tools and self.options.shared:
+            # FIXME: probably also broken for shared dependencies
+            # None of the deps are linked correctly for shared builds, probably due to CMake visibility issues.
+            raise ConanInvalidConfiguration("Building of tools is currently broken for shared=True")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
