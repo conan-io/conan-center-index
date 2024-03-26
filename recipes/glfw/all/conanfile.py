@@ -219,14 +219,18 @@ class GlfwConan(ConanFile):
                 "CoreServices", "Foundation", "IOKit",
             ])
 
-        self.cpp_info.requires = ["opengl::opengl"]
-        if self.options.get_safe("vulkan_static"):
-            self.cpp_info.requires.extend(["vulkan-loader::vulkan-loader"])
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            if self.options.get_safe("with_x11", True):
-                self.cpp_info.requires.extend(["xorg::x11"])
-        if self.options.get_safe("with_wayland"):
-            self.cpp_info.requires.extend(["wayland::wayland", "xkbcommon::xkbcommon"])
+        # Starting with version 3.4, glfw loads the platform libraries at runtime
+        # and hence does not need to link with them.
+        self.cpp_info.requires = []
+        if Version(self.version) < "3.4":
+            self.cpp_info.requires.append("opengl::opengl")
+            if self.options.get_safe("vulkan_static"):
+                self.cpp_info.requires.append("vulkan-loader::vulkan-loader")
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                if self.options.get_safe("with_x11", True):
+                    self.cpp_info.requires.append("xorg::x11")
+            if self.options.get_safe("with_wayland"):
+                self.cpp_info.requires.extend(["wayland::wayland", "xkbcommon::xkbcommon"])
 
         # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
         self.cpp_info.filenames["cmake_find_package"] = "glfw3"
