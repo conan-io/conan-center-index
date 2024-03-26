@@ -295,8 +295,6 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("with_x11", False) and not self.dependencies.direct_host["xkbcommon"].options.with_x11:
             raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled when the 'with_x11' option is enabled")
-        if self.options.get_safe("qtwayland", False) and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
-            raise ConanInvalidConfiguration("The 'with_wayland' option for the 'xkbcommon' package must be enabled when the 'qtwayland' option is enabled")
 
         if cross_building(self):
             raise ConanInvalidConfiguration("cross compiling qt 6 is not yet supported. Contributions are welcome")
@@ -306,6 +304,11 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("qtspeech") and not self.options.qtdeclarative:
             raise ConanInvalidConfiguration("qtspeech requires qtdeclarative, cf QTBUG-108381")
+
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.get_safe("with_egl") and not self.dependencies.direct_host["libglvnd"].options.egl:
+            raise ConanInvalidConfiguration("The 'egl' option for the 'libglvnd' package must be enabled when the 'with_egl' option is enabled")
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.get_safe("opengl", "no") != "no" and not self.dependencies.direct_host["libglvnd"].options.glx:
+            raise ConanInvalidConfiguration("The 'glx' option for the 'libglvnd' package must be enabled when the 'opengl' option is enabled")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -356,10 +359,12 @@ class QtConan(ConanFile):
             self.requires("xkbcommon/1.5.0")
         if self.options.get_safe("with_x11", False):
             self.requires("xorg/system")
-        if self.options.get_safe("with_egl"):
+        if self.options.get_safe("with_egl") and self.settings.os not in ["FreeBSD", "Linux"]:
             self.requires("egl/system")
-        if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
+        if self.settings.os not in ["FreeBSD", "Linux", "Windows"] and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
+        if self.settings.os in ["FreeBSD", "Linux"] and (self.options.get_safe("with_egl") or self.options.get_safe("opengl", "no") != "no"):
+            self.requires("libglvnd/1.7.0")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.qtwayland:
@@ -1055,9 +1060,12 @@ class QtConan(ConanFile):
                 if self.options.get_safe("with_x11", False):
                     gui_reqs.append("xorg::xorg")
                 if self.options.get_safe("with_egl"):
-                    gui_reqs.append("egl::egl")
+                    gui_reqs.append("libglvnd::egl")
             if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
-                gui_reqs.append("opengl::opengl")
+                if self.settings.os in ["FreeBSD", "Linux"]:
+                    gui_reqs.append("libglvnd::gl")
+                else:
+                    gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
                 gui_reqs.append("vulkan-loader::vulkan-loader")
                 if is_apple_os(self):
