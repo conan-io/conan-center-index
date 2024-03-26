@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import can_run, stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -55,9 +55,6 @@ class HarfbuzzConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -72,7 +69,7 @@ class HarfbuzzConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if self.options.shared and self.options.with_glib:
-            wildcard = "" if Version(conan_version) < "2.0.0" else "/*"
+            wildcard = "" if conan_version.major == 1 else "/*"
             self.options[f"glib{wildcard}"].shared = True
 
     def layout(self):
@@ -160,7 +157,6 @@ class HarfbuzzConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('util')", "")
         meson = Meson(self)
         meson.configure()
