@@ -1,0 +1,62 @@
+--- Source/C/NCSEcw/NCSEcw/NCSOutputFile.cpp
++++ Source/C/NCSEcw/NCSEcw/NCSOutputFile.cpp
+@@ -24,28 +24,15 @@
+ *******************************************************/
+ 
+ 
+-#ifdef WIN32
+-	#define _WIN32_WINNT 0x0400	// For MB_SERVICE_NOTIFICATION
+-	#define XMD_H
+-	#include <stdio.h> /**[04]**/
+-	#include "../../libjpeg/jpeglib.h"
+-#elif defined( macintosh )
+-	#include <stdio.h>
+-	extern "C" {
+-		#include "jpeglib.h"
+-	}
+-	#include <string.h>
+-#elif defined(_WIN32_WCE)
+-	#define _WIN32_WINNT 0x0400	// For MB_SERVICE_NOTIFICATION
+-	#define XMD_H
+-	#include <stdio.h> /**[04]**/
+-	#include "../../libjpeg/jpeglib.h"
+-#endif
+ 
+ #include <setjmp.h>
+ 
+ #include "NCSUtil.h"
+ #include "NCSRenderer.h"
++
++#define XMD_H
++#include <jpeglib.h>
++#undef XMD_H
+ 
+ //#ifdef WIN32
+ //#include "WINWRAP.H"
+--- Source/C/NCSEcw/NCSJP2/NCSJP2GMLGeoLocationBox.cpp
++++ Source/C/NCSEcw/NCSJP2/NCSJP2GMLGeoLocationBox.cpp
+@@ -23,15 +23,7 @@
+ #include "NCSJP2File.h"
+ #include "../../NCSGDT2/NCSGDTEpsg.h"
+ 
+-#ifdef NCSJPC_USE_TINYXML
+-#include "../../tinyxml/tinyxml.h"
+-#include "../../tinyxml/tinyxml.cpp"
+-#include "../../tinyxml/tinyxmlparser.cpp"
+-#include "../../tinyxml/tinyxmlerror.cpp"
+-#ifndef TIXML_USE_STL
+-#	include "../../tinyxml/tinystr.cpp"
+-#endif
+-#endif
++#include <tinyxml.h>
+ 
+ #ifndef M_PI
+ #define M_PI    3.14159265358979323846
+--- Source/C/NCSUtil/NCSPrefsXML.h
++++ Source/C/NCSUtil/NCSPrefsXML.h
+@@ -1,4 +1,4 @@
+-#include "../tinyxml/tinyxml.h"
++#include <tinyxml.h>
+ 
+ using namespace std;
+ 
