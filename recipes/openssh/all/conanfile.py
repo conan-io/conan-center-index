@@ -28,7 +28,7 @@ class PackageConan(ConanFile):
     }
     default_options = {
         "with_libcrypto": "openssl",
-        "with_pam": None,
+        "with_pam": False,
         "with_selinux": False,
         "with_libedit": False,
         "with_sandbox": "auto"
