@@ -2,3 +2,8 @@ sources:
   "0.27.10":
     url: "https://github.com/libgit2/libgit2/archive/v0.27.10.tar.gz"
     sha256: "f6fd26378ff71bd7a4b17b576c82c774a2e9c2d6b74b24718a8fb29551e1c4a5"
+patches:
+  "0.27.10":
+    - patch_file: "patches/0.27.10-0001-fix-cmake.patch"
+      patch_description: "correct the order of cmake min and project, use cci's package"
+      patch_type: "conan"

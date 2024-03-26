@@ -1,24 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 88eb9ec..0dc7f87 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -11,8 +11,8 @@
+ # Install:
+ # > cmake --build . --target install
+ 
+-PROJECT(libgit2 C)
+ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11)
++PROJECT(libgit2 C)
+ CMAKE_POLICY(SET CMP0015 NEW)
+ IF(POLICY CMP0051)
+ 	CMAKE_POLICY(SET CMP0051 NEW)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index d01cc64..5691f7e 100644
+index 213dd79..c1e9722 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -167,11 +167,11 @@ ENDIF()
- 
- # Optional external dependency: http-parser
- IF(USE_HTTP_PARSER STREQUAL "system")
--	FIND_PACKAGE(HTTP_Parser)
-+	FIND_PACKAGE(http_parser)
- 
--	IF (HTTP_PARSER_FOUND AND HTTP_PARSER_VERSION_MAJOR EQUAL 2)
--		LIST(APPEND LIBGIT2_SYSTEM_INCLUDES ${HTTP_PARSER_INCLUDE_DIRS})
--		LIST(APPEND LIBGIT2_LIBS ${HTTP_PARSER_LIBRARIES})
-+	IF (http_parser_FOUND)
-+		LIST(APPEND LIBGIT2_SYSTEM_INCLUDES ${http_parser_INCLUDE_DIRS})
-+		LIST(APPEND LIBGIT2_LIBS ${http_parser_LIBRARIES})
- 		LIST(APPEND LIBGIT2_PC_LIBS "-lhttp_parser")
- 		ADD_FEATURE_INFO(http-parser ON "http-parser support (system)")
- 	ELSE()
-@@ -210,7 +210,11 @@ ENDIF()
+@@ -347,7 +347,11 @@ ENDIF()
  
  # Optional external dependency: libssh2
  IF (USE_SSH)
@@ -31,7 +29,7 @@ index d01cc64..5691f7e 100644
  ENDIF()
  IF (LIBSSH2_FOUND)
  	SET(GIT_SSH 1)
-@@ -218,10 +222,7 @@ IF (LIBSSH2_FOUND)
+@@ -355,10 +359,7 @@ IF (LIBSSH2_FOUND)
  	LIST(APPEND LIBGIT2_LIBS ${LIBSSH2_LIBRARIES})
  	LIST(APPEND LIBGIT2_PC_LIBS ${LIBSSH2_LDFLAGS})
  
