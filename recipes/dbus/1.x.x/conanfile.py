@@ -75,7 +75,10 @@ class DbusConan(ConanFile):
         if self.options.with_selinux:
             self.requires("libselinux/3.3")
         if self.options.get_safe("with_x11"):
-            self.requires("xorg/system")
+            # libdbus itself will not link to X11, it will only be used by the executable dbus-launch
+            # which is only built if dbus is built with X11 support. Therefore we want this dependency
+            # to be private.
+            self.requires("xorg/system", visible=False)
 
     def validate(self):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 7:
