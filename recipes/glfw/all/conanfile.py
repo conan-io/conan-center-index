@@ -142,10 +142,10 @@ class GlfwConan(ConanFile):
         apply_conandata_patches(self)
         # don't force PIC
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
-                              "POSITION_INDEPENDENT_CODE ON", "")
+                        "POSITION_INDEPENDENT_CODE ON", "")
         # don't force static link to libgcc if MinGW
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
-                              "target_link_libraries(glfw PRIVATE \"-static-libgcc\")", "")
+                        "target_link_libraries(glfw PRIVATE \"-static-libgcc\")", "")
 
         # Allow to link vulkan-loader into shared glfw
         if self.options.vulkan_static:
@@ -216,6 +216,15 @@ class GlfwConan(ConanFile):
                 "AppKit", "Cocoa", "CoreFoundation", "CoreGraphics",
                 "CoreServices", "Foundation", "IOKit",
             ])
+
+        self.cpp_info.requires = ["opengl::opengl"]
+        if self.options.get_safe("vulkan_static"):
+            self.cpp_info.requires.extend(["vulkan-loader::vulkan-loader"])
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            if self.options.get_safe("with_x11", True):
+                self.cpp_info.requires.extend(["xorg::x11"])
+        if self.options.get_safe("with_wayland"):
+            self.cpp_info.requires.extend(["wayland::wayland", "xkbcommon::xkbcommon"])
 
         # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
         self.cpp_info.filenames["cmake_find_package"] = "glfw3"
