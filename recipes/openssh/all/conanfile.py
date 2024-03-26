@@ -24,7 +24,7 @@ class PackageConan(ConanFile):
         "with_pam": [None, "openpam"],
         "with_selinux": [True, False],
         "with_libedit": [True, False],
-        "with_sandbox": ["auto", "no", "capsicum", "darwin", "rlimit", "seccomp_filter", "systrace", "pledge"]
+        "with_sandbox": [False, "auto", "capsicum", "darwin", "rlimit", "seccomp_filter", "systrace", "pledge"]
     }
     default_options = {
         "with_libcrypto": "openssl",
