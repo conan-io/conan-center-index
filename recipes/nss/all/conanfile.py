@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
-from conan.tools.files import chdir, copy, get, rm
+from conan.tools.files import chdir, copy, get, rm, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars
 
@@ -87,6 +87,52 @@ class NSSConan(ConanFile):
         env.prepend_path("PATH", os.path.join(self._site_packages_dir, "bin"))
         env.vars(self, scope="build").save_script("conan_site_packages")
 
+    def _patch_sources(self):
+        def adjust_path(path):
+            """
+            adjusts path to be safely passed to the compiler command line
+            for Windows bash, ensures path is in format according to the subsystem
+            for path with spaces, places double quotes around it
+            converts slashes to backslashes, or vice versa
+            """
+            if is_msvc(self):
+                path = path.replace('/', '\\')
+            else:
+                path = path.replace('\\', '/')
+            return f'"{path}"' if ' ' in path else path
+
+        def _format_library_paths(library_paths):
+            pattern = "-LIBPATH:%s" if is_msvc(self) else "-L%s"
+            return [pattern % adjust_path(library_path)
+                    for library_path in library_paths if library_path]
+
+        def _format_libraries(libraries):
+            result = []
+            for library in libraries:
+                if is_msvc(self):
+                    if not library.endswith(".lib"):
+                        library += ".lib"
+                    result.append(library)
+                else:
+                    result.append(f"-l{library}")
+            return result
+
+        sqlite_info = self.dependencies["sqlite3"].cpp_info.aggregated_components()
+        sqlite_flags = " ".join([f"-I{sqlite_info.includedir}"] +
+                                _format_libraries(sqlite_info.libs) +
+                                _format_library_paths(sqlite_info.libdirs))
+        replace_in_file(self, os.path.join(self.source_folder, "nss", "lib", "sqlite", "sqlite.gyp"),
+                        "'libraries': ['<(sqlite_libs)'],",
+                        f"'libraries': ['{sqlite_flags}'],")
+
+        zlib_info = self.dependencies["zlib"].cpp_info.aggregated_components()
+        zlib_flags = " ".join([f"-I{zlib_info.includedir}"] +
+                                _format_libraries(zlib_info.libs) +
+                                _format_library_paths(zlib_info.libdirs))
+        replace_in_file(self, os.path.join(self.source_folder, "nss", "lib", "zlib", "zlib.gyp"),
+                        "'libraries': ['<@(zlib_libs)'],",
+                        f"'libraries': ['{zlib_flags}'],")
+
     @property
     def _build_args(self):
         # https://github.com/nss-dev/nss/blob/master/help.txt
@@ -110,10 +156,12 @@ class NSSConan(ConanFile):
         nspr_includedir = os.path.join(nspr_root, "include", "nspr").replace("\\", "/")
         nspr_libdir = os.path.join(nspr_root, "lib").replace("\\", "/")
         args.append(f"--with-nspr={nspr_includedir}:{nspr_libdir}")
+        args.append("--system-sqlite")
         args.append("--enable-legacy-db")  # for libnssdbm3
         return args
 
     def build(self):
+        self._patch_sources()
         # install gyp-next
         self.run(f"python -m pip install gyp-next --no-cache-dir --target={self._site_packages_dir}")
         self.run("gyp --version")
@@ -134,16 +182,17 @@ class NSSConan(ConanFile):
         if not self.options.get_safe("shared", True):
             rm(self, "*.so", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
+        else:
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        # Since the project exports over 30 static and 13 shared libraries with
-        # complex interdependencies and without an any .pc files,
+        # Since the project does not export any .pc files,
         # we will rely on the .pc files created by Fedora
         # https://src.fedoraproject.org/rpms/nss/tree/rawhide
         # and Debian
         # https://salsa.debian.org/mozilla-team/nss/-/tree/master/debian
-        # instead to keep things sane.
+        # instead.
 
         self.cpp_info.set_property("pkg_config_name", "_nss")
 
@@ -152,17 +201,23 @@ class NSSConan(ConanFile):
         self.cpp_info.components["nssutil"].libs = ["nssutil3"]
         self.cpp_info.components["nssutil"].includedirs.append(os.path.join("include", "nss"))
         self.cpp_info.components["nssutil"].requires = ["nspr::nspr"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["nssutil"].system_libs = ["pthread", "dl"]
 
         # https://src.fedoraproject.org/rpms/nss/blob/rawhide/f/nss.pc.in
         self.cpp_info.components["libnss"].set_property("pkg_config_name", "nss")
         self.cpp_info.components["libnss"].libs = ["ssl3", "smime3", "nss3"]
         self.cpp_info.components["libnss"].includedirs.append(os.path.join("include", "nss"))
         self.cpp_info.components["libnss"].requires = ["nspr::nspr", "nssutil"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["libnss"].system_libs = ["pthread", "dl"]
 
         # https://src.fedoraproject.org/rpms/nss/blob/rawhide/f/nss-softokn.pc.in
         self.cpp_info.components["softokn"].set_property("pkg_config_name", "nss-softokn")
         self.cpp_info.components["softokn"].libs = ["freebl3", "nssdbm3", "softokn3"]
         self.cpp_info.components["softokn"].includedirs.append(os.path.join("include", "nss"))
-        self.cpp_info.components["softokn"].requires = ["nspr::nspr", "nssutil"]
+        self.cpp_info.components["softokn"].requires = ["nspr::nspr", "sqlite3::sqlite3", "nssutil"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["softokn"].system_libs = ["pthread", "dl"]
 
         self.cpp_info.components["nss_executables"].requires = ["zlib::zlib", "nspr::nspr", "sqlite3::sqlite3"]
