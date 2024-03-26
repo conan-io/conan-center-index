@@ -107,8 +107,6 @@ class BoostConan(ConanFile):
         "buildid": [None, "ANY"],
         "python_buildid": [None, "ANY"],
         "system_use_utf8": [True, False],
-        "without_math_c99l": [True, False],
-        "without_math_tr1l": [True, False]
     }
     options.update({f"without_{_name}": [True, False] for _name in CONFIGURE_OPTIONS})
 
@@ -148,8 +146,6 @@ class BoostConan(ConanFile):
         "buildid": None,
         "python_buildid": None,
         "system_use_utf8": False,
-        "without_math_c99l": False,
-        "without_math_tr1l": False
     }
     default_options.update({f"without_{_name}": False for _name in CONFIGURE_OPTIONS})
     default_options.update({f"without_{_name}": True for _name in ("graph_parallel", "mpi", "python")})
@@ -259,10 +255,6 @@ class BoostConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-        if str(self.settings.arch).startswith("ppc"):
-            self.options.without_math_c99l = True
-            self.options.without_math_tr1l = True
 
         # Test whether all config_options from the yml are available in CONFIGURE_OPTIONS
         for opt_name in self._configure_options:
@@ -1631,6 +1623,8 @@ class BoostConan(ConanFile):
                 libs = []
                 for name in names:
                     if name in ("boost_stacktrace_windbg", "boost_stacktrace_windbg_cached") and self.settings.os != "Windows":
+                        continue
+                    if name in ("boost_math_c99l", "boost_math_tr1l") and str(self.settings.arch).startswith("ppc"):
                         continue
                     if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic",) and self.settings.os == "Windows":
                         continue
