@@ -4,6 +4,7 @@ from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rename, rm
+from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, VCVars
 import os
 import glob
@@ -79,8 +80,6 @@ class NSSConan(ConanFile):
         vc = VCVars(self)
         vc.generate()
 
-    @property
-    def _make_args(self):
         def adjust_path(path):
             """
             adjusts path to be safely passed to the compiler command line
@@ -110,6 +109,7 @@ class NSSConan(ConanFile):
                     result.append(f"-l{library}")
             return result
 
+        tc = AutotoolsToolchain(self)
         args = []
         if self.settings.arch in ["x86_64"]:
             args.append("USE_64=1")
@@ -138,7 +138,7 @@ class NSSConan(ConanFile):
             "Macos": "Darwin",
             "Windows": "WINNT",
             "FreeBSD": "FreeBSD",
-        }.get(str(self.settings.os), 'UNSUPPORTED_OS')
+        }.get(str(self.settings.os), "UNSUPPORTED_OS")
         args.append(f"OS_TARGET={os_id}")
         args.append(f"OS_ARCH={os_id}")
 
@@ -148,7 +148,7 @@ class NSSConan(ConanFile):
         args.append("USE_SYSTEM_ZLIB=1")
         zlib_cpp_info = self.dependencies["zlib"].cpp_info.aggregated_components()
         args.append(f"ZLIB_INCLUDE_DIR={zlib_cpp_info.includedir}")
-        args.append('"ZLIB_LIBS=%s"' % " ".join(
+        args.append("ZLIB_LIBS=%s" % " ".join(
             _format_libraries(zlib_cpp_info.libs) +
             _format_library_paths(zlib_cpp_info.libdirs)
         ))
@@ -161,16 +161,21 @@ class NSSConan(ConanFile):
         args.append(f"SQLITE_LIB_DIR={sqlite3_cpp_info.libdir}")
 
         args.append("NSDISTMODE=copy")
-        return " ".join(args)
+
+        tc.make_args += args
+        tc.generate()
+
 
     def build(self):
         with chdir(self, os.path.join(self.source_folder, "nss")):
-            self.run(f"make {self._make_args}")
+            autotools = Autotools(self)
+            autotools.make()
 
     def package(self):
         copy(self, "COPYING", src=os.path.join(self.source_folder, "nss"), dst=os.path.join(self.package_folder, "licenses"))
         with chdir(self, os.path.join(self.source_folder, "nss")):
-            self.run(f"make install {self._make_args}")
+            autotools = Autotools(self)
+            autotools.install()
         copy(self, "*",
                   src=os.path.join(self.source_folder, "dist", "public", "nss"),
                   dst=os.path.join(self.package_folder, "include"))
