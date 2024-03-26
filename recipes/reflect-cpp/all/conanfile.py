@@ -56,10 +56,10 @@ class ReflectCppConan(ConanFile):
         if self.options.with_xml:
             self.requires("pugixml/1.14", transitive_headers=True)
         if self.options.with_flatbuffers:
-            self.requires("flatbuffers/23.5.26", transitive_headers=True)
+            self.requires("flatbuffers/24.3.7", transitive_headers=True)
         if self.options.with_yaml:
             self.requires("yaml-cpp/0.8.0", transitive_headers=True)
-            
+
     def package_id(self):
         self.info.clear()
 
