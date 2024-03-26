@@ -1,0 +1,15 @@
+Simple typo bugfix, pending MR https://gitlab.kitware.com/vtk/vtk/-/merge_requests/10075
+
+diff --git a/Interaction/Widgets/vtkConstrainedPointHandleRepresentation.cxx b/Interaction/Widgets/vtkConstrainedPointHandleRepresentation.cxx
+index c1d24e0544..8a906b1bd0 100644
+--- a/Interaction/Widgets/vtkConstrainedPointHandleRepresentation.cxx
++++ b/Interaction/Widgets/vtkConstrainedPointHandleRepresentation.cxx
+@@ -219,7 +219,7 @@ void vtkConstrainedPointHandleRepresentation::SetActiveCursorShape(vtkPolyData*
+       this->ActiveCursorShape->Delete();
+     }
+     this->ActiveCursorShape = shape;
+-    if (this->CursorShape)
++    if (this->ActiveCursorShape)
+     {
+       this->ActiveCursorShape->Register(this);
+     }

@@ -1,0 +1,334 @@
+Greatly improve the performance of some vtkCollection operations.
+
+Namely:
+* determining if an item is in a collection.
+* removing a unique item from a collection.
+
+This is implemented using an unordered_map from items to list nodes,
+and by making the list doubly linked so that a node can be removed
+without needing to iterate from the beginning to find the preceding
+node.
+
+--- a/Common/Core/vtkCollection.cxx	2023-11-14 07:37:21.000000000 +0800
++++ b/Common/Core/vtkCollection.cxx	2024-02-25 07:47:26.906096895 +0800
+@@ -43,6 +43,7 @@
+ void vtkCollection::RemoveElement(vtkCollectionElement* elem, vtkCollectionElement* prev)
+ {
+   assert(elem);
++  assert(elem->Previous == prev);
+   if (prev)
+   {
+     prev->Next = elem->Next;
+@@ -56,12 +57,27 @@
+   {
+     this->Bottom = prev;
+   }
++  else
++  {
++    elem->Next->Previous = prev;
++  }
+ 
+   if (this->Current == elem)
+   {
+     this->Current = elem->Next;
+   }
+ 
++  auto const iterRange = this->ItemMap.equal_range(elem->Item);
++
++  for (auto iter = iterRange.first; iter != iterRange.second; ++iter)
++  {
++    if (iter->second == elem)
++    {
++      this->ItemMap.erase(iter);
++      break;
++    }
++  }
++
+   this->NumberOfItems--;
+   this->DeleteElement(elem);
+ }
+@@ -81,12 +97,16 @@
+   {
+     this->Bottom->Next = elem;
+   }
++
++  elem->Previous = this->Bottom;
+   this->Bottom = elem;
+ 
+   a->Register(this);
+   elem->Item = a;
+   elem->Next = nullptr;
+ 
++  this->ItemMap.emplace(a, elem);
++
+   this->NumberOfItems++;
+ 
+   this->Modified();
+@@ -110,6 +130,7 @@
+   {
+     this->Top = elem;
+     elem->Next = curr;
++    curr->Previous = elem;
+   }
+   else
+   {
+@@ -124,6 +145,8 @@
+     }
+ 
+     curr->Next = elem;
++    elem->Previous = curr;
++
+     if (curr == this->Bottom)
+     {
+       this->Bottom = elem;
+@@ -131,12 +154,15 @@
+     else
+     {
+       elem->Next = next;
++      next->Previous = elem;
+     }
+   }
+ 
+   a->Register(this);
+   elem->Item = a;
+ 
++  this->ItemMap.emplace(a, elem);
++
+   this->NumberOfItems++;
+ 
+   this->Modified();
+@@ -152,20 +178,34 @@
+     return;
+   }
+ 
+-  vtkCollectionElement* prev = nullptr;
+-  vtkCollectionElement* elem = this->Top;
+-  for (int i = 0; i < this->NumberOfItems; i++)
++  // If the object is only in the list once, we can remove it without
++  // searching the list to find the first one.
++  auto const iterRange = this->ItemMap.equal_range(a);
++  if (iterRange.first != this->ItemMap.end()
++    && std::next(iterRange.first) == iterRange.second)
++  {
++    vtkCollectionElement* elem = iterRange.first->second;
++    this->RemoveElement(elem, elem->Previous);
++    this->Modified();
++    return;
++  }
++  else
+   {
+-    if (elem->Item == a)
+-    {
+-      this->RemoveElement(elem, prev);
+-      this->Modified();
+-      return;
+-    }
+-    else
+-    {
+-      prev = elem;
+-      elem = elem->Next;
++    vtkCollectionElement* prev = nullptr;
++    vtkCollectionElement* elem = this->Top;
++    for (int i = 0; i < this->NumberOfItems; i++)
++    {
++      if (elem->Item == a)
++      {
++        this->RemoveElement(elem, prev);
++        this->Modified();
++        return;
++      }
++      else
++      {
++        prev = elem;
++        elem = elem->Next;
++      }
+     }
+   }
+ }
+@@ -179,6 +219,8 @@
+     return;
+   }
+ 
++  this->ItemMap.clear();
++
+   while (this->NumberOfItems)
+   {
+     this->RemoveElement(this->Top, nullptr);
+@@ -237,6 +279,11 @@
+   return 0;
+ }
+ 
++std::size_t vtkCollection::CountItemInstances(vtkObject* a)
++{
++  return this->ItemMap.count(a);
++}
++
+ void vtkCollection::PrintSelf(ostream& os, vtkIndent indent)
+ {
+   this->Superclass::PrintSelf(os, indent);
+--- a/Common/Core/vtkCollection.h	2023-11-14 07:37:21.000000000 +0800
++++ b/Common/Core/vtkCollection.h	2024-02-25 07:48:50.041593356 +0800
+@@ -22,6 +22,8 @@
+ #include "vtkCommonCoreModule.h" // For export macro
+ #include "vtkObject.h"
+ 
++#include <unordered_map>
++
+ VTK_ABI_NAMESPACE_BEGIN
+ class vtkCollectionElement //;prevents pick-up by man page generator
+ {
+@@ -29,10 +31,12 @@
+   vtkCollectionElement()
+     : Item(nullptr)
+     , Next(nullptr)
++    , Previous(nullptr)
+   {
+   }
+   vtkObject* Item;
+   vtkCollectionElement* Next;
++  vtkCollectionElement* Previous;
+ };
+ typedef void* vtkCollectionSimpleIterator;
+ 
+@@ -101,6 +105,11 @@
+   int IndexOfFirstOccurence(vtkObject* a);
+ 
+   /**
++   * 
++   */
++  std::size_t CountItemInstances(vtkObject* a);
++
++  /**
+    * Return the number of objects in the list.
+    */
+   int GetNumberOfItems() { return this->NumberOfItems; }
+@@ -161,6 +170,8 @@
+   vtkCollectionElement* Bottom;
+   vtkCollectionElement* Current;
+ 
++  std::unordered_multimap<vtkObject*, vtkCollectionElement*> ItemMap;
++
+   friend class vtkCollectionIterator;
+ 
+   // See vtkGarbageCollector.h:
+--- a/Interaction/Widgets/vtkMagnifierRepresentation.cxx	2023-11-14 07:37:21.000000000 +0800
++++ b/Interaction/Widgets/vtkMagnifierRepresentation.cxx	2024-02-25 07:47:26.930096573 +0800
+@@ -210,7 +210,7 @@
+ //------------------------------------------------------------------------------
+ int vtkMagnifierRepresentation::HasViewProp(vtkProp* prop)
+ {
+-  return (prop && this->Props->IsItemPresent(prop));
++  return (prop && this->Props->CountItemInstances(prop));
+ }
+ 
+ //------------------------------------------------------------------------------
+--- a/Rendering/Core/vtkActor2DCollection.cxx	2023-11-14 07:37:21.000000000 +0800
++++ b/Rendering/Core/vtkActor2DCollection.cxx	2024-02-25 07:47:26.934096519 +0800
+@@ -52,13 +52,14 @@
+   vtkCollectionElement* indexElem;
+   vtkCollectionElement* elem = new vtkCollectionElement;
+ 
++  elem->Item = a;
++
+   // Check if the top item is nullptr
+   if (this->Top == nullptr)
+   {
+     vtkDebugMacro(<< "vtkActor2DCollection::AddItem - Adding item to top of the list");
+ 
+     this->Top = elem;
+-    elem->Item = a;
+     elem->Next = nullptr;
+     this->Bottom = elem;
+     this->NumberOfItems++;
+@@ -68,17 +69,26 @@
+ 
+   for (indexElem = this->Top; indexElem != nullptr; indexElem = indexElem->Next)
+   {
+-
+     vtkActor2D* tempActor = static_cast<vtkActor2D*>(indexElem->Item);
+     if (a->GetLayerNumber() < tempActor->GetLayerNumber())
+     {
+-      // The indexElem item's layer number is larger, so swap
+-      // the new item and the indexElem item.
++      // The indexElem item's layer number is larger, so insert
++      // the new item prior to indexElem.
+       vtkDebugMacro(<< "vtkActor2DCollection::AddItem - Inserting item");
+-      elem->Item = indexElem->Item;
+-      elem->Next = indexElem->Next;
+-      indexElem->Item = a;
+-      indexElem->Next = elem;
++
++      // Back link
++      elem->Previous = indexElem->Previous;
++      elem->Previous->Next = elem;
++
++      // Forward link
++      elem->Next = indexElem;
++      indexElem->Previous = elem;
++
++      // elem->Item = indexElem->Item;
++      // elem->Next = indexElem->Next;
++      // indexElem->Item = a;
++      // indexElem->Next = elem;
++
+       this->NumberOfItems++;
+       a->Register(this);
+       return;
+@@ -87,8 +97,8 @@
+ 
+   // End of list found before a larger layer number
+   vtkDebugMacro(<< "vtkActor2DCollection::AddItem - Adding item to end of the list");
+-  elem->Item = a;
+   elem->Next = nullptr;
++  elem->Previous = this->Bottom;
+   this->Bottom->Next = elem;
+   this->Bottom = elem;
+   this->NumberOfItems++;
+@@ -151,14 +161,20 @@
+   vtkDebugMacro(<< "vtkActor2DCollection::Sort - Rearraging the linked list.");
+   // Now move the items around in the linked list -
+   // keep the links the same, but swap around the items
++  // We also completely regenerate the hashmap lookup,
++  // expensive if there was no change, but simple for now.
++
++  this->ItemMap.clear();
+ 
+   vtkCollectionElement* elem = this->Top;
+   elem->Item = actorPtrArr[0];
++  this->ItemMap.emplace(elem->Item, elem);
+ 
+   for (i = 1; i < numElems; i++)
+   {
+     elem = elem->Next;
+     elem->Item = actorPtrArr[i];
++    this->ItemMap.emplace(elem->Item, elem);
+   }
+ 
+   delete[] actorPtrArr;
+--- a/Rendering/Image/vtkImageSliceCollection.cxx	2023-11-14 07:37:21.000000000 +0800
++++ b/Rendering/Image/vtkImageSliceCollection.cxx	2024-02-25 07:47:26.958096196 +0800
+@@ -61,6 +61,7 @@
+   else
+   {
+     elem->Next = prevElem->Next;
++    elem->Previous = prevElem;
+     prevElem->Next = elem;
+   }
+ 
+@@ -135,10 +136,16 @@
+ 
+   // Now move the items around in the linked list -
+   // keep the links the same, but swap around the items
++  // We also completely regenerate the hashmap lookup,
++  // expensive if there was no change, but simple for now.
++
++  this->ItemMap.clear();
++
+   vtkCollectionElement* elem = this->Top;
+   for (int jj = 0; jj < numElems; jj++)
+   {
+     elem->Item = layerArray[jj].image;
++    this->ItemMap.emplace(elem->Item, elem);
+     elem = elem->Next;
+   }
+ 
