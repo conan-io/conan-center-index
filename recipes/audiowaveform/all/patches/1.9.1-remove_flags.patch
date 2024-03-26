@@ -1,0 +1,30 @@
+Remove custom compile flags
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -162,6 +162,7 @@ if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6.3")
+     message(FATAL_ERROR "g++ 4.6.3 or later required")
+ endif()
+ 
++if(0)
+ if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "4.7")
+     set(CMAKE_CXX_FLAGS "-std=c++11")
+ else()
+@@ -170,7 +171,7 @@ else()
+     set(CMAKE_CXX_FLAGS "-std=c++0x -DGTEST_LANG_CXX11=0")
+ endif()
+ 
+-set(COMMON_FLAGS "-Wall -Wextra -Wconversion -pedantic")
++set(COMMON_FLAGS "")
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS} -DBOOST_FILESYSTEM_NO_DEPRECATED")
+ set(CMAKE_C_FLAGS "-std=c99 ${COMMON_FLAGS}")
+ 
+@@ -178,7 +179,9 @@ if(APPLE AND BUILD_STATIC)
+     set(CMAKE_CXX_FLAGS "-stdlib=libc++ ${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
+     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
+ endif()
++endif()
+ 
++set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBOOST_FILESYSTEM_NO_DEPRECATED")
+ message(STATUS "CMAKE_CXX_COMPILER_VERSION='${CMAKE_CXX_COMPILER_VERSION}'")
+ message(STATUS "CMAKE_CXX_FLAGS='${CMAKE_CXX_FLAGS}'")
+ message(STATUS "CMAKE_CXX_FLAGS_DEBUG='${CMAKE_CXX_FLAGS_DEBUG}'")
