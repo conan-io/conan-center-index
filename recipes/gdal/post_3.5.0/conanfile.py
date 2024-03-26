@@ -230,7 +230,8 @@ class GdalConan(ConanFile):
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.2")
         if self.options.with_jxl:
-            self.requires("libjxl/0.6.1")
+            # 0.9+ is not compatible as of v3.8.4
+            self.requires("libjxl/0.8.2")
         if self.options.with_kea:
             self.requires("kealib/1.5.2")
         if self.options.with_lerc:
