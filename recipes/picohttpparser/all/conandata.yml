@@ -1,0 +1,9 @@
+sources:
+  "cci.20230804":
+    url: "https://github.com/h2o/picohttpparser/archive/066d2b1e9ab820703db0837a7255d92d30f0c9f5.tar.gz"
+    sha256: "637ff2ab6f5c7f7e05a5b5dc393d5cf2fea8d4754fcaceaaf935ffff5c1323ee"
+patches:
+  "cci.20230804":
+    - patch_file: "patches/cci.20230804-0001-add-cmake.patch"
+      patch_description: "add CMakeLists.txt"
+      patch_type: "conan"
