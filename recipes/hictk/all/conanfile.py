@@ -121,3 +121,6 @@ class HictkConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.set_property("cmake_file_name", "hictk")
         self.cpp_info.set_property("cmake_target_name", "hictk::libhictk")
+
+        if self.options.with_eigen:
+            self.cpp_info.defines.append("HICTK_WITH_EIGEN")
