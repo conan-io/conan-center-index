@@ -20,8 +20,8 @@ class PackageConan(ConanFile):
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "with_libcrypto": [None, "libressl", "openssl"],
-        "with_pam": [None, "openpam"],
+        "with_libcrypto": [False, "libressl", "openssl"],
+        "with_pam": [False, "openpam"],
         "with_selinux": [True, False],
         "with_libedit": [True, False],
         "with_sandbox": [False, "auto", "capsicum", "darwin", "rlimit", "seccomp_filter", "systrace", "pledge"]
