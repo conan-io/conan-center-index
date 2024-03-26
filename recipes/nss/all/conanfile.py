@@ -56,9 +56,6 @@ class NSSConan(ConanFile):
             raise ConanInvalidConfiguration("NSS cannot link to static sqlite. Please use option sqlite3:shared=True")
         if self.settings.arch in ["armv8", "armv8.3"] and is_apple_os(self):
             raise ConanInvalidConfiguration("Macos ARM64 builds not yet supported. Contributions are welcome.")
-        if is_msvc(self):
-            # https://c3i.jfrog.io/c3i/misc/summary.html?json=https://c3i.jfrog.io/c3i/misc/logs/pr/19262/4-windows-visual_studio/nss/3.89/summary.json
-            raise ConanInvalidConfiguration("MSVC is currently not supported. Contributions are welcome.")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
