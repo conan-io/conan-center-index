@@ -39,6 +39,8 @@ class NSSConan(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        self.options["nspr"].shared = True
+        self.options["sqlite3"].shared = True
 
     def requirements(self):
         self.requires("nspr/4.35", transitive_headers=True, transitive_libs=True)
