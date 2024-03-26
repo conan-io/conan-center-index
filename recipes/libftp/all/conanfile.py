@@ -72,6 +72,7 @@ class LibFTPConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["LIBFTP_BUILD_TEST"] = False
         tc.variables["LIBFTP_BUILD_EXAMPLE"] = False
         tc.variables["LIBFTP_BUILD_CMDLINE_CLIENT"] = False
@@ -95,3 +96,6 @@ class LibFTPConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "ftp")
         self.cpp_info.set_property("cmake_target_name", "ftp::ftp")
+
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("ws2_32")
