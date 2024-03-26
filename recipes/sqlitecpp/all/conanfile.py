@@ -25,13 +25,13 @@ class SQLiteCppConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "stack_protection": [True, False],
-        "has_codec": [True, False],
+        "with_sqlcipher": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "stack_protection": True,
-        "has_codec": False,
+        "with_sqlcipher": False,
     }
 
     def export_sources(self):
@@ -44,11 +44,11 @@ class SQLiteCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.options.has_codec:
+        if self.options.with_sqlcipher:
             self.options["sqlcipher"].enable_column_metadata = True
 
     def requirements(self):
-        if self.options.has_codec:
+        if self.options.with_sqlcipher:
             self.requires("sqlcipher/4.5.6")
         else:
             self.requires("sqlite3/3.45.0")
@@ -58,7 +58,7 @@ class SQLiteCppConan(ConanFile):
             check_min_cppstd(self, 11)
         if self.info.settings.os == "Windows" and self.info.options.shared:
             raise ConanInvalidConfiguration("SQLiteCpp can not be built as shared lib on Windows")
-        if self.options.has_codec and Version(self.version) < "3.3.1":
+        if self.options.with_sqlcipher and Version(self.version) < "3.3.1":
             raise ConanInvalidConfiguration("Using SQLCipher with this recipe is only available from version 3.3.1")
 
     def layout(self):
@@ -88,7 +88,7 @@ class SQLiteCppConan(ConanFile):
         tc.variables["SQLITECPP_BUILD_EXAMPLES"] = False
         tc.variables["SQLITECPP_BUILD_TESTS"] = False
         tc.variables["SQLITECPP_USE_STACK_PROTECTION"] = self.options.stack_protection
-        tc.variables["SQLITE_HAS_CODEC"] = self.options.get_safe("has_codec")
+        tc.variables["SQLITE_HAS_CODEC"] = self.options.get_safe("with_sqlcipher", False)
         tc.generate()
 
         tc = CMakeDeps(self)
