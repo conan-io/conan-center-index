@@ -1,0 +1,10 @@
+sources:
+  "1.139.1000":
+    url: "https://github.com/openhome/ohPipeline/archive/refs/tags/ohMediaPlayer_1.139.1000.tar.gz"
+    sha256: "070eac6d974bbe520d0b292df1ca4a72160a2b607a60dabdaa0971c3ef96e5e4"
+patches:
+  "1.139.1000":
+    - patch_file: "patches/0002-include-limits.patch"
+      patch_description: "Add limits include"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/openhome/ohPipeline/pull/11"
