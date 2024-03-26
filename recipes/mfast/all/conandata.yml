@@ -8,6 +8,10 @@ sources:
 patches:
   "1.2.2":
     - patch_file: "patches/0001-fix-cmake-1.2.2.patch"
+    - patch_file: "patches/0004-boost-compat-1.2.2.patch"
+      patch_description: "boost >= 1.76.0 compatibility"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/objectcomputing/mFAST/pull/119"
   "1.2.1":
     - patch_file: "patches/0001-fix-cmake-1.2.1.patch"
     - patch_file: "patches/0002-remove-deprecated-boost-detail-endian.patch"
