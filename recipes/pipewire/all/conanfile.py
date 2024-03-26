@@ -288,32 +288,32 @@ class PipeWireConan(ConanFile):
         libpipewire_api_version = load(self, self._libpipewire_api_version_txt).strip()
         libspa_api_version = load(self, self._libspa_api_version_txt).strip()
 
-        self.runenv_info.prepend_path(
+        self.runenv_info.define(
             "PIPEWIRE_CONFIG_DIR", os.path.join(self.package_folder, "res", "pipewire")
         )
-        self.runenv_info.prepend_path(
+        self.runenv_info.define(
             "PIPEWIRE_MODULE_DIR",
             os.path.join(
                 self.package_folder, "lib", f"pipewire-{libpipewire_api_version}"
             ),
         )
-        self.runenv_info.prepend_path(
+        self.runenv_info.define(
             "SPA_PLUGIN_DIR",
             os.path.join(self.package_folder, "lib", f"libspa-{libspa_api_version}"),
         )
-        self.runenv_info.prepend_path(
+        self.runenv_info.define(
             "SPA_DATA_DIR",
             os.path.join(self.package_folder, "res", f"libspa-{libspa_api_version}"),
         )
 
         if self.options.with_libalsa:
-            self.runenv_info.prepend_path(
+            self.runenv_info.define(
                 "ACP_PATHS_DIR",
                 os.path.join(
                     self.package_folder, "res", "alsa-card-profile", "mixer", "paths"
                 ),
             )
-            self.runenv_info.prepend_path(
+            self.runenv_info.define(
                 "ACP_PROFILES_DIR",
                 os.path.join(
                     self.package_folder,
