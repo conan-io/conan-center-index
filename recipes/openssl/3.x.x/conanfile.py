@@ -344,7 +344,7 @@ class OpenSSLConan(ConanFile):
         return ancestor
 
     def _get_default_openssl_dir(self):
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "Neutrino"]:
             return "/etc/ssl"
         return os.path.join(self.package_folder, "res")
 
@@ -439,6 +439,7 @@ class OpenSSLConan(ConanFile):
                     cxxflags => add("{cxxflags}"),
                     {defines}
                     lflags => add("{lflags}"),
+                    {dso_scheme}
                     {shared_target}
                     {shared_cflag}
                     {shared_extension}
@@ -447,13 +448,16 @@ class OpenSSLConan(ConanFile):
             );
         """)
 
+        dso_scheme = ""
+        if self.settings.os == "Neutrino":
+          dso_scheme = 'dso_scheme => "dlfcn",'
+
         perlasm_scheme = ""
         if self._perlasm_scheme:
             perlasm_scheme = 'perlasm_scheme => "%s",' % self._perlasm_scheme
 
-        defines = " ".join(defines)
-        defines = 'defines => add("%s"),' % defines if defines else ""
-        targets = "my %targets"
+        defines = "\n".join(f"defines => add(\"{d}\")," for d in defines)
+        targets = "my %targets"        
 
         if self._asm_target:
             ancestor = '[ "%s", asm("%s") ]' % (self._ancestor_target, self._asm_target)
@@ -481,6 +485,7 @@ class OpenSSLConan(ConanFile):
             cxxflags=" ".join(cxxflags),
             defines=defines,
             perlasm_scheme=perlasm_scheme,
+            dso_scheme=dso_scheme,
             shared_target=shared_target,
             shared_extension=shared_extension,
             shared_cflag=shared_cflag,
