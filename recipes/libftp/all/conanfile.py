@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
@@ -59,6 +60,8 @@ class LibFTPConan(ConanFile):
         self.requires("boost/1.84.0", transitive_headers=True)
 
     def validate(self):
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared builds with Visual Studio.")        
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -72,7 +75,6 @@ class LibFTPConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["LIBFTP_BUILD_TEST"] = False
         tc.variables["LIBFTP_BUILD_EXAMPLE"] = False
         tc.variables["LIBFTP_BUILD_CMDLINE_CLIENT"] = False
