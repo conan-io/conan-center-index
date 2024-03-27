@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.scm import Version
 
@@ -43,9 +43,6 @@ class Open62541ppConan(ConanFile):
             "Visual Studio": "15",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -78,12 +75,19 @@ class Open62541ppConan(ConanFile):
         tc.variables["UAPP_BUILD_DOCUMENTATION"] = False
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+        # IPO is enabled by default in open62541: https://github.com/open62541/open62541/blob/v1.3.9/CMakeLists.txt#L728-L738
+        tc.variables["open62541_ipo"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
+        # Otherwise fails with
+        #   INTERFACE_LIBRARY targets may only have whitelisted properties.  The
+        #   property "INTERPROCEDURAL_OPTIMIZATION" is not allowed.
+        # Set this in CMakeToolchain instead
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "get_target_property(open62541_ipo open62541::open62541 INTERPROCEDURAL_OPTIMIZATION)", "")
 
     def build(self):
         self._patch_sources()
