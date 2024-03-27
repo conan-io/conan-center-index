@@ -95,12 +95,6 @@ class FontconfigConan(ConanFile):
         deps.generate()
 
     def _patch_files(self):
-        # fontconfig requires libtool version number, change it for the corresponding freetype one
-        replace_in_file(
-            self, os.path.join(self.generators_folder, "freetype2.pc"),
-            "Version: {}".format(self.dependencies["freetype"].ref.version),
-            "Version: {}".format(self.dependencies["freetype"].conf_info.get("user.freetype:libtool_version")),
-        )
         # disable fc-cache test to enable cross compilation but also builds with shared libraries on MacOS
         replace_in_file(self,
             os.path.join(self.source_folder, "Makefile.in"),
@@ -137,14 +131,10 @@ class FontconfigConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["m", "pthread"])
 
-        fontconfig_file = os.path.join(self.package_folder, "bin", "etc", "fonts", "fonts.conf")
-        self.runenv_info.prepend_path("FONTCONFIG_FILE", fontconfig_file)
-
         fontconfig_path = os.path.join(self.package_folder, "bin", "etc", "fonts")
-        self.runenv_info.prepend_path("FONTCONFIG_PATH", fontconfig_path)
+        self.runenv_info.append_path("FONTCONFIG_PATH", fontconfig_path)
 
         # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "Fontconfig"
         self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"
-        self.env_info.FONTCONFIG_FILE = fontconfig_file
         self.env_info.FONTCONFIG_PATH = fontconfig_path
