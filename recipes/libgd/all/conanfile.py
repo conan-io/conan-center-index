@@ -110,7 +110,7 @@ class LibgdConan(ConanFile):
 
         deps = CMakeDeps(self)
         deps.set_property("libheif", "cmake_file_name", "HEIF")
-        deps.set_property("WebP", "cmake_file_name", "WEBP")
+        deps.set_property("webp", "cmake_file_name", "WEBP")
         deps.set_property("libxpm", "cmake_file_name", "XPM")
         deps.set_property("freetype", "cmake_file_name", "FREETYPE")
         deps.generate()
