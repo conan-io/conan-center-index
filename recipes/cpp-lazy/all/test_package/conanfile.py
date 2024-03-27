@@ -14,6 +14,8 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        # cpp-lazy>=8.0.0 requires fmt library when neither LZ_STANDALONE or LZ_MODULE_EXPORT are not defined
+        self.requires("fmt/10.2.1")
 
     def build(self):
         cmake = CMake(self)
