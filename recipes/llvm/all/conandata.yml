@@ -1,0 +1,38 @@
+sources:
+  "17.0.2":
+    url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-17.0.2.tar.gz
+    sha256: dcba3eb486973dce45b6edfe618f3f29b703ae7e6ef9df65182fb50fb6fe4235
+  "16.0.6":
+    url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-16.0.6.tar.gz
+    sha256: 56b2f75fdaa95ad5e477a246d3f0d164964ab066b4619a01836ef08e475ec9d5
+  "15.0.7":
+    url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-15.0.7.tar.gz
+    sha256: 42a0088f148edcf6c770dfc780a7273014a9a89b66f357c761b4ca7c8dfa10ba
+  "14.0.6":
+    url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-14.0.6.tar.gz
+    sha256: 98f15f842700bdb7220a166c8d2739a03a72e775b67031205078f39dd756a055
+  "13.0.1":
+    url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-13.0.1.tar.gz
+    sha256: 09c50d558bd975c41157364421820228df66632802a4a6a7c9c17f86a7340802
+
+patches:
+  "17.0.2":
+    - patch_file: "patches/17/calculate_job_pools.patch"
+      patch_type: "portability"
+      patch_description: "Calculate ninja job pools according to current available memory. Most useful in shared CI or a low memory environment."
+  "16.0.6":
+    - patch_file: "patches/16/calculate_job_pools.patch"
+      patch_type: "portability"
+      patch_description: "Calculate ninja job pools according to current available memory. Most useful in shared CI or a low memory environment."
+  "15.0.7":
+    - patch_file: "patches/15/calculate_job_pools.patch"
+      patch_type: "portability"
+      patch_description: "Calculate ninja job pools according to current available memory. Most useful in shared CI or a low memory environment."
+  "14.0.6":
+    - patch_file: "patches/14/calculate_job_pools.patch"
+      patch_type: "portability"
+      patch_description: "Calculate ninja job pools according to current available memory. Most useful in shared CI or a low memory environment."
+  "13.0.1":
+    - patch_file: "patches/13/calculate_job_pools.patch"
+      patch_type: "portability"
+      patch_description: "Calculate ninja job pools according to current available memory. Most useful in shared CI or a low memory environment."

@@ -1,0 +1,53 @@
+diff --git a/llvm/cmake/modules/HandleLLVMOptions.cmake b/llvm/cmake/modules/HandleLLVMOptions.cmake
+index 56d05f5b5fce..43f6c7b83dbe 100644
+--- a/llvm/cmake/modules/HandleLLVMOptions.cmake
++++ b/llvm/cmake/modules/HandleLLVMOptions.cmake
+@@ -32,8 +32,25 @@ string(TOUPPER "${LLVM_ENABLE_LTO}" uppercase_LLVM_ENABLE_LTO)
+ 
+ # Ninja Job Pool support
+ # The following only works with the Ninja generator in CMake >= 3.0.
++if (NOT LLVM_RAM_PER_COMPILE_JOB)
++  set(LLVM_RAM_PER_COMPILE_JOB "2000")
++endif()
+ set(LLVM_PARALLEL_COMPILE_JOBS "" CACHE STRING
+   "Define the maximum number of concurrent compilation jobs (Ninja only).")
++
++cmake_host_system_information(RESULT AVAILABLE_PHYSICAL_MEMORY QUERY AVAILABLE_PHYSICAL_MEMORY)
++cmake_host_system_information(RESULT NUMBER_OF_LOGICAL_CORES QUERY NUMBER_OF_LOGICAL_CORES)
++if(LLVM_RAM_PER_COMPILE_JOB)
++  math(EXPR memory_available_jobs "${AVAILABLE_PHYSICAL_MEMORY} / ${LLVM_RAM_PER_COMPILE_JOB}" OUTPUT_FORMAT DECIMAL)
++  if (memory_available_jobs LESS 1)
++    set(memory_available_jobs 1)
++  endif()
++  if (memory_available_jobs LESS NUMBER_OF_LOGICAL_CORES)
++    set(LLVM_PARALLEL_COMPILE_JOBS "${memory_available_jobs}")
++  else()
++    set(LLVM_PARALLEL_COMPILE_JOBS "${NUMBER_OF_LOGICAL_CORES}")
++  endif()
++endif()
+ if(LLVM_PARALLEL_COMPILE_JOBS)
+   if(NOT CMAKE_GENERATOR MATCHES "Ninja")
+     message(WARNING "Job pooling is only available with Ninja generators.")
+@@ -43,8 +60,22 @@ if(LLVM_PARALLEL_COMPILE_JOBS)
+   endif()
+ endif()
+ 
++if (NOT LLVM_RAM_PER_LINK_JOB)
++  set(LLVM_RAM_PER_LINK_JOB "14000")
++endif()
+ set(LLVM_PARALLEL_LINK_JOBS "" CACHE STRING
+   "Define the maximum number of concurrent link jobs (Ninja only).")
++if(LLVM_RAM_PER_LINK_JOB)
++  math(EXPR memory_available_jobs "${AVAILABLE_PHYSICAL_MEMORY} / ${LLVM_RAM_PER_LINK_JOB}" OUTPUT_FORMAT DECIMAL)
++  if (memory_available_jobs LESS 1)
++    set(memory_available_jobs 1)
++  endif()
++  if (memory_available_jobs LESS NUMBER_OF_LOGICAL_CORES)
++    set(LLVM_PARALLEL_LINK_JOBS "${memory_available_jobs}")
++  else()
++    set(LLVM_PARALLEL_LINK_JOBS "${NUMBER_OF_LOGICAL_CORES}")
++  endif()
++endif()
+ if(CMAKE_GENERATOR MATCHES "Ninja")
+   if(NOT LLVM_PARALLEL_LINK_JOBS AND uppercase_LLVM_ENABLE_LTO STREQUAL "THIN")
+     message(STATUS "ThinLTO provides its own parallel linking - limiting parallel link jobs to 2.")
