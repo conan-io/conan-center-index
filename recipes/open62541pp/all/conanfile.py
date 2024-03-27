@@ -23,10 +23,12 @@ class Open62541ppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "ipo": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "ipo": False,
     }
 
     @property
@@ -75,8 +77,7 @@ class Open62541ppConan(ConanFile):
         tc.variables["UAPP_BUILD_DOCUMENTATION"] = False
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        # IPO is enabled by default in open62541: https://github.com/open62541/open62541/blob/v1.3.9/CMakeLists.txt#L728-L738
-        tc.variables["open62541_ipo"] = True
+        tc.variables["open62541_ipo"] = self.options.ipo
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
