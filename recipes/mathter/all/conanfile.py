@@ -60,13 +60,18 @@ class MathterConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def requirements(self):
-        dependencies = self.conan_data["dependencies"][self.version] or {}
-        for package, version in dependencies.items():
-            if package == "xsimd":
+        dependencies = {
+            "1.1.0": ["xsimd/11.1.0"],
+            "1.0.1": [],
+            "1.0.0": [],
+        }
+
+        for package in dependencies[self.version]:
+            if package.startswith("xsimd"):
                 if self.options.xsimd:
-                    self.requires(f"{package}/{version}")
+                    self.requires(package)
             else:
-                self.requires(f"{package}/{version}")            
+                self.requires(package)
 
     def package(self):
         if self.version == "1.0.0":

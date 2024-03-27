@@ -8,8 +8,3 @@ sources:
   "1.0.0":
     url: "https://github.com/petiaccja/Mathter/archive/v1.0.0.tar.gz"
     sha256: "c75cca8d8aec627935250908f2c0f9f1839561e7596a4199bcf80e12b0e6c53b"
-dependencies:
-  "1.1.0":
-    xsimd: "11.1.0"
-  "1.0.1": {}  # No dependencies
-  "1.0.0": {}  # No dependencies
