@@ -1,9 +1,7 @@
 #include <iostream>
 
-#ifdef METALCPP_HEADER_ONLY
 #define NS_PRIVATE_IMPLEMENTATION
 #define MTL_PRIVATE_IMPLEMENTATION
-#endif
 
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
