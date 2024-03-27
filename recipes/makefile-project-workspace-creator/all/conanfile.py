@@ -1,37 +1,53 @@
 import os
-from conans import ConanFile, tools
+
+from conan import ConanFile, conan_version
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+
+required_conan_version = ">=1.53.0"
 
 
 class MPCGeneratorConan(ConanFile):
     name = "makefile-project-workspace-creator"
     description = "The Makefile, Project and Workspace Creator"
     license = "BSD-3-Clause"
-    homepage = "https://objectcomputing.com/"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "makefile-project-workspace-creator", "objectcomputing", "installer")
-    settings = "os"
+    homepage = "https://github.com/objectcomputing/MPC"
+    topics = ("objectcomputing", "installer")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    package_type = "build-scripts"
+    settings = "os", "arch", "compiler", "build_type"
 
-    def requirements(self):
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def build_requirements(self):
         if self.settings.os == "Windows":
-            self.requires("strawberryperl/5.30.0.1")
+            kwargs = dict(visible=True) if conan_version.major >= 2 else {}
+            self.tool_requires("strawberryperl/5.32.1.1", **kwargs)
+
+    def package_id(self):
+        self.info.clear()
 
     def build(self):
-        pass
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("MPC-MPC_" + self.version.replace(".", "_"), self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy(pattern="*", src=self._source_subfolder, dst="bin")
-        self.copy(pattern="LICENSE", src=os.path.join(self._source_subfolder, "docs"), dst="licenses")
+        copy(self, "*",
+             src=self.build_folder,
+             dst=os.path.join(self.package_folder, "bin"))
+        copy(self, "LICENSE",
+            src=os.path.join(self.build_folder, "docs"),
+            dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
+        self.cpp_info.includedirs = []
+
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info('Appending PATH environment variable: %s' % bin_path)
+        self.buildenv_info.define("MPC_ROOT", bin_path)
+
         self.env_info.PATH.append(bin_path)
         self.env_info.MPC_ROOT = bin_path

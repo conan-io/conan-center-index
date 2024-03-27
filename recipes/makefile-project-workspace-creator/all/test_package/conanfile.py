@@ -1,12 +1,19 @@
-from conans import ConanFile, tools
+from conan import ConanFile, conan_version
+from conan.tools.layout import basic_layout
 
 
-class DefaultNameConan(ConanFile):
-    settings = "os"
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "VirtualBuildEnv", "VirtualRunEnv"
+    test_type = "explicit"
 
-    def build(self):
-        pass
+    def layout(self):
+        basic_layout(self)
+
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
+        if conan_version.major < 2 and self.settings.os == "Windows":
+            self.tool_requires("strawberryperl/5.32.1.1")
 
     def test(self):
-        if not tools.cross_building(self.settings):
-            self.run("perl -S mpc.pl --version", run_environment=True)
+        self.run("perl -S mpc.pl --version")
