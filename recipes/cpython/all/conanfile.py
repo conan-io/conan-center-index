@@ -275,11 +275,12 @@ class CPythonConan(ConanFile):
             replace_in_file(self, setup_py, ":libmpdec.so.2", "mpdec")
 
         if self.options.get_safe("with_curses", False):
-            # FIXME: this will link to ALL libraries of ncurses. Only need to link to ncurses(w) (+ eventually tinfo)
-            ncurses_info = self.dependencies["ncurses"].cpp_info.aggregated_components()
+            libcurses = self.dependencies["ncurses"].cpp_info.components["libcurses"]
+            tinfo = self.dependencies["ncurses"].cpp_info.components["tinfo"]
+            libs = libcurses.libs + libcurses.system_libs + info.libs + tinfo.system_libs
             replace_in_file(self, setup_py,
                 "curses_libs = ",
-                "curses_libs = {} #".format(repr(ncurses_info.libs + ncurses_info.system_libs)))
+                "curses_libs = {} #".format(repr(libs)))
 
         if self._supports_modules:
             openssl = self.dependencies["openssl"].cpp_info.aggregated_components()
