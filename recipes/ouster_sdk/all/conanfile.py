@@ -87,8 +87,8 @@ class PackageConan(ConanFile):
 
         if self.options.build_osf:
             # Used in fb_generated/*.h
-            self.requires("flatbuffers/23.5.26", transitive_headers=True)
-            self.requires("libpng/1.6.42")
+            self.requires("flatbuffers/24.3.7", transitive_headers=True)
+            self.requires("libpng/[>=1.6 <2]")
             self.requires("zlib/[>=1.2.11 <2]", transitive_libs=True)
 
         if self.options.build_viz:
