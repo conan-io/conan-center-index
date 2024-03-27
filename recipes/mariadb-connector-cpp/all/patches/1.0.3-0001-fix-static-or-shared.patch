@@ -1,0 +1,138 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e563c7e..babb3cd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -466,11 +466,13 @@ IF(NOT USE_SYSTEM_INSTALLED_LIB)
+     FOREACH(CC_PLUGIN ${PLUGINS_LIST})
+       IF(NOT PLUGINS_DYNAMIC OR "${PLUGIN_${CC_PLUGIN}_TYPE}" STREQUAL "MARIADB_CLIENT_PLUGIN_AUTH")
+         MESSAGE(STATUS "Configuring to install ${CC_PLUGIN} to ${INSTALL_PLUGINDIR}")
++        IF(BUILD_SHARED_LIBS)
+         ADD_DEPENDENCIES(DEPENDENCIES_FOR_PACKAGE ${CC_PLUGIN})
+         INSTALL(FILES
+                 $<TARGET_FILE:${CC_PLUGIN}>
+                 DESTINATION ${INSTALL_PLUGINDIR}
+                 COMPONENT ConCPlugins)
++        ENDIF()        
+       ENDIF()
+     ENDFOREACH()
+     INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libmariadb/include)
+@@ -566,15 +568,16 @@ ENDIF()
+ SET(${LIBRARY_NAME}_OBJECTS $<TARGET_OBJECTS:${LIBRARY_NAME}_obj>)
+ 
+ IF(WIN32 AND NOT MINGW)
++IF(BUILD_SHARED_LIBS)
+   ADD_LIBRARY(${LIBRARY_NAME} SHARED ${CMAKE_SOURCE_DIR}/src/maconncpp.rc ${${LIBRARY_NAME}_OBJECTS} ${CMAKE_SOURCE_DIR}/src/maconncpp.def)
+-  ADD_LIBRARY(${STATIC_LIBRARY_NAME} STATIC ${${LIBRARY_NAME}_OBJECTS} ${CMAKE_SOURCE_DIR}/src/maconncpp.rc)
+-
+   TARGET_COMPILE_DEFINITIONS(${LIBRARY_NAME}_obj PRIVATE "MARIADB_EXPORTED=__declspec(dllexport)")
+-
+   TARGET_COMPILE_DEFINITIONS(${LIBRARY_NAME} PRIVATE "MARIADB_EXPORTED=__declspec(dllexport)")
+   TARGET_COMPILE_DEFINITIONS(${LIBRARY_NAME} INTERFACE "MARIADB_EXPORTED=__declspec(dllimport)")
+-
++ELSE()
++  ADD_LIBRARY(${STATIC_LIBRARY_NAME} STATIC ${${LIBRARY_NAME}_OBJECTS} ${CMAKE_SOURCE_DIR}/src/maconncpp.rc)
+   TARGET_COMPILE_DEFINITIONS(${STATIC_LIBRARY_NAME} PUBLIC MARIADB_STATIC_LINK)
++ENDIF()
++
+ ELSE()
+   # Xcode doesn't support targets that have only object files,
+   # so let's add an empty file to keep Xcode happy
+@@ -583,36 +586,51 @@ ELSE()
+     SET(EMPTY_FILE ${CMAKE_BINARY_DIR}/empty.cpp)
+   ENDIF()
+   #  MESSAGE(STATUS "Version script: ${CMAKE_SOURCE_DIR}/src/maconncpp.def")
++IF(BUILD_SHARED_LIBS)
+   ADD_LIBRARY(${LIBRARY_NAME} SHARED ${${LIBRARY_NAME}_OBJECTS} ${EMPTY_FILE})
++ELSE()  
+   ADD_LIBRARY(${STATIC_LIBRARY_NAME} STATIC ${${LIBRARY_NAME}_OBJECTS} ${EMPTY_FILE})
++ENDIF()  
+ 
+   IF(APPLE)
++    IF(BUILD_SHARED_LIBS)
+     SET_TARGET_PROPERTIES(${LIBRARY_NAME} PROPERTIES LINK_FLAGS "-Wl"
+                                      INSTALL_RPATH_USE_LINK_PATH 0
+                                      BUILD_WITH_INSTALL_RPATH 1
+                                      XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES
+                                      XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--timestamp -f"
+                                      INSTALL_RPATH "${MAODBC_INSTALL_RPATH}")
++    ELSE()                                     
+     SET_TARGET_PROPERTIES(${STATIC_LIBRARY_NAME} PROPERTIES 
+                                      INSTALL_RPATH_USE_LINK_PATH 0
+                                      BUILD_WITH_INSTALL_RPATH 1
+                                      XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES
+                                      XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--timestamp -f"
+                                      INSTALL_RPATH "${MAODBC_INSTALL_RPATH}")
++    ENDIF()                                 
+     IF(WITH_SIGNCODE)
++      IF(BUILD_SHARED_LIBS)
+       SET_TARGET_PROPERTIES(${LIBRARY_NAME} PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Developer ID Application: ${DEVELOPER_ID}")
++      ELSE()  
+       SET_TARGET_PROPERTIES(${STATIC_LIBRARY_NAME} PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Developer ID Application: ${DEVELOPER_ID}")
++      ENDIF()  
+     ELSE()
++      IF(BUILD_SHARED_LIBS)
+       SET_TARGET_PROPERTIES(${LIBRARY_NAME} PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
++      ELSE()
+       SET_TARGET_PROPERTIES(${STATIC_LIBRARY_NAME} PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
++      ENDIF()
+     ENDIF()
+   ELSE()
+ #    SET_TARGET_PROPERTIES(${LIBRARY_NAME} PROPERTIES LINK_FLAGS "-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/maconncpp.def")
+   ENDIF()
+ ENDIF()
+ 
++IF(BUILD_SHARED_LIBS)
+ TARGET_LINK_LIBRARIES(${LIBRARY_NAME} ${MARIADB_CLIENT_TARGET_NAME} ${PLATFORM_DEPENDENCIES})
++ELSE()
+ TARGET_LINK_LIBRARIES(${STATIC_LIBRARY_NAME} mariadbclient)
++ENDIF()
+ 
+ # MINGW Specific includes and linking
+ IF(MINGW)
+@@ -634,8 +652,11 @@ IF(MINGW)
+   ENDIF()
+   
+   IF(MARIADB_CONNECTORC_LIB)
++    IF(BUILD_SHARED_LIBS)
+     TARGET_LINK_DIRECTORIES(${LIBRARY_NAME} PUBLIC ${MARIADB_CONNECTORC_LIB})
++    ELSE()
+     TARGET_LINK_DIRECTORIES(${STATIC_LIBRARY_NAME} PUBLIC ${MARIADB_CONNECTORC_LIB})
++    ENDIF()
+     MESSAGE(STATUS "Found MariaDB Connector/C libraries - ${MARIADB_CONNECTORC_LIB}")
+   ELSE()
+     MESSAGE(WARNING "Did not find MariaDB Connector/C libraries")
+@@ -643,10 +664,15 @@ IF(MINGW)
+   
+ ENDIF()
+ 
++IF(NOT BUILD_SHARED_LIBS)
+ INCLUDE(symlink)
+ CREATE_SYMLINK(lib${LIBRARY_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX} ${STATIC_LIBRARY_NAME} ${INSTALL_LIBDIR})
++ENDIF()
+ 
++IF(BUILD_SHARED_LIBS)
+ ADD_DEPENDENCIES(${LIBRARY_NAME} DEPENDENCIES_FOR_PACKAGE)
++ENDIF()
++
+ 
+ ########## Packaging ##########
+ 
+@@ -668,14 +694,18 @@ ELSE()
+     #MESSAGE(STATUS "Configuring to generate PKG package")
+     #ADD_SUBDIRECTORY(osxinstall)
+   ENDIF()
++
++  IF(BUILD_SHARED_LIBS)
+   INSTALL(TARGETS
+           ${LIBRARY_NAME}
+           LIBRARY DESTINATION ${INSTALL_LIBDIR}
+           COMPONENT SharedLibraries)
++  ELSE()        
+   INSTALL(TARGETS
+           ${STATIC_LIBRARY_NAME}
+           ARCHIVE DESTINATION ${INSTALL_LIBDIR}
+           COMPONENT Development)
++  ENDIF()        
+ 
+   MESSAGE(STATUS "Documentation installed to ${INSTALL_DOCDIR}")
+   MESSAGE(STATUS "License file installed to ${INSTALL_LICENSEDIR}")
