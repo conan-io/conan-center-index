@@ -1,9 +1,11 @@
+import shutil
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, chdir, save, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag
@@ -49,7 +51,7 @@ class CoinOsiConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("coin-utils/2.11.9")
+        self.requires("coin-utils/2.11.10")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
@@ -59,9 +61,13 @@ class CoinOsiConan(ConanFile):
             raise ConanInvalidConfiguration("coin-osi shared not supported yet when cross-building")
 
     def build_requirements(self):
+        self.tool_requires("autoconf/2.71")
+        self.tool_requires("autoconf-archive/2023.02.20")
+        self.tool_requires("automake/1.16.5")
+        self.tool_requires("libtool/2.4.7")
         self.tool_requires("gnu-config/cci.20210814")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -69,6 +75,9 @@ class CoinOsiConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, url="https://github.com/coin-or-tools/BuildTools/archive/refs/tags/releases/0.8.11.tar.gz",
+            sha256="ec4cec2455537b4911b1ce223f1f946f5afa2ea6264fc96ae4da6bea63af34dc",
+            destination=os.path.join(self.source_folder, "BuildTools"), strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -96,6 +105,7 @@ class CoinOsiConan(ConanFile):
             # This is a weird workaround when build machine is Windows. Here we have to inject regular
             # Windows path to pc files folder instead of unix path flavor injected by AutotoolsToolchain...
             env.define("PKG_CONFIG_PATH", self.generators_folder)
+        env.append_path("ACLOCAL_PATH", os.path.join(self.source_folder, "BuildTools"))
         tc.generate(env)
 
         deps = PkgConfigDeps(self)
@@ -103,12 +113,22 @@ class CoinOsiConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        # Based on https://github.com/coin-or-tools/BuildTools/blob/master/run_autotools
+        for file in ["config.guess", "config.sub", "depcomp", "install-sh", "ltmain.sh", "missing"]:
+            copy(self, file, src=os.path.join(self.source_folder, "BuildTools"), dst=self.source_folder)
+        shutil.copy(os.path.join(self.source_folder, "BuildTools", "coin.m4"), os.path.join(self.source_folder, "acinclude.m4"))
+        # Use newer config.guess and config.sub
         for gnu_config in [
             self.conf.get("user.gnu-config:config_guess", check_type=str),
             self.conf.get("user.gnu-config:config_sub", check_type=str),
         ]:
             if gnu_config:
                 copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+        with chdir(self, self.source_folder):
+            self.run("aclocal")
+            self.run("libtoolize -fiv")
+            self.run("automake --add-missing")
+            self.run("autoconf")
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
