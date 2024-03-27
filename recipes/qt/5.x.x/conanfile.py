@@ -328,8 +328,6 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("with_x11", False) and not self.dependencies.direct_host["xkbcommon"].options.with_x11:
             raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled when the 'with_x11' option is enabled")
-        if self.options.get_safe("qtwayland", False) and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
-            raise ConanInvalidConfiguration("The 'with_wayland' option for the 'xkbcommon' package must be enabled when the 'qtwayland' option is enabled")
 
         if cross_building(self) and self.options.cross_compile == "None" and not is_apple_os(self) and self.settings.os != "Android":
             raise ConanInvalidConfiguration("option cross_compile must be set for cross compilation "
@@ -337,6 +335,11 @@ class QtConan(ConanFile):
 
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
+
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.qtwebengine and not self.dependencies.direct_host["libglvnd"].options.egl:
+            raise ConanInvalidConfiguration("The 'egl' option for the 'libglvnd' package must be enabled when the 'qtwebengine' option is enabled")
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.get_safe("opengl", "no") != "no" and not self.dependencies.direct_host["libglvnd"].options.glx:
+            raise ConanInvalidConfiguration("The 'glx' option for the 'libglvnd' package must be enabled when the 'opengl' option is enabled")
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
@@ -386,7 +389,9 @@ class QtConan(ConanFile):
             self.requires("xorg/system")
         if self.options.get_safe("with_x11") or self.options.qtwayland:
             self.requires("xkbcommon/1.5.0")
-        if self.options.get_safe("opengl", "no") != "no":
+        if self.settings.os in ["Linux", "FreeBSD"] and (self.options.get_safe("opengl", "no") != "no" or self.options.qtwebengine):
+            self.requires("libglvnd/1.7.0")
+        if self.settings.os not in ["Linux", "FreeBSD"] and self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
@@ -398,7 +403,6 @@ class QtConan(ConanFile):
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.93")
             self.requires("libdrm/2.4.119")
-            self.requires("egl/system")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
         if self.options.get_safe("with_pulseaudio", False):
@@ -1087,7 +1091,10 @@ Examples = bin/datadir/examples""")
                 if self.options.get_safe("with_x11", False):
                     gui_reqs.append("xorg::xorg")
             if self.options.get_safe("opengl", "no") != "no":
-                gui_reqs.append("opengl::opengl")
+                if self.settings.os in ["FreeBSD", "Linux"]:
+                    gui_reqs.append("libglvnd::gl")
+                else:
+                    gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
                 gui_reqs.append("vulkan-loader::vulkan-loader")
                 if is_apple_os(self):
@@ -1290,7 +1297,7 @@ Examples = bin/datadir/examples""")
             webenginereqs = ["Gui", "Quick", "WebChannel", "Positioning"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 webenginereqs.extend(["expat::expat", "opus::libopus", "xorg-proto::xorg-proto", "libxshmfence::libxshmfence", \
-                                      "nss::nss", "libdrm::libdrm", "egl::egl"])
+                                      "nss::nss", "libdrm::libdrm", "libglvnd::egl"])
             _create_module("WebEngineCore", webenginereqs)
             if self.settings.os != "Windows":
                 self.cpp_info.components["WebEngineCore"].system_libs.append("resolv")
