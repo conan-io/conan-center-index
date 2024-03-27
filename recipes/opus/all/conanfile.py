@@ -65,6 +65,7 @@ class OpusConan(ConanFile):
         tc.variables["OPUS_OSCE"] = self.options.osce
         tc.variables["OPUS_DEEP_PLC"] = self.options.deep_plc
         tc.variables["OPUS_DRED"] = self.options.dred
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):
