@@ -97,5 +97,8 @@ class LibFTPConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ftp")
         self.cpp_info.set_property("cmake_target_name", "ftp::ftp")
 
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
