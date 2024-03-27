@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, copy, rmdir, rm, save, replace_in_file
+from conan.tools.files import get, copy, rmdir, rm, save, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
@@ -56,6 +56,9 @@ class PackageConan(ConanFile):
             "msvc": "191",
             "Visual Studio": "15",
         }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -137,6 +140,8 @@ class PackageConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
+
         # Unvendor optional-lite
         rmdir(self, os.path.join(self.source_folder, "ouster_client", "include", "optional-lite"))
         replace_in_file(self, os.path.join(self.source_folder, "ouster_client", "CMakeLists.txt"),
