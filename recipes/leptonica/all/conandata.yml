@@ -1,4 +1,7 @@
 sources:
+  "1.84.1":
+    url: "https://github.com/DanBloomberg/leptonica/archive/1.84.1.tar.gz"
+    sha256: "ecd7a868403b3963c4e33623595d77f2c87667e2cfdd9b370f87729192061bef"
   "1.83.1":
     url: "https://github.com/DanBloomberg/leptonica/archive/1.83.1.tar.gz"
     sha256: "4289d0a4224b614010072253531c0455a33a4d7c7a0017fe7825ed382290c0da"
