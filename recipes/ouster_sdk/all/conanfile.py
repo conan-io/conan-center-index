@@ -63,6 +63,7 @@ class PackageConan(ConanFile):
         if conan_version.major == 1:
             # Turning off by default due to perpetually missing libtins binaries on CCI
             self.options.build_pcap = False
+            self.options.build_osf = False
 
     def configure(self):
         if self.options.shared:
@@ -107,6 +108,9 @@ class PackageConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+
+        if self.options.build_osf and not self.options.build_pcap:
+            raise ConanInvalidConfiguration("build_osf=True requires build_pcap=True")
 
     def build_requirements(self):
         if self.options.build_osf:
@@ -175,6 +179,7 @@ class PackageConan(ConanFile):
             self.cpp_info.components["ouster_osf"].includedirs.append(os.path.join("include", "fb_generated"))
             self.cpp_info.components["ouster_osf"].requires = [
                 "ouster_client",
+                "ouster_pcap",
                 "flatbuffers::flatbuffers",
                 "libpng::libpng",
                 "zlib::zlib",
