@@ -72,7 +72,7 @@ class EmbreeConan(ConanFile):
 
     @property
     def _has_sse_avx(self):
-        return self.settings.arch in ["x86", "x86_64"]
+        return self.settings.arch in ["x86", "x86_64", "wasm"]
 
     @property
     def _embree_has_neon_support(self):
@@ -109,6 +109,11 @@ class EmbreeConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch == "wasm":
+            del self.options.sse42
+            del self.options.avx
+            del self.options.avx2
+            del self.options.avx512
         if not self._has_sse_avx:
             del self.options.sse2
             del self.options.sse42
