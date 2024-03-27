@@ -112,6 +112,9 @@ class PackageConan(ConanFile):
         if self.options.build_osf and not self.options.build_pcap:
             raise ConanInvalidConfiguration("build_osf=True requires build_pcap=True")
 
+        if self.options.shared and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Shared builds are not supported on Windows")
+
     def build_requirements(self):
         if self.options.build_osf:
             self.tool_requires("flatbuffers/<host_version>")
@@ -127,7 +130,6 @@ class PackageConan(ConanFile):
         tc.variables["BUILD_PCAP"] = self.options.build_pcap
         tc.variables["BUILD_OSF"] = self.options.build_osf
         tc.variables["OUSTER_USE_EIGEN_MAX_ALIGN_BYTES_32"] = self.options.eigen_max_align_bytes
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
@@ -143,6 +145,10 @@ class PackageConan(ConanFile):
              "find_package(optional-lite REQUIRED)\n"
              "target_link_libraries(ouster_client PUBLIC nonstd::optional-lite)\n",
              append=True)
+
+        # Allow non-static ouster_osf for consistency with other components
+        replace_in_file(self, os.path.join(self.source_folder, "ouster_osf", "CMakeLists.txt"),
+                        "add_library(ouster_osf STATIC", "add_library(ouster_osf")
 
     def build(self):
         self._patch_sources()
