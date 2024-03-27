@@ -189,7 +189,7 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
-            self.requires("arrow/14.0.2")
+            self.requires("arrow/15.0.0")
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
@@ -228,9 +228,10 @@ class GdalConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.1")
+            self.requires("libjpeg-turbo/3.0.2")
         if self.options.with_jxl:
-            self.requires("libjxl/0.6.1")
+            # 0.9+ is not compatible as of v3.8.4
+            self.requires("libjxl/0.8.2")
         if self.options.with_kea:
             self.requires("kealib/1.4.14")
         if self.options.with_lerc:
@@ -273,10 +274,9 @@ class GdalConan(ConanFile):
         # if self.options.with_pdfium:
         #     self.requires("pdfium/95.0.4629")
         if self.options.with_pg:
-            # libpq 15+ is not supported
-            self.requires("libpq/14.9")
+            self.requires("libpq/15.4")
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_podofo:
             self.requires("podofo/0.9.7")
         if self.options.with_poppler:
@@ -286,11 +286,11 @@ class GdalConan(ConanFile):
         if self.options.with_rasterlite2:
             self.requires("librasterlite2/1.1.0-beta1")
         if self.options.with_spatialite:
-            self.requires("libspatialite/5.0.1")
+            self.requires("libspatialite/5.1.0")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.44.2")
         if self.options.with_tiledb:
-            self.requires("tiledb/2.17.4")
+            self.requires("tiledb/2.21.0")
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
         if self.options.with_xerces:
@@ -338,6 +338,11 @@ class GdalConan(ConanFile):
             msg = "poppler:with_libjpeg and gdal:with_jpeg must be set to the same value, either libjpeg or libjpeg-turbo."
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
+
+        if self.options.tools and self.options.shared:
+            # FIXME: probably also broken for shared dependencies
+            # None of the deps are linked correctly for shared builds, probably due to CMake visibility issues.
+            raise ConanInvalidConfiguration("Building of tools is currently broken for shared=True")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
