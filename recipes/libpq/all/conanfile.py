@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
@@ -59,6 +59,9 @@ class LibpqConan(ConanFile):
             del self.options.disable_rpath
             # TODO: add Windows support for these
             del self.options.with_icu
+            del self.options.with_zlib
+        if is_apple_os(self):
+            # FIXME: not sure why this one fails to link on macOS
             del self.options.with_zlib
 
     def configure(self):
