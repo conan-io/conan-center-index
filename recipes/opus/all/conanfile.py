@@ -21,12 +21,18 @@ class OpusConan(ConanFile):
         "fPIC": [True, False],
         "fixed_point": [True, False],
         "stack_protector": [True, False],
+        "osce": [True, False],
+        "deep_plc": [True, False],
+        "dred": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "fixed_point": False,
         "stack_protector": True,
+        "osce": False,
+        "deep_plc": False,
+        "dred": False,
     }
 
     def export_sources(self):
@@ -56,6 +62,10 @@ class OpusConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["OPUS_FIXED_POINT"] = self.options.fixed_point
         tc.variables["OPUS_STACK_PROTECTOR"] = self.options.stack_protector
+        tc.variables["OPUS_OSCE"] = self.options.osce
+        tc.variables["OPUS_DEEP_PLC"] = self.options.deep_plc
+        tc.variables["OPUS_DRED"] = self.options.dred
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):
