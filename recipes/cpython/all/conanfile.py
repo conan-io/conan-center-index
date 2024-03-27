@@ -277,7 +277,7 @@ class CPythonConan(ConanFile):
         if self.options.get_safe("with_curses", False):
             libcurses = self.dependencies["ncurses"].cpp_info.components["libcurses"]
             tinfo = self.dependencies["ncurses"].cpp_info.components["tinfo"]
-            libs = libcurses.libs + libcurses.system_libs + info.libs + tinfo.system_libs
+            libs = libcurses.libs + libcurses.system_libs + tinfo.libs + tinfo.system_libs
             replace_in_file(self, setup_py,
                 "curses_libs = ",
                 "curses_libs = {} #".format(repr(libs)))
