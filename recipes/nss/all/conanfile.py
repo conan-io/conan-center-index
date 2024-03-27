@@ -72,6 +72,11 @@ class NSSConan(ConanFile):
     def _site_packages_dir(self):
         return os.path.join(self.build_folder, "site-packages")
 
+    @property
+    def _dist_dir(self):
+        # location for installed lib/ and bin/ subdirs
+        return os.path.join(self.source_folder, "dist", "Debug" if self.settings.build_type == "Debug" else "Release")
+
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -81,11 +86,13 @@ class NSSConan(ConanFile):
         vc = VCVars(self)
         vc.generate()
 
-        # add PYTHONPATH for gyp-next
         env = Environment()
+        # Add temporary site-packages to PYTHONPATH for gyp-next
         env.prepend_path("PYTHONPATH", self._site_packages_dir)
         env.prepend_path("PATH", os.path.join(self._site_packages_dir, "bin"))
-        env.vars(self, scope="build").save_script("conan_site_packages")
+        # For 'shlibsign -v -i <dist_dir>/lib/libfreebl3.so' etc to work during build
+        env.prepend_path("LD_LIBRARY_PATH", os.path.join(self._dist_dir, "lib"))
+        env.vars(self, scope="build").save_script("conan_paths")
 
     def _patch_sources(self):
         def adjust_path(path):
@@ -174,11 +181,10 @@ class NSSConan(ConanFile):
         copy(self, "*",
              src=os.path.join(self.source_folder, "dist", "public"),
              dst=os.path.join(self.package_folder, "include"))
-        dist_dir = os.path.join(self.source_folder, "dist", "Debug" if self.settings.build_type == "Debug" else "Release")
-        copy(self, "*", os.path.join(dist_dir, "bin"), os.path.join(self.package_folder, "bin"))
+        copy(self, "*", os.path.join(self._dist_dir, "bin"), os.path.join(self.package_folder, "bin"))
         for pattern in ["*.a", "*.lib", "*.so", "*.dylib"]:
-            copy(self, pattern, os.path.join(dist_dir, "lib"), os.path.join(self.package_folder, "lib"))
-        copy(self, "*.dll", os.path.join(dist_dir, "lib"), os.path.join(self.package_folder, "bin"))
+            copy(self, pattern, os.path.join(self._dist_dir, "lib"), os.path.join(self.package_folder, "lib"))
+        copy(self, "*.dll", os.path.join(self._dist_dir, "lib"), os.path.join(self.package_folder, "bin"))
         if not self.options.get_safe("shared", True):
             rm(self, "*.so", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
