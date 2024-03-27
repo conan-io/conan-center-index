@@ -1,0 +1,42 @@
+diff --git a/cmake/modules/HandleLLVMOptions.cmake b/cmake/modules/HandleLLVMOptions.cmake
+index 5d4d692a70a..5776a85b747 100644
+--- a/cmake/modules/HandleLLVMOptions.cmake
++++ b/cmake/modules/HandleLLVMOptions.cmake
+@@ -27,6 +27,19 @@ string(TOUPPER "${LLVM_ENABLE_LTO}" uppercase_LLVM_ENABLE_LTO)
+ # The following only works with the Ninja generator in CMake >= 3.0.
+ set(LLVM_PARALLEL_COMPILE_JOBS "" CACHE STRING
+   "Define the maximum number of concurrent compilation jobs (Ninja only).")
++cmake_host_system_information(RESULT AVAILABLE_PHYSICAL_MEMORY QUERY AVAILABLE_PHYSICAL_MEMORY)
++cmake_host_system_information(RESULT NUMBER_OF_LOGICAL_CORES QUERY NUMBER_OF_LOGICAL_CORES)
++if(LLVM_RAM_PER_COMPILE_JOB)
++  math(EXPR memory_available_jobs "${AVAILABLE_PHYSICAL_MEMORY} / ${LLVM_RAM_PER_COMPILE_JOB}" OUTPUT_FORMAT DECIMAL)
++  if (memory_available_jobs LESS 1)
++    set(memory_available_jobs 1)
++  endif()
++  if (memory_available_jobs LESS NUMBER_OF_LOGICAL_CORES)
++    set(LLVM_PARALLEL_COMPILE_JOBS "${memory_available_jobs}")
++  else()
++    set(LLVM_PARALLEL_COMPILE_JOBS "${NUMBER_OF_LOGICAL_CORES}")
++  endif()
++endif()
+ if(LLVM_PARALLEL_COMPILE_JOBS)
+   if(NOT CMAKE_GENERATOR STREQUAL "Ninja")
+     message(WARNING "Job pooling is only available with Ninja generators.")
+@@ -38,6 +51,17 @@ endif()
+ 
+ set(LLVM_PARALLEL_LINK_JOBS "" CACHE STRING
+   "Define the maximum number of concurrent link jobs (Ninja only).")
++if(LLVM_RAM_PER_LINK_JOB)
++  math(EXPR memory_available_jobs "${AVAILABLE_PHYSICAL_MEMORY} / ${LLVM_RAM_PER_LINK_JOB}" OUTPUT_FORMAT DECIMAL)
++  if (memory_available_jobs LESS 1)
++    set(memory_available_jobs 1)
++  endif()
++  if (memory_available_jobs LESS NUMBER_OF_LOGICAL_CORES)
++    set(LLVM_PARALLEL_LINK_JOBS "${memory_available_jobs}")
++  else()
++    set(LLVM_PARALLEL_LINK_JOBS "${NUMBER_OF_LOGICAL_CORES}")
++  endif()
++endif()
+ if(CMAKE_GENERATOR STREQUAL "Ninja")
+   if(NOT LLVM_PARALLEL_LINK_JOBS AND uppercase_LLVM_ENABLE_LTO STREQUAL "THIN")
+     message(STATUS "ThinLTO provides its own parallel linking - limiting parallel link jobs to 2.")

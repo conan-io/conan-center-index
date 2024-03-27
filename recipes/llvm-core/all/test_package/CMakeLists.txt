@@ -1,20 +1,31 @@
-cmake_minimum_required(VERSION 3.13.4)
-project(test_package)
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+macro(test_llvm_cmake_variable VARIABLE)
+    if(NOT DEFINED ${VARIABLE})
+        message(FATAL_ERROR "${VARIABLE} is not defined")
+    endif()
+    message(STATUS "${VARIABLE}: ${${VARIABLE}}")
+endmacro()
 
-find_package(LLVM REQUIRED)
-
+set(CMAKE_CXX_STANDARD 17)
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
 
-if(TARGET LLVMInterpreter)  # static libraries
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-        LLVMInterpreter
-        LLVMIRReader
-        LLVMX86CodeGen
-    )
-else()  # shared library
-    target_link_libraries(${PROJECT_NAME} LLVM)
+if (LLVM_SHARED)
+    find_package(LLVM REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE LLVM)
+else()
+    find_package(LLVM REQUIRED)
+    llvm_map_components_to_libnames(llvm_libs interpreter nativecodegen irreader)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${llvm_libs})
 endif()
+
+message(STATUS "Testing LLVM Build Module Variables")
+test_llvm_cmake_variable(LLVM_PACKAGE_VERSION)
+test_llvm_cmake_variable(LLVM_BUILD_TYPE)
+test_llvm_cmake_variable(LLVM_CMAKE_DIR)
+test_llvm_cmake_variable(LLVM_TOOLS_BINARY_DIR)
+test_llvm_cmake_variable(LLVM_ALL_TARGETS)
+test_llvm_cmake_variable(LLVM_TARGETS_TO_BUILD)
+test_llvm_cmake_variable(LLVM_TARGETS_WITH_JIT)
+test_llvm_cmake_variable(LLVM_NATIVE_ARCH)

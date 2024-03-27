@@ -1,0 +1,13 @@
+diff --git a/cmake/modules/AddLLVM.cmake b/cmake/modules/AddLLVM.cmake
+index 29e40f45fef8..bde9a02b3432 100644
+--- a/cmake/modules/AddLLVM.cmake
++++ b/cmake/modules/AddLLVM.cmake
+@@ -2143,7 +2143,7 @@ function(llvm_setup_rpath name)
+ 
+   # Enable BUILD_WITH_INSTALL_RPATH unless CMAKE_BUILD_RPATH is set.
+   if("${CMAKE_BUILD_RPATH}" STREQUAL "")
+-    set_property(TARGET ${name} PROPERTY BUILD_WITH_INSTALL_RPATH ON)
++	  set_property(TARGET ${name} PROPERTY BUILD_WITH_INSTALL_RPATH OFF)
+   endif()
+ 
+   set_target_properties(${name} PROPERTIES
