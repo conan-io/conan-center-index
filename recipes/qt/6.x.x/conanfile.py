@@ -1059,8 +1059,11 @@ class QtConan(ConanFile):
                     gui_reqs.append("xkbcommon::xkbcommon")
                 if self.options.get_safe("with_x11", False):
                     gui_reqs.append("xorg::xorg")
-                if self.options.get_safe("with_egl"):
+            if self.options.get_safe("with_egl"):
+                if self.settings.os in ["Linux", "FreeBSD"]:
                     gui_reqs.append("libglvnd::egl")
+                else:
+                    gui_reqs.append("egl::egl")
             if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
                 if self.settings.os in ["FreeBSD", "Linux"]:
                     gui_reqs.append("libglvnd::gl")
