@@ -55,6 +55,10 @@ class PremakeConan(ConanFile):
             self.requires("util-linux-libuuid/2.39.2")
         # Lua sources are required during the build and cannot be unvendored
 
+    def validate(self):
+        if self.version == "5.0.0-alpha15" and cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building is not supported for Premake 5.0.0-alpha15")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -171,9 +175,6 @@ class PremakeConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
-
-        # https://github.com/premake/premake-core/blob/v5.0.0-beta2/premake5.lua#L232-L271
-
 
         # TODO: Legacy, to be removed on Conan 2.0
         bindir = os.path.join(self.package_folder, "bin")
