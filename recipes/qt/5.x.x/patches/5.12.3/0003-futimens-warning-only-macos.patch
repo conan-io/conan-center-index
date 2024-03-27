@@ -1,0 +1,14 @@
+diff --git a/src/corelib/configure.json b/src/corelib/configure.json
+index 5f5a00a64f..13c6a13cad 100644
+--- a/src/corelib/configure.json
++++ b/src/corelib/configure.json
+@@ -343,7 +343,8 @@
+                     "# Block futimens() on Apple platforms unless it's available on ALL",
+                     "# deployment targets. This simplifies the logic at the call site",
+                     "# dramatically, as it isn't strictly needed compared to futimes().",
+-                    "darwin: QMAKE_CXXFLAGS += -Werror=unguarded-availability"
++		    "darwin: QMAKE_CXXFLAGS += -Werror=unguarded-availability -Werror=unguarded-availability-new",
++                    "CONFIG += warn_on"
+                 ]
+             }
+         },

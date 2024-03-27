@@ -205,8 +205,6 @@ class QtConan(ConanFile):
             del self.options.android_sdk
 
     def configure(self):
-        # if self.settings.os != "Linux":
-        #         self.options.with_libiconv = False # QTBUG-84708
         version = Version(self.version)
         if version.minor == "12":
             del self.options.with_zstd
@@ -223,6 +221,8 @@ class QtConan(ConanFile):
             del self.options.with_libpng
             del self.options.with_md4c
             del self.options.with_x11
+        # if self.settings.os != "Linux":
+        #         self.options.with_libiconv = False # QTBUG-84708
 
         if not self.options.with_dbus:
             del self.options.with_atspi
@@ -756,6 +756,7 @@ class QtConan(ConanFile):
             args += ["-no-framework"]
             if self.settings.arch == "armv8":
                 args.append('QMAKE_APPLE_DEVICE_ARCHS="arm64"')
+            args.append("QMAKE_CXXFLAGS+=-mmacosx-version-min=10.13")
         elif self.settings.os == "Android":
             args += [f"-android-ndk-platform android-{self.settings.os.api_level}"]
             args += [f"-android-abis {android_abi(self)}"]
