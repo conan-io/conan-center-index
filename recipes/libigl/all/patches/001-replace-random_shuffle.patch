@@ -1,0 +1,31 @@
+From 3f3d186db7c2f5ce79194c3439134ca5faf2818a Mon Sep 17 00:00:00 2001
+From: Jeremie Dumas <jedumas@adobe.com>
+Date: Wed, 5 Jan 2022 11:26:47 -0800
+Subject: [PATCH] Fix blue noise random shuffle.
+
+---
+ include/igl/blue_noise.cpp | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/include/igl/blue_noise.cpp b/include/igl/blue_noise.cpp
+index ac447feb42..10df1ad1ba 100644
+--- a/include/igl/blue_noise.cpp
++++ b/include/igl/blue_noise.cpp
+@@ -15,6 +15,7 @@
+ #include <unordered_map>
+ #include <algorithm>
+ #include <vector>
++#include <random>
+ 
+ namespace igl
+ {
+@@ -209,7 +210,8 @@ namespace igl
+     }
+         //printf("  --------\n");
+     // randomize order: this might be a little paranoid...
+-    std::random_shuffle(std::begin(N), std::end(N));
++    std::mt19937 twister;
++    std::shuffle(std::begin(N), std::end(N), twister);
+     bool found = false;
+     for(const BlueNoiseKeyType & nk : N)
+     {
