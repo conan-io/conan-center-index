@@ -1,117 +1,176 @@
 import os
-from conans import ConanFile, MSBuild, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
+import textwrap
+
 import yaml
+from conan import ConanFile, conan_version
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import chdir, collect_libs, copy, get, replace_in_file, rmdir, save
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import MSBuild, MSBuildDeps, MSBuildToolchain, is_msvc
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.53.0"
 
 
 class YojimboConan(ConanFile):
     name = "yojimbo"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/networkprotocol/yojimbo"
-    topics = ("conan", "yojimbo", "game", "udp", "protocol", "client-server", "multiplayer-game-server")
     description = "A network library for client/server games written in C++"
     license = "BSD-3-Clause"
-    exports = "submoduledata.yml"
-    build_requires = "premake/5.0.0-alpha15"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/networkprotocol/yojimbo"
+    topics = ("game", "udp", "protocol", "client-server", "multiplayer-game-server")
+
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
+    options = {
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+    }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
-
-    def configure(self):
-        if self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration("Only 64-bit architecture supported")
+    def export_sources(self):
+        copy(self, "submoduledata.yml", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.settings.arch != "x86_64":
+            raise ConanInvalidConfiguration("Only 64-bit x86 architecture is supported")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
-        self.requires("libsodium/1.0.18")
-        self.requires("mbedtls/2.25.0")
- 
+        self.requires("libsodium/1.0.19")
+        self.requires("mbedtls/2.28.4")  # v3+ is not supported
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def validate_build(self):
+        if self._settings_build.build_type == "Debug":
+            if conan_version.major == 1:
+                raise ConanInvalidConfiguration("Premake does not support debug builds with Conan < 2.0")
+            if self._settings_build.os != "Windows" and self._settings_build.compiler == "gcc" and Version(self._settings_build.compiler.version) < 8:
+                raise ConanInvalidConfiguration("Debug build requires GCC >= 8 due to util-linux-libuuid")
+
+    def build_requirements(self):
+        self.tool_requires("premake/5.0.0-alpha15")
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
-        
-        submodule_filename = os.path.join(self.recipe_folder, 'submoduledata.yml')
-        with open(submodule_filename, 'r') as submodule_stream:
-            submodules_data = yaml.load(submodule_stream)
-            for path, submodule in submodules_data["submodules"][self.version].items():
-                submodule_data = {
-                    "url": submodule["url"],
-                    "sha256": submodule["sha256"],
-                    "destination": os.path.join(self._source_subfolder, submodule["destination"]),
-                    "strip_root": True
-                }
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-                tools.get(**submodule_data)
-                submodule_source = os.path.join(self._source_subfolder, path)
-                tools.rmdir(submodule_source)
+        submodule_filename = os.path.join(self.export_sources_folder, "submoduledata.yml")
+        with open(submodule_filename, "r", encoding="utf8") as submodule_stream:
+            submodules_data = yaml.load(submodule_stream, Loader=yaml.SafeLoader)
+        for path, submodule_data in submodules_data["submodules"][self.version].items():
+            get(self, **submodule_data, strip_root=True)
+            submodule_source = os.path.join(self.source_folder, path)
+            rmdir(self, submodule_source)
 
-    def build(self):
+    @property
+    def _conan_paths_lua(self):
+        return os.path.join(self.generators_folder, "conan_paths.lua")
 
-        # Before building we need to make some edits to the premake file to build using conan dependencies rather than local/bundled
-
-        # Generate the list of dependency include and library paths as strings
-        include_path_str = ', '.join('"{0}"'.format(p) for p in self.deps_cpp_info["libsodium"].include_paths + self.deps_cpp_info["mbedtls"].include_paths)
-        lib_path_str = ', '.join('"{0}"'.format(p) for p in self.deps_cpp_info["libsodium"].lib_paths + self.deps_cpp_info["mbedtls"].lib_paths)
-
-        premake_path = os.path.join(self._source_subfolder, "premake5.lua")
-
-        if self.settings.os == "Windows":
-        
-            # Replace Windows directory seperator
-            include_path_str = include_path_str.replace("\\", "/")
-            lib_path_str = lib_path_str.replace("\\", "/")
-            
-            # Edit the premake script to use conan rather than bundled dependencies
-            tools.replace_in_file(premake_path, "includedirs { \".\", \"./windows\"", "includedirs { \".\", %s" % include_path_str, strict=True)
-            tools.replace_in_file(premake_path, "libdirs { \"./windows\" }", "libdirs { %s }" % lib_path_str, strict=True)
-            
-            # Edit the premake script to change the name of libsodium
-            tools.replace_in_file(premake_path, "\"sodium\"", "\"libsodium\"", strict=True)
-            
+    def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+        if is_msvc(self):
+            tc = MSBuildToolchain(self)
+            tc.generate()
+            tc = MSBuildDeps(self)
+            tc.generate()
         else:
-        
-        	# Edit the premake script to use  conan rather than local dependencies
-            tools.replace_in_file(premake_path, "\"/usr/local/include\"", include_path_str, strict=True)
-            
-            
-        # Build using premake
-            
-        if self.settings.compiler == "Visual Studio":
-            generator = "vs" + {"16": "2019",
-                                "15": "2017",
-                                "14": "2015",
-                                "12": "2013",
-                                "11": "2012",
-                                "10": "2010",
-                                "9": "2008",
-                                "8": "2005"}.get(str(self.settings.compiler.version))
+            tc = AutotoolsToolchain(self)
+            tc.generate()
+            tc = AutotoolsDeps(self)
+            tc.generate()
+
+        deps = list(reversed(self.dependencies.host.topological_sort.values()))
+        includedirs = ', '.join(f'"{p}"'.replace("\\", "/") for dep in deps for p in dep.cpp_info.aggregated_components().includedirs)
+        libdirs = ', '.join(f'"{p}"'.replace("\\", "/") for dep in deps for p in dep.cpp_info.aggregated_components().libdirs)
+        save(self, self._conan_paths_lua,
+             "conan_includedirs = {" + includedirs + "}\n"
+             "conan_libdirs = {" + libdirs + "}\n")
+
+    def _patch_sources(self):
+        premake_path = os.path.join(self.source_folder, "premake5.lua")
+        replace_in_file(self, premake_path, ', "/usr/local/include"', "")
+        if self.settings.os == "Windows":
+            replace_in_file(self, premake_path, '"sodium"', '"libsodium"')
+
+        # Inject Conan dependencies
+        conan_paths_lua = self._conan_paths_lua.replace("\\", "/")
+        save(self, premake_path,
+             f"\ndofile('{conan_paths_lua}')\n" +
+             textwrap.dedent("""
+                workspace "Yojimbo"
+                    configurations { "Debug", "Release" }
+                    includedirs { conan_includedirs }
+                    libdirs { conan_libdirs }
+                """), append=True)
+
+    @property
+    def _premake_generator(self):
+        if is_msvc(self):
+            generator = "vs2015"
         else:
             generator = "gmake2"
+        return generator
 
-        with tools.chdir(self._source_subfolder):
-            self.run("premake5 %s" % generator)
-            
-            if self.settings.compiler == "Visual Studio":
+    def _inject_msbuild_toolchain(self):
+        vcxproj_files = list(self.source_path.rglob("*.vcxproj"))
+        platform_toolset = MSBuildToolchain(self).toolset
+        import_conan_generators = ""
+        for props_file in ["conantoolchain.props", "conandeps.props"]:
+            props_path = os.path.join(self.generators_folder, props_file)
+            if os.path.exists(props_path):
+                import_conan_generators += f"<Import Project=\"{props_path}\" />"
+        for vcxproj_file in vcxproj_files:
+            replace_in_file(self, vcxproj_file, "v140", platform_toolset)
+            if props_path:
+                replace_in_file(
+                    self, vcxproj_file,
+                    r'<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />',
+                    rf'{import_conan_generators}<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />',
+                )
+
+    def build(self):
+        self._patch_sources()
+        # Build using premake
+        with chdir(self, self.source_folder):
+            self.run(f"premake5 {self._premake_generator}")
+            if is_msvc(self):
+                self._inject_msbuild_toolchain()
                 msbuild = MSBuild(self)
                 msbuild.build("Yojimbo.sln")
             else:
                 config = "debug" if self.settings.build_type == "Debug" else "release"
                 config += "_x64"
-                env_build = AutoToolsBuildEnvironment(self)
-                env_build.make(args=["config=%s" % config])
-
+                autotools = Autotools(self)
+                autotools.make(args=[f"config={config}"])
 
     def package(self):
-        self.copy(pattern="LICENCE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="yojimbo.h", dst="include", src=self._source_subfolder)
-        
-        self.copy(pattern="*/yojimbo.lib", dst="lib", keep_path=False)
-        self.copy(pattern="*/libyojimbo.a", dst="lib", keep_path=False)
+        copy(self, "LICENCE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        copy(self, "yojimbo.h",
+            dst=os.path.join(self.package_folder, "include"),
+            src=self.source_folder)
+        copy(self, "*/yojimbo.lib",
+             dst=os.path.join(self.package_folder, "lib"),
+             src=self.source_folder,
+             keep_path=False)
+        copy(self, "*/libyojimbo.a",
+             dst=os.path.join(self.package_folder, "lib"),
+             src=self.source_folder,
+             keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
