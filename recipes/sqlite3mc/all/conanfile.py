@@ -84,7 +84,7 @@ class sqlite3mc(ConanFile):
         "enable_rtree": True,
         "enable_uuid": True,
         "use_uri": True,
-        "user_authentication": True,
+        "user_authentication": False,
         "enable_preupdate_hook": False,
         "enable_session": False,
         "shell_is_utf8": True,
