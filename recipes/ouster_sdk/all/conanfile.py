@@ -60,6 +60,9 @@ class PackageConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if conan_version.major == 1:
+            # Turning off by default due to perpetually missing libtins binaries on CCI
+            self.options.build_pcap = False
 
     def configure(self):
         if self.options.shared:
