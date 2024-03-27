@@ -1,5 +1,5 @@
 versions:
-  "1.5":
-    folder: all
   "cci.20170314":
+    folder: all
+  "1.5":
     folder: all
