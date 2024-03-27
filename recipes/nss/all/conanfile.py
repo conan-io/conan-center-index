@@ -140,6 +140,10 @@ class NSSConan(ConanFile):
                         "'libraries': ['<@(zlib_libs)'],",
                         f"'libraries': ['{zlib_flags}'],")
 
+        # Do not hide shlibsign errors in subprocess.check_call()
+        replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "shlibsign.py"),
+                        ", stdout=dev_null, stderr=dev_null", "")
+
     @property
     def _build_args(self):
         # https://github.com/nss-dev/nss/blob/master/help.txt
