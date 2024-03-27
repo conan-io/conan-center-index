@@ -199,6 +199,8 @@ class SqlcipherConan(ConanFile):
                 copy(self, os.path.basename(gnu_config), os.path.dirname(gnu_config), os.path.join(self.source_folder, "build-aux"))
         configure = os.path.join(self.source_folder, "configure")
         self._chmod_plus_x(configure)
+        replace_in_file(self, configure, 'LIBS="-lcrypto $LIBS"', "", strict=False)
+        replace_in_file(self, configure, 'LIBS="-lcrypto  $LIBS"', "", strict=False)
         # relocatable shared libs on macOS
         replace_in_file(self, configure, "-install_name \\$rpath/", "-install_name @rpath/")
         # avoid SIP issues on macOS when dependencies are shared
@@ -209,9 +211,24 @@ class SqlcipherConan(ConanFile):
                             "#! /bin/sh\n",
                             f"#! /bin/sh\nexport DYLD_LIBRARY_PATH={libpaths}:$DYLD_LIBRARY_PATH\n")
 
+    def _patch_sources_msvc(self):
+        makefile = os.path.join(self.source_folder, "Makefile.msc")
+        replace_in_file(self, makefile, "winsqlite3.", "sqlcipher.")
+        replace_in_file(self, makefile, "libsqlite3.", "sqlcipher.")
+        replace_in_file(self, makefile, " sqlite3.", " sqlcipher.")
+        # Remove /NODEFAULTLIB:kernel32.lib, required by OpenSSL
+        replace_in_file(self, makefile, "/NODEFAULTLIB:kernel32.lib", "")
+        # /d2guard4 requires /guard:cf to be present as well, but it doesn't work with /Zi (Debug builds)
+        replace_in_file(self, makefile, "/d2guard4", "")
+        # LTLIBPATHS is required to find the openssl/libressl libs
+        replace_in_file(self, makefile, " $(LTLIBOPTS)", " $(LTLIBOPTS) $(LTLIBPATHS)")
+        # Allow overriding of the value
+        replace_in_file(self, makefile, "-DSQLITE_TEMP_STORE=1", "-DSQLITE_TEMP_STORE=$(SQLITE_TEMP_STORE)")
+
     def build(self):
         apply_conandata_patches(self)
         if is_msvc(self):
+            self._patch_sources_msvc()
             with chdir(self, self.source_folder):
                 main_target = "dll" if self.options.shared else "sqlcipher.lib"
                 self.run(f"nmake /f Makefile.msc {main_target}")
