@@ -20,7 +20,6 @@ class GodotCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/godotengine/godot-cpp"
     topics = ("game-engine", "game-development", "c++")
-
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
