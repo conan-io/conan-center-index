@@ -60,8 +60,6 @@ class LibpqConan(ConanFile):
             # TODO: add Windows support for these
             del self.options.with_icu
             del self.options.with_zlib
-        if Version(self.version) < "10":
-            self.options.rm_safe("with_icu")
 
     def configure(self):
         if self.options.shared:
