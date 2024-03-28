@@ -203,7 +203,7 @@ class OpenCVConan(ConanFile):
         "with_msmf": True,
         "with_msmf_dxva": True,
         # objdetect module options
-        "with_quirc": False,
+        "with_quirc": True,
         # videoio module options
         "with_ffmpeg": True,
         "with_v4l": False,
@@ -350,9 +350,6 @@ class OpenCVConan(ConanFile):
             # in a big dependency graph
             if not self._has_with_wayland_option:
                 self.options.with_gtk = True
-
-        if Version(self.version) >= "4.9":
-            self.options.with_quirc = True
 
     @property
     def _opencv_modules(self):
@@ -1241,9 +1238,9 @@ class OpenCVConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "elseif(EMSCRIPTEN)", "elseif(QNXNTO)\nelseif(EMSCRIPTEN)")
 
-        if self.options.with_quirc:
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(3rdparty/quirc)", "# add_subdirectory(3rdparty/quirc)")
-
+        ## Upstream CMakeLists vendors quirc in CMakeLists of 3rdparty/quirc.
+        ## Instead we rely on find-quirc.patch in order to link external quirc.
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(3rdparty/quirc)", "")
 
         ## Fix link to several dependencies
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
@@ -1492,8 +1489,6 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_protobuf"):
             tc.variables["PROTOBUF_UPDATE_FILES"] = True
         tc.variables["WITH_ADE"] = self.options.gapi
-        if self.options.objdetect:
-            tc.variables["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
 
         # Extra modules
         if any([self.options.get_safe(module) for module in OPENCV_EXTRA_MODULES_OPTIONS]) or self.options.with_cuda:
