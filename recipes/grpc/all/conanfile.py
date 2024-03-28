@@ -404,6 +404,30 @@ class GrpcConan(ConanFile):
                 },
             })
 
+        if Version(self.version) >= "1.60":
+            components.update({
+                "upb_collections_lib": {
+                    "lib": "upb_collections_lib",
+                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                },
+                "upb_json_lib": {
+                    "lib": "upb_json_lib",
+                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                },
+                "upb_textformat_lib": {
+                    "lib": "upb_textformat_lib",
+                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                },
+                "utf8_range_lib": {
+                    "lib": "utf8_range_lib",
+                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                },
+            })
+            extra_libs = ["upb_textformat_lib", "upb_json_lib", "utf8_range_lib", "upb_collections_lib"]
+            components["_grpc"]["requires"] += extra_libs
+            if not self.options.secure:
+                components["grpc_unsecure"]["requires"] += extra_libs
+
         return components
 
     def package_info(self):
