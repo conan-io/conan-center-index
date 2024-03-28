@@ -1,0 +1,6 @@
+versions:
+  # Note: Only ever add the versions of OpenSSL that have been FIPS certified
+  3.0.9:
+    folder: "all"
+  3.0.8:
+    folder: "all"
