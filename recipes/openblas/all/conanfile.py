@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir, collect_libs
+from conan.tools.files import copy, get, replace_in_file, rmdir, collect_libs, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.errors import ConanInvalidConfiguration
@@ -62,7 +63,12 @@ class OpenblasConan(ConanFile):
             raise ConanInvalidConfiguration("armv8 builds are not currently supported for versions lower than 0.3.24. Contributions to support this are welcome.")
 
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross-building not implemented")
+            self.output.warning("Cross-building has only been tested for x86_64 to armv8. Proceed with caution.")
+        if Version(self.version) < "0.3.12" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("armv8 builds are not supported for versions less than 0.3.12")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
         get(self,
@@ -90,8 +96,13 @@ class OpenblasConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
         tc = CMakeToolchain(self)
 
+        if cross_building(self, skip_x64_x86=True):
+            tc.cache_variables["TARGET"] = str(self.settings.arch).upper()
         tc.cache_variables["NOFORTRAN"] = not self.options.build_lapack
         # This checks explicit user-specified fortran compiler
         if self.options.build_lapack:
@@ -122,6 +133,8 @@ class OpenblasConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
+
         if Version(self.version) < "0.3.21":
             if Version(self.version) >= "0.3.12":
                 search = """message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")"""
@@ -182,7 +195,7 @@ endif()"""
                 self.cpp_info.components["openblas_component"].system_libs.append("gfortran")
 
         self.output.info(
-            "Setting OpenBLAS_HOME environment variable: {}".format(self.package_folder)
+            f"Setting OpenBLAS_HOME environment variable: {self.package_folder}"
         )
         self.env_info.OpenBLAS_HOME = self.package_folder
 

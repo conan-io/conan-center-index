@@ -1,0 +1,27 @@
+From 45b2cd2fb299efdda04e539467fc3b15c2bd6d63 Mon Sep 17 00:00:00 2001
+From: Andy Mroczkowski <amroczkowski@exyntechnologies.com>
+Date: Wed, 12 Jul 2023 09:37:45 -0400
+Subject: [PATCH] treat armv8 CMAKE_SYSTEM_PROCESSOR as arm64
+
+The cmake scripts incorrectly treated armv8 as 32-bit arm, causing
+compilation issues. This just adds 'armv8' to the arm64 condition check.
+---
+ cmake/system_check.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cmake/system_check.cmake b/cmake/system_check.cmake
+index fdc79c8ce..bf3c23d23 100644
+--- a/cmake/system_check.cmake
++++ b/cmake/system_check.cmake
+@@ -54,7 +54,7 @@ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "amd64.*|x86_64.*|AMD64.*")
+   endif()
+ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "i686.*|i386.*|x86.*|amd64.*|AMD64.*")
+   set(X86 1)
+-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64.*|AARCH64.*|arm64.*|ARM64.*)")
++elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64.*|AARCH64.*|arm64.*|ARM64.*|armv8.*)")
+   if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+     set(ARM64 1)
+   else()
+-- 
+2.40.1
+
