@@ -8,7 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os != "Windows":
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def build(self):
         if self.settings.os != "Windows":
