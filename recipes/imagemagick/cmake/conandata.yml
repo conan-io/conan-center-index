@@ -1,0 +1,8 @@
+sources:
+  "7.1.1-25":
+    source:
+      url: "https://github.com/ImageMagick/ImageMagick/archive/refs/tags/7.1.1-25.tar.gz"
+      sha256: "983df08061bdcf95fe49146444fd1deb9c176b06359d3431053f59813c3e9668"
+    cmake:  # 2024-01-07 version
+      url: "https://codeload.github.com/valgur/ImageMagick/zip/adf2813a611603f588b6a62f99f0feb604fbbeda"
+      sha256: "9013e3c925feb45582a55db9666354e393e546bde5f642f590de8ced62b36ee6"
