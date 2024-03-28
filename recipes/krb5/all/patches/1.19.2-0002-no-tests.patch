@@ -1,0 +1,13 @@
+diff --git a/src/Makefile.in b/src/Makefile.in
+index 8f14e9bf2..dfb6843c9 100644
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -30,7 +30,7 @@ SUBDIRS=util include lib \
+ 	plugins/preauth/spake \
+ 	plugins/preauth/test \
+ 	plugins/tls/k5tls \
+-	kdc kadmin kprop clients appl tests \
++	kdc kadmin kprop clients appl \
+ 	config-files build-tools man doc @po@
+ WINSUBDIRS=include util lib ccapi windows clients appl plugins\preauth\spake
+ BUILDTOP=$(REL).
