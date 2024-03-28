@@ -300,12 +300,17 @@ class CPythonConan(ConanFile):
                 replace_in_file(self, setup_py, "if (MACOS and self.detect_tkinter_darwin())", "if (False)")
 
     def _patch_msvc_projects(self):
+        # Don't build vendored bz2
         self._regex_replace_in_file(self._msvc_project_path("_bz2"), r'.*Include=\"\$\(bz2Dir\).*', "")
+
         if self._supports_modules:
+            # Don't import vendored libffi
             replace_in_file(self, self._msvc_project_path("_ctypes"), '<Import Project="libffi.props" />', "")
             if Version(self.version) < "3.11":
+                # Don't add this define, it should be added conditionally by the libffi package
                 replace_in_file(self, self._msvc_project_path("_ctypes"), "FFI_BUILDING;", "")
 
+        # Don't import vendored openssl
         replace_in_file(self, self._msvc_project_path("_hashlib"), '<Import Project="openssl.props" />', "")
         replace_in_file(self, self._msvc_project_path("_ssl"), '<Import Project="openssl.props" />', "")
 
@@ -318,26 +323,37 @@ class CPythonConan(ConanFile):
         # Remove extra include directory
         replace_in_file(self, self._msvc_project_path("_decimal"), r"..\Modules\_decimal\libmpdec;", "")
 
+        # Don't include vendored sqlite3
         replace_in_file(self, self._msvc_project_path("_sqlite3"),
                         '<ProjectReference Include="sqlite3.vcxproj">',
                         '<ProjectReference Include="sqlite3.vcxproj" Condition="False">')
 
+        # TODO I think this line can be removed
         replace_in_file(self, self._msvc_project_path("_lzma"), "<PreprocessorDefinitions>", "<PreprocessorDefinitions>$(ConanPreprocessorDefinitions);")
+
+        # Remove hardcoded reference to lzma library
         replace_in_file(self, self._msvc_project_path("_lzma"), "<AdditionalDependencies>$(OutDir)liblzma$(PyDebugExt).lib;", "<AdditionalDependencies>")
+        # Don't include vendored lzma
         replace_in_file(self, self._msvc_project_path("_lzma"),
                         '<ProjectReference Include="liblzma.vcxproj">',
                         '<ProjectReference Include="liblzma.vcxproj" Condition="False">')
 
+        # Don't include vendored expat project
         replace_in_file(self, self._msvc_project_path("pyexpat"),
                         r"<AdditionalIncludeDirectories>$(PySourcePath)Modules\expat;",
                         "<AdditionalIncludeDirectories>")
+        # Remove XML_STATIC, this should conditionally be set by the expat library.
+        # TODO: Why HAVE_EXPAT_H? (It is at least removed in later versions)
         replace_in_file(self, self._msvc_project_path("pyexpat"), ("HAVE_EXPAT_H;" if Version(self.version) < "3.11" else "") + "XML_STATIC;", "")
         self._regex_replace_in_file(self._msvc_project_path("pyexpat"), r'.*Include=\"\.\.\\Modules\\expat\\.*" />', "")
 
+        # Don't include vendored expat headers
         replace_in_file(self, self._msvc_project_path("_elementtree"),
                         r"<AdditionalIncludeDirectories>..\Modules\expat;",
                         "<AdditionalIncludeDirectories>")
+        # Remove XML_STATIC, this should conditionally be set by the expat library.
         replace_in_file(self, self._msvc_project_path("_elementtree"), "XML_STATIC;", "")
+        # Remove vendored expat
         self._regex_replace_in_file(self._msvc_project_path("_elementtree"), r'.*Include=\"\.\.\\Modules\\expat\\.*" />', "")
 
         if Version(self.version) >= "3.9":
@@ -346,23 +362,30 @@ class CPythonConan(ConanFile):
             replace_in_file(self, self._msvc_project_path("pythoncore"),
                             r'<ClCompile Include="$(zlibDir)\deflate.c">',
                             r'<ClCompile Include= "$(zlibDir)\deflate.c" Condition="False">')
+        # Don't use vendored zlib
         self._regex_replace_in_file(self._msvc_project_path("pythoncore"), r'.*Include=\"\$\(zlibDir\).*', "")
 
+        # Don't use vendored tcl/tk include dir
         replace_in_file(self, self._msvc_project_path("_tkinter"), "<AdditionalIncludeDirectories>$(tcltkDir)include;", "<AdditionalIncludeDirectories>")
+        # Don't use hardcoded tcl/tk library
         replace_in_file(self, self._msvc_project_path("_tkinter"), "<AdditionalDependencies>$(tcltkLib);", "<AdditionalDependencies>")
+        # TODO: Why?
         replace_in_file(self, self._msvc_project_path("_tkinter"),
                         "<PreprocessorDefinitions Condition=\"'$(BuildForRelease)' != 'true'\">",
                         "<PreprocessorDefinitions Condition='False'>")
+        # Don't use vendored tcl/tk
         self._regex_replace_in_file(self._msvc_project_path("_tkinter"), r'.*Include=\"\$\(tcltkdir\).*', "")
 
-        # Disable "ValidateUcrtbase" target
+        # Disable "ValidateUcrtbase" target (TODO: Why?)
         replace_in_file(self, self._msvc_project_path("python"), "$(Configuration) != 'PGInstrument'", "False")
 
         if Version(self.version) < "3.11":
+            # TODO: Why?
             replace_in_file(self, self._msvc_project_path("_freeze_importlib"),
                             "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"$(Configuration) == 'Debug' or $(Configuration) == 'Release'\"",
                             "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"False\"")
 
+        # Remove vendored openssl file (TODO: verify)
         replace_in_file(self, self._msvc_project_path("_ssl"),
                         r'<ClCompile Include="$(opensslIncludeDir)\applink.c">',
                         r'<ClCompile Include="$(opensslIncludeDir)\applink.c" Condition="False">')
