@@ -1,5 +1,7 @@
 from conan import ConanFile
-from conan.tools.build import can_run
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import can_run, check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout
 import os
 
@@ -8,6 +10,17 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
+
+    @property
+    def _min_cppstd(self):
+        return 17
+
+    def validate(self):
+        if not is_apple_os(self):
+            raise ConanInvalidConfiguration("Metal can only be used on an Apple OS.")
+
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
     def layout(self):
         cmake_layout(self)
