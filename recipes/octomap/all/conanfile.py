@@ -66,7 +66,7 @@ class OctomapConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if Version(self.version) >= "1.10.0":
-            tc.variables["CMAKE_CXX_STANDARD"] = 11
+            tc.variables["CMAKE_CXX_STANDARD"] = self.settings.compiler.get_safe("cppstd", "11").replace("gnu", "")
         tc.generate()
 
     def _patch_sources(self):
