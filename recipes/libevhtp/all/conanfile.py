@@ -23,6 +23,7 @@ class LibevhtpConan(ConanFile):
         "disable_regex": [True, False],
         "use_jemalloc": [True, False],
         "use_tcmalloc": [True, False],
+        "parse_query_body": [True, False],
     }
     default_options = {
         "shared": False,
@@ -32,6 +33,7 @@ class LibevhtpConan(ConanFile):
         "disable_regex": False,
         "use_jemalloc": False,
         "use_tcmalloc": False,
+        "parse_query_body": False,
     }
 
     def export_sources(self):
@@ -75,6 +77,7 @@ class LibevhtpConan(ConanFile):
         tc.cache_variables["EVHTP_BUILD_SHARED"] = self.options.shared
         tc.cache_variables["EVHTP_USE_JEMALLOC"] = self.options.use_jemalloc
         tc.cache_variables["EVHTP_USE_TCMALLOC"] = self.options.use_tcmalloc
+        tc.cache_variables["EVHTP_PARSE_QUERY_BODY"] = self.options.parse_query_body
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -90,5 +93,7 @@ class LibevhtpConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "libevhtp")
+        self.cpp_info.set_property("pkg_config_name", "libevhtp")
         self.cpp_info.libs = ["evhtp"]
 

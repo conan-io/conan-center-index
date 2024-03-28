@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 481ddd0..0f9ae85 100644
+index 481ddd0..a152630 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -54,10 +54,10 @@ set(LIBEVHTP_SOURCE_FILES
@@ -115,11 +115,19 @@ index 481ddd0..0f9ae85 100644
 
  # Installation (https://github.com/forexample/package-example)
 
+@@ -315,6 +331,7 @@ message(STATUS "${BoldBlue}EVHTP_DISABLE_REGEX${ColourReset}      : ${BoldGreen}
+ message(STATUS "${BoldBlue}EVHTP_BUILD_SHARED${ColourReset}       : ${BoldGreen} ${EVHTP_BUILD_SHARED}${ColourReset}")
+ message(STATUS "${BoldBlue}EVHTP_USE_JEMALLOC${ColourReset}       : ${BoldGreen} ${EVHTP_USE_JEMALLOC}${ColourReset}")
+ message(STATUS "${BoldBlue}EVHTP_USE_TCMALLOC${ColourReset}       : ${BoldGreen} ${EVHTP_USE_TCMALLOC}${ColourReset}")
++message(STATUS "${BoldBlue}EVHTP_PARSE_QUERY_BODY${ColourReset}       : ${BoldGreen} ${EVHTP_PARSE_QUERY_BODY}${ColourReset}")
+ message("")
+ message(STATUS "${Blue}CMAKE_BUILD_TYPE${ColourReset}         : " ${BoldRed}${CMAKE_BUILD_TYPE}${ColourReset})
+ message(STATUS "${Blue}CMAKE_INSTALL_PREFIX${ColourReset}     : " ${BoldMagenta}${CMAKE_INSTALL_PREFIX}${ColourReset})
 diff --git a/cmake/options.cmake b/cmake/options.cmake
-index f7d6f22..e9a54df 100644
+index f7d6f22..374de17 100644
 --- a/cmake/options.cmake
 +++ b/cmake/options.cmake
-@@ -1,19 +1,23 @@
+@@ -1,19 +1,25 @@
  # -DEVHTP_DISABLE_SSL=ON
 -option (EVHTP_DISABLE_SSL   "Disable ssl support"          OFF)
 +option(EVHTP_DISABLE_SSL "Disable ssl support" OFF)
@@ -152,3 +160,40 @@ index f7d6f22..e9a54df 100644
  # disable ability to wrap memory functions
 -option (EVHTP_DISABLE_MEMFUNCTIONS "Disable custom allocators" OFF)
 +option(EVHTP_DISABLE_MEMFUNCTIONS "Disable custom allocators" OFF)
++
++option(EVHTP_PARSE_QUERY_BODY "Enabled parse query body feature" OFF)
+\ No newline at end of file
+diff --git a/evhtp.c b/evhtp.c
+index 8d34676..98022a9 100644
+--- a/evhtp.c
++++ b/evhtp.c
+@@ -1922,6 +1922,7 @@ htp__request_parse_chunks_fini_(htparser * p)
+ static int
+ htp__should_parse_query_body_(evhtp_request_t * req)
+ {
++#ifdef EVHTP_PARSE_QUERY_BODY
+     const char * content_type;
+
+     if (req == NULL) {
+@@ -1952,6 +1953,9 @@ htp__should_parse_query_body_(evhtp_request_t * req)
+     }
+
+     return 1;
++#else
++    return 0;
++#endif
+ }
+
+ static int
+diff --git a/include/evhtp/config.h.in b/include/evhtp/config.h.in
+index e5e434f..efec2d5 100644
+--- a/include/evhtp/config.h.in
++++ b/include/evhtp/config.h.in
+@@ -43,6 +43,7 @@ extern "C" {
+ #cmakedefine EVHTP_USE_TCMALLOC
+ #cmakedefine EVHTP_DEBUG
+ #cmakedefine EVHTP_DISABLE_MEMFUNCTIONS
++#cmakedefine EVHTP_PARSE_QUERY_BODY
+
+ #ifndef EVHTP_DISABLE_REGEX
+ #include <onigposix.h>
