@@ -1,0 +1,121 @@
+From cf4c57d9d02f02eb826105273441b5beaf0f8dc6 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Fri, 15 Mar 2024 16:59:50 -0500
+Subject: [PATCH] meson: Add missing dependencies on egl
+
+A proper dependency on egl is missing for several backends as well as
+for libshared.
+
+Signed-off-by: Jordan Williams <jordan@jwillikers.com>
+---
+ libweston/backend-headless/meson.build |  1 +
+ libweston/backend-pipewire/meson.build |  1 +
+ libweston/backend-wayland/meson.build  |  1 +
+ libweston/meson.build                  | 13 ++-----------
+ meson.build                            |  9 +++++++++
+ shared/meson.build                     |  2 +-
+ 6 files changed, 15 insertions(+), 12 deletions(-)
+
+diff --git a/libweston/backend-headless/meson.build b/libweston/backend-headless/meson.build
+index 338fa08a..c93b3b7b 100644
+--- a/libweston/backend-headless/meson.build
++++ b/libweston/backend-headless/meson.build
+@@ -13,6 +13,7 @@ plugin_headless = shared_library(
+ 	srcs_headless,
+ 	include_directories: common_inc,
+ 	dependencies: [
++		dep_egl, # for gl-renderer.h
+ 		dep_libweston_private,
+ 		dep_libdrm_headers,
+ 		dep_lib_cairo_shared,
+diff --git a/libweston/backend-pipewire/meson.build b/libweston/backend-pipewire/meson.build
+index 267f5d36..3ce50921 100644
+--- a/libweston/backend-pipewire/meson.build
++++ b/libweston/backend-pipewire/meson.build
+@@ -16,6 +16,7 @@ if not dep_libspa.found()
+ endif
+ 
+ deps_pipewire = [
++	dep_egl, # for gl-renderer.h
+ 	dep_libweston_private,
+ 	dep_libpipewire,
+ 	dep_libspa,
+diff --git a/libweston/backend-wayland/meson.build b/libweston/backend-wayland/meson.build
+index e36ab619..2224ea13 100644
+--- a/libweston/backend-wayland/meson.build
++++ b/libweston/backend-wayland/meson.build
+@@ -30,6 +30,7 @@ if get_option('renderer-gl')
+ 		error('wayland-backend + gl-renderer requires wayland-egl which was not found. Or, you can use \'-Dbackend-wayland=false\' or \'-Drenderer-gl=false\'.')
+ 	endif
+ 	deps_wlwl += d
++	deps_wlwl += dep_egl # for gl-renderer.h
+ endif
+ 
+ plugin_wlwl = shared_library(
+diff --git a/libweston/meson.build b/libweston/meson.build
+index a83a52dc..3a858a6d 100644
+--- a/libweston/meson.build
++++ b/libweston/meson.build
+@@ -5,7 +5,8 @@ deps_libweston = [
+ 	dep_libdl,
+ 	dep_libdrm,
+ 	dep_xkbcommon,
+-	dep_matrix_c
++	dep_matrix_c,
++	dep_egl,
+ ]
+ srcs_libweston = [
+ 	git_version_h,
+@@ -80,16 +81,6 @@ srcs_libweston = [
+ subdir('desktop')
+ subdir('shell-utils')
+ 
+-if get_option('renderer-gl')
+-	dep_egl = dependency('egl', required: false)
+-	if not dep_egl.found()
+-		error('libweston + gl-renderer requires egl which was not found. Or, you can use \'-Drenderer-gl=false\'.')
+-	endif
+-	deps_libweston += dep_egl
+-else
+-	dep_egl = dependency('', required: false)
+-endif
+-
+ if get_option('backend-vnc')
+ 	dep_pam = dependency('pam', required: false)
+ 	if not dep_pam.found()
+diff --git a/meson.build b/meson.build
+index 4aa290d4..5a421a07 100644
+--- a/meson.build
++++ b/meson.build
+@@ -156,6 +156,15 @@ deps_for_libweston_users = [
+ 	dep_xkbcommon,
+ ]
+ 
++if get_option('renderer-gl')
++	dep_egl = dependency('egl', required: false)
++	if not dep_egl.found()
++		error('libweston + gl-renderer requires egl which was not found. Or, you can use \'-Drenderer-gl=false\'.')
++	endif
++else
++	dep_egl = dependency('', required: false)
++endif
++
+ 
+ subdir('include')
+ subdir('protocol')
+diff --git a/shared/meson.build b/shared/meson.build
+index 86d46a03..d30cbd36 100644
+--- a/shared/meson.build
++++ b/shared/meson.build
+@@ -8,7 +8,7 @@ srcs_libshared = [
+ 	'hash.c',
+ ]
+ deps_libshared = [dep_wayland_client, dep_wayland_server,
+-                  dep_pixman, deps_for_libweston_users]
++                  dep_pixman, deps_for_libweston_users, dep_egl]
+ 
+ lib_libshared = static_library(
+ 	'shared',
+-- 
+2.44.0
+
