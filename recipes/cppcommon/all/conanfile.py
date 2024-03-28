@@ -60,11 +60,11 @@ class CppCommon(ConanFile):
 
     def requirements(self):
         if Version(self.version) < "1.0.3" or self.version == "cci.20201104":
-            self.requires("fmt/8.1.1")
+            self.requires("fmt/8.1.1", transitive_headers=True)
         else:
             self.requires("fmt/10.2.0", transitive_headers=True)
         if self.settings.os == "Linux":
-            self.requires("util-linux-libuuid/2.39.2")
+            self.requires("util-linux-libuuid/2.39.2", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
