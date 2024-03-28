@@ -1,0 +1,19 @@
+--- CMake/FollyCompilerUnix.cmake
++++ CMake/FollyCompilerUnix.cmake
+@@ -12,7 +12,7 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+-set(CMAKE_CXX_FLAGS_COMMON "-g -Wall -Wextra")
++set(CMAKE_CXX_FLAGS_COMMON "-Wall -Wextra")
+ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_CXX_FLAGS_COMMON}")
+ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS_COMMON} -O3")
+ 
+@@ -25,7 +25,6 @@
+   )
+   target_compile_options(${THETARGET}
+     PRIVATE
+-      -g
+       -finput-charset=UTF-8
+       -fsigned-char
+       -Wall
