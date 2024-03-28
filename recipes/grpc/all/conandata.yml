@@ -1,20 +1,18 @@
 sources:
+  "1.60.0":
+    url: "https://github.com/grpc/grpc/archive/v1.60.0.tar.gz"
+    sha256: "437068b8b777d3b339da94d3498f1dc20642ac9bfa76db43abdd522186b1542b"
   "1.54.3":
     url: "https://github.com/grpc/grpc/archive/v1.54.3.tar.gz"
     sha256: "17e4e1b100657b88027721220cbfb694d86c4b807e9257eaf2fb2d273b41b1b1"
-  "1.50.1":
-    url: "https://github.com/grpc/grpc/archive/v1.50.1.tar.gz"
-    sha256: "fb1ed98eb3555877d55eb2b948caca44bc8601c6704896594de81558639709ef"
-  "1.50.0":
-    url: "https://github.com/grpc/grpc/archive/v1.50.0.tar.gz"
-    sha256: "76900ab068da86378395a8e125b5cc43dfae671e09ff6462ddfef18676e2165a"
+  "1.50.2":
+    url: "https://github.com/grpc/grpc/archive/v1.50.2.tar.gz"
+    sha256: "e941752638a92f21e27566903e1eb9b4a6380d70ca5ce91116b4cff6cb8fe2f2"
   "1.48.4":
     url: "https://github.com/grpc/grpc/archive/v1.48.4.tar.gz"
     sha256: "0c3faa83e39d4f1ab55fe1476362b9ac3b81632a46dce7fd4d50271bce816b53"
 patches:
-  "1.50.1":
-    - patch_file: "patches/v1.50.x/001-disable-cppstd-override.patch"
-  "1.50.0":
+  "1.50.2":
     - patch_file: "patches/v1.50.x/001-disable-cppstd-override.patch"
   "1.48.4":
     - patch_file: "patches/v1.48.x/001-disable-cppstd-override.patch"

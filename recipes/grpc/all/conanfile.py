@@ -10,8 +10,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.60.0 <2 || >=2.0.5"
-
+required_conan_version = ">=1.60.0 <2 || >=2.0.6"
 
 class GrpcConan(ConanFile):
     name = "grpc"
@@ -56,12 +55,20 @@ class GrpcConan(ConanFile):
     short_paths = True
 
     @property
-    def _grpc_plugin_template(self):
-        return "grpc_plugin_template.cmake.in"
+    def _min_cppstd(self):
+        return 14
 
     @property
-    def _cxxstd_required(self):
-        return 14 if Version(self.version) >= "1.47" else 11
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "14",
+            "msvc": "190",
+            "gcc": "6",
+        }
+
+    @property
+    def _grpc_plugin_template(self):
+        return "grpc_plugin_template.cmake.in"
 
     @property
     def _is_legacy_one_profile(self):
@@ -89,18 +96,12 @@ class GrpcConan(ConanFile):
 
     def requirements(self):
         # abseil is public. See https://github.com/conan-io/conan-center-index/pull/17284#issuecomment-1526082638
-        if Version(self.version) < "1.47":
-            if is_msvc(self):
-                self.requires("abseil/20211102.0", transitive_headers=True, transitive_libs=True)
-            else:
-                self.requires("abseil/20220623.1", transitive_headers=True, transitive_libs=True)
-        else:
-            self.requires("abseil/20230125.3", transitive_headers=True, transitive_libs=True)
-        self.requires("c-ares/1.19.1")
+        self.requires("abseil/20230802.1", transitive_headers=True, transitive_libs=True)
+        self.requires("c-ares/1.22.1")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
-        self.requires("re2/20230301")
+        self.requires("re2/20231101")
         self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("protobuf/3.25.1", transitive_headers=True, transitive_libs=True)
         if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52":
             self.requires("libsystemd/255")
 
@@ -108,15 +109,16 @@ class GrpcConan(ConanFile):
         del self.info.options.secure
 
     def validate(self):
-        check_min_vs(self, "190")
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported by Visual Studio")
-
-        if Version(self.version) >= "1.47" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
-            raise ConanInvalidConfiguration("GCC older than 6 is not supported")
-
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._cxxstd_required)
 
         if self.options.shared and not self.dependencies.host["protobuf"].options.shared:
             raise ConanInvalidConfiguration(
@@ -175,14 +177,14 @@ class GrpcConan(ConanFile):
         tc.cache_variables["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = self.options.ruby_plugin
 
         # Consumed targets (abseil) via interface target_compiler_feature can propagate newer standards
-        if not valid_min_cppstd(self, self._cxxstd_required):
-            tc.cache_variables["CMAKE_CXX_STANDARD"] = self._cxxstd_required
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.cache_variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
 
         if is_apple_os(self):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
             tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
 
-        if is_msvc(self) and Version(self.version) >= "1.48":
+        if is_msvc(self):
             tc.cache_variables["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
 
         tc.generate()
@@ -192,6 +194,12 @@ class GrpcConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+
+        # Inject abseil
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "abseil-cpp.cmake"),
+                        "find_package(absl REQUIRED CONFIG)",
+                        "find_package(absl REQUIRED CONFIG)\n"
+                        "include_directories(${absl_INCLUDE_DIRS})\n")
 
         # On macOS if all the following are true:
         # - protoc from protobuf has shared library dependencies
@@ -395,6 +403,30 @@ class GrpcConan(ConanFile):
                     "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
                 },
             })
+
+        if Version(self.version) >= "1.60":
+            components.update({
+                "upb_collections_lib": {
+                    "lib": "upb_collections_lib",
+                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                },
+                "upb_json_lib": {
+                    "lib": "upb_json_lib",
+                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                },
+                "upb_textformat_lib": {
+                    "lib": "upb_textformat_lib",
+                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                },
+                "utf8_range_lib": {
+                    "lib": "utf8_range_lib",
+                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                },
+            })
+            extra_libs = ["upb_textformat_lib", "upb_json_lib", "utf8_range_lib", "upb_collections_lib"]
+            components["_grpc"]["requires"] += extra_libs
+            if not self.options.secure:
+                components["grpc_unsecure"]["requires"] += extra_libs
 
         return components
 
