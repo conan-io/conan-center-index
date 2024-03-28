@@ -23,23 +23,33 @@ patches:
       patch_file: patches/5.12.3/0000-missing-limits-header.patch
       patch_type: portability
       patch_description: fixes compilation error due to missing c++ stdlib header
+
     - base_path: qt5/qtbase
       patch_file: patches/5.12.3/0001-fix-configure-libs-var.patch
       patch_type: bugfix
       patch_description: fix parsing of <LIBNAME>_LIBS variables when configuring Qt. Backported from 5.15.13
       patch_source: https://codereview.qt-project.org/c/qt/qtbase/+/281892
+
     - base_path: qt5/qtbase
       patch_description: Fix qmake build with apple-clang>=15
-      patch_file: patches/5.12.3/0002-fix-qmake-default-libdirs-apple-clang-15.patch"
+      patch_file: patches/5.12.3/0002-fix-qmake-default-libdirs-apple-clang-15.patch
       patch_source: https://codereview.qt-project.org/c/qt/qtbase/+/503916
       patch_type: portability
+
     - base_path: qt5/qtbase
       patch_description: Dont error with features that aren't supported on Macos < 10.13
       patch_file: patches/5.12.3/0003-futimens-warning-only-macos.patch
       patch_source: https://codereview.qt-project.org/c/qt/qtbase/+/295266
       patch_type: portability
+
     - base_path: qt5/qtbase
       patch_description: Add missing header from cocoa plugin
       patch_file: patches/5.12.3/0004-missing-coregraphics-header.patch
       patch_source: https://codereview.qt-project.org/c/qt/qtbase/+/378706
+      patch_type: portability
+
+    - base_path: qt5/qtbase
+      patch_description: Fix missing freetype dependencies
+      patch_file: patches/5.12.3/0005-freetype-dependencies.patch
+      patch_source: https://codereview.qt-project.org/c/qt/qtbase/+/273939
       patch_type: portability
