@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -67,6 +67,7 @@ class SDLImageConan(ConanFile):
     }
 
     def export_sources(self):
+        export_conandata_patches(self)
         if Version(self.version) < "2.6":
             copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
@@ -165,11 +166,14 @@ class SDLImageConan(ConanFile):
             tc.variables["SDL2IMAGE_XV"] = self.options.xv
             tc.variables["SDL2IMAGE_BACKEND_WIC"] = self.options.get_safe("wic")
             tc.variables["SDL2IMAGE_BACKEND_IMAGEIO"] = self.options.get_safe("imageio")
+        if not is_apple_os(self):
+            tc.variables["CMAKE_SHARED_LINKER_FLAGS_INIT"] = '-Wl,--as-needed'
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         rmdir(self, os.path.join(self.source_folder, "external"))
         cmake = CMake(self)
         if Version(self.version) < "2.6":

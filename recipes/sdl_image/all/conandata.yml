@@ -5,3 +5,8 @@ sources:
   "2.0.5":
     url: "https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.5.tar.gz"
     sha256: "bdd5f6e026682f7d7e1be0b6051b209da2f402a2dd8bd1c4bd9c25ad263108d0"
+patches:
+  "2.6.3":
+    - patch_file: "patches/0001-set-sdl-version-directly.patch"
+      patch_type: "conan"
+      patch_description: "Set SDL version directly in CMake rather than parsing a header"

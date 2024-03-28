@@ -1,0 +1,21 @@
+diff --git a/cmake/FindPrivateSDL2.cmake b/cmake/FindPrivateSDL2.cmake
+index 0314170..185f352 100644
+--- a/cmake/FindPrivateSDL2.cmake
++++ b/cmake/FindPrivateSDL2.cmake
+@@ -17,7 +17,7 @@ find_path(SDL2_INCLUDE_DIR
+ )
+ 
+ set(SDL2_VERSION)
+-if(SDL2_INCLUDE_DIR)
++if(FALSE)
+     file(READ "${SDL2_INCLUDE_DIR}/SDL_version.h" _sdl_version_h)
+     string(REGEX MATCH "#define[ \t]+SDL_MAJOR_VERSION[ \t]+([0-9]+)" _sdl2_major_re "${_sdl_version_h}")
+     set(_sdl2_major "${CMAKE_MATCH_1}")
+@@ -29,6 +29,7 @@ if(SDL2_INCLUDE_DIR)
+         set(SDL2_VERSION "${_sdl2_major}.${_sdl2_minor}.${_sdl2_patch}")
+     endif()
+ endif()
++set(SDL2_VERSION ${SDL2_VERSION_STRING})
+ 
+ find_package_handle_standard_args(PrivateSDL2
+     REQUIRED_VARS SDL2_LIBRARY SDL2_INCLUDE_DIR
