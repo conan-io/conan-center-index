@@ -3,5 +3,6 @@ project(test_pacakge LANGUAGES CXX)
 
 find_package(metal-cpp REQUIRED)
 
-add_executable(test_package test_package.cpp)
-target_link_libraries(test_package  PRIVATE  metal-cpp::metal-cpp)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME}  PRIVATE  metal-cpp::metal-cpp)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
