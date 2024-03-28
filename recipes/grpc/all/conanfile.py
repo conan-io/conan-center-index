@@ -1,4 +1,5 @@
 import os
+import re
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -36,7 +37,8 @@ class GrpcConan(ConanFile):
         "php_plugin": [True, False],
         "python_plugin": [True, False],
         "ruby_plugin": [True, False],
-        "secure": [True, False]
+        "secure": [True, False],
+        "with_systemd": [True, False],
     }
     default_options = {
         "shared": False,
@@ -51,6 +53,7 @@ class GrpcConan(ConanFile):
         "python_plugin": True,
         "ruby_plugin": True,
         "secure": False,
+        "with_systemd": True,
     }
 
     short_paths = True
@@ -98,10 +101,10 @@ class GrpcConan(ConanFile):
             self.requires("abseil/20230125.3", transitive_headers=True, transitive_libs=True)
         self.requires("c-ares/1.19.1")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
+        self.requires("protobuf/3.22.3", transitive_headers=True, transitive_libs=True)
         self.requires("re2/20230301")
         self.requires("zlib/[>=1.2.11 <2]")
-        if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52":
+        if self.options.with_systemd and self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52":
             self.requires("libsystemd/255")
 
     def package_id(self):
@@ -173,6 +176,7 @@ class GrpcConan(ConanFile):
         tc.cache_variables["gRPC_BUILD_GRPC_PHP_PLUGIN"] = self.options.php_plugin
         tc.cache_variables["gRPC_BUILD_GRPC_PYTHON_PLUGIN"] = self.options.python_plugin
         tc.cache_variables["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = self.options.ruby_plugin
+        tc.cache_variables["HAVE_LIBSYSTEMD"] = self.options.with_systemd
 
         # Consumed targets (abseil) via interface target_compiler_feature can propagate newer standards
         if not valid_min_cppstd(self, self._cxxstd_required):
@@ -190,6 +194,16 @@ class GrpcConan(ConanFile):
         cmake_deps = CMakeDeps(self)
         cmake_deps.generate()
 
+    def _remove_in_file(self, file_path, pattern):
+        content = ""
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        updated_content = re.sub(pattern, "", content)
+        if content == updated_content:
+            raise ConanInvalidConfiguration(f"_remove_in_file didn't find pattern: {pattern} in {file_path}")
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(updated_content)
+
     def _patch_sources(self):
         apply_conandata_patches(self)
 
@@ -204,6 +218,18 @@ class GrpcConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}",
                             'COMMAND ${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}')
+
+        # Remove downloading archives in CMakeLists.txt
+        pattern = r"if \(NOT EXISTS \$\{CMAKE_CURRENT_SOURCE_DIR\}/third_party(.|\n)*?endif\(\)"
+        self._remove_in_file(os.path.join(self.source_folder, "CMakeLists.txt"), pattern)
+
+        # Make systemd an option
+        replace_in_file(
+            self, os.path.join(self.source_folder, "CMakeLists.txt"),
+            'option(gRPC_BUILD_GRPC_CPP_PLUGIN "Build grpc_cpp_plugin" ON)',
+            'option(HAVE_LIBSYSTEMD "Build HAVE_LIBSYSTEMD" ON)\noption(gRPC_BUILD_GRPC_CPP_PLUGIN "Build grpc_cpp_plugin" ON)')
+        replace_in_file(self, os.path.join(self.source_folder, "cmake/systemd.cmake"), "if(TARGET systemd)", "if(HAVE_LIBSYSTEMD AND TARGET systemd)")
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
@@ -288,7 +314,7 @@ class GrpcConan(ConanFile):
     def _grpc_components(self):
 
         def libsystemd():
-            return ["libsystemd::libsystemd"] if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52" else []
+            return ["libsystemd::libsystemd"] if self.options.with_systemd and self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52" else []
 
         def libm():
             return ["m"] if self.settings.os in ["Linux", "FreeBSD"] else []
@@ -311,6 +337,7 @@ class GrpcConan(ConanFile):
         components = {
             "address_sorting": {
                 "lib": "address_sorting",
+                "requires" : ["zlib::zlib"],
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
             },
             "gpr": {
@@ -320,7 +347,7 @@ class GrpcConan(ConanFile):
                     "abseil::absl_status", "abseil::absl_str_format",
                     "abseil::absl_strings", "abseil::absl_synchronization",
                     "abseil::absl_time", "abseil::absl_optional",
-                    "abseil::absl_flags"
+                    "abseil::absl_flags", "abseil::absl_random_random", "zlib::zlib"
                 ] + libsystemd(),
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
             },
@@ -353,6 +380,7 @@ class GrpcConan(ConanFile):
             },
             "upb": {
                 "lib": "upb",
+                "requires": ["zlib::zlib"],
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
             },
             "grpc_plugin_support": {
