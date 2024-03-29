@@ -1,7 +1,6 @@
 sources:
-  "2.40-rc2":
-    url: "https://github.com/util-linux/util-linux/archive/refs/tags/v2.40-rc2.tar.gz"
-    sha256: "0fdf4a47eb415639cfcdf2ca4cb76919ca971dc173ce5bb034857a77188a7c27"
-patches:
-  "2.40-rc2":
-    - patch_file: "patches/4ebdd569049ac48a3867a59537cea769fa319e8f.patch"
+  "2.40":
+    # Official release tarball is missing meson.build files, so use GitHub archive.
+    # Refer to https://github.com/util-linux/util-linux/issues/2875.
+    url: "https://github.com/util-linux/util-linux/archive/refs/tags/v2.40.tar.gz"
+    sha256: "f7ff8573289313e38ee3378cbc2938f34444a8cb546e1236e46151834be69784"
