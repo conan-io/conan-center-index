@@ -10,3 +10,7 @@ patches:
       patch_description: "Only require the crypt library when necessary"
       patch_type: "portability"
       patch_source: "https://github.com/util-linux/util-linux/pull/2877"
+    - patch_file: "patches/2.40-0002-meson-Do-not-require-lib-rt-when-checking-for-the-ti.patch"
+      patch_description: "Don't incorrectly require the rt library"
+      patch_type: "portability"
+      patch_source: ""

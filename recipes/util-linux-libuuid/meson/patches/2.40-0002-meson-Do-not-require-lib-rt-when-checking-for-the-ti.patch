@@ -1,0 +1,39 @@
+From b63bf7bc0f260cc9d0cb3063901aed32b5e93eb8 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Fri, 29 Mar 2024 11:36:18 -0500
+Subject: [PATCH] meson: Do not require lib rt when checking for the
+ timer_create function
+
+A dependency on the rt library is unnecessarily required when checking
+for the timer_create function.
+This causes the build to fail if the rt library is not found.
+This should not fail the build as rt is only required for a check.
+
+Signed-off-by: Jordan Williams <jordan@jwillikers.com>
+---
+ meson.build | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index a80f96460..6f36f0ecb 100644
+--- a/meson.build
++++ b/meson.build
+@@ -740,9 +740,12 @@ thread_libs = dependency('threads')
+ 
+ have = cc.has_function('timer_create')
+ if not have
+-  realtime_libs = [cc.find_library('rt', required : true)]
+-  have = cc.has_function('timer_create',
+-                         dependencies : realtime_libs)
++  rt_dep = cc.find_library('rt', required : false)
++  if rt_dep.found()
++    realtime_libs = [rt_dep]
++    have = cc.has_function('timer_create',
++                           dependencies : realtime_libs)
++  endif
+   if not have
+     realtime_libs += thread_libs
+     have = cc.has_function('timer_create',
+-- 
+2.44.0
+
