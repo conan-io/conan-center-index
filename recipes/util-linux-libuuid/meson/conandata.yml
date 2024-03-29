@@ -4,3 +4,9 @@ sources:
     # Refer to https://github.com/util-linux/util-linux/issues/2875.
     url: "https://github.com/util-linux/util-linux/archive/refs/tags/v2.40.tar.gz"
     sha256: "f7ff8573289313e38ee3378cbc2938f34444a8cb546e1236e46151834be69784"
+patches:
+  "2.40":
+    - patch_file: "patches/2.40-0001-meson-Only-require-the-crypt-library-when-necessary.patch"
+      patch_description: "Only require the crypt library when necessary"
+      patch_type: "portability"
+      patch_source: "https://github.com/util-linux/util-linux/pull/2877"
