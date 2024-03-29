@@ -140,6 +140,7 @@ class LibcurlConan(ConanFile):
 
     def export_sources(self):
         copy(self, "lib_Makefile_add.am", self.recipe_folder, self.export_sources_folder)
+        copy(self, "cacert.pem", self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
 
     def config_options(self):
@@ -221,9 +222,10 @@ class LibcurlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or "https://curl.se/ca/cacert-2023-08-22.pem"
-        cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or "23c2469e2a568362a62eecf1b49ed90a15621e6fa30e29947ded3436422de9b9"
-        download(self, cert_url, "cacert.pem", verify=True, sha256=cert_sha256)
+        cert_url = self.conf.get("user.libcurl.cert:url", check_type=str)
+        if cert_url:
+            cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str)
+            download(self, cert_url, "cacert.pem", verify=True, sha256=cert_sha256)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -445,7 +447,7 @@ class LibcurlConan(ConanFile):
             tc.configure_args.append(f"--with-wolfssl={path}")
         else:
             tc.configure_args.append("--without-wolfssl")
-        
+
         if self.options.with_ssl == "mbedtls":
             path = unix_path(self, self.dependencies["mbedtls"].package_folder)
             tc.configure_args.append(f"--with-mbedtls={path}")
