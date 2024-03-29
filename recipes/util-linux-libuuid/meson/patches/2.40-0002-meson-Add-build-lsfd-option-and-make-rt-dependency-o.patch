@@ -1,4 +1,4 @@
-From 3258b734ab8f146e89e1f3174412afd6344cdaed Mon Sep 17 00:00:00 2001
+From 1ddc3073276c45bbe53cf98df9271ad79cb9b16d Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Fri, 29 Mar 2024 12:14:44 -0500
 Subject: [PATCH] meson: Add build-lsfd option and make rt dependency optional
@@ -20,12 +20,12 @@ The effected tests won't be built unless rt has been found.
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
 ---
- meson.build       | 31 +++++++++++++++++++------------
+ meson.build       | 33 ++++++++++++++++++++-------------
  meson_options.txt |  2 ++
- 2 files changed, 21 insertions(+), 12 deletions(-)
+ 2 files changed, 22 insertions(+), 13 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index a80f96460..c5ca65848 100644
+index a80f96460..40fabb9ae 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -730,9 +730,12 @@ endif
@@ -60,7 +60,7 @@ index a80f96460..c5ca65848 100644
    if not have
      realtime_libs += thread_libs
      have = cc.has_function('timer_create',
-@@ -2703,18 +2709,19 @@ if not is_disabler(exe)
+@@ -2703,19 +2709,20 @@ if not is_disabler(exe)
    bashcompletions += ['lsblk']
  endif
  
@@ -79,11 +79,13 @@ index a80f96460..c5ca65848 100644
 +  dependencies : [lib_rt],
    install_dir : usrbin_exec_dir,
 -  install : true)
+-if not is_disabler(exe)
 +  install : opt,
 +  build_by_default : opt)
- if not is_disabler(exe)
++if opt and not is_disabler(exe)
    exes += exe
    manadocs += ['misc-utils/lsfd.1.adoc']
+ endif
 @@ -3491,14 +3498,14 @@ exe = executable(
    build_by_default: program_tests)
  exes += exe

@@ -13,4 +13,4 @@ patches:
     - patch_file: "patches/2.40-0002-meson-Add-build-lsfd-option-and-make-rt-dependency-o.patch"
       patch_description: "Fix dependency on the rt library"
       patch_type: "portability"
-      patch_source: ""
+      patch_source: "https://github.com/util-linux/util-linux/pull/2879"
