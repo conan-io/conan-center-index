@@ -17,9 +17,8 @@ patches:
     - patch_file: "patches/2.40-0003-meson-Fix-false-positive-detection-of-mempcpy-on-mac.patch"
       patch_description: "Fix invalid detection of mempcpy on macOS"
       patch_type: "portability"
-      patch_source: ""
+      patch_source: "https://github.com/util-linux/util-linux/pull/2881"
     - patch_file: "patches/2.40-0004-meson-Don-t-define-HAVE_ENVIRON_DECL-when-environ-is.patch"
       patch_description: "Fix declaration of environ when it is not available"
       patch_type: "portability"
-      patch_source: ""
-
+      patch_source: "https://github.com/util-linux/util-linux/pull/2885"
