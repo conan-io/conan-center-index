@@ -4,4 +4,4 @@ sources:
     sha256: "eb8d01524aa86b26c0c9acfaa78e3379a89da839fa35d561ae7eb62a187b1f49"
 patches:
   "1.0":
-    - patch_file: patches/fix-cmake-1.0.path
+    - patch_file: patches/fix-cmake-1.0.patch
