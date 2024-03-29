@@ -1,0 +1,108 @@
+From ebd8ddd20ecd16ed6bf9b034b734c0319848535f Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Fri, 29 Mar 2024 11:36:18 -0500
+Subject: [PATCH] meson: Add build-lsfd option and make rt dependency optional
+
+A dependency on the rt library is unnecessarily required when checking
+for the clock_gettime and timer_create functions.
+This causes the build to fail if the rt library is not found.
+This should not fail the build as rt is only required for the checks.
+Additionally, the lsfd executable and some tests require rt.
+There is currently no option to toggle building lsfd.
+
+This PR makes it possible to build without the rt library.
+Function checks no longer require rt for the build.
+The function checks for the rt library only run when rt is available.
+This PR adds an option to allow building without lsfd.
+This makes it possible to build without the executable that requires rt.
+To not require rt for the test, a additional check has been added.
+The effected tests won't be built unless rt has been found.
+
+Signed-off-by: Jordan Williams <jordan@jwillikers.com>
+---
+ meson.build       | 26 +++++++++++++++++---------
+ meson_options.txt |  2 ++
+ 2 files changed, 19 insertions(+), 9 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index a80f96460..88adabd5a 100644
+--- a/meson.build
++++ b/meson.build
+@@ -730,9 +730,12 @@ endif
+ realtime_libs = []
+ have = cc.has_function('clock_gettime')
+ if not have
+-  realtime_libs += cc.find_library('rt', required : true)
+-  have = cc.has_function('clock_gettime',
+-                         dependencies : realtime_libs)
++  lib_rt = cc.find_library('rt', required : false)
++  if lib_rt.found()
++    realtime_libs += lib_rt
++    have = cc.has_function('clock_gettime',
++                          dependencies : realtime_libs)
++  endif
+ endif
+ conf.set('HAVE_CLOCK_GETTIME', have ? 1 : false)
+ 
+@@ -740,9 +743,12 @@ thread_libs = dependency('threads')
+ 
+ have = cc.has_function('timer_create')
+ if not have
+-  realtime_libs = [cc.find_library('rt', required : true)]
+-  have = cc.has_function('timer_create',
+-                         dependencies : realtime_libs)
++  lib_rt = cc.find_library('rt', required : false)
++  if lib_rt.found()
++    realtime_libs = [lib_rt]
++    have = cc.has_function('timer_create',
++                           dependencies : realtime_libs)
++  endif
+   if not have
+     realtime_libs += thread_libs
+     have = cc.has_function('timer_create',
+@@ -2704,8 +2710,9 @@ if not is_disabler(exe)
+ endif
+ 
+ mq_libs = []
+-mq_libs += cc.find_library('rt', required : true)
++mq_libs += cc.find_library('rt', required : get_option('build-lsfd'))
+ 
++opt = not get_option('build-lsfd').disabled()
+ exe = executable(
+   'lsfd',
+   lsfd_sources,
+@@ -2714,7 +2721,8 @@ exe = executable(
+                lib_smartcols],
+   dependencies : mq_libs,
+   install_dir : usrbin_exec_dir,
+-  install : true)
++  install : opt,
++  build_by_default : opt)
+ if not is_disabler(exe)
+   exes += exe
+   manadocs += ['misc-utils/lsfd.1.adoc']
+@@ -3491,7 +3499,7 @@ exe = executable(
+   build_by_default: program_tests)
+ exes += exe
+ 
+-if LINUX
++if LINUX and lib_rt.found()
+   exe = executable(
+     'test_mkfds',
+     'tests/helpers/test_mkfds.c',
+diff --git a/meson_options.txt b/meson_options.txt
+index 7acf9d4fc..5cc8b4f61 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -101,6 +101,8 @@ option('build-cal', type : 'feature',
+        description : 'build cal')
+ option('build-logger', type : 'feature',
+        description : 'build logger')
++option('build-lsfd', type : 'feature',
++       description : 'build lsfd')
+ option('build-switch_root', type : 'feature',
+        description : 'switch_root')
+ option('build-pivot_root', type : 'feature',
+-- 
+2.44.0
+
