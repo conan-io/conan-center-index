@@ -1,0 +1,392 @@
+From c1fb12058b60b959871e452842ae6d42a52009a2 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Fri, 29 Mar 2024 17:45:12 -0500
+Subject: [PATCH] meson: Don't build libmount unless it is enabled
+
+---
+ libmount/meson.build |   1 +
+ meson.build          | 134 +++++++++++++++++++++++++++----------------
+ meson_options.txt    |  14 +++++
+ 3 files changed, 101 insertions(+), 48 deletions(-)
+
+diff --git a/libmount/meson.build b/libmount/meson.build
+index d1262e7f0..ea363a0d5 100644
+--- a/libmount/meson.build
++++ b/libmount/meson.build
+@@ -80,6 +80,7 @@ lib_mount_static = static_library(
+                lib_blkid.get_static_lib()],
+   dependencies : [realtime_libs],
+   install : false)
++mount_static_dep = declare_dependency(link_with: lib_mount_static, include_directories: '.')
+ 
+ lib__mount_deps = [
+   lib_selinux,
+diff --git a/meson.build b/meson.build
+index 62153d852..379256750 100644
+--- a/meson.build
++++ b/meson.build
+@@ -97,7 +97,28 @@ conf.set('HAVE_MOUNTFD_API', have_mountfd_api ? 1 : false)
+ have_struct_statx = cc.sizeof('struct statx', prefix : '#include <sys/stat.h>') > 0
+ conf.set('HAVE_STRUCT_STATX', have_struct_statx ? 1 : false)
+ 
+-build_libmount = not get_option('build-libmount').disabled()
++static_programs = get_option('static-programs')
++
++build_libmount = get_option('build-libmount').enable_if(
++  get_option('build-eject').enabled() or \
++  get_option('build-fstrim').enabled() or \
++  get_option('build-libblkid').enabled() or \
++  get_option('build-lsns').enabled() or \
++  get_option('build-mount').enabled() or \
++  'mount' in static_programs or \
++  'umount' in static_programs or \
++  get_option('build-swapon').enabled() or \
++  get_option('build-swapoff').enabled() or \
++  get_option('build-mountpoint').enabled() or \
++  get_option('build-fsck').enabled() or \
++  # Required by cfdisk.
++  get_option('build-fdisks').enabled() or \
++  get_option('build-lslocks').enabled() or \
++  get_option('build-lsblk').enabled() or \
++  get_option('build-findmnt').enabled(),
++  error_message : 'libmount is required to build enabled features'
++)
++
+ conf.set('HAVE_LIBMOUNT', build_libmount ? 1 : false)
+ conf.set('USE_LIBMOUNT_SUPPORT_NAMESPACES', 1)
+ conf.set('USE_LIBMOUNT_MOUNTFD_SUPPORT', have_mountfd_api ? 1 : false)
+@@ -115,7 +136,6 @@ build_uuidd = not get_option('build-uuidd').disabled()
+ conf.set('HAVE_UUIDD', build_uuidd ? 1 : false)
+ summary('uuidd', build_uuidd ? 'enabled' : 'disabled', section : 'components')
+ 
+-static_programs = get_option('static-programs')
+ need_static_libs = static_programs.length() > 0 # a rough estimate...
+ summary('static programs', static_programs)
+ 
+@@ -955,7 +975,12 @@ bashcompletionslinks = {}
+ subdir('include')
+ subdir('lib')
+ subdir('libblkid')
+-subdir('libmount')
++if build_libmount
++  subdir('libmount')
++else
++  mount_dep = dependency('', required : false)
++  mount_static_dep = dependency('', required : false)
++endif
+ subdir('libsmartcols')
+ subdir('libuuid')
+ subdir('liblastlog2')
+@@ -972,7 +997,6 @@ subdir('po')
+ includes = [dir_include,
+             dir_libblkid,
+             dir_libsmartcols,
+-            dir_libmount,
+             dir_libfdisk,
+             dir_libuuid,
+             dir_liblastlog2,
+@@ -1495,15 +1519,17 @@ if opt and not is_disabler(exe)
+   bashcompletions += ['tunelp']
+ endif
+ 
++opt = not get_option('build-fstrim').disabled()
+ exe = executable(
+   'fstrim',
+   fstrim_sources,
+   include_directories : includes,
+-  link_with : [lib_common,
+-               lib_mount],
++  link_with : [lib_common],
++  dependencies : [mount_dep],
+   install_dir : sbindir,
+-  install : true)
+-if not is_disabler(exe)
++  install : opt,
++  build_by_default : opt)
++if opt and not is_disabler(exe)
+   exes += exe
+   manadocs += ['sys-utils/fstrim.8.adoc']
+   bashcompletions += ['fstrim']
+@@ -1650,8 +1676,8 @@ exe = executable(
+   'eject',
+   eject_sources,
+   include_directories : includes,
+-  link_with : [lib_common,
+-               lib_mount],
++  link_with : [lib_common],
++  dependencies : [mount_dep],
+   install_dir : usrbin_exec_dir,
+   install : opt,
+   build_by_default : opt)
+@@ -1722,16 +1748,18 @@ if not is_disabler(exe)
+   bashcompletions += ['prlimit']
+ endif
+ 
++opt = not get_option('build-lsns').disabled()
+ exe = executable(
+   'lsns',
+   lsns_sources,
+   include_directories : includes,
+   link_with : [lib_common,
+-               lib_smartcols,
+-               lib_mount],
++               lib_smartcols],
++  dependencies : [mount_dep],
+   install_dir : usrbin_exec_dir,
+-  install : true)
+-if not is_disabler(exe)
++  install : opt,
++  build_by_default : opt)
++if opt and not is_disabler(exe)
+   exes += exe
+   manadocs += ['sys-utils/lsns.8.adoc']
+   bashcompletions += ['lsns']
+@@ -1743,9 +1771,8 @@ exe = executable(
+   mount_sources,
+   include_directories : includes,
+   link_with : [lib_common,
+-               lib_smartcols,
+-               lib_mount],
+-  dependencies : lib_selinux,
++               lib_smartcols],
++  dependencies : [lib_selinux, mount_dep],
+   install_mode : 'rwsr-xr-x',
+   install : opt,
+   build_by_default : opt)
+@@ -1753,8 +1780,8 @@ exe2 = executable(
+   'umount',
+   umount_sources,
+   include_directories : includes,
+-  link_with : [lib_common,
+-               lib_mount],
++  link_with : [lib_common],
++  dependencies : [mount_dep],
+   install_mode : 'rwsr-xr-x',
+   install : opt,
+   build_by_default : opt)
+@@ -1773,8 +1800,8 @@ exe = executable(
+   include_directories : includes,
+   link_args : ['--static'],
+   link_with : [lib_common,
+-               lib_smartcols_static,
+-               lib_mount_static],
++               lib_smartcols_static],
++  dependencies : [mount_static_dep],
+   install : opt2,
+   build_by_default : opt2)
+ if opt2 and not is_disabler(exe)
+@@ -1787,8 +1814,8 @@ exe = executable(
+   umount_sources,
+   include_directories : includes,
+   link_args : ['--static'],
+-  link_with : [lib_common,
+-               lib_mount_static],
++  link_with : [lib_common],
++  dependencies : [mount_static_dep],
+   install : opt2,
+   build_by_default : opt2)
+ if opt2 and not is_disabler(exe)
+@@ -1797,32 +1824,36 @@ endif
+ 
+ # setuid?
+ 
++opt = not get_option('build-swapon').disabled()
+ exe = executable(
+   'swapon',
+   swapon_sources,
+   include_directories : includes,
+   link_with : [lib_common,
+                lib_blkid,
+-               lib_mount,
+                lib_smartcols],
++  dependencies : [mount_dep],
+   install_dir : sbindir,
+-  install : true)
+-if not is_disabler(exe)
++  install : opt,
++  build_by_default : opt)
++if opt and not is_disabler(exe)
+   exes += exe
+   manadocs += ['sys-utils/swapon.8.adoc']
+   bashcompletions += ['swapon']
+ endif
+ 
++opt = not get_option('build-swapoff').disabled()
+ exe = executable(
+   'swapoff',
+   swapoff_sources,
+   include_directories : includes,
+   link_with : [lib_common,
+-               lib_blkid,
+-               lib_mount],
++               lib_blkid],
++  dependencies : [mount_dep],
+   install_dir : sbindir,
+-  install : true)
+-if not is_disabler(exe)
++  install : opt,
++  build_by_default : opt)
++if opt and not is_disabler(exe)
+   exes += exe
+   manlinks += {'swapoff.8': 'swapon.8'}
+   bashcompletions += ['swapoff']
+@@ -1872,7 +1903,7 @@ exe = executable(
+   'mountpoint',
+   mountpoint_sources,
+   include_directories : includes,
+-  link_with : [lib_mount],
++  dependencies : [mount_dep],
+   install : opt,
+   build_by_default : opt)
+ if opt and not is_disabler(exe)
+@@ -2152,9 +2183,8 @@ exe = executable(
+   fsck_sources,
+   include_directories : includes,
+   link_with : [lib_common,
+-               lib_blkid,
+-               lib_mount],
+-  dependencies : realtime_libs,
++               lib_blkid],
++  dependencies : [realtime_libs, mount_dep],
+   install_dir : sbindir,
+   install : opt,
+   build_by_default : opt)
+@@ -2341,9 +2371,8 @@ exe = executable(
+   link_with : [lib_common,
+                lib_fdisk,
+                lib_smartcols,
+-               lib_tcolors,
+-               lib_mount],
+-  dependencies : [curses_libs],
++               lib_tcolors],
++  dependencies : [curses_libs, mount_dep],
+   install_dir : sbindir,
+   install : opt,
+   build_by_default : opt)
+@@ -2679,33 +2708,36 @@ exes += exe
+ manadocs += ['misc-utils/whereis.1.adoc']
+ bashcompletions += ['whereis']
+ 
++opt = not get_option('build-lslocks').disabled()
+ exe = executable(
+   'lslocks',
+   lslocks_sources,
+   include_directories : includes,
+   link_with : [lib_common,
+-               lib_mount,
+                lib_smartcols],
++  dependencies : [mount_dep],
+   install_dir : usrbin_exec_dir,
+-  install : true)
+-if not is_disabler(exe)
++  install : opt,
++  build_by_default : opt)
++if opt and not is_disabler(exe)
+   exes += exe
+   manadocs += ['misc-utils/lslocks.8.adoc']
+   bashcompletions += ['lslocks']
+ endif
+ 
++opt = not get_option('build-lsblk').disabled()
+ exe = executable(
+   'lsblk',
+   lsblk_sources,
+   include_directories : includes,
+   link_with : [lib_common,
+                lib_blkid,
+-               lib_mount,
+                lib_tcolors,
+                lib_smartcols],
+-  dependencies : lib_udev,
+-  install : true)
+-if not is_disabler(exe)
++  dependencies : [lib_udev, mount_dep],
++  install : opt,
++  build_by_default : opt)
++if opt and not is_disabler(exe)
+   exes += exe
+   manadocs += ['misc-utils/lsblk.8.adoc']
+   bashcompletions += ['lsblk']
+@@ -2890,17 +2922,18 @@ if not is_disabler(exe)
+   bashcompletions += ['wipefs']
+ endif
+ 
++opt = not get_option('build-findmnt').disabled()
+ exe = executable(
+   'findmnt',
+   findmnt_sources,
+   include_directories : includes,
+   link_with : [lib_common,
+                lib_blkid,
+-               lib_mount,
+                lib_smartcols],
+-  dependencies : [lib_udev],
+-  install : true)
+-if not is_disabler(exe)
++  dependencies : [lib_udev, mount_dep],
++  install : opt,
++  build_by_default : opt)
++if opt and not is_disabler(exe)
+   exes += exe
+   manadocs += ['misc-utils/findmnt.8.adoc']
+   bashcompletions += ['findmnt']
+@@ -3619,6 +3652,11 @@ endif
+ # Let the test runner know whether we're running under asan and export
+ # some paths. We use a file on disk so that it is possible to run the
+ # test scripts from commandline without setting any variables.
++python_module = import('python')
++python = python_module.find_installation(
++    get_option('python'),
++    required : true,
++    disabler : true)
+ configure_file(output : 'meson.conf',
+                capture : true,
+                command : ['echo',
+diff --git a/meson_options.txt b/meson_options.txt
+index 5cc8b4f61..5e2187517 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -53,10 +53,16 @@ option('build-fdisks', type : 'feature',
+        description : 'build fdisk(8), sfdisk(8) and cfdisk(8)')
+ option('build-mount', type : 'feature',
+        description : 'build mount(8) and umount(8)')
++option('build-swapon', type : 'feature',
++       description : 'build swapon')
++option('build-swapoff', type : 'feature',
++       description : 'build swapoff')
+ option('build-losetup', type : 'feature',
+        description : 'build losetup')
+ option('build-zramctl', type : 'feature',
+        description : 'build zramctl')
++option('build-lsns', type : 'feature',
++       description : 'build lsns')
+ option('build-fsck', type : 'feature',
+        description : 'build fsck')
+ option('build-partx', type : 'feature',
+@@ -101,8 +107,14 @@ option('build-cal', type : 'feature',
+        description : 'build cal')
+ option('build-logger', type : 'feature',
+        description : 'build logger')
++option('build-lsblk', type : 'feature',
++       description : 'build lsblk')
+ option('build-lsfd', type : 'feature',
+        description : 'build lsfd')
++option('build-lslocks', type : 'feature',
++       description : 'build lslocks')
++option('build-findmnt', type : 'feature',
++       description : 'build findmnt')
+ option('build-switch_root', type : 'feature',
+        description : 'switch_root')
+ option('build-pivot_root', type : 'feature',
+@@ -123,6 +135,8 @@ option('build-rfkill', type : 'feature',
+        description : 'build rfkill')
+ option('build-tunelp', type : 'feature',
+        description : 'build tunelp')
++option('build-fstrim', type : 'feature',
++       description : 'build fstrim')
+ option('build-kill', type : 'feature',
+        description : 'build kill')
+ option('build-last', type : 'feature',
+-- 
+2.44.0
+

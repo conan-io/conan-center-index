@@ -22,3 +22,7 @@ patches:
       patch_description: "Fix declaration of environ when it is not available"
       patch_type: "portability"
       patch_source: "https://github.com/util-linux/util-linux/pull/2885"
+    - patch_file: "patches/2.40-0005-meson-Don-t-build-libmount-unless-it-is-enabled.patch"
+      patch_description: "Don't build libmount when it is disabled"
+      patch_type: "portability"
+      patch_source: ""
