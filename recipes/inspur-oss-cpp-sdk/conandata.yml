@@ -1,0 +1,7 @@
+sources:
+  "1.0":
+    url: "https://github.com/OpenInspur/inspur-oss-cpp-sdk/archive/a0932232aaf46aab7c5a2079f72d80cc5d634ba2.zip"
+    sha256: "eb8d01524aa86b26c0c9acfaa78e3379a89da839fa35d561ae7eb62a187b1f49"
+patches:
+  "1.0":
+    - patch_file: patches/fix-cmake-1.0.path

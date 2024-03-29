@@ -1,0 +1,224 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 38f15c9..bc68864 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -11,7 +11,7 @@ set(TARGET_OUTPUT_NAME_PREFIX "inspurcloud-oss-" CACHE STRING "The target's outp
+
+ #Options
+ option(BUILD_SHARED_LIBS  "Enable shared library" OFF)
+-option(BUILD_DEMO "Build demo" ON)
++option(BUILD_DEMO "Build demo" OFF)
+ option(ENABLE_COVERAGE "Flag to enable/disable building code with -fprofile-arcs and -ftest-coverage. Gcc only" OFF)
+
+
+@@ -35,41 +35,22 @@ message(STATUS "TARGET_OS: ${TARGET_OS}")
+ add_definitions(-DPLATFORM_${TARGET_OS})
+
+ #Find dependency Library, curl, openssl
+-if (${TARGET_OS} STREQUAL "WINDOWS")
+-	set(WLIB_TARGET "Win32")
+-	if (CMAKE_CL_64)
+-	set(WLIB_TARGET "x64")
+-	endif()
+-	set(CRYPTO_LIBS
+-		${CMAKE_SOURCE_DIR}/third_party/lib/${WLIB_TARGET}/ssleay32.lib
+-		${CMAKE_SOURCE_DIR}/third_party/lib/${WLIB_TARGET}/libeay32.lib)
+-	set(CRYPTO_INCLUDE_DIRS
+-		${CMAKE_SOURCE_DIR}/third_party/include)
+-
+-	set(CLIENT_LIBS
+-		${CMAKE_SOURCE_DIR}/third_party/lib/${WLIB_TARGET}/libcurl.lib)
+-	set(CLIENT_INCLUDE_DIRS
+-		${CMAKE_SOURCE_DIR}/third_party/include)
+-else()
+-	include(FindCURL)
+-	include(FindOpenSSL)
++find_package(OpenSSL REQUIRED)
++find_package(CURL REQUIRED)
+
+-	if(NOT CURL_FOUND)
+-		message(FATAL_ERROR "Could not find curl")
+-	endif()
++if(NOT CURL_FOUND)
++	message(FATAL_ERROR "Could not find curl")
++endif()
+
+-	if(NOT OPENSSL_FOUND)
+-		message(FATAL_ERROR "Could not find openssl")
+-	endif()
++if(NOT OPENSSL_FOUND)
++	message(FATAL_ERROR "Could not find openssl")
++endif()
+
+-	set(CRYPTO_LIBS ${OPENSSL_LIBRARIES})
+-	set(CRYPTO_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIRS})
+-	set(CRYPTO_LIBS_ABSTRACT_NAME crypto ssl)
++set(CRYPTO_LIBS ${OpenSSL_LIBRARIES})
++set(CRYPTO_INCLUDE_DIRS ${OpenSSL_INCLUDE_DIRS})
+
+-	set(CLIENT_LIBS ${CURL_LIBRARIES})
+-	set(CLIENT_INCLUDE_DIRS ${CURL_INCLUDE_DIRS})
+-	set(CLIENT_LIBS_ABSTRACT_NAME curl)
+-endif()
++set(CLIENT_LIBS ${CURL_LIBRARIES})
++set(CLIENT_INCLUDE_DIRS ${CURL_INCLUDE_DIRS})
+
+ #Compiler flags
+ list(APPEND SDK_COMPILER_FLAGS "-std=c++11")
+@@ -77,10 +58,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+ 	list(APPEND SDK_COMPILER_FLAGS "/MP")
+ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+ 	list(APPEND SDK_COMPILER_FLAGS "-fno-exceptions" "-fPIC" "-fno-rtti")
+-	list(APPEND SDK_COMPILER_FLAGS "-Wall" "-Werror" "-pedantic" "-Wextra")
++	list(APPEND SDK_COMPILER_FLAGS "-Wall" "-pedantic" "-Wextra")
+ else()
+ 	list(APPEND SDK_COMPILER_FLAGS "-fno-exceptions" "-fPIC" "-fno-rtti")
+-	list(APPEND SDK_COMPILER_FLAGS "-Wall" "-Werror" "-pedantic" "-Wextra")
++	list(APPEND SDK_COMPILER_FLAGS "-Wall" "-pedantic" "-Wextra")
+
+ 	if (ENABLE_COVERAGE)
+ 	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+@@ -89,18 +70,15 @@ else()
+ 	endif()
+ endif()
+
+-
+-if (BUILD_SHARED_LIBS)
+-	set(STATIC_LIB_SUFFIX "-static")
+-else()
+-	set(STATIC_LIB_SUFFIX "")
+-endif()
+-
+ include(ExternalProject)
+ include(GNUInstallDirs)
+
+ add_subdirectory(sdk)
+
++IF (POLICY CMP0054)
++	cmake_policy(SET CMP0054 NEW)
++endif()
++
+ if(BUILD_DEMO)
+ 	add_subdirectory(Demo)
+ endif()
+diff --git a/sdk/CMakeLists.txt b/sdk/CMakeLists.txt
+index c540551..089013f 100644
+--- a/sdk/CMakeLists.txt
++++ b/sdk/CMakeLists.txt
+@@ -51,69 +51,46 @@ if (BUILD_TESTS)
+ else()
+ 	set(EXTRA_DEFINE "")
+ endif()
+-
+-#static lib
+-add_library(${PROJECT_NAME}${STATIC_LIB_SUFFIX} STATIC
+-	${sdk_header}
+-	${sdk_src})
+-
+-set_target_properties(${PROJECT_NAME}${STATIC_LIB_SUFFIX}
+-	PROPERTIES
+-	LINKER_LANGUAGE CXX
+-	ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+-	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+-	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+-	OUTPUT_NAME ${TARGET_OUTPUT_NAME_PREFIX}${PROJECT_NAME}${STATIC_LIB_SUFFIX}
+-	)
+-
+-target_include_directories(${PROJECT_NAME}${STATIC_LIB_SUFFIX}
+-	PRIVATE include
+-	PRIVATE include/inspurcloud/oss
+-	PRIVATE src/external/)
+-
+-target_include_directories(${PROJECT_NAME}${STATIC_LIB_SUFFIX}
+-	PRIVATE ${CRYPTO_INCLUDE_DIRS}
+-	PRIVATE ${CLIENT_INCLUDE_DIRS})
+-
+-target_compile_options(${PROJECT_NAME}${STATIC_LIB_SUFFIX}
+-	PRIVATE "${SDK_COMPILER_FLAGS}" "${EXTRA_DEFINE}")
+
+-#shared lib
+ if (BUILD_SHARED_LIBS)
+ 	add_library(${PROJECT_NAME} SHARED
+-		${sdk_header}
+-		${sdk_src})
+-
+-	set_target_properties(${PROJECT_NAME}
++			${sdk_header}
++			${sdk_src})
++else ()
++	add_library(${PROJECT_NAME} STATIC
++			${sdk_header}
++			${sdk_src})
++endif ()
++
++set_target_properties(${PROJECT_NAME}
+ 		PROPERTIES
+ 		LINKER_LANGUAGE CXX
+ 		ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+ 		LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+ 		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+ 		OUTPUT_NAME ${TARGET_OUTPUT_NAME_PREFIX}${PROJECT_NAME}
+-		)
+-
+-	target_include_directories(${PROJECT_NAME}
++)
++
++target_include_directories(${PROJECT_NAME}
+ 		PRIVATE include
+-		PRIVATE include/inspurcloud/oss
++		PRIVATE include/inspurcloud/oss
+ 		PRIVATE src/external/)
+-
+-	target_include_directories(${PROJECT_NAME}
++
++target_include_directories(${PROJECT_NAME}
+ 		PRIVATE ${CRYPTO_INCLUDE_DIRS}
+ 		PRIVATE ${CLIENT_INCLUDE_DIRS})
+
+-	target_compile_options(${PROJECT_NAME}
++target_compile_options(${PROJECT_NAME}
+ 		PRIVATE "${SDK_COMPILER_FLAGS}" -DInspurCLOUD_SHARED -DInspurCLOUD_OSS_LIBRARY)
+-
+-	if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+-	target_compile_options(${PROJECT_NAME}
+-		PRIVATE "-fvisibility=hidden")
+-	endif()
+-
+-	target_link_libraries(${PROJECT_NAME} ${CRYPTO_LIBS})
+-	target_link_libraries(${PROJECT_NAME} ${CLIENT_LIBS})
++
++if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
++	target_compile_options(${PROJECT_NAME}
++			PRIVATE "-fvisibility=hidden")
+ endif()
+
++target_link_libraries(${PROJECT_NAME} ${CRYPTO_LIBS})
++target_link_libraries(${PROJECT_NAME} ${CLIENT_LIBS})
++
+ #install
+ install(FILES ${sdk_auth_header}
+ 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/inspurcloud/oss/auth)
+@@ -128,16 +105,14 @@ install(FILES ${sdk_model_header}
+ install(FILES ${sdk_public_header}
+ 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/inspurcloud/oss)
+
+-install(TARGETS  ${PROJECT_NAME}${STATIC_LIB_SUFFIX}
++install(TARGETS  ${PROJECT_NAME}
+ 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+ 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+ 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+ 	)
+
+-if (BUILD_SHARED_LIBS)
+ install(TARGETS  ${PROJECT_NAME}
+-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+-	)
+-endif()
+\ No newline at end of file
++		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++)
+\ No newline at end of file
