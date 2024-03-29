@@ -14,3 +14,7 @@ patches:
       patch_description: "Fix dependency on the rt library"
       patch_type: "portability"
       patch_source: "https://github.com/util-linux/util-linux/pull/2879"
+    - patch_file: "patches/2.40-0003-meson-Fix-false-positive-detection-of-mempcpy-on-mac.patch"
+      patch_description: "Fix invalid detection of mempcpy on macOS"
+      patch_type: "portability"
+      patch_source: ""
