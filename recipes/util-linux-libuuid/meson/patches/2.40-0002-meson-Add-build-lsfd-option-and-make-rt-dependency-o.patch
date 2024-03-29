@@ -1,6 +1,6 @@
-From ebd8ddd20ecd16ed6bf9b034b734c0319848535f Mon Sep 17 00:00:00 2001
+From 3258b734ab8f146e89e1f3174412afd6344cdaed Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
-Date: Fri, 29 Mar 2024 11:36:18 -0500
+Date: Fri, 29 Mar 2024 12:14:44 -0500
 Subject: [PATCH] meson: Add build-lsfd option and make rt dependency optional
 
 A dependency on the rt library is unnecessarily required when checking
@@ -20,12 +20,12 @@ The effected tests won't be built unless rt has been found.
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
 ---
- meson.build       | 26 +++++++++++++++++---------
+ meson.build       | 31 +++++++++++++++++++------------
  meson_options.txt |  2 ++
- 2 files changed, 19 insertions(+), 9 deletions(-)
+ 2 files changed, 21 insertions(+), 12 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index a80f96460..88adabd5a 100644
+index a80f96460..c5ca65848 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -730,9 +730,12 @@ endif
@@ -60,20 +60,23 @@ index a80f96460..88adabd5a 100644
    if not have
      realtime_libs += thread_libs
      have = cc.has_function('timer_create',
-@@ -2704,8 +2710,9 @@ if not is_disabler(exe)
+@@ -2703,18 +2709,19 @@ if not is_disabler(exe)
+   bashcompletions += ['lsblk']
  endif
  
- mq_libs = []
+-mq_libs = []
 -mq_libs += cc.find_library('rt', required : true)
-+mq_libs += cc.find_library('rt', required : get_option('build-lsfd'))
++lib_rt = cc.find_library('rt', required : get_option('build-lsfd'))
  
 +opt = not get_option('build-lsfd').disabled()
  exe = executable(
    'lsfd',
    lsfd_sources,
-@@ -2714,7 +2721,8 @@ exe = executable(
+   include_directories : includes,
+   link_with : [lib_common,
                 lib_smartcols],
-   dependencies : mq_libs,
+-  dependencies : mq_libs,
++  dependencies : [lib_rt],
    install_dir : usrbin_exec_dir,
 -  install : true)
 +  install : opt,
@@ -81,7 +84,7 @@ index a80f96460..88adabd5a 100644
  if not is_disabler(exe)
    exes += exe
    manadocs += ['misc-utils/lsfd.1.adoc']
-@@ -3491,7 +3499,7 @@ exe = executable(
+@@ -3491,14 +3498,14 @@ exe = executable(
    build_by_default: program_tests)
  exes += exe
  
@@ -90,6 +93,14 @@ index a80f96460..88adabd5a 100644
    exe = executable(
      'test_mkfds',
      'tests/helpers/test_mkfds.c',
+     'tests/helpers/test_mkfds.h',
+     'tests/helpers/test_mkfds_ppoll.c',
+     include_directories : includes,
+-    dependencies : mq_libs,
++    dependencies : [lib_rt],
+     build_by_default: program_tests)
+   exes += exe
+ endif
 diff --git a/meson_options.txt b/meson_options.txt
 index 7acf9d4fc..5cc8b4f61 100644
 --- a/meson_options.txt
