@@ -52,6 +52,7 @@ class WiringpiConan(ConanFile):
             if self.settings.compiler == "gcc" and \
                 Version(self.settings.compiler.version) < 8:
                 raise ConanInvalidConfiguration(f"{self.ref} requires gcc >= 8")
+            # wiringPi.c:1755:9: error: case label does not reduce to an integer constant
             if self.settings.compiler == "gcc" and \
                 Version(self.settings.compiler.version).major == 11 and \
                 self.settings.build_type == "Debug":
