@@ -43,7 +43,7 @@ class WiringpiConan(ConanFile):
 
     def requirements(self):
         if  Version(self.version) >= "3.2":
-            self.requires("linux-headers-generic/6.5.9")
+            self.requires("linux-headers-generic/6.5.9", transitive_headers=True)
 
     def validate(self):
         if self.settings.os != "Linux":
@@ -65,6 +65,8 @@ class WiringpiConan(ConanFile):
         tc.variables["WIRINGPI_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["WIRINGPI_WITH_WPI_EXTENSIONS"] = self.options.wpi_extensions
         tc.variables["WIRINGPI_WITH_DEV_LIB"] = self.options.with_devlib
+        if  Version(self.version) >= "3.2":
+            tc.variables["WIRINGPI_LINUX_HEADERS_DIR"] = self.dependencies["linux-headers-generic"].cpp_info.includedirs[0]
         tc.generate()
 
     def build(self):
