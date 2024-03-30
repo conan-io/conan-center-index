@@ -83,8 +83,11 @@ class Nghttp2Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ENABLE_SHARED_LIB"] = self.options.shared
-        tc.variables["ENABLE_STATIC_LIB"] = not self.options.shared
+        if Version(self.version) < "1.60.0":
+            tc.variables["ENABLE_SHARED_LIB"] = self.options.shared
+            tc.variables["ENABLE_STATIC_LIB"] = not self.options.shared
+        else:
+            tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["ENABLE_HPACK_TOOLS"] = self.options.with_hpack
         tc.variables["ENABLE_APP"] = self.options.with_app
         tc.variables["ENABLE_EXAMPLES"] = False
@@ -107,7 +110,7 @@ class Nghttp2Conan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        if not self.options.shared:
+        if not self.options.shared and Version(self.version) < "1.60.0":
             # easier to patch here rather than have patch 'nghttp_static_include_directories' for each version
             save(self, os.path.join(self.source_folder, "lib", "CMakeLists.txt"),
                        "target_include_directories(nghttp2_static INTERFACE\n"
@@ -135,6 +138,8 @@ class Nghttp2Conan(ConanFile):
                                   "\n"
                                   "  target_link_libraries(nghttp2_asio\n"
                                  f"    {target_libnghttp2}\n")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(examples)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(tests)", "")
 
     def build(self):
         self._patch_sources()
