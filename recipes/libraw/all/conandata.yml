@@ -1,4 +1,7 @@
 sources:
+  "0.22.0-devel202403":
+    url: "https://github.com/irieger/LibRaw/archive/0.22.0-Devel202403.tar.gz"
+    sha256: "c22c38b4a6b27e2ba08f0bf11c55974bcde9810cf332006d5c3744210ebb9135"
   "0.21.2":
     url: "https://github.com/LibRaw/LibRaw/archive/0.21.2.tar.gz"
     sha256: "7ac056e0d9e814d808f6973a950bbf45e71b53283eed07a7ea87117a6c0ced96"
