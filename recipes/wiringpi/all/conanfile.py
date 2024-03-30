@@ -41,6 +41,10 @@ class WiringpiConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        if  Version(self.version) >= "3.2":
+            self.requires("linux-headers-generic/6.5.9")
+
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} only works for Linux")
