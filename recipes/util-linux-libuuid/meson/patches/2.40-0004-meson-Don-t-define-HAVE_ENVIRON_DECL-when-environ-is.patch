@@ -1,7 +1,7 @@
-From 8070dd9c8bdd58298f6715fd205809423ac95334 Mon Sep 17 00:00:00 2001
+From 22d10ca8881caad1ae3edb21aefd89982a5f9db5 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Fri, 29 Mar 2024 16:56:43 -0500
-Subject: [PATCH] meson: Don't define HAVE_ENVIRON_DECL when environ is
+Subject: [PATCH 4/5] meson: Don't define HAVE_ENVIRON_DECL when environ is
  unavailable
 
 HAVE_ENVIRON_DECL is being defined to 0 by cfg_data.set10().
@@ -15,10 +15,10 @@ Signed-off-by: Jordan Williams <jordan@jwillikers.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
-index 23e87f3b0..62153d852 100644
+index 19b8c8a6b..35bd7d28a 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -455,7 +455,7 @@ have_cpu_set_t = cc.sizeof('cpu_set_t', prefix : '#define _GNU_SOURCE\n#include
+@@ -452,7 +452,7 @@ have_cpu_set_t = cc.sizeof('cpu_set_t', prefix : '#define _GNU_SOURCE\n#include
  conf.set('HAVE_CPU_SET_T', have_cpu_set_t ? 1 : false)
  
  have = cc.has_header_symbol('unistd.h', 'environ', args : '-D_GNU_SOURCE')

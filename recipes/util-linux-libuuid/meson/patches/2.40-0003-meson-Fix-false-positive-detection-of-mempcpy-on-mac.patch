@@ -1,7 +1,7 @@
-From 7fefedc2551ab7dd4255bf46830bffdd36b6f646 Mon Sep 17 00:00:00 2001
+From f254465ee070745a637f6326258dc36772d3b036 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Fri, 29 Mar 2024 14:00:01 -0500
-Subject: [PATCH] meson: Fix false positive detection of mempcpy on macOS
+Subject: [PATCH 3/5] meson: Fix false positive detection of mempcpy on macOS
 
 The has_function check incorrectly detects mempcpy on macOS.
 This function is not available on macOS and should not be detected.
@@ -14,10 +14,10 @@ Signed-off-by: Jordan Williams <jordan@jwillikers.com>
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
-index 40fabb9ae..b56991d8a 100644
+index 70c8e4855..19b8c8a6b 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -568,7 +568,6 @@ funcs = '''
+@@ -565,7 +565,6 @@ funcs = '''
          llistxattr
          llseek
          newlocale
@@ -25,11 +25,11 @@ index 40fabb9ae..b56991d8a 100644
          mkostemp
          move_mount
          mount_setattr
-@@ -633,6 +632,9 @@ foreach func: funcs
+@@ -630,6 +629,9 @@ foreach func: funcs
    conf.set('HAVE_' + func.to_upper(), have ? 1 : false)
  endforeach
  
-+have_mempcpy = cc.has_function('mempcpy', prefix: '#include <strings.h>')
++have_mempcpy = cc.has_header_symbol('string.h', 'mempcpy', args : '-D_GNU_SOURCE')
 +conf.set('HAVE_MEMPCPY', have_mempcpy ? 1 : false)
 +
  have = conf.get('HAVE_FUTIMENS') in [1] and conf.get('HAVE_INOTIFY_INIT1') in [1]

@@ -1,7 +1,7 @@
-From f52903f43c091fd4487811ce948fbc67f341bf97 Mon Sep 17 00:00:00 2001
+From 4bea7488af8180746fe788bcbb74c21ea2ef9468 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
-Date: Fri, 29 Mar 2024 10:31:27 -0500
-Subject: [PATCH] meson: Only require the crypt library when necessary
+Date: Sat, 30 Mar 2024 10:34:37 -0500
+Subject: [PATCH 1/5] meson: Only require the crypt library when necessary
 
 The `crypt` library is only necessary for two executables.
 These are build-newgrp and build-sulogin.
@@ -9,22 +9,19 @@ Don't otherwise require this dependency.
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
 ---
- meson.build | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
-index bc335709d..a80f96460 100644
+index bc335709d..f8ca2f7bd 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -346,7 +346,10 @@ lib_udev = dependency(
+@@ -346,7 +346,7 @@ lib_udev = dependency(
    required : get_option('systemd'))
  conf.set('HAVE_LIBUDEV', lib_udev.found() ? 1 : false)
  
 -lib_crypt = cc.find_library('crypt')
-+lib_crypt = cc.find_library('crypt', required : get_option('build-newgrp'))
-+if not lib_crypt.found()
-+  lib_crypt = cc.find_library('crypt', required : get_option('build-sulogin'))
-+endif
++lib_crypt = cc.find_library('crypt', required : get_option('build-newgrp').enabled() or get_option('build-sulogin').enabled())
  
  lib_pam = cc.find_library('pam', required : get_option('build-login'))
  if not lib_pam.found()
