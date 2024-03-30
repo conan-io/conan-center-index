@@ -1,4 +1,4 @@
-From fdefb6c50dadcd2a5e1dcc303139abd0b444a19e Mon Sep 17 00:00:00 2001
+From 68784432874cdc237134f789a0d429f4d34aebe1 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Fri, 29 Mar 2024 12:14:44 -0500
 Subject: [PATCH 2/5] meson: Add build-lsfd option and make rt dependency
@@ -26,10 +26,10 @@ Signed-off-by: Jordan Williams <jordan@jwillikers.com>
  2 files changed, 22 insertions(+), 13 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index f8ca2f7bd..70c8e4855 100644
+index a80f96460..40fabb9ae 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -727,9 +727,12 @@ endif
+@@ -730,9 +730,12 @@ endif
  realtime_libs = []
  have = cc.has_function('clock_gettime')
  if not have
@@ -45,7 +45,7 @@ index f8ca2f7bd..70c8e4855 100644
  endif
  conf.set('HAVE_CLOCK_GETTIME', have ? 1 : false)
  
-@@ -737,9 +740,12 @@ thread_libs = dependency('threads')
+@@ -740,9 +743,12 @@ thread_libs = dependency('threads')
  
  have = cc.has_function('timer_create')
  if not have
@@ -61,7 +61,7 @@ index f8ca2f7bd..70c8e4855 100644
    if not have
      realtime_libs += thread_libs
      have = cc.has_function('timer_create',
-@@ -2700,19 +2706,20 @@ if not is_disabler(exe)
+@@ -2703,19 +2709,20 @@ if not is_disabler(exe)
    bashcompletions += ['lsblk']
  endif
  
@@ -87,7 +87,7 @@ index f8ca2f7bd..70c8e4855 100644
    exes += exe
    manadocs += ['misc-utils/lsfd.1.adoc']
  endif
-@@ -3488,14 +3495,14 @@ exe = executable(
+@@ -3491,14 +3498,14 @@ exe = executable(
    build_by_default: program_tests)
  exes += exe
  

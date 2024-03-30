@@ -1,4 +1,4 @@
-From f254465ee070745a637f6326258dc36772d3b036 Mon Sep 17 00:00:00 2001
+From 4ad81475b00e002b41164bdf81bfec561fb6d1ee Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Fri, 29 Mar 2024 14:00:01 -0500
 Subject: [PATCH 3/5] meson: Fix false positive detection of mempcpy on macOS
@@ -14,10 +14,10 @@ Signed-off-by: Jordan Williams <jordan@jwillikers.com>
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
-index 70c8e4855..19b8c8a6b 100644
+index 40fabb9ae..23e87f3b0 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -565,7 +565,6 @@ funcs = '''
+@@ -568,7 +568,6 @@ funcs = '''
          llistxattr
          llseek
          newlocale
@@ -25,7 +25,7 @@ index 70c8e4855..19b8c8a6b 100644
          mkostemp
          move_mount
          mount_setattr
-@@ -630,6 +629,9 @@ foreach func: funcs
+@@ -633,6 +632,9 @@ foreach func: funcs
    conf.set('HAVE_' + func.to_upper(), have ? 1 : false)
  endforeach
  

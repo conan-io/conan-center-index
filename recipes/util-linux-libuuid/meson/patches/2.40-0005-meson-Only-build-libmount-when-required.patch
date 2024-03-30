@@ -1,8 +1,41 @@
-From d71f81fbe6c76dfbf4775f052ed125672a480c15 Mon Sep 17 00:00:00 2001
+From e83bdc5e112b6a3ef962aa3140ba1711802dc8a2 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Fri, 29 Mar 2024 17:45:12 -0500
-Subject: [PATCH 5/5] meson: Don't build libmount unless it is enabled
+Subject: [PATCH 5/5] meson: Only build libmount when required
 
+It is not currently possible to build any part of util-linux without
+building libmount when using Meson.
+The libuuid library is commonly used on macOS, where it is not possible
+to build libmount.
+To address this, this PR makes it possible to build without libmount.
+It does this by only including the libmount subdir when building
+libmount.
+Several utilities depend on libmount.
+The build-libmount feature option has been configured to properly
+enforce this relationship.
+If build-libmount is disabled and any of these targets is enabled, the
+build will fail with an error.
+The targets now define the relationship to libmount using dependencies.
+This carries include directories along with the library to link.
+This also allows defining a null dependency when build-libmount is
+disabled.
+This ensures the dependency objects are defined in either case.
+The tools that depend on libmount are still defined and need the
+libmount dependency to exist the way the build system is currently
+organized.
+
+An additional dependency is declared for the static libmount library.
+A couple of executables use this dependency explicitly.
+
+Options have been added to allow toggling whether to build targets that
+require libmount.
+This makes it possible to fully disable building libmount.
+
+The python object had to be defined outside of the meson.build file in
+libmount/python since this may no longer be included.
+The python object is used for tests.
+
+Signed-off-by: Jordan Williams <jordan@jwillikers.com>
 ---
  libmount/meson.build |   1 +
  meson.build          | 134 +++++++++++++++++++++++++++----------------
@@ -22,7 +55,7 @@ index d1262e7f0..ea363a0d5 100644
  lib__mount_deps = [
    lib_selinux,
 diff --git a/meson.build b/meson.build
-index 35bd7d28a..4d1e08dd6 100644
+index 62153d852..b199116aa 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -97,7 +97,28 @@ conf.set('HAVE_MOUNTFD_API', have_mountfd_api ? 1 : false)
@@ -63,7 +96,7 @@ index 35bd7d28a..4d1e08dd6 100644
  need_static_libs = static_programs.length() > 0 # a rough estimate...
  summary('static programs', static_programs)
  
-@@ -952,7 +972,12 @@ bashcompletionslinks = {}
+@@ -955,7 +975,12 @@ bashcompletionslinks = {}
  subdir('include')
  subdir('lib')
  subdir('libblkid')
@@ -77,7 +110,7 @@ index 35bd7d28a..4d1e08dd6 100644
  subdir('libsmartcols')
  subdir('libuuid')
  subdir('liblastlog2')
-@@ -969,7 +994,6 @@ subdir('po')
+@@ -972,7 +997,6 @@ subdir('po')
  includes = [dir_include,
              dir_libblkid,
              dir_libsmartcols,
@@ -85,7 +118,7 @@ index 35bd7d28a..4d1e08dd6 100644
              dir_libfdisk,
              dir_libuuid,
              dir_liblastlog2,
-@@ -1492,15 +1516,17 @@ if opt and not is_disabler(exe)
+@@ -1495,15 +1519,17 @@ if opt and not is_disabler(exe)
    bashcompletions += ['tunelp']
  endif
  
@@ -107,7 +140,7 @@ index 35bd7d28a..4d1e08dd6 100644
    exes += exe
    manadocs += ['sys-utils/fstrim.8.adoc']
    bashcompletions += ['fstrim']
-@@ -1647,8 +1673,8 @@ exe = executable(
+@@ -1650,8 +1676,8 @@ exe = executable(
    'eject',
    eject_sources,
    include_directories : includes,
@@ -118,7 +151,7 @@ index 35bd7d28a..4d1e08dd6 100644
    install_dir : usrbin_exec_dir,
    install : opt,
    build_by_default : opt)
-@@ -1719,16 +1745,18 @@ if not is_disabler(exe)
+@@ -1722,16 +1748,18 @@ if not is_disabler(exe)
    bashcompletions += ['prlimit']
  endif
  
@@ -141,7 +174,7 @@ index 35bd7d28a..4d1e08dd6 100644
    exes += exe
    manadocs += ['sys-utils/lsns.8.adoc']
    bashcompletions += ['lsns']
-@@ -1740,9 +1768,8 @@ exe = executable(
+@@ -1743,9 +1771,8 @@ exe = executable(
    mount_sources,
    include_directories : includes,
    link_with : [lib_common,
@@ -153,7 +186,7 @@ index 35bd7d28a..4d1e08dd6 100644
    install_mode : 'rwsr-xr-x',
    install : opt,
    build_by_default : opt)
-@@ -1750,8 +1777,8 @@ exe2 = executable(
+@@ -1753,8 +1780,8 @@ exe2 = executable(
    'umount',
    umount_sources,
    include_directories : includes,
@@ -164,7 +197,7 @@ index 35bd7d28a..4d1e08dd6 100644
    install_mode : 'rwsr-xr-x',
    install : opt,
    build_by_default : opt)
-@@ -1770,8 +1797,8 @@ exe = executable(
+@@ -1773,8 +1800,8 @@ exe = executable(
    include_directories : includes,
    link_args : ['--static'],
    link_with : [lib_common,
@@ -175,7 +208,7 @@ index 35bd7d28a..4d1e08dd6 100644
    install : opt2,
    build_by_default : opt2)
  if opt2 and not is_disabler(exe)
-@@ -1784,8 +1811,8 @@ exe = executable(
+@@ -1787,8 +1814,8 @@ exe = executable(
    umount_sources,
    include_directories : includes,
    link_args : ['--static'],
@@ -186,7 +219,7 @@ index 35bd7d28a..4d1e08dd6 100644
    install : opt2,
    build_by_default : opt2)
  if opt2 and not is_disabler(exe)
-@@ -1794,32 +1821,36 @@ endif
+@@ -1797,32 +1824,36 @@ endif
  
  # setuid?
  
@@ -230,7 +263,7 @@ index 35bd7d28a..4d1e08dd6 100644
    exes += exe
    manlinks += {'swapoff.8': 'swapon.8'}
    bashcompletions += ['swapoff']
-@@ -1869,7 +1900,7 @@ exe = executable(
+@@ -1872,7 +1903,7 @@ exe = executable(
    'mountpoint',
    mountpoint_sources,
    include_directories : includes,
@@ -239,7 +272,7 @@ index 35bd7d28a..4d1e08dd6 100644
    install : opt,
    build_by_default : opt)
  if opt and not is_disabler(exe)
-@@ -2149,9 +2180,8 @@ exe = executable(
+@@ -2152,9 +2183,8 @@ exe = executable(
    fsck_sources,
    include_directories : includes,
    link_with : [lib_common,
@@ -251,7 +284,7 @@ index 35bd7d28a..4d1e08dd6 100644
    install_dir : sbindir,
    install : opt,
    build_by_default : opt)
-@@ -2338,9 +2368,8 @@ exe = executable(
+@@ -2341,9 +2371,8 @@ exe = executable(
    link_with : [lib_common,
                 lib_fdisk,
                 lib_smartcols,
@@ -263,7 +296,7 @@ index 35bd7d28a..4d1e08dd6 100644
    install_dir : sbindir,
    install : opt,
    build_by_default : opt)
-@@ -2676,33 +2705,36 @@ exes += exe
+@@ -2679,33 +2708,36 @@ exes += exe
  manadocs += ['misc-utils/whereis.1.adoc']
  bashcompletions += ['whereis']
  
@@ -307,7 +340,7 @@ index 35bd7d28a..4d1e08dd6 100644
    exes += exe
    manadocs += ['misc-utils/lsblk.8.adoc']
    bashcompletions += ['lsblk']
-@@ -2887,17 +2919,18 @@ if not is_disabler(exe)
+@@ -2890,17 +2922,18 @@ if not is_disabler(exe)
    bashcompletions += ['wipefs']
  endif
  
@@ -330,7 +363,7 @@ index 35bd7d28a..4d1e08dd6 100644
    exes += exe
    manadocs += ['misc-utils/findmnt.8.adoc']
    bashcompletions += ['findmnt']
-@@ -3616,6 +3649,11 @@ endif
+@@ -3619,6 +3652,11 @@ endif
  # Let the test runner know whether we're running under asan and export
  # some paths. We use a file on disk so that it is possible to run the
  # test scripts from commandline without setting any variables.
