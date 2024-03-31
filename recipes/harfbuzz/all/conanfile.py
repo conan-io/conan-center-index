@@ -154,14 +154,18 @@ class HarfbuzzConan(ConanFile):
             "tests": "disabled",
             "docs": "disabled",
             "benchmark": "disabled",
-            "icu_builtin": "false"
+            "icu_builtin": "false",
+            "utilities": "disabled",
         })
         tc.cpp_args += cxxflags
         tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('util')", "")
+        if Version(self.version) < "7.3.0":
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('util')", "")
+        if Version(self.version) >= "8.4.0":
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "version: freetype_min_version,", "")
         meson = Meson(self)
         meson.configure()
         meson.build()
