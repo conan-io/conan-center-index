@@ -155,8 +155,11 @@ class HarfbuzzConan(ConanFile):
             "docs": "disabled",
             "benchmark": "disabled",
             "icu_builtin": "false",
-            "utilities": "disabled",
         })
+        if Version(self.version) >= "7.3.0":
+            tc.project_options.update({
+                "utilities": "disabled",
+            })
         tc.cpp_args += cxxflags
         tc.generate()
 
