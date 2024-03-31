@@ -3,7 +3,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc_static_runtime
@@ -149,6 +149,9 @@ class PdalConan(ConanFile):
         tc.variables["WITH_TESTS"] = False
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_PostgreSQL"] = True
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Libexecinfo"] = True
+        if cross_building(self) and can_run(self):
+            # Workaround for dimbuilder not being found when cross-compiling on macOS
+            tc.variables["DIMBUILDER_EXECUTABLE"] = os.path.join(self.build_folder, "src", "bin", "dimbuilder")
         tc.generate()
 
         # For the namespace injection in _patch_sources() below
