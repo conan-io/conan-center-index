@@ -30,8 +30,8 @@ class ProxyConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "11",
-            "clang": "12",
-            "apple-clang": "13",
+            "clang": "15",
+            "apple-clang": "14",
             "msvc": "193",
             "Visual Studio": "17",
         }
