@@ -631,7 +631,6 @@ class OpenSSLConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenSSL")
         self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_target_name", "openssl::openssl")
         self.cpp_info.set_property("pkg_config_name", "openssl")
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.names["cmake_find_package"] = "OpenSSL"
