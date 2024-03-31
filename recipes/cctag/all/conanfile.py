@@ -59,14 +59,13 @@ class CCTagConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # boost/1.81+ fails with "multiple definition of `boost::phoenix::placeholders::uarg1'", etc.
-        self.requires("boost/1.80.0", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/1.84.0", transitive_headers=True, transitive_libs=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if Version(self.version) >= "1.0.3":
             self.requires("onetbb/2021.10.0")
         else:
             self.requires("onetbb/2020.3.3")
-        self.requires("opencv/4.8.1", transitive_headers=True, transitive_libs=True)
+        self.requires("opencv/4.9.0", transitive_headers=True, transitive_libs=True)
 
     @property
     def _required_boost_components(self):
