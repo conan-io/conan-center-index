@@ -1,5 +1,5 @@
-from conan import ConanFile, tools
-from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
+from conan import ConanFile
+from conan.tools.files import get, copy, rmdir, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.microsoft import is_msvc
@@ -42,13 +42,13 @@ class SwigConan(ConanFile):
             self.requires("pcre/8.45")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-        if self.settings.compiler == "msvc":
-            self.build_requires("winflexbison/2.5.24")
+        if self._settings_build.os == "Windows" and "CONAN_BASH_PATH" not in os.environ:
+            self.tool_requires("msys2/cci.latest")
+        if is_msvc(self):
+            self.tool_requires("winflexbison/2.5.24")
         else:
-            self.build_requires("bison/3.8.2")
-        self.build_requires("automake/1.16.5")
+            self.tool_requires("bison/3.8.2")
+        self.tool_requires("automake/1.16.5")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -73,8 +73,8 @@ class SwigConan(ConanFile):
         deps.generate()
 
         tc.configure_args.extend([
-            "--host={}".format(self.settings.arch),
-            "--with-swiglibdir={}".format(os.path.join("bin", "swiglib")),
+            f"--host={self.settings.arch}",
+            f"--with-swiglibdir={os.path.join('bin', 'swiglib')}",
         ])
 
         env = tc.environment()
@@ -82,7 +82,7 @@ class SwigConan(ConanFile):
             tc.extra_cflags.append("-FS")
             env.define("CC", "{} cl -nologo")
             env.define("CXX", "{} cl -nologo")
-            env.define("AR", f"{ar_wrapper} lib")
+            env.define("AR", "{} lib -nologo")
             env.define("LD", "link")
         tc.generate(env)
 
@@ -114,7 +114,7 @@ class SwigConan(ConanFile):
 
     @property
     def _module_file(self):
-        return "conan-official-{}-targets.cmake".format(self.name)
+        return f"conan-official-{self.name}-targets.cmake"
 
     def package_info(self):
         self.cpp_info.includedirs = []
@@ -123,5 +123,5 @@ class SwigConan(ConanFile):
             os.path.join(self._module_subfolder, self._module_file)
         ])
         bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.output.info(f"Appending PATH environment variable: {bindir}")
         self.buildenv_info.append_path("PATH", os.path.join(self.package_folder, bindir))
