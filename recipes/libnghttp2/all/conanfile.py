@@ -99,6 +99,9 @@ class Nghttp2Conan(ConanFile):
         tc.variables["WITH_JEMALLOC"] = self.options.get_safe("with_jemalloc", False)
         if Version(self.version) < "1.52.0":
             tc.variables["ENABLE_ASIO_LIB"] = self.options.with_asio
+        # To avoid overwriting dll import lib by static lib
+        if Version(self.version) >= "1.60.0" and self.options.shared:
+            tc.variables["STATIC_LIB_SUFFIX"] = "-static"
         if is_apple_os(self):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
             tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
@@ -153,6 +156,7 @@ class Nghttp2Conan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.components["nghttp2"].set_property("pkg_config_name", "libnghttp2")
