@@ -52,29 +52,29 @@ class OpenSlideConan(ConanFile):
     def requirements(self):
         self.requires("cairo/1.18.0")
         self.requires("gdk-pixbuf/2.42.10")
-        self.requires("glib/2.78.1", force=True)  # FIXME
+        self.requires("glib/2.78.3")
         self.requires("libdicom/1.0.5")
-        self.requires("libpng/1.6.40")
-        self.requires("libtiff/4.6.0", force=True)  # FIXME
-        self.requires("libxml2/2.11.5")
-        self.requires("openjpeg/2.5.0")
-        self.requires("sqlite3/3.44.0")
+        self.requires("libpng/[>=1.6 <2]")
+        self.requires("libtiff/4.6.0")
+        self.requires("libxml2/[>=2.12.5 <3]")
+        self.requires("openjpeg/2.5.2")
+        self.requires("sqlite3/3.45.3")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.1")
+            self.requires("libjpeg-turbo/3.0.2")
         elif self.options.jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.3")
+            self.requires("mozjpeg/4.1.5")
 
     def validate(self):
         if is_msvc(self):
             raise ConanInvalidConfiguration("OpenSlide requires GNU C extensions support and is not compatible with MSVC")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.3")
+        self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.2.0")
         self.tool_requires("glib/<host_version>")
 
     def source(self):
