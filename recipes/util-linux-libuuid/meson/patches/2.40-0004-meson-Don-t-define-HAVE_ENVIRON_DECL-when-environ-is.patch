@@ -1,4 +1,4 @@
-From 098f36e0dcec7477becd5304aaa9b4816b3ef138 Mon Sep 17 00:00:00 2001
+From f6d3d7b0aa47d148a7d67a80b1b30b0302befe57 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Fri, 29 Mar 2024 16:56:43 -0500
 Subject: [PATCH 4/5] meson: Don't define HAVE_ENVIRON_DECL when environ is
@@ -15,7 +15,7 @@ Signed-off-by: Jordan Williams <jordan@jwillikers.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
-index 23e87f3b0..62153d852 100644
+index 319294a2e..fcf96b826 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -455,7 +455,7 @@ have_cpu_set_t = cc.sizeof('cpu_set_t', prefix : '#define _GNU_SOURCE\n#include

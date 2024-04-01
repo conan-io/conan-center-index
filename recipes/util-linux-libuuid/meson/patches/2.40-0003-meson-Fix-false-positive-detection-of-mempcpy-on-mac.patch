@@ -1,12 +1,12 @@
-From 4ad81475b00e002b41164bdf81bfec561fb6d1ee Mon Sep 17 00:00:00 2001
+From a82cb7a99c30a36e9678b55322e1fba78e88f9f9 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
-Date: Fri, 29 Mar 2024 14:00:01 -0500
+Date: Mon, 1 Apr 2024 07:44:52 -0500
 Subject: [PATCH 3/5] meson: Fix false positive detection of mempcpy on macOS
 
 The has_function check incorrectly detects mempcpy on macOS.
 This function is not available on macOS and should not be detected.
 Likely, this has to do with Meson's detection of compiler built-ins.
-Use has_header_symbol to check for this symbol instead.
+Using a specific prefix and defining _GNU_SOURCE fixes the detection.
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
 ---
@@ -14,7 +14,7 @@ Signed-off-by: Jordan Williams <jordan@jwillikers.com>
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
-index 40fabb9ae..23e87f3b0 100644
+index 40fabb9ae..319294a2e 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -568,7 +568,6 @@ funcs = '''
@@ -29,7 +29,7 @@ index 40fabb9ae..23e87f3b0 100644
    conf.set('HAVE_' + func.to_upper(), have ? 1 : false)
  endforeach
  
-+have_mempcpy = cc.has_function('mempcpy', prefix: '#include <string.h>', args : '-D_GNU_SOURCE')
++have_mempcpy = cc.has_function('mempcpy', prefix: '#include <string.h>', args: '-D_GNU_SOURCE')
 +conf.set('HAVE_MEMPCPY', have_mempcpy ? 1 : false)
 +
  have = conf.get('HAVE_FUTIMENS') in [1] and conf.get('HAVE_INOTIFY_INIT1') in [1]
