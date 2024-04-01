@@ -10,6 +10,9 @@ patches:
     - patch_file: "patches/0000-msvc-strtok_r.patch"
       patch_description: "Use strtok_s instead of strtok_r with MSVC"
       patch_type: "portability"
+    - patch_file: "patches/5.2.2-0001-msvc-export.patch"
+      patch_description: "export symbols with MSVC"
+      patch_type: "portability"
   "5.2.1":
     - patch_file: "patches/0000-msvc-strtok_r.patch"
       patch_description: "Use strtok_s instead of strtok_r with MSVC"
