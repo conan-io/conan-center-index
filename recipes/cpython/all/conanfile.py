@@ -134,7 +134,7 @@ class CPythonConan(ConanFile):
             # https://github.com/python/cpython/blob/v3.10.13/Include/py_curses.h#L34
             self.requires("ncurses/6.4", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_lzma", False):
-            self.requires("xz_utils/5.6.1")
+            self.requires("xz_utils/5.4.5")
 
     def package_id(self):
         del self.info.options.env_vars
@@ -224,7 +224,7 @@ class CPythonConan(ConanFile):
 
     def generate(self):
         VirtualRunEnv(self).generate(scope="build")
-        
+
         if is_msvc(self):
             # The msbuild generator only works with Visual Studio
             deps = MSBuildDeps(self)
