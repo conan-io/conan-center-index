@@ -3,7 +3,7 @@ sources:
   "0.5.2":
     url:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.2.tar.gz"
-    sha256: "efb64dd92270eca1cdab2f0bfd876c7c411d2c0d1160a6d8da78b0c5f8c0ce33"
+    sha256: "d148998e175b9c69ffb4383ab321a0d27487392e4eee3f39441d35b6856c8f78"
   "0.5.1":
     url:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.1.tar.gz"
@@ -33,15 +33,6 @@ sources:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.2.1.tar.gz"
     sha256: "3184f404c61b6b8ba6fe7c64fc40d1c3d6d87df59bcacf1845d846101bc22f9a"
 patches:
-  "0.5.2":
-    - patch_file: "patches/0.5.2/0001-size_t.patch"
-      patch_type: "conan"
-      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/06372b772f1687619820de00761f008b1f6209ce"
-      patch_description: "Handle MSVC warning treated as error"
-    - patch_file: "patches/0.5.2/0002-result.patch"
-      patch_type: "conan"
-      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/0dd71cebb79f9f4b46b7655370106ee25e0d5dda"
-      patch_description: "Fix Result constructor"
   "0.4.0":
     - patch_file: "patches/0.4.0/0001-libdwarf_path.patch"
       patch_type: "conan"
