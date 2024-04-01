@@ -1,7 +1,7 @@
-From e83bdc5e112b6a3ef962aa3140ba1711802dc8a2 Mon Sep 17 00:00:00 2001
+From e895f17e561e7f2e9cd9f0a0c370e2da587b93c3 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Fri, 29 Mar 2024 17:45:12 -0500
-Subject: [PATCH 5/5] meson: Only build libmount when required
+Subject: [PATCH] meson: Only build libmount when required
 
 It is not currently possible to build any part of util-linux without
 building libmount when using Meson.
@@ -38,9 +38,9 @@ The python object is used for tests.
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
 ---
  libmount/meson.build |   1 +
- meson.build          | 134 +++++++++++++++++++++++++++----------------
- meson_options.txt    |  14 +++++
- 3 files changed, 101 insertions(+), 48 deletions(-)
+ meson.build          | 148 +++++++++++++++++++++++++++----------------
+ meson_options.txt    |  14 ++++
+ 3 files changed, 109 insertions(+), 54 deletions(-)
 
 diff --git a/libmount/meson.build b/libmount/meson.build
 index d1262e7f0..ea363a0d5 100644
@@ -55,40 +55,51 @@ index d1262e7f0..ea363a0d5 100644
  lib__mount_deps = [
    lib_selinux,
 diff --git a/meson.build b/meson.build
-index 62153d852..b199116aa 100644
+index 62153d852..f318066ea 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -97,7 +97,28 @@ conf.set('HAVE_MOUNTFD_API', have_mountfd_api ? 1 : false)
+@@ -78,7 +78,7 @@ conf.set_quoted('ADJTIME_PATH', '/etc/adjtime') # yes, both are used :(
+ conf.set_quoted('_PATH_VENDORDIR', vendordir)
+ conf.set('USE_VENDORDIR', vendordir == '' ? false : 1)
+ 
+-build_libblkid = not get_option('build-libblkid').disabled()
++build_libblkid = not get_option('build-libblkid').disable_auto_if(get_option('build-libmount').disabled()).disabled()
+ conf.set('HAVE_LIBBLKID', build_libblkid ? 1 : false)
+ summary('libblkid', build_libblkid ? 'enabled' : 'disabled', section : 'components')
+ 
+@@ -97,7 +97,30 @@ conf.set('HAVE_MOUNTFD_API', have_mountfd_api ? 1 : false)
  have_struct_statx = cc.sizeof('struct statx', prefix : '#include <sys/stat.h>') > 0
  conf.set('HAVE_STRUCT_STATX', have_struct_statx ? 1 : false)
  
 -build_libmount = not get_option('build-libmount').disabled()
 +static_programs = get_option('static-programs')
 +
-+build_libmount = get_option('build-libmount').enable_if(
-+  get_option('build-eject').enabled() or \
-+  get_option('build-fstrim').enabled() or \
-+  get_option('build-libblkid').enabled() or \
-+  get_option('build-lsns').enabled() or \
-+  get_option('build-mount').enabled() or \
-+  'mount' in static_programs or \
-+  'umount' in static_programs or \
-+  get_option('build-swapon').enabled() or \
-+  get_option('build-swapoff').enabled() or \
-+  get_option('build-mountpoint').enabled() or \
-+  get_option('build-fsck').enabled() or \
-+  # Required by cfdisk.
-+  get_option('build-fdisks').enabled() or \
-+  get_option('build-lslocks').enabled() or \
-+  get_option('build-lsblk').enabled() or \
-+  get_option('build-findmnt').enabled(),
-+  error_message : 'libmount is required to build enabled features'
-+).enabled()
++if get_option('build-libmount').disabled() and ( \
++    get_option('build-eject').enabled() or \
++    get_option('build-fstrim').enabled() or \
++    build_libblkid or \
++    get_option('build-lsns').enabled() or \
++    get_option('build-mount').enabled() or \
++    'mount' in static_programs or \
++    'umount' in static_programs or \
++    get_option('build-swapon').enabled() or \
++    get_option('build-swapoff').enabled() or \
++    get_option('build-mountpoint').enabled() or \
++    get_option('build-fsck').enabled() or \
++    # Required by cfdisk.
++    get_option('build-fdisks').enabled() or \
++    get_option('build-lslocks').enabled() or \
++    get_option('build-lsblk').enabled() or \
++    get_option('build-findmnt').enabled()
++  )
++  error('libmount is required to build enabled features')
++endif
++build_libmount = get_option('build-libmount').allowed()
 +
  conf.set('HAVE_LIBMOUNT', build_libmount ? 1 : false)
  conf.set('USE_LIBMOUNT_SUPPORT_NAMESPACES', 1)
  conf.set('USE_LIBMOUNT_MOUNTFD_SUPPORT', have_mountfd_api ? 1 : false)
-@@ -115,7 +136,6 @@ build_uuidd = not get_option('build-uuidd').disabled()
+@@ -115,7 +138,6 @@ build_uuidd = not get_option('build-uuidd').disabled()
  conf.set('HAVE_UUIDD', build_uuidd ? 1 : false)
  summary('uuidd', build_uuidd ? 'enabled' : 'disabled', section : 'components')
  
@@ -96,7 +107,7 @@ index 62153d852..b199116aa 100644
  need_static_libs = static_programs.length() > 0 # a rough estimate...
  summary('static programs', static_programs)
  
-@@ -955,7 +975,12 @@ bashcompletionslinks = {}
+@@ -955,7 +977,12 @@ bashcompletionslinks = {}
  subdir('include')
  subdir('lib')
  subdir('libblkid')
@@ -110,7 +121,7 @@ index 62153d852..b199116aa 100644
  subdir('libsmartcols')
  subdir('libuuid')
  subdir('liblastlog2')
-@@ -972,7 +997,6 @@ subdir('po')
+@@ -972,7 +999,6 @@ subdir('po')
  includes = [dir_include,
              dir_libblkid,
              dir_libsmartcols,
@@ -118,11 +129,11 @@ index 62153d852..b199116aa 100644
              dir_libfdisk,
              dir_libuuid,
              dir_liblastlog2,
-@@ -1495,15 +1519,17 @@ if opt and not is_disabler(exe)
+@@ -1495,15 +1521,17 @@ if opt and not is_disabler(exe)
    bashcompletions += ['tunelp']
  endif
  
-+opt = not get_option('build-fstrim').disabled()
++opt = not get_option('build-fstrim').disable_auto_if(not build_libmount).disabled()
  exe = executable(
    'fstrim',
    fstrim_sources,
@@ -140,7 +151,13 @@ index 62153d852..b199116aa 100644
    exes += exe
    manadocs += ['sys-utils/fstrim.8.adoc']
    bashcompletions += ['fstrim']
-@@ -1650,8 +1676,8 @@ exe = executable(
+@@ -1645,13 +1673,13 @@ foreach link: setarch_links
+   manlinks += {link + '.8': 'setarch.8'}
+ endforeach
+ 
+-opt = not get_option('build-eject').disabled()
++opt = not get_option('build-eject').disable_auto_if(not build_libmount).disabled()
+ exe = executable(
    'eject',
    eject_sources,
    include_directories : includes,
@@ -151,11 +168,11 @@ index 62153d852..b199116aa 100644
    install_dir : usrbin_exec_dir,
    install : opt,
    build_by_default : opt)
-@@ -1722,16 +1748,18 @@ if not is_disabler(exe)
+@@ -1722,30 +1750,31 @@ if not is_disabler(exe)
    bashcompletions += ['prlimit']
  endif
  
-+opt = not get_option('build-lsns').disabled()
++opt = not get_option('build-lsns').disable_auto_if(not build_libmount).disabled()
  exe = executable(
    'lsns',
    lsns_sources,
@@ -174,7 +191,12 @@ index 62153d852..b199116aa 100644
    exes += exe
    manadocs += ['sys-utils/lsns.8.adoc']
    bashcompletions += ['lsns']
-@@ -1743,9 +1771,8 @@ exe = executable(
+ endif
+ 
+-opt = not get_option('build-mount').disabled()
++opt = not get_option('build-mount').disable_auto_if(not build_libmount).disabled()
+ exe = executable(
+   'mount',
    mount_sources,
    include_directories : includes,
    link_with : [lib_common,
@@ -186,7 +208,7 @@ index 62153d852..b199116aa 100644
    install_mode : 'rwsr-xr-x',
    install : opt,
    build_by_default : opt)
-@@ -1753,8 +1780,8 @@ exe2 = executable(
+@@ -1753,8 +1782,8 @@ exe2 = executable(
    'umount',
    umount_sources,
    include_directories : includes,
@@ -197,7 +219,7 @@ index 62153d852..b199116aa 100644
    install_mode : 'rwsr-xr-x',
    install : opt,
    build_by_default : opt)
-@@ -1773,8 +1800,8 @@ exe = executable(
+@@ -1773,8 +1802,8 @@ exe = executable(
    include_directories : includes,
    link_args : ['--static'],
    link_with : [lib_common,
@@ -208,7 +230,7 @@ index 62153d852..b199116aa 100644
    install : opt2,
    build_by_default : opt2)
  if opt2 and not is_disabler(exe)
-@@ -1787,8 +1814,8 @@ exe = executable(
+@@ -1787,8 +1816,8 @@ exe = executable(
    umount_sources,
    include_directories : includes,
    link_args : ['--static'],
@@ -219,11 +241,11 @@ index 62153d852..b199116aa 100644
    install : opt2,
    build_by_default : opt2)
  if opt2 and not is_disabler(exe)
-@@ -1797,32 +1824,36 @@ endif
+@@ -1797,32 +1826,36 @@ endif
  
  # setuid?
  
-+opt = not get_option('build-swapon').disabled()
++opt = not get_option('build-swapon').disable_auto_if(not build_libmount).disabled()
  exe = executable(
    'swapon',
    swapon_sources,
@@ -244,7 +266,7 @@ index 62153d852..b199116aa 100644
    bashcompletions += ['swapon']
  endif
  
-+opt = not get_option('build-swapoff').disabled()
++opt = not get_option('build-swapoff').disable_auto_if(not build_libmount).disabled()
  exe = executable(
    'swapoff',
    swapoff_sources,
@@ -263,7 +285,13 @@ index 62153d852..b199116aa 100644
    exes += exe
    manlinks += {'swapoff.8': 'swapon.8'}
    bashcompletions += ['swapoff']
-@@ -1872,7 +1903,7 @@ exe = executable(
+@@ -1867,12 +1900,12 @@ if not is_disabler(exe)
+   bashcompletions += ['wdctl']
+ endif
+ 
+-opt = not get_option('build-mountpoint').disabled()
++opt = not get_option('build-mountpoint').disable_auto_if(not build_libmount).disabled()
+ exe = executable(
    'mountpoint',
    mountpoint_sources,
    include_directories : includes,
@@ -272,7 +300,14 @@ index 62153d852..b199116aa 100644
    install : opt,
    build_by_default : opt)
  if opt and not is_disabler(exe)
-@@ -2152,9 +2183,8 @@ exe = executable(
+@@ -2146,15 +2179,14 @@ if not is_disabler(exe)
+   bashcompletions += ['swaplabel']
+ endif
+ 
+-opt = not get_option('build-fsck').disabled()
++opt = not get_option('build-fsck').disable_auto_if(not build_libmount).disabled()
+ exe = executable(
+   'fsck',
    fsck_sources,
    include_directories : includes,
    link_with : [lib_common,
@@ -284,7 +319,16 @@ index 62153d852..b199116aa 100644
    install_dir : sbindir,
    install : opt,
    build_by_default : opt)
-@@ -2341,9 +2371,8 @@ exe = executable(
+@@ -2261,7 +2293,7 @@ exe = executable(
+ manadocs += ['disk-utils/blockdev.8.adoc']
+ bashcompletions += ['blockdev']
+ 
+-opt = not get_option('build-fdisks').disabled()
++opt = not get_option('build-fdisks').disable_auto_if(not build_libmount).disabled()
+ if opt and not have_dirfd and not have_ddfd
+   error('neither dirfd nor ddfd are available')
+ endif
+@@ -2341,9 +2373,8 @@ exe = executable(
    link_with : [lib_common,
                 lib_fdisk,
                 lib_smartcols,
@@ -296,11 +340,11 @@ index 62153d852..b199116aa 100644
    install_dir : sbindir,
    install : opt,
    build_by_default : opt)
-@@ -2679,33 +2708,36 @@ exes += exe
+@@ -2679,33 +2710,36 @@ exes += exe
  manadocs += ['misc-utils/whereis.1.adoc']
  bashcompletions += ['whereis']
  
-+opt = not get_option('build-lslocks').disabled()
++opt = not get_option('build-lslocks').disable_auto_if(not build_libmount).disabled()
  exe = executable(
    'lslocks',
    lslocks_sources,
@@ -320,7 +364,7 @@ index 62153d852..b199116aa 100644
    bashcompletions += ['lslocks']
  endif
  
-+opt = not get_option('build-lsblk').disabled()
++opt = not get_option('build-lsblk').disable_auto_if(not build_libmount).disabled()
  exe = executable(
    'lsblk',
    lsblk_sources,
@@ -340,11 +384,11 @@ index 62153d852..b199116aa 100644
    exes += exe
    manadocs += ['misc-utils/lsblk.8.adoc']
    bashcompletions += ['lsblk']
-@@ -2890,17 +2922,18 @@ if not is_disabler(exe)
+@@ -2890,17 +2924,18 @@ if not is_disabler(exe)
    bashcompletions += ['wipefs']
  endif
  
-+opt = not get_option('build-findmnt').disabled()
++opt = not get_option('build-findmnt').disable_auto_if(not build_libmount).disabled()
  exe = executable(
    'findmnt',
    findmnt_sources,
@@ -363,7 +407,7 @@ index 62153d852..b199116aa 100644
    exes += exe
    manadocs += ['misc-utils/findmnt.8.adoc']
    bashcompletions += ['findmnt']
-@@ -3619,6 +3652,11 @@ endif
+@@ -3619,6 +3654,11 @@ endif
  # Let the test runner know whether we're running under asan and export
  # some paths. We use a file on disk so that it is possible to run the
  # test scripts from commandline without setting any variables.
@@ -376,7 +420,7 @@ index 62153d852..b199116aa 100644
                 capture : true,
                 command : ['echo',
 diff --git a/meson_options.txt b/meson_options.txt
-index 5cc8b4f61..5e2187517 100644
+index 5cc8b4f61..e4862ad4a 100644
 --- a/meson_options.txt
 +++ b/meson_options.txt
 @@ -53,10 +53,16 @@ option('build-fdisks', type : 'feature',
@@ -396,21 +440,19 @@ index 5cc8b4f61..5e2187517 100644
  option('build-fsck', type : 'feature',
         description : 'build fsck')
  option('build-partx', type : 'feature',
-@@ -101,8 +107,14 @@ option('build-cal', type : 'feature',
+@@ -101,6 +107,12 @@ option('build-cal', type : 'feature',
         description : 'build cal')
  option('build-logger', type : 'feature',
         description : 'build logger')
 +option('build-lsblk', type : 'feature',
 +       description : 'build lsblk')
- option('build-lsfd', type : 'feature',
-        description : 'build lsfd')
 +option('build-lslocks', type : 'feature',
 +       description : 'build lslocks')
 +option('build-findmnt', type : 'feature',
 +       description : 'build findmnt')
+ option('build-lsfd', type : 'feature',
+        description : 'build lsfd')
  option('build-switch_root', type : 'feature',
-        description : 'switch_root')
- option('build-pivot_root', type : 'feature',
 @@ -123,6 +135,8 @@ option('build-rfkill', type : 'feature',
         description : 'build rfkill')
  option('build-tunelp', type : 'feature',

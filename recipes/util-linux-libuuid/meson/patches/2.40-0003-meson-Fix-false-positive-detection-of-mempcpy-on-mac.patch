@@ -29,7 +29,7 @@ index 40fabb9ae..23e87f3b0 100644
    conf.set('HAVE_' + func.to_upper(), have ? 1 : false)
  endforeach
  
-+have_mempcpy = cc.has_header_symbol('string.h', 'mempcpy', args : '-D_GNU_SOURCE')
++have_mempcpy = cc.has_function('mempcpy', prefix: '#include <string.h>', args : '-D_GNU_SOURCE')
 +conf.set('HAVE_MEMPCPY', have_mempcpy ? 1 : false)
 +
  have = conf.get('HAVE_FUTIMENS') in [1] and conf.get('HAVE_INOTIFY_INIT1') in [1]
