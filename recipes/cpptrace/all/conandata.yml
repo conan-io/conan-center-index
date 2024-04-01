@@ -38,6 +38,10 @@ patches:
       patch_type: "conan"
       patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/06372b772f1687619820de00761f008b1f6209ce"
       patch_description: "Handle MSVC warning treated as error"
+    - patch_file: "patches/0.5.2/0002-result.patch"
+      patch_type: "conan"
+      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/0dd71cebb79f9f4b46b7655370106ee25e0d5dda"
+      patch_description: "Fix Result constructor"
   "0.4.0":
     - patch_file: "patches/0.4.0/0001-libdwarf_path.patch"
       patch_type: "conan"
