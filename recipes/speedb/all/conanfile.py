@@ -105,6 +105,7 @@ class SpeedbConan(ConanFile):
         tc.variables["WITH_GFLAGS"] = self.options.with_core_tools
         tc.variables["WITH_TOOLS"] = False
         tc.variables["ROCKSDB_BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
