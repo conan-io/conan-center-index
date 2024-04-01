@@ -1,0 +1,4 @@
+sources:
+  "0.4.1":
+    url: "https://github.com/deniskovalchuk/libftp/archive/refs/tags/v0.4.1.tar.gz"
+    sha256: "873dd7647234f72fecfe57150b0a4a60f4c16611d26ad7eb687e0561f54b9eec"
