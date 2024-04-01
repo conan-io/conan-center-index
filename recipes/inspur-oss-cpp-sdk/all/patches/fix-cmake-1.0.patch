@@ -1,3 +1,13 @@
+From 532a11872778d6985459f51153034e63429ace1a Mon Sep 17 00:00:00 2001
+From: manx98 <1323517022@qq.com>
+Date: Mon, 1 Apr 2024 15:51:11 +0800
+Subject: [PATCH] support conan
+
+---
+ CMakeLists.txt     | 60 +++++++++++-----------------------
+ sdk/CMakeLists.txt | 81 ++++++++++++++++------------------------------
+ 2 files changed, 47 insertions(+), 94 deletions(-)
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 38f15c9..bc68864 100644
 --- a/CMakeLists.txt
@@ -222,3 +232,6 @@ index c540551..089013f 100644
 +		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 +)
 \ No newline at end of file
+-- 
+2.34.1
+
