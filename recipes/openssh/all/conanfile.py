@@ -1,3 +1,5 @@
+from os.path import join
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
@@ -5,7 +7,6 @@ from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rmdir, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
-from os.path import join
 
 required_conan_version = ">=1.54.0"
 
@@ -21,7 +22,7 @@ class PackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_libcrypto": [False, "libressl", "openssl"],
-        "with_pam": [False, "openpam"],
+        "with_pam": [False, "openpam"],  # linux-pam and Solaris PAM are also supported
         "with_selinux": [True, False],
         "with_libedit": [True, False],
         "with_sandbox": [False, "auto", "capsicum", "darwin", "rlimit", "seccomp_filter", "systrace", "pledge"]
@@ -50,9 +51,9 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
-        if self.options.with_libcrypto  == "openssl":
+        if self.options.with_libcrypto == "openssl":
             self.requires("openssl/[>=1.1 <=3.1]")
-        elif self.options.with_libcrypto  == "libressl":
+        elif self.options.with_libcrypto == "libressl":
             self.requires("libressl/3.5.3")
         if self.options.with_pam == "openpam":
             self.requires("openpam/20190224")
@@ -89,6 +90,10 @@ class PackageConan(ConanFile):
         if self.options.with_libcrypto == "openssl":
             openssl = self.dependencies["openssl"]
             tc.configure_args.append("--with-ssl-dir={}".format(openssl.package_folder))
+            # It needs libcrypto.so in build time context
+            if openssl.options.shared:
+                env = VirtualRunEnv(self)
+                env.generate(scope="build")
         elif self.options.with_libcrypto == "libressl":
             libressl = self.dependencies["libressl"]
             tc.configure_args.append("--with-ssl-dir={}".format(libressl.package_folder))
@@ -96,16 +101,13 @@ class PackageConan(ConanFile):
             tc.configure_args.append("--without-openssl")
 
         if self.options.with_sandbox != 'auto':
-            tc.configure_args.append("--with-sandbox={}".format(self.options.with_sandbox))
+            tc.configure_args.append("--with-sandbox={}".format(self.options.with_sandbox or "no"))
 
         tc.generate()
 
     def build(self):
         autotools = Autotools(self)
-        env = VirtualRunEnv(self)
-        with env.vars().apply():
-            autotools.configure()
-
+        autotools.configure()
         autotools.make()
 
     def package(self):
