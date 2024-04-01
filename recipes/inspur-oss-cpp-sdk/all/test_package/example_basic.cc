@@ -23,18 +23,6 @@ int main(void)
     /*指定新创建bucket的名称、存储类型和ACL*/
     CreateBucketRequest request(BucketName, StorageClass::IA, CannedAccessControlList::PublicReadWrite);
     request.SetRegion("cn-north-3");
-    /*创建bucket*/
-    auto outcome = client.CreateBucket(request);
-
-    if (!outcome.isSuccess()) {
-        /* 异常处理 */
-        std::cout << "CreateBucket fail" <<
-                  ",code:" << outcome.error().Code() <<
-                  ",message:" << outcome.error().Message() <<
-                  ",requestId:" << outcome.error().RequestId() << std::endl;
-        ShutdownSdk();
-        return 0;
-    }
 
     /*释放网络等资源*/
     ShutdownSdk();
