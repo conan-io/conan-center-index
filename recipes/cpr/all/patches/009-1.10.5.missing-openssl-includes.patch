@@ -1,0 +1,19 @@
+diff --git a/cpr/CMakeLists.txt b/cpr/CMakeLists.txt
+index 52787f5..e663cce 100644
+--- a/cpr/CMakeLists.txt
++++ b/cpr/CMakeLists.txt
+@@ -37,6 +37,14 @@ target_link_libraries(cpr PUBLIC CURL::libcurl) # todo should be private, but fi
+ # Fix missing OpenSSL includes for Windows since in 'ssl_ctx.cpp' we include OpenSSL directly
+ if(SSL_BACKEND_USED STREQUAL "OpenSSL")
+         target_link_libraries(cpr PRIVATE OpenSSL::SSL)
++
++        if(NOT OPENSSL_INCLUDE_DIR)
++                message(STATUS "OPENSSL_INCLUDE_DIR not set, computing it from OpenSSL::SSL target link directories.")
++                get_target_property(OPENSSL_LINK_DIRS OpenSSL::SSL INTERFACE_LINK_DIRECTORIES)
++                list(GET OPENSSL_LINK_DIRS 0 OPENSSL_LINK_DIR)
++                set(OPENSSL_INCLUDE_DIR "${OPENSSL_LINK_DIR}/../include")
++        endif()
++
+         target_include_directories(cpr PRIVATE ${OPENSSL_INCLUDE_DIR})
+ endif()
+ 

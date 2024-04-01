@@ -19,6 +19,9 @@ patches:
     - patch_file: "patches/008-1.10.0-remove-warning-flags.patch"
       patch_description: "disable warning flags and warning as error"
       patch_type: "portability"
+    - patch_file: "patches/009-1.10.5.missing-openssl-includes.patch"
+      patch_description: "OpenSSL include paths are not found when building with the Android NDK."
+      patch_type: "portability"
   "1.10.4":
     - patch_file: "patches/008-1.10.0-remove-warning-flags.patch"
       patch_description: "disable warning flags and warning as error"
