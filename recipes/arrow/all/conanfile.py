@@ -142,23 +142,11 @@ class ArrowConan(ConanFile):
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
-        version = Version(self.version)
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "2.0.0":
-            del self.options.simd_level
-            del self.options.runtime_simd_level
-        elif Version(self.version) < "6.0.0":
-            self.options.simd_level = "sse4_2"
-        if Version(self.version) < "6.0.0":
-            del self.options.with_gcs
-        if Version(self.version) < "7.0.0":
-            del self.options.skyhook
-            del self.options.with_flight_sql
-            del self.options.with_opentelemetry
         if Version(self.version) < "8.0.0":
             del self.options.substrait
-        if version.major >= "2" and is_msvc(self):
+        if is_msvc(self):
             self.options.with_boost = True
 
     def configure(self):
@@ -169,7 +157,7 @@ class ArrowConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def _requires_rapidjson(self):
-       return self.options.with_json or (Version(self.version) >= "7.0.0" and self.options.encryption)
+        return self.options.with_json or self.options.encryption
 
     def requirements(self):
         if self.options.with_thrift:
@@ -212,8 +200,7 @@ class ArrowConan(ConanFile):
             self.requires("lz4/1.9.4")
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
-        if Version(self.version) >= "6.0.0" and \
-            self.options.get_safe("simd_level") != None or \
+        if self.options.get_safe("simd_level") != None or \
             self.options.get_safe("runtime_simd_level") != None:
             self.requires("xsimd/9.0.1")
         if self.options.with_zlib:
@@ -229,7 +216,7 @@ class ArrowConan(ConanFile):
 
     def validate(self):
         # FIXME: Temporaly discard these configurations
-        if self.version == "1.0.0" and self.settings.compiler == "apple-clang":
+        if self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration("Not supported")
         # Do not allow options with 'auto' value
         # TODO: Remove "auto" from the possible values for these options
@@ -239,16 +226,13 @@ class ArrowConan(ConanFile):
                                  f" Please change the following options: {auto_options}")
 
         # Warn/error on some option values
-        version = Version(self.version)
         if not self.options.with_boost:
             if self.options.gandiva:
                 self.output.warning("Option 'with_boost=True' could be required when option 'gandiva=True'")
-            if (version.major == "1") and self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < Version("4.9"):
-                self.output.warning("Option 'with_boost=True' could be required when option 'parquet=True' and using gcc < 4.9")
         if not self.options.with_re2:
             if self.options.gandiva or self.options.parquet:
                 self.output.warning("Option 'with_re2=True' could be required when option 'gandiva=True' or 'parquet=True'")
-            if version >= "7.0.0" and (self.options.compute or self.options.dataset_modules):
+            if self.options.compute or self.options.dataset_modules:
                 self.output.warning("Option 'with_re2=True' could be required when 'compute=True' or 'dataset_modules=True'")
         if not self.options.with_jemalloc:
             if "BSD" in self.settings.os:
@@ -276,8 +260,6 @@ class ArrowConan(ConanFile):
             if self.dependencies["jemalloc"].options.enable_cxx:
                 raise ConanInvalidConfiguration("jemmalloc.enable_cxx of a static jemalloc must be disabled")
 
-        if version < "6.0.0" and self.options.get_safe("simd_level") == "default":
-            raise ConanInvalidConfiguration(f"In {self.ref}, simd_level options is not supported `default` value.")
 
     def build_requirements(self):
         if Version(self.version) >= "13.0.0":
@@ -359,12 +341,9 @@ class ArrowConan(ConanFile):
         tc.variables["ZLIB_SOURCE"] = "SYSTEM"
         tc.variables["xsimd_SOURCE"] = "SYSTEM"
         tc.variables["ARROW_WITH_ZSTD"] = bool(self.options.with_zstd)
-        if Version(self.version) >= "2.0":
-            tc.variables["zstd_SOURCE"] = "SYSTEM"
-            tc.variables["ARROW_SIMD_LEVEL"] = str(self.options.simd_level).upper()
-            tc.variables["ARROW_RUNTIME_SIMD_LEVEL"] = str(self.options.runtime_simd_level).upper()
-        else:
-            tc.variables["ZSTD_SOURCE"] = "SYSTEM"
+        tc.variables["zstd_SOURCE"] = "SYSTEM"
+        tc.variables["ARROW_SIMD_LEVEL"] = str(self.options.simd_level).upper()
+        tc.variables["ARROW_RUNTIME_SIMD_LEVEL"] = str(self.options.runtime_simd_level).upper()
         if self.options.with_zstd:
             tc.variables["ARROW_ZSTD_USE_SHARED"] = bool(self.dependencies["zstd"].options.shared)
         tc.variables["ORC_SOURCE"] = "SYSTEM"
@@ -409,7 +388,7 @@ class ArrowConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if "7.0.0" <= Version(self.version) < "10.0.0":
+        if Version(self.version) < "10.0.0":
             for filename in glob.glob(os.path.join(self.source_folder, "cpp", "cmake_modules", "Find*.cmake")):
                 if os.path.basename(filename) not in [
                     "FindArrow.cmake",
@@ -513,9 +492,8 @@ class ArrowConan(ConanFile):
                 self.cpp_info.components["libgandiva"].requires.append("boost::boost")
             if self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < Version("4.9"):
                 self.cpp_info.components["libparquet"].requires.append("boost::boost")
-            if Version(self.version) >= "2.0":
-                # FIXME: only headers components is used
-                self.cpp_info.components["libarrow"].requires.append("boost::boost")
+            # FIXME: only headers components is used
+            self.cpp_info.components["libarrow"].requires.append("boost::boost")
         if self.options.with_openssl:
             self.cpp_info.components["libarrow"].requires.append("openssl::openssl")
         if self.options.with_gflags:
