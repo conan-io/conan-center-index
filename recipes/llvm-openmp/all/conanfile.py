@@ -1,8 +1,9 @@
 import os
+import re
 import textwrap
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
@@ -205,16 +206,34 @@ class LLVMOpenMpConan(ConanFile):
             return ["psapi"]
         return []
 
+    @property
+    def _omp_runtime_version(self):
+        # llvm-openmp has hardcoded its OMP runtime version since v9
+        # https://github.com/llvm/llvm-project/commit/e4b4f994d2f6a090694276b40d433dc1a58beb24
+        cmake_content = load(self, os.path.join(self.source_folder, "runtime", "CMakeLists.txt"))
+        year_date = re.search(r"set\(LIBOMP_OMP_YEAR_MONTH (\d{6})\)", cmake_content).group(1)
+        if year_date != "201611":
+            raise ConanException(f"Unexpected LIBOMP_OMP_YEAR_MONTH value: {year_date}")
+        return "5.0", "201611"
+
+    def _write_cmake_module(self):
+        omp_version, omp_spec_date = self._omp_runtime_version
+        cmake_module = load(self, os.path.join(self.export_sources_folder, "cmake", "conan-llvm-openmp-vars.cmake.in"))
+        cmake_module = cmake_module.replace("@OpenMP_FLAGS@", " ".join(self._openmp_flags))
+        cmake_module = cmake_module.replace("@OpenMP_LIB_NAMES@", ";".join(["omp"] + self._system_libs))
+        cmake_module = cmake_module.replace("@OpenMP_SPEC_DATE@", omp_spec_date)
+        cmake_module = cmake_module.replace("@OpenMP_VERSION_MAJOR@", str(Version(omp_version).major))
+        cmake_module = cmake_module.replace("@OpenMP_VERSION_MINOR@", str(Version(omp_version).minor))
+        cmake_module = cmake_module.replace("@OpenMP_VERSION@", omp_version)
+        save(self, os.path.join(self.package_folder, self._module_file_rel_path), cmake_module)
+
     def package(self):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
-        cmake_module = load(self, os.path.join(self.export_sources_folder, "cmake", "conan-llvm-openmp-vars.cmake.in"))
-        cmake_module = cmake_module.replace("@OpenMP_FLAGS@", " ".join(self._openmp_flags))
-        cmake_module = cmake_module.replace("@OpenMP_LIB_NAMES@", ";".join(["omp"] + self._system_libs))
-        save(self, os.path.join(self.package_folder, self._module_file_rel_path), cmake_module)
+        self._write_cmake_module()
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
