@@ -19,6 +19,6 @@ int main()
         std::cout << "There are probably missing compiler flags.\n";
         return 1;
     }
-    std::cout << "OpenMP year-month version: " << _OPENMP << "\n";
+    std::cout << "_OPENMP version: " << _OPENMP << "\n";
     return 0;
 }
