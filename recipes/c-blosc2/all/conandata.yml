@@ -1,4 +1,7 @@
 sources:
+  "2.14.0":
+    url: "https://github.com/Blosc/c-blosc2/archive/v2.14.0.tar.gz"
+    sha256: "e604f23ed5b6010810ae30413426622e2cf2ee81912c2f997e3a14993a4b7ec4"
   "2.13.1":
     url: "https://github.com/Blosc/c-blosc2/archive/v2.13.1.tar.gz"
     sha256: "6e7f5940269acd54d8dfe87c2102a442ad0407b1a62266a6f916134bae234399"
@@ -20,32 +23,3 @@ sources:
   "2.6.1":
     url: "https://github.com/Blosc/c-blosc2/archive/v2.6.1.tar.gz"
     sha256: "514a793368093893c1a7cae030f7e31faca7f86465ae69dd576f256d8bf28c08"
-patches:
-  "2.13.1":
-    - patch_file: "patches/2.11.1-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "2.13.0":
-    - patch_file: "patches/2.11.1-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "2.12.0":
-    - patch_file: "patches/2.11.1-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "2.11.3":
-    - patch_file: "patches/2.11.1-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "2.10.5":
-    - patch_file: "patches/2.10.5-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "2.8.0":
-    - patch_file: "patches/2.8.0-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "2.6.1":
-    - patch_file: "patches/2.6.0-0001-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
