@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
+from conan.tools.files import get, copy, rm, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -50,9 +50,6 @@ class SpixConan(ConanFile):
                 "apple-clang": "10",
             }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -66,8 +63,8 @@ class SpixConan(ConanFile):
 
     def requirements(self):
         self.requires("anyrpc/1.0.2")
-        self.requires("qt/6.5.3")
-        
+        self.requires("qt/6.6.1")
+
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
@@ -98,9 +95,10 @@ class SpixConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
+        rmdir(self, os.path.join(self.source_folder, "cmake", "modules"))
         if self.version == "0.4" and Version(self.dependencies["qt"].ref.version).major == 6:
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 14)", "set(CMAKE_CXX_STANDARD 17)")
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "set(CMAKE_CXX_STANDARD 14)", "set(CMAKE_CXX_STANDARD 17)")
 
     def build(self):
         self._patch_sources()
@@ -122,9 +120,9 @@ class SpixConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["Spix"]
-        self.cpp_info.set_property("cmake_file_name", "Spix") 
+        self.cpp_info.set_property("cmake_file_name", "Spix")
         self.cpp_info.set_property("cmake_target_name", "Spix::Spix")
-        
+
         # TODO remove once conan v2 removed cmake_find_package_*
         self.cpp_info.names["cmake_find_package"] = "Spix"
         self.cpp_info.names["cmake_find_package_multi"] = "Spix"
