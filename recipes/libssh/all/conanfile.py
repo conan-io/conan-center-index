@@ -103,11 +103,17 @@ class LibSSHRecipe(ConanFile):
             self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi"])
 
         self.cpp_info.set_property("cmake_file_name", "libssh")
+        # target and alias names defined at:
+        # ssh         https://git.libssh.org/projects/libssh.git/tree/src/CMakeLists.txt?h=libssh-0.10.6#n351
+        # ssh::ssh    https://git.libssh.org/projects/libssh.git/tree/src/CMakeLists.txt?h=libssh-0.10.6#n371
+        # ssh-static  https://git.libssh.org/projects/libssh.git/tree/src/CMakeLists.txt?h=libssh-0.10.6#n413
+        # ssh::static https://git.libssh.org/projects/libssh.git/tree/src/CMakeLists.txt?h=libssh-0.10.6#n428
         self.cpp_info.set_property("cmake_target_name", "ssh::ssh")
         self.cpp_info.set_property(
             "cmake_target_aliases",
             ["ssh"] if self.options.shared else ["ssh", "ssh-static", "ssh::static"],
         )
+        # pkg-config defined at https://git.libssh.org/projects/libssh.git/tree/CMakeLists.txt?h=libssh-0.10.6#n124
         self.cpp_info.set_property("pkg_config_name", "libssh")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
