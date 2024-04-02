@@ -1,9 +1,9 @@
 sources:
-  "cci.20221028":
-    url: "https://github.com/libtom/libtommath/archive/03de03dee753442d4b23166982514639c4ccbc39.tar.gz"
-    sha256: "ab65fcfc88f7bd457b13a615228298935f05af17a0a8554ad0e3fba9812b03c2"
+  "1.3.0":
+    url: "https://github.com/libtom/libtommath/releases/download/v1.3.0/ltm-1.3.0.tar.xz"
+    sha256: "296272d93435991308eb73607600c034b558807a07e829e751142e65ccfa9d08"
 patches:
-  "cci.20221028":
-    - patch_file: "patches/0002-enable-building-dlls.patch"
-      patch_description: "add support for windows dlls"
+  "1.3.0":
+    - patch_file: "patches/0001-enable-building-dlls.patch"
+      patch_description: "Enable building DLLs using tommath.def"
       patch_type: "portability"

@@ -1,4 +1,4 @@
-#include "libtommath/tommath.h"
+#include "tommath.h"
 
 #include <stdio.h>
 #include <stdlib.h>
