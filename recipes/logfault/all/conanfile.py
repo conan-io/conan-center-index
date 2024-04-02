@@ -36,11 +36,6 @@ class PackageConan(ConanFile):
            "apple-clang": "12",
         }
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables['LOGFAULT_BUILD_TESTS'] = False
-        tc.generate()
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
