@@ -81,7 +81,6 @@ class DiligentCoreConan(ConanFile):
         tc.variables["DILIGENT_NO_DXC"] = True
         tc.variables["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
         tc.variables["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.dependencies["spirv-cross"].options.namespace
-        tc.variables["BUILD_SHARED_LIBS"] = False
         tc.variables["DILIGENT_CLANG_COMPILE_OPTIONS"] = ""
         tc.variables["DILIGENT_MSVC_COMPILE_OPTIONS"] = ""
         tc.variables["ENABLE_RTTI"] = True
@@ -97,11 +96,11 @@ class DiligentCoreConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -150,7 +149,14 @@ class DiligentCoreConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure()
+        # By default, Diligent builds static and shared versions of every main library. We select the one we
+        # want based on options.shared in package(). To avoid building every intermediate library as SHARED,
+        # we have to disable BUILD_SHARED_LIBS.
+        # However, BUILD_SHARED_LIBS cannot be disabled normally (in the toolchain in configure()), because
+        # Conan outputs that override after the standard line that enables BUILD_SHARED_LIBS. Since the latter
+        # is a CACHE variable that cannot be overwritten with another set(), we have to specify it on the
+        # command-line, so it takes effect before the toolchain is parsed.
+        cmake.configure(variables={"BUILD_SHARED_LIBS": "OFF"})
         cmake.build()
 
     def package(self):
