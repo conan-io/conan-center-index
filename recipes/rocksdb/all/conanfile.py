@@ -35,6 +35,7 @@ class RocksDBConan(ConanFile):
         "with_jemalloc": [True, False],
         "enable_sse": [False, "sse42", "avx2"],
         "use_rtti": [True, False],
+        "cxx_header": [True, False],
     }
     default_options = {
         "shared": False,
@@ -49,6 +50,7 @@ class RocksDBConan(ConanFile):
         "with_jemalloc": False,
         "enable_sse": False,
         "use_rtti": False,
+        "cxx_headers": False,
     }
 
     @property
@@ -192,7 +194,8 @@ class RocksDBConan(ConanFile):
         cmake.install()
         if self.options.shared:
             self._remove_static_libraries()
-            self._remove_cpp_headers() # Force stable ABI for shared libraries
+            if not self.options.cxx_headers:
+                self._remove_cpp_headers() # Force stable ABI for shared libraries
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
