@@ -136,5 +136,6 @@ class LibassertConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["assert"].defines.append("LIBASSERT_STATIC_DEFINE")
         
-        self.cpp_info.system_libs.append("m")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
         self.cpp_info.requires = ["cpptrace::cpptrace"]
