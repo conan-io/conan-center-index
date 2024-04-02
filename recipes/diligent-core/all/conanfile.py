@@ -4,6 +4,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.files import rm, get, rmdir, rename, collect_libs, patches, export_conandata_patches, copy, apply_conandata_patches
+from conan.tools.microsoft.visual import is_msvc, is_msvc_static_runtime
 from conan.tools.apple import is_apple_os
 import os
 
@@ -34,6 +35,7 @@ class DiligentCoreConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "16",
+            "msvc": "192",
             "gcc": "6",
             "clang": "3.4",
             "apple-clang": "5.1",
@@ -48,13 +50,13 @@ class DiligentCoreConan(ConanFile):
             check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+            self.output.warning("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
         else:
             if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
-        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
+        if is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
 
     def export_sources(self):
@@ -66,11 +68,11 @@ class DiligentCoreConan(ConanFile):
             destination=os.path.join(self.source_folder, "source_subfolder"), strip_root=True)
 
     def package_id(self):
-        if self.settings.compiler == "Visual Studio":
-            if "MD" in self.settings.compiler.runtime:
-                self.info.settings.compiler.runtime = "MD/MDd"
-            else:
+        if is_msvc(self.info):
+            if is_msvc_static_runtime(self.info):
                 self.info.settings.compiler.runtime = "MT/MTd"
+            else:
+                self.info.settings.compiler.runtime = "MD/MDd"
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -79,7 +81,7 @@ class DiligentCoreConan(ConanFile):
         tc.variables["DILIGENT_BUILD_TESTS"] = False
         tc.variables["DILIGENT_NO_DXC"] = True
         tc.variables["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
-        tc.variables["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options["spirv-cross"].namespace
+        tc.variables["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.dependencies["spirv-cross"].options.namespace
         tc.variables["BUILD_SHARED_LIBS"] = False
         tc.variables["DILIGENT_CLANG_COMPILE_OPTIONS"] = ""
         tc.variables["DILIGENT_MSVC_COMPILE_OPTIONS"] = ""
@@ -106,7 +108,7 @@ class DiligentCoreConan(ConanFile):
         patches.apply_conandata_patches(self)
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.24.2")
+        self.tool_requires("cmake/[>=3.24 <4]")
 
     def requirements(self):
         self.requires("opengl/system")
@@ -117,9 +119,9 @@ class DiligentCoreConan(ConanFile):
         self.requires("spirv-tools/1.3.224.0")
         if self.options.with_glslang:
             self.requires("glslang/1.3.224.0")
-        self.requires("vulkan-headers/1.3.224.1")
+        self.requires("vulkan-headers/1.3.224.0")
         self.requires("vulkan-validationlayers/1.3.224.1")
-        self.requires("volk/1.3.224.1")
+        self.requires("volk/1.3.224.0")
         self.requires("xxhash/0.8.1")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -214,7 +216,7 @@ class DiligentCoreConan(ConanFile):
             self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineD3D11", "interface"))
             self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineD3D12", "interface"))
 
-        self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.options["spirv-cross"].namespace))
+        self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.dependencies["spirv-cross"].options.namespace))
         self.cpp_info.defines.append("{}=1".format(self._diligent_platform()))
 
         if self.settings.os in ["Macos", "Linux"]:
