@@ -129,15 +129,16 @@ class GFortranConan(ConanFile):
     @property
     def _gfortran_full_executable(self):
         # e.g. x86_64-pc-linux-gnu
-        triplet = os.listdir(os.path.join(self.package_folder, "libexec", "gcc"))[0]
+        triplet = os.listdir(os.path.join(self.package_folder, "lib", "gcc"))[0]
         return f"{triplet}-gfortran-{self.version}"
 
     def package(self):
         copy(self, "COPYING*", self.source_folder, os.path.join(self.package_folder, "licenses"), keep_path=False)
         autotools = Autotools(self)
         autotools.install(target="install-strip")
-        rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", self.package_folder, recursive=True)
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "libexec"))
 
         # Export shared libraries only
         # libssp_nonshared does not appear to be a critical component.
