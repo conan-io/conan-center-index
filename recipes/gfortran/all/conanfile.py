@@ -1,81 +1,178 @@
-from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, get, load, save, download
 import os
 
-required_conan_version = ">=1.46.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import XCRun
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import copy, get, replace_in_file, rmdir, rm, chdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
+
+required_conan_version = ">=1.55.0"
+
 
 class GFortranConan(ConanFile):
     name = "gfortran"
     description = "The Fortran compiler front end and run-time libraries for GCC"
+    license = "GPL-3.0-only WITH GCC-exception-3.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gcc.gnu.org/fortran"
-    topics = ("gnu", "gcc", "fortran", "compiler")
-    license = "GPL-3.0-or-later"
-    settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
-    short_paths = True
-    
-    deprecated = "gcc"
+    topics = ("fortran", "gcc", "gnu", "compiler")
 
-    def validate(self):
-        if self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration("No binaries available for the architecture '{}'.".format(self.settings.arch))
-        if str(self.settings.os) not in ("Windows", "Linux", "Macos"):
-            raise ConanInvalidConfiguration("No binaries available for the OS '{}'.".format(self.settings.os))
+    # "library" because it also provides libgfortran, libquadmath, etc. in the host context.
+    # You will usually need to use the package as both a tool_requires() and a requires() in your recipe.
+    # "shared" to keep things simple and to not accidentally mix static and shared libraries during linking.
+    package_type = "shared-library"
+    settings = "os", "compiler", "arch", "build_type"
 
-    def build_requirements(self):
-        if self.settings.os == "Windows":
-            self.tool_requires("7zip/22.01")
-
-    def build(self):
-        if self.settings.os == "Windows":
-            filename =  os.path.join(self.build_folder, "GCC-10.2.0-crt-8.0.0-with-ada-20201019.7z")
-            download(self, **self.conan_data["sources"][self.version][str(self.settings.os)]["x86_64"], filename=filename)
-            self.run(f"7z x {filename}")
-        else:
-            get(self, **self.conan_data["sources"][self.version][str(self.settings.os)]["x86_64"],
-                    destination=self.build_folder, strip_root=True)
-
-    @property
-    def _archive_contents_path(self):
-        if self.settings.os == "Macos":
-            return os.path.join(self.build_folder, "local")
-        elif self.settings.os == "Windows":
-            return os.path.join(self.build_folder, "mingw64")
-        else:
-            return os.path.join(self.build_folder)
-
-    @property
-    def _license_path(self):
-        return os.path.join(self._archive_contents_path, "share", "info")
-
-    @property
-    def _library_source_path(self):
-        return os.path.join(self._archive_contents_path, {
-            "Linux":  "lib64",
-            "Macos": "lib",
-            "Windows": os.path.join("lib", "gcc", "x86_64-w64-mingw32", "10.2.0")
-        }[str(self.settings.os)])
-
-    def _extract_license(self):
-        info = load(self, os.path.join(self._license_path, "gfortran.info"))
-        license_contents = info[info.find("Version 3"):info.find("END OF TERMS", 1)]
-        save(self, os.path.join(self.build_folder, "LICENSE"), license_contents)
+    def configure(self):
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def package_id(self):
         del self.info.settings.compiler
-        del self.info.settings.build_type # The binaries are not specific
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("mpc/1.3.1")
+        self.requires("mpfr/4.2.0")
+        self.requires("gmp/6.3.0")
+        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("isl/0.26")
+
+    def validate_build(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("GCC can't be built with MSVC")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(
+                "Windows builds aren't currently supported. Contributions to support this are welcome."
+            )
+        if self.settings.os == "Macos":
+            # FIXME: This recipe should largely support Macos, however the following
+            # errors are present when building using the c3i CI:
+            # clang: error: unsupported option '-print-multi-os-directory'
+            # clang: error: no input files
+            raise ConanInvalidConfiguration(
+                "Macos builds aren't currently supported. Contributions to support this are welcome."
+            )
+        if cross_building(self):
+            raise ConanInvalidConfiguration(
+                "Cross builds are not current supported. Contributions to support this are welcome"
+            )
+
+    def build_requirements(self):
+        if self.settings.os == "Linux":
+            # binutils recipe is broken for Macos, and Windows uses tools
+            # distributed with msys/mingw
+            self.tool_requires("binutils/2.41")
+        self.tool_requires("flex/2.6.4")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        # Ensure binutils and flex are on the path.
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
+
+        runenv = VirtualRunEnv(self)
+        runenv.generate(scope="build")
+
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--enable-languages=fortran")
+        tc.configure_args.append("--disable-nls")
+        tc.configure_args.append("--disable-multilib")
+        tc.configure_args.append("--disable-bootstrap")
+        tc.configure_args.append(f"--with-zlib={self.dependencies['zlib'].package_folder}")
+        tc.configure_args.append(f"--with-isl={self.dependencies['isl'].package_folder}")
+        tc.configure_args.append(f"--with-gmp={self.dependencies['gmp'].package_folder}")
+        tc.configure_args.append(f"--with-mpc={self.dependencies['mpc'].package_folder}")
+        tc.configure_args.append(f"--with-mpfr={self.dependencies['mpfr'].package_folder}")
+        tc.configure_args.append(f"--with-pkgversion=ConanCenter gfortran {self.version}")
+        tc.configure_args.append(f"--program-suffix=-{self.version}")
+        tc.configure_args.append(f"--with-bugurl={self.url}/issues")
+
+        if self.settings.os == "Macos":
+            xcrun = XCRun(self)
+            tc.configure_args.append(f"--with-sysroot={xcrun.sdk_path}")
+            # Set native system header dir to ${{sysroot}}/usr/include to
+            # isolate installation from the system as much as possible
+            tc.configure_args.append("--with-native-system-header-dir=/usr/include")
+            tc.make_args.append("BOOT_LDFLAGS=-Wl,-headerpad_max_install_names")
+        tc.generate()
+
+        # Don't use AutotoolsDeps here - deps are passed directly in configure_args.
+        # Using AutotoolsDeps causes the compiler tests to fail by erroneously adding
+        # additional $LIBS to the test compilation
+
+    def build(self):
+        # If building on x86_64, change the default directory name for 64-bit libraries to "lib":
+        replace_in_file(self, os.path.join(self.source_folder, "gcc", "config", "i386", "t-linux64"),
+                        "m64=../lib64", "m64=../lib", strict=False)
+
+        # Ensure correct install names when linking against libgcc_s;
+        # see discussion in https://github.com/Homebrew/legacy-homebrew/pull/34303
+        replace_in_file(self, os.path.join(self.source_folder, "libgcc", "config", "t-slibgcc-darwin"),
+                        "@shlib_slibdir@", os.path.join(self.package_folder, "lib"), strict=False)
+
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
+
+    @property
+    def _gfortran_full_executable(self):
+        # e.g. x86_64-pc-linux-gnu
+        triplet = os.listdir(os.path.join(self.package_folder, "libexec", "gcc"))[0]
+        return f"{triplet}-gfortran-{self.version}"
 
     def package(self):
-        self._extract_license()
-        copy(self, "LICENSE", src=self.build_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "gfortran*", src=os.path.join(self._archive_contents_path, "bin"), dst=os.path.join(self.package_folder, "bin"))
-        copy(self, "libgfortran.a", src=self._library_source_path, dst=os.path.join(self.package_folder, "lib"))
+        copy(self, "COPYING*", self.source_folder, os.path.join(self.package_folder, "licenses"), keep_path=False)
+        autotools = Autotools(self)
+        autotools.install(target="install-strip")
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", self.package_folder, recursive=True)
+
+        # Export shared libraries only
+        # libssp_nonshared does not appear to be a critical component.
+        # https://github.com/intc/libssp-nonshared/blob/master/README
+        rm(self, "libssp_nonshared.a", os.path.join(self.package_folder, "lib"))
+
+        # Drop ar, nm, ranlib, cpp, etc. to not clash with the existing C/C++ toolchain
+        for f in self.package_path.joinpath("bin").iterdir():
+            if f.name != self._gfortran_full_executable:
+                f.unlink()
+        with chdir(self, os.path.join(self.package_folder, "bin")):
+            os.symlink(self._gfortran_full_executable, f"gfortran-{self.version}")
+            os.symlink(self._gfortran_full_executable, "gfortran")
 
     def package_info(self):
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.cpp_info.includedirs = []
-        self.env_info.PATH.append(bin_path)
-        self.cpp_info.libs = ["gfortran"]
+        # Make sure to always include
+        # self.requires.expand(["gfortran::libgfortran"])
+        # in consuming packages to not overlink to all the components listed below.
+
+        # libgfortran.so: GNU Fortran Library
+        self.cpp_info.components["libgfortran"].libs = ["gfortran"]
+        self.cpp_info.components["libgfortran"].requires = ["libgcc_s"]
+        # libquadmath.so: GCC Quad Precision Math Library
+        self.cpp_info.components["libquadmath"].libs = ["quadmath"]
+        # libgomp.so: GNU Offloading and Multi-Processing Project
+        self.cpp_info.components["libgomp"].libs = ["gomp"]
+        # libatomic.so: GNU atomic library
+        self.cpp_info.components["libatomic"].libs = ["atomic"]
+        # libgcc_s.so: Dynamic gcc runtime
+        self.cpp_info.components["libgcc_s"].libs = ["gcc_s"]
+        # libssp.so: Stack Smashing Protector library
+        self.cpp_info.components["libssp"].libs = ["ssp"]
+
+        gfortran_path = os.path.join(self.package_folder, "bin", self._gfortran_full_executable)
+        self.buildenv_info.define_path("FC", gfortran_path)
+
+        # TODO: Legacy, remove when Conan v1 support is dropped
+        self.env_info.PATH = os.path.join(self.package_folder, "bin")
+        self.env_info.FC = gfortran_path
