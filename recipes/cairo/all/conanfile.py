@@ -15,7 +15,7 @@ from conan.tools.files import (
     rm,
     rmdir
 )
-from conan.tools.gnu import PkgConfigDeps, Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.gnu import PkgConfigDeps, Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
@@ -173,15 +173,6 @@ class CairoConan(ConanFile):
             tc_gobject.generate()
 
         PkgConfigDeps(self).generate()
-        deps = AutotoolsDeps(self)
-        if is_msvc(self):
-            cppflags = deps.vars().get("CPPFLAGS")
-            deps.environment.append('CFLAGS', cppflags.replace("/I", "-I"))
-            ldflags = deps.vars().get("LDFLAGS")
-            deps.environment.define('LDFLAGS', ldflags.replace("/LIBPATH:", "-LIBPATH:"))
-            deps.environment.append('LDFLAGS', deps.vars().get("LIBS"))
-
-        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
