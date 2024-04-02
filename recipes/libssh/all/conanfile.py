@@ -116,8 +116,3 @@ class LibSSHRecipe(ConanFile):
         # pkg-config defined at https://git.libssh.org/projects/libssh.git/tree/CMakeLists.txt?h=libssh-0.10.6#n124
         self.cpp_info.set_property("pkg_config_name", "libssh")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "libssh"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "libssh"
-        self.cpp_info.names["cmake_find_package"] = "libssh"
-        self.cpp_info.names["cmake_find_package_multi"] = "libssh"
