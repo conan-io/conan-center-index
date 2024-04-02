@@ -89,6 +89,7 @@ class GFortranConan(ConanFile):
         tc.configure_args.append("--disable-nls")
         tc.configure_args.append("--disable-multilib")
         tc.configure_args.append("--disable-bootstrap")
+        tc.configure_args.append("--disable-fixincludes")
         tc.configure_args.append(f"--with-zlib={self.dependencies['zlib'].package_folder}")
         tc.configure_args.append(f"--with-isl={self.dependencies['isl'].package_folder}")
         tc.configure_args.append(f"--with-gmp={self.dependencies['gmp'].package_folder}")
