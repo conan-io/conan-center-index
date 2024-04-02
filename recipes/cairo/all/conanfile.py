@@ -84,7 +84,7 @@ class CairoConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_freetype", True):
-            self.requires("freetype/2.13.0")
+            self.requires("freetype/2.13.2")
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.14.2")
         if self.settings.os == "Linux":
