@@ -22,12 +22,14 @@ class LibSSHRecipe(ConanFile):
         "fPIC": [True, False],
         "with_zlib": [True, False],
         "crypto_backend": ["openssl", "gcrypt"],
+        "with_symbol_versioning": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_zlib": True,
         "crypto_backend": "openssl",
+        "with_symbol_versioning": True,
     }
 
     def export_sources(self):
@@ -36,6 +38,7 @@ class LibSSHRecipe(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.with_symbol_versioning
 
     def configure(self):
         if self.options.shared:
@@ -66,7 +69,7 @@ class LibSSHRecipe(ConanFile):
         tc.variables["WITH_GSSAPI"] = False
         tc.variables["WITH_MBEDTLS"] = False
         tc.variables["WITH_NACL"] = False
-        tc.variables["WITH_SYMBOL_VERSIONING"] = False
+        tc.variables["WITH_SYMBOL_VERSIONING"] = self.options.get_safe("with_symbol_versioning", True)
         tc.variables["WITH_ZLIB"] = self.options.with_zlib
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
