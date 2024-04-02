@@ -137,7 +137,8 @@ class LibassertConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "assert"
         self.cpp_info.names["cmake_find_package_multi"] = "assert"
         
-        self.cpp_info.system_libs.append("m")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         if Version(self.version) < "1.2.1":
             # pre-cpptrace
