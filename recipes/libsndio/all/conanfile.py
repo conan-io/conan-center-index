@@ -32,8 +32,8 @@ class LibsndioConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration(f"Unsupported OS for {self.ref}")
 
         if self.options.with_alsa and not self.dependencies["libalsa"].options.get_safe("shared", False):
             raise ConanInvalidConfiguration(f"{self.ref} requires libalsa to be built as a shared library")
@@ -67,8 +67,8 @@ class LibsndioConan(ConanFile):
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
 
-        # # inject requires env vars in build scope
-        # # it's required in case of native build when there is AutotoolsDeps & at least one dependency which might be shared, because configure tries to run a test executable
+        # Inject requires env vars in build scope
+        # It's required in case of native build when there is AutotoolsDeps & at least one dependency which might be shared, because configure tries to run a test executable
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
@@ -88,7 +88,11 @@ class LibsndioConan(ConanFile):
         else:
             tc.configure_args.append("--disable-alsa")
 
-        # Inject conan dependency information into sndio configuration
+        # The original project source has a hand-written `configure` script that does not expose
+        # many hooks for specifying additional build flags and library dependencies. Because the script is
+        # not auto-generated with Autotools, the standard Conan workflow of using AutoolsDeps is not possible.
+        # The one hook the script does provide is a command line arg: `CC=*|CFLAGS=*|LDFLAGS=*|AR=*)`. 
+        # We use this to inject the various flags, paths, and libraries that the Conan dependency tree specifies.
         dep_cflags = []
         dep_ldflags = []
         for dependency in reversed(self.dependencies.host.topological_sort.values()):
