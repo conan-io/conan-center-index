@@ -1,4 +1,16 @@
 sources:
+  "2.9.2":
+    url: "https://github.com/Tradias/asio-grpc/archive/refs/tags/v2.9.2.tar.gz"
+    sha256: "a025587278b3332f4c5dd0464b3d5313fbecb89fc58a6ec1d611f693d6b51ef2"
+  "2.7.0":
+    url: "https://github.com/Tradias/asio-grpc/archive/refs/tags/v2.7.0.tar.gz"
+    sha256: "a4a3deeabbdef37a8e7238e25b6f26b63071151c4b49e1f2f86c528da54eed79"
+  "2.6.0":
+    url: "https://github.com/Tradias/asio-grpc/archive/refs/tags/v2.6.0.tar.gz"
+    sha256: "9f17f1dfe390667c71d8e0645937afa36f1a0e146f60f6036c7b4e12b09ed14e"
+  "2.5.1":
+    url: "https://github.com/Tradias/asio-grpc/archive/refs/tags/v2.5.1.tar.gz"
+    sha256: "571779a25be6eed77a345088e3ded2cccf880c16800ee0075ece57116f14fc35"
   "2.4.0":
     url: "https://github.com/Tradias/asio-grpc/archive/refs/tags/v2.4.0.tar.gz"
     sha256: "d71de4f8de91dc0ad44d6a161fc628496b80622a6f9030dcd4c53b516629b8b7"

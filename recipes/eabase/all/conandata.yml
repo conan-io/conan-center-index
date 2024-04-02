@@ -1,7 +1,10 @@
 sources:
+  "2.09.12":
+    url: "https://github.com/electronicarts/EABase/archive/d1be0a1d0fc01a9bf8f3f2cea75018df0d2410ee.zip"
+    sha256: "53b72d188aa17c7b23aa6bef9a4767854e82eac46a027dec233d12fd3dfbc677"
+  "2.09.06":
+    url: "https://github.com/electronicarts/EABase/archive/refs/heads/2.09.06.zip"
+    sha256: "3223c2b81dcdccaeb9fca7a83695f9edb402b817c89c073c0eb3ee64646699ea"
   "2.09.05":
     url: "https://github.com/electronicarts/EABase/archive/2.09.05.tar.gz"
     sha256: "f85b98c96f1976aa013c8d6016c5e37a409633ac3fce843cd4ec0b89c67e6b7a"
-  "2.09.06":
-    url: "https://github.com/electronicarts/EABase/archive/2.09.06.tar.gz"
-    sha256: "981f922441617152b841585c0fc0bd205bd898c758016fa4985599a63c5a6e16"

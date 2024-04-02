@@ -1,0 +1,26 @@
+diff --git a/include/assert.hpp b/include/assert.hpp
+index 89113c0..8c52d1b 100644
+--- a/include/assert.hpp
++++ b/include/assert.hpp
+@@ -693,7 +693,7 @@ namespace libassert::detail {
+         binary_diagnostics_descriptor(const binary_diagnostics_descriptor&) = delete;
+         binary_diagnostics_descriptor(binary_diagnostics_descriptor&&) noexcept; // = default; in the .cpp
+         binary_diagnostics_descriptor& operator=(const binary_diagnostics_descriptor&) = delete;
+-        binary_diagnostics_descriptor& operator=(binary_diagnostics_descriptor&&) noexcept; // = default; in the .cpp
++        binary_diagnostics_descriptor& operator=(binary_diagnostics_descriptor&&); // = default; in the .cpp
+     };
+ 
+     void sort_and_dedup(literal_format(&)[format_arr_length]);
+diff --git a/src/assert.cpp b/src/assert.cpp
+index 5eb80f1..8d52a64 100644
+--- a/src/assert.cpp
++++ b/src/assert.cpp
+@@ -2111,7 +2111,7 @@ namespace libassert::detail {
+     LIBASSERT_ATTR_COLD
+     binary_diagnostics_descriptor::binary_diagnostics_descriptor(binary_diagnostics_descriptor&&) noexcept = default;
+     LIBASSERT_ATTR_COLD binary_diagnostics_descriptor&
+-    binary_diagnostics_descriptor::operator=(binary_diagnostics_descriptor&&) noexcept = default;
++    binary_diagnostics_descriptor::operator=(binary_diagnostics_descriptor&&) = default;
+ 
+     LIBASSERT_ATTR_COLD
+     static std::string print_values(const std::vector<std::string>& vec, size_t lw) {

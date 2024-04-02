@@ -10,7 +10,7 @@ required_conan_version = ">=1.53.0"
 
 class NuRaftConan(ConanFile):
     name = "nuraft"
-    homepage = "https://github.corp.ebay.com/sds/NuRaft"
+    homepage = "https://github.com/eBay/NuRaft"
     description = """Cornerstone based RAFT library."""
     topics = ("raft",)
     url = "https://github.com/conan-io/conan-center-index"
@@ -40,7 +40,7 @@ class NuRaftConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/3.1.0")
+        self.requires("openssl/[>=1.1 <4]")
         if self.options.asio == "boost":
             self.requires("boost/1.81.0")
         else:

@@ -24,12 +24,12 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: ".github/*/*"
-          reviewers: "@ericLemanissier @prince-chrismc @Croydon"
+          reviewers: "@ericLemanissier @Croydon"
 
       - uses: ./.github/actions/alert-community
         with:
           files: "linter/*/*"
-          reviewers: "@ericLemanissier @prince-chrismc @Croydon"
+          reviewers: "@ericLemanissier @Croydon"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -69,7 +69,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/boost/*/*"
-          reviewers: "@grafikrobot @Hopobcn @jwillikers"
+          reviewers: "@grafikrobot @Hopobcn @jwillikers @paulharris"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -188,6 +188,11 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/imath/*/*"
+          reviewers: "@irieger"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/imgui/*/*"
           reviewers: "@Hopobcn"
 
@@ -268,8 +273,13 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/libraw/*/*"
+          reviewers: "@irieger"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/libsodium/*/*"
-          reviewers: "@Hopobcn"
+          reviewers: "@Hopobcn @paulharris"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -294,7 +304,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/llvm-core/*/*"
-          reviewers: "@Hopobcn"
+          reviewers: "@Hopobcn @paulharris"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -328,6 +338,16 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/opencolorio/*/*"
+          reviewers: "@irieger"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/openexr/*/*"
+          reviewers: "@irieger"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/opengl/*/*"
           reviewers: "@Hopobcn"
 
@@ -335,6 +355,11 @@ jobs:
         with:
           files: "recipes/opengl-registry/*/*"
           reviewers: "@MartinDelille"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/openimageio/*/*"
+          reviewers: "@irieger"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -354,7 +379,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/qt/*/*"
-          reviewers: "@ericLemanissier @jwillikers @MartinDelille"
+          reviewers: "@ericLemanissier @jwillikers @MartinDelille @paulharris"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -380,6 +405,11 @@ jobs:
         with:
           files: "recipes/snappy/*/*"
           reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/snowhouse/*/*"
+          reviewers: "@MartinDelille"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -425,3 +455,8 @@ jobs:
         with:
           files: "recipes/zstd/*/*"
           reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/libhal/*/*"
+          reviewers: "@kammce"

@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import download
+from conan.tools.files import download, copy
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -19,18 +19,18 @@ class MozillaBuildConan(ConanFile):
             raise ConanInvalidConfiguration("Only Windows supported")
 
     def build_requirements(self):
-        self.build_requires("7zip/19.00")
+        self.build_requires("7zip/22.01")
 
     def build(self):
         filename = "mozilla-build.exe"
         download(self, **self.conan_data["sources"][self.version][0], filename=filename)
         download(self, **self.conan_data["sources"][self.version][1], filename="LICENSE")
-        self.run(f"7z x {filename}", run_environment=True)
+        self.run(f"7z x {filename}")
 
 
     def package(self):
-        self.copy("LICENSE", dst="licenses")
-        self.copy("nsinstall.exe", src="bin", dst="bin")
+        copy(self, "LICENSE", src=self.build_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "nsinstall.exe", src=os.path.join(self.build_folder, "bin"), dst=os.path.join(self.package_folder, "bin"))
 
     def package_id(self):
         del self.info.settings.build_type

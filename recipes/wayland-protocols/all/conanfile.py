@@ -27,7 +27,7 @@ class WaylandProtocolsConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.3.0")
 
     def layout(self):
         basic_layout(self, src_folder="src")

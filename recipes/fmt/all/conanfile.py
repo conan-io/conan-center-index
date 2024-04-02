@@ -17,6 +17,7 @@ class FmtConan(ConanFile):
     topics = ("format", "iostream", "printf")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "header_only": [True, False],
@@ -94,7 +95,10 @@ class FmtConan(ConanFile):
             cmake.build()
 
     def package(self):
-        copy(self, pattern="*LICENSE.rst", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if Version(self.version) < "10.2.0":
+            copy(self, pattern="*LICENSE.rst", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        else:
+            copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if self.options.header_only:
             copy(self, pattern="*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
         else:
@@ -117,6 +121,9 @@ class FmtConan(ConanFile):
 
         if self.options.header_only:
             self.cpp_info.components["_fmt"].defines.append("FMT_HEADER_ONLY=1")
+            self.cpp_info.components["_fmt"].libdirs = []
+            self.cpp_info.components["_fmt"].bindirs = []
+
         else:
             postfix = "d" if self.settings.build_type == "Debug" else ""
             libname = "fmt" + postfix

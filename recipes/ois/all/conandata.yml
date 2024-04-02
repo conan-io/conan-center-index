@@ -1,8 +1,11 @@
 sources:
+  "1.5.1":
+    url: "https://github.com/wgois/OIS/archive/v1.5.1.tar.gz"
+    sha256: "614f6ef6d69cf6d84f1b50efff46a6c1acce426933e5f0dcf29862ea8332af73"
   "1.5":
     url: "https://github.com/wgois/OIS/archive/v1.5.tar.gz"
     sha256: "aa3e6b840b1149bb06835e04365957f4659c08b3e3095a48b289050f1637a174"
 patches:
   "1.5":
-    - patch_file: "patches/1.5/001_export_headers_from_CMAKE_CURRENT_SOURCE_DIR.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.5-0001_export_headers_from_CMAKE_CURRENT_SOURCE_DIR.patch"
+      patch_type: "conan"

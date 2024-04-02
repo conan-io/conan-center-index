@@ -17,13 +17,13 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-        self.requires("wayland/1.21.0")
+        self.requires("wayland/1.22.0")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.3.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
-        self.tool_requires("wayland/1.21.0")
+            self.tool_requires("pkgconf/2.1.0")
+        self.tool_requires("wayland/1.22.0")
 
     def layout(self):
         basic_layout(self)

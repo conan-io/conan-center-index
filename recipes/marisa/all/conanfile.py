@@ -1,20 +1,22 @@
 import os
-from conan import ConanFile, tools
-from conan.tools.files import apply_conandata_patches
-from conans import CMake
 
-required_conan_version = ">=1.45.0"
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+
+required_conan_version = ">=1.53.0"
 
 
 class MarisaConan(ConanFile):
     name = "marisa"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/s-yata/marisa-trie"
     description = "Matching Algorithm with Recursively Implemented StorAge "
     license = ("BSD-2-Clause", "LGPL-2.1")
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/s-yata/marisa-trie"
     topics = ("algorithm", "dictionary", "marisa")
-    exports_sources = "patches/**", "CMakeLists.txt"
-    settings = "os", "compiler", "build_type", "arch"
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -26,16 +28,8 @@ class MarisaConan(ConanFile):
         "tools": True,
     }
 
-    generators = "cmake"
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,45 +37,42 @@ class MarisaConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.files.get(**self.conan_data["sources"][self.version],
-                        conanfile=self, destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-
-        self._cmake.definitions["BUILD_TOOLS"] = self.options.tools
-
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TOOLS"] = self.options.tools
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="COPYING.md", dst="licenses",
-                  src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="COPYING.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.files.rmdir(self, os.path.join(
-            self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "marisa"
-        self.cpp_info.names["cmake_find_package_multi"] = "marisa"
-        self.cpp_info.names["pkgconfig"] = "marisa"
+        self.cpp_info.set_property("pkg_config_name", "marisa")
         self.cpp_info.libs = ["marisa"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
 
+        # TODO: to remove in conan v2
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info(f"Appending PATH env var with : '{bin_path}'")
         self.env_info.PATH.append(bin_path)

@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
-from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.microsoft import is_msvc
 import os
 
@@ -10,17 +10,34 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     test_type = "explicit"
 
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
+
     def layout(self):
         cmake_layout(self)
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        self.requires("protobuf/3.21.12")
 
     def build_requirements(self):
-        # For the grpc-cpp-plugin executable
-        self.tool_requires(self.tested_reference_str)
+        if not self._is_legacy_one_profile:
+            # For the grpc-cpp-plugin executable at build time
+            self.tool_requires(self.tested_reference_str)
+            self.tool_requires("protobuf/<host_version>")
 
     def generate(self):
+        # Set up environment so that we can run protoc & grpc-cpp-plugin at build time
+        if self._is_legacy_one_profile:
+            VirtualRunEnv(self).generate(scope="build")
+        else:
+            VirtualBuildEnv(self).generate()
+
+        # Environment so that the compiled test executable can load shared libraries
+        runenv = VirtualRunEnv(self)
+        runenv.generate()
+
         tc = CMakeToolchain(self)
         tc.cache_variables["TEST_ACTUAL_SERVER"] = not (is_msvc(self)
                                                         and str(self.settings.compiler.version) in ("15", "191")
@@ -31,22 +48,10 @@ class TestPackageConan(ConanFile):
         project_include = os.path.join(self.source_folder, "macos_make_override.cmake")
         tc.cache_variables["CMAKE_PROJECT_test_package_INCLUDE"] = project_include
         tc.generate()
-        
-        # Set up environment so that we can run grpc-cpp-plugin at build time
-        if hasattr(self, "settings_build"):
-            VirtualBuildEnv(self).generate()
-        else:
-            # Cover case in Conan 1.x when only one profile is provided
-            self.output.info("Generating VirtualRunEnv in build environment - using two profiles is advised.")
-            VirtualRunEnv(self).generate(scope="build")
-
-        # Environment so that the compiled test executable can load shared libraries
-        runenv = VirtualRunEnv(self)
-        runenv.generate(scope="run")
 
         deps = CMakeDeps(self)
         deps.generate()
-        
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()

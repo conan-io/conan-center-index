@@ -1,4 +1,14 @@
 sources:
+  "3.6":
+    - url: "https://github.com/SELinuxProject/selinux/releases/download/3.6/libselinux-3.6.tar.gz"
+      sha256: "ba4e0ef34b270e7672a5e5f1b523fe2beab3a40bb33d9389f4ad3a8728f21b52"
+    - url: "https://github.com/SELinuxProject/selinux/releases/download/3.6/libsepol-3.6.tar.gz"
+      sha256: "c9dc585ea94903d784d597c861cd5dce6459168f95e22b31a0eab1cdd800975a"
+  "3.5":
+    - url: "https://github.com/SELinuxProject/selinux/releases/download/3.5/libselinux-3.5.tar.gz"
+      sha256: "9a3a3705ac13a2ccca2de6d652b6356fead10f36fb33115c185c5ccdf29eec19"
+    - url: "https://github.com/SELinuxProject/selinux/releases/download/3.5/libsepol-3.5.tar.gz"
+      sha256: "78fdaf69924db780bac78546e43d9c44074bad798c2c415d0b9bb96d065ee8a2"
   "3.3":
     - url: "https://github.com/SELinuxProject/selinux/releases/download/3.3/libselinux-3.3.tar.gz"
       sha256: "acfdee27633d2496508c28727c3d41d3748076f66d42fccde2e6b9f3463a7057"
@@ -25,6 +35,14 @@ sources:
     - url: "https://github.com/SELinuxProject/selinux/releases/download/20190315/libsepol-2.9.tar.gz"
       sha256: "a34b12b038d121e3e459b1cbaca3c9202e983137819c16baf63658390e3f1d5d"
 patches:
+  "3.6":
+    - patch_file: patches/0003-fix-missing-include-3.6.patch
+      base_path: libselinux-3.6
+      patch_description: "Fix a missing #include <stdint.h>"
+      patch_type: "portability"
+  "3.3":
+    - patch_file: patches/0003-fix-link-pcre.patch
+      base_path: libselinux-3.3
   "3.0":
     - patch_file: patches/0001-fix-fno-common-3.0.patch
       base_path: libsepol-3.0

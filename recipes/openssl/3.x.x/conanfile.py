@@ -2,10 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, XCRun
 from conan.tools.build import build_jobs
-from conan.tools.files import chdir, copy, get, rename, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
+from conan.tools.scm import Version
 
 import fnmatch
 import os
@@ -16,12 +17,13 @@ required_conan_version = ">=1.57.0"
 
 class OpenSSLConan(ConanFile):
     name = "openssl"
-    settings = "os", "arch", "compiler", "build_type"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/openssl/openssl"
     license = "Apache-2.0"
     topics = ("ssl", "tls", "encryption", "security")
     description = "A toolkit for the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -29,7 +31,10 @@ class OpenSSLConan(ConanFile):
         "386": [True, False],
         "capieng_dialog": [True, False],
         "enable_capieng": [True, False],
+        "enable_trace": [True, False],
         "no_aria": [True, False],
+        "no_apps": [True, False],
+        "no_autoload_config": [True, False],
         "no_asm": [True, False],
         "no_async": [True, False],
         "no_blake2": [True, False],
@@ -83,11 +88,26 @@ class OpenSSLConan(ConanFile):
         "no_whirlpool": [True, False],
         "no_zlib": [True, False],
         "openssldir": [None, "ANY"],
+        "tls_security_level": [None, 0, 1, 2, 3, 4, 5],
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
     default_options["no_md2"] = True
     default_options["openssldir"] = None
+    default_options["tls_security_level"] = None
+
+    @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+               self.settings.compiler.get_safe("runtime")
+
+    @property
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+
+    @property
+    def _use_nmake(self):
+        return self._is_clang_cl or is_msvc(self)
 
     @property
     def _settings_build(self):
@@ -111,9 +131,23 @@ class OpenSSLConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         if not self.options.no_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
+
+    def validate(self):
+        if self.settings.os == "Emscripten":
+            if not all((self.options.no_asm, self.options.no_threads, self.options.no_stdio)):
+                raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio}=True")
+
+        if self.settings.os == "iOS" and self.options.shared:
+            raise ConanInvalidConfiguration("OpenSSL 3 does not support building shared libraries for iOS")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -126,32 +160,8 @@ class OpenSSLConan(ConanFile):
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
 
-    def validate(self):
-        if self.settings.os == "Emscripten":
-            if not all((self.options.no_asm, self.options.no_threads, self.options.no_stdio)):
-                raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio}=True")
-            
-        if self.settings.os == "iOS" and self.options.shared:
-            raise ConanInvalidConfiguration("OpenSSL 3 does not support building shared libraries for iOS")
-            
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
-    @property
-    def _is_clangcl(self):
-        return self.settings.compiler == "clang" and self.settings.os == "Windows"
-
-    @property
-    def _is_mingw(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
-
-    @property
-    def _use_nmake(self):
-        return self._is_clangcl or is_msvc(self)
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _target(self):
@@ -338,6 +348,11 @@ class OpenSSLConan(ConanFile):
             return "/etc/ssl"
         return os.path.join(self.package_folder, "res")
 
+    def _adjust_path(self, path):
+        if self._use_nmake:
+            return path.replace("\\", "/")
+        return unix_path(self, path)
+
     @property
     def _configure_args(self):
         openssldir = self.options.openssldir or self._get_default_openssl_dir()
@@ -369,22 +384,23 @@ class OpenSSLConan(ConanFile):
 
         args.append("no-fips" if self.options.get_safe("no_fips", True) else "enable-fips")
         args.append("no-md2" if self.options.get_safe("no_md2", True) else "enable-md2")
+        if str(self.options.tls_security_level) != "None":
+            args.append(f"-DOPENSSL_TLS_SECURITY_LEVEL={self.options.tls_security_level}")
+
+        if self.options.get_safe("enable_trace"):
+            args.append("enable-trace")
 
         if self.settings.os == "Neutrino":
             args.append("no-asm -lsocket -latomic")
 
         if not self.options.no_zlib:
-            zlib_info = self.dependencies["zlib"].cpp_info.aggregated_components()
-            include_path = zlib_info.includedirs[0]
-            if self.settings.os == "Windows":
-                lib_path = "%s/%s.lib" % (zlib_info.libdirs[0], zlib_info.libs[0])
+            zlib_cpp_info = self.dependencies["zlib"].cpp_info.aggregated_components()
+            include_path = self._adjust_path(zlib_cpp_info.includedirs[0])
+            if self._use_nmake:
+                lib_path = self._adjust_path(os.path.join(zlib_cpp_info.libdirs[0], f"{zlib_cpp_info.libs[0]}.lib"))
             else:
-                # Just path, linux will find the right file
-                lib_path = zlib_info.libdirs[0]
-            if self._settings_build.os == "Windows":
-                # clang-cl doesn't like backslashes in #define CFLAGS (builldinf.h -> cversion.c)
-                include_path = include_path.replace("\\", "/")
-                lib_path = lib_path.replace("\\", "/")
+                # Just path, GNU like compilers will find the right file
+                lib_path = self._adjust_path(zlib_cpp_info.libdirs[0])
 
             if self.dependencies["zlib"].options.shared:
                 args.append("zlib-dynamic")
@@ -392,16 +408,16 @@ class OpenSSLConan(ConanFile):
                 args.append("zlib")
 
             args.extend([
-                '--with-zlib-include="%s"' % include_path,
-                '--with-zlib-lib="%s"' % lib_path
+                f'--with-zlib-include="{include_path}"',
+                f'--with-zlib-lib="{lib_path}"',
             ])
 
         for option_name in self.default_options.keys():
-            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2"):
+            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "tls_security_level", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2"):
                 self.output.info(f"Activated option: {option_name}")
                 args.append(option_name.replace("_", "-"))
         return args
-    
+
     def generate(self):
         tc = AutotoolsToolchain(self)
         env = tc.environment()
@@ -438,9 +454,6 @@ class OpenSSLConan(ConanFile):
         defines = " ".join(defines)
         defines = 'defines => add("%s"),' % defines if defines else ""
         targets = "my %targets"
-        includes = "" 
-        if self.settings.os == "Windows":
-            includes = includes.replace("\\", "/")  # OpenSSL doesn't like backslashes
 
         if self._asm_target:
             ancestor = '[ "%s", asm("%s") ]' % (self._ancestor_target, self._asm_target)
@@ -481,7 +494,7 @@ class OpenSSLConan(ConanFile):
     def _run_make(self, targets=None, parallel=True, install=False):
         command = [self._make_program]
         if install:
-            command.append(f"DESTDIR={self.package_folder}")
+            command.append(f"DESTDIR={self._adjust_path(self.package_folder)}")
         if targets:
             command.extend(targets)
         if not self._use_nmake:
@@ -497,7 +510,7 @@ class OpenSSLConan(ConanFile):
     def _make(self):
         with chdir(self, self.source_folder):
             # workaround for clang-cl not producing .pdb files
-            if self._is_clangcl:
+            if self._is_clang_cl:
                 save(self, "ossl_static.pdb", "")
             args = " ".join(self._configure_args)
 
@@ -516,8 +529,10 @@ class OpenSSLConan(ConanFile):
             self._run_make(targets=["install_sw"], parallel=False, install=True)
 
     def build(self):
+        apply_conandata_patches(self)
         self._make()
-        self.run(f"{self._perl} {self.source_folder}/configdata.pm --dump")
+        configdata_pm = self._adjust_path(os.path.join(self.source_folder, "configdata.pm"))
+        self.run(f"{self._perl} {configdata_pm} --dump")
 
     @property
     def _make_program(self):
@@ -539,12 +554,6 @@ class OpenSSLConan(ConanFile):
             for filename in files:
                 if fnmatch.fnmatch(filename, "*.pdb"):
                     os.unlink(os.path.join(self.package_folder, root, filename))
-        if self._use_nmake:
-            if self.settings.build_type == "Debug":
-                with chdir(self, os.path.join(self.package_folder, "lib")):
-                    rename(self, "libssl.lib", "libssld.lib")
-                    rename(self, "libcrypto.lib", "libcryptod.lib")
-
         if self.options.shared:
             libdir = os.path.join(self.package_folder, "lib")
             for file in os.listdir(libdir):
@@ -634,9 +643,8 @@ class OpenSSLConan(ConanFile):
         self.cpp_info.components["crypto"].set_property("cmake_build_modules", [self._module_file_rel_path])
 
         if self._use_nmake:
-            libsuffix = "d" if self.settings.build_type == "Debug" else ""
-            self.cpp_info.components["ssl"].libs = ["libssl" + libsuffix]
-            self.cpp_info.components["crypto"].libs = ["libcrypto" + libsuffix]
+            self.cpp_info.components["ssl"].libs = ["libssl"]
+            self.cpp_info.components["crypto"].libs = ["libcrypto"]
         else:
             self.cpp_info.components["ssl"].libs = ["ssl"]
             self.cpp_info.components["crypto"].libs = ["crypto"]
@@ -657,6 +665,8 @@ class OpenSSLConan(ConanFile):
         elif self.settings.os == "Neutrino":
             self.cpp_info.components["crypto"].system_libs.append("atomic")
             self.cpp_info.components["ssl"].system_libs.append("atomic")
+            self.cpp_info.components["crypto"].system_libs.append("socket")
+            self.cpp_info.components["ssl"].system_libs.append("socket")
 
         self.cpp_info.components["crypto"].set_property("cmake_target_name", "OpenSSL::Crypto")
         self.cpp_info.components["crypto"].set_property("pkg_config_name", "libcrypto")
@@ -672,4 +682,3 @@ class OpenSSLConan(ConanFile):
 
         # For legacy 1.x downstream consumers, remove once recipe is 2.0 only:
         self.env_info.OPENSSL_MODULES = openssl_modules_dir
-

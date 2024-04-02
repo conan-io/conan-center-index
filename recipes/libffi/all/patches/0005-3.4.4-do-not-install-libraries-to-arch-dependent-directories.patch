@@ -1,0 +1,13 @@
+diff --git a/Makefile.in b/Makefile.in
+index 86eb4a5..450200a 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -521,7 +521,7 @@ target_os = @target_os@
+ target_vendor = @target_vendor@
+ tmake_file = @tmake_file@
+ toolexecdir = @toolexecdir@
+-toolexeclibdir = @toolexeclibdir@
++toolexeclibdir = @libdir@
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@

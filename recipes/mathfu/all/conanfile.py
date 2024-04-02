@@ -13,6 +13,7 @@ class MathfuConan(ConanFile):
     license = "Apache-2.0"
     homepage = "https://github.com/google/mathfu"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -20,14 +21,13 @@ class MathfuConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("vectorial/cci.20190628", transitive_headers=True, transitive_libs=True)
+        self.requires("vectorial/cci.20190628")
 
     def package_id(self):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

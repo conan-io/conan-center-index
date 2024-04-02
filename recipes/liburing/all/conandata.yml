@@ -1,4 +1,13 @@
 sources:
+  "2.5":
+    url: "https://github.com/axboe/liburing/archive/liburing-2.5.tar.gz"
+    sha256: "456f5f882165630f0dc7b75e8fd53bd01a955d5d4720729b4323097e6e9f2a98"
+  "2.4":
+    url: "https://github.com/axboe/liburing/archive/liburing-2.4.tar.gz"
+    sha256: "2398ec82d967a6f903f3ae1fd4541c754472d3a85a584dc78c5da2fabc90706b"
+  "2.3":
+    url: "https://github.com/axboe/liburing/archive/liburing-2.3.tar.gz"
+    sha256: "60b367dbdc6f2b0418a6e0cd203ee0049d9d629a36706fcf91dfb9428bae23c8"
   "2.2":
     url: "https://github.com/axboe/liburing/archive/liburing-2.2.tar.gz"
     sha256: "e092624af6aa244ade2d52181cc07751ac5caba2f3d63e9240790db9ed130bbc"
@@ -13,6 +22,32 @@ sources:
     sha256: "8e2842cfe947f3a443af301bdd6d034455536c38a455c7a700d0c1ad165a7543"
 
 patches:
+  "0.7":
+    - patch_file: "patches/liburing-0.7-disable_samples_and_tests.patch"
+      patch_description: "Disable tests and samples as it might not work while cross-compiling"
+      patch_type: "conan"
+  "2.0":
+    - patch_file: "patches/liburing-2.0-disable_samples_and_tests.patch"
+      patch_description: "Disable tests and samples as it might not work while cross-compiling"
+      patch_type: "conan"
   "2.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-liburing-2.1-memfd-create.patch"
+    - patch_file: "patches/0001-liburing-2.1-memfd-create.patch"
+    - patch_file: "patches/liburing-2.0-disable_samples_and_tests.patch"
+      patch_description: "Disable tests and samples as it might not work while cross-compiling"
+      patch_type: "conan"
+  "2.2":
+    - patch_file: "patches/liburing-2.2-disable_samples_and_tests.patch"
+      patch_description: "Disable tests and samples as it might not work while cross-compiling"
+      patch_type: "conan"
+  "2.3":
+    - patch_file: "patches/liburing-2.2-disable_samples_and_tests.patch"
+      patch_description: "Disable tests and samples as it might not work while cross-compiling"
+      patch_type: "conan"
+  "2.4":
+    - patch_file: "patches/liburing-2.4-disable_samples_and_tests.patch"
+      patch_description: "Disable tests and samples as it might not work while cross-compiling"
+      patch_type: "conan"
+  "2.5":
+    - patch_file: "patches/liburing-2.4-disable_samples_and_tests.patch"
+      patch_description: "Disable tests and samples as it might not work while cross-compiling"
+      patch_type: "conan"

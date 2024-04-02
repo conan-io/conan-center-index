@@ -1,0 +1,58 @@
+diff --git a/mDNSCore/mDNS.c b/mDNSCore/mDNS.c
+index 9466634..d60c6f2 100644
+--- a/mDNSCore/mDNS.c
++++ b/mDNSCore/mDNS.c
+@@ -9849,7 +9849,7 @@ mDNSlocal void mDNSCoreReceiveNoUnicastAnswers(mDNS *const m, const DNSMessage *
+ #else
+                             const DNSServRef dnsserv = qptr->qDNSServer;
+ #endif
+-                            debugf("mDNSCoreReceiveNoUnicastAnswers making negative cache entry TTL %d for %##s (%s)", negttl, name->c, DNSTypeName(q.qtype));
++                            debugf("mDNSCoreReceiveNoUnicastAnswers making negative cache entry TTL %d for %##s (%s)", negttl, currentQName->c, DNSTypeName(q.qtype));
+                             // Create a negative record for the current name in the CNAME chain.
+                             MakeNegativeCacheRecord(m, &m->rec.r, currentQName, currentQNameHash, q.qtype, q.qclass, negttl, mDNSInterface_Any,
+                                 dnsserv, response->h.flags);
+diff --git a/mDNSPosix/mbedtls.c b/mDNSPosix/mbedtls.c
+index a73681b..dba44b9 100644
+--- a/mDNSPosix/mbedtls.c
++++ b/mDNSPosix/mbedtls.c
+@@ -218,10 +218,12 @@ mDNSPosixTLSRead(TCPSocket *sock, void *buf, unsigned long buflen, mDNSBool *clo
+             // and then re-enable read events.   What we don't want is to keep calling
+             // read, because that will spin.
+             return 0;
++#ifdef MBEDTLS_ERR_SSL_ASYNC_IN_PROGRESS
+         case MBEDTLS_ERR_SSL_ASYNC_IN_PROGRESS:
+             LogRedact(MDNS_LOG_CATEGORY_DEFAULT, MDNS_LOG_ERROR, "Got async in progress in TLS read!");
+             // No idea how to handle this yet.
+             return 0;
++#endif
+ #ifdef MBEDTLS_ERR_SSL_CRYPTO_IN_PROGRESS
+         case MBEDTLS_ERR_SSL_CRYPTO_IN_PROGRESS:
+             LogRedact(MDNS_LOG_CATEGORY_DEFAULT, MDNS_LOG_ERROR, "Got crypto in progress in TLS read!");
+@@ -259,9 +261,11 @@ mDNSPosixTLSWrite(TCPSocket *sock, const void *buf, unsigned long buflen)
+         case MBEDTLS_ERR_SSL_WANT_WRITE:
+             LogRedact(MDNS_LOG_CATEGORY_DEFAULT, MDNS_LOG_ERROR, "Got SSL want write in TLS read!");
+             return 0;
++#ifdef MBEDTLS_ERR_SSL_ASYNC_IN_PROGRESS
+         case MBEDTLS_ERR_SSL_ASYNC_IN_PROGRESS:
+             LogRedact(MDNS_LOG_CATEGORY_DEFAULT, MDNS_LOG_ERROR, "Got async in progress in TLS read!");
+             return 0;
++#endif
+ #ifdef MBEDTLS_ERR_SSL_CRYPTO_IN_PROGRESS
+         case MBEDTLS_ERR_SSL_CRYPTO_IN_PROGRESS:
+             LogRedact(MDNS_LOG_CATEGORY_DEFAULT, MDNS_LOG_ERROR, "Got crypto in progress in TLS read!");
+diff --git a/mDNSShared/uds_daemon.c b/mDNSShared/uds_daemon.c
+index bfcb5d8..7475784 100644
+--- a/mDNSShared/uds_daemon.c
++++ b/mDNSShared/uds_daemon.c
+@@ -2913,7 +2913,11 @@ exit:
+ mDNSlocal mStatus add_domain_to_browser(request_state *info, const domainname *d)
+ {
+     browser_t *b, *p;
++#if MDNSRESPONDER_PLATFORM_APPLE
+     __block mStatus err;
++#else
++    mStatus err;
++#endif
+ 
+     for (p = info->u.browser.browsers; p; p = p->next)
+     {

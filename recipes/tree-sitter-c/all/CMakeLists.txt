@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 project(tree-sitter-c C)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
 find_package(tree-sitter REQUIRED CONFIG)
 include(GenerateExportHeader)
 
@@ -12,11 +9,19 @@ file(WRITE api.h [[
 #include <tree_sitter/parser.h>
 #include "tree_sitter_c_export.h"
 
-TREE_SITTER_C_EXPORT const TSLanguage *tree_sitter_c(void);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+const TSLanguage *tree_sitter_c(void);
+
+#ifdef __cplusplus
+}
+#endif
 ]])
 
 add_library(${PROJECT_NAME}
-    source_subfolder/src/parser.c
+    src/parser.c
 )
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
@@ -24,8 +29,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 target_include_directories(${PROJECT_NAME}
     PRIVATE
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source_subfolder/lib/include>
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source_subfolder/src>
+        $<BUILD_INTERFACE:${TREE_SITTER_C_SRC_DIR}/src>
 )
 set_target_properties(${PROJECT_NAME}
     PROPERTIES

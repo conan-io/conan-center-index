@@ -1,42 +1,20 @@
 sources:
-  "1.5.18":
-    url: "https://downloads.sourceforge.net/project/matio/matio/1.5.18/matio-1.5.18.tar.gz"
-    sha256: "5fad71a63a854d821cc6f4e8c84da837149dd5fb57e1e2baeffd85fa0f28fe25"
-  "1.5.19":
-    url: "https://downloads.sourceforge.net/project/matio/matio/1.5.19/matio-1.5.19.tar.gz"
-    sha256: "a4fa4d248b0414fc72f3d6155f710c470d5628d3c31af834f8d5ccf06b60286f"
-  "1.5.21":
-    url: "https://downloads.sourceforge.net/project/matio/matio/1.5.21/matio-1.5.21.tar.gz"
-    sha256: "21809177e55839e7c94dada744ee55c1dea7d757ddaab89605776d50122fb065"
   "1.5.23":
     url: "https://downloads.sourceforge.net/project/matio/matio/1.5.23/matio-1.5.23.tar.gz"
     sha256: "9f91eae661df46ea53c311a1b2dcff72051095b023c612d7cbfc09406c9f4d6e"
+  "1.5.24":
+    url: "https://downloads.sourceforge.net/project/matio/matio/1.5.24/matio-1.5.24.tar.gz"
+    sha256: "5106ebed5b40d02a2bb968b57bef8876701c566e039e6ebe134bab779c436f7c"
+  "1.5.26":
+    url: "https://downloads.sourceforge.net/project/matio/matio/1.5.26/matio-1.5.26.tar.gz"
+    sha256: "8b47c29f58e468dba7a5555371c6a72ad4c6aa8b15f459b2b0b65a303c063933"
 patches:
-  "1.5.18":
-    - patch_file: "patches/require-cmake-3.10.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/disable-hdf5-target.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/patch-apple-no-undefined.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/cmake-install-bundle.patch"
-      base_path: "source_subfolder"
-  "1.5.19":
-    - patch_file: "patches/require-cmake-3.10.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/patch-apple-no-undefined.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/cmake-install-bundle.patch"
-      base_path: "source_subfolder"
-  "1.5.21":
-    - patch_file: "patches/require-cmake-3.10.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/patch-apple-no-undefined.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/cmake-install-bundle.patch"
-      base_path: "source_subfolder"
   "1.5.23":
     - patch_file: "patches/require-cmake-3.10.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/cmake-install-bundle.patch"
-      base_path: "source_subfolder"
+  "1.5.24":
+    - patch_file: "patches/require-cmake-3.10.patch"
+    - patch_file: "patches/cmake-install-bundle.patch"
+  "1.5.26":
+    - patch_file: "patches/require-cmake-3.10.patch"
+    - patch_file: "patches/cmake-install-bundle.patch"

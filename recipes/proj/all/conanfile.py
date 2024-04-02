@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.build import can_run, stdcpp_library
+from conan.tools.build import stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs, rm, rename
@@ -9,7 +9,7 @@ from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
 
 class ProjConan(ConanFile):
@@ -19,7 +19,7 @@ class ProjConan(ConanFile):
     topics = "dsp", "proj", "proj4", "projections", "gis", "geospatial"
     homepage = "https://proj.org"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -37,6 +37,10 @@ class ProjConan(ConanFile):
         "with_curl": True,
         "build_executables": True,
     }
+
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -56,24 +60,24 @@ class ProjConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nlohmann_json/3.11.2")
-        self.requires("sqlite3/3.41.1", run=can_run(self))
+        self.requires("nlohmann_json/3.11.3")
+        self.requires("sqlite3/3.44.2")
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.4.0")
+            self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_curl"):
-            self.requires("libcurl/7.88.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
 
     def build_requirements(self):
-        if not can_run(self):
-            self.tool_requires("sqlite3/3.41.1")
+        if not self._is_legacy_one_profile:
+            self.tool_requires("sqlite3/<host_version>")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if can_run(self):
+        if self._is_legacy_one_profile:
             env = VirtualRunEnv(self)
             env.generate(scope="build")
 
@@ -101,8 +105,10 @@ class ProjConan(ConanFile):
         if Version(self.version) >= "8.1.0":
             tc.variables["NLOHMANN_JSON_ORIGIN"] = "external"
         tc.variables["CMAKE_MACOSX_BUNDLE"] = False
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        if self.settings.os == "Linux":
+            # Workaround for: https://github.com/conan-io/conan/issues/13560
+            libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
+            tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -135,7 +141,7 @@ class ProjConan(ConanFile):
             else:
                 cmake_sqlite_call = "generate_proj_db.cmake"
                 pattern = "\"${EXE_SQLITE3}\""
-            if can_run(self):
+            if self._is_legacy_one_profile:
                 lib_paths = self.dependencies["sqlite3"].cpp_info.libdirs
             else:
                 lib_paths = self.dependencies.build["sqlite3"].cpp_info.libdirs

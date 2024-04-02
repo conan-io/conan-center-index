@@ -1,10 +1,8 @@
-cmake_minimum_required(VERSION 3.8)
-project(test_package)
+cmake_minimum_required(VERSION 3.15)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+project(test_package LANGUAGES CXX)
 
-find_package(skyr-url CONFIG REQUIRED)
+find_package(skyr-url REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} skyr::skyr-url)

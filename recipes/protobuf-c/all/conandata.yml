@@ -1,0 +1,17 @@
+sources:
+  "1.5.0":
+    url: "https://github.com/protobuf-c/protobuf-c/archive/v1.5.0.tar.gz"
+    sha256: "d4cb022d55f49796959b07a9d83040822e39129bc0eb28f4e8301da17d758f62"
+  "1.4.1":
+    url: https://github.com/protobuf-c/protobuf-c/archive/v1.4.1.tar.gz
+    sha256: 99be336cdb15dfc5827efe34e5ac9aaa962e2485db547dd254d2a122a7d23102
+patches:
+  "1.5.0":
+    - patch_file: "patches/1.5.0-disable-msvc-runtime.patch"
+      patch_description: "disable msvc runtime setting"
+      patch_type: conan
+  "1.4.1":
+    # TODO: This won't be needed once upstream PR (https://github.com/protobuf-c/protobuf-c/pull/555) gets merged
+    - patch_file: "patches/1.4.1-cmake-protobuf-target.patch"
+      patch_description: "Fit Protobuf directory variables to official targets"
+      patch_type: conan

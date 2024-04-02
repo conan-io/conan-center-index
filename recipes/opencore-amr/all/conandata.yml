@@ -5,3 +5,12 @@ sources:
   "0.1.5":
     url: "https://downloads.sourceforge.net/project/opencore-amr/opencore-amr/opencore-amr-0.1.5.tar.gz"
     sha256: "2c006cb9d5f651bfb5e60156dbff6af3c9d35c7bbcc9015308c0aff1e14cd341"
+patches:
+  "0.1.6":
+    - patch_file: "patches/0001-remove-deprecated-register-keyword.patch"
+      patch_description: "remove deprecated register keyword"
+      patch_type: "portability"
+  "0.1.5":
+    - patch_file: "patches/0001-remove-deprecated-register-keyword.patch"
+      patch_description: "remove deprecated register keyword"
+      patch_type: "portability"

@@ -1,0 +1,5 @@
+sources:
+  "1.1.0":
+    url:
+      - "https://github.com/gegles/spdlog_setup/archive/v1.1.0.tar.gz"
+    sha256: "80a37463a1cd2735f6f7af0b0dfb01a1ecc0a271b33fb29966564b9758f7c309"

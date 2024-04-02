@@ -1,7 +1,7 @@
-#include <iostream>
-
 #include <zug/meta.hpp>
 #include <zug/util.hpp>
+
+#include <iostream>
 
 using namespace zug;
 

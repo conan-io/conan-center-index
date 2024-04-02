@@ -1,28 +1,28 @@
 sources:
-  "20.36.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v20.36.0.tar.gz"
-    sha256: "cda266f7ed6abe67ef3cae6e223a580fe5091db9156c1f4123ee328ae21511c9"
-  "20.17.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v20.17.0.tar.gz"
-    sha256: "62027b0b847563bcc65a760045dc4233328229fc551f97fe5814e518e272141c"
-  "20.14.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v20.14.0.tar.gz"
-    sha256: "15cf995844a930c9a36747e8d714b94ff886b6814b5d4e3b3ee176f05681cccc"
-  "20.9.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v20.9.0.tar.gz"
-    sha256: "91897568291a2081ffc1ae27c354446cc130c168a25892b2289f25e185af8676"
-  "20.8.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v20.8.0.tar.gz"
-    sha256: "6ab4bc0207f44eacbb9c82fd0dc59a49ef84e13698ccdbfb44b92c6a0eaa951a"
+  "20.62.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.62.0.tar.gz"
+    sha256: "03dfc8037cf43856a41e64bbc7fc5a7cf5e6369c9158682753074ecbbe09eed1"
+  "20.60.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.60.0.tar.gz"
+    sha256: "eb72223768f93d40038181653ee5b59a53736448a6ff4e8924fd56b2fcdc00db"
+  "20.58.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.58.0.tar.gz"
+    sha256: "f71ca310cc5c39b12f56db1cf85727ee4d0f03fdf019a9e14ef4ba08addc6077"
+  "20.57.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.57.0.tar.gz"
+    sha256: "82d15eea0889a6b73c6e6170dd506995162bddfc7565c6df2c2d1e8287bbb9b0"
+  "20.56.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.56.0.tar.gz"
+    sha256: "bbac3e317eabf4e558dffe9bfeab4f5ae2d23affcc6df54fb8e580a9e0372767"
+  "20.55.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.55.0.tar.gz"
+    sha256: "bf6b22229fcd10c7cbd256bfd9abf31c829d44eefd56341c0f404e0fa0184f2f"
+  "20.53.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.53.0.tar.gz"
+    sha256: "324b857e787a472bd258aaa66f5ceeac6b01ebc41bbb423fff71559d72872783"
   "19.3.0":
     url: "https://github.com/uNetworking/uWebSockets/archive/v19.3.0.tar.gz"
     sha256: "6f709b4e5fe053a94a952da93c07c919b36bcb8c838c69067560ae85f97c5621"
-  "19.2.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v19.2.0.tar.gz"
-    sha256: "2956075293090754bc2431c53634f93a1e74739c61392be6040cb3ed29430ec2"
-  "19.1.0":
-    url: "https://github.com/uNetworking/uWebSockets/archive/v19.1.0.tar.gz"
-    sha256: "65afa329b0c768a7443ea2621f3f371bc5ce0e1c3518d59bb11b9a2c7adb65dd"
   "18.3.0":
     url: "https://github.com/uNetworking/uWebSockets/archive/v18.3.0.tar.gz"
     sha256: "f51317e2a8cd743e6ff9dfd215569824eaca489c24f7d8fd94eaca44443a9728"

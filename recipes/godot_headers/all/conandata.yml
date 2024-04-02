@@ -1,4 +1,10 @@
 sources:
+  "3.5.3":
+    url: "https://github.com/godotengine/godot-headers/archive/godot-3.5.3-stable.tar.gz"
+    sha256: "98bf368ab07cac91b864e983bffa50757aabf2a8156d3e9f4d81ecbcea77ebd7"
+  "3.5.2":
+    url: "https://github.com/godotengine/godot-headers/archive/godot-3.5.2-stable.tar.gz"
+    sha256: "42e97953d3f193db01cccd856dff0430a6737d47b8496a70e7df34387d870a6e"
   "3.5.1":
     url: "https://github.com/godotengine/godot-headers/archive/godot-3.5.1-stable.tar.gz"
     sha256: "1c38268031425a4881c0d6d41926a0f1bf5847f05dc24c29332609e318276b6b"

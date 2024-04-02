@@ -23,7 +23,7 @@ class LibPcapConan(ConanFile):
     description = "libpcap is an API for capturing network traffic"
     license = "BSD-3-Clause"
     topics = ("networking", "pcap", "sniffing", "network-traffic")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -77,15 +77,14 @@ class LibPcapConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built static on Windows")
 
     def build_requirements(self):
-        if is_msvc(self, build_context=True):
+        if self._settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.24")
         else:
             self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         VirtualBuildEnv(self).generate()

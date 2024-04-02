@@ -27,26 +27,32 @@ class ZlibNgConan(ConanFile):
         "with_optim": [True, False],
         "with_new_strategies": [True, False],
         "with_native_instructions": [True, False],
+        "with_reduced_mem": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "zlib_compat": False,
         "with_gzfileop": True,
-        "with_optim": False,
+        "with_optim": True,
         "with_new_strategies": True,
         "with_native_instructions": False,
+        "with_reduced_mem": False,
     }
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "2.1.0":
+            del self.options.with_reduced_mem
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        if self.options.zlib_compat:
+            self.provides = ["zlib"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -61,11 +67,15 @@ class ZlibNgConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["ZLIB_ENABLE_TESTS"] = False
+        tc.variables["ZLIBNG_ENABLE_TESTS"] = False
+
         tc.variables["ZLIB_COMPAT"] = self.options.zlib_compat
         tc.variables["WITH_GZFILEOP"] = self.options.with_gzfileop
         tc.variables["WITH_OPTIM"] = self.options.with_optim
         tc.variables["WITH_NEW_STRATEGIES"] = self.options.with_new_strategies
         tc.variables["WITH_NATIVE_INSTRUCTIONS"] = self.options.with_native_instructions
+        if Version(self.version) >= "2.1.0":
+            tc.variables["WITH_REDUCED_MEM"] = self.options.with_reduced_mem
         tc.generate()
 
     def build(self):
@@ -98,6 +108,12 @@ class ZlibNgConan(ConanFile):
             self.cpp_info.libs = [f"z{suffix}"]
         if self.options.zlib_compat:
             self.cpp_info.defines.append("ZLIB_COMPAT")
+            #copied from zlib
+            self.cpp_info.set_property("cmake_find_mode", "both")
+            self.cpp_info.set_property("cmake_file_name", "ZLIB")
+            self.cpp_info.set_property("cmake_target_name", "ZLIB::ZLIB")
+            self.cpp_info.names["cmake_find_package"] = "ZLIB"
+            self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
         if self.options.with_gzfileop:
             self.cpp_info.defines.append("WITH_GZFILEOP")
         if not self.options.with_new_strategies:

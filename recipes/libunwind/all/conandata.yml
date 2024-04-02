@@ -1,4 +1,13 @@
 sources:
+  "1.8.0":
+    url: "https://github.com/libunwind/libunwind/releases/download/v1.8.0/libunwind-1.8.0.tar.gz"
+    sha256: "b6b3df40a0970c8f2865fb39aa2af7b5d6f12ad6c5774e266ccca4d6b8b72268"
+  "1.7.2":
+    url: "https://github.com/libunwind/libunwind/releases/download/v1.7.2/libunwind-1.7.2.tar.gz"
+    sha256: "a18a6a24307443a8ace7a8acc2ce79fbbe6826cd0edf98d6326d0225d6a5d6e6"
+  "1.7.0":
+    url: "https://github.com/libunwind/libunwind/releases/download/v1.7.0/libunwind-1.70.tar.gz"
+    sha256: "c24c913d2337d6eff851b6ab32aadfb683a86fee48d28fe1fc9cd56c8e9dfa58"
   "1.6.2":
     url: "https://github.com/libunwind/libunwind/releases/download/v1.6.2/libunwind-1.6.2.tar.gz"
     sha256: "4a6aec666991fb45d0889c44aede8ad6eb108071c3554fcdff671f9c94794976"

@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools import build, files
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import json
 import os
 import re
@@ -16,6 +17,8 @@ class NmosCppConan(ConanFile):
     homepage = "https://github.com/sony/nmos-cpp"
     topics = ("amwa", "nmos", "is-04", "is-05", "is-07", "is-08", "is-09", "broadcasting", "network", "media")
 
+    # https://github.com/sony/nmos-cpp/blob/master/Development/cmake/NmosCppLibraries.cmake#L947
+    package_type = "static-library"
     settings = "os", "compiler", "build_type", "arch"
     # for now, no "shared" option support
     options = {
@@ -46,13 +49,17 @@ class NmosCppConan(ConanFile):
 
     def requirements(self):
         # for now, consistent with project's conanfile.txt
-        self.requires("boost/1.80.0")
-        self.requires("cpprestsdk/2.10.18")
+        # INFO: details/system_error.h: #include <boost/system/system_error.hpp>
+        self.requires("boost/1.83.0", transitive_headers=True)
+        # INFO: json_ops.h exposes cpprest/json.h
+        self.requires("cpprestsdk/2.10.19", transitive_headers=True)
         self.requires("websocketpp/0.8.2")
-        self.requires("openssl/1.1.1s")
-        self.requires("json-schema-validator/2.2.0")
-        self.requires("nlohmann_json/3.11.2")
-        self.requires("zlib/1.2.13")
+        self.requires("openssl/[>=1.1 <4]")
+        self.requires("json-schema-validator/2.3.0")
+        self.requires("nlohmann_json/3.11.3")
+        self.requires("zlib/[>=1.2.11 <2]")
+        if Version(self.version) >= "cci.20240222":
+            self.requires("jwt-cpp/0.7.0")
 
         if self.options.get_safe("with_dnssd") == "mdnsresponder":
             self.requires("mdnsresponder/878.200.35")
@@ -64,18 +71,13 @@ class NmosCppConan(ConanFile):
             self.requires("avahi/0.8")
 
     def build_requirements(self):
-        # nmos-cpp needs CMake 3.17 or higher but CCI doesn't allow version ranges
-        self.build_requires("cmake/3.24.2")
+        self.tool_requires("cmake/[>=3.17 <4]")
 
     def validate(self):
         if self.info.settings.os in ["Macos"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not currently supported on {self.info.settings.os}. Contributions welcomed.")
         if self.info.settings.compiler.get_safe("cppstd"):
             build.check_min_cppstd(self, 11)
-
-    def package_id(self):
-        self.info.requires["boost"].minor_mode()
-        self.info.requires["nlohmann_json"].patch_mode()
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -227,6 +229,7 @@ class NmosCppConan(ConanFile):
             libdir = os.path.join(libdir, config_install_dir)
         self.cpp_info.bindirs = [bindir]
         self.cpp_info.libdirs = [libdir]
+        self.cpp_info.requires = ["nlohmann_json::nlohmann_json", "zlib::zlib"]
 
         def _register_components():
             components_json_file = files.load(self, self._components_helper_filepath)
@@ -252,5 +255,4 @@ class NmosCppConan(ConanFile):
 
         # add nmos-cpp-registry and nmos-cpp-node to the path
         bin_path = os.path.join(self.package_folder, bindir)
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)

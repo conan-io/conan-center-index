@@ -1,10 +1,18 @@
 sources:
-  "0.0.2":
-    sha256: 6f5c58b4cd23550d5a589d134727296438793cb818ce7158fbd5e1b0db1548ba
-    url: https://github.com/AmokHuginnsson/replxx/archive/release-0.0.2.tar.gz
-  "0.0.3":
-    sha256: 72ad0655eead16544645b1724b27a988543fcefd14d46df6e8dfef17d9ba50ac
-    url: https://github.com/AmokHuginnsson/replxx/archive/release-0.0.3.tar.gz
   "0.0.4":
     url: "https://github.com/AmokHuginnsson/replxx/archive/release-0.0.4.tar.gz"
     sha256: "a22988b2184e1d256e2d111b5749e16ffb1accbf757c7b248226d73c426844c4"
+  "0.0.3":
+    url: "https://github.com/AmokHuginnsson/replxx/archive/release-0.0.3.tar.gz"
+    sha256: "72ad0655eead16544645b1724b27a988543fcefd14d46df6e8dfef17d9ba50ac"
+patches:
+  "0.0.4":
+    - patch_file: "patches/0.0.4-0001-fix-export-symbols-windows.patch"
+      patch_description: "Fix export of symbols for Windows"
+      patch_type: "portability"
+      patch_source: "https://github.com/AmokHuginnsson/replxx/pull/151"
+  "0.0.3":
+    - patch_file: "patches/0.0.3-0001-fix-export-symbols-windows.patch"
+      patch_description: "Fix export of symbols for Windows"
+      patch_type: "portability"
+      patch_source: "https://github.com/AmokHuginnsson/replxx/pull/151"

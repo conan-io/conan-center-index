@@ -1,4 +1,16 @@
 sources:
+  "7.06":
+    url: "https://github.com/herumi/xbyak/archive/v7.06.tar.gz"
+    sha256: "686c710a67c7fb8e99d8e326cf22aea310a29db27a9db8ba19a9fee44f8ec097"
+  "7.05":
+    url: "https://github.com/herumi/xbyak/archive/v7.05.tar.gz"
+    sha256: "853b619a6615985dbb36e8c5528d96d83f7bba3d0728ed3b3ee8ac8f4f96d87f"
+  "7.00":
+    url: "https://github.com/herumi/xbyak/archive/v7.00.tar.gz"
+    sha256: "9bc479d99bb3bbd30669813ca9719126fe93ab1bae857bd799d2b16a1fcb4c32"
+  "6.73":
+    url: "https://github.com/herumi/xbyak/archive/v6.73.tar.gz"
+    sha256: "41f3dc7727a48c751024c92fa4da24a4a1e0ed16b7930c79d05b76960b19562d"
   "6.62":
     url: "https://github.com/herumi/xbyak/archive/v6.62.tar.gz"
     sha256: "fd5f074d64cdfcacad3bbe8664727a8eab569f131cadd725a778c028fa6b0ccd"

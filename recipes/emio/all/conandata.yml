@@ -1,0 +1,19 @@
+sources:
+  "0.7.0":
+    url: "https://github.com/viatorus/emio/archive/0.7.0.tar.gz"
+    sha256: "1ef5304964eee109c13477f2d84822ee474612475049a377b59e33a5fe05d7eb"
+  "0.6.1":
+    url: "https://github.com/viatorus/emio/archive/0.6.1.tar.gz"
+    sha256: "118bb67581d68b33d9764e016700014ad63b68520b5786c0d12036f33bcef0dc"
+  "0.6.0":
+    url: "https://github.com/viatorus/emio/archive/0.6.0.tar.gz"
+    sha256: "789c0c1b73d2add1caef9ffd90bc2dd0286e31a0f0f5dc12ff206eb32c394a98"
+  "0.5.0":
+    url: "https://github.com/viatorus/emio/archive/0.5.0.tar.gz"
+    sha256: "14cfa81d96db6ef74b8da7b5d2ffbd26535f2930d0d423e4fde7b526ddb3b308"
+  "0.4.0":
+    url: "https://github.com/viatorus/emio/archive/0.4.0.tar.gz"
+    sha256: "847198a37fbf9dcc00ac85fbc64b283e41a018f53c39363129a4bdb9939338a6"
+  "0.3.0":
+    url: "https://github.com/viatorus/emio/archive/0.3.0.tar.gz"
+    sha256: "d891d0a435a8b71eee78bba46b9abc3848b1c20d61eb747b6059adaf23acce1d"

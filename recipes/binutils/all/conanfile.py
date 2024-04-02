@@ -138,7 +138,7 @@ class BinutilsConan(ConanFile):
             self.tool_requires("flex/2.6.4")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -205,7 +205,10 @@ class BinutilsConan(ConanFile):
         # Add recipe path to enable running the self test in the test package.
         # Don't use this property in production code. It's unsupported.
         self.user_info.recipe_path = os.path.realpath(__file__)
-
+        self.cpp_info.resdirs = ["etc"]
+        self.buildenv_info.define("GPROFNG_SYSCONFDIR", os.path.join(self.package_folder, "etc"))
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.cpp_info.system_libs = ["dl", "rt"]
 
 class _ArchOs:
     def __init__(self, arch: str, os: str, extra: typing.Optional[typing.Dict[str, str]] = None):

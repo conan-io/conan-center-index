@@ -1,0 +1,19 @@
+sources:
+  "1.13.1":
+    url: https://github.com/PointCloudLibrary/pcl/archive/refs/tags/pcl-1.13.1.tar.gz
+    sha256: 8ab98a9db371d822de0859084a375a74bdc7f31c96d674147710cf4101b79621
+patches:
+  "1.13.1":
+    - patch_file: "patches/0001-cmake_use_conan_targets.patch"
+      patch_description: "Update PCL CMake files to work with Conan"
+      patch_type: "conan"
+    - patch_file: "patches/0001-fix-FindOpenNI-bug.patch"
+      patch_description: "Fix a libusb detection bug in FindOpenNI.cmake"
+      patch_type: "bugfix"
+    - patch_file: "patches/0001-Add-Eigen3-Eigen-target-in-pcl_common-target.patch"
+      patch_description: "Add Eigen3::Eigen target to pcl_common target"
+      patch_type: "conan"
+    - patch_file: "patches/0001-ReportFixAboutMemoryConsumptionDuringBuild.patch"
+      patch_description: "MovingLeastSquares: reduce the number of instantiations to reduce compile time"
+      patch_source: "https://github.com/PointCloudLibrary/pcl/pull/5764"
+      patch_type: "conan"

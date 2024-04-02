@@ -1,0 +1,4 @@
+sources:
+  "cci.20230406":
+    url: "https://github.com/emilk/loguru/archive/4adaa185883e3c04da25913579c451d3c32cfac1.tar.gz"
+    sha256: "1424f3ce814fa413e5fbdf2949994d455e3914560f958d2931ba869349a686a8"

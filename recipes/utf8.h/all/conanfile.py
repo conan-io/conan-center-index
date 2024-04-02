@@ -13,6 +13,7 @@ class Utf8HConan(ConanFile):
     description = "Single header utf8 string functions for C and C++"
     topics = ("utf8", "unicode", "text")
     license = "Unlicense"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -23,8 +24,7 @@ class Utf8HConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -36,4 +36,3 @@ class Utf8HConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
