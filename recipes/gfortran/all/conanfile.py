@@ -140,10 +140,9 @@ class GFortranConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "libexec"))
 
-        # Export shared libraries only
-        # libssp_nonshared does not appear to be a critical component.
-        # https://github.com/intc/libssp-nonshared/blob/master/README
-        rm(self, "libssp_nonshared.a", os.path.join(self.package_folder, "lib"))
+        # Don't export static libraries.
+        # This removes only libssp_nonshared.a as of v13.2.
+        rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
         # Drop ar, nm, ranlib, cpp, etc. to not clash with the existing C/C++ toolchain
         for f in self.package_path.joinpath("bin").iterdir():
