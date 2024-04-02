@@ -16,8 +16,8 @@ class LibsndioConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sndio.org/"
     topics = ("sndio", "sound", "audio", "midi")
-    description = "A small audio and MIDI framework that provides a lightweight audio & MIDI server \
-        and a user-space API to access either the server or the hardware directly in a uniform way."
+    description = ("A small audio and MIDI framework that provides a lightweight audio & MIDI server "
+                   "and a user-space API to access either the server or the hardware directly in a uniform way.")
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
