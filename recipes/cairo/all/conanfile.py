@@ -93,7 +93,7 @@ class CairoConan(ConanFile):
         if self.options.get_safe("with_glib", True):
             self.requires("glib/2.76.3")
         self.requires("zlib/1.2.13")
-        self.requires("pixman/0.40.0")
+        self.requires("pixman/0.43.4")
         self.requires("libpng/1.6.40")
 
     def package_id(self):
