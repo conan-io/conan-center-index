@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, copy, rm, rmdir
+from conan.tools.files import get, copy, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -39,6 +39,9 @@ class CBlosc2Conan(ConanFile):
         "with_zstd": True,
         "with_plugins": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -121,6 +124,8 @@ class CBlosc2Conan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
+
         for filename in glob.glob(os.path.join(self.source_folder, "cmake", "Find*.cmake")):
             if os.path.basename(filename) not in [
                 "FindSIMD.cmake",
