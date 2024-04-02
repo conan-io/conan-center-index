@@ -86,7 +86,8 @@ class CprConan(ConanFile):
         # FIXME: This is a very dirty hack.
         # with_ssl == _AUTO_SSL, cpr needs the openssl header to compile. But Conan recipe does not know which SSL library to use.
         # because cpr's CMakeLists.txt automatically detects SSL libraries with CPR_ENABLE_SSL == ON.
-        if (self.settings.os in ["Linux", "FreeBSD"] and self.options.with_ssl == CprConan._AUTO_SSL) or self.options.with_ssl == "openssl":
+        if ((self.settings.os in ["Linux", "FreeBSD", "Android"] and self.options.with_ssl == CprConan._AUTO_SSL) or
+            self.options.with_ssl == "openssl"):
             self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
@@ -102,7 +103,7 @@ class CprConan(ConanFile):
             raise ConanInvalidConfiguration(f"Cannot compile {self.ref} with libstdc++ on clang < 9")
 
         ssl_library = str(self.options.with_ssl)
-        
+
         if ssl_library == "openssl" and is_apple_os(self):
             raise ConanInvalidConfiguration("OpenSSL is not supported on macOS")
         if ssl_library == "darwinssl" and not is_apple_os(self):
