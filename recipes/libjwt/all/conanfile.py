@@ -60,7 +60,10 @@ class LibjwtConan(ConanFile):
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["WITHOUT_OPENSSL"] = self.options.without_openssl
         tc.cache_variables["USE_WINSSL"] = self.options.use_win_ssl
-        tc.cache_variables["ENABLE_PIC"] = self.options.fPIC
+        if "fPIC" in self.options:
+            tc.cache_variables["ENABLE_PIC"] = self.options.fPIC
+        else:
+            tc.cache_variables["ENABLE_PIC"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
