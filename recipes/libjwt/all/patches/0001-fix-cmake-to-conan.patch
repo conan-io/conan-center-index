@@ -1,0 +1,66 @@
+From 36c1986dfa0684b97de86bfc96987fe8cd5e5b70 Mon Sep 17 00:00:00 2001
+From: manx98 <1323517022@qq.com>
+Date: Tue, 2 Apr 2024 12:47:22 +0800
+Subject: [PATCH] fix cmake to conan
+
+---
+ CMakeLists.txt        |  2 +-
+ libjwt/CMakeLists.txt | 15 ++-------------
+ 2 files changed, 3 insertions(+), 14 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 94b4aab..915a666 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -16,7 +16,7 @@ string(REPLACE "\\" "/" CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+ 
+ option (ENABLE_DEBUG_INFO_IN_RELEASE "Enable adding debug info to release build." OFF)
+ option (ENABLE_LTO "Enable link time optimizations." OFF)
+-option (BUILD_EXAMPLES "Build example projects." ON)
++option (BUILD_EXAMPLES "Build example projects." OFF)
+ 
+ if (MSVC)
+ 	option (STATIC_RUNTIME "Link runtome library statically." OFF)
+diff --git a/libjwt/CMakeLists.txt b/libjwt/CMakeLists.txt
+index a6ecd20..30d46de 100644
+--- a/libjwt/CMakeLists.txt
++++ b/libjwt/CMakeLists.txt
+@@ -5,7 +5,6 @@ set (TARGET_NAME ${PROJECT_NAME})
+ option (BUILD_SHARED_LIBS "Build libjwt as shared library instead as static one." OFF)
+ option (WITHOUT_OPENSSL "Use GnuTLS for encryption instead of OpenSSL" OFF)
+ option (USE_WINSSL "Use Windows crypto API for encryption instead of OpenSSL" OFF)
+-option (USE_INSTALLED_JANSSON "Use pre-installed jansson library" ON)
+ 
+ if (UNIX)
+ 	option (ENABLE_PIC "Use position independent code in static library build." OFF)
+@@ -46,17 +45,7 @@ else ()
+ 	set (SSL_LIBRARIES_OPTIMIZED ${OPENSSL_LIBRARIES})
+ endif ()
+ 
+-if (USE_INSTALLED_JANSSON)
+-    PKG_SEARCH_MODULE( JANSSON jansson )
+-else()
+-    FetchContent_Declare(
+-    jansson
+-    GIT_REPOSITORY https://github.com/akheron/jansson.git
+-    GIT_TAG        v2.14
+-    )
+-
+-    FetchContent_MakeAvailable(jansson)
+-endif()
++find_package(jansson REQUIRED)
+ 
+ write_file(${CMAKE_CURRENT_BINARY_DIR}/config.h "")
+ 
+@@ -101,7 +90,7 @@ endif ()
+ 
+ target_link_libraries (${TARGET_NAME}
+ 	debug ${SSL_LIBRARIES_DEBUG} optimized ${SSL_LIBRARIES_OPTIMIZED}
+-	jansson
++	${jansson_LIBRARIES}
+ 	)
+ 
+ install (TARGETS ${TARGET_NAME}
+-- 
+2.34.1
+

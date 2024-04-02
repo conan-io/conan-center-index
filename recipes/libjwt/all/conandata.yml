@@ -1,0 +1,7 @@
+sources:
+  "1.15.3":
+    url: "https://github.com/benmcollins/libjwt/archive/refs/tags/v1.15.3.zip"
+    sha256: "3972f5a64ce399166c9098aed4903f4bd327c0c7f3b386f3a94baa8f0f937df7"
+patches:
+  "1.15.3":
+    - patch_file: patches/0001-fix-cmake-to-conan.patch
