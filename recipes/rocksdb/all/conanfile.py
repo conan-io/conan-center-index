@@ -35,7 +35,7 @@ class RocksDBConan(ConanFile):
         "with_jemalloc": [True, False],
         "enable_sse": [False, "sse42", "avx2"],
         "use_rtti": [True, False],
-        "cxx_header": [True, False],
+        "cxx_headers": [True, False],
     }
     default_options = {
         "shared": False,
