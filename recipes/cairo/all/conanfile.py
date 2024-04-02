@@ -289,8 +289,6 @@ class CairoConan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.components["cairo_"].defines.append("CAIRO_WIN32_STATIC_BUILD=1")
         else:
-            if self.options.with_glib:
-                self.cpp_info.components["cairo_"].requires.extend(["glib::gobject-2.0", "glib::glib-2.0"])
             if self.options.with_fontconfig:
                 self.cpp_info.components["cairo_"].requires.append("fontconfig::fontconfig")
 
@@ -315,7 +313,7 @@ class CairoConan(ConanFile):
         if self.options.get_safe("with_glib", True):
             self.cpp_info.components["cairo-gobject"].set_property("pkg_config_name", "cairo-gobject")
             self.cpp_info.components["cairo-gobject"].libs = ["cairo-gobject"]
-            self.cpp_info.components["cairo-gobject"].requires = ["cairo_", "glib::gobject-2.0", "glib::glib-2.0"]
+            self.cpp_info.components["cairo-gobject"].requires = ["cairo_", "glib::gobject-2.0"]
         if self.settings.os != "Windows":
             if self.options.with_fontconfig:
                 self.cpp_info.components["cairo-fc"].set_property("pkg_config_name", "cairo-fc")
