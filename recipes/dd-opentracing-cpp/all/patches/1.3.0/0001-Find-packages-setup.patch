@@ -26,8 +26,7 @@
  
  # Outputs
 -set(DATADOG_LINK_LIBRARIES ${OPENTRACING_LIB} ${CURL_LIBRARIES} ${ZLIB_LIBRARIES} Threads::Threads)
-+set(DATADOG_LINK_LIBRARIES OpenTracing::OpenTracing CURL::libcurl ${msgpack_LIBRARIES} ZLIB::ZLIB Threads::Threads)
-+include_directories(${msgpack_INCLUDE_DIRS})
++set(DATADOG_LINK_LIBRARIES OpenTracing::OpenTracing CURL::libcurl msgpack-cxx ZLIB::ZLIB Threads::Threads)
  
  ## Shared lib
  if(BUILD_SHARED)
