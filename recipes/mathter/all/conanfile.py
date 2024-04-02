@@ -80,5 +80,5 @@ class MathterConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        if self.options.xsimd:
+        if self.options.get_safe("with_xsimd"):
             self.cpp_info.defines = ["MATHTER_USE_XSIMD=1"]
