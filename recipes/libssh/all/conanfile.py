@@ -67,6 +67,7 @@ class LibSSHRecipe(ConanFile):
         tc.variables["WITH_EXAMPLES"] = False
         tc.variables["WITH_GCRYPT"] = self.options.crypto_backend == "gcrypt"
         tc.variables["WITH_GSSAPI"] = False
+        # TODO: Add support for mbedtls. Package available in Conan Center already.
         tc.variables["WITH_MBEDTLS"] = False
         tc.variables["WITH_NACL"] = False
         tc.variables["WITH_SYMBOL_VERSIONING"] = self.options.get_safe("with_symbol_versioning", True)
