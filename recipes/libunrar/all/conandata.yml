@@ -1,0 +1,4 @@
+sources:
+  "7.0.7":
+    url: "https://www.rarlab.com/rar/unrarsrc-7.0.7.tar.gz"
+    sha256: "da95829c7e66fe461c06eb4bea8145e58d88d76909432d0875cd1ff86669f728"
