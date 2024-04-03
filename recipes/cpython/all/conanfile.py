@@ -661,6 +661,9 @@ class CPythonConan(ConanFile):
             rm(self, "vcruntime*", os.path.join(self.package_folder, "bin"), recursive=True)
         else:
             autotools = Autotools(self)
+            if is_apple_os(self):
+                # FIXME: See https://github.com/python/cpython/issues/109796, this workaround is mentioned there
+                autotools.make(target="sharedinstall", args=["DESTDIR="])
             autotools.install(args=["DESTDIR="])
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
