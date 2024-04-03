@@ -76,23 +76,28 @@ class AerospikeConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         includes = []
-        includes.append(self.deps_cpp_info['openssl'].rootpath)
-        includes.append(self.deps_cpp_info['zlib'].rootpath)
-        lua_include = f"{self.deps_cpp_info['lua'].rootpath}/include"
+        for _, dependency in self.dependencies.items():
+            for path in dependency.cpp_info.includedirs:
+                includes.append(path)
+
+        lua_include = self.dependencies["lua"].cpp_info.includedirs[0]
         event_library = ""
         if self.options.event_library:
             event_library = f"EVENT_LIB={self.options.event_library}"
             includes.append(self.deps_cpp_info[str(
                 self.options.event_library)].rootpath)
-        include_flags = ' '.join([f'-I{i}/include' for i in includes])
+        include_flags = ' '.join([f'-I{i}' for i in includes])
 
         self.run(
             f"make TARGET_BASE='target' {event_library} LUAMOD='{lua_include}' EXT_CFLAGS='{include_flags}' -C {self.source_path}")
 
     def package(self):
-        lib_ext = 'so' if self.options.shared else 'a'
-        copy(self, pattern=f"lib/*.{lib_ext}",
-             src=f'{self.source_folder}/target', dst=self.package_folder)
+        if self.options.shared:
+            copy(self, src=f"{self.source_folder}/target", pattern="lib/*.so*", dst=self.package_folder)
+            copy(self, src=f"{self.source_folder}/target", pattern="lib/*.dylib", dst=self.package_folder)
+        else:
+            copy(self, src=f"{self.source_folder}/target", pattern="lib/*.a", dst=self.package_folder)
+
         copy(self, pattern="*",
              src=f'{self.source_folder}/src/include', dst=f'{self.package_folder}/include')
         copy(self, pattern="*",
