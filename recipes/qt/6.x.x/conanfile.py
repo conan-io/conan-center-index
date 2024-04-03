@@ -651,9 +651,6 @@ class QtConan(ConanFile):
                                   "  if (enable_precompiled_headers) {\n    if (false) {"
                                   )
 
-        replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", "QtInternalTargets.cmake"),
-                              "-Zc:wchar_t",
-                              "-Zc:wchar_t -Zc:twoPhase-")
         for f in ["FindPostgreSQL.cmake"]:
             file = os.path.join(self.source_folder, "qtbase", "cmake", f)
             if os.path.isfile(file):
