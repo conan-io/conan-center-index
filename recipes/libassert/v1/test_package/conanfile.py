@@ -17,7 +17,6 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["LIBASSERT2"] = self.dependencies[self.tested_reference_str].ref.version >= "2.0.0"
         tc.generate()
 
     def build(self):
