@@ -2,9 +2,9 @@ sources:
   "3.12.2":
     url: "https://www.python.org/ftp/python/3.12.2/Python-3.12.2.tgz"
     sha256: "a7c4f6a9dc423d8c328003254ab0c9338b83037bd787d680826a5bf84308116e"
-  "3.11.8":
-    url: "https://www.python.org/ftp/python/3.11.8/Python-3.11.8.tgz"
-    sha256: "d3019a613b9e8761d260d9ebe3bd4df63976de30464e5c0189566e1ae3f61889"
+  "3.11.9":
+    url: "https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz"
+    sha256: "e7de3240a8bc2b1e1ba5c81bf943f06861ff494b69fda990ce2722a504c6153d"
   "3.10.14":
     url: "https://www.python.org/ftp/python/3.10.14/Python-3.10.14.tgz"
     sha256: "cefea32d3be89c02436711c95a45c7f8e880105514b78680c14fe76f5709a0f6"
