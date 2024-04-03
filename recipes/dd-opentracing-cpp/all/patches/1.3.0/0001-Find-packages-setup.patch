@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -34,17 +34,12 @@ include_directories(include)
+@@ -34,16 +34,11 @@
  set(CMAKE_LIBRARY_PATH deps/lib)
  
  # Dependencies
@@ -13,15 +13,14 @@
 +find_package(msgpack REQUIRED CONFIG)
 +find_package(CURL REQUIRED CONFIG)
  find_package(Threads REQUIRED)
- 
+-
 -# Code Sanitizers
 -set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/3rd_party/sanitizers-cmake" ${CMAKE_MODULE_PATH})
 -find_package(Sanitizers)
--
+ 
  # Code
  install(DIRECTORY include/datadog DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
- file(GLOB DD_OPENTRACING_SOURCES "src/*.cpp")
-@@ -58,29 +53,28 @@ else()
+@@ -58,16 +53,16 @@
  endif()
  
  # Outputs
@@ -40,21 +39,16 @@
            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
  endif()
- 
+@@ -75,9 +70,9 @@
  ## Static lib
  if(BUILD_STATIC)
    add_library(dd_opentracing-static STATIC ${DD_OPENTRACING_SOURCES})
 -  add_sanitizers(dd_opentracing-static)
 -  set_target_properties(dd_opentracing-static PROPERTIES OUTPUT_NAME dd_opentracing POSITION_INDEPENDENT_CODE ON)
 -  target_compile_definitions(dd_opentracing PRIVATE DD_OPENTRACING_STATIC)
--  install(TARGETS dd_opentracing-static
--          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
--          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 +  target_link_libraries(dd_opentracing-static ${DATADOG_LINK_LIBRARIES})
 +  set_target_properties(dd_opentracing-static PROPERTIES OUTPUT_NAME dd_opentracing)
 +  target_compile_definitions(dd_opentracing-static PUBLIC DD_OPENTRACING_STATIC)
-+  install(TARGETS dd_opentracing-static)
- endif()
- 
- ## Plugin
-
+   install(TARGETS dd_opentracing-static
+           LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+           ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
