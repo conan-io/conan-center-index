@@ -37,6 +37,8 @@ class AerospikeConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
