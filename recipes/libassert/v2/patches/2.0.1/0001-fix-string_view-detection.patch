@@ -1,5 +1,5 @@
 diff --git a/src/microfmt.hpp b/src/microfmt.hpp
-index 0f750c3..4a0057e 100644
+index 0f750c3..59f5eea 100644
 --- a/src/microfmt.hpp
 +++ b/src/microfmt.hpp
 @@ -10,7 +10,7 @@
@@ -7,7 +7,7 @@ index 0f750c3..4a0057e 100644
  #include <iostream>
  #include <string>
 -#if defined(__cpp_lib_string_view) && __cpp_lib_string_view >= 201606L
-+#if __cplusplus >= 201703L
++#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
  #include <string_view>
  #endif
  #ifdef _MSC_VER
@@ -16,7 +16,7 @@ index 0f750c3..4a0057e 100644
                  uint64_value,
                  string_value,
 -                #if defined(__cpp_lib_string_view) && __cpp_lib_string_view >= 201606L
-+                #if __cplusplus >= 201703L
++                #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
                  string_view_value,
                  #endif
                  c_string_value,
@@ -25,7 +25,7 @@ index 0f750c3..4a0057e 100644
                  std::uint64_t uint64_value;
                  const std::string* string_value;
 -                #if defined(__cpp_lib_string_view) && __cpp_lib_string_view >= 201606L
-+                #if __cplusplus >= 201703L
++                #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
                  std::string_view string_view_value;
                  #endif
                  const char* c_string_value;
@@ -34,7 +34,7 @@ index 0f750c3..4a0057e 100644
              format_value(unsigned long long int_val) : uint64_value(int_val), value(value_type::uint64_value) {}
              format_value(const std::string& string) : string_value(&string), value(value_type::string_value) {}
 -            #if defined(__cpp_lib_string_view) && __cpp_lib_string_view >= 201606L
-+            #if __cplusplus >= 201703L
++            #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
              format_value(std::string_view sv) : string_view_value(sv), value(value_type::string_view_value) {}
              #endif
              format_value(const char* c_string) : c_string_value(c_string), value(value_type::c_string_value) {}
@@ -43,7 +43,7 @@ index 0f750c3..4a0057e 100644
                          do_write(out, string_value->begin(), string_value->end(), options);
                          break;
 -                    #if defined(__cpp_lib_string_view) && __cpp_lib_string_view >= 201606L
-+                    #if __cplusplus >= 201703L
++                    #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
                      case value_type::string_view_value:
                          do_write(out, string_view_value.begin(), string_view_value.end(), options);
                          break;
@@ -52,7 +52,7 @@ index 0f750c3..4a0057e 100644
      }
  
 -    #if defined(__cpp_lib_string_view) && __cpp_lib_string_view >= 201606L
-+    #if __cplusplus >= 201703L
++    #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
      template<typename... Args>
      std::string format(std::string_view fmt, Args&&... args) {
          return detail::format<sizeof...(args)>(fmt.begin(), fmt.end(), {detail::format_value(args)...});
