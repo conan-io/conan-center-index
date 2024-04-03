@@ -1,13 +1,13 @@
 sources:
   "2.1":
-    url: "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-2.1.tar.gz"
-    sha256: "fd6ed4b2c674fe6cc3b481880f6cde1eea79e296e95a139b85401eaaea6de3fc"
+    url: "https://mirrors.edge.kernel.org/pub/software/libs/libgpiod/libgpiod-2.1.tar.gz"
+    sha256: "1f7ddd3d8b1331da8735a88ed6ec55c82c1c469b4c38a118ddcd651db4808d98"
   "2.0.1":
-    url: "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-2.0.1.tar.gz"
-    sha256: "b6eda55356160a8e73906e3d48e959ef81296787d764975b10f257e9660668e9"
+    url: "https://mirrors.edge.kernel.org/pub/software/libs/libgpiod/libgpiod-2.0.1.tar.gz"
+    sha256: "b382c7135d53feb98b33f99fb9c24d61282bcc2658dc32f3be748d9d3dab71cd"
   "1.6.4":
-    url: "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.4.tar.gz"
-    sha256: "829d4ac268df07853609d67cfc7f476e9aa736cb2a68a630be99e8fad197be0a"
+    url: "https://mirrors.edge.kernel.org/pub/software/libs/libgpiod/libgpiod-1.6.4.tar.gz"
+    sha256: "9cc08303a24567546585bfc6cac6ad76654949f56d4024317fc10f1e9dae924c"
   "1.6.3":
-    url: "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.3.tar.gz"
-    sha256: "eb446070be1444fd7d32d32bbca53c2f3bbb0a21193db86198cf6050b7a28441"
+    url: "https://mirrors.edge.kernel.org/pub/software/libs/libgpiod/libgpiod-1.6.3.tar.gz"
+    sha256: "0e6f375e2c748d518c1c960c967cf84c154a00501850861343203a0e34d217b7"
