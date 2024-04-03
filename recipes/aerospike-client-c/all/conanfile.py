@@ -77,6 +77,7 @@ class AerospikeConan(ConanFile):
         apply_conandata_patches(self)
         includes = []
         includes.append(self.deps_cpp_info['openssl'].rootpath)
+        includes.append(self.deps_cpp_info['zlib'].rootpath)
         lua_include = f"{self.deps_cpp_info['lua'].rootpath}/include"
         event_library = ""
         if self.options.event_library:
