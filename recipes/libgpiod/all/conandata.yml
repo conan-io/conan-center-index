@@ -1,4 +1,7 @@
 sources:
+  "2.1.1":
+    url: "https://mirrors.edge.kernel.org/pub/software/libs/libgpiod/libgpiod-2.1.1.tar.gz"
+    sha256: "dc03781a4571a95df29908cd0d308692f398f55dfa14c9dc9d555c664a9ee97f"
   "2.1":
     url: "https://mirrors.edge.kernel.org/pub/software/libs/libgpiod/libgpiod-2.1.tar.gz"
     sha256: "1f7ddd3d8b1331da8735a88ed6ec55c82c1c469b4c38a118ddcd651db4808d98"
