@@ -209,6 +209,7 @@ required_for_references:
 - cose-c
 - cotila
 - coz
+- cpp-channel
 - cpp-httplib
 - cpp-ipc
 - cpp-jwt
@@ -632,6 +633,7 @@ required_for_references:
 - libbacktrace
 - libbasisu
 - libbigwig
+- libboxes
 - libbpf
 - libbsd
 - libcap
@@ -677,6 +679,7 @@ required_for_references:
 - libfreenect
 - libfreenect2
 - libftdi
+- libftp
 - libfuse
 - libgcrypt
 - libgd

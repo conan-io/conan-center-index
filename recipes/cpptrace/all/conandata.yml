@@ -1,5 +1,9 @@
 sources:
   # Newer versions at the top
+  "0.5.2":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.2.tar.gz"
+    sha256: "d148998e175b9c69ffb4383ab321a0d27487392e4eee3f39441d35b6856c8f78"
   "0.5.1":
     url:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.1.tar.gz"
@@ -29,6 +33,11 @@ sources:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.2.1.tar.gz"
     sha256: "3184f404c61b6b8ba6fe7c64fc40d1c3d6d87df59bcacf1845d846101bc22f9a"
 patches:
+  "0.5.2":
+    - patch_file: "patches/0.5.2/0001-msvc-bug.patch"
+      patch_type: "official"
+      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/599d6abd6cc74e80e8429fc309247be5f7edd5d7"
+      patch_description: "Workaround bug for old msvc"
   "0.4.0":
     - patch_file: "patches/0.4.0/0001-libdwarf_path.patch"
       patch_type: "conan"

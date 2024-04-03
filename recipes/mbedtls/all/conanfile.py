@@ -100,6 +100,7 @@ class MBedTLSConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
@@ -110,16 +111,22 @@ class MBedTLSConan(ConanFile):
         self.cpp_info.components["mbedcrypto"].libs = ["mbedcrypto"]
         if self.settings.os == "Windows":
             self.cpp_info.components["mbedcrypto"].system_libs = ["bcrypt"]
+        if Version(self.version) >= "3.6.0":
+            self.cpp_info.components["mbedcrypto"].set_property("pkg_config_name", "mbedcrypto")
 
         self.cpp_info.components["mbedx509"].set_property("cmake_target_name", "MbedTLS::mbedx509")
         self.cpp_info.components["mbedx509"].libs = ["mbedx509"]
         if self.settings.os == "Windows":
             self.cpp_info.components["mbedx509"].system_libs = ["ws2_32"]
         self.cpp_info.components["mbedx509"].requires = ["mbedcrypto"]
+        if Version(self.version) >= "3.6.0":
+            self.cpp_info.components["mbedx509"].set_property("pkg_config_name", "mbedx509")
 
         self.cpp_info.components["libembedtls"].set_property("cmake_target_name", "MbedTLS::mbedtls")
         self.cpp_info.components["libembedtls"].libs = ["mbedtls"]
         self.cpp_info.components["libembedtls"].requires = ["mbedx509"]
+        if Version(self.version) >= "3.6.0":
+            self.cpp_info.components["libembedtls"].set_property("pkg_config_name", "embedtls")
 
         if self.options.get_safe("with_zlib"):
             for component in self.cpp_info.components:
