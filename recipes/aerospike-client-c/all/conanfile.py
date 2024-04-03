@@ -1,9 +1,9 @@
 import os
 
 from conan import ConanFile
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.files import copy, apply_conandata_patches, export_conandata_patches
-from conan.tools.scm.git import Git
+from conan.tools.scm import git
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.57.0"
@@ -61,14 +61,14 @@ class AerospikeConan(ConanFile):
         basic_layout(self, src_folder='src')
 
     def source(self):
-        git = Git(self)
+        repo = git.Git(self)
         clone_args = ['--depth', '1', '--branch',
                       self.version, '--single-branch', '.']
-        git.clone(self.conan_data["sources"]
+        repo.clone(self.conan_data["sources"]
                   [self.version]['url'], args=clone_args)
-        if git.get_commit() != self.conan_data["sources"][self.version]['sha256']:
+        if repo.get_commit() != self.conan_data["sources"][self.version]['sha256']:
             raise ConanException("tag {} commit sha256 {} do not match with provided in conandata.yml: {}".format(
-                self.version, git.get_commit(), self.conan_data["sources"][self.version]['sha256']))
+                self.version, repo.get_commit(), self.conan_data["sources"][self.version]['sha256']))
         self.run('git submodule update --init --recursive')
 
     def build(self):
