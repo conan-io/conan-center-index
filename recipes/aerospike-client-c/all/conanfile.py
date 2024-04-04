@@ -88,8 +88,19 @@ class AerospikeConan(ConanFile):
                 self.options.event_library)].rootpath)
         include_flags = ' '.join([f'-I{i}' for i in includes])
 
+        ld_flags = ""
+        if self.options.shared:
+            libs = []
+            for _, dependency in self.dependencies.items():
+                for dir in dependency.cpp_info.libdirs:
+                    for lib in os.listdir(dir):
+                        if lib.endswith(".a"):
+                            libs.append(os.path.join(dir, lib))
+            libs_str = " ".join(libs)
+            ld_flags = f"LDFLAGS='{libs_str}'"
+
         self.run(
-            f"make TARGET_BASE='target' {event_library} LUAMOD='{lua_include}' EXT_CFLAGS='{include_flags}' -C {self.source_path}")
+            f"make TARGET_BASE='target' {event_library} {ld_flags} LUAMOD='{lua_include}' EXT_CFLAGS='{include_flags}' -C {self.source_path}")
 
     def package(self):
         if self.options.shared:
