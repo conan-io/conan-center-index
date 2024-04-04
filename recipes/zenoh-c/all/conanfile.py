@@ -12,6 +12,8 @@ class ZenohCConan(ConanFile):
     license = "EPL-2.0 OR Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eclipse-zenoh/zenoh-c"
+    topics = ("networking", "pub-sub", "messaging", "robotics", "ros2", "iot", "edge-computing", "micro-controllers")
+
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
