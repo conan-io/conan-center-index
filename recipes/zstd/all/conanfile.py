@@ -65,10 +65,6 @@ class ZstdConan(ConanFile):
         # Don't force PIC
         replace_in_file(self, os.path.join(self.source_folder, "build", "cmake", "lib", "CMakeLists.txt"),
                               "POSITION_INDEPENDENT_CODE On", "")
-        if Version(self.version) >= "1.5.6":
-            replace_in_file(self, os.path.join(self.source_folder, "build", "cmake", "lib", "CMakeLists.txt"),
-                                  "target_include_directories(libzstd_shared INTERFACE $<BUILD_INTERFACE:${PUBLIC_INCLUDE_DIRS}>)",
-                                  "target_include_directories(libzstd_shared PUBLIC $<BUILD_INTERFACE:${PUBLIC_INCLUDE_DIRS}>)")
 
     def build(self):
         self._patch_sources()
