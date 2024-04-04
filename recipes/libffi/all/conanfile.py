@@ -78,10 +78,11 @@ class LibffiConan(ConanFile):
         if self._settings_build.compiler == "apple-clang":
             tc.configure_args.append("--disable-multi-os-directory")
 
-        tc.extra_defines.append("FFI_BUILDING")
         if self.options.shared:
             tc.extra_defines.append("FFI_BUILDING_DLL")
-        elif Version(self.version) >= "3.4.6":
+        if Version(self.version) < "3.4.6":
+            tc.extra_defines.append("FFI_BUILDING")
+        elif not self.options.shared:
             tc.extra_defines.append("FFI_STATIC_BUILD")
 
         env = tc.environment()
