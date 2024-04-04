@@ -81,6 +81,8 @@ class LibffiConan(ConanFile):
         tc.extra_defines.append("FFI_BUILDING")
         if self.options.shared:
             tc.extra_defines.append("FFI_BUILDING_DLL")
+        elif Version(self.version) >= "3.4.6":
+            tc.extra_defines.append("FFI_STATIC_BUILD")
 
         env = tc.environment()
         if self._settings_build.os == "Windows" and (is_msvc(self) or self.settings.compiler == "clang"):
@@ -170,4 +172,5 @@ class LibffiConan(ConanFile):
         self.cpp_info.libs = ["{}ffi".format("lib" if is_msvc(self) else "")]
         self.cpp_info.set_property("pkg_config_name", "libffi")
         if not self.options.shared:
-            self.cpp_info.defines = ["FFI_BUILDING"]
+            static_define = "FFI_STATIC_BUILD" if Version(self.version) >= "3.4.6" else "FFI_BUILDING"
+            self.cpp_info.defines = [static_define]
