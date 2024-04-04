@@ -1,5 +1,10 @@
 # Changelog
 
+### 03-April-2024 - 13:53 CEST
+
+- [feature] Add support for Conan 2.2.2 in the CI
+- [feature] Add support for Conan 1.63.0 in the CI
+
 ### 20-March-2024 - 11:13 CET
 
 - [fix] Changing Version Ranges in dependencies is now bump dependencies
