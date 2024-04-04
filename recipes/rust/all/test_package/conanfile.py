@@ -23,8 +23,11 @@ class TestPackageConan(ConanFile):
             VCVars(self).generate()
 
         env = Environment()
-        env.define_path("CARGO_TARGET_DIR", self.build_folder)
-        env.vars(self).save_script("cargo_target_dir")
+        # Don't add Cargo dependencies to the global Cargo cache
+        env.define_path("CARGO_HOME", os.path.join(self.build_folder, "cargo"))
+        # Output location of the built binaries
+        env.define_path("CARGO_TARGET_DIR", self.cpp.build.bindir)
+        env.vars(self).save_script("cargo_build_env")
 
     def build(self):
         if can_run(self):
