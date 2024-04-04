@@ -1,68 +1,68 @@
 # Hashes can be updated with https://gist.github.com/valgur/f94bc2cf455daf081095f6088551c24e
 sources:
-  "1.73.0":
+  "1.77.0":
     Macos:
       armv8:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-aarch64-apple-darwin.tar.gz"
-        sha256: "9c96e4c57328fb438ee2d87aa75970ce89b4426b49780ccb3c16af0d7c617cc6"
+        url: "https://static.rust-lang.org/dist/rust-1.77.0-aarch64-apple-darwin.tar.gz"
+        sha256: "8a0c1b5344acfc91cf12351cc5668b2fc0ff2e96b69aba1510c9dedf86185988"
       x86_64:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-x86_64-apple-darwin.tar.gz"
-        sha256: "ece9646bb153d4bc0f7f1443989de0cbcd8989a7d0bf3b7fb9956e1223954f0c"
+        url: "https://static.rust-lang.org/dist/rust-1.77.0-x86_64-apple-darwin.tar.gz"
+        sha256: "06a8e3b00248b80bc70c859a0fc652f337d53cff11dab49e7f07db4206d28ae7"
     Windows:
       msvc:
         armv8:
-          url: "https://static.rust-lang.org/dist/rust-1.73.0-aarch64-pc-windows-msvc.tar.gz"
-          sha256: "ea36179b1da415d8c4756885b698b5ba14e77c092bf7bfff5e7fdfbc899ffd78"
+          url: "https://static.rust-lang.org/dist/rust-1.77.0-aarch64-pc-windows-msvc.tar.gz"
+          sha256: "5f7b29d56ab92a025598f3b88aa32db2650e78f0ce6ba7b801a6a0b12e8dfa79"
         x86:
-          url: "https://static.rust-lang.org/dist/rust-1.73.0-i686-pc-windows-msvc.tar.gz"
-          sha256: "985dcae82e154e662d78a03df637339b679120bb92acd34401e9d33c5b1156dc"
+          url: "https://static.rust-lang.org/dist/rust-1.77.0-i686-pc-windows-msvc.tar.gz"
+          sha256: "a84e78be31b974e0b676e0930294d971223cca850ea22fde4f133aab766e363f"
         x86_64:
-          url: "https://static.rust-lang.org/dist/rust-1.73.0-x86_64-pc-windows-msvc.tar.gz"
-          sha256: "d6b0db0acc5ffef638ffb7bfc0497381ffa41d5935a1115230c34db6c6f1ab20"
+          url: "https://static.rust-lang.org/dist/rust-1.77.0-x86_64-pc-windows-msvc.tar.gz"
+          sha256: "4de7b3785480b20bae1d2b0f3402ca2acb9c46439400152f62d0de4dbb47390d"
       gcc:
         x86:
-          url: "https://static.rust-lang.org/dist/rust-1.73.0-i686-pc-windows-gnu.tar.gz"
-          sha256: "7b703658fb5c55ed74d79a75229a34fc6de23383dec39bfcc65ed9b106bf1f5d"
+          url: "https://static.rust-lang.org/dist/rust-1.77.0-i686-pc-windows-gnu.tar.gz"
+          sha256: "ecf5fe03e2ecc92cfcd17bd5129f60691e2948ec734e57c7ae64953e4d56b523"
         x86_64:
-          url: "https://static.rust-lang.org/dist/rust-1.73.0-x86_64-pc-windows-gnu.tar.gz"
-          sha256: "801f159f8e1959301583abb167ffbcf28a6ce01671c67570415a45b39aa017d4"
+          url: "https://static.rust-lang.org/dist/rust-1.77.0-x86_64-pc-windows-gnu.tar.gz"
+          sha256: "f7a9711b4546715906bb9448ec6b055e86140b7e52a3e353a65397316f22ed90"
     Linux:
       armv8:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-aarch64-unknown-linux-gnu.tar.gz"
-        sha256: "e54d7d886ba413ae573151f668e76ea537f9a44406d3d29598269a4a536d12f6"
+        url: "https://static.rust-lang.org/dist/rust-1.77.0-aarch64-unknown-linux-gnu.tar.gz"
+        sha256: "df4630b250c53227649214fa5d57240217686e86bf502e5de0402d3264cb74d8"
       x86:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-i686-unknown-linux-gnu.tar.gz"
-        sha256: "6a088acbbda734d27e8b431499f1d746de7781673b88fead3aeae072be1d1a5a"
+        url: "https://static.rust-lang.org/dist/rust-1.77.0-i686-unknown-linux-gnu.tar.gz"
+        sha256: "45e434c8955f8573c22fc1a70355dff4a681c28a9bce95a3f2c8685381323f98"
       x86_64:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-x86_64-unknown-linux-gnu.tar.gz"
-        sha256: "aa4cf0b7e66a9f5b7c623d4b340bb1ac2864a5f2c2b981f39f796245dc84f2cb"
+        url: "https://static.rust-lang.org/dist/rust-1.77.0-x86_64-unknown-linux-gnu.tar.gz"
+        sha256: "cbdd1b93046ea4aed974016e328cb09ad0b8ee96893bd5d548fd3e7907607c75"
       # https://doc.rust-lang.org/nightly/rustc/platform-support.html#tier-2-with-host-tools
       armv6:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-arm-unknown-linux-gnueabi.tar.gz"
-        sha256: "92e43664c9578309c7ac867fae3ae270e1ecbb9c042e3a52f456360e8eaf5eb5"
+        url: "https://static.rust-lang.org/dist/rust-1.77.0-arm-unknown-linux-gnueabi.tar.gz"
+        sha256: "d2b476e746e8e6079027d7f8a8687508c8bf7d26c4aefe47243fed8a5484ba41"
       armv6hf:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-arm-unknown-linux-gnueabihf.tar.gz"
-        sha256: "9c29bb42786aedbb16ea71564eb06068a8b01cca6c6b8857f0c37f91dfba7134"
+        url: "https://static.rust-lang.org/dist/rust-1.77.0-arm-unknown-linux-gnueabihf.tar.gz"
+        sha256: "d5df253085b6bafce5eb1d36593450622e4775b1204f6d28ec50a592761e90b5"
       armv7hf:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-armv7-unknown-linux-gnueabihf.tar.gz"
-        sha256: "092b32b82c602c18279d76d9a96763e85030aa62cda64c1bc73fc1f6355bb99c"
+        url: "https://static.rust-lang.org/dist/rust-1.77.0-armv7-unknown-linux-gnueabihf.tar.gz"
+        sha256: "e5f90dc1a4d7d093d202f53ab349c494164b5e323e53608ea039779e71715baa"
       ppc64:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-powerpc64-unknown-linux-gnu.tar.gz"
-        sha256: "5bff0143a2c2a7511312f25b1907310bf70d87e7ee1451cd2b6e934365539c7b"
+        url: "https://static.rust-lang.org/dist/rust-1.77.0-powerpc64-unknown-linux-gnu.tar.gz"
+        sha256: "2c9b5d98a7d730ceba7df6571903f3d19fbb9f1827be147531d33137ab4810cf"
       ppc64le:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-powerpc64le-unknown-linux-gnu.tar.gz"
-        sha256: "8fa215ee3e274fb64364e7084613bc570369488fa22cf5bc8e0fe6dc810fe2b9"
+        url: "https://static.rust-lang.org/dist/rust-1.77.0-powerpc64le-unknown-linux-gnu.tar.gz"
+        sha256: "8593c41db9f01688ea290286aa2910462c91879ec23a6faece1a682b69436651"
       s390x:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-s390x-unknown-linux-gnu.tar.gz"
-        sha256: "e671cb9dcde4ce37a6f97c4ee7ec9be6cf8012ac2df54f1b1d48738484cc87fe"
+        url: "https://static.rust-lang.org/dist/rust-1.77.0-s390x-unknown-linux-gnu.tar.gz"
+        sha256: "efe4ea653ae1b95c72f53a352cc9a5e61fd86025a8ca469eb529df02ce2d6c1b"
       riscv64:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-riscv64gc-unknown-linux-gnu.tar.gz"
-        sha256: "381379a2381835428b2e7a396b3046581517356b7cc851e39e385aebd5700623"
+        url: "https://static.rust-lang.org/dist/rust-1.77.0-riscv64gc-unknown-linux-gnu.tar.gz"
+        sha256: "0eb06cfed3972a45d4e7e6bac7a63d9289df8c8924d932fcf8cdcde1719b821c"
     FreeBSD:
       x86_64:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-x86_64-unknown-freebsd.tar.gz"
-        sha256: "f13b2c1c84aab582f963af135e8b410bc19d372eaf0e1540773a24bfbcfafa7f"
+        url: "https://static.rust-lang.org/dist/rust-1.77.0-x86_64-unknown-freebsd.tar.gz"
+        sha256: "b0be53659b713dd98bfd6723db60d9d879afc6ae65eb697bed2d892b871986c2"
     NetBSD:
       x86_64:
-        url: "https://static.rust-lang.org/dist/rust-1.73.0-x86_64-unknown-netbsd.tar.gz"
-        sha256: "667f93b465747183561c9507a68a78ac7854ed6b808ca79ec2901e1ef219d464"
+        url: "https://static.rust-lang.org/dist/rust-1.77.0-x86_64-unknown-netbsd.tar.gz"
+        sha256: "05e5a3acc9fbb45bff558fa7f044c50c1ec92ed3fc9de10eb799b3e5ffdec5dd"
