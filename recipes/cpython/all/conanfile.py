@@ -328,9 +328,6 @@ class CPythonConan(ConanFile):
                         '<ProjectReference Include="sqlite3.vcxproj">',
                         '<ProjectReference Include="sqlite3.vcxproj" Condition="False">')
 
-        # TODO I think this line can be removed
-        replace_in_file(self, self._msvc_project_path("_lzma"), "<PreprocessorDefinitions>", "<PreprocessorDefinitions>$(ConanPreprocessorDefinitions);")
-
         # Remove hardcoded reference to lzma library
         replace_in_file(self, self._msvc_project_path("_lzma"), "<AdditionalDependencies>$(OutDir)liblzma$(PyDebugExt).lib;", "<AdditionalDependencies>")
         # Don't include vendored lzma
@@ -385,7 +382,7 @@ class CPythonConan(ConanFile):
                             "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"$(Configuration) == 'Debug' or $(Configuration) == 'Release'\"",
                             "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"False\"")
 
-        # Remove vendored openssl file (TODO: verify)
+        # Remove vendored openssl file
         replace_in_file(self, self._msvc_project_path("_ssl"),
                         r'<ClCompile Include="$(opensslIncludeDir)\applink.c">',
                         r'<ClCompile Include="$(opensslIncludeDir)\applink.c" Condition="False">')
