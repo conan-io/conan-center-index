@@ -17,7 +17,7 @@ sources:
 patches:
   "3.4.6":
     - patch_file: "patches/0002-3.4.6-fix-libtool-path.patch"
-    - patch_file: "patches/0004-3.3.6-fix-complex-type-msvc.patch"
+    - patch_file: "patches/0004-3.4.6-fix-complex-type-msvc.patch"
     - patch_file: "patches/0005-3.4.4-do-not-install-libraries-to-arch-dependent-directories.patch"
     - patch_file: "patches/0006-3.4.6-library-no-version-suffix.patch"
   "3.4.4":
