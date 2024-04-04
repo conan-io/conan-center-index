@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout
+from conan.tools.env import Environment
 from conan.tools.microsoft import VCVars, is_msvc
 
 
@@ -21,10 +22,13 @@ class TestPackageConan(ConanFile):
         if is_msvc(self):
             VCVars(self).generate()
 
+        env = Environment()
+        env.define_path("CARGO_TARGET_DIR", self.build_folder)
+        env.vars(self).save_script("cargo_target_dir")
+
     def build(self):
         if can_run(self):
             self.run("rustc --version")
-            os.environ["CARGO_TARGET_DIR"] = "."
             self.run("cargo build --release")
 
     def test(self):
