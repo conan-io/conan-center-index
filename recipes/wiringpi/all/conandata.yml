@@ -1,4 +1,7 @@
 sources:
+  "3.2":
+    url: "https://github.com/WiringPi/WiringPi/archive/refs/tags/3.2.tar.gz"
+    sha256: "45aeaf52d86631edb7a5c82a4f6d0050ef10c8b4de6c566cd8017fc52a17b68e"
   "2.61-1":
     url: "https://github.com/WiringPi/WiringPi/archive/refs/tags/2.61-1.tar.gz"
     sha256: "b5dc6c6c2ba1349acf602fafd7b58aa81e3fc3216a33b983386264cca0033e12"
