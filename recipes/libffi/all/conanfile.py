@@ -142,22 +142,9 @@ class LibffiConan(ConanFile):
             env.define("INSTALL", unix_path(self, os.path.join(self.source_folder, "install-sh")))
         tc.generate(env=env)
 
-    def _patch_source(self):
+    def build(self):
         apply_conandata_patches(self)
 
-        if Version(self.version) < "3.3":
-            if self.settings.compiler == "clang" and Version(str(self.settings.compiler.version)) >= 7.0:
-                # https://android.googlesource.com/platform/external/libffi/+/ca22c3cb49a8cca299828c5ffad6fcfa76fdfa77
-                sysv_s_src = os.path.join(self.source_folder, "src", "arm", "sysv.S")
-                replace_in_file(self, sysv_s_src, "fldmiad", "vldmia")
-                replace_in_file(self, sysv_s_src, "fstmiad", "vstmia")
-                replace_in_file(self, sysv_s_src, "fstmfdd\tsp!,", "vpush")
-
-                # https://android.googlesource.com/platform/external/libffi/+/7748bd0e4a8f7d7c67b2867a3afdd92420e95a9f
-                replace_in_file(self, sysv_s_src, "stmeqia", "stmiaeq")
-
-    def build(self):
-        self._patch_source()
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
