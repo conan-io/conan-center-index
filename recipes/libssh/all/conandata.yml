@@ -7,3 +7,6 @@ patches:
     - patch_file: patches/0.10.6-0001-fix-cmake.patch
       patch_description: "cmake: fix OpenSSL compatibility checks, fix ZLIB targets"
       patch_type: "conan"
+    - patch_file: patches/0.10.6-0002-fix-cmake.patch
+      patch_description: "cmake: fix MbedTLS and GCrypt compatibility"
+      patch_type: "conan"

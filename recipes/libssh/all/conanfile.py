@@ -21,7 +21,7 @@ class LibSSHRecipe(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_zlib": [True, False],
-        "crypto_backend": ["openssl", "gcrypt"],
+        "crypto_backend": ["openssl", "gcrypt", "mbedtls"],
         "with_symbol_versioning": [True, False],
     }
     default_options = {
@@ -56,6 +56,8 @@ class LibSSHRecipe(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         elif self.options.crypto_backend == "gcrypt":
             self.requires("libgcrypt/1.8.4")
+        elif self.options.crypto_backend == "mbedtls":
+            self.requires("mbedtls/3.6.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -67,8 +69,7 @@ class LibSSHRecipe(ConanFile):
         tc.variables["WITH_EXAMPLES"] = False
         tc.variables["WITH_GCRYPT"] = self.options.crypto_backend == "gcrypt"
         tc.variables["WITH_GSSAPI"] = False
-        # TODO: Add support for mbedtls. Package available in Conan Center already.
-        tc.variables["WITH_MBEDTLS"] = False
+        tc.variables["WITH_MBEDTLS"] = self.options.crypto_backend == "mbedtls"
         tc.variables["WITH_NACL"] = False
         tc.variables["WITH_SYMBOL_VERSIONING"] = self.options.get_safe("with_symbol_versioning", True)
         tc.variables["WITH_ZLIB"] = self.options.with_zlib
