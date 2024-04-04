@@ -1,21 +1,28 @@
 # Set the dependency flags expected by https://github.com/facebook/folly/blob/v2023.12.18.00/CMake/folly-deps.cmake
 
-macro(custom_find_package name var)
-    find_package(${name} ${ARGN}
+macro(custom_find_package package_name variable_prefix)
+    find_package(${package_name} ${ARGN}
         # Allow only Conan packages
         NO_DEFAULT_PATH
         PATHS ${CMAKE_PREFIX_PATH}
     )
-    set(${var}_FOUND TRUE)
-    set(${var}_VERSION ${${name}_VERSION})
-    set(${var}_VERSION_STRING ${${name}_VERSION_STRING})
-    set(${var}_INCLUDE_DIRS ${${name}_INCLUDE_DIRS})
-    set(${var}_INCLUDE_DIR ${${name}_INCLUDE_DIR})
-    set(${var}_INCLUDE ${${name}_INCLUDE_DIR})
-    set(${var}_LIB ${${name}_LIBRARIES})
-    set(${var}_LIBRARY ${${name}_LIBRARIES})
-    set(${var}_LIBRARIES ${${name}_LIBRARIES})
-    set(${var}_DEFINITIONS ${${name}_DEFINITIONS})
+    list(APPEND FROM FOUND VERSION VERSION_STRING INCLUDE_DIRS INCLUDE_DIR INCLUDE_DIR LIBRARIES LIBRARIES LIBRARIES DEFINITIONS)
+    list(APPEND TO   FOUND VERSION VERSION_STRING INCLUDE_DIRS INCLUDE_DIR INCLUDE     LIB       LIBRARY   LIBRARIES DEFINITIONS)
+
+    foreach (from_substr to_substr IN ZIP_LISTS FROM TO)
+        set(src_var ${package_name}_${from_substr})
+        set(dst_var ${variable_prefix}_${to_substr})
+        if (NOT DEFINED ${src_var})
+            # if Conan doesn't define any content for one of the properties
+            continue()
+        endif()
+        if ((DEFINED ${dst_var}) AND ("${${dst_var}}" STREQUAL "${${src_var}}"))
+            # if they're equal, skip
+            continue()
+        endif()
+        message(STATUS "custom_find_package definining ${dst_var} with ${src_var} contents: ${${src_var}}")
+        set(${dst_var} ${${src_var}})
+    endforeach()
 endmacro()
 
 custom_find_package(BZip2 BZIP2)
