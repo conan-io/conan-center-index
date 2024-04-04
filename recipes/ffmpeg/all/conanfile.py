@@ -679,6 +679,12 @@ class FFMpegConan(ConanFile):
             env.append("LDFLAGS", [f"-LIBPATH:{unix_path(self, p)}" for p in libdirs] + linkflags)
             env.append("CXXFLAGS", cxxflags)
             env.append("CFLAGS", cflags)
+            pkg_config_path = env.vars(self).get("PKG_CONFIG_PATH")
+            if pkg_config_path is None:
+                env.define_path("PKG_CONFIG_PATH", self.generators_folder)
+            else:
+                env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
+
             env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
         else:
             deps = AutotoolsDeps(self)
@@ -686,6 +692,7 @@ class FFMpegConan(ConanFile):
 
         deps = PkgConfigDeps(self)
         deps.generate()
+
 
     def _split_and_format_options_string(self, flag_name, options_list):
         if not options_list:
