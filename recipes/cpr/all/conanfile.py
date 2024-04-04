@@ -109,16 +109,6 @@ class CprConan(ConanFile):
             if ssl_library == "winssl" and self.settings.os != "Windows":
                 raise ConanInvalidConfiguration("WinSSL is only on Windows")
 
-            if ssl_library != "winssl" and ssl_library != self.dependencies["libcurl"].options.with_ssl:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref}:with_ssl={self.options.with_ssl} requires libcurl:with_ssl={self.options.with_ssl}"
-                )
-
-            if ssl_library == "winssl" and self.dependencies["libcurl"].options.with_ssl != "schannel":
-                raise ConanInvalidConfiguration(
-                    f"{self.ref}:with_ssl=winssl requires libcurl:with_ssl=schannel"
-                )
-
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
@@ -142,9 +132,7 @@ class CprConan(ConanFile):
         tc.variables["CPR_FORCE_OPENSSL_BACKEND"] = (self.options.with_ssl == "openssl")
         tc.variables["CPR_FORCE_WINSSL_BACKEND"] = (self.options.with_ssl == "winssl")
         tc.variables["CMAKE_USE_OPENSSL"] = (self.options.with_ssl == "openssl")
-        # If we are on a version where disabling SSL requires a cmake option, disable it
-        if not self.options.with_ssl:
-            tc.variables["CPR_ENABLE_SSL"] = False
+        tc.variables["CPR_ENABLE_SSL"] = bool(self.options.with_ssl)
 
         if self.options.get_safe("verbose_logging", False):
             tc.variables["CURL_VERBOSE_LOGGING"] = True
