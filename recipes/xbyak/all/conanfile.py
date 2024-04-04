@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.50.0"
@@ -23,6 +24,10 @@ class XbyakConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
+
+    def validate(self):
+        if self.settings.arch not in ("x86", "x86_64"):
+            raise ConanInvalidConfiguration(f"{self.ref} is only available for x86 and x86_64 architecture")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

@@ -1,0 +1,4 @@
+sources:
+  "0.5.0":
+    url: "https://github.com/mapbox/wagyu/archive/refs/tags/0.5.0.tar.gz"
+    sha256: "88c41eaba03107ebe79052fdbd66e419e903d331a2616a51849018e13648ab83"
