@@ -1,5 +1,6 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -42,6 +43,10 @@ class LibffiConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+    
+    def validate(self):
+        if is_apple_os(self) and self.settings.arch == "armv8" and Version(self.version) < "3.4.0":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Apple ARM CPUs")
 
     def configure(self):
         if self.options.shared:
