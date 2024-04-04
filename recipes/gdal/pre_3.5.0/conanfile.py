@@ -204,13 +204,13 @@ class GdalConan(ConanFile):
         self.requires("json-c/0.17")
         self.requires("libgeotiff/1.7.1")
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
-        self.requires("libtiff/4.5.1")
-        self.requires("proj/9.2.1")
+        self.requires("libtiff/4.6.0")
+        self.requires("proj/9.3.1")
         self.requires("flatbuffers/2.0.5")
         if self.options.get_safe("with_zlib", True):
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_libdeflate:
-            self.requires("libdeflate/1.18")
+            self.requires("libdeflate/1.19")
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
         if self.options.get_safe("with_zstd"):
@@ -286,7 +286,7 @@ class GdalConan(ConanFile):
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.42.0")
+            self.requires("sqlite3/3.44.2")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
