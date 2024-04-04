@@ -117,9 +117,11 @@ class LibPcapConan(ConanFile):
                 "--disable-dbus",
                 "--disable-rdma",
             ])
+            
             snf = self.options.get_safe("with_snf")
             if snf:
                 tc.configure_args.append(f"--with-snf={yes_no(snf)}")
+            
             if cross_building(self):
                 target_os = "linux" if self.settings.os == "Linux" else "null"
                 tc.configure_args.append(f"--with-pcap={target_os}")
