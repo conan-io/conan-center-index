@@ -90,6 +90,7 @@ required_for_references:
 - bdwgc
 - bear
 - beauty
+- behaviortree.cpp
 - benchmark
 - bertrand
 - bezier
@@ -208,6 +209,7 @@ required_for_references:
 - cose-c
 - cotila
 - coz
+- cpp-channel
 - cpp-httplib
 - cpp-ipc
 - cpp-jwt
@@ -236,6 +238,7 @@ required_for_references:
 - cprocessing
 - cpu_features
 - cpuinfo
+- cpython
 - cqrlib
 - crc32c
 - crc_cpp
@@ -533,6 +536,7 @@ required_for_references:
 - id3v2lib
 - idna
 - ignition-cmake
+- iguana
 - iir1
 - im95able-rea
 - imagl
@@ -629,6 +633,7 @@ required_for_references:
 - libbacktrace
 - libbasisu
 - libbigwig
+- libboxes
 - libbpf
 - libbsd
 - libcap
@@ -670,9 +675,11 @@ required_for_references:
 - libexif
 - libfdk_aac
 - libffi
+- libfork
 - libfreenect
 - libfreenect2
 - libftdi
+- libftp
 - libfuse
 - libgcrypt
 - libgd
@@ -690,6 +697,7 @@ required_for_references:
 - libiberty
 - libiconv
 - libid3tag
+- libinput
 - libinterpolate
 - libipt
 - libjpeg
@@ -893,6 +901,7 @@ required_for_references:
 - mingw-builds
 - mingw-w64
 - miniaudio
+- minicoro
 - minimp3
 - minisat
 - miniscript
@@ -970,6 +979,7 @@ required_for_references:
 - numcpp
 - nuraft
 - nv-codec-headers
+- nvcloth
 - nvtx
 - oatpp
 - oatpp-libressl
@@ -1032,6 +1042,7 @@ required_for_references:
 - opentelemetry-cpp
 - opentelemetry-proto
 - opentracing-cpp
+- openvdb
 - openvino
 - openvr
 - openxlsx
@@ -1146,6 +1157,7 @@ required_for_references:
 - quantlib
 - quaternions
 - quazip
+- quickcpplib
 - quickfix
 - quickjs
 - quill
@@ -1281,6 +1293,7 @@ required_for_references:
 - spy
 - sqlcipher
 - sqlite3
+- sqlite3mc
 - sqlite_orm
 - sqlitecpp
 - sqlpp11
@@ -1474,6 +1487,7 @@ required_for_references:
 - whisper-cpp
 - wide-integer
 - wil
+- wildcards
 - wildmidi
 - winflexbison
 - winmd
