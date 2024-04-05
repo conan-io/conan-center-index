@@ -123,6 +123,10 @@ class MBedTLSConan(ConanFile):
             self.cpp_info.components["mbedcrypto"].system_libs = ["bcrypt"]
         if Version(self.version) >= "3.6.0":
             self.cpp_info.components["mbedcrypto"].set_property("pkg_config_name", "mbedcrypto")
+        if self.options.enable_threading:
+            self.cpp_info.components["mbedcrypto"].defines.extend(["MBEDTLS_THREADING_C=1", "MBEDTLS_THREADING_PTHREAD=1"])
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["mbedcrypto"].system_libs.append("pthread")
 
         self.cpp_info.components["mbedx509"].set_property("cmake_target_name", "MbedTLS::mbedx509")
         self.cpp_info.components["mbedx509"].libs = ["mbedx509"]
@@ -142,8 +146,7 @@ class MBedTLSConan(ConanFile):
             for component in self.cpp_info.components:
                 self.cpp_info.components[component].requires.append("zlib::zlib")
 
-        if self.options.enable_threading:
-            self.cpp_info.components["mbedcrypto"].defines.extend(["MBEDTLS_THREADING_C=1", "MBEDTLS_THREADING_PTHREAD=1"])
+
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "MbedTLS"
