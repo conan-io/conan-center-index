@@ -32,7 +32,7 @@ class MBedTLSConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_zlib": True,
-        "enable_threading": True,
+        "enable_threading": False,
     }
 
     def config_options(self):
