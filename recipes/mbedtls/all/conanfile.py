@@ -143,7 +143,7 @@ class MBedTLSConan(ConanFile):
                 self.cpp_info.components[component].requires.append("zlib::zlib")
 
         if self.options.enable_threading:
-            self.cpp_info.defines.extend(["MBEDTLS_THREADING_C=1", "MBEDTLS_THREADING_PTHREAD=1"])
+            self.cpp_info.components["mbedcrypto"].defines.extend(["MBEDTLS_THREADING_C=1", "MBEDTLS_THREADING_PTHREAD=1"])
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "MbedTLS"
