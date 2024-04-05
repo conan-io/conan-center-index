@@ -1,5 +1,6 @@
 import os
 
+from conan.errors import ConanException
 from conan import ConanFile
 from conan.tools.files import (
     copy,
@@ -30,6 +31,14 @@ class AerospikeCommonConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanException(f"Windows os is not supported")
+        if self.settings.compiler not in ["gcc", "clang", "apple-clang"]:
+            raise ConanException(f"Unsupported compiler: {self.settings.compiler}")
+        if self.settings.arch not in ["x86", "x86_64", "armv7", "armv8"]:
+            raise ConanException(f"Unsupported compiler: {self.settings.compiler}")
 
     def configure(self):
         if self.options.shared or self.settings.os == "Windows":
@@ -62,8 +71,9 @@ class AerospikeCommonConan(ConanFile):
         if self.options.shared:
             ld_flags = f"LDFLAGS='{self._get_ld_flags()}'"
 
+        cc_flags = f"EXT_CFLAGS='{include_flags} {self._get_arch_flag()}'"
         self.run(
-            f"make TARGET_BASE='target' {ld_flags} EXT_CFLAGS='{include_flags}' -C {self.source_path}"
+            f"make TARGET_BASE='target' {ld_flags} {cc_flags} -C {self.source_path}"
         )
 
     def package(self):
@@ -103,6 +113,21 @@ class AerospikeCommonConan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = ["include"]
         self.cpp_info.libs = ["aerospike-common"]
+
+    def _get_arch_flag(self):
+        gcc_arch = {'x86': '32',
+                    'x86_64': '64',
+                    'armv7': 'armv7',
+                    'armv8': 'armv8'}
+        clang_arch = {'x86': 'i386',
+                      'x86_64': 'x86_64',
+                      'armv7': 'arm',
+                      'armv8': 'arm64'}
+        if self.settings.compiler == "gcc":
+            return f"-m {gcc_arch[str(self.settings.arch)]}"
+        elif str(self.settings.compiler).endswith("clang"):
+            return f"-arch {clang_arch[str(self.settings.arch)]}"
+        raise ConanException(f"Unsupported compiler: {self.settings.compiler}")
 
     def _get_ld_flags(self):
         static_libs = []
