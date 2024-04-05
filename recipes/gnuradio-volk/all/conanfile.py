@@ -87,6 +87,7 @@ class GnuradioVolkConan(ConanFile):
         venv.generate()
 
         tc = CMakeToolchain(self)
+        tc.variables["ENABLE_STATIC_LIBS"] = not self.options.shared
         tc.variables["ENABLE_TESTING"] = False
         tc.variables["ENABLE_MODTOOL"] = False  # Requires Python
         tc.variables["ENABLE_ORC"] = False  # Not available on CCI
@@ -120,6 +121,11 @@ class GnuradioVolkConan(ConanFile):
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        if not self.options.shared:
+            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dylib*", os.path.join(self.package_folder, "lib"))
+            rm(self, "volk.dll.lib", os.path.join(self.package_folder, "lib"))
+            rm(self, "volk.dll", os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
@@ -129,8 +135,6 @@ class GnuradioVolkConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Volk")
         self.cpp_info.set_property("cmake_target_name", "Volk::volk")
         self.cpp_info.set_property("pkg_config_name", "volk")
-
         self.cpp_info.libs = ["volk"]
-
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.extend(["m", "pthread"])
