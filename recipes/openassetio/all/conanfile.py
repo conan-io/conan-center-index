@@ -47,10 +47,9 @@ class PackageConan(ConanFile):
         }
 
     def configure(self):
-        if self.options.with_python:
-            if is_msvc(self):
-                # Required to create import .lib for building extension module.
-                self.options["cpython"].shared = True
+        if self.options.with_python and is_msvc(self):
+            # Required to create import .lib for building extension module.
+            self.options["cpython"].shared = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -60,7 +59,7 @@ class PackageConan(ConanFile):
         if self.options.with_python:
             self.requires("ncurses/6.4")
             self.requires("cpython/3.10.0")
-            self.requires("pybind11/2.11.1")
+            self.requires("pybind11/2.12.0")
 
     def validate(self):
         if is_apple_os(self):
@@ -90,7 +89,6 @@ class PackageConan(ConanFile):
         tc.variables["OPENASSETIO_ENABLE_TESTS"] = False
         tc.variables["OPENASSETIO_GLIBCXX_USE_CXX11_ABI"] = self.settings.get_safe("compiler.libcxx") == "libstdc++11"
         tc.variables["OPENASSETIO_ENABLE_PYTHON"] = self.options.with_python
-
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -108,7 +106,7 @@ class PackageConan(ConanFile):
             self.info.requires["cpython"].minor_mode()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
@@ -126,6 +124,7 @@ class PackageConan(ConanFile):
 
         self.cpp_info.components["openassetio-core"].set_property("cmake_target_name", "OpenAssetIO::openassetio-core")
         self.cpp_info.components["openassetio-core"].libs = ["openassetio"]
+
         if self.options.with_python:
             self.cpp_info.components["openassetio-python-bridge"].set_property("cmake_target_name", "OpenAssetIO::openassetio-python-bridge")
             self.cpp_info.components["openassetio-python-bridge"].requires = ["openassetio-core"]
