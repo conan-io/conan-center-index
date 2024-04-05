@@ -770,7 +770,7 @@ class CPythonConan(ConanFile):
             "pkg_config_name", f"python-{py_version.major}.{py_version.minor}"
         )
         self.cpp_info.components["python"].set_property(
-            "pkg_config_aliases", f"python{py_version.major}"
+            "pkg_config_aliases", [f"python{py_version.major}"]
         )
         self.cpp_info.components["python"].libdirs = []
 
@@ -782,7 +782,7 @@ class CPythonConan(ConanFile):
             "pkg_config_name", f"python-{py_version.major}.{py_version.minor}-embed"
         )
         self.cpp_info.components["embed"].set_property(
-            "pkg_config_aliases", f"python{py_version.major}-embed"
+            "pkg_config_aliases", [f"python{py_version.major}-embed"]
         )
         self.cpp_info.components["embed"].requires = ["python"]
 
