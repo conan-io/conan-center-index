@@ -91,7 +91,7 @@ class OneTBBConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             if not self.conf_info.get("tools.gnu:make_program", check_type=str):
-                self.tool_requires("make/4.3")
+                self.tool_requires("make/4.4.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -210,6 +210,10 @@ class OneTBBConan(ConanFile):
         replace_in_file(self, linux_include, "= gcc", "= $(CC)")
         if self.version != "2019_u9" and self.settings.build_type == "Debug":
             replace_in_file(self, os.path.join(self.source_folder, "Makefile"), "release", "debug")
+        # Remove -Werror from
+        #   WARNING_AS_ERROR_KEY = -Werror
+        for inc_file in self.source_path.joinpath("build").glob("*.inc"):
+            replace_in_file(self, inc_file, "WARNING_AS_ERROR_KEY = ", "WARNING_AS_ERROR_KEY = #", strict=False)
 
     def build(self):
         self._patch_sources()
