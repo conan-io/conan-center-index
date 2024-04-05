@@ -26,11 +26,13 @@ class MBedTLSConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_zlib": [True, False],
+        "enable_threading": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_zlib": True,
+        "enable_threading": True,
     }
 
     def config_options(self):
@@ -86,6 +88,10 @@ class MBedTLSConan(ConanFile):
                 tc.preprocessor_definitions["MBEDTLS_PLATFORM_SNPRINTF_MACRO"] = "snprintf"
             else:
                 tc.preprocessor_definitions["MBEDTLS_PLATFORM_SNPRINTF_MACRO"] = "MBEDTLS_PLATFORM_STD_SNPRINTF"
+        if self.options.enable_threading:
+            tc.preprocessor_definitions["MBEDTLS_THREADING_C"] = True
+            tc.preprocessor_definitions["MBEDTLS_THREADING_PTHREAD"] = True
+
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -131,6 +137,9 @@ class MBedTLSConan(ConanFile):
         if self.options.get_safe("with_zlib"):
             for component in self.cpp_info.components:
                 self.cpp_info.components[component].requires.append("zlib::zlib")
+
+        if self.options.enable_threading:
+            self.cpp_info.defines.extend(["MBEDTLS_THREADING_C=1", "MBEDTLS_THREADING_PTHREAD=1"])
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "MbedTLS"
