@@ -130,7 +130,5 @@ class AerospikeCommonConan(ConanFile):
 
     def _get_dynamic_library_name(self, file_name):
         lib = file_name[3:]  # removes 'lib' prefix
-        lib = lib.rsplit(".", 1)[
-            0
-        ]  # removes everything after (and including) the last '.'
+        lib = lib.split(".", 1)[0]
         return lib
