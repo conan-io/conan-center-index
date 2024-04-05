@@ -59,6 +59,10 @@ class LibSSHRecipe(ConanFile):
         elif self.options.crypto_backend == "mbedtls":
             self.requires("mbedtls/3.6.0")
 
+    def validate(self):
+        if self.options.crypto_backend == "mbedtls" and not self.dependencies["mbedtls"].options.enable_threading:
+            raise ConanInvalidConfiguration(f"{self.ref} requires '-o mbedtls/*:enable_threading=True' when using '-o libssh/*:crypto_backend=mbedtls'")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
