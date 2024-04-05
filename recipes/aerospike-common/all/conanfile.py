@@ -58,7 +58,9 @@ class AerospikeCommonConan(ConanFile):
                 includes.append(path)
         include_flags = " ".join([f"-I{i}" for i in includes])
 
-        ld_flags = f"LDFLAGS='{self._get_ld_flags()}'"
+        ld_flags = ""
+        if self.options.shared:
+            ld_flags = f"LDFLAGS='{self._get_ld_flags()}'"
 
         self.run(
             f"make TARGET_BASE='target' {ld_flags} EXT_CFLAGS='{include_flags}' -C {self.source_path}"
@@ -115,7 +117,7 @@ class AerospikeCommonConan(ConanFile):
                     os.listdir(dir),
                 )
                 for lib in files:
-                    if lib.endswith(".a") and self.options.shared:
+                    if lib.endswith(".a"):
                         # add static lib only in case of shared build
                         static_libs.append(os.path.join(dir, lib))
                     else:
