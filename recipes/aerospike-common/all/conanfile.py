@@ -115,8 +115,8 @@ class AerospikeCommonConan(ConanFile):
                     os.listdir(dir),
                 )
                 for lib in files:
-                    if lib.endswith(".a"):
-                        # add static lib
+                    if lib.endswith(".a") and self.options.shared:
+                        # add static lib only in case of shared build
                         static_libs.append(os.path.join(dir, lib))
                     else:
                         # add dynamic lib
