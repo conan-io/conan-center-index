@@ -56,8 +56,12 @@ class MBedTLSConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} does not support shared build on Windows")
+        if self.settings.os == "Windows":
+            if self.options.shared:
+                raise ConanInvalidConfiguration(f"{self.ref} does not support shared build on Windows")
+            if self.options.enable_threading:
+                # INFO: Planned: https://github.com/Mbed-TLS/mbedtls/issues/8455
+                raise ConanInvalidConfiguration(f"{self.ref} does not support the option enable_threading on Windows")
 
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             # The command line flags set are not supported on older versions of gcc
