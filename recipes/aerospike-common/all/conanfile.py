@@ -7,10 +7,11 @@ from conan.tools.layout import basic_layout
 required_conan_version = ">=1.57.0"
 
 
-class AerospikeConan(ConanFile):
+class AerospikeCommonConan(ConanFile):
     name = "aerospike-common"
     homepage = "https://github.com/aerospike/aerospike-common"
     description = "Library for commonly used or shared code. Used by Aerospike Server and Aerospike C Client."
+    url = "https://github.com/conan-io/conan-center-index"
     topics = ("aerospike", "client", "database")
     license = "Apache-2.0"
     package_type = "library"
