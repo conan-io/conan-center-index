@@ -1,6 +1,8 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import get, copy, replace_in_file, save, rmdir, rm, rename, mkdir
@@ -19,10 +21,22 @@ class ZenohCConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "logger_autoinit": [True, False],
+        "shared_memory": [True, False],
+        "extra_cargo_flags": ["ANY"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "logger_autoinit": True,
+        "shared_memory": True,
+        "extra_cargo_flags": "",
+    }
+    options_description = {
+        "logger_autoinit": ("Enable zenoh-c Zenoh's logging library automatically on init. "
+                            "The logger can still be manually re-enabled with the zc_init_logger function."),
+        "shared_memory": "Enables transferring data through shared memory if the receiver and transmitter are on the same host",
+        "extra_cargo_flags": "Extra flags to pass to Cargo"
     }
 
     def config_options(self):
@@ -38,8 +52,20 @@ class ZenohCConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def requirements(self):
-        pass
+    def _is_supported_platform(self):
+        if self.settings.os == "Windows" and self.settings.arch == "x86_64":
+            return True
+        if self.settings.os in ["Linux", "FreeBSD"] and self.settings.arch in ["x86_64", "armv6", "armv7hf", "armv8"]:
+            return True
+        if is_apple_os(self) and self.settings.arch in ["x86_64", "armv8"]:
+            return True
+        return False
+
+    def validate(self):
+        if not self._is_supported_platform():
+            raise ConanInvalidConfiguration(
+                f"{self.settings.os}/{self.settings.arch} combination is not supported"
+            )
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
@@ -54,6 +80,9 @@ class ZenohCConan(ConanFile):
 
         tc = CMakeToolchain(self)
         tc.variables["ZENOHC_INSTALL_STATIC_LIBRARY"] = not self.options.shared
+        tc.variables["ZENOHC_BUILD_WITH_LOGGER_AUTOINIT"] = self.options.logger_autoinit
+        tc.variables["ZENOHC_BUILD_WITH_SHARED_MEMORY"] = self.options.shared_memory
+        tc.variables["ZENOHC_CARGO_FLAGS"] = self.options.extra_cargo_flags
         tc.generate()
 
         # Don't add the Cargo dependencies to a global Cargo cache
@@ -106,3 +135,7 @@ class ZenohCConan(ConanFile):
         self.cpp_info.libs = [self._lib_name]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread", "rt"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["bcrypt", "crypt32", "iphlpapi", "ncrypt", "ntdll", "runtimeobject", "secur32", "userenv", "ws2_32"])
+        elif is_apple_os(self):
+            self.cpp_info.frameworks.extend(["Foundation", "Security"])
