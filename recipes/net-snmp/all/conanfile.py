@@ -1,5 +1,4 @@
 import os
-import shutil
 import stat
 
 from conan import ConanFile
@@ -179,11 +178,9 @@ class NetSnmpConan(ConanFile):
         apply_conandata_patches(self)
         if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "win32")):
-                if self.should_configure:
-                    self._patch_msvc()
-                    self.run("perl build.pl")
-                if self.should_build:
-                    self.run("nmake /nologo libsnmp")
+                self._patch_msvc()
+                self.run("perl build.pl")
+                self.run("nmake /nologo libsnmp")
         else:
             self._patch_unix()
             configure_path = os.path.join(self.source_folder, "configure")
