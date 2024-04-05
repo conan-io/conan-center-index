@@ -90,7 +90,8 @@ class GnuradioVolkConan(ConanFile):
         tc.variables["ENABLE_TESTING"] = False
         tc.variables["ENABLE_MODTOOL"] = False  # Requires Python
         tc.variables["ENABLE_ORC"] = False  # Not available on CCI
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0148"] = "OLD" # FindPythonInterp support
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW" # tc.requires support
         tc.generate()
 
         deps = CMakeDeps(self)
