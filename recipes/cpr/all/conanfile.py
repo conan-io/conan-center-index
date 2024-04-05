@@ -103,7 +103,7 @@ class CprConan(ConanFile):
             ssl_library = str(self.options.with_ssl)
 
             if ssl_library == "openssl" and is_apple_os(self):
-                raise ConanInvalidConfiguration("OpenSSL is not supported on macOS")
+                raise ConanInvalidConfiguration("OpenSSL is not supported on macOS. Use DarwinSSL instead.")
             if ssl_library == "darwinssl" and not is_apple_os(self):
                 raise ConanInvalidConfiguration("DarwinSSL is only supported on macOS")
             if ssl_library == "winssl" and self.settings.os != "Windows":
