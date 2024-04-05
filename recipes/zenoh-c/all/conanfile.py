@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, Environment
-from conan.tools.files import get, copy, replace_in_file, save, rmdir, rm, rename
+from conan.tools.files import get, copy, replace_in_file, save, rmdir, rm, rename, mkdir
 
 
 class ZenohCConan(ConanFile):
@@ -21,7 +21,7 @@ class ZenohCConan(ConanFile):
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
     }
 
@@ -90,8 +90,11 @@ class ZenohCConan(ConanFile):
             rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
         if self.settings.os == "Windows" and self.options.shared:
-            rename(self, os.path.join(self.package_folder, "bin", f"{self._lib_name}.dll.lib"),
+            rename(self, os.path.join(self.package_folder, "lib", f"{self._lib_name}.dll.lib"),
                    os.path.join(self.package_folder, "lib", f"{self._lib_name}.lib"))
+            mkdir(self, os.path.join(self.package_folder, "bin"))
+            rename(self, os.path.join(self.package_folder, "lib", f"{self._lib_name}.dll"),
+                   os.path.join(self.package_folder, "bin", f"{self._lib_name}.dll"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
