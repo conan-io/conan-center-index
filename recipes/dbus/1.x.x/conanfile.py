@@ -52,8 +52,8 @@ class DbusConan(ConanFile):
     def config_options(self):
         if self.settings.os not in ("Linux", "FreeBSD"):
             del self.options.with_systemd
-        if self.settings.os not in ("Linux", "FreeBSD"):
             del self.options.with_x11
+            del self.options.with_selinux
         if self.settings.os == "Windows":
             del self.options.fPIC
 
@@ -72,8 +72,8 @@ class DbusConan(ConanFile):
             self.requires("glib/2.78.3")
         if self.options.get_safe("with_systemd"):
             self.requires("libsystemd/253.6")
-        if self.options.with_selinux:
-            self.requires("libselinux/3.3")
+        if self.options.get_safe("with_selinux"):
+            self.requires("libselinux/3.5")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
 
@@ -82,7 +82,7 @@ class DbusConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires at least gcc 7.")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.2")
+        self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config",check_type=str):
             self.tool_requires("pkgconf/2.1.0")
 
@@ -109,13 +109,18 @@ class DbusConan(ConanFile):
             tc.project_options["launchd_agent_dir"] = os.path.join(self.package_folder, "res", "LaunchAgents")
         tc.project_options["x11_autolaunch"] = "enabled" if self.options.get_safe("with_x11", False) else "disabled"
         tc.project_options["xml_docs"] = "disabled"
+        tc.project_options["modular_tests"] = "enabled" if self.options.with_glib else "disabled" # glib is not found otherwise due to a buggy build.meson
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('test')", "# subdir('test')")
+        replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                        "subdir('test')", "# subdir('test')")
+
+    def build(self):
+        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -178,6 +183,19 @@ class DbusConan(ConanFile):
 
         if not self.options.shared:
             self.cpp_info.defines.append("DBUS_STATIC_BUILD")
+
+        self.cpp_info.requires.append("expat::expat")
+        if self.options.with_glib:
+            if self.settings.os == "Windows":
+                self.cpp_info.requires.append("glib::gio-windows-2.0")
+            else:
+                self.cpp_info.requires.append("glib::gio-unix-2.0")
+        if self.options.get_safe("with_systemd"):
+            self.cpp_info.requires.append("libsystemd::libsystemd")
+        if self.options.get_safe("with_selinux"):
+            self.cpp_info.requires.append("libselinux::selinux")
+        if self.options.get_safe("with_x11"):
+            self.cpp_info.requires.append("xorg::x11")
 
         # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "DBus1"
