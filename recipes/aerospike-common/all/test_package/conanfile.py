@@ -18,7 +18,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
-        cmake.build()
+        cmake.build(build_tool_args=["VERBOSE=1"])
 
     def test(self):
         if can_run(self):
