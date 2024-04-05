@@ -1,4 +1,4 @@
-# Hashes can be updated with https://gist.github.com/valgur/f94bc2cf455daf081095f6088551c24e
+# Use ./update_hashes.py <version> to update the hashes for new versions
 sources:
   "1.77.1":
     Macos:
