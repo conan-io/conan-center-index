@@ -36,5 +36,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path = os.path.join(self.build_folder, "release", "greetings")
+            bin_path = os.path.join(self.cpp.build.bindir, "release", "greetings")
             self.run(bin_path, env="conanrun")
