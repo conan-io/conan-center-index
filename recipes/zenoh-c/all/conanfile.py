@@ -43,7 +43,7 @@ class ZenohCConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
-        self.tool_requires("rust/1.76.0")
+        self.tool_requires("rust/1.72.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
