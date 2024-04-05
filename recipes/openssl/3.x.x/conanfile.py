@@ -451,7 +451,7 @@ class OpenSSLConan(ConanFile):
         if self._perlasm_scheme:
             perlasm_scheme = 'perlasm_scheme => "%s",' % self._perlasm_scheme
 
-        defines = " ".join(defines)
+        defines = '", "'.join(defines)
         defines = 'defines => add("%s"),' % defines if defines else ""
         targets = "my %targets"
 
