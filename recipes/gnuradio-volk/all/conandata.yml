@@ -1,0 +1,4 @@
+sources:
+  "3.1.2":
+    url: "https://github.com/gnuradio/volk/archive/refs/tags/v3.1.2.tar.gz"
+    sha256: "90082bf68d76d00aa6c35f8bff0e93891b4204d817e1a3ba829486b445f715dc"
