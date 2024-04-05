@@ -12,7 +12,7 @@ from conan.tools.files import copy, get, replace_in_file, apply_conandata_patche
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanException, ConanInvalidConfiguration
 
 required_conan_version = ">=1.55.0"
 
@@ -150,7 +150,8 @@ class QtConan(ConanFile):
                 continue
             status = str(config.get(section, "status"))
             if status not in ["obsolete", "ignore", "additionalLibrary"]:
-                assert status in self._module_statuses, f"module {modulename} has status {status} which is not in self._module_statuses {self._module_statuses}"
+                if status not in self._module_statuses:
+                    raise ConanException(f"module {modulename} has status {status} which is not in self._module_statuses {self._module_statuses}")
                 assert modulename in self._submodules, f"module {modulename} not in self._submodules"
                 self._submodules_tree[modulename] = {"status": status,
                                 "path": str(config.get(section, "path")), "depends": []}
@@ -220,12 +221,13 @@ class QtConan(ConanFile):
         # enable all modules which are
         # - required by a module explicitely enabled by the consumer
         for module_name, module in self._get_module_tree.items():
-            for status in self._module_statuses:
-                if getattr(self.options, f"{status}_modules"):
-                    if module['status'] == status:
-                        _enablemodule(module_name)
             if getattr(self.options, module_name):
                 _enablemodule(module_name)
+            else:
+                for status in self._module_statuses:
+                    if getattr(self.options, f"{status}_modules") and module['status'] == status:
+                        _enablemodule(module_name)
+                        break
 
         # disable all modules which are:
         # - not explicitely enabled by the consumer and

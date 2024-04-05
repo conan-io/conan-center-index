@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.android import android_abi
 from conan.tools.apple import is_apple_os
 from conan.tools.build import build_jobs, check_min_cppstd, cross_building
@@ -241,7 +241,8 @@ class QtConan(ConanFile):
             modulename = section[section.find('"') + 1: section.rfind('"')]
             status = str(config.get(section, "status"))
             if status not in ("obsolete", "ignore"):
-                assert status in self._module_statuses, f"module {modulename} has status {status} which is not in self._module_statuses {self._module_statuses}"
+                if status not in self._module_statuses:
+                    raise ConanException(f"module {modulename} has status {status} which is not in self._module_statuses {self._module_statuses}")
                 submodules_tree[modulename] = {"status": status,
                                 "path": str(config.get(section, "path")), "depends": []}
                 if config.has_option(section, "depends"):
@@ -261,12 +262,14 @@ class QtConan(ConanFile):
                 _enablemodule(req)
 
         for module in self._submodules:
-            for status in self._module_statuses:
-                if getattr(self.options, f"{status}_modules"):
-                    if module in submodules_tree and submodules_tree[module]['status'] == status:
-                        _enablemodule(module)
             if self.options.get_safe(module):
                 _enablemodule(module)
+            else:
+                if module in submodules_tree:
+                    for status in self._module_statuses:
+                        if getattr(self.options, f"{status}_modules") and submodules_tree[module]['status'] == status:
+                            _enablemodule(module)
+                            break
 
         for module in self._submodules:
             if module in self.options and not self.options.get_safe(module):
