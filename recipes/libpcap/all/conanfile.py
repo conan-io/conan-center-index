@@ -29,13 +29,13 @@ class LibPcapConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_libusb": [True, False],
-        "with_snf": [None, True, False],
+        "with_snf": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_libusb": False,
-        "with_snf": None,
+        "with_snf": False,
     }
 
     # TODO: Add dbus-glib when available
