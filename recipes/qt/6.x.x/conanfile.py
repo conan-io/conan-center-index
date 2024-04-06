@@ -12,7 +12,7 @@ from conan.tools.files import copy, get, replace_in_file, apply_conandata_patche
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanException, ConanInvalidConfiguration
 
 required_conan_version = ">=1.55.0"
 
@@ -27,6 +27,8 @@ class QtConan(ConanFile):
                    "qtremoteobjects", "qtpositioning", "qtlanguageserver",
                    "qtspeech", "qthttpserver", "qtquick3dphysics", "qtgrpc", "qtquickeffectmaker"]
     _submodules += ["qtgraphs"] # new modules for qt 6.6.0
+
+    _module_statuses = ["essential", "addon", "deprecated", "preview"]
 
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
@@ -76,6 +78,7 @@ class QtConan(ConanFile):
         "disabled_features": [None, "ANY"],
     }
     options.update({module: [True, False] for module in _submodules})
+    options.update({f"{status}_modules": [True, False] for status in _module_statuses})
 
     # this significantly speeds up windows builds
     no_copy_source = True
@@ -118,7 +121,9 @@ class QtConan(ConanFile):
         "sysroot": None,
         "multiconfiguration": False,
         "disabled_features": "",
+        "essential_modules": not os.getenv('CONAN_CENTER_BUILD_SERVICE')
     }
+    default_options.update({f"{status}_modules": False for status in _module_statuses if status != "essential"})
 
     short_paths = True
 
@@ -145,6 +150,8 @@ class QtConan(ConanFile):
                 continue
             status = str(config.get(section, "status"))
             if status not in ["obsolete", "ignore", "additionalLibrary"]:
+                if status not in self._module_statuses:
+                    raise ConanException(f"module {modulename} has status {status} which is not in self._module_statuses {self._module_statuses}")
                 assert modulename in self._submodules, f"module {modulename} not in self._submodules"
                 self._submodules_tree[modulename] = {"status": status,
                                 "path": str(config.get(section, "path")), "depends": []}
@@ -202,16 +209,6 @@ class QtConan(ConanFile):
             self.options.rm_safe("with_x11")
             self.options.rm_safe("with_egl")
 
-        if not self.options.get_safe("qtmultimedia"):
-            self.options.rm_safe("with_libalsa")
-            del self.options.with_openal
-            del self.options.with_gstreamer
-            del self.options.with_pulseaudio
-
-        if self.settings.os in ("FreeBSD", "Linux"):
-            if self.options.get_safe("qtwebengine"):
-                self.options.with_fontconfig = True
-
         if self.options.multiconfiguration:
             del self.settings.build_type
 
@@ -223,9 +220,14 @@ class QtConan(ConanFile):
 
         # enable all modules which are
         # - required by a module explicitely enabled by the consumer
-        for module in self._get_module_tree:
-            if getattr(self.options, module):
-                _enablemodule(module)
+        for module_name, module in self._get_module_tree.items():
+            if getattr(self.options, module_name):
+                _enablemodule(module_name)
+            else:
+                for status in self._module_statuses:
+                    if getattr(self.options, f"{status}_modules") and module['status'] == status:
+                        _enablemodule(module_name)
+                        break
 
         # disable all modules which are:
         # - not explicitely enabled by the consumer and
@@ -233,6 +235,16 @@ class QtConan(ConanFile):
         for module in self._get_module_tree:
             if getattr(self.options, module).value is None:
                 setattr(self.options, module, False)
+
+        if not self.options.get_safe("qtmultimedia"):
+            self.options.rm_safe("with_libalsa")
+            del self.options.with_openal
+            del self.options.with_gstreamer
+            del self.options.with_pulseaudio
+
+        if self.settings.os in ("FreeBSD", "Linux"):
+            if self.options.get_safe("qtwebengine"):
+                self.options.with_fontconfig = True
 
     def validate(self):
         if os.getenv('CONAN_CENTER_BUILD_SERVICE') is not None:
@@ -634,6 +646,8 @@ class QtConan(ConanFile):
                 self.info.settings.compiler.runtime_type = "Release/Debug"
         if self.info.settings.os == "Android":
             del self.info.options.android_sdk
+        for status in self._module_statuses:
+            delattr(self.info.options, f"{status}_modules")
 
     def source(self):
         destination = self.source_folder
@@ -651,9 +665,6 @@ class QtConan(ConanFile):
                                   "  if (enable_precompiled_headers) {\n    if (false) {"
                                   )
 
-        replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", "QtInternalTargets.cmake"),
-                              "-Zc:wchar_t",
-                              "-Zc:wchar_t -Zc:twoPhase-")
         for f in ["FindPostgreSQL.cmake"]:
             file = os.path.join(self.source_folder, "qtbase", "cmake", f)
             if os.path.isfile(file):
@@ -1099,7 +1110,11 @@ class QtConan(ConanFile):
                     "wtsapi32", "shcore", "comdlg32", "d3d9", "runtimeobject"
                 ]
                 _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
-                _create_plugin("QWindowsVistaStylePlugin", "qwindowsvistastyle", "styles", ["Core", "Gui"])
+                # https://github.com/qt/qtbase/commit/65d58e6c41e3c549c89ea4f05a8e467466e79ca3
+                if Version(self.version) >= "6.7.0":
+                    _create_plugin("QModernWindowsStylePlugin", "qmodernwindowsstyle", "styles", ["Core", "Gui"])
+                else:
+                    _create_plugin("QWindowsVistaStylePlugin", "qwindowsvistastyle", "styles", ["Core", "Gui"])
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/windows/CMakeLists.txt#L53-L69
                 self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs += [
                     "advapi32", "dwmapi", "gdi32", "imm32", "ole32", "oleaut32", "setupapi", "shell32", "shlwapi",
