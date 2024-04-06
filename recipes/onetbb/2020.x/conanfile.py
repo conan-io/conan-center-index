@@ -201,10 +201,11 @@ class OneTBBConan(ConanFile):
             vcvars.generate()
 
     def _patch_sources(self):
-        if self._is_msvc:
+        if not self.options.shared:
             # Fix LDFLAGS getting incorrectly applied to ar command
-            linux_include = os.path.join(self.source_folder, "build", "common_rules.inc")
-            replace_in_file(self, linux_include, "LIB_LINK_FLAGS += $(LDFLAGS)", "")
+            for makefile in ["Makefile.tbb", "Makefile.tbbmalloc", "Makefile.rml"]:
+                replace_in_file(self, os.path.join(self.source_folder, "build", makefile),
+                                "$(LIB_LINK_FLAGS)", "")
         # Get the version of the current compiler instead of gcc
         linux_include = os.path.join(self.source_folder, "build", "linux.inc")
         replace_in_file(self, linux_include, "shell gcc", "shell $(CC)")
