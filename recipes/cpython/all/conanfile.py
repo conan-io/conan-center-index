@@ -516,7 +516,7 @@ class CPythonConan(ConanFile):
         possible_extensions = ("a", "so", "dylib", "lib")
         for file in os.listdir(folder):
             for extension in possible_extensions:
-                if re.match(f".*\.{extension}", file):
+                if re.match(f".*\\.{extension}", file):
                     return file
         raise ConanException(f"No library files found in {folder}")
 
@@ -694,7 +694,6 @@ class CPythonConan(ConanFile):
             "pkg_config_aliases", f"python{py_version.major}"
         )
         self.cpp_info.components["python"].libdirs = []
-        self.cpp_info.components["python"].set_property("cmake_target_name", "cpython::python")
 
         # embed component: "Embed Python into an application"
         self.cpp_info.components["embed"].libs = [self._lib_name]
@@ -707,7 +706,6 @@ class CPythonConan(ConanFile):
             "pkg_config_aliases", f"python{py_version.major}-embed"
         )
         self.cpp_info.components["embed"].requires = ["python"]
-        self.cpp_info.components["embed"].set_property("cmake_target_name", "cpython::embed")
 
         # Transparent integration with CMake's FindPython(3)
         self.cpp_info.set_property("cmake_file_name", "Python3")
