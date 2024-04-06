@@ -74,7 +74,7 @@ class LibPcapConan(ConanFile):
         if self.options.get_safe("enable_rdma"):
             self.requires("rdma-core/49.0")
         if self.options.get_safe("enable_dbus"):
-            self.requires("dbus/1.15.8", options={"with_glib": True})
+            self.requires("dbus/1.15.8")
         # TODO: Add libbluetooth when available
 
     def validate(self):
@@ -85,8 +85,6 @@ class LibPcapConan(ConanFile):
             raise ConanInvalidConfiguration("cross-build of libpcap shared is broken on Apple")
         if Version(self.version) < "1.10.1" and self.settings.os == "Windows" and not self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built static on Windows")
-        if self.options.get_safe("enable_dbus") and not self.dependencies["dbus"].options.with_glib:
-            raise ConanInvalidConfiguration("libpcap with dbus requires dbus/*:with_glib=True")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
