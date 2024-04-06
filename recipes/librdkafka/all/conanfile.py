@@ -4,7 +4,6 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.55.0"
@@ -70,13 +69,13 @@ class LibrdkafkaConan(ConanFile):
         if self.options.ssl:
             self.requires("openssl/[>=1.1 <4]")
         if self._depends_on_cyrus_sasl:
-            self.requires("cyrus-sasl/2.1.27")
+            self.requires("cyrus-sasl/2.1.28")
         if self.options.curl:
             self.requires("libcurl/[>=7.78.0 <9]")
 
     def build_requirements(self):
         if self._depends_on_cyrus_sasl:
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -99,8 +98,7 @@ class LibrdkafkaConan(ConanFile):
         tc.variables["WITH_SSL"] = self.options.ssl
         tc.variables["WITH_SASL"] = self.options.sasl
         tc.variables["ENABLE_LZ4_EXT"] = True
-        if Version(self.version) >= "1.9.0":
-            tc.variables["WITH_CURL"] = self.options.curl
+        tc.variables["WITH_CURL"] = self.options.curl
         tc.generate()
 
         cd = CMakeDeps(self)
@@ -113,8 +111,7 @@ class LibrdkafkaConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         # There are references to libcrypto.lib and libssl.lib in rdkafka_ssl.c for versions >= 1.8.0
-        if Version(self.version) >= "1.8.0" and is_msvc(self) and \
-                self.settings.build_type == "Debug" and self.options.get_safe("ssl", False):
+        if is_msvc(self) and self.settings.build_type == "Debug" and self.options.get_safe("ssl", False):
             rdkafka_ssl_path = os.path.join(self.source_folder, "src", "rdkafka_ssl.c")
             replace_in_file(self, rdkafka_ssl_path, "libcrypto.lib", "libcryptod.lib")
             replace_in_file(self, rdkafka_ssl_path, "libssl.lib", "libssld.lib")

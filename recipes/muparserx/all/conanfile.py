@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -11,9 +12,10 @@ class MuparserxConan(ConanFile):
     description = "A C++ Library for Parsing Expressions with Strings, Complex Numbers, Vectors, Matrices and more"
     license = "BSD-2-Clause"
     topics = ("math", "parser")
-    homepage = "https://beltoforion.de/article.php?a=muparserx"
+    homepage = "https://beltoforion.de/en/muparserx"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,8 +38,7 @@ class MuparserxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -62,7 +63,10 @@ class MuparserxConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "License.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if Version(self.version) < "4.0.10":
+            copy(self, "License.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        else:
+            copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

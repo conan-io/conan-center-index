@@ -1,8 +1,15 @@
 sources:
+  "2.3.3":
+    url: "https://github.com/babelouest/orcania/archive/refs/tags/v2.3.3.tar.gz"
+    sha256: "e26947f7622acf3660b71fb8018ee791c97376530ab6c4a00e4aa2775e052626"
   "2.3.1":
     url: "https://github.com/babelouest/orcania/archive/refs/tags/v2.3.1.tar.gz"
     sha256: "bbf08d563528b8ab88dd4b0e67aeb4e7c4fc9f19dcd1a0346b773cf492f7612b"
 patches:
+  "2.3.3":
+    - patch_file: "patches//2.3.3-0001-getopt-for-msvc.patch"
+      patch_description: "fubd_package getopt-for-visual-studio for MSVC"
+      patch_type: "portability"
   "2.3.1":
     - patch_file: "patches/2.3.1-0001-mingw-fix-Werror=stringop-truncation.patch"
       patch_description: "Fixes -Werror=stringop-truncation error when building with MinGW@Linux"

@@ -1,0 +1,26 @@
+diff --git a/gettext-runtime/configure b/gettext-runtime/configure
+index 75c8e6f..6e4df72 100755
+--- a/gettext-runtime/configure
++++ b/gettext-runtime/configure
+@@ -36149,7 +36149,7 @@ fi
+       haiku*) use_elf_origin_trick=yes ;;
+       # On Mac OS X 10.4 or newer, use Mac OS X tools. See
+       # <https://wincent.com/wiki/@executable_path,_@load_path_and_@rpath>.
+-      darwin | darwin[1-7].*) ;;
++      darwin | darwin[1-7].*) use_macos_tools=yes ;;
+       darwin*) use_macos_tools=yes ;;
+     esac
+     if test $is_noop = yes; then
+diff --git a/gettext-tools/configure b/gettext-tools/configure
+index c62f256..f3a66ed 100755
+--- a/gettext-tools/configure
++++ b/gettext-tools/configure
+@@ -49566,7 +49566,7 @@ fi
+       haiku*) use_elf_origin_trick=yes ;;
+       # On Mac OS X 10.4 or newer, use Mac OS X tools. See
+       # <https://wincent.com/wiki/@executable_path,_@load_path_and_@rpath>.
+-      darwin | darwin[1-7].*) ;;
++      darwin | darwin[1-7].*) use_macos_tools=yes ;;
+       darwin*) use_macos_tools=yes ;;
+     esac
+     if test $is_noop = yes; then

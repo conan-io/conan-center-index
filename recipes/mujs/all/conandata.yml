@@ -1,4 +1,7 @@
 sources:
+  "1.3.4":
+    url: "https://mujs.com/downloads/mujs-1.3.4.tar.gz"
+    sha256: "c015475880f6a382e706169c94371a7dd6cc22078832f6e0865af8289c2ef42b"
   "1.1.2":
     url: "https://mujs.com/downloads/mujs-1.1.2.tar.xz"
     sha256: "719e882bb7d98640efa163381e9b68ef1ce35c87a422e2aa4190c9e40225875d"

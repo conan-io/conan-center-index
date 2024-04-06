@@ -60,7 +60,7 @@ index 48e871418..21f709b1d 100644
 -                                  JPEG_LIBRARIES JPEG_VERSION)
 -if (NOT JPEG_FOUND) # Try to find the non-turbo version
 +if (USE_JPEGTURBO)
-+    checked_find_package (JPEGTurbo
++    checked_find_package (libjpeg-turbo REQUIRED
 +                          DEFINITIONS -DUSE_JPEG_TURBO=1
 +                          PRINT libjpeg-turbo_INCLUDES libjpeg-turbo_LIBRARIES)
 +    add_library(JPEG::JPEG ALIAS libjpeg-turbo::libjpeg-turbo)
@@ -155,7 +155,7 @@ index 48e871418..21f709b1d 100644
  # For HEIF/HEIC/AVIF formats
 -checked_find_package (Libheif VERSION_MIN 1.3
 +if (USE_LIBHEIF)
-+checked_find_package (libheif VERSION_MIN 1.3
++checked_find_package (libheif REQUIRED VERSION_MIN 1.3
                        RECOMMEND_MIN 1.7
                        RECOMMEND_MIN_REASON "for AVIF support")
 -if (APPLE AND LIBHEIF_VERSION VERSION_GREATER_EQUAL 1.10 AND LIBHEIF_VERSION VERSION_LESS 1.11)
@@ -299,6 +299,24 @@ index 58402060e..5dea82369 100644
  else()
      message (STATUS "FFmpeg not found: ffmpeg plugin will not be built")
  endif()
+diff --git src/heif.imageio/CMakeLists.txt src/heif.imageio/CMakeLists.txt
+index ece763a27..83abdea66 100644
+--- src/heif.imageio/CMakeLists.txt
++++ src/heif.imageio/CMakeLists.txt
+@@ -2,10 +2,10 @@
+ # SPDX-License-Identifier: BSD-3-Clause
+ # https://github.com/OpenImageIO/oiio
+ 
+-if (Libheif_FOUND)
++if (USE_LIBHEIF)
+     add_oiio_plugin (heifinput.cpp heifoutput.cpp
+-                     INCLUDE_DIRS ${LIBHEIF_INCLUDES}
+-                     LINK_LIBRARIES ${LIBHEIF_LIBRARIES}
++                     #INCLUDE_DIRS ${LIBHEIF_INCLUDES}
++                     LINK_LIBRARIES libheif::heif
+                      DEFINITIONS "-DUSE_HEIF=1")
+ else ()
+     message (WARNING "heif plugin will not be built")
 diff --git a/src/include/CMakeLists.txt b/src/include/CMakeLists.txt
 index 52b0936a6..611eadb4e 100644
 --- a/src/include/CMakeLists.txt
@@ -348,7 +366,7 @@ index 1f47269bf..85b90d66a 100644
      add_oiio_plugin (jpeg2000input.cpp jpeg2000output.cpp
 -                     INCLUDE_DIRS ${OPENJPEG_INCLUDES}
 -                     LINK_LIBRARIES ${OPENJPEG_LIBRARIES}
-+                     LINK_LIBRARIES OpenJPEG::OpenJPEG
++                     LINK_LIBRARIES openjp2
                       DEFINITIONS "-DUSE_OPENJPEG")
  else()
      message (WARNING "Jpeg-2000 plugin will not be built")
@@ -356,11 +374,12 @@ diff --git a/src/libOpenImageIO/CMakeLists.txt b/src/libOpenImageIO/CMakeLists.t
 index 456aab81a..eb5bb00fc 100644
 --- a/src/libOpenImageIO/CMakeLists.txt
 +++ b/src/libOpenImageIO/CMakeLists.txt
-@@ -141,10 +141,14 @@ target_link_libraries (OpenImageIO
+@@ -141,12 +141,17 @@ target_link_libraries (OpenImageIO
              $<TARGET_NAME_IF_EXISTS:TBB::tbb>
              ${BZIP2_LIBRARIES}
              ZLIB::ZLIB
 -            $<TARGET_NAME_IF_EXISTS:Boost::thread>
++            tsl::robin_map
 +            Boost::filesystem Boost::thread Boost::system Boost::container
              ${CMAKE_DL_LIBS}
          )
@@ -370,15 +389,21 @@ index 456aab81a..eb5bb00fc 100644
 +endif ()
 +
  if (FREETYPE_FOUND)
-     target_link_libraries (OpenImageIO PRIVATE ${FREETYPE_LIBRARIES})
+-    target_link_libraries (OpenImageIO PRIVATE ${FREETYPE_LIBRARIES})
++    target_link_libraries (OpenImageIO PRIVATE Freetype::Freetype)
  endif()
+
+ if (WIN32)
 diff --git a/src/libutil/CMakeLists.txt b/src/libutil/CMakeLists.txt
 index 09b9139d0..a2d39982e 100644
 --- a/src/libutil/CMakeLists.txt
 +++ b/src/libutil/CMakeLists.txt
-@@ -17,8 +17,7 @@ target_link_libraries (OpenImageIO_Util
+@@ -15,8 +15,8 @@ target_link_libraries (OpenImageIO_Util
+             $<TARGET_NAME_IF_EXISTS:Threads::Threads>
+             ${GCC_ATOMIC_LIBRARIES}
              ${OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY}
              ${OPENIMAGEIO_IMATH_TARGETS}
++            fmt::fmt
          PRIVATE
 -            $<TARGET_NAME_IF_EXISTS:Boost::filesystem>
 -            $<TARGET_NAME_IF_EXISTS:Boost::thread>
@@ -390,7 +415,7 @@ diff --git a/src/ptex.imageio/CMakeLists.txt b/src/ptex.imageio/CMakeLists.txt
 index d7f0a9582..7cfce4a35 100644
 --- a/src/ptex.imageio/CMakeLists.txt
 +++ b/src/ptex.imageio/CMakeLists.txt
-@@ -2,8 +2,8 @@
+@@ -2,8 +2,9 @@
  # SPDX-License-Identifier: BSD-3-Clause
  # https://github.com/OpenImageIO/oiio
 
@@ -398,6 +423,7 @@ index d7f0a9582..7cfce4a35 100644
 +if (ptex_FOUND)
      add_oiio_plugin (ptexinput.cpp
 -                     LINK_LIBRARIES Ptex::Ptex_dynamic ZLIB::ZLIB
-+                     LINK_LIBRARIES Ptex::Ptex ZLIB::ZLIB
++                     LINK_LIBRARIES ${ptex_LIBRARIES} ZLIB::ZLIB
++                     INCLUDE_DIRS ${ptex_INCLUDE_DIRS}
                       DEFINITIONS "-DUSE_PTEX")
  endif ()

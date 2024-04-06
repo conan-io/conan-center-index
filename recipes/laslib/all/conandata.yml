@@ -1,0 +1,9 @@
+sources:
+  "2.0.2":
+    url: "https://github.com/LAStools/LAStools/archive/refs/tags/v2.0.2.tar.gz"
+    sha256: "41200e2b6ad92fe057fc5008132978090890463d5b602bce89ecf8aa84c78a82"
+patches:
+  "2.0.2":
+    - patch_file: "patches/0001-build-only-laslib.patch"
+      patch_description: "Build only laslib from LASTools: update multiple CMakeList.txt"
+      patch_type: "conan"

@@ -52,6 +52,7 @@ def transform_conanfile(node):
     dynamic_fields = {
         "conan_data": str_class,
         "build_requires": build_requires_class,
+        "test_requires" : build_requires_class,
         "tool_requires": build_requires_class,
         "info_build": info_class,
         "user_info_build": [_user_info_build_transform()],

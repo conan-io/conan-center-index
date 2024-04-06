@@ -1,7 +1,12 @@
 sources:
+  "2.4.2":
+    url: "https://github.com/wdas/ptex/archive/refs/tags/v2.4.2.tar.gz"
+    sha256: "c8235fb30c921cfb10848f4ea04d5b662ba46886c5e32ad5137c5086f3979ee1"
   "2.4.0":
     url: "https://github.com/wdas/ptex/archive/refs/tags/v2.4.0.tar.gz"
     sha256: "690d66b72f34a92488d63134ad1f5736078677356b0004070b0169b9e3240f8e"
 patches:
+  "2.4.2":
+    - patch_file: "patches/2.4.2-0001-fix-cmake.patch"
   "2.4.0":
-    - patch_file: "patches/0001-fix-cmake.patch"
+    - patch_file: "patches/2.4.0-0001-fix-cmake.patch"

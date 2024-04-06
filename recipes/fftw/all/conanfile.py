@@ -117,6 +117,9 @@ class FFTWConan(ConanFile):
             cmake.configure(variables=variables)
             cmake.build()
 
+        # Potentially avoid side effects due to build_folder property tweak.
+        self._current_precision = None
+
     def package(self):
         copy(self, "COPYRIGHT", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         for self._current_precision in self._all_precisions:
@@ -124,6 +127,9 @@ class FFTWConan(ConanFile):
             cmake.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+
+        # Potentially avoid side effects due to build_folder property tweak.
+        self._current_precision = None
 
     def package_info(self):
         cmake_config_name = cmake_namespace = "FFTW3"
@@ -136,10 +142,10 @@ class FFTWConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = cmake_namespace
         self.cpp_info.names["cmake_find_package_multi"] = cmake_namespace
 
-        for self._current_precision in self._all_precisions:
-            prec_suffix = self._prec_suffix[self._current_precision]
+        for precision in self._all_precisions:
+            prec_suffix = self._prec_suffix[precision]
             cmake_target_name = pkgconfig_name = lib_name = "fftw3" + prec_suffix
-            component_name = f"fftwlib_{self._current_precision}"
+            component_name = f"fftwlib_{precision}"
             component = self.cpp_info.components[component_name]
 
             # TODO: back to global scope in conan v2 once cmake_find_package_* & pkg_config generators removed
@@ -150,7 +156,7 @@ class FFTWConan(ConanFile):
             self.cpp_info.components[component_name].libs.append(lib_name)
             if self.settings.os in ["Linux", "FreeBSD"]:
                 component.system_libs.append("m")
-                if self._current_precision == QUAD:
+                if precision == QUAD:
                     component.system_libs.extend(['quadmath'])
                 if self.options.threads:
                     component.system_libs.append("pthread")

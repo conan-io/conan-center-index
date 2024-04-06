@@ -1,4 +1,10 @@
 sources:
+  "2.4.1":
+    url: "https://github.com/CLIUtils/CLI11/archive/v2.4.1.tar.gz"
+    sha256: "73b7ec52261ce8fe980a29df6b4ceb66243bb0b779451dbd3d014cfec9fdbb58"
+  "2.4.0":
+    url: "https://github.com/CLIUtils/CLI11/archive/v2.4.0.tar.gz"
+    sha256: "d2ce8d5318d2a7a7d1120e2a18caac49cd65423d5d4158cbbc0267e6768af522"
   "2.3.2":
     url: "https://github.com/CLIUtils/CLI11/archive/v2.3.2.tar.gz"
     sha256: "aac0ab42108131ac5d3344a9db0fdf25c4db652296641955720a4fbe52334e22"

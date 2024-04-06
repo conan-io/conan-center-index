@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["ZLIB_COMPAT"] = self.options["zlib-ng"].zlib_compat
         cmake.configure()
         cmake.build()
 

@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import get, copy
 
 required_conan_version = ">=1.53.0"
@@ -24,8 +24,6 @@ class TreeSitterConan(ConanFile):
         "fPIC": True,
         "shared": False,
     }
-
-    generators = "CMakeToolchain"
     exports_sources = "CMakeLists.txt"
 
     def config_options(self):
@@ -43,6 +41,12 @@ class TreeSitterConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["TREE_SITTER_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.variables["TREE_SITTER_VERSION"] = str(self.version)
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)

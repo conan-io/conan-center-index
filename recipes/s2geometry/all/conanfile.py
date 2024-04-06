@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -36,7 +36,7 @@ class S2GeometryConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "5",
+            "gcc": "6",
             "clang": "7",
             "apple-clang": "10",
             "Visual Studio": "15",
@@ -58,7 +58,7 @@ class S2GeometryConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("abseil/20230125.3", transitive_headers=True, transitive_libs=True)
+        self.requires("abseil/20230802.1", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
 
     def validate(self):
@@ -81,6 +81,7 @@ class S2GeometryConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["GOOGLETEST_ROOT"] = False
         tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_TESTS"] = False
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -95,6 +96,9 @@ class S2GeometryConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["s2"]
+        self.cpp_info.set_property("cmake_file_name", "s2")
+        self.cpp_info.set_property("cmake_target_name", "s2::s2")

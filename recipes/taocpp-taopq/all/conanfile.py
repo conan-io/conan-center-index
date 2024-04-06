@@ -70,8 +70,13 @@ class TaoCPPTaopqConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["TAOPQ_BUILD_TESTS"] = False
-        tc.variables["TAOPQ_INSTALL_DOC_DIR"] = "licenses"
+        # Option names changed in https://github.com/taocpp/taopq/commit/d77896ab80369f13512a7f0ba8af818a03de1cdf
+        if Version(self.version) < "cci.20211017":
+            tc.variables["TAOPQ_BUILD_TESTS"] = False
+            tc.variables["TAOPQ_INSTALL_DOC_DIR"] = "licenses"
+        else:
+            tc.variables["taopq_BUILD_TESTS"] = False
+            tc.variables["taopq_INSTALL_DOC_DIR"] = "licenses"
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         deps = CMakeDeps(self)

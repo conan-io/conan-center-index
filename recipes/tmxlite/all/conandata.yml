@@ -1,4 +1,7 @@
 sources:
+  "1.4.4":
+    url: "https://github.com/fallahn/tmxlite/archive/refs/tags/v1.4.4.tar.gz"
+    sha256: "ec8893efc8396308f291c284cb09f007441a15aabbb0e5722096cf79c65c9e58"
   "1.3.0":
     url: "https://github.com/fallahn/tmxlite/archive/refs/tags/v1.3.0.tar.gz"
     sha256: "f5d2abd23d4516168eb82bbe879998ce41cb17768f8cd72f643f394939123efe"

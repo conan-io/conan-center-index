@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools import build, files
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import json
 import os
 import re
@@ -51,12 +52,14 @@ class NmosCppConan(ConanFile):
         # INFO: details/system_error.h: #include <boost/system/system_error.hpp>
         self.requires("boost/1.83.0", transitive_headers=True)
         # INFO: json_ops.h exposes cpprest/json.h
-        self.requires("cpprestsdk/2.10.18", transitive_headers=True)
+        self.requires("cpprestsdk/2.10.19", transitive_headers=True)
         self.requires("websocketpp/0.8.2")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("json-schema-validator/2.2.0")
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("json-schema-validator/2.3.0")
+        self.requires("nlohmann_json/3.11.3")
         self.requires("zlib/[>=1.2.11 <2]")
+        if Version(self.version) >= "cci.20240222":
+            self.requires("jwt-cpp/0.7.0")
 
         if self.options.get_safe("with_dnssd") == "mdnsresponder":
             self.requires("mdnsresponder/878.200.35")

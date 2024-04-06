@@ -1,0 +1,7 @@
+sources:
+  "0.1.2":
+    url: "https://github.com/Klebert-Engineering/simfil/archive/refs/tags/v0.1.2.tar.gz"
+    sha256: "a903658ff37fa304dc6d8cb65e7923b6857b825ce2ac205522b84e4785d80e8d"
+  "0.1.1":
+    url: "https://github.com/Klebert-Engineering/simfil/archive/refs/tags/v0.1.1.tar.gz"
+    sha256: "e82a9d92ec65b7e27776d5507c78571cecc234f2b6fcdacc7ffcece6198f7f9a"

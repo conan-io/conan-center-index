@@ -159,13 +159,14 @@ class B2Conan(ConanFile):
         if self.options.use_cxx_env:
             envvars = VirtualBuildEnv(self).vars()
 
-            cxx = envvars.get("CXX")
-            if cxx:
-                command += f" --cxx={cxx}"
-                self._write_project_config(cxx)
+            cxx_env = envvars.get("CXX")
+            if cxx_env:
+                command += f" --cxx={cxx_env}"
+                self._write_project_config(cxx_env)
 
             cxxflags_env = envvars.get("CXXFLAGS")
-            cxxflags = f"{cxxflags} {cxxflags_env}"
+            if cxxflags_env:
+                cxxflags = f"{cxxflags} {cxxflags_env}"
 
         if cxxflags:
             command += f' --cxxflags="{cxxflags}"'

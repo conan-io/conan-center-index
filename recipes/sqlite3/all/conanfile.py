@@ -35,6 +35,7 @@ class Sqlite3Conan(ConanFile):
         "enable_preupdate_hook": [True, False],
         "enable_rtree": [True, False],
         "use_alloca": [True, False],
+        "use_uri": [True, False],
         "omit_load_extension": [True, False],
         "omit_deprecated": [True, False],
         "enable_math_functions": [True, False],
@@ -64,6 +65,7 @@ class Sqlite3Conan(ConanFile):
         "enable_preupdate_hook": False,
         "enable_rtree": True,
         "use_alloca": False,
+        "use_uri": False,
         "omit_load_extension": False,
         "omit_deprecated": False,
         "enable_math_functions": True,
@@ -130,6 +132,7 @@ class Sqlite3Conan(ConanFile):
         tc.variables["ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify
         tc.variables["ENABLE_DEFAULT_SECURE_DELETE"] = self.options.enable_default_secure_delete
         tc.variables["USE_ALLOCA"] = self.options.use_alloca
+        tc.variables["USE_URI"] = self.options.use_uri
         tc.variables["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
         tc.variables["OMIT_DEPRECATED"] = self.options.omit_deprecated
         if self._has_enable_math_function_option:

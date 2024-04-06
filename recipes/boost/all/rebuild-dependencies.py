@@ -26,6 +26,7 @@ BOOST_GIT_URL = "https://github.com/boostorg/boost.git"
 CONFIGURE_OPTIONS = (
     "atomic",
     "chrono",
+    "cobalt",
     "container",
     "context",
     "contract",

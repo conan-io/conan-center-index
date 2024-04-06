@@ -1,0 +1,4 @@
+sources:
+  "1.0.3":
+    url: "https://github.com/qicosmos/iguana/archive/refs/tags/v1.0.3.tar.gz"
+    sha256: "7dcb21a36bd64a63a9ea857f3563ac61e965c49ec60ad7b99a2bfb9192f3e4c3"

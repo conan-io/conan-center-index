@@ -1,0 +1,20 @@
+--- src/Makefile.in
++++ src/Makefile.in
+@@ -326,7 +326,7 @@
+ localstatedir = @localstatedir@
+ mandir = @mandir@
+ mkdir_p = @mkdir_p@
+-my_CFLAGS = @my_CFLAGS@
++my_CFLAGS =
+ oldincludedir = @oldincludedir@
+ pdfdir = @pdfdir@
+ prefix = @prefix@
+--- src/modbus-private.h
++++ src/modbus-private.h
+@@ -14,5 +14,5 @@
+ #else
+ # include "stdint.h"
+ # include <time.h>
+-typedef int ssize_t;
++//typedef int ssize_t;
+ #endif

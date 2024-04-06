@@ -20,7 +20,7 @@ class SqlcipherConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.zetetic.net/sqlcipher/"
-    topics = ("database", "encryption", "SQLite")
+    topics = ("database", "encryption", "sqlite")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -30,6 +30,7 @@ class SqlcipherConan(ConanFile):
         "crypto_library": ["openssl", "libressl", "commoncrypto"],
         "with_largefile": [True, False],
         "temporary_store": ["always_file", "default_file", "default_memory", "always_memory"],
+        "enable_column_metadata": [True, False],
     }
     default_options = {
         "shared": False,
@@ -37,6 +38,7 @@ class SqlcipherConan(ConanFile):
         "crypto_library": "openssl",
         "with_largefile": True,
         "temporary_store": "default_memory",
+        "enable_column_metadata": False,
     }
 
     @property
@@ -114,7 +116,10 @@ class SqlcipherConan(ConanFile):
         env.define("OPTS", f'-I{crypto_dep.includedir} -DSQLITE_HAS_CODEC')
         env.define("NO_TCL", "1")
         env.define("USE_AMALGAMATION", "1")
-        env.define("OPT_FEATURE_FLAGS", "-DSQLCIPHER_CRYPTO_OPENSSL")
+        opt_feature_flags = "-DSQLCIPHER_CRYPTO_OPENSSL"
+        if self.options.enable_column_metadata:
+            opt_feature_flags += " -DSQLITE_ENABLE_COLUMN_METADATA"
+        env.define("OPT_FEATURE_FLAGS", opt_feature_flags)
         env.define("SQLITE_TEMP_STORE", self._temp_store_nmake_value)
         env.define("TCLSH_CMD", self.dependencies.build['tcl'].runenv_info.vars(self)['TCLSH'])
 
@@ -221,7 +226,7 @@ class SqlcipherConan(ConanFile):
                 autotools.make()
 
     def package(self):
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if is_msvc(self):
             copy(self, "*.dll", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder, keep_path=False)
             copy(self, "*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.source_folder, keep_path=False)

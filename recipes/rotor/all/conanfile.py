@@ -6,18 +6,16 @@ from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.54.0"
 
 class RotorConan(ConanFile):
     name = "rotor"
+    description = "Event loop friendly C++ actor micro-framework, supervisable"
     license = "MIT"
     homepage = "https://github.com/basiliscos/cpp-rotor"
     url = "https://github.com/conan-io/conan-center-index"
-    description = (
-        "Event loop friendly C++ actor micro-framework, supervisable"
-    )
     topics = ("concurrency", "actor-framework", "actors", "actor-model", "erlang", "supervising", "supervisor")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -25,6 +23,7 @@ class RotorConan(ConanFile):
         "enable_asio": [True, False],
         "enable_thread": [True, False],
         "multithreading": [True, False],  # enables multithreading support
+        "enable_ev": [True, False],
     }
     default_options = {
         "fPIC": True,
@@ -32,7 +31,22 @@ class RotorConan(ConanFile):
         "enable_asio": False,
         "enable_thread": False,
         "multithreading": True,
+        "enable_ev": False,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "12",
+        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -40,16 +54,17 @@ class RotorConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "0.26":
+            del self.options.enable_ev
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("boost/1.81.0")
+        self.requires("boost/1.84.0", transitive_headers=True)
+        if self.options.get_safe("enable_ev", False):
+            self.requires("libev/4.33")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -60,31 +75,18 @@ class RotorConan(ConanFile):
         tc.variables["BUILD_THREAD"] = self.options.enable_thread
         tc.variables["BUILD_THREAD_UNSAFE"] = not self.options.multithreading
         tc.variables["BUILD_TESTING"] = False
+        if Version(self.version) >= "0.26":
+            tc.variables["BUILD_EV"] = self.options.enable_ev
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
     def validate(self):
-        minimal_cpp_standard = "17"
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, minimal_cpp_standard)
-        minimal_version = {
-            "gcc": "7",
-            "clang": "6",
-            "apple-clang": "10",
-            "Visual Studio": "15"
-        }
-        compiler = str(self.settings.compiler)
-        if compiler not in minimal_version:
-            self.output.warn(
-                f"{self.ref} recipe lacks information about the {compiler} compiler standard version support")
-            self.output.warn(
-                f"{self.ref} requires a compiler that supports at least C++{minimal_cpp_standard}")
-            return
-
-        compiler_version = Version(self.settings.compiler.version)
-        if compiler_version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports at least C++{minimal_cpp_standard}")
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
 
         if self.options.shared and Version(self.version) < "0.23":
             raise ConanInvalidConfiguration("shared option is available from v0.23")
@@ -121,5 +123,6 @@ class RotorConan(ConanFile):
             self.cpp_info.components["thread"].libs = ["rotor_thread"]
             self.cpp_info.components["thread"].requires = ["core"]
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "rotor"
+        if self.options.get_safe("enable_ev", False):
+            self.cpp_info.components["ev"].libs = ["rotor_ev"]
+            self.cpp_info.components["ev"].requires = ["core", "libev::libev"]

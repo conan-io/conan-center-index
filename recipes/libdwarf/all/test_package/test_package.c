@@ -3,12 +3,12 @@
 #include <string.h>
 #include <fcntl.h>
 
-#ifndef LIBDWARF_NEW_STRUCTURE
-    #include "dwarf.h"
-    #include "libdwarf.h"
-#else
+#ifdef LIBDWARF_NESTED_INCLUDE
     #include "libdwarf/dwarf.h"
     #include "libdwarf/libdwarf.h"
+#else
+    #include "dwarf.h"
+    #include "libdwarf.h"
 #endif
 
 void example1(Dwarf_Die somedie) {
