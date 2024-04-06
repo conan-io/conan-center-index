@@ -66,18 +66,18 @@ class Librasterlite2Conan(ConanFile):
     def requirements(self):
         self.requires("cairo/1.18.0")
         self.requires("freetype/2.13.2")
-        self.requires("giflib/5.2.1")
+        self.requires("giflib/5.2.2")
         self.requires("libcurl/[>=7.78 <9]")
         self.requires("libgeotiff/1.7.1")
         self.requires("libjpeg/9e")
-        self.requires("libpng/1.6.42")
+        self.requires("libpng/[>=1.6 <2]")
         self.requires("libspatialite/5.1.0")
         self.requires("libtiff/4.6.0")
-        self.requires("libxml2/2.12.4")
-        self.requires("sqlite3/3.45.1")
+        self.requires("libxml2/[>=2.12.0 <3]")
+        self.requires("sqlite3/3.44.2")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.5.1")
+            self.requires("openjpeg/2.5.2")
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
         if self.options.with_lzma:
