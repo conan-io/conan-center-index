@@ -546,7 +546,7 @@ class CPythonConan(ConanFile):
         include(${{CMAKE_ROOT}}/Modules/FindPython${{_CONAN_PYTHON_SUFFIX}}.cmake)
                                    
         # Sanity check: The former comes from FindPython(3), the latter comes from the injected find module
-        if(NOT Python${{_CONAN_PYTHON_SUFFIX}}_VERSION STREQUAL "${{Python${{_CONAN_PYTHON_SUFFIX}}_VERSION_STRING}}")
+        if(NOT Python${{_CONAN_PYTHON_SUFFIX}}_VERSION STREQUAL Python${{_CONAN_PYTHON_SUFFIX}}_VERSION_STRING)
             message(FATAL_ERROR "CMake detected wrong cpython version - this is likely a bug with the cpython Conan package")
         endif()
 
