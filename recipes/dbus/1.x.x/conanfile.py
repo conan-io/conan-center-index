@@ -15,7 +15,8 @@ required_conan_version = ">=1.53.0"
 
 class DbusConan(ConanFile):
     name = "dbus"
-    license = ("AFL-2.1", "GPL-2.0-or-later")
+    # license is AFL-2.1 OR GPL-2.0-or-later with several other compatible licenses for smaller sections of code
+    license = "(AFL-2.1 OR GPL-2.0-or-later) AND DocumentRef-COPYING"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freedesktop.org/wiki/Software/dbus"
     description = "D-Bus is a simple system for interprocess communication and coordination."
@@ -129,7 +130,8 @@ class DbusConan(ConanFile):
         meson.build()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*", os.path.join(self.source_folder, "LICENSES"), os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
 
