@@ -75,7 +75,10 @@ class DbusConan(ConanFile):
         if self.options.get_safe("with_selinux"):
             self.requires("libselinux/3.5")
         if self.options.get_safe("with_x11"):
-            self.requires("xorg/system")
+            # X11 is only linked into an executable and should not be propagated as a library dependency.
+            # It should still be provided in a VirtualRunEnv context, though,
+            # but Conan as of v2.2 does not yet provide a fine-grained enough control over this.
+            self.requires("xorg/system", visible=False)
 
     def validate(self):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 7:
@@ -194,8 +197,6 @@ class DbusConan(ConanFile):
             self.cpp_info.requires.append("libsystemd::libsystemd")
         if self.options.get_safe("with_selinux"):
             self.cpp_info.requires.append("libselinux::selinux")
-        if self.options.get_safe("with_x11"):
-            self.cpp_info.requires.append("xorg::x11")
 
         # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "DBus1"
