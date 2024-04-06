@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy
 from conan.tools.files import get, rmdir
@@ -57,10 +58,10 @@ class SDLMixerConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            self.options.rm_safe("tinymidi")
-        else:
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.options.rm_safe("nativemidi")
+        else:
+            self.options.rm_safe("tinymidi")
 
     def configure(self):
         if self.options.shared:
@@ -145,6 +146,14 @@ class SDLMixerConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "SDL2"))
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
+
+        if self.options.get_safe("nativemidi"):
+            if is_apple_os(self):
+                # https://github.com/libsdl-org/SDL_mixer/blob/release-2.0.4/configure.in#L380
+                self.cpp_info.frameworks.extend(["AudioToolbox", "AudioUnit", "CoreServices"])
+            elif self.settings.os == "Windows":
+                # https://github.com/libsdl-org/SDL_mixer/blob/release-2.0.4/configure.in#L376
+                self.cpp_info.system_libs.extend(["winmm"])
 
         self.cpp_info.names["cmake_find_package"] = "SDL2_mixer"
         self.cpp_info.names["cmake_find_package_multi"] = "SDL2_mixer"
