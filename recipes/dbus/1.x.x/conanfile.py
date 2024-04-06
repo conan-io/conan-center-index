@@ -113,7 +113,7 @@ class DbusConan(ConanFile):
             tc.project_options["systemd_system_unitdir"] = "/res/lib/systemd/system"
             tc.project_options["systemd_user_unitdir"] = "/res/usr/lib/systemd/system"
         if is_apple_os(self):
-            tc.project_options["launchd_agent_dir"] = "/res/LaunchAgents"
+            tc.project_options["launchd_agent_dir"] = os.path.join(self.package_folder, "res", "LaunchAgents")
         tc.project_options["x11_autolaunch"] = "enabled" if self.options.get_safe("with_x11", False) else "disabled"
         tc.project_options["xml_docs"] = "disabled"
         tc.generate()
