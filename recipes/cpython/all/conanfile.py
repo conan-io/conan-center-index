@@ -6,7 +6,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir, unzip
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir, save, unzip
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuildDeps, MSBuildToolchain, MSBuild, is_msvc, is_msvc_static_runtime, msvc_runtime_flag, msvs_toolset
@@ -512,6 +512,68 @@ class CPythonConan(ConanFile):
         lib_dir_path = os.path.join(self.package_folder, self._msvc_install_subprefix, "Lib").replace("\\", "/")
         self.run(f"{interpreter_path} -c \"import compileall; compileall.compile_dir('{lib_dir_path}')\"")
 
+    def _exact_lib_name(self, folder):
+        possible_extensions = ("a", "so", "dylib", "lib")
+        for file in os.listdir(folder):
+            for extension in possible_extensions:
+                if re.match(f".*\.{extension}", file):
+                    return file
+        raise ConanException(f"No library files found in {folder}")
+
+    @property
+    def _cmake_module_path(self):
+        if is_msvc(self):
+            return os.path.join(self._msvc_install_subprefix, "lib", "cmake")
+        else:
+            return os.path.join("lib", "cmake")
+
+    def _write_cmake_findpython_wrapper_file(self):
+        template = textwrap.dedent("""
+        if (DEFINED Python3_VERSION_STRING)
+            set(_CONAN_PYTHON_SUFFIX "3")
+        else()
+            set(_CONAN_PYTHON_SUFFIX "")
+        endif()
+        set(Python${{_CONAN_PYTHON_SUFFIX}}_EXECUTABLE {})
+        set(Python${{_CONAN_PYTHON_SUFFIX}}_LIBRARY {})
+
+        # Fails if these are set beforehand
+        unset(Python${{_CONAN_PYTHON_SUFFIX}}_INCLUDE_DIRS)
+        unset(Python${{_CONAN_PYTHON_SUFFIX}}_INCLUDE_DIR)
+        
+        include(${{CMAKE_ROOT}}/Modules/FindPython${{_CONAN_PYTHON_SUFFIX}}.cmake)
+                                   
+        # Sanity check: The former comes from FindPython(3), the latter comes from the injected find module
+        if(NOT Python${{_CONAN_PYTHON_SUFFIX}}_VERSION STREQUAL "${{Python${{_CONAN_PYTHON_SUFFIX}}_VERSION_STRING}}")
+            message(FATAL_ERROR "CMake detected wrong cpython version - this is likely a bug with the cpython Conan package")
+        endif()
+
+        if (TARGET Python${{_CONAN_PYTHON_SUFFIX}}::Module)
+            target_link_libraries(Python${{_CONAN_PYTHON_SUFFIX}}::Module INTERFACE cpython::python)
+        endif()
+        if (TARGET Python${{_CONAN_PYTHON_SUFFIX}}::SABIModule)
+            target_link_libraries(Python${{_CONAN_PYTHON_SUFFIX}}::SABIModule INTERFACE cpython::python)
+        endif()
+        if (TARGET Python${{_CONAN_PYTHON_SUFFIX}}::Python)
+            target_link_libraries(Python${{_CONAN_PYTHON_SUFFIX}}::Python INTERFACE cpython::embed)
+        endif()
+        """)
+
+        # In order for the package to be relocatable, these variables must be relative to the installed CMake file
+        if is_msvc(self):
+            lib_folder = os.path.join(self.package_folder, self._msvc_install_subprefix, "libs")
+            lib_file = self._exact_lib_name(lib_folder)
+            python_exe = "${CMAKE_CURRENT_LIST_DIR}/../../" + self._cpython_interpreter_name
+            python_library = "${CMAKE_CURRENT_LIST_DIR}/../../" + lib_file
+        else:
+            lib_folder = os.path.join(self.package_folder, "lib")
+            lib_file = self._exact_lib_name(lib_folder)
+            python_exe = "${CMAKE_CURRENT_LIST_DIR}/../../bin/" + self._cpython_interpreter_name
+            python_library = "${CMAKE_CURRENT_LIST_DIR}/../" + lib_file
+
+        cmake_file = os.path.join(self.package_folder, self._cmake_module_path, "use_conan_python.cmake")
+        save(self, cmake_file, template.format(python_exe, python_library))
+
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
@@ -555,6 +617,8 @@ class CPythonConan(ConanFile):
             if not os.path.exists(self._cpython_symlink):
                 os.symlink(f"python{self._version_suffix}", self._cpython_symlink)
         fix_apple_shared_install_name(self)
+
+        self._write_cmake_findpython_wrapper_file()
 
     @property
     def _cpython_symlink(self):
@@ -600,10 +664,6 @@ class CPythonConan(ConanFile):
         return f"python{self._version_suffix}{lib_ext}"
 
     def package_info(self):
-        # FIXME: conan components Python::Interpreter component, need a target type
-        # self.cpp_info.names["cmake_find_package"] = "Python"
-        # self.cpp_info.names["cmake_find_package_multi"] = "Python"
-
         py_version = Version(self.version)
         # python component: "Build a C extension for Python"
         if is_msvc(self):
@@ -634,6 +694,7 @@ class CPythonConan(ConanFile):
             "pkg_config_aliases", f"python{py_version.major}"
         )
         self.cpp_info.components["python"].libdirs = []
+        self.cpp_info.components["python"].set_property("cmake_target_name", "cpython::python")
 
         # embed component: "Embed Python into an application"
         self.cpp_info.components["embed"].libs = [self._lib_name]
@@ -646,6 +707,13 @@ class CPythonConan(ConanFile):
             "pkg_config_aliases", f"python{py_version.major}-embed"
         )
         self.cpp_info.components["embed"].requires = ["python"]
+        self.cpp_info.components["embed"].set_property("cmake_target_name", "cpython::embed")
+
+        # Transparent integration with CMake's FindPython(3)
+        self.cpp_info.set_property("cmake_file_name", "Python3")
+        self.cpp_info.set_property("cmake_module_file_name", "Python")
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join(self._cmake_module_path, "use_conan_python.cmake")])
 
         if self._supports_modules:
             # hidden components: the C extensions of python are built as dynamically loaded shared libraries.
