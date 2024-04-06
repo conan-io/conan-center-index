@@ -1,0 +1,488 @@
+From ed89edaa39c3798b4087eb378a751a67c60112f5 Mon Sep 17 00:00:00 2001
+From: Esteban DUGUEPEROUX <esteban.dugueperoux@gmail.com>
+Date: Sat, 19 Oct 2024 21:33:36 +0200
+Subject: [PATCH] Patch to work with conan
+
+---
+ CMakeLists.txt                                |  35 ++--
+ conanfile.py                                  | 183 ++++++++++++++++++
+ src/lib/geogram/CMakeLists.txt                |  12 +-
+ src/lib/geogram/basic/geofile.h               |   2 +-
+ src/lib/geogram/mesh/mesh_io.cpp              |   4 +-
+ src/lib/geogram/third_party/CMakeLists.txt    |  12 +-
+ src/lib/geogram_gfx/CMakeLists.txt            |   2 +
+ src/lib/geogram_gfx/imgui_ext/imgui_ext.h     |   2 +-
+ .../geogram_gfx/third_party/CMakeLists.txt    |  40 ++--
+ 9 files changed, 245 insertions(+), 47 deletions(-)
+ create mode 100644 conanfile.py
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8e41b33e2..8c80cc52a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -6,6 +6,10 @@ cmake_minimum_required(VERSION 3.5)
+ cmake_policy(SET CMP0048 NEW)
+ 
+ 
++macro(vor_add_executable)
++    add_executable(${ARGN})
++endmacro()
++
+ ##############################################################################
+ set(VORPALINE_VERSION_RC FALSE)
+ set(VORPALINE_VERSION_MAJOR 1)
+@@ -47,10 +51,14 @@ if(NOT GEOGRAM_SUB_BUILD)
+    option(GEOGRAM_WITH_FPG "Predicate generator (Sylvain Pion's FPG)" OFF)
+    option(GEOGRAM_USE_SYSTEM_GLFW3 "Use the version of GLFW3 installed in the system if found" OFF)
+    option(GEOGRAM_WITH_GARGANTUA "64-bit indices" OFF)
+-   include(cmake/geo_detect_platform.cmake)
++  #  include(cmake/geo_detect_platform.cmake)
+ endif()
+ 
+-include(cmake/geogram.cmake)
++function(vor_reset_warning_level)
++endfunction()
++
++include(cmake/utilities.cmake)
++# include(cmake/geogram.cmake)
+ 
+ # Override default CMAKE_INSTALL_DOCDIR: Use doc instead of CMake default DATAROOTDIR/doc/PROJECT_NAME
+ set(CMAKE_INSTALL_DOCDIR doc CACHE PATH "Documentation root")
+@@ -66,7 +74,7 @@ set(GEOGRAM_INSTALL_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/modules CACHE PATH "
+ set(VORPALINE_INCLUDE_SUBPATH geogram${VORPALINE_VERSION_MAJOR})
+ 
+ # Determine the current Build-OS (Build-platform without the compiler info)
+-string(REGEX REPLACE "-[^-]+$" "" VORPALINE_OS ${VORPALINE_PLATFORM})
++# string(REGEX REPLACE "-[^-]+$" "" VORPALINE_OS ${VORPALINE_PLATFORM})
+ 
+ # Determine the current build date
+ string(TIMESTAMP VORPALINE_BUILD_DATE "%Y-%m-%d %H:%M:%S")
+@@ -94,10 +102,10 @@ endif()
+ # - Makes RPATH of dynamic libraries and executable point to the directory
+ #   where libraries are installed.
+ 
+-if(VORPALINE_BUILD_DYNAMIC)
+-   set(CMAKE_MACOSX_RPATH 1)
+-   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+-endif()
++# if(VORPALINE_BUILD_DYNAMIC)
++#    set(CMAKE_MACOSX_RPATH 1)
++#    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
++# endif()
+ 
+ set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+ 
+@@ -117,6 +125,9 @@ add_custom_target(uninstall
+ ##############################################################################
+ # Geogram/Vorpaline sources
+ 
++include_directories(${CMAKE_SOURCE_DIR}/src/lib)
++include_directories(${CMAKE_SOURCE_DIR}/src/lib/geogram_gfx/third_party/)
++
+ add_subdirectory(src/lib/geogram)
+ if(GEOGRAM_WITH_VORPALINE)
+    add_subdirectory(src/lib/vorpalib)
+@@ -136,12 +147,12 @@ endif()
+ 
+ if(NOT GEOGRAM_LIB_ONLY)
+   add_subdirectory(src/bin)
+-  add_subdirectory(src/tests)
+-  add_subdirectory(src/examples)
+-  add_subdirectory(tests)
++  # add_subdirectory(src/tests)
++  # add_subdirectory(src/examples)
++  # add_subdirectory(tests)
+ endif()
+ 
+-add_subdirectory(doc)
++# add_subdirectory(doc)
+ 
+ ##############################################################################
+ # Cleanup from previous builds
+@@ -155,7 +166,7 @@ file(REMOVE ${CMAKE_BINARY_DIR}/doc/LICENSE.txt)
+ 
+ # FindGeogram.cmake
+ 
+-install(FILES cmake/FindGeogram.cmake DESTINATION ${GEOGRAM_INSTALL_CMAKE_DIR} COMPONENT devkit)
++# install(FILES cmake/FindGeogram.cmake DESTINATION ${GEOGRAM_INSTALL_CMAKE_DIR} COMPONENT devkit)
+ 
+ # Configure CPack
+ 
+diff --git a/conanfile.py b/conanfile.py
+new file mode 100644
+index 000000000..00a317c64
+--- /dev/null
++++ b/conanfile.py
+@@ -0,0 +1,183 @@
++from conan import ConanFile
++from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
++from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
++from conan.tools.microsoft import is_msvc
++import os
++
++required_conan_version = ">=1.53.0"
++
++class GeogramConan(ConanFile):
++    name = "geogram"
++    version = "1.9.0"
++    description = "A programming library with geometric algorithms"
++    license = "BSD-3-Clause"
++    url = "https://github.com/conan-io/conan-center-index"
++    homepage = "https://github.com/BrunoLevy/geogram"
++    topics = ("graphics programming", "mesh generation", "geometry processing", "graphics libraries", "mesh processing")
++    settings = "os", "arch", "compiler", "build_type"
++    options = {
++        "shared": [True, False],
++        "fPIC": [True, False],
++        "with_graphics": [True, False],
++    }
++    default_options = {
++        "shared": False,
++        "fPIC": True,
++        "with_graphics": True,
++    }
++    
++    package_type = "library"
++    short_paths = True
++
++    exports_sources = "CMakeLists.txt", "src/**", "cmake/utilities.cmake", "cmake/cmake_uninstall.cmake.in", "tools/**", "tests/**", "doc/**"
++
++    # def export_sources(self):
++    #     export_conandata_patches(self)
++
++    def config_options(self):
++        if self.settings.os == "Windows":
++            del self.options.fPIC
++
++    def configure(self):
++        if self.options.shared:
++            self.options.rm_safe("fPIC")
++
++    def layout(self):
++        cmake_layout(self, src_folder="")
++
++    def requirements(self):
++        self.requires("zlib/[>=1.2.11 <2]")
++        self.requires("libmeshb/7.80", visible=True)
++        self.requires("rply/1.1.4", visible=True)
++        self.requires("amgcl/1.4.4")
++
++        # self.requires("lua/5.4.7")
++        
++        
++        if self.options.with_graphics:
++            self.requires("xorg/system")
++            self.requires("glfw/3.4")
++            self.requires("imgui/1.91.2")
++
++    # def source(self):
++    #     get(self, **self.conan_data["sources"][self.version], strip_root=True)
++
++    def generate(self):
++        tc = CMakeToolchain(self)
++        tc.variables["VORPALINE_BUILD_DYNAMIC"] = self.options.shared
++        tc.variables["GEOGRAM_WITH_GRAPHICS"] = self.options.with_graphics
++        # tc.variables["GEOGRAM_LIB_ONLY"] = True
++        tc.variables["GEOGRAM_WITH_LEGACY_NUMERICS"] = False
++        tc.variables["GEOGRAM_WITH_HLBFGS"] = False
++        tc.variables["GEOGRAM_WITH_TETGEN"] = False
++        tc.variables["GEOGRAM_WITH_TRIANGLE"] = False
++        tc.variables["GEOGRAM_WITH_LUA"] = False
++        tc.variables["GEOGRAM_WITH_FPG"] = False
++        # To use glfw from conan dependencies
++        tc.variables["GEOGRAM_USE_SYSTEM_GLFW3"] = True
++        tc.variables["GEOGRAM_WITH_GARGANTUA"] = False
++        tc.variables["GEOGRAM_WITH_TBB"] = False
++        tc.generate()
++
++        tc = CMakeDeps(self)
++        tc.generate()
++
++    def _patch_sources(self):
++        # apply_conandata_patches(self)
++        # Remove gitmodules dependencies
++        rmdir(self, os.path.join(self.source_folder, "src/lib/geogram/third_party/amgcl"))
++        rmdir(self, os.path.join(self.source_folder, "src/lib/third_party/glfw"))
++        rmdir(self, os.path.join(self.source_folder, "src/lib/geogram_gfx/third_party/imgui"))
++        # rmdir(self, os.path.join(self.source_folder, "src/lib/geogram/third_party/libMeshb"))
++        rmdir(self, os.path.join(self.source_folder, "src/lib/geogram/third_party/rply"))
++        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(src/lib/third_party)", "")
++        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(doc)", "")
++        replace_in_file(self, os.path.join(self.source_folder, "src", "lib", "geogram", "CMakeLists.txt"), "add_subdirectory(third_party)", 
++                        """
++                        add_subdirectory(third_party)
++                        
++                        find_package(libMeshb REQUIRED CONFIG)
++                        find_package(rply REQUIRED CONFIG)
++                        find_package(amgcl REQUIRED CONFIG)
++                        """)
++        replace_in_file(self, os.path.join(self.source_folder, "src", "lib", "geogram", "CMakeLists.txt"), "add_library(geogram ${SOURCES} $<TARGET_OBJECTS:geogram_third_party>)", 
++                        """
++                        add_library(geogram ${SOURCES} $<TARGET_OBJECTS:geogram_third_party>)
++
++                        target_link_libraries(geogram libMeshb::Meshb.7)
++                        target_link_libraries(geogram rply::rply)
++                        target_link_libraries(geogram amgcl::amgcl)
++                        """)
++
++        # Rework cpp includes to works with libmeshb conan dependency
++        replace_in_file(self, os.path.join(self.source_folder, "src/lib/geogram/mesh/mesh_io.cpp"), "#include <geogram/third_party/libMeshb/sources/libmeshb7.h>", "#include <libmeshb7.h>")
++        replace_in_file(self, os.path.join(self.source_folder, "src/lib/geogram/mesh/mesh_io.cpp"), "#include <geogram/third_party/rply/rply.h>", "#include <rply.h>")
++
++        # Disable cmake specific stuff in favor of CMakeDeps generated ones 
++        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(cmake/geo_detect_platform.cmake)", "")
++        # replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(cmake/geogram.cmake)", "include(cmake/utilities.cmake)")
++        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), 'string(REGEX REPLACE "-[^-]+$" "" VORPALINE_OS ${VORPALINE_PLATFORM})', "")
++        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), 'set(CPACK_SYSTEM_NAME ${VORPALINE_OS})', "")
++        replace_in_file(self, os.path.join(self.source_folder, "src/bin/fpg/CMakeLists.txt"), "vor_reset_warning_level()", "")
++        replace_in_file(self, os.path.join(self.source_folder, "src/lib/geogram/third_party/CMakeLists.txt"), "vor_reset_warning_level()", "")
++        replace_in_file(self, os.path.join(self.source_folder, "src/lib/geogram_gfx/third_party/CMakeLists.txt"), "vor_reset_warning_level()", "")
++        replace_in_file(self, os.path.join(self.source_folder, "src/lib/third_party/CMakeLists.txt"), "vor_reset_warning_level()", "")
++        replace_in_file(self, os.path.join(self.source_folder, "src/lib/third_party/numerics/CMakeLists.txt"), "vor_reset_warning_level()", "")
++
++        replace_in_file(self, os.path.join(self.source_folder, "cmake/geogram.cmake"), "if(NOT VORPALINE_PLATFORM)", "if(0)")
++        replace_in_file(self, os.path.join(self.source_folder, "cmake/geogram.cmake"), "include(${GEOGRAM_SOURCE_DIR}/cmake/platforms/${VORPALINE_PLATFORM}/config.cmake)", "")
++        # To disable rpath
++        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "if(VORPALINE_BUILD_DYNAMIC)", "if(0)")
++
++    def build(self):
++        # self._patch_sources()
++        
++        cmake = CMake(self)
++        cmake.configure()
++        cmake.build()
++
++    def package(self):
++        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
++        cmake = CMake(self)
++        cmake.install()
++
++        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
++        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
++        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
++        rmdir(self, os.path.join(self.package_folder, "share"))
++        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
++        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
++        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
++
++    def package_info(self):
++        self.cpp_info.set_property("cmake_file_name", "Geogram")
++
++        if self.options.with_graphics:
++            self.cpp_info.components["geogram_gfx"].includedirs = ["include/geogram1"]
++            self.cpp_info.components["geogram_gfx"].libs = ["geogram_gfx"]
++            self.cpp_info.components["geogram_gfx"].requires = ["geogram", "glfw::glfw"]
++            self.cpp_info.components["geogram_gfx"].set_property("cmake_target_name", "Geogram::geogram")
++
++        # self.cpp_info.components["geogram_num_3rdparty"].includedirs = ["include/geogram1"]
++        # self.cpp_info.components["geogram_num_3rdparty"].libs = ["geogram_num_3rdparty"]
++        # self.cpp_info.components["geogram_num_3rdparty"].set_property("cmake_target_name", "Geogram::geogram_num_3rdparty")
++
++        self.cpp_info.components["geogram"].includedirs = ["include/geogram1"]
++        self.cpp_info.components["geogram"].libs = ["geogram"]
++        self.cpp_info.components["geogram"].set_property("cmake_target_name", "Geogram::geogram")
++        if not self.options.shared:
++            openmp_flags = []
++            if is_msvc(self):
++                openmp_flags = ["-openmp"]
++            elif self.settings.compiler in ("gcc", "clang"):
++                openmp_flags = ["-fopenmp"]
++            elif self.settings.compiler == "apple-clang":
++                openmp_flags = ["-Xpreprocessor", "-fopenmp"]
++            self.cpp_info.components["geogram"].sharedlinkflags = openmp_flags
++            self.cpp_info.components["geogram"].exelinkflags = openmp_flags
++
++        # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
++        if self.settings.os in ["Linux", "FreeBSD"]:
++            self.cpp_info.system_libs.append("m")
++            self.cpp_info.system_libs.append("pthread")
++            self.cpp_info.system_libs.append("dl")
+diff --git a/src/lib/geogram/CMakeLists.txt b/src/lib/geogram/CMakeLists.txt
+index 92493bc44..64a9a5985 100755
+--- a/src/lib/geogram/CMakeLists.txt
++++ b/src/lib/geogram/CMakeLists.txt
+@@ -45,11 +45,15 @@ set_source_files_properties(version.h PROPERTIES GENERATED true)
+ 
+ include_directories(${PROJECT_BINARY_DIR}/src/lib)
+ 
++find_package(libMeshb REQUIRED CONFIG)
++find_package(rply REQUIRED CONFIG)
++find_package(amgcl REQUIRED CONFIG)
++find_package(ZLIB REQUIRED CONFIG)
+ add_library(geogram ${SOURCES} $<TARGET_OBJECTS:geogram_third_party>)
+ 
+-target_include_directories(geogram PRIVATE
+-    ${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/amgcl
+-)
++# target_include_directories(geogram PRIVATE
++#     ${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/amgcl
++# )
+ 
+ if(GEOGRAM_WITH_GEOGRAMPLUS)
+    target_include_directories(geogram PUBLIC
+@@ -93,6 +97,8 @@ if(GEOGRAM_WITH_GEOGRAMPLUS)
+   target_link_libraries(geogram ${GEOGRAMPLUS_LIBS})
+ endif()
+ 
++target_link_libraries(geogram libMeshb::Meshb.7 rply::rply amgcl::amgcl ZLIB::ZLIB)
++
+ # Install the library
+ install_devkit_targets(geogram)
+ 
+diff --git a/src/lib/geogram/basic/geofile.h b/src/lib/geogram/basic/geofile.h
+index 8db7e553d..1a1ed2c4d 100644
+--- a/src/lib/geogram/basic/geofile.h
++++ b/src/lib/geogram/basic/geofile.h
+@@ -44,7 +44,7 @@
+ #include <geogram/basic/numeric.h>
+ #include <geogram/basic/memory.h>
+ #include <geogram/basic/string.h>
+-#include <geogram/third_party/zlib/zlib.h>
++#include <zlib.h>
+ 
+ #include <stdexcept>
+ #include <fstream>
+diff --git a/src/lib/geogram/mesh/mesh_io.cpp b/src/lib/geogram/mesh/mesh_io.cpp
+index 8eb18518f..d89b8046a 100644
+--- a/src/lib/geogram/mesh/mesh_io.cpp
++++ b/src/lib/geogram/mesh/mesh_io.cpp
+@@ -54,10 +54,10 @@
+ #include <fstream>
+ 
+ extern "C" {
+-#include <geogram/third_party/libMeshb/sources/libmeshb7.h>
++#include <libmeshb7.h>
+ }
+ 
+-#include <geogram/third_party/rply/rply.h>
++#include <rply.h>
+ 
+ #ifdef GEO_COMPILER_GCC
+ #include <cxxabi.h>
+diff --git a/src/lib/geogram/third_party/CMakeLists.txt b/src/lib/geogram/third_party/CMakeLists.txt
+index 8df3c8276..ad9d9584b 100644
+--- a/src/lib/geogram/third_party/CMakeLists.txt
++++ b/src/lib/geogram/third_party/CMakeLists.txt
+@@ -29,10 +29,6 @@ else()
+   endif()
+ endif()
+ 
+-include_directories(
+-    ${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/libMeshb/sources
+-)
+-
+ # Since we are in a CMake "object library" (i.e.,
+ # a set of object files compiled with same options),
+ # the automatically generated geogram_EXPORTS
+@@ -49,11 +45,11 @@ if(BUILD_SHARED_LIBS)
+    endif()
+ endif()
+ 
+-aux_source_directories(SOURCES "Source Files"               .)
+-aux_source_directories(SOURCES "Source Files\\libMeshb"     libMeshb/sources)
+-aux_source_directories(SOURCES "Source Files\\rply"         rply)
++# aux_source_directories(SOURCES "Source Files"               .)
++# aux_source_directories(SOURCES "Source Files\\libMeshb"     libMeshb/sources)
++# aux_source_directories(SOURCES "Source Files\\rply"         rply)
+ aux_source_directories(SOURCES "Source Files\\shewchuk"     shewchuk)
+-aux_source_directories(SOURCES "Source Files\\zlib"         zlib)
++# aux_source_directories(SOURCES "Source Files\\zlib"         zlib)
+ aux_source_directories(SOURCES "Source Files\\PoissonRecon" PoissonRecon)
+ aux_source_directories(SOURCES "Source Files\\xatlas"       xatlas)
+ 
+diff --git a/src/lib/geogram_gfx/CMakeLists.txt b/src/lib/geogram_gfx/CMakeLists.txt
+index 6755dc4ca..d7e9b7f6e 100755
+--- a/src/lib/geogram_gfx/CMakeLists.txt
++++ b/src/lib/geogram_gfx/CMakeLists.txt
+@@ -24,6 +24,7 @@ if(GEOGRAM_USE_SYSTEM_GLFW3)
+   add_definitions(-DGEO_USE_SYSTEM_GLFW3)
+ endif()
+ 
++find_package(imgui REQUIRED CONFIG)
+ add_library(geogram_gfx ${SOURCES} $<TARGET_OBJECTS:geogram_gfx_third_party>)
+ 
+ target_include_directories(geogram_gfx PUBLIC ${PROJECT_SOURCE_DIR}/src/lib/geogram_gfx/third_party)
+@@ -44,6 +45,7 @@ set_target_properties(geogram_gfx PROPERTIES
+ if(NOT ANDROID)
+   target_link_libraries(geogram_gfx glfw)
+ endif()
++target_link_libraries(geogram_gfx imgui::imgui)
+ 
+ if(VORPALINE_BUILD_DYNAMIC)
+     # Must provide all symbols at link time
+diff --git a/src/lib/geogram_gfx/imgui_ext/imgui_ext.h b/src/lib/geogram_gfx/imgui_ext/imgui_ext.h
+index 5109b1b10..70e021c10 100644
+--- a/src/lib/geogram_gfx/imgui_ext/imgui_ext.h
++++ b/src/lib/geogram_gfx/imgui_ext/imgui_ext.h
+@@ -53,7 +53,7 @@
+ #endif
+ #endif
+ 
+-#include <geogram_gfx/third_party/imgui/imgui.h>
++#include <imgui.h>
+ 
+ #if defined(GEO_COMPILER_GCC_FAMILY)
+ #pragma GCC diagnostic pop
+diff --git a/src/lib/geogram_gfx/third_party/CMakeLists.txt b/src/lib/geogram_gfx/third_party/CMakeLists.txt
+index fe953be15..9200a612d 100644
+--- a/src/lib/geogram_gfx/third_party/CMakeLists.txt
++++ b/src/lib/geogram_gfx/third_party/CMakeLists.txt
+@@ -34,24 +34,24 @@ endif()
+ 
+ add_library(geogram_gfx_third_party OBJECT ${SOURCES})
+ 
+-target_sources(
+-  geogram_gfx_third_party PRIVATE
+-    imgui/imgui.cpp
+-    imgui/imgui_demo.cpp
+-    imgui/imgui_draw.cpp
+-    imgui/imgui_tables.cpp
+-    imgui/imgui_widgets.cpp
+-)
++# target_sources(
++#   geogram_gfx_third_party PRIVATE
++#     imgui/imgui.cpp
++#     imgui/imgui_demo.cpp
++#     imgui/imgui_draw.cpp
++#     imgui/imgui_tables.cpp
++#     imgui/imgui_widgets.cpp
++# )
+ 
+-target_sources(
+-  geogram_gfx_third_party PRIVATE
+-    imgui/backends/imgui_impl_opengl3.cpp
+-)
++# target_sources(
++#   geogram_gfx_third_party PRIVATE
++#     imgui/backends/imgui_impl_opengl3.cpp
++# )
+ 
+-target_include_directories(
+-  geogram_gfx_third_party PRIVATE
+-  ${PROJECT_SOURCE_DIR}/src/lib/geogram_gfx/third_party/imgui
+-)
++# target_include_directories(
++#   geogram_gfx_third_party PRIVATE
++#   ${PROJECT_SOURCE_DIR}/src/lib/geogram_gfx/third_party/imgui
++# )
+ 
+ if(ANDROID)
+ #  target_sources(
+@@ -62,10 +62,10 @@ if(ANDROID)
+     ${ANDROID_NDK}/sources/android/native_app_glue
+   )
+ else()
+-  target_sources(
+-    geogram_gfx_third_party PRIVATE
+-       imgui/backends/imgui_impl_glfw.cpp
+-  )  
++  # target_sources(
++  #   geogram_gfx_third_party PRIVATE
++  #      imgui/backends/imgui_impl_glfw.cpp
++  # )  
+   target_include_directories(
+     geogram_gfx_third_party PRIVATE
+     ${PROJECT_SOURCE_DIR}/src/lib/third_party/glfw/include
+-- 
+2.43.0
+
