@@ -89,6 +89,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE "src")
 
 if(MIDI_NATIVE)
   target_include_directories(${PROJECT_NAME} PRIVATE "src/native_midi")
+  if(APPLE)
+    # https://github.com/libsdl-org/SDL_mixer/blob/release-2.0.4/configure.in#L380
+    target_link_libraries(${PROJECT_NAME} PRIVATE "-framework AudioToolbox" "-framework AudioUnit" "-framework CoreServices")
+  elseif(WIN32)
+    # https://github.com/libsdl-org/SDL_mixer/blob/release-2.0.4/configure.in#L376
+    target_link_libraries(${PROJECT_NAME} PRIVATE winmm)
+  endif()
 endif()
 
 find_package(SDL2 CONFIG REQUIRED)
