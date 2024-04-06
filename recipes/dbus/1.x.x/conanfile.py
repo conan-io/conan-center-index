@@ -30,7 +30,7 @@ class DbusConan(ConanFile):
         "system_socket": [None, "ANY"],
         "system_pid_file": [None, "ANY"],
         "with_x11": [True, False],
-        "with_glib": [True, False],
+        "with_glib": ["deprecated", True, False],
         "with_systemd": [True, False],
         "with_selinux": [True, False],
         "session_socket_dir": ["ANY"],
@@ -41,7 +41,7 @@ class DbusConan(ConanFile):
         "system_socket": None,
         "system_pid_file": None,
         "with_x11": False,
-        "with_glib": False,
+        "with_glib": "deprecated",
         "with_systemd": False,
         "with_selinux": False,
         "session_socket_dir": "/tmp",
@@ -64,13 +64,14 @@ class DbusConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def package_id(self):
+        del self.info.options.with_glib
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("expat/2.6.0")
-        if self.options.with_glib:
-            self.requires("glib/2.78.3")
         if self.options.get_safe("with_systemd"):
             self.requires("libsystemd/253.6")
         if self.options.get_safe("with_selinux"):
@@ -84,6 +85,8 @@ class DbusConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 7:
             raise ConanInvalidConfiguration(f"{self.ref} requires at least gcc 7.")
+        if self.options.with_glib != "deprecated":
+            raise ConanInvalidConfiguration(f"with_glib option is deprecated and should not be used - the option had no effect.")
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.0")
@@ -113,7 +116,6 @@ class DbusConan(ConanFile):
             tc.project_options["launchd_agent_dir"] = os.path.join(self.package_folder, "res", "LaunchAgents")
         tc.project_options["x11_autolaunch"] = "enabled" if self.options.get_safe("with_x11", False) else "disabled"
         tc.project_options["xml_docs"] = "disabled"
-        tc.project_options["modular_tests"] = "enabled" if self.options.with_glib else "disabled" # glib is not found otherwise due to a buggy build.meson
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
@@ -190,11 +192,6 @@ class DbusConan(ConanFile):
             self.cpp_info.defines.append("DBUS_STATIC_BUILD")
 
         self.cpp_info.requires.append("expat::expat")
-        if self.options.with_glib:
-            if self.settings.os == "Windows":
-                self.cpp_info.requires.append("glib::gio-windows-2.0")
-            else:
-                self.cpp_info.requires.append("glib::gio-unix-2.0")
         if self.options.get_safe("with_systemd"):
             self.cpp_info.requires.append("libsystemd::libsystemd")
         if self.options.get_safe("with_selinux"):
