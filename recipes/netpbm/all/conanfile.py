@@ -75,36 +75,35 @@ class NetpbmConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    @property
+    def _libtype_and_suffix(self):
+        if self.settings.os == "Windows":
+            return "dll", "dll"
+        elif is_apple_os(self):
+            if self.options.shared:
+                return "dylib", "dylib"
+            else:
+                return "unixstatic", "a"
+        else:
+            if self.options.shared:
+                return "unixshared", "so"
+            else:
+                return "unixstatic", "a"
+
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
 
         tc = AutotoolsToolchain(self)
         config = []
-        if self.settings.os == "Windows":
-            config.append("NETPBMLIBTYPE=dll")
-        elif is_apple_os(self):
-            if self.options.shared:
-                config.append("NETPBMLIBTYPE=dylib")
-                config.append("NETPBMLIBSUFFIX=dylib")
-            else:
-                config.append("NETPBMLIBTYPE=unixstatic")
-                config.append("NETPBMLIBSUFFIX=a")
-        else:
-            if self.options.shared:
-                config.append("NETPBMLIBTYPE=unixshared")
-                config.append("NETPBMLIBSUFFIX=so")
-            else:
-                config.append("NETPBMLIBTYPE=unixstatic")
-                config.append("NETPBMLIBSUFFIX=a")
-
-        config.append("DEFAULT_TARGET=nonmerge")
+        lib_type, suffix = self._libtype_and_suffix
+        config.append(f"NETPBMLIBTYPE={lib_type}")
+        config.append(f"NETPBMLIBSUFFIX={suffix}")
         config.append(f"STATICLIB_TOO={'N' if self.options.shared else 'Y'}")
-        config.append("LDRELOC=ld --reloc")
         config.append(f"PKGDIR_DEFAULT={self.package_folder}")
-
-        if self.settings.arch in ["x86", "x86_64"]:
-            config.append("WANT_SSE=Y")
+        config.append(f"WANT_SSE={'Y' if self.settings.arch in ['x86', 'x86_64'] else 'N'}")
+        config.append("DEFAULT_TARGET=nonmerge")
+        config.append("LDRELOC=ld --reloc")
 
         def _configure_dependency(name, pkg):
             cpp_info = self.dependencies[pkg].cpp_info.aggregated_components()
