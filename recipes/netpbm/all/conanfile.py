@@ -2,12 +2,12 @@ import os
 import shutil
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, save, replace_in_file, chdir, rmdir, rm, rename, copy
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conans.errors import ConanInvalidConfiguration
 
 
 class NetpbmConan(ConanFile):
