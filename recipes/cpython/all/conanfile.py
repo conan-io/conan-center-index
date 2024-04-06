@@ -512,13 +512,17 @@ class CPythonConan(ConanFile):
         lib_dir_path = os.path.join(self.package_folder, self._msvc_install_subprefix, "Lib").replace("\\", "/")
         self.run(f"{interpreter_path} -c \"import compileall; compileall.compile_dir('{lib_dir_path}')\"")
 
-    def _exact_lib_name(self, folder):
-        possible_extensions = ("a", "so", "dylib", "lib")
-        for file in os.listdir(folder):
-            for extension in possible_extensions:
-                if re.match(f".*\\.{extension}", file):
-                    return file
-        raise ConanException(f"No library files found in {folder}")
+    @property
+    def _exact_lib_name(self):
+        if self.settings.os == "Windows":
+            extension = "lib"
+        elif not self.options.shared:
+            extension = "a"
+        elif is_apple_os(self):
+            extension = "dylib"
+        else:
+            extension = "so"
+        return f"{self._lib_name}.{extension}"
 
     @property
     def _cmake_module_path(self):
@@ -536,45 +540,42 @@ class CPythonConan(ConanFile):
         else()
             set(_CONAN_PYTHON_SUFFIX "")
         endif()
-        set(Python${{_CONAN_PYTHON_SUFFIX}}_EXECUTABLE {})
-        set(Python${{_CONAN_PYTHON_SUFFIX}}_LIBRARY {})
+        set(Python${_CONAN_PYTHON_SUFFIX}_EXECUTABLE @PYTHON_EXECUTABLE@)
+        set(Python${_CONAN_PYTHON_SUFFIX}_LIBRARY @PYTHON_LIBRARY@)
 
         # Fails if these are set beforehand
-        unset(Python${{_CONAN_PYTHON_SUFFIX}}_INCLUDE_DIRS)
-        unset(Python${{_CONAN_PYTHON_SUFFIX}}_INCLUDE_DIR)
-        
-        include(${{CMAKE_ROOT}}/Modules/FindPython${{_CONAN_PYTHON_SUFFIX}}.cmake)
-                                   
+        unset(Python${_CONAN_PYTHON_SUFFIX}_INCLUDE_DIRS)
+        unset(Python${_CONAN_PYTHON_SUFFIX}_INCLUDE_DIR)
+
+        include(${CMAKE_ROOT}/Modules/FindPython${_CONAN_PYTHON_SUFFIX}.cmake)
+
         # Sanity check: The former comes from FindPython(3), the latter comes from the injected find module
-        if(NOT Python${{_CONAN_PYTHON_SUFFIX}}_VERSION STREQUAL Python${{_CONAN_PYTHON_SUFFIX}}_VERSION_STRING)
+        if(NOT Python${_CONAN_PYTHON_SUFFIX}_VERSION STREQUAL Python${_CONAN_PYTHON_SUFFIX}_VERSION_STRING)
             message(FATAL_ERROR "CMake detected wrong cpython version - this is likely a bug with the cpython Conan package")
         endif()
 
-        if (TARGET Python${{_CONAN_PYTHON_SUFFIX}}::Module)
-            target_link_libraries(Python${{_CONAN_PYTHON_SUFFIX}}::Module INTERFACE cpython::python)
+        if (TARGET Python${_CONAN_PYTHON_SUFFIX}::Module)
+            set_target_properties(Python${_CONAN_PYTHON_SUFFIX}::Module PROPERTIES INTERFACE_LINK_LIBRARIES cpython::python)
         endif()
-        if (TARGET Python${{_CONAN_PYTHON_SUFFIX}}::SABIModule)
-            target_link_libraries(Python${{_CONAN_PYTHON_SUFFIX}}::SABIModule INTERFACE cpython::python)
+        if (TARGET Python${_CONAN_PYTHON_SUFFIX}::SABIModule)
+            set_target_properties(Python${_CONAN_PYTHON_SUFFIX}::SABIModule PROPERTIES INTERFACE_LINK_LIBRARIES cpython::python)
         endif()
-        if (TARGET Python${{_CONAN_PYTHON_SUFFIX}}::Python)
-            target_link_libraries(Python${{_CONAN_PYTHON_SUFFIX}}::Python INTERFACE cpython::embed)
+        if (TARGET Python${_CONAN_PYTHON_SUFFIX}::Python)
+            set_target_properties(Python${_CONAN_PYTHON_SUFFIX}::Python PROPERTIES INTERFACE_LINK_LIBRARIES cpython::embed)
         endif()
         """)
 
         # In order for the package to be relocatable, these variables must be relative to the installed CMake file
         if is_msvc(self):
-            lib_folder = os.path.join(self.package_folder, self._msvc_install_subprefix, "libs")
-            lib_file = self._exact_lib_name(lib_folder)
             python_exe = "${CMAKE_CURRENT_LIST_DIR}/../../" + self._cpython_interpreter_name
-            python_library = "${CMAKE_CURRENT_LIST_DIR}/../" + lib_file
+            python_library = "${CMAKE_CURRENT_LIST_DIR}/../" + self._exact_lib_name
         else:
-            lib_folder = os.path.join(self.package_folder, "lib")
-            lib_file = self._exact_lib_name(lib_folder)
             python_exe = "${CMAKE_CURRENT_LIST_DIR}/../../bin/" + self._cpython_interpreter_name
-            python_library = "${CMAKE_CURRENT_LIST_DIR}/../" + lib_file
+            python_library = "${CMAKE_CURRENT_LIST_DIR}/../" + self._exact_lib_name
 
         cmake_file = os.path.join(self.package_folder, self._cmake_module_path, "use_conan_python.cmake")
-        save(self, cmake_file, template.format(python_exe, python_library))
+        content = template.replace("@PYTHON_EXECUTABLE@", python_exe).replace("@PYTHON_LIBRARY@", python_library)
+        save(self, cmake_file, content)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
