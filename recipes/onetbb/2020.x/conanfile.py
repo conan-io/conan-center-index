@@ -213,8 +213,10 @@ class OneTBBConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "Makefile"), "release", "debug")
         # Remove -Werror and /WX from
         #   WARNING_AS_ERROR_KEY = -Werror
-        for inc_file in self.source_path.joinpath("build").glob("*.inc"):
-            replace_in_file(self, inc_file, "WARNING_AS_ERROR_KEY = ", "WARNING_AS_ERROR_KEY = #", strict=False)
+        for compiler in ["cl", "clang", "gcc", "icc", "icl"]:
+            for inc_file in self.source_path.joinpath("build").glob(f"*.{compiler}.inc"):
+                if inc_file.stem not in ["ios.clang", "OpenBSD.clang", "FreeBSD.clang"]:
+                    replace_in_file(self, inc_file, "WARNING_AS_ERROR_KEY = ", "WARNING_AS_ERROR_KEY = #", strict=False)
 
     def build(self):
         self._patch_sources()
