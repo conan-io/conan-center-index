@@ -514,6 +514,7 @@ class CPythonConan(ConanFile):
 
     @property
     def _exact_lib_name(self):
+        prefix = "" if self.settings.os == "Windows" else "lib"
         if self.settings.os == "Windows":
             extension = "lib"
         elif not self.options.shared:
@@ -522,7 +523,7 @@ class CPythonConan(ConanFile):
             extension = "dylib"
         else:
             extension = "so"
-        return f"{self._lib_name}.{extension}"
+        return f"{prefix}{self._lib_name}.{extension}"
 
     @property
     def _cmake_module_path(self):
