@@ -178,3 +178,5 @@ class LibPcapConan(ConanFile):
         self.cpp_info.libs = [f"pcap{suffix}"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
+        if self.options.get_safe("with_snf"):
+            self.cpp_info.system_libs.append("snf")
