@@ -664,9 +664,7 @@ class CPythonConan(ConanFile):
             else:
                 lib_ext = ""
         else:
-            lib_ext = self._abi_suffix + (
-                ".dll.a" if self.options.shared and self.settings.os == "Windows" else ""
-            )
+            lib_ext = self._abi_suffix
         return f"python{self._version_suffix}{lib_ext}"
 
     def package_info(self):
