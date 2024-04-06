@@ -20,3 +20,7 @@ patches:
     - patch_file: "patches/1.0.3-0002-fix-boost-deprecated-includes.patch"
       patch_description: "Fix deprecated Boost includes"
       patch_type: "portability"
+    - patch_file: "patches/1.0.1-0002-fix-missing-define.patch"
+      patch_description: "Add missing _GNU_SOURCE define"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/alicevision/CCTag/commit/b49d710ab6870a865c20c943a65bd6dca906a184"
