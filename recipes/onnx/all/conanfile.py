@@ -49,10 +49,19 @@ class OnnxConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
+        if Version(self.version) < "1.16.0":
+            return {
+                "Visual Studio": "15",
+                "msvc": "191",
+                "gcc": "7",
+                "clang": "5",
+                "apple-clang": "10",
+            }
+        # 1.16.0+ requires <filesystem> header available with gcc8+
         return {
             "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "7",
+            "gcc": "8",
             "clang": "5",
             "apple-clang": "10",
         }
