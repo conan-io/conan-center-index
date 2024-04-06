@@ -1,4 +1,14 @@
 versions:
+  "2.101.0":
+    folder: all
+  "2.98.5":
+    folder: all
+  "2.97.0":
+    folder: all
+  "2.96.1":
+    folder: all
+  "2.95.0":
+    folder: all
   "2.93.1":
     folder: all
   "2.92.0":
@@ -14,14 +24,4 @@ versions:
   "2.76.2":
     folder: all
   "2.74.2":
-    folder: all
-  "2.73.1":
-    folder: all
-  "2.72.0":
-    folder: all
-  "2.71.0":
-    folder: all
-  "2.68.3":
-    folder: all
-  "1.29.7":
     folder: all

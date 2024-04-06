@@ -85,20 +85,22 @@ class LibspatialiteConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("sqlite3/3.41.1")
-        self.requires("zlib/1.2.13")
+        # Included in public spatialite/sqlite.h
+        # https://www.gaia-gis.it/fossil/libspatialite/file?name=src/headers/spatialite/sqlite.h&ci=tip
+        self.requires("sqlite3/3.44.2", transitive_headers=True, transitive_libs=True)
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_proj:
-            self.requires("proj/9.1.1")
+            self.requires("proj/9.3.1")
         if self.options.with_iconv:
             self.requires("libiconv/1.17")
         if self.options.with_freexl:
-            self.requires("freexl/1.0.6")
+            self.requires("freexl/2.0.0")
         if self.options.with_geos:
-            self.requires("geos/3.11.1")
+            self.requires("geos/3.12.0")
         if self.options.get_safe("with_rttopo"):
             self.requires("librttopo/1.1.0")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.10.3")
+            self.requires("libxml2/2.12.4")
         if self.options.with_minizip:
             self.requires("minizip/1.2.13")
 
@@ -106,7 +108,7 @@ class LibspatialiteConan(ConanFile):
         if not is_msvc(self):
             self.tool_requires("libtool/2.4.7")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/1.9.3")
+                self.tool_requires("pkgconf/2.1.0")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -118,6 +120,9 @@ class LibspatialiteConan(ConanFile):
     def generate(self):
         if is_msvc(self):
             tc = NMakeToolchain(self)
+            tc.extra_defines.append("YY_NO_UNISTD_H")
+            if self.options.shared:
+                tc.extra_defines.append("DLL_EXPORT")
             tc.generate()
             deps = NMakeDeps(self)
             deps.generate()
@@ -154,6 +159,7 @@ class LibspatialiteConan(ConanFile):
                     "--enable-geosonlyreentrant=no",
                     "--enable-geos370=yes",
                     f"--enable-rttopo={yes_no(self.options.with_rttopo)}",
+                    "--with-geosconfig=true",  # Using `true` command for a no-op
                 ])
             tc.generate()
 
@@ -192,14 +198,17 @@ class LibspatialiteConan(ConanFile):
         if not self.options.with_minizip:
             replace_in_file(self, gaiaconfig_msvc, "#define ENABLE_MINIZIP 1", "")
 
-        target = "spatialite_i.lib" if self.options.shared else "spatialite.lib"
-        optflags = ["-DYY_NO_UNISTD_H"]
-        if self.options.shared:
-            optflags.append("-DDLL_EXPORT")
-        with chdir(self, self.source_folder):
-            self.run(f"nmake -f makefile.vc {target} OPTFLAGS=\"{' '.join(optflags)}\"")
+        # Workaround for a NMakeDeps define quoting issue:
+        # https://github.com/conan-io/conan/issues/13603
+        replace_in_file(self, os.path.join(self.generators_folder, "conannmakedeps.bat"),
+                        r'/DSQLITE_API#\"__declspec(dllimport)\"',
+                        "/DSQLITE_API#__declspec(dllimport)", strict=False)
 
-    def _build_autotools(self):
+        target = "spatialite_i.lib" if self.options.shared else "spatialite.lib"
+        with chdir(self, self.source_folder):
+            self.run(f"nmake -f makefile.vc {target}")
+
+    def _patch_autotools(self):
         # fix MinGW
         replace_in_file(
             self, os.path.join(self.source_folder, "configure.ac"),
@@ -208,9 +217,18 @@ class LibspatialiteConan(ConanFile):
         )
         # Disable tests
         replace_in_file(self, os.path.join(self.source_folder, "Makefile.am"),
-                              "SUBDIRS = src test $(EXAMPLES)",
-                              "SUBDIRS = src $(EXAMPLES)")
+                        "SUBDIRS = src test $(EXAMPLES)",
+                        "SUBDIRS = src $(EXAMPLES)")
+        # We can't use geos-config file in conan because it's a non-relocatable file,
+        # therefore not packaged by geos recipe of conan-center-index.
+        # Instead, we rely on AutoToolsBuildEnvironment helper to inject proper flags.
+        configure_ac = os.path.join(self.source_folder, "configure.ac")
+        replace_in_file(self, configure_ac, "AC_MSG_ERROR([the user-specified geos-config", "echo # ")
+        replace_in_file(self, configure_ac, "AC_CHECK_HEADERS([geos_c.h", "# ")
+        replace_in_file(self, configure_ac, "AC_SEARCH_LIBS(GEOSCoveredBy", "# ")
 
+    def _build_autotools(self):
+        self._patch_autotools()
         autotools = Autotools(self)
         autotools.autoreconf()
         autotools.configure()

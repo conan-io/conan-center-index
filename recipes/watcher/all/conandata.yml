@@ -1,4 +1,16 @@
 sources:
+  "0.10.0":
+    url: "https://github.com/e-dant/watcher/archive/release/0.10.0.tar.gz"
+    sha256: "c15f088ddc41b58100921ea0b630bcbde83c9960aefecf82221da997f4d4b4ec"
+  "0.9.5":
+    url: "https://github.com/e-dant/watcher/archive/release/0.9.5.tar.gz"
+    sha256: "41b74d138eec106c35a99e7544def599453a8bf4cf4887ad627e1c9e3355287c"
+  "0.9.2":
+    url: "https://github.com/e-dant/watcher/archive/release/0.9.2.tar.gz"
+    sha256: "d728960cbf5cebb05e1e0b7d61482b1cfd10b6bc616f9e494168f7d5d2e689cf"
+  "0.8.8":
+    url: "https://github.com/e-dant/watcher/archive/release/0.8.8.tar.gz"
+    sha256: "51e61a096d072ae5c78df9318dec50fb5718c88b672305fc4b6bd2c7ba264bbe"
   "0.8.7":
     url: "https://github.com/e-dant/watcher/archive/release/0.8.7.tar.gz"
     sha256: "e83eaf097f8ebe9b87bee2962e6e18f6f2597ae4e76d8d0258adc2c62fa545d2"
@@ -20,22 +32,8 @@ sources:
   "0.4.3":
     url: "https://github.com/e-dant/watcher/archive/release/0.4.3.tar.gz"
     sha256: "8603b45edfa5023752d9e2fdd731efe5a556a542aaf03f6be0e69c68f552b25a"
-  "0.3.3":
-    url: "https://github.com/e-dant/watcher/archive/release/0.3.3.tar.gz"
-    sha256: "1cb4a898741306bb9089bd24175bcbb2cb434531eac6bbcfe1a3679b8bf1f44c"
-  "0.3.2":
-    url: "https://github.com/e-dant/watcher/archive/release/0.3.2.tar.gz"
-    sha256: "f00247ad8ee492cb70143917bd19f80056227f4ebd4263015727f02750e4fbd5"
-  "0.3.1":
-    url: "https://github.com/e-dant/watcher/archive/release/0.3.1.tar.gz"
-    sha256: "0fa79d21ac16c96b7ca50f2563aed9d8841e5b8f139af27d0b2cf199d0d281dc"
 patches:
   "0.5.5":
     - patch_file: "patches/0.5.5-fix-limits_max.patch"
       patch_description: "fix max macro error in windows"
       patch_type: "portability"
-  "0.3.1":
-    - patch_file: "patches/0.3.1-fix-include.patch"
-      patch_description: "add missing include headers for some compilers"
-      patch_type: "portability"
-      patch_source: "https://github.com/e-dant/watcher/pull/18"

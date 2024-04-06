@@ -1,4 +1,10 @@
 sources:
+  "1.13.0":
+    url: "https://github.com/gabime/spdlog/archive/v1.13.0.tar.gz"
+    sha256: "534f2ee1a4dcbeb22249856edfb2be76a1cf4f708a20b0ac2ed090ee24cfdbc9"
+  "1.12.0":
+    url: "https://github.com/gabime/spdlog/archive/v1.12.0.tar.gz"
+    sha256: "4dccf2d10f410c1e2feaff89966bfc49a1abb29ef6f08246335b110e001e09a9"
   "1.11.0":
     url: "https://github.com/gabime/spdlog/archive/v1.11.0.tar.gz"
     sha256: "ca5cae8d6cac15dae0ec63b21d6ad3530070650f68076f3a4a862ca293a858bb"
@@ -14,3 +20,9 @@ sources:
   "1.8.5":
     url: "https://github.com/gabime/spdlog/archive/v1.8.5.tar.gz"
     sha256: "944d0bd7c763ac721398dca2bb0f3b5ed16f67cef36810ede5061f35a543b4b8"
+patches:
+  "1.11.0":
+    - patch_file: "patches/1.11.0-0001-fix-fmt10-build.patch"
+      patch_description: "Fix fmt 10.0.0 build"
+      patch_type: "conan"
+      patch_source: "https://github.com/gabime/spdlog/pull/2694"

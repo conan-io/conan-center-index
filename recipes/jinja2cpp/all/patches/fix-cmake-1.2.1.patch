@@ -12,7 +12,7 @@ index bf603b0..6229f02 100644
  )
  
 diff --git a/src/helpers.h b/src/helpers.h
-index 3af280f..a6a3205 100644
+index 3af280f..b1c31fe 100644
 --- a/src/helpers.h
 +++ b/src/helpers.h
 @@ -32,12 +32,21 @@ struct MultiStringLiteral
@@ -37,3 +37,33 @@ index 3af280f..a6a3205 100644
  
      template<typename CharT, const char* MultiStringLiteral::*, const wchar_t* MultiStringLiteral::*>
      struct SelectMemberPtr;
+diff --git a/thirdparty/CMakeLists.txt b/thirdparty/CMakeLists.txt
+index 77794b9..e31b999 100644
+--- a/thirdparty/CMakeLists.txt
++++ b/thirdparty/CMakeLists.txt
+@@ -67,8 +67,8 @@ if(JINJA2CPP_BUILD_TESTS)
+ endif()
+ 
+ if (NOT DEFINED JINJA2_PRIVATE_LIBS_INT)
+-    set(JINJA2CPP_PRIVATE_LIBS ${JINJA2CPP_PRIVATE_LIBS} Boost::variant
+-        Boost::filesystem Boost::algorithm Boost::lexical_cast fmt RapidJson)
++    set(JINJA2CPP_PRIVATE_LIBS ${JINJA2CPP_PRIVATE_LIBS} Boost::headers
++        Boost::filesystem fmt RapidJson)
+ else ()
+     set (JINJA2CPP_PRIVATE_LIBS ${JINJA2_PRIVATE_LIBS_INT})
+ endif ()
+diff --git a/thirdparty/thirdparty-conan-build.cmake b/thirdparty/thirdparty-conan-build.cmake
+index ec1e2c4..3a70e8a 100644
+--- a/thirdparty/thirdparty-conan-build.cmake
++++ b/thirdparty/thirdparty-conan-build.cmake
+@@ -7,9 +7,8 @@ find_package(string-view-lite REQUIRED)
+ find_package(nlohmann_json REQUIRED)
+ 
+ find_package(Boost)
+-set(CONAN_BOOST_PACKAGE_NAME Boost::Boost)
+ find_package(fmt)
+ find_package(RapidJSON)
+ 
+-set(JINJA2_PRIVATE_LIBS_INT ${CONAN_BOOST_PACKAGE_NAME} fmt::fmt RapidJSON::RapidJSON nlohmann_json::nlohmann_json)
++set(JINJA2_PRIVATE_LIBS_INT Boost::headers Boost::filesystem fmt::fmt rapidjson nlohmann_json::nlohmann_json)
+ set(JINJA2_PUBLIC_LIBS_INT nonstd::expected-lite nonstd::variant-lite nonstd::optional-lite nonstd::string-view-lite)

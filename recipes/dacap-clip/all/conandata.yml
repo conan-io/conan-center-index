@@ -1,4 +1,13 @@
 sources:
+  "1.8":
+    url: "https://github.com/dacap/clip/archive/refs/tags/v1.8.tar.gz"
+    sha256: "a54d243451fb483590ffd9239a3c55f8d8e672d44df63dc2b81da01a229074bc"
+  "1.7":
+    url: "https://github.com/dacap/clip/archive/refs/tags/v1.7.tar.gz"
+    sha256: "f494d306f3425e984368cbd94ffb213e0a3b3d44c3ab169e5134788d3342535c"
+  "1.6":
+    url: "https://github.com/dacap/clip/archive/refs/tags/v1.6.tar.gz"
+    sha256: "fc37319775ec1b6a75475b46696f5014418d90676359b96b894f646241dcbb7e"
   "1.5":
     url: "https://github.com/dacap/clip/archive/refs/tags/v1.5.tar.gz"
     sha256: "8f6f8a427075a09011fafbb75bfdbf1213e4492a13cff4a70975aab361c99382"

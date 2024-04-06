@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, to_apple_arch, XCRun
-from conan.tools.build import build_jobs, check_min_cppstd, cross_building, valid_min_cppstd
+from conan.tools.build import build_jobs, check_min_cppstd, cross_building, valid_min_cppstd, supported_cppstd
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches, chdir, collect_libs, copy, export_conandata_patches,
@@ -29,6 +29,7 @@ required_conan_version = ">=1.53.0"
 CONFIGURE_OPTIONS = (
     "atomic",
     "chrono",
+    "cobalt",
     "container",
     "context",
     "contract",
@@ -160,18 +161,96 @@ class BoostConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def _cppstd_flag(self, compiler_cppstd=None):
+        """Return the flag for the given C++ standard and compiler"""
+        # TODO: Replace it by Conan tool when available: https://github.com/conan-io/conan/issues/12603
+        compiler = self.settings.get_safe("compiler")
+        compiler_version = self.settings.get_safe("compiler.version")
+        cppstd = self.settings.get_safe("compiler.cppstd") or compiler_cppstd
+        if not compiler or not compiler_version or not cppstd:
+            return ""
+
+        def _cppstd_gcc(gcc_version, cppstd):
+            """Return the flag for the given C++ standard and GCC version"""
+            cppstd_flags = {}
+            cppstd_flags.setdefault("98", "98" if gcc_version >= "3.4" else None)
+            cppstd_flags.setdefault("11", "11" if gcc_version >= "4.7" else "0x" if gcc_version >= "4.3" else None)
+            cppstd_flags.setdefault("14", "14" if gcc_version >= "4.9" else "1y" if gcc_version >= "4.8" else None)
+            cppstd_flags.setdefault("17", "17" if gcc_version >= "5.2" else "1z" if gcc_version >= "5" else None)
+            cppstd_flags.setdefault("20", "2a" if gcc_version >= "8" else "20" if gcc_version >= "12" else None)
+            cppstd_flags.setdefault("23", "2b" if gcc_version >= "11" else None)
+            return cppstd_flags.get(cppstd.lstrip("gnu"))
+
+        def _cppstd_clang(clang_version, cppstd):
+            """Return the flag for the given C++ standard and Clang version"""
+            cppstd_flags = {}
+            cppstd_flags.setdefault("98", "98" if clang_version >= "2.1" else None)
+            cppstd_flags.setdefault("11", "11" if clang_version >= "3.1" else "0x" if clang_version >= "2.1" else None)
+            cppstd_flags.setdefault("14", "14" if clang_version >= "3.5" else "1y" if clang_version >= "3.4" else None)
+            cppstd_flags.setdefault("17", "17" if clang_version >= "5" else "1z" if clang_version >= "3.5" else None)
+            cppstd_flags.setdefault("20", "2a" if clang_version >= "6" else "20" if clang_version >= "12" else None)
+            cppstd_flags.setdefault("23", "2b" if clang_version >= "13"  else "23" if clang_version >= "17" else None)
+            return cppstd_flags.get(cppstd.lstrip("gnu"))
+
+
+        def _cppstd_apple_clang(clang_version, cppstd):
+            """Return the flag for the given C++ standard and Apple Clang version"""
+            cppstd_flags = {}
+            cppstd_flags.setdefault("98", "98" if clang_version >= "4.0" else None)
+            cppstd_flags.setdefault("11", "11" if clang_version >= "4.0" else None)
+            cppstd_flags.setdefault("14", "14" if clang_version >= "6.1" else "1y" if clang_version >= "5.1" else None)
+            cppstd_flags.setdefault("17", "17" if clang_version >= "9.1" else "1z" if clang_version >= "6.1" else None)
+            cppstd_flags.setdefault("20", "20" if clang_version >= "13.0" else "2a" if clang_version >= "10.0" else None)
+            cppstd_flags.setdefault("23", "2b" if clang_version >= "13.0" else None)
+            return cppstd_flags.get(cppstd.lstrip("gnu"))
+
+        def _cppstd_msvc(visual_version, cppstd):
+            """Return the flag for the given C++ standard and MSVC version"""
+            cppstd_flags = {}
+            cppstd_flags.setdefault("98", "98")
+            cppstd_flags.setdefault("11", "11")
+            cppstd_flags.setdefault("14", "14" if visual_version >= "190" else None)
+            cppstd_flags.setdefault("17", "17" if visual_version >= "191" else "latest" if visual_version >= "190" else None)
+            cppstd_flags.setdefault("20", "20" if visual_version >= "192" else "latest" if visual_version >= "191" else None)
+            cppstd_flags.setdefault("23", "latest" if visual_version >= "193" else None)
+            return cppstd_flags.get(cppstd)
+
+        func = {"gcc": _cppstd_gcc, "clang": _cppstd_clang, "apple-clang": _cppstd_apple_clang, "msvc": _cppstd_msvc}.get(compiler)
+        flag = cppstd
+        if func:
+            flag = func(Version(compiler_version), str(cppstd))
+        return flag
+
     @property
     def _min_compiler_version_default_cxx11(self):
-        # Minimum compiler version having c++ standard >= 11
-        if self.settings.compiler == "apple-clang":
-            # For now, assume apple-clang will enable c++11 in the distant future
-            return 99
+        """ Minimum compiler version having c++ standard >= 11
+        """
         return {
             "gcc": 6,
             "clang": 6,
+            "apple-clang": 99,  # still uses C++98 by default. XCode does not reflect apple-clang
             "Visual Studio": 14,  # guess
             "msvc": 190,  # guess
         }.get(str(self.settings.compiler))
+
+    @property
+    def _min_compiler_version_default_cxx20(self):
+        return {
+            "gcc": 99,
+            "clang": 99,
+            "apple-clang": 99,
+            "Visual Studio": 99,
+            "msvc": 999,
+        }.get(str(self.settings.compiler))
+
+    @property
+    def _has_cppstd_11_supported(self):
+        cppstd = self.settings.compiler.get_safe("cppstd")
+        if cppstd:
+            return valid_min_cppstd(self, 11)
+        compiler_version = self._min_compiler_version_default_cxx11
+        if compiler_version:
+            return (Version(self.settings.compiler.version) >= compiler_version) or "11" in supported_cppstd(self)
 
     @property
     def _min_compiler_version_nowide(self):
@@ -276,7 +355,7 @@ class BoostConan(ConanFile):
         else:
             version_cxx11_standard_json = self._min_compiler_version_default_cxx11
             if version_cxx11_standard_json:
-                if Version(self.settings.compiler.version) < version_cxx11_standard_json:
+                if not self._has_cppstd_11_supported:
                     self.options.without_fiber = True
                     self.options.without_json = True
                     self.options.without_nowide = True
@@ -322,7 +401,7 @@ class BoostConan(ConanFile):
                 min_compiler_version = self._min_compiler_version_default_cxx11
                 if min_compiler_version is None:
                     self.output.warning("Assuming the compiler supports c++11 by default")
-                elif Version(self.settings.compiler.version) < min_compiler_version:
+                elif not self._has_cppstd_11_supported:
                     disable_math()
 
         if Version(self.version) >= "1.79.0":
@@ -344,7 +423,7 @@ class BoostConan(ConanFile):
                 min_compiler_version = self._min_compiler_version_default_cxx11
                 if min_compiler_version is None:
                     self.output.warning("Assuming the compiler supports c++11 by default")
-                elif Version(self.settings.compiler.version) < min_compiler_version:
+                elif not self._has_cppstd_11_supported:
                     disable_wave()
 
         if Version(self.version) >= "1.81.0":
@@ -366,8 +445,34 @@ class BoostConan(ConanFile):
                 min_compiler_version = self._min_compiler_version_default_cxx11
                 if min_compiler_version is None:
                     self.output.warning("Assuming the compiler supports c++11 by default")
-                elif Version(self.settings.compiler.version) < min_compiler_version:
+                elif not self._has_cppstd_11_supported:
                     disable_locale()
+
+        if Version(self.version) >= "1.84.0":
+            # Starting from 1.84.0, Boost.Cobalt requires a c++20 capable compiler
+            # ==> disable it by default for older compilers or c++ standards
+
+            def disable_cobalt():
+                super_modules = self._all_super_modules("cobalt")
+                for smod in super_modules:
+                    try:
+                        setattr(self.options, f"without_{smod}", True)
+                    except ConanException:
+                        pass
+
+            if self.settings.compiler.get_safe("cppstd"):
+                if not valid_min_cppstd(self, 20):
+                    disable_cobalt()
+            else:
+                min_compiler_version = self._min_compiler_version_default_cxx20
+                if min_compiler_version is None:
+                    self.output.warning("Assuming the compiler supports c++20 by default")
+                elif Version(self.settings.compiler.version) < min_compiler_version:
+                    disable_cobalt()
+
+            # FIXME: Compilation errors on msvc shared build for boost.fiber https://github.com/boostorg/fiber/issues/314
+            if is_msvc(self):
+                self.options.without_fiber = True
 
     @property
     def _configure_options(self):
@@ -441,6 +546,14 @@ class BoostConan(ConanFile):
             libraries.append("wave")
         if Version(self.version) >= "1.81.0":
             libraries.append("locale")
+        if Version(self.version) >= "1.84.0":
+            libraries.append("atomic")
+            libraries.append("filesystem")
+            libraries.append("log")
+            libraries.append("random")
+            libraries.append("stacktrace")
+            libraries.append("test")
+            libraries.append("thread")
         libraries.sort()
         return filter(lambda library: f"without_{library}" in self.options, libraries)
 
@@ -456,6 +569,10 @@ class BoostConan(ConanFile):
 
         if is_msvc(self) and self._shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
+
+        # FIXME: In 1.84.0, there are compilation errors on msvc shared build for boost.fiber. https://github.com/boostorg/fiber/issues/314
+        if Version(self.version) >= "1.84.0" and is_msvc(self) and self._shared and not self.options.without_fiber:
+            raise ConanInvalidConfiguration("Boost.fiber can not be built as shared library on MSVC.")
 
         if not self.options.without_locale and self.options.i18n_backend_iconv == "off" and \
            not self.options.i18n_backend_icu and not self._is_windows_platform:
@@ -484,8 +601,7 @@ class BoostConan(ConanFile):
             if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, 11)
             else:
-                version_cxx11_standard = self._min_compiler_version_default_cxx11
-                if version_cxx11_standard and Version(self.settings.compiler.version) < version_cxx11_standard:
+                if not self._has_cppstd_11_supported:
                     raise ConanInvalidConfiguration(
                         f"Boost.{{{','.join(self._cxx11_boost_libraries)}}} requires a c++11 compiler "
                         "(please set compiler.cppstd or use a newer compiler)"
@@ -531,18 +647,18 @@ class BoostConan(ConanFile):
 
     def requirements(self):
         if self._with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self._with_bzip2:
             self.requires("bzip2/1.0.8")
         if self._with_lzma:
-            self.requires("xz_utils/5.4.2")
+            self.requires("xz_utils/5.4.4")
         if self._with_zstd:
             self.requires("zstd/1.5.5")
         if self._with_stacktrace_backtrace:
             self.requires("libbacktrace/cci.20210118", transitive_headers=True, transitive_libs=True)
 
         if self._with_icu:
-            self.requires("icu/72.1")
+            self.requires("icu/73.2")
         if self._with_iconv:
             self.requires("libiconv/1.17")
 
@@ -561,7 +677,7 @@ class BoostConan(ConanFile):
 
     def build_requirements(self):
         if not self.options.header_only:
-            self.tool_requires("b2/4.9.6")
+            self.tool_requires("b2/4.10.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -1027,6 +1143,9 @@ class BoostConan(ConanFile):
         if self._with_zstd:
             add_defines("zstd")
 
+        for define in self.conf.get("tools.build:defines", default=[], check_type=list):
+            flags.append(f"define={define}")
+
         if is_msvc(self):
             flags.append(f"runtime-link={'static' if is_msvc_static_runtime(self) else 'shared'}")
             flags.append(f"runtime-debugging={'on' if 'd' in msvc_runtime_flag(self) else 'off'}")
@@ -1047,9 +1166,15 @@ class BoostConan(ConanFile):
 
         flags.append(f"toolset={self._toolset}")
 
-        if self.settings.get_safe("compiler.cppstd"):
-            cppstd_flag = AutotoolsToolchain(self).cppstd
-            flags.append(f"cxxflags={cppstd_flag}")
+        safe_cppstd = self.settings.get_safe("compiler.cppstd")
+        if safe_cppstd:
+            cppstd_version = self._cppstd_flag(safe_cppstd)
+            flags.append(f"cxxstd={cppstd_version}")
+            if "gnu" in safe_cppstd:
+                flags.append("cxxstd-dialect=gnu")
+        elif self._has_cppstd_11_supported:
+            cppstd_version = self._cppstd_flag("11")
+            flags.append(f"cxxstd={cppstd_version}")
 
         # LDFLAGS
         link_flags = []
@@ -1444,6 +1569,7 @@ class BoostConan(ConanFile):
         # - Use '_libboost' component to attach extra system_libs, ...
 
         self.cpp_info.components["headers"].libs = []
+        self.cpp_info.components["headers"].libdirs = []
         self.cpp_info.components["headers"].set_property("cmake_target_name", "Boost::headers")
         self.cpp_info.components["headers"].names["cmake_find_package"] = "headers"
         self.cpp_info.components["headers"].names["cmake_find_package_multi"] = "headers"
@@ -1490,6 +1616,8 @@ class BoostConan(ConanFile):
         self.cpp_info.components["_boost_cmake"].set_property("cmake_target_name", "Boost::boost")
         self.cpp_info.components["_boost_cmake"].names["cmake_find_package"] = "boost"
         self.cpp_info.components["_boost_cmake"].names["cmake_find_package_multi"] = "boost"
+        if self.options.header_only:
+            self.cpp_info.components["_boost_cmake"].libdirs = []
 
         if not self.options.header_only:
             self.cpp_info.components["_libboost"].requires = ["headers"]
@@ -1620,6 +1748,8 @@ class BoostConan(ConanFile):
                 libs = []
                 for name in names:
                     if name in ("boost_stacktrace_windbg", "boost_stacktrace_windbg_cached") and self.settings.os != "Windows":
+                        continue
+                    if name in ("boost_math_c99l", "boost_math_tr1l") and str(self.settings.arch).startswith("ppc"):
                         continue
                     if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic",) and self.settings.os == "Windows":
                         continue

@@ -39,8 +39,8 @@ class SpdlogSetupConan(ConanFile):
 
     def requirements(self):
         self.requires("cpptoml/0.1.1")
-        self.requires("spdlog/1.11.0")
-        self.requires("fmt/9.1.0")
+        self.requires("spdlog/1.13.0")
+        self.requires("fmt/10.2.1")
 
     def package_id(self):
         self.info.clear()

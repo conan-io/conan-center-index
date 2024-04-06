@@ -1,0 +1,4 @@
+sources:
+  "0.5.3":
+    url: "http://downloads.sourceforge.net/nmea/nmealib-0.5.3.zip"
+    sha256: "41e9fbb8fd5cb1836ff727355b3debe98662b39beb7493af9b78bc4bd4a2ad7d"

@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get
 from conan.tools.layout import basic_layout
 
@@ -62,10 +63,14 @@ class B2Conan(ConanFile):
         del self.info.options.use_cxx_env
         del self.info.options.toolset
 
-    def validate(self):
-        if hasattr(self, "settings_build") and cross_building(self):
+        if self._is_macos_intel_or_arm(self.info.settings):
+            self.info.settings.arch = "x86_64,armv8"
+
+    def validate_build(self):
+        if hasattr(self, "settings_build") and cross_building(self) and not self._is_macos_intel_or_arm(self.settings):
             raise ConanInvalidConfiguration(f"{self.ref} recipe doesn't support cross-build yet")
 
+    def validate(self):
         if (self.options.toolset == 'cxx' or self.options.toolset == 'cross-cxx') and not self.options.use_cxx_env:
             raise ConanInvalidConfiguration(
                 "Option toolset 'cxx' and 'cross-cxx' requires 'use_cxx_env=True'")
@@ -89,6 +94,9 @@ class B2Conan(ConanFile):
     def _pkg_bin_dir(self):
         return os.path.join(self.package_folder, "bin")
 
+    def _is_macos_intel_or_arm(self, settings):
+        return settings.os == "Macos" and settings.arch in ["x86_64", "armv8"]
+
     @contextmanager
     def _bootstrap_env(self):
         saved_env = dict(os.environ)
@@ -106,6 +114,12 @@ class B2Conan(ConanFile):
         finally:
             os.environ.clear()
             os.environ.update(saved_env)
+
+    def _write_project_config(self, cxx):
+        with open(os.path.join(self.source_folder, "project-config.jam"), "w") as f:
+            f.write(
+                f"using {self.options.toolset} : : {cxx} ;\n"
+            )
 
     def build(self):
         # The order of the with:with: below is important. The first one changes
@@ -138,13 +152,24 @@ class B2Conan(ConanFile):
                                     command += '"'+b2_vcvars+'" && '
         command += "build" if use_windows_commands else "./build.sh"
 
+        cxxflags = ""
+        if self._is_macos_intel_or_arm(self.settings):
+            cxxflags += " -arch arm64 -arch x86_64"
+
         if self.options.use_cxx_env:
-            cxx = os.environ.get("CXX")
-            if cxx:
-                command += f" --cxx={cxx}"
-            cxxflags = os.environ.get("CXXFLAGS")
-            if cxxflags:
-                command += f" --cxxflags={cxxflags}"
+            envvars = VirtualBuildEnv(self).vars()
+
+            cxx_env = envvars.get("CXX")
+            if cxx_env:
+                command += f" --cxx={cxx_env}"
+                self._write_project_config(cxx_env)
+
+            cxxflags_env = envvars.get("CXXFLAGS")
+            if cxxflags_env:
+                cxxflags = f"{cxxflags} {cxxflags_env}"
+
+        if cxxflags:
+            command += f' --cxxflags="{cxxflags}"'
 
         if b2_toolset != 'auto':
             command += " "+str(b2_toolset)

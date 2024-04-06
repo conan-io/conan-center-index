@@ -9,5 +9,9 @@ versions:
     folder: "all"
   "1.40.1":
     folder: "all"
-  "2.5.0":
+  "2.12.0":
+    folder: "2.x"
+  "2.15.1":
+    folder: "2.x"
+  "2.19.0":
     folder: "2.x"

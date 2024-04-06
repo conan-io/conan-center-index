@@ -1,0 +1,9 @@
+versions:
+  "2024.0.0":
+    folder: "all"
+  "2023.3.0":
+    folder: "all"
+  "2023.2.0":
+    folder: "all"
+  "2023.1.0":
+    folder: "all"

@@ -1,4 +1,4 @@
 sources:
   "1.8.78":
     sha256: "b466fe730d751e4bfc5900d1f37b0fb955f2826ac456e70012785e012cdcb73e"
-    url: http://fallabs.com/qdbm/qdbm-1.8.78.tar.gz
+    url: "https://dbmx.net/qdbm/qdbm-1.8.78.tar.gz"

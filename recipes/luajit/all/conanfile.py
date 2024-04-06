@@ -20,6 +20,7 @@ class LuajitConan(ConanFile):
     homepage = "http://luajit.org"
     description = "LuaJIT is a Just-In-Time Compiler (JIT) for the Lua programming language."
     topics = ("lua", "jit")
+    provides = "lua"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}

@@ -1,0 +1,42 @@
+diff --git a/a/makefile.vc b/b/makefile.vc
+index 5cd5d05..f7505ea 100644
+--- a/a/makefile.vc
++++ b/b/makefile.vc
+@@ -11,7 +11,7 @@ ODS					   = freexl_ods.obj
+ LIBOBJ	               =	$(CORE) $(XLSX) $(ODS)
+ FREEXL_DLL	 	       =	freexl$(VERSION).dll
+ 
+-CFLAGS	=	/nologo -I. -Iheaders -IC:\OSGeo4W\include $(OPTFLAGS)
++CFLAGS	=	/nologo -I. -Iheaders $(OPTFLAGS)
+ 
+ default:	all
+ 
+@@ -33,12 +33,8 @@ freexl.lib:	$(LIBOBJ)
+ $(FREEXL_DLL):	freexl_i.lib
+ 
+ freexl_i.lib:	$(LIBOBJ)
+-	link /debug /dll /out:$(FREEXL_DLL) \
+-		/implib:freexl_i.lib $(LIBOBJ) \
+-		C:\OSGeo4W\lib\iconv.lib \
+-		C:\OSGeo4W\lib\libexpat.lib \
+-		C:\OSGeo4W\lib\libminizip.lib \
+-		C:\OSGeo4w\lib\zlib.lib
++	link /dll /out:$(FREEXL_DLL) \
++		/implib:freexl_i.lib $(LIBOBJ)
+ 	if exist $(FREEXL_DLL).manifest mt -manifest \
+ 		$(FREEXL_DLL).manifest -outputresource:$(FREEXL_DLL);2 
+ 
+diff --git a/a/nmake.opt b/b/nmake.opt
+index 35f9242..15abafe 100644
+--- a/a/nmake.opt
++++ b/b/nmake.opt
+@@ -2,8 +2,7 @@
+ INSTDIR=C:\OSGeo4W
+ 
+ # Uncomment the first for an optimized build, or the second for debug.
+-OPTFLAGS=	/nologo /Ox /fp:precise /W3 /MD /D_CRT_SECURE_NO_WARNINGS \
+-			/DDLL_EXPORT
++OPTFLAGS=	/nologo /fp:precise /W3 /D_CRT_SECURE_NO_WARNINGS $(FREEXL_EXPORT)
+ #OPTFLAGS=	/nologo /Zi /MD /Fdfreexl.pdb /DDLL_EXPORT
+ 
+ # Set the version number for the DLL.  Normally we leave this blank since

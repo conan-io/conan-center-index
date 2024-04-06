@@ -1,19 +1,22 @@
 sources:
+  "2.2.0":
+    url: "https://github.com/eProsima/Fast-CDR/archive/v2.2.0.tar.gz"
+    sha256: "8a75ee3aed59f495e95208050920d2c2146df92f073809505a3bd29011c21f20"
+  "2.1.0":
+    url: "https://github.com/eProsima/Fast-CDR/archive/v2.1.0.tar.gz"
+    sha256: "7ee3b3e977381f76f8d9ab1e1df7b5202556505b104afb3f03ee79bbe6507aa0"
+  "2.0.0":
+    url: "https://github.com/eProsima/Fast-CDR/archive/v2.0.0.tar.gz"
+    sha256: "66234a5504879f7af706530996177df930d61dd88045dcafb73799458413ee93"
+  "1.1.0":
+    url: "https://github.com/eProsima/Fast-CDR/archive/v1.1.0.tar.gz"
+    sha256: "5c4b2ad5493abd30b9475b14856641a8944c98077a36bd0760c1d83c65216e67"
   "1.0.27":
     url: "https://github.com/eProsima/Fast-CDR/archive/v1.0.27.tar.gz"
     sha256: "a9bc8fd31a2c2b95e6d2fb46e6ce1ad733e86dc4442f733479e33ed9cdc54bf6"
-  "1.0.26":
-    url: "https://github.com/eProsima/Fast-CDR/archive/v1.0.26.tar.gz"
-    sha256: "812b29dd9fa8b79395dea3f4b810f9ab9e820fa4f0a666338c279b739a36595d"
-  "1.0.24":
-    url: "https://github.com/eProsima/Fast-CDR/archive/v1.0.24.tar.gz"
-    sha256: "ecd688ab89ff1c03b9031c314891ae60995e2e73d919b93569eb840d6e87dec2"
-  "1.0.23":
-    url: "https://github.com/eProsima/Fast-CDR/archive/v1.0.23.tar.gz"
-    sha256: "6f7c9c6c0c82c150b5ea2b0a58d5c9a466b87a1fcfca40d5786d99d4963a6721"
-  "1.0.22":
-    url: "https://github.com/eProsima/Fast-CDR/archive/v1.0.22.tar.gz"
-    sha256: "7ca7f09c633963622431bdb216eeb4145e378f81a2ce5113e341b9eee55e4f44"
-  "1.0.21":
-    url: "https://github.com/eProsima/Fast-CDR/archive/refs/tags/v1.0.21.tar.gz"
-    sha256: "C1F32BDD76910ADA00D551EB8828DE7561AD2B2846D063CB4316F9262C03C77D"
+patches:
+  "2.0.0":
+    - patch_file: "patches/2.0.0-0001-Fix-for-non-CWG-1270-revision-compliant-compilers-17.patch"
+      patch_type: "portability"
+      patch_description: "Fix for non CWG 1270 revision compliant compilers"
+      patch_source: "https://github.com/eProsima/Fast-CDR/pull/173"

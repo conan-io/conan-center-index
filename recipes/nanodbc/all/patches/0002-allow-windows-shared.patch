@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -215,9 +215,9 @@ else()
+@@ -216,9 +216,9 @@ else()
    message(STATUS "nanodbc build: Enable nanodbc target - STATIC")
  endif()
  

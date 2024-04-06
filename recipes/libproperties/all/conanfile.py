@@ -1,28 +1,36 @@
-from conans import ConanFile, CMake, tools
 import os
+
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+
+required_conan_version = ">=1.53.0"
+
 
 class LibpropertiesConan(ConanFile):
     name = "libproperties"
+    description = (
+        "libproperties is a library to parse the Java .properties files. "
+        "It was writen in pure C and is fully compatible with the Java .properties file format."
+    )
     license = "Apache-2.0"
-    homepage = "https://github.com/tinyhubs/libproperties"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "libproperties is a library to parse the Java .properties files. It was writen in pure C. And fully compatible with the Java .properties file format."
+    homepage = "https://github.com/tinyhubs/libproperties"
     topics = ("properties", "java", "pure-c")
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], }
-    default_options = {"shared": False, "fPIC": True, }
-    generators = "cmake"
-    exports_sources = "CMakeLists.txt", "patches/**"
 
-    _cmake = None
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    @property
-    def _source_package_tag(self):
-        return "{}-{}".format(self.name, self.version)
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -30,36 +38,36 @@ class LibpropertiesConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        source_dir = "{}-{}".format(self.name, self.version)
-        os.rename(source_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["LIBPROPERTIES_INSTALL"] = True
-        self._cmake.definitions["LIBPROPERTIES_TEST"] = False
-        self._cmake.configure()
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["LIBPROPERTIES_INSTALL"] = True
+        tc.cache_variables["LIBPROPERTIES_TEST"] = False
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE",
+             src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         if not self.options.shared:

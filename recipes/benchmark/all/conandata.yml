@@ -1,4 +1,13 @@
 sources:
+  "1.8.3":
+    url: "https://github.com/google/benchmark/archive/refs/tags/v1.8.3.tar.gz"
+    sha256: "6bc180a57d23d4d9515519f92b0c83d61b05b5bab188961f36ac7b06b0d9e9ce"
+  "1.8.2":
+    url: "https://github.com/google/benchmark/archive/refs/tags/v1.8.2.tar.gz"
+    sha256: "2aab2980d0376137f969d92848fbb68216abb07633034534fc8c65cc4e7a0e93"
+  "1.8.1":
+    url: "https://github.com/google/benchmark/archive/refs/tags/v1.8.1.tar.gz"
+    sha256: "e9ff65cecfed4f60c893a1e8a1ba94221fad3b27075f2f80f47eb424b0f8c9bd"
   "1.8.0":
     url: "https://github.com/google/benchmark/archive/refs/tags/v1.8.0.tar.gz"
     sha256: "ea2e94c24ddf6594d15c711c06ccd4486434d9cf3eca954e2af8a20c88f9f172"

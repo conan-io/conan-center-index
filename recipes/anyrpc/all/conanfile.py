@@ -15,6 +15,8 @@ class AnyRPCConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/sgieseking/anyrpc"
     topics = ("rpc",)
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -66,7 +68,10 @@ class AnyRPCConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
         if self.options.with_log4cplus and self.options.with_wchar:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built with both log4cplus and wchar, see https://github.com/sgieseking/anyrpc/issues/25")
+            raise ConanInvalidConfiguration(
+                f"{self.ref} can not be built with both log4cplus and wchar, see"
+                " https://github.com/sgieseking/anyrpc/issues/25"
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -105,6 +110,6 @@ class AnyRPCConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["anyrpc"]
         if not self.options.shared and self.settings.os == "Windows":
-                self.cpp_info.system_libs.append("ws2_32")
+            self.cpp_info.system_libs.append("ws2_32")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])

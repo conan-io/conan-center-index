@@ -1,9 +1,9 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.microsoft import is_msvc
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.55.0"
@@ -52,8 +52,6 @@ class LibrdkafkaConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "1.9.0":
-            del self.options.curl
 
     def configure(self):
         if self.options.shared:
@@ -65,19 +63,19 @@ class LibrdkafkaConan(ConanFile):
     def requirements(self):
         self.requires("lz4/1.9.4")
         if self.options.zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.zstd:
             self.requires("zstd/1.5.5")
         if self.options.ssl:
             self.requires("openssl/[>=1.1 <4]")
         if self._depends_on_cyrus_sasl:
-            self.requires("cyrus-sasl/2.1.27")
-        if self.options.get_safe("curl", False):
-            self.requires("libcurl/8.0.1")
+            self.requires("cyrus-sasl/2.1.28")
+        if self.options.curl:
+            self.requires("libcurl/[>=7.78.0 <9]")
 
     def build_requirements(self):
         if self._depends_on_cyrus_sasl:
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -100,8 +98,7 @@ class LibrdkafkaConan(ConanFile):
         tc.variables["WITH_SSL"] = self.options.ssl
         tc.variables["WITH_SASL"] = self.options.sasl
         tc.variables["ENABLE_LZ4_EXT"] = True
-        if Version(self.version) >= "1.9.0":
-            tc.variables["WITH_CURL"] = self.options.curl
+        tc.variables["WITH_CURL"] = self.options.curl
         tc.generate()
 
         cd = CMakeDeps(self)
@@ -113,6 +110,11 @@ class LibrdkafkaConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        # There are references to libcrypto.lib and libssl.lib in rdkafka_ssl.c for versions >= 1.8.0
+        if is_msvc(self) and self.settings.build_type == "Debug" and self.options.get_safe("ssl", False):
+            rdkafka_ssl_path = os.path.join(self.source_folder, "src", "rdkafka_ssl.c")
+            replace_in_file(self, rdkafka_ssl_path, "libcrypto.lib", "libcryptod.lib")
+            replace_in_file(self, rdkafka_ssl_path, "libssl.lib", "libssld.lib")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

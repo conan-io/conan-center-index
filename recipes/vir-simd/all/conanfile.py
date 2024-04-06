@@ -1,13 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.50.0"
 
 
 class VirSIMDConan(ConanFile):
@@ -29,7 +29,7 @@ class VirSIMDConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
-            "msvc": "19.15",
+            "msvc": "191",
             "gcc": "7",
             "clang": "5",
             "apple-clang": "5.1",
@@ -38,7 +38,6 @@ class VirSIMDConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    # same package ID for any package
     def package_id(self):
         self.info.clear()
 
@@ -71,19 +70,7 @@ class VirSIMDConan(ConanFile):
         )
 
     def package_info(self):
-        # Folders not used for header-only
-        self.cpp_info.bindirs = []
-        self.cpp_info.libdirs = []
-
-        # Set these to the appropriate values if the package has an official FindPACKAGE.cmake
-        # listed in https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules
-        # examples: bzip2, freetype, gdal, icu, libcurl, libjpeg, libpng, libtiff, openssl, sqlite3, zlib...
-        self.cpp_info.set_property("cmake_module_file_name", "vir-simd")
-        self.cpp_info.set_property("cmake_module_target_name", "vir-simd::vir-simd")
-        # Set these to the appropriate values if package provides a CMake config file
-        # (package-config.cmake or packageConfig.cmake, with package::package target, usually installed in <prefix>/lib/cmake/<package>/)
         self.cpp_info.set_property("cmake_file_name", "vir-simd")
         self.cpp_info.set_property("cmake_target_name", "vir-simd::vir-simd")
-        # Set this to the appropriate value if the package provides a pkgconfig file
-        # (package.pc, usually installed in <prefix>/lib/pkgconfig/)
-        self.cpp_info.set_property("pkg_config_name", "vir-simd")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

@@ -1,10 +1,28 @@
 sources:
+  "6.1":
+    url: "http://ffmpeg.org/releases/ffmpeg-6.1.tar.bz2"
+    sha256: "eb7da3de7dd3ce48a9946ab447a7346bd11a3a85e6efb8f2c2ce637e7f547611"
+  "6.0.1":
+    url: "http://ffmpeg.org/releases/ffmpeg-6.0.1.tar.bz2"
+    sha256: "2c6e294569d1ba8e99cbf1acbe49e060a23454228a540a0f45d679d72ec69a06"
+  "6.0":
+    url: "https://ffmpeg.org/releases/ffmpeg-6.0.tar.bz2"
+    sha256: "47d062731c9f66a78380e35a19aac77cebceccd1c7cc309b9c82343ffc430c3d"
+  "5.1.3":
+    url: "https://ffmpeg.org/releases/ffmpeg-5.1.3.tar.bz2"
+    sha256: "5d5bef6a11f0c500588f9870ec965a30acc0d54d8b1e535da6554a32902d236d"
   "5.1":
     url: "https://ffmpeg.org/releases/ffmpeg-5.1.tar.bz2"
     sha256: "32b56fb01ce90d452958ae25e91c9564abf49ed5453c127bec23c63e530aa8fa"
+  "5.0.3":
+    url: "https://ffmpeg.org/releases/ffmpeg-5.0.3.tar.bz2"
+    sha256: "664e8fa8ac4cc5dce03277f022798461998d9bb8d96b9e1859b24e74511229fd"
   "5.0":
     url: "https://ffmpeg.org/releases/ffmpeg-5.0.tar.bz2"
     sha256: "c0130b8db2c763430fd1c6905288d61bc44ee0548ad5fcd2dfd650b88432bed9"
+  "4.4.4":
+    url: "https://ffmpeg.org/releases/ffmpeg-4.4.4.tar.bz2"
+    sha256: "47b1fbf70a2c090d9c0fae5910da11c6406ca92408bb69d8c935cd46c622c7ce"
   "4.4.3":
     url: "https://ffmpeg.org/releases/ffmpeg-4.4.3.tar.bz2"
     sha256: "33b8c2dbcd530fe1db5710415345609b4ca227bd0da1e3a9332dbb0f11fd273a"
@@ -18,7 +36,41 @@ sources:
     url: "https://ffmpeg.org/releases/ffmpeg-4.2.1.tar.bz2"
     sha256: "682a9fa3f6864d7f0dbf224f86b129e337bc60286e0d00dffcd710998d521624"
 patches:
+  "5.1.3":
+    - patch_file: "patches/5.1-0001-fix-libsvtav1-compressed_ten_bit_format.patch"
+      patch_description: "Compatibility with libsvtav1 > 1.2.0"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/031f1561cd286596cdb374da32f8aa816ce3b135"
+    - patch_file: "patches/5.1-0002-fix-libsvtav1-vbv_bufsize-1.patch"
+      patch_description: "Compatibility with libsvtav1 > 1.2.0"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/1c6fd7d756afe0f8b7df14dbf7a95df275f8f5ee"
+    - patch_file: "patches/5.1-0003-fix-libsvtav1-vbv_bufsize-2.patch"
+      patch_description: "Compatibility with libsvtav1 > 1.2.0"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/96748ac54f998ba6fe22802799c16b4eba8d4ccc"
+    - patch_file: "patches/5.0-0001-fix-hwcontext_vulkan.patch"
+      patch_description: "Compatibility with vulkan >= 1.3.239"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/eb0455d64690eed0068e5cb202f72ecdf899837c"
   "5.1":
+    - patch_file: "patches/5.1-0001-fix-libsvtav1-compressed_ten_bit_format.patch"
+      patch_description: "Compatibility with libsvtav1 > 1.2.0"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/031f1561cd286596cdb374da32f8aa816ce3b135"
+    - patch_file: "patches/5.1-0002-fix-libsvtav1-vbv_bufsize-1.patch"
+      patch_description: "Compatibility with libsvtav1 > 1.2.0"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/1c6fd7d756afe0f8b7df14dbf7a95df275f8f5ee"
+    - patch_file: "patches/5.1-0003-fix-libsvtav1-vbv_bufsize-2.patch"
+      patch_description: "Compatibility with libsvtav1 > 1.2.0"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/96748ac54f998ba6fe22802799c16b4eba8d4ccc"
+    - patch_file: "patches/5.0-0001-fix-hwcontext_vulkan.patch"
+      patch_description: "Compatibility with vulkan >= 1.3.239"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/eb0455d64690eed0068e5cb202f72ecdf899837c"
+  "5.0.3":
     - patch_file: "patches/5.0-0001-fix-hwcontext_vulkan.patch"
       patch_description: "Compatibility with vulkan >= 1.3.239"
       patch_type: "portability"
@@ -28,3 +80,28 @@ patches:
       patch_description: "Compatibility with vulkan >= 1.3.239"
       patch_type: "portability"
       patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/eb0455d64690eed0068e5cb202f72ecdf899837c"
+  "4.4.4":
+    - patch_file: "patches/4.4-0001-fix-aom_codec_av1_dx_algo.patch"
+      patch_description: "Compatibility with shared libaom"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/d92fdc714496d43234733c315894abe0beeb3529"
+  "4.4.3":
+    - patch_file: "patches/4.4-0001-fix-aom_codec_av1_dx_algo.patch"
+      patch_description: "Compatibility with shared libaom"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/d92fdc714496d43234733c315894abe0beeb3529"
+  "4.4":
+    - patch_file: "patches/4.4-0001-fix-aom_codec_av1_dx_algo.patch"
+      patch_description: "Compatibility with shared libaom"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/d92fdc714496d43234733c315894abe0beeb3529"
+  "4.3.2":
+    - patch_file: "patches/4.2-0001-fix-aom_codec_av1_dx_algo.patch"
+      patch_description: "Compatibility with shared libaom"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/d92fdc714496d43234733c315894abe0beeb3529"
+  "4.2.1":
+    - patch_file: "patches/4.2-0001-fix-aom_codec_av1_dx_algo.patch"
+      patch_description: "Compatibility with shared libaom"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/d92fdc714496d43234733c315894abe0beeb3529"

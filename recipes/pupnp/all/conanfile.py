@@ -1,8 +1,15 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
+
+required_conan_version = ">=1.53.0"
 
 
 class PupnpConan(ConanFile):
@@ -15,8 +22,10 @@ class PupnpConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/pupnp/pupnp"
-    topics = ("conan", "upnp", "networking")
-    settings = "os", "compiler", "build_type", "arch"
+    topics = ("upnp", "networking")
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -28,7 +37,7 @@ class PupnpConan(ConanFile):
         "largefile": [True, False],
         "tools": [True, False],
         "blocking-tcp": [True, False],
-        "debug":  [True, False]
+        "debug": [True, False],
     }
     default_options = {
         "shared": False,
@@ -41,95 +50,75 @@ class PupnpConan(ConanFile):
         "largefile": True,
         "tools": True,
         "blocking-tcp": False,
-        "debug": True # Actually enables logging routines...
+        "debug": True,
     }
 
-    _autotools = None
-
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             # Note, pupnp has build instructions for Visual Studio but they
             # include VC 6 and require pthreads-w32 library.
             # Someone who needs it and has possibility to build it could step in.
             raise ConanInvalidConfiguration("Visual Studio not supported yet in this recipe")
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def build_requirements(self):
-        self.build_requires("libtool/2.4.6")
-        self.build_requires("pkgconf/1.7.4")
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        self.tool_requires("libtool/2.4.7")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/2.0.3")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if not self._autotools:
-            args = [
-                "--enable-static=%s" % ("no" if self.options.shared else "yes"),
-                "--enable-shared=%s" % ("yes" if self.options.shared else "no"),
-                "--disable-samples",
-            ]
-
-            def enable_disable(opt):
-                what = "enable" if getattr(self.options, opt) else "disable"
-                return "--{}-{}".format(what, opt)
-
-            args.extend(
-                map(
-                    enable_disable,
-                    (
-                        "ipv6",
-                        "reuseaddr",
-                        "webserver",
-                        "client",
-                        "device",
-                        "largefile",
-                        "tools",
-                        "debug"
-                    ),
-                )
-            )
-
-            args.append("--%s-blocking_tcp_connections" % ("enable" if getattr(self.options, "blocking-tcp") else "disable"))
-
-            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            self._autotools.configure(configure_dir=self._source_subfolder, args=args)
-        return self._autotools
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        tc = AutotoolsToolchain(self)
+        features = {}
+        features["samples"] = False
+        features["blocking_tcp_connections"] = self.options["blocking-tcp"]
+        for opt in ("ipv6", "reuseaddr", "webserver", "client", "device", "largefile", "tools", "debug"):
+            features[opt] = self.options.get_safe(opt)
+        for feature, enabled in features.items():
+            what = "enable" if enabled else "disable"
+            tc.configure_args.append(f"--{what}-{feature}")
+        tc.generate()
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
+        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        autotools = Autotools(self)
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.la", self.package_folder, recursive=True)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libupnp"
+        self.cpp_info.set_property("pkg_config_name", "libupnp")
         self.cpp_info.libs = ["upnp", "ixml"]
         self.cpp_info.includedirs.append(os.path.join("include", "upnp"))
         if self.settings.os in ["Linux", "FreeBSD"]:

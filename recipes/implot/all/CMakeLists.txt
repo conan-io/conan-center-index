@@ -1,14 +1,13 @@
 cmake_minimum_required(VERSION 3.4)
-project(implot CXX)
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+project(implot LANGUAGES CXX)
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-
-file(GLOB SOURCE_FILES ${IMPLOT_SRC_DIR}/*.cpp)
 file(GLOB HEADER_FILES ${IMPLOT_SRC_DIR}/*.h)
 
-add_library(${PROJECT_NAME} ${SOURCE_FILES})
+add_library(${PROJECT_NAME}
+    ${IMPLOT_SRC_DIR}/implot.cpp
+    ${IMPLOT_SRC_DIR}/implot_items.cpp
+    ${IMPLOT_SRC_DIR}/implot_demo.cpp
+)
 target_include_directories(${PROJECT_NAME} PRIVATE ${IMPLOT_SRC_DIR})
 
 find_package(imgui CONFIG REQUIRED)
@@ -16,6 +15,8 @@ find_package(imgui CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC imgui::imgui)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 include(GNUInstallDirs)
 

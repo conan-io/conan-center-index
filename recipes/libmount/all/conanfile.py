@@ -61,7 +61,8 @@ class LibmountConan(ConanFile):
         autotools.make()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", src=os.path.join(self.source_folder, "libmount"), dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING.LGPL-2.1-or-later", src=os.path.join(self.source_folder, "Documentation", "licenses"), dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "sbin"))
@@ -71,7 +72,11 @@ class LibmountConan(ConanFile):
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.libs = ["mount", "blkid"]
-        self.cpp_info.system_libs = ["rt"]
-        self.cpp_info.includedirs.append(os.path.join("include", "libmount"))
-        self.cpp_info.set_property("pkg_config_name", "mount")
+        self.cpp_info.components["libblkid"].libs = ["blkid"]
+        self.cpp_info.components["libblkid"].set_property("pkg_config_name", "blkid")
+
+        self.cpp_info.components["libmount"].libs = ["mount"]
+        self.cpp_info.components["libmount"].system_libs = ["rt"]
+        self.cpp_info.components["libmount"].includedirs.append(os.path.join("include", "libmount"))
+        self.cpp_info.components["libmount"].set_property("pkg_config_name", "mount")
+        self.cpp_info.components["libmount"].requires = ["libblkid"]

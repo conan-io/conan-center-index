@@ -1,4 +1,16 @@
 versions:
+  "8.6.0":
+    folder: all
+  "8.5.0":
+    folder: all
+  "8.4.0":
+    folder: all
+  "8.2.1":
+    folder: all
+  "8.2.0":
+    folder: all
+  "8.1.2":
+    folder: all
   "8.1.1":
     folder: all
   "8.0.1":
@@ -22,8 +34,4 @@ versions:
   "7.79.1":
     folder: all
   "7.78.0":
-    folder: all
-  "7.77.0":
-    folder: all
-  "7.76.0":
     folder: all

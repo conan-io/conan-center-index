@@ -1,25 +1,43 @@
 sources:
+  "2.7.7":
+    url: "https://github.com/ada-url/ada/archive/v2.7.7.tar.gz"
+    sha256: "7116d86a80b79886efbc9d946d3919801815060ae62daf78de68c508552af554"
+  "2.7.5":
+    url: "https://github.com/ada-url/ada/archive/v2.7.5.tar.gz"
+    sha256: "25a5d62fdd4950dbef785db5725675c15f3df2cf899a4a920449fe9a05fc6d00"
+  "2.7.4":
+    url: "https://github.com/ada-url/ada/archive/v2.7.4.tar.gz"
+    sha256: "897942ba8c99153f916c25698a49604022f3e54441cfa9b76f657ad15b6ca041"
+  "2.7.3":
+    url: "https://github.com/ada-url/ada/archive/v2.7.3.tar.gz"
+    sha256: "8e222d536d237269488f7d454544eedf12847f47b3d42651e8c9963c3fb0cf5e"
+  "2.7.2":
+    url: "https://github.com/ada-url/ada/archive/v2.7.2.tar.gz"
+    sha256: "4dea9dd6a46695547da2dac3dc7254d32187cd35d3170179c0cdc0900090c025"
+  "2.7.0":
+    url: "https://github.com/ada-url/ada/archive/v2.7.0.tar.gz"
+    sha256: "08646b8a41cd6367b282aab2c87c82e5ce4876078a0cbe0799af7e51e4358591"
+  "2.6.10":
+    url: "https://github.com/ada-url/ada/archive/v2.6.10.tar.gz"
+    sha256: "a43e1ea0bcdd7585edf538afffe1fc3303b936752e18bac545fa11729de088bc"
+  "2.6.7":
+    url: "https://github.com/ada-url/ada/archive/v2.6.7.tar.gz"
+    sha256: "882a0aa6e19174b60b2fa00ee75d35a31ecd5158fb97d0e4e719ba21bb07acb9"
+  "2.6.4":
+    url: "https://github.com/ada-url/ada/archive/v2.6.4.tar.gz"
+    sha256: "5b488e9a7a700de5d40a749c96c4339bcc9c425e5f5406a0887b13e70bd90907"
+  "2.6.2":
+    url: "https://github.com/ada-url/ada/archive/v2.6.2.tar.gz"
+    sha256: "425b8696a28a22d19ee7aa4516c26fc8ae3ab574870a9a74ef58ba8a345b822e"
+  "2.6.0":
+    url: "https://github.com/ada-url/ada/archive/v2.6.0.tar.gz"
+    sha256: "09551bfbd92853e59d731e5f44a88a690425fd2906977ad03a6a1059615a02a5"
+  "2.5.1":
+    url: "https://github.com/ada-url/ada/archive/v2.5.1.tar.gz"
+    sha256: "a7591d771822c3f16e6665311b0c6b4de7dd7615333183f35d89c7573be7f7fa"
   "2.5.0":
     url: "https://github.com/ada-url/ada/archive/v2.5.0.tar.gz"
     sha256: "bf11c9d0cc1ee9e377080bdd8a3b8a8bf736ac7acaedcae882587e21b3e5625c"
   "2.4.2":
     url: "https://github.com/ada-url/ada/archive/v2.4.2.tar.gz"
     sha256: "d865ab8828c14fc1e2217ca9f5d7918d50775175b2873faf2fbda0085e0623d2"
-  "2.4.1":
-    url: "https://github.com/ada-url/ada/archive/refs/tags/v2.4.1.tar.gz"
-    sha256: "e9359937e7aeb8e5889515c0a9e22cd5da50e9b053038eb092135a0e64888fe7"
-  "2.4.0":
-    url: "https://github.com/ada-url/ada/archive/refs/tags/v2.4.0.tar.gz"
-    sha256: "14624f1dfd966fee85272688064714172ff70e6e304a1e1850f352a07e4c6dc7"
-  "2.3.1":
-    url: "https://github.com/ada-url/ada/archive/refs/tags/v2.3.1.tar.gz"
-    sha256: "298992ec0958979090566c7835ea60c14f5330d6372ee092ef6eee1d2e6ac079"
-  "2.3.0":
-    url: "https://github.com/ada-url/ada/archive/refs/tags/v2.3.0.tar.gz"
-    sha256: "932a93f6a745775343ebdbaafca295e07b9513f6aaeb738f9e85dcb397925e33"
-  "2.2.0":
-    url: "https://github.com/ada-url/ada/archive/refs/tags/v2.2.0.tar.gz"
-    sha256: "40a6b3fe0d5c62936c081e8403790ec05d5afe3d0909eece894efcfef7e678ee"
-  "2.0.0":
-    url: "https://github.com/ada-url/ada/archive/refs/tags/v2.0.0.tar.gz"
-    sha256: "a18272e1c5d6580f62a333df88149e3810ffedcb61b3fb06c480a5b52e458b5e"

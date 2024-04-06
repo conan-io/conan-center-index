@@ -1,4 +1,25 @@
 sources:
+  "3.0.0":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v3.0.0.tar.gz"
+    sha256: "25183bc54ab650d964256d547869a34573a13d06f7e6a369b79e77f5c1feb8ba"
+  "2.1.2":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v2.1.2.tar.gz"
+    sha256: "a53d2f540f78ddae31e30c573b1b7fd41d7257d6a090507ba35d9c398712e5ad"
+  "2.1.1":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v2.1.1.tar.gz"
+    sha256: "40a1c04e220bb2305c3adb5347f42b6b435c4bb4ac89dd0047ba8e73a7388dfb"
+  "2.1.0":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v2.1.0.tar.gz"
+    sha256: "75e2c106bf3c035f92560017b56b01602744b643a3fef08d69255c138c6c6f5c"
+  "2.0.4":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v2.0.4.tar.gz"
+    sha256: "3c962c196ba28abf2639067f2e2fd25879744ba98152a4e0e74556ca515eda33"
+  "2.0.2":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/v2.0.2.tar.gz"
+    sha256: "92636a931f8a7bf36ce5a96d3039db128afd0e075f5aa7936fa1685dd2bbc75b"
+  "1.3.0":
+    url: "https://github.com/RoaringBitmap/CRoaring/archive/v1.3.0.tar.gz"
+    sha256: "c4fccf6a8cfa6f15f47d0e6f6b202940c2305e3078eb745d25fe9e2739ae5278"
   "1.1.5":
     url: "https://github.com/RoaringBitmap/CRoaring/archive/v1.1.5.tar.gz"
     sha256: "5210a277ce83c3099dfee41d494c28aec61bdbc9160b3b124cb5afeab49cd123"
@@ -14,36 +35,9 @@ sources:
   "0.9.9":
     url: "https://github.com/RoaringBitmap/CRoaring/archive/v0.9.9.tar.gz"
     sha256: "3083bcbc37e43403111c482ddf317a710972256c23bc83abc8925803a02bdf60"
-  "0.9.8":
-    url: "https://github.com/RoaringBitmap/CRoaring/archive/v0.9.8.tar.gz"
-    sha256: "d83ea18ded541a49f792951a6e71cd20136171ca0a4c15c77ec5cd5b83ca8e63"
-  "0.9.6":
-    url: "https://github.com/RoaringBitmap/CRoaring/archive/v0.9.6.tar.gz"
-    sha256: "6d410750eb4ce70db2fa3dc25b7bc33fd4a91a85ef7dff595200d0acef99b1ee"
-  "0.9.3":
-    url: "https://github.com/RoaringBitmap/CRoaring/archive/v0.9.3.tar.gz"
-    sha256: "b7534adebf50a554e86b81a2b39459c9921c504e9a876abe00bd741d0a4bc85d"
-  "0.9.0":
-    url: "https://github.com/RoaringBitmap/CRoaring/archive/v0.9.0.tar.gz"
-    sha256: "52c1f56e1f84ffb9ff6cb90fd1d23cfe04926f696ae57e796d0b056fff572693"
   "0.8.1":
     url: "https://github.com/RoaringBitmap/CRoaring/archive/v0.8.1.tar.gz"
     sha256: "5359f2a051f10e42cea5edc3cb3650fd272e9125e6a0538901cf30619939d4f8"
-  "0.8.0":
-    url: "https://github.com/RoaringBitmap/CRoaring/archive/v0.8.0.tar.gz"
-    sha256: "cd6c4770baccfea385c0c6891a8a80133ba26093209740ca0a3eea348aff1a20"
   "0.7.3":
     url: "https://github.com/RoaringBitmap/CRoaring/archive/v0.7.3.tar.gz"
     sha256: "e3f8115ba44ef0e1eb7b982dc3c3233f08f5f95ec1260169c2ad0ca50e56b656"
-  "0.6.0":
-    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v0.6.0.tar.gz"
-    sha256: "b8e2499ca9ac6ba0d18dbbcde4bae3752acf81f08ea6309ea2a88d27972dffcf"
-  "0.5.0":
-    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v0.5.0.tar.gz"
-    sha256: "edab1b1a464e5a361ff622dc833170b2f33729c161aee4c2e53a324ac62ef78f"
-  "0.4.0":
-    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v0.4.0.tar.gz"
-    sha256: "0faf6ac893694d5c283a729373af74f813989ef0257781636ac4c397b48c1219"
-  "0.3.4":
-    url: "https://github.com/RoaringBitmap/CRoaring/archive/refs/tags/v0.3.4.tar.gz"
-    sha256: "ddc5899823c46707d7dbf4e4c117a811b0428bdcb84978d9e65ceaefe6f59595"

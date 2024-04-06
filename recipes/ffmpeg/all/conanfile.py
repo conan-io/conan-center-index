@@ -71,6 +71,9 @@ class FFMpegConan(ConanFile):
         "with_audiotoolbox": [True, False],
         "with_videotoolbox": [True, False],
         "with_programs": [True, False],
+        "with_libsvtav1": [True, False],
+        "with_libaom": [True, False],
+        "with_libdav1d": [True, False],
         "disable_everything": [True, False],
         "disable_all_encoders": [True, False],
         "disable_encoders": [None, "ANY"],
@@ -140,7 +143,7 @@ class FFMpegConan(ConanFile):
         "with_pulse": True,
         "with_vaapi": True,
         "with_vdpau": True,
-        "with_vulkan": True,
+        "with_vulkan": False,
         "with_xcb": True,
         "with_appkit": True,
         "with_avfoundation": True,
@@ -148,6 +151,9 @@ class FFMpegConan(ConanFile):
         "with_audiotoolbox": True,
         "with_videotoolbox": True,
         "with_programs": True,
+        "with_libsvtav1": True,
+        "with_libaom": True,
+        "with_libdav1d": True,
         "disable_everything": False,
         "disable_all_encoders": False,
         "disable_encoders": None,
@@ -216,10 +222,21 @@ class FFMpegConan(ConanFile):
             "with_xcb": ["avdevice"],
             "with_pulse": ["avdevice"],
             "with_sdl": ["with_programs"],
+            "with_libsvtav1": ["avcodec"],
+            "with_libaom": ["avcodec"],
+            "with_libdav1d": ["avcodec"],
         }
 
     @property
     def _version_supports_vulkan(self):
+        return Version(self.version) >= "4.3.0"
+
+    @property
+    def _version_supports_libsvtav1(self):
+        return Version(self.version) >= "5.1.0"
+
+    @property
+    def _version_supports_libdav1d(self):
         return Version(self.version) >= "4.3.0"
 
     def export_sources(self):
@@ -245,6 +262,10 @@ class FFMpegConan(ConanFile):
             del self.options.with_avfoundation
         if not self._version_supports_vulkan:
             self.options.rm_safe("with_vulkan")
+        if not self._version_supports_libsvtav1:
+            self.options.rm_safe("with_libsvtav1")
+        if not self._version_supports_libdav1d:
+            self.options.rm_safe("with_libdav1d")
 
     def configure(self):
         if self.options.shared:
@@ -257,15 +278,15 @@ class FFMpegConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.2")
+            self.requires("xz_utils/5.4.5")
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
         if self.options.with_freetype:
-            self.requires("freetype/2.13.0")
+            self.requires("freetype/2.13.2")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.0")
         if self.options.with_openh264:
@@ -273,27 +294,27 @@ class FFMpegConan(ConanFile):
         if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
         if self.options.with_opus:
-            self.requires("opus/1.3.1")
+            self.requires("opus/1.4")
         if self.options.with_zeromq:
-            self.requires("zeromq/4.3.4")
+            self.requires("zeromq/4.3.5")
         if self.options.with_sdl:
-            self.requires("sdl/2.26.1")
+            self.requires("sdl/2.28.5")
         if self.options.with_libx264:
             self.requires("libx264/cci.20220602")
         if self.options.with_libx265:
             self.requires("libx265/3.4")
         if self.options.with_libvpx:
-            self.requires("libvpx/1.11.0")
+            self.requires("libvpx/1.13.1")
         if self.options.with_libmp3lame:
             self.requires("libmp3lame/3.100")
         if self.options.with_libfdk_aac:
-            self.requires("libfdk_aac/2.0.2")
+            self.requires("libfdk_aac/2.0.3")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.3.0")
+            self.requires("libwebp/1.3.2")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_libalsa"):
-            self.requires("libalsa/1.2.7.2")
+            self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi"):
             self.requires("xorg/system")
         if self.options.get_safe("with_pulse"):
@@ -303,7 +324,13 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vdpau"):
             self.requires("vdpau/system")
         if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.239.0")
+            self.requires("vulkan-loader/1.3.243.0")
+        if self.options.get_safe("with_libsvtav1"):
+            self.requires("libsvtav1/1.6.0")
+        if self.options.with_libaom:
+            self.requires("libaom-av1/3.6.1")
+        if self.options.get_safe("with_libdav1d"):
+            self.requires("dav1d/1.2.1")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -324,7 +351,7 @@ class FFMpegConan(ConanFile):
         if self.settings.arch in ("x86", "x86_64"):
             self.tool_requires("yasm/1.3.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -460,6 +487,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("libmp3lame", self.options.with_libmp3lame),
             opt_enable_disable("libfdk-aac", self.options.with_libfdk_aac),
             opt_enable_disable("libwebp", self.options.with_libwebp),
+            opt_enable_disable("libaom", self.options.with_libaom),
             opt_enable_disable("openssl", self.options.with_ssl == "openssl"),
             opt_enable_disable("alsa", self.options.get_safe("with_libalsa")),
             opt_enable_disable(
@@ -555,6 +583,10 @@ class FFMpegConan(ConanFile):
 
         if self._version_supports_vulkan:
             args.append(opt_enable_disable("vulkan", self.options.get_safe("with_vulkan")))
+        if self._version_supports_libsvtav1:
+            args.append(opt_enable_disable("libsvtav1", self.options.get_safe("with_libsvtav1")))
+        if self._version_supports_libsvtav1:
+            args.append(opt_enable_disable("libdav1d", self.options.get_safe("with_libdav1d")))
         if is_apple_os(self):
             # relocatable shared libs
             args.append("--install-name-dir=@rpath")
@@ -606,6 +638,9 @@ class FFMpegConan(ConanFile):
             if not check_min_vs(self, "190", raise_invalid=False):
                 # Visual Studio 2013 (and earlier) doesn't support "inline" keyword for C (only for C++)
                 tc.extra_defines.append("inline=__inline")
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "15":
+            # Workaround for link error "ld: building exports trie: duplicate symbol '_av_ac3_parse_header'"
+            tc.extra_ldflags.append("-Wl,-ld_classic")
         if cross_building(self):
             args.append(f"--target-os={self._target_os}")
             if is_apple_os(self) and self.options.with_audiotoolbox:
@@ -937,6 +972,15 @@ class FFMpegConan(ConanFile):
             if self.options.get_safe("with_videotoolbox"):
                 self.cpp_info.components["avcodec"].frameworks.append(
                     "VideoToolbox")
+            if self.options.get_safe("with_libsvtav1"):
+                self.cpp_info.components["avcodec"].requires.extend(
+                    ["libsvtav1::decoder", "libsvtav1::encoder"])
+            if self.options.get_safe("with_libaom"):
+                self.cpp_info.components["avcodec"].requires.append(
+                    "libaom-av1::libaom-av1")
+            if self.options.get_safe("with_libdav1d"):
+                self.cpp_info.components["avcodec"].requires.append(
+                    "dav1d::dav1d")
 
         if self.options.avformat:
             if self.options.with_bzip2:

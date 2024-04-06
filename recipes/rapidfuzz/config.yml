@@ -1,5 +1,15 @@
 versions:
-  "1.10.4":
+  "3.0.2":
     folder: "all"
-  "cci.20210513":
+  "3.0.0":
+    folder: "all"
+  "2.2.3":
+    folder: "all"
+  "2.2.0":
+    folder: "all"
+  "2.1.1":
+    folder: "all"
+  "2.0.0":
+    folder: "all"
+  "1.10.4":
     folder: "all"

@@ -1,62 +1,92 @@
 sources:
-  "1.8.3":
-    url: "https://github.com/drogonframework/drogon/archive/v1.8.3.tar.gz"
-    sha256: "db6d92a0c40ec52d5704fb4128860b9eecdc284653e8d85113b4219b96dc7129"
-  "1.8.2":
-    url: "https://github.com/drogonframework/drogon/archive/v1.8.2.tar.gz"
-    sha256: "1182cab00c33e400eac617c6dbf44fa2f358e1844990b6b8c5c87783024f9971"
-  "1.8.0":
-    url: "https://github.com/drogonframework/drogon/archive/refs/tags/v1.8.0.tar.gz"
-    sha256: "bc6503cf213ed961d4a5e9fd7cb8e75b6b11045a67840ea2241e57321dd8711b"
-  "1.7.5":
-    url: "https://github.com/drogonframework/drogon/archive/refs/tags/v1.7.5.tar.gz"
-    sha256: "e2af7c55dcabafef16f26f5b3242692f5a2b54c19b7b626840bf9132d24766f6"
+  "1.9.3":
+    url: "https://github.com/drogonframework/drogon/archive/v1.9.3.tar.gz"
+    sha256: "fb4ef351b3e4c06ed850cfbbf50c571502decb1738fb7d62a9d7d70077c9fc23"
+  "1.9.2":
+    url: "https://github.com/drogonframework/drogon/archive/v1.9.2.tar.gz"
+    sha256: "5bfcb7e11df83de45efc24e2785646276a0166893e0475221d8e7fa82832ffbd"
+  "1.9.1":
+    url: "https://github.com/drogonframework/drogon/archive/v1.9.1.tar.gz"
+    sha256: "0f8bab22e02681d05787c88cbef5d04b105f6644ebf7cf29898d0a52ebe959e4"
+  "1.9.0":
+    url: "https://github.com/drogonframework/drogon/archive/v1.9.0.tar.gz"
+    sha256: "35793c1b64c32ebbea5a6cb3b1c22bcd0820e948674ecba92022ec05b41c848b"
+  "1.8.7":
+    url: "https://github.com/drogonframework/drogon/archive/v1.8.7.tar.gz"
+    sha256: "d2d80d35becd69bf80d74bf09b69425193f1b7be3926bd44f3ac7b951e54465d"
+  "1.8.6":
+    url: "https://github.com/drogonframework/drogon/archive/v1.8.6.tar.gz"
+    sha256: "ff02979f28047e97e19e36d1f363b3052b8122975fa8a379305d746dfe5fb004"
+  "1.8.5":
+    url: "https://github.com/drogonframework/drogon/archive/v1.8.5.tar.gz"
+    sha256: "9469f99408c114bc1e89945a3a8dab4640ea6d8cb06e7d42f06c1dfda3f71d2a"
+  "1.8.4":
+    url: "https://github.com/drogonframework/drogon/archive/v1.8.4.tar.gz"
+    sha256: "6f2f59ead0f0c37b0aac4bc889cbaedf3c2540f3020e892596c72f0a4d887a18"
 patches:
-  "1.8.3":
-    - patch_file: "patches/1.8.0-0001-disable-unused-data.patch"
-      patch_description: "Consume Trantor package from Conan instead of using the\
-        \ subproject"
+  "1.9.3":
+    - patch_file: "patches/1.8.5-0001-remove-shared-libs.patch"
+      patch_description: "remove shared libs option"
       patch_type: "conan"
-    - patch_file: "patches/1.8.0-0002-find-package-jsoncpp.patch"
+    - patch_file: "patches/1.9.2-0002-find-cci-packages.patch"
       patch_description: "Fix jsoncpp cmake target name"
       patch_type: "conan"
-    - patch_file: "patches/1.8.3-0003-find-package-sqlite.patch"
+  "1.9.2":
+    - patch_file: "patches/1.8.5-0001-remove-shared-libs.patch"
+      patch_description: "remove shared libs option"
+      patch_type: "conan"
+    - patch_file: "patches/1.9.2-0002-find-cci-packages.patch"
+      patch_description: "Fix jsoncpp cmake target name"
+      patch_type: "conan"
+  "1.9.1":
+    - patch_file: "patches/1.8.5-0001-remove-shared-libs.patch"
+      patch_description: "remove shared libs option"
+      patch_type: "conan"
+    - patch_file: "patches/1.9.0-0002-find-cci-packages.patch"
+      patch_description: "Fix jsoncpp cmake target name"
+      patch_type: "conan"
+  "1.9.0":
+    - patch_file: "patches/1.8.5-0001-remove-shared-libs.patch"
+      patch_description: "remove shared libs option"
+      patch_type: "conan"
+    - patch_file: "patches/1.9.0-0002-find-cci-packages.patch"
+      patch_description: "Fix jsoncpp cmake target name"
+      patch_type: "conan"
+  "1.8.7":
+    - patch_file: "patches/1.8.5-0001-remove-shared-libs.patch"
+      patch_description: "remove shared libs option"
+      patch_type: "conan"
+    - patch_file: "patches/1.8.6-0002-find-cci-packages.patch"
+      patch_description: "Fix jsoncpp cmake target name"
+      patch_type: "conan"
+  "1.8.6":
+    - patch_file: "patches/1.8.5-0001-remove-shared-libs.patch"
+      patch_description: "remove shared libs option"
+      patch_type: "conan"
+    - patch_file: "patches/1.8.6-0002-find-cci-packages.patch"
+      patch_description: "Fix jsoncpp cmake target name"
+      patch_type: "conan"
+  "1.8.5":
+    - patch_file: "patches/1.8.5-0001-remove-shared-libs.patch"
+      patch_description: "remove shared libs option"
+      patch_type: "conan"
+    - patch_file: "patches/1.8.5-0002-find-cci-packages.patch"
+      patch_description: "Fix jsoncpp cmake target name"
+      patch_type: "conan"
+  "1.8.4":
+    - patch_file: "patches/1.8.4-0001-remove-shared-libs.patch"
+      patch_description: "remove shared libs option"
+      patch_type: "conan"
+    - patch_file: "patches/1.8.4-0002-find-package-jsoncpp.patch"
+      patch_description: "Fix jsoncpp cmake target name"
+      patch_type: "conan"
+    - patch_file: "patches/1.8.4-0003-find-package-sqlite.patch"
       patch_description: "Fix sqlite cmake target name"
       patch_type: "conan"
-
-  "1.8.2":
-    - patch_file: "patches/1.8.0-0001-disable-unused-data.patch"
-      patch_description: "Consume Trantor package from Conan instead of using the\
-        \ subproject"
+    - patch_file: "patches/1.8.4-0004-find-package-yaml-cpp.patch"
+      patch_description: "Fix yaml-cpp cmake target name"
       patch_type: "conan"
-    - patch_file: "patches/1.8.0-0002-find-package-jsoncpp.patch"
-      patch_description: "Fix jsoncpp cmake target name"
-      patch_type: "conan"
-    - patch_file: "patches/1.8.2-0003-find-package-sqlite.patch"
-      patch_description: "Fix sqlite cmake target name"
-      patch_type: "conan"
-
-  "1.8.0":
-    - patch_file: "patches/1.8.0-0001-disable-unused-data.patch"
-      patch_description: "Consume Trantor package from Conan instead of using the subproject"
-      patch_type: "conan"
-    - patch_file: "patches/1.8.0-0002-find-package-jsoncpp.patch"
-      patch_description: "Fix jsoncpp cmake target name"
-      patch_type: "conan"
-    - patch_file: "patches/1.8.0-0003-find-package-sqlite.patch"
-      patch_description: "Fix sqlite cmake target name"
-      patch_type: "conan"
-
-  "1.7.5":
-    - patch_file: "patches/1.7.5-0001-disable_trantor.patch"
-      patch_description: "Consume Trantor package from Conan instead of using the subproject"
-      patch_type: "conan"
-    - patch_file: "patches/1.7.5-0002-remove-boost-components.patch"
-      patch_description: "Do not consume specific Boost components"
-      patch_type: "conan"
-    - patch_file: "patches/1.7.5-0003-find-package-trantor.patch"
-      patch_description: "Fix Trantor cmake target name"
-      patch_type: "conan"
-    - patch_file: "patches/1.7.5-0004-find-package-jsoncpp.patch"
-      patch_description: "Fix jsoncpp cmake target name"
-      patch_type: "conan"
+    - patch_file: "patches/1.8.2-0004-support-gcc13.patch"
+      patch_description: "Fix compilation error on gcc13 with C++17"
+      patch_type: "portability"
+      patch_source: "https://github.com/drogonframework/drogon/pull/1563/"

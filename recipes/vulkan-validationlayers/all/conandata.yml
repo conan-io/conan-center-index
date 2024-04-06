@@ -17,18 +17,6 @@ sources:
   "1.3.211.0":
     url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/sdk-1.3.211.0.tar.gz"
     sha256: "927c1cb98c81fe8a1a529cf2d977d701dcda49c495a19583dc00e178b6757203"
-  "1.3.204.1":
-    url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/sdk-1.3.204.1.tar.gz"
-    sha256: "a5e658a4c1f504ae38488acdbe2ab2799e2ae4b626104d76776f1c24b079f341"
-  "1.2.198.0":
-    url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/sdk-1.2.198.0.tar.gz"
-    sha256: "4a70cc5da26baf873fcf69b081eeeda545515dd66e5904f18fee32b4d275593a"
-  "1.2.189.2":
-    url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/refs/tags/sdk-1.2.189.2.tar.gz"
-    sha256: "f59eb2c7d601c155a528b62637277b9ef4beb5132cbf868eb3779c7d4415bb1c"
-  "1.2.182":
-    url: "https://github.com/KhronosGroup/Vulkan-ValidationLayers/archive/v1.2.182.tar.gz"
-    sha256: "5a1f7027c06a8e5ae777d9053b5ce46f10ca623806a43332eb2da06fe46476d4"
 patches:
   "1.3.239.0":
     - patch_file: "patches/1.3.239.0-0001-fix-cmake.patch"
@@ -55,21 +43,5 @@ patches:
       patch_type: "conan"
   "1.3.211.0":
     - patch_file: "patches/1.3.204.1-0001-fix-cmake.patch"
-      patch_description: "CMake: Adapt to conan"
-      patch_type: "conan"
-  "1.3.204.1":
-    - patch_file: "patches/1.3.204.1-0001-fix-cmake.patch"
-      patch_description: "CMake: Adapt to conan"
-      patch_type: "conan"
-  "1.2.198.0":
-    - patch_file: "patches/1.2.198.0-0001-fix-cmake.patch"
-      patch_description: "CMake: Adapt to conan"
-      patch_type: "conan"
-  "1.2.189.2":
-    - patch_file: "patches/1.2.189.2-0001-fix-cmake.patch"
-      patch_description: "CMake: Adapt to conan"
-      patch_type: "conan"
-  "1.2.182":
-    - patch_file: "patches/1.2.182-0001-fix-cmake.patch"
       patch_description: "CMake: Adapt to conan"
       patch_type: "conan"

@@ -1,4 +1,13 @@
 sources:
+  "74.2":
+    url: "https://github.com/unicode-org/icu/releases/download/release-74-2/icu4c-74_2-src.tgz"
+    sha256: "68db082212a96d6f53e35d60f47d38b962e9f9d207a74cfac78029ae8ff5e08c"
+  "74.1":
+    url: "https://github.com/unicode-org/icu/releases/download/release-74-1/icu4c-74_1-src.tgz"
+    sha256: "86ce8e60681972e60e4dcb2490c697463fcec60dd400a5f9bffba26d0b52b8d0"
+  "73.2":
+    url: "https://github.com/unicode-org/icu/releases/download/release-73-2/icu4c-73_2-src.tgz"
+    sha256: "818a80712ed3caacd9b652305e01afc7fa167e6f2e94996da44b90c2ab604ce1"
   "73.1":
     url: "https://github.com/unicode-org/icu/releases/download/release-73-1/icu4c-73_1-src.tgz"
     sha256: "a457431de164b4aa7eca00ed134d00dfbf88a77c6986a10ae7774fc076bb8c45"
@@ -18,6 +27,12 @@ sources:
     url: "https://github.com/unicode-org/icu/releases/download/release-68-2/icu4c-68_2-src.tgz"
     sha256: "c79193dee3907a2199b8296a93b52c5cb74332c26f3d167269487680d479d625"
 patches:
+  "74.2":
+    - patch_file: "patches/0001-69.1-fix-mingw.patch"
+  "74.1":
+    - patch_file: "patches/0001-69.1-fix-mingw.patch"
+  "73.2":
+    - patch_file: "patches/0001-69.1-fix-mingw.patch"
   "73.1":
     - patch_file: "patches/0001-69.1-fix-mingw.patch"
   "72.1":

@@ -13,13 +13,13 @@ required_conan_version = ">=1.53.0"
 
 class DataFrameConan(ConanFile):
     name = "dataframe"
-    license = "BSD-3-Clause"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/hosseinmoein/DataFrame"
     description = (
         "C++ DataFrame for statistical, Financial, and ML analysis -- in modern C++ "
         "using native types, continuous memory storage, and no pointers are involved"
     )
+    license = "BSD-3-Clause"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/hosseinmoein/DataFrame"
     topics = (
         "dataframe",
         "data-science",
@@ -37,7 +37,6 @@ class DataFrameConan(ConanFile):
         "financial-engineering",
         "large-data",
     )
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -51,17 +50,38 @@ class DataFrameConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17"
+        if Version(self.version) < "2.1.0":
+            return "17"
+        elif Version(self.version) <= "2.2.0":
+            return "20"
+        else:
+            return "23"
 
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "15",
-            "msvc": "191",
-            "gcc": "7",
-            "clang": "6",
-            "apple-clang": "10.0",
-        }
+            "17": {
+                "Visual Studio": "15",
+                "msvc": "191",
+                "gcc": "7",
+                "clang": "6",
+                "apple-clang": "10.0",
+            },
+            "20": {
+                "Visual Studio": "16",
+                "msvc": "192",
+                "gcc": "11",
+                "clang": "12",
+                "apple-clang": "13",
+            },
+            "23": {
+                "Visual Studio": "17",
+                "msvc": "192",
+                "gcc": "13",
+                "clang": "15",
+                "apple-clang": "15",
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -83,12 +103,19 @@ class DataFrameConan(ConanFile):
 
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+
+        if Version(self.version) >= "2.2.0":
+            if (self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "13.0.0" and \
+                self.settings.compiler.libcxx == "libc++"):
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang < 13.0.0 with libc++.")
+            if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14.0.0":
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support apple-clang < 14.0.0.")
+
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

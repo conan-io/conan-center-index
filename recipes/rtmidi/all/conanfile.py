@@ -46,7 +46,10 @@ class RtMidiConan(ConanFile):
 
     def requirements(self):
         if self._with_alsa:
-            self.requires("libalsa/1.2.7.2")
+            self.requires("libalsa/1.2.10")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.24 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -60,7 +63,8 @@ class RtMidiConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "${ALSA_LIBRARY}", "ALSA::ALSA")
+        if Version(self.version) < "6.0.0":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "${ALSA_LIBRARY}", "ALSA::ALSA")
 
     def build(self):
         self._patch_sources()

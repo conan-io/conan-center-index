@@ -1,4 +1,28 @@
 sources:
+  "43.1":
+    url: "https://github.com/google/perfetto/archive/refs/tags/v43.1.tar.gz"
+    sha256: "0f23ba39520c9ec629c48dc36a3a4bb92ed9653ac6694445be22985205a3f4ce"
+  "42.0":
+    url: "https://github.com/google/perfetto/archive/refs/tags/v42.0.tar.gz"
+    sha256: "1c474a0f16cc2f9da826fd3f9e44ffd77785c433e997cdaf0ee390ae3d64b53e"
+  "41.0":
+    url: "https://github.com/google/perfetto/archive/refs/tags/v41.0.tar.gz"
+    sha256: "4c8fe8a609fcc77ca653ec85f387ab6c3a048fcd8df9275a1aa8087984b89db8"
+  "40.0":
+    url: "https://github.com/google/perfetto/archive/refs/tags/v40.0.tar.gz"
+    sha256: "bd78f0165e66026c31c8c39221ed2863697a8bba5cd39b12e4b43d0b7f71626f"
+  "39.0":
+    url: "https://github.com/google/perfetto/archive/refs/tags/v39.0.tar.gz"
+    sha256: "241cbaddc9ff4e5d1de2d28497fef40b5510e9ca60808815bf4944d0d2f026db"
+  "38.0":
+    url: "https://github.com/google/perfetto/archive/refs/tags/v38.0.tar.gz"
+    sha256: "92160b0fbeb8c4992cc0690d832dd923cee1dda466f3364ef4ed26a835e55e40"
+  "37.0":
+    url: "https://github.com/google/perfetto/archive/refs/tags/v37.0.tar.gz"
+    sha256: "39d7b3635834398828cfd189bd61afb0657ca2a3a08efbfd9866bfbcd440810b"
+  "35.0":
+    url: "https://github.com/google/perfetto/archive/refs/tags/v35.0.tar.gz"
+    sha256: "224b6552e60ad0fc7c1447bdf719ddd9ceceaf2b6773b71541c21df5890f4166"
   "34.0":
     url: "https://github.com/google/perfetto/archive/refs/tags/v34.0.tar.gz"
     sha256: "81dbf2fac446a0389c80e309b2060dcccd926012ce2a61621a47e3e432aee8c1"
@@ -20,27 +44,6 @@ sources:
   "26.1":
     url: "https://github.com/google/perfetto/archive/refs/tags/v26.1.tar.gz"
     sha256: "cce387e82e2a137fce2eba927f80f20407764b77637a1a92b9b24065a500ce6d"
-  "25.0":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v25.0.tar.gz"
-    sha256: "73a4b895df9222ddb231b8d903099d6da08cd079f27983f540e89156fa88ba67"
-  "24.2":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v24.2.tar.gz"
-    sha256: "b296d0a939e694fd2e73ed6c6418b774b5ef6809ddf60988989416e5cbf90b41"
-  "23.0":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v23.0.tar.gz"
-    sha256: "9d2955736ce9d234e0f5153acfefea8facfa762c9167024902ea98f9010207aa"
-  "22.1":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v22.1.tar.gz"
-    sha256: "013ba743019a1ca04627f7ce8bf424b60ed7f0f57e232eff719ae879be4c90fd"
-  "22.0":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v22.0.tar.gz"
-    sha256: "c62e9059a566136665b0c69e1f9901fc747b1eca813cd59a76e941bc2772340c"
-  "21.0":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v21.0.tar.gz"
-    sha256: "8ce7d7c3dd8a2edd6d37092eb139e11bbf9c7e33a9964bab96c0505def6e1ad4"
-  "20.1":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v20.1.tar.gz"
-    sha256: "d681bb76e2b73e6ba46db53c1502f31f4f16c36cd6e91d4ae839a3b44272f646"
 patches:
   "31.0":
     - patch_file: "patches/v31.0/0001-tracing-fix-compile-on-MSVC.patch"
@@ -48,13 +51,3 @@ patches:
       patch_type: "backport"
       patch_source: "https://android-review.googlesource.com/c/platform/external/perfetto/+/2355222"
       sha256: "ad253a9bba3941bd8d1f206422d60eb1c06cb6d75d60eff5b5b8ae0f2ec7e15c"
-  "25.0":
-    - patch_file: "patches/v25.0/0001-MSVC-Fix-narrowing-conversion-error.patch"
-  "22.1":
-    - patch_file: "patches/v22.x/0001-Fix-perfetto-logging-when-PERFETTO_DISABLE_LOG-activ.patch"
-  "22.0":
-    - patch_file: "patches/v22.x/0001-Fix-perfetto-logging-when-PERFETTO_DISABLE_LOG-activ.patch"
-  "21.0":
-    - patch_file: "patches/v21.x/0001-Fix-perfetto-logging-when-PERFETTO_DISABLE_LOG-activ.patch"
-  "20.1":
-    - patch_file: "patches/v20.1/0001-Fix-perfetto-logging-when-PERFETTO_DISABLE_LOG-activ.patch"

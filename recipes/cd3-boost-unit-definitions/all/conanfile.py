@@ -10,13 +10,14 @@ import os
 required_conan_version = ">=1.52.0"
 
 
-class PackageConan(ConanFile):
+class Cd3BoostUnitDefinitionsConan(ConanFile):
     name = "cd3-boost-unit-definitions"
     description = "A collection of pre-defined types and unit instances for working with Boost.Units quantities."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/CD3/BoostUnitDefinitions"
     topics = ("physical dimensions", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -28,20 +29,17 @@ class PackageConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
-            "msvc": "19.0",
+            "msvc": "191",
             "gcc": "5",
             "clang": "5",
             "apple-clang": "5.1",
         }
 
-    def export_sources(self):
-        pass
-
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.80.0", transitive_headers=True)
+        self.requires("boost/1.80.0")
 
     def package_id(self):
         self.info.clear()

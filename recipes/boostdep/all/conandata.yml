@@ -1,6 +1,11 @@
 sources:
+  1.82.0:
+    - url: "https://github.com/boostorg/boostdep/archive/refs/tags/boost-1.82.0.tar.gz"
+      sha256: "b3bffa292709ad74bf2fa50831890161ad7b9ef33f9f4ffa83d474da4482a452"
+    - url: "https://www.boost.org/LICENSE_1_0.txt"
+      sha256: "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
   1.75.0:
     - url: "https://github.com/boostorg/boostdep/archive/boost-1.75.0.tar.gz"
       sha256: "7eecd835eb5b0fd602ff3615a6b663b45917689386d11073d961b86710f428af"
-    - url: "http://www.boost.org/LICENSE_1_0.txt"
+    - url: "https://www.boost.org/LICENSE_1_0.txt"
       sha256: "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"

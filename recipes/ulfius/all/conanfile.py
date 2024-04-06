@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class UlfiusConan(ConanFile):
@@ -16,6 +16,8 @@ class UlfiusConan(ConanFile):
     topics = ("web", "http", "rest", "endpoint", "json", "websocket")
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -49,28 +51,19 @@ class UlfiusConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def requirements(self):
-        self.requires("orcania/2.3.1")
-        self.requires("libmicrohttpd/0.9.75")
+        self.requires("orcania/2.3.1", transitive_headers=True)
+        self.requires("libmicrohttpd/0.9.75", transitive_headers=True)
         if self.options.with_yder:
-            self.requires("yder/1.4.18")
+            self.requires("yder/1.4.18", transitive_headers=True)
         if self.options.with_jansson:
-            self.requires("jansson/2.14")
+            self.requires("jansson/2.14", transitive_headers=True)
         if self.options.with_libcurl:
-            self.requires("libcurl/7.85.0")
+            self.requires("libcurl/[>=7.78.0 <9]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

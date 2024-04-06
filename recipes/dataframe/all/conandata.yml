@@ -1,4 +1,16 @@
 sources:
+  "3.0.0":
+    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.0.0.tar.gz"
+    sha256: "9266fb85c518a251a5440e490c81615601791f2de2fad8755aa09f13a0c541f9"
+  "2.3.0":
+    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/v2.3.0.tar.gz"
+    sha256: "d671a3d47c2ef250cadddbae545b1b7bee51f9411836b627b7860e187c868a72"
+  "2.2.0":
+    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/2.2.0.tar.gz"
+    sha256: "289e8f86c9d468ee62508167c202c34d662915922582af73b9d31691feb2b0af"
+  "2.1.0":
+    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/2.1.0.tar.gz"
+    sha256: "7f131c608dccd14599e5765e1a919550f08f5c334764f0e20ec181e7e8cbddae"
   "2.0.0":
     url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/2.0.0.tar.gz"
     sha256: "df46ab60153f75ef0a1ab269e6b107ec34fdc467993c3984029d7deb5e0fab6c"
@@ -17,21 +29,6 @@ sources:
   "1.18.0":
     url: "https://github.com/hosseinmoein/DataFrame/archive/1.18.0.tar.gz"
     sha256: "8cdb8b246263fbd8fcef07b6300f6aefb58b3a54cd67e5cbe5383bc948305844"
-  "1.17.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/1.17.0.tar.gz"
-    sha256: "669e9663de358330b15eacaa783ccf42fe16db27b9556fdcd18f1114c0335557"
-  "1.16.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/1.16.0.tar.gz"
-    sha256: "a5a24ec07fb4761a294a291d7bed7c72e82e2dde8bba8bfc1ca2f68e07afd7fc"
-  "1.15.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/1.15.0.tar.gz"
-    sha256: "68eb3fca66dff3f8473722d561e9391800957a09c2c6d4dde5f9ad37cbf88954"
-  "1.14.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/1.14.0.tar.gz"
-    sha256: "45991cc16e478b24641d0548aab24fd59ad534ada30fca8776fd9990e1914ac7"
-  "1.12.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/1.12.0.tar.gz"
-    sha256: "e951a699bd048bd7a034ac60bdd45f15cf066a04fda33cb22030d192b91a836c"
 patches:
   "2.0.0":
     - patch_file: "patches/2.0.0-0001-use-abs.patch"

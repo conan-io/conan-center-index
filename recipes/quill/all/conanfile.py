@@ -69,7 +69,7 @@ class QuillConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/10.0.0", transitive_headers=True)
+        self.requires("fmt/10.2.1", transitive_headers=True)
 
     def validate(self):
         supported_archs = ["x86", "x86_64", "armv6", "armv7", "armv7hf", "armv8"]
@@ -113,13 +113,11 @@ class QuillConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["QUILL_FMT_EXTERNAL"] = True
         tc.variables["QUILL_ENABLE_INSTALL"] = True
-
         if Version(self.version) < "2.8.0":
             tc.variables["QUILL_USE_BOUNDED_QUEUE"] = self.options.with_bounded_queue
         else:
             if self.options.with_bounded_queue:
                 tc.preprocessor_definitions["QUILL_USE_BOUNDED_QUEUE"] = 1
-
         tc.variables["QUILL_NO_EXCEPTIONS"] = self.options.with_no_exceptions
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if self.is_quilll_x86_arch():
@@ -130,7 +128,8 @@ class QuillConan(ConanFile):
             tc.variables["CMAKE_CXX_FLAGS"] = "-mclflushopt"
         if Version(self.version) >= "2.8.0" and self.options.get_safe("with_bounded_blocking_queue"):
             tc.preprocessor_definitions["QUILL_USE_BOUNDED_BLOCKING_QUEUE"] = 1
-
+        if Version(self.version) >= "3.2.0":
+            tc.variables["QUILL_DISABLE_POSITION_INDEPENDENT_CODE"] = not self.options.get_safe("fPIC")
         tc.generate()
 
         deps = CMakeDeps(self)

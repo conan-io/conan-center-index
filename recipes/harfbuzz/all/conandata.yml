@@ -1,39 +1,31 @@
 sources:
+  "8.3.0":
+    url: "https://github.com/harfbuzz/harfbuzz/releases/download/8.3.0/harfbuzz-8.3.0.tar.xz"
+    sha256: "109501eaeb8bde3eadb25fab4164e993fbace29c3d775bcaa1c1e58e2f15f847"
+  "8.2.2":
+    url: "https://github.com/harfbuzz/harfbuzz/releases/download/8.2.2/harfbuzz-8.2.2.tar.xz"
+    sha256: "e433ad85fbdf57f680be29479b3f964577379aaf319f557eb76569f0ecbc90f3"
+  "8.2.1":
+    url: "https://github.com/harfbuzz/harfbuzz/releases/download/8.2.1/harfbuzz-8.2.1.tar.xz"
+    sha256: "0fec78f98c9c8faf228957a201c8846f809452c20f8445eb092a1ba6f22dbea5"
+  "8.1.1":
+    url: "https://github.com/harfbuzz/harfbuzz/releases/download/8.1.1/harfbuzz-8.1.1.tar.xz"
+    sha256: "0305ad702e11906a5fc0c1ba11c270b7f64a8f5390d676aacfd71db129d6565f"
+  "8.0.1":
+    url: "https://github.com/harfbuzz/harfbuzz/releases/download/8.0.1/harfbuzz-8.0.1.tar.xz"
+    sha256: "c1ce780acd385569f25b9a29603d1d5bc71e6940e55bfdd4f7266fad50e42620"
   "7.3.0":
     url: "https://github.com/harfbuzz/harfbuzz/releases/download/7.3.0/harfbuzz-7.3.0.tar.xz"
     sha256: "20770789749ac9ba846df33983dbda22db836c70d9f5d050cb9aa5347094a8fb"
-  "7.1.0":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/7.1.0/harfbuzz-7.1.0.tar.xz"
-    sha256: "f135a61cd464c9ed6bc9823764c188f276c3850a8dc904628de2a87966b7077b"
   "6.0.0":
     url: "https://github.com/harfbuzz/harfbuzz/releases/download/6.0.0/harfbuzz-6.0.0.tar.xz"
     sha256: "1d1010a1751d076d5291e433c138502a794d679a7498d1268ee21e2d4a140eb4"
-  "5.3.1":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/5.3.1/harfbuzz-5.3.1.tar.xz"
-    sha256: "4a6ce097b75a8121facc4ba83b5b083bfec657f45b003cd5a3424f2ae6b4434d"
-  "5.3.0":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/5.3.0/harfbuzz-5.3.0.tar.xz"
-    sha256: "a05e19e3f52da24ed071522f0fddf872157d7d25e869cfd156cd6f1e81c42152"
-  "5.2.0":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/5.2.0/harfbuzz-5.2.0.tar.xz"
-    sha256: "735a94917b47936575acb4d4fa7e7986522f8a89527e4635721474dee2bc942c"
   "5.1.0":
     url: "https://github.com/harfbuzz/harfbuzz/releases/download/5.1.0/harfbuzz-5.1.0.tar.xz"
     sha256: "2edb95db668781aaa8d60959d21be2ff80085f31b12053cdd660d9a50ce84f05"
-  "4.4.1":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/4.4.1/harfbuzz-4.4.1.tar.xz"
-    sha256: "c5bc33ac099b2e52f01d27cde21cee4281b9d5bfec7684135e268512478bc9ee"
-  "3.2.0":
-    url: "https://github.com/harfbuzz/harfbuzz/releases/download/3.2.0/harfbuzz-3.2.0.tar.xz"
-    sha256: "0ada50a1c199bb6f70843ab893c55867743a443b84d087d54df08ad883ebc2cd"
 patches:
   "5.1.0":
     - patch_file: "patches/0000-fix-freetype-lookup-5.1.0.patch"
-      patch_type: "portability"
-      patch_description: "fix fretype and icu dependency lookup"
-      patch_source: "https://github.com/harfbuzz/harfbuzz/pull/3811"
-  "4.4.1":
-    - patch_file: "patches/0000-fix-freetype-lookup-4.4.1.patch"
       patch_type: "portability"
       patch_description: "fix fretype and icu dependency lookup"
       patch_source: "https://github.com/harfbuzz/harfbuzz/pull/3811"

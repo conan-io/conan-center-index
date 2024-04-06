@@ -1,9 +1,15 @@
 versions:
-  "5.75.0":
+  "5.113.0":
     folder: "all"
-  "5.80.0":
+  "5.111.0":
+    folder: "all"
+  "5.108.0":
+    folder: "all"
+  "5.93.0":
     folder: "all"
   "5.84.0":
     folder: "all"
-  "5.93.0":
+  "5.80.0":
+    folder: "all"
+  "5.75.0":
     folder: "all"

@@ -1,8 +1,13 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-import functools
+from conan import ConanFile
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import unix_path_package_info_legacy
+
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class GtkDocStubConan(ConanFile):
@@ -12,54 +17,59 @@ class GtkDocStubConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-2.0-or-later"
     topics = ("gtk", "documentation", "gtkdocize")
+    package_type = "application"
     settings = "os"
-
-    exports_sources = "patches/*"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        args = [
-            "--datadir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
-            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
-        ]
-        autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return autotools
+    def generate(self):
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--datarootdir=${prefix}/res")
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        autotools = self._configure_autotools()
+        apply_conandata_patches(self)
+        autotools = Autotools(self)
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
         autotools.install()
 
     def package_info(self):
+        self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = ["res"]
 
-        automake_dir = tools.unix_path(os.path.join(self.package_folder, "res", "aclocal"))
-        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(automake_dir))
+        self.buildenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
+
+        automake_dir = unix_path_package_info_legacy(self, os.path.join(self.package_folder, "res", "aclocal"))
+        self.buildenv_info.append_path("AUTOMAKE_CONAN_INCLUDES", automake_dir)
+
+        # TODO: remove the following when only Conan 2.0 is supported
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_dir)

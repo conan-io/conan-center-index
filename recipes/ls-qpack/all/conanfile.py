@@ -26,6 +26,7 @@ class LsQpackConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,7 +43,7 @@ class LsQpackConan(ConanFile):
 
     def requirements(self):
         if self.options.with_xxh:
-            self.requires("xxhash/0.8.1")
+            self.requires("xxhash/0.8.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -61,7 +62,7 @@ class LsQpackConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
 
     def package(self):

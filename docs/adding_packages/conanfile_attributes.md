@@ -49,13 +49,26 @@ In order to create reproducible builds, we also "commit-lock" to the latest comm
 
 ### License Attribute
 
-The mandatory license attribute of each recipe **should** be a [SPDX license](https://spdx.org/licenses/) [short Identifiers](https://spdx.dev/ids/) when applicable.
+The license attribute is a mandatory field which provides the legal information that summarizes the contents saved in the package. These follow the
+[SPDX license](https://spdx.org/licenses/) as a standard. This is for consummers, in particular in the enterprise sector, that do rely on SDPX compliant identifiers so that they can flag this as a custom license text.
 
-Where the SPDX guidelines do not apply, packages should do the following:
+* If the library has a license that has a SPDX identifier, use the [short Identifiers](https://spdx.dev/ids/).
+* If the library has a license text that does not match a SPDX identifier, including custom wording disclaiming copyright or dedicating the words to the ["public domain"](https://fairuse.stanford.edu/overview/public-domain/welcome/), use the [SPDX License Expressions](https://spdx.github.io/spdx-spec/v2-draft/SPDX-license-expressions/), this can follow:
+  * `LicenseRef-` as a prefix, followed by the name of the library. For example:`LicenseRef-libfoo-public-domain`
+* If the library makes no mention of a license and the terms of use - it **shall not be accepted in ConanCenter** , even if the code is publicly available in GitHub or any other platforms.
 
-* When no license is provided or it's under the ["public domain"](https://fairuse.stanford.edu/overview/public-domain/welcome/) - these are not a license by itself. Thus, we have [equivalent licenses](https://en.wikipedia.org/wiki/Public-domain-equivalent_license) that should be used instead. If a project falls under these criteria it should be identified as the [Unlicense](https://spdx.org/licenses/Unlicense) license.
-* When a custom (e.g. project specific) license is given, the value should be set to `LicenseRef-` as a prefix, followed by the name of the file which contains the custom license. See [this example](https://github.com/conan-io/conan-center-index/blob/e604534bbe0ef56bdb1f8513b83404eff02aebc8/recipes/fft/all/conanfile.py#L8). For more details, [read this conversation](https://github.com/conan-io/conan-center-index/pull/4928/files#r596216206).
+In case the license changes in a new release, the recipe should update the license attribute accordingly:
 
+```python
+class LibfooConan(ConanFile):
+    license = ("MIT", "BSD-3-Clause") # keep both old and new licenses, so conan inspect can find it
+
+    def configure (self):
+       # change the license according to the version, so conan graph info can show the correct one
+
+       # INFO: Version < 2.0 the license was MIT, but changed to BSD-3-Clause now.
+       self.license = "BSD-3-Clause" if Version(self.version) >= "2.0.0" else "MIT"
+```
 
 ## Order of methods and attributes
 

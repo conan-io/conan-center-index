@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -46,7 +47,7 @@ class LibspngConan(ConanFile):
         if self.options.with_miniz:
             self.requires("miniz/3.0.2")
         else:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -72,6 +73,8 @@ class LibspngConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if Version(self.version) >= "0.7.4":
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libspng")
@@ -80,3 +83,7 @@ class LibspngConan(ConanFile):
         self.cpp_info.libs = ["spng"] if self.options.shared else ["spng_static"]
         if self.settings.os in ["Linux", "Android", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
+        if Version(self.version) >= "0.7.4":
+            self.cpp_info.set_property("cmake_file_name", "SPNG")
+            self.cpp_info.set_property("cmake_target_name", "spng::spng{}".format("" if self.options.shared else "_static"))

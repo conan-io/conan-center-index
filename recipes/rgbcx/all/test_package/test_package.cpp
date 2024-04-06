@@ -1,3 +1,6 @@
+// Workaround for a missing math.h include in rgbcx.h
+#include <cmath>
+
 #define RGBCX_IMPLEMENTATION
 #include "rgbcx.h"
 

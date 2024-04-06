@@ -11,10 +11,10 @@ class TinygltfConan(ConanFile):
     name = "tinygltf"
     description = "Header only C++11 tiny glTF 2.0 library."
     license = "MIT"
-    topics = ("gltf")
-    homepage = "https://github.com/syoyo/tinygltf"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "https://github.com/syoyo/tinygltf"
+    topics = ("gltf", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "draco": [True, False],
@@ -34,19 +34,18 @@ class TinygltfConan(ConanFile):
         self.info.clear()
 
     def requirements(self):
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("nlohmann_json/3.11.3")
         if self.options.draco:
-            self.requires("draco/1.5.5")
+            self.requires("draco/1.5.6")
         if self.options.stb_image or self.options.stb_image_write:
-            self.requires("stb/cci.20210910")
+            self.requires("stb/cci.20230920")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         replace_in_file(self, os.path.join(self.source_folder, "tiny_gltf.h"),

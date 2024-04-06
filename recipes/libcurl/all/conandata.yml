@@ -1,43 +1,91 @@
 sources:
+  "8.6.0":
+    url:
+      - "https://curl.se/download/curl-8.6.0.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-8_6_0/curl-8.6.0.tar.xz"
+    sha256: "3ccd55d91af9516539df80625f818c734dc6f2ecf9bada33c76765e99121db15"
+  "8.5.0":
+    url:
+      - "https://curl.se/download/curl-8.5.0.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-8_5_0/curl-8.5.0.tar.xz"
+    sha256: "42ab8db9e20d8290a3b633e7fbb3cec15db34df65fd1015ef8ac1e4723750eeb"
+  "8.4.0":
+    url:
+      - "https://curl.se/download/curl-8.4.0.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-8_4_0/curl-8.4.0.tar.xz"
+    sha256: "16c62a9c4af0f703d28bda6d7bbf37ba47055ad3414d70dec63e2e6336f2a82d"
+  "8.2.1":
+    url:
+      - "https://curl.se/download/curl-8.2.1.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-8_2_1/curl-8.2.1.tar.xz"
+    sha256: "dd322f6bd0a20e6cebdfd388f69e98c3d183bed792cf4713c8a7ef498cba4894"
+  "8.2.0":
+    url:
+      - "https://curl.se/download/curl-8.2.0.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-8_2_0/curl-8.2.0.tar.xz"
+    sha256: "2859ec79e2cd96e976a99493547359b8001af1d1e21f3a3a3b846544ef54500f"
+  "8.1.2":
+    url:
+      - "https://curl.se/download/curl-8.1.2.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-8_1_2/curl-8.1.2.tar.xz"
+    sha256: "31b1118eb8bfd43cd95d9a3f146f814ff874f6ed3999b29d94f4d1e7dbac5ef6"
   "8.1.1":
-    url: "https://curl.se/download/curl-8.1.1.tar.gz"
-    sha256: "44915e6708551bff2b4fd1615d593bc843b00ba013012634c04208702e354ab2"
+    url:
+      - "https://curl.se/download/curl-8.1.1.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-8_1_1/curl-8.1.1.tar.xz"
+    sha256: "08a948e061929645597c1ef7194e07b308b22084ff03fa7400b465e6c05149e5"
   "8.0.1":
-    url: "https://curl.se/download/curl-8.0.1.tar.gz"
-    sha256: "5fd29000a4089934f121eff456101f0a5d09e2a3e89da1d714adf06c4be887cb"
+    url:
+      - "https://curl.se/download/curl-8.0.1.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-8_0_1/curl-8.0.1.tar.xz"
+    sha256: "0a381cd82f4d00a9a334438b8ca239afea5bfefcfa9a1025f2bf118e79e0b5f0"
   "7.88.1":
-    url: "https://curl.se/download/curl-7.88.1.tar.gz"
-    sha256: "cdb38b72e36bc5d33d5b8810f8018ece1baa29a8f215b4495e495ded82bbf3c7"
+    url:
+      - "https://curl.se/download/curl-7.88.1.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-7_88_1/curl-7.88.1.tar.xz"
+    sha256: "1dae31b2a7c1fe269de99c0c31bb488346aab3459b5ffca909d6938249ae415f"
   "7.87.0":
-    url: "https://curl.se/download/curl-7.87.0.tar.gz"
-    sha256: "8a063d664d1c23d35526b87a2bf15514962ffdd8ef7fd40519191b3c23e39548"
+    url:
+      - "https://curl.se/download/curl-7.87.0.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-7_87_0/curl-7.87.0.tar.xz"
+    sha256: "ee5f1a1955b0ed413435ef79db28b834ea5f0fb7c8cfb1ce47175cc3bee08fff"
   "7.86.0":
-    url: "https://curl.se/download/curl-7.86.0.tar.gz"
-    sha256: "3dfdd39ba95e18847965cd3051ea6d22586609d9011d91df7bc5521288987a82"
+    url:
+      - "https://curl.se/download/curl-7.86.0.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-7_86_0/curl-7.86.0.tar.xz"
+    sha256: "2d61116e5f485581f6d59865377df4463f2e788677ac43222b496d4e49fb627b"
   "7.85.0":
-    url: "https://curl.se/download/curl-7.85.0.tar.gz"
-    sha256: "78a06f918bd5fde3c4573ef4f9806f56372b32ec1829c9ec474799eeee641c27"
+    url:
+      - "https://curl.se/download/curl-7.85.0.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-7_85_0/curl-7.85.0.tar.xz"
+    sha256: "88b54a6d4b9a48cb4d873c7056dcba997ddd5b7be5a2d537a4acb55c20b04be6"
   "7.84.0":
-    url: "https://curl.se/download/curl-7.84.0.tar.gz"
-    sha256: "3c6893d38d054d4e378267166858698899e9d87258e8ff1419d020c395384535"
+    url:
+      - "https://curl.se/download/curl-7.84.0.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-7_84_0/curl-7.84.0.tar.xz"
+    sha256: "2d118b43f547bfe5bae806d8d47b4e596ea5b25a6c1f080aef49fbcd817c5db8"
   "7.83.1":
-    url: "https://curl.se/download/curl-7.83.1.tar.gz"
-    sha256: "93fb2cd4b880656b4e8589c912a9fd092750166d555166370247f09d18f5d0c0"
+    url:
+      - "https://curl.se/download/curl-7.83.1.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-7_83_1/curl-7.83.1.tar.xz"
+    sha256: "2cb9c2356e7263a1272fd1435ef7cdebf2cd21400ec287b068396deb705c22c4"
   "7.82.0":
-    url: "https://curl.se/download/curl-7.82.0.tar.gz"
-    sha256: "910cc5fe279dc36e2cca534172c94364cf3fcf7d6494ba56e6c61a390881ddce"
+    url:
+      - "https://curl.se/download/curl-7.82.0.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-7_82_0/curl-7.82.0.tar.xz"
+    sha256: "0aaa12d7bd04b0966254f2703ce80dd5c38dbbd76af0297d3d690cdce58a583c"
   "7.80.0":
-    url: "https://curl.se/download/curl-7.80.0.tar.gz"
-    sha256: "dab997c9b08cb4a636a03f2f7f985eaba33279c1c52692430018fae4a4878dc7"
+    url:
+      - "https://curl.se/download/curl-7.80.0.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-7_80_0/curl-7.80.0.tar.xz"
+    sha256: "a132bd93188b938771135ac7c1f3ac1d3ce507c1fcbef8c471397639214ae2ab"
   "7.79.1":
-    url: "https://curl.se/download/curl-7.79.1.tar.gz"
-    sha256: "370b11201349816287fb0ccc995e420277fbfcaf76206e309b3f60f0eda090c2"
+    url:
+      - "https://curl.se/download/curl-7.79.1.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-7_79_1/curl-7.79.1.tar.xz"
+    sha256: "0606f74b1182ab732a17c11613cbbaf7084f2e6cca432642d0e3ad7c224c3689"
   "7.78.0":
-    url: "https://curl.se/download/curl-7.78.0.tar.gz"
-    sha256: "ed936c0b02c06d42cf84b39dd12bb14b62d77c7c4e875ade022280df5dcc81d7"
-  "7.77.0":
-    url: "https://curl.se/download/curl-7.77.0.tar.gz"
-    sha256: "b0a3428acb60fa59044c4d0baae4e4fc09ae9af1d8a3aa84b2e3fbcd99841f77"
-  "7.76.0":
-    url: "https://curl.se/download/curl-7.76.0.tar.gz"
-    sha256: "3b4378156ba09e224008e81dcce854b7ce4d182b1f9cfb97fe5ed9e9c18c6bd3"
+    url:
+      - "https://curl.se/download/curl-7.78.0.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-7_78_0/curl-7.78.0.tar.xz"
+    sha256: "be42766d5664a739c3974ee3dfbbcbe978a4ccb1fe628bb1d9b59ac79e445fb5"

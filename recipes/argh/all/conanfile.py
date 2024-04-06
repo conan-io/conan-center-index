@@ -10,13 +10,18 @@ required_conan_version = ">=1.50.0"
 
 class ArgparseConan(ConanFile):
     name = "argh"
+    description = "Frustration-free command line processing"
+    license = "BSD-3"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/adishavit/argh"
-    topics = ("argh", "argument", "parsing")
-    license = "BSD-3"
-    description = "Frustration-free command line processing"
+    topics = ("argument", "parsing", "header-only")
+
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -25,12 +30,8 @@ class ArgparseConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

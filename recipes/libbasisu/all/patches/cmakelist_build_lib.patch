@@ -17,7 +17,7 @@
 -if( NOT CMAKE_BUILD_TYPE )
 -  set( CMAKE_BUILD_TYPE Release )
 -endif()
-+project(basisu VERSION 1.15.0 LANGUAGES CXX)
++project(basisu VERSION 1.15.0 LANGUAGES CXX C)
  
 -message( ${PROJECT_NAME} " build type: " ${CMAKE_BUILD_TYPE} )
 -
@@ -55,7 +55,7 @@
 -   if (NOT BUILD_X64)
 -	  set(GCC_COMPILE_FLAGS "${GCC_COMPILE_FLAGS} -m32")
 -   endif()
-+   set(GCC_COMPILE_FLAGS "-fPIC -fno-strict-aliasing -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-value -Wno-unused-parameter -Wno-unused-variable")
++   set(GCC_COMPILE_FLAGS "-fno-strict-aliasing -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-value -Wno-unused-parameter -Wno-unused-variable")
  
 -   if (EMSCRIPTEN)
 -	  set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -s ALLOW_MEMORY_GROWTH=1 -DBASISU_SUPPORT_SSE=0")
@@ -99,7 +99,7 @@
  		set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -DBASISU_SUPPORT_SSE=1")
  		set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DBASISU_SUPPORT_SSE=1")
  	else()
-@@ -93,64 +51,57 @@ else()
+@@ -93,64 +51,63 @@ else()
  	endif()
  endif()
  
@@ -173,6 +173,12 @@
  if (ZSTD)
 -	target_compile_definitions(basisu PRIVATE BASISD_SUPPORT_KTX2_ZSTD=1)
 +	target_compile_definitions(${PROJECT_NAME} PRIVATE BASISD_SUPPORT_KTX2_ZSTD=1)
++   find_package(zstd REQUIRED)
++   if (TARGET zstd::libzstd_static)
++       target_link_libraries(${PROJECT_NAME} PRIVATE zstd::libzstd_static)
++   else()
++       target_link_libraries(${PROJECT_NAME} PRIVATE zstd::libzstd_shared)
++   endif()
  else()
 -	target_compile_definitions(basisu PRIVATE BASISD_SUPPORT_KTX2_ZSTD=0)
 +	target_compile_definitions(${PROJECT_NAME} PRIVATE BASISD_SUPPORT_KTX2_ZSTD=0)

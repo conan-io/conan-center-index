@@ -10,7 +10,6 @@ This section gathers the most common questions from the community related to pac
   * [What is the policy on creating packages from pre-compiled binaries?](#what-is-the-policy-on-creating-packages-from-pre-compiled-binaries)
   * [Should reference names use `-` or `_`?](#should-reference-names-use---or-_)
   * [Why are CMake find/config files and pkg-config files not packaged?](#why-are-cmake-findconfig-files-and-pkg-config-files-not-packaged)
-  * [Should recipes export a recipe's license?](#should-recipes-export-a-recipes-license)
   * [Why recipes that use build tools (like CMake) that have packages in Conan Center do not use it as a build require by default?](#why-recipes-that-use-build-tools-like-cmake-that-have-packages-in-conan-center-do-not-use-it-as-a-build-require-by-default)
   * [How are rare build systems without generators packaged?](#how-are-rare-build-systems-without-generators-packaged)
   * [Are python requires allowed in the `conan-center-index`?](#are-python-requires-allowed-in-the-conan-center-index)
@@ -24,6 +23,7 @@ This section gathers the most common questions from the community related to pac
     * [Doesn't this make debug builds useless?](#doesnt-this-make-debug-builds-useless)
   * [Can I remove an option from a recipe?](#can-i-remove-an-option-from-a-recipe)
   * [Can I split a project into an installer and library package?](#can-i-split-a-project-into-an-installer-and-library-package)
+  * [Should recipes export a recipe's license?](#should-recipes-export-a-recipes-license)
   * [What license should I use for Public Domain?](#what-license-should-i-use-for-public-domain)
   * [What license should I use for a custom project specific license?](#what-license-should-i-use-for-a-custom-project-specific-license)
   * [How do I flag a problem to a recipe consumer?](#how-do-i-flag-a-problem-to-a-recipe-consumer)
@@ -41,6 +41,7 @@ This section gathers the most common questions from the community related to pac
   * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)
   * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)
   * [How long can I be inactive before being removed from the authorized users list?](#how-long-can-i-be-inactive-before-being-removed-from-the-authorized-users-list)
+  * [What happens in case I change my user name?](#what-happens-in-case-i-change-my-user-name)
   * [Can we add package which are parts of bigger projects like Boost?](#can-we-add-package-which-are-parts-of-bigger-projects-like-boost)
     * [Can I add my project which I will submit to Boost?](#can-i-add-my-project-which-i-will-submit-to-boost)
   * [Can I add options that do not affect `package_id` or the package contents](#can-i-add-options-that-do-not-affect-package_id-or-the-package-contents)
@@ -102,10 +103,6 @@ Finally, by not allowing these files we make packages agnostic to the consumer a
 If you really think this is an issue and there is something missing to cover the use case of a library you want to contribute to ConanCenter, please do not hesitate to open an issue and we will be happy to hear your feedback.
 
 \* Take a look at the integrations section to learn more: https://docs.conan.io/1/integrations/build_system/cmake/cmake_find_package_generator.html
-
-## Should recipes export a recipe's license?
-
-No, recipes do not need to export a recipe license. Recipes and all files contributed to this repository are licensed under the license in the root of the repository. Using any recipe from this repository or directly from conan-center implies the same licensing.
 
 ## Why recipes that use build tools (like CMake) that have packages in Conan Center do not use it as a build require by default?
 
@@ -208,6 +205,10 @@ After one month, we will welcome a PR removing the option that was deprecated.
 ## Can I split a project into an installer and library package?
 
 No. Some projects provide more than a simple library, but also applications. For those projects, both libraries and executables should be kept together under the same Conan package. In the past, we tried to separate popular projects, like Protobuf, and it proved to be a complex and hard task to be maintained, requiring custom patches to disable parts of the building. Also, with the [context](https://docs.conan.io/1/systems_cross_building/cross_building.html#conan-v1-24-and-newer) feature, we can use the same package as build requirement, for the same build platform, and as a regular requirement, for the host platform, when cross-building. It's recommended using 2 profiles in that case, one for build platform (where the compilation tools are being executed) and one for host platform (where the generated binaries will run).
+
+## Should recipes export a recipe's license?
+
+No, recipes do not need to export a recipe license. Recipes and all files contributed to this repository are licensed under the license in the root of the repository. Using any recipe from this repository or directly from conan-center implies the same licensing.
 
 ## What license should I use for Public Domain?
 
@@ -431,6 +432,14 @@ difficult to understand [linter errors](linters.md), please comment on your pull
 
 Please, read [Inactivity and user removal section](adding_packages/README.md#inactivity-and-user-removal).
 
+## What happens in case I change my user name?
+
+Your Github user name is used to identify you in the authorized users list. If you change your user name, you will need to communicate or, in the #4, or opening a new issue.
+Otherwise, the CI will not be able to find you and will not build your pull requests.
+In case you change you user name just after asking for authorization in #4, please, communicate the change in the same issue.
+Users are revised before being added to the authorized users list, in case the user name is not found in #4, it will be asked in the pull request `Update authorized users list`.
+If the user does not answer, the user will be moved to the `waitlist_users.yml` file, until having further communication.
+
 ## Can we add package which are parts of bigger projects like Boost?
 
 Sadly no. There have been many efforts in the past and we feel it's not sustainable given the number of combinations of libraries and version.
@@ -443,6 +452,8 @@ and does not install libraries with the boost prefix.
 ### Can I add my project which I will submit to Boost?
 
 Yes, but make sure it does not have Boost in the name. Use the [`author-name` convention](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#what-is-the-policy-on-recipe-name-collisions) so there are no conflicts. In addition to follow the rules outlined above.
+
+**NOTE**: In case you have no intention to submit to Boost, then you can use the project name as is (e.g `boost-foobar`).
 
 ## Can I add options that do not affect `package_id` or the package contents
 

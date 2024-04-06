@@ -1,7 +1,8 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -9,7 +10,8 @@ from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
+
 class AtSpi2CoreConan(ConanFile):
     name = "at-spi2-core"
     description = "It provides a Service Provider Interface for the Assistive Technologies available on the GNOME platform and a library against which applications can be linked"
@@ -20,47 +22,56 @@ class AtSpi2CoreConan(ConanFile):
 
     provides = "at-spi2-atk", "atk"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_x11": [True, False],
-        }
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_x11": False,
-        }
+    }
 
     def export_sources(self):
         export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        if self.options.shared:
-            self.options["glib"].shared = True
 
     def build_requirements(self):
-        self.tool_requires("meson/1.1.0")
+        self.tool_requires("meson/1.3.1")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.1.0")
+        self.tool_requires("glib/<host_version>")
 
     def requirements(self):
-        self.requires("glib/2.76.2")
+        self.requires("glib/2.78.3")
         if self.options.with_x11:
             self.requires("xorg/system")
-        self.requires("dbus/1.15.2")
+        if self.settings.os == "Linux":
+            self.requires("dbus/1.15.8")
 
     def validate(self):
-        if self.options.shared and not self.options["glib"].shared:
+        if self.options.shared and not  self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("only linux is supported by this recipe")
+        if Version(self.version) < "2.49.1":
+            if self.settings.os == "Windows":
+                raise ConanInvalidConfiguration("Windows is not supported before version 2.49.1")
+        if Version(self.version) < "2.50.0":
+            if self.settings.os == "Macos":
+                raise ConanInvalidConfiguration("macos is not supported before version 2.50.0")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -79,6 +90,9 @@ class AtSpi2CoreConan(ConanFile):
         else:
             tc.project_options["introspection"] = "no"
             tc.project_options["x11"] = "yes" if self.options.with_x11 else "no"
+        if self.settings.os != "Linux":
+            tc.project_options["atk_only"] = "true"
+            
         tc.project_options["docs"] = "false"
         tc.generate()
         tc = PkgConfigDeps(self)
@@ -106,23 +120,42 @@ class AtSpi2CoreConan(ConanFile):
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "etc"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        fix_apple_shared_install_name(self)
+        fix_msvc_libname(self)
 
 
     def package_info(self):
-        self.cpp_info.components["atspi"].libs = ['atspi']
-        self.cpp_info.components["atspi"].includedirs = ["include/at-spi-2.0"]
-        self.cpp_info.components["atspi"].requires = ["dbus::dbus", "glib::glib"]
-        self.cpp_info.components["atspi"].set_property("pkg_config_name", "atspi-2")
+        if self.settings.os == "Linux":
+            self.cpp_info.components["atspi"].libs = ['atspi']
+            self.cpp_info.components["atspi"].includedirs = ["include/at-spi-2.0"]
+            self.cpp_info.components["atspi"].requires = ["dbus::dbus", "glib::glib"]
+            self.cpp_info.components["atspi"].set_property("pkg_config_name", "atspi-2")
 
         self.cpp_info.components["atk"].libs = ["atk-1.0"]
         self.cpp_info.components["atk"].includedirs = ['include/atk-1.0']
         self.cpp_info.components["atk"].requires = ["glib::glib"]
         self.cpp_info.components["atk"].set_property("pkg_config_name", 'atk')
 
-        self.cpp_info.components["atk-bridge"].libs = ['atk-bridge-2.0']
-        self.cpp_info.components["atk-bridge"].includedirs = [os.path.join('include', 'at-spi2-atk', '2.0')]
-        self.cpp_info.components["atk-bridge"].requires = ["dbus::dbus", "atk", "glib::glib", "atspi"]
-        self.cpp_info.components["atk-bridge"].set_property("pkg_config_name", 'atk-bridge-2.0')
+        if self.settings.os == "Linux":
+            self.cpp_info.components["atk-bridge"].libs = ['atk-bridge-2.0']
+            self.cpp_info.components["atk-bridge"].includedirs = [os.path.join('include', 'at-spi2-atk', '2.0')]
+            self.cpp_info.components["atk-bridge"].requires = ["dbus::dbus", "atk", "glib::glib", "atspi"]
+            self.cpp_info.components["atk-bridge"].set_property("pkg_config_name", 'atk-bridge-2.0')
 
-    def package_id(self):
-        self.info.requires["glib"].full_package_mode()
+
+def fix_msvc_libname(conanfile, remove_lib_prefix=True):
+    """remove lib prefix & change extension to .lib in case of cl like compiler"""
+    if not conanfile.settings.get_safe("compiler.runtime"):
+        return
+    from conan.tools.files import rename
+    import glob
+    libdirs = getattr(conanfile.cpp.package, "libdirs")
+    for libdir in libdirs:
+        for ext in [".dll.a", ".dll.lib", ".a"]:
+            full_folder = os.path.join(conanfile.package_folder, libdir)
+            for filepath in glob.glob(os.path.join(full_folder, f"*{ext}")):
+                libname = os.path.basename(filepath)[0:-len(ext)]
+                if remove_lib_prefix and libname[0:3] == "lib":
+                    libname = libname[3:]
+                rename(conanfile, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))

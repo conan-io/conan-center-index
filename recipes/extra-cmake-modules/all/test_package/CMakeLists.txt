@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(test_package CXX)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+project(test_package LANGUAGES CXX)
 
 
 find_package(ECM REQUIRED NO_MODULE)
@@ -17,5 +14,5 @@ ecm_generate_headers(
     REQUIRED_HEADERS MyLib_HEADERS
 )
 
-add_executable(example example.cpp)
-target_link_libraries(example MyLib)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE MyLib)

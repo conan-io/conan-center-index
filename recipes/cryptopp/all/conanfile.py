@@ -97,6 +97,7 @@ class CryptoPPConan(ConanFile):
             tc.cache_variables["CRYPTOPP_USE_INTERMEDIATE_OBJECTS_TARGET"] = False
             if self.settings.os == "Android":
                 tc.cache_variables["CRYPTOPP_NATIVE_ARCH"] = True
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Git"] = True
         tc.generate()
 
     def _patch_sources(self):

@@ -1,4 +1,10 @@
 sources:
+  "3.3.0":
+    url: "https://github.com/skypjack/uvw/archive/v3.3.0_libuv_v1.47.tar.gz"
+    sha256: "aabb17d3d8f0b3481b44e981c889dd4a2a6a3f1a96a4d01055e669f4b7d37d0e"
+  "3.2.0":
+    url: "https://github.com/skypjack/uvw/archive/v3.2.0_libuv_v1.46.tar.gz"
+    sha256: "bd5aed741765950074b1ea2507291dce81e528abdf56c406991ad4a27d8d1714"
   "3.1.0":
     url: "https://github.com/skypjack/uvw/archive/v3.1.0_libuv_v1.45.tar.gz"
     sha256: "0a612bd243150fbbe1365cdaf48203d32061c1d14f93825a31876b183922f93b"
