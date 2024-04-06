@@ -523,7 +523,9 @@ class CPythonConan(ConanFile):
     @property
     def _cmake_module_path(self):
         if is_msvc(self):
-            return os.path.join(self._msvc_install_subprefix, "lib", "cmake")
+            # On Windows, `lib` is for Python modules, `libs` is for compiled objects.
+            # Usually CMake modules are packaged with the latter.
+            return os.path.join(self._msvc_install_subprefix, "libs", "cmake")
         else:
             return os.path.join("lib", "cmake")
 
@@ -564,7 +566,7 @@ class CPythonConan(ConanFile):
             lib_folder = os.path.join(self.package_folder, self._msvc_install_subprefix, "libs")
             lib_file = self._exact_lib_name(lib_folder)
             python_exe = "${CMAKE_CURRENT_LIST_DIR}/../../" + self._cpython_interpreter_name
-            python_library = "${CMAKE_CURRENT_LIST_DIR}/../../" + lib_file
+            python_library = "${CMAKE_CURRENT_LIST_DIR}/../" + lib_file
         else:
             lib_folder = os.path.join(self.package_folder, "lib")
             lib_file = self._exact_lib_name(lib_folder)
