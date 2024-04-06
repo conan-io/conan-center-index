@@ -1,0 +1,5 @@
+# Using versions from a Debian mirror because the upstream only hosts some quite outdated tarballs and an SVN repo with no tagged versions
+sources:
+  "11.06.00":
+    url: "https://salsa.debian.org/debian-phototools-team/netpbm/-/archive/upstream/11.06.00/netpbm-upstream-11.06.00.tar.bz2"
+    sha256: "3e0323ff3f472413cef3eeda2a16942eded3ac3117b7d597e3a25f3326208c3d"
