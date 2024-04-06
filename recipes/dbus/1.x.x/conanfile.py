@@ -110,10 +110,10 @@ class DbusConan(ConanFile):
         tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux", False) else "disabled"
         tc.project_options["systemd"] = "enabled" if self.options.get_safe("with_systemd", False) else "disabled"
         if self.options.get_safe("with_systemd", False):
-            tc.project_options["systemd_system_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "system")
-            tc.project_options["systemd_user_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "user")
+            tc.project_options["systemd_system_unitdir"] = "/res/lib/systemd/system"
+            tc.project_options["systemd_user_unitdir"] = "/res/usr/lib/systemd/system"
         if is_apple_os(self):
-            tc.project_options["launchd_agent_dir"] = os.path.join(self.package_folder, "res", "LaunchAgents")
+            tc.project_options["launchd_agent_dir"] = "/res/LaunchAgents"
         tc.project_options["x11_autolaunch"] = "enabled" if self.options.get_safe("with_x11", False) else "disabled"
         tc.project_options["xml_docs"] = "disabled"
         tc.generate()
@@ -145,7 +145,6 @@ class DbusConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "systemd"))
         fix_apple_shared_install_name(self)
         if self.settings.os == "Windows" and not self.options.shared:
             rename(self, os.path.join(self.package_folder, "lib", "libdbus-1.a"), os.path.join(self.package_folder, "lib", "dbus-1.lib"))
