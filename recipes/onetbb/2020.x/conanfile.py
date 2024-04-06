@@ -201,16 +201,17 @@ class OneTBBConan(ConanFile):
             vcvars.generate()
 
     def _patch_sources(self):
-        # Fix LDFLAGS getting incorrectly applied to ar command
-        linux_include = os.path.join(self.source_folder, "build", "common_rules.inc")
-        replace_in_file(self, linux_include, "LIB_LINK_FLAGS += $(LDFLAGS)", "")
+        if self._is_msvc:
+            # Fix LDFLAGS getting incorrectly applied to ar command
+            linux_include = os.path.join(self.source_folder, "build", "common_rules.inc")
+            replace_in_file(self, linux_include, "LIB_LINK_FLAGS += $(LDFLAGS)", "")
         # Get the version of the current compiler instead of gcc
         linux_include = os.path.join(self.source_folder, "build", "linux.inc")
         replace_in_file(self, linux_include, "shell gcc", "shell $(CC)")
         replace_in_file(self, linux_include, "= gcc", "= $(CC)")
         if self.version != "2019_u9" and self.settings.build_type == "Debug":
             replace_in_file(self, os.path.join(self.source_folder, "Makefile"), "release", "debug")
-        # Remove -Werror from
+        # Remove -Werror and /WX from
         #   WARNING_AS_ERROR_KEY = -Werror
         for inc_file in self.source_path.joinpath("build").glob("*.inc"):
             replace_in_file(self, inc_file, "WARNING_AS_ERROR_KEY = ", "WARNING_AS_ERROR_KEY = #", strict=False)
