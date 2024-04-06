@@ -100,7 +100,6 @@ class NetpbmConan(ConanFile):
         config.append(f"NETPBMLIBTYPE={lib_type}")
         config.append(f"NETPBMLIBSUFFIX={suffix}")
         config.append(f"STATICLIB_TOO={'N' if self.options.shared else 'Y'}")
-        config.append(f"PKGDIR_DEFAULT={self.package_folder}")
         config.append(f"WANT_SSE={'Y' if self.settings.arch in ['x86', 'x86_64'] else 'N'}")
         config.append("DEFAULT_TARGET=nonmerge")
         config.append("LDRELOC=ld --reloc")
@@ -151,11 +150,6 @@ class NetpbmConan(ConanFile):
         # add missing -ljpeg to cameratopam
         save(self, os.path.join(self.source_folder, "converter", "other", "cameratopam", "Makefile"),
              "\ncameratopam: LDFLAGS_TARGET = $(shell $(LIBOPT) $(LIBOPTR) $(JPEGLIB))\n", append=True)
-        # don't care if pkgdir already exists
-        replace_in_file(self, os.path.join(self.source_folder, "GNUmakefile"),
-                        "if [ -d $(PKGDIR) ]; then", "if false; then")
-        replace_in_file(self, os.path.join(self.source_folder, "GNUmakefile"),
-                        "mkdir $(PKGDIR)", "mkdir -p $(PKGDIR)")
 
         if not self.options.tools:
             replace_in_file(self, os.path.join(self.source_folder, "GNUmakefile"),
@@ -171,21 +165,22 @@ class NetpbmConan(ConanFile):
     def package(self):
         for file in ["copyright_summary", "patent_summary", "GPL_LICENSE.txt", "lgpl_v21.txt", "COPYRIGHT.PATENT"]:
             copy(self, file, os.path.join(self.source_folder, "doc"), os.path.join(self.package_folder, "licenses"))
+        temp_dir = os.path.join(self.build_folder, "tmp")
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
-            autotools.make(target="package")
+            autotools.make(target="package", args=[f"pkgdir={temp_dir}"])
+        rename(self, os.path.join(temp_dir, "include"), os.path.join(self.package_folder, "include"))
+        rename(self, os.path.join(temp_dir, "lib"), os.path.join(self.package_folder, "lib"))
+        rename(self, os.path.join(temp_dir, "misc"), os.path.join(self.package_folder, "res"))
+        if self.options.tools:
+            rename(self, os.path.join(temp_dir, "bin"), os.path.join(self.package_folder, "bin"))
+        rmdir(self, temp_dir)
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.shared:
                 soname_file = next(self.package_path.joinpath("lib").glob("libnetpbm.so.*")).name
                 self.run(f"ln -s {soname_file} libnetpbm.so", cwd=os.path.join(self.package_folder, "lib"))
             else:
                 copy(self, "*.a", os.path.join(self.source_folder, "lib"), os.path.join(self.package_folder, "lib"))
-        rename(self, os.path.join(self.package_folder, "misc"), os.path.join(self.package_folder, "res"))
-        rm(self, "*_template", self.package_folder)
-        rmdir(self, os.path.join(self.package_folder, "staticlink"))
-        rmdir(self, os.path.join(self.package_folder, "sharedlink"))
-        if not self.options.tools:
-            rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "netpbm")
