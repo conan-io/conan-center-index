@@ -2,7 +2,6 @@ import os
 import shutil
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, save, replace_in_file, chdir, rmdir, rm, rename, copy
@@ -51,31 +50,39 @@ class NetpbmConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def package_id(self):
+        if not self.info.options.tools:
+            self.info.options.rm_safe("with_libjpeg")
+            self.info.options.rm_safe("with_x11")
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("jasper/4.2.0")
-        self.requires("libpng/[>=1.6 <2]")
-        self.requires("libtiff/4.6.0")
-        self.requires("libxml2/2.12.5")
-        self.requires("zlib/[>=1.2.11 <2]")
-        if self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/9e")
-        elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
-        elif self.options.with_libjpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.5")
-        if self.options.get_safe("with_x11"):
-            self.requires("xorg/system")
-        # TODO: add ghostscript to CCI
-        # TODO: add jbigkit to CCI
+        if self.options.tools:
+            self.requires("jasper/4.2.0")
+            self.requires("jbig/20160605")
+            self.requires("libpng/[>=1.6 <2]")
+            self.requires("libtiff/4.6.0")
+            self.requires("libxml2/2.12.5")
+            self.requires("zlib/[>=1.2.11 <2]")
+            if self.options.with_libjpeg == "libjpeg":
+                self.requires("libjpeg/9e")
+            elif self.options.with_libjpeg == "libjpeg-turbo":
+                self.requires("libjpeg-turbo/3.0.2")
+            elif self.options.with_libjpeg == "mozjpeg":
+                self.requires("mozjpeg/4.1.5")
+            if self.options.get_safe("with_x11"):
+                self.requires("xorg/system")
+            # TODO: add ghostscript to CCI
 
     def build_requirements(self):
-        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
         self.tool_requires("make/4.4.1")
-        self.tool_requires("flex/2.6.4")
+        if self.options.tools:
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("flex/2.6.4")
+            self.tool_requires("bison/3.8.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -123,13 +130,14 @@ class NetpbmConan(ConanFile):
             config.append(f"{name}LIB=USE_PKGCONFIG.a")
             config.append(f"{name}HDR_DIR=USE_PKGCONFIG.a")
 
-        _configure_dependency("TIFF", "libtiff", "tiff")
-        _configure_dependency("PNG", "libpng", "png")
-        _configure_dependency("JPEG", str(self.options.with_libjpeg), "jpeg")
-        _configure_dependency("JASPER", "jasper", "jasper")
-        # _configure_dependency("JBIG", "jbigkit", "jbig")
-        if self.options.get_safe("with_x11"):
-            _use_pkgconfig("X11")
+        if self.options.tools:
+            _configure_dependency("TIFF", "libtiff", "tiff")
+            _configure_dependency("PNG", "libpng", "png")
+            _configure_dependency("JPEG", str(self.options.with_libjpeg), "jpeg")
+            _configure_dependency("JASPER", "jasper", "jasper")
+            _configure_dependency("JBIG", "jbig", "jbig")
+            if self.options.get_safe("with_x11"):
+                _use_pkgconfig("X11")
 
         cflags = list(tc.cflags)
         if self.settings.build_type == "Debug":
@@ -200,18 +208,20 @@ class NetpbmConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
-        self.cpp_info.requires.extend([
-            "jasper::jasper",
-            "libpng::libpng",
-            "libtiff::libtiff",
-            "libxml2::libxml2",
-            "zlib::zlib",
-        ])
-        if self.options.with_libjpeg == "libjpeg":
-            self.cpp_info.requires.append("libjpeg::libjpeg")
-        elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.cpp_info.requires.append("libjpeg-turbo::jpeg")
-        elif self.options.with_libjpeg == "mozjpeg":
-            self.cpp_info.requires.append("mozjpeg::libjpeg")
-        if self.options.get_safe("with_x11"):
-            self.cpp_info.requires.append("xorg::x11")
+        if self.options.tools:
+            self.cpp_info.requires.extend([
+                "jasper::jasper",
+                "jbig::jbig",
+                "libpng::libpng",
+                "libtiff::libtiff",
+                "libxml2::libxml2",
+                "zlib::zlib",
+            ])
+            if self.options.with_libjpeg == "libjpeg":
+                self.cpp_info.requires.append("libjpeg::libjpeg")
+            elif self.options.with_libjpeg == "libjpeg-turbo":
+                self.cpp_info.requires.append("libjpeg-turbo::jpeg")
+            elif self.options.with_libjpeg == "mozjpeg":
+                self.cpp_info.requires.append("mozjpeg::libjpeg")
+            if self.options.get_safe("with_x11"):
+                self.cpp_info.requires.append("xorg::x11")
