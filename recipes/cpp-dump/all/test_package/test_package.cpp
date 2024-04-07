@@ -1,8 +1,8 @@
+#include <dump.hpp>
+
 #include <iostream>
 #include <ostream>
 #include <vector>
-
-#include "dump.hpp"
 
 int main() {
   std::clog << std::endl;
