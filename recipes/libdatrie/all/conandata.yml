@@ -1,0 +1,9 @@
+sources:
+  "0.2.13":
+    url: "https://linux.thai.net/pub/ThaiLinux/software/libthai/libdatrie-0.2.13.tar.xz"
+    sha256: "12231bb2be2581a7f0fb9904092d24b0ed2a271a16835071ed97bed65267f4be"
+patches:
+  "0.2.13":
+    - patch_file: "patches/fix-exports.patch"
+      patch_type: "portability"
+      patch_description: "Fix .def exports for Windows"
