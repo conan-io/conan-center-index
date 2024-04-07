@@ -98,9 +98,18 @@ class OpenldapConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, folder))
 
     def package_info(self):
-        self.cpp_info.libs = ["ldap", "lber"]
+        self.cpp_info.components["ldap"].set_property("pkg_config_name", "ldap")
+        self.cpp_info.components["ldap"].libs = ["ldap"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread", "resolv"]
+            self.cpp_info.components["ldap"].system_libs = ["pthread", "resolv"]
+        self.cpp_info.components["ldap"].requires = ["lber", "openssl::ssl", "openssl::crypto"]
+        if self.options.with_cyrus_sasl:
+            self.cpp_info.components["ldap"].requires.append("cyrus-sasl::cyrus-sasl")
+
+        self.cpp_info.components["lber"].set_property("pkg_config_name", "lber")
+        self.cpp_info.components["lber"].libs = ["lber"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["lber"].system_libs = ["pthread"]
 
         # TODO: to remove in conan v2
         bin_path = os.path.join(self.package_folder, "bin")
