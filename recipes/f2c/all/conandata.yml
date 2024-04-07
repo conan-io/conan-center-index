@@ -1,0 +1,19 @@
+sources:
+  "20240312":
+    f2c:
+      url:
+        - "https://github.com/valgur/f2c/releases/download/f2c-20240312/f2c-20240312.tgz"
+        - "https://netlib.org/f2c/src.tgz"
+      sha256: "4d33ef7b67dedf5fc077ec45016cba35421eb36432522e8d8c5b9c374a5d6f99"
+    fc:
+      url:
+        - "https://salsa.debian.org/debian/f2c/-/raw/b17b7c087db97f96ef9f603dcea5424093669799/fc"
+        - "https://github.com/valgur/f2c/releases/download/f2c-20240312/fc"
+        - "https://www.netlib.org/f2c/fc"
+      sha256: "f0dced9b581a5808bd2d0d5e4716997043960a56333d5f4c44b201b870aa0ea8"
+patches:
+  # https://salsa.debian.org/debian/f2c/-/tree/b17b7c087db97f96ef9f603dcea5424093669799/debian/patches
+  - patch_file: "patches/0002-prototype-rmdir.patch"
+  - patch_file: "patches/0004-fc-script-path-and-tmpfile.patch"
+  - patch_file: "patches/0005-sysdep-tmpfiles.patch"
+  - patch_file: "patches/0008-typos.patch"

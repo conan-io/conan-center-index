@@ -1,0 +1,32 @@
+From: "Barak A. Pearlmutter" <barak+git@cs.nuim.ie>
+Date: Wed, 18 Jul 2012 11:15:58 +0200
+Subject: sysdep tmpfiles
+
+---
+ sysdep.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/sysdep.c b/sysdep.c
+index a692b4a..66da0c0 100644
+--- a/sysdep.c
++++ b/sysdep.c
+@@ -96,7 +96,9 @@ Un_link_all(int cdelete)
+ 	if (!debugflag) {
+ 		unlink(c_functions);
+ 		unlink(initfname);
++                unlink(initbname);
+ 		unlink(p1_file);
++                unlink(p1_bakfile);
+ 		unlink(sortfname);
+ 		unlink(blkdfname);
+ 		if (cdelete && coutput)
+@@ -233,6 +235,9 @@ set_tmp_names(Void)
+ #endif /*NO_TEMPDIR*/
+ 		}
+ 	alloc_names();
++        /* What follows is safe if tmpdir is really
++        a private diectory created by us -- otherwise
++        the file could be a sym link somewhere else....*/
+ 	sprintf(c_functions, "%s/f2c%ld_func", tmpdir, pid);
+ 	sprintf(initfname, "%s/f2c%ld_rd", tmpdir, pid);
+ 	sprintf(blkdfname, "%s/f2c%ld_blkd", tmpdir, pid);
