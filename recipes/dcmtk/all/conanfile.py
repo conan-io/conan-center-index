@@ -1,4 +1,6 @@
 import os
+import subprocess
+import sys
 import textwrap
 
 from conan import ConanFile
@@ -114,6 +116,14 @@ class DCMTKConan(ConanFile):
         del self.info.options.builtin_dictionary
         del self.info.options.external_dictionary
 
+    def _can_run(self):
+        result = can_run(self)
+        if not result and self.settings.os == "Macos" and self.settings.arch == "x86_64" and sys.platform == "darwin":
+            # check rosetta is installed & working
+            command = ["arch", "-arch",  "x86_64", "uname", "-m"]
+            result = subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+        return result
+
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
@@ -121,15 +131,15 @@ class DCMTKConan(ConanFile):
             # FIXME: Probable issue with flags, build includes header 'mmintrin.h'
             raise ConanInvalidConfiguration("Cross building to Macos M1 is not supported (yet)")
         if hasattr(self, "settings_build") and cross_building(self) and \
-           self.settings.os == "Macos" and self.settings.arch == "x86_64" and not can_run(self):
-            raise ConanInvalidConfiguration("Cross building to macOS x86_64 is only supported from macOS arm64 using rosetta with 'tools.build.cross_building:can_run=True'")
+           self.settings.os == "Macos" and self.settings.arch == "x86_64" and not self._can_run():
+            raise ConanInvalidConfiguration("Cross building to macOS x86_64 is only supported from macOS arm64 using rosetta")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if cross_building(self) and can_run(self):
+        if cross_building(self) and self._can_run():
             tc.variables["CMAKE_CROSSCOMPILING_EMULATOR"] = ""
         # DICOM Data Dictionaries are required
         tc.variables["CMAKE_INSTALL_DATADIR"] = self._dcm_datadictionary_path.replace("\\", "/")
