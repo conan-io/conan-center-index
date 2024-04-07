@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, save, replace_in_file, chdir, rmdir, rename, copy
+from conan.tools.files import get, save, replace_in_file, chdir, rmdir, rm, rename, copy
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 
@@ -42,6 +42,8 @@ class NetpbmConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            del self.options.with_x11
 
     def configure(self):
         if self.options.shared:
@@ -64,14 +66,10 @@ class NetpbmConan(ConanFile):
             self.requires("libjpeg-turbo/3.0.2")
         elif self.options.with_libjpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.5")
-        if self.options.with_x11:
+        if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
         # TODO: add ghostscript to CCI
         # TODO: add jbigkit to CCI
-
-    def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("Only Linux is currently supported. Contributions are welcome!")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
@@ -111,6 +109,9 @@ class NetpbmConan(ConanFile):
         config.append("DEFAULT_TARGET=nonmerge")
         config.append("LDRELOC=ld --reloc")
 
+        if is_apple_os(self):
+            config.append("LDSHLIB=-shared -dynamiclib -install_name @rpath/libnetpbm.dylib")
+
         def _configure_dependency(name, pkg, lib):
             cpp_info = self.dependencies[pkg].cpp_info.aggregated_components()
             # The file does not need to exist. The build script simply strips 'lib*.a' from the paths.
@@ -127,7 +128,7 @@ class NetpbmConan(ConanFile):
         _configure_dependency("JPEG", str(self.options.with_libjpeg), "jpeg")
         _configure_dependency("JASPER", "jasper", "jasper")
         # _configure_dependency("JBIG", "jbigkit", "jbig")
-        if self.options.with_x11:
+        if self.options.get_safe("with_x11"):
             _use_pkgconfig("X11")
 
         cflags = list(tc.cflags)
@@ -138,6 +139,9 @@ class NetpbmConan(ConanFile):
             cflags += ["-O3", "-ffast-math", "-fno-finite-math-only"]
         if self.options.get_safe("fPIC", True):
             cflags.append("-fPIC")
+        if is_apple_os(self):
+            # For vasprintf
+            cflags.append("-D_DARWIN_C_SOURCE")
         config.append(f"CFLAGS={' '.join(cflags)}")
 
         tc.make_args.extend(config)
@@ -169,16 +173,20 @@ class NetpbmConan(ConanFile):
         for file in ["copyright_summary", "patent_summary", "GPL_LICENSE.txt", "lgpl_v21.txt", "COPYRIGHT.PATENT"]:
             copy(self, file, os.path.join(self.source_folder, "doc"), os.path.join(self.package_folder, "licenses"))
         temp_dir = self.package_path.joinpath("tmp")
+        lib_dir = temp_dir.joinpath("lib")
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
             autotools.make(target="package", args=[f"pkgdir={temp_dir}"])
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            lib_dir = temp_dir.joinpath("lib")
-            if self.options.shared:
+        if self.options.shared:
+            if is_apple_os(self):
+                soname_file = next(lib_dir.glob("libnetpbm.*.*.dylib"))
+                rename(self, soname_file, lib_dir.joinpath("libnetpbm.dylib"))
+                rm(self, "libnetpbm.*.dylib", lib_dir)
+            else:
                 soname_file = next(lib_dir.glob("libnetpbm.so.*")).name
                 self.run(f"ln -s {soname_file} libnetpbm.so", cwd=lib_dir)
-            else:
-                copy(self, "*.a", os.path.join(self.source_folder, "lib"), lib_dir)
+        else:
+            copy(self, "*.a", os.path.join(self.source_folder, "lib"), lib_dir)
         rename(self, os.path.join(temp_dir, "include"), os.path.join(self.package_folder, "include"))
         rename(self, os.path.join(temp_dir, "lib"), os.path.join(self.package_folder, "lib"))
         rename(self, os.path.join(temp_dir, "misc"), os.path.join(self.package_folder, "res"))
@@ -205,5 +213,5 @@ class NetpbmConan(ConanFile):
             self.cpp_info.requires.append("libjpeg-turbo::jpeg")
         elif self.options.with_libjpeg == "mozjpeg":
             self.cpp_info.requires.append("mozjpeg::libjpeg")
-        if self.options.with_x11:
+        if self.options.get_safe("with_x11"):
             self.cpp_info.requires.append("xorg::x11")
