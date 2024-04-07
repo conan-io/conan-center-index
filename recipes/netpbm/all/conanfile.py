@@ -2,7 +2,9 @@ import os
 import shutil
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, save, replace_in_file, chdir, rmdir, rm, rename, copy
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
@@ -78,6 +80,12 @@ class NetpbmConan(ConanFile):
             if self.options.get_safe("with_x11"):
                 self.requires("xorg/system")
             # TODO: add ghostscript to CCI
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows is not supported. Contributions are welcome!")
+        if cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building is not supported")
 
     def build_requirements(self):
         self.tool_requires("make/4.4.1")
