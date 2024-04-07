@@ -212,6 +212,11 @@ class NmosCppConan(ConanFile):
                     else:
                         self.output.warn(f"{self.name} recipe does not handle {property_type} (yet)")
 
+        # until https://github.com/sony/nmos-cpp/commit/9489d84098ddc8cc514b7e4d5afe740dee4518ee
+        # direct dependency on nlohmann_json was missing
+        if Version(self.version) < "cci.20221203":
+            components["json_schema_validator"].setdefault("requires", []).append("nlohmann_json::nlohmann_json")
+
         # Save components informations in json file
         with open(self._components_helper_filepath, "w", encoding="utf-8") as json_file:
             json.dump(components, json_file, indent=4)
