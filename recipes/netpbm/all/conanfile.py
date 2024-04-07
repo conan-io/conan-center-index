@@ -24,12 +24,14 @@ class NetpbmConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "tools": [True, False],
+        "with_libjpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_x11": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "tools": False,
+        "with_libjpeg": "libjpeg",
         "with_x11": True,
     }
 
@@ -52,11 +54,16 @@ class NetpbmConan(ConanFile):
 
     def requirements(self):
         self.requires("jasper/4.2.0")
-        self.requires("libjpeg/9e")
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/4.6.0")
         self.requires("libxml2/2.12.5")
         self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.with_libjpeg == "libjpeg":
+            self.requires("libjpeg/9e")
+        elif self.options.with_libjpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/3.0.2")
+        elif self.options.with_libjpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.5")
         if self.options.with_x11:
             self.requires("xorg/system")
         # TODO: add ghostscript to CCI
@@ -104,12 +111,8 @@ class NetpbmConan(ConanFile):
         config.append("DEFAULT_TARGET=nonmerge")
         config.append("LDRELOC=ld --reloc")
 
-        def _configure_dependency(name, pkg):
+        def _configure_dependency(name, pkg, lib):
             cpp_info = self.dependencies[pkg].cpp_info.aggregated_components()
-            if pkg == "libtiff":
-                lib = "tiff"
-            else:
-                lib = cpp_info.libs[0]
             # The file does not need to exist. The build script simply strips 'lib*.a' from the paths.
             lib_path = os.path.join(cpp_info.libdir, f"lib{lib}.a")
             config.append(f"{name}LIB={lib_path}")
@@ -119,11 +122,11 @@ class NetpbmConan(ConanFile):
             config.append(f"{name}LIB=USE_PKGCONFIG.a")
             config.append(f"{name}HDR_DIR=USE_PKGCONFIG.a")
 
-        _configure_dependency("TIFF", "libtiff")
-        _configure_dependency("PNG", "libpng")
-        _configure_dependency("JPEG", "libjpeg")
-        _configure_dependency("JASPER", "jasper")
-        # _configure_dependency("JBIG", "jbigkit")
+        _configure_dependency("TIFF", "libtiff", "tiff")
+        _configure_dependency("PNG", "libpng", "png")
+        _configure_dependency("JPEG", str(self.options.with_libjpeg), "jpeg")
+        _configure_dependency("JASPER", "jasper", "jasper")
+        # _configure_dependency("JBIG", "jbigkit", "jbig")
         if self.options.with_x11:
             _use_pkgconfig("X11")
 
@@ -187,3 +190,19 @@ class NetpbmConan(ConanFile):
         self.cpp_info.libs = ["netpbm"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
+        self.cpp_info.requires.extend([
+            "jasper::jasper",
+            "libpng::libpng",
+            "libtiff::libtiff",
+            "libxml2::libxml2",
+            "zlib::zlib",
+        ])
+        if self.options.with_libjpeg == "libjpeg":
+            self.cpp_info.requires.append("libjpeg::libjpeg")
+        elif self.options.with_libjpeg == "libjpeg-turbo":
+            self.cpp_info.requires.append("libjpeg-turbo::jpeg")
+        elif self.options.with_libjpeg == "mozjpeg":
+            self.cpp_info.requires.append("mozjpeg::libjpeg")
+        if self.options.with_x11:
+            self.cpp_info.requires.append("xorg::x11")
