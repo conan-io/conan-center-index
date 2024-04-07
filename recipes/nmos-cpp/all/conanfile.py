@@ -127,7 +127,7 @@ class NmosCppConan(ConanFile):
 
         target_content = files.load(self, target_file_path)
 
-        cmake_functions = re.findall(r"(?P<func>add_library|set_target_properties)[\n|\s]*\([\n|\s]*(?P<args>[^)]*)\)", target_content)
+        cmake_functions = re.findall(r"(?P<func>add_executable|add_library|set_target_properties)[\n|\s]*\([\n|\s]*(?P<args>[^)]*)\)", target_content)
         for (cmake_function_name, cmake_function_args) in cmake_functions:
             cmake_function_args = re.split(r"[\s|\n]+", cmake_function_args, maxsplit=2)
 
@@ -140,7 +140,9 @@ class NmosCppConan(ConanFile):
 
             components.setdefault(component_name, {"cmake_target": cmake_target_nonamespace})
 
-            if cmake_function_name == "add_library":
+            if cmake_function_name == "add_executable":
+                components[component_name]["exe"] = True
+            elif cmake_function_name == "add_library":
                 cmake_imported_target_type = cmake_function_args[1]
                 if cmake_imported_target_type in ["STATIC", "SHARED"]:
                     # library filenames are based on the target name by default
@@ -238,6 +240,7 @@ class NmosCppConan(ConanFile):
                 cmake_target = values["cmake_target"]
                 self.cpp_info.components[component_name].names["cmake_find_package"] = cmake_target
                 self.cpp_info.components[component_name].names["cmake_find_package_multi"] = cmake_target
+                self.cpp_info.components[component_name].bindirs = [bindir] if values.get("exe") else []
                 self.cpp_info.components[component_name].libs = values.get("libs", [])
                 self.cpp_info.components[component_name].libdirs = [libdir]
                 self.cpp_info.components[component_name].defines = values.get("defines", [])
