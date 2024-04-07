@@ -62,4 +62,6 @@ class LibevhtpConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Libunrar")
         self.cpp_info.set_property("pkg_config_name", "Libunrar")
         self.cpp_info.libs = ["unrar"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread"]
 
