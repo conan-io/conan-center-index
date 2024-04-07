@@ -16,7 +16,7 @@ class CppDumpConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/philip82148/cpp-dump"
-    topics = ("debug", "dump" "header-only")
+    topics = ("debug", "dump", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
