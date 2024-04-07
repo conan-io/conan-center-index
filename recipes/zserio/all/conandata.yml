@@ -1,0 +1,11 @@
+sources:
+  "2.13.0":
+    runtime:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.13.0/zserio-2.13.0-runtime-libs.zip"
+      sha256: "a720bd3208190f44b232296c11f1a3880154431f2f005e7db8f07ab01c9d235d"
+    compiler:
+      url: "https://github.com/ndsev/zserio/releases/download/v2.13.0/zserio-2.13.0-bin.zip"
+      sha256: "be5cf2a08aa91adac034f12609ea0a697d9f3ef7a00c1c38e6b997f9455dacd4"
+    license:
+      url: "https://raw.githubusercontent.com/ndsev/zserio/v2.13.0/LICENSE"
+      sha256: "7049b75154737fd45754917ba3d1027ad0b00beac15cb8931edaee4de40978ac"
