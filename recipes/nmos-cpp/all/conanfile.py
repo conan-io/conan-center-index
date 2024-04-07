@@ -57,7 +57,6 @@ class NmosCppConan(ConanFile):
         self.requires("openssl/[>=1.1 <4]")
         self.requires("json-schema-validator/2.3.0")
         self.requires("nlohmann_json/3.11.3")
-        self.requires("zlib/[>=1.2.11 <2]")
         if Version(self.version) >= "cci.20240222":
             self.requires("jwt-cpp/0.7.0")
 
@@ -231,7 +230,6 @@ class NmosCppConan(ConanFile):
             libdir = os.path.join(libdir, config_install_dir)
         self.cpp_info.bindirs = [bindir]
         self.cpp_info.libdirs = [libdir]
-        self.cpp_info.requires = ["nlohmann_json::nlohmann_json", "zlib::zlib"]
 
         def _register_components():
             components_json_file = files.load(self, self._components_helper_filepath)
