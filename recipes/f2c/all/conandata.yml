@@ -17,3 +17,7 @@ patches:
   - patch_file: "patches/0004-fc-script-path-and-tmpfile.patch"
   - patch_file: "patches/0005-sysdep-tmpfiles.patch"
   - patch_file: "patches/0008-typos.patch"
+  # CCI
+  - patch_file: "patches/0009-fc-pass-libf2c-flags.patch"
+    patch_type: "conan"
+    patch_description: "Pass libf2c flags to cc in fc"

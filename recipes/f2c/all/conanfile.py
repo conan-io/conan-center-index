@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake
-from conan.tools.files import get, load, save, copy, download, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, copy, download, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 
@@ -36,6 +36,9 @@ class F2cConan(ConanFile):
         del self.info.settings.compiler
         del self.info.options.fc_wrapper
 
+    def requirements(self):
+        self.requires("libf2c/20240130", transitive_headers=True, transitive_libs=True, run=True)
+
     @staticmethod
     def _chmod_plus_x(name):
         if os.name == "posix":
@@ -56,12 +59,8 @@ class F2cConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def _read_license(self):
-        lines = load(self, os.path.join(self.source_folder, "main.c")).splitlines()
-        return "\n".join(lines[1:21]) + "\n"
-
     def package(self):
-        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._read_license())
+        copy(self, "Notice", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         copy(self, "fc", self.source_folder, os.path.join(self.package_folder, "bin"))
@@ -76,12 +75,11 @@ class F2cConan(ConanFile):
 
         if self.options.fc_wrapper:
             fc_path = os.path.join(self.package_folder, "bin", "fc")
-            includedir = os.path.join(self.package_folder, "include")
-            libdir = os.path.join(self.package_folder, "lib")
+            libf2c = self.dependencies.host["libf2c"].cpp_info
             if is_msvc(self):
-                cflags = f"-I{includedir} -link /LIBPATH:{libdir} f2c.lib"
+                cflags = f"-I{libf2c.includedir} -link /LIBPATH:{libf2c.libdir} f2c.lib"
             else:
-                cflags = f"-I{includedir} -L{libdir} -lf2c"
+                cflags = f"-I{libf2c.includedir} -L{libf2c.libdir} -lf2c"
             self.buildenv_info.define_path("FC", fc_path)
             self.buildenv_info.define("CFLAGSF2C", cflags)
             self.env_info.FC = fc_path

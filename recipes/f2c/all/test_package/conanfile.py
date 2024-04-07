@@ -6,19 +6,20 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeToolchain", "VirtualBuildEnv"
+    generators = "CMakeToolchain", "CMakeDeps", "VirtualBuildEnv", "VirtualRunEnv"
     test_type = "explicit"
 
     def layout(self):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires(self.tested_reference_str, visible=False)
+        self.requires(self.tested_reference_str, libs=True, headers=True)
 
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
 
     def build(self):
+        self.run("fc --version")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
