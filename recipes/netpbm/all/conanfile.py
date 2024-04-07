@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, save, replace_in_file, chdir, rmdir, rm, rename, copy
+from conan.tools.files import get, save, replace_in_file, chdir, rmdir, rename, copy
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 
@@ -168,22 +168,23 @@ class NetpbmConan(ConanFile):
     def package(self):
         for file in ["copyright_summary", "patent_summary", "GPL_LICENSE.txt", "lgpl_v21.txt", "COPYRIGHT.PATENT"]:
             copy(self, file, os.path.join(self.source_folder, "doc"), os.path.join(self.package_folder, "licenses"))
-        temp_dir = os.path.join(self.build_folder, "tmp")
+        temp_dir = self.package_path.joinpath("tmp")
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
             autotools.make(target="package", args=[f"pkgdir={temp_dir}"])
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            lib_dir = temp_dir.joinpath("lib")
+            if self.options.shared:
+                soname_file = next(lib_dir.glob("libnetpbm.so.*")).name
+                self.run(f"ln -s {soname_file} libnetpbm.so", cwd=lib_dir)
+            else:
+                copy(self, "*.a", os.path.join(self.source_folder, "lib"), lib_dir)
         rename(self, os.path.join(temp_dir, "include"), os.path.join(self.package_folder, "include"))
         rename(self, os.path.join(temp_dir, "lib"), os.path.join(self.package_folder, "lib"))
         rename(self, os.path.join(temp_dir, "misc"), os.path.join(self.package_folder, "res"))
         if self.options.tools:
             rename(self, os.path.join(temp_dir, "bin"), os.path.join(self.package_folder, "bin"))
         rmdir(self, temp_dir)
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            if self.options.shared:
-                soname_file = next(self.package_path.joinpath("lib").glob("libnetpbm.so.*")).name
-                self.run(f"ln -s {soname_file} libnetpbm.so", cwd=os.path.join(self.package_folder, "lib"))
-            else:
-                copy(self, "*.a", os.path.join(self.source_folder, "lib"), os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "netpbm")
