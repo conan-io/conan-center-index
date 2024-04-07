@@ -1,0 +1,26 @@
+From: "Barak A. Pearlmutter" <barak+git@pearlmutter.net>
+Date: Thu, 9 Jul 2020 12:54:36 +0100
+Subject: largefile_source redefinition
+
+Avoid re#definition of _LARGEFILE{,64}_SOURCE
+---
+ sysdep1.h0 | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/sysdep1.h0 b/sysdep1.h0
+index 29546db..8239843 100644
+--- a/sysdep1.h0
++++ b/sysdep1.h0
+@@ -43,8 +43,12 @@
+ #ifndef OFF_T
+ #define OFF_T off64_t
+ #endif
++#ifndef _LARGEFILE_SOURCE
+ #define _LARGEFILE_SOURCE
++#endif
++#ifndef _LARGEFILE64_SOURCE
+ #define _LARGEFILE64_SOURCE
++#endif
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #define FOPEN fopen64

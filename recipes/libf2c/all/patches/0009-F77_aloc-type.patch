@@ -1,0 +1,84 @@
+From: "Barak A. Pearlmutter" <barak+git@pearlmutter.net>
+Date: Thu, 9 Jul 2020 12:48:57 +0100
+Subject: F77_aloc type
+
+Be consistent about type of F77_aloc().  Ultimately it calls
+malloc(size_t) so just use size_t for the length.
+
+See bugs.debian.org/748989 which says:
+
+... research compiler tool-chain ... which permits extended reporting
+on type inconsistencies at link time.
+
+[...]
+gcc -shared -Wl,-soname,libf2c_i2.so.2\
+                 -o libf2c_i2.so.2.1 *.o -lc -lm
+
+error: conflicting function declarations "F77_aloc"
+old definition in module f77_aloc file f77_aloc.c line 29
+char * (signed int Len, const char *whence)
+new definition in module getenv_ file getenv_.c line 11
+char * (signed short int, const char *)
+debian/make_lib:4: recipe for target 'all' failed
+make[1]: *** [all] Error 64
+
+The original declarations can be reviewed here:
+
+http://sources.debian.net/libf2c2/20090411-2/f77_aloc.c?hl=14#L14
+http://sources.debian.net/libf2c2/20090411-2/getenv_.c?hl=11#L11
+
+It seems that the latter should be adjusted, replacing ftnlen by integer. One
+may hope that the remaining bytes (for all systems with sizeof(short
+int)<sizeof(int)) happen to be zero - but on big endian systems this should
+yield some fun. (Not.)
+---
+ f77_aloc.c | 12 +++++-------
+ getenv_.c  |  2 +-
+ 2 files changed, 6 insertions(+), 8 deletions(-)
+
+diff --git a/f77_aloc.c b/f77_aloc.c
+index f536099..02ac05e 100644
+--- a/f77_aloc.c
++++ b/f77_aloc.c
+@@ -11,7 +11,7 @@ extern char *malloc();
+ extern void exit_();
+ 
+  char *
+-F77_aloc(Len, whence) integer Len; char *whence;
++F77_aloc(Len, whence) size_t Len; char *whence;
+ #else
+ #include "stdlib.h"
+ #ifdef __cplusplus
+@@ -26,15 +26,13 @@ extern void exit_(integer*);
+ #endif
+ 
+  char *
+-F77_aloc(integer Len, const char *whence)
++F77_aloc(size_t Len, const char *whence)
+ #endif
+ {
+ 	char *rv;
+-	unsigned int uLen = (unsigned int) Len;	/* for K&R C */
+-
+-	if (!(rv = (char*)malloc(uLen))) {
+-		fprintf(stderr, "malloc(%u) failure in %s\n",
+-			uLen, whence);
++	if (!(rv = (char*)malloc(Len))) {
++		fprintf(stderr, "malloc(%ld) failure in %s\n",
++			(long)Len, whence);
+ 		exit_(&memfailure);
+ 		}
+ 	return rv;
+diff --git a/getenv_.c b/getenv_.c
+index b615a37..0859460 100644
+--- a/getenv_.c
++++ b/getenv_.c
+@@ -8,7 +8,7 @@ extern char *F77_aloc(), *getenv();
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+-extern char *F77_aloc(ftnlen, const char*);
++extern char *F77_aloc(size_t, const char*);
+ #endif
+ 
+ /*

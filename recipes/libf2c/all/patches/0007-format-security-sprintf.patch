@@ -1,0 +1,38 @@
+From: "Barak A. Pearlmutter" <barak+git@pearlmutter.net>
+Date: Sun, 25 Feb 2018 16:51:35 +0000
+Subject: format security sprintf
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Squash potential buffer overflow noticed by GCC.  Note that even if
+this is not an actual danger, a false positive can cause FTBFS in a
+high security environment.
+
+open.c: In function ‘fk_open’:
+open.c:222:28: warning: ‘%ld’ directive writing between 1 and 11 bytes into a region of size 5 [-Wformat-overflow=]
+  (void) sprintf(nbuf,"fort.%ld",(long)n);
+                            ^~~
+open.c:222:22: note: directive argument in the range [-2147483648, 2147483647]
+  (void) sprintf(nbuf,"fort.%ld",(long)n);
+                      ^~~~~~~~~~
+open.c:222:2: note: ‘sprintf’ output between 7 and 17 bytes into a destination of size 10
+  (void) sprintf(nbuf,"fort.%ld",(long)n);
+  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+ open.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/open.c b/open.c
+index a06428d..288990c 100644
+--- a/open.c
++++ b/open.c
+@@ -282,7 +282,7 @@ fk_open(seq,fmt,n) ftnint n;
+ #else
+ fk_open(int seq, int fmt, ftnint n)
+ #endif
+-{	char nbuf[10];
++{	char nbuf[17];
+ 	olist a;
+ 	(void) sprintf(nbuf,"fort.%ld",(long)n);
+ 	a.oerr=1;

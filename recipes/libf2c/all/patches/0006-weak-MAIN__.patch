@@ -1,0 +1,41 @@
+From: Christian Seiler <christian@iwakd.de>
+Date: Fri, 3 Jun 2016 19:26:07 +0200
+Subject: weak MAIN__
+
+Make MAIN__ a weak symbol
+
+Make MAIN__ a weak symbol, to make sure that non-f2c binaries can link
+against libraries created by it. Also make main() a weak symbol, just
+in case, because we really don't want to override a C program's main
+routine.
+
+Bug-Debian: https://bugs.debian.org/826253
+---
+ main.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/main.c b/main.c
+index d95fdc9..3825bf7 100644
+--- a/main.c
++++ b/main.c
+@@ -53,6 +53,20 @@ extern int MAIN__(void);
+ #define Int int
+ #endif
+ 
++/* Make main() a weak symbol. */
++int main(int argc, char **argv) __attribute__((weak));
++
++/* Create dummy MAIN__ function and make MAIN__ a weak alias to it.
++ * If linked against a program that exports MAIN__, i.e. one compiled
++ * by f2c, this MAIN__ will resolve to the program's MAIN__ instead,
++ * whereas normal C programs will still be able to link against this
++ * library. */
++static int weak_MAIN__()
++{
++  return -1;
++}
++extern int MAIN__() __attribute__((weak, alias("weak_MAIN__")));
++
+ static VOID sigfdie(Sigarg)
+ {
+ Use_Sigarg;

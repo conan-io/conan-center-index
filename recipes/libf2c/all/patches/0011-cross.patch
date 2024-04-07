@@ -1,0 +1,30 @@
+From: Helmut Grohne <helmut.grohne@intenta.de>
+Date: Mon, 6 Jul 2020 11:24:51 +0200
+Subject: cross
+
+The file makefile.u hard codes the build architecture ld, which needs
+to be made substitutable for cross compilation.
+---
+ makefile.u | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/makefile.u b/makefile.u
+index f78ff4b..808bf8b 100644
+--- a/makefile.u
++++ b/makefile.u
+@@ -14,13 +14,14 @@
+ 
+ .SUFFIXES: .c .o
+ CC = cc
++LD ?= ld
+ SHELL = /bin/sh
+ CFLAGS = -O
+ 
+ # compile, then strip unnecessary symbols
+ .c.o:
+ 	$(CC) -c -DSkip_f2c_Undefs $(CFLAGS) $*.c
+-	ld -r -x -o $*.xxx $*.o
++	$(LD) -r -x -o $*.xxx $*.o
+ 	mv $*.xxx $*.o
+ ## Under Solaris (and other systems that do not understand ld -x),
+ ## omit -x in the ld line above.
