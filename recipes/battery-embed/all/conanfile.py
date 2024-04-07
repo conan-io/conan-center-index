@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get
+from conan.tools.cmake import cmake_layout
 from conan.tools.scm import Version
 import os
 
@@ -32,12 +33,12 @@ class BatteryEmbedConan(ConanFile):
         }
 
     def export_sources(self):
-        export_conandata_patches(self)
+        copy(self, "embed.cmake", src=self.recipe_folder, dst=self.export_sources_folder)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if Version(self.version) >= "1.2.0" and self.settings.compiler == "apple-clang":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support apple-clang due to lack of jthread and stop_token.")
-
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -55,10 +56,11 @@ class BatteryEmbedConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
-        apply_conandata_patches(self)
+        copy(self, "embed.cmake", os.path.join(self.source_folder, os.pardir), self.recipe_folder)
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "embed.cmake", self.recipe_folder, os.path.join(self.package_folder, "lib", "cmake"))
         copy(self, "CMakeLists.txt", self.source_folder, os.path.join(self.package_folder, "lib", "cmake", "battery-embed"))
 
     def package_info(self):
@@ -66,7 +68,8 @@ class BatteryEmbedConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.includedirs = []
 
-        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "battery-embed", "CMakeLists.txt")])
+        self.cpp_info.set_property("cmake_target_name", "battery::embed")
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "embed.cmake")])
 
-        if Version(self.version) >= "1.2.0" and self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
