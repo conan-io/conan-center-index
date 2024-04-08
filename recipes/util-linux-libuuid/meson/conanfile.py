@@ -92,7 +92,6 @@ class UtilLinuxLibuuidConan(ConanFile):
         tc.project_options["build-libuuid"] = "enabled"
         # Temporary test.
         tc.project_options["build-libblkid"] = "enabled"
-        tc.project_options["build-libmount"] = "enabled"
         # Enable libutil for older versions of glibc which still provide an actual libutil library.
         tc.project_options["libutil"] = "enabled"
         tc.project_options["program-tests"] = False
