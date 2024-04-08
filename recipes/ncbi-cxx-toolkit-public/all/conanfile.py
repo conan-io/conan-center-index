@@ -1,7 +1,7 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rmdir
 from conan.tools.build import check_min_cppstd, cross_building, can_run
 from conan.tools.scm import Version
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
@@ -218,6 +218,8 @@ class NcbiCxxToolkit(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        rmdir(self, os.path.join(self.source_folder, "src", "build-system", "cmake", "unused"))
+        rmdir(self, os.path.join(self.source_folder, "src", "build-system", "cmake", "modules"))
         if self.settings.os == "Macos":
             grpc = os.path.join(self.source_folder, "src", "build-system", "cmake", "CMake.NCBIptb.grpc.cmake")
             replace_in_file(self, grpc,

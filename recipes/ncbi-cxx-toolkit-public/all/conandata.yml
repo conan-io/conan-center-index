@@ -1,16 +1,4 @@
 sources:
-  "27.0.0":
-    url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-27.0.0.tar.gz"
-    sha256: "c8fb3f99c6fce4f170b381f3a7789c76a2ff1c23c094c9852e2e3de1fdc57277"
   "28.0.0":
     url: "https://github.com/ncbi/ncbi-cxx-toolkit-public/archive/refs/tags/release-28.0.0.tar.gz"
     sha256: "f0300db41849bbaf690c1dfb9080f3e441fc617a004283acfb2b7b25b32ff885"
-
-patches:
-  "27.0.0":
-    - patch_file: "patches/27.0.0-compiler.patch"
-      patch_description: "Corrected version check of GCC compiler"
-      patch_type: "portability"
-    - patch_file: "patches/27.0.0-install.patch"
-      patch_description: "Replaced hard-coded configuration with cmake generator expression"
-      patch_type: "conan"
