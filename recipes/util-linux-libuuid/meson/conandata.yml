@@ -12,3 +12,4 @@ patches:
       patch_description: "Don't build libmount when it is disabled"
       patch_type: "portability"
       patch_source: "https://github.com/util-linux/util-linux/pull/2893"
+    - patch_file: "patches/2.40-0002-Merge-branch-meson-optional-rt-of-https-github.com-j.patch"
