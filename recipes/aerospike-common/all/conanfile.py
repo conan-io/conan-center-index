@@ -49,11 +49,11 @@ class AerospikeCommonConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanException(f"Windows os is not supported")
-        if str(self.settings.compiler) not in self._compiler_arch_flags.keys():
-            raise ConanException(f"Unsupported compiler: {self.settings.compiler}")
-        if str(self.settings.arch) not in self._compiler_arch_flags[str(self.settings.compiler)].keys():
+        if str(self.settings_build.compiler) not in self._compiler_arch_flags.keys():
+            raise ConanException(f"Unsupported compiler: {self.settings_build.compiler}")
+        if str(self.settings_build.arch) not in self._compiler_arch_flags[str(self.settings_build.compiler)].keys():
             raise ConanException(
-                f"Unsupported arch {self.settings.arch} for compiler {self.settings.compiler}"
+                f"Unsupported arch {self.settings.arch} for compiler {self.settings_build.compiler}"
             )
 
     def configure(self):
@@ -87,7 +87,7 @@ class AerospikeCommonConan(ConanFile):
         if self.options.shared:
             ld_flags = f"LDFLAGS='{self._get_ld_flags()}'"
 
-        cc_flags = f"EXT_CFLAGS='{include_flags} {self._compiler_arch_flags[str(self.settings.compiler)][str(self.settings.arch)]}'"
+        cc_flags = f"EXT_CFLAGS='{include_flags} {self._compiler_arch_flags[str(self.settings_build.compiler)][str(self.settings_build.arch)]}'"
         self.run(
             f"make TARGET_BASE='target' {ld_flags} {cc_flags} -C {self.source_path}"
         )
