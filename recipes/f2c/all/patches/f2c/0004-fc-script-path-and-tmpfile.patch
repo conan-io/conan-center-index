@@ -19,7 +19,7 @@ index 1f71e59..46d13c7 100644
  
  # f77-style shell script to compile and load fortran, C, and assembly codes
  
-@@ -80,12 +80,13 @@ PATH=/usr/local/bin:/bin:/usr/bin
+@@ -80,12 +80,18 @@ PATH=/usr/local/bin:/bin:/usr/bin
  
  #		-U def		passed to C compiler (for .c files)
  #				or to cpp (for .F files) to remove def
@@ -29,14 +29,19 @@ index 1f71e59..46d13c7 100644
  
 -s=/tmp/stderr_$$
 -t=/tmp/f77_$$.o
-+s=`tempfile --prefix=stderr` || { echo "$0: Cannot create temporary file" ; exit 1; }
-+t=`tempfile --suffix=.o --prefix=f77` || { echo "$0: Cannot create temporary file" ; exit 1; }
++if command -v tempfile >/dev/null; then
++    s=`tempfile --prefix=stderr` || { echo "$0: Cannot create temporary file" ; exit 1; }
++    t=`tempfile --suffix=.o --prefix=f77` || { echo "$0: Cannot create temporary file" ; exit 1; }
++else
++    s=/tmp/stderr_$$
++    t=/tmp/f77_$$.o
++fi
 +trap "rm -f $s $t; exit \$rc" 0
 +
  ### On some systems (e.g., IRIX), -common prevents complaints
  ### about multiple definitions of COMMON blocks.
  #CC=${CC_f2c:-'cc -common'}
-@@ -94,7 +95,7 @@ EFL=${EFL:-efl}
+@@ -94,7 +100,7 @@ EFL=${EFL:-efl}
  EFLFLAGS=${EFLFLAGS:-'system=portable deltastno=10'}
  RATFOR=${RATFOR:-ratfor}
  RFLAGS=${RFLAGS:-'-6&'}
@@ -45,7 +50,7 @@ index 1f71e59..46d13c7 100644
  show_fc_help=0
  case $1 in
  	--help)		show_fc_help=1;;
-@@ -116,14 +117,11 @@ case $show_fc_help in
+@@ -116,14 +122,11 @@ case $show_fc_help in
  F2CFLAGS=${F2CFLAGS:='-ARw8 -Nn802 -Nq300 -Nx400'}
  CPP=${CPP:-/lib/cpp}
  rc=0
@@ -60,7 +65,7 @@ index 1f71e59..46d13c7 100644
  OFILES=
  trapuv=
  strip=
-@@ -358,8 +356,8 @@ done
+@@ -358,8 +361,8 @@ done
  
  case $cOPT in 2)
  #	case $trapuv in 1) OFILES="$OFILES -lfpe";; esac

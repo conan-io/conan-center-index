@@ -1,0 +1,17 @@
+--- fc
++++ fc
+@@ -95,12 +95,12 @@
+ ### On some systems (e.g., IRIX), -common prevents complaints
+ ### about multiple definitions of COMMON blocks.
+ #CC=${CC_f2c:-'cc -common'}
+-CC=${CC_f2c:-'cc'}
++CC=${CC_f2c:-${CC:-'cc'}}
+ EFL=${EFL:-efl}
+ EFLFLAGS=${EFLFLAGS:-'system=portable deltastno=10'}
+ RATFOR=${RATFOR:-ratfor}
+ RFLAGS=${RFLAGS:-'-6&'}
+-F2C=${F2C:-/usr/bin/f2c}
++F2C=${F2C:-f2c}
+ show_fc_help=0
+ case $1 in
+ 	--help)		show_fc_help=1;;

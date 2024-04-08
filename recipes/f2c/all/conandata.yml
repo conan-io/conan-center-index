@@ -32,6 +32,10 @@ patches:
       base_path: "f2c"
       patch_type: "conan"
       patch_description: "Pass libf2c flags to cc in fc"
+    - patch_file: "patches/f2c/0010-fc-respect-CC-envvar.patch"
+      base_path: "f2c"
+      patch_type: "conan"
+      patch_description: "Respect CC environment variable"
 
     # https://salsa.debian.org/debian/libf2c2/-/tree/7de354efec5312e15deab83affdaa620ae75849a/debian/patches
     - patch_file: "patches/libf2c/0003-C-tweaks.patch"

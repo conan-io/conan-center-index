@@ -4,10 +4,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMakeToolchain, CMake
-from conan.tools.files import get, copy, download, export_conandata_patches, apply_conandata_patches, chdir, mkdir
+from conan.tools.files import get, copy, download, export_conandata_patches, apply_conandata_patches, chdir, mkdir, \
+    rename, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, NMakeToolchain, VCVars
+from conan.tools.microsoft import is_msvc, NMakeToolchain, VCVars, unix_path
 
 required_conan_version = ">=1.54.0"
 
@@ -103,8 +104,6 @@ class F2cConan(ConanFile):
 
     @property
     def _target(self):
-        if is_msvc(self):
-            return None
         if not self.options.shared:
             return "static"
         if is_apple_os(self):
@@ -129,6 +128,14 @@ class F2cConan(ConanFile):
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "f2c"))
         cmake.build()
 
+        if is_msvc(self):
+            fc = os.path.join(self.source_folder, "f2c", "fc")
+            # '-u __MAIN' is not understood correctly by automake wrapper and cl
+            replace_in_file(self, fc, " -u MAIN__", "")
+            replace_in_file(self, fc, '.o"', '.obj"')
+            replace_in_file(self, fc, "`.o", "`.obj")
+            replace_in_file(self, fc, "-lf2c -lm", "-lf2c")
+
     def build(self):
         apply_conandata_patches(self)
         self._build_libf2c()
@@ -146,6 +153,8 @@ class F2cConan(ConanFile):
         libf2c_dir = os.path.join(self.source_folder, "libf2c")
         if is_msvc(self):
             copy(self, "vcf2c.lib", libf2c_dir, os.path.join(self.package_folder, "lib"))
+            rename(self, os.path.join(self.package_folder, "lib", "vcf2c.lib"),
+                   os.path.join(self.package_folder, "lib", "f2c.lib"))
         elif not self.options.shared:
             copy(self, "libf2c.a", libf2c_dir, os.path.join(self.package_folder, "lib"))
         elif is_apple_os(self):
@@ -157,27 +166,27 @@ class F2cConan(ConanFile):
         copy(self, "f2c.h", libf2c_dir, os.path.join(self.package_folder, "include"))
 
     def package_info(self):
-        self.cpp_info.libs = ["vcf2c" if is_msvc(self) else "f2c"]
+        self.cpp_info.libs = ["f2c"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
 
         f2c_path = os.path.join(self.package_folder, "bin", "f2c")
         self.buildenv_info.define_path("F2C", f2c_path)
 
+        fc_path = os.path.join(self.package_folder, "bin", "fc")
         if self.options.fc_wrapper:
-            fc_path = os.path.join(self.package_folder, "bin", "fc")
-            includedir = os.path.join(self.package_folder, "include")
-            libdir = os.path.join(self.package_folder, "lib")
-            if is_msvc(self):
-                cflags = f"-I{includedir} -link /LIBPATH:{libdir} vcf2c.lib"
-            else:
-                cflags = f"-I{includedir} -L{libdir} -lf2c"
             self.buildenv_info.define_path("FC", fc_path)
-            self.buildenv_info.define("CFLAGSF2C", cflags)
             self.env_info.FC = fc_path
-            self.env_info.CFLAGSF2C = cflags
+
+        includedir = unix_path(self, os.path.join(self.package_folder, "include"))
+        libdir = unix_path(self, os.path.join(self.package_folder, "lib"))
+        cflags = f"-I{includedir} -L{libdir} -lf2c"
+        if is_msvc(self):
+            cflags += " -DMAIN__=main"
+        self.buildenv_info.define("CFLAGSF2C", cflags)
 
         # TODO: Legacy, to be removed on Conan 2.0
         bin_folder = os.path.join(self.package_folder, "bin")
         self.env_info.PATH.append(bin_folder)
         self.env_info.F2C = f2c_path
+        self.env_info.CFLAGSF2C = cflags
