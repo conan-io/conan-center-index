@@ -76,9 +76,6 @@ class DbusConan(ConanFile):
         if not self.options.get_safe("message_bus"):
             self.options.rm_safe("dbus_user")
 
-    def package_id(self):
-        del self.info.options.with_glib
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -95,6 +92,7 @@ class DbusConan(ConanFile):
             self.requires("xorg/system", visible=False)
 
     def package_id(self):
+        del self.info.options.with_glib
         # The dbus_user option only effects the installation of dbus during the package method.
         # Otherwise, it only appears in the system.conf file in the package.
         self.info.options.rm_safe("dbus_user")
@@ -103,7 +101,7 @@ class DbusConan(ConanFile):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 7:
             raise ConanInvalidConfiguration(f"{self.ref} requires at least gcc 7.")
         if self.options.with_glib != "deprecated":
-            raise ConanInvalidConfiguration(f"with_glib option is deprecated and should not be used - the option had no effect.")
+            raise ConanInvalidConfiguration("with_glib option is deprecated and should not be used - the option had no effect.")
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.0")
