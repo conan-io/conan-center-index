@@ -4,8 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMakeToolchain, CMake
-from conan.tools.files import get, copy, download, export_conandata_patches, apply_conandata_patches, chdir, mkdir, \
-    rename, replace_in_file
+from conan.tools.files import get, copy, download, export_conandata_patches, apply_conandata_patches, chdir, mkdir, rename, replace_in_file, load, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, NMakeToolchain, VCVars, unix_path
@@ -112,15 +111,14 @@ class F2cConan(ConanFile):
 
     def _build_libf2c(self):
         with chdir(self, os.path.join(self.source_folder, "libf2c")):
+            if self.options.cxx_support:
+                # Do the 'make hadd' command here, since it is missing in the .vc makefile
+                # cat f2c.h0 f2ch.add >f2c.h
+                save(self, "f2c.h", load(self, "f2c.h0") + load(self, "f2ch.add"))
             if is_msvc(self):
-                # FIXME: hadd is not available in makefile.vc
-                # if self.options.cxx_support:
-                #     self.run("nmake /f makefile.vc hadd")
                 self.run("nmake /f makefile.vc")
             else:
                 autotools = Autotools(self)
-                if self.options.cxx_support:
-                    autotools.make(args=["-f", "makefile.u"], target="hadd")
                 autotools.make(args=["-f", "makefile.u"], target=self._target)
 
     def _build_f2c(self):
