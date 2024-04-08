@@ -1,0 +1,27 @@
+From f23f975a2360449f0943e55501232eafd0043e65 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Mon, 8 Apr 2024 12:06:43 -0500
+Subject: [PATCH] Add patch to workaround alias on macOS
+
+---
+ libuuid/src/uuid_time.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/libuuid/src/uuid_time.c b/libuuid/src/uuid_time.c
+index 9b415b3ee7..df0478e190 100644
+--- a/libuuid/src/uuid_time.c
++++ b/libuuid/src/uuid_time.c
+@@ -85,6 +85,10 @@ time_t __uuid_time(const uuid_t uu, struct timeval *ret_tv)
+ }
+ #if defined(__USE_TIME_BITS64) && defined(__GLIBC__)
+ extern time_t uuid_time64(const uuid_t uu, struct timeval *ret_tv) __attribute__((weak, alias("__uuid_time")));
++#elif defined(__clang__) && defined(__APPLE__)
++__asm__(".globl _uuid_time");
++__asm__(".set _uuid_time, ___uuid_time");
++extern time_t uuid_time(const uuid_t uu, struct timeval *ret_tv);
+ #else
+ extern time_t uuid_time(const uuid_t uu, struct timeval *ret_tv) __attribute__((weak, alias("__uuid_time")));
+ #endif
+-- 
+2.44.0
+

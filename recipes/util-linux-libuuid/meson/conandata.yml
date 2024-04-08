@@ -13,3 +13,5 @@ patches:
       patch_type: "portability"
       patch_source: "https://github.com/util-linux/util-linux/pull/2893"
     - patch_file: "patches/2.40-0002-Merge-branch-meson-optional-rt-of-https-github.com-j.patch"
+    - patch_file: "patches/2.40-0003-meson-Only-use-the-version-script-linker-flag-where-.patch"
+    - patch_file: "patches/2.40-0004-Add-patch-to-workaround-alias-on-macOS.patch"
