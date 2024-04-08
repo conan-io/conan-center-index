@@ -115,6 +115,8 @@ class DbusConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
         tc = MesonToolchain(self)
+        if self.settings.os == "Windows":
+            tc.project_options["prefix"] = self.package_folder.replace("\\", "/")
         tc.project_options["asserts"] = not is_apple_os(self)
         tc.project_options["checks"] = False
         tc.project_options["datadir"] = os.path.join(self.package_folder, "res", "share")
