@@ -2,27 +2,13 @@ sources:
   "2.40":
     # Official release tarball is missing meson.build files, so use GitHub archive.
     # Refer to https://github.com/util-linux/util-linux/issues/2875.
-    url: "https://github.com/util-linux/util-linux/archive/refs/tags/v2.40.tar.gz"
-    sha256: "f7ff8573289313e38ee3378cbc2938f34444a8cb546e1236e46151834be69784"
+    # url: "https://github.com/util-linux/util-linux/archive/refs/tags/v2.40.tar.gz"
+    # sha256: "f7ff8573289313e38ee3378cbc2938f34444a8cb546e1236e46151834be69784"
+    url: "https://github.com/util-linux/util-linux/archive/5de7172a3e59b6861bff0b7baa6f0cad321ab3ff.tar.gz"
+    sha256: "1846be419adda068e9e69f969c42ce3ca9ef2f0332f6edda60cb2ac24a07001f"
 patches:
   "2.40":
-    - patch_file: "patches/2.40-0001-meson-Only-require-the-crypt-library-when-necessary.patch"
-      patch_description: "Only require the crypt library when necessary"
-      patch_type: "portability"
-      patch_source: "https://github.com/util-linux/util-linux/pull/2877"
-    - patch_file: "patches/2.40-0002-meson-Add-build-lsfd-option-and-make-rt-dependency-o.patch"
-      patch_description: "Fix dependency on the rt library"
-      patch_type: "portability"
-      patch_source: "https://github.com/util-linux/util-linux/pull/2879"
-    - patch_file: "patches/2.40-0003-meson-Fix-false-positive-detection-of-mempcpy-on-mac.patch"
-      patch_description: "Fix invalid detection of mempcpy on macOS"
-      patch_type: "portability"
-      patch_source: "https://github.com/util-linux/util-linux/pull/2881"
-    - patch_file: "patches/2.40-0004-meson-Don-t-define-HAVE_ENVIRON_DECL-when-environ-is.patch"
-      patch_description: "Fix declaration of environ when it is not available"
-      patch_type: "portability"
-      patch_source: "https://github.com/util-linux/util-linux/pull/2885"
-    - patch_file: "patches/2.40-0005-meson-Only-build-libmount-when-required.patch"
+    - patch_file: "patches/2.40-0001-Merge-branch-meson-make-libmount-optional-of-https-g.patch"
       patch_description: "Don't build libmount when it is disabled"
       patch_type: "portability"
       patch_source: "https://github.com/util-linux/util-linux/pull/2893"
