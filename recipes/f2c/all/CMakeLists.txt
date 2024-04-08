@@ -2,11 +2,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(f2c C)
 
-if(MSVC)
-    # https://github.com/valgur/f2c/blob/20240312/makefile.vc#L7
-    add_compile_definitions(-DNO_LONG_LONG)
-endif()
-
 # Configure systep.h. No need to define NO_MKDTEMP or NO_MKSTEMP on modern systems.
 file(WRITE sysdep.hd "")
 

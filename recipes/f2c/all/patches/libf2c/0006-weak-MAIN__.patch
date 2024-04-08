@@ -10,6 +10,8 @@ in case, because we really don't want to override a C program's main
 routine.
 
 Bug-Debian: https://bugs.debian.org/826253
+
+Adjusted for CCI to disable this for MSVC, as it has no equivalent attribute.
 ---
  main.c | 14 ++++++++++++++
  1 file changed, 14 insertions(+)
@@ -18,10 +20,11 @@ diff --git a/main.c b/main.c
 index d95fdc9..3825bf7 100644
 --- a/main.c
 +++ b/main.c
-@@ -53,6 +53,20 @@ extern int MAIN__(void);
+@@ -53,6 +53,22 @@ extern int MAIN__(void);
  #define Int int
  #endif
  
++#ifndef _MSC_VER
 +/* Make main() a weak symbol. */
 +int main(int argc, char **argv) __attribute__((weak));
 +
@@ -35,6 +38,7 @@ index d95fdc9..3825bf7 100644
 +  return -1;
 +}
 +extern int MAIN__() __attribute__((weak, alias("weak_MAIN__")));
++#endif
 +
  static VOID sigfdie(Sigarg)
  {

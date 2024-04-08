@@ -1,14 +1,16 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMakeToolchain, CMake
 from conan.tools.files import get, copy, download, export_conandata_patches, apply_conandata_patches, chdir, mkdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, NMakeToolchain, VCVars
 
 required_conan_version = ">=1.54.0"
+
 
 class F2cConan(ConanFile):
     name = "f2c"
@@ -33,10 +35,6 @@ class F2cConan(ConanFile):
         "fc_wrapper": True,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -56,6 +54,10 @@ class F2cConan(ConanFile):
 
     def package_id(self):
         del self.info.options.fc_wrapper
+
+    def validate(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("shared builds are not supported on Windows")
 
     @staticmethod
     def _chmod_plus_x(name):
@@ -78,27 +80,26 @@ class F2cConan(ConanFile):
         tc.generate()
 
         # libf2c
-        tc = AutotoolsToolchain(self)
-        defines = list(tc.defines)
-        if self.settings.os == "Linux":
-            defines.append("NON_UNIX_STDIO")
-        elif self.settings.os in ["FreeBSD", "NetBSD", "OpenBSD", "SunOS"]:
-            defines.append("USE_STRLEN")
-        cflags = list(tc.cflags)
-        if self.options.get_safe("fPIC", True):
-            cflags.append("-fPIC")
-        cflags += [f"-D{d}" for d in defines]
-        tc.make_args += [
-            f"CFLAGS={' '.join(cflags)}",
-            f"LDFLAGS={' '.join(tc.ldflags)}"
-        ]
-        tc.generate()
-
-    @property
-    def _makefile(self):
         if is_msvc(self):
-            return "makefile.vc"
-        return "makefile.u"
+            VCVars(self).generate()
+            tc = NMakeToolchain(self)
+            tc.generate()
+        else:
+            tc = AutotoolsToolchain(self)
+            defines = list(tc.defines)
+            if self.settings.os == "Linux":
+                defines.append("NON_UNIX_STDIO")
+            elif not is_apple_os(self) and self.settings.os != "Windows":
+                defines.append("USE_STRLEN")
+            cflags = list(tc.cflags)
+            if self.options.get_safe("fPIC", True):
+                cflags.append("-fPIC")
+            cflags += [f"-D{d}" for d in defines]
+            tc.make_args += [
+                f"CFLAGS={' '.join(cflags)}",
+                f"LDFLAGS={' '.join(tc.ldflags)}"
+            ]
+            tc.generate()
 
     @property
     def _target(self):
@@ -112,10 +113,16 @@ class F2cConan(ConanFile):
 
     def _build_libf2c(self):
         with chdir(self, os.path.join(self.source_folder, "libf2c")):
-            autotools = Autotools(self)
-            if self.options.cxx_support:
-                autotools.make(args=["-f", self._makefile], target="hadd")
-            autotools.make(args=["-f", self._makefile], target=self._target)
+            if is_msvc(self):
+                # FIXME: hadd is not available in makefile.vc
+                # if self.options.cxx_support:
+                #     self.run("nmake /f makefile.vc hadd")
+                self.run("nmake /f makefile.vc")
+            else:
+                autotools = Autotools(self)
+                if self.options.cxx_support:
+                    autotools.make(args=["-f", "makefile.u"], target="hadd")
+                autotools.make(args=["-f", "makefile.u"], target=self._target)
 
     def _build_f2c(self):
         cmake = CMake(self)
@@ -124,11 +131,11 @@ class F2cConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        self._build_f2c()
         self._build_libf2c()
+        self._build_f2c()
 
     def package(self):
-        copy(self, "Notice", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "Notice", os.path.join(self.source_folder, "f2c"), os.path.join(self.package_folder, "licenses"))
 
         #f2c
         cmake = CMake(self)
@@ -138,7 +145,7 @@ class F2cConan(ConanFile):
         # libf2c
         libf2c_dir = os.path.join(self.source_folder, "libf2c")
         if is_msvc(self):
-            pass
+            copy(self, "vcf2c.lib", libf2c_dir, os.path.join(self.package_folder, "lib"))
         elif not self.options.shared:
             copy(self, "libf2c.a", libf2c_dir, os.path.join(self.package_folder, "lib"))
         elif is_apple_os(self):
@@ -150,7 +157,7 @@ class F2cConan(ConanFile):
         copy(self, "f2c.h", libf2c_dir, os.path.join(self.package_folder, "include"))
 
     def package_info(self):
-        self.cpp_info.libs = ["f2c"]
+        self.cpp_info.libs = ["vcf2c" if is_msvc(self) else "f2c"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
 
@@ -162,7 +169,7 @@ class F2cConan(ConanFile):
             includedir = os.path.join(self.package_folder, "include")
             libdir = os.path.join(self.package_folder, "lib")
             if is_msvc(self):
-                cflags = f"-I{includedir} -link /LIBPATH:{libdir} f2c.lib"
+                cflags = f"-I{includedir} -link /LIBPATH:{libdir} vcf2c.lib"
             else:
                 cflags = f"-I{includedir} -L{libdir} -lf2c"
             self.buildenv_info.define_path("FC", fc_path)

@@ -15,7 +15,7 @@ index 93a1e5b..a692b4a 100644
  #include "defs.h"
  #include "usignal.h"
 +#include <stdlib.h>
-+#include <unistd.h>
++// #include <unistd.h>
  
  char binread[] = "rb", textread[] = "r";
  char binwrite[] = "wb", textwrite[] = "w";
