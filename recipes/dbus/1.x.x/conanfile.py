@@ -59,7 +59,7 @@ class DbusConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if self.settings.os not in ("Linux", "FreeBSD"):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_systemd
             del self.options.with_x11
             del self.options.with_selinux
