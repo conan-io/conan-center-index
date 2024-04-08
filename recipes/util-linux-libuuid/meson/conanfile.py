@@ -132,6 +132,7 @@ class UtilLinuxLibuuidConan(ConanFile):
         if self.settings.os == "Macos":
             shared_library_extension = ".dylib"
         rm(self, "libuuid.a" if self.options.shared else f"libuuid{shared_library_extension}*", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.a" if self.options.shared else f"*{shared_library_extension}*", os.path.join(self.package_folder, "lib"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
