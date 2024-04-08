@@ -2,8 +2,12 @@
 cmake_minimum_required(VERSION 3.15)
 project(f2c C)
 
-# Configure systep.h. No need to define NO_MKDTEMP or NO_MKSTEMP on modern systems.
-file(WRITE sysdep.hd "")
+# Configure sysdep.hd. Only sets NO_MKDTEMP and NO_MKSTEMP, if necessary.
+if(MSVC)
+    file(WRITE sysdep.hd "#define NO_MKDTEMP\n#define NO_MKSTEMP\n")
+else()
+    file(WRITE sysdep.hd "")
+endif()
 
 # Generate tokdefs.h
 # grep -n . <tokens | sed "s/\([^:]*\):\(.*\)/#define \2 \1/" >tokdefs.h
