@@ -1,0 +1,36 @@
+diff --git a/lib/cmake/windows.cmake b/lib/cmake/windows.cmake
+index 02d39a1..0647029 100644
+--- a/lib/cmake/windows.cmake
++++ b/lib/cmake/windows.cmake
+@@ -93,27 +93,18 @@ endif()
+ add_library(${LIB} ${SRC_FILES_ASM} ${SRC_FILES_C} ${SRC_DEF_FILE})
+ 
+ # set install rules
+-set(CMAKE_INSTALL_PREFIX "c:/Program Files"
+-  CACHE STRING "Set default installation directory" FORCE)
+ install(TARGETS ${LIB}
+-  DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_PROJECT_NAME})
++  RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
++  LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
++
+ install(FILES
+   ${IMB_HDR}
+   ${SRC_DEF_FILE}
+   DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_PROJECT_NAME})
+-if(BUILD_SHARED_LIBS)
+-  install(FILES
+-    $<TARGET_FILE_DIR:${LIB}>/${LIB}.exp
+-    $<TARGET_FILE_DIR:${LIB}>/${LIB}.pdb
+-    DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_PROJECT_NAME})
+-  install(FILES
+-    $<TARGET_FILE_DIR:${LIB}>/${LIB}.dll
+-    DESTINATION $ENV{WINDIR}/system32)
+-endif()
+ 
+ execute_process(
+   COMMAND cmd /C ${GEN_DEF_FILE_CMD}
+   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+   OUTPUT_QUIET
+ )
+-
