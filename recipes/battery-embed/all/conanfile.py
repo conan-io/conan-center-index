@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
 from conan.tools.cmake import cmake_layout
 from conan.tools.scm import Version
 import os
@@ -34,6 +34,7 @@ class BatteryEmbedConan(ConanFile):
 
     def export_sources(self):
         copy(self, "embed.cmake", src=self.recipe_folder, dst=self.export_sources_folder)
+        export_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -56,6 +57,7 @@ class BatteryEmbedConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
+        apply_conandata_patches(self)
         copy(self, "embed.cmake", os.path.join(self.source_folder, os.pardir), self.recipe_folder)
 
     def package(self):
