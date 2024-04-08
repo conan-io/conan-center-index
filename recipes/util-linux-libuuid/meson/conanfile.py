@@ -108,8 +108,6 @@ class UtilLinuxLibuuidConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # Disable translations.
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('po')", "#subdir('po')")
 
     def build(self):
         self._patch_sources()
