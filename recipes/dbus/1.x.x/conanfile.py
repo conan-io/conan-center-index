@@ -15,7 +15,8 @@ required_conan_version = ">=1.53.0"
 
 class DbusConan(ConanFile):
     name = "dbus"
-    license = ("AFL-2.1", "GPL-2.0-or-later")
+    # license is AFL-2.1 OR GPL-2.0-or-later with several other compatible licenses for smaller sections of code
+    license = "(AFL-2.1 OR GPL-2.0-or-later) AND DocumentRef-COPYING"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freedesktop.org/wiki/Software/dbus"
     description = "D-Bus is a simple system for interprocess communication and coordination."
@@ -29,7 +30,7 @@ class DbusConan(ConanFile):
         "system_socket": [None, "ANY"],
         "system_pid_file": [None, "ANY"],
         "with_x11": [True, False],
-        "with_glib": [True, False],
+        "with_glib": ["deprecated", True, False],
         "with_systemd": [True, False],
         "with_selinux": [True, False],
         "session_socket_dir": ["ANY"],
@@ -40,7 +41,7 @@ class DbusConan(ConanFile):
         "system_socket": None,
         "system_pid_file": None,
         "with_x11": False,
-        "with_glib": False,
+        "with_glib": "deprecated",
         "with_systemd": False,
         "with_selinux": False,
         "session_socket_dir": "/tmp",
@@ -52,8 +53,8 @@ class DbusConan(ConanFile):
     def config_options(self):
         if self.settings.os not in ("Linux", "FreeBSD"):
             del self.options.with_systemd
-        if self.settings.os not in ("Linux", "FreeBSD"):
             del self.options.with_x11
+            del self.options.with_selinux
         if self.settings.os == "Windows":
             del self.options.fPIC
 
@@ -63,26 +64,32 @@ class DbusConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def package_id(self):
+        del self.info.options.with_glib
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("expat/2.6.0")
-        if self.options.with_glib:
-            self.requires("glib/2.78.3")
         if self.options.get_safe("with_systemd"):
             self.requires("libsystemd/253.6")
-        if self.options.with_selinux:
-            self.requires("libselinux/3.3")
+        if self.options.get_safe("with_selinux"):
+            self.requires("libselinux/3.5")
         if self.options.get_safe("with_x11"):
-            self.requires("xorg/system")
+            # X11 is only linked into an executable and should not be propagated as a library dependency.
+            # It should still be provided in a VirtualRunEnv context, though,
+            # but Conan as of v2.2 does not yet provide a fine-grained enough control over this.
+            self.requires("xorg/system", visible=False)
 
     def validate(self):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 7:
             raise ConanInvalidConfiguration(f"{self.ref} requires at least gcc 7.")
+        if self.options.with_glib != "deprecated":
+            raise ConanInvalidConfiguration(f"with_glib option is deprecated and should not be used - the option had no effect.")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.2")
+        self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config",check_type=str):
             self.tool_requires("pkgconf/2.1.0")
 
@@ -103,8 +110,8 @@ class DbusConan(ConanFile):
         tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux", False) else "disabled"
         tc.project_options["systemd"] = "enabled" if self.options.get_safe("with_systemd", False) else "disabled"
         if self.options.get_safe("with_systemd", False):
-            tc.project_options["systemd_system_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "system")
-            tc.project_options["systemd_user_unitdir"] = os.path.join(self.package_folder, "lib", "systemd", "user")
+            tc.project_options["systemd_system_unitdir"] = "/res/lib/systemd/system"
+            tc.project_options["systemd_user_unitdir"] = "/res/usr/lib/systemd/system"
         if is_apple_os(self):
             tc.project_options["launchd_agent_dir"] = os.path.join(self.package_folder, "res", "LaunchAgents")
         tc.project_options["x11_autolaunch"] = "enabled" if self.options.get_safe("with_x11", False) else "disabled"
@@ -113,15 +120,20 @@ class DbusConan(ConanFile):
         deps = PkgConfigDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('test')", "# subdir('test')")
+        replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                        "subdir('test')", "# subdir('test')")
+
+    def build(self):
+        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*", os.path.join(self.source_folder, "LICENSES"), os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
 
@@ -133,7 +145,6 @@ class DbusConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "systemd"))
         fix_apple_shared_install_name(self)
         if self.settings.os == "Windows" and not self.options.shared:
             rename(self, os.path.join(self.package_folder, "lib", "libdbus-1.a"), os.path.join(self.package_folder, "lib", "dbus-1.lib"))
@@ -178,6 +189,12 @@ class DbusConan(ConanFile):
 
         if not self.options.shared:
             self.cpp_info.defines.append("DBUS_STATIC_BUILD")
+
+        self.cpp_info.requires.append("expat::expat")
+        if self.options.get_safe("with_systemd"):
+            self.cpp_info.requires.append("libsystemd::libsystemd")
+        if self.options.get_safe("with_selinux"):
+            self.cpp_info.requires.append("libselinux::selinux")
 
         # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "DBus1"

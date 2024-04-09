@@ -5,6 +5,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.57.0"
 
@@ -67,13 +68,25 @@ class SDLMixerConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if not self.options.flac and self.options.gme:
+            raise ConanInvalidConfiguration("gme is not yet available in CCI, contributions are welcome")
+        if self.options.vorbis == "tremor":
+            raise ConanInvalidConfiguration("tremor is not yet available in CCI, contributions are welcome")
+        if self.options.xmp == "libxmp":
+            raise ConanInvalidConfiguration("libxmp is not yet available in CCI, contributions are welcome")
+        if self.options.xmp == "libxmp-lite":
+            raise ConanInvalidConfiguration("libxmp-lite is not yet available in CCI, contributions are welcome")
+        if self.options.fluidsynth:
+            raise ConanInvalidConfiguration("fluidsynth is not yet available in CCI, contributions are welcome")
+        if self.options.wavpack:
+            raise ConanInvalidConfiguration("wavpack is not yet available in CCI, contributions are welcome")
 
     def requirements(self):
         self.requires("sdl/2.28.5", transitive_headers=True, transitive_libs=True)
@@ -81,7 +94,8 @@ class SDLMixerConan(ConanFile):
             self.requires("flac/1.4.2")
         elif self.options.gme:
             # TODO: not available on CCI
-            self.requires("gme/x.y.z")
+            # self.requires("gme/x.y.z")
+            pass
         if self.options.mpg123:
             self.requires("mpg123/1.31.2")
         if self.options.minimp3:
@@ -92,20 +106,24 @@ class SDLMixerConan(ConanFile):
             self.requires("vorbis/1.3.7")
         elif self.options.vorbis == "tremor":
             # TODO: not available on CCI
-            self.requires("tremor/1.2.1")
+            # self.requires("tremor/1.2.1")
+            pass
         if self.options.opus:
             self.requires("opusfile/0.12")
         if self.options.modplug:
             self.requires("libmodplug/0.8.9.0")
         if self.options.xmp == "libxmp":
             # TODO: not available on CCI
-            self.requires("libxmp/x.y.z")
+            # self.requires("libxmp/x.y.z")
+            pass
         elif self.options.xmp == "libxmp-lite":
             # TODO: not available on CCI
-            self.requires("libxmp-lite/x.y.z")
+            # self.requires("libxmp-lite/x.y.z")
+            pass
         if self.options.fluidsynth:
             # TODO: not available on CCI
-            self.requires("fluidsynth/2.2")
+            # self.requires("fluidsynth/2.2")
+            pass
         if self.options.get_safe("tinymidi"):
             self.requires("tinymidi/cci.20130325")
         # https://github.com/libsdl-org/SDL_mixer/blob/release-2.6.3/CMakeLists.txt#L148-L162
@@ -113,7 +131,8 @@ class SDLMixerConan(ConanFile):
             self.requires("ogg/1.3.5")
         if self.options.wavpack:
             # TODO: not available on CCI
-            self.requires("wavpack/x.y.z")
+            # self.requires("wavpack/x.y.z")
+            pass
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
