@@ -31,7 +31,7 @@ class ImplotConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC # rm_safe not needed
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
@@ -39,9 +39,9 @@ class ImplotConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= "0.15":
-            self.requires("imgui/1.90", transitive_headers=True)
+            self.requires("imgui/1.90.4", transitive_headers=True)
         elif Version(self.version) >= "0.14":
-            self.requires("imgui/1.89.4", transitive_headers=True)
+            self.requires("imgui/1.89.5", transitive_headers=True)
         elif Version(self.version) >= "0.13":
             # imgui 1.89 renamed ImGuiKeyModFlags_* to  ImGuiModFlags_*
             self.requires("imgui/1.88", transitive_headers=True)
