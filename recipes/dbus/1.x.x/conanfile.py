@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -27,6 +27,8 @@ class DbusConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "dbus_user": ["ANY"],
+        "message_bus": [True, False],
         "system_socket": [None, "ANY"],
         "system_pid_file": [None, "ANY"],
         "with_x11": [True, False],
@@ -38,6 +40,8 @@ class DbusConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "dbus_user": "messagebus",
+        "message_bus": False,
         "system_socket": None,
         "system_pid_file": None,
         "with_x11": False,
@@ -47,25 +51,30 @@ class DbusConan(ConanFile):
         "session_socket_dir": "/tmp",
     }
 
+    @property
+    def _has_message_bus_option(self):
+        return Version(self.version) > "1.15.2"
+
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
-        if self.settings.os not in ("Linux", "FreeBSD"):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_systemd
             del self.options.with_x11
             del self.options.with_selinux
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._has_message_bus_option:
+            self.options.rm_safe("message_bus")
 
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
         if self.options.shared:
             self.options.rm_safe("fPIC")
-
-    def package_id(self):
-        del self.info.options.with_glib
+        if not self.options.get_safe("message_bus"):
+            self.options.rm_safe("dbus_user")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -82,11 +91,17 @@ class DbusConan(ConanFile):
             # but Conan as of v2.2 does not yet provide a fine-grained enough control over this.
             self.requires("xorg/system", visible=False)
 
+    def package_id(self):
+        del self.info.options.with_glib
+        # The dbus_user option only effects the installation of dbus during the package method.
+        # Otherwise, it only appears in the system.conf file in the package.
+        self.info.options.rm_safe("dbus_user")
+
     def validate(self):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 7:
             raise ConanInvalidConfiguration(f"{self.ref} requires at least gcc 7.")
         if self.options.with_glib != "deprecated":
-            raise ConanInvalidConfiguration(f"with_glib option is deprecated and should not be used - the option had no effect.")
+            raise ConanInvalidConfiguration("with_glib option is deprecated and should not be used - the option had no effect.")
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.0")
@@ -100,21 +115,32 @@ class DbusConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
         tc = MesonToolchain(self)
+        if self.settings.os == "Windows":
+            tc.project_options["prefix"] = self.package_folder.replace("\\", "/")
         tc.project_options["asserts"] = not is_apple_os(self)
         tc.project_options["checks"] = False
+        tc.project_options["datadir"] = os.path.join(self.package_folder, "res", "share")
+        tc.project_options["localstatedir"] = os.path.join(self.package_folder, "res", "var")
+        tc.project_options["sysconfdir"] = os.path.join(self.package_folder, "res", "etc")
         tc.project_options["doxygen_docs"] = "disabled"
+        tc.project_options["ducktype_docs"] = "disabled"
+        tc.project_options["qt_help"] = "disabled"
         tc.project_options["modular_tests"] = "disabled"
-        tc.project_options["system_socket"] = str(self.options.get_safe("system_socket", ""))
-        tc.project_options["system_pid_file"] = str(self.options.get_safe("system_pid_file", ""))
+        tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
         tc.project_options["session_socket_dir"] = str(self.options.get_safe("session_socket_dir", ""))
-        tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux", False) else "disabled"
-        tc.project_options["systemd"] = "enabled" if self.options.get_safe("with_systemd", False) else "disabled"
-        if self.options.get_safe("with_systemd", False):
+        tc.project_options["systemd"] = "enabled" if self.options.get_safe("with_systemd") else "disabled"
+        if self.options.get_safe("with_systemd"):
             tc.project_options["systemd_system_unitdir"] = "/res/lib/systemd/system"
             tc.project_options["systemd_user_unitdir"] = "/res/usr/lib/systemd/system"
+        if self._has_message_bus_option:
+            tc.project_options["message_bus"] = bool(self.options.message_bus)
+        if self.options.get_safe("dbus_user"):
+            tc.project_options["dbus_user"] = str(self.options.dbus_user)
+        tc.project_options["system_pid_file"] = str(self.options.get_safe("system_pid_file", ""))
+        tc.project_options["system_socket"] = str(self.options.get_safe("system_socket", ""))
         if is_apple_os(self):
             tc.project_options["launchd_agent_dir"] = os.path.join(self.package_folder, "res", "LaunchAgents")
-        tc.project_options["x11_autolaunch"] = "enabled" if self.options.get_safe("with_x11", False) else "disabled"
+        tc.project_options["x11_autolaunch"] = "enabled" if self.options.get_safe("with_x11") else "disabled"
         tc.project_options["xml_docs"] = "disabled"
         tc.generate()
         deps = PkgConfigDeps(self)
@@ -138,10 +164,7 @@ class DbusConan(ConanFile):
         meson.install()
 
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-        rmdir(self, os.path.join(self.package_folder, "share", "doc"))
-        mkdir(self, os.path.join(self.package_folder, "res"))
-        for i in ["var", "share", "etc"]:
-            rename(self, os.path.join(self.package_folder, i), os.path.join(self.package_folder, "res", i))
+        rmdir(self, os.path.join(self.package_folder, "res", "share", "doc"))
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
