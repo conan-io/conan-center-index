@@ -1,5 +1,9 @@
-#include "test_libqasm_conan_package.hpp"
+#include "cqasm.hpp"
+
+#include <iostream>
+
 
 int main() {
-    test_libqasm_conan_package();
+    auto analyzer = cqasm::v3x::default_analyzer();
+    analyzer.analyze_string("version 3.0; qubit[2] q; H q[0]; CNOT q[0], q[1]; measure q", "");
 }
