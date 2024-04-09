@@ -115,7 +115,10 @@ class bgfxConan(ConanFile):
         # bgfx's C99 API absolutely requires a header from bx so we need those to be transitive
         self.requires(f"bx/{self._bx_version[self.version]}", transitive_headers=True)
         self.requires(f"bimg/{self._bimg_version[self.version]}")
-        self.requires("opengl/system")
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            self.requires("libglvnd/1.7.0")
+        else:
+            self.requires("opengl/system")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
