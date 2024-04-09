@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.build import can_run
 import os
 
 
@@ -22,10 +23,11 @@ class TestPackgeConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if self.settings.os == "Windows":
-            self.run("ndk-build.cmd --version")
-        else:
-            self.run("ndk-build --version")
+        if can_run(self):
+            if self.settings.os == "Windows":
+                self.run("ndk-build.cmd --version")
+            else:
+                self.run("ndk-build --version")
 
         # INFO: Run the project that was built using Android NDK
         if self.settings.os == "Android":
