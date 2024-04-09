@@ -83,7 +83,7 @@ class ThorvgConan(ConanFile):
         tc = PkgConfigDeps(self)
         tc.generate()
         venv = VirtualBuildEnv(self)
-        venv.generate(scope="build")
+        venv.generate()
 
     def build(self):
         meson = Meson(self)
