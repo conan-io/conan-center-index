@@ -22,6 +22,8 @@ class LibYangConan(ConanFile):
         "fPIC": True
     }
 
+    tool_requires = "cmake/[>=3.22.0 <4]"
+
     def requirements(self):
         self.requires("pcre2/10.42", transitive_headers=True)
 
@@ -62,10 +64,15 @@ class LibYangConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # move /share to /res
+        copy(self, "*", os.path.join(self.package_folder, "share"),
+             os.path.join(self.package_folder, "res", "share"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "libyang")
+        self.cpp_info.set_property("cmake_file_name", "LibYANG")
         self.cpp_info.libs = ["yang"]
+        self.cpp_info.resdirs = ["res"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32", "shlwapi"])
         elif self.settings.os in ["Linux", "FreeBSD"]:
