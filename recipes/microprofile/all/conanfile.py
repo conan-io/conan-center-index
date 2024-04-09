@@ -92,7 +92,10 @@ class MicroprofileConan(ConanFile):
         if self.options.with_miniz:
             self.requires("miniz/3.0.2")
         if self.options.enable_timer == "gl":
-            self.requires("opengl/system")
+            if self.settings.os in ["FreeBSD", "Linux"]:
+                self.requires("libglvnd/1.7.0")
+            else:
+                self.requires("opengl/system")
         if self.options.enable_timer == "vulkan":
             self.requires("vulkan-loader/1.3.268.0")
         if Version(self.version) >= "4.0":
