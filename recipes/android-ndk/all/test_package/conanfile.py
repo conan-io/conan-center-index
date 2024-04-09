@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
-from conan.tools.build import can_run
+from conan.tools.build import cross_building
 import os
 
 
@@ -23,7 +23,8 @@ class TestPackgeConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if can_run(self):
+        # INFO: can_run allows mac M1, but it does not work for the NDK
+        if not cross_building(self):
             if self.settings.os == "Windows":
                 self.run("ndk-build.cmd --version")
             else:
