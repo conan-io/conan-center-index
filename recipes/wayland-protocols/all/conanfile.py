@@ -64,14 +64,8 @@ class WaylandProtocolsConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "res", "pkgconfig"))
 
     def package_info(self):
-        pkgconfig_variables = {
-            'datarootdir': '${prefix}/res',
-            'pkgdatadir': '${datarootdir}/wayland-protocols',
-        }
-        self.cpp_info.set_property(
-            "pkg_config_custom_content",
-            "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))
-
+        self.cpp_info.set_property("pkg_config_custom_content", {'datarootdir': '${prefix}/res',
+                                                                 'pkgdatadir': '${datarootdir}/wayland-protocols'})
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
         self.cpp_info.bindirs = []
