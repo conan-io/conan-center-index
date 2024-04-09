@@ -43,7 +43,10 @@ class CProcessingConan(ConanFile):
         self.requires("glm/0.9.9.8")
         self.requires("glew/2.2.0")
         self.requires("stb/cci.20220909")
-        self.requires("opengl/system")
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            self.requires("libglvnd/1.7.0")
+        else:
+            self.requires("opengl/system")
 
     def package_id(self):
         self.info.clear()
