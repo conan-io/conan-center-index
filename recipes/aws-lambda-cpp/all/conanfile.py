@@ -91,6 +91,7 @@ class AwsLambdaRuntimeConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["aws-lambda-runtime"]
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
 
         self.cpp_info.set_property("cmake_file_name", "aws-lambda-runtime")
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-lambda-runtime")
