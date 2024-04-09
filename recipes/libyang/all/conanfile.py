@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get, rmdir, copy
-from conan.tools.microsoft import is_msvc
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
 
@@ -25,12 +25,18 @@ class LibYangConan(ConanFile):
 
     tool_requires = "cmake/[>=3.22.0 <4]"
 
+    def validate(self):
+        # TODO support windows build
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} on Windows is not yet supported.")
+
     def requirements(self):
         self.requires("pcre2/10.42", transitive_headers=True)
-        if is_msvc(self):
-            self.requires("getopt-for-visual-studio/20200201")
-            self.requires("dirent/1.24")
-            self.requires("pthreads4w/3.0.0")
+        # TODO windows build
+        # if is_msvc(self):
+        #     self.requires("getopt-for-visual-studio/20200201")
+        #     self.requires("dirent/1.24")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,6 +60,7 @@ class LibYangConan(ConanFile):
         tc.variables["ENABLE_TESTS"] = False
         tc.variables["ENABLE_VALGRIND_TESTS"] = False
         tc.variables["ENABLE_STATIC"] = not self.options.shared
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
