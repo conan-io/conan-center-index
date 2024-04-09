@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
-from conan.tools.build import cross_building
+from conan.tools.build import can_run
 import os
 
 
@@ -24,7 +24,8 @@ class TestPackgeConan(ConanFile):
 
     def test(self):
         # INFO: can_run allows mac M1, but it does not work for the NDK
-        if not cross_building(self):
+        # https://github.com/android/ndk/issues/1299
+        if can_run(self) and not (self.settings.os == "Macos" and self.settings.arch == "armv8"):
             if self.settings.os == "Windows":
                 self.run("ndk-build.cmd --version")
             else:
