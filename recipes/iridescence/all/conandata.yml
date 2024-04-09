@@ -1,0 +1,9 @@
+sources:
+  "cci.20240407":
+    url: "https://github.com/koide3/iridescence/archive/15c5a8787759e104f21cf85fdaeefe64c418d99f.zip"
+    sha256: "dd89806fe771a41b03b6559f0ead6cf3bde0ac0c63bcd65a6f08f2edc53c3986"
+patches:
+  "cci.20240407":
+    - patch_file: "patches/001-unvendor-deps.patch"
+      patch_description: "Use dependencies from Conan"
+      patch_type: "conan"

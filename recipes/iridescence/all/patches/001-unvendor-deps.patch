@@ -1,0 +1,120 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -21,7 +21,7 @@
+   set(CMAKE_CXX_FLAGS "-march=native ${CMAKE_CXX_FLAGS}")
+ endif()
+ 
+-find_package(GLM REQUIRED)
++find_package(glm REQUIRED)
+ find_package(OpenGL REQUIRED)
+ 
+ # find_package(PCL)
+@@ -29,50 +29,43 @@
+ find_package(Eigen3 REQUIRED)
+ find_package(PNG REQUIRED)
+ find_package(JPEG REQUIRED)
+-find_package(assimp QUIET)
++find_package(assimp REQUIRED)
+ 
+ ###########
+ ## Build ##
+ ###########
+ 
+ # imgui
++find_package(imgui REQUIRED CONFIG)
++find_package(imguizmo REQUIRED CONFIG)
++find_package(implot REQUIRED CONFIG)
++find_package(glfw3 REQUIRED CONFIG)
++find_package(portable-file-dialogs REQUIRED CONFIG)
++
+ add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GL3W)
+ add_definitions(-DDATA_PATH_GUESS="${CMAKE_SOURCE_DIR}/data")
+ 
+ add_library(gl_imgui SHARED
+   thirdparty/gl3w/gl3w.cpp
+-  thirdparty/imgui/imgui.cpp
+-  thirdparty/imgui/imgui_demo.cpp
+-  thirdparty/imgui/imgui_draw.cpp
+-  thirdparty/imgui/imgui_tables.cpp
+-  thirdparty/imgui/imgui_widgets.cpp
+-  thirdparty/ImGuizmo/ImCurveEdit.cpp
+-  thirdparty/ImGuizmo/ImGradient.cpp
+-  thirdparty/ImGuizmo/ImGuizmo.cpp
+-  thirdparty/ImGuizmo/ImSequencer.cpp
+-  thirdparty/implot/implot.cpp
+-  thirdparty/implot/implot_demo.cpp
+-  thirdparty/implot/implot_items.cpp
+-  thirdparty/imgui/backends/imgui_impl_glfw.cpp
+-  thirdparty/imgui/backends/imgui_impl_opengl3.cpp
++  ${IMGUI_BACKENDS}/imgui_impl_glfw.cpp
++  ${IMGUI_BACKENDS}/imgui_impl_opengl3.cpp
+ )
+ target_include_directories(gl_imgui PUBLIC
+   include
+-  thirdparty/imgui
+-  thirdparty/imgui/backends
+-  thirdparty/ImGuizmo
+-  thirdparty/implot
+-  thirdparty/portable-file-dialogs
++  ${IMGUI_BACKENDS}
+   thirdparty/gl3w
+ )
+ target_link_libraries(gl_imgui
+-  ${OPENGL_LIBRARIES}
++  OpenGL::GL
+   glfw
+-  dl
++  imgui::imgui
++  imguizmo::imguizmo
++  implot::implot
++  portable-file-dialogs::portable-file-dialogs
+ )
+ 
+ if(${assimp_FOUND})
+-  list(APPEND EXTRA_LIBRARIES assimp)
++  list(APPEND EXTRA_LIBRARIES assimp::assimp)
+   list(APPEND EXTRA_SOURCE src/glk/io/mesh_io.cpp)
+ endif()
+ 
+@@ -143,23 +136,18 @@
+ )
+ target_include_directories(iridescence PUBLIC
+   include
+-  thirdparty/imgui
+-  thirdparty/imgui/examples
+-  thirdparty/ImGuizmo
+-  thirdparty/portable-file-dialogs
+   thirdparty/gl3w
+-  ${PNG_INCLUDE_DIRS}
+-  ${JPEG_INCLUDE_DIRS}
+-  ${GLM_INCLUDE_DIRS}
+-  ${Boost_INCLUDE_DIRS}
+-  ${EIGEN3_INCLUDE_DIRS}
+-)
++)
++find_package(Threads REQUIRED)
+ target_link_libraries(iridescence
+   gl_imgui
+-  pthread
+-  ${PNG_LIBRARIES}
+-  ${JPEG_LIBRARIES}
+-  ${Boost_LIBRARIES}
++  Threads::Threads
++  Eigen3::Eigen
++  PNG::PNG
++  JPEG::JPEG
++  glm::glm
++  Boost::boost
++  Boost::filesystem
+   ${EXTRA_LIBRARIES}
+ )
+ 
+@@ -224,8 +212,4 @@
+ install(TARGETS gl_imgui iridescence DESTINATION lib)
+ install(DIRECTORY include/ DESTINATION include/iridescence)
+ install(DIRECTORY thirdparty/gl3w/GL/ DESTINATION include/iridescence/GL)
+-install(FILES thirdparty/imgui/imgui.h thirdparty/imgui/imconfig.h thirdparty/imgui/imgui_internal.h thirdparty/imgui/imstb_textedit.h DESTINATION include/iridescence)
+-install(FILES thirdparty/implot/implot.h thirdparty/implot/implot_internal.h DESTINATION include/iridescence)
+-install(FILES thirdparty/portable-file-dialogs/portable-file-dialogs.h DESTINATION include/iridescence)
+-install(FILES thirdparty/ImGuizmo/ImGuizmo.h DESTINATION include/iridescence)
+ install(DIRECTORY data/ DESTINATION share/iridescence/data)
