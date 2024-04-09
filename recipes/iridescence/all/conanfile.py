@@ -22,12 +22,10 @@ class IridescenceConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "imgui_docking": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "imgui_docking": False,
     }
 
     @property
