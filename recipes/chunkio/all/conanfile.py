@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -70,3 +71,5 @@ class ChunkIOConan(ConanFile):
         self.cpp_info.libs = ["chunkio-shared"] if self.options.shared else ["chunkio-static", "cio-crc32"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("shlwapi")
+            if Version(self.version) >= "1.5.0":
+                self.cpp_info.system_libs.append("ws2_32")
