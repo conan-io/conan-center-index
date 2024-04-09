@@ -1,6 +1,6 @@
 import os
 
-from conan.errors import ConanException
+from conan.errors import ConanInvalidConfiguration
 from conan import ConanFile
 from conan.tools.files import (
     copy,
@@ -48,11 +48,11 @@ class AerospikeCommonConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Windows":
-            raise ConanException(f"Windows os is not supported")
+            raise ConanInvalidConfiguration(f"Windows os is not supported")
         if str(self.settings_build.compiler) not in self._compiler_arch_flags.keys():
-            raise ConanException(f"Unsupported compiler: {self.settings_build.compiler}")
+            raise ConanInvalidConfiguration(f"Unsupported compiler: {self.settings_build.compiler}")
         if str(self.settings_build.arch) not in self._compiler_arch_flags[str(self.settings_build.compiler)].keys():
-            raise ConanException(
+            raise ConanInvalidConfiguration(
                 f"Unsupported arch {self.settings.arch} for compiler {self.settings_build.compiler}"
             )
 
