@@ -1,0 +1,13 @@
+--- a/src/math/FGTable.cpp
++++ b/src/math/FGTable.cpp
+@@ -87,8 +87,8 @@ FGTable::FGTable(const FGTable& t)
+ 
+   // Deep copy of t.Tables
+   Tables.reserve(t.Tables.size());
+-  for(const auto &t: t.Tables)
+-    Tables.push_back(std::unique_ptr<FGTable>(new FGTable(*t)));
++  for(const auto &table: t.Tables)
++    Tables.push_back(std::unique_ptr<FGTable>(new FGTable(*table)));
+ 
+   Data = t.Data;
+ }

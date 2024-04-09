@@ -1,0 +1,26 @@
+diff --git a/include/uuid.h b/include/uuid.h
+index 600846f..5f00a49 100644
+--- a/include/uuid.h
++++ b/include/uuid.h
+@@ -15,7 +15,11 @@
+ #include <chrono>
+ #include <numeric>
+ #include <atomic>
+-#include <span>
++#if defined(LIBUUID_CPP20_OR_GREATER)
++# include <span>
++#else
++# include <gsl/span>
++#endif
+ 
+ #ifdef _WIN32
+ 
+@@ -51,7 +55,7 @@
+ 
+ namespace uuids
+ {
+-#ifdef __cpp_lib_span
++#if defined(LIBUUID_CPP20_OR_GREATER)
+    template <class ElementType, std::size_t Extent>
+    using span = std::span<ElementType, Extent>;
+ #else

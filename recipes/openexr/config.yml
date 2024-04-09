@@ -1,19 +1,17 @@
 versions:
+  "3.2.3":
+    folder: "3.x"
+  "3.2.2":
+    folder: "3.x"
+  "3.2.1":
+    folder: "3.x"
+  "3.1.9":
+    folder: "3.x"
   "3.1.7":
     folder: "3.x"
-  "3.1.5":
-    folder: "3.x"
-  "3.1.4":
-    folder: "3.x"
+  "2.5.9":
+    folder: "2.x"
   "2.5.7":
-    folder: "2.x"
-  "2.5.5":
-    folder: "2.x"
-  "2.5.4":
-    folder: "2.x"
-  "2.5.3":
-    folder: "2.x"
-  "2.5.2":
     folder: "2.x"
   "2.4.0":
     folder: "2.x"

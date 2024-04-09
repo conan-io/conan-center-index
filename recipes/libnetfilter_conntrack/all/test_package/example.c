@@ -1,11 +1,11 @@
+#include <libmnl/libmnl.h>
+#include <libnetfilter_conntrack/libnetfilter_conntrack.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
 #include <arpa/inet.h>
-
-#include <libmnl/libmnl.h>
-#include <libnetfilter_conntrack/libnetfilter_conntrack.h>
 
 static int data_cb(const struct nlmsghdr *nlh, void *data)
 {

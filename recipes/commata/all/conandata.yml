@@ -1,7 +1,22 @@
 sources:
-  "0.2.4":
-    url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.4.tar.gz"
-    sha256: "2d154c1ed7bbf6551729bcc5baf581613f6605df080ada35a9e107648d255e2e"
-  "0.2.3":
-    url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.3.tar.gz"
-    sha256: "47521aa27b26fe650bd985c4e07df44453f9d09ab0d61ee98dd6877afe4c25a0"
+  "0.2.8":
+    url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.8.tar.gz"
+    sha256: "a762ec3ef1549aa5aebef78a160a40ee16d396fd976154f1f5c160837d145c8a"
+  "0.2.7":
+    url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.7.tar.gz"
+    sha256: "3feeeea8eafa67a0f328382380f193df9a798665e10333e9e5b6db5fe1794283"
+  "0.2.6-bug1":
+    url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.6-bug1.tar.gz"
+    sha256: "141eb86f9033a808b6ead22a9367fc4d18a3047f55255ddf67d60e90f46b8f60"
+  "0.2.6":
+    url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.6.tar.gz"
+    sha256: "bc91f496cb261e5627fb39d8e79d1aaa924975332d9957de4cb4097db6957815"
+  "0.2.5":
+    url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.5.tar.gz"
+    sha256: "d1be1f366267af6c466c29f846f5968f57626a8a6635a2ea9a3de3f6fb88e53b"
+patches:
+  "0.2.7":
+    - patch_file: "patches/0.2.7-0001-include-optional.patch"
+      patch_description: "include <optional> header"
+      patch_type: "portability"
+      patch_source: "https://github.com/furfurylic/commata/pull/2"

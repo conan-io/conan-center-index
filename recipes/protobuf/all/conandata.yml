@@ -1,33 +1,38 @@
 sources:
+  "3.21.12":
+    url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.21.12.tar.gz"
+    sha256: "930c2c3b5ecc6c9c12615cf5ad93f1cd6e12d0aba862b572e076259970ac3a53"
   "3.21.9":
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.21.9.tar.gz"
     sha256: "1add10f9bd92775b91f326da259f243881e904dd509367d5031d4c782ba82810"
-  "3.21.4":
-    url: "https://github.com/protocolbuffers/protobuf/archive/v3.21.4.tar.gz"
-    sha256: "85d42d4485f36f8cec3e475a3b9e841d7d78523cd775de3a86dba77081f4ca25"
+  "3.20.3":
+    url: "https://github.com/protocolbuffers/protobuf/archive/v3.20.3.tar.gz"
+    sha256: "9c0fd39c7a08dff543c643f0f4baf081988129a411b977a07c46221793605638"
   "3.20.0":
     url: "https://github.com/protocolbuffers/protobuf/archive/v3.20.0.tar.gz"
     sha256: "b07772d38ab07e55eca4d50f4b53da2d998bb221575c60a4f81100242d4b4889"
   "3.19.6":
     url: "https://github.com/protocolbuffers/protobuf/archive/v3.19.6.tar.gz"
     sha256: "9a301cf94a8ddcb380b901e7aac852780b826595075577bb967004050c835056"
-  "3.19.4":
-    url: "https://github.com/protocolbuffers/protobuf/archive/v3.19.4.tar.gz"
-    sha256: "3bd7828aa5af4b13b99c191e8b1e884ebfa9ad371b0ce264605d347f135d2568"
-  "3.18.1":
-    url: "https://github.com/protocolbuffers/protobuf/archive/v3.18.1.tar.gz"
-    sha256: "9111bf0b542b631165fadbd80aa60e7fb25b25311c532139ed2089d76ddf6dd7"
+  "3.18.3":
+    url: "https://github.com/protocolbuffers/protobuf/archive/v3.18.3.tar.gz"
+    sha256: "663b3a6d56605e6ab7888d32a1525c34f34639b25b8996337821591e60c37041"
   "3.17.1":
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.17.1.tar.gz"
     sha256: "036d66d6eec216160dd898cfb162e9d82c1904627642667cc32b104d407bb411"
 patches:
+  "3.21.12":
+    - patch_file: "patches/protobuf-3.21.12-upstream-macos-macros.patch"
+      patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/protocolbuffers/protobuf/pull/10103"
   "3.21.9":
     - patch_file: "patches/protobuf-3.21.9-upstream-macos-macros.patch"
       patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
       patch_type: "bugfix"
       patch_source: "https://github.com/protocolbuffers/protobuf/pull/10103"
-  "3.21.4":
-    - patch_file: "patches/protobuf-3.21.4-upstream-macos-macros.patch"
+  "3.20.3":
+    - patch_file: "patches/protobuf-3.20.0-upstream-macos-macros.patch"
       patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
       patch_type: "bugfix"
       patch_source: "https://github.com/protocolbuffers/protobuf/pull/10103"
@@ -45,16 +50,7 @@ patches:
       patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
       patch_type: "bugfix"
       patch_source: "https://github.com/protocolbuffers/protobuf/pull/10103"
-  "3.19.4":
-    - patch_file: "patches/upstream-pr-9437-msvc-runtime.patch"
-      patch_description: "Properly handle CMAKE_MSVC_RUNTIME_LIBRARY when using CMake >= 3.15"
-      patch_type: "portability"
-      patch_source: "https://github.com/protocolbuffers/protobuf/pull/9437"
-    - patch_file: "patches/protobuf-3.19.4-upstream-macos-macros.patch"
-      patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
-      patch_type: "bugfix"
-      patch_source: "https://github.com/protocolbuffers/protobuf/pull/10103"
-  "3.18.1":
+  "3.18.3":
     - patch_file: "patches/protobuf-3.18.1-upstream-macos-macros.patch"
       patch_description: "Handle case where macOS SDK macros may conflict with protobuf message types"
       patch_type: "bugfix"

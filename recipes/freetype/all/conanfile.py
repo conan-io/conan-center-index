@@ -64,13 +64,13 @@ class FreetypeConan(ConanFile):
 
     def requirements(self):
         if self.options.with_png:
-            self.requires("libpng/1.6.39")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.10 <2]")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_brotli"):
-            self.requires("brotli/1.0.9")
+            self.requires("brotli/1.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

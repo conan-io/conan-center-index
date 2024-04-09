@@ -6,6 +6,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, MSBuild, MSBuildToolchain
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
@@ -14,11 +15,11 @@ required_conan_version = ">=1.54.0"
 class ZimgConan(ConanFile):
     name = "zimg"
     description = "Scaling, colorspace conversion, and dithering library"
-    topics = ("image", "manipulation")
-    homepage = "https://github.com/sekrit-twc/zimg"
-    url = "https://github.com/conan-io/conan-center-index"
     license = "WTFPL"
-
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/sekrit-twc/zimg"
+    topics = ("image", "manipulation")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -94,11 +95,18 @@ class ZimgConan(ConanFile):
             platform_toolset = MSBuildToolchain(self).toolset
             conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
             for vcxproj_file in vcxproj_files:
-                replace_in_file(
-                    self, vcxproj_file,
-                    "<PlatformToolset>v142</PlatformToolset>",
-                    f"<PlatformToolset>{platform_toolset}</PlatformToolset>",
-                )
+                if Version(self.version) >= "3.0.5":
+                    replace_in_file(
+                        self, vcxproj_file,
+                        "<PlatformToolset>v143</PlatformToolset>",
+                        f"<PlatformToolset>{platform_toolset}</PlatformToolset>",
+                    )
+                else:
+                    replace_in_file(
+                        self, vcxproj_file,
+                        "<PlatformToolset>v142</PlatformToolset>",
+                        f"<PlatformToolset>{platform_toolset}</PlatformToolset>",
+                    )
                 replace_in_file(
                     self, vcxproj_file,
                     "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",

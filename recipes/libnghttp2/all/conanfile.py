@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, save, replace_in_file, rmdir, copy
+from conan.tools.files import get, save, replace_in_file, rmdir, copy
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -15,10 +15,10 @@ required_conan_version = ">=1.53.0"
 class Nghttp2Conan(ConanFile):
     name = "libnghttp2"
     description = "HTTP/2 C Library and tools"
-    topics = ("http", "http2")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://nghttp2.org"
-    license = "MIT"
+    topics = ("http", "http2")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -37,9 +37,6 @@ class Nghttp2Conan(ConanFile):
         "with_jemalloc": False,
         "with_asio": False,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -63,17 +60,17 @@ class Nghttp2Conan(ConanFile):
         if self.options.with_app or self.options.get_safe("with_asio"):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_app:
-            self.requires("c-ares/1.19.0")
+            self.requires("c-ares/1.25.0")
             self.requires("libev/4.33")
             self.requires("libevent/2.1.12")
-            self.requires("libxml2/2.10.4")
-            self.requires("zlib/1.2.13")
+            self.requires("libxml2/2.12.4")
+            self.requires("zlib/[>=1.2.11 <2]")
             if self.options.with_jemalloc:
                 self.requires("jemalloc/5.3.0")
         if self.options.with_hpack:
             self.requires("jansson/2.14")
         if self.options.get_safe("with_asio"):
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.84.0")
 
     def validate(self):
         if self.options.get_safe("with_asio") and is_msvc(self):
@@ -97,8 +94,6 @@ class Nghttp2Conan(ConanFile):
         # disable unneeded auto-picked dependencies
         tc.variables["WITH_LIBXML2"] = False
         tc.variables["WITH_JEMALLOC"] = self.options.get_safe("with_jemalloc", False)
-        if Version(self.version) < "1.47.0":
-            tc.variables["WITH_SPDYLAY"] = False
         if Version(self.version) < "1.52.0":
             tc.variables["ENABLE_ASIO_LIB"] = self.options.with_asio
         if is_apple_os(self):
@@ -112,7 +107,6 @@ class Nghttp2Conan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         if not self.options.shared:
             # easier to patch here rather than have patch 'nghttp_static_include_directories' for each version
             save(self, os.path.join(self.source_folder, "lib", "CMakeLists.txt"),

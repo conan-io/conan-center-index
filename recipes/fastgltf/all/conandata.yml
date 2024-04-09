@@ -1,0 +1,24 @@
+sources:
+  "0.7.0":
+    url: "https://github.com/spnda/fastgltf/archive/refs/tags/v0.7.0.tar.gz"
+    sha256: "1d0af69db938fd81dd34ea51f99e37f0023852c93befe63e23f9e55abd4a18ec"
+  "0.6.1":
+    url: "https://github.com/spnda/fastgltf/archive/refs/tags/v0.6.1.tar.gz"
+    sha256: "5f10b153ec941f5e6465425f542d3864f586aca040b0b659cb9ae70d42369390"
+  "0.5.0":
+    url: "https://github.com/spnda/fastgltf/archive/refs/tags/v0.5.0.tar.gz"
+    sha256: "f67558da009bfd1174b3f32606c41c20fe6fbcb70fc516e9f7bf0f63c06e87ff"
+  "0.4.0":
+    url: "https://github.com/spnda/fastgltf/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: "77debe12acb6b498ea77306ce64277cedb14ad803b461ea677a61bc604bb59b5"
+patches:
+  "0.6.1":
+    - patch_file: "patches/0.6.1-0001-find_package-simdjson.patch"
+      patch_description: "find_package simdjson"
+      patch_type: "conan"
+      patch_source: "https://github.com/spnda/fastgltf/issues/22"
+  "0.5.0":
+    - patch_file: "patches/0.5.0-0001-find_package-simdjson.patch"
+      patch_description: "find_package simdjson"
+      patch_type: "conan"
+      patch_source: "https://github.com/spnda/fastgltf/issues/22"

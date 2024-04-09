@@ -1,0 +1,4 @@
+sources:
+  0.1.0:
+    url: https://github.com/foxglove/schemas/archive/refs/tags/releases/python/foxglove-schemas-protobuf/v0.1.0.tar.gz
+    sha256: 42153b62000c0c614301ecd2b9173c69f467dd543db3328a1b0491bce8ee5594

@@ -15,15 +15,14 @@ class PackageConan(ConanFile):
     description = "Rapid fuzzy string matching in C++ using the Levenshtein Distance"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/maxbachmann/rapidfuzz-cpp"
+    homepage = "https://github.com/rapidfuzz/rapidfuzz-cpp"
     topics = ("levenshtein", "string-matching", "string-similarity", "string-comparison", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
     def _min_cppstd(self):
-        if self.version == "cci.20210513":
-            return 98
         return 17
 
     @property
@@ -33,7 +32,7 @@ class PackageConan(ConanFile):
             "msvc": "192",
             "gcc": "6",
             "clang": "6",
-            "apple-clang": "12",
+            "apple-clang": "12",            
         }
 
     def layout(self):
@@ -53,7 +52,6 @@ class PackageConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))

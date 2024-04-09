@@ -1,0 +1,9 @@
+versions:
+  "0.7.0-b2":
+    folder: all
+  "0.7-b1":
+    folder: all
+  "0.6.8":
+    folder: all
+  "0.6.3":
+    folder: all

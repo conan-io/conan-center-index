@@ -14,6 +14,7 @@ class ZstrConan(ConanFile):
     topics = ("zlib", "wrapper", "compression")
     homepage = "https://github.com/mateidavid/zstr"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -21,7 +22,7 @@ class ZstrConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def package_id(self):
         self.info.clear()
@@ -31,8 +32,7 @@ class ZstrConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

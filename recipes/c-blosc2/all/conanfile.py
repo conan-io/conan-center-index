@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rm, rmdir
@@ -17,13 +18,13 @@ class CBlosc2Conan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Blosc/c-blosc2"
-    topics = ("c-blosc", "blosc", "compression")
+    topics = ("c-blosc", "blosc", "compression", "cache", "store")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "simd_intrinsics": [None, "sse2", "avx2"],
+        "simd_intrinsics": [None, "sse2", "avx2", "avx512"],
         "with_lz4": [True, False],
         "with_zlib": [None, "zlib", "zlib-ng", "zlib-ng-compat"],
         "with_zstd": [True, False],
@@ -67,15 +68,20 @@ class CBlosc2Conan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_zlib in ["zlib-ng", "zlib-ng-compat"]:
-            self.requires("zlib-ng/2.0.6")
+            self.requires("zlib-ng/2.1.6")
         elif self.options.with_zlib == "zlib":
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.4")
+            self.requires("zstd/1.5.5")
+
+    def validate(self):
+        if Version(self.version) < "2.11.0" \
+           and self.info.settings.arch in ["x86", "x86_64"] \
+           and self.options.simd_intrinsics == "avx512":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support 'avx512' SIMD intrinsics")
 
     def build_requirements(self):
-        if Version(self.version) >= "2.4.1":
-            self.tool_requires("cmake/[>=3.16.3 <4]")
+        self.tool_requires("cmake/[>=3.16.3 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -94,7 +100,8 @@ class CBlosc2Conan(ConanFile):
         tc.cache_variables["BUILD_BENCHMARKS"] = False
         tc.cache_variables["BUILD_EXAMPLES"] = False
         simd_intrinsics = self.options.get_safe("simd_intrinsics", False)
-        tc.cache_variables["DEACTIVATE_AVX2"] = simd_intrinsics != "avx2"
+        tc.cache_variables["DEACTIVATE_AVX2"] = simd_intrinsics not in ["avx2", "avx512"]
+        tc.cache_variables["DEACTIVATE_AVX512"] = simd_intrinsics != "avx512"
         tc.cache_variables["DEACTIVATE_LZ4"] = not bool(self.options.with_lz4)
         tc.cache_variables["PREFER_EXTERNAL_LZ4"] = True
         tc.cache_variables["DEACTIVATE_ZLIB"] = self.options.with_zlib is None
@@ -132,6 +139,8 @@ class CBlosc2Conan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
 
         # Remove MS runtime files
         for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
@@ -143,4 +152,4 @@ class CBlosc2Conan(ConanFile):
         prefix = "lib" if is_msvc(self) and not self.options.shared else ""
         self.cpp_info.libs = [f"{prefix}blosc2"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["rt", "m", "pthread"]
+            self.cpp_info.system_libs = ["rt", "m", "pthread", "dl"]

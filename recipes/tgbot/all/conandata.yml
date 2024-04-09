@@ -1,13 +1,10 @@
 sources:
+  "1.7.2":
+    url: "https://github.com/reo7sp/tgbot-cpp/archive/v1.7.2.tar.gz"
+    sha256: "3a41c25c5e4b60bda3f278550a380f1c7c382fd50ea1ab1801edc837d1535462"
   "1.5":
     url: "https://github.com/reo7sp/tgbot-cpp/archive/v1.5.tar.gz"
     sha256: "ecd5a21ea45b890828aba1639ac49401cfdd5b30f791322cb1ba84c9ac77647c"
   "1.3":
     url: "https://github.com/reo7sp/tgbot-cpp/archive/v1.3.tar.gz"
     sha256: "85b9aef49c595d39fc9dc330b1b83625bea9509966dc623f7b4c1ee7309679c9"
-  "1.2.1":
-    url: "https://github.com/reo7sp/tgbot-cpp/archive/v1.2.1.tar.gz"
-    sha256: "bcc82cc8c421e96098ba6ef350acc0c1ce9fbbc21a11b91eb8643324757d09f2"
-  "1.2":
-    url: "https://github.com/reo7sp/tgbot-cpp/archive/v1.2.tar.gz"
-    sha256: "6d5158db38fb092e12060080a611ccdccde35cfb85f030996daee9619bebc513"

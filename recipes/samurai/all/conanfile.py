@@ -40,11 +40,11 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         self.requires("cli11/2.3.2")
-        self.requires("fmt/9.1.0")
+        self.requires("fmt/10.1.1")
         self.requires("highfive/2.7.1")
-        self.requires("pugixml/1.13")
-        self.requires("xsimd/10.0.0")
-        self.requires("xtensor/0.24.3")
+        self.requires("pugixml/1.14")
+        self.requires("xsimd/11.1.0")
+        self.requires("xtensor/0.24.6")
 
     def package_id(self):
         self.info.clear()
@@ -61,7 +61,6 @@ class PackageConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    # Copy all files to the package folder
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(
@@ -72,6 +71,5 @@ class PackageConan(ConanFile):
         )
 
     def package_info(self):
-        # Folders not used for header-only
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []

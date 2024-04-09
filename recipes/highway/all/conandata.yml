@@ -1,4 +1,19 @@
 sources:
+  "1.1.0":
+    url: "https://github.com/google/highway/archive/1.1.0.tar.gz"
+    sha256: "354a8b4539b588e70b98ec70844273e3f2741302c4c377bcc4e81b3d1866f7c9"
+  "1.0.7":
+    url: "https://github.com/google/highway/archive/1.0.7.tar.gz"
+    sha256: "5434488108186c170a5e2fca5e3c9b6ef59a1caa4d520b008a9b8be6b8abe6c5"
+  "1.0.6":
+    url: "https://github.com/google/highway/archive/1.0.6.tar.gz"
+    sha256: "d89664a045a41d822146e787bceeefbf648cc228ce354f347b18f2b419e57207"
+  "1.0.5":
+    url: "https://github.com/google/highway/archive/1.0.5.tar.gz"
+    sha256: "99b7dad98b8fa088673b720151458fae698ae5df9154016e39de4afdc23bb927"
+  "1.0.4":
+    url: "https://github.com/google/highway/archive/1.0.4.tar.gz"
+    sha256: "faccd343935c9e98afd1016e9d20e0b8b89d908508d1af958496f8c2d3004ac2"
   "1.0.3":
     url: "https://github.com/google/highway/archive/1.0.3.tar.gz"
     sha256: "566fc77315878473d9a6bd815f7de78c73734acdcb745c3dde8579560ac5440e"
@@ -14,21 +29,6 @@ sources:
   "0.17.0":
     url: "https://github.com/google/highway/archive/0.17.0.tar.gz"
     sha256: "25158fd5c090b70ecea47fc246c860d150f07f801d2434e1e51ec14a6c15822c"
-  "0.16.0":
-    url: "https://github.com/google/highway/archive/0.16.0.tar.gz"
-    sha256: "746c9578446be6c5286e8846c5f0d4118c0c1f04219c401abadcb8a5f2051893"
   "0.12.2":
     url: "https://github.com/google/highway/archive/0.12.2.tar.gz"
     sha256: "e1d47ce510429fdcf31f41697ca74fb0dcd59d933196e531a86d51751a56f4cc"
-  "0.11.1":
-    url: "https://github.com/google/highway/archive/0.11.1.tar.gz"
-    sha256: "4c4bb9501c02b27a0944afde8923aaab554384690d37e5b2a7f97553426ea641"
-patches:
-  "0.16.0":
-    - patch_file: "patches/0.16.0-0001-fix-sys-random-h.patch"
-      patch_description: "fix including sys/random.h on several environments"
-      patch_type: "portability"
-  "0.11.1":
-    - patch_file: "patches/0.11.1-0001-remove-contrib.patch"
-      patch_description: "remove contrib sources"
-      patch_type: "portability"

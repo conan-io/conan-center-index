@@ -75,11 +75,11 @@ class GlibmmConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.76.0")
+        self.requires("glib/2.78.0", transitive_headers=True)
         if self._abi_version == "2.68":
-            self.requires("libsigcpp/3.0.7")
+            self.requires("libsigcpp/3.0.7", transitive_headers=True)
         else:
-            self.requires("libsigcpp/2.10.8")
+            self.requires("libsigcpp/2.10.8", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -97,9 +97,9 @@ class GlibmmConan(ConanFile):
             raise ConanInvalidConfiguration("Linking shared glib with the MSVC static runtime is not supported")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.2.2")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

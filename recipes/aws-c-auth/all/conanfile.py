@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.scm import Version
 
 import os
+import textwrap
 
 required_conan_version = ">=1.53.0"
 
@@ -14,7 +15,7 @@ class AwsCAuth(ConanFile):
         "C99 library implementation of AWS client-side authentication: "
         "standard credentials providers and signing."
     )
-    license = "Apache-2.0",
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/awslabs/aws-c-auth"
     topics = ("aws", "amazon", "cloud", "authentication", "credentials", "providers", "signing")
@@ -28,6 +29,9 @@ class AwsCAuth(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,19 +47,26 @@ class AwsCAuth(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
-        self.requires("aws-c-cal/0.5.13")
-        if Version(self.version) < "0.6.17":
-            self.requires("aws-c-io/0.10.20", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-http/0.6.13", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) <= "0.6.17":
+            self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-cal/0.5.13")
+            if Version(self.version) < "0.6.17":
+                self.requires("aws-c-io/0.10.20", transitive_headers=True, transitive_libs=True)
+                self.requires("aws-c-http/0.6.13", transitive_headers=True)
+            else:
+                self.requires("aws-c-io/0.13.4", transitive_headers=True, transitive_libs=True)
+                self.requires("aws-c-http/0.6.22", transitive_headers=True)
+            if Version(self.version) >= "0.6.5":
+                self.requires("aws-c-sdkutils/0.1.3", transitive_headers=True)
         else:
-            self.requires("aws-c-io/0.13.4", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-http/0.6.22", transitive_headers=True, transitive_libs=True)
-        if Version(self.version) >= "0.6.5":
-            self.requires("aws-c-sdkutils/0.1.3", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-common/0.9.6", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-cal/0.6.9")
+            self.requires("aws-c-io/0.13.35", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-http/0.7.14", transitive_headers=True)
+            self.requires("aws-c-sdkutils/0.1.12", transitive_headers=True)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -66,6 +77,7 @@ class AwsCAuth(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -76,25 +88,34 @@ class AwsCAuth(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "aws-c-auth"))
 
+        # TODO: to remove in conan v2 once legacy generators removed
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path),
+            {"AWS::aws-c-auth": "aws-c-auth::aws-c-auth"}
+        )
+
+    def _create_cmake_module_alias_targets(self, module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent(f"""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """)
+        save(self, module_file, content)
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-c-auth")
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-auth")
-        # TODO: back to global scope once conan v1 support dropped
-        self.cpp_info.components["aws-c-auth-lib"].libs = ["aws-c-auth"]
-        self.cpp_info.components["aws-c-auth-lib"].requires = [
-            "aws-c-common::aws-c-common-lib",
-            "aws-c-cal::aws-c-cal-lib",
-            "aws-c-io::aws-c-io-lib",
-            "aws-c-http::aws-c-http-lib",
-        ]
-        if Version(self.version) >= "0.6.5":
-            self.cpp_info.components["aws-c-auth-lib"].requires.append("aws-c-sdkutils::aws-c-sdkutils-lib")
+        self.cpp_info.libs = ["aws-c-auth"]
+        if self.options.shared:
+            self.cpp_info.defines.append("AWS_AUTH_USE_IMPORT_EXPORT")
 
-        # TODO: to remove once conan v1 support dropped
-        self.cpp_info.filenames["cmake_find_package"] = "aws-c-auth"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "aws-c-auth"
-        self.cpp_info.names["cmake_find_package"] = "AWS"
-        self.cpp_info.names["cmake_find_package_multi"] = "AWS"
-        self.cpp_info.components["aws-c-auth-lib"].names["cmake_find_package"] = "aws-c-auth"
-        self.cpp_info.components["aws-c-auth-lib"].names["cmake_find_package_multi"] = "aws-c-auth"
-        self.cpp_info.components["aws-c-auth-lib"].set_property("cmake_target_name", "AWS::aws-c-auth")
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

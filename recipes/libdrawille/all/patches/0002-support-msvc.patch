@@ -1,0 +1,95 @@
+diff --git a/src/stamp.c b/src/stamp.c
+index 73c78d0..6da8910 100644
+--- a/src/stamp.c
++++ b/src/stamp.c
+@@ -138,8 +138,13 @@ int draw_stamp_outline(Canvas* c, Color color, const Stamp* s) {
+     return 1;
+ }
+ 
++#ifdef _MSC_VER
++void fill_triangle(Canvas* __restrict canvas, const Color color,
++                   const Point v1, const Point v2, const Point v3) {
++#else
+ void fill_triangle(Canvas* restrict canvas, const Color color,
+                    const Point v1, const Point v2, const Point v3) {
++#endif
+     // 28.4 fixed-point coordinates
+     const int Y1 = to_fixed(v1.y);
+     const int Y2 = to_fixed(v2.y);
+diff --git a/src/stamp.h b/src/stamp.h
+index 5132bd7..009fea9 100644
+--- a/src/stamp.h
++++ b/src/stamp.h
+@@ -35,7 +35,12 @@ void apply_matrix(Stamp* s);
+ int draw_stamp_outline(Canvas* c, Color color, const Stamp* s);
+ int fill_shape(Canvas* c, Color color, const Stamp* s);
+ 
++#ifdef _MSC_VER
++void fill_triangle(Canvas* __restrict canvas, const Color color,
++                   const Point v1, const Point v2, const Point v3);
++#else
+ void fill_triangle(Canvas* restrict canvas, const Color color,
+                    const Point v1, const Point v2, const Point v3);
++#endif
+ 
+ #endif //LIBDRAWILLE_STAMP_H
+diff --git a/src/x86/avx2.c b/src/x86/avx2.c
+index 100c474..27870a8 100644
+--- a/src/x86/avx2.c
++++ b/src/x86/avx2.c
+@@ -17,8 +17,13 @@ static inline __m256i to_fixed_avx2(const float a, const float b, const float c,
+     return _mm256_cvtps_epi32(m);
+ }
+ 
++#ifdef _MSC_VER
++void fill_triangle_avx2(Canvas* __restrict canvas, const Color color,
++                        const Point v1, const Point v2, const Point v3) {
++#else
+ void fill_triangle_avx2(Canvas* restrict canvas, const Color color,
+                         const Point v1, const Point v2, const Point v3) {
++#endif
+     // Block size, standard 8x8 (must be power of two)
+     const int q = 8;
+ 
+diff --git a/src/x86/sse.c b/src/x86/sse.c
+index 27a6380..5cf0b48 100644
+--- a/src/x86/sse.c
++++ b/src/x86/sse.c
+@@ -10,8 +10,13 @@ static inline __m128i to_fixed_sse(const float a, const float b, const float c)
+     return _mm_cvtps_epi32(m);
+ }
+ 
++#ifdef _MSC_VER
++void fill_triangle_sse4(Canvas* __restrict canvas, const Color color,
++                        const Point v1, const Point v2, const Point v3) {
++#else
+ void fill_triangle_sse4(Canvas* restrict canvas, const Color color,
+                         const Point v1, const Point v2, const Point v3) {
++#endif
+     // Block size, standard 8x8 (must be power of two)
+     const int q = 8;
+ 
+diff --git a/src/x86/x86.h b/src/x86/x86.h
+index c31cd03..4d161cb 100644
+--- a/src/x86/x86.h
++++ b/src/x86/x86.h
+@@ -36,10 +36,19 @@ static inline void printv8h(const char* prefix, vec8 v) {
+ }
+ 
+ 
++#ifdef _MSC_VER
++void fill_triangle_sse4(Canvas* __restrict canvas, const Color color,
++                        const Point v1, const Point v2, const Point v3);
++
++void fill_triangle_avx2(Canvas* __restrict canvas, const Color color,
++                        const Point v1, const Point v2, const Point v3);
++#else
+ void fill_triangle_sse4(Canvas* restrict canvas, const Color color,
+                         const Point v1, const Point v2, const Point v3);
+ 
+ void fill_triangle_avx2(Canvas* restrict canvas, const Color color,
+                         const Point v1, const Point v2, const Point v3);
++#endif
++
+ 
+ #endif //LIBDRAWILLE_X86_H

@@ -1,4 +1,10 @@
 sources:
+  "1.0.2":
+    url: "https://github.com/bluescarni/mppp/archive/v1.0.2.tar.gz"
+    sha256: "2a537bc339726388fdda39905692d3df92fceee51d264e720e0e7ab7570bcdaf"
+  "1.0.0":
+    url: "https://github.com/bluescarni/mppp/archive/v1.0.0.tar.gz"
+    sha256: "e58b1a5fb8bdf095261eeb0861c3f46f96c71c4b043d19700e73ce3e4e639268"
   "0.27":
     url: "https://github.com/bluescarni/mppp/archive/v0.27.tar.gz"
     sha256: "a1e04f6605b3242d4361742159cf5ab273162fd7c105c2743a9bebcf44c846c3"
@@ -6,10 +12,30 @@ sources:
     url: "https://github.com/bluescarni/mppp/archive/v0.26.tar.gz"
     sha256: "4dbfa68802d9a1365eda884f085418afc147d01b7a928e8333e4dcc1c3b3ce9e"
 patches:
+  "1.0.2":
+    - patch_file: "patches/1.0.0-0001-disable-warning-error.patch"
+      patch_description: "disable the flag for treats warning as errors"
+      patch_type: "portability"
+    - patch_file: "patches/1.0.0-0002-remove-fmt-version.patch"
+      # https://github.com/conan-io/conan/issues/14172
+      patch_description: "remove fmt version number from find_package"
+      patch_type: "conan"
+  "1.0.0":
+    - patch_file: "patches/1.0.0-0001-disable-warning-error.patch"
+      patch_description: "disable the flag for treats warning as errors"
+      patch_type: "portability"
+    - patch_file: "patches/1.0.0-0002-remove-fmt-version.patch"
+      # https://github.com/conan-io/conan/issues/14172
+      patch_description: "remove fmt version number from find_package"
+      patch_type: "conan"
   "0.27":
     - patch_file: "patches/0.27-0001-disable-warning-error.patch"
       patch_description: "disable the flag for treats warning as errors"
       patch_type: "portability"
+    - patch_file: "patches/0.27-0002-remove-fmt-version.patch"
+      # https://github.com/conan-io/conan/issues/14172
+      patch_description: "remove fmt version number from find_package"
+      patch_type: "conan"
   "0.26":
     - patch_file: "patches/0.26-0001-disable-warning-error.patch"
       patch_description: "disable the flag for treats warning as errors"

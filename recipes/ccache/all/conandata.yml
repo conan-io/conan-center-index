@@ -1,4 +1,16 @@
 sources:
+  "4.9.1":
+    url: "https://github.com/ccache/ccache/releases/download/v4.9.1/ccache-4.9.1.tar.xz"
+    sha256: "4c03bc840699127d16c3f0e6112e3f40ce6a230d5873daa78c60a59c7ef59d25"
+  "4.9":
+    url: "https://github.com/ccache/ccache/releases/download/v4.9/ccache-4.9.tar.xz"
+    sha256: "1ebc72324e3ab52af0b562bf54189d108e85eef6478d6304a345a3c2dc4018e0"
+  "4.8.3":
+    url: "https://github.com/ccache/ccache/releases/download/v4.8.3/ccache-4.8.3.tar.xz"
+    sha256: "e47374c810b248cfca3665ee1d86c7c763ffd68d9944bc422d9c1872611f2b11"
+  "4.8.2":
+    url: "https://github.com/ccache/ccache/releases/download/v4.8.2/ccache-4.8.2.tar.xz"
+    sha256: "3d3fb3f888a5b16c4fa7ee5214cca76348afd6130e8443de5f6f2424f2076a49"
   "4.8.1":
     url: "https://github.com/ccache/ccache/releases/download/v4.8.1/ccache-4.8.1.tar.xz"
     sha256: "87959b6819530b3dcaeb39992f585b9fc2c7120302809741378097774919fb6f"
@@ -9,15 +21,43 @@ sources:
     url: "https://github.com/ccache/ccache/releases/download/v4.7.4/ccache-4.7.4.tar.xz"
     sha256: "df0c64d15d3efaf0b4f6837dd6b1467e40eeaaa807db25ce79c3a08a46a84e36"
 patches:
+  "4.9.1":
+    - patch_file: "patches/4.9-cmake-msvc-runtime.patch"
+      patch_description: "fixup MSVC runtime"
+      patch_type: "conan"
+  "4.9":
+    - patch_file: "patches/4.9-cmake-msvc-runtime.patch"
+      patch_description: "fixup MSVC runtime"
+      patch_type: "conan"
+  "4.8.3":
+    - patch_file: "patches/4.8-cmake-msvc-runtime.patch"
+      patch_description: "fixup MSVC runtime"
+      patch_type: "conan"
+  "4.8.2":
+    - patch_file: "patches/4.8-cmake-msvc-runtime.patch"
+      patch_description: "fixup MSVC runtime"
+      patch_type: "conan"
   "4.8.1":
     - patch_file: "patches/4.8-cmake-msvc-runtime.patch"
       patch_description: "fixup MSVC runtime"
       patch_type: "conan"
+    - patch_file: "patches/4.7.4-use-intrinsics-if-msbuild.patch"
+      patch_description: "fix build issue when using Visual Studio generator"
+      patch_type: "backport"
+      patch_source: "https://github.com/ccache/ccache/commit/350787245e7e894c8a472b176545f59a10e9dadb"
   "4.8":
     - patch_file: "patches/4.8-cmake-msvc-runtime.patch"
       patch_description: "fixup MSVC runtime"
       patch_type: "conan"
+    - patch_file: "patches/4.7.4-use-intrinsics-if-msbuild.patch"
+      patch_description: "fix build issue when using Visual Studio generator"
+      patch_type: "backport"
+      patch_source: "https://github.com/ccache/ccache/commit/350787245e7e894c8a472b176545f59a10e9dadb"
   "4.7.4":
     - patch_file: "patches/4.7.4-cmake-msvc-runtime.patch"
       patch_description: "fixup MSVC runtime"
       patch_type: "conan"
+    - patch_file: "patches/4.7.4-use-intrinsics-if-msbuild.patch"
+      patch_description: "fix build issue when using Visual Studio generator"
+      patch_type: "backport"
+      patch_source: "https://github.com/ccache/ccache/commit/350787245e7e894c8a472b176545f59a10e9dadb"

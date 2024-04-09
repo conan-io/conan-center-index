@@ -1,4 +1,10 @@
 sources:
+  "2.22.0":
+    url: "https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.22.0/SDL2_ttf-2.22.0.tar.gz"
+    sha256: "d48cbd1ce475b9e178206bf3b72d56b66d84d44f64ac05803328396234d67723"
+  "2.20.2":
+    url: "https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.20.2/SDL2_ttf-2.20.2.tar.gz"
+    sha256: "9dc71ed93487521b107a2c4a9ca6bf43fb62f6bddd5c26b055e6b91418a22053"
   "2.20.1":
     url: "https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.20.1/SDL2_ttf-2.20.1.tar.gz"
     sha256: "78cdad51f3cc3ada6932b1bb6e914b33798ab970a1e817763f22ddbfd97d0c57"
@@ -13,6 +19,10 @@ patches:
     - patch_file: "patches/2.20.1-0001-fix-cmake-min-version.patch"
       patch_description: "Disable useless .pc file install to avoid relying on CMake 3.21 features"
       patch_type: "conan"
+    - patch_file: "patches/2.20.1-0002-remove-unsupported-property.patch"
+      patch_description: "remove DEPRECATION property is available on CMake 3.17+ (Linux C3i is 3.15 and the Conan min)"
+      patch_type: "portability"
+      patch_source: "https://github.com/libsdl-org/SDL_ttf/commit/e49b6030bd57b7aa3f0e4e42cb7ccc5fee876184"
   "2.0.18":
     - patch_file: "patches/2.0.18-0001-cmake-fix-link-target.patch"
       patch_description: "correct target name, disable PIC fixed"

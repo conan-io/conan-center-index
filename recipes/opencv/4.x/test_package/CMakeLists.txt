@@ -1,32 +1,33 @@
 cmake_minimum_required(VERSION 3.8)
 project(test_package LANGUAGES CXX)
 
-option(built_dnn "Enabled if opencv is built dnn" OFF)
-option(built_with_ade "Enabled if opencv is built with ade" OFF)
-option(built_with_ffmpeg "Enabled if opencv is built with ffmpeg" OFF)
-option(built_contrib_sfm "Enabled if opencv is built contrib sfm" OFF)
+enable_testing()
 
-find_package(OpenCV REQUIRED imgcodecs highgui objdetect CONFIG)
-
-add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    opencv_imgcodecs
-    opencv_highgui
-    opencv_objdetect
-    $<TARGET_NAME_IF_EXISTS:opencv_gapi>
-    $<TARGET_NAME_IF_EXISTS:opencv_videoio>
-    $<TARGET_NAME_IF_EXISTS:opencv_sfm>
+set(TESTED_MODULES
+    # Main modules
+    "calib3d" "core" "dnn" "features2d" "flann" "gapi" "highgui" "imgcodecs"
+    "imgproc" "ml" "objdetect" "photo" "stitching" "video" "videoio"
+    # Extra modules
+    "alphamat" "aruco" "bgsegm" "bioinspired" "ccalib" "datasets" "dnn_superres"
+    "face" "freetype" "fuzzy" "hdf" "hfs" "img_hash" "intensity_transform"
+    "line_descriptor" "mcc" "optflow" "phase_unwrapping" "plot" "quality" "reg"
+    "rgbd" "saliency" "sfm" "shape" "structured_light" "superres"
+    "surface_matching" "text" "tracking" "wechat_qrcode" "xfeatures2d"
+    "ximgproc" "xobjdetect" "xphoto"
 )
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
-if(built_dnn)
-    target_link_libraries(${PROJECT_NAME} PRIVATE opencv_dnn)
-endif()
-if(built_with_ade)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE BUILT_WITH_ADE)
-endif()
-if(built_with_ffmpeg)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE BUILT_WITH_FFMPEG)
-endif()
-if(built_contrib_sfm)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE BUILT_CONTRIB_SFM)
-endif()
+
+find_package(OpenCV REQUIRED core CONFIG)
+
+foreach(_module ${TESTED_MODULES})
+    string(TOUPPER ${_module} _module_upper)
+    if(OPENCV_WITH_${_module_upper})
+        set(_test_target test_${_module})
+        set(_module_target opencv_${_module})
+        add_executable(${_test_target} ${_test_target}.cpp)
+        target_link_libraries(${_test_target} PRIVATE ${_module_target})
+        target_compile_features(${_test_target} PRIVATE cxx_std_11)
+        if(NOT ${_module} STREQUAL "highgui")
+            add_test(NAME ${_test_target} COMMAND ${_test_target})
+        endif()
+    endif()
+endforeach()

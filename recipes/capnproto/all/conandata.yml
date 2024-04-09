@@ -1,4 +1,13 @@
 sources:
+  "1.0.1":
+    url: "https://github.com/capnproto/capnproto/archive/v1.0.1.tar.gz"
+    sha256: "5bdb16f6b389a9e29b04214b9bae1759e8b7fe2b45049d7e3f1f286ba050a200"
+  "1.0.0":
+    url: "https://github.com/capnproto/capnproto/archive/v1.0.0.tar.gz"
+    sha256: "bcd44dde78055313a7786cb6ab020cbef19b9045b53857f90cce101c9453f715"
+  "0.10.4":
+    url: "https://github.com/capnproto/capnproto/archive/v0.10.4.tar.gz"
+    sha256: "c6f25940688c87ddb24e0c4e475c3213d9b044aad2ba305439cc8c224f559da6"
   "0.10.3":
     url: "https://github.com/capnproto/capnproto/archive/v0.10.3.tar.gz"
     sha256: "e07446f56043c983e009038e69d18ff86a2924909f0b518ccf47eccf5ac03919"
@@ -16,26 +25,75 @@ sources:
     sha256: "6d8b43a7ec2a764b4dfe4139a7cdd070ad9057f106898050d9f4db3754b98820"
   "0.7.0":
     url: "https://github.com/capnproto/capnproto/archive/v0.7.0.tar.gz"
-    sha256: 76c7114a3d142ad08b7208b3964a26e72a6320ee81331d3f0b87569fc9c47a28
+    sha256: "76c7114a3d142ad08b7208b3964a26e72a6320ee81331d3f0b87569fc9c47a28"
 patches:
+  "1.0.1":
+    - patch_file: "patches/0015-disable-tests-for-1.0.0.patch"
+      patch_description: "disable test build"
+      patch_type: "conan"
+  "1.0.0":
+    - patch_file: "patches/0015-disable-tests-for-1.0.0.patch"
+      patch_description: "disable test build"
+      patch_type: "conan"
+  "0.10.4":
+    - patch_file: "patches/0014-disable-tests-for-0.10.1.patch"
+      patch_description: "disable test build"
+      patch_type: "conan"
   "0.10.3":
-    - patch_file: patches/0014-disable-tests-for-0.10.1.patch
+    - patch_file: "patches/0014-disable-tests-for-0.10.1.patch"
+      patch_description: "disable test build"
+      patch_type: "conan"
   "0.10.1":
-    - patch_file: patches/0014-disable-tests-for-0.10.1.patch
+    - patch_file: "patches/0014-disable-tests-for-0.10.1.patch"
+      patch_description: "disable test build"
+      patch_type: "conan"
   "0.10.0":
-    - patch_file: patches/0013-disable-tests-for-0.10.0.patch
+    - patch_file: "patches/0013-disable-tests-for-0.10.0.patch"
+      patch_description: "disable test build"
+      patch_type: "conan"
   "0.9.1":
-    - patch_file: patches/0010-disable-tests-for-0.9.1.patch
-    - patch_file: patches/0011-msvc-cpp17-hassubstring-fix-0.9.1.patch
-    - patch_file: patches/0012-msvc-nogdi-fix-0.9.1.patch
+    - patch_file: "patches/0010-disable-tests-for-0.9.1.patch"
+      patch_description: "disable test build"
+      patch_type: "conan"
+    - patch_file: "patches/0011-msvc-cpp17-hassubstring-fix-0.9.1.patch"
+      patch_description: "fix compilation errors on Windows Clang"
+      patch_type: "portability"
+      patch_source: "https://github.com/capnproto/capnproto/pull/1344"
+    - patch_file: "patches/0012-msvc-nogdi-fix-0.9.1.patch"
+      patch_description: "fix compilation error on Windows"
+      patch_type: "portability"
+      patch_source: "https://github.com/capnproto/capnproto/issues/1421"
   "0.8.0":
-    - patch_file: patches/0001-disable-tests.patch
-    - patch_file: patches/0002-cmake-compat-header-install.patch
-    - patch_file: patches/0003-kj-tls-windows.patch
-    - patch_file: patches/0004-cmake-module-path.patch
-    - patch_file: patches/0005-msvc-16.7-ice-workaround.patch
-    - patch_file: patches/0009-windows-symlink-fix-0.8.0.patch
+    - patch_file: "patches/0001-disable-tests.patch"
+      patch_description: "disable test build"
+      patch_type: "conan"
+    - patch_file: "patches/0002-cmake-compat-header-install.patch"
+      patch_description: "fix compilation error for std::copy with list types"
+      patch_type: "portability"
+      patch_source: "https://github.com/capnproto/capnproto/pull/895"
+    - patch_file: "patches/0003-kj-tls-windows.patch"
+      patch_description: "add kj-tls target"
+      patch_type: "portability"
+      patch_source: "https://github.com/capnproto/capnproto/commit/7da6abf233fdf74a4ad4db56b6e98778b162dd7d"
+    - patch_file: "patches/0004-cmake-module-path.patch"
+      patch_description: "append cmake module path instead set"
+      patch_type: "conan"
+    - patch_file: "patches/0005-msvc-16.7-ice-workaround.patch"
+      patch_description: "Workaround for internal compiler error with msvc 16.7.x"
+      patch_type: "portability"
+      patch_source: "https://github.com/capnproto/capnproto/pull/1058"
+    - patch_file: "patches/0009-windows-symlink-fix-0.8.0.patch"
+      patch_description: "orkaround for install step on Windows where symlinks might be not supported."
+      patch_type: "portability"
+      patch_source: "https://github.com/capnproto/capnproto/pull/1240"
   "0.7.0":
-    - patch_file: patches/0006-symlink.patch
-    - patch_file: patches/0007-cmake-module-path.patch
-    - patch_file: patches/0008-disable-tests.patch
+    - patch_file: "patches/0006-symlink.patch"
+      patch_description: "Fix capnpc extension handling on Windows"
+      patch_type: "portability"
+      patch_source: "https://github.com/capnproto/capnproto/pull/804"
+    - patch_file: "patches/0007-cmake-module-path.patch"
+      patch_description: "append cmake module path instead set"
+      patch_type: "conan"
+    - patch_file: "patches/0008-disable-tests.patch"
+      patch_description: "disable test build"
+      patch_type: "conan"

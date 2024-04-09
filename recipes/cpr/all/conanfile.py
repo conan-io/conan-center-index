@@ -56,42 +56,10 @@ class CprConan(ConanFile):
         }.get(self._min_cppstd, {})
 
     @property
-    def _supports_openssl(self):
-        # https://github.com/libcpr/cpr/commit/b036a3279ba62720d1e43362d32202bf412ea152
-        # https://github.com/libcpr/cpr/releases/tag/1.5.0
-        return Version(self.version) >= "1.5.0" and not is_apple_os(self)
-
-    @property
-    def _supports_winssl(self):
-        # https://github.com/libcpr/cpr/commit/18e1fc5c3fc0ffc07695f1d78897fb69e7474ea9
-        # https://github.com/libcpr/cpr/releases/tag/1.5.1
-        return Version(self.version) >= "1.5.1" and self.settings.os == "Windows"
-
-    @property
-    def _supports_darwinssl(self):
-        # https://github.com/libcpr/cpr/releases/tag/1.6.1
-        return Version(self.version) >= "1.6.1" and is_apple_os(self)
-
-    @property
-    def _can_auto_ssl(self):
-        # https://github.com/libcpr/cpr/releases/tag/1.6.0
-        return not self._uses_old_cmake_options and not (
-           #  https://github.com/libcpr/cpr/issues/546
-            Version(self.version) in ["1.6.0", "1.6.1"]
-            and is_apple_os(self)
-        )
-
-    @property
-    def _uses_old_cmake_options(self):
-        # https://github.com/libcpr/cpr/releases/tag/1.6.0
-        return Version(self.version) < "1.6.0"
-
-    @property
     def _uses_valid_abi_and_compiler(self):
         # https://github.com/conan-io/conan-center-index/pull/5194#issuecomment-821908385
         return not (
-            Version(self.version) >= "1.6.0"
-            and self.settings.compiler == "clang"
+            self.settings.compiler == "clang"
             and self.settings.compiler.libcxx == "libstdc++"
             and Version(self.settings.compiler.version) < "9"
         )
@@ -102,15 +70,6 @@ class CprConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-        ssl_library = str(self.options.get_safe("with_ssl"))
-        if not self._can_auto_ssl and ssl_library == CprConan._AUTO_SSL:
-            if self._supports_openssl:
-                self.output.info("Auto SSL is not available below version 1.6.0. Falling back to openssl")
-                self.options.with_ssl = "openssl"
-            else:
-                self.output.info("Auto SSL is not available below version 1.6.0 (or below 1.6.2 on macOS), and openssl not supported. Disabling SSL")
-                self.options.with_ssl = CprConan._NO_SSL
 
         if Version(self.version) < "1.10.0":
             del self.options.verbose_logging
@@ -123,24 +82,12 @@ class CprConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcurl/7.87.0", transitive_headers=True, transitive_libs=True)
-
-    # Check if the system supports the given ssl library
-    def _supports_ssl_library(self, library):
-        if library == CprConan._NO_SSL:
-            return True
-        elif library == CprConan._AUTO_SSL:
-            return self._can_auto_ssl
-
-        validators = {
-            "openssl": self._supports_openssl,
-            "darwinssl": self._supports_darwinssl,
-            "winssl": self._supports_winssl,
-            CprConan._AUTO_SSL: self._can_auto_ssl
-        }
-
-        # A KeyError should never happen, as the options are validated by conan.
-        return validators[library]
+        self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True, transitive_libs=True)
+        # FIXME: This is a very dirty hack.
+        # with_ssl == _AUTO_SSL, cpr needs the openssl header to compile. But Conan recipe does not know which SSL library to use.
+        # because cpr's CMakeLists.txt automatically detects SSL libraries with CPR_ENABLE_SSL == ON.
+        if self.settings.os in ["Linux", "FreeBSD"] and self.options.with_ssl in ["openssl", CprConan._AUTO_SSL]:
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -151,23 +98,17 @@ class CprConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        SSL_FAILURE_MESSAGES = {
-            "openssl": "OpenSSL is not supported on macOS or on CPR versions < 1.5.0",
-            "darwinssl": "DarwinSSL is only supported on macOS and on CPR versions >= 1.6.1",
-            "winssl": "WinSSL is only on Windows and on CPR versions >= 1.5.1",
-            CprConan._AUTO_SSL: "Automatic SSL selection is only available on CPR versions >= 1.6.0 (and only >= 1.6.2 on macOS)"
-        }
-
         if not self._uses_valid_abi_and_compiler:
             raise ConanInvalidConfiguration(f"Cannot compile {self.ref} with libstdc++ on clang < 9")
 
         ssl_library = str(self.options.with_ssl)
-        if not self._supports_ssl_library(ssl_library):
-            raise ConanInvalidConfiguration(
-                f"Invalid SSL selection for the given configuration: {SSL_FAILURE_MESSAGES[ssl_library]}"
-                if ssl_library in SSL_FAILURE_MESSAGES
-                else f"Invalid value of ssl option, {ssl_library}"
-            )
+        
+        if ssl_library == "openssl" and is_apple_os(self):
+            raise ConanInvalidConfiguration("OpenSSL is not supported on macOS")
+        if ssl_library == "darwinssl" and not is_apple_os(self):
+            raise ConanInvalidConfiguration("DarwinSSL is only supported on macOS")
+        if ssl_library == "winssl" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("WinSSL is only on Windows")
 
         if ssl_library not in (CprConan._AUTO_SSL, CprConan._NO_SSL, "winssl") and ssl_library != self.dependencies["libcurl"].options.with_ssl:
             raise ConanInvalidConfiguration(
@@ -188,47 +129,22 @@ class CprConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _get_cmake_option(self, option):
-        CPR_1_6_CMAKE_OPTIONS_TO_OLD = {
-            "CPR_FORCE_USE_SYSTEM_CURL": "USE_SYSTEM_CURL",
-            "CPR_BUILD_TESTS": "BUILD_CPR_TESTS",
-            "CPR_BUILD_TESTS_SSL": "BUILD_CPR_TESTS_SSL",
-            "CPR_GENERATE_COVERAGE": "GENERATE_COVERAGE",
-            "CPR_USE_SYSTEM_GTEST": "USE_SYSTEM_GTEST",
-            "CPR_FORCE_OPENSSL_BACKEND": "USE_OPENSSL",
-            "CPR_FORCE_WINSSL_BACKEND": "USE_WINSSL",
-        }
-
-        if self._uses_old_cmake_options:
-            # Get the translated option if we can, or the original if one isn't defined.
-            return CPR_1_6_CMAKE_OPTIONS_TO_OLD.get(option, option)
-
-        CPR_1_6_CMAKE_OPTIONS_TO_1_10 = {
-            "CPR_FORCE_USE_SYSTEM_CURL": "CPR_USE_SYSTEM_CURL"
-        }
-
-        if Version(self.version) >= "1.10.0":
-            return CPR_1_6_CMAKE_OPTIONS_TO_1_10.get(option, option)
-        return option
-
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables[self._get_cmake_option("CPR_FORCE_USE_SYSTEM_CURL")] = True
-        tc.variables[self._get_cmake_option("CPR_BUILD_TESTS")] = False
-        tc.variables[self._get_cmake_option("CPR_GENERATE_COVERAGE")] = False
-        tc.variables[self._get_cmake_option("CPR_USE_SYSTEM_GTEST")] = False
+        if Version(self.version) >= "1.10.0":
+            tc.variables["CPR_USE_SYSTEM_CURL"] = True
+        else:
+            tc.variables["CPR_FORCE_USE_SYSTEM_CURL"] = True
+        tc.variables["CPR_BUILD_TESTS"] = False
+        tc.variables["CPR_GENERATE_COVERAGE"] = False
+        tc.variables["CPR_USE_SYSTEM_GTEST"] = False
         tc.variables["CPR_CURL_NOSIGNAL"] = not self.options.signal
-        ssl_value = str(self.options.get_safe("with_ssl"))
-        SSL_OPTIONS = {
-            "CPR_FORCE_DARWINSSL_BACKEND": ssl_value == "darwinssl",
-            "CPR_FORCE_OPENSSL_BACKEND": ssl_value == "openssl",
-            "CPR_FORCE_WINSSL_BACKEND": ssl_value == "winssl",
-            "CMAKE_USE_OPENSSL": ssl_value == "openssl"
-        }
-        for cmake_option, value in SSL_OPTIONS.items():
-            tc.variables[self._get_cmake_option(cmake_option)] = value
+        tc.variables["CPR_FORCE_DARWINSSL_BACKEND"] = (self.options.with_ssl == "darwinssl")
+        tc.variables["CPR_FORCE_OPENSSL_BACKEND"] = (self.options.with_ssl == "openssl")
+        tc.variables["CPR_FORCE_WINSSL_BACKEND"] = (self.options.with_ssl == "winssl")
+        tc.variables["CMAKE_USE_OPENSSL"] = (self.options.with_ssl == "openssl")
         # If we are on a version where disabling SSL requires a cmake option, disable it
-        if not self._uses_old_cmake_options and str(self.options.get_safe("with_ssl")) == CprConan._NO_SSL:
+        if self.options.with_ssl == CprConan._NO_SSL:
             tc.variables["CPR_ENABLE_SSL"] = False
 
         if self.options.get_safe("verbose_logging", False):

@@ -1,0 +1,13 @@
+diff --git a/src/bsoncxx/stdx/make_unique.hpp b/src/bsoncxx/stdx/make_unique.hpp
+index fe8bb2d..737e76b 100644
+--- a/src/bsoncxx/stdx/make_unique.hpp
++++ b/src/bsoncxx/stdx/make_unique.hpp
+@@ -48,7 +48,7 @@ using ::boost::make_unique;
+ BSONCXX_INLINE_NAMESPACE_END
+ }  // namespace bsoncxx
+ 
+-#elif __cplusplus >= 201402L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201402L)
++#elif defined(BSONCXX_POLY_USE_STD)
+ 
+ #include <memory>
+ 

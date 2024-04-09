@@ -1,16 +1,62 @@
 sources:
-  "0.6.2":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.6.2/sentry-native.zip"
-    sha256: "9b9f4b2cec961ca132039c7887fb876b3dd6f4795b31ca01d188187f69758efa"
-  "0.6.1":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.6.1/sentry-native.zip"
-    sha256: "47527a3513db141affb8af28a0b8d886f78348a65acd2110d7eed936e3d82954"
-  "0.6.0":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.6.0/sentry-native.zip"
-    sha256: "ae03c9c8487794cd0f6d7fb7bb9b3c13e1a253190b290eaf752e2b4f007fd089"
+  "0.6.5":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.6.5/sentry-native.zip"
+    sha256: "5f74a5c5c3abc6e1e7825d3306be9e3b3fd4e0f586f3cf7e86607d6f56a71995"
+  "0.6.4":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.6.4/sentry-native.zip"
+    sha256: "e00278bf9a4821bb4008985a5a552a84aba6ebb06d3f9e828082fcbf06b04a38"
+  "0.6.3":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.6.3/sentry-native.zip"
+    sha256: "6b515c17a9b860ea47c6a5fd7abdfdc89b4b8cbc654c23a8bb42a39bfcb87ad9"
   "0.5.4":
     url: "https://github.com/getsentry/sentry-native/releases/download/0.5.4/sentry-native.zip"
     sha256: "e151bdc76894eb964ba4637361b2a96b7447fb04212053cf695fd7f72b636e4d"
   "0.4.18":
     url: "https://github.com/getsentry/sentry-native/releases/download/0.4.18/sentry-native.zip"
     sha256: "41fdf6499cd8576142beb03104badcc9e0b80b8ef27080ca71cd4408cc1d7ece"
+patches:
+  "0.6.5":
+    - patch_file: "patches/0.6.x-0001-remove-third-pary-lss.patch"
+      patch_description: "Remove third party lss from include"
+      patch_type: "conan"
+      patch_source: "https://github.com/getsentry/breakpad/pull/37"
+    - patch_file: "patches/0.6.x-0002-install-breakpad-header.patch"
+      patch_description: "Install breakpad header"
+      patch_type: "conan"
+      patch_source: "https://github.com/getsentry/sentry-native/pull/872"
+  "0.6.4":
+    - patch_file: "patches/0.6.x-0001-remove-third-pary-lss.patch"
+      patch_description: "Remove third party lss from include"
+      patch_type: "conan"
+      patch_source: "https://github.com/getsentry/breakpad/pull/37"
+    - patch_file: "patches/0.6.x-0002-install-breakpad-header.patch"
+      patch_description: "Install breakpad header"
+      patch_type: "conan"
+      patch_source: "https://github.com/getsentry/sentry-native/pull/872"
+  "0.6.3":
+    - patch_file: "patches/0.6.x-0001-remove-third-pary-lss.patch"
+      patch_description: "Remove third party lss from include"
+      patch_type: "conan"
+      patch_source: "https://github.com/getsentry/breakpad/pull/37"
+    - patch_file: "patches/0.6.x-0002-install-breakpad-header.patch"
+      patch_description: "Install breakpad header"
+      patch_type: "conan"
+      patch_source: "https://github.com/getsentry/sentry-native/pull/872"
+  "0.5.4":
+    - patch_file: "patches/0.5.4-0001-remove-third-pary-lss.patch"
+      patch_description: "Remove third party lss from include"
+      patch_type: "conan"
+      patch_source: "https://github.com/getsentry/breakpad/pull/37"
+    - patch_file: "patches/0.5.4-0002-install-breakpad-header.patch"
+      patch_description: "Install breakpad header"
+      patch_type: "conan"
+      patch_source: "https://github.com/getsentry/sentry-native/pull/872"
+  "0.4.18":
+    - patch_file: "patches/0.4.18-0001-remove-third-pary-lss.patch"
+      patch_description: "Remove third party lss from include"
+      patch_type: "conan"
+      patch_source: "https://github.com/getsentry/breakpad/pull/37"
+    - patch_file: "patches/0.4.18-0002-install-breakpad-header.patch"
+      patch_description: "Install breakpad header"
+      patch_type: "conan"
+      patch_source: "https://github.com/getsentry/sentry-native/pull/872"

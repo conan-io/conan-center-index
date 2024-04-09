@@ -1,7 +1,22 @@
 sources:
+  "3.0.2":
+    url: "https://github.com/rapidfuzz/rapidfuzz-cpp/archive/refs/tags/v3.0.2.tar.gz"
+    sha256: "4fddce5c0368e78bd604c6b820e6be248d669754715e39b4a8a281bda4c06de1"
+  "3.0.0":
+    url: "https://github.com/rapidfuzz/rapidfuzz-cpp/archive/refs/tags/v3.0.0.tar.gz"
+    sha256: "26a76c5a881c07638567557c1d73f6601f0d444816de03f297d731b1e019f21b"
+  "2.2.3":
+    url: "https://github.com/rapidfuzz/rapidfuzz-cpp/archive/refs/tags/v2.2.3.tar.gz"
+    sha256: "df4412e9593945782de2212095bd4b70a8f8e63ae8f313976c616809be124d2c"
+  "2.2.0":
+    url: "https://github.com/rapidfuzz/rapidfuzz-cpp/archive/refs/tags/v2.2.0.tar.gz"
+    sha256: "8fe2d2792ee8b32598f4aa3aad5db7d449fb3c4a32387080f650335cf4faef81"
+  "2.1.1":
+    url: "https://github.com/rapidfuzz/rapidfuzz-cpp/archive/refs/tags/v2.1.1.tar.gz"
+    sha256: "1680c0dbf77d228ea81825c24755db99ee0e21a8db3663b5136741b3e108c3f2"
+  "2.0.0":
+    url: "https://github.com/rapidfuzz/rapidfuzz-cpp/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "0d6d399be1de151631bbc189b72089600884831a4dac91e22f17351cef18ae64"
   "1.10.4":
-    url: "https://github.com/maxbachmann/rapidfuzz-cpp/archive/refs/tags/v1.10.4.tar.gz"
+    url: "https://github.com/rapidfuzz/rapidfuzz-cpp/archive/refs/tags/v1.10.4.tar.gz"
     sha256: "84a1ea8759aaa5bc8587c26504421d6fd34ad2a8dc74bf469b0cc3cc6758e17a"
-  "cci.20210513":
-    url: "https://github.com/maxbachmann/rapidfuzz-cpp/archive/d1e82379395cafc6d439c1c1e2cbe7512eaf2518.tar.gz"
-    sha256: "e5c306aae2fb4b34a381fbffaa97399114f20de14d83914ac2c9013b0226ce57"

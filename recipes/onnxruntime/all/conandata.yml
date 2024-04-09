@@ -1,8 +1,58 @@
 sources:
+  "1.16.3":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.16.3.tar.gz"
+    sha256: "d26b8a7eed1df4440aa3d8eac5049980cbe585514ccedfda809712051a4b1721"
+  "1.16.2":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.16.2.tar.gz"
+    sha256: "609a9d31fd9445eb2e737cbb6420100fa7d4e1180b594c1a62505b26f730bfd5"
+  "1.16.1":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.16.1.tar.gz"
+    sha256: "197c6ce4f2de9176402fb8a634c390e757b729ff48a30e8038a0f7d71ff1f1ae"
+  "1.16.0":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.16.0.tar.gz"
+    sha256: "3a4e57d454bce4349e11e2262fc47728a78b86ef1e0754514bbbc7d709e0a80d"
+  "1.15.1":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.15.1.tar.gz"
+    sha256: "93a9b6f148639938ccbaa48d0f641d8f33312fdfcc69ee9466e11362b43917c4"
   "1.14.1":
     url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.14.1.tar.gz"
     sha256: "f998352b131bb89fa7dd1f1d87ddbafe647dfaddd11929b6b5168b3f4ef857de"
 patches:
+  "1.16.3":
+    - patch_file: "patches/1.16.0-0001-cmake-dependencies.patch"
+      patch_description: "CMake: ensure conan dependencies are used"
+      patch_type: "conan"
+    - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
+      patch_description: "allow to build with abseil built without c++17 support"
+      patch_type: "portability"
+  "1.16.2":
+    - patch_file: "patches/1.16.0-0001-cmake-dependencies.patch"
+      patch_description: "CMake: ensure conan dependencies are used"
+      patch_type: "conan"
+    - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
+      patch_description: "allow to build with abseil built without c++17 support"
+      patch_type: "portability"
+  "1.16.1":
+    - patch_file: "patches/1.16.0-0001-cmake-dependencies.patch"
+      patch_description: "CMake: ensure conan dependencies are used"
+      patch_type: "conan"
+    - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
+      patch_description: "allow to build with abseil built without c++17 support"
+      patch_type: "portability"
+  "1.16.0":
+    - patch_file: "patches/1.16.0-0001-cmake-dependencies.patch"
+      patch_description: "CMake: ensure conan dependencies are used"
+      patch_type: "conan"
+    - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
+      patch_description: "allow to build with abseil built without c++17 support"
+      patch_type: "portability"
+  "1.15.1":
+    - patch_file: "patches/1.15.1-0001-cmake-dependencies.patch"
+      patch_description: "CMake: ensure conan dependencies are used"
+      patch_type: "conan"
+    - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
+      patch_description: "allow to build with abseil built without c++17 support"
+      patch_type: "portability"
   "1.14.1":
     - patch_file: "patches/1.14.1-0001-cmake-dependencies.patch"
       patch_description: "CMake: ensure conan dependencies are used (upstreamed future versions)"
@@ -18,3 +68,7 @@ patches:
     - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
       patch_description: "allow to build with abseil built without c++17 support"
       patch_type: "portability"
+    - patch_file: "patches/1.14.1-0005-re2-compat.patch"
+      patch_description: "Ensures the forward compatibility with the newest versions of re2 library."
+      patch_type: "portability"
+      patch_source: "https://github.com/microsoft/onnxruntime/commit/126e7bf15fa4af8621814b82a3f7bd0d786f0239.patch"

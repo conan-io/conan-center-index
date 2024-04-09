@@ -1,13 +1,15 @@
 versions:
-  "5.0.4":
-    folder: all
-  "5.1.5":
-    folder: all
-  "5.2.4":
-    folder: all
   "5.3.2":
     folder: all
   "5.5":
     folder: all
   "5.5.1":
+    folder: all
+  "5.5.2":
+    folder: all
+  "5.5.3":
+    folder: all
+  "5.6":
+    folder: all
+  "5.6.1":
     folder: all

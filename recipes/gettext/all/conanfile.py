@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import AutotoolsToolchain, Autotools
+from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path, unix_path_package_info_legacy
 from conan.tools.scm import Version
 
@@ -31,26 +32,30 @@ class GetTextConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
         self.requires("libiconv/1.17")
 
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self.conf.get("tools.microsoft.bash:path", check_type=str):
-            self.win_bash = True
-            self.tool_requires("msys2/cci.latest")
-        if is_msvc(self):
-            self.build_requires("automake/1.16.5")
+    def package_id(self):
+        del self.info.settings.compiler
 
     def validate(self):
         if Version(self.version) < "0.21" and is_msvc(self):
             raise ConanInvalidConfiguration("MSVC builds of gettext for versions < 0.21 are not supported.")  # FIXME: it used to be possible. What changed?
 
-    def package_id(self):
-        del self.info.settings.compiler
+    def build_requirements(self):
+        if self._settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+        
+        if self.version >= Version("0.22") or is_msvc(self):
+            self.build_requires("automake/1.16.5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -79,6 +84,12 @@ class GetTextConan(ConanFile):
         if is_msvc(self):
             if check_min_vs(self, "180", raise_invalid=False):
                 tc.extra_cflags.append("-FS") #TODO: reference github issue
+
+            # prevent redefining compiler instrinsic functions
+            tc.configure_args.extend([
+                'ac_cv_func_memmove=yes',
+                'ac_cv_func_memset=yes'
+            ])
 
             # The flag above `--with-libiconv-prefix` fails to correctly detect libiconv on windows+msvc
             # so it needs an extra nudge. We could use `AutotoolsDeps` but it's currently affected by the
@@ -118,9 +129,9 @@ class GetTextConan(ConanFile):
     def package(self):
         autotools = Autotools(self)
         autotools.install()
-        
+
         copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
- 
+
         rmdir(self, os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "include"))
         rmdir(self, os.path.join(self.package_folder, "share", "doc"))
@@ -135,14 +146,8 @@ class GetTextConan(ConanFile):
         autopoint = os.path.join(self.package_folder, "bin", "autopoint")
         self.buildenv_info.append_path("ACLOCAL_PATH", aclocal)
         self.buildenv_info.define_path("AUTOPOINT", autopoint)
-        
+
         # TODO: the following can be removed when the recipe supports Conan >= 2.0 only
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
-
-        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(aclocal))
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(unix_path_package_info_legacy(self, aclocal))
-
-        self.output.info("Setting AUTOPOINT environment variable: {}".format(autopoint))
         self.env_info.AUTOPOINT = unix_path_package_info_legacy(self, autopoint)

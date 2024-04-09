@@ -1,16 +1,17 @@
 import os
+import textwrap
 
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import copy, get, replace_in_file, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
 
 class XkbcommonConan(ConanFile):
@@ -65,24 +66,23 @@ class XkbcommonConan(ConanFile):
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.options.get_safe("xkbregistry"):
-            self.requires("libxml2/2.11.4")
+            self.requires("libxml2/2.12.3")
         if self.options.get_safe("with_wayland"):
-            self.requires("wayland/1.21.0")
-            if not self._has_build_profile:
-                self.requires("wayland-protocols/1.31")
+            self.requires("wayland/1.22.0")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(f"{self.ref} is only compatible with Linux and FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.1.0")
+        self.tool_requires("meson/1.3.2")
         self.tool_requires("bison/3.8.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
-        if self._has_build_profile and self.options.get_safe("with_wayland"):
-            self.tool_requires("wayland/1.21.0")
-            self.tool_requires("wayland-protocols/1.31")
+            self.tool_requires("pkgconf/2.1.0")
+        if self.options.get_safe("with_wayland"):
+            if self._has_build_profile:
+                self.tool_requires("wayland/<host_version>")
+            self.tool_requires("wayland-protocols/1.33")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -90,53 +90,58 @@ class XkbcommonConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+        if self.options.get_safe("with_wayland") and not self._has_build_profile:
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
         tc = MesonToolchain(self)
+        if Version(self.version) >= "1.6":
+            tc.project_options["enable-bash-completion"] = False
         tc.project_options["enable-docs"] = False
         tc.project_options["enable-wayland"] = self.options.get_safe("with_wayland", False)
         tc.project_options["enable-x11"] = self.options.with_x11
         if self._has_xkbregistry_option:
             tc.project_options["enable-xkbregistry"] = self.options.xkbregistry
-        if self._has_build_profile:
-            tc.project_options["build.pkg_config_path"] = self.generators_folder
+        tc.project_options["build.pkg_config_path"] = self.generators_folder
         tc.generate()
 
         pkg_config_deps = PkgConfigDeps(self)
-        if self._has_build_profile and self.options.get_safe("with_wayland"):
-            pkg_config_deps.build_context_activated = ["wayland", "wayland-protocols"]
-            pkg_config_deps.build_context_suffix = {"wayland": "_BUILD", "wayland-protocols": "_BUILD"}
+        if self.options.get_safe("with_wayland"):
+            if self._has_build_profile:
+                pkg_config_deps.build_context_activated = ["wayland", "wayland-protocols"]
+                pkg_config_deps.build_context_suffix = {"wayland": "_BUILD"}
+            else:
+                # Manually generate pkgconfig file of wayland-protocols since
+                # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
+                # We must use legacy conan v1 deps_cpp_info because self.dependencies doesn't
+                # contain build requirements when using 1 profile.
+                wp_prefix = self.deps_cpp_info["wayland-protocols"].rootpath
+                wp_version = self.deps_cpp_info["wayland-protocols"].version
+                wp_pkg_content = textwrap.dedent(f"""\
+                    prefix={wp_prefix}
+                    datarootdir=${{prefix}}/res
+                    pkgdatadir=${{datarootdir}}/wayland-protocols
+                    Name: Wayland Protocols
+                    Description: Wayland protocol files
+                    Version: {wp_version}
+                """)
+                save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
         pkg_config_deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         if self.options.get_safe("with_wayland"):
-            meson_build_file = os.path.join(self.source_folder, "meson.build")
-            # Patch the build system to use the pkg-config files generated for the build context.
-
-            if Version(self.version) >= "1.5.0":
-                get_pkg_config_var = "get_variable(pkgconfig: "
-            else:
-                get_pkg_config_var = "get_pkgconfig_variable("
-
             if self._has_build_profile:
-                replace_in_file(self, meson_build_file,
-                                "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
-                                "wayland_scanner_dep = dependency('wayland-scanner_BUILD', required: false, native: true)")
-                replace_in_file(self, meson_build_file,
-                                "wayland_protocols_dep = dependency('wayland-protocols', version: '>=1.12', required: false)",
-                                "wayland_protocols_dep = dependency('wayland-protocols_BUILD', version: '>=1.12', required: false, native: true)")
-            else:
-                replace_in_file(self, meson_build_file,
-                                "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
-                                "# wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)")
+                # Patch the build system to use the pkg-config files generated for the build context.
+                meson_build_file = os.path.join(self.source_folder, "meson.build")
+                replace_in_file(
+                    self,
+                    meson_build_file,
+                    "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
+                    "wayland_scanner_dep = dependency('wayland-scanner_BUILD', required: false, native: true)",
+                )
 
-                replace_in_file(self, meson_build_file,
-                                "if not wayland_client_dep.found() or not wayland_protocols_dep.found() or not wayland_scanner_dep.found()",
-                                "if not wayland_client_dep.found() or not wayland_protocols_dep.found()")
-
-                replace_in_file(self, meson_build_file,
-                                f"wayland_scanner = find_program(wayland_scanner_dep.{get_pkg_config_var}'wayland_scanner'))",
-                                "wayland_scanner = find_program('wayland-scanner')")
-
+    def build(self):
+        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -167,13 +172,9 @@ class XkbcommonConan(ConanFile):
             self.cpp_info.components["xkbcli-interactive-wayland"].libs = []
             self.cpp_info.components["xkbcli-interactive-wayland"].includedirs = []
             self.cpp_info.components["xkbcli-interactive-wayland"].requires = ["wayland::wayland-client"]
-            if not self._has_build_profile:
-                self.cpp_info.components["xkbcli-interactive-wayland"].requires.append("wayland-protocols::wayland-protocols")
 
         if Version(self.version) >= "1.0.0":
-            bindir = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH environment variable: {bindir}")
-            self.env_info.PATH.append(bindir)
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
         # unofficial, but required to avoid side effects (libxkbcommon component
         # "steals" the default global pkg_config name)

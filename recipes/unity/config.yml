@@ -1,0 +1,5 @@
+versions:
+  "2.6.0":
+    folder: all
+  "2.5.2":
+    folder: all
