@@ -89,7 +89,7 @@ class LibqasmConan(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
         tc.variables["LIBQASM_BUILD_PYTHON"] = self.options.build_python
-        tc.variables["LIBQASM_BUILD_TESTS"] = self.options.build_tests
+        tc.variables["LIBQASM_BUILD_TESTS"] = self._should_build_test
         tc.generate()
         env = VirtualBuildEnv(self)
         env.generate()
