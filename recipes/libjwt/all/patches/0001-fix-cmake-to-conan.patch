@@ -1,28 +1,50 @@
-From 36c1986dfa0684b97de86bfc96987fe8cd5e5b70 Mon Sep 17 00:00:00 2001
+From 07e04886d6b399637bf237b48a680169e0596423 Mon Sep 17 00:00:00 2001
 From: manx98 <1323517022@qq.com>
-Date: Tue, 2 Apr 2024 12:47:22 +0800
-Subject: [PATCH] fix cmake to conan
+Date: Tue, 9 Apr 2024 09:24:12 +0800
+Subject: [PATCH] fix conan cmake
 
 ---
- CMakeLists.txt        |  2 +-
- libjwt/CMakeLists.txt | 15 ++-------------
- 2 files changed, 3 insertions(+), 14 deletions(-)
+ CMakeLists.txt        | 18 +++++++--------
+ libjwt/CMakeLists.txt | 53 +++++++++++++++++--------------------------
+ 2 files changed, 30 insertions(+), 41 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 94b4aab..915a666 100644
+index 94b4aab..781d1e8 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -16,7 +16,7 @@ string(REPLACE "\\" "/" CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
- 
+
  option (ENABLE_DEBUG_INFO_IN_RELEASE "Enable adding debug info to release build." OFF)
  option (ENABLE_LTO "Enable link time optimizations." OFF)
 -option (BUILD_EXAMPLES "Build example projects." ON)
 +option (BUILD_EXAMPLES "Build example projects." OFF)
- 
+
  if (MSVC)
  	option (STATIC_RUNTIME "Link runtome library statically." OFF)
+@@ -96,13 +96,13 @@ set(LIB_INSTALL_DIR lib/)
+ set(LIBJWT_VERSION ${version_string})
+ include(CMakePackageConfigHelpers)
+ configure_package_config_file(cmake/libjwtConfig.cmake.in
+-  ${CMAKE_CURRENT_BINARY_DIR}/libjwtConfig.cmake
+-  INSTALL_DESTINATION ${LIB_INSTALL_DIR}/libjwt/cmake
+-  PATH_VARS INCLUDE_INSTALL_DIR)
++		${CMAKE_CURRENT_BINARY_DIR}/libjwtConfig.cmake
++		INSTALL_DESTINATION ${LIB_INSTALL_DIR}/libjwt/cmake
++		PATH_VARS INCLUDE_INSTALL_DIR)
+ write_basic_package_version_file(
+-  ${CMAKE_CURRENT_BINARY_DIR}/libjwtConfigVersion.cmake
+-  VERSION ${LIBJWT_VERSION}
+-  COMPATIBILITY SameMajorVersion )
++		${CMAKE_CURRENT_BINARY_DIR}/libjwtConfigVersion.cmake
++		VERSION ${LIBJWT_VERSION}
++		COMPATIBILITY SameMajorVersion )
+ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libjwtConfig.cmake
+-              ${CMAKE_CURRENT_BINARY_DIR}/libjwtConfigVersion.cmake
+-        DESTINATION ${LIB_INSTALL_DIR}/libjwt/cmake )
++		${CMAKE_CURRENT_BINARY_DIR}/libjwtConfigVersion.cmake
++		DESTINATION ${LIB_INSTALL_DIR}/libjwt/cmake )
 diff --git a/libjwt/CMakeLists.txt b/libjwt/CMakeLists.txt
-index a6ecd20..30d46de 100644
+index a6ecd20..49c5709 100644
 --- a/libjwt/CMakeLists.txt
 +++ b/libjwt/CMakeLists.txt
 @@ -5,7 +5,6 @@ set (TARGET_NAME ${PROJECT_NAME})
@@ -30,13 +52,13 @@ index a6ecd20..30d46de 100644
  option (WITHOUT_OPENSSL "Use GnuTLS for encryption instead of OpenSSL" OFF)
  option (USE_WINSSL "Use Windows crypto API for encryption instead of OpenSSL" OFF)
 -option (USE_INSTALLED_JANSSON "Use pre-installed jansson library" ON)
- 
+
  if (UNIX)
  	option (ENABLE_PIC "Use position independent code in static library build." OFF)
 @@ -46,17 +45,7 @@ else ()
  	set (SSL_LIBRARIES_OPTIMIZED ${OPENSSL_LIBRARIES})
  endif ()
- 
+
 -if (USE_INSTALLED_JANSSON)
 -    PKG_SEARCH_MODULE( JANSSON jansson )
 -else()
@@ -49,18 +71,74 @@ index a6ecd20..30d46de 100644
 -    FetchContent_MakeAvailable(jansson)
 -endif()
 +find_package(jansson REQUIRED)
- 
+
  write_file(${CMAKE_CURRENT_BINARY_DIR}/config.h "")
- 
-@@ -101,7 +90,7 @@ endif ()
- 
+
+@@ -66,16 +55,16 @@ list (REMOVE_ITEM SOURCE_FILES ${FILES_TO_REMOVE})
+ add_library (${TARGET_NAME} ${LIBRARY_TYPE} ${SOURCE_FILES})
+
+ target_include_directories (${TARGET_NAME} PRIVATE
+-	${SSL_LIBRARY_INCLUDE_DIR}
+-       ${jansson_SOURCE_DIR}/src
+-       ${jansson_SOURCE_DIR}/android
+-       ${CMAKE_CURRENT_BINARY_DIR}
+-	)
++		${SSL_LIBRARY_INCLUDE_DIR}
++		${jansson_SOURCE_DIR}/src
++		${jansson_SOURCE_DIR}/android
++		${CMAKE_CURRENT_BINARY_DIR}
++)
+
+ # Need for using the project by add_subdirectory
+ target_include_directories (${TARGET_NAME} INTERFACE
+-  ${CMAKE_CURRENT_LIST_DIR}/../include
+-  )
++		${CMAKE_CURRENT_LIST_DIR}/../include
++)
+
+ if (UNIX)
+ 	target_compile_definitions (${TARGET_NAME} PUBLIC _GNU_SOURCE)
+@@ -89,9 +78,9 @@ if (MSVC)
+ 	target_compile_definitions (${TARGET_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
+ 	if (BUILD_SHARED_LIBS)
+ 		target_compile_definitions (${TARGET_NAME}
+-			PUBLIC JWT_DLL_CONFIG
+-			PRIVATE JWT_BUILD_SHARED_LIBRARY
+-			)
++				PUBLIC JWT_DLL_CONFIG
++				PRIVATE JWT_BUILD_SHARED_LIBRARY
++		)
+ 	endif ()
+ endif ()
+
+@@ -100,17 +89,17 @@ if (NOT BUILD_SHARED_LIBS AND ENABLE_PIC)
+ endif ()
+
  target_link_libraries (${TARGET_NAME}
- 	debug ${SSL_LIBRARIES_DEBUG} optimized ${SSL_LIBRARIES_OPTIMIZED}
+-	debug ${SSL_LIBRARIES_DEBUG} optimized ${SSL_LIBRARIES_OPTIMIZED}
 -	jansson
-+	${jansson_LIBRARIES}
- 	)
- 
+-	)
++		debug ${SSL_LIBRARIES_DEBUG} optimized ${SSL_LIBRARIES_OPTIMIZED}
++		${jansson_LIBRARIES}
++)
+
  install (TARGETS ${TARGET_NAME}
+-	RUNTIME DESTINATION bin
+-	LIBRARY DESTINATION lib
+-	ARCHIVE DESTINATION lib
+-	)
++		RUNTIME DESTINATION bin
++		LIBRARY DESTINATION lib
++		ARCHIVE DESTINATION lib
++)
+
+ install (FILES
+-	${PROJECT_SOURCE_DIR}/include/jwt.h
+-	DESTINATION include/
+-	)
++		${PROJECT_SOURCE_DIR}/include/jwt.h
++		DESTINATION include/jwt
++)
 -- 
 2.34.1
 
