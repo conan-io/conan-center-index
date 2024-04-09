@@ -222,18 +222,14 @@ class ArrowConan(ConanFile):
             raise ConanException("Options with value 'auto' are deprecated. Please set them true/false or use its default value."
                                  f" Please change the following options: {auto_options}")
 
-        # Warn/error on some option values
-        if not self.options.with_boost:
-            if self.options.gandiva:
-                self.output.warning("Option 'with_boost=True' could be required when option 'gandiva=True'")
-        if not self.options.with_re2:
-            if self.options.gandiva or self.options.parquet:
-                self.output.warning("Option 'with_re2=True' could be required when option 'gandiva=True' or 'parquet=True'")
-            if self.options.compute or self.options.dataset_modules:
-                self.output.warning("Option 'with_re2=True' could be required when 'compute=True' or 'dataset_modules=True'")
-        if not self.options.with_jemalloc:
-            if "BSD" in self.settings.os:
-                self.output.warning("Option 'with_jemalloc=True' could be required for BSD in settings.os")
+        # From https://github.com/conan-io/conan-center-index/pull/23163#issuecomment-2039808851
+        if self.options.gandiva:
+            if not self.options.with_re2:
+                raise ConanException("'with_re2' option should be True when'gandiva=True'")
+            if not self.options.with_boost:
+                raise ConanException("'with_boost' option should be True when'gandiva=True'")
+            if not self.options.with_utf8proc:
+                raise ConanException("'with_utf8proc' option should be True when'gandiva=True'")
 
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
