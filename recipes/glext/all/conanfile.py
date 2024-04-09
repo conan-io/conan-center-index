@@ -23,8 +23,11 @@ class GlextConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("opengl/system")
         self.requires("khrplatform/cci.20200529")
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            self.requires("libglvnd/1.7.0")
+        else:
+            self.requires("opengl/system")
 
     def package_id(self):
         self.info.clear()
