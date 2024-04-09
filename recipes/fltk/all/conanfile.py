@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
@@ -57,6 +58,8 @@ class FltkConan(ConanFile):
             self.options.abi_version = str(
                 int(_version_major) * 10000 + int(_version_minor) * 100 + int(_version_patch)
             )
+        if self.settings.os in ["FreeBSD", "Linux"] and self.options.with_gl:
+            self.options["libglvnd"].glx = True
 
     def configure(self):
         if self.options.shared:
@@ -71,12 +74,16 @@ class FltkConan(ConanFile):
         self.requires("libpng/[>=1.6 <2]")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_gl:
-                self.requires("opengl/system")
                 self.requires("glu/system")
+                self.requires("libglvnd/1.7.0")
             self.requires("fontconfig/2.15.0")
             self.requires("xorg/system")
             if self.options.with_xft:
                 self.requires("libxft/2.3.8")
+
+    def validate(self):
+        if self.settings.os in ["FreeBSD", "Linux"] and self.options.with_gl and not self.dependencies["libglvnd"].options.glx:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the glx option of libglvnd to be enabled when the with_gl option is enabled")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -125,7 +132,7 @@ class FltkConan(ConanFile):
             if self.options.with_threads:
                 self.cpp_info.system_libs.extend(["pthread", "dl"])
             if self.options.with_gl:
-                self.cpp_info.system_libs.extend(["GL", "GLU"])
+                self.cpp_info.system_libs.append("GLU")
         elif is_apple_os(self):
             self.cpp_info.frameworks = [
                 "AppKit", "ApplicationServices", "Carbon", "Cocoa", "CoreFoundation", "CoreGraphics",
