@@ -1,6 +1,17 @@
+From ad00c6cbacfb9ac0a186c11615a3f3be58536e76 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Wed, 10 Apr 2024 07:41:17 -0500
+Subject: [PATCH 1/2] Fix CMake
+
+---
+ CMakeLists.txt | 29 +++++++++++++----------------
+ 1 file changed, 13 insertions(+), 16 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d8ef047..0e6f5ec 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -157,7 +157,7 @@
+@@ -157,7 +157,7 @@ SET(SOURCES
  )
  
  SET(LIBRARIES
@@ -9,7 +20,16 @@
    ${LIBFREENECT2_THREADING_LIBRARIES}
  )
  
-@@ -276,8 +272,8 @@
+@@ -209,7 +209,7 @@ IF(ENABLE_VAAPI)
+       src/vaapi_rgb_packet_processor.cpp
+     )
+     LIST(APPEND LIBRARIES
+-      ${VAAPI_LIBRARIES}
++      ${VAAPI_LINK_LIBRARIES}
+       ${JPEG_LIBRARY}
+     )
+   ENDIF()
+@@ -276,8 +276,8 @@ IF(ENABLE_OPENGL)
  
      LIST(APPEND LIBFREENECT2_DLLS ${GLFW3_DLL})
      LIST(APPEND LIBRARIES
@@ -20,7 +40,7 @@
      )
      LIST(APPEND SOURCES
        src/flextGL.cpp
-@@ -297,10 +293,10 @@
+@@ -297,10 +297,10 @@ ENDIF(ENABLE_OPENGL)
  
  SET(HAVE_OpenCL disabled)
  IF(ENABLE_OPENCL)
@@ -33,7 +53,7 @@
      SET(LIBFREENECT2_WITH_OPENCL_SUPPORT 1)
      SET(HAVE_OpenCL yes)
  
-@@ -312,7 +308,7 @@
+@@ -312,7 +312,7 @@ IF(ENABLE_OPENCL)
          MESSAGE(WARNING "Your libOpenCL.so is incompatible with CL/cl.h. Install ocl-icd-opencl-dev to update libOpenCL.so?")
        ENDIF()
      ENDIF()
@@ -42,7 +62,7 @@
  
      LIST(APPEND SOURCES
        src/opencl_depth_packet_processor.cpp
-@@ -320,7 +316,7 @@
+@@ -320,7 +320,7 @@ IF(ENABLE_OPENCL)
      )
  
      LIST(APPEND LIBRARIES
@@ -51,7 +71,7 @@
      )
  
      LIST(APPEND RESOURCES
-@@ -334,12 +330,11 @@
+@@ -334,12 +334,11 @@ IF(ENABLE_OPENCL)
      IF(UNIX AND NOT APPLE)
        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
      ENDIF()
@@ -65,7 +85,7 @@
    SET(HAVE_CUDA no)
    IF(CUDA_FOUND AND MSVC14 AND CUDA_VERSION VERSION_LESS 8.0)
      SET(HAVE_CUDA "no (VS2015 not supported)")
-@@ -347,12 +342,15 @@
+@@ -347,12 +346,15 @@ IF(ENABLE_CUDA)
      SET(LIBFREENECT2_WITH_CUDA_SUPPORT 1)
      SET(HAVE_CUDA yes)
  
@@ -82,7 +102,7 @@
        "${NVCUDASAMPLES8_0_ROOT}/common/inc"
      )
      SET(CUDA_FLAGS -use_fast_math)
-@@ -403,11 +401,6 @@
+@@ -403,11 +405,6 @@ ENDIF()
  # Both command line -DCMAKE_INSTALL_RPATH=... and CMake GUI settings are accepted.
  #
  # Anyway if wrong versions of libusb is used, errors will be reported explicitly.
@@ -94,3 +114,6 @@
  IF(DEFINED CMAKE_INSTALL_RPATH)
    MESSAGE(STATUS "RPATH set to ${CMAKE_INSTALL_RPATH}")
  ENDIF()
+-- 
+2.44.0
+

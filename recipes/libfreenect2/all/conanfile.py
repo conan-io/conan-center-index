@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -49,6 +50,10 @@ class Libfreenect2Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if self.settings.os in ["FreeBSD", "Linux"] and self.options.with_opengl:
+            self.options["libglvnd"].glx = True
+        if self.options.get_safe("with_vaapi"):
+            self.options["libva"].with_drm = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -61,10 +66,13 @@ class Libfreenect2Conan(ConanFile):
             self.requires("opencl-headers/2023.02.06")
             self.requires("opencl-icd-loader/2023.02.06")
         if self.options.with_opengl:
-            self.requires("opengl/system")
+            if self.settings.os in ["FreeBSD", "Linux"]:
+                self.requires("libglvnd/1.7.0")
+            else:
+                self.requires("opengl/system")
             self.requires("glfw/3.3.8")
         if self.options.get_safe("with_vaapi"):
-            self.requires("vaapi/system")
+            self.requires("libva/2.20.0")
         if self.options.with_cuda:
             self.requires("cuda-samples/12.2")
 
@@ -73,6 +81,10 @@ class Libfreenect2Conan(ConanFile):
             check_min_cppstd(self, 11)
         if self.options.with_cuda:
             self.output.warning("Conan package for CUDA is not available, will use system CUDA")
+        if self.settings.os in ["FreeBSD", "Linux"] and self.options.get_safe("with_opengl") and not self.dependencies["libglvnd"].options.glx:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the glx option of libglvnd to be enabled when the with_opengl option is enabled")
+        if self.options.get_safe("with_vaapi") and not self.dependencies["libva"].options.with_drm:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the with_drm option of libva to be enabled when the with_vaapi option is enabled")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -153,11 +165,11 @@ class Libfreenect2Conan(ConanFile):
             ]
         if self.options.with_opengl:
             self.cpp_info.requires += [
-                "opengl::opengl",
+                "libglvnd::gl" if self.settings.os in ["FreeBSD", "Linux"] else "opengl::opengl",
                 "glfw::glfw",
             ]
         if self.options.get_safe("with_vaapi"):
-            self.cpp_info.requires += ["vaapi::vaapi"]
+            self.cpp_info.requires += ["libva::libva_", "libva::libva-drm"]
         if self.options.with_cuda:
             self.cpp_info.requires += ["cuda-samples::cuda-samples"]
 

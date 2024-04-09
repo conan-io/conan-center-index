@@ -1,6 +1,11 @@
-This patch avoids compiling 'generate_resources_tool' to generate C sources of binary resources
-and instead uses CMake functionality to generate the files. This patch is necessary to enable
-cross-compiling without setting up host compiling environment. @sh0
+From dfebe6e53ac1609fc927d2b49ecd3f6574a278e5 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Wed, 10 Apr 2024 07:41:33 -0500
+Subject: [PATCH 2/2] Generate resources
+
+---
+ cmake_modules/GenerateResources.cmake | 27 ++++++++++++++++++---------
+ 1 file changed, 18 insertions(+), 9 deletions(-)
 
 diff --git a/cmake_modules/GenerateResources.cmake b/cmake_modules/GenerateResources.cmake
 index 8616e38..6deea9a 100644
@@ -39,3 +44,6 @@ index 8616e38..6deea9a 100644
  )
  
  ENDFUNCTION(GENERATE_RESOURCES)
+-- 
+2.44.0
+
