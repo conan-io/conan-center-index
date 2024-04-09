@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.64.0 <2 || >=2.2.0"
 
 
 class WaylandProtocolsConan(ConanFile):
@@ -38,7 +38,7 @@ class WaylandProtocolsConan(ConanFile):
 
     def generate(self):
         tc = MesonToolchain(self)
-        tc.project_options["datadir"] = os.path.join(self.package_folder, "res")
+        tc.project_options["datadir"] = "res"
         tc.project_options["tests"] = "false"
         tc.generate()
         virtual_build_env = VirtualBuildEnv(self)
