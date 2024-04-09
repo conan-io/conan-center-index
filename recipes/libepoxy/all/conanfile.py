@@ -43,7 +43,7 @@ class EpoxyConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             self.options.shared = True
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["FreeBSD", "Linux"]:
             del self.options.glx
             del self.options.egl
             del self.options.x11
@@ -53,24 +53,38 @@ class EpoxyConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            if self.options.get_safe("egl"):
+                self.options["libglvnd"].egl = True
+            if self.options.get_safe("glx"):
+                self.options["libglvnd"].glx = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("opengl/system")
-        if self.settings.os == "Linux":
-            if self.options.x11:
+        # epoxy/egl_generated.h includes EGL/eglplatform.h
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            if self.options.get_safe("egl") or self.options.get_safe("glx"):
+                self.requires("libglvnd/1.7.0", transitive_headers=bool(self.options.get_safe("egl")))
+            if self.options.get_safe("x11"):
                 self.requires("xorg/system")
-            if self.options.egl:
-                self.requires("egl/system")
+        else:
+            self.requires("opengl/system")
 
     def validate(self):
         if self.settings.os == "Windows" and not self.options.shared:
             raise ConanInvalidConfiguration("Static builds on Windows are not supported")
+        if self.settings.os in ["FreeBSD", "Linux"] and self.options.glx and not self.options.x11:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the x11 option to be enabled when the glx option is enabled")
+        if self.settings.os in ["FreeBSD", "Linux"] and self.options.get_safe("egl") and not self.dependencies["libglvnd"].options.egl:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the egl option of libglvnd to be enabled")
+        if self.settings.os in ["FreeBSD", "Linux"] and self.options.get_safe("glx") and not self.dependencies["libglvnd"].options.glx:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the glx option of libglvnd to be enabled")
+
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.1")
+        self.tool_requires("meson/1.4.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -105,7 +119,7 @@ class EpoxyConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["epoxy"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["FreeBSD", "Linux"]:
             self.cpp_info.system_libs = ["dl"]
         self.cpp_info.set_property("pkg_config_name", "epoxy")
         pkgconfig_variables = {
