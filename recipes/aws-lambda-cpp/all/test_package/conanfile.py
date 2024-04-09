@@ -19,7 +19,6 @@ class TestPackageConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        cmake.build(target="aws-lambda-package-test_package")
 
     def test(self):
         if can_run(self):
