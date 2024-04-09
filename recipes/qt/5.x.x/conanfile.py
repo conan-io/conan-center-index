@@ -35,6 +35,7 @@ class QtConan(ConanFile):
     license = "LGPL-3.0-only"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+    user = "sky"
     options = {
         "shared": [True, False],
         "commercial": [True, False],
