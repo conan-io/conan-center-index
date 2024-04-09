@@ -1,9 +1,9 @@
 sources:
-  "1.2.13":
-    url: "https://github.com/batterycenter/embed/archive/refs/tags/v1.2.13.tar.gz"
-    sha256: "f1df5f752293c78546c12abf6421349f6154c5ef19e99e3eb0146f7eef2efd8c"
+  "1.2.14":
+    url: "https://github.com/batterycenter/embed/archive/refs/tags/v1.2.14.tar.gz"
+    sha256: "879934293780e206f3b11702109759e57bdd98d5f266392b75823f284633b7fa"
 patches:
-  "1.2.13":
-    - patch_file: "patches/1.2.13-include-unordered_map.patch"
-      patch_description: "include unordered_map"
+  "1.2.14":
+    - patch_file: "patches/1.2.14-link-threads.patch"
+      patch_description: "link thread library (temporary)"
       patch_type: "portability"

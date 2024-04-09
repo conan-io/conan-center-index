@@ -69,10 +69,8 @@ class BatteryEmbedConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.bindirs = []
         self.cpp_info.includedirs = []
+        self.cpp_info.defines.append("B_PRODUCTION_MODE")
 
         self.cpp_info.set_property("cmake_target_name", "battery::embed")
         self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
         self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "embed.cmake")])
-
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
