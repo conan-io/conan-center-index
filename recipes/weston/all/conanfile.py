@@ -201,7 +201,7 @@ class WestonConan(ConanFile):
             self.requires("libseat/0.8.0")
             # Requires mesa for libgbm
             if self.options.renderer_gl:
-                self.requires("mesa/24.0.3")
+                self.requires("mesa/24.0.4")
             if self.options.backend_drm_screencast_vaapi:
                 self.requires("libva/2.20.0")
 
