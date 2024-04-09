@@ -129,7 +129,7 @@ class F2cConan(ConanFile):
         if is_msvc(self):
             fc = os.path.join(self.source_folder, "f2c", "fc")
             # '-u __MAIN' is not understood correctly by automake wrapper and cl
-            replace_in_file(self, fc, " -u MAIN__", "")
+            replace_in_file(self, fc, " -u MAIN__ -u _MAIN__", "")
             replace_in_file(self, fc, '.o"', '.obj"')
             replace_in_file(self, fc, "`.o", "`.obj")
             replace_in_file(self, fc, "-lf2c -lm", "-lf2c")
