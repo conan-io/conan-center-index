@@ -139,6 +139,10 @@ class SDLConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+        if self.options.get_safe("opengl"):
+            self.options["libglvnd"].glx = True
+        if self.options.get_safe("wayland"):
+            self.options["libglvnd"].egl = True
 
     def requirements(self):
         if self.options.get_safe("iconv", False):
@@ -148,14 +152,13 @@ class SDLConan(ConanFile):
                 self.requires("libalsa/1.2.10")
             if self.options.pulse:
                 self.requires("pulseaudio/14.2")
-            if self.options.opengl:
-                self.requires("opengl/system")
+            if self.options.opengl or self.options.wayland:
+                self.requires("libglvnd/1.7.0")
             if self.options.nas:
                 self.requires("nas/1.9.5")
             if self.options.wayland:
                 self.requires("wayland/1.22.0")
                 self.requires("xkbcommon/1.6.0")
-                self.requires("egl/system")
             if self.options.libunwind:
                 self.requires("libunwind/1.8.0")
 
@@ -173,6 +176,11 @@ class SDLConan(ConanFile):
                 raise ConanInvalidConfiguration("Package for 'esd' is not available (yet)")
             if self.options.directfb:
                 raise ConanInvalidConfiguration("Package for 'directfb' is not available (yet)")
+            if self.options.opengl and not self.dependencies["libglvnd"].options.glx:
+                raise ConanInvalidConfiguration(f"{self.ref} requires the glx option of libglvnd to be enabled when the opengl option is enabled")
+            if self.options.wayland and not self.dependencies["libglvnd"].options.egl:
+                raise ConanInvalidConfiguration(f"{self.ref} requires the egl option of libglvnd to be enabled when the wayland option is enabled")
+
 
     def package_id(self):
         if Version(self.version) < "2.0.22":
@@ -183,7 +191,7 @@ class SDLConan(ConanFile):
         if self.settings.os == "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         if hasattr(self, "settings_build") and self.options.get_safe("wayland"):
-            self.build_requires("wayland/1.22.0")  # Provides wayland-scanner
+            self.build_requires("wayland/<host_version>")  # Provides wayland-scanner
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True,
@@ -259,7 +267,7 @@ class SDLConan(ConanFile):
                 tc.variables["SDL_ESD_SHARED"] = self.options["esd"].shared
             tc.variables["SDL_PULSEAUDIO"] = self.options.pulse
             if self.options.pulse:
-                tc.variables["SDL_PULSEAUDIO_SHARED"] = self.dependencies["pulseaudio"].options.shared
+                tc.variables["SDL_PULSEAUDIO_SHARED"] = True
                 for component in self.dependencies["pulseaudio"].cpp_info.components:
                     if self.dependencies["pulseaudio"].cpp_info.components[component].libs:
                         cmake_extra_libs += self.dependencies["pulseaudio"].cpp_info.components[component].libs
@@ -381,7 +389,7 @@ class SDLConan(ConanFile):
             if self.options.pulse:
                 self.cpp_info.components["libsdl2"].requires.append("pulseaudio::pulseaudio")
             if self.options.opengl:
-                self.cpp_info.components["libsdl2"].requires.append("opengl::opengl")
+                self.cpp_info.components["libsdl2"].requires.append("libglvnd::gl")
             if self.options.jack:
                 self.cpp_info.components["libsdl2"].requires.append("jack::jack")
             if self.options.sndio:
@@ -405,7 +413,7 @@ class SDLConan(ConanFile):
             if self.options.wayland:
                 self.cpp_info.components["libsdl2"].requires.append("wayland::wayland")
                 self.cpp_info.components["libsdl2"].requires.append("xkbcommon::xkbcommon")
-                self.cpp_info.components["libsdl2"].requires.append("egl::egl")
+                self.cpp_info.components["libsdl2"].requires.append("libglvnd::egl")
             if self.options.libunwind:
                 self.cpp_info.components["libsdl2"].requires.append("libunwind::libunwind")
         elif is_apple_os(self) and not self.options.shared:
