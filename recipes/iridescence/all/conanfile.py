@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, rename
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, rename, replace_in_file
 from conan.tools.scm import Version
 import os
 
@@ -66,11 +66,10 @@ class IridescenceConan(ConanFile):
         self.requires("libjpeg/9e")
         self.requires("libpng/[>=1.6 <2]")
         self.requires("portable-file-dialogs/0.1.0", transitive_headers=True)
-        docking = '-docking' if self.options.imgui_docking else ''
-        # Would prefer imgui/1.89.9-docking and implot/0.16, but they would cause a version conflict on CCI
-        self.requires(f"imgui/1.89.4{docking}", transitive_headers=True, transitive_libs=True)
+        # Upstream uses -docking version of imgui, but it would cause version conflicts on CCI
+        self.requires("imgui/1.90.4", transitive_headers=True, transitive_libs=True, force=True)
         self.requires("imguizmo/1.83")
-        self.requires("implot/0.14")
+        self.requires("implot/0.16")
         self.requires("glfw/3.4", transitive_headers=True, transitive_libs=True)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libglvnd/1.7.0")
@@ -101,13 +100,23 @@ class IridescenceConan(ConanFile):
         tc.variables["BUILD_WITH_MARCH_NATIVE"] = "OFF"
         tc.variables["BUILD_EXT_TESTS"] = "OFF"
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        if "docking" not in str(self.dependencies["imgui"].ref.version):
+            tc.preprocessor_definitions["ImGuiConfigFlags_DockingEnable"] = "0"
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        if Version(self.dependencies["imgui"].ref.version) >= "1.90":
+            # https://github.com/ocornut/imgui/blob/master/imgui.cpp#L460
+            replace_in_file(self, os.path.join(self.source_folder, "src", "guik", "viewer", "viewer_ui.cpp"),
+                            "ImGui::GetWindowContentRegionWidth()",
+                            "(ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x)")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
