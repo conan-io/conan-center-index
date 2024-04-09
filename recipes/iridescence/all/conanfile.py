@@ -130,9 +130,8 @@ class IridescenceConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "iridescence")
-        self.cpp_info.set_property("cmake_target_name", "iridescence::iridescence")
-        self.cpp_info.set_property("pkg_config_name", "iridescence")
+        self.cpp_info.set_property("cmake_file_name", "Iridescence")
+        self.cpp_info.set_property("cmake_target_name", "Iridescence::Iridescence")
 
         self.cpp_info.libs = ["iridescence", "gl_imgui"]
         self.cpp_info.includedirs.append(os.path.join("include", "iridescence"))
