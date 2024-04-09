@@ -2,12 +2,13 @@ cmake_minimum_required(VERSION 3.12)
 
 project(PackageTest CXX)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_EXTENSIONS OFF)
+find_package(libqasm REQUIRED CONFIG)
 
-find_package(libqasm CONFIG REQUIRED)
-
-add_executable(example src/example.cpp)
-target_link_libraries(example libqasm::libqasm)
-target_compile_features(example PUBLIC cxx_std_20)
+add_executable(test_package
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/test_package.cpp"
+)
+target_compile_features(test_package PRIVATE cxx_std_20)
+if(MSVC)
+    target_compile_options(test_package PRIVATE /DEBUG:NONE)
+endif()
+target_link_libraries(tests_package PRIVATE libqasm::libqasm)
