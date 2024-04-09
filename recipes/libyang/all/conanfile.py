@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get, rmdir, copy
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -26,6 +27,9 @@ class LibYangConan(ConanFile):
 
     def requirements(self):
         self.requires("pcre2/10.42", transitive_headers=True)
+        if is_msvc(self):
+            self.requires("getopt-for-visual-studio/20200201")
+            self.requires("dirent/1.24")
 
     def config_options(self):
         if self.settings.os == "Windows":
