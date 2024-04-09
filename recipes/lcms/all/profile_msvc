@@ -1,0 +1,9 @@
+[settings]
+arch=arm64ec
+build_type=Debug
+compiler=msvc
+compiler.cppstd=20
+compiler.runtime=dynamic
+compiler.runtime_type=Debug
+compiler.version=193
+os=Windows
