@@ -10,7 +10,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.64.0 <2 || >=2.2.0"
 
 backends = [
     "drm",
@@ -300,7 +300,7 @@ class WestonConan(ConanFile):
             )
         tc.project_options["build.pkg_config_path"] = self.generators_folder
         tc.project_options["color-management-lcms"] = self.options.with_lcms
-        tc.project_options["datadir"] = os.path.join(self.package_folder, "res")
+        tc.project_options["datadir"] = "res"
         tc.project_options["demo-clients"] = self.options.demo_clients
         tc.project_options["desktop-shell-client-default"] = str(
             self.options.desktop_shell_client_default
@@ -309,9 +309,7 @@ class WestonConan(ConanFile):
         if self.options.with_libjpeg:
             tc.project_options["image-jpeg"] = True
         tc.project_options["image-webp"] = self.options.with_libwebp
-        tc.project_options["libexecdir"] = os.path.join(
-            self.package_folder, "bin", "plugin"
-        )
+        tc.project_options["libexecdir"] = os.path.join("bin", "plugin")
         tc.project_options["renderer-gl"] = self.options.renderer_gl
         tc.project_options["resize-pool"] = self.options.resize_pool
         tc.project_options["remoting"] = self.options.remoting
