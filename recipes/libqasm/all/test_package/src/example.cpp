@@ -5,5 +5,6 @@
 
 int main() {
     auto analyzer = cqasm::v3x::default_analyzer();
-    analyzer.analyze_string("version 3.0; qubit[2] q; H q[0]; CNOT q[0], q[1]; measure q", "");
+    auto result = analyzer.analyze_string("version 3.0; qubit[2] q; H q[0]; CNOT q[0], q[1]; measure q", "");
+    std::cout << result.to_json();
 }
