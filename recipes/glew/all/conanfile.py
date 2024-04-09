@@ -1,8 +1,10 @@
+import os
+
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-import os
 
 required_conan_version = ">=1.53.0"
 
@@ -40,17 +42,34 @@ class GlewConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            self.options["libglvnd"].glx = True
+            if self.options.get_safe("with_egl"):
+                self.options["libglvnd"].egl = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("opengl/system")
+        # eglew.h includes EGL/eglplatform.h.
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            self.requires("libglvnd/1.7.0", transitive_headers=bool(self.options.get_safe("with_egl")))
+        else:
+            self.requires("opengl/system")
+            if self.options.get_safe("with_egl"):
+                self.requires("egl/system", transitive_headers=True)
+
         # GL/glew.h includes glu.h.
         if is_apple_os(self) or self.settings.os == "Windows":
             self.requires("glu/system", transitive_headers=True)
         else:
             self.requires("mesa-glu/9.0.3", transitive_headers=True)
+
+    def validate(self):
+        if self.settings.os in ["FreeBSD", "Linux"] and not self.dependencies["libglvnd"].options.egl:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the egl option of libglvnd to be enabled when the with_egl option is enabled")
+        if self.settings.os in ["FreeBSD", "Linux"] and not self.dependencies["libglvnd"].options.glx:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the glx option of libglvnd to be enabled")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -58,7 +77,7 @@ class GlewConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_UTILS"] = False
-        tc.variables["GLEW_EGL"] = self.options.get_safe("with_egl", False)
+        tc.variables["GLEW_EGL"] = self.options.get_safe("with_egl")
         tc.generate()
 
     def build(self):
@@ -95,7 +114,14 @@ class GlewConan(ConanFile):
         self.cpp_info.components["glewlib"].libs = [lib_name]
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.components["glewlib"].defines.append("GLEW_STATIC")
-        self.cpp_info.components["glewlib"].requires = ["opengl::opengl"]
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            self.cpp_info.components["glewlib"].requires = ["libglvnd::gl"]
+            if self.options.get_safe("with_egl"):
+                self.cpp_info.components["glewlib"].requires.append("libglvnd::egl")
+        else:
+            self.cpp_info.components["glewlib"].requires = ["opengl::opengl"]
+            if self.options.get_safe("with_egl"):
+                self.cpp_info.components["glewlib"].requires.append("egl::egl")
         if is_apple_os(self) or self.settings.os == "Windows":
             self.cpp_info.components["glewlib"].requires.append("glu::glu")
         else:
