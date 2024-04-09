@@ -1,4 +1,7 @@
 sources:
+  "1.5.6":
+    url: "https://github.com/facebook/zstd/releases/download/v1.5.6/zstd-1.5.6.tar.gz"
+    sha256: "8c29e06cf42aacc1eafc4077ae2ec6c6fcb96a626157e0593d5e82a34fd403c1"
   "1.5.5":
     url: "https://github.com/facebook/zstd/releases/download/v1.5.5/zstd-1.5.5.tar.gz"
     sha256: "9c4396cc829cfae319a6e2615202e82aad41372073482fce286fac78646d3ee4"
@@ -18,6 +21,12 @@ sources:
     url: "https://github.com/facebook/zstd/releases/download/v1.4.9/zstd-1.4.9.tar.gz"
     sha256: "29ac74e19ea28659017361976240c4b5c5c24db3b89338731a6feb97c038d293"
 patches:
+  "1.5.6":
+    - patch_file: "patches/1.5.6-public-scope-windows-shared.patch"
+      patch_description: "Include zstd.h folder when building shared library on Windows"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/facebook/zstd/pull/4009"
+
   "1.5.5":
     - patch_file: "patches/1.5.2-cmake-remove-asm-except-x86_64.patch"
       patch_description: "use assembler codes only on x86_64"
