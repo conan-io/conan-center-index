@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <iostream>
 
 #include "stringzilla/stringzilla.hpp"
 
