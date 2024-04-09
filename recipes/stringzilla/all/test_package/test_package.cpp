@@ -1,7 +1,4 @@
 #include <cstdlib>
-#include <iostream>
-
-#if STRINGZILLA_API == 1
 
 #include "stringzilla.h"
 
@@ -25,54 +22,3 @@ int main(void) {
 
   return EXIT_SUCCESS;
 }
-
-#elif STRINGZILLA_API == 2
-
-#include "stringzilla.h"
-
-int main(void) {
-  // Initialize your haystack and needle
-  sz_string_view_t haystack = {
-    "Fastest string sort, search, split, "
-    "and shuffle for long strings and multi-gigabyte files in Python and C, "
-    "leveraging SIMD with Arm Neon and x86 AVX2 & AVX-512 intrinsics.",
-    171};
-  sz_string_view_t needle = {"SIMD", 4};
-
-  // Perform string-level operations
-  sz_size_t character_count = sz_count_char(haystack.start, haystack.length, "a");
-  sz_string_start_t substring_position = sz_find_substring(
-    haystack.start, haystack.length,
-    needle.start, needle.length
-  );
-
-  // Hash strings
-  sz_u32_t crc32 = sz_hash_crc32(haystack.start, haystack.length);
-
-  return EXIT_SUCCESS;
-}
-
-#else
-
-#include <array>
-#include <cstdint>
-#include <vector>
-#include "stringzilla/stringzilla.hpp"
-
-namespace sz = ashvardanian::stringzilla;
-
-int main(void) {
-  sz::string haystack = "some string";
-  sz::string_view needle = sz::string_view(haystack).substr(0, 4);
-
-  auto substring_position = haystack.find(needle); // Or `rfind`
-
-  haystack.end() - haystack.begin() == haystack.size(); // Or `rbegin`, `rend`
-  haystack.find_first_of(" \w\t") == 4; // Or `find_last_of`, `find_first_not_of`, `find_last_not_of`
-  haystack.starts_with(needle) == true; // Or `ends_with`
-  haystack.remove_prefix(needle.size()); // Why is this operation in-place?!
-
-  return EXIT_SUCCESS;
-}
-
-#endif
