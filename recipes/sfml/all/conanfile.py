@@ -54,7 +54,9 @@ class SfmlConan(ConanFile):
     def requirements(self):
         if self.options.window:
             # FIXME: use cci's glad
-            if self.settings.os in ["Windows", "Linux", "FreeBSD", "Macos"]:
+            if self.settings.os in ["FreeBSD", "Linux"]:
+                self.requires("libglvnd/1.7.0")
+            elif self.settings.os in ["Macos", "Windows"]:
                 self.requires("opengl/system")
             if self.settings.os == "Linux":
                 self.requires("libudev/system")
@@ -74,6 +76,8 @@ class SfmlConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} not supported on {self.settings.os}")
         if self.options.graphics and not self.options.window:
             raise ConanInvalidConfiguration("sfml:graphics=True requires sfml:window=True")
+        if self.options.window and self.settings.os in ["FreeBSD", "Linux"] and not self.dependencies["libglvnd"].options.glx:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the glx option of libglvnd to be enabled when the window option is enabled")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -85,6 +89,7 @@ class SfmlConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["SFML_DEPENDENCIES_INSTALL_PREFIX"] = self.package_folder.replace("\\", "/")
         tc.cache_variables["SFML_MISC_INSTALL_PREFIX"] = os.path.join(self.package_folder, "licenses").replace("\\", "/")
+        tc.variables["OpenGL_GL_PREFERENCE"] = "GLVND"
         tc.variables["SFML_BUILD_WINDOW"] = self.options.window
         tc.variables["SFML_BUILD_GRAPHICS"] = self.options.graphics
         tc.variables["SFML_BUILD_NETWORK"] = self.options.network
@@ -199,7 +204,11 @@ class SfmlConan(ConanFile):
             return ["UIKit"] if self.settings.os == "iOS" else []
 
         def opengl():
-            return ["opengl::opengl"] if self.settings.os in ["Windows", "Linux", "FreeBSD", "Macos"] else []
+            if self.settings.os in ["FreeBSD", "Linux"]:
+                return ["libglvnd::gl"]
+            elif self.settings.os in ["Macos", "Windows"]:
+                return ["opengl::opengl"]
+            return []
 
         def opengles_android():
             return ["EGL", "GLESv1_CM"] if self.settings.os == "Android" else []
