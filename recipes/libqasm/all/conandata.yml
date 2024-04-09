@@ -1,4 +1,4 @@
 sources:
-  "0.5.7":
-    url: "https://github.com/QuTech-Delft/libqasm/archive/refs/tags/v3-0.5.7.zip"
-    sha256: "6c6d5551b4dd1deec5a3a35c6a292cdd01ac3dc3bbb69dc94f6ca3227391fe90"
+  "0.6.1":
+    url: "https://github.com/QuTech-Delft/libqasm/archive/refs/tags/0.6.1.tar.gz"
+    sha256: "a1fef18e65b4ab72217601b5768adb1b3807b73b3244b06b79991269d20521c1"
