@@ -4,11 +4,11 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
 import os
 import textwrap
 
 required_conan_version = ">=1.53.0"
-
 
 class OctomapConan(ConanFile):
     name = "octomap"
@@ -31,6 +31,10 @@ class OctomapConan(ConanFile):
         "openmp": False,
     }
 
+    @property
+    def _min_cppstd(self):
+        return 11
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -49,6 +53,9 @@ class OctomapConan(ConanFile):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("shared octomap doesn't support MT runtime")
 
+        if Version(self.version) >= "1.10.0" and self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -58,6 +65,8 @@ class OctomapConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         if is_msvc(self) and self.options.shared:
             tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        if Version(self.version) >= "1.10.0":
+            tc.variables["CMAKE_CXX_STANDARD"] = self.settings.compiler.get_safe("cppstd", "11").replace("gnu", "")
         tc.generate()
 
     def _patch_sources(self):
