@@ -402,7 +402,7 @@ class WestonConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.components["weston"].libdirs = []
+        self.cpp_info.components["weston"].libdirs = [os.path.join(self.package_folder, "lib", "weston")]
         self.cpp_info.components["weston"].includedirs = [
             os.path.join(self.package_folder, "include", "weston")
         ]
