@@ -10,7 +10,7 @@ class ChunkIOConan(ConanFile):
     description = "Simple library to manage chunks of data in memory and file system"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/edsiper/chunkio"
+    homepage = "https://github.com/fluent/chunkio"
     topics = ("chunk", "io", "memory", "file")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
