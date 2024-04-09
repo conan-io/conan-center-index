@@ -26,17 +26,15 @@ class LibYangConan(ConanFile):
     tool_requires = "cmake/[>=3.22.0 <4]"
 
     def validate(self):
-        # TODO support windows build
+        # TODO For Windows support: https://github.com/CESNET/libyang?tab=readme-ov-file#windows-build-requirements
+        # CMake Error at CMakeLists.txt:386 (find_package):
+        #   By not providing "Findpthreads.cmake" in CMAKE_MODULE_PATH this project has
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(
-                f"{self.ref} on Windows is not yet supported.")
+                f"{self.ref} Conan recipe is not prepared to work on Windows. Contributions are welcome.")
 
     def requirements(self):
         self.requires("pcre2/10.42", transitive_headers=True)
-        # TODO windows build
-        # if is_msvc(self):
-        #     self.requires("getopt-for-visual-studio/20200201")
-        #     self.requires("dirent/1.24")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -76,8 +74,8 @@ class LibYangConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # move /share to /res
-        copy(self, "*", os.path.join(self.package_folder, "share"),
+        # move *.yang files from /share to /res
+        copy(self, "*.yang", os.path.join(self.package_folder, "share"),
              os.path.join(self.package_folder, "res", "share"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
