@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, replace_in_file
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 import os
@@ -38,10 +38,8 @@ class ImplotConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        if Version(self.version) >= "0.15":
+        if Version(self.version) >= "0.14":
             self.requires("imgui/1.90.4", transitive_headers=True)
-        elif Version(self.version) >= "0.14":
-            self.requires("imgui/1.89.5", transitive_headers=True)
         elif Version(self.version) >= "0.13":
             # imgui 1.89 renamed ImGuiKeyModFlags_* to  ImGuiModFlags_*
             self.requires("imgui/1.88", transitive_headers=True)
@@ -68,7 +66,15 @@ class ImplotConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
+    def _patch_sources(self):
+        if Version(self.version) == "0.14" and Version(self.dependencies["imgui"].ref.version) >= "1.89.7":
+            # https://github.com/ocornut/imgui/commit/51f564eea6333bae9242f40c983a3e29d119a9c2
+            replace_in_file(self, os.path.join(self.source_folder, "implot.cpp"),
+                            "ImGuiButtonFlags_AllowItemOverlap",
+                            "ImGuiButtonFlags_AllowOverlap")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
