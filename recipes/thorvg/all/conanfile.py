@@ -12,7 +12,7 @@ from conan.tools.env import VirtualBuildEnv
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.64.0 <2 || >=2.2.0"
 
 class ThorvgConan(ConanFile):
     name = "thorvg"
