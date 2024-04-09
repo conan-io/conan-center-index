@@ -1,10 +1,10 @@
+#include <jpeglib.h>
+#include <jpegint.h>
+#include <transupp.h>
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "jpeglib.h"
-#include "jpegint.h"
-#include "transupp.h"
 
 struct error_data {
     struct jpeg_error_mgr pub;

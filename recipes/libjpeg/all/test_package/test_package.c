@@ -12,12 +12,12 @@
  * JPEG markers.
  */
 
+#define JPEG_CJPEG_DJPEG /* to get the command-line config symbols */
+#include <jpeglib.h>    /* get auto-config symbols, <stdio.h> */
+
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
-
-#define JPEG_CJPEG_DJPEG /* to get the command-line config symbols */
-#include "jpeglib.h"    /* get auto-config symbols, <stdio.h> */
 
 #ifdef HAVE_LOCALE_H
 #include <locale.h> /* Bill Allombert: use locale for isprint */
@@ -475,41 +475,41 @@ int main(int argc, char **argv) {
     if (arg[0] != '-')
       break; /* not switch, must be file name */
     arg++;   /* advance over '-' */
-    if (keymatch(arg, "verbose", 1)) 
+    if (keymatch(arg, "verbose", 1))
     {
       verbose++;
     }
     else if (keymatch(arg, "raw", 1))
     {
       raw = 1;
-    } 
+    }
     else
       usage();
   }
 
   /* Open the input file. */
   /* Unix style: expect zero or one file name */
-  if (argn < argc - 1) 
+  if (argn < argc - 1)
   {
     fprintf(stderr, "%s: only one input file\n", progname);
     usage();
   }
-  if (argn < argc) 
+  if (argn < argc)
   {
-    if ((infile = fopen(argv[argn], READ_BINARY)) == NULL) 
+    if ((infile = fopen(argv[argn], READ_BINARY)) == NULL)
     {
       fprintf(stderr, "%s: can't open %s\n", progname, argv[argn]);
       exit(EXIT_FAILURE);
     }
-  } 
-  else if ((infile = fopen("testimg.jpg", READ_BINARY)) == NULL) 
+  }
+  else if ((infile = fopen("testimg.jpg", READ_BINARY)) == NULL)
   {
 /* default input file is stdin */
 #ifdef USE_SETMODE /* need to hack file mode? */
     setmode(fileno(stdin), O_BINARY);
 #endif
 #ifdef USE_FDOPEN /* need to re-open in binary mode? */
-    if ((infile = fdopen(fileno(stdin), READ_BINARY)) == NULL) 
+    if ((infile = fdopen(fileno(stdin), READ_BINARY)) == NULL)
     {
       fprintf(stderr, "%s: can't open stdin\n", progname);
       exit(EXIT_FAILURE);
