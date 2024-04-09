@@ -32,7 +32,7 @@ class bgfxConan(ConanFile):
     @property
     def _bimg_folder(self):
         return "bimg"
-    
+
     @property
     def _bgfx_folder(self):
         return "bgfx"
@@ -65,7 +65,7 @@ class bgfxConan(ConanFile):
             return "tools\\"
         else:
             return ""
-        
+
     @property
     def _shaderc_target_prefix(self):
         if self.settings.os == "Windows":
@@ -99,7 +99,7 @@ class bgfxConan(ConanFile):
     @property
     def _bx_version(self): #mapping of bgfx version to required/used bx version
         return {"cci.20230216": "cci.20221116"}
-    
+
     @property
     def _bimg_version(self): #mapping of bgfx version to required/used bimg version
         return {"cci.20230216": "cci.20230114"}
@@ -179,7 +179,7 @@ class bgfxConan(ConanFile):
         else:
             # Not sure if XCode can be spefically handled by conan for building through, so assume everything not VS is make
             # gcc-multilib and g++-multilib required for 32bit cross-compilation, should see if we can check and install through conan
-            
+
             # Conan to Genie translation maps
             compiler_str = str(self.settings.compiler)
             compiler_and_os_to_genie = {"Windows": f"--gcc=mingw-{compiler_str}", "Linux": f"--gcc=linux-{compiler_str}",
@@ -223,7 +223,7 @@ class bgfxConan(ConanFile):
                 autotools.make(target=proj, args=["-R", f"-C {proj_path}", mingw, conf])
 
     def package(self):
-        # Set platform suffixes and prefixes 
+        # Set platform suffixes and prefixes
         if self.settings.os == "Windows":
             if self.options.shared:
                 lib_pat = "*bgfx-shared-lib*.lib"
@@ -268,22 +268,22 @@ class bgfxConan(ConanFile):
         # Rename for consistency across platforms and configs
         if not (is_apple_os(self) and self.options.shared): #Apparently apple dylibs break if renamed
             for bgfx_file in Path(os.path.join(self.package_folder, "lib")).glob("*bgfx*"):
-                rename(self, os.path.join(self.package_folder, "lib", bgfx_file.name), 
+                rename(self, os.path.join(self.package_folder, "lib", bgfx_file.name),
                         os.path.join(self.package_folder, "lib", f"{package_lib_prefix}bgfx{bgfx_file.suffix}"))
         if self.options.tools:
             for bgfx_file in Path(os.path.join(self.package_folder, "bin")).glob("*shaderc*"):
-                rename(self, os.path.join(self.package_folder, "bin", bgfx_file.name), 
+                rename(self, os.path.join(self.package_folder, "bin", bgfx_file.name),
                         os.path.join(self.package_folder, "bin", f"shaderc{bgfx_file.suffix}"))
             for bgfx_file in Path(os.path.join(self.package_folder, "bin")).glob("*texturev*"):
-                rename(self, os.path.join(self.package_folder, "bin", bgfx_file.name), 
+                rename(self, os.path.join(self.package_folder, "bin", bgfx_file.name),
                         os.path.join(self.package_folder, "bin", f"texturev{bgfx_file.suffix}"))
             for bgfx_file in Path(os.path.join(self.package_folder, "bin")).glob("*geometryc*"):
-                rename(self, os.path.join(self.package_folder, "bin", bgfx_file.name), 
+                rename(self, os.path.join(self.package_folder, "bin", bgfx_file.name),
                         os.path.join(self.package_folder, "bin", f"geometryc{bgfx_file.suffix}"))
             for bgfx_file in Path(os.path.join(self.package_folder, "bin")).glob("*geometryv*"):
-                rename(self, os.path.join(self.package_folder, "bin", bgfx_file.name), 
+                rename(self, os.path.join(self.package_folder, "bin", bgfx_file.name),
                         os.path.join(self.package_folder, "bin", f"geometryv{bgfx_file.suffix}"))
-                
+
         # Maybe this helps
         if is_apple_os(self):
             fix_apple_shared_install_name(self)
