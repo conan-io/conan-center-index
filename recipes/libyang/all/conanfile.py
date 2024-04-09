@@ -30,6 +30,7 @@ class LibYangConan(ConanFile):
         if is_msvc(self):
             self.requires("getopt-for-visual-studio/20200201")
             self.requires("dirent/1.24")
+            self.requires("pthreads4w/3.0.0")
 
     def config_options(self):
         if self.settings.os == "Windows":
