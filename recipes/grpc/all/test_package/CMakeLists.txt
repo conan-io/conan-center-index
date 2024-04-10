@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
 
-find_package(protobuf CONFIG REQUIRED QUIET)
-find_package(gRPC CONFIG REQUIRED QUIET)
+find_package(protobuf CONFIG REQUIRED)
+find_package(gRPC CONFIG REQUIRED)
 
 message("DYLD_LIBRARY_PATH from CMake: $ENV{DYLD_LIBRARY_PATH}")
 

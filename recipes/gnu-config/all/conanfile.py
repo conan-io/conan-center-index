@@ -14,8 +14,8 @@ class GnuConfigConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("gnu", "config", "autotools", "canonical", "host", "build", "target", "triplet")
     license = "GPL-3.0-or-later", "autoconf-special-exception"
+    package_type = "build-scripts"
     os = "arch", "compiler", "build_type", "arch"
-    no_copy_source = True
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -27,8 +27,7 @@ class GnuConfigConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)

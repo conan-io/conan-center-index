@@ -1,4 +1,11 @@
+# Add only the SDK release versions from https://github.com/KhronosGroup/SPIRV-Tools/tags for consistency
 sources:
+  "1.3.268.0":
+    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/vulkan-sdk-1.3.268.0.tar.gz"
+    sha256: "4c19fdcffb5fe8ef8dc93d7a65ae78b64edc7a5688893ee381c57f70be77deaf"
+  "1.3.261.1":
+    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/sdk-1.3.261.1.tar.gz"
+    sha256: "ead95c626ad482882a141d1aa0ce47b9453871f72c42c0b28d39c82f60a52008"
   "1.3.243.0":
     url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/sdk-1.3.243.0.tar.gz"
     sha256: "684a29e37bfdc6e151fe1d3ec4b87c5396c17a439de545d81ea05d4ee6fbc86e"
@@ -8,15 +15,6 @@ sources:
   "1.3.236.0":
     url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/sdk-1.3.236.0.tar.gz"
     sha256: "6789c782a8ba8fa127c3d579f9362f0cdde7a9ccc2e8513cdf217bba579dfda9"
-  "1.3.231.1":
-    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/sdk-1.3.231.1.tar.gz"
-    sha256: "b97df7fdac617878668762ab452ae2ae425a0f36e29711b4cc6c4ae216e32309"
-  "1.3.224.0":
-    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/sdk-1.3.224.0.tar.gz"
-    sha256: "428b83f2710c07123cf2ec21934389f893aa0b570d1fe4aba6e38718c9a6ea69"
-  "1.3.216.0":
-    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/sdk-1.3.216.0.tar.gz"
-    sha256: "b4b9abeb59deda20c41808ac4cd5f9faf6f0a9daa51a8c82e13ca47c045e982f"
-  "1.3.211.0":
-    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/sdk-1.3.211.0.tar.gz"
-    sha256: "5466e628c92c30aeb45547b9d836dcf7b6249afb94de9dea4ac4449a82202b50"
+  "1.2.198.0":
+    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/sdk-1.2.198.0.tar.gz"
+    sha256: "e8a9fec946f8473129374ad6b98ee690ac9a4574ace7cb3b46bbeb4eddfdc33b"

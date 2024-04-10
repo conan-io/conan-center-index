@@ -20,6 +20,12 @@ class MathterConan(ConanFile):
 
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "with_xsimd": [True, False] # XSimd is optionally used for hand-rolled vectorization.
+    }
+    default_options = {
+        "with_xsimd": True
+    }
     no_copy_source = True
 
     @property
@@ -34,6 +40,10 @@ class MathterConan(ConanFile):
             "gcc": 7,
             "Visual Studio": 16,
         }
+    
+    def config_options(self):
+        if Version(self.version) < "1.1":
+            del self.options.with_xsimd
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -46,28 +56,29 @@ class MathterConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd}, "
-                                                f"which your compiler does not support.")
-        else:
-            self.output.warning(f"{self.name} requires C++{self._min_cppstd}. "
-                                f"Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd}, "
+                                            "which your compiler does not support.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def requirements(self):
+        if self.options.get_safe("with_xsimd"):
+            self.requires("xsimd/11.1.0")
+
     def package(self):
-        copy(self, "*.hpp",
-             dst=os.path.join(self.package_folder, "include", "Mathter"),
-             src=os.path.join(self.source_folder, "Mathter"))
-        copy(self, "*.natvis",
-             dst=os.path.join(self.package_folder, "include", "Mathter"),
-             src=os.path.join(self.source_folder, "Mathter"))
-        copy(self, "LICENCE",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=self.source_folder)
+        if self.version == "1.0.0":
+            copy(self, "LICENCE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+            include_dir = os.path.join(self.source_folder, "Mathter")
+        else:
+            copy(self, "LICENCE.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
+            include_dir = os.path.join(self.source_folder, "include", "Mathter")
+        copy(self, "*.hpp", include_dir, os.path.join(self.package_folder, "include", "Mathter"))
+        copy(self, "*.natvis", include_dir, os.path.join(self.package_folder, "include", "Mathter"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        if self.options.get_safe("with_xsimd"):
+            self.cpp_info.defines = ["MATHTER_USE_XSIMD=1"]

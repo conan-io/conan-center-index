@@ -80,17 +80,17 @@ class LibdrmConan(ConanFile):
     def requirements(self):
         if self.options.intel:
             self.requires("libpciaccess/0.17")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("linux-headers-generic/5.15.128")
+        if self.settings.os == "Linux":
+            self.requires("linux-headers-generic/6.5.9")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("libdrm supports only Linux or FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/1.3.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -139,7 +139,7 @@ class LibdrmConan(ConanFile):
         self.cpp_info.components["libdrm_libdrm"].libs = ["drm"]
         self.cpp_info.components["libdrm_libdrm"].includedirs.append(os.path.join("include", "libdrm"))
         self.cpp_info.components["libdrm_libdrm"].set_property("pkg_config_name", "libdrm")
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os == "Linux":
             self.cpp_info.components["libdrm_libdrm"].requires = ["linux-headers-generic::linux-headers-generic"]
 
         if Version(self.version) < "2.4.111":
