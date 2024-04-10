@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -44,17 +45,24 @@ class openfx(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            self.options["libglvnd"].glx = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("opengl/system")
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            self.requires("libglvnd/1.7.0")
+        else:
+            self.requires("opengl/system")
         self.requires("expat/2.5.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
+        if self.settings.os in ["FreeBSD", "Linux"] and not self.dependencies["libglvnd"].options.glx:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the glx option of libglvnd to be enabled")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -100,8 +108,6 @@ class openfx(ConanFile):
         else:
             self.cpp_info.libs = ["OfxHost", "OfxSupport"]
 
-        if self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.system_libs.extend(["GL"])
         if is_apple_os(self):
             self.cpp_info.frameworks = ["CoreFoundation", "OpenGL"]
 
