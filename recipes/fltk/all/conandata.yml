@@ -1,4 +1,10 @@
 sources:
+  # todo Remove me.
+  # Do not merge!
+  # This is a test for the latest branch on master, not the actual 1.4.0 release.
+  "1.4.0":
+    url: "https://github.com/fltk/fltk/archive/05a95e146b2429154b360030d098f0dae5555706.tar.gz"
+    sha256: "619ddd5351fcb747d5dec005310f0f5f99d56749573f83f4e5bdbb4f416d2acd"
   "1.3.9":
     url: "https://github.com/fltk/fltk/archive/refs/tags/release-1.3.9.tar.gz"
     sha256: "f30661851a61f1931eaaceb9ef4005584c85cb07fd7ffc38a645172b8e4eb3df"
