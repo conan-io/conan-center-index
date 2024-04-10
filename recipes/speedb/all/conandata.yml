@@ -1,0 +1,12 @@
+sources:
+  "2.8.0":
+    url: "https://github.com/speedb-io/speedb/archive/refs/tags/speedb/v2.8.0.tar.gz"
+    sha256: "ee7a55942a23d9589e5d3527364a2f9ae552ef7d52f6fd303dda25e4f27786ba"
+patches:
+  "2.8.0":
+    - patch_file: "patches/2.8.0-0001-use-cci.patch"
+      patch_description: "use cci's package"
+      patch_type: "conan"
+    - patch_file: "patches/2.8.0-0002-fix-install.patch"
+      patch_description: "disable static lib installation on shared build"
+      patch_type: "conan"
