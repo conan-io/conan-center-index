@@ -94,6 +94,8 @@ class OpenCascadeConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if self._link_opengl and self.settings.os in ["FreeBSD", "Linux"]:
+            self.options["libglvnd"].glx = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -102,9 +104,12 @@ class OpenCascadeConan(ConanFile):
         self.requires("tcl/8.6.10")
         if self._link_tk:
             self.requires("tk/8.6.10")
-        self.requires("freetype/2.13.0")
+        self.requires("freetype/2.13.2")
         if self._link_opengl:
-            self.requires("opengl/system")
+            if self.settings.os in ["FreeBSD", "Linux"]:
+                self.requires("libglvnd/1.7.0")
+            else:
+                self.requires("opengl/system")
         if self._is_linux:
             self.requires("fontconfig/2.13.93")
             self.requires("xorg/system")
@@ -128,6 +133,9 @@ class OpenCascadeConan(ConanFile):
         if self.settings.compiler == "clang" and self.settings.compiler.version == "6.0" and \
            self.settings.build_type == "Release":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support Clang 6.0 if Release build type")
+        if self._link_opengl and self.settings.os in ["FreeBSD", "Linux"] and not self.dependencies["libglvnd"].options.glx:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the glx option of libglvnd to be enabled")
+
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -493,7 +501,7 @@ class OpenCascadeConan(ConanFile):
             "CSF_fontconfig": {"externals": ["fontconfig::fontconfig"] if self._is_linux else []},
             "CSF_XwLibs": {"externals": ["xorg::xorg"] if self._is_linux else []},
             # Optional dependencies
-            "CSF_OpenGlLibs": {"externals": ["opengl::opengl"] if self._link_opengl else []},
+            "CSF_OpenGlLibs": {"externals": ["libglvnd::gl" if self.settings.os in ["FreeBSD", "Linux"] else "opengl::opengl"] if self._link_opengl else []},
             "CSF_TclTkLibs": {"externals": ["tk::tk"] if self._link_tk else []},
             "CSF_FFmpeg": {"externals": ["ffmpeg::ffmpeg"] if self.options.with_ffmpeg else []},
             "CSF_FreeImagePlus": {"externals": ["freeimage::freeimage"] if self.options.with_freeimage else []},
