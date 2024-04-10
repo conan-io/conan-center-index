@@ -7,7 +7,7 @@ from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import MSBuild, VCVars
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.env import VirtualBuildEnv
 from pathlib import Path
 import os
@@ -156,6 +156,8 @@ class bgfxConan(ConanFile):
             tc = VCVars(self)
             tc.generate()
         else:
+            tc = AutotoolsDeps(self)
+            tc.generate()
             tc = AutotoolsToolchain(self)
             tc.generate()
 
@@ -303,7 +305,7 @@ class bgfxConan(ConanFile):
             if not is_msvc(self):
                 self.cpp_info.system_libs.extend(["comdlg32"])
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["X11", "GL"])
+            self.cpp_info.system_libs.extend(["X11"])
         elif self.settings.os in ["Macos", "iOS"]:
             self.cpp_info.frameworks.extend(["CoreFoundation", "AppKit", "IOKit", "QuartzCore", "Metal"])
             if self.settings.os in ["Macos"]:
