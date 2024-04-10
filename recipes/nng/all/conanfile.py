@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
 
@@ -71,7 +71,7 @@ class NngConan(ConanFile):
             if Version(self.version) < "1.5.2":
                 self.requires("mbedtls/2.25.0")
             else:
-                self.requires("mbedtls/3.5.2")
+                self.requires("mbedtls/3.6.0")
 
     def validate(self):
         compiler_minimum_version = {
@@ -109,6 +109,8 @@ class NngConan(ConanFile):
         if "with_ipv6" in self.options:
             tc.variables["NNG_ENABLE_IPV6"] = self.options.with_ipv6
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
