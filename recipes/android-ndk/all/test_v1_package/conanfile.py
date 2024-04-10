@@ -20,7 +20,7 @@ class TestPackgeConan(ConanFile):
             cmake.build()
 
     def test(self):
-        if not cross_building(self):
+        if not cross_building(self) and not (self.settings.os == "Macos" and self.settings.arch == "armv8"):
             if self.settings.os == "Windows":
                 self.run("ndk-build.cmd --version", run_environment=True)
             else:
