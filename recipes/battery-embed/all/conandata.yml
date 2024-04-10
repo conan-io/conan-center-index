@@ -1,9 +1,4 @@
 sources:
-  "1.2.14":
-    url: "https://github.com/batterycenter/embed/archive/refs/tags/v1.2.14.tar.gz"
-    sha256: "879934293780e206f3b11702109759e57bdd98d5f266392b75823f284633b7fa"
-patches:
-  "1.2.14":
-    - patch_file: "patches/1.2.14-link-threads.patch"
-      patch_description: "link thread library (temporary)"
-      patch_type: "portability"
+  "1.2.15":
+    url: "https://github.com/batterycenter/embed/archive/refs/tags/v1.2.15.tar.gz"
+    sha256: "d49aebb59099e6d8fa0bd3a0214e6027ef19de85c56cf2cd2365b4221f963cf8"
