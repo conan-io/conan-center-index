@@ -1,10 +1,12 @@
+import os
+import textwrap
+
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-import os
-import textwrap
 
 required_conan_version = ">=1.54.0"
 
@@ -43,6 +45,8 @@ class RaylibConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            self.options["libglvnd"].glx = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -50,9 +54,16 @@ class RaylibConan(ConanFile):
     def requirements(self):
         if self.settings.os != "Android":
             self.requires("glfw/3.3.8")
-            self.requires("opengl/system")
+            if self.settings.os in ["FreeBSD", "Linux"]:
+                self.requires("libglvnd/1.7.0")
+            else:
+                self.requires("opengl/system")
         if self.settings.os == "Linux":
             self.requires("xorg/system")
+
+    def validate(self):
+        if self.settings.os in ["FreeBSD", "Linux"] and not self.dependencies["libglvnd"].options.glx:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the glx option of libglvnd to be enabled")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
