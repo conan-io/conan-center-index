@@ -108,7 +108,6 @@ class LibiglConan(ConanFile):
 
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_libigl_INCLUDE"] = "conan_deps.cmake"
-        tc.variables[""] = True
         tc.variables["LIBIGL_USE_STATIC_LIBRARY"] = not self.options.header_only
         tc.variables["LIBIGL_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0048"] = "NEW"
