@@ -1,4 +1,32 @@
 sources:
+  "2.4.0":
+    url: "https://github.com/stephenberry/glaze/archive/v2.4.0.tar.gz"
+    sha256: "be8cfb94c0b4b13c0a1fc846e2c112614d2dda02a49977fcdeea544876b3625b"
+  "2.3.2":
+    url: "https://github.com/stephenberry/glaze/archive/v2.3.2.tar.gz"
+    sha256: "360c1eab71afb69d59cc0f0e180d6b214653950340ac267a464a18c81dac585a"
+  "2.3.1":
+    url: "https://github.com/stephenberry/glaze/archive/v2.3.1.tar.gz"
+    sha256: "941bf3f8cea5b6a024895d37dceaaaa82071a9178af63e9935a1d9fd80caa451"
+  "2.3.0":
+    url: "https://github.com/stephenberry/glaze/archive/v2.3.0.tar.gz"
+    sha256: "9963761337941f4709458155a045ce4ab5dc5edf5e60dca8cc290200fce8330e"
+  "2.2.1":
+    url: "https://github.com/stephenberry/glaze/archive/v2.2.1.tar.gz"
+    sha256: "ef0eb30a038c623ca100696e773ba1c9888719ed02c46e9fabf6238ee07026bb"
+  "2.1.9":
+    url: "https://github.com/stephenberry/glaze/archive/v2.1.9.tar.gz"
+    sha256: "678126f068e3c21c2b3d2e1ae914c72296b68610a004cf542ea050946ab06416"
+  "2.1.7":
+    url: "https://github.com/stephenberry/glaze/archive/v2.1.7.tar.gz"
+    sha256: "e110bfc6494ca3a0616beaec214e61a53d4e0bd1489d8f1a45ca6f87594a3502"
+  # Keep 2.1.6 for now as 2.1.7 had some breaking changes
+  "2.1.6":
+    url: "https://github.com/stephenberry/glaze/archive/v2.1.6.tar.gz"
+    sha256: "5ae31b1a48a5b54b84e115a12195341bfbe39f03f92bb3bcad074f984380f72d"
+  "2.1.4":
+    url: "https://github.com/stephenberry/glaze/archive/v2.1.4.tar.gz"
+    sha256: "cbaba4dfbaaf342c8be8e6834cb79933b080ac89f3aa1470bc7a83197d9ebc1a"
   "2.1.0":
     url: "https://github.com/stephenberry/glaze/archive/v2.1.0.tar.gz"
     sha256: "b3bb4d886f17d266f37a6eec2c42b2e57e287918b20511297c4eb6b9960f0f8f"
@@ -11,27 +39,9 @@ sources:
   "2.0.6":
     url: "https://github.com/stephenberry/glaze/archive/v2.0.6.tar.gz"
     sha256: "aa5d4921382e9781998ebbf6d36964556daa3367a2aef5ca814122502b450abc"
-  "2.0.5":
-    url: "https://github.com/stephenberry/glaze/archive/v2.0.5.tar.gz"
-    sha256: "a826c823dd125e25ecd29881775df5db07ccacd5358a04efba2b290eb6c945eb"
-  "2.0.3":
-    url: "https://github.com/stephenberry/glaze/archive/v2.0.3.tar.gz"
-    sha256: "7e155d2970329ff4a13fe1d4c4e4b63509405a984b4f37ef9f92b8756bb3c8ce"
-  "2.0.2":
-    url: "https://github.com/stephenberry/glaze/archive/v2.0.2.tar.gz"
-    sha256: "af65752fb523c82313bfbe9c04ab47e332d881154f06c63967b973ee51e5923d"
-  "2.0.1":
-    url: "https://github.com/stephenberry/glaze/archive/v2.0.1.tar.gz"
-    sha256: "0f515588189796696a802c88b0308b5386376d202c7ff1875683f38316f09c90"
-  "2.0.0":
-    url: "https://github.com/stephenberry/glaze/archive/v2.0.0.tar.gz"
-    sha256: "8553ade81a20b1a7c8398f95490ab540f34a78f226f7fe5555dfcbbaf216e108"
   "1.9.9":
     url: "https://github.com/stephenberry/glaze/archive/v1.9.9.tar.gz"
     sha256: "7e2605046742a89ec455887a5a0d6b3188ed5c14ea309c5eb9814848c26bedca"
-  "1.9.5":
-    url: "https://github.com/stephenberry/glaze/archive/v1.9.5.tar.gz"
-    sha256: "3800fa7283a1d4e5bd2c746fe9e268d2f8af76d3a75be7318b2084f38f529c7f"
   "1.8.5":
     url: "https://github.com/stephenberry/glaze/archive/v1.8.5.tar.gz"
     sha256: "5d876eed5689f1947ea4eafd9f13a4e0b527611a6b1857c79a5d598a856287b4"
