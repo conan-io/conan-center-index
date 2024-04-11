@@ -62,9 +62,11 @@ class SevenZipConan(ConanFile):
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
+            env = None
             if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-                tc.environment().define("IS_MINGW", "1")
-            tc.generate()
+                env = tc.environment()
+                env.define("IS_MINGW", "1")
+            tc.generate(env=env)
             deps = AutotoolsDeps(self)
             deps.generate()
 
