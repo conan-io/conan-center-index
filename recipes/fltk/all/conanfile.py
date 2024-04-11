@@ -89,7 +89,7 @@ class FltkConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["FLTK_BUILD_TEST"] = False
         tc.variables["FLTK_BUILD_EXAMPLES"] = False
-        if Version(self.version) < "1.3.0":
+        if Version(self.version) < "1.4.0":
             tc.variables["OPTION_BUILD_SHARED_LIBS"] = self.options.shared
             tc.variables["OPTION_USE_GL"] = self.options.with_gl
             tc.variables["OPTION_USE_THREADS"] = self.options.with_threads
