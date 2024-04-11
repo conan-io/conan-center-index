@@ -1,13 +1,15 @@
-From 123d5770a04ae029d6e67876a2f712551c214d45 Mon Sep 17 00:00:00 2001
+From 52fbae1dbc0166a4a39576247ed7fd5eaccc252b Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
-Date: Wed, 10 Apr 2024 14:52:03 -0500
-Subject: [PATCH] CMake: Improve detection of the GLU library and GL/glu.h
+Date: Thu, 11 Apr 2024 08:28:48 -0500
+Subject: [PATCH 1/2] CMake: Improve detection of the GLU library and GL/glu.h
  header file
 
+Locate the GLU library and header independent of the GL library and header locations.
+Add the GLU header location to necessary target_include_directory calls.
 ---
  CMake/options.cmake | 7 +++++--
- src/CMakeLists.txt  | 3 +++
- 2 files changed, 8 insertions(+), 2 deletions(-)
+ src/CMakeLists.txt  | 9 +++++++++
+ 2 files changed, 14 insertions(+), 2 deletions(-)
 
 diff --git a/CMake/options.cmake b/CMake/options.cmake
 index d04431ba7..c4ba98914 100644
@@ -37,30 +39,36 @@ index d04431ba7..c4ba98914 100644
    # Set GLLIBS (used in fltk-config).
    # We should probably deduct this from OPENGL_LIBRARIES but it turned
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 58954c2ca..e283f0ce4 100644
+index 58954c2ca..91a8c614c 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -813,6 +813,7 @@ endif()
+@@ -813,6 +813,9 @@ endif()
  if(FLTK_USE_GL)
    fl_add_library(fltk_gl STATIC "${GLCPPFILES};${GL_HEADER_FILES};${GL_DRIVER_HEADER_FILES}")
    target_link_libraries(fltk_gl PUBLIC ${OPENGL_LIBRARIES} fltk::fltk)
-+  target_include_directories(fltk_gl PUBLIC ${OPENGL_GLU_INCLUDE_DIR})
++  if(OPENGL_GLU_INCLUDE_DIR)
++    target_include_directories(fltk_gl PUBLIC ${OPENGL_GLU_INCLUDE_DIR})
++  endif()
  endif(FLTK_USE_GL)
  
  #######################################################################
-@@ -879,6 +880,7 @@ if(FLTK_BUILD_SHARED_LIBS AND NOT MSVC)
+@@ -879,6 +882,9 @@ if(FLTK_BUILD_SHARED_LIBS AND NOT MSVC)
    if(FLTK_USE_GL)
      fl_add_library(fltk_gl SHARED "${GLCPPFILES};${GL_HEADER_FILES};${GL_DRIVER_HEADER_FILES}")
      target_link_libraries(fltk_gl-shared PUBLIC ${OPENGL_LIBRARIES} fltk::fltk-shared)
-+    target_include_directories(fltk_gl-shared PUBLIC ${OPENGL_GLU_INCLUDE_DIR})
++    if(OPENGL_GLU_INCLUDE_DIR)
++      target_include_directories(fltk_gl-shared PUBLIC ${OPENGL_GLU_INCLUDE_DIR})
++    endif()
    endif(FLTK_USE_GL)
  
  endif(FLTK_BUILD_SHARED_LIBS AND NOT MSVC)
-@@ -918,6 +920,7 @@ if(FLTK_BUILD_SHARED_LIBS AND MSVC)
+@@ -918,6 +924,9 @@ if(FLTK_BUILD_SHARED_LIBS AND MSVC)
  
    if(OPENGL_FOUND)
      target_link_libraries(fltk-shared PUBLIC ${OPENGL_LIBRARIES})
-+    target_include_directories(fltk-shared PUBLIC ${OPENGL_GLU_INCLUDE_DIR})
++    if(OPENGL_GLU_INCLUDE_DIR)
++      target_include_directories(fltk-shared PUBLIC ${OPENGL_GLU_INCLUDE_DIR})
++    endif()
    endif(OPENGL_FOUND)
  
  endif(FLTK_BUILD_SHARED_LIBS AND MSVC)
