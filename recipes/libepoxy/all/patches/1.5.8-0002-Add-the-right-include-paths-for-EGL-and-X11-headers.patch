@@ -1,0 +1,57 @@
+From 49d9375f3ddaa99267b6aea71445836540a0263f Mon Sep 17 00:00:00 2001
+From: Alex Richardson <Alexander.Richardson@cl.cam.ac.uk>
+Date: Wed, 6 Oct 2021 09:44:12 +0100
+Subject: [PATCH] Add the right include paths for EGL and X11 headers
+
+Libepoxy currently depends on all headers living under the same prefix.
+This is not necessarily true: X11 headers can live in a separate prefix,
+for instance under /opt/X11. This is also the case when cross-compiling to
+a platform that sets up the build environment in non-standard ways.
+
+We could add `x11_dep` and `egl_dep` to the libepoxy target dependencies,
+but that could potentially add spurious linker flags and cause libepoxy to
+depend on libraries it will dlopen() during normal operations.
+
+To avoid that case, we use a partial_dep() object from Meson, and we limit
+the dependency to compiler flags and inclusion paths.
+---
+ meson.build     | 2 ++
+ src/meson.build | 6 ++++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/meson.build b/meson.build
+index acf41e4..e6a8cfd 100644
+--- a/meson.build
++++ b/meson.build
+@@ -166,9 +166,11 @@ endif
+ dl_dep = cc.find_library('dl', required: false)
+ gl_dep = dependency('gl', required: false)
+ egl_dep = dependency('egl', required: false)
++elg_headers_dep = egl_dep.partial_dependency(compile_args: true, includes: true)
+ 
+ # Optional dependencies for tests
+ x11_dep = dependency('x11', required: false)
++x11_headers_dep = x11_dep.partial_dependency(compile_args: true, includes: true)
+ 
+ # GLES v2 and v1 may have pkg-config files, courtesy of downstream
+ # packagers; let's check those first, and fall back to find_library()
+diff --git a/src/meson.build b/src/meson.build
+index 37e28f0..e19a918 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -59,6 +59,12 @@ epoxy_deps = [ dl_dep, ]
+ if host_system == 'windows'
+   epoxy_deps += [ opengl32_dep, gdi32_dep ]
+ endif
++if enable_x11
++  epoxy_deps += [ x11_headers_dep, ]
++endif
++if build_egl
++  epoxy_deps += [ elg_headers_dep, ]
++endif
+ 
+ libepoxy = library(
+   'epoxy',
+-- 
+2.44.0
+

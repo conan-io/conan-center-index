@@ -10,6 +10,20 @@ sources:
     sha256: "0cd80cb040b75cbe77fadd45c48282ebab82d845c597ce11ee5e8cb9c1efeabb"
 patches:
   "1.5.9":
-    - patch_file: "patches/0001-fix-for-building-on-non-English-locale.patch"
+    - patch_file: "patches/1.5.8-0001-fix-for-building-on-non-English-locale.patch"
+      patch_description: "Fix for building on non-English locale"
+      patch_type: "portability"
+      patch_source: "https://github.com/anholt/libepoxy/pull/262"
+    - patch_file: "patches/1.5.8-0002-Add-the-right-include-paths-for-EGL-and-X11-headers.patch"
+      patch_description: "Fix build if EGL/X11 headers are in a custom prefix"
+      patch_type: "portability"
+      patch_source: "https://github.com/anholt/libepoxy/pull/261"
   "1.5.8":
-    - patch_file: "patches/0001-fix-for-building-on-non-English-locale.patch"
+    - patch_file: "patches/1.5.8-0001-fix-for-building-on-non-English-locale.patch"
+      patch_description: "Fix for building on non-English locale"
+      patch_type: "portability"
+      patch_source: "https://github.com/anholt/libepoxy/pull/262"
+    - patch_file: "patches/1.5.8-0002-Add-the-right-include-paths-for-EGL-and-X11-headers.patch"
+      patch_description: "Fix build if EGL/X11 headers are in a custom prefix"
+      patch_type: "portability"
+      patch_source: "https://github.com/anholt/libepoxy/pull/261"
