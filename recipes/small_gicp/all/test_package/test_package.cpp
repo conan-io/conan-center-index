@@ -7,9 +7,7 @@
 #include <small_gicp/benchmark/read_points.hpp>
 #include <small_gicp/registration/registration_helper.hpp>
 
-#ifdef WITH_OPENMP
 #include <small_gicp/ann/kdtree_omp.hpp>
-#endif
 #ifdef WITH_TBB
 #include <small_gicp/ann/kdtree_tbb.hpp>
 #endif
@@ -60,9 +58,7 @@ int main(int argc, char** argv) {
   example1(target_points, source_points);
 
   // test that these compile and link
-#ifdef WITH_OPENMP
   KdTreeOMP<PointCloud>::Ptr kdtree_omp;
-#endif
 #ifdef WITH_TBB
   KdTreeTBB<PointCloud>::Ptr kdtree_tbb;
 #endif
