@@ -16,6 +16,7 @@ class SimfilRecipe(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Klebert-Engineering/simfil"
     license = "BSD-3-Clause"
+    package_type = "library"
     topics = ["query-language", "json", "data-model"]
 
     # Binary configuration
