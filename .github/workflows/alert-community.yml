@@ -69,7 +69,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/boost/*/*"
-          reviewers: "@grafikrobot @Hopobcn @jwillikers"
+          reviewers: "@grafikrobot @Hopobcn @jwillikers @paulharris"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -279,7 +279,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/libsodium/*/*"
-          reviewers: "@Hopobcn"
+          reviewers: "@Hopobcn @paulharris"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -304,7 +304,7 @@ jobs:
       - uses: ./.github/actions/alert-community
         with:
           files: "recipes/llvm-core/*/*"
-          reviewers: "@Hopobcn"
+          reviewers: "@Hopobcn @paulharris"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -315,6 +315,11 @@ jobs:
         with:
           files: "recipes/lz4/*/*"
           reviewers: "@Hopobcn"
+
+      - uses: ./.github/actions/alert-community
+        with:
+          files: "recipes/mocknetworkaccessmanager/*/*"
+          reviewers: "@MartinDelille"
 
       - uses: ./.github/actions/alert-community
         with:
@@ -378,8 +383,13 @@ jobs:
 
       - uses: ./.github/actions/alert-community
         with:
+          files: "recipes/qtawesome/*/*"
+          reviewers: "@MartinDelille"
+
+      - uses: ./.github/actions/alert-community
+        with:
           files: "recipes/qt/*/*"
-          reviewers: "@ericLemanissier @jwillikers @MartinDelille"
+          reviewers: "@ericLemanissier @jwillikers @MartinDelille @paulharris"
 
       - uses: ./.github/actions/alert-community
         with:
