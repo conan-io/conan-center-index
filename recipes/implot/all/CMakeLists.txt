@@ -6,6 +6,10 @@ file(GLOB HEADER_FILES ${IMPLOT_SRC_DIR}/*.h)
 add_library(${PROJECT_NAME}
     ${IMPLOT_SRC_DIR}/implot.cpp
     ${IMPLOT_SRC_DIR}/implot_items.cpp
+    # implot_demo.cpp is included so that user can use it to display the main documentation of implot.
+    # Note that these functions are not declared by the public headers.
+    # https://github.com/conan-io/conan-center-index/pull/20374
+    ${IMPLOT_SRC_DIR}/implot_demo.cpp
 )
 target_include_directories(${PROJECT_NAME} PRIVATE ${IMPLOT_SRC_DIR})
 
