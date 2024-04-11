@@ -101,10 +101,10 @@ class LibqasmConan(ConanFile):
         cmake.build()
 
     def package(self):
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rm(self, "*.pdb", os.path.join(self.package_folder, recursive=True))
 
     def package_info(self):
         self.cpp_info.libs = ["cqasm"]
