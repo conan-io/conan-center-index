@@ -72,6 +72,10 @@ patches:
     - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
       patch_description: "Optional flag to specify iconv from either libc of libiconv"
       patch_type: "conan"
+    - patch_file: "patches/1.84.0-reimplement-string_set-as-any-string.patch"
+      patch_description: "Fix compilation with cppstd=20 on libcxx platforms (e.g. MacOS)"
+      patch_type: "official"
+      patch_source: "https://github.com/boostorg/locale/commit/c5e8f02c903696a213fc4b710f6740ccd1f07f4e"
   "1.83.0":
     - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
       patch_description: "Optional flag to specify iconv from either libc of libiconv"
