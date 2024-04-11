@@ -29,7 +29,8 @@ class ProxyConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "11",
+            # proxy/2.3.0 has an internal compilation error on gcc 11.
+            "gcc": "11" if Version(self.version) < "2.3.0" else "12",
             "clang": "15",
             "apple-clang": "14",
             "msvc": "193",
