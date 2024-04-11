@@ -1,0 +1,75 @@
+From d77d51c6f02224ee396d4d26282495599989ca04 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Thu, 11 Apr 2024 11:55:39 -0500
+Subject: [PATCH] CMake: Improve detection of the GLU library and GL/glu.h
+ header file
+
+Locate the GLU library and header independent of the GL library and header locations.
+Add the GLU header location to necessary target_include_directory calls.
+---
+ CMake/options.cmake | 7 +++++--
+ src/CMakeLists.txt  | 9 +++++++++
+ 2 files changed, 14 insertions(+), 2 deletions(-)
+
+diff --git a/CMake/options.cmake b/CMake/options.cmake
+index 28c4190ed..a8271204a 100644
+--- a/CMake/options.cmake
++++ b/CMake/options.cmake
+@@ -210,7 +210,9 @@ endif (HAVE_GL)
+ if (OPTION_USE_GL)
+   if (OPTION_APPLE_X11)
+     set (OPENGL_FOUND TRUE)
+-    set (OPENGL_LIBRARIES -L${PATH_TO_XLIBS} -lGLU -lGL)
++    find_library(GLU_LIB GLU)
++    get_filename_component(PATH_TO_GLULIB ${GLU_LIB} DIRECTORY)
++    set (OPENGL_LIBRARIES -L${PATH_TO_GLULIB} -L${PATH_TO_XLIBS} -lGLU -lGL)
+     unset(HAVE_GL_GLU_H CACHE)
+     find_file (HAVE_GL_GLU_H GL/glu.h PATHS ${X11_INCLUDE_DIR})
+   else()
+@@ -224,7 +226,8 @@ else ()
+ endif (OPTION_USE_GL)
+ 
+ if (OPENGL_FOUND)
+-  set (CMAKE_REQUIRED_INCLUDES ${OPENGL_INCLUDE_DIR}/GL)
++  find_path(OPENGL_GLU_INCLUDE_DIR NAMES GL/glu.h OpenGL/glu.h HINTS ${OPENGL_INCLUDE_DIR} ${X11_INCLUDE_DIR})
++  set(CMAKE_REQUIRED_INCLUDES ${OPENGL_INCLUDE_DIR}/GL ${OPENGL_GLU_INCLUDE_DIR})
+ 
+   # Set GLLIBS (used in fltk-config).
+   # We should probably deduct this from OPENGL_LIBRARIES but it turned
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index ef5a492cc..6a09bc882 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -342,6 +342,9 @@ endif (OPTION_USE_SYSTEM_LIBPNG)
+ if (OPENGL_FOUND)
+   FL_ADD_LIBRARY (fltk_gl STATIC "${GLCPPFILES}")
+   target_link_libraries (fltk_gl fltk ${OPENGL_LIBRARIES})
++  if(OPENGL_GLU_INCLUDE_DIR)
++    target_include_directories(fltk_gl PUBLIC ${OPENGL_GLU_INCLUDE_DIR})
++  endif()
+ endif (OPENGL_FOUND)
+ endif (NOT OPTION_BUILD_SHARED_LIBS)
+ 
+@@ -389,6 +392,9 @@ if (OPTION_BUILD_SHARED_LIBS AND NOT MSVC)
+   if (OPENGL_FOUND)
+     FL_ADD_LIBRARY (fltk_gl SHARED "${GLCPPFILES};${GL_HEADER_FILES};${GL_DRIVER_HEADER_FILES}")
+     target_link_libraries (fltk_gl_SHARED fltk_SHARED ${OPENGL_LIBRARIES})
++    if(OPENGL_GLU_INCLUDE_DIR)
++      target_include_directories(fltk_gl_SHARED PUBLIC ${OPENGL_GLU_INCLUDE_DIR})
++    endif()
+   endif (OPENGL_FOUND)
+ 
+ endif (OPTION_BUILD_SHARED_LIBS AND NOT MSVC)
+@@ -432,6 +438,9 @@ if (OPTION_BUILD_SHARED_LIBS AND MSVC)
+ 
+   if (OPENGL_FOUND)
+     target_link_libraries (fltk_SHARED ${OPENGL_LIBRARIES})
++    if(OPENGL_GLU_INCLUDE_DIR)
++      target_include_directories(fltk_SHARED PUBLIC ${OPENGL_GLU_INCLUDE_DIR})
++    endif()
+   endif (OPENGL_FOUND)
+ 
+ endif (OPTION_BUILD_SHARED_LIBS AND MSVC)
+-- 
+2.44.0
+

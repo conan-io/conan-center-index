@@ -19,7 +19,15 @@ patches:
   "1.3.9":
     - patch_file: "patches/1.3.8-0001-remove-fluid.patch"
     - patch_file: "patches/1.3.8-0003-build-static-only-on-static.patch"
+    - patch_file: "patches/1.3.9-0001-CMake-Improve-detection-of-the-GLU-library-and-GL-gl.patch"
+      patch_description: "Detect the GLU library separately from the GL library"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/fltk/fltk/pull/953"
   "1.3.8":
     - patch_file: "patches/1.3.8-0001-remove-fluid.patch"
     - patch_file: "patches/1.3.8-0002-fix-resources.patch"
     - patch_file: "patches/1.3.8-0003-build-static-only-on-static.patch"
+    - patch_file: "patches/1.3.8-0004-CMake-Improve-detection-of-the-GLU-library-and-GL-gl.patch"
+      patch_description: "Detect the GLU library separately from the GL library"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/fltk/fltk/pull/953"
