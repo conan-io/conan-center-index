@@ -1,3 +1,4 @@
+# Adds upper-case varariables and ensures that only Conan dependencies are used
 macro(custom_find_package name)
     find_package(${name} ${ARGN}
         # Allow only Conan packages

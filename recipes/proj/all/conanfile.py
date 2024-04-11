@@ -81,6 +81,7 @@ class ProjConan(ConanFile):
             env.generate(scope="build")
 
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_PROJECT_PROJ_INCLUDE"] = "conan_deps.cmake"
         tc.variables["USE_THREAD"] = self.options.threadsafe
         tc.variables["BUILD_CCT"] = self.options.build_executables
         tc.variables["BUILD_CS2CS"] = self.options.build_executables
@@ -117,9 +118,6 @@ class ProjConan(ConanFile):
 
     def _patch_sources(self):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-
-        # Inject Conan dependencies
-        replace_in_file(self, cmakelists, "# Set C++ version", "include(conan_deps.cmake)\n# ")
 
         replace_in_file(self, cmakelists, "/W4", "")
 
