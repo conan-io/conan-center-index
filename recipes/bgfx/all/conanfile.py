@@ -305,7 +305,7 @@ class bgfxConan(ConanFile):
             if not is_msvc(self):
                 self.cpp_info.system_libs.extend(["comdlg32"])
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["X11"])
+            self.cpp_info.system_libs.extend(["rt", "X11"])
         elif self.settings.os in ["Macos", "iOS"]:
             self.cpp_info.frameworks.extend(["CoreFoundation", "AppKit", "IOKit", "QuartzCore", "Metal"])
             if self.settings.os in ["Macos"]:
