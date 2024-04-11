@@ -2,6 +2,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, download, rmdir
+from conan.tools.scm import Version
 
 
 required_conan_version = ">=1.47.0"
@@ -14,8 +15,16 @@ class MingwConan(ConanFile):
     license = "ZPL-2.1", "MIT", "GPL-2.0-or-later"
     topics = ("gcc", "gnu", "unix", "mingw32", "binutils")
     settings = "os", "arch"
-    options = {"threads": ["posix", "win32"], "exception": ["seh", "sjlj"]}
-    default_options = {"threads": "posix", "exception": "seh"}
+    options = {
+        "threads": ["posix", "win32", "mcf"],
+        "exception": ["seh", "sjlj"],
+        "runtime": ["msvcrt", "ucrt"]
+    }
+    default_options = {
+        "threads": "posix",
+        "exception": "seh",
+        "runtime": "ucrt"
+    }
     provides = "mingw-w64"
 
     @property
@@ -52,9 +61,15 @@ class MingwConan(ConanFile):
     def build_requirements(self):
         self.build_requires("7zip/19.00")
 
+    def _get_url(self):
+        if Version(self.version) < Version("12"):
+            return self.conan_data["sources"][self.version][str(self.options.threads)][str(self.options.exception)]
+        else:
+            return self.conan_data["sources"][self.version][str(self.options.threads)][str(self.options.exception)][str(self.options.runtime)]
+
     def build(self):
         # Source should be downloaded in the build step since it depends on specific options
-        url = self.conan_data["sources"][self.version][str(self.options.threads)][str(self.options.exception)]
+        url = self._get_url()
         self.output.info(f"Downloading: {url['url']}")
         download(self, url["url"], "file.7z", sha256=url["sha256"])
         self.run("7z x file.7z")
