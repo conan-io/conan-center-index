@@ -205,7 +205,7 @@ class PangoConan(ConanFile):
         if self.options.with_fontconfig:
             self.cpp_info.components["pangofc"].set_property("pkg_config_name", "pangofc")
             if self.options.with_freetype:
-                self.cpp_info.components["pangofc"].requires = ["freetype::freetype", "harfbuzz::harfbuzz" "pangoft2"]
+                self.cpp_info.components["pangofc"].requires = ["freetype::freetype", "harfbuzz::harfbuzz", "pangoft2"]
 
         if self.settings.os != "Windows":
             self.cpp_info.components["pangoroot"].set_property("pkg_config_name", "pangoroot")
