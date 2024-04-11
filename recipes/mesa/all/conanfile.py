@@ -145,7 +145,6 @@ class MesaConan(ConanFile):
         "glx": [False, "dri", "xlib"],
         "imagination_srv": [True, False],
         "intel_clc": [True, False, "system"],
-        "intel_xe_kmd": [True, False],
         "microsoft_clc": [True, False],
         "min_windows_version": ["7", "8", "10", "11"],
         "opencl_spirv": [True, False],
@@ -223,7 +222,6 @@ class MesaConan(ConanFile):
         "glx": "dri",
         "imagination_srv": False,
         "intel_clc": False,
-        "intel_xe_kmd": False,
         "microsoft_clc": False,
         "min_windows_version": "8",
         "opencl_spirv": False,
@@ -1242,7 +1240,6 @@ class MesaConan(ConanFile):
             if self.options.get_safe("intel_clc") == "system"
             else (feature("intel_clc"))
         )
-        tc.project_options["intel-xe-kmd"] = feature("intel_xe_kmd")
         tc.project_options["llvm"] = feature("with_llvm")
         tc.project_options["libunwind"] = feature("with_libunwind")
         tc.project_options["microsoft-clc"] = feature("microsoft_clc")
