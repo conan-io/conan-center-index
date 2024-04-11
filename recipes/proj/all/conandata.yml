@@ -17,6 +17,31 @@ sources:
   "7.2.1":
     url: "https://github.com/OSGeo/PROJ/releases/download/7.2.1/proj-7.2.1.tar.gz"
     sha256: "b384f42e5fb9c6d01fe5fa4d31da2e91329668863a684f97be5d4760dbbf0a14"
-  "6.3.2":
-    url: "https://github.com/OSGeo/PROJ/releases/download/6.3.2/proj-6.3.2.tar.gz"
-    sha256: "cb776a70f40c35579ae4ba04fb4a388c1d1ce025a1df6171350dc19f25b80311"
+  "6.3.1":
+    url: "https://github.com/OSGeo/PROJ/releases/download/6.3.1/proj-6.3.1.tar.gz"
+    sha256: "6de0112778438dcae30fcc6942dee472ce31399b9e5a2b67e8642529868c86f8"
+patches:
+  "9.3.1":
+    - patch_file: "patches/0001-use-cmake-targets-9.2.1.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
+  "9.3.0":
+    - patch_file: "patches/0001-use-cmake-targets-9.2.1.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
+  "9.2.1":
+    - patch_file: "patches/0001-use-cmake-targets-9.2.1.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
+  "8.2.1":
+    - patch_file: "patches/0001-use-cmake-targets-8.2.0.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
+  "7.2.1":
+    - patch_file: "patches/0001-use-cmake-targets-7.2.1.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
+  "6.3.1":
+    - patch_file: "patches/0001-use-cmake-targets-6.x.x.patch"
+      patch_type: "conan"
+      patch_description: "Use cmake targets"
