@@ -98,7 +98,7 @@ class PipeWireConan(ConanFile):
     def requirements(self):
         self.requires("linux-headers-generic/6.5.9")
         if self.options.flatpak or self.options.gsettings:
-            self.requires("glib/2.78.1")
+            self.requires("glib/2.78.3")
         if self.options.raop:
             self.requires("openssl/3.2.1")
         if self.options.with_avahi:
