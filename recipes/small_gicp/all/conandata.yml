@@ -1,10 +1,4 @@
 sources:
-  "cci.20240408":
-    url: "https://github.com/koide3/small_gicp/archive/ff8269ec09c9ddccff8358a4b7cc5e4c5fda134f.zip"
-    sha256: "ebcc1c6c82e0d8e1e58ce8bd2e0961fb066d606663e70796aff203ef7c739736"
-patches:
-  "cci.20240408":
-    - patch_file: "patches/001-fix-invalid-install.patch"
-      patch_description: "Fix an invalid install command in CMakeLists.txt"
-      patch_type: "bugfix"
-      patch_source: "https://github.com/koide3/small_gicp/pull/23"
+  "cci.20240411":
+    url: "https://github.com/koide3/small_gicp/archive/9886474ec7067203c97946877b2fd5d61c571174.zip"
+    sha256: "7d187a1acabdcc5418340116ea6fcad6d975d8a7e970fdfb9cf13e050b3e3f04"
