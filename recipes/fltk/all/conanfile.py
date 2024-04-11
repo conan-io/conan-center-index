@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -86,19 +87,32 @@ class FltkConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["OPTION_BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["FLTK_BUILD_TEST"] = False
         tc.variables["FLTK_BUILD_EXAMPLES"] = False
-        tc.variables["OPTION_USE_GL"] = self.options.with_gl
-        tc.variables["OPTION_USE_THREADS"] = self.options.with_threads
-        tc.variables["OPTION_BUILD_HTML_DOCUMENTATION"] = False
-        tc.variables["OPTION_BUILD_PDF_DOCUMENTATION"] = False
-        tc.variables["OPTION_USE_XFT"] = self.options.with_xft
-        if self.options.abi_version:
-            tc.variables["OPTION_ABI_VERSION"] = self.options.abi_version
-        tc.variables["OPTION_USE_SYSTEM_LIBJPEG"] = True
-        tc.variables["OPTION_USE_SYSTEM_ZLIB"] = True
-        tc.variables["OPTION_USE_SYSTEM_LIBPNG"] = True
+        if Version(self.version) < "1.3.0":
+            tc.variables["OPTION_BUILD_SHARED_LIBS"] = self.options.shared
+            tc.variables["OPTION_USE_GL"] = self.options.with_gl
+            tc.variables["OPTION_USE_THREADS"] = self.options.with_threads
+            tc.variables["OPTION_BUILD_HTML_DOCUMENTATION"] = False
+            tc.variables["OPTION_BUILD_PDF_DOCUMENTATION"] = False
+            tc.variables["OPTION_USE_XFT"] = self.options.with_xft
+            if self.options.abi_version:
+                tc.variables["OPTION_ABI_VERSION"] = self.options.abi_version
+            tc.variables["OPTION_USE_SYSTEM_LIBJPEG"] = True
+            tc.variables["OPTION_USE_SYSTEM_ZLIB"] = True
+            tc.variables["OPTION_USE_SYSTEM_LIBPNG"] = True
+        else:
+            tc.variables["FLTK_BUILD_SHARED_LIBS"] = self.options.shared
+            tc.variables["FLTK_BUILD_GL"] = self.options.with_gl
+            tc.variables["FLTK_USE_PTHREADS"] = self.options.with_threads
+            tc.variables["FLTK_BUILD_HTML_DOCS"] = False
+            tc.variables["FLTK_BUILD_PDF_DOCS"] = False
+            tc.variables["FLTK_USE_XFT"] = self.options.with_xft
+            if self.options.abi_version:
+                tc.variables["FLTK_ABI_VERSION"] = self.options.abi_version
+            tc.variables["FLTK_USE_SYSTEM_LIBJPEG"] = True
+            tc.variables["FLTK_USE_SYSTEM_ZLIB"] = True
+            tc.variables["FLTK_USE_SYSTEM_LIBPNG"] = True
 
         tc.generate()
         tc = CMakeDeps(self)
