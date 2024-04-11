@@ -81,6 +81,12 @@ class CairoConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        if self.settings.os in ["FreeBSD", "Linux"] and self.options.get_safe("with_opengl"):
+            self.options["libglvnd"].egl = True
+            if self.options.get_safe("with_opengl") == "desktop":
+                self.options["libglvnd"].glx = True
+            elif self.options.get_safe("with_opengl") in ["gles2", "gles3"]:
+                self.options["libglvnd"].gles2 = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -104,14 +110,15 @@ class CairoConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
-        if self.options.get_safe("with_opengl") == "desktop":
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            if self.options.get_safe("with_opengl"):
+                self.requires("libglvnd/1.7.0", transitive_headers=True, transitive_libs=True)
+        elif self.options.get_safe("with_opengl") == "desktop":
             self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
             if self.settings.os == "Windows":
                 self.requires("glext/cci.20210420")
                 self.requires("wglext/cci.20200813")
                 self.requires("khrplatform/cci.20200529")
-        if self.options.get_safe("with_opengl") and self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("egl/system", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.options.get_safe("with_xlib_xrender") and not self.options.get_safe("with_xlib"):
@@ -126,6 +133,12 @@ class CairoConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     "Linking a shared library against static glib can cause unexpected behaviour."
                 )
+        if self.settings.os in ["FreeBSD", "Linux"] and self.options.get_safe("with_opengl") and not self.dependencies["libglvnd"].options.egl:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the egl option of libglvnd to be enabled when the with_opengl option is enabled")
+        if self.settings.os in ["FreeBSD", "Linux"] and self.options.get_safe("with_opengl") == "desktop" and not self.dependencies["libglvnd"].options.glx:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the glx option of libglvnd to be enabled when the with_opengl option is desktop")
+        if self.settings.os in ["FreeBSD", "Linux"] and self.options.get_safe("with_opengl") in ["gles2", "gles3"] and not self.dependencies["libglvnd"].options.gles2:
+            raise ConanInvalidConfiguration(f"{self.ref} requires the gles2 option of libglvnd to be enabled when the with_opengl option is gles2 or gles3")
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.0")
@@ -309,21 +322,31 @@ class CairoConan(ConanFile):
                 self.cpp_info.components["cairo_"].defines.append("CAIRO_WIN32_STATIC_BUILD=1")
 
         if self.options.get_safe("with_opengl"):
-            if self.options.with_opengl == "desktop":
-                add_component_and_base_requirements("cairo-gl", ["opengl::opengl"])
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                add_component_and_base_requirements("cairo-glx", ["libglvnd::gl"])
+                add_component_and_base_requirements("cairo-egl", ["libglvnd::egl"])
+            else:
+                add_component_and_base_requirements("cairo-glx", ["opengl::opengl"])
 
+            if self.options.with_opengl == "desktop":
                 if self.settings.os in ["Linux", "FreeBSD"]:
-                    add_component_and_base_requirements("cairo-glx", ["opengl::opengl"])
+                    add_component_and_base_requirements("cairo-gl", ["libglvnd::gl"])
+                else:
+                    add_component_and_base_requirements("cairo-gl", ["opengl::opengl"])
 
                 if self.settings.os == "Windows":
                     add_component_and_base_requirements("cairo-wgl", ["glext::glext", "wglext::wglext", "khrplatform::khrplatform"])
 
             elif self.options.with_opengl == "gles3":
-                add_component_and_base_requirements("cairo-glesv3", [], ["GLESv2"])
+                if self.settings.os in ["Linux", "FreeBSD"]:
+                    add_component_and_base_requirements("cairo-glesv3", ["libglvnd::glesv2"])
+                else:
+                    add_component_and_base_requirements("cairo-glesv3", [], ["GLESv2"])
             elif self.options.with_opengl == "gles2":
-                add_component_and_base_requirements("cairo-glesv2", [], ["GLESv2"])
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                add_component_and_base_requirements("cairo-egl", ["egl::egl"])
+                if self.settings.os in ["Linux", "FreeBSD"]:
+                    add_component_and_base_requirements("cairo-glesv2", ["libglvnd::glesv2"])
+                else:
+                    add_component_and_base_requirements("cairo-glesv2", [], ["GLESv2"])
 
         if self.options.with_zlib:
             add_component_and_base_requirements("cairo-script", ["zlib::zlib"])
