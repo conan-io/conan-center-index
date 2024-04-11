@@ -163,7 +163,7 @@ class ArrowConan(ConanFile):
         if self.options.with_thrift:
             self.requires("thrift/0.17.0")
         if self.options.with_protobuf:
-            self.requires("protobuf/3.21.9")
+            self.requires("protobuf/3.21.12")
         if self.options.with_jemalloc:
             self.requires("jemalloc/5.3.0")
         if self.options.with_mimalloc:
@@ -230,6 +230,8 @@ class ArrowConan(ConanFile):
                 raise ConanException("'with_boost' option should be True when'gandiva=True'")
             if not self.options.with_utf8proc:
                 raise ConanException("'with_utf8proc' option should be True when'gandiva=True'")
+        if self.options.with_flight_rpc and not self.options.with_protobuf:
+            raise ConanException("'with_protobuf' option should be True when'with_flight_rpc=True'")
 
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
