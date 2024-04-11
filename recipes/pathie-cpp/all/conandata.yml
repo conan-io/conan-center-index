@@ -1,0 +1,12 @@
+sources:
+  "0.1.1":
+    url: "https://github.com/Quintus/pathie-cpp/archive/refs/tags/v0.1.1.tar.gz"
+    sha256: "7c2cca0c52ad80792bf6dbeb74213c1791fe9e599058765f5b81fd00f53eb2d3"
+patches:
+  "0.1.1":
+    - patch_file: "patches/0.1.1-0001-fix-cmake.patch"
+      patch_description: "separate shtatic and shared build"
+      patch_type: "conan"
+    - patch_file: "patches/0.1.1-0002-fix-install-path.patch"
+      patch_description: "fix install path for windows shared build"
+      patch_type: "conan"

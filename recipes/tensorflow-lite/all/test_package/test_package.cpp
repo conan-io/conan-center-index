@@ -1,3 +1,4 @@
+#include <tensorflow/lite/version.h>
 #include <tensorflow/lite/model.h>
 #include <tensorflow/lite/interpreter.h>
 #include <tensorflow/lite/kernels/register.h>
@@ -12,6 +13,7 @@ int main(int argc, char * argv[]) {
         std::cerr << "Pass model file path as argument" << std::endl;
         return -1;
     }
+    std::cout << "Using TensorFlow Lite version " << TFLITE_VERSION_STRING << std::endl;
     auto model = tflite::FlatBufferModel::BuildFromFile(argv[1]);
     if (!model) {
         throw std::runtime_error("Failed to load TFLite model");
