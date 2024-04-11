@@ -2,11 +2,10 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, XCRun
 from conan.tools.build import build_jobs
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
-from conan.tools.scm import Version
 
 import fnmatch
 import os
@@ -464,7 +463,7 @@ class OpenSSLConan(ConanFile):
         shared_target = ""
         if self.settings.os == "Neutrino":
             if self.options.shared:
-                shared_extension = 'shared_extension => ".so.\$(SHLIB_VERSION_NUMBER)",'
+                shared_extension = r'shared_extension => ".so.\$(SHLIB_VERSION_NUMBER)",'
                 shared_target = 'shared_target  => "gnu-shared",'
             if self.options.get_safe("fPIC", True):
                 shared_cflag = 'shared_cflag => "-fPIC",'
