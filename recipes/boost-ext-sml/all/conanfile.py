@@ -17,7 +17,8 @@ class BoostExtSmlConan(ConanFile):
 
     package_type = "header-library"
     exports_sources = "include/*", "LICENSE*"
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     def validate(self):
         check_min_cppstd(self, "14")
