@@ -14,6 +14,7 @@ import os
 
 required_conan_version = ">=1.64.0 <2 || >=2.2.0"
 
+
 class ThorvgConan(ConanFile):
     name = "thorvg"
     description = "ThorVG is a platform-independent portable library that allows for drawing vector-based scenes and animations."
@@ -26,10 +27,37 @@ class ThorvgConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_engines": ['sw', 'gl_beta', 'wg_beta'],
+        "with_loaders": [False, 'tvg', 'svg', 'png', 'jpg', 'lottie', 'ttf', 'webp', 'all'],
+        "with_savers": [False, 'tvg', 'gif', 'all'],
+        "with_bindings": [False, 'capi', 'wasm_beta'],
+        "with_tools": [False, 'svg2tvg', 'svg2png', 'lottie2gif', 'all'],
+        "with_threads": [True, False],
+        "with_vector": [True, False],
+        "with_examples": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_engines": 'sw',
+        "with_loaders": 'all',
+        "with_savers": False,
+        "with_bindings": 'capi',
+        "with_tools": False,
+        "with_threads": True,
+        "with_vector": False,
+        "with_examples": False
+    }
+    # See more here: https://github.com/thorvg/thorvg/blob/main/meson_options.txt
+    options_description = {
+        "engines": "Enable Rasterizer Engine in thorvg",
+        "loaders": "Enable File Loaders in thorvg",
+        "savers": "Enable File Savers in thorvg",
+        "threads": "Enable the multi-threading task scheduler in thorvg",
+        "vector": "Enable CPU Vectorization(SIMD) in thorvg",
+        "bindings": "Enable API bindings",
+        "tools": "Enable building thorvg tools",
+        "examples": "Enable building examples",
     }
 
     @property
@@ -79,6 +107,20 @@ class ThorvgConan(ConanFile):
             tc = MesonToolchain(self, backend="vs")
         else:
             tc = MesonToolchain(self)
+        is_debug = self.settings.get_safe("build_type") == "Debug"
+        tc.project_options.update({
+            "static": not bool(self.options.shared),
+            "engines": str(self.options.with_engines),
+            "loaders": str(self.options.with_loaders) if self.options.with_loaders else '',
+            "savers": str(self.options.with_savers) if self.options.with_savers else '',
+            "bindings": str(self.options.with_bindings) if self.options.with_bindings else '',
+            "tools": str(self.options.with_tools )if self.options.with_tools else '',
+            "threads": bool(self.options.with_threads),
+            "vector": bool(self.options.with_vector),
+            "examples": bool(self.options.with_examples),
+            "tests": False,
+            "log": is_debug
+        })
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
