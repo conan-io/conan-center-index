@@ -31,6 +31,7 @@ class PocoConan(ConanFile):
         "enable_active_record": [True, False, "deprecated"],
         "log_debug": [True, False],
         "with_sql_parser": [True, False],
+        "comp_foundation_sharedlibrary_debug_suffix": [True, False],
     }
     default_options = {
         "shared": False,
@@ -39,6 +40,7 @@ class PocoConan(ConanFile):
         "enable_active_record": "deprecated",
         "log_debug": False,
         "with_sql_parser": True,
+        "comp_foundation_sharedlibrary_debug_suffix": True,
     }
 
     _PocoComponent = namedtuple("_PocoComponent", ("option", "default_option", "dependencies", "external_dependencies", "is_lib"))
@@ -127,6 +129,8 @@ class PocoConan(ConanFile):
             del self.options.enable_prometheus
         if Version(self.version) < "1.13.0":
             del self.options.with_sql_parser
+        if self.settings.build_type != "Debug":
+            del self.options.comp_foundation_sharedlibrary_debug_suffix
 
     def configure(self):
         if self.options.enable_active_record != "deprecated":
@@ -250,6 +254,9 @@ class PocoConan(ConanFile):
         tc.preprocessor_definitions["POCO_NO_AUTOMATIC_LIBS"] = "1"
         # Picked up from conan v1 CMake wrapper, don't know the rationale
         tc.preprocessor_definitions["XML_DTD"] = "1"
+        # Disable SharedLibrary::suffix() including "d" as part of the platform-specific filename suffix
+        if not self.options.get_safe("comp_foundation_sharedlibrary_debug_suffix", True):
+            tc.preprocessor_definitions["POCO_NO_SHARED_LIBRARY_DEBUG_SUFFIX"] = "1"
         tc.generate()
 
         deps = CMakeDeps(self)

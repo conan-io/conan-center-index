@@ -45,8 +45,8 @@ class AvahiConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.78.1")
-        self.requires("expat/2.5.0")
+        self.requires("glib/2.78.3")
+        self.requires("expat/2.6.0")
         self.requires("libdaemon/0.14")
         self.requires("dbus/1.15.8")
         self.requires("gdbm/1.23")
@@ -59,7 +59,7 @@ class AvahiConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -69,17 +69,19 @@ class AvahiConan(ConanFile):
         virtual_build_env.generate()
         if can_run(self):
             VirtualRunEnv(self).generate(scope="build")
+
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--enable-compat-libdns_sd")
+        tc.configure_args.append("--enable-introspection=no")
         tc.configure_args.append("--disable-gtk3")
         tc.configure_args.append("--disable-mono")
         tc.configure_args.append("--disable-monodoc")
         tc.configure_args.append("--disable-python")
         tc.configure_args.append("--disable-qt5")
         tc.configure_args.append("--with-systemdsystemunitdir=/lib/systemd/system")
+        tc.configure_args.append("--with-distro=none")
         tc.configure_args.append("ac_cv_func_strlcpy=no")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            tc.configure_args.append("ac_cv_func_setproctitle=no")
+        tc.configure_args.append("ac_cv_func_setproctitle=no")
         tc.generate()
         AutotoolsDeps(self).generate()
         PkgConfigDeps(self).generate()
