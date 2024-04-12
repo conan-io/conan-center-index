@@ -10,7 +10,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.64.0 <2 || >=2.2.0"
 
 
 class DbusConan(ConanFile):
@@ -115,13 +115,11 @@ class DbusConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
         tc = MesonToolchain(self)
-        if self.settings.os == "Windows":
-            tc.project_options["prefix"] = self.package_folder.replace("\\", "/")
         tc.project_options["asserts"] = not is_apple_os(self)
         tc.project_options["checks"] = False
-        tc.project_options["datadir"] = os.path.join(self.package_folder, "res", "share")
-        tc.project_options["localstatedir"] = os.path.join(self.package_folder, "res", "var")
-        tc.project_options["sysconfdir"] = os.path.join(self.package_folder, "res", "etc")
+        tc.project_options["datadir"] = os.path.join("res", "share")
+        tc.project_options["localstatedir"] = os.path.join("res", "var")
+        tc.project_options["sysconfdir"] = os.path.join("res", "etc")
         tc.project_options["doxygen_docs"] = "disabled"
         tc.project_options["ducktype_docs"] = "disabled"
         tc.project_options["qt_help"] = "disabled"
@@ -139,7 +137,7 @@ class DbusConan(ConanFile):
         tc.project_options["system_pid_file"] = str(self.options.get_safe("system_pid_file", ""))
         tc.project_options["system_socket"] = str(self.options.get_safe("system_socket", ""))
         if is_apple_os(self):
-            tc.project_options["launchd_agent_dir"] = os.path.join(self.package_folder, "res", "LaunchAgents")
+            tc.project_options["launchd_agent_dir"] = os.path.join("res", "LaunchAgents")
         tc.project_options["x11_autolaunch"] = "enabled" if self.options.get_safe("with_x11") else "disabled"
         tc.project_options["xml_docs"] = "disabled"
         tc.generate()
