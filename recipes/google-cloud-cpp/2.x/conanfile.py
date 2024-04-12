@@ -162,7 +162,7 @@ class GoogleCloudCppConan(ConanFile):
     def build_requirements(self):
         # For the `grpc-cpp-plugin` executable, and indirectly `protoc`
         if not self._is_legacy_one_profile:
-          self.tool_requires("grpc/<host_version>")
+            self.tool_requires("grpc/<host_version>")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -173,7 +173,7 @@ class GoogleCloudCppConan(ConanFile):
         tc.generate()
         VirtualBuildEnv(self).generate()
         if self._is_legacy_one_profile:
-          VirtualRunEnv(self).generate(scope="build")
+            VirtualRunEnv(self).generate(scope="build")
         deps = CMakeDeps(self)
         deps.generate()
 
