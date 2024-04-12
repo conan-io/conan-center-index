@@ -16,7 +16,7 @@ class BoostExtSmlConan(ConanFile):
     license = "BSL-1.0"
 
     package_type = "header-library"
-    exports_sources = "include/*", "LICENSE*"
+    exports_sources = "include/*"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
