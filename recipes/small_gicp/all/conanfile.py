@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, download
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -74,12 +75,18 @@ class IridescenceConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         download(self, "https://github.com/jlblancoc/nanoflann/blob/568ae53f5fcd82d5398bb1b32144fa22028518d5/COPYING", "LICENSE.nanoflann")
         download(self, "https://github.com/strasdat/Sophus/blob/593db47500ea1a2de5f0e6579c86147991509c59/LICENSE.txt", "LICENSE.sophus")
 
     def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+
         tc = CMakeToolchain(self)
         tc.variables["BUILD_HELPER"] = True
         tc.variables["BUILD_WITH_OPENMP"] = True
