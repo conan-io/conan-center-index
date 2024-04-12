@@ -48,7 +48,7 @@ class LibharuConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("libpng/1.6.40")
+        self.requires("libpng/[>=1.6 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)

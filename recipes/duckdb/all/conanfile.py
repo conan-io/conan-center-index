@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -108,7 +108,7 @@ class DuckdbConan(ConanFile):
         tc.variables["DUCKDB_MINOR_VERSION"] = Version(self.version).minor
         tc.variables["DUCKDB_PATCH_VERSION"] = Version(self.version).patch
         tc.variables["DUCKDB_DEV_ITERATION"] = 0
-
+        tc.variables["OVERRIDE_GIT_DESCRIBE"] = f"v{self.version}"
         if "with_parquet" in self.options:
             tc.variables["BUILD_PARQUET_EXTENSION"] = self.options.with_parquet
 
@@ -159,6 +159,8 @@ class DuckdbConan(ConanFile):
         tc.variables["ENABLE_UBSAN"] = False
         if is_msvc(self) and not self.options.shared:
             tc.preprocessor_definitions["DUCKDB_API"] = ""
+        if Version(self.version) >= "0.10.0" and cross_building(self):
+            tc.variables["DUCKDB_EXPLICIT_PLATFORM"] = f"{self.settings.os}_{self.settings.arch}"
         tc.generate()
 
         dpes = CMakeDeps(self)
@@ -211,6 +213,8 @@ class DuckdbConan(ConanFile):
             ]
             if Version(self.version) >= "0.6.0":
                 self.cpp_info.libs.append("duckdb_fsst")
+            if Version(self.version) >= "0.10.0":
+                self.cpp_info.libs.append("duckdb_skiplistlib")
 
             if self.options.with_autocomplete:
                 self.cpp_info.libs.append("autocomplete_extension")
@@ -228,7 +232,8 @@ class DuckdbConan(ConanFile):
                 self.cpp_info.libs.append("visualizer_extension")
             if self.options.with_httpfs:
                 self.cpp_info.libs.append("httpfs_extension")
-            if Version(self.version) >= "0.6.0" and self.settings.os == "Linux":
+            if (Version(self.version) >= "0.6.0" and self.settings.os == "Linux" and 
+                (Version(self.version) < "0.10.1" or self.settings.arch == "x86_64")):
                 self.cpp_info.libs.append("jemalloc_extension")
             if self.options.with_json:
                 self.cpp_info.libs.append("json_extension")
@@ -244,6 +249,9 @@ class DuckdbConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
+            if Version(self.version) >= "0.10.0":
+                self.cpp_info.system_libs.extend(["rstrtmgr", "bcrypt"])
+
 
         if self.options.with_shell:
             binpath = os.path.join(self.package_folder, "bin")
