@@ -1,0 +1,11 @@
+sources:
+  "0.2.1":
+    url: "https://git.sr.ht/~emersion/basu/refs/download/v0.2.1/basu-0.2.1.tar.gz"
+    sha256: "d9b373a9fcb5d5eb5f6c1c56355f76edb7f2f52bc744570e80604e83455a19bd"
+
+patches:
+  "0.2.1":
+    - patch_file: "patches/0001-memfd-util.c-Use-F_ADD_SEALS-definition-from-missing.patch"
+      patch_description: "add missing header to support old glibc"
+      patch_type: "portability"
+      patch_source: "https://lists.sr.ht/~emersion/public-inbox/patches/49899"
