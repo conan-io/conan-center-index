@@ -103,7 +103,7 @@ class OpenCascadeConan(ConanFile):
     def requirements(self):
         self.requires("tcl/8.6.10")
         if self._link_tk:
-            self.requires("tk/8.6.10")
+            self.requires("tk/8.6.10", transitive_libs=True)
         self.requires("freetype/2.13.2")
         if self._link_opengl:
             if self.settings.os in ["FreeBSD", "Linux"]:
