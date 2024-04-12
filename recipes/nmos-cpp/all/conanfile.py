@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools import build, files
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import json
 import os
 import re
@@ -51,12 +52,13 @@ class NmosCppConan(ConanFile):
         # INFO: details/system_error.h: #include <boost/system/system_error.hpp>
         self.requires("boost/1.83.0", transitive_headers=True)
         # INFO: json_ops.h exposes cpprest/json.h
-        self.requires("cpprestsdk/2.10.18", transitive_headers=True)
+        self.requires("cpprestsdk/2.10.19", transitive_headers=True)
         self.requires("websocketpp/0.8.2")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("json-schema-validator/2.3.0")
         self.requires("nlohmann_json/3.11.3")
-        self.requires("zlib/[>=1.2.11 <2]")
+        if Version(self.version) >= "cci.20240222":
+            self.requires("jwt-cpp/0.7.0")
 
         if self.options.get_safe("with_dnssd") == "mdnsresponder":
             self.requires("mdnsresponder/878.200.35")
@@ -124,7 +126,7 @@ class NmosCppConan(ConanFile):
 
         target_content = files.load(self, target_file_path)
 
-        cmake_functions = re.findall(r"(?P<func>add_library|set_target_properties)[\n|\s]*\([\n|\s]*(?P<args>[^)]*)\)", target_content)
+        cmake_functions = re.findall(r"(?P<func>add_executable|add_library|set_target_properties)[\n|\s]*\([\n|\s]*(?P<args>[^)]*)\)", target_content)
         for (cmake_function_name, cmake_function_args) in cmake_functions:
             cmake_function_args = re.split(r"[\s|\n]+", cmake_function_args, maxsplit=2)
 
@@ -137,7 +139,9 @@ class NmosCppConan(ConanFile):
 
             components.setdefault(component_name, {"cmake_target": cmake_target_nonamespace})
 
-            if cmake_function_name == "add_library":
+            if cmake_function_name == "add_executable":
+                components[component_name]["exe"] = True
+            elif cmake_function_name == "add_library":
                 cmake_imported_target_type = cmake_function_args[1]
                 if cmake_imported_target_type in ["STATIC", "SHARED"]:
                     # library filenames are based on the target name by default
@@ -208,6 +212,11 @@ class NmosCppConan(ConanFile):
                     else:
                         self.output.warn(f"{self.name} recipe does not handle {property_type} (yet)")
 
+        # until https://github.com/sony/nmos-cpp/commit/9489d84098ddc8cc514b7e4d5afe740dee4518ee
+        # direct dependency on nlohmann_json was missing
+        if Version(self.version) < "cci.20221203":
+            components["json_schema_validator"].setdefault("requires", []).append("nlohmann_json::nlohmann_json")
+
         # Save components informations in json file
         with open(self._components_helper_filepath, "w", encoding="utf-8") as json_file:
             json.dump(components, json_file, indent=4)
@@ -226,7 +235,6 @@ class NmosCppConan(ConanFile):
             libdir = os.path.join(libdir, config_install_dir)
         self.cpp_info.bindirs = [bindir]
         self.cpp_info.libdirs = [libdir]
-        self.cpp_info.requires = ["nlohmann_json::nlohmann_json", "zlib::zlib"]
 
         def _register_components():
             components_json_file = files.load(self, self._components_helper_filepath)
@@ -235,6 +243,7 @@ class NmosCppConan(ConanFile):
                 cmake_target = values["cmake_target"]
                 self.cpp_info.components[component_name].names["cmake_find_package"] = cmake_target
                 self.cpp_info.components[component_name].names["cmake_find_package_multi"] = cmake_target
+                self.cpp_info.components[component_name].bindirs = [bindir] if values.get("exe") else []
                 self.cpp_info.components[component_name].libs = values.get("libs", [])
                 self.cpp_info.components[component_name].libdirs = [libdir]
                 self.cpp_info.components[component_name].defines = values.get("defines", [])
