@@ -155,7 +155,7 @@ class WestonConan(ConanFile):
         self.requires("libglvnd/1.7.0")
         self.requires("libinput/1.25.0")
         self.requires("libpng/[>=1.6 <2]")
-        self.requires("pixman/0.42.2", transitive_headers=True)
+        self.requires("pixman/0.43.4", transitive_headers=True)
         self.requires("pango/1.51.0")
         self.requires("wayland/1.22.0", transitive_headers=True)
         self.requires("xkbcommon/1.6.0", transitive_headers=True)
