@@ -209,6 +209,7 @@ required_for_references:
 - cose-c
 - cotila
 - coz
+- cpp-channel
 - cpp-httplib
 - cpp-ipc
 - cpp-jwt
@@ -632,6 +633,7 @@ required_for_references:
 - libbacktrace
 - libbasisu
 - libbigwig
+- libboxes
 - libbpf
 - libbsd
 - libcap
@@ -647,6 +649,7 @@ required_for_references:
 - libcpuid
 - libcuckoo
 - libcurl
+- libcvd
 - libdaemon
 - libdb
 - libdc1394
@@ -677,6 +680,7 @@ required_for_references:
 - libfreenect
 - libfreenect2
 - libftdi
+- libftp
 - libfuse
 - libgcrypt
 - libgd
@@ -772,6 +776,7 @@ required_for_references:
 - libspng
 - libsquish
 - libsrtp
+- libssh
 - libssh2
 - libsvm
 - libsvtav1
@@ -852,6 +857,7 @@ required_for_references:
 - lzma_sdk
 - lzo
 - m4
+- macdylibbundler
 - maddy
 - magic_enum
 - mailio
@@ -909,6 +915,7 @@ required_for_references:
 - minizip-ng
 - mio
 - mm_file
+- mocknetworkaccessmanager
 - modern-cpp-kafka
 - mold
 - moltenvk
@@ -1033,6 +1040,7 @@ required_for_references:
 - openmesh
 - openmvg
 - openpam
+- openssh
 - openssl
 - opensubdiv
 - opentdf-client
@@ -1050,6 +1058,7 @@ required_for_references:
 - orcania
 - osmanip
 - osqp
+- ouster_sdk
 - out_ptr
 - outcome
 - ozz-animation
@@ -1131,6 +1140,7 @@ required_for_references:
 - protobuf-c
 - protopuf
 - protozero
+- proxy
 - psimd
 - psyinf-gmtl
 - ptex
@@ -1283,6 +1293,7 @@ required_for_references:
 - span-lite
 - spdlog
 - spectra
+- speedb
 - spirv-cross
 - spirv-headers
 - spirv-tools
@@ -1390,6 +1401,7 @@ required_for_references:
 - tng
 - toml11
 - tomlplusplus
+- toon
 - tqdm-cpp
 - tracy
 - transwarp

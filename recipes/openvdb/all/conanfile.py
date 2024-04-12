@@ -133,7 +133,7 @@ class OpenVDBConan(ConanFile):
         self.requires("boost/1.84.0", transitive_headers=True)
         self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
         if self.options.use_imath_half:
-            self.requires("imath/3.1.10", transitive_headers=True, transitive_libs=True)
+            self.requires("imath/3.1.9", transitive_headers=True, transitive_libs=True)
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_blosc:
