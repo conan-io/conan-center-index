@@ -161,7 +161,7 @@ class WestonConan(ConanFile):
         self.requires("xkbcommon/1.6.0", transitive_headers=True)
 
         if self.options.with_glib:
-            self.requires("glib/2.78.1")
+            self.requires("glib/2.78.3")
 
         if self.options.backend_x11:
             self.requires("xorg/system")
@@ -201,7 +201,7 @@ class WestonConan(ConanFile):
             self.requires("libseat/0.8.0")
             # Requires mesa for libgbm
             if self.options.renderer_gl:
-                self.requires("mesa/24.0.4")
+                self.requires("mesa/24.0.5")
             if self.options.backend_drm_screencast_vaapi:
                 self.requires("libva/2.20.0")
 
