@@ -159,7 +159,7 @@ class LibvipsConan(ConanFile):
         if self.options.with_matio:
             self.requires("matio/1.5.24")
         if self.options.with_openexr:
-            self.requires("openexr/3.2.1")
+            self.requires("openexr/3.2.3")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.2")
         if self.options.with_pangocairo:
