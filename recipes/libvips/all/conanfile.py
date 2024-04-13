@@ -126,7 +126,7 @@ class LibvipsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("expat/2.6.0")
+        self.requires("expat/2.6.2")
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_archive"):
             self.requires("libarchive/3.7.2")
@@ -227,7 +227,7 @@ class LibvipsConan(ConanFile):
             # a different/incompatible libiconv than the one being exposed
             # in the runtime environment (DYLD_LIBRARY_PATH)
             # See https://github.com/conan-io/conan-center-index/pull/17502#issuecomment-1542492466
-            self.tool_requires("gettext/0.21")
+            self.tool_requires("gettext/0.22.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
