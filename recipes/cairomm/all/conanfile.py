@@ -58,7 +58,7 @@ class CairommConan(ConanFile):
 
     def requirements(self):
         self.requires("cairo/1.18.0", transitive_headers=True, transitive_libs=True)
-        self.requires("fontconfig/2.14.2", transitive_headers=True, transitive_libs=True)
+        self.requires("fontconfig/2.15.0", transitive_headers=True, transitive_libs=True)
         if self._abi_version == "1.16":
             self.requires("libsigcpp/3.0.7", transitive_headers=True, transitive_libs=True)
         else:
@@ -76,9 +76,9 @@ class CairommConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.3")
+        self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
