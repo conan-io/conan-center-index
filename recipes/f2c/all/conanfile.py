@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMakeToolchain, CMake
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, copy, download, export_conandata_patches, apply_conandata_patches, chdir, mkdir, rename, replace_in_file, load, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -58,6 +59,10 @@ class F2cConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("shared builds are not supported on Windows")
+    
+    def build_requirements(self):
+        if is_apple_os(self):
+            self.tool_requires("gnu-getopt/2.40", visible=True)
 
     @staticmethod
     def _chmod_plus_x(name):
@@ -75,6 +80,8 @@ class F2cConan(ConanFile):
             get(self, **self.conan_data["sources"][self.version]["libf2c"])
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
+
         # f2c
         tc = CMakeToolchain(self)
         tc.generate()
