@@ -126,12 +126,14 @@ class F2cConan(ConanFile):
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "f2c"))
         cmake.build()
 
-        if is_msvc(self):
-            fc = os.path.join(self.source_folder, "f2c", "fc")
+        fc = os.path.join(self.source_folder, "f2c", "fc")
+        if is_msvc(self) or self.settings.compiler == "apple-clang":
             # '-u __MAIN' is not understood correctly by automake wrapper and cl
-            replace_in_file(self, fc, " -u MAIN__ -u _MAIN__", "")
+            replace_in_file(self, fc, " -u MAIN__", "")
+        if is_msvc(self):
             replace_in_file(self, fc, '.o"', '.obj"')
             replace_in_file(self, fc, "`.o", "`.obj")
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             replace_in_file(self, fc, "-lf2c -lm", "-lf2c")
 
     def build(self):
@@ -178,7 +180,7 @@ class F2cConan(ConanFile):
 
         includedir = unix_path(self, os.path.join(self.package_folder, "include"))
         libdir = unix_path(self, os.path.join(self.package_folder, "lib"))
-        cflags = f"-I{includedir} -L{libdir} -lf2c"
+        cflags = f"-I{includedir} -L{libdir}"
         if is_msvc(self):
             cflags += " -DMAIN__=main"
         self.buildenv_info.define("CFLAGSF2C", cflags)
