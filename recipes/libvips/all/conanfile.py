@@ -126,7 +126,7 @@ class LibvipsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("expat/2.5.0")
+        self.requires("expat/2.6.0")
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_archive"):
             self.requires("libarchive/3.7.2")
@@ -215,7 +215,7 @@ class LibvipsConan(ConanFile):
             raise ConanInvalidConfiguration("librsvg recipe not available in conancenter yet")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.0")
+        self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         if self.options.introspection:
