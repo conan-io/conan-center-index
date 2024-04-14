@@ -1,13 +1,14 @@
 import os
 
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
+from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.54.0"
 
@@ -55,6 +56,11 @@ class LibdatrieConan(ConanFile):
     def requirements(self):
         if self.options.tools:
             self.requires("libiconv/1.17", visible=False)
+
+    def validate(self):
+        if is_apple_os(self) and self.options.shared:
+            # Fails due to build script bugs
+            raise ConanInvalidConfiguration("shared builds on Apple OS-s are not supported. Contributions are welcome!")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
