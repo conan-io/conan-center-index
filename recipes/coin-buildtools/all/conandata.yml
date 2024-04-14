@@ -1,0 +1,10 @@
+sources:
+  "0.8.11":
+    url: "https://github.com/coin-or-tools/BuildTools/archive/refs/tags/releases/0.8.11.tar.gz"
+    sha256: "ec4cec2455537b4911b1ce223f1f946f5afa2ea6264fc96ae4da6bea63af34dc"
+patches:
+  "0.8.11":
+    - patch_file: "patches/0.8.11-m4-tweaks.patch"
+      patch_type: "portability"
+      patch_description: "Fixes to Autotools M4 scripts for compatibility with Conan"
+      patch_source: "https://github.com/microsoft/vcpkg/pull/29398"

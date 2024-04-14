@@ -1,0 +1,45 @@
+Adapted from https://github.com/microsoft/vcpkg/blob/ad3bae57455a3c3ce528fcd47d8e8027d0498add/ports/coin-or-buildtools/buildtools.patch
+--- a/coin.m4
++++ b/coin.m4
+@@ -2137,14 +2137,12 @@
+   AC_COIN_CHECK_HEADER([zlib.h],[coin_has_zlib=yes])
+ 
+   if test $coin_has_zlib = yes; then
+-    AC_CHECK_LIB([z],[gzopen],[:],[coin_has_zlib=no])
++    AC_SEARCH_LIBS([gzopen],[z zlib zlibd],[],[coin_has_zlib=no])
+   fi
+ 
+   if test $coin_has_zlib = yes; then
+     coin_foreach_w([myvar], [$1], [
+-                    m4_toupper(myvar)_LIBS="-lz $m4_toupper(myvar)_LIBS"
+-                    m4_toupper(myvar)_PCLIBS="-lz $m4_toupper(myvar)_PCLIBS"
+-                    m4_toupper(myvar)_LIBS_INSTALLED="-lz $m4_toupper(myvar)_LIBS_INSTALLED"
++                    m4_toupper(myvar)_LFLAGS="$ac_cv_search_gzopen $m4_toupper(myvar)_LFLAGS"
+                    ])
+     AC_DEFINE([COIN_HAS_ZLIB],[1],[Define to 1 if zlib is available])
+   fi
+@@ -2181,14 +2179,12 @@
+   AC_COIN_CHECK_HEADER([bzlib.h],[coin_has_bzlib=yes])
+ 
+   if test $coin_has_bzlib = yes; then
+-    AC_CHECK_LIB([bz2],[BZ2_bzReadOpen],[:],[coin_has_bzlib=no])
++    AC_SEARCH_LIBS([BZ2_bzReadOpen],[bz2 bz2d],[],[coin_has_bzlib=no])
+   fi
+ 
+   if test $coin_has_bzlib = yes; then
+     coin_foreach_w([myvar], [$1], [
+-                    m4_toupper(myvar)_LIBS="-lbz2 $m4_toupper(myvar)_LIBS"
+-                    m4_toupper(myvar)_PCLIBS="-lbz2 $m4_toupper(myvar)_PCLIBS"
+-                    m4_toupper(myvar)_LIBS_INSTALLED="-lbz2 $m4_toupper(myvar)_LIBS_INSTALLED"
++                    m4_toupper(myvar)_LFLAGS="$ac_cv_search_BZ2_bzReadOpen $m4_toupper(myvar)_LFLAGS"
+                   ])
+     AC_DEFINE([COIN_HAS_BZLIB],[1],[Define to 1 if bzlib is available])
+   fi
+@@ -3069,6 +3065,7 @@
+    COIN_PKG_CONFIG_PATH="$withval/lib/pkgconfig:$withval/share/pkgconfig:${COIN_PKG_CONFIG_PATH}"
+   ],[])
+ 
++COIN_PKG_CONFIG_PATH=${PKG_CONFIG_PATH}
+ AC_SUBST(COIN_PKG_CONFIG_PATH)
+ 
+ # assemble additional pkg-config search paths for uninstalled projects
