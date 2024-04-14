@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(schrift LANGUAGES C)
+project(neco LANGUAGES C)
 
 include(GNUInstallDirs)
 
