@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
@@ -55,21 +54,10 @@ class CoinUtilsConan(ConanFile):
     def requirements(self):
         self.requires("bzip2/1.0.8")
         self.requires("zlib/[>=1.2.11 <2]")
-        # TODO: add blas and lapack support
-
-    def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("coin-utils does not provide a shared library on Windows")
-        # FIXME: This issue likely comes from very old autotools versions used to produce configure.
-        #        It might be fixed by calling autoreconf, but https://github.com/coin-or-tools/BuildTools
-        #        should be packaged and added to build requirements.
-        if hasattr(self, "settings_build") and cross_building(self) and self.options.shared:
-            raise ConanInvalidConfiguration("coin-utils shared not supported yet when cross-building")
 
     def build_requirements(self):
-        if is_msvc(self):
-            self.tool_requires("automake/1.16.5")
-        else:
+        self.tool_requires("coin-buildtools/0.8.11")
+        if not is_msvc(self):
             self.tool_requires("gnu-config/cci.20210814")
         if self._settings_build.os == "Windows":
             self.win_bash = True
@@ -142,6 +130,10 @@ class CoinUtilsConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        copy(self, "*", os.path.join(self.dependencies.build["coin-buildtools"].package_folder, "res"),
+             os.path.join(self.source_folder, "BuildTools"))
+        copy(self, "*", os.path.join(self.dependencies.build["coin-buildtools"].package_folder, "res"),
+             os.path.join(self.source_folder, "CoinUtils", "BuildTools"))
         if not is_msvc(self):
             for gnu_config in [
                 self.conf.get("user.gnu-config:config_guess", check_type=str),
@@ -150,6 +142,7 @@ class CoinUtilsConan(ConanFile):
                 if gnu_config:
                     copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
         autotools = Autotools(self)
+        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
