@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/dzcode-io/kuliya/releases/download/c-v1.0.0/c-release.tar.gz"
+    sha256: "0aee06fd40e476bb0f585bb1020851930aaa240724613445d83fcf8c60ac2206"
