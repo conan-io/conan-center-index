@@ -1,0 +1,12 @@
+sources:
+  "1.9.0":
+    url: "https://github.com/reductstore/reduct-cpp/archive/refs/tags/v1.9.0.tar.gz"
+    sha256: "91ab9702aea52497ec40279a2661c3386797ad814879bf1ed65f14162a108dba"
+patches:
+  "1.9.0":
+    - patch_file: "patches/1.9.0-0001-use-cci.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"
+    - patch_file: "patches/1.9.0-0002-disable-fpic.patch"
+      patch_description: "disable hardcoded fPIC"
+      patch_type: "conan"
