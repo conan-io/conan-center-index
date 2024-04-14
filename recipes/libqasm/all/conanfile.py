@@ -73,7 +73,8 @@ class LibqasmConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd},"
+                                            f"which your compiler does not support.")
 
     def requirements(self):
         self.requires("fmt/10.2.1", transitive_headers=True)
