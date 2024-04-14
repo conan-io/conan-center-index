@@ -75,24 +75,21 @@ class CoinUtilsConan(ConanFile):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
 
+        def _add_dependency_flags(name, package):
+            dep = self.dependencies[package]
+            package_folder = unix_path(self, dep.package_folder)
+            tc.configure_args.extend([
+                f"--with-{name}={dep.cpp_info.aggregated_components().libs[0]}",
+                f"--with-{name}-lib=-L{package_folder}/lib",
+                f"--with-{name}-incdir={package_folder}/include",
+                f"--with-{name}-datadir={package_folder}/res",
+            ])
+
         tc = AutotoolsToolchain(self)
-        blas = self.dependencies["openblas"]
-        glpk = self.dependencies["glpk"]
-        tc.configure_args.extend([
-            "--with-blas=openblas",
-            f"--with-blas-lib=-L{unix_path(self, blas.cpp_info.libdir)}",
-            f"--with-blas-incdir={unix_path(self, blas.cpp_info.includedir)}",
-            f"--with-blas-datadir={unix_path(self, blas.package_folder)}/res",
-            "--with-lapack=openblas",
-            f"--with-lapack-lib=-L{unix_path(self, blas.cpp_info.libdir)}",
-            f"--with-lapack-incdir={unix_path(self, blas.cpp_info.includedir)}",
-            f"--with-lapack-datadir={unix_path(self, blas.package_folder)}/res",
-            "--with-glpk=glpk",
-            f"--with-glpk-lib=-L{unix_path(self, glpk.cpp_info.libdir)}",
-            f"--with-glpk-incdir={unix_path(self, glpk.cpp_info.includedir)}",
-            f"--with-glpk-datadir={unix_path(self, glpk.package_folder)}/res",
-            "--without-sample",
-        ])
+        _add_dependency_flags("blas", "openblas")
+        _add_dependency_flags("lapack", "openblas")
+        _add_dependency_flags("glpk", "glpk")
+        tc.configure_args.append("--without-sample")
         if is_msvc(self):
             tc.configure_args.append(f"--enable-msvc={self.settings.compiler.runtime}")
             tc.extra_cxxflags.append("-EHsc")
