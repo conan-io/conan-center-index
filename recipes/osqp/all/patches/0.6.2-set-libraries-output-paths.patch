@@ -1,0 +1,43 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 64671fc6..8e82f163 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -265,7 +265,7 @@ add_subdirectory(lin_sys)
+ # Static library
+ add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
+ # Give same name to static library output
+-set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
++set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp ARCHIVE_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_PATH}/static)
+ 
+ # Include directories for linear system solvers
+ target_include_directories(osqpstatic PRIVATE ${linsys_solvers_includes})
+@@ -305,6 +305,7 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
+     # Create osqp shared library
+     # NB: Add all the linear system solvers here
+     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
++    set_target_properties(osqp PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_PATH}/shared)
+ 
+     # Include directories for linear system solvers
+     target_include_directories(osqp PRIVATE ${linsys_solvers_includes})
+
+diff --git a/lin_sys/direct/qdldl/qdldl_sources/CMakeLists.txt b/lin_sys/direct/qdldl/qdldl_sources/CMakeLists.txt
+index 06c3d9c..2e830ac 100644
+--- a/lin_sys/direct/qdldl/qdldl_sources/CMakeLists.txt
++++ b/lin_sys/direct/qdldl/qdldl_sources/CMakeLists.txt
+@@ -104,7 +104,7 @@ include(GNUInstallDirs)
+ # Static library
+ add_library (qdldlstatic STATIC ${qdldl_src} ${qdldl_headers})
+ # Give same name to static library output
+-set_target_properties(qdldlstatic PROPERTIES OUTPUT_NAME qdldl)
++set_target_properties(qdldlstatic PROPERTIES OUTPUT_NAME qdldl ARCHIVE_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_PATH}/static)
+ 
+ # Declare include directories for the cmake exported target
+ target_include_directories(qdldlstatic
+@@ -130,6 +130,7 @@ install(FILES ${qdldl_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/qdldl")
+ # ----------------------------------------------
+ # Create qdldl shared library
+ add_library (qdldl SHARED ${qdldl_src} ${qdldl_headers})
++set_target_properties(qdldl PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_PATH}/shared)
+ 
+ # Declare include directories for the cmake exported target
+ target_include_directories(qdldl
