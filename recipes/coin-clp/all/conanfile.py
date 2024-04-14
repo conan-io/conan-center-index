@@ -1,12 +1,12 @@
+import shutil
+
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, rm, rmdir
+from conan.tools.files import copy, get, mkdir, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
+from conan.tools.microsoft import check_min_vs, is_msvc, unix_path, msvc_runtime_flag
 import os
 
 required_conan_version = ">=1.57.0"
@@ -34,9 +34,6 @@ class CoinClpConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -50,17 +47,19 @@ class CoinClpConan(ConanFile):
 
     def requirements(self):
         # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16053#issuecomment-1512637106
-        self.requires("coin-utils/2.11.9", transitive_headers=True, transitive_libs=True)
-        self.requires("coin-osi/0.108.7", transitive_headers=True)
+        self.requires("coin-utils/2.11.11", transitive_headers=True, transitive_libs=True)
+        self.requires("coin-osi/0.108.10", transitive_headers=True)
+        self.requires("openblas/0.3.26")
 
-    def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("coin-clp does not support shared builds on Windows")
-        # FIXME: This issue likely comes from very old autotools versions used to produce configure.
-        if hasattr(self, "settings_build") and cross_building(self) and self.options.shared:
-            raise ConanInvalidConfiguration("coin-clp shared not supported yet when cross-building")
+        # TODO:
+        # self.requires("metis/5.2.1")
+        # self.requires("coin-mumps/3.0.5")
+        # self.requires("suitesparse-amd/3.3.2")
+        # self.requires("suitesparse-cholmod/5.2.1")
+        # Not yet available on CCI: ASL, WSMP
 
     def build_requirements(self):
+        self.tool_requires("coin-buildtools/0.8.11")
         self.tool_requires("gnu-config/cci.20210814")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
@@ -68,8 +67,6 @@ class CoinClpConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        if is_msvc(self):
-            self.tool_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -78,10 +75,46 @@ class CoinClpConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
 
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
+        def _add_pkg_config_alias(src_name, dst_name):
+            shutil.copy(os.path.join(self.generators_folder, f"{src_name}.pc"),
+                        os.path.join(self.generators_folder, f"{dst_name}.pc"))
+
+        _add_pkg_config_alias("openblas", "coinblas")
+        _add_pkg_config_alias("openblas", "coinlapack")
+
         tc = AutotoolsToolchain(self)
-        if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
-            tc.extra_cflags.append("-FS")
-            tc.extra_cxxflags.append("-FS")
+        tc.configure_args.extend([
+            # the coin*.pc pkg-config files are only used when set to BUILD
+            "--with-blas=BUILD",
+            "--with-lapack=BUILD",
+            "--with-glpk=no", # GLPK is used as a substitute for AMD, but fails with undefined symbols
+            # TODO
+            "--without-asl",
+            "--without-mumps",
+            "--without-wsmp",
+            "--disable-amd-libcheck",
+            "--disable-cholmod-libcheck",
+            # These are only used for sample datasets
+            "--without-netlib",
+            "--without-sample",
+        ])
+
+        # TODO: add option
+        # 1 - build Abc serial but no inherit code
+        # 2 - build Abc serial and inherit code
+        # 3 - build Abc cilk parallel but no inherit code
+        # 4 - build Abc cilk parallel and inherit code
+        # [AC_HELP_STRING([--enable-aboca],[enables build of Aboca solver (set to 1,2,3,4)])],
+
+        if is_msvc(self):
+            tc.extra_cxxflags.append("-EHsc")
+            tc.configure_args.append(f"--enable-msvc={msvc_runtime_flag(self)}")
+            if check_min_vs(self, "180", raise_invalid=False):
+                tc.extra_cflags.append("-FS")
+                tc.extra_cxxflags.append("-FS")
         env = tc.environment()
         if is_msvc(self):
             compile_wrapper = unix_path(self, self.conf.get("user.automake:compile-wrapper", check_type=str))
@@ -91,9 +124,6 @@ class CoinClpConan(ConanFile):
             env.define("LD", f"{compile_wrapper} link -nologo")
             env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
             env.define("NM", "dumpbin -symbols")
-            env.define("OBJDUMP", ":")
-            env.define("RANLIB", ":")
-            env.define("STRIP", ":")
         if self._settings_build.os == "Windows":
             # TODO: Something to fix in conan client or pkgconf recipe?
             # This is a weird workaround when build machine is Windows. Here we have to inject regular
@@ -101,19 +131,18 @@ class CoinClpConan(ConanFile):
             env.define("PKG_CONFIG_PATH", self.generators_folder)
         tc.generate(env)
 
-        deps = PkgConfigDeps(self)
-        deps.generate()
-
     def build(self):
-        apply_conandata_patches(self)
-        if not is_msvc(self):
-            for gnu_config in [
-                self.conf.get("user.gnu-config:config_guess", check_type=str),
-                self.conf.get("user.gnu-config:config_sub", check_type=str),
-            ]:
-                if gnu_config:
-                    copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+        copy(self, "*", os.path.join(self.dependencies.build["coin-buildtools"].package_folder, "res"),
+             os.path.join(self.source_folder, "BuildTools"))
+        copy(self, "*", os.path.join(self.dependencies.build["coin-buildtools"].package_folder, "res"),
+             os.path.join(self.source_folder, "Clp", "BuildTools"))
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
         autotools = Autotools(self)
+        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
@@ -136,7 +165,7 @@ class CoinClpConan(ConanFile):
         self.cpp_info.components["clp"].set_property("pkg_config_name", "clp")
         self.cpp_info.components["clp"].libs = ["ClpSolver", "Clp"]
         self.cpp_info.components["clp"].includedirs.append(os.path.join("include", "coin"))
-        self.cpp_info.components["clp"].requires = ["coin-utils::coin-utils"]
+        self.cpp_info.components["clp"].requires = ["coin-utils::coin-utils", "openblas::openblas"]
 
         self.cpp_info.components["osi-clp"].set_property("pkg_config_name", "osi-clp")
         self.cpp_info.components["osi-clp"].libs = ["OsiClp"]
