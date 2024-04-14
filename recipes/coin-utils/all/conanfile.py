@@ -59,8 +59,7 @@ class CoinUtilsConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("coin-buildtools/0.8.11")
-        if not is_msvc(self):
-            self.tool_requires("gnu-config/cci.20210814")
+        self.tool_requires("gnu-config/cci.20210814")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -151,13 +150,11 @@ class CoinUtilsConan(ConanFile):
              os.path.join(self.source_folder, "BuildTools"))
         copy(self, "*", os.path.join(self.dependencies.build["coin-buildtools"].package_folder, "res"),
              os.path.join(self.source_folder, "CoinUtils", "BuildTools"))
-        if not is_msvc(self):
-            for gnu_config in [
-                self.conf.get("user.gnu-config:config_guess", check_type=str),
-                self.conf.get("user.gnu-config:config_sub", check_type=str),
-            ]:
-                if gnu_config:
-                    copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
         autotools = Autotools(self)
         autotools.autoreconf()
         autotools.configure()
