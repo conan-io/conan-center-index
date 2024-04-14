@@ -54,6 +54,7 @@ class CoinUtilsConan(ConanFile):
     def requirements(self):
         self.requires("bzip2/1.0.8")
         self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("openblas/0.3.26")
 
     def build_requirements(self):
         self.tool_requires("coin-buildtools/0.8.11")
@@ -75,8 +76,19 @@ class CoinUtilsConan(ConanFile):
             env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
-        tc.configure_args.append("--without-blas")
-        tc.configure_args.append("--without-lapack")
+        blas = self.dependencies["openblas"]
+        tc.configure_args.extend([
+            "--with-blas=openblas",
+            f"--with-blas-lib=-L{unix_path(self, blas.cpp_info.libdir)}",
+            f"--with-blas-incdir={unix_path(self, blas.cpp_info.includedir)}",
+            f"--with-blas-datadir={unix_path(self, blas.package_folder)}/res",
+            "--with-lapack=openblas",
+            f"--with-lapack-lib=-L{unix_path(self, blas.cpp_info.libdir)}",
+            f"--with-lapack-incdir={unix_path(self, blas.cpp_info.includedir)}",
+            f"--with-lapack-datadir={unix_path(self, blas.package_folder)}/res",
+            # TODO: --with-glpk
+            "--without-sample",
+        ])
         if is_msvc(self):
             tc.configure_args.append(f"--enable-msvc={self.settings.compiler.runtime}")
             tc.extra_cxxflags.append("-EHsc")
