@@ -53,8 +53,9 @@ class CoinUtilsConan(ConanFile):
 
     def requirements(self):
         self.requires("bzip2/1.0.8")
-        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("glpk/4.65")  # v5.0 is not supported by CoinOsi
         self.requires("openblas/0.3.26")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
         self.tool_requires("coin-buildtools/0.8.11")
@@ -77,6 +78,7 @@ class CoinUtilsConan(ConanFile):
 
         tc = AutotoolsToolchain(self)
         blas = self.dependencies["openblas"]
+        glpk = self.dependencies["glpk"]
         tc.configure_args.extend([
             "--with-blas=openblas",
             f"--with-blas-lib=-L{unix_path(self, blas.cpp_info.libdir)}",
@@ -86,7 +88,10 @@ class CoinUtilsConan(ConanFile):
             f"--with-lapack-lib=-L{unix_path(self, blas.cpp_info.libdir)}",
             f"--with-lapack-incdir={unix_path(self, blas.cpp_info.includedir)}",
             f"--with-lapack-datadir={unix_path(self, blas.package_folder)}/res",
-            # TODO: --with-glpk
+            "--with-glpk=glpk",
+            f"--with-glpk-lib=-L{unix_path(self, glpk.cpp_info.libdir)}",
+            f"--with-glpk-incdir={unix_path(self, glpk.cpp_info.includedir)}",
+            f"--with-glpk-datadir={unix_path(self, glpk.package_folder)}/res",
             "--without-sample",
         ])
         if is_msvc(self):
