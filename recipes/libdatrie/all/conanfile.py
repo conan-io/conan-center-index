@@ -1,16 +1,17 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save, rename
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
-from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.54.0"
+
 
 class LibdatrieConan(ConanFile):
     name = "libdatrie"
@@ -54,8 +55,9 @@ class LibdatrieConan(ConanFile):
         export_conandata_patches(self)
 
     def requirements(self):
-        if self.options.tools:
-            self.requires("libiconv/1.17", visible=False)
+        # Only used by the tools and to pass a ./configure check
+        # FIXME: should not be required if tools=False
+        self.requires("libiconv/1.17", visible=False)
 
     def validate(self):
         if is_apple_os(self) and self.options.shared:
@@ -87,23 +89,25 @@ class LibdatrieConan(ConanFile):
         ])
         tc.generate()
 
-        tc = AutotoolsDeps(self)
-        tc.generate()
+        if is_msvc(self):
+            env = Environment()
+            iconv_info = self.dependencies["libiconv"].cpp_info
+            env.append("CPPFLAGS", [f"-I{unix_path(self, iconv_info.includedir)}"] + [f"-D{d}" for d in iconv_info.defines])
+            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in iconv_info.libs])
+            env.append("LDFLAGS", [f"-L{unix_path(self, iconv_info.libdir)}"])
+            env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
+        else:
+            tc = AutotoolsDeps(self)
+            tc.generate()
 
-        # If Visual Studio is supported
         if is_msvc(self):
             env = Environment()
             automake_conf = self.dependencies.build["automake"].conf_info
             compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
             ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
             env.define("CC", f"{compile_wrapper} cl -nologo")
-            env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
             env.define("AR", f"{ar_wrapper} lib")
-            env.define("NM", "dumpbin -symbols")
-            env.define("OBJDUMP", ":")
-            env.define("RANLIB", ":")
-            env.define("STRIP", ":")
             env.vars(self).save_script("conanbuild_msvc")
 
     def build(self):
@@ -112,6 +116,8 @@ class LibdatrieConan(ConanFile):
         autotools.configure()
         if not self.options.tools:
             save(self, os.path.join(self.build_folder, "tools", "Makefile"), "all:\n\t\ninstall:\n\t\n")
+        # Unnecessary and breaks MSVC build
+        save(self, os.path.join(self.build_folder, "man", "Makefile"), "all:\n\t\ninstall:\n\t\n")
         autotools.make()
 
     def package(self):
@@ -122,6 +128,9 @@ class LibdatrieConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
+        if is_msvc(self) and self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "datrie.dll.lib"),
+                   os.path.join(self.package_folder, "lib", "datrie.lib"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "datrie-0.2")
