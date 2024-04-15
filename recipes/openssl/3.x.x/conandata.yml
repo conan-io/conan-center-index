@@ -36,7 +36,7 @@ sources:
     sha256: f93c9e8edde5e9166119de31755fc87b4aa34863662f67ddfcba14d0b6b69b61
 patches:
   3.2.1:
-    - patch_file: "patches/3.2.1-android-x509-md5-names.patch"
+    - patch_file: "patches/3.2.1-x509-md5-names.patch"
       patch_description: "Android ships MD5 hash named certificates which OpenSSL no longer supports by default."
       patch_type: portability
       patch_source: https://github.com/openssl/openssl/issues/13565

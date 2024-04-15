@@ -1,12 +1,12 @@
 diff --git a/crypto/x509/by_dir.c b/crypto/x509/by_dir.c
-index 1d401d0420..5788e95932 100644
+index 1d401d0420..49a32d694f 100644
 --- a/crypto/x509/by_dir.c
 +++ b/crypto/x509/by_dir.c
 @@ -257,9 +257,13 @@ static int get_cert_by_subject_ex(X509_LOOKUP *xl, X509_LOOKUP_TYPE type,
      }
  
      ctx = (BY_DIR *)xl->method_data;
-+#ifdef __ANDROID__
++#ifdef FORCE_MD5_X509_NAME_HASHES
 +    h = X509_NAME_hash_old(name);
 +#else
      h = X509_NAME_hash_ex(name, libctx, propq, &i);

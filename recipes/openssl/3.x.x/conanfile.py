@@ -89,6 +89,7 @@ class OpenSSLConan(ConanFile):
         "no_zlib": [True, False],
         "openssldir": [None, "ANY"],
         "tls_security_level": [None, 0, 1, 2, 3, 4, 5],
+        "force_md5_x509_name_hashes": [True, False],
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
@@ -412,8 +413,11 @@ class OpenSSLConan(ConanFile):
                 f'--with-zlib-lib="{lib_path}"',
             ])
 
+        if self.options.force_md5_x509_name_hashes:
+            args.append("-DFORCE_MD5_X509_NAME_HASHES=1")
+
         for option_name in self.default_options.keys():
-            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "tls_security_level", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2"):
+            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "tls_security_level", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2", "force_md5_x509_name_hashes"):
                 self.output.info(f"Activated option: {option_name}")
                 args.append(option_name.replace("_", "-"))
         return args
