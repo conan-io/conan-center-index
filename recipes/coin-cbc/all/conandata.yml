@@ -1,8 +1,12 @@
 sources:
+  "2.10.11":
+    url: "https://github.com/coin-or/Cbc/archive/releases/2.10.11.tar.gz"
+    sha256: "1fb591dd88336fdaf096b8e42e46111e41671a5eb85d4ee36e45baff1678bd33"
   "2.10.5":
     url: "https://github.com/coin-or/Cbc/archive/releases/2.10.5.tar.gz"
     sha256: "cc44c1950ff4615e7791d7e03ea34318ca001d3cac6dc3f7f5ee392459ce6719"
 patches:
+  "2.10.11":
+    - patch_file: "patches/0002-pthreads4w.patch"
   "2.10.5":
-    - patch_file: "patches/0001-no-pkg-config-check.patch"
     - patch_file: "patches/0002-pthreads4w.patch"

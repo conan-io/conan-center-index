@@ -1,14 +1,12 @@
 import os
+import shutil
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, mkdir, rename, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, check_min_vs
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -53,28 +51,29 @@ class CoinCbcConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("coin-utils/2.11.9")
-        self.requires("coin-osi/0.108.7")
-        self.requires("coin-clp/1.17.7", transitive_headers=True, transitive_libs=True)
-        self.requires("coin-cgl/0.60.7")
+        self.requires("coin-utils/2.11.11")
+        self.requires("coin-osi/0.108.10")
+        self.requires("coin-clp/1.17.9", transitive_headers=True, transitive_libs=True)
+        self.requires("coin-cgl/0.60.8")
+        self.requires("glpk/4.48")
+        self.requires("openblas/0.3.26")
         if is_msvc(self) and self.options.parallel:
             self.requires("pthreads4w/3.0.0")
 
-    def validate(self):
-        # FIXME: This issue likely comes from very old autotools versions used to produce configure.
-        if hasattr(self, "settings_build") and cross_building(self) and self.options.shared:
-            raise ConanInvalidConfiguration("coin-cbc shared not supported yet when cross-building")
+        # TODO: add support for:
+        # self.requires("metis/5.2.1")
+        # self.requires("coin-mumps/3.0.5")
+        # TODO: add support for: Nauty, ASL, DyLP, Vol, Cplex, Gurobi, Highs, Mosek, Soplex, Xpress
 
     def build_requirements(self):
+        self.tool_requires("coin-buildtools/0.8.11")
         self.tool_requires("gnu-config/cci.20210814")
-        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        if is_msvc(self):
-            self.tool_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -83,12 +82,28 @@ class CoinCbcConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
 
+        tc = PkgConfigDeps(self)
+        tc.generate()
+
+        def _add_pkg_config_alias(src_name, dst_name):
+            shutil.copy(os.path.join(self.generators_folder, f"{src_name}.pc"),
+                        os.path.join(self.generators_folder, f"{dst_name}.pc"))
+
+        _add_pkg_config_alias("openblas", "coinblas")
+        _add_pkg_config_alias("openblas", "coinlapack")
+        _add_pkg_config_alias("glpk", "coinglpk")
+
         tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args += [
-            "--enable-cbc-parallel={}".format(yes_no(self.options.parallel)),
-            "--without-blas",
-            "--without-lapack",
+            f"--enable-cbc-parallel={yes_no(self.options.parallel)}",
+            "--with-blas=BUILD",
+            "--with-lapack=BUILD",
+            "--with-glpk=BUILD",
+            # Only used for sample data
+            "--without-netlib",
+            "--without-sample",
+            "--without-miplib3",
         ]
         if is_msvc(self):
             tc.extra_cxxflags.append("-EHsc")
@@ -118,29 +133,29 @@ class CoinCbcConan(ConanFile):
             env.define("PKG_CONFIG_PATH", self.generators_folder)
         tc.generate(env)
 
-        tc = PkgConfigDeps(self)
-        tc.generate()
-
     def build(self):
         apply_conandata_patches(self)
+        copy(self, "*", os.path.join(self.dependencies.build["coin-buildtools"].package_folder, "res"),
+             os.path.join(self.source_folder, "BuildTools"))
+        copy(self, "*", os.path.join(self.dependencies.build["coin-buildtools"].package_folder, "res"),
+             os.path.join(self.source_folder, "Cbc", "BuildTools"))
         for gnu_config in [
             self.conf.get("user.gnu-config:config_guess", check_type=str),
             self.conf.get("user.gnu-config:config_sub", check_type=str),
         ]:
             config_folder = os.path.join(self.source_folder, "config")
             copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=config_folder)
-        with chdir(self, self.source_folder):
-            autotools = Autotools(self)
-            autotools.configure()
-            autotools.make()
+        autotools = Autotools(self)
+        autotools.autoreconf()
+        autotools.configure()
+        autotools.make()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         # Installation script expects include/coin to already exist
         mkdir(self, os.path.join(self.package_folder, "include", "coin"))
-        with chdir(self, self.source_folder):
-            autotools = Autotools(self)
-            autotools.install()
+        autotools = Autotools(self)
+        autotools.install()
 
         for l in ("CbcSolver", "Cbc", "OsiCbc"):
             os.unlink(f"{self.package_folder}/lib/lib{l}.la")
@@ -159,6 +174,8 @@ class CoinCbcConan(ConanFile):
             "coin-utils::coin-utils",
             "coin-osi::coin-osi",
             "coin-cgl::coin-cgl",
+            "openblas::openblas",
+            "glpk::glpk",
         ]
         if self.settings.os in ["Linux", "FreeBSD"] and self.options.parallel:
             self.cpp_info.components["libcbc"].system_libs.append("pthread")
