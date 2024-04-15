@@ -126,7 +126,7 @@ class LibvipsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("expat/2.6.2")
+        self.requires("expat/[>=2.6.2 <3]")
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_archive"):
             self.requires("libarchive/3.7.2")
