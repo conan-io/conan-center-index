@@ -71,7 +71,7 @@ class NngConan(ConanFile):
             if Version(self.version) < "1.5.2":
                 self.requires("mbedtls/2.25.0")
             else:
-                self.requires("mbedtls/3.6.0")
+                self.requires("mbedtls/3.5.2")
 
     def validate(self):
         compiler_minimum_version = {
