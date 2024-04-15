@@ -1,0 +1,11 @@
+--- SPEX/CMakeLists.txt
++++ SPEX/CMakeLists.txt
+@@ -509,7 +509,7 @@
+ # configure MATLAB and Tcov
+ #-------------------------------------------------------------------------------
+ 
+-if ( BUILD_SHARED_LIBS AND NOT SUITESPARSE_ROOT_CMAKELISTS )
++if ( FALSE )
+ 
+     # get paths to libraries
+     get_filename_component ( GMP_PATH ${GMP_LIBRARY} DIRECTORY )
