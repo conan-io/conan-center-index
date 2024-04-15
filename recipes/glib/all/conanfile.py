@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv, Environment
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, download, load, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -24,7 +24,8 @@ class GLibConan(ConanFile):
     topics = "gio", "gmodule", "gnome", "gobject", "gtk"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.gnome.org/GNOME/glib"
-    license = "LGPL-2.1-or-later"
+    # The latter half of the AND in the license is for the vendored pypa/packaging components
+    license = "LGPL-2.1-or-later AND (Apache-2.0 OR BSD-2-Clause)"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -60,6 +61,8 @@ class GLibConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        if Version(self.version) < "2.79":
+            self.license = "LGPL-2.1-or-later"
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -85,15 +88,24 @@ class GLibConan(ConanFile):
         self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
-        if Version(self.version) >= "2.79.0":
-            self.tool_requires("cpython/3.12.2")
+
+    @property
+    def _codegen_dir(self):
+        return os.path.join(self.source_folder, "gio", "gdbus-2.0", "codegen")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    @property
-    def _site_packages_dir(self):
-        return os.path.join(self.build_folder, "site-packages")
+        if Version(self.version) >= "2.79":
+            # Vendor https://github.com/pypa/packaging/blob/24.0/src/packaging/version.py
+            download(self, url="https://raw.githubusercontent.com/pypa/packaging/24.0/src/packaging/version.py",
+                     sha256="5e34412cd2b5ed430380b78ff141e7ab0898dd37528b4df1150511b5e736d750",
+                     filename=os.path.join(self._codegen_dir, "version.py"))
+            download(self, url="https://raw.githubusercontent.com/pypa/packaging/24.0/src/packaging/_structures.py",
+                     sha256="ab77953666d62461bf4b40e2b7f4b7028f2a42acffe4f6135c500a0597b9cabe",
+                     filename=os.path.join(self._codegen_dir, "_structures.py"))
+            for license in ["LICENSE", "LICENSE.APACHE", "LICENSE.BSD"]:
+                filename = "LICENSE.pypa-packaging" if license == "LICENSE" else license
+                download(self, url=f"https://raw.githubusercontent.com/pypa/packaging/24.0/{license}", filename=filename)
 
     def generate(self):
         virtual_build_env = VirtualBuildEnv(self)
@@ -109,11 +121,6 @@ class GLibConan(ConanFile):
         tc.project_options["tests"] = "false"
         tc.project_options["libelf"] = "enabled" if self.options.get_safe("with_elf") else "disabled"
         tc.generate()
-
-        env = Environment()
-        env.append_path("PYTHONPATH", self._site_packages_dir)
-        env.append_path("PATH", os.path.join(self._site_packages_dir, "bin"))
-        env.vars(self).save_script("pythonpath")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -142,20 +149,31 @@ class GLibConan(ConanFile):
             "'res'",
         )
 
-    def _pip_install(self, packages):
-        self.run(f"python -m pip install {' '.join(packages)} --no-cache-dir --target={self._site_packages_dir}")
+        if Version(self.version) >= "2.79":
+            # Use the vendored packaging.version.Version
+            replace_in_file(self, os.path.join(self._codegen_dir, "utils.py"),
+                            "import packaging.version",
+                            "from .version import Version")
+            replace_in_file(self, os.path.join(self._codegen_dir, "utils.py"),
+                            "packaging.version.Version",
+                            "Version")
+            replace_in_file(self, os.path.join(self._codegen_dir, "meson.build"),
+                            "'utils.py',",
+                            "'utils.py', 'version.py', '_structures.py',")
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                            ".find_installation(modules: ['packaging'])",
+                            ".find_installation()")
 
     def build(self):
         self._patch_sources()
-        # Install 'packaging' Python package for Meson.
-        # Note that artifacts corresponding to a version are immutable on PyPI, which is exactly what we want.
-        self._pip_install(["packaging==24.0"])
         meson = Meson(self)
         meson.configure()
         meson.build()
 
     def package(self):
-        copy(self, pattern="LGPL-2.1-or-later.txt", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, "LICENSES"))
+        copy(self, "LGPL-2.1-or-later.txt", os.path.join(self.source_folder, "LICENSES"), os.path.join(self.package_folder, "licenses"))
+        # pypa/packaging license files
+        copy(self, "LICENSE.*", os.path.join(self.source_folder, "LICENSES"), os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

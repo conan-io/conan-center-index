@@ -56,4 +56,4 @@ class TestPackageConan(ConanFile):
             if self.settings.os != "Windows":
                 pkg_config = PkgConfig(self, "gio-2.0", pkg_config_path=self.generators_folder)
                 gdbus_codegen = pkg_config.variables["gdbus_codegen"]
-                self.run(f"{gdbus_codegen} -h", env="conanrun")
+                self.run(f"{gdbus_codegen} -h")
