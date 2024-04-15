@@ -171,6 +171,8 @@ class MSYS2Conan(ConanFile):
                         os.unlink(fullname)
         # See https://github.com/conan-io/conan-center-index/blob/master/docs/error_knowledge_base.md#kb-h013-default-package-layout
         copy(self, "*", dst=os.path.join(self.package_folder, "bin", "msys64"), src=self._msys_dir, excludes=excludes)
+        # Avoid  '/dev/shm' and '/dev/shm': Read-only file system warnings creating the dev folder which is empty
+        os.mkdir(os.path.join(self.package_folder, "bin", "msys64", "dev"))
         shutil.copytree(os.path.join(self._msys_dir, "usr", "share", "licenses"),
                         os.path.join(self.package_folder, "licenses"))
 
