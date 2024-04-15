@@ -123,6 +123,9 @@ class GLibConan(ConanFile):
             tc.project_options["xattr"] = "false"
         tc.project_options["tests"] = "false"
         tc.project_options["libelf"] = "enabled" if self.options.get_safe("with_elf") else "disabled"
+        if Version(self.version) >= "2.79.0":
+            # https://gitlab.gnome.org/GNOME/glib/-/commit/fe32c3f5c5155eab5cd4838867b0c95beefa2239
+            tc.project_options["introspection"] = "disabled"
         tc.generate()
 
     def _patch_sources(self):
