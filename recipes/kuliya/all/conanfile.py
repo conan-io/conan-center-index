@@ -10,8 +10,8 @@ class JsmnConan(ConanFile):
     name = "kuliya"
     description = "Algeria's college hierarchy dataset as a C library."
     license = "MIT"
-    topics = ("kuliya", "dataset", "api", "dz")
-    homepage = "https://dzcode-io.github.io/kuliya/"
+    topics = ("dataset", "api", "dz")
+    homepage = "https://github.com/dzcode-io/kuliya"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
@@ -32,6 +32,7 @@ class JsmnConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "kuliya.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
+        copy(self, "data.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
