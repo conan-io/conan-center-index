@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -86,10 +86,14 @@ class GLibConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         if Version(self.version) >= "2.79.0":
-            self.tool_requires("python_packaging/24.0")
+            self.tool_requires("cpython/3.12.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    @property
+    def _site_packages_dir(self):
+        return os.path.join(self.build_folder, "site-packages")
 
     def generate(self):
         virtual_build_env = VirtualBuildEnv(self)
@@ -105,6 +109,11 @@ class GLibConan(ConanFile):
         tc.project_options["tests"] = "false"
         tc.project_options["libelf"] = "enabled" if self.options.get_safe("with_elf") else "disabled"
         tc.generate()
+
+        env = Environment()
+        env.append_path("PYTHONPATH", self._site_packages_dir)
+        env.append_path("PATH", os.path.join(self._site_packages_dir, "bin"))
+        env.vars(self).save_script("pythonpath")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -133,8 +142,14 @@ class GLibConan(ConanFile):
             "'res'",
         )
 
+    def _pip_install(self, packages):
+        self.run(f"python -m pip install {' '.join(packages)} --no-cache-dir --target={self._site_packages_dir}")
+
     def build(self):
         self._patch_sources()
+        # Install 'packaging' Python package for Meson.
+        # Note that artifacts corresponding to a version are immutable on PyPI, which is exactly what we want.
+        self._pip_install(["packaging==24.0"])
         meson = Meson(self)
         meson.configure()
         meson.build()
