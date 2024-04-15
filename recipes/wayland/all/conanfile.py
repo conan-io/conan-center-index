@@ -51,7 +51,7 @@ class WaylandConan(ConanFile):
             self.requires("libffi/3.4.4")
         if self.options.enable_dtd_validation:
             self.requires("libxml2/2.12.5")
-        self.requires("expat/2.6.2")
+        self.requires("expat/[>=2.6.2 <3]")
 
     def validate(self):
         if self.settings.os != "Linux":
