@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv, Environment
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, download, load, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, load, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -90,22 +90,25 @@ class GLibConan(ConanFile):
             self.tool_requires("pkgconf/2.1.0")
 
     @property
+    def _vendor_pypa_packaging(self):
+        return Version(self.version) >= "2.79"
+
+    @property
+    def _pypa_packaging_dir(self):
+        return os.path.join(self.source_folder, "pypa-packaging")
+
+    @property
     def _codegen_dir(self):
         return os.path.join(self.source_folder, "gio", "gdbus-2.0", "codegen")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        if Version(self.version) >= "2.79":
+        if self._vendor_pypa_packaging:
+            get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
             # Vendor https://github.com/pypa/packaging/blob/24.0/src/packaging/version.py
-            download(self, url="https://raw.githubusercontent.com/pypa/packaging/24.0/src/packaging/version.py",
-                     sha256="5e34412cd2b5ed430380b78ff141e7ab0898dd37528b4df1150511b5e736d750",
-                     filename=os.path.join(self._codegen_dir, "version.py"))
-            download(self, url="https://raw.githubusercontent.com/pypa/packaging/24.0/src/packaging/_structures.py",
-                     sha256="ab77953666d62461bf4b40e2b7f4b7028f2a42acffe4f6135c500a0597b9cabe",
-                     filename=os.path.join(self._codegen_dir, "_structures.py"))
-            for license in ["LICENSE", "LICENSE.APACHE", "LICENSE.BSD"]:
-                filename = "LICENSE.pypa-packaging" if license == "LICENSE" else license
-                download(self, url=f"https://raw.githubusercontent.com/pypa/packaging/24.0/{license}", filename=filename)
+            get(self, **self.conan_data["sources"][self.version]["pypa-packaging"], strip_root=True,
+                destination=self._pypa_packaging_dir)
+        else:
+            get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         virtual_build_env = VirtualBuildEnv(self)
@@ -149,8 +152,10 @@ class GLibConan(ConanFile):
             "'res'",
         )
 
-        if Version(self.version) >= "2.79":
+        if self._vendor_pypa_packaging:
             # Use the vendored packaging.version.Version
+            copy(self, "version.py", os.path.join(self._pypa_packaging_dir, "src", "packaging"), self._codegen_dir)
+            copy(self, "_structures.py", os.path.join(self._pypa_packaging_dir, "src", "packaging"), self._codegen_dir)
             replace_in_file(self, os.path.join(self._codegen_dir, "utils.py"),
                             "import packaging.version",
                             "from .version import Version")
@@ -172,8 +177,11 @@ class GLibConan(ConanFile):
 
     def package(self):
         copy(self, "LGPL-2.1-or-later.txt", os.path.join(self.source_folder, "LICENSES"), os.path.join(self.package_folder, "licenses"))
-        # pypa/packaging license files
-        copy(self, "LICENSE.*", os.path.join(self.source_folder, "LICENSES"), os.path.join(self.package_folder, "licenses"))
+        if self._vendor_pypa_packaging:
+            # pypa/packaging license files
+            copy(self, "LICENSE*", os.path.join(self.source_folder, "pypa-packaging"), os.path.join(self.package_folder, "licenses"))
+            os.rename(os.path.join(self.package_folder, "licenses", "LICENSE"),
+                      os.path.join(self.package_folder, "licenses", "LICENSE.pypa-packaging"))
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

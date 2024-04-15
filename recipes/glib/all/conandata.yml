@@ -1,7 +1,11 @@
 sources:
   "2.80.0":
-    url: "https://download.gnome.org/sources/glib/2.80/glib-2.80.0.tar.xz"
-    sha256: "8228a92f92a412160b139ae68b6345bd28f24434a7b5af150ebe21ff587a561d"
+    source:
+      url: "https://download.gnome.org/sources/glib/2.80/glib-2.80.0.tar.xz"
+      sha256: "8228a92f92a412160b139ae68b6345bd28f24434a7b5af150ebe21ff587a561d"
+    pypa-packaging:
+      url: "https://github.com/pypa/packaging/archive/refs/tags/24.0.tar.gz"
+      sha256: "1bf35cf2c2be982f2ae6c905760ae19cb744fadbf56269f2e54f7bdcef64d291"
   "2.78.3":
     url: "https://download.gnome.org/sources/glib/2.78/glib-2.78.3.tar.xz"
     sha256: "609801dd373796e515972bf95fc0b2daa44545481ee2f465c4f204d224b2bc21"
