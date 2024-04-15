@@ -29,10 +29,12 @@ class CoinUtilsConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_glpk": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_glpk": True,
     }
 
     @property
@@ -55,9 +57,10 @@ class CoinUtilsConan(ConanFile):
 
     def requirements(self):
         self.requires("bzip2/1.0.8")
-        self.requires("glpk/4.48")  # v4.49+ are not supported due to dropped lpx_* functions
-        self.requires("openblas/0.3.26")
         self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("openblas/0.3.26")
+        if self.options.with_glpk:
+            self.requires("glpk/4.48")  # v4.49+ are not supported due to dropped lpx_* functions
 
     def build_requirements(self):
         self.tool_requires("coin-buildtools/0.8.11")
@@ -89,14 +92,15 @@ class CoinUtilsConan(ConanFile):
 
         _add_pkg_config_alias("openblas", "coinblas")
         _add_pkg_config_alias("openblas", "coinlapack")
-        _add_pkg_config_alias("glpk", "coinglpk")
+        if self.options.with_glpk:
+            _add_pkg_config_alias("glpk", "coinglpk")
 
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             # the coin*.pc pkg-config files are only used when set to BUILD
             "--with-blas=BUILD",
             "--with-lapack=BUILD",
-            "--with-glpk=BUILD",
+            "--with-glpk=BUILD" if self.options.with_glpk else "--without-glpk",
             # These are only used for sample datasets
             "--without-netlib",
             "--without-sample",
