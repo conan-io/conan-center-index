@@ -18,10 +18,24 @@ class OsqpConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "printing": [True, False],
+        "profiling": [True, False],
+        "ctrlc": [True, False],
+        "dfloat": [True, False],
+        "dlong": [True, False],
+        "coverage": [True, False],
+        "mkl_paradisio": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "printing": True,
+        "profiling": True,
+        "ctrlc": True,
+        "dfloat": False,
+        "dlong": True,
+        "coverage": False,
+        "mkl_paradisio": True
     }
 
     def export_sources(self):
@@ -47,13 +61,13 @@ class OsqpConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables['UNITTESTS'] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
-        tc.variables["PRINTING"] = True
-        tc.variables["PROFILING"] = True
-        tc.variables["CTRLC"] = True
-        tc.variables["DFLOAT"] = False
-        tc.variables["DLONG"] = True
-        tc.variables["COVERAGE"] = False
-        tc.variables["ENABLE_MKL_PARDISO"] = True
+        tc.variables["PRINTING"] = self.options.printing
+        tc.variables["PROFILING"] = self.options.profiling
+        tc.variables["CTRLC"] = self.options.ctrlc
+        tc.variables["DFLOAT"] = self.options.dfloat
+        tc.variables["DLONG"] = self.options.dlong
+        tc.variables["COVERAGE"] = self.options.coverage
+        tc.variables["ENABLE_MKL_PARDISO"] = self.options.mkl_paradisio
         tc.generate()
 
     def build(self):
