@@ -14,10 +14,6 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
-    def build_requirements(self):
-        if not self._is_legacy_one_profile:
-            self.tool_requires("grpc/<host_version>")
-
     @property
     def _is_legacy_one_profile(self):
         return not hasattr(self, "settings_build")
