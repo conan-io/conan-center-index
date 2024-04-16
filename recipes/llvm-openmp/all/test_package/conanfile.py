@@ -18,8 +18,12 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         env = Environment()
-        # Trigger printing of runtime version info on startup
+        # Trigger printing of runtime version info on startup.
+        # Should state "LLVM OMP" as the runtime library ID if everything is configured correctly.
         env.define("KMP_VERSION", "TRUE")
+        # Display general OpenMP parameters in a standardized format.
+        # https://www.openmp.org/spec-html/5.0/openmpse60.html
+        env.define("OMP_DISPLAY_ENV", "TRUE")
         env.vars(self, scope="run").save_script("conan_openmp_version")
 
     def build(self):
