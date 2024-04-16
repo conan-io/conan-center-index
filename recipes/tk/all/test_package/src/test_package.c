@@ -11,9 +11,9 @@ int main (int argc ,char *argv[]) {
         fprintf(stderr ,"Tcl_Init error: %s\n" ,Tcl_GetStringResult(interp));
         return EXIT_FAILURE;
     }
-    
+
     Tk_Uid id = Tk_GetUid("hello");
-    
+
     Tcl_Finalize();
     fprintf(stderr, "Test package success.\n");
     return EXIT_SUCCESS;
