@@ -26,12 +26,14 @@ class LibsodiumConan(ConanFile):
         "fPIC": [True, False],
         "use_soname": [True, False],
         "PIE": [True, False],
+        "ssp": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "use_soname": True,
         "PIE": False,
+        "ssp": True,
     }
 
     @property
@@ -48,6 +50,8 @@ class LibsodiumConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os == "Emscripten":
+            self.options.ssp = False
 
     def configure(self):
         if self.options.shared:
@@ -90,6 +94,8 @@ class LibsodiumConan(ConanFile):
             yes_no = lambda v: "yes" if v else "no"
             tc.configure_args.append("--enable-soname-versions={}".format(yes_no(self.options.use_soname)))
             tc.configure_args.append("--enable-pie={}".format(yes_no(self.options.PIE)))
+            if not self.options.ssp:
+                tc.configure_args.append("--disable-ssp")
             if self._is_mingw:
                 tc.extra_ldflags.append("-lssp")
             if self.settings.os == "Emscripten" and Version(conan_version).major < 2:
