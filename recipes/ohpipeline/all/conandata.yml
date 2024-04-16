@@ -1,10 +1,4 @@
 sources:
   "1.139.1000":
-    url: "https://github.com/openhome/ohPipeline/archive/refs/tags/ohMediaPlayer_1.139.1000.tar.gz"
-    sha256: "070eac6d974bbe520d0b292df1ca4a72160a2b607a60dabdaa0971c3ef96e5e4"
-patches:
-  "1.139.1000":
-    - patch_file: "patches/0002-include-limits.patch"
-      patch_description: "Add limits include"
-      patch_type: "bugfix"
-      patch_source: "https://github.com/openhome/ohPipeline/pull/11"
+    url: "https://github.com/merakiacoustic/ohPipeline/archive/refs/heads/ohMediaPlayer_1.139.1000_meraki1.tar.gz"
+    sha256: "8bc1baaf6a7030ff572e67192f1ed672be531ebb1e36536a66c98ddce7e6425d"
