@@ -4,14 +4,10 @@ sources:
     # Refer to https://github.com/util-linux/util-linux/issues/2875.
     # url: "https://github.com/util-linux/util-linux/archive/refs/tags/v2.40.tar.gz"
     # sha256: "f7ff8573289313e38ee3378cbc2938f34444a8cb546e1236e46151834be69784"
-    url: "https://github.com/util-linux/util-linux/archive/5de7172a3e59b6861bff0b7baa6f0cad321ab3ff.tar.gz"
-    sha256: "1846be419adda068e9e69f969c42ce3ca9ef2f0332f6edda60cb2ac24a07001f"
+    url: "https://github.com/util-linux/util-linux/archive/eaa8798a4871c7e6564e5da1c2dd6d66bbc6a7cb.tar.gz"
+    sha256: "0efb1260d079db333d2bc6d47fd8bf20ce0d62de04092363529ea99e0842d326"
 patches:
   "2.40":
-    - patch_file: "patches/2.40-0001-Merge-branch-meson-make-libmount-optional-of-https-g.patch"
-      patch_description: "Don't build libmount when it is disabled"
-      patch_type: "portability"
-      patch_source: "https://github.com/util-linux/util-linux/pull/2893"
-    - patch_file: "patches/2.40-0002-Merge-branch-meson-optional-rt-of-https-github.com-j.patch"
-    - patch_file: "patches/2.40-0003-meson-Only-use-the-version-script-linker-flag-where-.patch"
-    - patch_file: "patches/2.40-0004-Add-patch-to-workaround-alias-on-macOS.patch"
+    # Do not merge this patch!
+    # It is a hack to build but needs verification that it actually works properly.
+    - patch_file: "patches/2.40-0001-Add-patch-to-workaround-alias-on-macOS.patch"
