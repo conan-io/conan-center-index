@@ -4,7 +4,6 @@
 
 int main() {
    capnp::MallocMessageBuilder message;
-   message.allocateSegment(0);
-   std::cout << message.sizeInWords() << std::endl;
+   std::cout << sizeof(message) << std::endl;
    return 0;
 }
