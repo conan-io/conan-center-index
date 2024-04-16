@@ -232,6 +232,11 @@ class ArrowConan(ConanFile):
                 raise ConanException("'with_boost' option should be True when'gandiva=True'")
             if not self.options.with_utf8proc:
                 raise ConanException("'with_utf8proc' option should be True when'gandiva=True'")
+        if self.options.parquet:
+            if not self.options.with_boost:
+                raise ConanException("'with_boost' option should be True when'parquet=True'")
+            if not self.options.with_thrift:
+                raise ConanException("'with_thrift' option should be True when'parquet=True'")
         if self.options.with_flight_rpc and not self.options.with_protobuf:
             raise ConanException("'with_protobuf' option should be True when'with_flight_rpc=True'")
 
