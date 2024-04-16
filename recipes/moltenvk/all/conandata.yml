@@ -36,6 +36,11 @@ sources:
     url: "https://github.com/KhronosGroup/MoltenVK/archive/v1.1.0.tar.gz"
     sha256: "0538fa1c23ddae495c7f82ccd0db90790a90b7017a258ca7575fbae8021f3058"
 patches:
+  "1.2.2":
+    - patch_file: "patches/1.2.0-0001-fix-version-number-icd-json.patch"
+      patch_description: "Fix build errors in Xcode 15.3 beta"
+      patch_type: "portability"
+      patch_source: "https://github.com/KhronosGroup/MoltenVK/issues/2156"
   "1.2.0":
     - patch_file: "patches/1.2.0-0001-fix-version-number-icd-json.patch"
       patch_description: "Fix api_version in MoltenVK_icd.json"
