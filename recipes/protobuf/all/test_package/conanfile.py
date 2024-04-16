@@ -39,3 +39,6 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
+
+            assert os.path.exists(os.path.join(self.build_folder, "addressbook.pb.cc"))
+            assert os.path.exists(os.path.join(self.build_folder, "addressbook.pb.h"))
