@@ -580,6 +580,8 @@ class QtConan(ConanFile):
 
         for feature in str(self.options.disabled_features).split():
             tc.variables[f"FEATURE_{feature}"] = "OFF"
+        
+        tc.variables["INPUT_bundled_xcb_xinput"] = "yes"
 
         if self.settings.os == "Macos":
             tc.variables["FEATURE_framework"] = "OFF"
