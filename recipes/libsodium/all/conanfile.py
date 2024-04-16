@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
@@ -6,6 +6,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, MSBuild, MSBuildToolchain
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
@@ -91,8 +92,7 @@ class LibsodiumConan(ConanFile):
             tc.configure_args.append("--enable-pie={}".format(yes_no(self.options.PIE)))
             if self._is_mingw:
                 tc.extra_ldflags.append("-lssp")
-            if self.settings.os == "Emscripten":
-                # FIXME: this is an old comment/test, has not been re-tested with conan2 upgrade
+            if self.settings.os == "Emscripten" and Version(conan_version).major < 2:
                 self.output.warn("os=Emscripten is not tested/supported by this recipe")
                 # FIXME: ./dist-build/emscripten.sh does not respect options of this recipe
             tc.generate()
