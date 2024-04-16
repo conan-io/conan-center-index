@@ -257,9 +257,11 @@ class QtConan(ConanFile):
 
         def _enablemodule(mod):
             if mod != "qtbase":
-                setattr(self.options, mod, True)
-            for req in submodules_tree[mod]["depends"]:
-                _enablemodule(req)
+                if getattr(self.options, mod) not in [True, False]:
+                    setattr(self.options, mod, True)
+                if getattr(self.options, mod):
+                    for req in submodules_tree[mod]["depends"]:
+                        _enablemodule(req)
 
         for module in self._submodules:
             if self.options.get_safe(module):
