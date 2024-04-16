@@ -28,6 +28,7 @@ required_conan_version = ">=1.53.0"
 # `rebuild-dependencies.yml` and re-run that script.
 CONFIGURE_OPTIONS = (
     "atomic",
+    "charconv",
     "chrono",
     "cobalt",
     "container",
