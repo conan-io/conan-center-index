@@ -697,6 +697,8 @@ class QtConan(ConanFile):
 
         args.append("-feature-gssapi" if self.options.get_safe("with_gssapi", False) else "-no-feature-gssapi")
 
+        args.append("-bundled-xcb-xinput")
+
         for opt, conf_arg in [
                               ("with_doubleconversion", "doubleconversion"),
                               ("with_freetype", "freetype"),
