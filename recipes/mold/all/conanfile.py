@@ -41,7 +41,6 @@ class MoldConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("xxhash/0.8.2")
-        self.requires("onetbb/2021.10.0")
         if self.options.with_mimalloc:
             self.requires("mimalloc/2.1.2")
 
@@ -74,7 +73,7 @@ class MoldConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["MOLD_USE_MIMALLOC"] = self.options.with_mimalloc
         tc.variables["MOLD_USE_SYSTEM_MIMALLOC"] = True
-        tc.variables["MOLD_USE_SYSTEM_TBB"] = True
+        tc.variables["MOLD_USE_SYSTEM_TBB"] = False # see https://github.com/conan-io/conan-center-index/pull/23575#issuecomment-2059154281
         tc.variables["CMAKE_INSTALL_LIBEXECDIR"] = "libexec"
         tc.generate()
 
