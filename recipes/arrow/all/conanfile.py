@@ -213,6 +213,8 @@ class ArrowConan(ConanFile):
             self.requires("utf8proc/2.8.0")
         if self.options.with_backtrace:
             self.requires("libbacktrace/cci.20210118")
+        if self.options.with_orc:
+            self.requires("orc/2.0.0")
 
     def validate(self):
         # Do not allow options with 'auto' value
@@ -246,8 +248,6 @@ class ArrowConan(ConanFile):
             raise ConanInvalidConfiguration("CCI has no librados recipe (yet)")
         if self.options.with_cuda:
             raise ConanInvalidConfiguration("CCI has no cuda recipe (yet)")
-        if self.options.with_orc:
-            raise ConanInvalidConfiguration("CCI has no orc recipe (yet)")
         if self.options.with_s3 and not self.dependencies["aws-sdk-cpp"].options.config:
             raise ConanInvalidConfiguration("arrow:with_s3 requires aws-sdk-cpp:config is True.")
 
