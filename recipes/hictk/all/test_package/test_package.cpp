@@ -1,5 +1,3 @@
-#include <fmt/format.h>
-
 #include <stdexcept>
 
 #include "hictk/file.hpp"
