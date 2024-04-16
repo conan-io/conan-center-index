@@ -1,9 +1,10 @@
-#include <kj/arena.h>
+#include <capnp/message.h>
 #include <iostream>
 
 
 int main() {
-   auto arena = kj::Arena(512);
-   arena.allocate<int>(1);
+   capnp::MallocMessageBuilder message;
+   message.allocateSegment(0);
+   std::cout << message.sizeInWords() << std::endl;
    return 0;
 }
