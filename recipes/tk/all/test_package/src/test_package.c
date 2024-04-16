@@ -1,4 +1,7 @@
 #include <stdlib.h>
+#include <string.h>
+
+#include <tcl.h>
 #include <tk.h>
 
 int main() {
