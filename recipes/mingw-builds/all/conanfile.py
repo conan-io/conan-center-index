@@ -39,6 +39,10 @@ class MingwConan(ConanFile):
         if str(self.settings.arch) not in valid_arch:
             raise ConanInvalidConfiguration(f"MinGW {self.version} is only supported for the following architectures on {self.settings.os}: {valid_arch}")
 
+        # Before version 12 (included) the only possible runtime was msvcrt
+        if Version(self.version) < Version("13"):
+            del self.options.runtime
+
         if getattr(self, "settings_target", None):
             if str(self.settings_target.os) not in valid_os:
                 raise ConanInvalidConfiguration(f"MinGW {self.version} is only supported for the following operating systems: {valid_os}")
@@ -74,7 +78,6 @@ class MingwConan(ConanFile):
         download(self, url["url"], "file.7z", sha256=url["sha256"])
         self.run("7z x file.7z")
         os.remove('file.7z')
-
 
     def package(self):
         target = "mingw64" if self.settings.arch == "x86_64" else "mingw32"
