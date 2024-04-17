@@ -34,6 +34,16 @@ class OsqpConan(ConanFile):
         "dlong": True
     }
 
+    options_description = {
+        "shared": "Build shared libraries",
+        "fPIC": "Build with -fPIC flag (only for static libraries",
+        "printing": "Enable solver printing",
+        "profiling": "Enable solver profiling / timing (see https://osqp.org/docs/solver/index.html#rho-step-size)",
+        "interrupt": "Enable user interrupt (Ctrl-C)",
+        "dfloat": "Use float numbers instead of doubles",
+        "dlong": "Use long integers (64bit) for indexing"
+    }
+
     def export_sources(self):
         export_conandata_patches(self)
 
