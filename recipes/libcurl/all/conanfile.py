@@ -188,7 +188,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.25.0")
+            self.requires("c-ares/1.27.0")
         if self.options.get_safe("with_libpsl"):
             self.requires("libpsl/0.21.1")
 
