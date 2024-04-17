@@ -31,6 +31,11 @@ class MingwConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def config_options(self):
+        # Before version 12 (included) the only possible runtime was msvcrt
+        if Version(self.version) <= Version("12.2.0"):
+            del self.options.runtime
+
     def validate(self):
         valid_os = ["Windows"]
         if str(self.settings.os) not in valid_os:
@@ -38,10 +43,6 @@ class MingwConan(ConanFile):
         valid_arch = ["x86_64"]
         if str(self.settings.arch) not in valid_arch:
             raise ConanInvalidConfiguration(f"MinGW {self.version} is only supported for the following architectures on {self.settings.os}: {valid_arch}")
-
-        # Before version 12 (included) the only possible runtime was msvcrt
-        if Version(self.version) <= Version("12.2.0"):
-            del self.options.runtime
 
         if getattr(self, "settings_target", None):
             if str(self.settings_target.os) not in valid_os:
