@@ -53,6 +53,7 @@ class WaylandConan(ConanFile):
             self.requires("libxml2/2.12.3")
         self.requires("expat/2.6.0")
 
+    
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
