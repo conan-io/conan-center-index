@@ -101,7 +101,7 @@ class TileDBConan(ConanFile):
     def requirements(self):
         # TileDB has no transitive header deps
         self.requires("bzip2/1.0.8")
-        self.requires("libxml2/2.12.4")
+        self.requires("libxml2/2.12.5")
         self.requires("lz4/1.9.4")
         self.requires("spdlog/1.13.0")
         self.requires("xz_utils/5.4.4")
