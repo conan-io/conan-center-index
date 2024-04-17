@@ -69,8 +69,6 @@ class LibarchiveConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "3.4.2":
-            del self.options.with_mbedtls
         if Version(self.version) < "3.7.3":
             del self.options.with_pcre2
 
@@ -89,9 +87,9 @@ class LibarchiveConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.12.3")
+            self.requires("libxml2/2.12.5")
         if self.options.with_expat:
-            self.requires("expat/2.5.0")
+            self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_iconv:
             self.requires("libiconv/1.17")
         if self.options.with_pcreposix:
@@ -158,8 +156,7 @@ class LibarchiveConan(ConanFile):
         tc.variables["ENABLE_UNZIP"] = False
         # too strict check
         tc.variables["ENABLE_WERROR"] = False
-        if Version(self.version) >= "3.4.2":
-            tc.variables["ENABLE_MBEDTLS"] = self.options.with_mbedtls
+        tc.variables["ENABLE_MBEDTLS"] = self.options.with_mbedtls
         if Version(self.version) >= "3.7.3":
             tc.variables["ENABLE_PCRE2POSIX"] = self.options.with_pcre2
         tc.variables["ENABLE_XATTR"] = self.options.with_xattr
