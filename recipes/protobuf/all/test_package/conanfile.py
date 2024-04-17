@@ -28,6 +28,9 @@ class TestPackageConan(ConanFile):
 
         tc = CMakeToolchain(self)
         tc.variables["protobuf_LITE"] = self.dependencies[self.tested_reference_str].options.lite
+        # Additional logic to override the make program on MacOS if /usr/bin/make is found by CMake
+        # which otherwise prevents the propagation of DYLD_LIBRARY_PATH as set by the VirtualBuildEnv
+        tc.cache_variables["CMAKE_PROJECT_test_package_INCLUDE"] = os.path.join(self.source_folder, "macos_make_override.cmake")
         tc.generate()
 
     def build(self):
