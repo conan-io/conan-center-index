@@ -23,6 +23,10 @@ patches:
       patch_description: "include <set> header"
       patch_type: "portability"
       patch_source: "https://github.com/furfurylic/commata/pull/3"
+    - patch_file: "patches/0.2.9-0002-additional-missing-includes.patch"
+      patch_description: "add more missing headers"
+      patch_type: "portability"
+      patch_source: "https://github.com/furfurylic/commata/commit/07c6f43f0fae0237569d12420aded35f8ccf792f"
   "0.2.7":
     - patch_file: "patches/0.2.7-0001-include-optional.patch"
       patch_description: "include <optional> header"

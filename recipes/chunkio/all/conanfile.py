@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -10,7 +11,7 @@ class ChunkIOConan(ConanFile):
     description = "Simple library to manage chunks of data in memory and file system"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/edsiper/chunkio"
+    homepage = "https://github.com/fluent/chunkio"
     topics = ("chunk", "io", "memory", "file")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -70,3 +71,5 @@ class ChunkIOConan(ConanFile):
         self.cpp_info.libs = ["chunkio-shared"] if self.options.shared else ["chunkio-static", "cio-crc32"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("shlwapi")
+            if Version(self.version) >= "1.5.0":
+                self.cpp_info.system_libs.append("ws2_32")
