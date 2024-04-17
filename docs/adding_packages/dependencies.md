@@ -185,6 +185,7 @@ Currently, these are (except if the recipe needs a newer lower version for speci
 version range only when a requirement for a newer version is needed.
 * Libcurl: `[>=7.78 <9]`
 * Zlib: `[>=1.2.11 <2]`
+* Libpng: `[>=1.6 <2]`
 * Expat: `[>=2.6.2 <3]`
 * Libxml2: `[>=2.12.5 <3]`
 
