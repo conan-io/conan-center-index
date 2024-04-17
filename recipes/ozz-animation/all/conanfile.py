@@ -1,10 +1,9 @@
-import os
-from pathlib import Path
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, rename, get, replace_in_file
-from conan.tools.microsoft import is_msvc
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, rename, get, replace_in_file, mkdir, rm, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -46,28 +45,8 @@ class OzzAnimationConan(ConanFile):
         "ozz_animation_tools": "Enable library for creating tools",
     }
 
-    def validate(self):
-        def _ensure_enabled(opt, req):
-            if self.options.get_safe(opt):
-                missing = [r for r in req if not getattr(self.options, r, False)]
-                if missing:
-                    raise ConanInvalidConfiguration(f"Option '{opt}' requires option(s) {missing} to be enabled too")
-        _ensure_enabled('ozz_animation_offline', ['ozz_animation'])
-        _ensure_enabled('ozz_animation_tools', ['ozz_animation_offline', 'ozz_options'])
-        _ensure_enabled('tools', ['ozz_animation_tools'])
-
-        if self.settings.compiler == 'gcc':
-            # GCC 11.2 bug breaks build
-            # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99578
-            # https://github.com/guillaumeblanc/ozz-animation/issues/147
-            if Version(self.settings.compiler.version) < "11.3":
-                raise ConanInvalidConfiguration(f"GCC 11.3 or newer required")
-
-        if self.options.shared and Version(self.version) < "0.14.0":
-            raise ConanInvalidConfiguration(f"Can't build shared library for {self.version}")
-
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -78,77 +57,102 @@ class OzzAnimationConan(ConanFile):
         #upstream updates to a newer jsoncpp version, or someone adds a package
         #for that version of jsoncpp
         if self.options.ozz_animation_tools:
-            self.provides = ['jsoncpp']
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-        tc.generate()
+            self.provides = ["jsoncpp"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 11)
+
+        def loose_lt_semver(v1, v2):
+            return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))
+
+        if self.settings.compiler == "gcc" and loose_lt_semver(self.settings.compiler.version, "11.3"):
+            # GCC 11.2 bug breaks build
+            # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99578
+            # https://github.com/guillaumeblanc/ozz-animation/issues/147
+            raise ConanInvalidConfiguration("GCC 11.3 or newer required")
+
+        if self.options.shared and Version(self.version) < "0.14.0":
+            raise ConanInvalidConfiguration(f"Can't build shared library for {self.version}")
+
+        def _ensure_enabled(opt, req):
+            if self.options.get_safe(opt):
+                missing = [r for r in req if not self.options.get_safe(r)]
+                if missing:
+                    raise ConanInvalidConfiguration(f"Option '{opt}' requires option(s) {missing} to be enabled too")
+        _ensure_enabled("ozz_animation_offline", ["ozz_animation"])
+        _ensure_enabled("ozz_animation_tools", ["ozz_animation_offline", "ozz_options"])
+        _ensure_enabled("tools", ["ozz_animation_tools"])
+
+    def build_requirements(self):
+        if Version(self.version) >= "0.14.2":
+            self.tool_requires("cmake/[>=3.24 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmvars = {
-            "ozz_build_fbx": False,
-            "ozz_build_data": False,
-            "ozz_build_samples": False,
-            "ozz_build_howtos": False,
-            "ozz_build_tests": False,
-            "ozz_build_cpp11": True,
-            "ozz_build_tools": False,
-            "ozz_build_gltf": False,
-        }
+    def generate(self):
+        VirtualBuildEnv(self).generate()
 
+        tc = CMakeToolchain(self)
+        tc.variables["ozz_build_fbx"] = False
+        tc.variables["ozz_build_data"] = False
+        tc.variables["ozz_build_samples"] = False
+        tc.variables["ozz_build_howtos"] = False
+        tc.variables["ozz_build_tests"] = False
+        tc.variables["ozz_build_cpp11"] = True
+        tc.variables["ozz_build_tools"] = False
+        tc.variables["ozz_build_gltf"] = False
         if self.options.ozz_animation_tools:
-            cmvars["ozz_build_tools"] = True
-
+            tc.variables["ozz_build_tools"] = True
         if self.options.tools:
-            cmvars["ozz_build_tools"] = True
-            cmvars["ozz_build_gltf"] = True
-
-        cmake.configure(variables = cmvars)
-        return cmake
+            tc.variables["ozz_build_tools"] = True
+            tc.variables["ozz_build_gltf"] = True
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
 
     def build(self):
-        subfolder = Path(self.source_folder)
-        for before, after in [('string(REGEX REPLACE "/MT" "/MD" ${flag} "${${flag}}")', ""), ('string(REGEX REPLACE "/MD" "/MT" ${flag} "${${flag}}")', "")]:
-            replace_in_file(self, subfolder/"build-utils"/"cmake"/"compiler_settings.cmake", before, after)
-
-        replace_in_file(self, subfolder/"src"/"animation"/"offline"/"tools"/"CMakeLists.txt",
-                              "if(NOT EMSCRIPTEN)",
-                              "if(NOT CMAKE_CROSSCOMPILING)")
-
-        cmake = self._configure_cmake()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
+    def _patch_sources(self):
+        if Version(self.version) < "0.14.2":
+            # Removed in v0.14.3: https://github.com/guillaumeblanc/ozz-animation/commit/1db3df07173fc410d2215262f746e45f10577e32
+            compiler_settings = self.source_path / "build-utils" / "cmake" / "compiler_settings.cmake"
+            replace_in_file(self, compiler_settings, 'string(REGEX REPLACE "/MT" "/MD" ${flag} "${${flag}}")', "")
+            replace_in_file(self, compiler_settings, 'string(REGEX REPLACE "/MD" "/MT" ${flag} "${${flag}}")', "")
+
+        replace_in_file(self, self.source_path / "src" / "animation" / "offline" / "tools" / "CMakeLists.txt",
+                        "if(NOT EMSCRIPTEN)",
+                        "if(NOT CMAKE_CROSSCOMPILING)")
+
     def package(self):
+        copy(self, "LICENSE.md", self.source_folder, self.package_path/"licenses")
         cmake = CMake(self)
         cmake.install()
 
-        pkg = self.package_path
-
         if self.options.ozz_animation_tools:
-            json = Path(self.build_folder)/'src'/'animation'/'offline'/'tools'/'json'
-            copy(self, "*.a", src=json, dst=pkg/'lib', keep_path=False)
-            copy(self, "*.so", src=json, dst=pkg/'lib', keep_path=False)
-            copy(self, "*.dylib", src=json, dst=pkg/'lib', keep_path=False)
-            copy(self, "*.lib", src=json, dst=pkg/'lib', keep_path=False)
-            copy(self, "*.dll", src=json, dst=pkg/'bin', keep_path=False)
+            json_dir = self.build_path.joinpath("src", "animation", "offline", "tools", "json")
+            for pattern in ["*.a", "*.so*", "*.dylib", "*.lib"]:
+                copy(self, pattern, src=json_dir, dst=self.package_path/"lib", keep_path=False)
+            copy(self, "*.dll", src=json_dir, dst=self.package_path/"bin", keep_path=False)
 
-        os.remove(pkg/"CHANGES.md")
-        os.remove(pkg/"LICENSE.md")
-        os.remove(pkg/"README.md")
+        mkdir(self, self.package_path.joinpath("bin"))
+        for file in self.package_path.joinpath("lib").glob("*.dll"):
+            rename(self, src=file, dst=self.package_path/"bin"/file.name)
 
-        (pkg/'bin').mkdir(exist_ok=True)
-        for file in filter(lambda p: p.suffix=='.dll', (pkg/'lib').iterdir()):
-            rename(self, src=file, dst=pkg/'bin'/file.name)
+        if self.options.tools:
+            for file in self.package_path.joinpath("bin", "tools").iterdir():
+                rename(self, src=file, dst=self.package_path/"bin"/file.name)
+            rmdir(self, self.package_path.joinpath("bin", "tools"))
 
-        copy(self, pattern="LICENSE.md", dst=pkg/"licenses", src=self.source_folder)
+        rm(self, "*.md", self.package_path)
+        rmdir(self, self.package_path / "share")
 
     def package_info(self):
         postfix = {
@@ -189,6 +193,3 @@ class OzzAnimationConan(ConanFile):
             self.cpp_info.components["animation_tools"].libs = [f"ozz_animation_tools{postfix}"]
             self.cpp_info.components["animation_tools"].requires = ["animation_offline", "options", "jsoncpp"]
             self.cpp_info.components["jsoncpp"].libs = [f"json{postfix}"]
-
-        if self.options.tools:
-            self.buildenv_info.prepend_path("PATH", str(Path(self.package_folder)/"bin"/"tools"))
