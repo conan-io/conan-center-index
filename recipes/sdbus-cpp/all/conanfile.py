@@ -76,7 +76,7 @@ class SdbusCppConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("pkgconf/2.1.0")
         if self.options.with_code_gen:
-            self.tool_requires("expat/2.6.0")
+            self.tool_requires("expat/[>=2.6.2 <3]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")

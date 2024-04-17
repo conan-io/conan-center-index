@@ -1,4 +1,6 @@
 versions:
+  "44.0":
+    folder: all
   "43.1":
     folder: all
   "42.0":

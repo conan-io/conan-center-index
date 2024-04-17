@@ -10,7 +10,7 @@ from conan.tools.scm import Version
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
 
-class PackageConan(ConanFile):
+class OusterSdkConan(ConanFile):
     name = "ouster_sdk"
     description = "Ouster SDK - tools for working with Ouster Lidars"
     license = "BSD 3-Clause"
@@ -97,7 +97,7 @@ class PackageConan(ConanFile):
 
         if self.options.build_viz:
             self.requires("glad/0.1.36")
-            self.requires("CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS/3.4")
+            self.requires("glfw/3.4")
             if self.settings.os != "Windows":
                 self.requires("xorg/system")
 
