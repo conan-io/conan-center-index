@@ -46,11 +46,11 @@ class OpenColorIOConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("expat/2.5.0")
+        self.requires("expat/[>=2.6.2 <3]")
         if Version(self.version) < "2.2.0":
             self.requires("openexr/2.5.7")
         else:
-            self.requires("openexr/3.2.1")
+            self.requires("openexr/3.2.3")
             self.requires("imath/3.1.9")
 
         if Version(self.version) < "2.0.0":
