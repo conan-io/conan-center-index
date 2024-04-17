@@ -1,6 +1,8 @@
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, download, export_conandata_patches, apply_conandata_patches
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -15,28 +17,31 @@ class OhPipelineConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/openhome/ohPipeline"
     topics = ("openhome", "ohnet", "ohpipeline", "upnp")
-    package_type = "library"
+
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 11
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+        }
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared")
-
     def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
         export_conandata_patches(self)
 
     def build_requirements(self):
@@ -44,12 +49,12 @@ class OhPipelineConan(ConanFile):
 
     def requirements(self):
         self.requires("ohnet/1.36.5182", transitive_headers=True, transitive_libs=True)
-        self.requires("openssl/3.2.0")
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("libmad/0.15.1b")
         self.requires("alac/cci.20121212")
-        self.requires("libfdk_aac/2.0.2")
+        self.requires("libfdk_aac/2.0.3")
         self.requires("faac/1.30")
-        self.requires("flac/1.4.2")
+        self.requires("flac/1.4.3")
         self.requires("ogg/1.3.5")
         self.requires("vorbis/1.3.7")
 
@@ -57,17 +62,25 @@ class OhPipelineConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support GCC < 7")
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
         tc = CMakeToolchain(self)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
+        download(self, **self.conan_data["sources"][self.version]["cmake"], filename="CMakeLists.txt")
 
     def build(self):
         apply_conandata_patches(self)
