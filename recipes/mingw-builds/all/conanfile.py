@@ -66,7 +66,7 @@ class MingwConan(ConanFile):
         self.build_requires("7zip/19.00")
 
     def _get_url(self):
-        if Version(self.version) < Version("12"):
+        if Version(self.version) <= Version("12.2.0"):
             return self.conan_data["sources"][self.version][str(self.options.threads)][str(self.options.exception)]
         else:
             return self.conan_data["sources"][self.version][str(self.options.threads)][str(self.options.exception)][str(self.options.runtime)]
