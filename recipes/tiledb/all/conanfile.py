@@ -133,6 +133,15 @@ class TileDBConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+        if self.options.serialization and not self.dependencies["libcurl"].options.with_zstd:
+            raise ConanInvalidConfiguration("TileDB serialization requires libcurl with with_zstd option enabled.")
+        if self.options.s3:
+            aws_opts = self.dependencies["aws-sdk-cpp"].options
+            if not (aws_opts.get_safe("s3") and aws_opts.get_safe("identity-management") and aws_opts.get_safe("sts")):
+                raise ConanInvalidConfiguration(
+                    f"TileDB S3 support requires aws-sdk-cpp with 's3', 'identity-management' and 'sts' options enabled."
+                )
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21 <4]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
