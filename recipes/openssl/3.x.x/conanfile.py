@@ -451,7 +451,7 @@ class OpenSSLConan(ConanFile):
         if self._perlasm_scheme:
             perlasm_scheme = 'perlasm_scheme => "%s",' % self._perlasm_scheme
 
-        defines = " ".join(defines)
+        defines = '", "'.join(defines)
         defines = 'defines => add("%s"),' % defines if defines else ""
         targets = "my %targets"
 
@@ -554,12 +554,6 @@ class OpenSSLConan(ConanFile):
             for filename in files:
                 if fnmatch.fnmatch(filename, "*.pdb"):
                     os.unlink(os.path.join(self.package_folder, root, filename))
-        if self._use_nmake:
-            if self.settings.build_type == "Debug":
-                with chdir(self, os.path.join(self.package_folder, "lib")):
-                    rename(self, "libssl.lib", "libssld.lib")
-                    rename(self, "libcrypto.lib", "libcryptod.lib")
-
         if self.options.shared:
             libdir = os.path.join(self.package_folder, "lib")
             for file in os.listdir(libdir):
@@ -649,9 +643,8 @@ class OpenSSLConan(ConanFile):
         self.cpp_info.components["crypto"].set_property("cmake_build_modules", [self._module_file_rel_path])
 
         if self._use_nmake:
-            libsuffix = "d" if self.settings.build_type == "Debug" else ""
-            self.cpp_info.components["ssl"].libs = ["libssl" + libsuffix]
-            self.cpp_info.components["crypto"].libs = ["libcrypto" + libsuffix]
+            self.cpp_info.components["ssl"].libs = ["libssl"]
+            self.cpp_info.components["crypto"].libs = ["libcrypto"]
         else:
             self.cpp_info.components["ssl"].libs = ["ssl"]
             self.cpp_info.components["crypto"].libs = ["crypto"]

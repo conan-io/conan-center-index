@@ -25,7 +25,7 @@ class ensmallenRecipe(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("armadillo/12.2.0")
+        self.requires("armadillo/12.6.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

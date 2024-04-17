@@ -19,6 +19,7 @@ class QtXlsxWriterConan(ConanFile):
     topics = ("excel", "xlsx")
 
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -44,7 +45,7 @@ class QtXlsxWriterConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/5.15.7")
+        self.requires("qt/5.15.13", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if not self.dependencies["qt"].options.gui:
