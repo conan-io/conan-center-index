@@ -1186,11 +1186,11 @@ Examples = bin/datadir/examples""")
                     cocoa_reqs.append("PrintSupport")
                 _create_plugin("QCocoaIntegrationPlugin", "qcocoa", "platforms", cocoa_reqs)
                 _create_plugin("QMacStylePlugin", "qmacstyle", "styles", cocoa_reqs)
-                self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = ["AppKit", "Carbon", "CoreServices", "CoreVideo",
+                self.cpp_info.components["qtQCocoaIntegrationPlugin"].frameworks = ["AppKit", "Carbon", "CoreServices", "CoreVideo",
                     "IOKit", "IOSurface", "Metal", "QuartzCore"]
             elif self.settings.os in ["iOS", "tvOS"]:
                 _create_plugin("QIOSIntegrationPlugin", "qios", "platforms", ["ClipboardSupport", "FontDatabaseSupport", "GraphicsSupport"])
-                self.cpp_info.components["QIOSIntegrationPlugin"].frameworks = ["AudioToolbox", "Foundation", "Metal",
+                self.cpp_info.components["qtQIOSIntegrationPlugin"].frameworks = ["AudioToolbox", "Foundation", "Metal",
                     "MobileCoreServices", "OpenGLES", "QuartzCore", "UIKit"]
             elif self.settings.os == "watchOS":
                 _create_plugin("QMinimalIntegrationPlugin", "qminimal", "platforms", ["EventDispatcherSupport", "FontDatabaseSupport"])
@@ -1312,7 +1312,7 @@ Examples = bin/datadir/examples""")
                                       "nss::nss", "libdrm::libdrm", "egl::egl"])
             _create_module("WebEngineCore", webenginereqs)
             if self.settings.os != "Windows":
-                self.cpp_info.components["WebEngineCore"].system_libs.append("resolv")
+                self.cpp_info.components["qtWebEngineCore"].system_libs.append("resolv")
             _create_module("WebEngine", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
 
