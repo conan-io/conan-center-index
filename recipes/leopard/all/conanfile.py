@@ -77,4 +77,4 @@ class LeopardConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "ThreadPool")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread"])
+            self.cpp_info.system_libs.extend(["pthread", "dl", "m"])
