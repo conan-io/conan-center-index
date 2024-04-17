@@ -22,9 +22,7 @@ class OsqpConan(ConanFile):
         "profiling": [True, False],
         "ctrlc": [True, False],
         "dfloat": [True, False],
-        "dlong": [True, False],
-        "coverage": [True, False],
-        "mkl_paradisio": [True, False]
+        "dlong": [True, False]
     }
     default_options = {
         "shared": False,
@@ -33,9 +31,7 @@ class OsqpConan(ConanFile):
         "profiling": True,
         "ctrlc": True,
         "dfloat": False,
-        "dlong": True,
-        "coverage": False,
-        "mkl_paradisio": True
+        "dlong": True
     }
 
     def export_sources(self):
@@ -66,8 +62,6 @@ class OsqpConan(ConanFile):
         tc.variables["CTRLC"] = self.options.ctrlc
         tc.variables["DFLOAT"] = self.options.dfloat
         tc.variables["DLONG"] = self.options.dlong
-        tc.variables["COVERAGE"] = self.options.coverage
-        tc.variables["ENABLE_MKL_PARDISO"] = self.options.mkl_paradisio
         tc.generate()
 
     def build(self):
