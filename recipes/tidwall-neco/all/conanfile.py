@@ -1,6 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
+from concn.tools.msvc import is_msvc
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.53.0"
@@ -38,6 +40,10 @@ class TidwallNecoConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio (yet).")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
