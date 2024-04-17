@@ -11,4 +11,3 @@ sources:
 patches:
   "1.16.8":
     - patch_file: "patches/fix-includes-and-assert-1.16.8.patch"
-      base_path: "source_subfolder"
