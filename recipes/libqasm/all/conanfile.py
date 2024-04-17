@@ -6,7 +6,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -80,7 +80,7 @@ class LibqasmConan(ConanFile):
     def requirements(self):
         self.requires("fmt/10.2.1", transitive_headers=True)
         self.requires("range-v3/0.12.0", transitive_headers=True)
-        self.requires("tree-gen/1.0.7", transitive_headers=True)
+        self.requires("tree-gen/1.0.7", transitive_headers=True, transitive_libs=True)
         if not self.settings.arch == "wasm":
             self.requires("antlr4-cppruntime/4.13.1", transitive_headers=True)
 
@@ -104,20 +104,17 @@ class LibqasmConan(ConanFile):
         cmake.build()
 
     def package(self):
-        bin_dir = os.path.join(self.package_folder, "bin")
-        lib_dir = os.path.join(self.package_folder, "lib")
-        licenses_dir = os.path.join(self.package_folder, "licenses")
-        copy(self, "LICENSE.md", src=self.source_folder, dst=licenses_dir)
-        copy(self, "*.a", src=self.build_folder, dst=lib_dir, keep_path=False)
-        copy(self, "*.lib", src=self.build_folder, dst=lib_dir, keep_path=False)
-        copy(self, "*.so", src=self.build_folder, dst=lib_dir, keep_path=False)
-        copy(self, "*.dylib", src=self.build_folder, dst=lib_dir, keep_path=False)
-        copy(self, "*.dll*", src=self.build_folder, dst=bin_dir, keep_path=False)
-        fix_apple_shared_install_name(self)
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rm(self, "*.pdb", os.path.join(self.package_folder), recursive=True)
-
+        fix_apple_shared_install_name(self)
+        rm(self, "*.interp", os.path.join(self.package_folder, "include"), recursive=True)
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rm(self, "*.tokens", os.path.join(self.package_folder, "include"), recursive=True)
+        rm(self, "cmake_install.cmake", os.path.join(self.package_folder, "include"), recursive=True)
+        rm(self, "Makefile", os.path.join(self.package_folder, "include"), recursive=True)
+        rmdir(self, os.path.join(os.path.join(self.package_folder, "include", "CMakeFiles")))
+        rmdir(self, os.path.join(os.path.join(self.package_folder, "include", "v3x", "CMakeFiles")))
 
     def package_info(self):
         self.cpp_info.libs = ["cqasm"]
