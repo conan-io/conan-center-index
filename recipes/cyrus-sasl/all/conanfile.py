@@ -195,6 +195,10 @@ class CyrusSaslConan(ConanFile):
                                 f'{import_conan_generators}<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />')
         replace_in_file(self, os.path.join(self.source_folder, "win32", "openssl.props"),
                         "libeay32.lib;", "")
+        # https://github.com/cyrusimap/cyrus-sasl/issues/831
+        for attr in ["(format(printf, 2, 3))", "(format(printf, 3, 4))"]:
+            replace_in_file(self, os.path.join(self.source_folder, "include", "saslplug.h"),
+                            f"__attribute__({attr})", "")
         # https://github.com/cyrusimap/cyrus-sasl/issues/730
         copy(self, "md5global.h",
              src=os.path.join(self.source_folder, "win32", "include"),
