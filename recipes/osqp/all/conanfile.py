@@ -20,7 +20,7 @@ class OsqpConan(ConanFile):
         "fPIC": [True, False],
         "printing": [True, False],
         "profiling": [True, False],
-        "ctrlc": [True, False],
+        "interrupt": [True, False],
         "dfloat": [True, False],
         "dlong": [True, False]
     }
@@ -29,7 +29,7 @@ class OsqpConan(ConanFile):
         "fPIC": True,
         "printing": True,
         "profiling": True,
-        "ctrlc": True,
+        "interrupt": True,
         "dfloat": False,
         "dlong": True
     }
@@ -59,7 +59,7 @@ class OsqpConan(ConanFile):
         tc.variables['UNITTESTS'] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
         tc.variables["PRINTING"] = self.options.printing
         tc.variables["PROFILING"] = self.options.profiling
-        tc.variables["CTRLC"] = self.options.ctrlc
+        tc.variables["CTRLC"] = self.options.interrupt
         tc.variables["DFLOAT"] = self.options.dfloat
         tc.variables["DLONG"] = self.options.dlong
         tc.generate()
