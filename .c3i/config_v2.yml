@@ -81,19 +81,6 @@ configurations:
               compiler.libcxx: ["libstdc++11"]
               compiler.version: ["11"]
               build_type: ["Release"]
-  - id: macos-clang
-    hrname: "macOS, Clang"
-    build_profile:
-      os: "Macos"
-      arch: "armv8"
-    content:
-      - os: [ "Macos" ]
-        arch: [ "x86_64" ]
-        compiler:
-          - "apple-clang":
-              compiler.version: [ "13" ]
-              compiler.libcxx: [ "libc++" ]
-              build_type: [ "Release"]
   - id: macos-m1-clang
     hrname: "macOS M1, Clang"
     build_profile:
@@ -105,6 +92,19 @@ configurations:
         compiler:
           - "apple-clang":
               compiler.version: ["13" ]
+              compiler.libcxx: [ "libc++" ]
+              build_type: [ "Release"]
+  - id: macos-clang
+    hrname: "macOS, Clang"
+    build_profile:
+      os: "Macos"
+      arch: "armv8"
+    content:
+      - os: [ "Macos" ]
+        arch: [ "x86_64" ]
+        compiler:
+          - "apple-clang":
+              compiler.version: [ "13" ]
               compiler.libcxx: [ "libc++" ]
               build_type: [ "Release"]
   - id: windows-msvc
