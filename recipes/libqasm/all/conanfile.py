@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -103,7 +104,16 @@ class LibqasmConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        bin_dir = os.path.join(self.package_folder, "bin")
+        lib_dir = os.path.join(self.package_folder, "lib")
+        licenses_dir = os.path.join(self.package_folder, "licenses")
+        copy(self, "LICENSE.md", src=self.source_folder, dst=licenses_dir)
+        copy(self, "*.a", src=self.build_folder, dst=lib_dir, keep_path=False)
+        copy(self, "*.lib", src=self.build_folder, dst=lib_dir, keep_path=False)
+        copy(self, "*.so", src=self.build_folder, dst=lib_dir, keep_path=False)
+        copy(self, "*.dylib", src=self.build_folder, dst=lib_dir, keep_path=False)
+        copy(self, "*.dll*", src=self.build_folder, bin_dir, keep_path=False)
+        fix_apple_shared_install_name(self)
         cmake = CMake(self)
         cmake.install()
         rm(self, "*.pdb", os.path.join(self.package_folder), recursive=True)
