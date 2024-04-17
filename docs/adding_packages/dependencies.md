@@ -178,7 +178,7 @@ for consumer, we do impose some limits on Conan features to provide a smoother f
 
 Version ranges are a useful Conan feature, [documentation here](https://docs.conan.io/2/tutorial/versioning/version_ranges.html).
 With the introduction of Conan 2.0, we are currently working to allow the use of version ranges and are allowing this for a handful of dependencies.
-Currently, these are (expect if the recipe needs a newer lower version for specific reasons):
+Currently, these are (except if the recipe needs a newer lower version for specific reasons):
 
 * OpenSSL: `[>=1.1 <4]` for libraries known to be compatible with OpenSSL 1.x and 3.x
 * CMake: `[>3.XX <4]`, where `3.XX` is the minimum version of CMake required by the relevant build scripts. Note that CCI recipes assume 3.15 is installed in the system, so add this
