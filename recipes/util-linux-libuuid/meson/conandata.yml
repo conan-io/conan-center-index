@@ -4,8 +4,8 @@ sources:
     # Refer to https://github.com/util-linux/util-linux/issues/2875.
     # url: "https://github.com/util-linux/util-linux/archive/refs/tags/v2.40.tar.gz"
     # sha256: "f7ff8573289313e38ee3378cbc2938f34444a8cb546e1236e46151834be69784"
-    url: "https://github.com/util-linux/util-linux/archive/eaa8798a4871c7e6564e5da1c2dd6d66bbc6a7cb.tar.gz"
-    sha256: "0efb1260d079db333d2bc6d47fd8bf20ce0d62de04092363529ea99e0842d326"
+    url: "https://github.com/util-linux/util-linux/archive/58bc2bb7c9d6d00767186eb44ea597a80d02f92d.tar.gz"
+    sha256: "d0f13d8160d25ac5613f1d7d28f34b251428fc8f2154658c2bf2e84bd5eec04b"
 patches:
   "2.40":
     # Do not merge this patch!
