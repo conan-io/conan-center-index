@@ -72,6 +72,9 @@ class awskvspicConan(ConanFile):
         self.cpp_info.components["kvspic"].set_property("pkg_config_name", "libkvspic")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["kvspic"].system_libs = ["dl", "rt", "pthread"]
+        
+        if self.settings.build_type == "Debug":
+            self.cpp_info.components["kvspic"].defines = ["DEBUG_BUILD"]
 
         self.cpp_info.components["kvspicClient"].libs = ["kvspicClient"]
         self.cpp_info.components["kvspicClient"].set_property("pkg_config_name", "libkvspicClient")
