@@ -1,0 +1,27 @@
+From 63fe35fb1c7f0b41590a7da4a2dacbabb0f86ef1 Mon Sep 17 00:00:00 2001
+From: Arenoros <arenoros@gmail.com>
+Date: Wed, 17 Apr 2024 20:49:11 +0300
+Subject: [PATCH 2/2] fix build
+
+---
+ src/PE/ResourcesManager.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/PE/ResourcesManager.cpp b/src/PE/ResourcesManager.cpp
+index dcdbc97e..73b34725 100644
+--- a/src/PE/ResourcesManager.cpp
++++ b/src/PE/ResourcesManager.cpp
+@@ -33,6 +33,10 @@
+ #include "fmt_formatter.hpp"
+ 
+ FMT_FORMATTER(LIEF::PE::ResourcesManager::TYPE, LIEF::PE::to_string);
++template <> struct fmt::formatter<LIEF::PE::ResourceVersion> : ostream_formatter {};
++template <> struct fmt::formatter<LIEF::PE::ResourceIcon> : ostream_formatter {};
++template <> struct fmt::formatter<LIEF::PE::ResourceDialog> : ostream_formatter {};
++template <> struct fmt::formatter<LIEF::PE::ResourceStringTable> : ostream_formatter {};
+ 
+ namespace LIEF {
+ namespace PE {
+-- 
+2.43.0.windows.1
+
