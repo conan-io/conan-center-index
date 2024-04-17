@@ -112,7 +112,7 @@ class LibqasmConan(ConanFile):
         copy(self, "*.lib", src=self.build_folder, dst=lib_dir, keep_path=False)
         copy(self, "*.so", src=self.build_folder, dst=lib_dir, keep_path=False)
         copy(self, "*.dylib", src=self.build_folder, dst=lib_dir, keep_path=False)
-        copy(self, "*.dll*", src=self.build_folder, bin_dir, keep_path=False)
+        copy(self, "*.dll*", src=self.build_folder, dst=bin_dir, keep_path=False)
         fix_apple_shared_install_name(self)
         cmake = CMake(self)
         cmake.install()
