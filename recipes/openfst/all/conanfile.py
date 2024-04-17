@@ -3,6 +3,7 @@ from itertools import product
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -74,8 +75,8 @@ class OpenFstConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("OpenFst is only supported on linux")
+        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
+            raise ConanInvalidConfiguration(f"OpenFst is only supported on Linux, FreeBSD, and Macos (got: {self.settings.os})")
 
         compilers = {
             "gcc": "8",
@@ -146,6 +147,7 @@ class OpenFstConan(ConanFile):
 
         autotools = Autotools(self)
         autotools.install()
+        fix_apple_shared_install_name(self)
 
         lib_dir = os.path.join(self.package_folder, "lib")
         lib_subdir = os.path.join(self.package_folder, "lib", "fst")
