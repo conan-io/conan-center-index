@@ -1,13 +1,16 @@
 sources:
-  "0.12.1":
-    url: "https://github.com/guillaumeblanc/ozz-animation/archive/0.12.1.tar.gz"
-    sha256: "1c0df65d9802a200e0aed60e5b5d8bbcec9c36cd3c666d252376bba6a220e079"
-  "0.13.0":
-    url: "https://github.com/guillaumeblanc/ozz-animation/archive/0.13.0.tar.gz"
-    sha256: "2677f28d83bb4be00f92537ee3fb2573f9e99fc82fb1777a1b8a6131aa9b96a4"
+  "0.15.0":
+    url: "https://github.com/guillaumeblanc/ozz-animation/archive/0.15.0.tar.gz"
+    sha256: "9e84c87bcbc9dc57fe028e64c9d0344972e88841df138e2519e0a8970c5afde1"
+  "0.14.3":
+    url: "https://github.com/guillaumeblanc/ozz-animation/archive/0.14.3.tar.gz"
+    sha256: "1ab7d2fbf4c5a79aafac43cbd41ac9cff1e7f750248bee5141da5ee2d893cefe"
   "0.14.1":
     url: "https://github.com/guillaumeblanc/ozz-animation/archive/0.14.1.tar.gz"
     sha256: "621094d43aeea4b11da530178d1199107f2b590a9bfb3cba7c36b3176a86ac1e"
-  "0.14.2":
-    url: "https://github.com/guillaumeblanc/ozz-animation/archive/0.14.2.tar.gz"
-    sha256: "52938e5a699b2c444dfeb2375facfbb7b1e3d405b424e361ad1a27391a53b89a"
+  "0.13.0":
+    url: "https://github.com/guillaumeblanc/ozz-animation/archive/0.13.0.tar.gz"
+    sha256: "2677f28d83bb4be00f92537ee3fb2573f9e99fc82fb1777a1b8a6131aa9b96a4"
+  "0.12.1":
+    url: "https://github.com/guillaumeblanc/ozz-animation/archive/0.12.1.tar.gz"
+    sha256: "1c0df65d9802a200e0aed60e5b5d8bbcec9c36cd3c666d252376bba6a220e079"
