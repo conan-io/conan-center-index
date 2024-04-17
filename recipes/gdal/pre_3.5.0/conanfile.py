@@ -270,7 +270,7 @@ class GdalConan(ConanFile):
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.4")
         if self.options.with_expat:
-            self.requires("expat/2.5.0")
+            self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_libkml:
             self.requires("libkml/1.3.0")
         if self.options.with_odbc and self.settings.os != "Windows":
