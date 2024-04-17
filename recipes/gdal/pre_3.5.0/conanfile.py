@@ -172,8 +172,6 @@ class GdalConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        # if Version(self.version) < "3.0.0":
-        #     del self.options.with_tiledb
 
     def configure(self):
         if self.options.shared:
@@ -385,8 +383,8 @@ class GdalConan(ConanFile):
             os.path.join("frmts", "zlib"),
             # os.path.join("ogr", "ogrsf_frmts", "cad", "libopencad"), # TODO: uncomment when libopencad available
             os.path.join("ogr", "ogrsf_frmts", "geojson", "libjson"),
+            os.path.join("ogr", "ogrsf_frmts", "flatgeobuf", "flatbuffers"),
         ]
-        embedded_libs.append(os.path.join("ogr", "ogrsf_frmts", "flatgeobuf", "flatbuffers"))
         for lib_subdir in embedded_libs:
             rmdir(self, os.path.join(self.source_folder, lib_subdir))
 
