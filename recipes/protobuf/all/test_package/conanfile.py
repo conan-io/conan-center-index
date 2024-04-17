@@ -14,10 +14,7 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        # A workaround for CI only.
-        # https://github.com/conan-io/conan-center-index/pull/23573#issue-2246020949
-        # Should normally be added without run=True and with a self.tool_requires("protobuf/...") instead
-        # to avoid propagating run=True in the host context in the graph.
+        # note `run=True` so that the runenv can find protoc
         self.requires(self.tested_reference_str, run=True)
 
     def generate(self):
@@ -43,5 +40,7 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
 
+            # Invoke protoc in the same way CMake would
+            self.run(f"protoc --proto_path={self.source_folder} --cpp_out={self.build_folder} {self.source_folder}/addressbook.proto", env="conanrun")
             assert os.path.exists(os.path.join(self.build_folder, "addressbook.pb.cc"))
             assert os.path.exists(os.path.join(self.build_folder, "addressbook.pb.h"))

@@ -3,7 +3,7 @@ project(test_package LANGUAGES CXX)
 
 find_package(protobuf CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} test_package.cpp addressbook.proto)
+add_executable(${PROJECT_NAME} test_package.cpp)
 
 if (protobuf_VERSION VERSION_LESS "3.22.0")
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
@@ -25,4 +25,4 @@ endif()
 if(NOT CMAKE_CROSSCOMPILING)
     protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS TARGET ${PROJECT_NAME})
     protobuf_generate(LANGUAGE cpp TARGET ${PROJECT_NAME} PROTOS addressbook.proto)
-endif()
+endif ()
