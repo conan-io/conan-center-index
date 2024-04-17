@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
-from conan.tools.msvc import is_msvc
+from conan.tools.microsoft import is_msvc
 from conans.errors import ConanInvalidConfiguration
 import os
 
