@@ -1,6 +1,6 @@
 sources:
   "13.2.0":
-    mfc:
+    mcf:
       seh:
         ucrt:
           url: "https://github.com/niXman/mingw-builds-binaries/releases/download/13.2.0-rt_v11-rev1/x86_64-13.2.0-release-mcf-seh-ucrt-rt_v11-rev1.7z"
