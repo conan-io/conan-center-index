@@ -66,7 +66,7 @@ class MingwConan(ConanFile):
     def build_requirements(self):
         self.build_requires("7zip/19.00")
 
-    def _get_url(self):
+    def _get_source(self):
         if Version(self.version) <= Version("12.2.0"):
             return self.conan_data["sources"][self.version][str(self.options.threads)][str(self.options.exception)]
         else:
@@ -74,7 +74,7 @@ class MingwConan(ConanFile):
 
     def build(self):
         # Source should be downloaded in the build step since it depends on specific options
-        url = self._get_url()
+        url = self._get_source()
         self.output.info(f"Downloading: {url['url']}")
         download(self, url["url"], "file.7z", sha256=url["sha256"])
         self.run("7z x file.7z")
