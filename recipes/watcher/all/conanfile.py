@@ -88,6 +88,6 @@ class WatcherConan(ConanFile):
         self.cpp_info.libdirs = []
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.extend(["m", "pthread"])
         if is_apple_os(self):
             self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
