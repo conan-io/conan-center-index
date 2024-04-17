@@ -43,10 +43,9 @@ class TestPackageConan(ConanFile):
             deps = CMakeDeps(self)
             deps.generate()
 
-        # Check build postconditions
+        # Check build environment postconditions
         buildenv = VirtualBuildEnv(self)
         env = buildenv.vars(scope='build')
-        print(env)
         assert 'PKG_CONFIG' in env.keys()
         assert 'ACLOCAL_PATH' in env.keys()
         assert 'AUTOMAKE_CONAN_INCLUDES' in env.keys()
