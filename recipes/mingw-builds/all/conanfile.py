@@ -40,7 +40,7 @@ class MingwConan(ConanFile):
             raise ConanInvalidConfiguration(f"MinGW {self.version} is only supported for the following architectures on {self.settings.os}: {valid_arch}")
 
         # Before version 12 (included) the only possible runtime was msvcrt
-        if Version(self.version) < Version("13"):
+        if Version(self.version) <= Version("12.2.0"):
             del self.options.runtime
 
         if getattr(self, "settings_target", None):
