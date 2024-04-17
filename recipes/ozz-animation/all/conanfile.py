@@ -20,23 +20,11 @@ class OzzAnimationConan(ConanFile):
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
-
-        #runtime geometry library (skinning jobs)
         "ozz_geometry": [True, False],
-
-        #runtime animation library
         "ozz_animation": [True, False],
-
-        #library for parsing CLI args
         "ozz_options": [True, False],
-
-        #library for offline processing
         "ozz_animation_offline": [True, False],
-
-        #library for creating tools
         "ozz_animation_tools": [True, False],
-
-        #gltf2ozz CLI tool
         "tools": [True, False],
     }
     default_options = {
@@ -48,6 +36,14 @@ class OzzAnimationConan(ConanFile):
         "ozz_options": False,
         "ozz_animation_offline": False,
         "ozz_animation_tools": False,
+    }
+    options_description = {
+        "tools": "Enable gltf2ozz CLI tool",
+        "ozz_geometry": "Enable runtime geometry library (skinning jobs)",
+        "ozz_animation": "Enable runtime animation library",
+        "ozz_options": "Enable library for parsing CLI args",
+        "ozz_animation_offline": "Enable library for offline processing",
+        "ozz_animation_tools": "Enable library for creating tools",
     }
 
     def validate(self):
@@ -107,7 +103,7 @@ class OzzAnimationConan(ConanFile):
             "ozz_build_tools": False,
             "ozz_build_gltf": False,
         }
-        
+
         if self.options.ozz_animation_tools:
             cmvars["ozz_build_tools"] = True
 
