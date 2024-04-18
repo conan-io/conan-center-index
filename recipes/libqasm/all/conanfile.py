@@ -6,7 +6,8 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -102,7 +103,12 @@ class LibqasmConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
 
+    def _patch_sources(self):
+        if is_msvc(self):
+            replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "/WX", "")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -113,7 +119,7 @@ class LibqasmConan(ConanFile):
         cmake.install()
         fix_apple_shared_install_name(self)
         rm(self, "*.interp", os.path.join(self.package_folder, "include"), recursive=True)
-        rm(self, "*.pdb", os.path.join(self.package_folder), recursive=True)
+        rm(self, "*.pdb", self.package_folder, recursive=True)
         rm(self, "*.tokens", os.path.join(self.package_folder, "include"), recursive=True)
         rm(self, "cmake_install.cmake", os.path.join(self.package_folder, "include"), recursive=True)
         rm(self, "Makefile", os.path.join(self.package_folder, "include"), recursive=True)
