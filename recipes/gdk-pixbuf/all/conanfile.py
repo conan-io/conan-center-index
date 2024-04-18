@@ -86,7 +86,7 @@ class GdkPixbufConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.0")
+        self.tool_requires("meson/1.4.0")
         # FIXME: unify libgettext and gettext??
         # INFO: gettext provides msgfmt, which is required to build the .mo files
         self.tool_requires("gettext/0.21")
