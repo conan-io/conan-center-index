@@ -156,7 +156,7 @@ class ProjConan(ConanFile):
             rmdir(self, os.path.join(self.source_folder, "include", "proj", "internal", "nlohmann"))
 
         # Remove warning flags that are unfamiliar to GCC 5
-        if Version(self.version) >= "9.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6.0":
+        if Version(self.version) >= "9.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8.0":
             replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "${PROJ_C_WARN_FLAGS}", "")
             replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "${PROJ_CXX_WARN_FLAGS}", "")
 
