@@ -2,3 +2,8 @@ sources:
   "0.9.21":
     url: "https://github.com/vlfeat/vlfeat/archive/refs/tags/v0.9.21.tar.gz"
     sha256: "221d7fb5103f004cc90201307fd1acb080c0caf5c2c26435ba1d5307c07e8cce"
+patches:
+  "0.9.21":
+    - patch_file: "patches/expose_missing_symbols.patch"
+      patch_type: "portability"
+      patch_source: "https://github.com/microsoft/vcpkg/blob/501cb01e517ee5689577bb01ba8bd1b4c1041a53/ports/vlfeat/expose_missing_symbols.patch"
