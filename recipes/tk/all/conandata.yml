@@ -14,6 +14,9 @@ patches:
     - patch_file: "patches/8.6.10/0003-Patch-tkConfig.sh.patch"
       patch_description: "Remove TK_BUILD_* and TK_SRC_DIR from tkConfig.sh for portability"
       patch_type: "portability"
+    - patch_file: "patches/8.6.13/0004-Fix-msvc-shared-build.patch"
+      patch_description: "Output an inline file directly to its final destination to avoid a failure in C3I"
+      patch_type: "conan"
   "8.6.10":
     - patch_file: "patches/8.6.10/0002-Add-windows-conan-compatibility.patch"
       patch_description: "Add windows conan compatibility"
@@ -21,6 +24,6 @@ patches:
     - patch_file: "patches/8.6.10/0003-Patch-tkConfig.sh.patch"
       patch_description: "Remove TK_BUILD_* and TK_SRC_DIR from tkConfig.sh for portability"
       patch_type: "portability"
-    - patch_file: "patches/0004-Fix-msvc-shared-build.patch"
+    - patch_file: "patches/8.6.10/0004-Fix-msvc-shared-build.patch"
       patch_description: "Output an inline file directly to its final destination to avoid a failure in C3I"
       patch_type: "conan"
