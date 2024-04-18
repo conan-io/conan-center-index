@@ -1,7 +1,9 @@
+import os
+
 from conan import ConanFile
 from conan.tools.files import get, copy, rm, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-import os
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
 
@@ -50,6 +52,10 @@ class OsqpConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def validate(self):
+        if self.info.settings.os == "Windows" and self.info.options.shared:
+            raise ConanInvalidConfiguration("Building ahared OSQP library is not supported on Windows")
 
     def configure(self):
         if self.options.shared:
