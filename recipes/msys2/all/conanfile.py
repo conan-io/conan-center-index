@@ -155,6 +155,13 @@ class MSYS2Conan(ConanFile):
         with open(tmp_name, 'a', encoding='UTF-8'):
             os.utime(tmp_name, None)
 
+        dev_dir = os.path.join(self._msys_dir, "dev")
+        if not os.path.isdir(dev_dir):
+            os.makedirs(dev_dir)
+        dev_name = os.path.join(dev_dir, 'dummy')
+        with open(dev_name, 'a', encoding='UTF-8'):
+            os.utime(dev_name, None)
+
         # Prepend the PKG_CONFIG_PATH environment variable with an eventual PKG_CONFIG_PATH environment variable
         replace_in_file(self, os.path.join(self._msys_dir, "etc", "profile"),
                               'PKG_CONFIG_PATH="', 'PKG_CONFIG_PATH="$PKG_CONFIG_PATH:')
@@ -171,8 +178,6 @@ class MSYS2Conan(ConanFile):
                         os.unlink(fullname)
         # See https://github.com/conan-io/conan-center-index/blob/master/docs/error_knowledge_base.md#kb-h013-default-package-layout
         copy(self, "*", dst=os.path.join(self.package_folder, "bin", "msys64"), src=self._msys_dir, excludes=excludes)
-        # Avoid  '/dev/shm' and '/dev/shm': Read-only file system warnings creating the dev folder which is empty
-        os.mkdir(os.path.join(self.package_folder, "bin", "msys64", "dev"))
         shutil.copytree(os.path.join(self._msys_dir, "usr", "share", "licenses"),
                         os.path.join(self.package_folder, "licenses"))
 
