@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(vlfeat C)
 
 if(MSVC)
-  # https://github.com/vlfeat/vlfeat/blob/v0.9.21/Makefile.mak#L147-L152
+  # https://github.com/vlfeat/vlfeat/blob/v0.9.21/Makefile.mak#L104-L122
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
   add_definitions(-D__LITTLE_ENDIAN__)
   add_compile_options(/Zp8)

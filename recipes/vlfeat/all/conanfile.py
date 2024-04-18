@@ -1,10 +1,13 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
+
 
 class VlfeatConan(ConanFile):
     name = "vlfeat"
@@ -58,6 +61,11 @@ class VlfeatConan(ConanFile):
         if self.options.openmp:
             # Used only in .c files
             self.requires("llvm-openmp/17.0.6")
+
+    def validate(self):
+        if is_msvc(self) and not self.options.shared:
+            # vlfeat function calls crash with STATUS_ACCESS_VIOLATION in test_package
+            raise ConanInvalidConfiguration("vlfeat does not support static linkage with MSVC")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
