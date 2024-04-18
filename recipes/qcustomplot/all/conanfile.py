@@ -42,7 +42,7 @@ class QCustomPlotConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("qt/[~6.4]", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/6.4.2", transitive_headers=True, transitive_libs=True)
 
         if self.options.with_opengl and self.settings.os == "Windows":
             self.requires("opengl/system")
