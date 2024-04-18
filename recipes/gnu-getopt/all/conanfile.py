@@ -66,7 +66,8 @@ class GnuGetoptConan(ConanFile):
     def build(self):
         autotools = Autotools(self)
         autotools.configure()
-        autotools.make(target="getopt")
+        target = "getopt.exe" if self.settings.os == "Windows" else "getopt"
+        autotools.make(target)
 
     def package(self):
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
