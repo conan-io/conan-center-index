@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.layout import basic_layout
+from conan.tools.build import check_min_cppstd
 import os
 
 required_conan_version = ">=1.52.0"
@@ -16,6 +17,10 @@ class StreamingPercentilesConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
+    @property
+    def _min_cppstd(self):
+        return 11
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -24,6 +29,10 @@ class StreamingPercentilesConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
