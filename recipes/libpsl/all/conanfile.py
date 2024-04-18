@@ -39,6 +39,8 @@ class LibPslConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "0.21.5":
+            self.options.rm_safe("enable_builtin")
 
     def configure(self):
         if self.options.shared:
