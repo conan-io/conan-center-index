@@ -48,6 +48,8 @@ class QCustomPlotConan(ConanFile):
             self.requires("opengl/system")
 
     def validate(self):
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration(f"{self.ref} Macos not supported at this moment")
         if self.info.settings.compiler.cppstd:
             min_cppstd = "11" if Version(self.dependencies["qt"].ref.version) < "6.0.0" else "17"
             check_min_cppstd(self, min_cppstd)
