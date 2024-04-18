@@ -57,6 +57,8 @@ class LibqasmConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        # https://github.com/QuTech-Delft/libqasm/blob/0.6.3/src/CMakeLists.txt#L234
+        self.options["antlr4-cppruntime"].shared = self.options.shared
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -77,13 +79,15 @@ class LibqasmConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd},"
                                             f"which your compiler does not support.")
 
+        if self.dependencies["antlr4-cppruntime"].options.shared != self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} requires antlr4-cppruntime to be built with the same shared option value.")
+
     def requirements(self):
         self.requires("fmt/10.2.1", transitive_headers=True)
         self.requires("range-v3/0.12.0", transitive_headers=True)
         self.requires("tree-gen/1.0.7", transitive_headers=True, transitive_libs=True)
         if not self.settings.arch == "wasm":
-            self.requires("antlr4-cppruntime/4.13.1", options={"shared": self.options.shared}, transitive_headers=True,
-                          transitive_libs=True)
+            self.requires("antlr4-cppruntime/4.13.1", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -92,7 +96,6 @@ class LibqasmConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["LIBQASM_BUILD_PYTHON"] = self.options.build_python
         tc.variables["LIBQASM_BUILD_TESTS"] = self._should_build_test
         tc.generate()
