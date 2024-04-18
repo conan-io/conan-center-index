@@ -14,11 +14,7 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires(self.tested_reference_str)
-
-    def build_requirements(self):
-        if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires(self.tested_reference_str)
+        self.requires(self.tested_reference_str, run=True)
 
     def generate(self):
         VirtualRunEnv(self).generate()
@@ -34,5 +30,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "addressbook")
-            self.run(f"{bin_path} write", env="conanrun")
+            bin_path = os.path.join(self.cpp.build.bindir, "addressbook")
+            self.run(bin_path, env="conanrun")
+
+            self.run("capnp id")
