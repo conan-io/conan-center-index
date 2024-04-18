@@ -82,7 +82,8 @@ class LibqasmConan(ConanFile):
         self.requires("range-v3/0.12.0", transitive_headers=True)
         self.requires("tree-gen/1.0.7", transitive_headers=True, transitive_libs=True)
         if not self.settings.arch == "wasm":
-            self.requires("antlr4-cppruntime/4.13.1", transitive_headers=True, transitive_libs=True)
+            self.requires("antlr4-cppruntime/4.13.1", options={"shared": self.options.shared}, transitive_headers=True,
+                          transitive_libs=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
