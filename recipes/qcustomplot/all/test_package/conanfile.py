@@ -26,7 +26,5 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        # can't run in Linux agents (headless)
-        if can_run(self) and self.settings.os != "Linux":
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(bin_path, env="conanrun")
+        # gui app, doesn't really make sense to run it
+        pass
