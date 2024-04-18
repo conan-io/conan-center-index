@@ -1,11 +1,12 @@
 import os
 
 from conan import ConanFile
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.54.0"
 
@@ -35,13 +36,16 @@ class GnuGetoptConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
+    def validate(self):
+        if is_msvc(self):
+            # Requires POSIX headers and libs
+            raise ConanInvalidConfiguration("MSVC is not supported. Consider using MSYS2 instead.")
+
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        if is_msvc(self):
-            self.tool_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -55,19 +59,10 @@ class GnuGetoptConan(ConanFile):
         tc.configure_args.append("--disable-liblastlog2")
         tc.generate()
 
-        if is_msvc(self):
-            env = Environment()
-            automake_conf = self.dependencies.build["automake"].conf_info
-            compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
-            env.define("CC", f"{compile_wrapper} cl -nologo")
-            env.define("LD", "link -nologo")
-            env.vars(self).save_script("conanbuild_msvc")
-
     def build(self):
         autotools = Autotools(self)
         autotools.configure()
-        target = "getopt.exe" if self.settings.os == "Windows" else "getopt"
-        autotools.make(target)
+        autotools.make(target="getopt")
 
     def package(self):
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
