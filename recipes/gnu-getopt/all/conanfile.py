@@ -51,6 +51,8 @@ class GnuGetoptConan(ConanFile):
         env.generate()
 
         tc = AutotoolsToolchain(self)
+        # liblastlog support requires sqlite3
+        tc.configure_args.append("--disable-liblastlog2")
         tc.generate()
 
         if is_msvc(self):
