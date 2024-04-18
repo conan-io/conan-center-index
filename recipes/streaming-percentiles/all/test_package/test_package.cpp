@@ -2,8 +2,7 @@
 #include <iostream>
 
 #include "stmpct/gk.hpp"
-
-auto main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) -> int {
+int main(int argc, char* argv[]) {
     double epsilon = 0.1;
     stmpct::gk<double> g(epsilon);
     for (int i = 0; i < 1000; ++i)
