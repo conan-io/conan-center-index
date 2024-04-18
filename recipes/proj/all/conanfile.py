@@ -67,6 +67,8 @@ class ProjConan(ConanFile):
             self.requires("libcurl/[>=7.78.0 <9]")
 
     def build_requirements(self):
+        if Version(self.version) >= "9.4.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
         if not self._is_legacy_one_profile:
             self.tool_requires("sqlite3/<host_version>")
 
