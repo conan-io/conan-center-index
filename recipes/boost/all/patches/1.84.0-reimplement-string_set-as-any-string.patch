@@ -1,0 +1,337 @@
+Fixes compilation with cppstd=20 on MacOS
+
+From c5e8f02c903696a213fc4b710f6740ccd1f07f4e Mon Sep 17 00:00:00 2001
+From: Alexander Grund <Flamefire@users.noreply.github.com>
+Date: Sun, 3 Dec 2023 20:06:27 +0100
+Subject: [PATCH] Reimplement `string_set` as `any_string`
+
+Use a better name for a type-erased string implemented using
+`dynamic_cast` instead of storing&comparing the `typeid` of the char
+type used.
+This is a workaround for missing typeinfo for `char8_t` on e.g. libc++
+on FreeBSD 13.1.
+It also simplifies memory management size calc/copy implementation.
+---
+ boost/locale/detail/any_string.hpp | 71 ++++++++++++++++++++++
+ boost/locale/formatting.hpp        | 51 ++--------------
+ libs/locale/src/boost/locale/formatting.cpp       | 45 --------------
+ libs/locale/test/test_ios_info.cpp             | 64 +++++++++++++++----
+ 4 files changed, 127 insertions(+), 104 deletions(-)
+ create mode 100644 boost/locale/detail/any_string.hpp
+
+diff --git a/boost/locale/detail/any_string.hpp b/boost/locale/detail/any_string.hpp
+new file mode 100644
+index 00000000..c0cc7ffb
+--- /dev/null
++++ b/boost/locale/detail/any_string.hpp
+@@ -0,0 +1,71 @@
++//
++// Copyright (c) 2023 Alexander Grund
++//
++// Distributed under the Boost Software License, Version 1.0.
++// https://www.boost.org/LICENSE_1_0.txt
++
++#ifndef BOOST_LOCALE_DETAIL_ANY_STRING_HPP_INCLUDED
++#define BOOST_LOCALE_DETAIL_ANY_STRING_HPP_INCLUDED
++
++#include <boost/locale/config.hpp>
++#include <boost/assert.hpp>
++#include <boost/utility/string_view.hpp>
++#include <memory>
++#include <stdexcept>
++#include <string>
++
++/// \cond INTERNAL
++namespace boost { namespace locale { namespace detail {
++    /// Type-erased std::basic_string
++    class any_string {
++        struct BOOST_SYMBOL_VISIBLE base {
++            virtual ~base() = default;
++            virtual base* clone() const = 0;
++
++        protected:
++            base() = default;
++            base(const base&) = default;
++            base(base&&) = delete;
++            base& operator=(const base&) = default;
++            base& operator=(base&&) = delete;
++        };
++        template<typename Char>
++        struct BOOST_SYMBOL_VISIBLE impl : base {
++            explicit impl(const boost::basic_string_view<Char> value) : s(value) {}
++            impl* clone() const override { return new impl(*this); }
++            std::basic_string<Char> s;
++        };
++
++        std::unique_ptr<const base> s_;
++
++    public:
++        any_string() = default;
++        any_string(const any_string& other) : s_(other.s_ ? other.s_->clone() : nullptr) {}
++        any_string(any_string&&) = default;
++        any_string& operator=(any_string other) // Covers the copy and move assignment
++        {
++            s_.swap(other.s_);
++            return *this;
++        }
++
++        template<typename Char>
++        void set(const boost::basic_string_view<Char> s)
++        {
++            BOOST_ASSERT(!s.empty());
++            s_.reset(new impl<Char>(s));
++        }
++
++        template<typename Char>
++        std::basic_string<Char> get() const
++        {
++            if(!s_)
++                throw std::bad_cast();
++            return dynamic_cast<const impl<Char>&>(*s_).s;
++        }
++    };
++
++}}} // namespace boost::locale::detail
++
++/// \endcond
++
++#endif
+diff --git a/boost/locale/formatting.hpp b/boost/locale/formatting.hpp
+index d14e6f69..e3c8619e 100644
+--- a/boost/locale/formatting.hpp
++++ b/boost/locale/formatting.hpp
+@@ -8,15 +8,13 @@
+ #ifndef BOOST_LOCALE_FORMATTING_HPP_INCLUDED
+ #define BOOST_LOCALE_FORMATTING_HPP_INCLUDED
+ 
++#include <boost/locale/detail/any_string.hpp>
+ #include <boost/locale/time_zone.hpp>
+-#include <boost/assert.hpp>
+-#include <boost/utility/string_view.hpp>
+ #include <cstdint>
+ #include <cstring>
+ #include <istream>
+ #include <ostream>
+ #include <string>
+-#include <typeinfo>
+ 
+ #ifdef BOOST_MSVC
+ #    pragma warning(push)
+@@ -130,13 +128,13 @@ namespace boost { namespace locale {
+         template<typename CharType>
+         void date_time_pattern(const std::basic_string<CharType>& str)
+         {
+-            date_time_pattern_set().set<CharType>(str);
++            datetime_.set<CharType>(str);
+         }
+         /// Get date/time pattern (strftime like)
+         template<typename CharType>
+         std::basic_string<CharType> date_time_pattern() const
+         {
+-            return date_time_pattern_set().get<CharType>();
++            return datetime_.get<CharType>();
+         }
+ 
+         /// \cond INTERNAL
+@@ -144,51 +142,10 @@ namespace boost { namespace locale {
+         /// \endcond
+ 
+     private:
+-        class string_set;
+-
+-        const string_set& date_time_pattern_set() const;
+-        string_set& date_time_pattern_set();
+-
+-        class BOOST_LOCALE_DECL string_set {
+-        public:
+-            string_set();
+-            ~string_set();
+-            string_set(const string_set& other);
+-            string_set& operator=(string_set other);
+-            void swap(string_set& other);
+-
+-            template<typename Char>
+-            void set(const boost::basic_string_view<Char> s)
+-            {
+-                BOOST_ASSERT(!s.empty());
+-                delete[] ptr;
+-                ptr = nullptr;
+-                type = &typeid(Char);
+-                size = sizeof(Char) * s.size();
+-                ptr = size ? new char[size] : nullptr;
+-                memcpy(ptr, s.data(), size);
+-            }
+-
+-            template<typename Char>
+-            std::basic_string<Char> get() const
+-            {
+-                if(type == nullptr || *type != typeid(Char))
+-                    throw std::bad_cast();
+-                std::basic_string<Char> result(size / sizeof(Char), Char(0));
+-                memcpy(&result.front(), ptr, size);
+-                return result;
+-            }
+-
+-        private:
+-            const std::type_info* type;
+-            size_t size;
+-            char* ptr;
+-        };
+-
+         uint64_t flags_;
+         int domain_id_;
+         std::string time_zone_;
+-        string_set datetime_;
++        detail::any_string datetime_;
+     };
+ 
+     /// \brief This namespace includes all manipulators that can be used on IO streams
+diff --git a/src/boost/locale/shared/formatting.cpp b/src/boost/locale/shared/formatting.cpp
+index 489d1fd5..457ba782 100644
+--- a/libs/locale/src/boost/locale/shared/formatting.cpp
++++ b/libs/locale/src/boost/locale/shared/formatting.cpp
+@@ -7,43 +7,8 @@
+ #include <boost/locale/date_time.hpp>
+ #include <boost/locale/formatting.hpp>
+ #include "boost/locale/shared/ios_prop.hpp"
+-#include <algorithm>
+-#include <typeinfo>
+ 
+ namespace boost { namespace locale {
+-
+-    ios_info::string_set::string_set() : type(nullptr), size(0), ptr(nullptr) {}
+-    ios_info::string_set::~string_set()
+-    {
+-        delete[] ptr;
+-    }
+-    ios_info::string_set::string_set(const string_set& other)
+-    {
+-        if(other.ptr != nullptr) {
+-            ptr = new char[other.size];
+-            size = other.size;
+-            type = other.type;
+-            memcpy(ptr, other.ptr, size);
+-        } else {
+-            ptr = nullptr;
+-            size = 0;
+-            type = nullptr;
+-        }
+-    }
+-
+-    void ios_info::string_set::swap(string_set& other)
+-    {
+-        std::swap(type, other.type);
+-        std::swap(size, other.size);
+-        std::swap(ptr, other.ptr);
+-    }
+-
+-    ios_info::string_set& ios_info::string_set::operator=(string_set other)
+-    {
+-        swap(other);
+-        return *this;
+-    }
+-
+     ios_info::ios_info() : flags_(0), domain_id_(0), time_zone_(time_zone::global()) {}
+ 
+     ios_info::~ios_info() = default;
+@@ -105,16 +70,6 @@ namespace boost { namespace locale {
+         return time_zone_;
+     }
+ 
+-    const ios_info::string_set& ios_info::date_time_pattern_set() const
+-    {
+-        return datetime_;
+-    }
+-
+-    ios_info::string_set& ios_info::date_time_pattern_set()
+-    {
+-        return datetime_;
+-    }
+-
+     ios_info& ios_info::get(std::ios_base& ios)
+     {
+         return impl::ios_prop<ios_info>::get(ios);
+diff --git a/libs/locale/test/test_ios_info.cpp b/libs/locale/test/test_ios_info.cpp
+index 9b63aaed..79179a8f 100644
+--- a/libs/locale/test/test_ios_info.cpp
++++ b/libs/locale/test/test_ios_info.cpp
+@@ -105,18 +105,6 @@ void test_member_methods()
+ 
+         info.date_time_pattern(std::string("Pattern"));
+         TEST_EQ(info.date_time_pattern<char>(), "Pattern");
+-
+-        info.date_time_pattern(ascii_to<wchar_t>("WChar Pattern"));
+-        TEST_EQ(info.date_time_pattern<wchar_t>(), ascii_to<wchar_t>("WChar Pattern"));
+-        TEST_THROWS(info.date_time_pattern<char>(), std::bad_cast);
+-
+-        info.date_time_pattern(ascii_to<char16_t>("Char16 Pattern"));
+-        TEST_THROWS(info.date_time_pattern<wchar_t>(), std::bad_cast);
+-        TEST_EQ(info.date_time_pattern<char16_t>(), ascii_to<char16_t>("Char16 Pattern"));
+-
+-        info.date_time_pattern(ascii_to<char32_t>("Char32 Pattern"));
+-        TEST_THROWS(info.date_time_pattern<char16_t>(), std::bad_cast);
+-        TEST_EQ(info.date_time_pattern<char32_t>(), ascii_to<char32_t>("Char32 Pattern"));
+     }
+ }
+ 
+@@ -212,8 +200,60 @@ void test_manipulators()
+     TEST_EQ(info2.date_time_pattern<wchar_t>(), L"My TZ");
+ }
+ 
++void test_any_string()
++{
++    boost::locale::detail::any_string s;
++    TEST_THROWS(s.get<char>(), std::bad_cast);
++    TEST_THROWS(s.get<wchar_t>(), std::bad_cast);
++
++    s.set<char>("Char Pattern");
++    TEST_EQ(s.get<char>(), "Char Pattern");
++    TEST_THROWS(s.get<wchar_t>(), std::bad_cast);
++
++    s.set<wchar_t>(ascii_to<wchar_t>("WChar Pattern"));
++    TEST_EQ(s.get<wchar_t>(), ascii_to<wchar_t>("WChar Pattern"));
++    TEST_THROWS(s.get<char>(), std::bad_cast);
++
++    s.set<char16_t>(ascii_to<char16_t>("Char16 Pattern"));
++    TEST_EQ(s.get<char16_t>(), ascii_to<char16_t>("Char16 Pattern"));
++    TEST_THROWS(s.get<char>(), std::bad_cast);
++
++    s.set<char32_t>(ascii_to<char32_t>("Char32 Pattern"));
++    TEST_EQ(s.get<char32_t>(), ascii_to<char32_t>("Char32 Pattern"));
++    TEST_THROWS(s.get<char16_t>(), std::bad_cast);
++
++#ifndef BOOST_LOCALE_NO_CXX20_STRING8
++    s.set<char8_t>(ascii_to<char8_t>("Char8 Pattern"));
++    TEST_EQ(s.get<char8_t>(), ascii_to<char8_t>("Char8 Pattern"));
++    TEST_THROWS(s.get<char32_t>(), std::bad_cast);
++#endif
++
++    boost::locale::detail::any_string s1, s2, empty;
++    s1.set<char>("Char");
++    s2.set<wchar_t>(ascii_to<wchar_t>("WChar"));
++    // Copy ctor
++    boost::locale::detail::any_string s3(s1);
++    TEST_EQ(s3.get<char>(), "Char");
++    TEST_EQ(s1.get<char>(), "Char");
++    // Ensure deep copy
++    s3.set<char>("Foo");
++    TEST_EQ(s3.get<char>(), "Foo");
++    TEST_EQ(s1.get<char>(), "Char");
++    // Copy assign
++    s3 = s2;
++    TEST_EQ(s3.get<wchar_t>(), ascii_to<wchar_t>("WChar"));
++    TEST_EQ(s2.get<wchar_t>(), ascii_to<wchar_t>("WChar"));
++    // Move assign
++    s3 = std::move(s1);
++    TEST_EQ(s3.get<char>(), "Char");
++    // From empty
++    s3 = empty;
++    TEST_THROWS(s3.get<char>(), std::bad_cast);
++}
++
+ void test_main(int /*argc*/, char** /*argv*/)
+ {
++    test_any_string();
+     test_member_methods();
+     test_manipulators();
+ }
