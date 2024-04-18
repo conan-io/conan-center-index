@@ -25,6 +25,10 @@ class GnuGetoptConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def configure(self):
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
