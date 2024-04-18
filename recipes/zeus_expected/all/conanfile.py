@@ -2,9 +2,10 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.cmake import cmake_layout
+from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=1.54.0"
 
 
 class ZeusExpectedConan(ConanFile):
@@ -21,9 +22,27 @@ class ZeusExpectedConan(ConanFile):
 
     no_copy_source = True
 
+    @property
+    def _min_cppstd(self):
+        return 17
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "gcc": "7",
+            "clang": "5",
+            "Visual Studio": "15.7",
+            "apple-clang": "10",
+        }
+
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 17)
+            check_min_cppstd(self, self._min_cppstd)
+
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if min_version and Version(self.settings.compiler.version) < min_version:
+            raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd}, which your compiler does not support.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
