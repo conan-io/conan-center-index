@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches, replace_in_file
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -89,6 +90,10 @@ class USearchConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+
+        if is_msvc(self) and not self.options.shared:
+            # test_package fails with STATUS_ACCESS_VIOLATION
+            raise ConanInvalidConfiguration("usearch does not support static linkage with MSVC")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
