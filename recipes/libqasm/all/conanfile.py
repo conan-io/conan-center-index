@@ -113,7 +113,7 @@ class LibqasmConan(ConanFile):
         cmake.install()
         fix_apple_shared_install_name(self)
         rm(self, "*.interp", os.path.join(self.package_folder, "include"), recursive=True)
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rm(self, "*.pdb", os.path.join(self.package_folder), recursive=True)
         rm(self, "*.tokens", os.path.join(self.package_folder, "include"), recursive=True)
         rm(self, "cmake_install.cmake", os.path.join(self.package_folder, "include"), recursive=True)
         rm(self, "Makefile", os.path.join(self.package_folder, "include"), recursive=True)
