@@ -20,7 +20,9 @@ class OpenJDK(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
         del self.info.settings.build_type
-        self.info.settings.rm_safe("os.version")
+
+    def configure(self):
+        self.settings.rm_safe("os.version")
         
     def validate(self):
         if Version(self.version) < "19.0.2" and self.settings.arch != "x86_64":
