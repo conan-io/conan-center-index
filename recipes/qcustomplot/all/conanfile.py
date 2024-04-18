@@ -42,10 +42,8 @@ class QCustomPlotConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        if Version(self.version) >= "2.0.0":
-            self.requires("qt/[~6.4]", transitive_headers=True, transitive_libs=True)
-        else:
-            self.requires("qt/[~5]", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/[~6.4]", transitive_headers=True, transitive_libs=True)
+
         if self.options.with_opengl and self.settings.os == "Windows":
             self.requires("opengl/system")
 
@@ -78,11 +76,10 @@ class QCustomPlotConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if Version(self.version) >= "2.0.0":
-            # allow static qcustomplot with shared qt, and vice versa
-            replace_in_file(self, os.path.join(self.source_folder, "qcustomplot.h"),
-                                  "#if defined(QT_STATIC_BUILD)",
-                                  "#if 0" if self.options.shared else "#if 1")
+        # allow static qcustomplot with shared qt, and vice versa
+        replace_in_file(self, os.path.join(self.source_folder, "qcustomplot.h"),
+                                "#if defined(QT_STATIC_BUILD)",
+                                "#if 0" if self.options.shared else "#if 1")
 
     def build(self):
         self._patch_sources()
