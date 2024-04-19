@@ -91,7 +91,7 @@ class USearchConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if is_msvc(self) and not self.options.shared:
+        if is_msvc(self) and not self.options.header_only and not self.options.shared:
             # test_package fails with STATUS_ACCESS_VIOLATION
             raise ConanInvalidConfiguration("usearch does not support static linkage with MSVC")
 
