@@ -39,15 +39,14 @@ class ZenohCConan(ConanFile):
         "extra_cargo_flags": "Extra flags to pass to Cargo"
     }
 
+
     def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+        # The library is always built as PIC
+        del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
+        # Does not use the C or C++ compiler
+        del self.settings.compiler
 
     def layout(self):
         cmake_layout(self, src_folder="src")
