@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, download
 from conan.tools.layout import basic_layout
 import os
 
@@ -10,7 +10,7 @@ class JsmnConan(ConanFile):
     name = "kuliya"
     description = "Algeria's college hierarchy dataset as a C library."
     license = "MIT"
-    topics = ("dataset", "api", "dz")
+    topics = ("dataset", "api", "dz", "header-only")
     homepage = "https://github.com/dzcode-io/kuliya"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
@@ -24,7 +24,8 @@ class JsmnConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["release"], strip_root=True)
+        download(self, **self.conan_data["sources"][self.version]["license"], filename="LICENSE")
 
     def build(self):
         pass

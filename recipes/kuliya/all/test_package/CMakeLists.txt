@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES C)
 
 find_package(kuliya REQUIRED CONFIG)
