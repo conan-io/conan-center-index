@@ -19,7 +19,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.64.0 <2 || >=2.2.0"
 
 
 class PipeWireConan(ConanFile):
@@ -194,7 +194,7 @@ class PipeWireConan(ConanFile):
         )
         tc.project_options["avahi"] = feature("with_avahi")
         tc.project_options["compress-offload"] = feature("with_libalsa")
-        tc.project_options["datadir"] = os.path.join(self.package_folder, "res")
+        tc.project_options["datadir"] = "res"
         tc.project_options["dbus"] = feature("with_dbus")
         tc.project_options["docs"] = "disabled"
         tc.project_options["examples"] = "disabled"
@@ -219,13 +219,13 @@ class PipeWireConan(ConanFile):
         tc.project_options["session-managers"] = []
         tc.project_options["sndfile"] = feature("with_libsndfile")
         tc.project_options["spa-plugins"] = "enabled"
-        tc.project_options["sysconfdir"] = os.path.join(self.package_folder, "res")
+        tc.project_options["sysconfdir"] = "res"
         tc.project_options["systemd"] = "disabled"
         tc.project_options["systemd-user-service"] = "disabled"
         tc.project_options["tests"] = "disabled"
         tc.project_options["udev"] = feature("with_libudev", True)
         tc.project_options["udevrulesdir"] = os.path.join(
-            self.package_folder, "res", "udev", "rules.d"
+            "res", "udev", "rules.d"
         )
         tc.project_options["vulkan"] = feature("with_vulkan")
         tc.project_options["x11"] = feature("with_x11")
