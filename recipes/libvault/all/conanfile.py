@@ -100,8 +100,7 @@ class LibvaultConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        # TODO: Send a PR to the upstream to fix this
-        # INFO: Using CURL::libcurl instead of curl will consume the imported target from Conan
+        # INFO: https://github.com/abedra/libvault/pull/123
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                          "target_link_libraries(vault curl)",
                          "target_link_libraries(vault CURL::libcurl)")
