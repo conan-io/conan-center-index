@@ -27,6 +27,7 @@ class TeemoConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    deprecated = "zoe"
 
     @property
     def _min_cppstd(self):
@@ -47,13 +48,14 @@ class TeemoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcurl/7.86.0")
+        self.requires("libcurl/[>=7.78.0 <9]")
+        self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         if self.info.settings.compiler == "apple-clang" and Version(self.info.settings.compiler.version) < "12.0":
-            raise ConanInvalidConfiguration(f"{self.ref} can not build on apple-clang < 12.0.") 
+            raise ConanInvalidConfiguration(f"{self.ref} can not build on apple-clang < 12.0.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
@@ -96,6 +98,6 @@ class TeemoConan(ConanFile):
             self.cpp_info.defines.append("TEEMO_EXPORTS")
         else:
             self.cpp_info.defines.append("TEEMO_STATIC")
-            
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

@@ -19,6 +19,7 @@ class LibvaultConan(ConanFile):
     homepage = "https://github.com/abedra/libvault"
     description = "A C++ library for Hashicorp Vault"
     topics = ("vault", "libvault", "secrets", "passwords")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -67,13 +68,13 @@ class LibvaultConan(ConanFile):
             raise ConanInvalidConfiguration("clang 11 with libstdc++ is not supported due to old libstdc++ missing C++17 support")
 
         if is_apple_os(self):
-            os_version = self.info.settings.get_safe("os.version")
+            os_version = self.settings.get_safe("os.version")
             if os_version and Version(os_version) < self._mac_os_minimum_required_version:
                 raise ConanInvalidConfiguration(
                     "Macos Mojave (10.14) and earlier cannot to be built because C++ standard library too old.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -116,9 +117,6 @@ class LibvaultConan(ConanFile):
 
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
             self.cpp_info.system_libs.append("stdc++fs")
-        # TODO: Remove after Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = "libvault"
-        self.cpp_info.names["cmake_find_package_multi"] = "libvault"
 
         self.cpp_info.set_property("pkg_config_name", "vault")
         self.cpp_info.set_property("cmake_file_name", "libvault")

@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.12)
 project(libelfin CXX)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
 
 if(NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 11)
@@ -11,19 +8,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(PythonInterp 3 REQUIRED)
 
-file(GLOB_RECURSE elf_sources source_subfolder/elf/*.cc)
+set(src ${CMAKE_CURRENT_LIST_DIR})
+
+file(GLOB_RECURSE elf_sources ${src}/elf/*.cc)
 set(elf_headers
-    source_subfolder/elf/common.hh
-    source_subfolder/elf/data.hh
-    source_subfolder/elf/elf++.hh)
-file(GLOB_RECURSE dwarf_sources source_subfolder/dwarf/*.cc)
+    ${src}/elf/common.hh
+    ${src}/elf/data.hh
+    ${src}/elf/elf++.hh)
+file(GLOB_RECURSE dwarf_sources ${src}/dwarf/*.cc)
 set(dwarf_headers
-    source_subfolder/dwarf/data.hh
-    source_subfolder/dwarf/dwarf++.hh
-    source_subfolder/dwarf/small_vector.hh)
+    ${src}/dwarf/data.hh
+    ${src}/dwarf/dwarf++.hh
+    ${src}/dwarf/small_vector.hh)
 
 add_custom_command(
-    OUTPUT source_subfolder/elf/to_string.cc
+    OUTPUT ${src}/elf/to_string.cc
     COMMAND ${CMAKE_COMMAND} -E echo '// Automatically generated' > to_string.cc
     COMMAND ${CMAKE_COMMAND} -E echo '// DO NOT EDIT' >> to_string.cc
     COMMAND ${CMAKE_COMMAND} -E echo >> to_string.cc
@@ -34,11 +33,11 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E echo >> to_string.cc
     COMMAND ${PYTHON_EXECUTABLE} enum-print.py -u --hex --no-type --mask shf --mask pf -x loos -x hios -x loproc -x hiproc < data.hh >> to_string.cc
     COMMAND ${CMAKE_COMMAND} -E echo 'ELFPP_END_NAMESPACE' >> to_string.cc
-    DEPENDS source_subfolder/elf/enum-print.py source_subfolder/elf/data.hh
-    WORKING_DIRECTORY source_subfolder/elf)
+    DEPENDS ${src}/elf/enum-print.py ${src}/elf/data.hh
+    WORKING_DIRECTORY ${src}/elf)
 
 add_custom_command(
-    OUTPUT source_subfolder/dwarf/to_string.cc
+    OUTPUT ${src}/dwarf/to_string.cc
     COMMAND ${CMAKE_COMMAND} -E echo '// Automatically generated' > to_string.cc
     COMMAND ${CMAKE_COMMAND} -E echo '// DO NOT EDIT' >> to_string.cc
     COMMAND ${CMAKE_COMMAND} -E echo >> to_string.cc
@@ -49,29 +48,23 @@ add_custom_command(
     COMMAND ${PYTHON_EXECUTABLE} ../elf/enum-print.py < dwarf++.hh >> to_string.cc
     COMMAND ${PYTHON_EXECUTABLE} ../elf/enum-print.py -s _ -u --hex -x hi_user -x lo_user < data.hh >> to_string.cc
     COMMAND ${CMAKE_COMMAND} -E echo 'DWARFPP_END_NAMESPACE' >> to_string.cc
-    DEPENDS source_subfolder/elf/enum-print.py source_subfolder/dwarf/data.hh
-    WORKING_DIRECTORY source_subfolder/dwarf)
+    DEPENDS ${src}/elf/enum-print.py ${src}/dwarf/data.hh
+    WORKING_DIRECTORY ${src}/dwarf)
 
-add_library(elf++ ${elf_sources} source_subfolder/elf/to_string.cc)
+add_library(elf++ ${elf_sources} ${src}/elf/to_string.cc)
 set_target_properties(elf++ PROPERTIES
     PUBLIC_HEADER "${elf_headers}"
-    VERSION ${CONAN_PACKAGE_VERSION})
+    VERSION ${libelfin_VERSION})
 
-add_library(dwarf++ ${dwarf_sources} source_subfolder/dwarf/to_string.cc)
+add_library(dwarf++ ${dwarf_sources} ${src}/dwarf/to_string.cc)
 set_target_properties(dwarf++ PROPERTIES
     PUBLIC_HEADER "${dwarf_headers}"
-    VERSION ${CONAN_PACKAGE_VERSION})
+    VERSION ${libelfin_VERSION})
 
 include(GNUInstallDirs)
 install(TARGETS elf++
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libelfin/elf)
 install(TARGETS dwarf++
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libelfin/dwarf)
 
-install(FILES source_subfolder/LICENSE DESTINATION licenses)
+install(FILES ${src}/LICENSE DESTINATION licenses)

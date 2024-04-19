@@ -1,4 +1,7 @@
 sources:
+  "2.10.19":
+    url: "https://github.com/microsoft/cpprestsdk/archive/refs/tags/v2.10.19.tar.gz"
+    sha256: "4b0d14e5bfe77ce419affd253366e861968ae6ef2c35ae293727c1415bd145c8"
   "2.10.18":
     url: "https://github.com/Microsoft/cpprestsdk/archive/2.10.18.tar.gz"
     sha256: "6bd74a637ff182144b6a4271227ea8b6b3ea92389f88b25b215e6f94fd4d41cb"
@@ -12,6 +15,13 @@ sources:
     url: "https://github.com/Microsoft/cpprestsdk/archive/v2.10.15.tar.gz"
     sha256: "1c027a53457e87b0b3a475e5c8045b94400c475898c8bd51b0fbd218b99a7f7b"
 patches:
+  "2.10.19":
+    - patch_file: "patches/0003-find-cmake-targets.patch"
+      patch_type: "conan"
+      patch_description: "CMake: internal targets"
+    - patch_file: "patches/0002-remove-wconversion.patch"
+      patch_type: "conan"
+      patch_description: "fix warnings"
   "2.10.18":
     - patch_file: "patches/0003-find-cmake-targets.patch"
       patch_type: "conan"

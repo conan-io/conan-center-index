@@ -38,7 +38,7 @@ class AclConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("rtm/2.1.5")
+        self.requires("rtm/2.2.0")
 
     def package_id(self):
         self.info.clear()

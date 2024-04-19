@@ -1,0 +1,26 @@
+sources:
+  "1.5.2":
+    url: "https://github.com/fluent/chunkio/archive/refs/tags/v1.5.2.tar.gz"
+    sha256: "c73e809215454c34a79ed2a7d38abc6058da99dad8564de85e2919100fb987a5"
+  "1.1.6":
+    url: "https://github.com/fluent/chunkio/archive/refs/tags/v1.1.6.tar.gz"
+    sha256: "755dda0b8ccf6f5ff804b2c1a3caa938bae7b0f37d73afa12c1bf1fab4fd4c86"
+patches:
+  "1.5.2":
+    - patch_file: "patches/1.5.2-0001-add-installer.patch"
+      patch_description: "add installer"
+      patch_type: "conan"
+    - patch_file: "patches/1.1.6-0003-disable-pic.patch"
+      patch_description: "disable pic on static build"
+      patch_type: "portability"
+  "1.1.6":
+    - patch_file: "patches/1.1.6-0001-add-installer.patch"
+      patch_description: "add installer"
+      patch_type: "conan"
+    - patch_file: "patches/1.1.6-0002-fix-wrong-target.patch"
+      patch_description: "fix wrong target"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/fluent/chunkio/issues/104"
+    - patch_file: "patches/1.1.6-0003-disable-pic.patch"
+      patch_description: "disable pic on static build"
+      patch_type: "portability"
