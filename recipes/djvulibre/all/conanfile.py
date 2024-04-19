@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir, save, rename, export_conandata_patches, apply_conandata_patches
@@ -129,6 +129,8 @@ class DjVuLibreConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
+        elif is_apple_os(self):
+            self.cpp_info.frameworks.extend(["CoreFoundation"])
 
         # Implemented in C++ but exports a pure C API
         if stdcpp_library(self):
