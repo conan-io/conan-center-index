@@ -4,6 +4,7 @@ from conan.tools.files import copy, get
 from conan.tools.cmake import cmake_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches, export_conandata_patches
 import os
 
 required_conan_version = ">=1.54.0"
@@ -21,7 +22,11 @@ class ZeusExpectedConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
-    no_copy_source = True
+    # patches applied
+    # no_copy_source = True
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     @property
     def _min_cppstd(self):
@@ -36,25 +41,24 @@ class ZeusExpectedConan(ConanFile):
             "apple-clang": "10",
         }
 
-
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if min_version and Version(self.settings.compiler.version) < min_version:
-            raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd}, which your compiler does not support.")
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(
-            self,
-            **self.conan_data["sources"][self.version],
-            destination=self.source_folder,
-            strip_root=True
-        )
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        apply_conandata_patches(self)
 
     def package(self):
         copy(
