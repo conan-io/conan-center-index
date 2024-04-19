@@ -57,6 +57,8 @@ class GnuGetoptConan(ConanFile):
         tc = AutotoolsToolchain(self)
         # liblastlog support requires sqlite3
         tc.configure_args.append("--disable-liblastlog2")
+        # Python is not used here, disable the check
+        tc.configure_args.append("--without-python")
         tc.generate()
 
     def build(self):
