@@ -198,14 +198,14 @@ class QtConan(ConanFile):
 
     def configure(self):
         if not self.options.gui:
-            del self.options.opengl
-            del self.options.with_vulkan
-            del self.options.with_freetype
+            self.options.rm_safe("opengl")
+            self.options.rm_safe("with_vulkan")
+            self.options.rm_safe("with_freetype")
             self.options.rm_safe("with_fontconfig")
-            del self.options.with_harfbuzz
-            del self.options.with_libjpeg
-            del self.options.with_libpng
-            del self.options.with_md4c
+            self.options.rm_safe("with_harfbuzz")
+            self.options.rm_safe("with_libjpeg")
+            self.options.rm_safe("with_libpng")
+            self.options.rm_safe("with_md4c")
             self.options.rm_safe("with_x11")
             self.options.rm_safe("with_egl")
 
@@ -240,9 +240,9 @@ class QtConan(ConanFile):
 
         if not self.options.get_safe("qtmultimedia"):
             self.options.rm_safe("with_libalsa")
-            del self.options.with_openal
-            del self.options.with_gstreamer
-            del self.options.with_pulseaudio
+            self.options.rm_safe("with_openal")
+            self.options.rm_safe("with_gstreamer")
+            self.options.rm_safe("with_pulseaudio")
 
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.get_safe("qtwebengine"):
