@@ -1,0 +1,13 @@
+diff --git a/include/rapidjson/document.h b/include/rapidjson/document.h
+index e3e20dfb..ad362a69 100644
+--- a/include/rapidjson/document.h
++++ b/include/rapidjson/document.h
+@@ -322,7 +322,7 @@ struct GenericStringRef {
+     operator const Ch *() const { return s; }
+ 
+     const Ch* const s; //!< plain CharType pointer
+-    const SizeType length; //!< length of the string (excluding the trailing NULL terminator)
++    SizeType length; //!< length of the string (excluding the trailing NULL terminator)
+ 
+ private:
+     //! Disallow construction from non-const array
