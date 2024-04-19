@@ -132,6 +132,9 @@ class AsyncSimpleConan(ConanFile):
     def package_info(self):
         if not self.options.header_only:
             self.cpp_info.libs = ["async_simple"]
+        
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m", "pthread"]
 
         self.cpp_info.set_property("cmake_file_name", "async_simple")
         if self.options.header_only:
