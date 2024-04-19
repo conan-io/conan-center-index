@@ -120,7 +120,9 @@ class OneTBBConan(ConanFile):
         toolchain.variables["TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH"] = not self._tbbbind_build
         if self._tbbbind_explicit_hwloc:
             hwloc_package_folder = self.dependencies["hwloc"].package_folder
-            hwloc_lib_name = "hwloc.lib" if self.settings.os == "Windows" else "libhwloc.dylib" if self.settings.os == "Macos" else "libhwloc.so"
+            hwloc_lib_name = ("hwloc.lib" if self.settings.os == "Windows" else
+                              "libhwloc.dylib" if self.settings.os == "Macos" else
+                              "libhwloc.so")
             toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_LIBRARY_PATH"] = \
                 os.path.join(hwloc_package_folder, "lib", hwloc_lib_name).replace("\\", "/")
             toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_INCLUDE_PATH"] = \
