@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rm, rmdir, save, rename
+from conan.tools.files import copy, get, rm, rmdir, save, rename, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -37,6 +37,9 @@ class DjVuLibreConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -95,6 +98,7 @@ class DjVuLibreConan(ConanFile):
             env.vars(self).save_script("conanbuild_msvc")
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         if not self.options.tools:
             save(self, os.path.join(self.source_folder, "tools", "Makefile.am"), "")
             save(self, os.path.join(self.source_folder, "xmltools", "Makefile.am"), "")
