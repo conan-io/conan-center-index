@@ -18,3 +18,4 @@ sources:
 patches:
   "1.1.0":
     - patch_file: "patches/0001-gcc14.patch"
+      patch_description: "Fix for GCC 14 compiler error in document.h."
