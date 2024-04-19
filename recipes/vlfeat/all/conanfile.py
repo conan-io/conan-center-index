@@ -38,7 +38,6 @@ class VlfeatConan(ConanFile):
     }
 
     def export_sources(self):
-        export_conandata_patches(self)
         copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
@@ -81,7 +80,6 @@ class VlfeatConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
