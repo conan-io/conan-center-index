@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import chdir, copy, get, rm, rmdir, move_folder_contents, replace_in_file, rename, mkdir
+from conan.tools.files import chdir, copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 
@@ -67,6 +67,7 @@ class OpenldapConan(ConanFile):
             "--without-fetch",
             "--with-tls=openssl",
             "--enable-auditlog",
+            "--libexecdir=${prefix}/bin",
             f"systemdsystemunitdir={os.path.join(self.package_folder, 'res')}",
         ]
         tc.generate()
@@ -91,10 +92,7 @@ class OpenldapConan(ConanFile):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         rm(self, "*.la", self.package_folder, recursive=True)
-        mkdir(self, os.path.join(self.package_folder, "res"))
-        rename(self, os.path.join(self.package_folder, "libexec"),
-               os.path.join(self.package_folder, "res", "libexec"))
-        for folder in ["var", "share", "etc", os.path.join("lib", "pkgconfig"), "res", "home"]:
+        for folder in ["var", "share", "etc", os.path.join("lib", "pkgconfig"), "home"]:
             rmdir(self, os.path.join(self.package_folder, folder))
 
     def package_info(self):
