@@ -7,8 +7,7 @@ from conan.tools.files import apply_conandata_patches, copy, get, export_conanda
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
-
+required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
 class QCustomPlotConan(ConanFile):
     name = "qcustomplot"
@@ -49,7 +48,7 @@ class QCustomPlotConan(ConanFile):
             self.requires("opengl/system")
 
     def build_requirements(self):
-        self.tool_requires("qt/6.4.2")
+        self.tool_requires("qt/<host_version>")
 
     def validate(self):
         if self.settings.os == "Macos":
