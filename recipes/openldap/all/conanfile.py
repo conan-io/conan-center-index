@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -6,6 +7,7 @@ from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.apple import is_apple_os
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.53.0"
@@ -47,8 +49,8 @@ class OpenldapConan(ConanFile):
             self.requires("cyrus-sasl/2.1.28")
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration(f"{self.name} is only supported on Linux")
+        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
+            raise ConanInvalidConfiguration(f"{self.name} is only supported on Unix platforms")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -62,6 +64,7 @@ class OpenldapConan(ConanFile):
             return "yes" if v else "no"
 
         tc = AutotoolsToolchain(self)
+        tc.make_args = self._soelim()
         tc.configure_args += [
             "--with-cyrus_sasl={}".format(yes_no(self.options.with_cyrus_sasl)),
             "--without-fetch",
@@ -78,6 +81,12 @@ class OpenldapConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "configure"),
                         "WITH_SYSTEMD=no\nsystemdsystemunitdir=", "WITH_SYSTEMD=no")
 
+    def _soelim(self):
+        # INFO: macOS Ventura does not have soelim, but mandoc_soelim
+        if is_apple_os(self):
+            return ["SOELIM=soelim"] if shutil.which("soelim") else ["SOELIM=mandoc_soelim"]
+        return []
+
     def build(self):
         self._patch_sources()
         with chdir(self, self.source_folder):
@@ -92,7 +101,7 @@ class OpenldapConan(ConanFile):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         rm(self, "*.la", self.package_folder, recursive=True)
-        for folder in ["var", "share", "etc", os.path.join("lib", "pkgconfig"), "home"]:
+        for folder in ["var", "share", "etc", os.path.join("lib", "pkgconfig"), "home", "Users"]:
             rmdir(self, os.path.join(self.package_folder, folder))
 
     def package_info(self):
