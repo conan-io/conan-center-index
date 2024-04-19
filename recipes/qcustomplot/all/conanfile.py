@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, get, export_conandata_patches, replace_in_file
 from conan.tools.scm import Version
 import os
@@ -47,6 +48,9 @@ class QCustomPlotConan(ConanFile):
         if self.options.with_opengl and self.settings.os == "Windows":
             self.requires("opengl/system")
 
+    def build_requirements(self):
+        self.tool_requires("qt/6.4.2")
+
     def validate(self):
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration(f"{self.ref} Macos not supported at this moment")
@@ -66,6 +70,9 @@ class QCustomPlotConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        be = VirtualBuildEnv(self)
+        be.generate()
+
         tc = CMakeToolchain(self)
         tc.variables["QCUSTOMPLOT_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["QCUSTOMPLOT_VERSION"] = self.version
