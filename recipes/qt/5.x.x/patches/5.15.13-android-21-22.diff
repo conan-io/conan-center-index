@@ -1,0 +1,82 @@
+diff --git a/src/android/jar/src/org/qtproject/qt5/android/ExtractStyle.java b/src/android/jar/src/org/qtproject/qt5/android/ExtractStyle.java
+index 9dba7f2..85a7027 100644
+--- a/src/android/jar/src/org/qtproject/qt5/android/ExtractStyle.java
++++ b/src/android/jar/src/org/qtproject/qt5/android/ExtractStyle.java
+@@ -88,6 +88,7 @@ import java.io.FileOutputStream;
+ import java.io.IOException;
+ import java.io.OutputStreamWriter;
+ import java.lang.reflect.Field;
++import java.lang.reflect.Method;
+ import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.HashMap;
+@@ -903,11 +904,28 @@ public class ExtractStyle {
+         }
+         return json;
+     }
++    
++    private ContextThemeWrapper getContextThemeWrapper()
++    {
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
++            return new ContextThemeWrapper(m_context, m_theme);
++
++        int themeResId = 0;
++        try {
++            Class<?> clazz = ContextThemeWrapper.class;
++            Method method = clazz.getMethod("getThemeResId");
++            method.setAccessible(true);
++            themeResId = (Integer)method.invoke(m_context);
++        } catch (Exception e) {
++            Log.e(QtNative.QtTAG, "Failed to get theme resource ID", e);
++        }
++        return new ContextThemeWrapper(m_context, themeResId);
++    }
+ 
+     private TypedArray obtainStyledAttributes(int styleName, int[] attributes)
+     {
+         TypedValue typedValue = new TypedValue();
+-        Context ctx = new ContextThemeWrapper(m_context, m_theme);
++        Context ctx = getContextThemeWrapper();
+         ctx.getTheme().resolveAttribute(styleName, typedValue, true);
+         return ctx.obtainStyledAttributes(typedValue.data, attributes);
+     }
+@@ -926,7 +944,7 @@ public class ExtractStyle {
+     public void extractViewInformation(int styleName, JSONObject json, String qtClassName, AttributeSet attributeSet) {
+         try {
+             TypedValue typedValue = new TypedValue();
+-            Context ctx = new ContextThemeWrapper(m_context, m_theme);
++            Context ctx = getContextThemeWrapper();
+             ctx.getTheme().resolveAttribute(styleName, typedValue, true);
+ 
+             int[] attributes = new int[]{
+@@ -1120,7 +1138,7 @@ public class ExtractStyle {
+ 
+         try {
+             TypedValue typedValue = new TypedValue();
+-            Context ctx = new ContextThemeWrapper(m_context, m_theme);
++            Context ctx = getContextThemeWrapper();
+             ctx.getTheme().resolveAttribute(styleName, typedValue, true);
+ 
+             // Get textAppearance values
+@@ -1391,7 +1409,7 @@ public class ExtractStyle {
+         JSONObject json = extractTextAppearanceInformation(styleName, qtClass);
+ 
+         TypedValue typedValue = new TypedValue();
+-        Context ctx = new ContextThemeWrapper(m_context, m_theme);
++        Context ctx = getContextThemeWrapper();
+         ctx.getTheme().resolveAttribute(styleName, typedValue, true);
+         final int[] attributes = new int[]{android.R.attr.button};
+         TypedArray array = ctx.obtainStyledAttributes(typedValue.data, attributes);
+diff --git a/src/android/jar/src/org/qtproject/qt5/android/QtLayout.java b/src/android/jar/src/org/qtproject/qt5/android/QtLayout.java
+index e59ac39..bac333c 100644
+--- a/src/android/jar/src/org/qtproject/qt5/android/QtLayout.java
++++ b/src/android/jar/src/org/qtproject/qt5/android/QtLayout.java
+@@ -106,8 +106,6 @@ public class QtLayout extends ViewGroup
+        final WindowManager windowManager = activity.getWindowManager();
+        Display display;
+
+-       final WindowInsets rootInsets = getRootWindowInsets();
+-
+        int maxWidth = 0;
+        int maxHeight = 0;
+

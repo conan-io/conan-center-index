@@ -117,6 +117,11 @@ patches:
       "patch_file": "patches/5.15.12-fix-macos-cpp-lib-memory-resource.patch"
       "patch_source": "https://codereview.qt-project.org/c/qt/qtbase/+/482392"
       "patch_type": "portability"
+    - "base_path": "qt5/qtbase"
+      "patch_description": "Fix crash at launch on Android < 23"
+      "patch_file": "patches/5.15.13-android-21-22.diff"
+      "patch_source": "https://bugreports.qt.io/browse/QTBUG-120627?focusedId=789243&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-789243"
+      "patch_type": "portability"
   "5.15.12":
     - "base_path": "qt5/qtbase"
       "patch_file": "patches/aa2a39dea5.diff"
