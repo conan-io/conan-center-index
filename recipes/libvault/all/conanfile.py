@@ -107,6 +107,7 @@ class LibvaultConan(ConanFile):
                          "target_link_libraries(vault CURL::libcurl)")
 
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
