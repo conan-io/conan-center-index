@@ -1,8 +1,7 @@
 sources:
+  "2.6.7":
+    url: "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.6.7.tgz"
+    sha256: "cd775f625c944ed78a3da18a03b03b08eea73c8aabc97b41bb336e9a10954930"
   "2.6.1":
-    url: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.6.1.tgz
-    sha256: 9d576ea6962d7db8a2e2808574e8c257c15aef55f403a1fb5a0faf35de70e6f3
-patches:
-  "2.6.1":
-    - base_path: source_subfolder
-      patch_file: patches/configure-2.6.1.patch
+    url: "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.6.1.tgz"
+    sha256: "9d576ea6962d7db8a2e2808574e8c257c15aef55f403a1fb5a0faf35de70e6f3"
