@@ -16,7 +16,7 @@ from conan.tools.files import (
     rmdir,
     save,
 )
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc, msvc_runtime_flag
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc, msvc_runtime_flag
 from conan.tools.scm import Version
 
 
