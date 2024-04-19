@@ -93,7 +93,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_iconv:
             self.requires("libiconv/1.17")
         if self.options.with_pcreposix:
-            self.requires("pcre2/10.42")
+            self.requires("pcre2/10.43")
         if self.options.with_nettle:
             self.requires("nettle/3.9.1")
         if self.options.with_openssl:
@@ -107,9 +107,9 @@ class LibarchiveConan(ConanFile):
         if self.options.with_lzma:
             self.requires("xz_utils/5.4.5")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/1.5.6")
         if self.options.get_safe("with_mbedtls"):
-            self.requires("mbedtls/3.5.1")
+            self.requires("mbedtls/3.6.0")
         if self.options.get_safe("with_pcre2"):
             self.requires("pcre2/10.43")
 
