@@ -94,6 +94,8 @@ class IridescenceConan(ConanFile):
         tc.variables["BUILD_HELPER"] = True
         tc.variables["BUILD_WITH_OPENMP"] = True
         tc.variables["BUILD_WITH_TBB"] = self.options.with_tbb
+        if is_msvc(self):
+            tc.preprocessor_definitions["_USE_MATH_DEFINES"] = ""
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -141,6 +143,8 @@ class IridescenceConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+        elif is_msvc(self):
+            self.cpp_info.defines.append("_USE_MATH_DEFINES")
 
         # TODO: drop after https://github.com/conan-io/conan-center-index/pull/22353 is merged
         if self.settings.os in ["Linux", "FreeBSD"]:
