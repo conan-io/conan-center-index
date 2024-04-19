@@ -19,6 +19,7 @@ class LibxcryptConan(ConanFile):
     topics = ("hash", "password", "one-way", "bcrypt", "md5", "sha256", "sha512")
     license = ("LGPL-2.1-or-later", )
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
