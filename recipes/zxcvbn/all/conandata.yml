@@ -1,0 +1,19 @@
+sources:
+  "2.5":
+    archive:
+      url: "https://github.com/tsyrogit/zxcvbn-c/archive/refs/tags/v2.5.tar.gz"
+      sha256: "77d6c6ecb35952a8d8ce7f736b7a2bf466275c48210e309b73782d6b7e84dffd"
+    cmakelists:
+      url: "https://raw.githubusercontent.com/tsyrogit/zxcvbn-c/31948901f613a8500e710fe13772591e4ab245bc/CMakeLists.txt"
+      sha256: "8a5f3c6a7afd203fc3e5e877ec06252a0823473a976e0db910334425005affaa"
+patches:
+  "2.5":
+    - patch_file: "patches/2.5-0001-tests.patch"
+      patch_description: "disable building of tests which are broken in the CMakeLists.txt"
+      patch_type: "portability"
+    - patch_file: "patches/2.5-0002-windows.patch"
+      patch_description: "add Windows/Emscripten portability by disabling libm linking and unsupported compile options"
+      patch_type: "portability"
+    - patch_file: "patches/2.5-0003-crossbuilding.patch"
+      patch_description: "crossbuilding: disable the dictgen executable building"
+      patch_type: "portability"

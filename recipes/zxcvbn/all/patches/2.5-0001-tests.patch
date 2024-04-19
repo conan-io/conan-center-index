@@ -1,0 +1,11 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -38,7 +38,7 @@
+ set_target_properties(zxcvbn-static PROPERTIES OUTPUT_NAME zxcvbn)
+ 
+ # in root projects we also want to build/run tests...
+-if(PROJECT_IS_TOP_LEVEL)
++if(FALSE)
+ 
+ 	# C tests
+ 	add_executable(test-internals test-internals.c dict-src.h dict-crc.h zxcvbn.h)
