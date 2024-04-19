@@ -86,6 +86,12 @@ class DjVuLibreConan(ConanFile):
             VirtualRunEnv(self).generate(scope="build")
 
         tc = AutotoolsToolchain(self)
+        jpeg = self.dependencies[self.options.with_libjpeg.value].cpp_info.aggregated_components()
+        tiff = self.dependencies["libtiff"].cpp_info.aggregated_components()
+        tc.configure_args.extend([
+            f"JPEG_LIBS={' '.join(f'-l{l}' for l in jpeg.libs)}",
+            f"TIFF_LIBS={' '.join(f'-l{l}' for l in tiff.libs)}",
+        ])
         if is_msvc(self):
             tc.extra_cxxflags.append("-EHsc")
             if check_min_vs(self, "180", raise_invalid=False):
@@ -104,12 +110,8 @@ class DjVuLibreConan(ConanFile):
             env.define("LD", "link -nologo")
             env.define("AR", f"{ar_wrapper} lib")
             env.define("NM", "dumpbin -symbols")
-            env.define("OBJDUMP", ":")
-            env.define("RANLIB", ":")
-            env.define("STRIP", ":")
             env.vars(self).save_script("conanbuild_msvc")
 
-        # FIXME: "JPEG support.......: no"
         if is_msvc(self):
             # Custom AutotoolsDeps for cl-like compilers
             # workaround for https://github.com/conan-io/conan/issues/12784
