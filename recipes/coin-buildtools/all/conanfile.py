@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, mkdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, mkdir, download
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
 
@@ -36,7 +36,8 @@ class CoinBuildtoolsConan(ConanFile):
         self.requires("libtool/2.4.7", run=True)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
+        download(self, **self.conan_data["sources"][self.version]["license"], filename="LICENSE")
 
     def build(self):
         apply_conandata_patches(self)
@@ -47,12 +48,9 @@ class CoinBuildtoolsConan(ConanFile):
             os.chmod(name, os.stat(name).st_mode | 0o111)
 
     def package(self):
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         resdir = os.path.join(self.package_folder, "res")
         copy(self, "*", self.source_folder, resdir)
-        if self.version.startswith("cci."):
-            mkdir(self, os.path.join(self.package_folder, "licenses"))
-            rename(self, os.path.join(resdir, "LICENSE"),
-                   os.path.join(self.package_folder, "licenses", "LICENSE"))
         copy(self, "*.m4", self.source_folder, os.path.join(self.package_folder, "bin"))
         rename(self, os.path.join(resdir, "run_autotools"),
                os.path.join(self.package_folder, "bin", "run_autotools"))

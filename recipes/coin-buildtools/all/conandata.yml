@@ -1,7 +1,11 @@
 sources:
   "0.8.11":
-    url: "https://github.com/coin-or-tools/BuildTools/archive/refs/tags/releases/0.8.11.tar.gz"
-    sha256: "ec4cec2455537b4911b1ce223f1f946f5afa2ea6264fc96ae4da6bea63af34dc"
+    source:
+      url: "https://github.com/coin-or-tools/BuildTools/archive/refs/tags/releases/0.8.11.tar.gz"
+      sha256: "ec4cec2455537b4911b1ce223f1f946f5afa2ea6264fc96ae4da6bea63af34dc"
+    license:
+      url: "https://raw.githubusercontent.com/coin-or-tools/BuildTools/20208f47f7bbc0056a92adefdfd43fded969f674/LICENSE"
+      sha256: "fe33d31053be0fbea60137ee7234291049d68c72f4f6880d13c03243c684e0a6"
 patches:
   "0.8.11":
     - patch_file: "patches/0.8.11-m4-tweaks.patch"
