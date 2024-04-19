@@ -21,8 +21,14 @@ class LibvaultConan(ConanFile):
     topics = ("vault", "libvault", "secrets", "passwords")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     @property
     def _mac_os_minimum_required_version(self):
@@ -35,7 +41,8 @@ class LibvaultConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "19",
+            "Visual Studio": "16",
+            "msvc": "192",
             "gcc": "8",
             "clang": "7.0",
             "apple-clang": "12",
@@ -53,7 +60,8 @@ class LibvaultConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcurl/[>=7.78.0 <9]")
+        # public header VaultClient.h includes curl/curl.h and use several functions
+        self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -113,7 +121,7 @@ class LibvaultConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["vault"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["m"]
+            self.cpp_info.system_libs.append("m")
 
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
             self.cpp_info.system_libs.append("stdc++fs")
