@@ -8,4 +8,10 @@ sources:
 patches:
   "1.0.0":
     - patch_file: "patches/disable-asan-1.0.patch"
+      patch_description: "Remove hardcoded -fsanitize=address from root CMakeLists"
+      patch_type: "portability"
+      patch_source: "https://github.com/alibaba/async_simple/commit/ccb760356b9d7481ca73f0c58d15928bf8b0aa0b"
     - patch_file: "patches/disable-asan-2-1.0.patch"
+      patch_description: "Remove hardcoded -fsanitize-address-use-after-return=never on clang >=13 from async_simple/CMakeLists"
+      patch_type: "portability"
+      patch_source: "https://github.com/alibaba/async_simple/commit/ccb760356b9d7481ca73f0c58d15928bf8b0aa0b"
