@@ -21,6 +21,9 @@ class AnnoyConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def package_id(self):
+        self.info.clear()
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
