@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
-from conan.tools.cmake import cmake_layout
+from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, export_conandata_patches
@@ -22,8 +22,7 @@ class ZeusExpectedConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
-    # patches applied
-    # no_copy_source = True
+    no_copy_source = True
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -52,7 +51,7 @@ class ZeusExpectedConan(ConanFile):
             )
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
