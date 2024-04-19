@@ -1,0 +1,11 @@
+diff --git a/include/small_gicp/benchmark/read_points.hpp b/include/small_gicp/benchmark/read_points.hpp
+--- a/include/small_gicp/benchmark/read_points.hpp	(revision b85d2469d3456ef18a92e677a3bbfe85536135d9)
++++ b/include/small_gicp/benchmark/read_points.hpp	(date 1712127101513)
+@@ -4,6 +4,7 @@
+ 
+ #include <fstream>
+ #include <iostream>
++#include <vector>
+ #include <Eigen/Core>
+ 
+ namespace small_gicp {
