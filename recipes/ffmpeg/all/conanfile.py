@@ -238,6 +238,7 @@ class FFMpegConan(ConanFile):
     def _version_supports_openvino(self):
         return Version(self.version) >= "6.1.0"
 
+    @property
     def _version_supports_libsvtav1(self):
         return Version(self.version) >= "5.1.0"
 
