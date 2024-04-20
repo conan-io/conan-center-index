@@ -14,6 +14,20 @@ sources:
   "1.8.2":
     sha256: 088307d9f6b6c4b8c13f34602e8ff65d21c2dc4d55284dfe15d502c4ee190d67
     url: https://github.com/libssh2/libssh2/releases/download/libssh2-1.8.2/libssh2-1.8.2.tar.gz
-  "1.8.0":
-    sha256: 39f34e2f6835f4b992cafe8625073a88e5a28ba78f83e8099610a7b3af4676d4
-    url: https://github.com/libssh2/libssh2/releases/download/libssh2-1.8.0/libssh2-1.8.0.tar.gz
+patches:
+  "1.11.0":
+    - patch_file: "patches/001-1.11.0-fix-dll-defines.patch"
+      patch_description: "Do not rely on _WINDLL or DLL_EXPORT defines for DLLs"
+      patch_type: "conan"
+  "1.10.0":
+    - patch_file: "patches/001-1.8.2-fix-dll-defines.patch"
+      patch_description: "Do not rely on _WINDLL define for DLLs"
+      patch_type: "conan"
+  "1.9.0":
+    - patch_file: "patches/001-1.8.2-fix-dll-defines.patch"
+      patch_description: "Do not rely on _WINDLL define for DLLs"
+      patch_type: "conan"
+  "1.8.2":
+    - patch_file: "patches/001-1.8.2-fix-dll-defines.patch"
+      patch_description: "Do not rely on _WINDLL define for DLLs"
+      patch_type: "conan"
