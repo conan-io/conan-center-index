@@ -83,6 +83,11 @@ class DaggyConan(ConanFile):
         if not self.dependencies["qt"].options.shared:
             raise ConanInvalidConfiguration("Shared Qt lib is required.")
 
+        # TODO: can be removed after https://github.com/conan-io/conan-center-index/pull/23683 is merged
+        if self.options.with_ssh2 and self.settings.os == "Windows":
+            if self.options.shared != self.dependencies["libssh2"].options.shared:
+                raise ConanInvalidConfiguration("Daggy and libssh2 must have the same shared option on Windows.")
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21 <4]")
         self.tool_requires("qt/<host_version>")
